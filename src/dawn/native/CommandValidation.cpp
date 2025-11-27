@@ -770,7 +770,7 @@ MaybeError ValidatePLSInfo(
     indexForSlot.fill(kSlotNotSet);
     for (size_t i = 0; i < storageAttachments.size(); i++) {
         const Format& format = device->GetValidInternalFormat(storageAttachments[i].format);
-        DAWN_ASSERT(format.supportsStorageAttachment);
+        DAWN_ASSERT(format.SupportsStorageAttachment());
 
         // Validate the slot's offset.
         uint64_t offset = storageAttachments[i].offset;

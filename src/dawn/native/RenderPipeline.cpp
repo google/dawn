@@ -332,7 +332,7 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
 
     const Format* format;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
-    DAWN_INVALID_IF(!format->HasDepthOrStencil() || !format->isRenderable,
+    DAWN_INVALID_IF(!format->HasDepthOrStencil() || !format->IsRenderable(),
                     "Depth stencil format (%s) is not depth-stencil renderable.",
                     descriptor->format);
 
@@ -514,10 +514,10 @@ MaybeError ValidateColorTargetState(
     }
 
     DAWN_TRY(ValidateColorWriteMask(descriptor.writeMask));
-    DAWN_INVALID_IF(!format->IsColor() || !format->isRenderable,
+    DAWN_INVALID_IF(!format->IsColor() || !format->IsRenderable(),
                     "Color format (%s) is not color renderable.", format->format);
 
-    DAWN_INVALID_IF(descriptor.blend && !format->isBlendable,
+    DAWN_INVALID_IF(descriptor.blend && !format->IsBlendable(),
                     "Blending is enabled but color format (%s) is not blendable.", format->format);
 
     if (!fragmentWritten) {

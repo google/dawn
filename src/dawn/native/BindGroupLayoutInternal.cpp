@@ -58,11 +58,11 @@ namespace {
 bool TextureFormatSupportStorageAccess(const Format& format, wgpu::StorageTextureAccess access) {
     switch (access) {
         case wgpu::StorageTextureAccess::ReadOnly:
-            return format.supportsReadOnlyStorageUsage;
+            return format.SupportsReadOnlyStorageUsage();
         case wgpu::StorageTextureAccess::WriteOnly:
-            return format.supportsWriteOnlyStorageUsage;
+            return format.SupportsWriteOnlyStorageUsage();
         case wgpu::StorageTextureAccess::ReadWrite:
-            return format.supportsReadWriteStorageUsage;
+            return format.SupportsReadWriteStorageUsage();
         default:
             DAWN_UNREACHABLE();
     }

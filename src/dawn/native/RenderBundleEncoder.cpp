@@ -48,7 +48,7 @@ MaybeError ValidateColorAttachmentFormat(const DeviceBase* device,
     DAWN_TRY(ValidateTextureFormat(textureFormat));
     const Format* format = nullptr;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
-    DAWN_INVALID_IF(!format->IsColor() || !format->isRenderable,
+    DAWN_INVALID_IF(!format->IsColor() || !format->IsRenderable(),
                     "Texture format %s is not color renderable.", textureFormat);
     return {};
 }
@@ -60,7 +60,7 @@ MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
     DAWN_TRY(ValidateTextureFormat(textureFormat));
     const Format* format = nullptr;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
-    DAWN_INVALID_IF(!format->HasDepthOrStencil() || !format->isRenderable,
+    DAWN_INVALID_IF(!format->HasDepthOrStencil() || !format->IsRenderable(),
                     "Texture format %s is not depth/stencil renderable.", textureFormat);
     return {};
 }

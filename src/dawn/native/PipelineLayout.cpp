@@ -66,7 +66,7 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
             const Format* format;
             DAWN_TRY_ASSIGN_CONTEXT(format, device->GetInternalFormat(attachment.format),
                                     "validating storageAttachments[%i]", i);
-            DAWN_INVALID_IF(!format->supportsStorageAttachment,
+            DAWN_INVALID_IF(!format->SupportsStorageAttachment(),
                             "storageAttachments[%i]'s format (%s) cannot be used with %s.", i,
                             format->format, wgpu::TextureUsage::StorageAttachment);
 

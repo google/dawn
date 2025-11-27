@@ -525,7 +525,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
     const double dClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.0 : 1.0;
 
     if ((mMtlUsage & MTLTextureUsageRenderTarget) != 0) {
-        DAWN_ASSERT(GetFormat().isRenderable);
+        DAWN_ASSERT(GetFormat().IsRenderable());
 
         // End the blit encoder if it is open.
         commandContext->EndBlit();

@@ -659,7 +659,7 @@ VkImageUsageFlags VulkanImageUsage(const DeviceBase* device,
         // If the sampled texture is a depth/stencil texture, its image layout will be set
         // to DEPTH_STENCIL_READ_ONLY_OPTIMAL in order to support readonly depth/stencil
         // attachment. That layout requires DEPTH_STENCIL_ATTACHMENT_BIT image usage.
-        if (format.HasDepthOrStencil() && format.isRenderable) {
+        if (format.HasDepthOrStencil() && format.IsRenderable()) {
             flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
         }
     }
@@ -727,7 +727,7 @@ VkImageLayout VulkanImageLayout(const Format& format, wgpu::TextureUsage usage) 
             // The sampled image can be used as a readonly depth/stencil attachment at the same
             // time if it is a depth/stencil renderable format, so the image layout need to be
             // VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL.
-            if (format.HasDepthOrStencil() && format.isRenderable) {
+            if (format.HasDepthOrStencil() && format.IsRenderable()) {
                 return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
             }
             return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

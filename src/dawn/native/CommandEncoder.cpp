@@ -489,7 +489,7 @@ MaybeError ValidateResolveTarget(const DeviceBase* device,
         "(%s).",
         resolveTarget, resolveTargetFormat, attachment, attachment->GetFormat().format);
     DAWN_INVALID_IF(
-        !resolveTarget->GetFormat().supportsResolveTarget,
+        !resolveTarget->GetFormat().SupportsResolveTarget(),
         "The resolve target %s format (%s) does not support being used as resolve target.",
         resolveTarget, resolveTargetFormat);
 
@@ -546,7 +546,7 @@ MaybeError ValidateColorAttachmentRenderToSingleSampled(
                     colorAttachment.view, wgpu::TextureUsage::TextureBinding,
                     msaaRenderToSingleSampledDesc->implicitSampleCount);
 
-    DAWN_INVALID_IF(!colorAttachment.view->GetFormat().supportsResolveTarget,
+    DAWN_INVALID_IF(!colorAttachment.view->GetFormat().SupportsResolveTarget(),
                     "The color attachment %s format (%s) does not support being used with "
                     "implicit sample count (%u). The format does not support resolve.",
                     colorAttachment.view, colorAttachment.view->GetFormat().format,
@@ -577,7 +577,7 @@ MaybeError ValidateExpandResolveTextureLoadOp(const DeviceBase* device,
     // These should already be validated before entering this function.
     DAWN_ASSERT(colorAttachment.resolveTarget != nullptr &&
                 !colorAttachment.resolveTarget->IsError());
-    DAWN_ASSERT(colorAttachment.view->GetFormat().supportsResolveTarget);
+    DAWN_ASSERT(colorAttachment.view->GetFormat().SupportsResolveTarget());
 
     DAWN_INVALID_IF(
         (colorAttachment.resolveTarget->GetUsage() & wgpu::TextureUsage::TextureBinding) == 0,
@@ -626,7 +626,7 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
     // attachments.
     Aspect kRenderableAspects = Aspect::Color | Aspect::Plane0 | Aspect::Plane1 | Aspect::Plane2;
     DAWN_INVALID_IF(
-        !(attachment->GetAspects() & kRenderableAspects) || !attachment->GetFormat().isRenderable,
+        !(attachment->GetAspects() & kRenderableAspects) || !attachment->GetFormat().IsRenderable(),
         "The color attachment %s format (%s) is not color renderable.", attachment,
         attachment->GetFormat().format);
 
@@ -711,7 +711,7 @@ MaybeError ValidateRenderPassDepthStencilAttachment(
                     "The depth stencil attachment %s format (%s) is not a depth stencil format.",
                     attachment, format.format);
 
-    DAWN_INVALID_IF(!format.isRenderable,
+    DAWN_INVALID_IF(!format.IsRenderable(),
                     "The depth stencil attachment %s format (%s) is not renderable.", attachment,
                     format.format);
 

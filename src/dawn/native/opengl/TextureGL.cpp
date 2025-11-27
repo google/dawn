@@ -339,7 +339,7 @@ MaybeError Texture::ClearTexture(const OpenGLFunctions& gl,
     uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
     float fClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f;
 
-    if (GetFormat().isRenderable) {
+    if (GetFormat().IsRenderable()) {
         if (range.aspects & (Aspect::Depth | Aspect::Stencil)) {
             GLfloat depth = fClearColor;
             GLint stencil = clearColor;

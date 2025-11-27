@@ -235,7 +235,7 @@ T Texture::GetD3D11TextureDesc() const {
 MaybeError Texture::InitializeAsInternalTexture() {
     Device* device = ToBackend(GetDevice());
 
-    if (GetFormat().isRenderable && mKind != Kind::Staging) {
+    if (GetFormat().IsRenderable() && mKind != Kind::Staging) {
         // If the texture format is renderable, we need to add the render attachment usage
         // internally, so the texture can be cleared with GPU.
         AddInternalUsage(wgpu::TextureUsage::RenderAttachment);
