@@ -1184,6 +1184,13 @@ class VectorRef {
         return std::any_of(begin(), end(), std::forward<PREDICATE>(pred));
     }
 
+    /// @returns true if the predicate function returns true for all the elements of the vector
+    /// @param pred a function-like with the signature `bool(T)`
+    template <typename PREDICATE>
+    bool All(PREDICATE&& pred) const {
+        return std::all_of(begin(), end(), std::forward<PREDICATE>(pred));
+    }
+
   private:
     /// Friend class
     template <typename, size_t>

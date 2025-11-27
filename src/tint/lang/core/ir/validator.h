@@ -85,8 +85,8 @@ enum class Capability : uint8_t {
     kAllowStructMatrixDecorations,
     /// Allows @location on structs, matrices, and arrays that have numeric elements
     kAllowLocationForNumericElements,
-    // Allows resource_binding to be used. Should not be present after
-    // core::core::ir::transform::ResourceBinding runs
+    /// Allows resource_binding to be used. Should not be present after
+    /// core::core::ir::transform::ResourceBinding runs
     kAllowResourceBinding,
     /// Allows a pointer to a handle type
     kAllowPointerToHandle,
@@ -94,7 +94,7 @@ enum class Capability : uint8_t {
     /// These are not separate capabilities, because they are enabled/disabled in lockstep with each
     /// other.
     /// TODO(448417342): Validate in/out address space usage based on this capability
-    kLoosenValidationForShaderIO
+    kLoosenValidationForShaderIO,
 };
 
 /// Capabilities is a set of Capability

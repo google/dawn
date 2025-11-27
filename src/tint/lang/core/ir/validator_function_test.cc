@@ -1305,6 +1305,260 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NonMember_WithCapability) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_Interpolate_WithLocation) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("p", ty.f32());
+    p->SetLocation(0);
+    p->SetInterpolation(Interpolation{.type = InterpolationType::kLinear,
+                                      .sampling = InterpolationSampling::kCenter});
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Interpolate_WithoutLocation) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("p", ty.f32());
+    p->SetInterpolation(Interpolation{.type = InterpolationType::kLinear,
+                                      .sampling = InterpolationSampling::kCenter});
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:1:27 error: interpolation attribute requires a location attribute
+%my_func = @fragment func(%p:f32):void {
+                          ^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_WithLocation) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.location = 0;
+    attr.interpolation = {InterpolationType::kLinear, InterpolationSampling::kCenter};
+    auto* str = ty.Struct(mod.symbols.New("S"), {
+                                                    {mod.symbols.New("a"), ty.f32(), attr},
+                                                });
+    auto* p = b.FunctionParam("p", str);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_WithoutLocation) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.interpolation = {InterpolationType::kLinear, InterpolationSampling::kCenter};
+    auto* str = ty.Struct(mod.symbols.New("S"), {
+                                                    {mod.symbols.New("a"), ty.f32(), attr},
+                                                });
+    auto* p = b.FunctionParam("p", str);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:5:27 error: interpolation attribute requires a location attribute
+%my_func = @fragment func(%p:S):void {
+                          ^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnStruct_WithCapability) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.interpolation = {InterpolationType::kLinear, InterpolationSampling::kCenter};
+    auto* str = ty.Struct(mod.symbols.New("S"), {
+                                                    {mod.symbols.New("a"), ty.f32(), attr},
+                                                });
+    auto* p = b.FunctionParam("p", str);
+    p->SetLocation(0);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowLocationForNumericElements});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnStruct_WithoutCapability) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.interpolation = {InterpolationType::kLinear, InterpolationSampling::kCenter};
+    auto* str = ty.Struct(mod.symbols.New("S"), {
+                                                    {mod.symbols.New("a"), ty.f32(), attr},
+                                                });
+    auto* p = b.FunctionParam("p", str);
+    p->SetLocation(0);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:5:27 error: input param with a location attribute must be a numeric scalar or vector, but has type S
+%my_func = @fragment func(%p:S [@location(0)]):void {
+                          ^^^^
+)")) << res.Failure();
+}
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_WithoutCapability) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr_a;
+    attr_a.location = 0;
+    auto* str = ty.Struct(mod.symbols.New("S"), {
+                                                    {mod.symbols.New("a"), ty.f32(), attr_a},
+                                                });
+    auto* p = b.FunctionParam("p", str);
+    p->SetInterpolation(Interpolation{InterpolationType::kLinear, InterpolationSampling::kCenter});
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:5:27 error: interpolation cannot be applied to a struct without 'kAllowLocationForNumericElements' capability
+%my_func = @fragment func(%p:S):void {
+                          ^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnAllMembers_WithCapability) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr_a;
+    attr_a.location = 0;
+    IOAttributes attr_b;
+    attr_b.location = 1;
+    auto* str = ty.Struct(mod.symbols.New("S"), {
+                                                    {mod.symbols.New("a"), ty.f32(), attr_a},
+                                                    {mod.symbols.New("b"), ty.f32(), attr_b},
+                                                });
+    auto* p = b.FunctionParam("p", str);
+    p->SetInterpolation(Interpolation{InterpolationType::kLinear, InterpolationSampling::kCenter});
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowLocationForNumericElements});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnAllMembers_WithoutCapability) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr_a;
+    attr_a.location = 0;
+    IOAttributes attr_b;
+    attr_b.location = 1;
+    auto* str = ty.Struct(mod.symbols.New("S"), {
+                                                    {mod.symbols.New("a"), ty.f32(), attr_a},
+                                                    {mod.symbols.New("b"), ty.f32(), attr_b},
+                                                });
+    auto* p = b.FunctionParam("p", str);
+    p->SetInterpolation(Interpolation{InterpolationType::kLinear, InterpolationSampling::kCenter});
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:6:27 error: interpolation cannot be applied to a struct without 'kAllowLocationForNumericElements' capability
+%my_func = @fragment func(%p:S):void {
+                          ^^^^
+
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnSomeMembers_WithCapability) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr_a;
+    attr_a.location = 0;
+    auto* str = ty.Struct(mod.symbols.New("S"), {
+                                                    {mod.symbols.New("a"), ty.f32(), attr_a},
+                                                    {mod.symbols.New("b"), ty.f32()},
+                                                });
+    auto* p = b.FunctionParam("p", str);
+    p->SetInterpolation(Interpolation{InterpolationType::kLinear, InterpolationSampling::kCenter});
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowLocationForNumericElements});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:6:27 error: interpolation attribute requires a location attribute
+%my_func = @fragment func(%p:S):void {
+                          ^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Interpolate_WithBuiltin_WithCapability) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("p", ty.u32());
+    p->SetBuiltin(BuiltinValue::kSampleIndex);
+    p->SetInterpolation(Interpolation{.type = InterpolationType::kFlat,
+                                      .sampling = InterpolationSampling::kUndefined});
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kLoosenValidationForShaderIO});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Interpolate_WithBuiltin_WithoutCapability) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("p", ty.u32());
+    p->SetBuiltin(BuiltinValue::kSampleIndex);
+    p->SetInterpolation(Interpolation{.type = InterpolationType::kFlat,
+                                      .sampling = InterpolationSampling::kUndefined});
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:1:27 error: interpolation attribute requires a location attribute
+%my_func = @fragment func(%p:u32 [@interpolate(flat), @sample_index]):void {
+                          ^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_ParameterWithConstructibleType) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("my_param", ty.u32());
