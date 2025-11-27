@@ -243,7 +243,7 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
         });
 
         Options options;
-        options.disable_image_robustness = true;
+        options.extensions.disable_image_robustness = true;
         ASSERT_TRUE(Generate(options)) << Error() << output_;
         for (auto& inst : params.instructions) {
             EXPECT_INST(inst);
@@ -2026,7 +2026,7 @@ TEST_F(SpirvWriterTest, Bgra8Unorm_textureStore) {
     });
 
     Options options;
-    options.disable_image_robustness = true;
+    options.extensions.disable_image_robustness = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
          %15 = OpVectorShuffle %v4float %value %value 2 1 0 3

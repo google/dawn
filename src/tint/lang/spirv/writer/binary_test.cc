@@ -1097,7 +1097,10 @@ TEST_F(SpirvWriterTest, Add_SubgroupMatrix) {
 
     Options options{
         .entry_point_name = "main",
-        .use_vulkan_memory_model = true,
+        .extensions =
+            {
+                .use_vulkan_memory_model = true,
+            },
     };
 
     ASSERT_TRUE(Generate(options)) << Error() << output_;
@@ -1130,7 +1133,10 @@ TEST_F(SpirvWriterTest, Subtract_SubgroupMatrix) {
 
     Options options{
         .entry_point_name = "main",
-        .use_vulkan_memory_model = true,
+        .extensions =
+            {
+                .use_vulkan_memory_model = true,
+            },
     };
 
     ASSERT_TRUE(Generate(options)) << Error() << output_;
@@ -1163,7 +1169,10 @@ TEST_F(SpirvWriterTest, Multiply_SubgroupMatrix) {
 
     Options options{
         .entry_point_name = "main",
-        .use_vulkan_memory_model = true,
+        .extensions =
+            {
+                .use_vulkan_memory_model = true,
+            },
     };
 
     ASSERT_TRUE(Generate(options)) << Error() << output_;

@@ -200,7 +200,7 @@ TEST_F(SpirvWriterTest, Construct_SubgroupMatrix_ZeroValue) {
     });
 
     Options options;
-    options.use_vulkan_memory_model = true;
+    options.extensions.use_vulkan_memory_model = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("%6 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_4 %uint_8 %uint_0");
     EXPECT_INST("%left = OpConstantNull %6");
@@ -228,7 +228,7 @@ TEST_F(SpirvWriterTest, Construct_SubgroupMatrix_SingleValue) {
     });
 
     Options options;
-    options.use_vulkan_memory_model = true;
+    options.extensions.use_vulkan_memory_model = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("%7 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_4 %uint_8 %uint_0");
     EXPECT_INST("%14 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_8 %uint_4 %uint_1");
@@ -249,7 +249,10 @@ TEST_F(SpirvWriterTest, Construct_ArrayOfSubgroupMatrix_ZeroValue) {
 
     Options options{
         .entry_point_name = "main",
-        .use_vulkan_memory_model = true,
+        .extensions =
+            {
+                .use_vulkan_memory_model = true,
+            },
     };
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
@@ -285,7 +288,10 @@ TEST_F(SpirvWriterTest, Construct_StructOfSubgroupMatrix_ZeroValue) {
 
     Options options{
         .entry_point_name = "main",
-        .use_vulkan_memory_model = true,
+        .extensions =
+            {
+                .use_vulkan_memory_model = true,
+            },
     };
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(

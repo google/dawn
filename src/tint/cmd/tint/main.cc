@@ -854,7 +854,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
     gen_options.entry_point_name = options.ep_name;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
-    gen_options.use_storage_input_output_16 = options.use_storage_input_output_16;
+    gen_options.extensions.use_storage_input_output_16 = options.use_storage_input_output_16;
     gen_options.spirv_version = options.spirv_version;
 
     auto entry_point = inspector.GetEntryPoint(options.ep_name);
@@ -885,7 +885,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
     // Enable the Vulkan Memory Model if needed.
     for (auto* ty : ir.Types()) {
         if (ty->Is<tint::core::type::SubgroupMatrix>()) {
-            gen_options.use_vulkan_memory_model = true;
+            gen_options.extensions.use_vulkan_memory_model = true;
         }
     }
 

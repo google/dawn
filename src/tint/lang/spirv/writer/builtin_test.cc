@@ -2468,7 +2468,7 @@ TEST_F(SpirvWriterTest, Builtin_StorageBarrier_VulkanMemoryModel) {
     });
 
     Options opts{};
-    opts.use_vulkan_memory_model = true;
+    opts.extensions.use_vulkan_memory_model = true;
     ASSERT_TRUE(Generate(opts)) << Error() << output_;
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_24648");
 }
@@ -2492,7 +2492,7 @@ TEST_F(SpirvWriterTest, Builtin_TextureBarrier_Vulkan) {
     });
 
     Options opts{};
-    opts.use_vulkan_memory_model = true;
+    opts.extensions.use_vulkan_memory_model = true;
     ASSERT_TRUE(Generate(opts)) << Error() << output_;
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_26632");
 }
@@ -2516,7 +2516,7 @@ TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier_VulkanMemoryModel) {
     });
 
     Options opts{};
-    opts.use_vulkan_memory_model = true;
+    opts.extensions.use_vulkan_memory_model = true;
     ASSERT_TRUE(Generate(opts)) << Error() << output_;
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_24840");
 }

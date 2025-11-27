@@ -206,58 +206,65 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
     req.tintOptions.statically_paired_texture_binding_points =
         std::move(staticallyPairedTextureBindingPoints);
-    req.tintOptions.disable_robustness = !GetDevice()->IsRobustnessEnabled();
-    req.tintOptions.emit_vertex_point_size = emitPointSize;
-
     req.tintOptions.substitute_overrides_config = {
         .map = BuildSubstituteOverridesTransformConfig(programmableStage),
     };
-    req.tintOptions.disable_workgroup_init =
-        GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
-    // The only possible alternative for the vulkan demote to helper extension is
-    // "OpTerminateInvocation" which remains unimplemented in dawn/tint.
-    req.tintOptions.use_demote_to_helper_invocation_extensions =
-        GetDevice()->IsToggleEnabled(Toggle::VulkanUseDemoteToHelperInvocationExtension);
-
-    req.tintOptions.use_zero_initialize_workgroup_memory_extension =
-        GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
-    req.tintOptions.use_storage_input_output_16 =
-        GetDevice()->IsToggleEnabled(Toggle::VulkanUseStorageInputOutput16);
     req.tintOptions.bindings = std::move(bindings);
     req.tintOptions.resource_binding = std::move(resourceBindingConfig);
-    req.tintOptions.disable_image_robustness =
-        GetDevice()->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2);
-    // Currently we can disable index clamping on all runtime-sized arrays in Tint robustness
-    // transform as unsized arrays can only be declared on storage address space.
-    req.tintOptions.disable_runtime_sized_array_index_clamping =
-        GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2);
-    req.tintOptions.polyfill_dot_4x8_packed =
-        GetDevice()->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
-    req.tintOptions.polyfill_pack_unpack_4x8_norm =
-        GetDevice()->IsToggleEnabled(Toggle::PolyfillPackUnpack4x8Norm);
-    req.tintOptions.polyfill_case_switch =
-        GetDevice()->IsToggleEnabled(Toggle::VulkanPolyfillSwitchWithIf);
-    req.tintOptions.polyfill_subgroup_broadcast_f16 =
-        GetDevice()->IsToggleEnabled(Toggle::EnableSubgroupsIntelGen9);
+
+    req.tintOptions.disable_robustness = !GetDevice()->IsRobustnessEnabled();
+    req.tintOptions.disable_workgroup_init =
+        GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.tintOptions.disable_polyfill_integer_div_mod =
         GetDevice()->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
-    req.tintOptions.scalarize_max_min_clamp =
-        GetDevice()->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
-    req.tintOptions.subgroup_shuffle_clamped =
-        GetDevice()->IsToggleEnabled(Toggle::SubgroupShuffleClamped);
-    req.tintOptions.use_vulkan_memory_model =
-        GetDevice()->IsToggleEnabled(Toggle::UseVulkanMemoryModel);
+
+    req.tintOptions.emit_vertex_point_size = emitPointSize;
+    req.tintOptions.apply_pixel_center_polyfill = isSampled;
+
     req.tintOptions.spirv_version = GetDevice()->IsToggleEnabled(Toggle::UseSpirv14)
                                         ? tint::spirv::writer::SpvVersion::kSpv14
                                         : tint::spirv::writer::SpvVersion::kSpv13;
-    req.tintOptions.decompose_uniform_buffers =
+    req.tintOptions.enable_integer_range_analysis =
+        GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
+
+    req.tintOptions.extensions.use_vulkan_memory_model =
+        GetDevice()->IsToggleEnabled(Toggle::UseVulkanMemoryModel);
+    // Currently we can disable index clamping on all runtime-sized arrays in Tint robustness
+    // transform as unsized arrays can only be declared on storage address space.
+    req.tintOptions.extensions.disable_runtime_sized_array_index_clamping =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2);
+    req.tintOptions.extensions.disable_image_robustness =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2);
+    // The only possible alternative for the vulkan demote to helper extension is
+    // "OpTerminateInvocation" which remains unimplemented in dawn/tint.
+    req.tintOptions.extensions.use_demote_to_helper_invocation =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanUseDemoteToHelperInvocationExtension);
+    req.tintOptions.extensions.use_storage_input_output_16 =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanUseStorageInputOutput16);
+    req.tintOptions.extensions.dot_4x8_packed =
+        GetDevice()->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
+    req.tintOptions.extensions.use_zero_initialize_workgroup_memory =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
+    req.tintOptions.extensions.decompose_uniform_buffers =
         GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
-    req.tintOptions.dva_transform_handle =
+
+    req.tintOptions.workarounds.subgroup_shuffle_clamped =
+        GetDevice()->IsToggleEnabled(Toggle::SubgroupShuffleClamped);
+    req.tintOptions.workarounds.polyfill_pack_unpack_4x8_norm =
+        GetDevice()->IsToggleEnabled(Toggle::PolyfillPackUnpack4x8Norm);
+    req.tintOptions.workarounds.polyfill_case_switch =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanPolyfillSwitchWithIf);
+    req.tintOptions.workarounds.scalarize_max_min_clamp =
+        GetDevice()->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
+    req.tintOptions.workarounds.dva_transform_handle =
         GetDevice()->IsToggleEnabled(Toggle::VulkanDirectVariableAccessTransformHandle);
+    req.tintOptions.workarounds.polyfill_subgroup_broadcast_f16 =
+        GetDevice()->IsToggleEnabled(Toggle::EnableSubgroupsIntelGen9);
+
     // Pass matrices to user functions by pointer on Qualcomm devices to workaround a known bug.
     // See crbug.com/tint/2045.
     if (ToBackend(GetDevice()->GetPhysicalDevice())->IsAndroidQualcomm()) {
-        req.tintOptions.pass_matrix_by_pointer = true;
+        req.tintOptions.workarounds.pass_matrix_by_pointer = true;
     }
 
     // Set internal immediate constant offsets
@@ -267,11 +274,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         req.tintOptions.depth_range_offsets = {
             offsetStartBytes, offsetStartBytes + kImmediateConstantElementByteSize};
     }
-
-    req.tintOptions.apply_pixel_center_polyfill = isSampled;
-
-    req.tintOptions.enable_integer_range_analysis =
-        GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
     req.limits = LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1);
     req.adapterSupportedLimits = UnsafeUnserializedValue(

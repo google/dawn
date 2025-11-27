@@ -217,7 +217,7 @@ TEST_F(SpirvWriterTest, WorkgroupVar_ZeroInitializeWithExtension) {
 
     Options opts{};
     opts.disable_workgroup_init = false;
-    opts.use_zero_initialize_workgroup_memory_extension = true;
+    opts.extensions.use_zero_initialize_workgroup_memory = true;
 
     // Create a writer with the zero_init_workgroup_memory flag set to `true`.
     ASSERT_TRUE(Generate(opts)) << Error() << output_;
@@ -298,7 +298,7 @@ TEST_F(SpirvWriterTest, StorageVar_WithVulkan) {
     });
 
     Options opts;
-    opts.use_vulkan_memory_model = true;
+    opts.extensions.use_vulkan_memory_model = true;
 
     ASSERT_TRUE(Generate(opts)) << Error() << output_;
     EXPECT_INST(R"(               OpCapability Shader
@@ -363,7 +363,7 @@ TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
     });
 
     Options opts;
-    opts.use_vulkan_memory_model = true;
+    opts.extensions.use_vulkan_memory_model = true;
 
     ASSERT_TRUE(Generate(opts)) << Error() << output_;
     EXPECT_INST(R"(               OpCapability Shader
@@ -605,7 +605,7 @@ TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_NoDva) {
     });
 
     Options opts{};
-    opts.dva_transform_handle = false;
+    opts.workarounds.dva_transform_handle = false;
 
     ASSERT_TRUE(Generate(opts)) << Error() << output_;
     EXPECT_INST("OpFunctionParameter");
@@ -637,7 +637,7 @@ TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_Dva) {
     });
 
     Options opts{};
-    opts.dva_transform_handle = true;
+    opts.workarounds.dva_transform_handle = true;
 
     ASSERT_TRUE(Generate(opts)) << Error() << output_;
     // Consider a EXPECT_NOT_INST macro.

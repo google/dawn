@@ -101,7 +101,6 @@
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/vector.h"
-#include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/symbol/symbol.h"
 
@@ -191,7 +190,7 @@ class Printer {
     Printer(core::ir::Module& module, const Options& options)
         : ir_(module), b_(module), options_(options) {
         zero_init_workgroup_memory_ = !options.disable_workgroup_init &&
-                                      options.use_zero_initialize_workgroup_memory_extension;
+                                      options.extensions.use_zero_initialize_workgroup_memory;
     }
 
     /// @returns the generated SPIR-V code on success, or failure
@@ -304,7 +303,7 @@ class Printer {
 
         module_.PushCapability(SpvCapabilityShader);
 
-        if (options_.use_vulkan_memory_model) {
+        if (options_.extensions.use_vulkan_memory_model) {
             module_.PushExtension("SPV_KHR_vulkan_memory_model");
             module_.PushCapability(SpvCapabilityVulkanMemoryModelKHR);
             // Required for the `Device` scope on atomic operations
@@ -545,7 +544,7 @@ class Printer {
                 [&](const core::type::F16*) {
                     module_.PushCapability(SpvCapabilityFloat16);
                     module_.PushCapability(SpvCapabilityStorageBuffer16BitAccess);
-                    if (!options_.decompose_uniform_buffers) {
+                    if (!options_.extensions.decompose_uniform_buffers) {
                         module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
                     }
                     module_.PushType(spv::Op::OpTypeFloat, {id, 16u});
@@ -593,7 +592,7 @@ class Printer {
                     module_.PushType(spv::Op::OpTypeSampledImage, {id, Type(s->Image())});
                 },
                 [&](const core::type::SubgroupMatrix* sm) {
-                    TINT_IR_ASSERT(ir_, options_.use_vulkan_memory_model);
+                    TINT_IR_ASSERT(ir_, options_.extensions.use_vulkan_memory_model);
                     auto scope = Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup)));
                     auto cols = Constant(ir_.constant_values.Get(u32(sm->Columns())));
                     auto rows = Constant(ir_.constant_values.Get(u32(sm->Rows())));
@@ -1012,7 +1011,7 @@ class Printer {
     }
 
     void EmitDiscard(core::ir::Discard*) {
-        if (options_.use_demote_to_helper_invocation_extensions) {
+        if (options_.extensions.use_demote_to_helper_invocation) {
             module_.PushExtension("SPV_EXT_demote_to_helper_invocation");
             module_.PushCapability(SpvCapabilityDemoteToHelperInvocationEXT);
             current_function_.PushInst(spv::Op::OpDemoteToHelperInvocationEXT, {});
@@ -2079,7 +2078,7 @@ class Printer {
             case core::BuiltinFn::kStorageBarrier: {
                 spv::MemorySemanticsMask memory_mask = spv::MemorySemanticsMask::UniformMemory |
                                                        spv::MemorySemanticsMask::AcquireRelease;
-                if (options_.use_vulkan_memory_model) {
+                if (options_.extensions.use_vulkan_memory_model) {
                     memory_mask = memory_mask | spv::MemorySemanticsMask::MakeAvailable |
                                   spv::MemorySemanticsMask::MakeVisible;
                 }
@@ -2236,7 +2235,7 @@ class Printer {
             case core::BuiltinFn::kTextureBarrier: {
                 spv::MemorySemanticsMask memory_mask = spv::MemorySemanticsMask::ImageMemory |
                                                        spv::MemorySemanticsMask::AcquireRelease;
-                if (options_.use_vulkan_memory_model) {
+                if (options_.extensions.use_vulkan_memory_model) {
                     memory_mask = memory_mask | spv::MemorySemanticsMask::MakeAvailable |
                                   spv::MemorySemanticsMask::MakeVisible;
                 }
@@ -2272,7 +2271,7 @@ class Printer {
             case core::BuiltinFn::kWorkgroupBarrier: {
                 spv::MemorySemanticsMask memory_mask = spv::MemorySemanticsMask::WorkgroupMemory |
                                                        spv::MemorySemanticsMask::AcquireRelease;
-                if (options_.use_vulkan_memory_model) {
+                if (options_.extensions.use_vulkan_memory_model) {
                     memory_mask = memory_mask | spv::MemorySemanticsMask::MakeAvailable |
                                   spv::MemorySemanticsMask::MakeVisible;
                 }
@@ -2410,7 +2409,7 @@ class Printer {
     SpvMemoryAccessMask MemoryAccessMaskForPointer(const core::type::Pointer* ptr) {
         TINT_IR_ASSERT(ir_, ptr);
 
-        if (options_.use_vulkan_memory_model &&
+        if (options_.extensions.use_vulkan_memory_model &&
             (ptr->AddressSpace() == core::AddressSpace::kStorage ||
              ptr->AddressSpace() == core::AddressSpace::kWorkgroup) &&
             ptr->Access() == core::Access::kReadWrite) {
@@ -2770,7 +2769,8 @@ class Printer {
                                           {id, U32Operand(SpvDecorationNonReadable)});
                     }
                 }
-                if (!options_.use_vulkan_memory_model && access == core::Access::kReadWrite) {
+                if (!options_.extensions.use_vulkan_memory_model &&
+                    access == core::Access::kReadWrite) {
                     module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationCoherent)});
                 }
 

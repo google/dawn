@@ -46,7 +46,7 @@ TEST_F(SpirvWriterTest, ModuleHeader) {
 
 TEST_F(SpirvWriterTest, ModuleHeader_VulkanMemoryModel) {
     Options opts;
-    opts.use_vulkan_memory_model = true;
+    opts.extensions.use_vulkan_memory_model = true;
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] { b.Return(eb); });
@@ -70,7 +70,7 @@ TEST_F(SpirvWriterTest, CanGenerate_SubgroupMatrixRequiresVulkanMemoryModel) {
     });
 
     Options options;
-    options.use_vulkan_memory_model = false;
+    options.extensions.use_vulkan_memory_model = false;
     options.entry_point_name = "main";
     auto result = CanGenerate(mod, options);
     ASSERT_NE(result, Success);

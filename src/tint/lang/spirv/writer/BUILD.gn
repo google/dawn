@@ -53,7 +53,6 @@ if (tint_build_spv_writer) {
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
-      "${tint_src_dir}/lang/core/intrinsic",
       "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/ir/analysis",
       "${tint_src_dir}/lang/core/ir/transform",

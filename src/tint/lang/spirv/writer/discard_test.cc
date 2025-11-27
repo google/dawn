@@ -143,7 +143,7 @@ TEST_F(SpirvWriterTest, DiscardBeforeAtomic) {
 
 TEST_F(SpirvWriterTest, Discard_DemoteToHelperWithExtension) {
     Options opts{};
-    opts.use_demote_to_helper_invocation_extensions = true;
+    opts.extensions.use_demote_to_helper_invocation = true;
 
     auto* v = b.Var("v", ty.ptr<private_, i32>());
     v->SetInitializer(b.Constant(42_i));
@@ -165,7 +165,7 @@ TEST_F(SpirvWriterTest, Discard_DemoteToHelperWithExtension) {
 
 TEST_F(SpirvWriterTest, Discard_DemoteToHelperAsTransform) {
     Options opts{};
-    opts.use_demote_to_helper_invocation_extensions = false;
+    opts.extensions.use_demote_to_helper_invocation = false;
 
     auto* v = b.Var("v", ty.ptr<private_, i32>());
     v->SetInitializer(b.Constant(42_i));

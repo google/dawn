@@ -65,7 +65,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&,
     }
 
     // TODO(454378504): Remove this when we always decompose uniform buffers.
-    if (!options.decompose_uniform_buffers) {
+    if (!options.extensions.decompose_uniform_buffers) {
         return Failure{"fuzzing requires decomposing uniform buffers"};
     }
 

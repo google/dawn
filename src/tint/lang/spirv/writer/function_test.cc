@@ -377,7 +377,7 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithCapability) {
     });
 
     Options options;
-    options.use_storage_input_output_16 = true;
+    options.extensions.use_storage_input_output_16 = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("OpCapability StorageInputOutput16");
     EXPECT_INST(R"(OpEntryPoint Fragment %main "main" %main_loc1_Input %main_loc2_Output)");
@@ -405,7 +405,7 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithoutCapability) {
     });
 
     Options options;
-    options.use_storage_input_output_16 = false;
+    options.extensions.use_storage_input_output_16 = false;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(OpEntryPoint Fragment %main "main" %main_loc1_Input %main_loc2_Output)");
     EXPECT_INST("%main_loc1_Input = OpVariable %_ptr_Input_v4float Input");
@@ -433,7 +433,7 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output_WithCapability) {
     });
 
     Options options;
-    options.use_storage_input_output_16 = true;
+    options.extensions.use_storage_input_output_16 = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("OpCapability StorageInputOutput16");
     EXPECT_INST(R"(OpEntryPoint Fragment %main "main" %main_loc1_Input %main_loc2_Output)");
@@ -461,7 +461,7 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output_WithoutCapability) {
     });
 
     Options options;
-    options.use_storage_input_output_16 = false;
+    options.extensions.use_storage_input_output_16 = false;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(OpEntryPoint Fragment %main "main" %main_loc1_Input %main_loc2_Output)");
     EXPECT_INST("%main_loc1_Input = OpVariable %_ptr_Input_v4float Input");
@@ -560,7 +560,7 @@ TEST_F(SpirvWriterTest, Function_PassMatrixByPointer) {
     });
 
     Options options;
-    options.pass_matrix_by_pointer = true;
+    options.workarounds.pass_matrix_by_pointer = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
 
     EXPECT_INST(R"(

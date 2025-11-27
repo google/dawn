@@ -150,7 +150,7 @@ TEST_F(SpirvWriterTest, Type_F16_WithoutDecomposeUniformBuffers) {
     });
 
     Options options;
-    options.decompose_uniform_buffers = false;
+    options.extensions.decompose_uniform_buffers = false;
 
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("OpCapability Float16");
@@ -927,7 +927,7 @@ TEST_F(SpirvWriterTest, Type_SubgroupMatrix) {
     });
 
     Options options;
-    options.use_vulkan_memory_model = true;
+    options.extensions.use_vulkan_memory_model = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("OpCapability CooperativeMatrixKHR");
     EXPECT_INST("OpExtension \"SPV_KHR_cooperative_matrix\"");
@@ -947,7 +947,10 @@ TEST_F(SpirvWriterTest, SubgroupMatrix_ConfigReturned) {
 
     Options options{
         .entry_point_name = "main",
-        .use_vulkan_memory_model = true,
+        .extensions =
+            {
+                .use_vulkan_memory_model = true,
+            },
     };
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_EQ(3u, subgroup_matrix_info.configs.size());
