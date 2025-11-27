@@ -27,24 +27,37 @@
 
 set(EM_BUILD_GEN_DIR "${DAWN_BUILD_GEN_DIR}/src/emdawnwebgpu")
 
+# Copy some extra files that we need to be able to include without their siblings.
+# TODO(crbug.com/414330682): Funnel all targets through emdawnwebgpu_pkg, then this won't be needed.
+set(EMDAWNWEBGPU_HEADERS_COPIED_HEADERS "")
+macro(emdawnwebgpu_headers_gen_add filename)
+    add_custom_command(
+        OUTPUT
+            "${EM_BUILD_GEN_DIR}/include/webgpu/${filename}"
+        MAIN_DEPENDENCY
+            "${DAWN_INCLUDE_DIR}/webgpu/${filename}"
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${DAWN_INCLUDE_DIR}/webgpu/${filename}"
+            "${EM_BUILD_GEN_DIR}/include/webgpu/${filename}"
+    )
+    list(APPEND EMDAWNWEBGPU_HEADERS_COPIED_HEADERS
+        "${EM_BUILD_GEN_DIR}/include/webgpu/${filename}"
+    )
+endmacro()
+emdawnwebgpu_headers_gen_add("webgpu_glfw.h")
+emdawnwebgpu_headers_gen_add("webgpu_enum_class_bitmasks.h")
+
 DawnJSONGenerator(
     TARGET "emdawnwebgpu_headers"
     PRINT_NAME "Dawn WebGPU Emscripten headers"
     OUTPUT_HEADERS EMDAWNWEBGPU_HEADERS_GEN_HEADERS
 )
 add_custom_target(emdawnwebgpu_headers_gen
-    DEPENDS ${EMDAWNWEBGPU_HEADERS_GEN_HEADERS}
+    DEPENDS
+        ${EMDAWNWEBGPU_HEADERS_GEN_HEADERS}
+        # Also include the copied headers in this target.
+        ${EMDAWNWEBGPU_HEADERS_COPIED_HEADERS}
 )
-# Also copy some extra files that we need to be able to include without their siblings.
-macro(emdawnwebgpu_headers_gen_add filename)
-    add_custom_command(TARGET emdawnwebgpu_headers_gen POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-            "${DAWN_INCLUDE_DIR}/webgpu/${filename}"
-            "${EM_BUILD_GEN_DIR}/include/webgpu/${filename}"
-    )
-endmacro()
-emdawnwebgpu_headers_gen_add("webgpu_glfw.h")
-emdawnwebgpu_headers_gen_add("webgpu_enum_class_bitmasks.h")
 
 DawnJSONGenerator(
     TARGET "emdawnwebgpu_js"
