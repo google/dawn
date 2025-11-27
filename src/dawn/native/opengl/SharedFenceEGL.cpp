@@ -53,19 +53,27 @@ ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
         EGL_NONE,
     };
 
-    Ref<WrappedEGLSync> sync;
-    DAWN_TRY_ASSIGN(sync, WrappedEGLSync::Create(device, EGL_SYNC_NATIVE_FENCE_ANDROID, attribs));
+    return device->ExecuteGL(
+        ExecutionQueueBase::SubmitMode::Passive,
+        [&](const OpenGLFunctions& gl) -> ResultOrError<Ref<SharedFence>> {
+            DisplayEGL* display = ToBackend(device->GetPhysicalDevice())->GetDisplay();
+            Ref<WrappedEGLSync> sync;
+            EGLint fdForSharedFence;
 
-    // If EGLSync creation succeeded, the sync now owns the handle.
-    handleForSyncCreation.Detach();
+            DAWN_TRY_ASSIGN(
+                sync, WrappedEGLSync::Create(display, gl, EGL_SYNC_NATIVE_FENCE_ANDROID, attribs));
 
-    EGLint fdForSharedFence;
-    DAWN_TRY_ASSIGN(fdForSharedFence, sync->DupFD());
+            // If EGLSync creation succeeded, the sync now owns the handle.
+            handleForSyncCreation.Detach();
 
-    auto fence =
-        AcquireRef(new SharedFenceEGL(device, label, wgpu::SharedFenceType::SyncFD,
-                                      utils::SystemHandle::Acquire(fdForSharedFence), sync));
-    return fence;
+            DAWN_TRY_ASSIGN(fdForSharedFence, sync->DupFD(gl));
+
+            auto fence = AcquireRef(
+                new SharedFenceEGL(device, label, wgpu::SharedFenceType::SyncFD,
+                                   utils::SystemHandle::Acquire(fdForSharedFence), sync));
+            return fence;
+        });
+
 #else
     DAWN_UNREACHABLE();
 #endif
@@ -98,8 +106,12 @@ MaybeError SharedFenceEGL::ServerWait(uint64_t signaledValue) {
     // All GL sync objects are binary, this should be validated at SharedTextureMemory::BeginAccess.
     DAWN_ASSERT(signaledValue == 1);
 
-    DAWN_TRY(mSync->Wait());
-    return {};
+    Device* device = ToBackend(GetDevice());
+    Ref<WrappedEGLSync> sync = mSync;
+    return device->EnqueueGL([sync](const OpenGLFunctions& gl) -> MaybeError {
+        DAWN_TRY(sync->Wait(gl));
+        return {};
+    });
 }
 
 MaybeError SharedFenceEGL::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {

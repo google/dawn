@@ -101,27 +101,26 @@ MaybeError CheckEGL(const EGLFunctions& egl, EGLBoolean result, const char* cont
     }
 }
 
-ResultOrError<Ref<WrappedEGLSync>> WrappedEGLSync::Create(Device* device,
+ResultOrError<Ref<WrappedEGLSync>> WrappedEGLSync::Create(DisplayEGL* display,
+                                                          const OpenGLFunctions&,
                                                           EGLenum type,
                                                           const EGLint* attribs) {
-    DisplayEGL* display = ToBackend(device->GetPhysicalDevice())->GetDisplay();
     const EGLFunctions& egl = display->egl;
 
     EGLSyncKHR sync = EGL_NO_SYNC;
-    // eglCreateSync requires a current context.
-    DAWN_TRY(device->ExecuteGLWork([&](const OpenGLFunctions&) -> MaybeError {
-        if (egl.HasExt(EGLExt::FenceSync)) {
-            sync = egl.CreateSyncKHR(display->GetDisplay(), type, attribs);
-        } else {
-            DAWN_ASSERT(egl.IsAtLeastVersion(1, 5));
-            std::vector<EGLAttrib> convertedAttribs =
-                ConvertEGLIntParameterListToEGLAttrib(attribs);
-            sync = egl.CreateSync(display->GetDisplay(), type, convertedAttribs.data());
-        }
+    // We don't use OpenGLFunctions struct. However eglCreateSync requires a current context,
+    // so a OpenGLFunctions parameter restricts the caller to call this inside Device's
+    // EnqueueGL/ExecuteGL.
+    if (egl.HasExt(EGLExt::FenceSync)) {
+        sync = egl.CreateSyncKHR(display->GetDisplay(), type, attribs);
+    } else {
+        DAWN_ASSERT(egl.IsAtLeastVersion(1, 5));
+        std::vector<EGLAttrib> convertedAttribs = ConvertEGLIntParameterListToEGLAttrib(attribs);
+        sync = egl.CreateSync(display->GetDisplay(), type, convertedAttribs.data());
+    }
 
-        DAWN_TRY(CheckEGL(egl, sync != EGL_NO_SYNC, "eglCreateSync"));
-        return {};
-    }));
+    DAWN_TRY(CheckEGL(egl, sync != EGL_NO_SYNC, "eglCreateSync"));
+
     return AcquireRef(new WrappedEGLSync(display, sync, true));
 }
 
@@ -168,7 +167,7 @@ EGLSync WrappedEGLSync::Get() const {
     return mSync;
 }
 
-MaybeError WrappedEGLSync::Signal(EGLenum mode) {
+MaybeError WrappedEGLSync::Signal(const OpenGLFunctions&, EGLenum mode) {
     const EGLFunctions& egl = mDisplay->egl;
     DAWN_ASSERT(egl.HasExt(EGLExt::ReusableSync));
 
@@ -176,7 +175,9 @@ MaybeError WrappedEGLSync::Signal(EGLenum mode) {
     return {};
 }
 
-ResultOrError<EGLenum> WrappedEGLSync::ClientWait(EGLint flags, Nanoseconds timeout) {
+ResultOrError<EGLenum> WrappedEGLSync::ClientWait(const OpenGLFunctions&,
+                                                  EGLint flags,
+                                                  Nanoseconds timeout) {
     const EGLFunctions& egl = mDisplay->egl;
 
     EGLenum result = EGL_FALSE;
@@ -191,7 +192,7 @@ ResultOrError<EGLenum> WrappedEGLSync::ClientWait(EGLint flags, Nanoseconds time
     return result;
 }
 
-MaybeError WrappedEGLSync::Wait() {
+MaybeError WrappedEGLSync::Wait(const OpenGLFunctions&) {
     const EGLFunctions& egl = mDisplay->egl;
     DAWN_ASSERT(egl.HasExt(EGLExt::WaitSync));
 
@@ -200,7 +201,7 @@ MaybeError WrappedEGLSync::Wait() {
     return {};
 }
 
-ResultOrError<EGLint> WrappedEGLSync::DupFD() {
+ResultOrError<EGLint> WrappedEGLSync::DupFD(const OpenGLFunctions&) {
     const EGLFunctions& egl = mDisplay->egl;
     DAWN_ASSERT(egl.HasExt(EGLExt::NativeFenceSync));
 
