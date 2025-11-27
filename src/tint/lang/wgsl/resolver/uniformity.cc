@@ -873,10 +873,14 @@ class UniformityGraph {
                 auto* cf1 = ProcessStatement(cf_body_start, f->body);
 
                 auto& loop_body_behavior = sem_.Get(f->body)->Behaviors();
+                const bool body_has_next_or_continue =
+                    loop_body_behavior.Contains(sem::Behavior::kNext) ||
+                    loop_body_behavior.Contains(sem::Behavior::kContinue);
+                const bool body_has_return = loop_body_behavior.Contains(sem::Behavior::kReturn);
 
+                auto* cf_end_of_iter = cf1;
                 // Insert the continuing statement at the end of the loop body, if it is reachable.
-                if (f->continuing && (loop_body_behavior.Contains(sem::Behavior::kNext) ||
-                                      loop_body_behavior.Contains(sem::Behavior::kContinue))) {
+                if (f->continuing && body_has_next_or_continue) {
                     // Set up input nodes for the continuing block, to merge data flow paths from
                     // all blocks that branch to the continuing block.
                     for (auto v : info.var_continuing_nodes) {
@@ -895,10 +899,17 @@ class UniformityGraph {
                     }
 
                     auto* cf2 = ProcessStatement(cf1, f->continuing);
-                    cf_iter_start->AddEdge(cf2);
-                } else {
-                    cf_iter_start->AddEdge(cf1);
+                    cf_end_of_iter = cf2;
                 }
+                if (body_has_next_or_continue) {
+                    // The backedge of the loop is reachable in a static sense.
+                    // This edge allows non-uniformity present at the end of the
+                    // iteration to affect the next iteration.
+                    cf_iter_start->AddEdge(cf_end_of_iter);
+                }
+                // Desugaring the for-loop to a loop-loop moves the initializer
+                // to just before the loop construct. So 'CF' in the spec rules for
+                // loop{} is represented by cf_init_end.
                 cf_iter_start->AddEdge(cf_init_end);
 
                 // Add edges from variable loop input nodes to their values at the end of the loop
@@ -925,11 +936,23 @@ class UniformityGraph {
 
                 current_function_->RemoveLoopSwitchInfoFor(sem_loop);
 
-                if (sem_loop->Behaviors() == sem::Behaviors{sem::Behavior::kNext}) {
-                    return cf;
-                } else {
-                    return cf_iter_start;
+                // Return the resulting control flow node.
+                // This structures the case analysis differently from the spec
+                // text in https://github.com/gpuweb/gpuweb/pull/5419
+                if (body_has_return) {
+                    if (body_has_next_or_continue) {
+                        // Control (statically) reaches the end of the iteration,
+                        // and then back to the top of the next iteration.
+                        return cf_iter_start;
+                    } else {
+                        // Control does not statically reach the end of the
+                        // iteration, nor the continuing block (update clause).
+                        return cf1;
+                    }
                 }
+                // When the loop does not include a return, divergence introduced
+                // by the loop resolves at the end of the loop.
+                return cf;
             },
 
             [&](const ast::WhileStatement* w) {

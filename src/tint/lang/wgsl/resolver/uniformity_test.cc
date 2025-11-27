@@ -3725,6 +3725,8 @@ fn foo() {
 // in the WGSL spec. Some edges always exist, and sometimes they exist
 // only if the behaviour of the loop body has certain behaviours.
 //
+// Analyzing loop { }, and loop { continuing { } }
+//
 // To test analysis of loops, we place code fragments in various key spots to:
 //  - attack: generate non-uniform control flow (or not)
 //  - detect: potentially observe non-uniform control flow (or not)
@@ -3883,6 +3885,46 @@ fn foo() {
 //  For example:
 //    if the full behaviour is "b=" then that implies a uniform Next.
 //    if the full behaviour is "b=r!" then then Next is not in the behaviour.
+//
+//
+// Analyzing for loops and while loops
+//
+// To analyze for loops and while loops, we need to also model the effect
+// of the condition expressions. We'll use a string mapping:
+//    ""    no condition (to be used in for loops without a condition)
+//    "="   uniform condition
+//    "x"   nonuniform condition
+//
+// The significant code locations are the same as for loop-without-continuing,
+// and we reuse the labels for before the loop, the body, and after the loop:
+//
+//    // A
+//    // CF
+//    for ( ; optional-cond ; )
+//         // CF'
+//      s1 // B
+//         // CF1
+//    }
+//    // D
+//    // CFResult
+//
+//    // A
+//    // CF
+//    while ( ; cond ; )
+//         // CF'
+//      s1 // B
+//         // CF1
+//    }
+//    // D
+//    // CFResult
+//
+// A 'for' loop without a condition is structurally identical to a
+// 'loop' without continuing. We will derive those cases automatically.
+//
+// A 'while' loop always has a condition, and is structurally very
+// similar to a 'for' loop with a condition. (The for loop may have
+// an initializer and update clause.)  We will derive the while
+// loop cases automatically.
 
 enum Verdict {
     // The shader is valid, and always passes uniformity analysis.
@@ -4041,31 +4083,90 @@ struct Role {
     const std::string role = "";
 };
 
+enum LoopKind {
+    kLoop,
+    kFor,
+    kWhile,
+};
+
 struct LoopGraphCase {
-    LoopGraphCase(std::string before_spec,
+    LoopGraphCase(LoopKind kind_,
+                  std::string before_spec,
+                  std::string condition_spec_,
                   std::string body_spec,
                   std::string continuing_spec,
                   std::string after_spec,
                   Verdict verdict_)
-        : before(Part::kBefore, before_spec),
+        : kind(kind_),
+          before(Part::kBefore, before_spec),
+          condition_spec(condition_spec_),
           body(Part::kBody, body_spec),
           continuing(Part::kContinuing, continuing_spec),
           after(Part::kAfter, after_spec),
-          verdict(verdict_) {}
+          verdict(verdict_) {
+        TINT_ASSERT(kind == kLoop || kind == kFor || kind == kWhile);
+        TINT_ASSERT(condition_spec == "" || condition_spec == "=" || condition_spec == "x");
+        if (condition_spec.empty()) {
+            TINT_ASSERT(kind == kLoop || kind == kFor);
+        } else {
+            TINT_ASSERT(kind == kFor || kind == kWhile);
+        }
+    }
+
+    std::string condition() const {
+        if (condition_spec == "") {
+            return "";
+        }
+        if (condition_spec == "=") {
+            return "uniform_cond";
+        }
+        if (condition_spec == "x") {
+            return "nonuniform_cond";
+        }
+        TINT_UNREACHABLE();
+    }
+    std::string summary() const {
+        std::ostringstream ss;
+        switch (kind) {
+            case kLoop:
+                ss << "loop ";
+                break;
+            case kFor:
+                ss << "for ";
+                break;
+            case kWhile:
+                ss << "while ";
+                break;
+            default:
+                TINT_UNREACHABLE() << "kind out of range " << static_cast<int>(kind);
+        }
+        ss << "\"" << condition_spec << "\" \"" << before.role << "\", \"" << body.role << "\", \""
+           << continuing.role << "\", \"" << after.role << "\"";
+        return ss.str();
+    }
 
     std::string Shader(bool enable_attack, bool enable_detect) const {
         std::ostringstream ss;
-        ss << "// \"" << before.role << "\", \"" << body.role << "\", \"" << continuing.role
-           << "\", \"" << after.role << "\"\n";
+        ss << "// " << summary() << "\n";
         ss << R"(@compute @workgroup_size(8)
 fn main(@builtin(local_invocation_index) nonuniform_var: u32, @builtin(num_workgroups) nw: vec3u) {
   let uniform_cond = 42 == nw.x;
   let nonuniform_cond = 42 == nonuniform_var;
 )";
         ss << before.behave(enable_attack, enable_detect);
-        ss << "  loop {\n";
+        switch (kind) {
+            case kLoop:
+                ss << "  loop {\n";
+                break;
+            case kFor:
+                ss << "  for ( ; " << condition() << " ; ) {\n";
+                break;
+            case kWhile:
+                ss << "  while (" << condition() << ") {\n";
+                break;
+        }
         ss << body.behave(enable_attack, enable_detect);
-        if (!continuing.role.empty()) {
+        if (kind == kLoop && !continuing.role.empty()) {
             ss << "    continuing {\n";
             ss << continuing.behave(enable_attack, enable_detect);
             ss << "    }\n";
@@ -4076,7 +4177,9 @@ fn main(@builtin(local_invocation_index) nonuniform_var: u32, @builtin(num_workg
         return ss.str();
     }
 
+    const LoopKind kind = kLoop;
     const Role before;
+    const std::string condition_spec;
     const Role body;
     const Role continuing;
     const Role after;
@@ -4086,11 +4189,21 @@ fn main(@builtin(local_invocation_index) nonuniform_var: u32, @builtin(num_workg
 std::vector<LoopGraphCase> LoopGraphCases() {
     // L is for Loop
     auto L = [](std::string a, std::string b, std::string c, Verdict v) -> LoopGraphCase {
-        return LoopGraphCase(a, b, "", c, v);
+        return LoopGraphCase(kLoop, a, "", b, "", c, v);
     };
     // LC is for Loop with Continuing
     auto LC = [](std::string a, std::string b, std::string c, std::string d,
-                 Verdict v) -> LoopGraphCase { return LoopGraphCase(a, b, c, d, v); };
+                 Verdict v) -> LoopGraphCase { return LoopGraphCase(kLoop, a, "", b, c, d, v); };
+    // F is for-loop
+    auto F = [](std::string before, std::string cond, std::string body, std::string after,
+                Verdict v) -> LoopGraphCase {
+        return LoopGraphCase(kFor, before, cond, body, "", after, v);
+    };
+    // F is while-loop
+    auto W = [](std::string before, std::string cond, std::string body, std::string after,
+                Verdict v) -> LoopGraphCase {
+        return LoopGraphCase(kWhile, before, cond, body, "", after, v);
+    };
 
     auto cases = std::vector<LoopGraphCase>{
         // clang-format off
@@ -4389,20 +4502,190 @@ std::vector<LoopGraphCase> LoopGraphCases() {
         LC("", "cxr=", "#", "_", kReject),
         LC("", "cxrx", "#", "_", kReject),
         LC("", "cxr!", "#", "_", kReject),
+
+        // For loops
+        // Note that most for-without-condition cases will be automatically
+        // generated from loop-without-continuing, as they should have
+        // isomorphic uniformity graphs.
+        //
+        // Trivial cases
+        F("", "", "", "", kRejectForOtherReasons),  // infinite loop
+        F("", "=", "", "", kAccept),
+        F("", "x", "", "", kAccept),
+
+        // For loops with a condition expression.
+        // Scenario (A,B): attacker before loop, detector in body
+        //   Uniform condition
+        F("#", "=", "_", "", kReject),
+        //     body has detector, then interruption
+        F("#", "=", "_b=", "", kReject),
+        F("#", "=", "_bx", "", kReject),
+        F("#", "=", "_b!", "", kReject),
+        F("#", "=", "_r=", "", kReject),
+        F("#", "=", "_rx", "", kReject),
+        F("#", "=", "_r!", "", kReject),
+        F("#", "=", "_c=", "", kReject),
+        F("#", "=", "_cx", "", kReject),
+        F("#", "=", "_c!", "", kReject),
+        //     body has interruption, then detector
+        F("#", "=", "b=_", "", kReject),
+        F("#", "=", "bx_", "", kReject),
+        F("#", "=", "b!_", "", kAccept),  // detector not reachable
+        F("#", "=", "r=_", "", kReject),
+        F("#", "=", "rx_", "", kReject),
+        F("#", "=", "r!_", "", kAccept),  // detector not reachable
+        F("#", "=", "c=_", "", kReject),
+        F("#", "=", "cx_", "", kReject),
+        F("#", "=", "c!_", "", kAccept),  // detector not reachable
+        //   Nonuniform condition
+        F("#", "x", "_", "", kReject),
+        //     body has detector, then interruption
+        F("#", "x", "_b=", "", kReject),
+        F("#", "x", "_bx", "", kReject),
+        F("#", "x", "_b!", "", kReject),
+        F("#", "x", "_r=", "", kReject),
+        F("#", "x", "_rx", "", kReject),
+        F("#", "x", "_r!", "", kReject),
+        F("#", "x", "_c=", "", kReject),
+        F("#", "x", "_cx", "", kReject),
+        F("#", "x", "_c!", "", kReject),
+        //     body has interruption, then detector
+        F("#", "x", "b=_", "", kReject),
+        F("#", "x", "bx_", "", kReject),
+        F("#", "x", "b!_", "", kAccept),  // detector not reachable
+        F("#", "x", "r=_", "", kReject),
+        F("#", "x", "rx_", "", kReject),
+        F("#", "x", "r!_", "", kAccept),  // detector not reachable
+        F("#", "x", "c=_", "", kReject),
+        F("#", "x", "cx_", "", kReject),
+        F("#", "x", "c!_", "", kAccept),  // detector not reachable
+
+        // Scenario (A,D): attacker before loop, detector after body
+        //   Uniform condition
+        F("#", "=", "", "_", kReject),
+        F("#", "=", "b=", "_", kReject),
+        F("#", "=", "bx", "_", kReject),
+        F("#", "=", "b!", "_", kReject),
+        F("#", "=", "c=", "_", kReject),
+        F("#", "=", "cx", "_", kReject),
+        F("#", "=", "c!", "_", kReject),
+        F("#", "=", "r=", "_", kReject),
+        F("#", "=", "rx", "_", kReject),
+        F("#", "=", "r!", "_", kReject),  // loop condition is an implicit break
+        //   Nonuniform condition
+        F("#", "x", "", "_", kReject),
+        F("#", "x", "b=", "_", kReject),
+        F("#", "x", "bx", "_", kReject),
+        F("#", "x", "b!", "_", kReject),
+        F("#", "x", "c=", "_", kReject),
+        F("#", "x", "cx", "_", kReject),
+        F("#", "x", "c!", "_", kReject),
+        F("#", "x", "r=", "_", kReject),
+        F("#", "x", "rx", "_", kReject),
+        F("#", "x", "r!", "_", kReject),  // loop condition is an implicit break
+
+        // Scenario (B,D): attacker in body, detector after body
+        // When the body behaviour includes Return, the after-loop node
+        // links to the end of the body.
+        //
+        //  Uniform condition
+        F("", "=", "#", "_", kAccept),
+        F("", "=", "#b=", "_", kAccept),
+        F("", "=", "#bx", "_", kAccept),
+        F("", "=", "#b!", "_", kAccept),
+        F("", "=", "#c=", "_", kAccept),
+        F("", "=", "#cx", "_", kAccept),
+        F("", "=", "#c!", "_", kAccept),
+        F("", "=", "#r=", "_", kReject),
+        F("", "=", "#rx", "_", kReject),
+        F("", "=", "#r!", "_", kReject),
+        //    Check return after others
+        F("", "=", "#b=r=", "_", kReject),
+        F("", "=", "#b=rx", "_", kReject),
+        F("", "=", "#b=r!", "_", kReject),
+        F("", "=", "#c=r=", "_", kReject),
+        F("", "=", "#c=rx", "_", kReject),
+        F("", "=", "#b=r!", "_", kReject),
+        //    Check return before others
+        F("", "=", "#r=b=", "_", kReject),
+        F("", "=", "#r=bx", "_", kReject),
+        F("", "=", "#r=b!", "_", kReject),
+        F("", "=", "#r=c=", "_", kReject),
+        F("", "=", "#r=cx", "_", kReject),
+        F("", "=", "#r=c!", "_", kReject),
+        F("", "=", "#rxb=", "_", kReject),
+        F("", "=", "#rxbx", "_", kReject),
+        F("", "=", "#rxb!", "_", kReject),
+        F("", "=", "#rxc=", "_", kReject),
+        F("", "=", "#rxcx", "_", kReject),
+        F("", "=", "#rxc!", "_", kReject),
+        //  Nonunifor condition
+        F("", "x", "#", "_", kAccept),
+        F("", "x", "#b=", "_", kAccept),
+        F("", "x", "#bx", "_", kAccept),
+        F("", "x", "#b!", "_", kAccept),
+        F("", "x", "#c=", "_", kAccept),
+        F("", "x", "#cx", "_", kAccept),
+        F("", "x", "#c!", "_", kAccept),
+        F("", "x", "#r=", "_", kReject),
+        F("", "x", "#rx", "_", kReject),
+        F("", "x", "#r!", "_", kReject),
+        //    Check return after others
+        F("", "x", "#b=r=", "_", kReject),
+        F("", "x", "#b=rx", "_", kReject),
+        F("", "x", "#b=r!", "_", kReject),
+        F("", "x", "#c=r=", "_", kReject),
+        F("", "x", "#c=rx", "_", kReject),
+        F("", "=", "#b=r!", "_", kReject),
+        //    Check return before others
+        F("", "x", "#r=b=", "_", kReject),
+        F("", "x", "#r=bx", "_", kReject),
+        F("", "x", "#r=b!", "_", kReject),
+        F("", "x", "#r=c=", "_", kReject),
+        F("", "x", "#r=cx", "_", kReject),
+        F("", "x", "#r=c!", "_", kReject),
+        F("", "x", "#rxb=", "_", kReject),
+        F("", "x", "#rxbx", "_", kReject),
+        F("", "x", "#rxb!", "_", kReject),
+        F("", "x", "#rxc=", "_", kReject),
+        F("", "x", "#rxcx", "_", kReject),
+        F("", "x", "#rxc!", "_", kReject),
+
+        // While loops
+        // While loops always have an expression.
+        //
+        // Trivial cases
+        W("", "=", "", "", kAccept), W("", "x", "", "", kAccept),
+        // We will automatically derive most while-loop tests from
+        // the for-loop tests.
+        //
+        // The uniformity graph of a while loop nearly isomorphic to a
+        // for-loop with a condition expression.  The only difference is
+        // that for-loops have an initializer statement, and while-loops
+        // do not.
+
         // clang-format on
     };
 
-    // Automatically derive loop-continuing cases from loop-without-continuing
-    // cases.
-    const auto n = cases.size();
-    for (size_t i = 0; i < n; i++) {
+    // Use loop-without-continuing cases to derive:
+    //  - loop-continuing cases, where the continiuing clause is empty
+    //  - for-loop without a condition.
+    for (size_t i = 0; i < cases.size(); i++) {
         // Take copy instead of a reference because the vector will expand at
         // some point, invalidating references.
         const auto case_ = cases[i];
-        if (case_.continuing.role.empty()) {
-            // Construct a new loop case, with an empty continuing clause.
-            cases.emplace_back(case_.before.role, case_.body.role, " ", case_.after.role,
+        if (case_.kind == kLoop && case_.continuing.role.empty()) {
+            // Create a new loop case, with an empty continuing clause.
+            cases.emplace_back(kLoop, case_.before.role, "", case_.body.role, " ", case_.after.role,
                                case_.verdict);
+            // Create a for-loop case without condition expression.
+            cases.emplace_back(kFor, case_.before.role, "", case_.body.role, "", case_.after.role,
+                               case_.verdict);
+        }
+        if (case_.kind == kFor && !case_.condition_spec.empty()) {
+            // Create a while-loop case without condition expression.
+            cases.emplace_back(kWhile, case_.before.role, case_.condition_spec, case_.body.role, "",
+                               case_.after.role, case_.verdict);
         }
     }
 
