@@ -2,6 +2,7 @@ package androidx.webgpu
 
 import androidx.test.filters.SmallTest
 import androidx.webgpu.ValidationException
+import androidx.webgpu.WebGpuTestConstants.EMULATOR_TESTS_MIN_API_LEVEL
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
 import java.nio.ByteBuffer
@@ -12,6 +13,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @Suppress("UNUSED_VARIABLE")
@@ -20,7 +22,8 @@ class CommandEncoderTest {
 
   private lateinit var device: GPUDevice
   private lateinit var webGpu: WebGpu
-
+  @get:Rule
+  val apiSkipRule = ApiLevelSkipRule()
   @Before
   fun setup() = runBlocking {
     webGpu = createWebGpu()
@@ -140,6 +143,7 @@ class CommandEncoderTest {
    * Verifies that a render pass with `LoadOp.Clear` correctly clears a texture to a specific color.
    */
   @Test
+  @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
   fun testBeginRenderPass_clearsTextureCorrectly() {
     val queue = device.getQueue()
 

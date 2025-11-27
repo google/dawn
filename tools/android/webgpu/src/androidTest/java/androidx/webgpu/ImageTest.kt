@@ -4,11 +4,13 @@ import android.graphics.BitmapFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.webgpu.WebGpuTestConstants.EMULATOR_TESTS_MIN_API_LEVEL
 import androidx.webgpu.helper.asString
 import androidx.webgpu.helper.createBitmap
 import androidx.webgpu.helper.createWebGpu
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -16,15 +18,19 @@ import org.junit.runner.RunWith
 class ImageTest {
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val storage = StorageFactory.createStore(appContext)
+    @get:Rule
+    val apiSkipRule = ApiLevelSkipRule()
 
     @Test
     @MediumTest
+    @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
     fun imageCompareGreen() {
         triangleTest(Color(0.2, 0.9, 0.1, 1.0), "green.png")
     }
 
     @Test
     @MediumTest
+    @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
     fun imageCompareRed() {
         triangleTest(Color(0.9, 0.1, 0.2, 1.0), "red.png")
     }

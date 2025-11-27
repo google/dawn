@@ -2,6 +2,7 @@ package androidx.webgpu
 
 import androidx.test.filters.MediumTest
 import androidx.test.filters.SmallTest
+import androidx.webgpu.WebGpuTestConstants.EMULATOR_TESTS_MIN_API_LEVEL
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
 import java.nio.ByteBuffer
@@ -13,11 +14,14 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 
 @Suppress("UNUSED_VARIABLE")
 class BufferTest {
   private lateinit var device: GPUDevice
   private lateinit var webGpu: WebGpu
+  @get:Rule
+  val apiSkipRule = ApiLevelSkipRule()
 
   @Before
   fun setup() = runBlocking {
@@ -118,6 +122,7 @@ class BufferTest {
    */
   @MediumTest
   @Test
+  @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
   fun testWriteAndReadBuffer() {
     val queue = device.getQueue()
 

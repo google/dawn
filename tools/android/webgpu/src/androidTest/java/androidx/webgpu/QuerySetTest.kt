@@ -12,6 +12,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assume
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @Suppress("UNUSED_VARIABLE")
@@ -19,6 +20,9 @@ import org.junit.Test
 class QuerySetTest {
   private lateinit var webGpu: WebGpu
   private lateinit var device: GPUDevice
+
+  @get:Rule
+  val apiSkipRule = ApiLevelSkipRule()
 
   @Before
   fun setup() = runBlocking {
@@ -384,6 +388,7 @@ class QuerySetTest {
    * and the triangle successfully draws, the query must return the exact sample count.
    */
   @Test
+  @ApiRequirement(minApi = 35, onlySkipOnEmulator = true)
   fun testResolveQuerySetAndReadback() {
     executeQueryResolveTest(
       drawAction = { passEncoder -> passEncoder.draw(3) },
@@ -395,6 +400,7 @@ class QuerySetTest {
    * Perform no drawing, which should result in an occlusion query count of 0.
    */
   @Test
+  @ApiRequirement(minApi = 35, onlySkipOnEmulator = true)
   fun testResolveQuerySetWithZeroResult() {
     executeQueryResolveTest(
       drawAction = { },
