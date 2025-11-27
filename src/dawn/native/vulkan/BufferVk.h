@@ -67,6 +67,11 @@ class Buffer final : public BufferBase {
     void TransitionUsageNow(CommandRecordingContext* recordingContext,
                             wgpu::BufferUsage usage,
                             wgpu::ShaderStage shaderStage = wgpu::ShaderStage::None);
+
+    // Tracks that buffer had `usage` from `shaderStage`. Returns a barrier to be inserted if
+    // necessary based on previous usage. For map usage this returns a GPU->HOST barrier if
+    // necessary but doesn't track the map usage. As a result this will never produce HOST->GPU
+    // barriers.
     BufferBarrier TrackUsageAndGetResourceBarrier(wgpu::BufferUsage usage,
                                                   wgpu::ShaderStage shaderStage);
 

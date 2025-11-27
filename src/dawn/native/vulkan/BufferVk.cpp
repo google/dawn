@@ -460,7 +460,14 @@ BufferBarrier Buffer::TrackUsageAndGetResourceBarrier(wgpu::BufferUsage usage,
     }
 
     const bool isMapUsage = usage & kMappableBufferUsages;
-    if (!isMapUsage) {
+    if (isMapUsage) {
+        DAWN_ASSERT(shaderStage == wgpu::ShaderStage::None);
+        DAWN_ASSERT(IsSubset(usage, kMappableBufferUsages));
+        // HOST->GPU barriers aren't required. For MapRead, vkQueueSubmit() happens-after all CPU
+        // reads are complete. For MapWrite, the writes are made available to the "Host domain" with
+        // vkFlushMappedMemory() (or buffers are coherent) and there is an implicit "Host domain" ->
+        // "Device domain" barrier in vkQueueSubmit().
+    } else {
         // Request non CPU usage, so assume the buffer will be used in pending commands.
         MarkUsedInPendingCommands();
     }
@@ -490,16 +497,13 @@ BufferBarrier Buffer::TrackUsageAndGetResourceBarrier(wgpu::BufferUsage usage,
             usage |= GetInternalUsage() & kReadOnlyShaderBufferUsages;
         }
 
-        mReadUsage |= usage;
-        mReadShaderStages |= shaderStage;
+        if (!isMapUsage) {
+            mReadUsage |= usage;
+            mReadShaderStages |= shaderStage;
+        }
 
         if (mLastWriteUsage == wgpu::BufferUsage::None) {
             // Read dependency with no prior writes. No barrier needed.
-            return {};
-        }
-
-        if (IsSubset(usage | mLastWriteUsage, kMappableBufferUsages)) {
-            // No barrier is needed for map write followed by map read.
             return {};
         }
 
@@ -509,16 +513,8 @@ BufferBarrier Buffer::TrackUsageAndGetResourceBarrier(wgpu::BufferUsage usage,
     } else {
         bool skipBarrier = false;
 
-        // vkQueueSubmit does an implicit domain and visibility operation. For HOST_COHERENT
-        // memory, we can ignore read (host)->write barriers. However, we can't necessarily
-        // skip the barrier if mReadUsage == MapRead, as we could still need a barrier for
-        // the last write. Instead, pretend the last host read didn't happen.
-        mReadUsage &= ~wgpu::BufferUsage::MapRead;
-
-        if ((mLastWriteUsage == wgpu::BufferUsage::None && mReadUsage == wgpu::BufferUsage::None) ||
-            IsSubset(usage | mLastWriteUsage | mReadUsage, kMappableBufferUsages)) {
-            // The buffer has never been used before, or the dependency is map->map. We don't need a
-            // barrier.
+        if (mLastWriteUsage == wgpu::BufferUsage::None && mReadUsage == wgpu::BufferUsage::None) {
+            // The buffer has never been used so we don't need a barrier.
             skipBarrier = true;
         } else if (mReadUsage == wgpu::BufferUsage::None) {
             // No reads since the last write.
@@ -531,11 +527,13 @@ BufferBarrier Buffer::TrackUsageAndGetResourceBarrier(wgpu::BufferUsage usage,
             srcStage = VulkanPipelineStage(mReadUsage, mReadShaderStages);
         }
 
-        mLastWriteUsage = usage;
-        mLastWriteShaderStage = shaderStage;
+        if (!isMapUsage) {
+            mLastWriteUsage = usage;
+            mLastWriteShaderStage = shaderStage;
 
-        mReadUsage = wgpu::BufferUsage::None;
-        mReadShaderStages = wgpu::ShaderStage::None;
+            mReadUsage = wgpu::BufferUsage::None;
+            mReadShaderStages = wgpu::ShaderStage::None;
+        }
 
         if (skipBarrier) {
             return {};
@@ -563,15 +561,6 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
 
 MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     Device* device = ToBackend(GetDevice());
-
-    // Any required barriers for mapping must have been inserted before map finalizes. This is done
-    // by eagerly transitioning mappable buffers at the end of GPU submissions that use them. If
-    // this ASSERT triggers, there is likely a missing call to CheckBufferNeedsEagerTransition()
-    // after a transition of the buffer for GPU usage.
-    wgpu::BufferUsage usage = (MapMode() & wgpu::MapMode::Read) ? wgpu::BufferUsage::MapRead
-                                                                : wgpu::BufferUsage::MapWrite;
-    BufferBarrier barrier = TrackUsageAndGetResourceBarrier(usage, wgpu::ShaderStage::None);
-    DAWN_ASSERT(barrier.IsEmpty());
 
     if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
         // Clear full allocated size, including padding bytes, except for zero sized buffers. For
@@ -641,9 +630,13 @@ MaybeError Buffer::UploadData(uint64_t bufferOffset, const void* data, size_t si
     Device* device = ToBackend(GetDevice());
 
     const bool isInUse = GetLastUsageSerial() > device->GetQueue()->GetCompletedCommandSerial();
-    // Get if buffer has pending writes on the GPU. Even if the write workload has finished, the
-    // write may still need a barrier to make the write available.
-    const bool hasPendingWrites = !IsSubset(mLastWriteUsage, wgpu::BufferUsage::MapWrite);
+
+    // Check if the buffer might have pending writes on the GPU. Even if the write workload has
+    // finished, the write may still need a barrier to make the write available. For MapWrite
+    // buffers we know the GPU->HOST barrier was eagerly inserted. For other buffers we don't know
+    // if the right barrier was inserted and assume it wasn't.
+    const bool hasPendingWrites = !(GetInternalUsage() & wgpu::BufferUsage::MapWrite ||
+                                    mLastWriteUsage == wgpu::BufferUsage::None);
 
     if (isInUse || hasPendingWrites || !mHostVisible) {
         // Write to scratch buffer and copy into final destination buffer.
