@@ -83,21 +83,22 @@ class CommandBufferBase : public ApiObjectBase {
 };
 
 bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
-                                   const Extent3D& copySize,
+                                   const TexelExtent3D& copySize,
                                    const uint32_t mipLevel,
                                    Aspect aspect);
 bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
-                                   const Extent3D& copySize,
+                                   const TexelExtent3D& copySize,
                                    const uint32_t mipLevel,
                                    wgpu::TextureAspect textureAspect);
-SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy, const Extent3D& copySize);
+SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy,
+                                               const TexelExtent3D& copySize);
 
 void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass);
 
 bool IsFullBufferOverwrittenInTextureToBufferCopy(const CopyTextureToBufferCmd* copy);
 bool IsFullBufferOverwrittenInTextureToBufferCopy(const TextureCopy& source,
                                                   const BufferCopy& destination,
-                                                  const Extent3D& copySize);
+                                                  const TexelExtent3D& copySize);
 
 std::array<float, 4> ConvertToFloatColor(dawn::native::Color color);
 std::array<int32_t, 4> ConvertToSignedIntegerColor(dawn::native::Color color);

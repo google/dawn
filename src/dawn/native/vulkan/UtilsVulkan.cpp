@@ -140,10 +140,11 @@ VkImageAspectFlags VulkanAspectMask(const Aspect& aspects) {
 // the image refers to the virtual size, while Dawn validates texture copy extent with the
 // physical size, so we need to re-calculate the texture copy extent to ensure it should fit
 // in the virtual size of the subresource.
-Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D& copySize) {
-    Extent3D validTextureCopyExtent = copySize;
+TexelExtent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy,
+                                       const TexelExtent3D& copySize) {
+    TexelExtent3D validTextureCopyExtent = copySize;
     const TextureBase* texture = textureCopy.texture.Get();
-    Extent3D virtualSizeAtLevel =
+    TexelExtent3D virtualSizeAtLevel =
         texture->GetMipLevelSingleSubresourceVirtualSize(textureCopy.mipLevel, textureCopy.aspect);
     DAWN_ASSERT(textureCopy.origin.x <= virtualSizeAtLevel.width);
     DAWN_ASSERT(textureCopy.origin.y <= virtualSizeAtLevel.height);
@@ -193,9 +194,9 @@ VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D:
-            DAWN_ASSERT(textureCopy.origin.z == 0 &&
+            DAWN_ASSERT(textureCopy.origin.z == TexelCount{0} &&
                         copySizeTexels.depthOrArrayLayers == TexelCount{1});
-            region.imageOffset.x = textureCopy.origin.x;
+            region.imageOffset.x = static_cast<uint32_t>(textureCopy.origin.x);
             region.imageOffset.y = 0;
             region.imageOffset.z = 0;
             region.imageSubresource.baseArrayLayer = 0;
@@ -208,32 +209,32 @@ VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
             break;
 
         case wgpu::TextureDimension::e2D: {
-            region.imageOffset.x = textureCopy.origin.x;
-            region.imageOffset.y = textureCopy.origin.y;
+            region.imageOffset.x = static_cast<uint32_t>(textureCopy.origin.x);
+            region.imageOffset.y = static_cast<uint32_t>(textureCopy.origin.y);
             region.imageOffset.z = 0;
-            region.imageSubresource.baseArrayLayer = textureCopy.origin.z;
+            region.imageSubresource.baseArrayLayer = static_cast<uint32_t>(textureCopy.origin.z);
             region.imageSubresource.layerCount =
                 static_cast<uint32_t>(copySizeTexels.depthOrArrayLayers);
 
-            Extent3D imageExtent =
+            TexelExtent3D imageExtent =
                 ComputeTextureCopyExtent(textureCopy, copySizeTexels.ToExtent3D());
-            region.imageExtent.width = imageExtent.width;
-            region.imageExtent.height = imageExtent.height;
+            region.imageExtent.width = static_cast<uint32_t>(imageExtent.width);
+            region.imageExtent.height = static_cast<uint32_t>(imageExtent.height);
             region.imageExtent.depth = 1;
             break;
         }
 
         case wgpu::TextureDimension::e3D: {
-            region.imageOffset.x = textureCopy.origin.x;
-            region.imageOffset.y = textureCopy.origin.y;
-            region.imageOffset.z = textureCopy.origin.z;
+            region.imageOffset.x = static_cast<uint32_t>(textureCopy.origin.x);
+            region.imageOffset.y = static_cast<uint32_t>(textureCopy.origin.y);
+            region.imageOffset.z = static_cast<uint32_t>(textureCopy.origin.z);
             region.imageSubresource.baseArrayLayer = 0;
             region.imageSubresource.layerCount = 1;
 
-            Extent3D imageExtent =
+            TexelExtent3D imageExtent =
                 ComputeTextureCopyExtent(textureCopy, copySizeTexels.ToExtent3D());
-            region.imageExtent.width = imageExtent.width;
-            region.imageExtent.height = imageExtent.height;
+            region.imageExtent.width = static_cast<uint32_t>(imageExtent.width);
+            region.imageExtent.height = static_cast<uint32_t>(imageExtent.height);
             region.imageExtent.depth = static_cast<uint32_t>(copySizeTexels.depthOrArrayLayers);
             break;
         }

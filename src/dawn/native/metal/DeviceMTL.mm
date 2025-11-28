@@ -359,8 +359,8 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
     RecordCopyBufferToTexture(
         ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive),
         ToBackend(source)->GetMTLBuffer(), source->GetSize(), dataLayout.offset,
-        dataLayout.bytesPerRow, dataLayout.rowsPerImage, texture, dst.mipLevel, dst.origin,
-        dst.aspect, copySizePixels);
+        dataLayout.bytesPerRow, dataLayout.rowsPerImage, texture, dst.mipLevel,
+        dst.origin.ToOrigin3D(), dst.aspect, copySizePixels);
     return {};
 }
 

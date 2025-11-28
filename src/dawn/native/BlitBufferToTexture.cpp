@@ -361,7 +361,7 @@ bool IsFormatSupportedByBufferToTextureBlit(wgpu::TextureFormat format) {
 
 bool IsBufferToTextureBlitSupported(BufferBase* buffer,
                                     const TextureCopy& dst,
-                                    const Extent3D& copyExtent) {
+                                    const TexelExtent3D& copyExtent) {
     if (!(buffer->GetInternalUsage() &
           (kReadOnlyStorageBuffer | kInternalStorageBuffer | wgpu::BufferUsage::Storage))) {
         return false;
@@ -382,7 +382,7 @@ bool IsBufferToTextureBlitSupported(BufferBase* buffer,
     }
 
     // Must have non-zero copy size.
-    return copyExtent.width * copyExtent.height * copyExtent.depthOrArrayLayers > 0;
+    return copyExtent.width * copyExtent.height * copyExtent.depthOrArrayLayers > TexelCount{0};
 }
 
 MaybeError BlitBufferToTexture(DeviceBase* device,
@@ -390,7 +390,7 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
                                BufferBase* buffer,
                                const TexelCopyBufferLayout& src,
                                const TextureCopy& dst,
-                               const Extent3D& copyExtent) {
+                               const TexelExtent3D& copyExtent) {
     DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
 
     // This function assumes bytesPerRow is multiples of 4. Normally it's required that
@@ -402,7 +402,7 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
     DAWN_ASSERT(buffer->GetInternalUsage() &
                 (kReadOnlyStorageBuffer | kInternalStorageBuffer | wgpu::BufferUsage::Storage));
 
-    DAWN_ASSERT(copyExtent.width > 0 && copyExtent.height > 0 && copyExtent.depthOrArrayLayers > 0);
+    DAWN_ASSERT(!copyExtent.IsEmpty());
 
     // Allow internal usages since we need to use the destination
     // as a render attachment.
@@ -428,29 +428,30 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
             break;
         case wgpu::TextureDimension::e3D:
             viewDimension = wgpu::TextureViewDimension::e3D;
-            baseDepth = dst.origin.z;
+            baseDepth = static_cast<uint32_t>(dst.origin.z);
             depthStep = 1;
             break;
         default:
             viewDimension = wgpu::TextureViewDimension::e2D;
-            baseArray = dst.origin.z;
+            baseArray = static_cast<uint32_t>(dst.origin.z);
             arrayStep = 1;
             break;
     }
 
-    for (uint32_t z = 0; z < copyExtent.depthOrArrayLayers; ++z) {
+    for (TexelCount z{0}; z < copyExtent.depthOrArrayLayers; ++z) {
         Ref<TextureViewBase> dstView;
         {
             TextureViewDescriptor viewDesc = {};
             viewDesc.dimension = viewDimension;
-            viewDesc.baseArrayLayer = baseArray + arrayStep * z;
+            viewDesc.baseArrayLayer = baseArray + arrayStep * static_cast<uint32_t>(z);
             viewDesc.arrayLayerCount = 1;
             viewDesc.baseMipLevel = dst.mipLevel;
             viewDesc.mipLevelCount = 1;
             DAWN_TRY_ASSIGN(dstView, dst.texture->CreateView(&viewDesc));
         }
 
-        const uint64_t srcOffset = src.offset + z * src.rowsPerImage * src.bytesPerRow;
+        const uint64_t srcOffset =
+            src.offset + static_cast<uint32_t>(z) * src.rowsPerImage * src.bytesPerRow;
         const uint64_t srcBufferBindingOffset = AlignDown(srcOffset, ssboAlignment);
         const uint32_t shaderReadOffset = static_cast<uint32_t>(srcOffset & (ssboAlignment - 1));
         Ref<BufferBase> paramsBuffer;
@@ -461,8 +462,8 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
             uint32_t params[4];
             params[0] = shaderReadOffset;
             params[1] = src.bytesPerRow;
-            params[2] = dst.origin.x;
-            params[3] = dst.origin.y;
+            params[2] = static_cast<uint32_t>(dst.origin.x);
+            params[3] = static_cast<uint32_t>(dst.origin.y);
             commandEncoder->APIWriteBuffer(paramsBuffer.Get(), 0,
                                            reinterpret_cast<const uint8_t*>(&params[0]),
                                            sizeof(params));
@@ -479,7 +480,7 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
         RenderPassColorAttachment colorAttachment;
         colorAttachment.view = dstView.Get();
         if (depthStep) {
-            colorAttachment.depthSlice = baseDepth + depthStep * z;
+            colorAttachment.depthSlice = baseDepth + depthStep * static_cast<uint32_t>(z);
         }
         colorAttachment.loadOp = wgpu::LoadOp::Load;
         colorAttachment.storeOp = wgpu::StoreOp::Store;
@@ -491,9 +492,11 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
         Ref<RenderPassEncoder> pass = commandEncoder->BeginRenderPass(&rpDesc);
         // Bind the resources.
         pass->APISetBindGroup(0, bindGroup.Get());
-        pass->APISetViewport(static_cast<float>(dst.origin.x), static_cast<float>(dst.origin.y),
-                             static_cast<float>(copyExtent.width),
-                             static_cast<float>(copyExtent.height), 0.f, 1.f);
+        pass->APISetViewport(static_cast<float>(static_cast<uint32_t>(dst.origin.x)),
+                             static_cast<float>(static_cast<uint32_t>(dst.origin.y)),
+                             static_cast<float>(static_cast<uint32_t>(copyExtent.width)),
+                             static_cast<float>(static_cast<uint32_t>(copyExtent.height)), 0.f,
+                             1.f);
 
         // Draw to perform the blit.
         pass->APISetPipeline(pipeline.Get());

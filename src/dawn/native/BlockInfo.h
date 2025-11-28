@@ -68,6 +68,9 @@ struct TexelOrigin3D {
     constexpr Origin3D ToOrigin3D() const {
         return {static_cast<uint32_t>(x), static_cast<uint32_t>(y), static_cast<uint32_t>(z)};
     }
+
+    // Comparison operator
+    constexpr bool operator==(const TexelOrigin3D&) const = default;
 };
 
 // Stores an origin in block space
@@ -82,6 +85,9 @@ struct BlockOrigin3D {
                             BlockCount y = BlockCount{0},
                             BlockCount z = BlockCount{0})
         : x(x), y(y), z(z) {}
+
+    // Comparison operator
+    constexpr bool operator==(const BlockOrigin3D&) const = default;
 };
 
 // Strong type version of Extent3D.
@@ -111,6 +117,15 @@ struct TexelExtent3D {
         return {static_cast<uint32_t>(width), static_cast<uint32_t>(height),
                 static_cast<uint32_t>(depthOrArrayLayers)};
     }
+
+    // Comparison operator
+    constexpr bool operator==(const TexelExtent3D&) const = default;
+
+    // Returns true if any extent is zero
+    bool IsEmpty() const {
+        return width == TexelCount{0} || height == TexelCount{0} ||
+               depthOrArrayLayers == TexelCount{0};
+    }
 };
 
 // Stores an extent in block space
@@ -128,6 +143,15 @@ struct BlockExtent3D {
                             BlockCount height = BlockCount{1},
                             BlockCount depthOrArrayLayers = BlockCount{1})
         : width(width), height(height), depthOrArrayLayers(depthOrArrayLayers) {}
+
+    // Comparison operator
+    constexpr bool operator==(const BlockExtent3D&) const = default;
+
+    // Returns true if any extent is zero
+    bool IsEmpty() const {
+        return width == BlockCount{0} || height == BlockCount{0} ||
+               depthOrArrayLayers == BlockCount{0};
+    }
 };
 
 // Strong type version of TexelBlockInfo that stores the dimensions of the block

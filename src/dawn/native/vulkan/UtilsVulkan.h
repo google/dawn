@@ -119,7 +119,8 @@ VkFilter ToVulkanSamplerFilter(wgpu::FilterMode filter);
 
 VkImageAspectFlags VulkanAspectMask(const Aspect& aspects);
 
-Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D& copySize);
+TexelExtent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy,
+                                       const TexelExtent3D& copySize);
 
 // TODO(crbug.com/424536624): Remove this overload and use BufferCopy instead of
 // TexelCopyBufferLayout.

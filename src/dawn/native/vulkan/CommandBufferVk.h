@@ -68,7 +68,7 @@ class CommandBuffer final : public CommandBufferBase {
     MaybeError RecordCopyImageWithTemporaryBuffer(CommandRecordingContext* recordingContext,
                                                   const TextureCopy& srcCopy,
                                                   const TextureCopy& dstCopy,
-                                                  const Extent3D& copySize);
+                                                  const TexelExtent3D& texelCopySize);
 };
 
 }  // namespace dawn::native::vulkan

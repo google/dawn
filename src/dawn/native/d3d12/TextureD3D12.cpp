@@ -924,7 +924,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
 
                             TextureCopy textureCopy;
                             textureCopy.texture = this;
-                            textureCopy.origin = {0, 0, layer};
+                            textureCopy.origin = {TexelCount{0}, TexelCount{0}, TexelCount{layer}};
                             textureCopy.mipLevel = level;
                             textureCopy.aspect = aspect;
                             RecordBufferTextureCopyWithBufferHandle(

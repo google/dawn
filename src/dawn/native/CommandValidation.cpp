@@ -244,17 +244,6 @@ MaybeError ValidateWriteBuffer(const DeviceBase* device,
     return {};
 }
 
-bool IsRangeOverlapped(uint32_t startA, uint32_t startB, uint32_t length) {
-    if (length < 1) {
-        return false;
-    }
-    return RangesOverlap<uint64_t>(
-        static_cast<uint64_t>(startA),
-        static_cast<uint64_t>(startA) + static_cast<uint64_t>(length) - 1,
-        static_cast<uint64_t>(startB),
-        static_cast<uint64_t>(startB) + static_cast<uint64_t>(length) - 1);
-}
-
 ResultOrError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockInfo,
                                                    const Extent3D& copySize,
                                                    uint32_t bytesPerRow,

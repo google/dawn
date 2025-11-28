@@ -1987,7 +1987,8 @@ void CommandEncoder::APICopyTextureToTexture(const TexelCopyTextureInfo* sourceO
                 (aspect & Aspect::Depth) &&
                 GetDevice()->IsToggleEnabled(
                     Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource) &&
-                (dst.mipLevel > 0 || dst.origin.z > 0 || copySize->depthOrArrayLayers > 1);
+                (dst.mipLevel > 0 || dst.origin.z > TexelCount{0} ||
+                 copySize->depthOrArrayLayers > 1);
 
             // If we're not using a blit, or there are aspects other than depth,
             // issue the copy. This is because if there's also stencil, we still need the copy

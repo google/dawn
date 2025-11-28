@@ -1238,9 +1238,9 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
         uint32_t* params =
             static_cast<uint32_t*>(uniformBuffer->GetMappedRange(0, bufferDesc.size));
         // srcOrigin: vec3u
-        params[0] = src.origin.x;
-        params[1] = src.origin.y;
-        params[2] = src.origin.z;
+        params[0] = static_cast<uint32_t>(src.origin.x);
+        params[1] = static_cast<uint32_t>(src.origin.y);
+        params[2] = static_cast<uint32_t>(src.origin.z);
 
         // packTexelCount: number of texel values (1, 2, or 4) one thread packs into the dst
         // buffer

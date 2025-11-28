@@ -39,19 +39,19 @@
 
 namespace dawn::native::webgpu {
 
-WGPUExtent3D ToWGPU(const Extent3D& extent) {
+WGPUExtent3D ToWGPU(const TexelExtent3D& extent) {
     return {
-        .width = extent.width,
-        .height = extent.height,
-        .depthOrArrayLayers = extent.depthOrArrayLayers,
+        .width = static_cast<uint32_t>(extent.width),
+        .height = static_cast<uint32_t>(extent.height),
+        .depthOrArrayLayers = static_cast<uint32_t>(extent.depthOrArrayLayers),
     };
 }
 
-WGPUOrigin3D ToWGPU(const Origin3D& origin) {
+WGPUOrigin3D ToWGPU(const TexelOrigin3D& origin) {
     return {
-        .x = origin.x,
-        .y = origin.y,
-        .z = origin.z,
+        .x = static_cast<uint32_t>(origin.x),
+        .y = static_cast<uint32_t>(origin.y),
+        .z = static_cast<uint32_t>(origin.z),
     };
 }
 

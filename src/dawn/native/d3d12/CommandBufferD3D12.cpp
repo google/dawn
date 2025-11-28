@@ -83,14 +83,16 @@ D3D12_QUERY_TYPE D3D12QueryType(wgpu::QueryType type) {
     }
 }
 
-bool CanUseCopyResource(const TextureCopy& src, const TextureCopy& dst, const Extent3D& copySize) {
+bool CanUseCopyResource(const TextureCopy& src,
+                        const TextureCopy& dst,
+                        const TexelExtent3D& copySize) {
     // Checked by validation
     DAWN_ASSERT(src.texture->GetSampleCount() == dst.texture->GetSampleCount());
     DAWN_ASSERT(src.texture->GetFormat().CopyCompatibleWith(dst.texture->GetFormat()));
     DAWN_ASSERT(src.aspect == dst.aspect);
 
-    const Extent3D& srcSize = src.texture->GetSize(src.aspect);
-    const Extent3D& dstSize = dst.texture->GetSize(dst.aspect);
+    const TexelExtent3D& srcSize = src.texture->GetSize(src.aspect);
+    const TexelExtent3D& dstSize = dst.texture->GetSize(dst.aspect);
 
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-copyresource
     // In order to use D3D12's copy resource, the textures must be the same dimensions, and
@@ -983,8 +985,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
             case Command::CopyBufferToTexture: {
                 CopyBufferToTextureCmd* copy = mCommands.NextCommand<CopyBufferToTextureCmd>();
-                if (copy->copySize.width == 0 || copy->copySize.height == 0 ||
-                    copy->copySize.depthOrArrayLayers == 0) {
+                if (copy->copySize.IsEmpty()) {
                     // Skip no-op copies.
                     continue;
                 }
@@ -994,9 +995,9 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 DAWN_TRY(buffer->EnsureDataInitialized(commandContext));
 
                 SubresourceRange subresources =
-                    GetSubresourcesAffectedByCopy(copy->destination, copy->copySize);
+                    GetSubresourcesAffectedByCopy(copy->destination, copy->copySize.ToExtent3D());
 
-                if (IsCompleteSubresourceCopiedTo(texture, copy->copySize,
+                if (IsCompleteSubresourceCopiedTo(texture, copy->copySize.ToExtent3D(),
                                                   copy->destination.mipLevel,
                                                   copy->destination.aspect)) {
                     texture->SetIsSubresourceContentInitialized(true, subresources);
@@ -1024,8 +1025,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
             case Command::CopyTextureToBuffer: {
                 CopyTextureToBufferCmd* copy = mCommands.NextCommand<CopyTextureToBufferCmd>();
-                if (copy->copySize.width == 0 || copy->copySize.height == 0 ||
-                    copy->copySize.depthOrArrayLayers == 0) {
+                if (copy->copySize.IsEmpty()) {
                     // Skip no-op copies.
                     continue;
                 }
@@ -1035,7 +1035,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 DAWN_TRY(buffer->EnsureDataInitializedAsDestination(commandContext, copy));
 
                 SubresourceRange subresources =
-                    GetSubresourcesAffectedByCopy(copy->source, copy->copySize);
+                    GetSubresourcesAffectedByCopy(copy->source, copy->copySize.ToExtent3D());
 
                 DAWN_TRY(
                     texture->EnsureSubresourceContentInitialized(commandContext, subresources));
@@ -1060,8 +1060,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
             case Command::CopyTextureToTexture: {
                 CopyTextureToTextureCmd* copy = mCommands.NextCommand<CopyTextureToTextureCmd>();
-                if (copy->copySize.width == 0 || copy->copySize.height == 0 ||
-                    copy->copySize.depthOrArrayLayers == 0) {
+                if (copy->copySize.IsEmpty()) {
                     // Skip no-op copies.
                     continue;
                 }
@@ -1069,12 +1068,12 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 Texture* destination = ToBackend(copy->destination.texture.Get());
 
                 SubresourceRange srcRange =
-                    GetSubresourcesAffectedByCopy(copy->source, copy->copySize);
+                    GetSubresourcesAffectedByCopy(copy->source, copy->copySize.ToExtent3D());
                 SubresourceRange dstRange =
-                    GetSubresourcesAffectedByCopy(copy->destination, copy->copySize);
+                    GetSubresourcesAffectedByCopy(copy->destination, copy->copySize.ToExtent3D());
 
                 DAWN_TRY(source->EnsureSubresourceContentInitialized(commandContext, srcRange));
-                if (IsCompleteSubresourceCopiedTo(destination, copy->copySize,
+                if (IsCompleteSubresourceCopiedTo(destination, copy->copySize.ToExtent3D(),
                                                   copy->destination.mipLevel,
                                                   copy->destination.aspect)) {
                     destination->SetIsSubresourceContentInitialized(true, dstRange);
@@ -1124,25 +1123,27 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                             ComputeD3D12BoxFromOffsetAndSize(copy->source.origin, copy->copySize);
 
                         commandList->CopyTextureRegion(
-                            &dstLocation, copy->destination.origin.x, copy->destination.origin.y,
-                            copy->destination.origin.z, &srcLocation, &sourceRegion);
+                            &dstLocation, static_cast<uint32_t>(copy->destination.origin.x),
+                            static_cast<uint32_t>(copy->destination.origin.y),
+                            static_cast<uint32_t>(copy->destination.origin.z), &srcLocation,
+                            &sourceRegion);
                     }
                 } else {
-                    const dawn::native::Extent3D copyExtentOneSlice = {copy->copySize.width,
-                                                                       copy->copySize.height, 1u};
+                    const TexelExtent3D copyExtentOneSlice = {copy->copySize.width,
+                                                              copy->copySize.height, TexelCount{1}};
 
                     for (Aspect aspect : IterateEnumMask(srcRange.aspects)) {
-                        for (uint32_t z = 0; z < copy->copySize.depthOrArrayLayers; ++z) {
+                        for (TexelCount z{0}; z < copy->copySize.depthOrArrayLayers; ++z) {
                             uint32_t sourceLayer = 0;
-                            uint32_t sourceZ = 0;
+                            TexelCount sourceZ{0};
                             switch (source->GetDimension()) {
                                 case wgpu::TextureDimension::Undefined:
                                     DAWN_UNREACHABLE();
                                 case wgpu::TextureDimension::e1D:
-                                    DAWN_ASSERT(copy->source.origin.z == 0);
+                                    DAWN_ASSERT(copy->source.origin.z == TexelCount{0});
                                     break;
                                 case wgpu::TextureDimension::e2D:
-                                    sourceLayer = copy->source.origin.z + z;
+                                    sourceLayer = static_cast<uint32_t>(copy->source.origin.z + z);
                                     break;
                                 case wgpu::TextureDimension::e3D:
                                     sourceZ = copy->source.origin.z + z;
@@ -1150,15 +1151,16 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                             }
 
                             uint32_t destinationLayer = 0;
-                            uint32_t destinationZ = 0;
+                            TexelCount destinationZ{0};
                             switch (destination->GetDimension()) {
                                 case wgpu::TextureDimension::Undefined:
                                     DAWN_UNREACHABLE();
                                 case wgpu::TextureDimension::e1D:
-                                    DAWN_ASSERT(copy->destination.origin.z == 0);
+                                    DAWN_ASSERT(copy->destination.origin.z == TexelCount{0});
                                     break;
                                 case wgpu::TextureDimension::e2D:
-                                    destinationLayer = copy->destination.origin.z + z;
+                                    destinationLayer =
+                                        static_cast<uint32_t>(copy->destination.origin.z + z);
                                     break;
                                 case wgpu::TextureDimension::e3D:
                                     destinationZ = copy->destination.origin.z + z;
@@ -1173,14 +1175,15 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                                                                      copy->destination.mipLevel,
                                                                      destinationLayer, aspect);
 
-                            Origin3D sourceOriginInSubresource = copy->source.origin;
+                            TexelOrigin3D sourceOriginInSubresource = copy->source.origin;
                             sourceOriginInSubresource.z = sourceZ;
                             D3D12_BOX sourceRegion = ComputeD3D12BoxFromOffsetAndSize(
                                 sourceOriginInSubresource, copyExtentOneSlice);
 
-                            commandList->CopyTextureRegion(&dstLocation, copy->destination.origin.x,
-                                                           copy->destination.origin.y, destinationZ,
-                                                           &srcLocation, &sourceRegion);
+                            commandList->CopyTextureRegion(
+                                &dstLocation, static_cast<uint32_t>(copy->destination.origin.x),
+                                static_cast<uint32_t>(copy->destination.origin.y),
+                                static_cast<uint32_t>(destinationZ), &srcLocation, &sourceRegion);
                         }
                     }
                 }

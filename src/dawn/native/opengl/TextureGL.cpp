@@ -581,7 +581,7 @@ MaybeError Texture::ClearTexture(const OpenGLFunctions& gl,
                     continue;
                 }
 
-                textureCopy.origin.z = layer;
+                textureCopy.origin.z = TexelCount{layer};
                 DAWN_TRY(DoTexSubImage(gl, textureCopy, 0, dataLayout, mipSize));
             }
         }

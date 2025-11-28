@@ -77,9 +77,9 @@ VkIndexType VulkanIndexType(wgpu::IndexFormat format) {
 
 bool HasSameTextureCopyExtent(const TextureCopy& srcCopy,
                               const TextureCopy& dstCopy,
-                              const Extent3D& copySize) {
-    Extent3D imageExtentSrc = ComputeTextureCopyExtent(srcCopy, copySize);
-    Extent3D imageExtentDst = ComputeTextureCopyExtent(dstCopy, copySize);
+                              const TexelExtent3D& copySize) {
+    TexelExtent3D imageExtentSrc = ComputeTextureCopyExtent(srcCopy, copySize);
+    TexelExtent3D imageExtentDst = ComputeTextureCopyExtent(dstCopy, copySize);
     return imageExtentSrc.width == imageExtentDst.width &&
            imageExtentSrc.height == imageExtentDst.height &&
            imageExtentSrc.depthOrArrayLayers == imageExtentDst.depthOrArrayLayers;
@@ -87,7 +87,7 @@ bool HasSameTextureCopyExtent(const TextureCopy& srcCopy,
 
 VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
                                    const TextureCopy& dstCopy,
-                                   const Extent3D& copySize,
+                                   const TexelExtent3D& copySize,
                                    Aspect aspect) {
     const Texture* srcTexture = ToBackend(srcCopy.texture.Get());
     const Texture* dstTexture = ToBackend(dstCopy.texture.Get());
@@ -100,8 +100,8 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
 
     bool has3DTextureInCopy = false;
 
-    region.srcOffset.x = srcCopy.origin.x;
-    region.srcOffset.y = srcCopy.origin.y;
+    region.srcOffset.x = static_cast<uint32_t>(srcCopy.origin.x);
+    region.srcOffset.y = static_cast<uint32_t>(srcCopy.origin.y);
     switch (srcTexture->GetDimension()) {
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();
@@ -111,20 +111,20 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
             region.srcOffset.z = 0;
             break;
         case wgpu::TextureDimension::e2D:
-            region.srcSubresource.baseArrayLayer = srcCopy.origin.z;
-            region.srcSubresource.layerCount = copySize.depthOrArrayLayers;
+            region.srcSubresource.baseArrayLayer = static_cast<uint32_t>(srcCopy.origin.z);
+            region.srcSubresource.layerCount = static_cast<uint32_t>(copySize.depthOrArrayLayers);
             region.srcOffset.z = 0;
             break;
         case wgpu::TextureDimension::e3D:
             has3DTextureInCopy = true;
             region.srcSubresource.baseArrayLayer = 0;
             region.srcSubresource.layerCount = 1;
-            region.srcOffset.z = srcCopy.origin.z;
+            region.srcOffset.z = static_cast<uint32_t>(srcCopy.origin.z);
             break;
     }
 
-    region.dstOffset.x = dstCopy.origin.x;
-    region.dstOffset.y = dstCopy.origin.y;
+    region.dstOffset.x = static_cast<uint32_t>(dstCopy.origin.x);
+    region.dstOffset.y = static_cast<uint32_t>(dstCopy.origin.y);
     switch (dstTexture->GetDimension()) {
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();
@@ -134,23 +134,24 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
             region.dstOffset.z = 0;
             break;
         case wgpu::TextureDimension::e2D:
-            region.dstSubresource.baseArrayLayer = dstCopy.origin.z;
-            region.dstSubresource.layerCount = copySize.depthOrArrayLayers;
+            region.dstSubresource.baseArrayLayer = static_cast<uint32_t>(dstCopy.origin.z);
+            region.dstSubresource.layerCount = static_cast<uint32_t>(copySize.depthOrArrayLayers);
             region.dstOffset.z = 0;
             break;
         case wgpu::TextureDimension::e3D:
             has3DTextureInCopy = true;
             region.dstSubresource.baseArrayLayer = 0;
             region.dstSubresource.layerCount = 1;
-            region.dstOffset.z = dstCopy.origin.z;
+            region.dstOffset.z = static_cast<uint32_t>(dstCopy.origin.z);
             break;
     }
 
     DAWN_ASSERT(HasSameTextureCopyExtent(srcCopy, dstCopy, copySize));
-    Extent3D imageExtent = ComputeTextureCopyExtent(dstCopy, copySize);
-    region.extent.width = imageExtent.width;
-    region.extent.height = imageExtent.height;
-    region.extent.depth = has3DTextureInCopy ? copySize.depthOrArrayLayers : 1;
+    TexelExtent3D imageExtent = ComputeTextureCopyExtent(dstCopy, copySize);
+    region.extent.width = static_cast<uint32_t>(imageExtent.width);
+    region.extent.height = static_cast<uint32_t>(imageExtent.height);
+    region.extent.depth =
+        has3DTextureInCopy ? static_cast<uint32_t>(copySize.depthOrArrayLayers) : 1;
 
     return region;
 }
@@ -646,11 +647,11 @@ MaybeError CommandBuffer::RecordCopyImageWithTemporaryBuffer(
     CommandRecordingContext* recordingContext,
     const TextureCopy& srcCopy,
     const TextureCopy& dstCopy,
-    const Extent3D& copySize_in) {
+    const TexelExtent3D& texelCopySize) {
     DAWN_ASSERT(srcCopy.texture->GetFormat().CopyCompatibleWith(dstCopy.texture->GetFormat()));
     DAWN_ASSERT(srcCopy.aspect == dstCopy.aspect);
     const TypedTexelBlockInfo& blockInfo = GetBlockInfo(srcCopy);
-    const BlockExtent3D copySize = blockInfo.ToBlock(copySize_in);
+    const BlockExtent3D copySize = blockInfo.ToBlock(texelCopySize);
     BlockCount widthInBlocks = copySize.width;
     BlockCount heightInBlocks = copySize.height;
 
@@ -756,8 +757,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
             case Command::CopyBufferToTexture: {
                 CopyBufferToTextureCmd* copy = mCommands.NextCommand<CopyBufferToTextureCmd>();
-                if (copy->copySize.width == 0 || copy->copySize.height == 0 ||
-                    copy->copySize.depthOrArrayLayers == 0) {
+                if (copy->copySize.IsEmpty()) {
                     // Skip no-op copies.
                     continue;
                 }
@@ -801,8 +801,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
             case Command::CopyTextureToBuffer: {
                 CopyTextureToBufferCmd* copy = mCommands.NextCommand<CopyTextureToBufferCmd>();
-                if (copy->copySize.width == 0 || copy->copySize.height == 0 ||
-                    copy->copySize.depthOrArrayLayers == 0) {
+                if (copy->copySize.IsEmpty()) {
                     // Skip no-op copies.
                     continue;
                 }
@@ -837,8 +836,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
             case Command::CopyTextureToTexture: {
                 CopyTextureToTextureCmd* copy = mCommands.NextCommand<CopyTextureToTextureCmd>();
-                if (copy->copySize.width == 0 || copy->copySize.height == 0 ||
-                    copy->copySize.depthOrArrayLayers == 0) {
+                if (copy->copySize.IsEmpty()) {
                     // Skip no-op copies.
                     continue;
                 }

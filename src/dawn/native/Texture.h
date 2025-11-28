@@ -38,6 +38,7 @@
 #include "dawn/common/WeakRef.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
+#include "dawn/native/BlockInfo.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Format.h"
 #include "dawn/native/Forward.h"
@@ -194,7 +195,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     bool IsMultisampledTexture() const;
 
     // Returns true if the size covers the whole subresource.
-    bool CoversFullSubresource(uint32_t mipLevel, Aspect aspect, const Extent3D& size) const;
+    bool CoversFullSubresource(uint32_t mipLevel, Aspect aspect, const TexelExtent3D& size) const;
 
     // For a texture with non-block-compressed texture format, its physical size is always equal
     // to its virtual size. For a texture with block compressed texture format, the physical

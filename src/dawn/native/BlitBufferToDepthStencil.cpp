@@ -262,7 +262,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
                                  CommandEncoder* commandEncoder,
                                  TextureBase* dataTexture,
                                  const TextureCopy& dst,
-                                 const Extent3D& copyExtent) {
+                                 const TexelExtent3D& copyExtent) {
     DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
     DAWN_ASSERT(dst.texture->GetFormat().format == wgpu::TextureFormat::Depth16Unorm);
     DAWN_ASSERT(dataTexture->GetFormat().format == wgpu::TextureFormat::RG8Uint);
@@ -277,12 +277,12 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
     Ref<BindGroupLayoutBase> bgl;
     DAWN_TRY_ASSIGN(bgl, pipeline->GetBindGroupLayout(0));
 
-    for (uint32_t z = 0; z < copyExtent.depthOrArrayLayers; ++z) {
+    for (TexelCount z{0}; z < copyExtent.depthOrArrayLayers; ++z) {
         Ref<TextureViewBase> srcView;
         {
             TextureViewDescriptor viewDesc = {};
             viewDesc.dimension = wgpu::TextureViewDimension::e2D;
-            viewDesc.baseArrayLayer = z;
+            viewDesc.baseArrayLayer = static_cast<uint32_t>(z);
             viewDesc.arrayLayerCount = 1;
             viewDesc.mipLevelCount = 1;
             DAWN_TRY_ASSIGN(srcView, dataTexture->CreateView(&viewDesc));
@@ -292,7 +292,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
         {
             TextureViewDescriptor viewDesc = {};
             viewDesc.dimension = wgpu::TextureViewDimension::e2D;
-            viewDesc.baseArrayLayer = dst.origin.z + z;
+            viewDesc.baseArrayLayer = static_cast<uint32_t>(dst.origin.z + z);
             viewDesc.arrayLayerCount = 1;
             viewDesc.baseMipLevel = dst.mipLevel;
             viewDesc.mipLevelCount = 1;
@@ -309,8 +309,8 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
 
             uint32_t* params =
                 static_cast<uint32_t*>(paramsBuffer->GetMappedRange(0, bufferDesc.size));
-            params[0] = dst.origin.x;
-            params[1] = dst.origin.y;
+            params[0] = static_cast<uint32_t>(dst.origin.x);
+            params[1] = static_cast<uint32_t>(dst.origin.y);
             DAWN_TRY(paramsBuffer->Unmap());
         }
 
@@ -342,7 +342,9 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
         // Bind the resources.
         pass->APISetBindGroup(0, bindGroup.Get());
         // Discard all fragments outside the copy region.
-        pass->APISetScissorRect(dst.origin.x, dst.origin.y, copyExtent.width, copyExtent.height);
+        pass->APISetScissorRect(
+            static_cast<uint32_t>(dst.origin.x), static_cast<uint32_t>(dst.origin.y),
+            static_cast<uint32_t>(copyExtent.width), static_cast<uint32_t>(copyExtent.height));
 
         // Draw to perform the blit.
         pass->APISetPipeline(pipeline.Get());
@@ -412,8 +414,8 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         DAWN_TRY_ASSIGN(paramsBuffer, device->CreateBuffer(&bufferDesc));
 
         uint32_t* params = static_cast<uint32_t*>(paramsBuffer->GetMappedRange(0, bufferDesc.size));
-        params[0] = dst.origin.x;
-        params[1] = dst.origin.y;
+        params[0] = static_cast<uint32_t>(dst.origin.x);
+        params[1] = static_cast<uint32_t>(dst.origin.y);
         params[2] = 0;
         DAWN_TRY(paramsBuffer->Unmap());
     }
@@ -441,7 +443,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         {
             TextureViewDescriptor viewDesc = {};
             viewDesc.dimension = textureViewDimension;
-            viewDesc.baseArrayLayer = dst.origin.z + z;
+            viewDesc.baseArrayLayer = static_cast<uint32_t>(dst.origin.z) + z;
             viewDesc.arrayLayerCount = 1;
             viewDesc.baseMipLevel = dst.mipLevel;
             viewDesc.mipLevelCount = 1;
@@ -481,7 +483,9 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         // Bind the resources.
         pass->APISetBindGroup(0, bindGroup.Get());
         // Discard all fragments outside the copy region.
-        pass->APISetScissorRect(dst.origin.x, dst.origin.y, copyExtent.width, copyExtent.height);
+        pass->APISetScissorRect(static_cast<uint32_t>(dst.origin.x),
+                                static_cast<uint32_t>(dst.origin.y), copyExtent.width,
+                                copyExtent.height);
 
         // Clear the copy region to 0.
         pass->APISetStencilReference(0);

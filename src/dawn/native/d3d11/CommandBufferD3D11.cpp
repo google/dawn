@@ -365,8 +365,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 
             case Command::CopyBufferToTexture: {
                 CopyBufferToTextureCmd* copy = mCommands.NextCommand<CopyBufferToTextureCmd>();
-                if (copy->copySize.width == 0 || copy->copySize.height == 0 ||
-                    copy->copySize.depthOrArrayLayers == 0) {
+                if (copy->copySize.IsEmpty()) {
                     // Skip no-op copies.
                     continue;
                 }
@@ -410,8 +409,9 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                 DAWN_ASSERT(scopedMap.GetMappedData());
                 const uint8_t* data = scopedMap.GetMappedData() + bufferOffset;
                 uint64_t bytesPerRow = blockInfo.ToBytes(src.blocksPerRow);
-                DAWN_TRY(texture->Write(commandContext, subresources, dst.origin, copy->copySize,
-                                        data, static_cast<uint32_t>(bytesPerRow),
+                DAWN_TRY(texture->Write(commandContext, subresources, dst.origin.ToOrigin3D(),
+                                        copy->copySize.ToExtent3D(), data,
+                                        static_cast<uint32_t>(bytesPerRow),
                                         static_cast<uint32_t>(src.rowsPerImage)));
 
                 buffer->MarkUsedInPendingCommands();
@@ -420,8 +420,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 
             case Command::CopyTextureToBuffer: {
                 CopyTextureToBufferCmd* copy = mCommands.NextCommand<CopyTextureToBufferCmd>();
-                if (copy->copySize.width == 0 || copy->copySize.height == 0 ||
-                    copy->copySize.depthOrArrayLayers == 0) {
+                if (copy->copySize.IsEmpty()) {
                     // Skip no-op copies.
                     continue;
                 }
@@ -453,8 +452,8 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                 uint64_t bytesPerRow = blockInfo.ToBytes(dst.blocksPerRow);
 
                 DAWN_TRY(ToBackend(src.texture)
-                             ->Read(commandContext, subresources, src.origin, copy->copySize,
-                                    static_cast<uint32_t>(bytesPerRow),
+                             ->Read(commandContext, subresources, src.origin.ToOrigin3D(),
+                                    copy->copySize.ToExtent3D(), static_cast<uint32_t>(bytesPerRow),
                                     static_cast<uint32_t>(dst.rowsPerImage), callback));
 
                 dst.buffer->MarkUsedInPendingCommands();
@@ -463,8 +462,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 
             case Command::CopyTextureToTexture: {
                 CopyTextureToTextureCmd* copy = mCommands.NextCommand<CopyTextureToTextureCmd>();
-                if (copy->copySize.width == 0 || copy->copySize.height == 0 ||
-                    copy->copySize.depthOrArrayLayers == 0) {
+                if (copy->copySize.IsEmpty()) {
                     // Skip no-op copies.
                     continue;
                 }

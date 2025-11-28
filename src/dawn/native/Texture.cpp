@@ -1334,8 +1334,8 @@ bool TextureBase::IsReadOnly() const {
 
 bool TextureBase::CoversFullSubresource(uint32_t mipLevel,
                                         Aspect aspect,
-                                        const Extent3D& size) const {
-    Extent3D levelSize = GetMipLevelSingleSubresourcePhysicalSize(mipLevel, aspect);
+                                        const TexelExtent3D& size) const {
+    TexelExtent3D levelSize = GetMipLevelSingleSubresourcePhysicalSize(mipLevel, aspect);
     switch (GetDimension()) {
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();

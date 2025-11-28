@@ -56,7 +56,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                          const TextureCopy& destination,
                          const void* data,
                          const TexelCopyBufferLayout& dataLayout,
-                         const Extent3D& copySize);
+                         const TexelExtent3D& copySize);
 }  // namespace dawn::native::opengl
 
 #endif  // SRC_DAWN_NATIVE_OPENGL_COMMANDBUFFERGL_H_

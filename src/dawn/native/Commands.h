@@ -206,7 +206,7 @@ struct TextureCopy {
 
     Ref<TextureBase> texture;
     uint32_t mipLevel;
-    Origin3D origin;  // Texels / array layer
+    TexelOrigin3D origin;  // Texels / array layer
     Aspect aspect;
 };
 
@@ -227,19 +227,19 @@ struct CopyBufferToBufferCmd {
 struct CopyBufferToTextureCmd {
     BufferCopy source;
     TextureCopy destination;
-    Extent3D copySize;  // Texels
+    TexelExtent3D copySize;
 };
 
 struct CopyTextureToBufferCmd {
     TextureCopy source;
     BufferCopy destination;
-    Extent3D copySize;  // Texels
+    TexelExtent3D copySize;
 };
 
 struct CopyTextureToTextureCmd {
     TextureCopy source;
     TextureCopy destination;
-    Extent3D copySize;  // Texels
+    TexelExtent3D copySize;
 };
 
 struct DispatchCmd {

@@ -386,8 +386,8 @@ void RecordBufferTextureCopy(BufferTextureCopyDirection direction,
         extentForTheLastImage.depthOrArrayLayers = BlockCount{1};
 
         TextureCopy textureCopyForTheLastImage = textureCopy;
-        textureCopyForTheLastImage.origin.z += static_cast<uint32_t>(
-            blockInfo.ToTexelDepth(copySize.depthOrArrayLayers) - TexelCount{1});
+        textureCopyForTheLastImage.origin.z +=
+            blockInfo.ToTexelDepth(copySize.depthOrArrayLayers) - TexelCount{1};
 
         // We offset the copy so that we skip the padding rows. This way the footprint Height
         // will be computed without this padding.

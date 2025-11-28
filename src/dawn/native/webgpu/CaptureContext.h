@@ -44,10 +44,10 @@ namespace dawn::native {
 class BufferBase;
 class DeviceBase;
 struct Color;
-struct Origin3D;
-struct Extent3D;
 struct BufferCopy;
 struct ProgrammableStage;
+struct TexelOrigin3D;
+struct TexelExtent3D;
 struct TextureCopy;
 struct TimestampWrites;
 struct TypedTexelBlockInfo;
@@ -170,7 +170,7 @@ class CaptureContext {
                                         const void* data,
                                         size_t dataSize,
                                         const TexelCopyBufferLayout& dataLayout,
-                                        const Extent3D& writeSizePixel);
+                                        const TexelExtent3D& writeSizePixel);
 
     WGPUBuffer GetCopyBuffer();
 
@@ -196,8 +196,8 @@ class CaptureContext {
 };
 
 wgpu::TextureAspect ToDawn(const Aspect aspect);
-schema::Origin3D ToSchema(const Origin3D& origin);
-schema::Extent3D ToSchema(const Extent3D& extent);
+schema::Origin3D ToSchema(const TexelOrigin3D& origin);
+schema::Extent3D ToSchema(const TexelExtent3D& extent);
 schema::Color ToSchema(const Color& color);
 schema::ProgrammableStage ToSchema(CaptureContext& captureContext, const ProgrammableStage& stage);
 schema::TexelCopyBufferLayout ToSchema(const BufferCopy& bufferCopy,
