@@ -428,7 +428,7 @@ TEST_F(IR_ValidatorTest, Var_HandleMissingBindingPoint) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:2:31 error: var: a resource variable is missing binding point
+                testing::HasSubstr(R"(:2:31 error: var: a handle resource requires a binding point
   %1:ptr<handle, i32, read> = var undef
                               ^^^
 )")) << res.Failure();
@@ -441,7 +441,7 @@ TEST_F(IR_ValidatorTest, Var_StorageMissingBindingPoint) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:2:38 error: var: a resource variable is missing binding point
+                testing::HasSubstr(R"(:2:38 error: var: a storage resource requires a binding point
   %1:ptr<storage, i32, read_write> = var undef
                                      ^^^
 )")) << res.Failure();
@@ -454,7 +454,7 @@ TEST_F(IR_ValidatorTest, Var_UniformMissingBindingPoint) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:2:32 error: var: a resource variable is missing binding point
+                testing::HasSubstr(R"(:2:32 error: var: a uniform resource requires a binding point
   %1:ptr<uniform, i32, read> = var undef
                                ^^^
 )")) << res.Failure();
@@ -467,8 +467,9 @@ TEST_F(IR_ValidatorTest, Var_NonResourceWithBindingPoint) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:2:38 error: var: a non-resource variable has binding point
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:2:38 error: var: a private non-resource cannot have a binding point
   %1:ptr<private, i32, read_write> = var undef @binding_point(0, 0)
                                      ^^^
 )")) << res.Failure();

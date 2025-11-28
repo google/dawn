@@ -783,7 +783,8 @@ constexpr IOAttributeChecker kDepthModeChecker{
                          // specific builtin.
     }};
 
-// kBlendSrcChecker, kLocationChecker, and kInterpolation are intentionally not implemented
+// kBlendSrcChecker, kLocationChecker, kInterpolationChecker, and kBindingPointChecker are
+// intentionally not implemented
 
 /// @returns all the appropriate IOAttributeCheckers for @p attr
 Vector<const IOAttributeChecker*, 4> IOAttributeCheckersFor(const IOAttributes& attr,
@@ -804,10 +805,9 @@ Vector<const IOAttributeChecker*, 4> IOAttributeCheckersFor(const IOAttributes& 
     if (attr.depth_mode.has_value()) {
         checkers.Push(&kDepthModeChecker);
     }
-    // attr.blend_src, attr.location, and attr.interpolation are intentionally skipped, because
-    // their rules are not amenable to implementation via IOAttributeChecker.
 
-    // TODO(455376684): Implement all the other checkers
+    // attr.blend_src, attr.location, attr.interpolation, and attr.binding_point are intentionally
+    // skipped, because their rules are not amenable to implementation via IOAttributeChecker.
     return checkers;
 }
 
@@ -1187,17 +1187,6 @@ class Validator {
     /// @param var the var to validate
     void CheckVar(const Var* var);
 
-    /// Validates binding_point usage for pointers
-    /// @param binding_point the binding information associated with pointer
-    /// @param address_space the address space of pointer
-    /// @param target_str string to insert in error message describing what has a binding_point,
-    /// defaults to 'variable'
-    /// @returns Success if a valid usage, or reason for invalidity in Failure
-    Result<SuccessType, std::string> ValidateBindingPoint(
-        const std::optional<struct BindingPoint>& binding_point,
-        AddressSpace address_space,
-        const std::string& target_str = "variable");
-
     /// Validates annotations related to shader IO
     /// @param ty type of the value under test
     /// @param binding_point the binding information associated with the value
@@ -1252,6 +1241,14 @@ class Validator {
     void CheckInterpolation(const CastableBase* anchor,
                             const core::type::Type* ty,
                             const IOAttributes& attr);
+
+    /// Validates binding_point attributes on entry point IO.
+    /// @param anchor where to attach error messages to.
+    /// @param ty the type of the IO object
+    /// @param attr the IO attributes of the object.
+    void CheckBindingPoint(const CastableBase* anchor,
+                           const core::type::Type* ty,
+                           const IOAttributes& attr);
 
     /// Validates the given let
     /// @param l the let to validate
@@ -2573,13 +2570,6 @@ void Validator::CheckFunction(const Function* func) {
                     AddError(param) << result.Failure();
                 }
             }
-            {
-                auto result =
-                    ValidateBindingPoint(param->BindingPoint(), address_space, "input param");
-                if (result != Success) {
-                    AddError(param) << result.Failure();
-                }
-            }
         } else {
             if (param->BindingPoint().has_value()) {
                 AddError(param)
@@ -2776,6 +2766,14 @@ void Validator::ValidateIOAttributes(const Function* func) {
     // Validate all the interpolation usages.
     for (const auto& task : tasks) {
         CheckInterpolation(task.anchor, task.type, task.attr);
+    }
+
+    if (stage != Function::PipelineStage::kUndefined) {
+        // Validate all the binding_point usages, and ensure things that require binding_point have
+        // them.
+        for (const auto& task : tasks) {
+            CheckBindingPoint(task.anchor, task.type, task.attr);
+        }
     }
 
     // Validate all remaining attributes on IO objects
@@ -3187,20 +3185,10 @@ void Validator::CheckVar(const Var* var) {
         }
     }
 
-    if (auto result = ValidateBindingPoint(var->BindingPoint(), mv->AddressSpace());
-        result != Success) {
-        AddError(var) << result.Failure();
-        return;
-    }
+    CheckBindingPoint(var, var->Result(0)->Type(), var->Attributes());
 
     if (var->Block() == mod_.root_block && mv->AddressSpace() == AddressSpace::kFunction) {
         AddError(var) << "vars in the 'function' address space must be in a function scope";
-        return;
-    }
-
-    if (auto result = ValidateBindingPoint(var->BindingPoint(), mv->AddressSpace());
-        result != Success) {
-        AddError(var) << result.Failure();
         return;
     }
 
@@ -3266,33 +3254,6 @@ void Validator::CheckVar(const Var* var) {
             }
         }
     }
-}
-
-Result<SuccessType, std::string> Validator::ValidateBindingPoint(
-    const std::optional<struct BindingPoint>& binding_point,
-    AddressSpace address_space,
-    const std::string& target_str) {
-    switch (address_space) {
-        case AddressSpace::kHandle:
-            if (!capabilities_.Contains(Capability::kAllowHandleVarsWithoutBindings)) {
-                if (!binding_point.has_value()) {
-                    return "a resource " + target_str + " is missing binding point";
-                }
-            }
-            break;
-        case AddressSpace::kStorage:
-        case AddressSpace::kUniform:
-            if (!binding_point.has_value()) {
-                return "a resource " + target_str + " is missing binding point";
-            }
-            break;
-        default:
-            if (binding_point.has_value()) {
-                return "a non-resource " + target_str + " has binding point";
-            }
-            break;
-    }
-    return Success;
 }
 
 void Validator::CheckBlendSrc(BlendSrcContext& ctx,
@@ -3463,6 +3424,45 @@ void Validator::CheckInterpolation(const CastableBase* anchor,
 
             in_location_composite |= a.location.has_value();
         });
+}
+
+void Validator::CheckBindingPoint(const CastableBase* anchor,
+                                  const core::type::Type* ty,
+                                  const IOAttributes& attr) {
+    const auto& binding_point = attr.binding_point;
+    auto address_space = AddressSpace::kUndefined;
+    if (const auto* mv = ty->As<core::type::MemoryView>()) {
+        address_space = mv->AddressSpace();
+    } else {
+        // ModuleScopeVars transform in MSL backends unwraps pointers to handles
+        if (ty->IsHandle()) {
+            address_space = AddressSpace::kHandle;
+        }
+    }
+
+    switch (address_space) {
+        case AddressSpace::kHandle:
+            if (!capabilities_.Contains(Capability::kAllowHandleVarsWithoutBindings)) {
+                if (!binding_point.has_value()) {
+                    AddError(anchor)
+                        << "a " << ToString(address_space) << " resource requires a binding point";
+                }
+            }
+            break;
+        case AddressSpace::kStorage:
+        case AddressSpace::kUniform:
+            if (!binding_point.has_value()) {
+                AddError(anchor) << "a " << ToString(address_space)
+                                 << " resource requires a binding point";
+            }
+            break;
+        default:
+            if (binding_point.has_value()) {
+                AddError(anchor) << "a " << ToString(address_space)
+                                 << " non-resource cannot have a binding point";
+            }
+            break;
+    }
 }
 
 Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
