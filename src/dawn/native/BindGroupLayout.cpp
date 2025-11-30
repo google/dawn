@@ -80,7 +80,11 @@ void BindGroupLayoutBase::SetLabelImpl() {
     // has 2 matching bindgroups one will get the wrong label
     // TODO(42240220): This can be fixed by keeping a list of labels per
     // deduplicated object.
-    GetInternalBindGroupLayout()->SetLabel(GetLabel());
+    // There will be no internal BGL if creation was an error.
+    BindGroupLayoutInternalBase* internal = GetInternalBindGroupLayout();
+    if (internal) {
+        internal->SetLabel(GetLabel());
+    }
 }
 
 }  // namespace dawn::native
