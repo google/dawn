@@ -33,13 +33,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// NOTE: There are two types of tests in this file, those suffixed with _MatchesReal and those that
-// are not. Those that are suffixed are meant to be testing the behaviour of the FSTestOSWrapper
-// against the RealOSWrapper to confirm that it is a drop in replacement. Those that are not
-// suffixed are traditional unittests that test the implementation functions in isolation against
-// defined expectations.
-
-// --- Path handling tests ---
+// Tests for functions which are meant to be used internally in FSTestOSWrapper
+// rather than being part of the public OSWrapper interface.
 
 func TestFSTestOSWrapper_CleanPath(t *testing.T) {
 	tests := []struct {
