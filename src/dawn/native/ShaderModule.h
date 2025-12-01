@@ -180,6 +180,9 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
     const LimitsForCompilationRequest& limits,
     const LimitsForCompilationRequest& adaterSupportedlimits);
 
+MaybeError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo& smInfo,
+                                               const std::vector<SubgroupMatrixConfig>& cfg);
+
 RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
                                                         const PipelineLayoutBase* layout);
 

@@ -122,13 +122,36 @@ struct State {
             return;
         }
 
-        SubgroupMatrixDirection dir = sm->Kind() == SubgroupMatrixKind::kResult
-                                          ? SubgroupMatrixDirection::kResult
-                                          : SubgroupMatrixDirection::kInput;
+        SubgroupMatrixDirection dir = SubgroupMatrixDirection::kResult;
+
+        uint32_t M = 0;
+        uint32_t N = 0;
+        uint32_t K = 0;
+
+        switch (sm->Kind()) {
+            case SubgroupMatrixKind::kResult:
+                dir = SubgroupMatrixDirection::kResult;
+                M = sm->Rows();
+                N = sm->Columns();
+                break;
+            case SubgroupMatrixKind::kLeft:
+                dir = SubgroupMatrixDirection::kLeft;
+                M = sm->Rows();
+                K = sm->Columns();
+                break;
+            case SubgroupMatrixKind::kRight:
+                dir = SubgroupMatrixDirection::kRight;
+                K = sm->Rows();
+                N = sm->Columns();
+                break;
+            case SubgroupMatrixKind::kUndefined:
+                TINT_UNREACHABLE();
+        }
 
         SubgroupMatrixConfig cfg{
-            .columns = sm->Columns(),
-            .rows = sm->Rows(),
+            .M = M,
+            .N = N,
+            .K = K,
             .type = TypeToSMType(sm->Type()),
             .direction = dir,
         };

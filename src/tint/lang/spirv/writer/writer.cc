@@ -143,6 +143,12 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
 }
 
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
+    // There are currently no plans on supporting override-expressions, so we can pull this
+    // information out before the raise. If we want to support overrides then this either needs to
+    // happen in raise, before the builtins are polyfilled, or the analysis needs to also look for
+    // `*` operations with subgroup matrices.
+    auto sm_info = core::ir::analysis::GatherSubgroupMatrixInfo(ir);
+
     // Raise from core-dialect to SPIR-V-dialect.
     if (auto res = Raise(ir, options); res != Success) {
         return std::move(res.Failure());
@@ -153,7 +159,7 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
         return res;
     }
 
-    res->subgroup_matrix_info = core::ir::analysis::GatherSubgroupMatrixInfo(ir);
+    res->subgroup_matrix_info = sm_info;
 
     return res;
 }

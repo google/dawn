@@ -88,7 +88,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, F32_8x8) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_ValidateSubgroupMatrixTest, 8x2) {
+TEST_F(MslWriter_ValidateSubgroupMatrixTest, Left8x2) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {  //
         b.Var("v", ty.ptr(function, ty.subgroup_matrix_left(ty.f32(), 8u, 2u)));
@@ -99,6 +99,52 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, 8x2) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %v:ptr<function, subgroup_matrix_left<f32, 8, 2>, read_write> = var undef
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto result = RunWithFailure(ValidateSubgroupMatrix);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              R"(error: subgroup_matrix requires dimensions of 8x8 for the selected device)");
+}
+
+TEST_F(MslWriter_ValidateSubgroupMatrixTest, Right2x8) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {  //
+        b.Var("v", ty.ptr(function, ty.subgroup_matrix_right(ty.f32(), 2u, 8u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_right<f32, 2, 8>, read_write> = var undef
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto result = RunWithFailure(ValidateSubgroupMatrix);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              R"(error: subgroup_matrix requires dimensions of 8x8 for the selected device)");
+}
+
+TEST_F(MslWriter_ValidateSubgroupMatrixTest, Result8x2) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {  //
+        b.Var("v", ty.ptr(function, ty.subgroup_matrix_result(ty.f32(), 8u, 2u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 2>, read_write> = var undef
     ret
   }
 }

@@ -1741,6 +1741,92 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
     return {};
 }
 
+MaybeError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo& smInfo,
+                                               const std::vector<SubgroupMatrixConfig>& cfg) {
+    if (cfg.empty()) {
+        DAWN_INVALID_IF(!smInfo.configs.empty(),
+                        "Shader uses a subgroup matrix, but no subgroup matrix configuration "
+                        "found for the device");
+    }
+
+    auto compare = [](wgpu::SubgroupMatrixComponentType wgpu_type,
+                      tint::SubgroupMatrixType tint_type) -> bool {
+        return (wgpu_type == wgpu::SubgroupMatrixComponentType::F16 &&
+                tint_type == tint::SubgroupMatrixType::kF16) ||
+               (wgpu_type == wgpu::SubgroupMatrixComponentType::F32 &&
+                tint_type == tint::SubgroupMatrixType::kF32) ||
+               (wgpu_type == wgpu::SubgroupMatrixComponentType::I8 &&
+                tint_type == tint::SubgroupMatrixType::kI8) ||
+               (wgpu_type == wgpu::SubgroupMatrixComponentType::U8 &&
+                tint_type == tint::SubgroupMatrixType::kU8) ||
+               (wgpu_type == wgpu::SubgroupMatrixComponentType::I32 &&
+                tint_type == tint::SubgroupMatrixType::kI32) ||
+               (wgpu_type == wgpu::SubgroupMatrixComponentType::U32 &&
+                tint_type == tint::SubgroupMatrixType::kU32);
+    };
+
+    auto SubgroupTypeToString = [](tint::SubgroupMatrixType type) -> std::string {
+        switch (type) {
+            case tint::SubgroupMatrixType::kF16:
+                return "f16";
+            case tint::SubgroupMatrixType::kF32:
+                return "f32";
+            case tint::SubgroupMatrixType::kI8:
+                return "i8";
+            case tint::SubgroupMatrixType::kU8:
+                return "u8";
+            case tint::SubgroupMatrixType::kI32:
+                return "i32";
+            case tint::SubgroupMatrixType::kU32:
+                return "u32";
+        }
+    };
+
+    for (auto& info : smInfo.configs) {
+        bool found = false;
+        for (const auto& config : cfg) {
+            if (info.direction == tint::SubgroupMatrixDirection::kResult &&
+                compare(config.resultComponentType, info.type) && config.M == info.M &&
+                config.N == info.N) {
+                found = true;
+            } else if (compare(config.componentType, info.type)) {
+                if (info.direction == tint::SubgroupMatrixDirection::kLeft && info.M == config.M &&
+                    info.K == config.K) {
+                    found = true;
+                } else if (info.direction == tint::SubgroupMatrixDirection::kRight &&
+                           info.N == config.N && info.K == config.K) {
+                    found = true;
+                }
+            }
+        }
+        DAWN_INVALID_IF(!found,
+                        "Subgroup matrix usage found which is not supported by the device.\n"
+                        "Unknown configuration is M(%zu), N(%zu), K(%zu), %s",
+                        info.M, info.N, info.K, SubgroupTypeToString(info.type));
+    }
+
+    for (auto& info : smInfo.multiplies) {
+        bool found = false;
+        for (const auto& config : cfg) {
+            if (config.M == info.M && config.N == info.N && config.K == info.K &&
+                compare(config.resultComponentType, info.output_type) &&
+                compare(config.componentType, info.input_type)) {
+                found = true;
+                break;
+            }
+        }
+        DAWN_INVALID_IF(!found,
+                        "Subgroup matrix multiplication found which is not "
+                        "supported by the device.\n"
+                        "Unknown configuration is M(%zu) N(%zu) K(%zu) "
+                        "InputType(%s) OutputType(%s).",
+                        info.M, info.N, info.K, SubgroupTypeToString(info.input_type),
+                        SubgroupTypeToString(info.output_type));
+    }
+
+    return {};
+}
+
 // ShaderModuleBase
 ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
                                    const UnpackedPtr<ShaderModuleDescriptor>& descriptor,

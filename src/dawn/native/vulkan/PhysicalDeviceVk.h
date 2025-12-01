@@ -72,6 +72,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsSwiftshader() const;
 
     uint32_t GetDefaultComputeSubgroupSize() const;
+    std::vector<SubgroupMatrixConfig> EnumerateSubgroupMatrixConfigs(
+        const TogglesState& toggles) const;
 
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
         InstanceBase* instance,
@@ -109,8 +111,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
     void PopulateBackendFormatCapabilities(
         wgpu::TextureFormat format,
         UnpackedPtr<DawnFormatCapabilities>& capabilities) const override;
-    std::vector<SubgroupMatrixConfig> EnumerateSubgroupMatrixConfigs(
-        const TogglesState& toggles) const;
 
     // Sets core feature level as not being supported and stores `error` with
     // reason why core isn't supported.
