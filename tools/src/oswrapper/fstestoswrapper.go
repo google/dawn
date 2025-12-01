@@ -536,8 +536,17 @@ func (w FSTestFilesystemReaderWriter) Mkdir(dir string, perm os.FileMode) error 
 		return &os.PathError{Op: "mkdir", Path: dir, Err: os.ErrExist}
 	}
 
-	parent := filepath.Dir(p)
-	if parent != "." {
+	resolvedPath, err := w.resolvePath(p)
+	if err != nil {
+		return &os.PathError{Op: "mkdir", Path: dir, Err: err}
+	}
+
+	if _, exists := w.FS[resolvedPath]; exists {
+		return &os.PathError{Op: "mkdir", Path: dir, Err: os.ErrExist}
+	}
+
+	parent := filepath.Dir(resolvedPath)
+	if parent != "." && parent != "" {
 		parentInfo, parentExists := w.FS[parent]
 		if !parentExists {
 			return &os.PathError{Op: "mkdir", Path: dir, Err: os.ErrNotExist}
@@ -546,7 +555,7 @@ func (w FSTestFilesystemReaderWriter) Mkdir(dir string, perm os.FileMode) error 
 			return &os.PathError{Op: "mkdir", Path: dir, Err: fmt.Errorf("not a directory")}
 		}
 	}
-	w.FS[p] = &fstest.MapFile{Mode: os.ModeDir | perm, ModTime: time.Now()}
+	w.FS[resolvedPath] = &fstest.MapFile{Mode: os.ModeDir | perm, ModTime: time.Now()}
 	return nil
 }
 

@@ -129,8 +129,38 @@ func TestFSTestOSWrapper_Mkdir(t *testing.T) {
 				wantErrIs: os.ErrExist,
 			},
 		},
-	}
+		{
+			name: "Create inside symlinked directory",
+			path: filepath.Join(root, "link_to_dir", "newdir"),
+			mode: 0755,
+			setup: unittestSetup{
+				initialDirs:     []string{filepath.Join(root, "real_dir")},
+				initialSymlinks: map[string]string{filepath.Join(root, "link_to_dir"): filepath.Join(root, "real_dir")},
+			},
+			verify: func(t *testing.T, fs oswrapper.FSTestOSWrapper) {
+				// Verify it exists in the real location
+				info, err := fs.Stat(filepath.Join(root, "real_dir", "newdir"))
+				require.NoError(t, err)
+				require.True(t, info.IsDir())
 
+				// Verify it can be accessed via the symlink
+				info, err = fs.Stat(filepath.Join(root, "link_to_dir", "newdir"))
+				require.NoError(t, err)
+				require.True(t, info.IsDir())
+			},
+		},
+		{
+			name: "Parent is symlink to file",
+			path: filepath.Join(root, "link_to_file", "newdir"),
+			setup: unittestSetup{
+				initialFiles:    map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialSymlinks: map[string]string{filepath.Join(root, "link_to_file"): filepath.Join(root, "file.txt")},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "not a directory",
+			},
+		},
+	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			wrapper := tc.setup.setup(t)
@@ -206,6 +236,22 @@ func TestFSTestOSWrapper_Mkdir_MatchesReal(t *testing.T) {
 		{
 			name: "Error on dot",
 			path: ".",
+		},
+		{
+			name: "Create inside symlinked directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs:     []string{"real_dir"},
+				initialSymlinks: map[string]string{"link_to_dir": "real_dir"},
+			}},
+			path: filepath.Join("link_to_dir", "newdir"),
+		},
+		{
+			name: "Parent is symlink to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles:    map[string]string{"file.txt": "content"},
+				initialSymlinks: map[string]string{"link_to_file": "file.txt"},
+			}},
+			path: filepath.Join("link_to_file", "newdir"),
 		},
 	}
 

@@ -137,6 +137,21 @@ func TestFSTestOSWrapper_MkdirAll(t *testing.T) {
 				wantErrIs: os.ErrExist,
 			},
 		},
+		{
+			name: "Create nested directory through symlink",
+			path: filepath.Join(root, "link_to_dir", "a", "b"),
+			mode: 0755,
+			setup: unittestSetup{
+				initialDirs:     []string{filepath.Join(root, "real_dir")},
+				initialSymlinks: map[string]string{filepath.Join(root, "link_to_dir"): filepath.Join(root, "real_dir")},
+			},
+			verify: func(t *testing.T, fs oswrapper.FSTestOSWrapper) {
+				// Verify it exists in the real location
+				info, err := fs.Stat(filepath.Join(root, "real_dir", "a", "b"))
+				require.NoError(t, err)
+				require.True(t, info.IsDir())
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -201,6 +216,14 @@ func TestFSTestOSWrapper_MkdirAll_MatchesReal(t *testing.T) {
 				initialDirs:  []string{"a"},
 			}},
 			path: filepath.Join("a", "b"),
+		},
+		{
+			name: "Create nested directory through symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs:     []string{"real_dir"},
+				initialSymlinks: map[string]string{"link_to_dir": "real_dir"},
+			}},
+			path: filepath.Join("link_to_dir", "a", "b"),
 		},
 	}
 
