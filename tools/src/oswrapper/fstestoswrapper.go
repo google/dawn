@@ -589,7 +589,7 @@ func (w FSTestFilesystemReaderWriter) MkdirAll(dir string, perm os.FileMode) err
 		return err
 	}
 
-	if !os.IsNotExist(err) {
+	if !os.IsNotExist(err) && !errors.Is(err, syscall.ELOOP) {
 		// Unexpected failure, probably indicating a bad path, i.e. parent is a file, so propagate the error
 		return err
 	}

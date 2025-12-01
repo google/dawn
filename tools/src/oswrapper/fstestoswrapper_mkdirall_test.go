@@ -152,6 +152,29 @@ func TestFSTestOSWrapper_MkdirAll(t *testing.T) {
 				require.True(t, info.IsDir())
 			},
 		},
+		{
+			name: "Part of path is a broken symlink",
+			path: filepath.Join(root, "broken_link", "a"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{filepath.Join(root, "broken_link"): filepath.Join(root, "nonexistent")},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrExist, // MkdirAll returns EEXIST because the broken link exists as a file/link
+			},
+		},
+		{
+			name: "Symlink loop in path",
+			path: filepath.Join(root, "loop1", "a"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): filepath.Join(root, "loop2"),
+					filepath.Join(root, "loop2"): filepath.Join(root, "loop1"),
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrExist, // MkdirAll recurses on ELOOP and hits EEXIST on the loop link itself
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -224,6 +247,23 @@ func TestFSTestOSWrapper_MkdirAll_MatchesReal(t *testing.T) {
 				initialSymlinks: map[string]string{"link_to_dir": "real_dir"},
 			}},
 			path: filepath.Join("link_to_dir", "a", "b"),
+		},
+		{
+			name: "Part of path is a broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{"broken_link": "nonexistent"},
+			}},
+			path: filepath.Join("broken_link", "a"),
+		},
+		{
+			name: "Symlink loop in path",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			path: filepath.Join("loop1", "a"),
 		},
 	}
 
