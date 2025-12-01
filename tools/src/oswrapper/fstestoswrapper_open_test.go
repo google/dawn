@@ -135,6 +135,66 @@ func TestFSTestOSWrapper_Open(t *testing.T) {
 				wantErrIs: syscall.ELOOP,
 			},
 		},
+		{
+			name: "Open symlink to symlink (chain)",
+			path: filepath.Join(root, "link1"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "target"): "target content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link1"): "link2",
+					filepath.Join(root, "link2"): "target",
+				},
+			},
+			expectedContent: stringPtr("target content"),
+		},
+		{
+			name: "Open absolute symlink",
+			path: filepath.Join(root, "abs_link"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "target"): "target content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "abs_link"): filepath.Join(root, "target"),
+				},
+			},
+			expectedContent: stringPtr("target content"),
+		},
+		{
+			name: "Open relative symlink with parent ref",
+			path: filepath.Join(root, "dir", "link"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "target"): "target content"},
+				initialDirs:  []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "dir", "link"): "../target",
+				},
+			},
+			expectedContent: stringPtr("target content"),
+		},
+		{
+			name: "Open symlink in subdirectory",
+			path: filepath.Join(root, "dir", "link"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "dir", "target"): "target content"},
+				initialDirs:  []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "dir", "link"): "target",
+				},
+			},
+			expectedContent: stringPtr("target content"),
+		},
+		{
+			name: "Open path with multiple symlinks",
+			path: filepath.Join(root, "link1", "link2", "file.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "real_dir1", "real_dir2", "file.txt"): "content"},
+				initialDirs:  []string{filepath.Join(root, "real_dir1"), filepath.Join(root, "real_dir1", "real_dir2")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link1"):              "real_dir1",
+					filepath.Join(root, "real_dir1", "link2"): "real_dir2",
+				},
+			},
+			expectedContent: stringPtr("content"),
+		},
 	}
 
 	for _, tc := range tests {
@@ -233,6 +293,51 @@ func TestFSTestOSWrapper_Open_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: "loop1",
+		},
+		{
+			name: "Open symlink to symlink (chain)",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"target": "target content"},
+				initialSymlinks: map[string]string{
+					"link1": "link2",
+					"link2": "target",
+				},
+			}},
+			path: "link1",
+		},
+		{
+			name: "Open relative symlink with parent ref",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"target": "target content"},
+				initialDirs:  []string{"dir"},
+				initialSymlinks: map[string]string{
+					filepath.Join("dir", "link"): "../target",
+				},
+			}},
+			path: filepath.Join("dir", "link"),
+		},
+		{
+			name: "Open symlink in subdirectory",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{filepath.Join("dir", "target"): "target content"},
+				initialDirs:  []string{"dir"},
+				initialSymlinks: map[string]string{
+					filepath.Join("dir", "link"): "target",
+				},
+			}},
+			path: filepath.Join("dir", "link"),
+		},
+		{
+			name: "Open path with multiple symlinks",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{filepath.Join("real_dir1", "real_dir2", "file.txt"): "content"},
+				initialDirs:  []string{filepath.Join("real_dir1", "real_dir2")},
+				initialSymlinks: map[string]string{
+					"link1":                             "real_dir1",
+					filepath.Join("real_dir1", "link2"): "real_dir2",
+				},
+			}},
+			path: filepath.Join("link1", "link2", "file.txt"),
 		},
 	}
 
