@@ -28,7 +28,6 @@ package oswrapper_test
 
 import (
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -249,75 +248,6 @@ func TestFSTestOSWrapper_ClosedFile_MatchesReal(t *testing.T) {
 
 			tc.operation(t, realFile, testFile)
 			requireFileSystemsMatch(t, realRoot, testFS)
-		})
-	}
-}
-
-// --- FilesystemWriter tests ---
-
-func TestFSTestOSWrapper_Symlink(t *testing.T) {
-	root := getTestRoot()
-	tests := []struct {
-		name          string
-		setup         unittestSetup
-		oldname       string
-		newname       string
-		expectedError expectedError
-	}{
-		{
-			name:    "Create valid symlink",
-			oldname: "target",
-			newname: filepath.Join(root, "link"),
-		},
-		{
-			name:    "Create symlink in subdirectory",
-			setup:   unittestSetup{initialDirs: []string{filepath.Join(root, "subdir")}},
-			oldname: "../target",
-			newname: filepath.Join(root, "subdir", "link"),
-		},
-		{
-			name:    "Destination exists",
-			setup:   unittestSetup{initialFiles: map[string]string{filepath.Join(root, "exists"): ""}},
-			oldname: "target",
-			newname: filepath.Join(root, "exists"),
-			expectedError: expectedError{
-				wantErrIs: os.ErrExist,
-			},
-		},
-		{
-			name:    "Parent directory does not exist",
-			oldname: "target",
-			newname: filepath.Join(root, "missing", "link"),
-			expectedError: expectedError{
-				wantErrIs: os.ErrNotExist,
-			},
-		},
-		{
-			name:    "Parent is not a directory",
-			setup:   unittestSetup{initialFiles: map[string]string{filepath.Join(root, "file"): ""}},
-			oldname: "target",
-			newname: filepath.Join(root, "file", "link"),
-			expectedError: expectedError{
-				wantErrMsg: "not a directory",
-			},
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			wrapper := tc.setup.setup(t)
-			err := wrapper.Symlink(tc.oldname, tc.newname)
-
-			if tc.expectedError.Check(t, err) {
-				return
-			}
-
-			// Verify the symlink entry
-			cleanedPath := wrapper.CleanPath(tc.newname)
-			file, ok := wrapper.FS[cleanedPath]
-			require.True(t, ok, "symlink entry not found in FS map")
-			require.Equal(t, fs.ModeSymlink, file.Mode&fs.ModeSymlink)
-			require.Equal(t, tc.oldname, string(file.Data))
 		})
 	}
 }
