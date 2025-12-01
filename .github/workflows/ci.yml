@@ -64,7 +64,10 @@ jobs:
             cpp_compiler: g++
             # The manylinux container is to ensure ABI compatibility with glibc 2.28.
             # This way, the continuous delivery process casts a wide net across many linux distros.
-            container: dockcross/manylinux_2_28-x64:latest
+            container: 
+              image: dockcross/manylinux_2_28-x64:latest
+              # Needed to run the "Free disk space on Linux host" step
+              options: --volume /:/host
         exclude:
           - os: macos-latest
             toolchain: msvc
@@ -90,6 +93,14 @@ jobs:
       SCCACHE_GHA_ENABLED: "true"
 
     steps:
+      - name: Free disk space on Linux host
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          # Prevent host from running out of space.
+          rm -rf /host/usr/share/dotnet
+          rm -rf /host/usr/local/lib/android
+          rm -rf /host/opt/ghc
+
       - uses: actions/checkout@v4
 
       - name: Extract Windows SDK build version
@@ -104,7 +115,7 @@ jobs:
           winsdk-build-version: ${{ env.WIN10_SDK_BUILD_VERSION }}
 
       - name: Set up dependencies on linux
-        if: matrix.container == 'dockcross/manylinux_2_28-x64:latest'
+        if: matrix.os == 'ubuntu-latest'
         run: >
           dnf install -y mesa-libGL-devel libxcb libxcb-devel libX11-xcb libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel libXext-devel libxkbcommon libxkbcommon-devel libxkbcommon-x11-devel mesa-vulkan-drivers wayland-protocols-devel wayland-devel
 
