@@ -1457,6 +1457,45 @@ func TestFSTestOSWrapper_ReadDir(t *testing.T) {
 				wantErrMsg: "not a directory",
 			},
 		},
+		{
+			name: "Read symlink to directory",
+			path: filepath.Join(root, "link_to_dir"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "dir", "file1.txt"): "",
+				},
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_dir"): "dir",
+				},
+			},
+			expectedEntries: []string{"file1.txt"},
+		},
+		{
+			name: "Read symlink to file",
+			path: filepath.Join(root, "link_to_file"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): ""},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_file"): "file.txt",
+				},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "not a directory",
+			},
+		},
+		{
+			name: "Read broken symlink",
+			path: filepath.Join(root, "broken_link"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "broken_link"): "nonexistent",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -1514,6 +1553,38 @@ func TestFSTestOSWrapper_ReadDir_MatchesReal(t *testing.T) {
 				initialFiles: map[string]string{"file.txt": "content"},
 			}},
 			path: "file.txt",
+		},
+		{
+			name: "Read symlink to directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join("dir", "file1.txt"): "content",
+				},
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link_to_dir": "dir",
+				},
+			}},
+			path: "link_to_dir",
+		},
+		{
+			name: "Read symlink to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+				initialSymlinks: map[string]string{
+					"link_to_file": "file.txt",
+				},
+			}},
+			path: "link_to_file",
+		},
+		{
+			name: "Read broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"broken_link": "nonexistent",
+				},
+			}},
+			path: "broken_link",
 		},
 	}
 

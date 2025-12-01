@@ -450,11 +450,15 @@ func (w FSTestFilesystemReaderWriter) ReadFile(name string) ([]byte, error) {
 
 func (w FSTestFilesystemReaderWriter) ReadDir(dir string) ([]os.DirEntry, error) {
 	p := w.CleanPath(dir)
+	resolvedPath, err := w.resolvePath(p)
+	if err != nil {
+		return nil, &os.PathError{Op: "readdir", Path: dir, Err: err}
+	}
 
-	if mapFile, exists := w.FS[p]; exists && !mapFile.Mode.IsDir() {
+	if mapFile, exists := w.FS[resolvedPath]; exists && !mapFile.Mode.IsDir() {
 		return nil, &os.PathError{Op: "readdir", Path: dir, Err: fmt.Errorf("not a directory")}
 	}
-	return fs.ReadDir(w.fs(), p)
+	return fs.ReadDir(w.fs(), resolvedPath)
 }
 
 // renamedFileInfo wraps an os.FileInfo to override its Name() method.
