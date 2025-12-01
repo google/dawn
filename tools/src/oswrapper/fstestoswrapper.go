@@ -326,10 +326,32 @@ func (w FSTestFilesystemReaderWriter) Open(name string) (File, error) {
 
 func (w FSTestFilesystemReaderWriter) OpenFile(name string, flag int, perm os.FileMode) (File, error) {
 	path := w.CleanPath(name)
-	mapFile, exists := w.FS[path]
+
+	// If O_EXCL is set and the path exists (even as a symlink), fail.
+	// We check the original path in the map directly.
+	if _, exists := w.FS[path]; exists {
+		if flag&os.O_CREATE != 0 && flag&os.O_EXCL != 0 {
+			return nil, &os.PathError{Op: "open", Path: name, Err: os.ErrExist}
+		}
+	}
+
+	// Resolve the path to handle symlinks.
+	// If the file doesn't exist, resolvePath will return the path where it *should* be
+	// (resolving parent symlinks).
+	resolvedPath, err := w.resolvePath(path)
+	if err != nil {
+		// If resolvePath fails, it might be because of a loop or other error.
+		// However, if we are creating a file, we might be okay if the final component doesn't exist.
+		// But resolvePath returns the path including the non-existent final component if parents resolve.
+		// So real errors from resolvePath (like ELOOP) should be propagated.
+		return nil, &os.PathError{Op: "open", Path: name, Err: err}
+	}
+
+	// Work with the resolved path from now on.
+	mapFile, exists := w.FS[resolvedPath]
 
 	// Check if a parent component of the path is a file.
-	dir := filepath.Dir(path)
+	dir := filepath.Dir(resolvedPath)
 	if dir != "." && dir != "" {
 		parentInfo, parentExists := w.FS[dir]
 		if parentExists && !parentInfo.Mode.IsDir() {
@@ -338,12 +360,8 @@ func (w FSTestFilesystemReaderWriter) OpenFile(name string, flag int, perm os.Fi
 	}
 
 	if flag&os.O_CREATE != 0 {
-		if exists {
-			if flag&os.O_EXCL != 0 {
-				return nil, &os.PathError{Op: "open", Path: name, Err: os.ErrExist}
-			}
-		} else {
-			parent := filepath.Dir(path)
+		if !exists {
+			parent := filepath.Dir(resolvedPath)
 			if parent != "." && parent != "" {
 				parentInfo, parentExists := w.FS[parent]
 				if !parentExists {
@@ -354,7 +372,7 @@ func (w FSTestFilesystemReaderWriter) OpenFile(name string, flag int, perm os.Fi
 				}
 			}
 			newFile := &fstest.MapFile{Data: []byte{}, Mode: perm, ModTime: time.Now()}
-			w.FS[path] = newFile
+			w.FS[resolvedPath] = newFile
 			mapFile = newFile
 			exists = true
 		}
@@ -374,9 +392,10 @@ func (w FSTestFilesystemReaderWriter) OpenFile(name string, flag int, perm os.Fi
 	}
 
 	// Create an os.FileInfo compatible wrapper for the fstest.MapFile.
-	info := &mapFileInfo{path: name, file: mapFile}
+	// We use the original name for the wrapper so that info.Name() matches what the user expects.
+	info := &renamedFileInfo{FileInfo: &mapFileInfo{path: resolvedPath, file: mapFile}, name: filepath.Base(name)}
 	handle := &fstestFileHandle{
-		path:         path,
+		path:         resolvedPath,
 		originalPath: name,
 		info:         info,
 		fsMap:        &w.FS,
@@ -403,13 +422,18 @@ func (w FSTestFilesystemReaderWriter) OpenFile(name string, flag int, perm os.Fi
 func (w FSTestFilesystemReaderWriter) ReadFile(name string) ([]byte, error) {
 	p := w.CleanPath(name)
 
+	resolvedPath, err := w.resolvePath(p)
+	if err != nil {
+		return nil, &os.PathError{Op: "read", Path: name, Err: err}
+	}
+
 	// If the path is the root, it's always a directory.
-	if p == "." {
+	if resolvedPath == "." {
 		return nil, &os.PathError{Op: "read", Path: name, Err: fmt.Errorf("is a directory")}
 	}
 
 	// Check for an explicit entry
-	if mapFile, exists := w.FS[p]; exists {
+	if mapFile, exists := w.FS[resolvedPath]; exists {
 		if mapFile.Mode.IsDir() {
 			return nil, &os.PathError{Op: "read", Path: name, Err: fmt.Errorf("is a directory")}
 		}

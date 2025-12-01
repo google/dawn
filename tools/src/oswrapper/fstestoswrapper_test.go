@@ -168,6 +168,7 @@ func requireFileSystemsMatch(t *testing.T, realRoot string, testFS oswrapper.FST
 	t.Helper()
 
 	realMap := make(map[string]*fstest.MapFile)
+	// We use filepath.Walk which uses Lstat, so we see symlinks.
 	err := filepath.Walk(realRoot, func(path string, info os.FileInfo, err error) error {
 		require.NoError(t, err)
 		if path == realRoot {
@@ -181,7 +182,11 @@ func requireFileSystemsMatch(t *testing.T, realRoot string, testFS oswrapper.FST
 		mapKey := testFS.FSTestFilesystemReaderWriter.CleanPath(relPath)
 
 		mapFile := &fstest.MapFile{Mode: info.Mode()}
-		if !info.IsDir() {
+		if info.Mode()&os.ModeSymlink != 0 {
+			target, err := os.Readlink(path)
+			require.NoError(t, err)
+			mapFile.Data = []byte(target)
+		} else if !info.IsDir() {
 			data, err := os.ReadFile(path)
 			require.NoError(t, err)
 			mapFile.Data = data
@@ -198,10 +203,14 @@ func requireFileSystemsMatch(t *testing.T, realRoot string, testFS oswrapper.FST
 		testFile, ok := testMap[key]
 		require.True(t, ok, "Path '%s' exists in real FS but not in FS under test", key)
 
+		// Compare file modes. Note: fs.FS doesn't strictly guarantee strict equality of all bits,
+		// but for our purposes (Dir, Symlink, Perms) they should match.
+		// However, fstest.MapFS might normalize modes.
 		require.Equal(t, realFile.Mode.IsDir(), testFile.Mode.IsDir(), "IsDir mismatch for '%s'", key)
+		require.Equal(t, realFile.Mode&os.ModeSymlink, testFile.Mode&os.ModeSymlink, "IsSymlink mismatch for '%s'", key)
 
 		if !realFile.Mode.IsDir() {
-			require.Equal(t, realFile.Data, testFile.Data, "Content mismatch for file '%s'", key)
+			require.Equal(t, realFile.Data, testFile.Data, "Content/Target mismatch for '%s'", key)
 		}
 	}
 }
@@ -728,6 +737,77 @@ func TestFSTestOSWrapper_OpenFile(t *testing.T) {
 				wantErrMsg: "is a directory",
 			},
 		},
+		{
+			name: "Open symlink to file",
+			path: filepath.Join(root, "link_to_file"),
+			flag: os.O_RDONLY,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_file"): "file.txt",
+				},
+			},
+			expectedContent: stringPtr("content"),
+		},
+		{
+			name: "Write to symlink to file",
+			path: filepath.Join(root, "link_to_file"),
+			flag: os.O_WRONLY,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "old"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_file"): "file.txt",
+				},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("new"))
+				require.NoError(t, err)
+			},
+			expectedContent: stringPtr("new"),
+		},
+		{
+			name: "Open broken symlink",
+			path: filepath.Join(root, "broken_link"),
+			flag: os.O_RDONLY,
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "broken_link"): "nonexistent",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Create file via symlink",
+			path: filepath.Join(root, "link_to_new"),
+			flag: os.O_WRONLY | os.O_CREATE,
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_new"): "new.txt",
+				},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("created"))
+				require.NoError(t, err)
+			},
+			// We check the symlink path content (which should read the target)
+			expectedContent: stringPtr("created"),
+		},
+		{
+			name: "O_EXCL fail on existing symlink",
+			path: filepath.Join(root, "link"),
+			flag: os.O_WRONLY | os.O_CREATE | os.O_EXCL,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): ""},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): "file.txt",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrExist,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -890,6 +970,67 @@ func TestFSTestOSWrapper_OpenFile_MatchesReal(t *testing.T) {
 			}},
 			path: "mydir",
 			flag: os.O_WRONLY,
+		},
+		{
+			name: "Open symlink to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+				initialSymlinks: map[string]string{
+					"link_to_file": "file.txt",
+				},
+			}},
+			path: "link_to_file",
+			flag: os.O_RDONLY,
+		},
+		{
+			name: "Write to symlink to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "old"},
+				initialSymlinks: map[string]string{
+					"link_to_file": "file.txt",
+				},
+			}},
+			path: "link_to_file",
+			flag: os.O_WRONLY,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("new"))
+				require.NoError(t, err)
+			},
+		},
+		{
+			name: "Open broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"broken_link": "nonexistent",
+				},
+			}},
+			path: "broken_link",
+			flag: os.O_RDONLY,
+		},
+		{
+			name: "Create file via symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"link_to_new": "new.txt",
+				},
+			}},
+			path: "link_to_new",
+			flag: os.O_WRONLY | os.O_CREATE,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("created"))
+				require.NoError(t, err)
+			},
+		},
+		{
+			name: "O_EXCL fail on existing symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": ""},
+				initialSymlinks: map[string]string{
+					"link": "file.txt",
+				},
+			}},
+			path: "link",
+			flag: os.O_WRONLY | os.O_CREATE | os.O_EXCL,
 		},
 	}
 
@@ -1142,6 +1283,42 @@ func TestFSTestOSWrapper_ReadFile(t *testing.T) {
 				wantErrMsg: "is a directory",
 			},
 		},
+		{
+			name: "Read symlink to file",
+			path: filepath.Join(root, "link_to_file"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_file"): "file.txt",
+				},
+			},
+			expectedContent: []byte("content"),
+		},
+		{
+			name: "Read symlink to dir",
+			path: filepath.Join(root, "link_to_dir"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_dir"): "dir",
+				},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "is a directory",
+			},
+		},
+		{
+			name: "Read broken symlink",
+			path: filepath.Join(root, "broken_link"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "broken_link"): "nonexistent",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -1185,6 +1362,35 @@ func TestFSTestOSWrapper_ReadFile_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: "mydir",
+		},
+		{
+			name: "Read symlink to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+				initialSymlinks: map[string]string{
+					"link_to_file": "file.txt",
+				},
+			}},
+			path: "link_to_file",
+		},
+		{
+			name: "Read symlink to dir",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link_to_dir": "dir",
+				},
+			}},
+			path: "link_to_dir",
+		},
+		{
+			name: "Read broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"broken_link": "nonexistent",
+				},
+			}},
+			path: "broken_link",
 		},
 	}
 
