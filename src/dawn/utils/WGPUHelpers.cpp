@@ -301,11 +301,9 @@ BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
     storageTexture.viewDimension = textureViewDimension;
 }
 
-#ifndef __EMSCRIPTEN__
 // ExternalTextureBindingLayout never contains data, so just make one that can be reused instead
 // of declaring a new one every time it's needed.
 wgpu::ExternalTextureBindingLayout kExternalTextureBindingLayout = {};
-wgpu::TexelBufferBindingLayout kTexelBufferBindingLayout = {};
 
 BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
     uint32_t entryBinding,
@@ -316,6 +314,16 @@ BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
     nextInChain = bindingLayout;
 }
 
+BindingInitializationHelper::BindingInitializationHelper(
+    uint32_t binding,
+    const wgpu::ExternalTexture& externalTexture)
+    : binding(binding) {
+    externalTextureBindingEntry.externalTexture = externalTexture;
+}
+
+#ifndef __EMSCRIPTEN__
+wgpu::TexelBufferBindingLayout kTexelBufferBindingLayout = {};
+
 BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
     uint32_t entryBinding,
     wgpu::ShaderStage entryVisibility,
@@ -323,13 +331,6 @@ BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
     binding = entryBinding;
     visibility = entryVisibility;
     nextInChain = bindingLayout;
-}
-
-BindingInitializationHelper::BindingInitializationHelper(
-    uint32_t binding,
-    const wgpu::ExternalTexture& externalTexture)
-    : binding(binding) {
-    externalTextureBindingEntry.externalTexture = externalTexture;
 }
 #endif  // __EMSCRIPTEN__
 
@@ -375,7 +376,6 @@ wgpu::BindGroupEntry BindingInitializationHelper::GetAsBinding() const {
     result.offset = offset;
     result.size = size;
 
-#ifndef __EMSCRIPTEN__
     if (externalTextureBindingEntry.externalTexture != nullptr) {
         // Similarly to texel buffers, external textures have their layout
         // specified on the bind group layout entry. Chain only the binding entry
@@ -383,6 +383,7 @@ wgpu::BindGroupEntry BindingInitializationHelper::GetAsBinding() const {
         externalTextureBindingEntry.nextInChain = result.nextInChain;
         result.nextInChain = &externalTextureBindingEntry;
     }
+#ifndef __EMSCRIPTEN__
     if (texelBufferBindingEntry.texelBufferView != nullptr) {
         // Insert the texel buffer binding entry at the head of the chain while
         // preserving any existing chained structures on `result`. The layout is

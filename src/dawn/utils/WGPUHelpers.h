@@ -117,8 +117,9 @@ wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
 wgpu::PipelineLayout MakePipelineLayout(const wgpu::Device& device,
                                         std::vector<wgpu::BindGroupLayout> bgls);
 
-#ifndef __EMSCRIPTEN__
 extern wgpu::ExternalTextureBindingLayout kExternalTextureBindingLayout;
+
+#ifndef __EMSCRIPTEN__
 extern wgpu::TexelBufferBindingLayout kTexelBufferBindingLayout;
 #endif  // __EMSCRIPTEN__
 
@@ -151,10 +152,10 @@ struct BindingLayoutEntryInitializationHelper : wgpu::BindGroupLayoutEntry {
         wgpu::StorageTextureAccess storageTextureAccess,
         wgpu::TextureFormat format,
         wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::e2D);
-#ifndef __EMSCRIPTEN__
     BindingLayoutEntryInitializationHelper(uint32_t entryBinding,
                                            wgpu::ShaderStage entryVisibility,
                                            wgpu::ExternalTextureBindingLayout* bindingLayout);
+#ifndef __EMSCRIPTEN__
     BindingLayoutEntryInitializationHelper(uint32_t entryBinding,
                                            wgpu::ShaderStage entryVisibility,
                                            wgpu::TexelBufferBindingLayout* bindingLayout);
@@ -180,8 +181,8 @@ wgpu::BindGroupLayout MakeBindGroupLayout(
 struct BindingInitializationHelper {
     BindingInitializationHelper(uint32_t binding, const wgpu::Sampler& sampler);
     BindingInitializationHelper(uint32_t binding, const wgpu::TextureView& textureView);
-#ifndef __EMSCRIPTEN__
     BindingInitializationHelper(uint32_t binding, const wgpu::ExternalTexture& externalTexture);
+#ifndef __EMSCRIPTEN__
     BindingInitializationHelper(uint32_t binding, const wgpu::TexelBufferView& texelBufferView);
 #endif  // __EMSCRIPTEN__
     BindingInitializationHelper(uint32_t binding,
@@ -197,8 +198,8 @@ struct BindingInitializationHelper {
     wgpu::Sampler sampler;
     wgpu::TextureView textureView;
     wgpu::Buffer buffer;
-#ifndef __EMSCRIPTEN__
     mutable wgpu::ExternalTextureBindingEntry externalTextureBindingEntry;
+#ifndef __EMSCRIPTEN__
     mutable wgpu::TexelBufferBindingEntry texelBufferBindingEntry = {};
 #endif  // __EMSCRIPTEN__
     uint64_t offset = 0;

@@ -342,6 +342,7 @@ WGPUStringView ToOutputStringView(const std::string& s) {
   X(ComputePassEncoder)  \
   X(ComputePipeline)     \
   X(Device)              \
+  X(ExternalTexture)     \
   X(Instance)            \
   X(PipelineLayout)      \
   X(QuerySet)            \
@@ -365,6 +366,7 @@ WGPUStringView ToOutputStringView(const std::string& s) {
   X(CommandEncoder)      \
   X(ComputePassEncoder)  \
   X(ComputePipeline)     \
+  X(ExternalTexture)     \
   X(PipelineLayout)      \
   X(QuerySet)            \
   X(RenderBundle)        \

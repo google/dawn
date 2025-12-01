@@ -37,8 +37,11 @@
 #include <string>
 #include <utility>
 
+#include "dawn/utils/WGPUHelpers.h"
+
 namespace {
 
+namespace utils = dawn::utils;
 using testing::_;
 using testing::HasSubstr;
 
@@ -218,6 +221,89 @@ TEST_F(SpotTests, GetWGSLLanguageFeatures) {
         EXPECT_NE(std::find(features.begin(), features.end(), feature), features.end());
         EXPECT_TRUE(mInstance.HasWGSLLanguageFeature(feature));
     }
+}
+
+TEST_F(SpotTests, ImportExternalTexture) {
+    auto cExternalTexture = static_cast<WGPUExternalTexture>(EM_ASM_PTR(
+        {
+            const cDevice = $0;
+            const device = WebGPU.getJsObject(cDevice);
+
+            const cvs = document.createElement('canvas');
+            cvs.width = 1;
+            cvs.height = 1;
+            const ctx = cvs.getContext('2d');
+            ctx.fillStyle = '#0f0';
+            ctx.fillRect(0, 0, 1, 1);
+            window.myVideoFrame = new VideoFrame(cvs, {timestamp : 0});
+
+            const jsExternalTexture = device.importExternalTexture({source : window.myVideoFrame});
+            const cExternalTexture = WebGPU.importJsExternalTexture(jsExternalTexture);
+            return cExternalTexture;
+        },
+        mDevice.Get()));
+    auto externalTexture = wgpu::ExternalTexture::Acquire(cExternalTexture);
+
+    wgpu::BufferDescriptor bufferDesc{
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = sizeof(uint32_t),
+    };
+    auto buffer = mDevice.CreateBuffer(&bufferDesc);
+
+    wgpu::BufferDescriptor readbackDesc{
+        .usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead,
+        .size = sizeof(uint32_t),
+    };
+    auto readback = mDevice.CreateBuffer(&readbackDesc);
+
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        mDevice, {{0, wgpu::ShaderStage::Compute, &utils::kExternalTextureBindingLayout},
+                  {1, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
+    wgpu::BindGroup bg = utils::MakeBindGroup(mDevice, bgl, {{0, externalTexture}, {1, buffer}});
+
+    auto module = utils::CreateShaderModule(mDevice, R"(
+        @group(0) @binding(0) var t: texture_external;
+        @group(0) @binding(1) var<storage, read_write> b: u32;
+
+        @compute @workgroup_size(1) fn main() {
+            b = pack4x8unorm(textureLoad(t, vec2u(0, 0)));
+        })");
+
+    wgpu::ComputePipelineDescriptor pipelineDesc{
+        .layout = utils::MakeBasicPipelineLayout(mDevice, &bgl),
+        .compute = {.module = module},
+    };
+    auto pipeline = mDevice.CreateComputePipeline(&pipelineDesc);
+
+    auto encoder = mDevice.CreateCommandEncoder();
+    {
+        auto pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, bg);
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+    }
+    encoder.CopyBufferToBuffer(buffer, 0, readback, 0, sizeof(uint32_t));
+    auto commandBuffer = encoder.Finish();
+    mDevice.GetQueue().Submit(1, &commandBuffer);
+
+    // Note we can't (yet) use EXPECT_BUFFER_U32_EQ here.
+    uint32_t result = 0;
+    mInstance.WaitAny(
+        readback.MapAsync(
+            wgpu::MapMode::Read, 0, wgpu::kWholeMapSize, wgpu::CallbackMode::WaitAnyOnly,
+            [&](wgpu::MapAsyncStatus, wgpu::StringView) {
+                result = static_cast<const uint32_t*>(readback.GetConstMappedRange())[0];
+                readback.Unmap();
+            }),
+        UINT64_MAX);
+    EXPECT_EQ(result, uint32_t(0xff00ff00));  // ABGR
+
+    EM_ASM({
+        // VideoFrames should always be closed manually.
+        window.myVideoFrame.close();
+        delete window.myVideoFrame;
+    });
 }
 
 }  // namespace

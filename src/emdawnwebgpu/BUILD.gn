@@ -144,6 +144,10 @@ if (is_wasm) {
       # directory which also has these files (at an older revision).
       "${target_gen_dir}/include",
     ]
+    cflags = [
+      # Allow using $0 etc. in EM_ASM.
+      "-Wno-dollar-in-identifier-extension",
+    ]
     ldflags = [
       # These will be processed in order; library_webgpu.js must come after
       # the generated files, because it depends on them.
@@ -242,6 +246,7 @@ if (is_wasm) {
     public_deps = [
       ":emdawnwebgpu",
       "../dawn/tests:gmock_main",
+      "../dawn/utils:wgpu_utils",
     ]
     sources = [
       "tests/FuturesTests.cpp",

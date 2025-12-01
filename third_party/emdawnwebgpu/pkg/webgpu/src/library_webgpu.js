@@ -190,7 +190,7 @@ var LibraryWebGPU = {
       WebGPU.Internals.jsObjectInsert(devicePtr, device);
       return devicePtr;
     },
-    {{{ gpu.makeImportJsObject('BindGroup') }}}
+    {{{ gpu.makeImportJsObject('ExternalTexture') }}}
     {{{ gpu.makeImportJsObject('PipelineLayout') }}}
     {{{ gpu.makeImportJsObject('QuerySet') }}}
     {{{ gpu.makeImportJsObject('Queue') }}}
@@ -211,6 +211,17 @@ var LibraryWebGPU = {
       var messagePtr = stringToUTF8OnStack(message);
       {{{ makeDynCall('vipp', 'callback') }}}(type, {{{ gpu.passAsPointer('messagePtr') }}}, userdata);
       stackRestore(sp);
+    },
+
+    iterateExtensions: (root, handlers) => {
+      {{{ gpu.makeCheck('root') }}}
+      for (var ptr = {{{ makeGetValue('root', gpu.kOffsetOfNextInChainMember, '*') }}}; ptr;
+               ptr = {{{ makeGetValue('ptr', C_STRUCTS.WGPUChainedStruct.next, '*') }}}) {
+        var sType = {{{ makeGetValue('ptr', C_STRUCTS.WGPUChainedStruct.sType, 'i32') }}};
+        // This will crash if there's no handler indicating either a bogus
+        // sType, or one we haven't implemented yet.
+        var handler = handlers[sType](ptr);
+      }
     },
 
     setStringView: (ptr, data, length) => {
@@ -1393,36 +1404,34 @@ var LibraryWebGPU = {
       var bufferPtr = {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBindGroupEntry.buffer, '*') }}};
       var samplerPtr = {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBindGroupEntry.sampler, '*') }}};
       var textureViewPtr = {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBindGroupEntry.textureView, '*') }}};
+      var externalTexturePtr = 0;
+      WebGPU.iterateExtensions(entryPtr, {
+        {{{ gpu.SType.ExternalTextureBindingEntry }}}: (ptr) => {
+          externalTexturePtr = {{{ makeGetValue('ptr', C_STRUCTS.WGPUExternalTextureBindingEntry.externalTexture, '*') }}};
+        },
+      });
 #if ASSERTIONS
-      assert((bufferPtr !== 0) + (samplerPtr !== 0) + (textureViewPtr !== 0) === 1);
+      assert((bufferPtr !== 0) + (samplerPtr !== 0) + (textureViewPtr !== 0) + (externalTexturePtr !== 0) === 1);
 #endif
 
-      var binding = {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBindGroupEntry.binding, 'u32') }}};
-
+      var resource;
       if (bufferPtr) {
         // Note the sentinel UINT64_MAX will be read as -1.
         var size = {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBindGroupEntry.size, 'i53') }}};
         {{{ gpu.convertSentinelToUndefined('size', 'i53') }}}
 
-        return {
-          "binding": binding,
-          "resource": {
-            "buffer": WebGPU.getJsObject(bufferPtr),
-            "offset": {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBindGroupEntry.offset, 'i53') }}},
-            "size": size
-          },
-        };
-      } else if (samplerPtr) {
-        return {
-          "binding": binding,
-          "resource": WebGPU.getJsObject(samplerPtr),
+        resource = {
+          "buffer": WebGPU.getJsObject(bufferPtr),
+          "offset": {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBindGroupEntry.offset, 'i53') }}},
+          "size": size,
         };
       } else {
-        return {
-          "binding": binding,
-          "resource": WebGPU.getJsObject(textureViewPtr),
-        };
+        resource = WebGPU.getJsObject(samplerPtr || textureViewPtr || externalTexturePtr);
       }
+      return {
+        "binding": {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBindGroupEntry.binding, 'u32') }}},
+        "resource": resource,
+      };
     }
 
     function makeEntries(count, entriesPtrs) {
@@ -1455,27 +1464,23 @@ var LibraryWebGPU = {
   wgpuDeviceCreateBindGroupLayout: (devicePtr, descriptor) => {
     {{{ gpu.makeCheckDescriptor('descriptor') }}}
 
-    function makeBufferEntry(entryPtr) {
-      {{{ gpu.makeCheck('entryPtr') }}}
-
+    function makeBufferEntry(substructPtr) {
       var typeInt =
-        {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBufferBindingLayout.type, 'u32') }}};
+        {{{ makeGetValue('substructPtr', C_STRUCTS.WGPUBufferBindingLayout.type, 'u32') }}};
       if (!typeInt) return undefined;
 
       return {
         "type": WebGPU.BufferBindingType[typeInt],
         "hasDynamicOffset":
-          {{{ gpu.makeGetBool('entryPtr', C_STRUCTS.WGPUBufferBindingLayout.hasDynamicOffset) }}},
+          {{{ gpu.makeGetBool('substructPtr', C_STRUCTS.WGPUBufferBindingLayout.hasDynamicOffset) }}},
         "minBindingSize":
-          {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBufferBindingLayout.minBindingSize, 'i53') }}},
+          {{{ makeGetValue('substructPtr', C_STRUCTS.WGPUBufferBindingLayout.minBindingSize, 'i53') }}},
       };
     }
 
-    function makeSamplerEntry(entryPtr) {
-      {{{ gpu.makeCheck('entryPtr') }}}
-
+    function makeSamplerEntry(substructPtr) {
       var typeInt =
-        {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUSamplerBindingLayout.type, 'u32') }}};
+        {{{ makeGetValue('substructPtr', C_STRUCTS.WGPUSamplerBindingLayout.type, 'u32') }}};
       if (!typeInt) return undefined;
 
       return {
@@ -1483,32 +1488,28 @@ var LibraryWebGPU = {
       };
     }
 
-    function makeTextureEntry(entryPtr) {
-      {{{ gpu.makeCheck('entryPtr') }}}
-
+    function makeTextureEntry(substructPtr) {
       var sampleTypeInt =
-        {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUTextureBindingLayout.sampleType, 'u32') }}};
+        {{{ makeGetValue('substructPtr', C_STRUCTS.WGPUTextureBindingLayout.sampleType, 'u32') }}};
       if (!sampleTypeInt) return undefined;
 
       return {
         "sampleType": WebGPU.TextureSampleType[sampleTypeInt],
-        "viewDimension": {{{ gpu.makeGetEnum('entryPtr', C_STRUCTS.WGPUTextureBindingLayout.viewDimension, 'TextureViewDimension') }}},
+        "viewDimension": {{{ gpu.makeGetEnum('substructPtr', C_STRUCTS.WGPUTextureBindingLayout.viewDimension, 'TextureViewDimension') }}},
         "multisampled":
-          {{{ gpu.makeGetBool('entryPtr', C_STRUCTS.WGPUTextureBindingLayout.multisampled) }}},
+          {{{ gpu.makeGetBool('substructPtr', C_STRUCTS.WGPUTextureBindingLayout.multisampled) }}},
       };
     }
 
-    function makeStorageTextureEntry(entryPtr) {
-      {{{ gpu.makeCheck('entryPtr') }}}
-
+    function makeStorageTextureEntry(substructPtr) {
       var accessInt =
-        {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUStorageTextureBindingLayout.access, 'u32') }}}
+        {{{ makeGetValue('substructPtr', C_STRUCTS.WGPUStorageTextureBindingLayout.access, 'u32') }}}
       if (!accessInt) return undefined;
 
       return {
         "access": WebGPU.StorageTextureAccess[accessInt],
-        "format": {{{ gpu.makeGetEnum('entryPtr', C_STRUCTS.WGPUStorageTextureBindingLayout.format, 'TextureFormat') }}},
-        "viewDimension": {{{ gpu.makeGetEnum('entryPtr', C_STRUCTS.WGPUStorageTextureBindingLayout.viewDimension, 'TextureViewDimension') }}},
+        "format": {{{ gpu.makeGetEnum('substructPtr', C_STRUCTS.WGPUStorageTextureBindingLayout.format, 'TextureFormat') }}},
+        "viewDimension": {{{ gpu.makeGetEnum('substructPtr', C_STRUCTS.WGPUStorageTextureBindingLayout.viewDimension, 'TextureViewDimension') }}},
       };
     }
 
@@ -1522,7 +1523,7 @@ var LibraryWebGPU = {
       assert(bindingArraySize == 0 || bindingArraySize == 1);
 #endif
 
-      return {
+      var entry = {
         "binding":
           {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBindGroupLayoutEntry.binding, 'u32') }}},
         "visibility":
@@ -1532,6 +1533,12 @@ var LibraryWebGPU = {
         "texture": makeTextureEntry(entryPtr + {{{ C_STRUCTS.WGPUBindGroupLayoutEntry.texture }}}),
         "storageTexture": makeStorageTextureEntry(entryPtr + {{{ C_STRUCTS.WGPUBindGroupLayoutEntry.storageTexture }}}),
       };
+      WebGPU.iterateExtensions(entryPtr, {
+        {{{ gpu.SType.ExternalTextureBindingLayout }}}: (ptr) => {
+          entry["externalTexture"] = {};
+        },
+      });
+      return entry;
     }
 
     function makeEntries(count, entriesPtrs) {
