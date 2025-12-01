@@ -475,10 +475,24 @@ MaybeError ProcessRenderCommand(const Replay& replay,
                                  data.offset, data.size);
             break;
         }
+        case schema::CommandBufferCommand::SetIndexBuffer: {
+            schema::CommandBufferCommandSetIndexBufferCmdData data;
+            DAWN_TRY(Deserialize(readHead, &data));
+            pass.SetIndexBuffer(replay.GetObjectById<wgpu::Buffer>(data.bufferId), data.format,
+                                data.offset, data.size);
+            break;
+        }
         case schema::CommandBufferCommand::Draw: {
             schema::CommandBufferCommandDrawCmdData data;
             DAWN_TRY(Deserialize(readHead, &data));
             pass.Draw(data.vertexCount, data.instanceCount, data.firstVertex, data.firstInstance);
+            break;
+        }
+        case schema::CommandBufferCommand::DrawIndexed: {
+            schema::CommandBufferCommandDrawIndexedCmdData data;
+            DAWN_TRY(Deserialize(readHead, &data));
+            pass.DrawIndexed(data.indexCount, data.instanceCount, data.firstIndex, data.baseVertex,
+                             data.firstInstance);
             break;
         }
         case schema::CommandBufferCommand::PushDebugGroup:

@@ -121,6 +121,19 @@ MaybeError CaptureRenderCommand(CaptureContext& captureContext,
             Serialize(captureContext, data);
             break;
         }
+        case Command::SetIndexBuffer: {
+            const auto& cmd = *commands.NextCommand<SetIndexBufferCmd>();
+            schema::CommandBufferCommandSetIndexBufferCmd data{{
+                .data = {{
+                    .bufferId = captureContext.GetId(cmd.buffer),
+                    .format = cmd.format,
+                    .offset = cmd.offset,
+                    .size = cmd.size,
+                }},
+            }};
+            Serialize(captureContext, data);
+            break;
+        }
         case Command::Draw: {
             const auto& cmd = *commands.NextCommand<DrawCmd>();
             schema::CommandBufferCommandDrawCmd data{{
@@ -128,6 +141,20 @@ MaybeError CaptureRenderCommand(CaptureContext& captureContext,
                     .vertexCount = cmd.vertexCount,
                     .instanceCount = cmd.instanceCount,
                     .firstVertex = cmd.firstVertex,
+                    .firstInstance = cmd.firstInstance,
+                }},
+            }};
+            Serialize(captureContext, data);
+            break;
+        }
+        case Command::DrawIndexed: {
+            const auto& cmd = *commands.NextCommand<DrawIndexedCmd>();
+            schema::CommandBufferCommandDrawIndexedCmd data{{
+                .data = {{
+                    .indexCount = cmd.indexCount,
+                    .instanceCount = cmd.instanceCount,
+                    .firstIndex = cmd.firstIndex,
+                    .baseVertex = cmd.baseVertex,
                     .firstInstance = cmd.firstInstance,
                 }},
             }};

@@ -598,6 +598,15 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(ExecuteBundles, EXECUTE_BUNDLES
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetVertexBuffer,
                                                  SET_VERTEX_BUFFER_CMD_DATA_MEMBER){};
 
+#define SET_INDEX_BUFFER_CMD_DATA_MEMBER(X) \
+    X(ObjectId, bufferId)                   \
+    X(wgpu::IndexFormat, format)            \
+    X(uint64_t, offset)                     \
+    X(uint64_t, size)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetIndexBuffer,
+                                                 SET_INDEX_BUFFER_CMD_DATA_MEMBER){};
+
 #define DRAW_CMD_DATA_MEMBER(X) \
     X(uint32_t, vertexCount)    \
     X(uint32_t, instanceCount)  \
@@ -605,6 +614,15 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetVertexBuffer,
     X(uint32_t, firstInstance)
 
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(Draw, DRAW_CMD_DATA_MEMBER){};
+
+#define DRAW_INDEXED_CMD_DATA_MEMBER(X) \
+    X(uint32_t, indexCount)             \
+    X(uint32_t, instanceCount)          \
+    X(uint32_t, firstIndex)             \
+    X(int32_t, baseVertex)              \
+    X(uint32_t, firstInstance)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(DrawIndexed, DRAW_INDEXED_CMD_DATA_MEMBER){};
 
 }  // namespace schema
 

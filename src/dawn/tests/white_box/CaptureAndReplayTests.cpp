@@ -1908,5 +1908,91 @@ TEST_P(CaptureAndReplayTests, CaptureSetLabel) {
 
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
+class CaptureAndReplayDrawTests : public CaptureAndReplayTests {
+  public:
+    // Sets up point-list render pipeline to a 1x1 rgba8uint texture
+    // and expects texture to be 'expected'
+    template <typename Func, typename T>
+    void TestDrawCommand(Func fn, const T& expected) {
+        wgpu::Texture dstTexture = CreateTexture("dstTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
+                                                 wgpu::TextureUsage::RenderAttachment);
+
+        const char* shader = R"(
+            struct VOut {
+                @builtin(position) pos: vec4f,
+                @location(0) @interpolate(flat, either) params: vec4u,
+            };
+
+            @vertex fn vs(
+                @builtin(vertex_index) vNdx: u32,
+                @builtin(instance_index) iNdx: u32) -> VOut
+            {
+                return VOut(
+                    vec4f(0, 0, 0, 1),
+                    vec4u(vNdx, iNdx, 0x33, 0x44));
+            }
+
+            @fragment fn fs(v: VOut) -> @location(0) vec4u {
+                return v.params;
+            }
+        )";
+        auto module = utils::CreateShaderModule(device, shader);
+
+        utils::ComboRenderPipelineDescriptor desc;
+        desc.vertex.module = module;
+        desc.cFragment.module = module;
+        desc.cFragment.targetCount = 1;
+        desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Uint;
+        desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+        wgpu::CommandBuffer commands;
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            utils::ComboRenderPassDescriptor passDescriptor({dstTexture.CreateView()});
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+            pass.SetPipeline(pipeline);
+            fn(pass);
+            pass.End();
+
+            commands = encoder.Finish();
+        }
+
+        // --- capture ---
+        auto recorder = Recorder::CreateAndStart(device);
+
+        queue.Submit(1, &commands);
+
+        // --- replay ---
+        auto capture = recorder.Finish();
+        auto replay = capture.Replay(device);
+
+        ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
+    }
+};
+
+// Capture DrawIndexed
+TEST_P(CaptureAndReplayDrawTests, CaptureDrawIndexed) {
+    uint32_t indices[] = {0x10, 0x20, 0x30};
+    wgpu::Buffer indexBuffer = CreateBuffer("index", sizeof(indices),
+                                            wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
+    queue.WriteBuffer(indexBuffer, 0, indices, sizeof(indices));
+
+    utils::RGBA8 expected[] = {{0x32, 0x3, 0x33, 0x44}};
+    TestDrawCommand(
+        [&](wgpu::RenderPassEncoder pass) {
+            pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+            pass.DrawIndexed(1,   // indexCount
+                             1,   // instanceCount
+                             2,   // firstIndex,
+                             2,   // baseVertex,
+                             3);  // firstInstance
+        },
+        expected);
+}
+
+DAWN_INSTANTIATE_TEST(CaptureAndReplayDrawTests, WebGPUBackend());
+
 }  // anonymous namespace
 }  // namespace dawn
