@@ -705,7 +705,7 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromComputeTexture) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
     ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
@@ -759,7 +759,7 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromRenderTexture) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
     ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
@@ -1038,7 +1038,7 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasic) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
     ExpectTextureEQ(replay.get(), "myTexture", {1}, expected);
 }
 
@@ -1102,7 +1102,7 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithBindGroup) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
     ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
@@ -1166,7 +1166,7 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithAttributes) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
     ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
@@ -1297,7 +1297,7 @@ TEST_P(CaptureAndReplayTests, CaptureStorageTextureUsageWithExplicitBindGroupLay
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
     ExpectTextureEQ(replay.get(), "myTexture", {1}, expected);
 }
 
@@ -1465,7 +1465,7 @@ TEST_P(CaptureAndReplayTests, CaptureSamplerUsageWithExplicitBindGroupLayout) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
     ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
@@ -1710,7 +1710,7 @@ TEST_P(CaptureAndReplayTests, CaptureRenderBundleBasic) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
     ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
