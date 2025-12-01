@@ -808,6 +808,20 @@ func TestFSTestOSWrapper_OpenFile(t *testing.T) {
 				wantErrIs: os.ErrExist,
 			},
 		},
+		{
+			name: "Open symlink loop",
+			path: filepath.Join(root, "loop1"),
+			flag: os.O_RDONLY,
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): "loop2",
+					filepath.Join(root, "loop2"): "loop1",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -1031,6 +1045,17 @@ func TestFSTestOSWrapper_OpenFile_MatchesReal(t *testing.T) {
 			}},
 			path: "link",
 			flag: os.O_WRONLY | os.O_CREATE | os.O_EXCL,
+		},
+		{
+			name: "Open symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			path: "loop1",
+			flag: os.O_RDONLY,
 		},
 	}
 
@@ -1319,6 +1344,19 @@ func TestFSTestOSWrapper_ReadFile(t *testing.T) {
 				wantErrIs: os.ErrNotExist,
 			},
 		},
+		{
+			name: "Read symlink loop",
+			path: filepath.Join(root, "loop1"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): "loop2",
+					filepath.Join(root, "loop2"): "loop1",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -1391,6 +1429,16 @@ func TestFSTestOSWrapper_ReadFile_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: "broken_link",
+		},
+		{
+			name: "Read symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			path: "loop1",
 		},
 	}
 
@@ -1496,6 +1544,19 @@ func TestFSTestOSWrapper_ReadDir(t *testing.T) {
 				wantErrIs: os.ErrNotExist,
 			},
 		},
+		{
+			name: "ReadDir symlink loop",
+			path: filepath.Join(root, "loop1"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): "loop2",
+					filepath.Join(root, "loop2"): "loop1",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -1585,6 +1646,16 @@ func TestFSTestOSWrapper_ReadDir_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: "broken_link",
+		},
+		{
+			name: "ReadDir symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			path: "loop1",
 		},
 	}
 
@@ -1800,6 +1871,16 @@ func TestFSTestOSWrapper_Stat_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: "broken_link",
+		},
+		{
+			name: "Stat symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			path: "loop1",
 		},
 	}
 
@@ -3274,6 +3355,21 @@ func TestFSTestOSWrapper_WriteFile(t *testing.T) {
 				wantErrMsg: "is a directory",
 			},
 		},
+		{
+			name: "Write to symlink loop",
+			path: filepath.Join(root, "loop1"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): "loop2",
+					filepath.Join(root, "loop2"): "loop1",
+				},
+			},
+			content: []byte("fail"),
+			mode:    0666,
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -3384,6 +3480,17 @@ func TestFSTestOSWrapper_WriteFile_MatchesReal(t *testing.T) {
 				},
 			}},
 			path:    "link_to_dir",
+			content: []byte("fail"),
+		},
+		{
+			name: "Write to symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			path:    "loop1",
 			content: []byte("fail"),
 		},
 	}
