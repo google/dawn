@@ -31,6 +31,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,6 +52,7 @@ func TestFSTestOSWrapper_Create(t *testing.T) {
 		contentToWrite  []byte
 		expectedContent *string
 		expectedError
+		verify func(t *testing.T, wrapper oswrapper.FSTestOSWrapper)
 	}{
 		{
 			name:            "Create new file and write",
@@ -103,6 +105,90 @@ func TestFSTestOSWrapper_Create(t *testing.T) {
 				wantErrMsg: "not a directory",
 			},
 		},
+		{
+			name: "Create via symlink to directory",
+			path: filepath.Join(root, "link", "file.txt"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): filepath.Join(root, "dir"),
+				},
+			},
+			contentToWrite:  []byte("content"),
+			expectedContent: stringPtr("content"),
+		},
+		{
+			name: "Create via symlink chain to directory",
+			path: filepath.Join(root, "link1", "file.txt"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link2"): filepath.Join(root, "dir"),
+					filepath.Join(root, "link1"): filepath.Join(root, "link2"),
+				},
+			},
+			contentToWrite:  []byte("chain"),
+			expectedContent: stringPtr("chain"),
+		},
+		{
+			name: "Create overwrites symlink target",
+			path: filepath.Join(root, "link"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "target.txt"): "old"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): filepath.Join(root, "target.txt"),
+				},
+			},
+			contentToWrite: []byte("new"),
+			verify: func(t *testing.T, wrapper oswrapper.FSTestOSWrapper) {
+				targetPath := filepath.Join(root, "target.txt")
+				content, err := wrapper.ReadFile(targetPath)
+				require.NoError(t, err)
+				require.Equal(t, "new", string(content))
+			},
+		},
+		{
+			name: "Create on symlink to non-existent file",
+			path: filepath.Join(root, "link"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): filepath.Join(root, "target.txt"),
+				},
+			},
+			contentToWrite: []byte("hello"),
+			verify: func(t *testing.T, wrapper oswrapper.FSTestOSWrapper) {
+				targetPath := filepath.Join(root, "target.txt")
+				content, err := wrapper.ReadFile(targetPath)
+				require.NoError(t, err)
+				require.Equal(t, "hello", string(content))
+			},
+		},
+		{
+			name: "Create fails if path is symlink to directory",
+			path: filepath.Join(root, "link"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): filepath.Join(root, "dir"),
+				},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "is a directory",
+			},
+		},
+		{
+			name: "Create fails if parent component is symlink to file",
+			path: filepath.Join(root, "link", "sub.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): filepath.Join(root, "file.txt"),
+				},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "not a directory",
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -128,9 +214,21 @@ func TestFSTestOSWrapper_Create(t *testing.T) {
 			require.NoError(t, file.Close())
 
 			if tc.expectedContent != nil {
+				// To verify content, we must resolve the path since we might have written through a symlink
+				// and ReadFile follows symlinks too.
+				// But specifically for "Create overwrites symlink target", we might want to verify the target explicitly.
+				// ReadFile does handle symlinks, so reading tc.path should work.
+
 				content, err := wrapper.ReadFile(tc.path)
 				require.NoError(t, err)
 				require.Equal(t, *tc.expectedContent, string(content))
+
+				// If it was a symlink test, verify the target directly too if possible.
+				// The wrapper doesn't expose ReadLink easily without peeking into FS, but ReadFile is enough.
+			}
+
+			if tc.verify != nil {
+				tc.verify(t, wrapper)
 			}
 		})
 	}
@@ -191,6 +289,74 @@ func TestFSTestOSWrapper_Create_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: filepath.Join("file.txt", "another.txt"),
+		},
+		{
+			name: "Create via symlink to directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link": "dir",
+				},
+			}},
+			path:           filepath.Join("link", "file.txt"),
+			contentToWrite: []byte("content"),
+		},
+		{
+			name: "Create via symlink chain to directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link2": "dir",
+					"link1": "link2",
+				},
+			}},
+			path:           filepath.Join("link1", "file.txt"),
+			contentToWrite: []byte("chain"),
+		},
+		{
+			name: "Create overwrites symlink target",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"target.txt": "old",
+				},
+				initialSymlinks: map[string]string{
+					"link": "target.txt",
+				},
+			}},
+			path:           "link",
+			contentToWrite: []byte("new"),
+		},
+		{
+			name: "Create on symlink to non-existent file",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"link": "target.txt",
+				},
+			}},
+			path:           "link",
+			contentToWrite: []byte("hello"),
+		},
+		{
+			name: "Error if path is symlink to directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link": "dir",
+				},
+			}},
+			path: "link",
+		},
+		{
+			name: "Error if parent component is symlink to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "content",
+				},
+				initialSymlinks: map[string]string{
+					"link": "file.txt",
+				},
+			}},
+			path: filepath.Join("link", "sub.txt"),
 		},
 	}
 
