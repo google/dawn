@@ -50,7 +50,7 @@ TEST_F(MslWriterTest, DiscardWithDemoteToHelper) {
     });
 
     Options options;
-    options.disable_demote_to_helper = false;
+    options.extensions.disable_demote_to_helper = false;
 
     ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
@@ -93,7 +93,7 @@ TEST_F(MslWriterTest, DiscardWithoutDemoteToHelper) {
     });
 
     Options options;
-    options.disable_demote_to_helper = true;
+    options.extensions.disable_demote_to_helper = true;
 
     ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(

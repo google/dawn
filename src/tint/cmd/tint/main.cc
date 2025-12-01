@@ -1056,7 +1056,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
         ir, options.ep_name, !options.use_argument_buffers, !options.use_argument_buffers);
     // TODO(crbug.com/366291600): Replace ubo with immediate block for end2end tests
     gen_options.immediate_binding_point = tint::BindingPoint{.group = 0u, .binding = 30u};
-    gen_options.disable_demote_to_helper = options.disable_demote_to_helper;
+    gen_options.extensions.disable_demote_to_helper = options.disable_demote_to_helper;
     gen_options.use_argument_buffers = options.use_argument_buffers;
     gen_options.group_to_argument_buffer_info = options.group_to_argument_buffer_info;
     gen_options.array_length_from_constants = GenerateArrayLengthFromConstants(ir, options.ep_name);

@@ -151,7 +151,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     {
         core::ir::transform::BuiltinPolyfillConfig core_polyfills{};
         core_polyfills.clamp_int = true;
-        core_polyfills.clamp_float = options.polyfill_clamp_float;
+        core_polyfills.clamp_float = options.workarounds.polyfill_clamp_float;
         core_polyfills.degrees = true;
         core_polyfills.dot_4x8_packed = true;
         core_polyfills.extract_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
@@ -164,7 +164,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.radians = true;
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         core_polyfills.abs_signed_int = true;
-        core_polyfills.subgroup_broadcast_f16 = options.polyfill_subgroup_broadcast_f16;
+        core_polyfills.subgroup_broadcast_f16 = options.workarounds.polyfill_subgroup_broadcast_f16;
         RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
     }
 
@@ -210,7 +210,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::RemoveContinueInSwitch, module);
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
-    if (!options.disable_demote_to_helper) {
+    if (!options.extensions.disable_demote_to_helper) {
         RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
     }
 
@@ -264,8 +264,8 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
     RUN_TRANSFORM(raise::BuiltinPolyfill, module,
                   {
-                      .polyfill_unpack_2x16_snorm = options.polyfill_unpack_2x16_snorm,
-                      .polyfill_unpack_2x16_unorm = options.polyfill_unpack_2x16_unorm,
+                      .polyfill_unpack_2x16_snorm = options.workarounds.polyfill_unpack_2x16_snorm,
+                      .polyfill_unpack_2x16_unorm = options.workarounds.polyfill_unpack_2x16_unorm,
                   });
     // After 'BuiltinPolyfill' as that transform can introduce signed dot products.
     core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
@@ -273,13 +273,14 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::SignedIntegerPolyfill, module, signed_integer_cfg);
 
     core::ir::transform::BuiltinScalarizeConfig scalarize_config{
-        .scalarize_clamp = options.scalarize_max_min_clamp,
-        .scalarize_max = options.scalarize_max_min_clamp,
-        .scalarize_min = options.scalarize_max_min_clamp,
+        .scalarize_clamp = options.workarounds.scalarize_max_min_clamp,
+        .scalarize_max = options.workarounds.scalarize_max_min_clamp,
+        .scalarize_min = options.workarounds.scalarize_max_min_clamp,
     };
     RUN_TRANSFORM(core::ir::transform::BuiltinScalarize, module, scalarize_config);
 
-    raise::ModuleConstantConfig module_const_config{options.disable_module_constant_f16};
+    raise::ModuleConstantConfig module_const_config{
+        options.workarounds.disable_module_constant_f16};
     RUN_TRANSFORM(raise::ModuleConstant, module, module_const_config);
 
     // These transforms need to be run last as various transforms introduce terminator arguments,

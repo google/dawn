@@ -78,6 +78,47 @@ struct ArgumentBufferInfo {
 
 /// Configuration options used for generating MSL.
 struct Options {
+    /// The set of options which control workarounds for driver issues.
+    struct Workarounds {
+        /// Set to `true` to scalarize max min and clamp builtins.
+        bool scalarize_max_min_clamp = false;
+
+        /// Set to `true` to disable the module constant transform for f16
+        bool disable_module_constant_f16 = false;
+
+        /// Set to `true` to generate polyfill for `subgroupBroadcast(f16)`
+        bool polyfill_subgroup_broadcast_f16 = false;
+
+        /// Set to `true` to generate polyfill for `clamp(f16/f32)`
+        bool polyfill_clamp_float = false;
+
+        /// Set to `true` to polyfill `unpack2x16snorm()`.
+        bool polyfill_unpack_2x16_snorm = false;
+
+        /// Set to `true` to polyfill `unpack2x16unorm()`.
+        bool polyfill_unpack_2x16_unorm = false;
+
+        TINT_REFLECT(Workarounds,
+                     scalarize_max_min_clamp,
+                     disable_module_constant_f16,
+                     polyfill_subgroup_broadcast_f16,
+                     polyfill_clamp_float,
+                     polyfill_unpack_2x16_snorm,
+                     polyfill_unpack_2x16_unorm);
+        TINT_REFLECT_EQUALS(Workarounds);
+        TINT_REFLECT_HASH_CODE(Workarounds);
+    };
+
+    /// Any options which are controlled by the current Metal version.
+    struct Extensions {
+        /// Set to `true` to disable demote to helper transform
+        bool disable_demote_to_helper = false;
+
+        TINT_REFLECT(Extensions, disable_demote_to_helper);
+        TINT_REFLECT_EQUALS(Extensions);
+        TINT_REFLECT_HASH_CODE(Extensions);
+    };
+
     /// Constructor
     Options();
     /// Destructor
@@ -106,9 +147,6 @@ struct Options {
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
 
-    /// Set to `true` to disable demote to helper transform
-    bool disable_demote_to_helper = false;
-
     /// Set to `true` to generate a [[point_size]] attribute which is set to 1.0
     /// for all vertex shaders in the module.
     bool emit_vertex_point_size = false;
@@ -116,26 +154,14 @@ struct Options {
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
 
-    /// Set to `true` to polyfill `unpack2x16snorm()`.
-    bool polyfill_unpack_2x16_snorm = false;
-
-    /// Set to `true` to polyfill `unpack2x16unorm()`.
-    bool polyfill_unpack_2x16_unorm = false;
-
-    /// Set to `true` to scalarize max min and clamp builtins.
-    bool scalarize_max_min_clamp = false;
-
-    /// Set to `true` to disable the module constant transform for f16
-    bool disable_module_constant_f16 = false;
-
-    /// Set to `true` to generate polyfill for `subgroupBroadcast(f16)`
-    bool polyfill_subgroup_broadcast_f16 = false;
-
-    /// Set to `true` to generate polyfill for `clamp(f16/f32)`
-    bool polyfill_clamp_float = false;
-
     /// Emit argument buffers
     bool use_argument_buffers = false;
+
+    /// Any workarounds to enable/disable.
+    Workarounds workarounds{};
+
+    /// Any used extensions
+    Extensions extensions{};
 
     /// The index to use when generating a UBO to receive storage buffer sizes.
     /// Defaults to 30, which is the last valid buffer slot.
@@ -175,16 +201,11 @@ struct Options {
                  disable_robustness,
                  enable_integer_range_analysis,
                  disable_workgroup_init,
-                 disable_demote_to_helper,
                  emit_vertex_point_size,
                  disable_polyfill_integer_div_mod,
-                 polyfill_unpack_2x16_snorm,
-                 polyfill_unpack_2x16_unorm,
-                 scalarize_max_min_clamp,
-                 disable_module_constant_f16,
-                 polyfill_subgroup_broadcast_f16,
-                 polyfill_clamp_float,
                  use_argument_buffers,
+                 workarounds,
+                 extensions,
                  buffer_size_ubo_index,
                  fixed_sample_mask,
                  pixel_local_attachments,
