@@ -141,6 +141,63 @@ func TestFSTestOSWrapper_ReadDir(t *testing.T) {
 				wantErrIs: syscall.ELOOP,
 			},
 		},
+		{
+			name: "ReadDir symlink chain",
+			path: filepath.Join(root, "link1"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "dir", "file.txt"): "",
+				},
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link1"): "link2",
+					filepath.Join(root, "link2"): "dir",
+				},
+			},
+			expectedEntries: []string{"file.txt"},
+		},
+		{
+			name: "ReadDir absolute symlink",
+			path: filepath.Join(root, "abs_link"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "dir", "file.txt"): "",
+				},
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "abs_link"): filepath.Join(root, "dir"),
+				},
+			},
+			expectedEntries: []string{"file.txt"},
+		},
+		{
+			name: "ReadDir symlink to parent",
+			path: filepath.Join(root, "subdir", "link"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "dir", "file.txt"): "",
+				},
+				initialDirs: []string{filepath.Join(root, "subdir"), filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "subdir", "link"): "../dir",
+				},
+			},
+			expectedEntries: []string{"file.txt"},
+		},
+		{
+			name: "ReadDir through symlink path component",
+			path: filepath.Join(root, "link_dir", "subdir"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "dir", "subdir", "file.txt"): "",
+				},
+				initialDirs: []string{filepath.Join(root, "dir", "subdir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_dir"): "dir",
+				},
+			},
+			expectedEntries: []string{"file.txt"},
+		},
 	}
 
 	for _, tc := range tests {
@@ -240,6 +297,46 @@ func TestFSTestOSWrapper_ReadDir_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: "loop1",
+		},
+		{
+			name: "ReadDir symlink chain",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join("dir", "file.txt"): "content",
+				},
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link1": "link2",
+					"link2": "dir",
+				},
+			}},
+			path: "link1",
+		},
+		{
+			name: "ReadDir symlink to parent",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join("dir", "file.txt"): "content",
+				},
+				initialDirs: []string{"subdir", "dir"},
+				initialSymlinks: map[string]string{
+					"subdir/link": "../dir",
+				},
+			}},
+			path: "subdir/link",
+		},
+		{
+			name: "ReadDir through symlink path component",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join("dir", "subdir", "file.txt"): "content",
+				},
+				initialDirs: []string{filepath.Join("dir", "subdir")},
+				initialSymlinks: map[string]string{
+					"link_dir": "dir",
+				},
+			}},
+			path: "link_dir/subdir",
 		},
 	}
 
