@@ -194,6 +194,81 @@ func (w FSTestFilesystemReaderWriter) fs() fs.FS {
 	return fstest.MapFS(w.FS)
 }
 
+// resolvePath resolves symlinks in the given path.
+// It assumes pathStr is a cleaned path (as returned by CleanPath).
+func (w FSTestFilesystemReaderWriter) resolvePath(pathStr string) (string, error) {
+	const maxSymlinks = 255
+	linksWalked := 0
+
+	parts := strings.Split(pathStr, "/")
+	resolvedPath := "."
+
+	for i := 0; i < len(parts); i++ {
+		part := parts[i]
+
+		// CleanPath guarantees that the initial pathStr doesn't contain ".." components,
+		// but symlink resolution can introduce them.
+		if part == ".." {
+			if resolvedPath != "." {
+				resolvedPath = path.Dir(resolvedPath)
+			}
+			continue
+		}
+
+		currentPath := ""
+		if resolvedPath == "." {
+			currentPath = part
+		} else {
+			currentPath = resolvedPath + "/" + part
+		}
+
+		entry, exists := w.FS[currentPath]
+		if exists && entry.Mode&fs.ModeSymlink != 0 {
+			linksWalked++
+			if linksWalked > maxSymlinks {
+				return "", &os.PathError{Op: "resolve", Path: pathStr, Err: syscall.ELOOP}
+			}
+
+			target := string(entry.Data)
+
+			// Clean the target to handle OS specific separators and redundancies.
+			cleanedTarget := w.CleanPath(target)
+
+			// Check for absolute path.
+			// Note: w.CleanPath removes the leading separator, so we check the raw target.
+			isAbs := filepath.IsAbs(target) || strings.HasPrefix(target, "/")
+
+			targetParts := strings.Split(cleanedTarget, "/")
+			if cleanedTarget == "." {
+				targetParts = []string{}
+			}
+
+			if isAbs {
+				resolvedPath = "."
+				remaining := parts[i+1:]
+				// Create new slice to be safe
+				parts = make([]string, 0, len(targetParts)+len(remaining))
+				parts = append(parts, targetParts...)
+				parts = append(parts, remaining...)
+				i = -1
+			} else {
+				remaining := parts[i+1:]
+				head := parts[:i]
+				newParts := make([]string, 0, len(head)+len(targetParts)+len(remaining))
+				newParts = append(newParts, head...)
+				newParts = append(newParts, targetParts...)
+				newParts = append(newParts, remaining...)
+				parts = newParts
+				i--
+			}
+			continue
+		}
+
+		resolvedPath = currentPath
+	}
+	return resolvedPath, nil
+}
+
 // mapFileInfo wraps a fstest.MapFile to implement the os.FileInfo interface.
 // It holds a pointer to the MapFile and the file's full path to derive its base name.
 type mapFileInfo struct {
