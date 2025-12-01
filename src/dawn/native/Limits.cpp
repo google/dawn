@@ -121,6 +121,11 @@
 #define LIMITS_DYNAMIC_BINDING_ARRAY(X) \
   X(dynamicBindingArrayLimits, Maximum, maxDynamicBindingArraySize,       0,    50'000)
 
+// Limits for the resource table.
+//                                                                   compat     tier0
+#define LIMITS_RESOURCE_TABLE(X) \
+  X(resourceTableLimits, Maximum, maxResourceTableSize,                   0,    50'000)
+
 // TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros
 // in this file expect more than one tier.
@@ -151,6 +156,7 @@
     X(LIMITS_TEXTURE_DIMENSIONS)           \
     X(LIMITS_IMMEDIATE_SIZE)               \
     X(LIMITS_DYNAMIC_BINDING_ARRAY)        \
+    X(LIMITS_RESOURCE_TABLE)               \
     X(LIMITS_OTHER)
 
 #define LIMITS(X)                          \
@@ -165,6 +171,7 @@
     LIMITS_TEXTURE_DIMENSIONS(X)           \
     LIMITS_IMMEDIATE_SIZE(X)               \
     LIMITS_DYNAMIC_BINDING_ARRAY(X)        \
+    LIMITS_RESOURCE_TABLE(X)               \
     LIMITS_OTHER(X)
 
 namespace dawn::native {
@@ -289,6 +296,10 @@ MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
         out->dynamicBindingArrayLimits = *dynamicBindingArrayLimits;
         out->dynamicBindingArrayLimits.nextInChain = nullptr;
     }
+    if (auto* resourceTableLimits = unpacked.Get<ResourceTableLimits>()) {
+        out->resourceTableLimits = *resourceTableLimits;
+        out->resourceTableLimits.nextInChain = nullptr;
+    }
 
     // TODO(crbug.com/378361783): Add validation and default values to support requiring limits for
     // DawnTexelCopyBufferRowAlignmentLimits. Test this, see old test removed here:
@@ -323,6 +334,10 @@ void UnpackLimitsIn(const Limits* chainedLimits, CombinedLimits* out) {
     if (auto* dynamicBindingArrayLimits = unpacked.Get<DynamicBindingArrayLimits>()) {
         out->dynamicBindingArrayLimits = *dynamicBindingArrayLimits;
         out->dynamicBindingArrayLimits.nextInChain = nullptr;
+    }
+    if (auto* resourceTableLimits = unpacked.Get<ResourceTableLimits>()) {
+        out->resourceTableLimits = *resourceTableLimits;
+        out->resourceTableLimits.nextInChain = nullptr;
     }
 }
 
@@ -394,7 +409,9 @@ void ApplyLimitTiers(CombinedLimits* limits) {
 }
 
 #define DAWN_INTERNAL_LIMITS_MEMBER_ASSIGNMENT(type, name) \
-    { result.name = limits.name; }
+    {                                                      \
+        result.name = limits.name;                         \
+    }
 #define DAWN_INTERNAL_LIMITS_FOREACH_MEMBER_ASSIGNMENT(MEMBERS) \
     MEMBERS(DAWN_INTERNAL_LIMITS_MEMBER_ASSIGNMENT)
 LimitsForCompilationRequest LimitsForCompilationRequest::Create(const Limits& limits) {
@@ -563,7 +580,8 @@ MaybeError FillLimits(Limits* outputLimits,
     FillExtensionLimits(unpacked.Get<DynamicBindingArrayLimits>(),
                         &CombinedLimits::dynamicBindingArrayLimits,
                         wgpu::FeatureName::ChromiumExperimentalBindless);
-
+    FillExtensionLimits(unpacked.Get<ResourceTableLimits>(), &CombinedLimits::resourceTableLimits,
+                        wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
     return {};
 }
 

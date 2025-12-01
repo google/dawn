@@ -1891,6 +1891,15 @@
             {"name": "rotation", "type": "external texture rotation", "default": "rotate 0 degrees"}
         ]
     },
+    "resource table limits": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["limits"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "max resource table size", "type": "uint32_t", "default": "limit u32 undefined"}
+        ]
+    },
     "status": {
         "category": "enum",
         "values": [
@@ -4014,8 +4023,8 @@
             {"value": 79, "name": "adapter properties WGPU", "tags": ["dawn"]},
             {"value": 80, "name": "shared buffer memory D3D12 shared memory file mapping handle descriptor", "tags": ["dawn", "native"]},
             {"value": 81, "name": "shared texture memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
-            {"value": 82, "name": "request adapter options angle virtualization group", "tags": ["dawn", "native"]}
-
+            {"value": 82, "name": "request adapter options angle virtualization group", "tags": ["dawn", "native"]},
+            {"value": 83, "name": "resource table limits", "tags": ["dawn"]}
         ]
     },
     "texture": {

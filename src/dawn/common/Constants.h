@@ -118,6 +118,10 @@ static constexpr uint32_t kMaxDynamicBindingArraySize = 50'000;
 // reserve for placeholders.
 static constexpr uint32_t kReservedDynamicBindingArrayEntries = 1000;
 
+// Default limit for the ResourceTable size.
+// TODO(https://issues.chromium.org/issues/435317394): Update once the spec decides on a value.
+static constexpr uint32_t kMaxResourceTableSize = 50'000;
+
 }  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_CONSTANTS_H_
