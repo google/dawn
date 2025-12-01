@@ -495,6 +495,13 @@ MaybeError ProcessRenderCommand(const Replay& replay,
                              data.firstInstance);
             break;
         }
+        case schema::CommandBufferCommand::DrawIndirect: {
+            schema::CommandBufferCommandDrawIndirectCmdData data;
+            DAWN_TRY(Deserialize(readHead, &data));
+            pass.DrawIndirect(replay.GetObjectById<wgpu::Buffer>(data.indirectBufferId),
+                              data.indirectOffset);
+            break;
+        }
         case schema::CommandBufferCommand::PushDebugGroup:
         case schema::CommandBufferCommand::InsertDebugMarker:
         case schema::CommandBufferCommand::PopDebugGroup:

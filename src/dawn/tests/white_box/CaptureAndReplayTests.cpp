@@ -1992,6 +1992,23 @@ TEST_P(CaptureAndReplayDrawTests, CaptureDrawIndexed) {
         expected);
 }
 
+// Capture DrawIndirect
+TEST_P(CaptureAndReplayDrawTests, CaptureDrawIndirect) {
+    uint32_t indirect[] = {
+        0x11,  // vertexCount
+        0x22,  // instanceCount
+        0,     // firstVertex
+        0,     // firstInstance (must be 0 without "indirect-first-instance")
+    };
+    wgpu::Buffer indirectBuffer = CreateBuffer(
+        "indirect", sizeof(indirect), wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Indirect);
+    queue.WriteBuffer(indirectBuffer, 0, indirect, sizeof(indirect));
+
+    utils::RGBA8 expected[] = {{0x10, 0x21, 0x33, 0x44}};
+    TestDrawCommand([&](wgpu::RenderPassEncoder pass) { pass.DrawIndirect(indirectBuffer, 0); },
+                    expected);
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayDrawTests, WebGPUBackend());
 
 }  // anonymous namespace
