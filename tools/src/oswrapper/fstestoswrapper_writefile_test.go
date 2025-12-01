@@ -192,6 +192,60 @@ func TestFSTestOSWrapper_WriteFile(t *testing.T) {
 				wantErrIs: syscall.ELOOP,
 			},
 		},
+		{
+			name: "Write through symlink in path",
+			path: filepath.Join(root, "link_dir", "file.txt"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "real_dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_dir"): "real_dir",
+				},
+			},
+			content:       []byte("content"),
+			mode:          0666,
+			expectContent: stringPtr("content"),
+		},
+		{
+			name: "Write through chain of symlinks",
+			path: filepath.Join(root, "link1"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "target.txt"): "old"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link1"): "link2",
+					filepath.Join(root, "link2"): "target.txt",
+				},
+			},
+			content:       []byte("new"),
+			mode:          0666,
+			expectContent: stringPtr("new"),
+		},
+		{
+			name: "Write to symlink with relative target",
+			path: filepath.Join(root, "subdir", "link"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "subdir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "subdir", "link"): "../target.txt",
+				},
+			},
+			content:       []byte("content"),
+			mode:          0666,
+			expectContent: stringPtr("content"),
+		},
+		{
+			name: "Write through broken symlink in path",
+			path: filepath.Join(root, "link", "file.txt"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): "missing",
+				},
+			},
+			content: []byte("fail"),
+			mode:    0666,
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -313,6 +367,50 @@ func TestFSTestOSWrapper_WriteFile_MatchesReal(t *testing.T) {
 				},
 			}},
 			path:    "loop1",
+			content: []byte("fail"),
+		},
+		{
+			name: "Write through symlink in path",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"real_dir"},
+				initialSymlinks: map[string]string{
+					"link_dir": "real_dir",
+				},
+			}},
+			path:    filepath.Join("link_dir", "file.txt"),
+			content: []byte("content"),
+		},
+		{
+			name: "Write through chain of symlinks",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"target.txt": "old"},
+				initialSymlinks: map[string]string{
+					"link1": "link2",
+					"link2": "target.txt",
+				},
+			}},
+			path:    "link1",
+			content: []byte("new"),
+		},
+		{
+			name: "Write to symlink with relative target",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"subdir"},
+				initialSymlinks: map[string]string{
+					filepath.Join("subdir", "link"): "../target.txt",
+				},
+			}},
+			path:    filepath.Join("subdir", "link"),
+			content: []byte("content"),
+		},
+		{
+			name: "Write through broken symlink in path",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"link": "missing",
+				},
+			}},
+			path:    filepath.Join("link", "file.txt"),
 			content: []byte("fail"),
 		},
 	}
