@@ -622,50 +622,85 @@ func (w FSTestFilesystemReaderWriter) MkdirTemp(dir, pattern string) (string, er
 func (w FSTestFilesystemReaderWriter) Remove(name string) error {
 	p := w.CleanPath(name)
 
-	info, err := w.Stat(p)
-	if err != nil {
-		var pathErr *os.PathError
-		if errors.As(err, &pathErr) {
-			pathErr.Op = "remove"
-			pathErr.Path = name
-			return pathErr
-		}
-		return &os.PathError{Op: "remove", Path: name, Err: err}
-	}
+	parent := filepath.Dir(p)
+	base := filepath.Base(p)
 
-	if info.IsDir() {
-		entries, err := w.ReadDir(p)
+	resolvedParent := parent
+	if parent != "." {
+		var err error
+		resolvedParent, err = w.resolvePath(parent)
 		if err != nil {
 			return &os.PathError{Op: "remove", Path: name, Err: err}
 		}
-		if len(entries) > 0 {
-			return &os.PathError{Op: "remove", Path: name, Err: syscall.ENOTEMPTY}
+	}
+
+	pathToRemove := base
+	if resolvedParent != "." {
+		pathToRemove = resolvedParent + "/" + base
+	}
+
+	entry, exists := w.FS[pathToRemove]
+	if !exists {
+		return &os.PathError{Op: "remove", Path: name, Err: os.ErrNotExist}
+	}
+
+	if entry.Mode.IsDir() {
+		prefix := pathToRemove + "/"
+		for k := range w.FS {
+			if strings.HasPrefix(k, prefix) {
+				return &os.PathError{Op: "remove", Path: name, Err: syscall.ENOTEMPTY}
+			}
 		}
 	}
-	delete(w.FS, p)
+	delete(w.FS, pathToRemove)
 	return nil
 }
 
 func (w FSTestFilesystemReaderWriter) RemoveAll(path string) error {
 	p := w.CleanPath(path)
 
-	// Check if the path or any of its parents are invalid.
-	// os.RemoveAll returns nil if the path doesn't exist, but errors if a
-	// parent path component is a file.
-	dir := filepath.Dir(p)
-	for dir != "." && dir != "" {
-		info, exists := w.FS[dir]
-		if exists && !info.Mode.IsDir() {
+	parent := filepath.Dir(p)
+	base := filepath.Base(p)
+
+	resolvedParent := parent
+	if parent != "." {
+		var err error
+		resolvedParent, err = w.resolvePath(parent)
+		if err != nil {
+			// If the path does not exist, RemoveAll returns nil.
+			if os.IsNotExist(err) {
+				return nil
+			}
+			return &os.PathError{Op: "removeall", Path: path, Err: err}
+		}
+		// If the resolved parent exists but is not a directory, we should return an error.
+		// However, resolvePath resolves symlinks, so if it returns successfully,
+		// the resolved path exists. We need to check if it's a directory.
+		if info, exists := w.FS[resolvedParent]; exists && !info.Mode.IsDir() {
 			return &os.PathError{Op: "removeall", Path: path, Err: fmt.Errorf("not a directory")}
 		}
-		dir = filepath.Dir(dir)
 	}
 
-	prefix := p + "/"
-	for key := range w.FS {
-		if key == p || strings.HasPrefix(key, prefix) {
-			delete(w.FS, key)
+	pathToRemove := base
+	if resolvedParent != "." {
+		pathToRemove = resolvedParent + "/" + base
+	}
+
+	entry, exists := w.FS[pathToRemove]
+	if !exists {
+		return nil
+	}
+
+	if entry.Mode.IsDir() {
+		prefix := pathToRemove + "/"
+		for key := range w.FS {
+			if key == pathToRemove || strings.HasPrefix(key, prefix) {
+				delete(w.FS, key)
+			}
 		}
+	} else {
+		// It's a file or symlink.
+		delete(w.FS, pathToRemove)
 	}
 	return nil
 }

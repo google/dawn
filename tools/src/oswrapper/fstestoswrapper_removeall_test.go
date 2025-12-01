@@ -123,6 +123,48 @@ func TestFSTestOSWrapper_RemoveAll(t *testing.T) {
 				wantErrMsg: "not a directory",
 			},
 		},
+		{
+			name: "Remove symlink to file",
+			path: filepath.Join(root, "link_to_file"),
+			setup: unittestSetup{
+				initialFiles:    map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialSymlinks: map[string]string{filepath.Join(root, "link_to_file"): filepath.Join(root, "file.txt")},
+			},
+			expectMissing: []string{filepath.Join(root, "link_to_file")},
+			expectPresent: []string{filepath.Join(root, "file.txt")},
+		},
+		{
+			name: "Remove symlink to directory",
+			path: filepath.Join(root, "link_to_dir"),
+			setup: unittestSetup{
+				initialFiles:    map[string]string{filepath.Join(root, "dir", "file.txt"): "content"},
+				initialDirs:     []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{filepath.Join(root, "link_to_dir"): filepath.Join(root, "dir")},
+			},
+			expectMissing: []string{filepath.Join(root, "link_to_dir")},
+			expectPresent: []string{
+				filepath.Join(root, "dir"),
+				filepath.Join(root, "dir", "file.txt"),
+			},
+		},
+		{
+			name: "Remove contents inside symlinked directory",
+			path: filepath.Join(root, "link_to_dir", "subdir"),
+			setup: unittestSetup{
+				initialFiles:    map[string]string{filepath.Join(root, "dir", "subdir", "file.txt"): "content"},
+				initialDirs:     []string{filepath.Join(root, "dir", "subdir")},
+				initialSymlinks: map[string]string{filepath.Join(root, "link_to_dir"): filepath.Join(root, "dir")},
+			},
+			expectMissing: []string{
+				filepath.Join(root, "link_to_dir", "subdir"),
+				filepath.Join(root, "dir", "subdir"),
+				filepath.Join(root, "dir", "subdir", "file.txt"),
+			},
+			expectPresent: []string{
+				filepath.Join(root, "dir"),
+				filepath.Join(root, "link_to_dir"),
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -203,6 +245,32 @@ func TestFSTestOSWrapper_RemoveAll_MatchesReal(t *testing.T) {
 				},
 			}},
 			pathToRemove: filepath.Join("a", "b"),
+		},
+		{
+			name: "Remove symlink to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles:    map[string]string{"file.txt": "content"},
+				initialSymlinks: map[string]string{"link_to_file": "file.txt"},
+			}},
+			pathToRemove: "link_to_file",
+		},
+		{
+			name: "Remove symlink to directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles:    map[string]string{filepath.Join("dir", "file.txt"): "content"},
+				initialDirs:     []string{"dir"},
+				initialSymlinks: map[string]string{"link_to_dir": "dir"},
+			}},
+			pathToRemove: "link_to_dir",
+		},
+		{
+			name: "Remove contents inside symlinked directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles:    map[string]string{filepath.Join("dir", "subdir", "file.txt"): "content"},
+				initialDirs:     []string{filepath.Join("dir", "subdir")},
+				initialSymlinks: map[string]string{"link_to_dir": "dir"},
+			}},
+			pathToRemove: filepath.Join("link_to_dir", "subdir"),
 		},
 	}
 
