@@ -152,6 +152,53 @@ func TestFSTestOSWrapper_Stat(t *testing.T) {
 				wantErrIs: syscall.ELOOP,
 			},
 		},
+		{
+			name: "Stat absolute symlink",
+			path: filepath.Join(root, "abs_link"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "abs_link"): filepath.Join(root, "file.txt"),
+				},
+			},
+			verify: func(t *testing.T, info os.FileInfo) {
+				require.False(t, info.IsDir())
+				require.Equal(t, "abs_link", info.Name())
+				require.Equal(t, int64(7), info.Size())
+			},
+		},
+		{
+			name: "Stat symlink to parent",
+			path: filepath.Join(root, "subdir", "link"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialDirs:  []string{filepath.Join(root, "subdir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "subdir", "link"): "../file.txt",
+				},
+			},
+			verify: func(t *testing.T, info os.FileInfo) {
+				require.False(t, info.IsDir())
+				require.Equal(t, "link", info.Name())
+				require.Equal(t, int64(7), info.Size())
+			},
+		},
+		{
+			name: "Stat through symlink path component",
+			path: filepath.Join(root, "link_dir", "file.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "subdir", "file.txt"): "content"},
+				initialDirs:  []string{filepath.Join(root, "subdir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_dir"): "subdir",
+				},
+			},
+			verify: func(t *testing.T, info os.FileInfo) {
+				require.False(t, info.IsDir())
+				require.Equal(t, "file.txt", info.Name())
+				require.Equal(t, int64(7), info.Size())
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -240,6 +287,39 @@ func TestFSTestOSWrapper_Stat_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: "loop1",
+		},
+		{
+			name: "Stat symlink chain",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+				initialSymlinks: map[string]string{
+					"link1": "link2",
+					"link2": "file.txt",
+				},
+			}},
+			path: "link1",
+		},
+		{
+			name: "Stat symlink to parent",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+				initialDirs:  []string{"subdir"},
+				initialSymlinks: map[string]string{
+					"subdir/link": "../file.txt",
+				},
+			}},
+			path: "subdir/link",
+		},
+		{
+			name: "Stat through symlink path component",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"subdir/file.txt": "content"},
+				initialDirs:  []string{"subdir"},
+				initialSymlinks: map[string]string{
+					"link_dir": "subdir",
+				},
+			}},
+			path: "link_dir/file.txt",
 		},
 	}
 
