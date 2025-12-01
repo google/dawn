@@ -31,6 +31,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -126,6 +127,33 @@ func TestFSTestOSWrapper_MkdirTemp(t *testing.T) {
 				wantErrIs: os.ErrNotExist,
 			},
 		},
+		{
+			name:    "Base dir is a symlink loop",
+			dir:     filepath.Join(root, "loop1"),
+			pattern: "test-",
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): filepath.Join(root, "loop2"),
+					filepath.Join(root, "loop2"): filepath.Join(root, "loop1"),
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
+			},
+		},
+		{
+			name:    "Base dir is a chain of symlinks",
+			dir:     filepath.Join(root, "link1"),
+			pattern: "test-",
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "target")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link1"): filepath.Join(root, "link2"),
+					filepath.Join(root, "link2"): filepath.Join(root, "target"),
+				},
+			},
+			expectedPrefix: "test-",
+		},
 	}
 
 	for _, tc := range tests {
@@ -218,6 +246,29 @@ func TestFSTestOSWrapper_MkdirTemp_MatchesReal(t *testing.T) {
 				initialSymlinks: map[string]string{"broken_link": "nonexistent"},
 			}},
 			dir:     "broken_link",
+			pattern: "test-",
+		},
+		{
+			name: "Base dir is a symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			dir:     "loop1",
+			pattern: "test-",
+		},
+		{
+			name: "Base dir is a chain of symlinks",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"target"},
+				initialSymlinks: map[string]string{
+					"link1": "link2",
+					"link2": "target",
+				},
+			}},
+			dir:     "link1",
 			pattern: "test-",
 		},
 	}
