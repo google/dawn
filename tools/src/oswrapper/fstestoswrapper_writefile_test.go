@@ -295,6 +295,10 @@ func TestFSTestOSWrapper_WriteFile_MatchesReal(t *testing.T) {
 			path:    "existing.txt",
 			content: []byte("overwritten"),
 		},
+		// TODO(crbug.com/436025865): Add a test to check the file permissions on
+		// overwritten files. This is not currently feasible since file permissions
+		// will differ from the real filesystem due to the mock filesystem not
+		// supporting umask.
 		{
 			name: "Create file in existing subdirectory",
 			setup: matchesRealSetup{unittestSetup{

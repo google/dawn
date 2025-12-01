@@ -117,6 +117,19 @@ func TestFSTestOSWrapper_ReadDir(t *testing.T) {
 			},
 		},
 		{
+			name: "Read through symlink to non-existent item",
+			path: filepath.Join(root, "link_to_dir", "nonexistent"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_dir"): filepath.Join(root, "dir"),
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
 			name: "Read broken symlink",
 			path: filepath.Join(root, "broken_link"),
 			setup: unittestSetup{
@@ -278,6 +291,16 @@ func TestFSTestOSWrapper_ReadDir_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: "link_to_file",
+		},
+		{
+			name: "Read through symlink to non-existent item",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link_to_dir": "dir",
+				},
+			}},
+			path: filepath.Join("link_to_dir", "nonexistent"),
 		},
 		{
 			name: "Read broken symlink",

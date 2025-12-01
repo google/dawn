@@ -235,7 +235,7 @@ func (w FSTestFilesystemReaderWriter) resolvePath(pathStr string) (string, error
 			cleanedTarget := w.CleanPath(target)
 
 			// Check for absolute path.
-			// Note: w.CleanPath removes the leading separator, so we check the raw target.
+			// Note: w.CleanPath removes the leading separator, so check the raw target.
 			isAbs := filepath.IsAbs(target) || strings.HasPrefix(target, "/")
 
 			targetParts := strings.Split(cleanedTarget, "/")
@@ -328,7 +328,7 @@ func (w FSTestFilesystemReaderWriter) OpenFile(name string, flag int, perm os.Fi
 	path := w.CleanPath(name)
 
 	// If O_EXCL is set and the path exists (even as a symlink), fail.
-	// We check the original path in the map directly.
+	// Check the original path in the map directly.
 	if _, exists := w.FS[path]; exists {
 		if flag&os.O_CREATE != 0 && flag&os.O_EXCL != 0 {
 			return nil, &os.PathError{Op: "open", Path: name, Err: os.ErrExist}
@@ -341,7 +341,7 @@ func (w FSTestFilesystemReaderWriter) OpenFile(name string, flag int, perm os.Fi
 	resolvedPath, err := w.resolvePath(path)
 	if err != nil {
 		// If resolvePath fails, it might be because of a loop or other error.
-		// However, if we are creating a file, we might be okay if the final component doesn't exist.
+		// However, if creating a file, it might be okay if the final component doesn't exist.
 		// But resolvePath returns the path including the non-existent final component if parents resolve.
 		// So real errors from resolvePath (like ELOOP) should be propagated.
 		return nil, &os.PathError{Op: "open", Path: name, Err: err}
@@ -392,7 +392,7 @@ func (w FSTestFilesystemReaderWriter) OpenFile(name string, flag int, perm os.Fi
 	}
 
 	// Create an os.FileInfo compatible wrapper for the fstest.MapFile.
-	// We use the original name for the wrapper so that info.Name() matches what the user expects.
+	// Use the original name for the wrapper so that info.Name() matches what the user expects.
 	info := &renamedFileInfo{FileInfo: &mapFileInfo{path: resolvedPath, file: mapFile}, name: filepath.Base(name)}
 	handle := &fstestFileHandle{
 		path:         resolvedPath,
@@ -488,7 +488,7 @@ func (w FSTestFilesystemReaderWriter) Walk(root string, fn filepath.WalkFunc) er
 	p := w.CleanPath(root)
 
 	// Resolve the parent of the root to handle symlinks in the path leading to the root.
-	// We do not resolve the root itself, because Walk should not follow the root if it is a symlink.
+	// Do not resolve the root itself, because Walk should not follow the root if it is a symlink.
 	parent := path.Dir(p)
 	base := path.Base(p)
 
@@ -504,7 +504,7 @@ func (w FSTestFilesystemReaderWriter) Walk(root string, fn filepath.WalkFunc) er
 	}
 
 	walkDirFn := func(pathStr string, d fs.DirEntry, err error) error {
-		// fsRoot is where we started walking in the internal FS.
+		// fsRoot is where the walk started in the internal FS.
 		// pathStr is the current path in the internal FS.
 
 		rel, errRel := filepath.Rel(fsRoot, pathStr)
@@ -687,9 +687,9 @@ func (w FSTestFilesystemReaderWriter) RemoveAll(path string) error {
 			}
 			return &os.PathError{Op: "removeall", Path: path, Err: err}
 		}
-		// If the resolved parent exists but is not a directory, we should return an error.
+		// If the resolved parent exists but is not a directory, this should return an error.
 		// However, resolvePath resolves symlinks, so if it returns successfully,
-		// the resolved path exists. We need to check if it's a directory.
+		// the resolved path exists. Thus, a directory check is required.
 		if info, exists := w.FS[resolvedParent]; exists && !info.Mode.IsDir() {
 			return &os.PathError{Op: "removeall", Path: path, Err: fmt.Errorf("not a directory")}
 		}
@@ -754,9 +754,9 @@ func (w FSTestFilesystemReaderWriter) Symlink(oldname, newname string) error {
 	}
 
 	// For symlinks, the Data field holds the target path.
-	// We do NOT clean oldname (the target), as it might be a relative path intended
+	// Do NOT clean oldname (the target), as it might be a relative path intended
 	// to be resolved relative to the link's location, or an absolute path.
-	// We store it exactly as provided.
+	// Store it exactly as provided.
 	w.FS[targetPath] = &fstest.MapFile{
 		Data:    []byte(oldname),
 		Mode:    fs.ModeSymlink | 0777,
@@ -777,7 +777,7 @@ func (w FSTestFilesystemReaderWriter) WriteFile(name string, data []byte, perm o
 		if info.Mode.IsDir() {
 			return &os.PathError{Op: "open", Path: name, Err: fmt.Errorf("is a directory")}
 		}
-		// If the file exists, we preserve the mode.
+		// If the file exists, preserve the mode.
 		perm = info.Mode
 	} else {
 		dir := filepath.Dir(resolvedPath)

@@ -199,6 +199,8 @@ func requireFileSystemsMatch(t *testing.T, realRoot string, testFS oswrapper.FST
 		// However, fstest.MapFS might normalize modes.
 		require.Equal(t, realFile.Mode.IsDir(), testFile.Mode.IsDir(), "IsDir mismatch for '%s'", key)
 		require.Equal(t, realFile.Mode&os.ModeSymlink, testFile.Mode&os.ModeSymlink, "IsSymlink mismatch for '%s'", key)
+		// TODO(crbug.com/436025865): Add a check that the permissions match once
+		// the mock filesystem supports umasks.
 
 		if !realFile.Mode.IsDir() {
 			require.Equal(t, realFile.Data, testFile.Data, "Content/Target mismatch for '%s'", key)
