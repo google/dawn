@@ -539,8 +539,34 @@ func (w FSTestFilesystemReaderWriter) RemoveAll(path string) error {
 	return nil
 }
 
-func (w FSTestFilesystemReaderWriter) Symlink(_, _ string) error {
-	panic("Symlink() is not currently implemented in fstest wrapper")
+func (w FSTestFilesystemReaderWriter) Symlink(oldname, newname string) error {
+	p := w.CleanPath(newname)
+
+	if _, exists := w.FS[p]; exists {
+		return &os.PathError{Op: "symlink", Path: newname, Err: os.ErrExist}
+	}
+
+	parent := filepath.Dir(p)
+	if parent != "." && parent != "" {
+		parentInfo, parentExists := w.FS[parent]
+		if !parentExists {
+			return &os.PathError{Op: "symlink", Path: newname, Err: os.ErrNotExist}
+		}
+		if !parentInfo.Mode.IsDir() {
+			return &os.PathError{Op: "symlink", Path: newname, Err: fmt.Errorf("not a directory")}
+		}
+	}
+
+	// For symlinks, the Data field holds the target path.
+	// We do NOT clean oldname (the target), as it might be a relative path intended
+	// to be resolved relative to the link's location, or an absolute path.
+	// We store it exactly as provided.
+	w.FS[p] = &fstest.MapFile{
+		Data:    []byte(oldname),
+		Mode:    fs.ModeSymlink | 0777,
+		ModTime: time.Now(),
+	}
+	return nil
 }
 
 func (w FSTestFilesystemReaderWriter) WriteFile(name string, data []byte, perm os.FileMode) error {
