@@ -134,8 +134,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.disable_workgroup_init =
         device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.hlsl.tintOptions.bindings = std::move(bindings);
-    req.hlsl.tintOptions.scalarize_max_min_clamp =
-        device->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
 
     req.hlsl.tintOptions.immediate_binding_point =
         tint::BindingPoint{0, PipelineLayout::kReservedConstantBufferSlot};
@@ -166,12 +164,14 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     // D3D11 only supports FXC
     req.hlsl.tintOptions.compiler = tint::hlsl::writer::Options::Compiler::kFXC;
 
+    req.hlsl.tintOptions.workarounds.scalarize_max_min_clamp =
+        device->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
     // TODO(dawn:1705): do we need to support it?
-    req.hlsl.tintOptions.polyfill_reflect_vec2_f32 = false;
+    req.hlsl.tintOptions.workarounds.polyfill_reflect_vec2_f32 = false;
 
     // D3D11 doesn't support shader model 6+ features
-    req.hlsl.tintOptions.polyfill_dot_4x8_packed = true;
-    req.hlsl.tintOptions.polyfill_pack_unpack_4x8 = true;
+    req.hlsl.tintOptions.extensions.polyfill_dot_4x8_packed = true;
+    req.hlsl.tintOptions.extensions.polyfill_pack_unpack_4x8 = true;
 
     CacheResult<d3d::CompiledShader> compiledShader;
     DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req),

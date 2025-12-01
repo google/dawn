@@ -93,10 +93,10 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.disable_robustness = fuzzed_options.disable_robustness;
     options.enable_integer_range_analysis = fuzzed_options.enable_integer_range_analysis;
     options.disable_workgroup_init = fuzzed_options.disable_workgroup_init;
-    options.polyfill_reflect_vec2_f32 = fuzzed_options.polyfill_reflect_vec2_f32;
-    options.polyfill_dot_4x8_packed = fuzzed_options.polyfill_dot_4x8_packed;
+    options.workarounds.polyfill_reflect_vec2_f32 = fuzzed_options.polyfill_reflect_vec2_f32;
+    options.extensions.polyfill_dot_4x8_packed = fuzzed_options.polyfill_dot_4x8_packed;
     options.disable_polyfill_integer_div_mod = fuzzed_options.disable_polyfill_integer_div_mod;
-    options.polyfill_pack_unpack_4x8 = fuzzed_options.polyfill_pack_unpack_4x8;
+    options.extensions.polyfill_pack_unpack_4x8 = fuzzed_options.polyfill_pack_unpack_4x8;
     options.compiler =
         fuzzed_options.compiler_is_dxc ? Options::Compiler::kDXC : Options::Compiler::kFXC;
 

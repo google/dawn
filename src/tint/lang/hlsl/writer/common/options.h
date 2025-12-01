@@ -59,13 +59,12 @@ struct ArrayLengthFromUniformOptions {
     /// into the uniform buffer where the length of the buffer is stored.
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
 
-    bool operator==(const ArrayLengthFromUniformOptions& other) const = default;
-
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ArrayLengthFromUniformOptions,
                  ubo_binding,
                  buffer_sizes_offset,
                  bindpoint_to_size_index);
+    TINT_REFLECT_EQUALS(ArrayLengthFromUniformOptions);
 };
 
 /// Options used to specify a mapping of binding points to indices into a UBO
@@ -81,13 +80,12 @@ struct ArrayOffsetFromUniformOptions {
     /// into the uniform buffer where the offset into the buffer is stored.
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_offset_index;
 
-    bool operator==(const ArrayOffsetFromUniformOptions& other) const = default;
-
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ArrayOffsetFromUniformOptions,
                  ubo_binding,
                  buffer_offsets_offset,
                  bindpoint_to_offset_index);
+    TINT_REFLECT_EQUALS(ArrayOffsetFromUniformOptions);
 };
 
 /// Data for a single pixel local attachment
@@ -108,6 +106,7 @@ struct PixelLocalAttachment {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(PixelLocalAttachment, index, format);
+    TINT_REFLECT_EQUALS(PixelLocalAttachment);
 };
 
 /// Data used to specify pixel local mappings
@@ -118,10 +117,9 @@ struct PixelLocalOptions {
     /// The bind group index of all pixel local storage attachments
     uint32_t group_index = 0;
 
-    bool operator==(const PixelLocalOptions& other) const = default;
-
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(PixelLocalOptions, attachments, group_index);
+    TINT_REFLECT_EQUALS(PixelLocalOptions);
 };
 
 /// Configuration options used for generating HLSL.
@@ -130,6 +128,37 @@ struct Options {
     enum class Compiler : uint8_t {
         kFXC,
         kDXC,
+    };
+
+    /// The set of options to work around driver issues
+    struct Workarounds {
+        /// Set to `true` to scalarize max, min, and clamp builtins.
+        bool scalarize_max_min_clamp = false;
+
+        /// Set to `true` to generate polyfill for `reflect` builtin for vec2<f32>
+        bool polyfill_reflect_vec2_f32 = false;
+
+        /// Set to `true` to generate polyfill for `subgroupBroadcast(f16)`
+        bool polyfill_subgroup_broadcast_f16 = false;
+
+        TINT_REFLECT(Workarounds,
+                     scalarize_max_min_clamp,
+                     polyfill_reflect_vec2_f32,
+                     polyfill_subgroup_broadcast_f16);
+        TINT_REFLECT_EQUALS(Workarounds);
+    };
+
+    /// The set of options for things which are only available in certain shader models
+    struct Extensions {
+        /// Set to `true` to generate polyfill for `dot4I8Packed` and `dot4U8Packed` builtins
+        bool polyfill_dot_4x8_packed = false;
+
+        /// Set to `true` to generate polyfill for `pack4xI8`, `pack4xU8`, `pack4xI8Clamp`,
+        /// `unpack4xI8` and `unpack4xU8` builtins
+        bool polyfill_pack_unpack_4x8 = false;
+
+        TINT_REFLECT(Extensions, polyfill_dot_4x8_packed, polyfill_pack_unpack_4x8);
+        TINT_REFLECT_EQUALS(Extensions);
     };
 
     /// Constructor
@@ -163,24 +192,14 @@ struct Options {
     /// Set to `true` to run the TruncateInterstageVariables transform.
     bool truncate_interstage_variables = false;
 
-    /// Set to `true` to generate polyfill for `reflect` builtin for vec2<f32>
-    bool polyfill_reflect_vec2_f32 = false;
-
-    /// Set to `true` to generate polyfill for `dot4I8Packed` and `dot4U8Packed` builtins
-    bool polyfill_dot_4x8_packed = false;
-
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
 
-    /// Set to `true` to scalarize max, min, and clamp builtins.
-    bool scalarize_max_min_clamp = false;
+    /// Any enabled workarounds
+    Workarounds workarounds{};
 
-    /// Set to `true` to generate polyfill for `pack4xI8`, `pack4xU8`, `pack4xI8Clamp`,
-    /// `unpack4xI8` and `unpack4xU8` builtins
-    bool polyfill_pack_unpack_4x8 = false;
-
-    /// Set to `true` to generate polyfill for `subgroupBroadcast(f16)`
-    bool polyfill_subgroup_broadcast_f16 = false;
+    /// Any enabled extensions
+    Extensions extensions{};
 
     /// The downstream compiler which will be used
     Compiler compiler = Compiler::kDXC;
@@ -224,8 +243,6 @@ struct Options {
     // Configuration for substitute overrides
     SubstituteOverridesConfig substitute_overrides_config = {};
 
-    bool operator==(const Options& other) const = default;
-
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  entry_point_name,
@@ -235,12 +252,9 @@ struct Options {
                  enable_integer_range_analysis,
                  disable_workgroup_init,
                  truncate_interstage_variables,
-                 polyfill_reflect_vec2_f32,
-                 polyfill_dot_4x8_packed,
                  disable_polyfill_integer_div_mod,
-                 scalarize_max_min_clamp,
-                 polyfill_pack_unpack_4x8,
-                 polyfill_subgroup_broadcast_f16,
+                 workarounds,
+                 extensions,
                  compiler,
                  array_length_from_uniform,
                  array_offset_from_uniform,
@@ -254,6 +268,7 @@ struct Options {
                  ignored_by_robustness_transform,
                  pixel_local,
                  substitute_overrides_config);
+    TINT_REFLECT_EQUALS(Options);
 };
 
 }  // namespace tint::hlsl::writer

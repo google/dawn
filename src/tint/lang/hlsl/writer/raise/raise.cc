@@ -204,7 +204,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     {
         core::ir::transform::BuiltinPolyfillConfig core_polyfills{};
         core_polyfills.clamp_int = true;
-        core_polyfills.dot_4x8_packed = options.polyfill_dot_4x8_packed;
+        core_polyfills.dot_4x8_packed = options.extensions.polyfill_dot_4x8_packed;
 
         // TODO(crbug.com/tint/1449): Some of these can map to HLSL's `firstbitlow`
         // and `firstbithigh`.
@@ -221,12 +221,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // receives an int32_t4 as its input.
         // See https://github.com/microsoft/DirectXShaderCompiler/issues/5091 for more details.
         core_polyfills.pack_4xu8_clamp = true;
-        core_polyfills.pack_unpack_4x8 = options.polyfill_pack_unpack_4x8;
+        core_polyfills.pack_unpack_4x8 = options.extensions.polyfill_pack_unpack_4x8;
         core_polyfills.radians = true;
-        core_polyfills.reflect_vec2_f32 = options.polyfill_reflect_vec2_f32;
+        core_polyfills.reflect_vec2_f32 = options.workarounds.polyfill_reflect_vec2_f32;
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         core_polyfills.abs_signed_int = true;
-        core_polyfills.subgroup_broadcast_f16 = options.polyfill_subgroup_broadcast_f16;
+        core_polyfills.subgroup_broadcast_f16 = options.workarounds.polyfill_subgroup_broadcast_f16;
         RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
     }
 
@@ -362,9 +362,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::RemoveContinueInSwitch, module);
 
     core::ir::transform::BuiltinScalarizeConfig scalarize_config{
-        .scalarize_clamp = options.scalarize_max_min_clamp,
-        .scalarize_max = options.scalarize_max_min_clamp,
-        .scalarize_min = options.scalarize_max_min_clamp};
+        .scalarize_clamp = options.workarounds.scalarize_max_min_clamp,
+        .scalarize_max = options.workarounds.scalarize_max_min_clamp,
+        .scalarize_min = options.workarounds.scalarize_max_min_clamp};
     RUN_TRANSFORM(core::ir::transform::BuiltinScalarize, module, scalarize_config);
 
     // These transforms need to be run last as various transforms introduce terminator arguments,

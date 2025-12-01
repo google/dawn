@@ -245,6 +245,11 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
     req.hlsl.tintOptions.disable_workgroup_init =
         device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
+    req.hlsl.tintOptions.disable_polyfill_integer_div_mod =
+        device->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
+    req.hlsl.tintOptions.enable_integer_range_analysis =
+        device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
+
     req.hlsl.tintOptions.bindings = std::move(bindings);
     req.hlsl.tintOptions.ignored_by_robustness_transform = std::move(ignored_by_robustness);
 
@@ -285,20 +290,17 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         req.hlsl.tintOptions.truncate_interstage_variables = true;
     }
 
-    req.hlsl.tintOptions.polyfill_reflect_vec2_f32 =
-        device->IsToggleEnabled(Toggle::D3D12PolyfillReflectVec2F32);
-    req.hlsl.tintOptions.polyfill_dot_4x8_packed =
-        device->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
-    req.hlsl.tintOptions.disable_polyfill_integer_div_mod =
-        device->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
-    req.hlsl.tintOptions.scalarize_max_min_clamp =
+    req.hlsl.tintOptions.workarounds.scalarize_max_min_clamp =
         device->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
-    req.hlsl.tintOptions.polyfill_pack_unpack_4x8 =
-        device->IsToggleEnabled(Toggle::D3D12PolyFillPackUnpack4x8);
-    req.hlsl.tintOptions.polyfill_subgroup_broadcast_f16 =
+    req.hlsl.tintOptions.workarounds.polyfill_reflect_vec2_f32 =
+        device->IsToggleEnabled(Toggle::D3D12PolyfillReflectVec2F32);
+    req.hlsl.tintOptions.workarounds.polyfill_subgroup_broadcast_f16 =
         device->IsToggleEnabled(Toggle::EnableSubgroupsIntelGen9);
-    req.hlsl.tintOptions.enable_integer_range_analysis =
-        device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
+
+    req.hlsl.tintOptions.extensions.polyfill_dot_4x8_packed =
+        device->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
+    req.hlsl.tintOptions.extensions.polyfill_pack_unpack_4x8 =
+        device->IsToggleEnabled(Toggle::D3D12PolyFillPackUnpack4x8);
 
     req.hlsl.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
     req.hlsl.adapterSupportedLimits = UnsafeUnserializedValue(

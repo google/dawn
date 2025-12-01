@@ -2133,7 +2133,7 @@ TEST_F(HlslWriterTest, BuiltinPack4xI8CorePolyfill) {
 
     Options opts{};
     opts.entry_point_name = "main";
-    opts.polyfill_pack_unpack_4x8 = true;
+    opts.extensions.polyfill_pack_unpack_4x8 = true;
     ASSERT_TRUE(Generate(opts)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
@@ -2157,7 +2157,7 @@ TEST_F(HlslWriterTest, BuiltinUnpack4xI8CorePolyfill) {
 
     Options opts{};
     opts.entry_point_name = "main";
-    opts.polyfill_pack_unpack_4x8 = true;
+    opts.extensions.polyfill_pack_unpack_4x8 = true;
     ASSERT_TRUE(Generate(opts)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
@@ -2217,7 +2217,7 @@ TEST_F(HlslWriterTest, BuiltinPack4xU8CorePolyfill) {
 
     Options opts{};
     opts.entry_point_name = "main";
-    opts.polyfill_pack_unpack_4x8 = true;
+    opts.extensions.polyfill_pack_unpack_4x8 = true;
     ASSERT_TRUE(Generate(opts)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
@@ -2241,7 +2241,7 @@ TEST_F(HlslWriterTest, BuiltinUnpack4xU8CorePolyfill) {
 
     Options opts{};
     opts.entry_point_name = "main";
-    opts.polyfill_pack_unpack_4x8 = true;
+    opts.extensions.polyfill_pack_unpack_4x8 = true;
     ASSERT_TRUE(Generate(opts)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
@@ -2301,7 +2301,7 @@ TEST_F(HlslWriterTest, BuiltinDot4U8PackedPolyfill) {
 
     Options opts{};
     opts.entry_point_name = "main";
-    opts.polyfill_dot_4x8_packed = true;
+    opts.extensions.polyfill_dot_4x8_packed = true;
     ASSERT_TRUE(Generate(opts)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
@@ -2369,7 +2369,7 @@ TEST_F(HlslWriterTest, BuiltinPack4xI8ClampPolyfill) {
 
     Options opts{};
     opts.entry_point_name = "main";
-    opts.polyfill_pack_unpack_4x8 = true;
+    opts.extensions.polyfill_pack_unpack_4x8 = true;
     ASSERT_TRUE(Generate(opts)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
@@ -2413,7 +2413,7 @@ TEST_F(HlslWriterTest, BuiltinDot4I8PackedPolyfill) {
 
     Options opts{};
     opts.entry_point_name = "main";
-    opts.polyfill_dot_4x8_packed = true;
+    opts.extensions.polyfill_dot_4x8_packed = true;
     ASSERT_TRUE(Generate(opts)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
@@ -4460,7 +4460,7 @@ TEST_F(HlslWriterTest, BuiltinReflect_Vec2f32_NoPolyfill) {
 
     tint::hlsl::writer::Options options;
     options.entry_point_name = "main";
-    options.polyfill_reflect_vec2_f32 = false;
+    options.workarounds.polyfill_reflect_vec2_f32 = false;
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
@@ -4491,7 +4491,7 @@ TEST_F(HlslWriterTest, BuiltinReflect_Vec2f32_Polyfill) {
 
     tint::hlsl::writer::Options options;
     options.entry_point_name = "main";
-    options.polyfill_reflect_vec2_f32 = true;
+    options.workarounds.polyfill_reflect_vec2_f32 = true;
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void main() {
