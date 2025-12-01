@@ -448,9 +448,6 @@ crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin
 crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=4;mapId="remap";scalarType="u32" [ Failure ]
 crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ]
 
-# DXC failures
-crbug.com/42241085 [ nvidia-0x2184 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,call,builtin,tanh:f32:* [ Failure ] # finder:disable-general UPF disabled until Dawn Win/GTX 1660 experiment is enabled crbug.com/413300864
-
 # Intel Mesa failures for f16 vector saturate when loading from uniform buffer
 crbug.com/448873316 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,saturate:f16:inputSource="uniform";vectorize=2 [ Failure ]
 crbug.com/448873316 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,saturate:f16:inputSource="uniform";vectorize=3 [ Failure ]
