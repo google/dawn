@@ -630,6 +630,13 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(DrawIndexed, DRAW_INDEXED_CMD_D
 
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(DrawIndirect, DRAW_INDIRECT_CMD_DATA_MEMBER){};
 
+#define DRAW_INDEXED_INDIRECT_CMD_DATA_MEMBER(X) \
+    X(ObjectId, indirectBufferId)                \
+    X(uint64_t, indirectOffset)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(DrawIndexedIndirect,
+                                                 DRAW_INDIRECT_CMD_DATA_MEMBER){};
+
 }  // namespace schema
 
 #endif  // SRC_DAWN_SERIALIZATION_SCHEMA_H_

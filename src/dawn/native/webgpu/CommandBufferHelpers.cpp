@@ -172,6 +172,17 @@ MaybeError CaptureRenderCommand(CaptureContext& captureContext,
             Serialize(captureContext, data);
             break;
         }
+        case Command::DrawIndexedIndirect: {
+            const auto& cmd = *commands.NextCommand<DrawIndexedIndirectCmd>();
+            schema::CommandBufferCommandDrawIndexedIndirectCmd data{{
+                .data = {{
+                    .indirectBufferId = captureContext.GetId(cmd.indirectBuffer),
+                    .indirectOffset = cmd.indirectOffset,
+                }},
+            }};
+            Serialize(captureContext, data);
+            break;
+        }
         default: {
             if (!CaptureDebugCommand(captureContext, commands, type)) {
                 return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");

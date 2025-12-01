@@ -2009,6 +2009,33 @@ TEST_P(CaptureAndReplayDrawTests, CaptureDrawIndirect) {
                     expected);
 }
 
+// Capture DrawIndexedIndirect
+TEST_P(CaptureAndReplayDrawTests, CaptureDrawIndexedIndirect) {
+    uint32_t indices[] = {10, 20};
+    wgpu::Buffer indexBuffer = CreateBuffer("index", sizeof(indices),
+                                            wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index);
+
+    uint32_t indirectIndexed[] = {
+        1,   // indexCount
+        10,  // instanceCount
+        1,   // firstIndex
+        3,   // baseVertex
+        0,   // firstInstance (must be 0 without "indirect-first-instance")
+    };
+    wgpu::Buffer indirectIndexedBuffer =
+        CreateBuffer("indirectIndexed", sizeof(indirectIndexed),
+                     wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Indirect);
+    queue.WriteBuffer(indirectIndexedBuffer, 0, indirectIndexed, sizeof(indirectIndexed));
+
+    utils::RGBA8 expected[] = {{0x3, 9, 0x33, 0x44}};
+    TestDrawCommand(
+        [&](wgpu::RenderPassEncoder pass) {
+            pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+            pass.DrawIndexedIndirect(indirectIndexedBuffer, 0);
+        },
+        expected);
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayDrawTests, WebGPUBackend());
 
 }  // anonymous namespace
