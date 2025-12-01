@@ -93,6 +93,39 @@ func TestFSTestOSWrapper_MkdirTemp(t *testing.T) {
 				wantErrMsg: "not a directory",
 			},
 		},
+		{
+			name:    "Base dir is a symlink to a directory",
+			dir:     filepath.Join(root, "link"),
+			pattern: "test-",
+			setup: unittestSetup{
+				initialDirs:     []string{filepath.Join(root, "target")},
+				initialSymlinks: map[string]string{filepath.Join(root, "link"): filepath.Join(root, "target")},
+			},
+			expectedPrefix: "test-",
+		},
+		{
+			name:    "Base dir is a symlink to a file",
+			dir:     filepath.Join(root, "link"),
+			pattern: "test-",
+			setup: unittestSetup{
+				initialFiles:    map[string]string{filepath.Join(root, "tmpfile"): ""},
+				initialSymlinks: map[string]string{filepath.Join(root, "link"): filepath.Join(root, "tmpfile")},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "not a directory",
+			},
+		},
+		{
+			name:    "Base dir is a broken symlink",
+			dir:     filepath.Join(root, "broken_link"),
+			pattern: "test-",
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{"broken_link": "nonexistent"},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -159,6 +192,32 @@ func TestFSTestOSWrapper_MkdirTemp_MatchesReal(t *testing.T) {
 				initialFiles: map[string]string{"tmpfile": ""},
 			}},
 			dir:     "tmpfile",
+			pattern: "test-",
+		},
+		{
+			name: "Base dir is a symlink to a directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs:     []string{"target"},
+				initialSymlinks: map[string]string{"link": "target"},
+			}},
+			dir:     "link",
+			pattern: "test-",
+		},
+		{
+			name: "Base dir is a symlink to a file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles:    map[string]string{"target_file": ""},
+				initialSymlinks: map[string]string{"link_file": "target_file"},
+			}},
+			dir:     "link_file",
+			pattern: "test-",
+		},
+		{
+			name: "Base dir is a broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{"broken_link": "nonexistent"},
+			}},
+			dir:     "broken_link",
 			pattern: "test-",
 		},
 	}
