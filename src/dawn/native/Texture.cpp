@@ -663,7 +663,8 @@ wgpu::TextureUsage AddInternalUsages(const DeviceBase* device,
 
     bool supportsMSAAPartialResolve = device->HasFeature(Feature::DawnPartialLoadResolveTexture) &&
                                       sampleCount > 1 &&
-                                      (usage & wgpu::TextureUsage::RenderAttachment);
+                                      (usage & wgpu::TextureUsage::RenderAttachment) &&
+                                      ((usage & wgpu::TextureUsage::TransientAttachment) == 0);
     if (supportsMSAAPartialResolve) {
         internalUsage |= wgpu::TextureUsage::TextureBinding;
     }
