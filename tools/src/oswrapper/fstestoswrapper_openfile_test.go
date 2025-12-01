@@ -295,6 +295,119 @@ func TestFSTestOSWrapper_OpenFile(t *testing.T) {
 				wantErrIs: syscall.ELOOP,
 			},
 		},
+		{
+			name: "Symlink chain",
+			path: filepath.Join(root, "link1"),
+			flag: os.O_RDONLY,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "target"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link1"): "link2",
+					filepath.Join(root, "link2"): "target",
+				},
+			},
+			expectedContent: stringPtr("content"),
+		},
+		{
+			name: "Absolute symlink",
+			path: filepath.Join(root, "abs_link"),
+			flag: os.O_RDONLY,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "target"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "abs_link"): filepath.Join(root, "target"),
+				},
+			},
+			expectedContent: stringPtr("content"),
+		},
+		{
+			name: "Relative symlink with parent ref",
+			path: filepath.Join(root, "dir", "link"),
+			flag: os.O_RDONLY,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "target"): "content"},
+				initialDirs:  []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "dir", "link"): "../target",
+				},
+			},
+			expectedContent: stringPtr("content"),
+		},
+		{
+			name: "Symlink in subdirectory",
+			path: filepath.Join(root, "dir", "link"),
+			flag: os.O_RDONLY,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "dir", "target"): "content"},
+				initialDirs:  []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "dir", "link"): "target",
+				},
+			},
+			expectedContent: stringPtr("content"),
+		},
+		{
+			name: "Path with multiple symlinks",
+			path: filepath.Join(root, "link1", "link2", "file.txt"),
+			flag: os.O_RDONLY,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "real_dir1", "real_dir2", "file.txt"): "content"},
+				initialDirs:  []string{filepath.Join(root, "real_dir1"), filepath.Join(root, "real_dir1", "real_dir2")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link1"):              "real_dir1",
+					filepath.Join(root, "real_dir1", "link2"): "real_dir2",
+				},
+			},
+			expectedContent: stringPtr("content"),
+		},
+		{
+			name: "Create file via broken symlink chain",
+			path: filepath.Join(root, "link1"),
+			flag: os.O_WRONLY | os.O_CREATE,
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link1"): "link2",
+					filepath.Join(root, "link2"): "target.txt",
+				},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("created"))
+				require.NoError(t, err)
+			},
+			expectedContent: stringPtr("created"),
+		},
+		{
+			name: "Truncate via symlink",
+			path: filepath.Join(root, "link"),
+			flag: os.O_WRONLY | os.O_TRUNC,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "old content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): "file.txt",
+				},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("new"))
+				require.NoError(t, err)
+			},
+			expectedContent: stringPtr("new"),
+		},
+		{
+			name: "Append via symlink",
+			path: filepath.Join(root, "link"),
+			flag: os.O_WRONLY | os.O_APPEND,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "old"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): "file.txt",
+				},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("new"))
+				require.NoError(t, err)
+			},
+			expectedContent: stringPtr("oldnew"),
+		},
 	}
 
 	for _, tc := range tests {
@@ -540,6 +653,100 @@ func TestFSTestOSWrapper_OpenFile_MatchesReal(t *testing.T) {
 			}},
 			path: "loop1",
 			flag: os.O_RDONLY,
+		},
+		{
+			name: "Symlink chain",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"target": "content"},
+				initialSymlinks: map[string]string{
+					"link1": "link2",
+					"link2": "target",
+				},
+			}},
+			path: "link1",
+			flag: os.O_RDONLY,
+		},
+		{
+			name: "Relative symlink with parent ref",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"target": "content"},
+				initialDirs:  []string{"dir"},
+				initialSymlinks: map[string]string{
+					filepath.Join("dir", "link"): "../target",
+				},
+			}},
+			path: filepath.Join("dir", "link"),
+			flag: os.O_RDONLY,
+		},
+		{
+			name: "Symlink in subdirectory",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{filepath.Join("dir", "target"): "content"},
+				initialDirs:  []string{"dir"},
+				initialSymlinks: map[string]string{
+					filepath.Join("dir", "link"): "target",
+				},
+			}},
+			path: filepath.Join("dir", "link"),
+			flag: os.O_RDONLY,
+		},
+		{
+			name: "Path with multiple symlinks",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{filepath.Join("real_dir1", "real_dir2", "file.txt"): "content"},
+				initialDirs:  []string{filepath.Join("real_dir1", "real_dir2")},
+				initialSymlinks: map[string]string{
+					"link1":                             "real_dir1",
+					filepath.Join("real_dir1", "link2"): "real_dir2",
+				},
+			}},
+			path: filepath.Join("link1", "link2", "file.txt"),
+			flag: os.O_RDONLY,
+		},
+		{
+			name: "Create file via broken symlink chain",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"link1": "link2",
+					"link2": "target.txt",
+				},
+			}},
+			path: "link1",
+			flag: os.O_WRONLY | os.O_CREATE,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("created"))
+				require.NoError(t, err)
+			},
+		},
+		{
+			name: "Truncate via symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "old content"},
+				initialSymlinks: map[string]string{
+					"link": "file.txt",
+				},
+			}},
+			path: "link",
+			flag: os.O_WRONLY | os.O_TRUNC,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("new"))
+				require.NoError(t, err)
+			},
+		},
+		{
+			name: "Append via symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "old"},
+				initialSymlinks: map[string]string{
+					"link": "file.txt",
+				},
+			}},
+			path: "link",
+			flag: os.O_WRONLY | os.O_APPEND,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("new"))
+				require.NoError(t, err)
+			},
 		},
 	}
 
