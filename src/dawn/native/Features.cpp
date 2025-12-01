@@ -446,6 +446,10 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::SharedTextureMemoryD3D12Resource,
      {"Support importing ID3D12Resource as shared texture memory.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shared_texture.md",
+      FeatureInfo::FeatureState::Experimental}},
+    {Feature::ChromiumExperimentalSamplingResourceTable,
+     {"Experimental support for the bindless sampling resource table",
+      "https://github.com/Kangz/gpuweb/blob/bindless/proposals/bindless.md",
       FeatureInfo::FeatureState::Experimental}}};
 
 }  // anonymous namespace

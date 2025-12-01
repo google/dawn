@@ -2491,7 +2491,8 @@
             {"value": 58, "name": "chromium experimental bindless", "tags": ["dawn"]},
             {"value": 59, "name": "adapter properties WGPU", "tags": ["dawn"]},
             {"value": 60, "name": "shared buffer memory D3D12 shared memory file mapping handle", "tags": ["dawn"]},
-            {"value": 61, "name": "shared texture memory D3D12 resource", "tags": ["dawn", "native"]}
+            {"value": 61, "name": "shared texture memory D3D12 resource", "tags": ["dawn", "native"]},
+            {"value": 62, "name": "chromium experimental sampling resource table", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

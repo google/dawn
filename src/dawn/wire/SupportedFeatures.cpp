@@ -126,6 +126,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_ChromiumExperimentalBindless:
         case WGPUFeatureName_PrimitiveIndex:
         case WGPUFeatureName_AdapterPropertiesWGPU:
+        case WGPUFeatureName_ChromiumExperimentalSamplingResourceTable:
             return true;
     }
 
