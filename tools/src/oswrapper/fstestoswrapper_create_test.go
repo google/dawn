@@ -29,6 +29,7 @@ package oswrapper_test
 import (
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
@@ -187,6 +188,31 @@ func TestFSTestOSWrapper_Create(t *testing.T) {
 			},
 			expectedError: expectedError{
 				wantErrMsg: "not a directory",
+			},
+		},
+		{
+			name: "Create fails with broken symlink in path",
+			path: filepath.Join(root, "link", "file.txt"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): filepath.Join(root, "target"),
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Create fails with symlink loop",
+			path: filepath.Join(root, "loop1", "file.txt"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): filepath.Join(root, "loop2"),
+					filepath.Join(root, "loop2"): filepath.Join(root, "loop1"),
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
 			},
 		},
 	}
@@ -357,6 +383,25 @@ func TestFSTestOSWrapper_Create_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: filepath.Join("link", "sub.txt"),
+		},
+		{
+			name: "Error with broken symlink in path",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"link": "target",
+				},
+			}},
+			path: filepath.Join("link", "file.txt"),
+		},
+		{
+			name: "Error with symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			path: filepath.Join("loop1", "file.txt"),
 		},
 	}
 
