@@ -33,6 +33,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -46,6 +47,21 @@ import (
 type Gerrit struct {
 	client        *gerrit.Client
 	authenticated bool
+}
+
+type GerritInterface interface {
+	QueryChanges(queries ...string) ([]gerrit.ChangeInfo, string, error)
+	QueryChangesWith(extras QueryExtraData, queries ...string) ([]gerrit.ChangeInfo, string, error)
+	ChangesSubmittedTogether(changeID string) ([]gerrit.ChangeInfo, error)
+	AddLabel(changeID, revisionID, message, label string, value int) error
+	Abandon(changeID string) error
+	CreateChange(project, branch, subject string, wip bool) (*ChangeInfo, error)
+	EditFiles(changeID, newCommitMsg string, files map[string]string, deletedFiles []string) (Patchset, error)
+	LatestPatchset(changeID string) (Patchset, error)
+	AddHashtags(changeID string, tags container.Set[string]) error
+	Comment(ps Patchset, msg string, comments []FileComment) error
+	SetReadyForReview(changeID, message, reviewer string) error
+	ListAccessRights(ctx context.Context, projects ...string) (*map[string]gerrit.ProjectAccessInfo, error)
 }
 
 // Patchset refers to a single gerrit patchset
@@ -99,20 +115,18 @@ func (p Patchset) RefsChanges() string {
 	return fmt.Sprintf("refs/changes/%v/%v/%v", shortChange, p.Change, p.Patchset)
 }
 
+// ClientFactory is a function type that creates a gerrit.Client
+type ClientFactory func(url string, httpClient *http.Client) (*gerrit.Client, error)
+
+// DefaultClientFactory is the default factory that creates real gerrit clients
+var DefaultClientFactory ClientFactory = func(url string, httpClient *http.Client) (*gerrit.Client, error) {
+	return gerrit.NewClient(url, httpClient)
+}
+
 // New returns a new Gerrit instance. If credentials are not provided, then
 // New() will automatically attempt to load them from the gitcookies file.
 func New(ctx context.Context, opts auth.Options, url string) (*Gerrit, error) {
-	http, err := auth.NewAuthenticator(ctx, auth.InteractiveLogin, opts).Client()
-	if err != nil {
-		return nil, fmt.Errorf("couldn't create gerrit client: %w", err)
-	}
-
-	client, err := gerrit.NewClient(url, http)
-	if err != nil {
-		return nil, fmt.Errorf("couldn't create gerrit client: %w", err)
-	}
-
-	return &Gerrit{client, true}, nil
+	return NewWrapper(ctx, opts, url, nil)
 }
 
 // QueryExtraData holds extra data to query for with QueryChangesWith()
@@ -364,4 +378,23 @@ func (g *Gerrit) ListAccessRights(
 	}
 
 	return accessInfo, nil
+}
+
+// a wrapper function that takes factory as a parameter.
+func NewWrapper(ctx context.Context, opts auth.Options, url string, factory ClientFactory) (*Gerrit, error) {
+	http, err := auth.NewAuthenticator(ctx, auth.InteractiveLogin, opts).Client()
+	if err != nil {
+		return nil, fmt.Errorf("couldn't create gerrit client: %w", err)
+	}
+
+	if factory == nil {
+		factory = DefaultClientFactory
+	}
+
+	client, err := factory(url, http)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't create gerrit client: %w", err)
+	}
+
+	return &Gerrit{client, true}, nil
 }
