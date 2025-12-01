@@ -488,6 +488,52 @@ func TestFSTestOSWrapper_Open(t *testing.T) {
 				wantErrMsg: "not a directory",
 			},
 		},
+		{
+			name: "Open symlink to file",
+			path: filepath.Join(root, "link_to_file"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "symlink content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_file"): "file.txt",
+				},
+			},
+			expectedContent: stringPtr("symlink content"),
+		},
+		{
+			name: "Open symlink to directory",
+			path: filepath.Join(root, "link_to_dir"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_dir"): "dir",
+				},
+			},
+		},
+		{
+			name: "Open broken symlink",
+			path: filepath.Join(root, "broken_link"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "broken_link"): "nonexistent",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Open symlink loop",
+			path: filepath.Join(root, "loop1"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): "loop2",
+					filepath.Join(root, "loop2"): "loop1",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -547,6 +593,45 @@ func TestFSTestOSWrapper_Open_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: filepath.Join("file.txt", "another.txt"),
+		},
+		{
+			name: "Open symlink to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "symlink content"},
+				initialSymlinks: map[string]string{
+					"link_to_file": "file.txt",
+				},
+			}},
+			path: "link_to_file",
+		},
+		{
+			name: "Open symlink to directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link_to_dir": "dir",
+				},
+			}},
+			path: "link_to_dir",
+		},
+		{
+			name: "Open broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"broken_link": "nonexistent",
+				},
+			}},
+			path: "broken_link",
+		},
+		{
+			name: "Open symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			path: "loop1",
 		},
 	}
 
@@ -732,6 +817,20 @@ func TestFSTestOSWrapper_OpenFile(t *testing.T) {
 			flag: os.O_WRONLY,
 			setup: unittestSetup{
 				initialDirs: []string{filepath.Join(root, "mydir")},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "is a directory",
+			},
+		},
+		{
+			name: "Error - Open symlink to directory for writing",
+			path: filepath.Join(root, "link_to_dir"),
+			flag: os.O_WRONLY,
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_dir"): "dir",
+				},
 			},
 			expectedError: expectedError{
 				wantErrMsg: "is a directory",
@@ -983,6 +1082,17 @@ func TestFSTestOSWrapper_OpenFile_MatchesReal(t *testing.T) {
 				initialDirs: []string{"mydir"},
 			}},
 			path: "mydir",
+			flag: os.O_WRONLY,
+		},
+		{
+			name: "Error - Open symlink to directory for writing",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link_to_dir": "dir",
+				},
+			}},
+			path: "link_to_dir",
 			flag: os.O_WRONLY,
 		},
 		{
