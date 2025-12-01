@@ -3232,7 +3232,47 @@ func TestFSTestOSWrapper_WriteFile(t *testing.T) {
 			content:       []byte("overwritten"),
 			mode:          0777,
 			expectContent: stringPtr("overwritten"),
-			expectedMode:  0777,
+			expectedMode:  0666, // Mode should be preserved
+		},
+		{
+			name: "Write to symlink to file",
+			path: filepath.Join(root, "link_to_file"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "old"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_file"): "file.txt",
+				},
+			},
+			content:       []byte("new"),
+			mode:          0666,
+			expectContent: stringPtr("new"),
+		},
+		{
+			name: "Write to broken symlink",
+			path: filepath.Join(root, "broken_link"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "broken_link"): "target.txt",
+				},
+			},
+			content:       []byte("created"),
+			mode:          0666,
+			expectContent: stringPtr("created"),
+		},
+		{
+			name: "Write to symlink to dir",
+			path: filepath.Join(root, "link_to_dir"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_dir"): "dir",
+				},
+			},
+			content: []byte("fail"),
+			mode:    0666,
+			expectedError: expectedError{
+				wantErrMsg: "is a directory",
+			},
 		},
 	}
 
@@ -3313,6 +3353,38 @@ func TestFSTestOSWrapper_WriteFile_MatchesReal(t *testing.T) {
 			}},
 			path:    filepath.Join("file.txt", "another.txt"),
 			content: []byte("some data"),
+		},
+		{
+			name: "Write to symlink to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "old"},
+				initialSymlinks: map[string]string{
+					"link_to_file": "file.txt",
+				},
+			}},
+			path:    "link_to_file",
+			content: []byte("new"),
+		},
+		{
+			name: "Write to broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"broken_link": "target.txt",
+				},
+			}},
+			path:    "broken_link",
+			content: []byte("created"),
+		},
+		{
+			name: "Error on symlink to directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link_to_dir": "dir",
+				},
+			}},
+			path:    "link_to_dir",
+			content: []byte("fail"),
 		},
 	}
 

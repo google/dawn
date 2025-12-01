@@ -694,21 +694,31 @@ func (w FSTestFilesystemReaderWriter) Symlink(oldname, newname string) error {
 func (w FSTestFilesystemReaderWriter) WriteFile(name string, data []byte, perm os.FileMode) error {
 	p := w.CleanPath(name)
 
-	if info, exists := w.FS[p]; exists && info.Mode.IsDir() {
-		return &os.PathError{Op: "open", Path: name, Err: fmt.Errorf("is a directory")}
+	resolvedPath, err := w.resolvePath(p)
+	if err != nil {
+		return &os.PathError{Op: "open", Path: name, Err: err}
 	}
 
-	dir := filepath.Dir(p)
-	if dir != "." && dir != "" {
-		parentInfo, parentExists := w.FS[dir]
-		if !parentExists {
-			return &os.PathError{Op: "open", Path: name, Err: os.ErrNotExist}
+	if info, exists := w.FS[resolvedPath]; exists {
+		if info.Mode.IsDir() {
+			return &os.PathError{Op: "open", Path: name, Err: fmt.Errorf("is a directory")}
 		}
-		if !parentInfo.Mode.IsDir() {
-			return &os.PathError{Op: "open", Path: name, Err: fmt.Errorf("not a directory")}
+		// If the file exists, we preserve the mode.
+		perm = info.Mode
+	} else {
+		dir := filepath.Dir(resolvedPath)
+		if dir != "." && dir != "" {
+			parentInfo, parentExists := w.FS[dir]
+			if !parentExists {
+				return &os.PathError{Op: "open", Path: name, Err: os.ErrNotExist}
+			}
+			if !parentInfo.Mode.IsDir() {
+				return &os.PathError{Op: "open", Path: name, Err: fmt.Errorf("not a directory")}
+			}
 		}
 	}
-	w.FS[p] = &fstest.MapFile{Data: data, Mode: perm, ModTime: time.Now()}
+
+	w.FS[resolvedPath] = &fstest.MapFile{Data: data, Mode: perm, ModTime: time.Now()}
 	return nil
 }
 
