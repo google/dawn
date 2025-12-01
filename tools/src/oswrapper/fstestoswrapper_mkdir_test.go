@@ -29,6 +29,7 @@ package oswrapper_test
 import (
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
@@ -160,6 +161,39 @@ func TestFSTestOSWrapper_Mkdir(t *testing.T) {
 				wantErrMsg: "not a directory",
 			},
 		},
+		{
+			name: "Path is broken symlink",
+			path: filepath.Join(root, "broken_link"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{filepath.Join(root, "broken_link"): filepath.Join(root, "nonexistent")},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrExist,
+			},
+		},
+		{
+			name: "Parent path is broken symlink",
+			path: filepath.Join(root, "broken_link", "newdir"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{filepath.Join(root, "broken_link"): filepath.Join(root, "nonexistent")},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Symlink loop in path",
+			path: filepath.Join(root, "loop1", "newdir"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): filepath.Join(root, "loop2"),
+					filepath.Join(root, "loop2"): filepath.Join(root, "loop1"),
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
+			},
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -252,6 +286,30 @@ func TestFSTestOSWrapper_Mkdir_MatchesReal(t *testing.T) {
 				initialSymlinks: map[string]string{"link_to_file": "file.txt"},
 			}},
 			path: filepath.Join("link_to_file", "newdir"),
+		},
+		{
+			name: "Path is broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{"broken_link": "nonexistent"},
+			}},
+			path: "broken_link",
+		},
+		{
+			name: "Parent path is broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{"broken_link": "nonexistent"},
+			}},
+			path: filepath.Join("broken_link", "newdir"),
+		},
+		{
+			name: "Symlink loop in path",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			path: filepath.Join("loop1", "newdir"),
 		},
 	}
 
