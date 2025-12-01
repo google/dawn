@@ -229,7 +229,7 @@ struct State {
                 for (uint32_t i = 0; i < type->Width(); ++i) {
                     auto* lhs = b.Swizzle(ret_ty, x, {i});
                     auto* rhs = b.Swizzle(ret_ty, y, {i});
-                    auto* v = b.Multiply(ret_ty, lhs, rhs);
+                    auto* v = b.Multiply(lhs, rhs);
 
                     if (ret != nullptr) {
                         ret = b.Add(ret_ty, ret, v)->Result();
@@ -336,8 +336,7 @@ struct State {
         auto args = call->Args();
 
         b.InsertBefore(call, [&] {
-            auto* res_ty = call->Result()->Type();
-            auto* mul = b.Multiply(res_ty, args[0], args[1]);
+            auto* mul = b.Multiply(args[0], args[1]);
             b.AddWithResult(call->DetachResult(), mul, args[2]);
         });
         call->Destroy();

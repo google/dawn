@@ -509,7 +509,7 @@ TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4f) 
     func->SetParams({scalar, vector});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply(ty.vec4<f32>(), vector, scalar);
+        auto* result = b.Multiply(vector, scalar);
         b.Return(func, result);
     });
 
@@ -544,7 +544,7 @@ TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4f) 
     func->SetParams({scalar, vector});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply(ty.vec4<f32>(), scalar, vector);
+        auto* result = b.Multiply(scalar, vector);
         b.Return(func, result);
     });
 
@@ -579,7 +579,7 @@ TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4i) 
     func->SetParams({scalar, vector});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply(ty.vec4<i32>(), vector, scalar);
+        auto* result = b.Multiply(vector, scalar);
         b.Return(func, result);
     });
 
@@ -615,7 +615,7 @@ TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4i) 
     func->SetParams({scalar, vector});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply(ty.vec4<i32>(), scalar, vector);
+        auto* result = b.Multiply(scalar, vector);
         b.Return(func, result);
     });
 

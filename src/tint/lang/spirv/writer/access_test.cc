@@ -131,7 +131,7 @@ TEST_F(SpirvWriterTest, Access_Matrix_Value_ConstantIndex) {
     b.Append(func->Block(), [&] {
         auto* result_vector = b.Access(ty.vec2f(), mat_val, 1_u);
         auto* result_scalar = b.Access(ty.f32(), mat_val, 1_u, 0_u);
-        b.Return(func, b.Multiply(ty.vec2<f32>(), result_vector, result_scalar));
+        b.Return(func, b.Multiply(result_vector, result_scalar));
         mod.SetName(result_vector, "result_vector");
         mod.SetName(result_scalar, "result_scalar");
     });

@@ -180,7 +180,7 @@ struct State {
 
                 ret = b.Divide(type, x, y)->Result();
                 ret = b.Call(type, core::BuiltinFn::kTrunc, ret)->Result();
-                ret = b.Multiply(type, y, ret)->Result();
+                ret = b.Multiply(y, ret)->Result();
                 ret = b.Subtract(type, x, ret)->Result();
                 b.Return(f, ret);
             });

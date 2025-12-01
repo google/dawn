@@ -73,7 +73,7 @@ TEST_F(IR_ReferencedModuleDeclsTest, DirectUse) {
     // Not referenced.
     mod.root_block->Append(b.Var<workgroup, u32>("c"));
     mod.root_block->Append(b.Override("p", ty.i32()));
-    mod.root_block->Append(b.Multiply(ty.i32(), 2_i, 4_i));
+    mod.root_block->Append(b.Multiply(2_i, 4_i));
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {  //

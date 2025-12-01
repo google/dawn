@@ -387,7 +387,7 @@ TEST_F(HlslWriterTest, BinaryMulMatVec) {
         auto* y = b.Var("y", b.Zero<vec4<f32>>());
         auto* l = b.Load(x);
         auto* r = b.Load(y);
-        b.Var("c", b.Multiply(ty.vec4<f32>(), l, r));
+        b.Var("c", b.Multiply(l, r));
         b.Return(func);
     });
 
@@ -410,7 +410,7 @@ TEST_F(HlslWriterTest, BinaryMulVecMat) {
         auto* y = b.Var("y", b.Zero<vec4<f32>>());
         auto* l = b.Load(x);
         auto* r = b.Load(y);
-        b.Var("c", b.Multiply(ty.vec4<f32>(), r, l));
+        b.Var("c", b.Multiply(r, l));
         b.Return(func);
     });
 
@@ -433,7 +433,7 @@ TEST_F(HlslWriterTest, BinaryMulVec4Mat3x4) {
         auto* y = b.Var("y", b.Zero<mat3x4<f32>>());
         auto* l = b.Load(x);
         auto* r = b.Load(y);
-        b.Var("c", b.Multiply(ty.vec3<f32>(), l, r));
+        b.Var("c", b.Multiply(l, r));
         b.Return(func);
     });
 
@@ -456,7 +456,7 @@ TEST_F(HlslWriterTest, BinaryMulMat3x2Vec3) {
         auto* y = b.Var("y", b.Zero<vec3<f32>>());
         auto* l = b.Load(x);
         auto* r = b.Load(y);
-        b.Var("c", b.Multiply(ty.vec2<f32>(), l, r));
+        b.Var("c", b.Multiply(l, r));
         b.Return(func);
     });
 
@@ -479,7 +479,7 @@ TEST_F(HlslWriterTest, BinaryMulMatMat) {
         auto* y = b.Var("y", b.Zero<mat4x4<f32>>());
         auto* l = b.Load(x);
         auto* r = b.Load(y);
-        b.Var("c", b.Multiply(ty.mat4x4<f32>(), l, r));
+        b.Var("c", b.Multiply(l, r));
         b.Return(func);
     });
 

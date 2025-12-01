@@ -233,7 +233,7 @@ struct State {
             if (buffer.array_stride != 4) {
                 // Multiply the index by the stride in words.
                 TINT_IR_ASSERT(ir, (buffer.array_stride & 3u) == 0u);
-                index = b.Multiply<u32>(index, u32(buffer.array_stride / 4))->Result();
+                index = b.Multiply(index, u32(buffer.array_stride / 4))->Result();
                 ir.SetName(index, buffer_name + "_base");
             }
 

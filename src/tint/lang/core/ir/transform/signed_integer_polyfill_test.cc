@@ -263,7 +263,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntMul_Scalar) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply<i32>(lhs, rhs);
+        auto* result = b.Multiply(lhs, rhs);
         b.Return(func, result);
     });
 
@@ -301,7 +301,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Disabled_IntMul_Scalar) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply<i32>(lhs, rhs);
+        auto* result = b.Multiply(lhs, rhs);
         b.Return(func, result);
     });
 

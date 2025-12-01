@@ -161,8 +161,7 @@ struct State {
                     // behavior for many backends:
                     //   result = lhs - ((lhs / rhs_or_one) * rhs_or_one)
                     auto* whole = b.Divide(result_ty, lhs, rhs_or_one);
-                    auto* remainder =
-                        b.Subtract(result_ty, lhs, b.Multiply(result_ty, whole, rhs_or_one));
+                    auto* remainder = b.Subtract(result_ty, lhs, b.Multiply(whole, rhs_or_one));
                     b.Return(func, remainder->Result());
                 }
             });

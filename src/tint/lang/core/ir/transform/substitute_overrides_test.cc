@@ -552,7 +552,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpression) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Let("y", b.Divide(ty.u32(), 10_u, x));
-        b.Let("z", b.Multiply(ty.u32(), 5_u, o));
+        b.Let("z", b.Multiply(5_u, o));
         b.Return(func);
     });
 
@@ -602,7 +602,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionNonConstBuiltin) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("y", b.Call(ty.f32(), core::BuiltinFn::kDpdx, b.Multiply(ty.f32(), x, 4_f)));
+        b.Let("y", b.Call(ty.f32(), core::BuiltinFn::kDpdx, b.Multiply(x, 4_f)));
         b.Return(func);
     });
 
@@ -657,8 +657,8 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperand) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Let("y", b.Divide(ty.u32(), 10_u, o));
-        auto* k = b.Add(ty.u32(), 1_u, b.Multiply(ty.u32(), 2_u, x));
-        b.Let("z", b.Multiply(ty.u32(), k, o));
+        auto* k = b.Add(ty.u32(), 1_u, b.Multiply(2_u, x));
+        b.Let("z", b.Multiply(k, o));
         b.Return(func);
     });
 
@@ -718,8 +718,8 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandFlipOrder) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Let("y", b.Divide(ty.u32(), 10_u, o));
-        auto* k = b.Add(ty.u32(), 1_u, b.Multiply(ty.u32(), 2_u, o));
-        b.Let("z", b.Multiply(ty.u32(), k, x));
+        auto* k = b.Add(ty.u32(), 1_u, b.Multiply(2_u, o));
+        b.Let("z", b.Multiply(k, x));
         b.Return(func);
     });
 
@@ -780,7 +780,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandNonConstFn) {
     b.Append(func->Block(), [&] {
         b.Let("y", b.Divide(ty.f32(), 10_f, x));
         auto* k = b.Call(ty.f32(), core::BuiltinFn::kDpdx, x);
-        b.Let("z", b.Multiply(ty.f32(), k, o));
+        b.Let("z", b.Multiply(k, o));
         b.Return(func);
     });
 
@@ -842,7 +842,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandLet) {
     b.Append(func->Block(), [&] {
         b.Let("y", b.Divide(ty.f32(), 10_f, x));
         auto* k = b.Let("k", b.Call(ty.f32(), core::BuiltinFn::kDpdx, x));
-        b.Let("z", b.Multiply(ty.f32(), k, o));
+        b.Let("z", b.Multiply(k, o));
         b.Return(func);
     });
 
@@ -1070,7 +1070,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeExpression) {
         auto* x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
 
-        auto* inst = b.Multiply(ty.u32(), x, 2_u);
+        auto* inst = b.Multiply(x, 2_u);
         auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(inst->Result());
         auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 4_u);
         b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));

@@ -5702,7 +5702,7 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithExpression_MaxB
             // access_idx = idx * factor + local_id.x
             // access_idx: [0, 31] (idx: [0, 7], factor = 4, local_id.x: [0, 3])
             auto* load_idx = b.Load(idx);
-            auto* multiply = b.Multiply<u32>(load_idx, factor);
+            auto* multiply = b.Multiply(load_idx, factor);
             auto* access_local_id_x = b.Access(ty.u32(), local_invocation_id, 0_u);
             auto* access_idx = b.Add<u32>(multiply, access_local_id_x);
 

@@ -156,7 +156,7 @@ TEST_F(SpirvWriterTest, Binary_ScalarTimesVector_F32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({scalar, vector});
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply(ty.vec4<f32>(), scalar, vector);
+        auto* result = b.Multiply(scalar, vector);
         b.Return(func);
         mod.SetName(result, "result");
     });
@@ -177,7 +177,7 @@ TEST_F(SpirvWriterTest, Binary_VectorTimesScalar_F32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({scalar, vector});
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply(ty.vec4<f32>(), vector, scalar);
+        auto* result = b.Multiply(vector, scalar);
         b.Return(func);
         mod.SetName(result, "result");
     });
@@ -198,7 +198,7 @@ TEST_F(SpirvWriterTest, Binary_ScalarTimesMatrix_F32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({scalar, matrix});
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply(ty.mat3x4<f32>(), scalar, matrix);
+        auto* result = b.Multiply(scalar, matrix);
         b.Return(func);
         mod.SetName(result, "result");
     });
@@ -219,7 +219,7 @@ TEST_F(SpirvWriterTest, Binary_MatrixTimesScalar_F32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({scalar, matrix});
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply(ty.mat3x4<f32>(), matrix, scalar);
+        auto* result = b.Multiply(matrix, scalar);
         b.Return(func);
         mod.SetName(result, "result");
     });
@@ -240,7 +240,7 @@ TEST_F(SpirvWriterTest, Binary_VectorTimesMatrix_F32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vector, matrix});
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply(ty.vec3<f32>(), vector, matrix);
+        auto* result = b.Multiply(vector, matrix);
         b.Return(func);
         mod.SetName(result, "result");
     });
@@ -261,7 +261,7 @@ TEST_F(SpirvWriterTest, Binary_MatrixTimesVector_F32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vector, matrix});
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply(ty.vec4<f32>(), matrix, vector);
+        auto* result = b.Multiply(matrix, vector);
         b.Return(func);
         mod.SetName(result, "result");
     });
@@ -282,7 +282,7 @@ TEST_F(SpirvWriterTest, Binary_MatrixTimesMatrix_F32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({mat1, mat2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Multiply(ty.mat3x3<f32>(), mat1, mat2);
+        auto* result = b.Multiply(mat1, mat2);
         b.Return(func);
         mod.SetName(result, "result");
     });

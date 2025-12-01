@@ -10253,7 +10253,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_I32) {
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
-                multiply = b.Multiply<i32>(loadx, loady);
+                multiply = b.Multiply(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -10380,7 +10380,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_U32) {
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
-                multiply = b.Multiply<u32>(loadx, loady);
+                multiply = b.Multiply(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -10507,7 +10507,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_lhs) {
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
-                multiply = b.Multiply<i32>(loadx, loady);
+                multiply = b.Multiply(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -10630,7 +10630,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_rhs) {
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
-                multiply = b.Multiply<i32>(loadx, loady);
+                multiply = b.Multiply(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -10741,7 +10741,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_I32
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
             // multiply = idx * kLargeValue
-            multiply = b.Multiply<i32>(b.Load(idx), b.Constant(i32(kLargeValue)));
+            multiply = b.Multiply(b.Load(idx), b.Constant(i32(kLargeValue)));
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -10818,7 +10818,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_I32
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
             // multiply = idx * kLargeValue
-            multiply = b.Multiply<i32>(b.Load(idx), b.Constant(i32(kLargeValue)));
+            multiply = b.Multiply(b.Load(idx), b.Constant(i32(kLargeValue)));
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -10895,7 +10895,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_U32
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
             // multiply = idx * kLargeValue
-            multiply = b.Multiply<u32>(b.Load(idx), b.Constant(u32(kLargeValue)));
+            multiply = b.Multiply(b.Load(idx), b.Constant(u32(kLargeValue)));
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -10972,7 +10972,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_U32
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
             // multiply = idx * kLargeValue
-            multiply = b.Multiply<u32>(b.Load(idx), b.Constant(u32(kLargeValue)));
+            multiply = b.Multiply(b.Load(idx), b.Constant(u32(kLargeValue)));
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {

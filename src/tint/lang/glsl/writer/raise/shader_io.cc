@@ -206,7 +206,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             // Recalculate gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
             auto* z = builder.Swizzle(ty.f32(), value, {2});
             auto* w = builder.Swizzle(ty.f32(), value, {3});
-            auto* mul = builder.Multiply(ty.f32(), 2_f, z);
+            auto* mul = builder.Multiply(2_f, z);
             auto* new_z = builder.Subtract(ty.f32(), mul, w);
             value = builder.Construct(ty.vec4<f32>(), x, new_y, new_z, w)->Result();
         }

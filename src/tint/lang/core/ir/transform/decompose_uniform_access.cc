@@ -202,7 +202,7 @@ struct State {
                 [&](core::ir::Value* val) {
                     b.InsertBefore(a, [&] {
                         offset.byte_offset_expr.Push(
-                            b.Multiply(ty.u32(), u32(size), b.InsertConvertIfNeeded(ty.u32(), val))
+                            b.Multiply(u32(size), b.InsertConvertIfNeeded(ty.u32(), val))
                                 ->Result());
                     });
                 });
@@ -291,8 +291,7 @@ struct State {
                 offset.byte_offset += (cnst->Value()->ValueAs<uint32_t>() * elem_byte_size);
             } else {
                 offset.byte_offset_expr.Push(
-                    b.Multiply(ty.u32(), b.InsertConvertIfNeeded(ty.u32(), lve->Index()),
-                               u32(elem_byte_size))
+                    b.Multiply(b.InsertConvertIfNeeded(ty.u32(), lve->Index()), u32(elem_byte_size))
                         ->Result());
             }
 
@@ -556,7 +555,7 @@ struct State {
                 TINT_IR_ASSERT(ir, count);
 
                 b.LoopRange(0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
-                    auto* stride = b.Multiply<u32>(idx, u32(arr->ImplicitStride()))->Result();
+                    auto* stride = b.Multiply(idx, u32(arr->ImplicitStride()))->Result();
                     OffsetData od{0, {start_byte_offset, stride}};
                     auto* byte_idx = OffsetToValue(od);
                     auto* access = b.Access(ty.ptr<function>(arr->ElemType()), result_arr, idx);

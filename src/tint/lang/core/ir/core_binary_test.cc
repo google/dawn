@@ -281,7 +281,7 @@ TEST_F(IR_BinaryTest, CreateSubtract) {
 }
 
 TEST_F(IR_BinaryTest, CreateMultiply) {
-    auto* inst = b.Multiply(mod.Types().i32(), 4_i, 2_i);
+    auto* inst = b.Multiply(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kMultiply);

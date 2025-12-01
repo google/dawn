@@ -171,7 +171,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, SingleMatrixValue) {
     auto* value = b.FunctionParam("value", mat_ty);
     target->SetParams({value});
     b.Append(target->Block(), [&] {
-        auto* scale = b.Multiply(mat_ty, value, b.Constant(2_f));
+        auto* scale = b.Multiply(value, b.Constant(2_f));
         b.Return(target, scale);
     });
 
@@ -239,7 +239,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleMatrixValues) {
     auto* value_b = b.FunctionParam("value_b", mat_ty);
     target->SetParams({value_a, scalar, value_b});
     b.Append(target->Block(), [&] {
-        auto* scale = b.Multiply(mat_ty, value_a, scalar);
+        auto* scale = b.Multiply(value_a, scalar);
         auto* sum = b.Add(mat_ty, scale, value_b);
         b.Return(target, sum);
     });
@@ -320,7 +320,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleParamUses) {
     target->SetParams({value});
     b.Append(target->Block(), [&] {
         auto* add = b.Add(mat_ty, value, value);
-        auto* mul = b.Multiply(mat_ty, add, value);
+        auto* mul = b.Multiply(add, value);
         b.Return(target, mul);
     });
 
@@ -389,7 +389,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleCallsites) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     target->SetParams({value, scalar});
     b.Append(target->Block(), [&] {
-        auto* scale = b.Multiply(mat_ty, value, scalar);
+        auto* scale = b.Multiply(value, scalar);
         b.Return(target, scale);
     });
 
@@ -576,7 +576,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MatrixInStruct) {
     b.Append(target->Block(), [&] {
         auto* m = b.Access(mat_ty, value, 0_u);
         auto* s = b.Access(ty.f32(), value, 1_u);
-        auto* mul = b.Multiply(mat_ty, m, s);
+        auto* mul = b.Multiply(m, s);
         b.Return(target, mul);
     });
 
@@ -666,7 +666,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MatrixArrayOfStructOfArray) {
         auto* mb = b.Access(mat_ty, value, 2_u, 0_u, 1_u);
         auto* s = b.Access(ty.f32(), value, 2_u, 1_u);
         auto* add = b.Add(mat_ty, ma, mb);
-        auto* mul = b.Multiply(mat_ty, add, s);
+        auto* mul = b.Multiply(add, s);
         b.Return(target, mul);
     });
 

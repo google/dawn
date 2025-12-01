@@ -539,7 +539,7 @@ TEST_F(SpirvWriterTest, Function_PassMatrixByPointer) {
     auto* value_b = b.FunctionParam("value_b", mat_ty);
     target->SetParams({value_a, scalar, value_b});
     b.Append(target->Block(), [&] {
-        auto* scale = b.Multiply(mat_ty, value_a, scalar);
+        auto* scale = b.Multiply(value_a, scalar);
         auto* sum = b.Add(mat_ty, scale, value_b);
         b.Return(target, sum);
     });

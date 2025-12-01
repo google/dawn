@@ -125,7 +125,7 @@ struct State {
             d->SetValue(div->Result());
 
             auto* trunc = b.Call(type, core::BuiltinFn::kTrunc, d);
-            auto* mul = b.Multiply(type, trunc, binary->RHS());
+            auto* mul = b.Multiply(trunc, binary->RHS());
             auto* sub = b.Subtract(type, binary->LHS(), mul);
 
             binary->Result()->ReplaceAllUsesWith(sub->Result());

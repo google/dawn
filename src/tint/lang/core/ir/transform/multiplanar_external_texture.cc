@@ -356,13 +356,12 @@ struct State {
             auto* abs_v = b.Call(vec3f, core::BuiltinFn::kAbs, v);
             auto* sign_v = b.Call(vec3f, core::BuiltinFn::kSign, v);
             auto* cond = b.LessThan(abs_v, D_splat);
-            auto* t = b.Multiply(vec3f, sign_v, b.Add(vec3f, b.Multiply(vec3f, C, abs_v), F));
+            auto* t = b.Multiply(sign_v, b.Add(vec3f, b.Multiply(C, abs_v), F));
             auto* f =
-                b.Multiply(vec3f, sign_v,
-                           b.Add(vec3f,
-                                 b.Call(vec3f, core::BuiltinFn::kPow,
-                                        b.Add(vec3f, b.Multiply(vec3f, A, abs_v), B), G_splat),
-                                 E));
+                b.Multiply(sign_v, b.Add(vec3f,
+                                         b.Call(vec3f, core::BuiltinFn::kPow,
+                                                b.Add(vec3f, b.Multiply(A, abs_v), B), G_splat),
+                                         E));
             b.Return(gamma_correction, b.Call(vec3f, core::BuiltinFn::kSelect, f, t, cond));
         });
 
@@ -422,7 +421,7 @@ struct State {
             auto* clamped_coords = b.Call(vec2u, core::BuiltinFn::kMin, coords, apparent_size);
             auto* clamped_coords_f = b.Convert(vec2f, clamped_coords);
             auto* modified_coords =
-                b.Multiply(vec2f, load_transform_matrix, b.Construct(vec3f, clamped_coords_f, 1_f));
+                b.Multiply(load_transform_matrix, b.Construct(vec3f, clamped_coords_f, 1_f));
             auto* plane0_clamped_f = b.Call(vec2f, core::BuiltinFn::kRound, modified_coords);
 
             auto* plane0_clamped = b.Convert(vec2u, plane0_clamped_f);
@@ -448,7 +447,7 @@ struct State {
                     0_u);
 
                 // Load the uv value from the second plane.
-                auto* plane1_clamped_f = b.Multiply(vec2f, plane0_clamped_f, plane1_coord_factor);
+                auto* plane1_clamped_f = b.Multiply(plane0_clamped_f, plane1_coord_factor);
 
                 auto* plane1_clamped = b.Convert(vec2u, plane1_clamped_f);
                 auto* uv = b.Swizzle(
@@ -458,8 +457,7 @@ struct State {
 
                 // Convert the combined yuv value into rgb and set the alpha to 1.0.
                 b.ExitIf(if_planes_eq_1,
-                         b.Multiply(vec3f, b.Construct(vec4f, y, uv, 1_f), yuv_to_rgb_conversion),
-                         1_f);
+                         b.Multiply(b.Construct(vec4f, y, uv, 1_f), yuv_to_rgb_conversion), 1_f);
             });
 
             // Apply gamma correction if needed.
@@ -471,7 +469,7 @@ struct State {
                 auto* gamma_encode_params = b.Access(GammaTransferParams(), params, 4_u);
                 auto* gamut_conversion_matrix = b.Access(ty.mat3x3<f32>(), params, 5_u);
                 auto* decoded = b.Call(vec3f, GammaCorrection(), rgb_result, gamma_decode_params);
-                auto* converted = b.Multiply(vec3f, gamut_conversion_matrix, decoded);
+                auto* converted = b.Multiply(gamut_conversion_matrix, decoded);
                 auto* encoded = b.Call(vec3f, GammaCorrection(), converted, gamma_encode_params);
                 b.ExitIf(if_gamma_correct, encoded);
             });
@@ -543,7 +541,7 @@ struct State {
             auto* sample_plane1_rect_max = b.Access(ty.vec2<f32>(), params, 11_u);
 
             auto* modified_coords =
-                b.Multiply(vec2f, transformation_matrix, b.Construct(vec3f, coords, 1_f));
+                b.Multiply(transformation_matrix, b.Construct(vec3f, coords, 1_f));
             auto* plane0_clamped = b.Call(vec2f, core::BuiltinFn::kClamp, modified_coords,
                                           sample_plane0_rect_min, sample_plane0_rect_max);
 
@@ -577,8 +575,7 @@ struct State {
 
                 // Convert the combined yuv value into rgb and set the alpha to 1.0.
                 b.ExitIf(if_planes_eq_1,
-                         b.Multiply(vec3f, b.Construct(vec4f, y, uv, 1_f), yuv_to_rgb_conversion),
-                         1_f);
+                         b.Multiply(b.Construct(vec4f, y, uv, 1_f), yuv_to_rgb_conversion), 1_f);
             });
 
             // Apply gamma correction if needed.
@@ -590,7 +587,7 @@ struct State {
                 auto* gamma_encode_params = b.Access(GammaTransferParams(), params, 4_u);
                 auto* gamut_conversion_matrix = b.Access(ty.mat3x3<f32>(), params, 5_u);
                 auto* decoded = b.Call(vec3f, GammaCorrection(), rgb_result, gamma_decode_params);
-                auto* converted = b.Multiply(vec3f, gamut_conversion_matrix, decoded);
+                auto* converted = b.Multiply(gamut_conversion_matrix, decoded);
                 auto* encoded = b.Call(vec3f, GammaCorrection(), converted, gamma_encode_params);
                 b.ExitIf(if_gamma_correct, encoded);
             });

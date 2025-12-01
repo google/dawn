@@ -454,7 +454,7 @@ struct State {
                     auto* func = b.Function("tint_dot", el_ty);
                     func->SetParams({lhs, rhs});
                     b.Append(func->Block(), [&] {
-                        auto* mul = b.Multiply(vec, lhs, rhs);
+                        auto* mul = b.Multiply(lhs, rhs);
                         auto* sum = b.Access(el_ty, mul, u32(0))->Result();
                         for (uint32_t i = 1; i < vec->Width(); i++) {
                             sum = b.Add(el_ty, sum, b.Access(el_ty, mul, u32(i)))->Result();

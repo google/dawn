@@ -1401,7 +1401,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_NotAddOrSub) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Multiply<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Multiply(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);

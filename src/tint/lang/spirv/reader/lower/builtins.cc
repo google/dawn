@@ -418,7 +418,7 @@ struct State {
 
                 for (uint32_t row = 0; row < rows; ++row) {
                     auto* v1_element = b.Access(elem_ty, vector1, u32(row));
-                    auto* result = b.Multiply(elem_ty, v1_element, v2_element)->Result();
+                    auto* result = b.Multiply(v1_element, v2_element)->Result();
                     col_elements.Push(result);
                 }
 
@@ -450,7 +450,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* div = b.Divide(res_ty, x, y);
             auto* floor = b.Call(res_ty, core::BuiltinFn::kFloor, div);
-            auto* mul = b.Multiply(res_ty, y, floor);
+            auto* mul = b.Multiply(y, floor);
             auto* sub = b.Subtract(res_ty, x, mul);
 
             call->Result()->ReplaceAllUsesWith(sub->Result());
@@ -851,9 +851,9 @@ struct State {
 
         b.InsertBefore(call, [&] {
             if (I->Type()->IsFloatScalar()) {
-                auto* v = b.Multiply(I->Type(), I, N)->Result();
-                v = b.Multiply(I->Type(), v, N)->Result();
-                v = b.Multiply(I->Type(), v, 2.0_f)->Result();
+                auto* v = b.Multiply(I, N)->Result();
+                v = b.Multiply(v, N)->Result();
+                v = b.Multiply(v, 2.0_f)->Result();
                 v = b.Subtract(I->Type(), I, v)->Result();
                 call->Result()->ReplaceAllUsesWith(v);
             } else {
@@ -873,7 +873,7 @@ struct State {
         b.InsertBefore(call, [&] {
             if (I->Type()->IsFloatScalar()) {
                 auto* neg = b.Negation(N);
-                auto* sel = b.Multiply(I->Type(), I, Nref)->Result();
+                auto* sel = b.Multiply(I, Nref)->Result();
                 sel = b.LessThan(sel, b.Zero(sel->Type()))->Result();
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, neg, N, sel);
             } else {
@@ -1108,16 +1108,16 @@ struct State {
 
             // Returns (m * n) - (o * p)
             auto sub_mul2 = [&](auto* m, auto* n, auto* o, auto* p) {
-                auto* x = b.Multiply(elem_ty, m, n);
-                auto* y = b.Multiply(elem_ty, o, p);
+                auto* x = b.Multiply(m, n);
+                auto* y = b.Multiply(o, p);
                 return b.Subtract(elem_ty, x, y);
             };
 
             // Returns (m * n) - (o * p) + (q * r)
             auto sub_add_mul3 = [&](auto* m, auto* n, auto* o, auto* p, auto* q, auto* r) {
-                auto* w = b.Multiply(elem_ty, m, n);
-                auto* x = b.Multiply(elem_ty, o, p);
-                auto* y = b.Multiply(elem_ty, q, r);
+                auto* w = b.Multiply(m, n);
+                auto* x = b.Multiply(o, p);
+                auto* y = b.Multiply(q, r);
 
                 auto* z = b.Subtract(elem_ty, w, x);
                 return b.Add(elem_ty, z, y);
@@ -1125,9 +1125,9 @@ struct State {
 
             // Returns (m * n) + (o * p) - (q * r)
             auto add_sub_mul3 = [&](auto* m, auto* n, auto* o, auto* p, auto* q, auto* r) {
-                auto* w = b.Multiply(elem_ty, m, n);
-                auto* x = b.Multiply(elem_ty, o, p);
-                auto* y = b.Multiply(elem_ty, q, r);
+                auto* w = b.Multiply(m, n);
+                auto* x = b.Multiply(o, p);
+                auto* y = b.Multiply(q, r);
 
                 auto* z = b.Add(elem_ty, w, x);
                 return b.Subtract(elem_ty, z, y);
@@ -1142,10 +1142,10 @@ struct State {
                     auto* mc = b.Access(elem_ty, arg, 1_u, 0_u);
                     auto* md = b.Access(elem_ty, arg, 1_u, 1_u);
 
-                    auto* r_00 = b.Multiply(elem_ty, inv_det, md);
-                    auto* r_01 = b.Multiply(elem_ty, neg_inv_det, mb);
-                    auto* r_10 = b.Multiply(elem_ty, neg_inv_det, mc);
-                    auto* r_11 = b.Multiply(elem_ty, inv_det, ma);
+                    auto* r_00 = b.Multiply(inv_det, md);
+                    auto* r_01 = b.Multiply(neg_inv_det, mb);
+                    auto* r_10 = b.Multiply(neg_inv_det, mc);
+                    auto* r_11 = b.Multiply(inv_det, ma);
 
                     auto* r1 = b.Construct(ty.vec2(elem_ty), r_00, r_01);
                     auto* r2 = b.Construct(ty.vec2(elem_ty), r_10, r_11);
@@ -1189,7 +1189,7 @@ struct State {
                     auto* r3 = b.Construct(ty.vec3(elem_ty), r_20, r_21, r_22);
 
                     auto* m = b.Construct(mat_ty, r1, r2, r3);
-                    auto* inv = b.Multiply(mat_ty, inv_det, m);
+                    auto* inv = b.Multiply(inv_det, m);
                     call->Result()->ReplaceAllUsesWith(inv->Result());
                     break;
                 }
@@ -1293,7 +1293,7 @@ struct State {
                     auto* r4 = b.Construct(ty.vec4(elem_ty), r_30, r_31, r_32, r_33);
 
                     auto* m = b.Construct(mat_ty, r1, r2, r3, r4);
-                    auto* inv = b.Multiply(mat_ty, inv_det, m);
+                    auto* inv = b.Multiply(inv_det, m);
                     call->Result()->ReplaceAllUsesWith(inv->Result());
                     break;
                 }

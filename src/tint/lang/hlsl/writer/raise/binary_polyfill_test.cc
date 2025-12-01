@@ -202,7 +202,7 @@ TEST_F(HlslWriter_BinaryPolyfillTest, MulVecMatF32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({x, y});
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Multiply(ty.vec3<f32>(), x, y));
+        b.Let("a", b.Multiply(x, y));
         b.Return(func);
     });
 
@@ -237,7 +237,7 @@ TEST_F(HlslWriter_BinaryPolyfillTest, MulVecMatF16) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({x, y});
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Multiply(ty.vec3<f16>(), x, y));
+        b.Let("a", b.Multiply(x, y));
         b.Return(func);
     });
 
@@ -272,7 +272,7 @@ TEST_F(HlslWriter_BinaryPolyfillTest, MulMatVecF32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({x, y});
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Multiply(ty.vec3<f32>(), x, y));
+        b.Let("a", b.Multiply(x, y));
         b.Return(func);
     });
 
@@ -307,7 +307,7 @@ TEST_F(HlslWriter_BinaryPolyfillTest, MulMatVecF16) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({x, y});
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Multiply(ty.vec3<f16>(), x, y));
+        b.Let("a", b.Multiply(x, y));
         b.Return(func);
     });
 
@@ -342,7 +342,7 @@ TEST_F(HlslWriter_BinaryPolyfillTest, MulMatMat32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({x, y});
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Multiply(ty.mat3x3<f32>(), x, y));
+        b.Let("a", b.Multiply(x, y));
         b.Return(func);
     });
 
@@ -377,7 +377,7 @@ TEST_F(HlslWriter_BinaryPolyfillTest, MulMatMat16) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({x, y});
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Multiply(ty.mat3x3<f16>(), x, y));
+        b.Let("a", b.Multiply(x, y));
         b.Return(func);
     });
 

@@ -362,7 +362,7 @@ struct State {
                 if (val->Type() != ty.u32()) {
                     idx = b.Convert(ty.u32(), val)->Result();
                 }
-                offset->expr.Push(b.Multiply(ty.u32(), idx, u32(elm_size))->Result());
+                offset->expr.Push(b.Multiply(idx, u32(elm_size))->Result());
             },
             TINT_ICE_ON_NO_MATCH);
     }
@@ -660,7 +660,7 @@ struct State {
 
                 b.LoopRange(0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
                     auto* access = b.Access(ty.ptr<function>(arr->ElemType()), result_arr, idx);
-                    auto* stride = b.Multiply<u32>(idx, u32(arr->ImplicitStride()));
+                    auto* stride = b.Multiply(idx, u32(arr->ImplicitStride()));
                     auto* byte_offset = b.Add<u32>(p, stride);
                     b.Store(access, MakeLoad(inst, var, arr->ElemType(), byte_offset->Result()));
                 });
@@ -687,7 +687,7 @@ struct State {
 
                 b.LoopRange(0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
                     auto* from = b.Access(arr->ElemType(), obj, idx);
-                    auto* stride = b.Multiply<u32>(idx, u32(arr->ImplicitStride()));
+                    auto* stride = b.Multiply(idx, u32(arr->ImplicitStride()));
                     auto* byte_offset = b.Add<u32>(p, stride);
                     MakeStore(inst, var, from->Result(), byte_offset->Result());
                 });

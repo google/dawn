@@ -257,8 +257,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             TINT_IR_ASSERT(ir, vert_out_position);
             auto one_div_w =
                 builder.Divide(ty.f32(), 1_f, builder.Swizzle(ty.f32(), vert_out_position, {3u}));
-            auto z_div_w = builder.Multiply(ty.f32(), one_div_w,
-                                            builder.Swizzle(ty.f32(), vert_out_position, {2u}));
+            auto z_div_w =
+                builder.Multiply(one_div_w, builder.Swizzle(ty.f32(), vert_out_position, {2u}));
             value =
                 builder
                     .Construct(ty.vec4f(), builder.Swizzle(ty.vec2f(), vert_out_position, {0, 1}),
@@ -297,7 +297,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // Viewport remapping depth normalization equation.
         // https://www.w3.org/TR/webgpu/#coordinate-systems#:~:text=Viewport%20coordinates
         auto* max_minus_min = builder.Subtract(ty.f32(), max, min);
-        auto* rhs = builder.Multiply(ty.f32(), max_minus_min, frag_depth);
+        auto* rhs = builder.Multiply(max_minus_min, frag_depth);
         return builder.Add(ty.f32(), min, rhs)->Result();
     }
 

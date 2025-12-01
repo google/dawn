@@ -83,7 +83,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NonStruct) {
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
         b.Append(ifelse->True(), [&] {
-            b.Multiply(ty.vec4<f32>(), position, b.Add(ty.f32(), color1, color2));
+            b.Multiply(position, b.Add(ty.f32(), color1, color2));
             b.ExitIf(ifelse);
         });
         b.Return(ep);
@@ -198,7 +198,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Struct) {
             auto* position = b.Access(ty.vec4<f32>(), str_param, 1_i);
             auto* color1 = b.Access(ty.f32(), str_param, 2_i);
             auto* color2 = b.Access(ty.f32(), str_param, 3_i);
-            b.Multiply(ty.vec4<f32>(), position, b.Add(ty.f32(), color1, color2));
+            b.Multiply(position, b.Add(ty.f32(), color1, color2));
             b.ExitIf(ifelse);
         });
         b.Return(ep);
@@ -324,7 +324,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Mixed) {
         b.Append(ifelse->True(), [&] {
             auto* position = b.Access(ty.vec4<f32>(), str_param, 0_i);
             auto* color1 = b.Access(ty.f32(), str_param, 1_i);
-            b.Multiply(ty.vec4<f32>(), position, b.Add(ty.f32(), color1, color2));
+            b.Multiply(position, b.Add(ty.f32(), color1, color2));
             b.ExitIf(ifelse);
         });
         b.Return(ep);
@@ -883,7 +883,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_NonStruct) {
     ep->SetParams({subgroup_invocation_id, subgroup_size});
 
     b.Append(ep->Block(), [&] {
-        b.Let("x", b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size));
+        b.Let("x", b.Multiply(subgroup_invocation_id, subgroup_size));
         b.Return(ep);
     });
 
@@ -950,7 +950,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_Struct) {
     b.Append(ep->Block(), [&] {
         auto* subgroup_invocation_id = b.Access(ty.u32(), str_param, 0_i);
         auto* subgroup_size = b.Access(ty.u32(), str_param, 1_i);
-        b.Let("x", b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size));
+        b.Let("x", b.Multiply(subgroup_invocation_id, subgroup_size));
         b.Return(ep);
     });
 
@@ -1019,7 +1019,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_WithNonSubgroupParam
     ep->SetParams({invocation_id, subgroup_invocation_id, subgroup_size});
 
     b.Append(ep->Block(), [&] {
-        auto* x = b.Let("x", b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size));
+        auto* x = b.Let("x", b.Multiply(subgroup_invocation_id, subgroup_size));
         b.Let("y", b.Add(ty.u32(), x, b.Access(ty.u32(), invocation_id, 0_u)));
         b.Return(ep);
     });
@@ -1085,7 +1085,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_WithNonSubgroupParam
     ep->SetParams({subgroup_invocation_id, subgroup_size, invocation_id});
 
     b.Append(ep->Block(), [&] {
-        auto* x = b.Let("x", b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size));
+        auto* x = b.Let("x", b.Multiply(subgroup_invocation_id, subgroup_size));
         b.Let("y", b.Add(ty.u32(), x, b.Access(ty.u32(), invocation_id, 0_u)));
         b.Return(ep);
     });
@@ -1151,7 +1151,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_WithNonSubgroupParam
     ep->SetParams({subgroup_invocation_id, invocation_id, subgroup_size});
 
     b.Append(ep->Block(), [&] {
-        auto* x = b.Let("x", b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size));
+        auto* x = b.Let("x", b.Multiply(subgroup_invocation_id, subgroup_size));
         b.Let("y", b.Add(ty.u32(), x, b.Access(ty.u32(), invocation_id, 0_u)));
         b.Return(ep);
     });
@@ -1211,7 +1211,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_NonStruct) {
     ep->SetParams({num_workgroups});
 
     b.Append(ep->Block(), [&] {
-        b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Multiply(num_workgroups, num_workgroups);
         b.Return(ep);
     });
 
@@ -1260,7 +1260,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_NumWorkgroups_NonSt
     ep->SetParams({num_workgroups});
 
     b.Append(ep->Block(), [&] {
-        b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Multiply(num_workgroups, num_workgroups);
         b.Return(ep);
     });
 
@@ -1334,7 +1334,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_Struct) {
 
     b.Append(ep->Block(), [&] {
         auto* num_workgroups = b.Access(ty.vec3<u32>(), str_param, 0_i);
-        b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Multiply(num_workgroups, num_workgroups);
         b.Return(ep);
     });
 
@@ -1405,7 +1405,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_NumWorkgroups_Struc
 
     b.Append(ep->Block(), [&] {
         auto* num_workgroups = b.Access(ty.vec3<u32>(), str_param, 0_i);
-        b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Multiply(num_workgroups, num_workgroups);
         b.Return(ep);
     });
 
@@ -1479,7 +1479,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_ExplicitBinding
     ep->SetParams({num_workgroups});
 
     b.Append(ep->Block(), [&] {
-        b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Multiply(num_workgroups, num_workgroups);
         b.Return(ep);
     });
 
@@ -1529,7 +1529,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_AutoBinding) {
     ep->SetParams({num_workgroups});
 
     b.Append(ep->Block(), [&] {
-        b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Multiply(num_workgroups, num_workgroups);
         b.Return(ep);
     });
 
@@ -1611,7 +1611,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_WithNonWorkgrou
     ep->SetParams({invocation_id, num_workgroups});
 
     b.Append(ep->Block(), [&] {
-        b.Multiply(ty.vec3<u32>(), b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
+        b.Multiply(b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
         b.Return(ep);
     });
 
@@ -1671,7 +1671,7 @@ TEST_F(HlslWriterTransformTest,
     ep->SetParams({invocation_id, num_workgroups});
 
     b.Append(ep->Block(), [&] {
-        b.Multiply(ty.vec3<u32>(), b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
+        b.Multiply(b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
         b.Return(ep);
     });
 
@@ -1744,7 +1744,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_WithNonWorkgrou
     ep->SetParams({num_workgroups, invocation_id});
 
     b.Append(ep->Block(), [&] {
-        b.Multiply(ty.vec3<u32>(), b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
+        b.Multiply(b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
         b.Return(ep);
     });
 
@@ -1804,7 +1804,7 @@ TEST_F(HlslWriterTransformTest,
     ep->SetParams({num_workgroups, invocation_id});
 
     b.Append(ep->Block(), [&] {
-        b.Multiply(ty.vec3<u32>(), b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
+        b.Multiply(b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
         b.Return(ep);
     });
 
@@ -4136,7 +4136,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupId_NonLinearWorkgroup
     auto* ep = b.ComputeFunction("foo", 8_u, 8_u, 1_u);
     ep->SetParams({subgroup_id});
     b.Append(ep->Block(), [&] {
-        b.Let("x", b.Multiply(ty.u32(), subgroup_id, subgroup_id));
+        b.Let("x", b.Multiply(subgroup_id, subgroup_id));
         b.Return(ep);
     });
 
@@ -4198,7 +4198,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumSubgroups_NonLinearWorkgro
     auto* ep = b.ComputeFunction("foo", 8_u, 8_u, 1_u);
     ep->SetParams({num_subgroups});
     b.Append(ep->Block(), [&] {
-        b.Let("x", b.Multiply(ty.u32(), num_subgroups, num_subgroups));
+        b.Let("x", b.Multiply(num_subgroups, num_subgroups));
         b.Return(ep);
     });
 
@@ -4263,7 +4263,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupId_Then_NumSubgroups_
     auto* ep = b.ComputeFunction("foo", 8_u, 8_u, 1_u);
     ep->SetParams({subgroup_id, num_subgroups});
     b.Append(ep->Block(), [&] {
-        b.Let("x", b.Multiply(ty.u32(), subgroup_id, num_subgroups));
+        b.Let("x", b.Multiply(subgroup_id, num_subgroups));
         b.Return(ep);
     });
 
@@ -4330,7 +4330,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumSubgroups_Then_SubgroupId_
     auto* ep = b.ComputeFunction("foo", 8_u, 8_u, 1_u);
     ep->SetParams({num_subgroups, subgroup_id});
     b.Append(ep->Block(), [&] {
-        b.Let("x", b.Multiply(ty.u32(), subgroup_id, num_subgroups));
+        b.Let("x", b.Multiply(subgroup_id, num_subgroups));
         b.Return(ep);
     });
 
@@ -4397,7 +4397,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupIdAndNumSubgroups_Lin
     auto* ep = b.ComputeFunction("foo", 64_u, 1_u, 1_u);
     ep->SetParams({subgroup_id, num_subgroups});
     b.Append(ep->Block(), [&] {
-        b.Let("x", b.Multiply(ty.u32(), subgroup_id, num_subgroups));
+        b.Let("x", b.Multiply(subgroup_id, num_subgroups));
         b.Return(ep);
     });
 
@@ -4455,7 +4455,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupIdAndNumSubgroups_Lin
     auto* ep = b.ComputeFunction("foo", 1_u, 64_u, 1_u);
     ep->SetParams({subgroup_id, num_subgroups});
     b.Append(ep->Block(), [&] {
-        b.Let("x", b.Multiply(ty.u32(), subgroup_id, num_subgroups));
+        b.Let("x", b.Multiply(subgroup_id, num_subgroups));
         b.Return(ep);
     });
 
@@ -4513,7 +4513,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupIdAndNumSubgroups_Lin
     auto* ep = b.ComputeFunction("foo", 1_u, 1_u, 64_u);
     ep->SetParams({subgroup_id, num_subgroups});
     b.Append(ep->Block(), [&] {
-        b.Let("x", b.Multiply(ty.u32(), subgroup_id, num_subgroups));
+        b.Let("x", b.Multiply(subgroup_id, num_subgroups));
         b.Return(ep);
     });
 
@@ -4575,7 +4575,7 @@ TEST_F(HlslWriterTransformTest,
     auto* ep = b.ComputeFunction("foo", 64_u, 1_u, 1_u);
     ep->SetParams({subgroup_id, num_subgroups, local_invocation_index});
     b.Append(ep->Block(), [&] {
-        b.Let("x", b.Multiply(ty.u32(), subgroup_id, local_invocation_index));
+        b.Let("x", b.Multiply(subgroup_id, local_invocation_index));
         b.Return(ep);
     });
 

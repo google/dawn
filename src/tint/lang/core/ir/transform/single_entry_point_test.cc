@@ -330,11 +330,11 @@ TEST_F(IR_SingleEntryPointTest, DirectOverridesWithInitializer) {
     Value* init2 = nullptr;
     Value* init3 = nullptr;
     b.Append(mod.root_block, [&] {
-        init1 = b.Multiply(ty.i32(), 2_i, 4_i)->Result();
-        auto* x = b.Multiply(ty.i32(), 2_i, 4_i);
+        init1 = b.Multiply(2_i, 4_i)->Result();
+        auto* x = b.Multiply(2_i, 4_i);
         init2 = b.Add(ty.i32(), x, 4_i)->Result();
 
-        auto* y = b.Multiply(ty.i32(), 3_i, 5_i);
+        auto* y = b.Multiply(3_i, 5_i);
         init3 = b.Add(ty.i32(), y, 5_i)->Result();
     });
 

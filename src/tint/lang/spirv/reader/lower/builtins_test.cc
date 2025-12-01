@@ -2613,7 +2613,7 @@ TEST_F(SpirvReader_BuiltinsTest, Modf_Scalar) {
     b.Append(ep->Block(), [&] {  //
         auto* v = b.Var(ty.ptr<function, f32>());
         auto* res = b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kModf, 50_f, v);
-        b.Let(b.Multiply(ty.f32(), res, res));
+        b.Let(b.Multiply(res, res));
         b.Return(ep);
     });
 
@@ -2661,7 +2661,7 @@ TEST_F(SpirvReader_BuiltinsTest, Modf_Vector) {
         auto* v = b.Var(ty.ptr<function, vec2<f32>>());
         auto* res = b.Call<spirv::ir::BuiltinCall>(ty.vec2<f32>(), spirv::BuiltinFn::kModf,
                                                    b.Splat(ty.vec2<f32>(), 50_f), v);
-        b.Let(b.Multiply(ty.vec2<f32>(), res, res));
+        b.Let(b.Multiply(res, res));
         b.Return(ep);
     });
 
@@ -2708,7 +2708,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_ScalarSigned) {
     b.Append(ep->Block(), [&] {  //
         auto* v = b.Var(ty.ptr<function, i32>());
         auto* res = b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kFrexp, 50_f, v);
-        b.Let(b.Multiply(ty.f32(), res, res));
+        b.Let(b.Multiply(res, res));
         b.Return(ep);
     });
 
@@ -2755,7 +2755,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_ScalarUnSigned) {
     b.Append(ep->Block(), [&] {  //
         auto* v = b.Var(ty.ptr<function, u32>());
         auto* res = b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kFrexp, 50_f, v);
-        b.Let(b.Multiply(ty.f32(), res, res));
+        b.Let(b.Multiply(res, res));
         b.Return(ep);
     });
 
@@ -2804,7 +2804,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_VectorSigned) {
         auto* v = b.Var(ty.ptr<function, vec2<i32>>());
         auto* res = b.Call<spirv::ir::BuiltinCall>(ty.vec2<f32>(), spirv::BuiltinFn::kFrexp,
                                                    b.Splat(ty.vec2<f32>(), 50_f), v);
-        b.Let(b.Multiply(ty.vec2<f32>(), res, res));
+        b.Let(b.Multiply(res, res));
         b.Return(ep);
     });
 
@@ -2852,7 +2852,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_VectorUnsigned) {
         auto* v = b.Var(ty.ptr<function, vec2<u32>>());
         auto* res = b.Call<spirv::ir::BuiltinCall>(ty.vec2<f32>(), spirv::BuiltinFn::kFrexp,
                                                    b.Splat(ty.vec2<f32>(), 50_f), v);
-        b.Let(b.Multiply(ty.vec2<f32>(), res, res));
+        b.Let(b.Multiply(res, res));
         b.Return(ep);
     });
 

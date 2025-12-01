@@ -1099,7 +1099,7 @@ TEST_F(IRToProgramTest, BinaryOp_Multiply) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.Multiply(ty.i32(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Multiply(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -1967,7 +1967,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Multiply) {
 
     b.Append(fn->Block(), [&] {
         auto* v = Var<function, i32>("v");
-        b.Store(v, b.Multiply(ty.i32(), b.Load(v), 8_i));
+        b.Store(v, b.Multiply(b.Load(v), 8_i));
 
         b.Return(fn);
     });
@@ -2043,7 +2043,7 @@ TEST_F(IRToProgramTest, LetUsedTwice) {
     fn->SetParams({i});
 
     b.Append(fn->Block(), [&] {
-        auto* v = b.Let("v", b.Multiply(ty.i32(), i, 2_i));
+        auto* v = b.Let("v", b.Multiply(i, 2_i));
         b.Return(fn, b.Add(ty.i32(), v, v));
     });
 

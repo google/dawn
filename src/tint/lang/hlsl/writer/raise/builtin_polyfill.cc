@@ -364,7 +364,7 @@ struct State {
 
             auto* one =
                 b.MatchWidth(is_f16 ? b.ConstantValue(1_h) : b.ConstantValue(1_f), result_ty);
-            auto* mul = b.Multiply(result_ty, args[0], args[0]);
+            auto* mul = b.Multiply(args[0], args[0]);
             auto* sub = b.Subtract(result_ty, mul, one);
             auto* sqrt = b.Call(result_ty, core::BuiltinFn::kSqrt, sub);
             auto* add = b.Add(result_ty, args[0], sqrt);
@@ -383,7 +383,7 @@ struct State {
 
             auto* one =
                 b.MatchWidth(is_f16 ? b.ConstantValue(1_h) : b.ConstantValue(1_f), result_ty);
-            auto* mul = b.Multiply(result_ty, args[0], args[0]);
+            auto* mul = b.Multiply(args[0], args[0]);
             auto* add_one = b.Add(result_ty, mul, one);
             auto* sqrt = b.Call(result_ty, core::BuiltinFn::kSqrt, add_one);
             auto* add = b.Add(result_ty, args[0], sqrt);
@@ -409,7 +409,7 @@ struct State {
             auto* one_minus_x = b.Subtract(result_ty, one, args[0]);
             auto* div = b.Divide(result_ty, one_plus_x, one_minus_x);
             auto* log = b.Call(result_ty, core::BuiltinFn::kLog, div);
-            auto* mul = b.Multiply(result_ty, log, half);
+            auto* mul = b.Multiply(log, half);
 
             call->Result()->ReplaceAllUsesWith(mul->Result());
         });
@@ -1549,7 +1549,7 @@ struct State {
             auto* clamp_upper = b.Splat(ty.vec2<f32>(), 1_f);
             auto* clamp =
                 b.Call(ty.vec2<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
-            auto* mul = b.Multiply(ty.vec2<f32>(), clamp, 32767_f);
+            auto* mul = b.Multiply(clamp, 32767_f);
             auto* round = b.Call(ty.vec2<f32>(), core::BuiltinFn::kRound, mul);
             auto* conv = b.Convert(ty.vec2<i32>(), round);
             auto* res = b.And(ty.vec2<i32>(), conv, b.Splat(ty.vec2<i32>(), 0xffff_i));
@@ -1589,7 +1589,7 @@ struct State {
             auto* clamp_upper = b.Splat(ty.vec2<f32>(), 1_f);
             auto* clamp =
                 b.Call(ty.vec2<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
-            auto* mul = b.Multiply(ty.vec2<f32>(), clamp, 65535_f);
+            auto* mul = b.Multiply(clamp, 65535_f);
             auto* round = b.Call(ty.vec2<f32>(), core::BuiltinFn::kRound, mul);
             auto* conv = b.Convert(ty.vec2<u32>(), round);
             auto* lower = b.Swizzle(ty.u32(), conv, {0});
@@ -1621,7 +1621,7 @@ struct State {
             auto* clamp_upper = b.Splat(ty.vec4<f32>(), 1_f);
             auto* clamp =
                 b.Call(ty.vec4<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
-            auto* mul = b.Multiply(ty.vec4<f32>(), clamp, 127_f);
+            auto* mul = b.Multiply(clamp, 127_f);
             auto* round = b.Call(ty.vec4<f32>(), core::BuiltinFn::kRound, mul);
             auto* conv = b.Convert(ty.vec4<i32>(), round);
             auto* band = b.And(ty.vec4<i32>(), conv, b.Splat(ty.vec4<i32>(), 0xff_i));
@@ -1662,7 +1662,7 @@ struct State {
             auto* clamp_upper = b.Splat(ty.vec4<f32>(), 1_f);
             auto* clamp =
                 b.Call(ty.vec4<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
-            auto* mul = b.Multiply(ty.vec4<f32>(), clamp, 255_f);
+            auto* mul = b.Multiply(clamp, 255_f);
             auto* round = b.Call(ty.vec4<f32>(), core::BuiltinFn::kRound, mul);
             auto* conv = b.Convert(ty.vec4<u32>(), round);
             auto* x = b.Swizzle(ty.u32(), conv, {0});
@@ -1791,7 +1791,7 @@ struct State {
             // The returned fraction is always positive, but for WGSL, we want it to keep the sign
             // of the input value.
             auto* arg_sign = BuildSign(arg);
-            fract = b.Multiply(arg_ty, arg_sign, fract);
+            fract = b.Multiply(arg_sign, fract);
             // Replace the call with new result struct
             b.ConstructWithResult(call->DetachResult(), fract,
                                   b.Convert(arg_i32_ty, b.Load(exp_out)));
@@ -1920,7 +1920,7 @@ struct State {
                     inst = b.Add(call_type, exclusive_call, arg1);
                     break;
                 case core::BuiltinFn::kSubgroupInclusiveMul:
-                    inst = b.Multiply(call_type, exclusive_call, arg1);
+                    inst = b.Multiply(exclusive_call, arg1);
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);

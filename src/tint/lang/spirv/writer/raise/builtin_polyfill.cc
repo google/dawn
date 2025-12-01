@@ -548,7 +548,7 @@ struct State {
                 b.InsertBefore(builtin, [&] {
                     auto* e1 = b.Access(elty, v1, u32(i));
                     auto* e2 = b.Access(elty, v2, u32(i));
-                    auto* mul = b.Multiply(elty, e1, e2);
+                    auto* mul = b.Multiply(e1, e2);
                     if (sum) {
                         sum = b.Add(elty, sum, mul);
                     } else {

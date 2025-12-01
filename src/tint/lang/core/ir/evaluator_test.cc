@@ -350,7 +350,7 @@ TEST_F(IR_EvaluatorTest, BuiltinCall) {
 
 TEST_F(IR_EvaluatorTest, MultiExpression) {
     auto* abs = b.Call(ty.i32(), core::BuiltinFn::kAbs, -1_i);
-    auto* mul = b.Multiply(ty.i32(), abs, 5_i);
+    auto* mul = b.Multiply(abs, 5_i);
     auto* cons = b.Construct(ty.vec2<i32>(), mul, mul);
     auto* inst = b.Swizzle(ty.i32(), cons, {1});
 

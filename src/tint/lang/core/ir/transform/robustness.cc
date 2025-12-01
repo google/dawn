@@ -471,7 +471,7 @@ struct State {
             TINT_IR_ASSERT(ir, arr_ty->Count()->Is<type::RuntimeArrayCount>());
             array_length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, arr)->Result(0);
             if (components_per_element > 1) {
-                array_length = b.Multiply<u32>(array_length, u32(components_per_element))->Result();
+                array_length = b.Multiply(array_length, u32(components_per_element))->Result();
             }
         }
 
@@ -493,7 +493,7 @@ struct State {
         b.InsertBefore(insertion_point, [&] {
             // The beginning of the last row/column is at `offset + (major_dim-1)*stride`.
             // We then add another `min_stride` elements to get to the end of the accessed memory.
-            auto* last_slice = b.Add<u32>(offset, b.Multiply<u32>(stride, u32(major_dim - 1)));
+            auto* last_slice = b.Add<u32>(offset, b.Multiply(stride, u32(major_dim - 1)));
             auto* end = b.Add<u32>(last_slice, u32(min_stride));
             auto* in_bounds = b.LessThanEqual(end, array_length);
             if (call->Func() == BuiltinFn::kSubgroupMatrixLoad) {

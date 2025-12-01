@@ -312,7 +312,7 @@ struct State {
 
             core::ir::Value* v =
                 b.Call(vec4f, core::BuiltinFn::kClamp, Vector{arg, neg_one, one})->Result();
-            v = b.Multiply(vec4f, b.Splat(vec4f, 127_f), v)->Result();
+            v = b.Multiply(b.Splat(vec4f, 127_f), v)->Result();
             v = b.Add(vec4f, b.Splat(vec4f, 0.5_f), v)->Result();
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result();
             v = b.Convert(ty.vec4<i32>(), v)->Result();
@@ -344,7 +344,7 @@ struct State {
             auto* one = b.Splat(vec4f, 1_f);
 
             auto* v = b.Call(vec4f, core::BuiltinFn::kClamp, Vector{arg, zero, one})->Result();
-            v = b.Multiply(vec4f, b.Splat(vec4f, 255_f), v)->Result();
+            v = b.Multiply(b.Splat(vec4f, 255_f), v)->Result();
             v = b.Add(vec4f, b.Splat(vec4f, 0.5_f), v)->Result();
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result();
             v = b.Convert(vec4u, v)->Result();
@@ -562,7 +562,7 @@ struct State {
             value = b.Constant(f32(kRadToDeg));
         }
         b.InsertBefore(call, [&] {
-            auto* mul = b.Multiply(arg->Type(), arg, value);
+            auto* mul = b.Multiply(arg, value);
             mul->SetResult(call->DetachResult());
         });
         call->Destroy();
@@ -599,10 +599,9 @@ struct State {
 
             // Smoothstep is a well defined function.
             // result = t * t * (3.0 - 2.0 * t);
-            auto* smooth_result =
-                b.Multiply(type, t_clamped,
-                           b.Multiply(type, t_clamped,
-                                      b.Subtract(type, three, b.Multiply(type, two, t_clamped))));
+            auto* smooth_result = b.Multiply(
+                t_clamped,
+                b.Multiply(t_clamped, b.Subtract(type, three, b.Multiply(two, t_clamped))));
             smooth_result->SetResult(call->DetachResult());
         });
         call->Destroy();
@@ -886,7 +885,7 @@ struct State {
             value = b.Constant(f32(kDegToRad));
         }
         b.InsertBefore(call, [&] {
-            auto* mul = b.Multiply(arg->Type(), arg, value);
+            auto* mul = b.Multiply(arg, value);
             mul->SetResult(call->DetachResult());
         });
         call->Destroy();
@@ -913,9 +912,9 @@ struct State {
             // case above) results in FXC emitting a `dp2` for the dot,
             // followed by a `mul 2`, which works around the bug.
             auto* dot = b.Call(ty.f32(), core::BuiltinFn::kDot, e1, e2);
-            auto* factor = b.Multiply(ty.f32(), -2.0_f, dot);
+            auto* factor = b.Multiply(-2.0_f, dot);
             auto* vfactor = b.Construct(vec_ty, factor);
-            auto* mul = b.Multiply(vec_ty, vfactor, e2);
+            auto* mul = b.Multiply(vfactor, e2);
             b.AddWithResult(call->DetachResult(), e1, mul);
         });
         call->Destroy();
