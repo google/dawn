@@ -166,6 +166,86 @@ func TestFSTestOSWrapper_Walk(t *testing.T) {
 				filepath.Join(root, "dir", "subdir"),
 			},
 		},
+		{
+			name: "Walk symlink to directory",
+			root: filepath.Join(root, "link"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "dir", "file.txt"): "",
+				},
+				initialDirs: []string{
+					filepath.Join(root, "dir"),
+				},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): filepath.Join(root, "dir"),
+				},
+			},
+			walkFn: func(t *testing.T, visited *[]string) filepath.WalkFunc {
+				return func(path string, info os.FileInfo, err error) error {
+					require.NoError(t, err)
+					*visited = append(*visited, path)
+					return nil
+				}
+			},
+			expectedPaths: []string{
+				filepath.Join(root, "link"),
+			},
+		},
+		{
+			name: "Walk through symlink to directory",
+			root: filepath.Join(root, "link", "subdir"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "dir", "subdir", "file.txt"): "",
+				},
+				initialDirs: []string{
+					filepath.Join(root, "dir", "subdir"),
+				},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): filepath.Join(root, "dir"),
+				},
+			},
+			walkFn: func(t *testing.T, visited *[]string) filepath.WalkFunc {
+				return func(path string, info os.FileInfo, err error) error {
+					require.NoError(t, err)
+					*visited = append(*visited, path)
+					return nil
+				}
+			},
+			expectedPaths: []string{
+				filepath.Join(root, "link", "subdir"),
+				filepath.Join(root, "link", "subdir", "file.txt"),
+			},
+		},
+		{
+			name: "Walk directory containing a symlink",
+			root: filepath.Join(root, "dir"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "dir", "file.txt"):  "",
+					filepath.Join(root, "other", "foo.txt"): "",
+				},
+				initialDirs: []string{
+					filepath.Join(root, "dir"),
+					filepath.Join(root, "other"),
+				},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "dir", "link"): filepath.Join(root, "other"),
+				},
+			},
+			walkFn: func(t *testing.T, visited *[]string) filepath.WalkFunc {
+				return func(path string, info os.FileInfo, err error) error {
+					require.NoError(t, err)
+					*visited = append(*visited, path)
+					return nil
+				}
+			},
+			expectedPaths: []string{
+				filepath.Join(root, "dir"),
+				filepath.Join(root, "dir", "file.txt"),
+				filepath.Join(root, "dir", "link"),
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -258,6 +338,46 @@ func TestFSTestOSWrapper_Walk_MatchesReal(t *testing.T) {
 				}
 				return nil
 			},
+		},
+		{
+			name: "Walk symlink to directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join("dir", "file.txt"): "",
+				},
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link": "dir",
+				},
+			}},
+			root: "link",
+		},
+		{
+			name: "Walk through symlink to directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join("dir", "subdir", "file.txt"): "",
+				},
+				initialDirs: []string{filepath.Join("dir", "subdir")},
+				initialSymlinks: map[string]string{
+					"link": "dir",
+				},
+			}},
+			root: filepath.Join("link", "subdir"),
+		},
+		{
+			name: "Walk directory containing a symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join("dir", "file.txt"):  "",
+					filepath.Join("other", "foo.txt"): "",
+				},
+				initialDirs: []string{"dir", "other"},
+				initialSymlinks: map[string]string{
+					filepath.Join("dir", "link"): filepath.Join("other"),
+				},
+			}},
+			root: "dir",
 		},
 	}
 

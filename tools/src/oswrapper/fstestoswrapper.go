@@ -485,23 +485,37 @@ func (w FSTestFilesystemReaderWriter) Stat(name string) (os.FileInfo, error) {
 }
 
 func (w FSTestFilesystemReaderWriter) Walk(root string, fn filepath.WalkFunc) error {
-	fsRoot := w.CleanPath(root)
+	p := w.CleanPath(root)
 
-	walkDirFn := func(path string, d fs.DirEntry, err error) error {
-		// The path from fs.WalkDir is relative to the FS root.
-		// We need to reconstruct the path that the user's filepath.WalkFunc expects.
-		// The contract for filepath.Walk is that the paths passed to the callback
-		// have the original `root` argument as a prefix.
+	// Resolve the parent of the root to handle symlinks in the path leading to the root.
+	// We do not resolve the root itself, because Walk should not follow the root if it is a symlink.
+	parent := path.Dir(p)
+	base := path.Base(p)
+
+	resolvedParent, err := w.resolvePath(parent)
+	if err != nil {
+		return fn(root, nil, err)
+	}
+
+	// Construct the path to start walking from in the internal map.
+	fsRoot := base
+	if resolvedParent != "." {
+		fsRoot = resolvedParent + "/" + base
+	}
+
+	walkDirFn := func(pathStr string, d fs.DirEntry, err error) error {
+		// fsRoot is where we started walking in the internal FS.
+		// pathStr is the current path in the internal FS.
+
+		rel, errRel := filepath.Rel(fsRoot, pathStr)
+		if errRel != nil {
+			return fn(pathStr, nil, fmt.Errorf("internal error creating relative path: %w", errRel))
+		}
+
 		var fullPath string
-		if path == fsRoot {
+		if rel == "." {
 			fullPath = root
 		} else {
-			// fs.WalkDir gives a path from the FS root. We need the part relative
-			// to the walk's root, and then join it with the original root string.
-			rel, errRel := filepath.Rel(fsRoot, path)
-			if errRel != nil {
-				return fn(path, nil, fmt.Errorf("internal error creating relative path: %w", errRel))
-			}
 			fullPath = filepath.Join(root, rel)
 		}
 
