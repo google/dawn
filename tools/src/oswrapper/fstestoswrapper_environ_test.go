@@ -35,7 +35,7 @@ import (
   "github.com/stretchr/testify/require"
 )
 
-// Tests for the EnvironProvider component of FSTestOSWrapper.
+// Tests for the environ-related components of FSTestOSWrapper.
 
 // NOTE: There are two types of tests in this file, those suffixed with _MatchesReal and those that
 // are not. Those that are suffixed are meant to be testing the behaviour of the FSTestOSWrapper
