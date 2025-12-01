@@ -433,8 +433,27 @@ func (w FSTestFilesystemReaderWriter) ReadDir(dir string) ([]os.DirEntry, error)
 	return fs.ReadDir(w.fs(), p)
 }
 
+// renamedFileInfo wraps an os.FileInfo to override its Name() method.
+type renamedFileInfo struct {
+	os.FileInfo
+	name string
+}
+
+func (i *renamedFileInfo) Name() string {
+	return i.name
+}
+
 func (w FSTestFilesystemReaderWriter) Stat(name string) (os.FileInfo, error) {
-	return fs.Stat(w.fs(), w.CleanPath(name))
+	p := w.CleanPath(name)
+	resolved, err := w.resolvePath(p)
+	if err != nil {
+		return nil, err
+	}
+	info, err := fs.Stat(w.fs(), resolved)
+	if err != nil {
+		return nil, err
+	}
+	return &renamedFileInfo{FileInfo: info, name: filepath.Base(name)}, nil
 }
 
 func (w FSTestFilesystemReaderWriter) Walk(root string, fn filepath.WalkFunc) error {

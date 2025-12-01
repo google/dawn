@@ -70,8 +70,9 @@ func getTestRoot() string {
 
 // unittestSetup is a helper for setting up the FSTestOSWrapper for an unittest.
 type unittestSetup struct {
-	initialFiles map[string]string
-	initialDirs  []string
+	initialFiles    map[string]string
+	initialDirs     []string
+	initialSymlinks map[string]string // map[linkPath]targetPath
 }
 
 // setup initializes the FSTestOSWrapper with the files and directories specified
@@ -86,6 +87,10 @@ func (s unittestSetup) setup(t *testing.T) oswrapper.FSTestOSWrapper {
 	}
 	for _, path := range s.initialDirs {
 		require.NoError(t, testFS.MkdirAll(path, 0755))
+	}
+	for linkPath, targetPath := range s.initialSymlinks {
+		require.NoError(t, testFS.MkdirAll(filepath.Dir(linkPath), 0755))
+		require.NoError(t, testFS.Symlink(targetPath, linkPath))
 	}
 	return testFS
 }
@@ -146,6 +151,11 @@ func (s matchesRealSetup) setup(t *testing.T) (string, oswrapper.OSWrapper, oswr
 	}
 	for _, path := range s.initialDirs {
 		require.NoError(t, os.MkdirAll(filepath.Join(realRoot, path), 0755))
+	}
+	for linkPath, targetPath := range s.initialSymlinks {
+		realPath := filepath.Join(realRoot, linkPath)
+		require.NoError(t, os.MkdirAll(filepath.Dir(realPath), 0755))
+		require.NoError(t, os.Symlink(targetPath, realPath))
 	}
 
 	return realRoot, realFS, testFS
@@ -1365,6 +1375,76 @@ func TestFSTestOSWrapper_Stat(t *testing.T) {
 				wantErrIs: os.ErrNotExist,
 			},
 		},
+		{
+			name: "Stat symlink to file",
+			path: filepath.Join(root, "link_to_file"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_file"): "file.txt",
+				},
+			},
+			verify: func(t *testing.T, info os.FileInfo) {
+				require.False(t, info.IsDir())
+				require.Equal(t, "link_to_file", info.Name())
+				require.Equal(t, int64(7), info.Size())
+			},
+		},
+		{
+			name: "Stat symlink to dir",
+			path: filepath.Join(root, "link_to_dir"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_dir"): "dir",
+				},
+			},
+			verify: func(t *testing.T, info os.FileInfo) {
+				require.True(t, info.IsDir())
+				require.Equal(t, "link_to_dir", info.Name())
+			},
+		},
+		{
+			name: "Stat broken symlink",
+			path: filepath.Join(root, "broken_link"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "broken_link"): "nonexistent",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Stat symlink to symlink",
+			path: filepath.Join(root, "link1"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link1"): "link2",
+					filepath.Join(root, "link2"): "file.txt",
+				},
+			},
+			verify: func(t *testing.T, info os.FileInfo) {
+				require.False(t, info.IsDir())
+				require.Equal(t, "link1", info.Name())
+				require.Equal(t, int64(7), info.Size())
+			},
+		},
+		{
+			name: "Stat symlink loop",
+			path: filepath.Join(root, "loop1"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): "loop2",
+					filepath.Join(root, "loop2"): "loop1",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -1414,6 +1494,35 @@ func TestFSTestOSWrapper_Stat_MatchesReal(t *testing.T) {
 		{
 			name: "Stat empty path",
 			path: "",
+		},
+		{
+			name: "Stat symlink to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+				initialSymlinks: map[string]string{
+					"link_to_file": "file.txt",
+				},
+			}},
+			path: "link_to_file",
+		},
+		{
+			name: "Stat symlink to dir",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link_to_dir": "dir",
+				},
+			}},
+			path: "link_to_dir",
+		},
+		{
+			name: "Stat broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"broken_link": "nonexistent",
+				},
+			}},
+			path: "broken_link",
 		},
 	}
 
