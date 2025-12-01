@@ -126,6 +126,52 @@ func TestFSTestOSWrapper_ReadFile(t *testing.T) {
 				wantErrIs: syscall.ELOOP,
 			},
 		},
+		{
+			name: "Read symlink chain",
+			path: filepath.Join(root, "link1"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link1"): "link2",
+					filepath.Join(root, "link2"): "file.txt",
+				},
+			},
+			expectedContent: []byte("content"),
+		},
+		{
+			name: "Read absolute symlink",
+			path: filepath.Join(root, "abs_link"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "abs_link"): filepath.Join(root, "file.txt"),
+				},
+			},
+			expectedContent: []byte("content"),
+		},
+		{
+			name: "Read symlink to parent",
+			path: filepath.Join(root, "subdir", "link"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialDirs:  []string{filepath.Join(root, "subdir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "subdir", "link"): "../file.txt",
+				},
+			},
+			expectedContent: []byte("content"),
+		},
+		{
+			name: "Read file through symlink dir",
+			path: filepath.Join(root, "link_dir", "file.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "subdir", "file.txt"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_dir"): "subdir",
+				},
+			},
+			expectedContent: []byte("content"),
+		},
 	}
 
 	for _, tc := range tests {
@@ -208,6 +254,38 @@ func TestFSTestOSWrapper_ReadFile_MatchesReal(t *testing.T) {
 				},
 			}},
 			path: "loop1",
+		},
+		{
+			name: "Read symlink chain",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+				initialSymlinks: map[string]string{
+					"link1": "link2",
+					"link2": "file.txt",
+				},
+			}},
+			path: "link1",
+		},
+		{
+			name: "Read symlink to parent",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+				initialDirs:  []string{"subdir"},
+				initialSymlinks: map[string]string{
+					"subdir/link": "../file.txt",
+				},
+			}},
+			path: "subdir/link",
+		},
+		{
+			name: "Read file through symlink dir",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"subdir/file.txt": "content"},
+				initialSymlinks: map[string]string{
+					"link_dir": "subdir",
+				},
+			}},
+			path: "link_dir/file.txt",
 		},
 	}
 
