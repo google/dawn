@@ -32,6 +32,7 @@
 #include "dawn/common/Enumerator.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/ScopedIgnoreValidationErrors.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
@@ -1760,7 +1761,7 @@ TEST_P(DynamicBindingArrayTests, UpdateAfterRemoveRequiresGPUIsFinished_ErrorBin
         // Ignore all validation errors for this test as they are tested in other places, and we're
         // checking immediate validation returned as a wgpu::Status and supposed to be the same for
         // valid and invalid objects.
-        device.PushErrorScope(wgpu::ErrorFilter::Validation);
+        utils::ScopedIgnoreValidationErrors ignoreErrors(device);
 
         // Removing while the dynamic array is still potentially in used by the GPU is an error. But
         // immediately after we know that the GPU is finished, it is valid.
@@ -1785,9 +1786,6 @@ TEST_P(DynamicBindingArrayTests, UpdateAfterRemoveRequiresGPUIsFinished_ErrorBin
         } else {
             EXPECT_EQ(wgpu::Status::Error, bg.Update(&entry));
         }
-
-        device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
-                             [](wgpu::PopErrorScopeStatus, wgpu::ErrorType, wgpu::StringView) {});
     }
 }
 

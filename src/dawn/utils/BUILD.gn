@@ -56,6 +56,8 @@ static_library("wgpu_utils") {
     "ComboRenderBundleEncoderDescriptor.h",
     "ComboRenderPipelineDescriptor.cpp",
     "ComboRenderPipelineDescriptor.h",
+    "ScopedIgnoreValidationErrors.cpp",
+    "ScopedIgnoreValidationErrors.h",
     "TextureUtils.cpp",
     "TextureUtils.h",
     "WGPUHelpers.cpp",

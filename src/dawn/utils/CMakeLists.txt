@@ -48,12 +48,14 @@ dawn_add_library(
     "${DAWN_UTILS_GEN_HEADERS}"
     "ComboRenderBundleEncoderDescriptor.h"
     "ComboRenderPipelineDescriptor.h"
+    "ScopedIgnoreValidationErrors.h"
     "TextureUtils.h"
     "WGPUHelpers.h"
   SOURCES
     "${DAWN_UTILS_GEN_SOURCES}"
     "ComboRenderBundleEncoderDescriptor.cpp"
     "ComboRenderPipelineDescriptor.cpp"
+    "ScopedIgnoreValidationErrors.cpp"
     "TextureUtils.cpp"
     "WGPUHelpers.cpp"
   DEPENDS
