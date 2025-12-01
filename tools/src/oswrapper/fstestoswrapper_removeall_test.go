@@ -165,6 +165,39 @@ func TestFSTestOSWrapper_RemoveAll(t *testing.T) {
 				filepath.Join(root, "link_to_dir"),
 			},
 		},
+		{
+			name: "Remove broken symlink",
+			path: filepath.Join(root, "broken_link"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{filepath.Join(root, "broken_link"): "nonexistent"},
+			},
+			expectMissing: []string{filepath.Join(root, "broken_link")},
+		},
+		{
+			name: "Remove file through symlinked directory",
+			path: filepath.Join(root, "link_to_dir", "file.txt"),
+			setup: unittestSetup{
+				initialFiles:    map[string]string{filepath.Join(root, "dir", "file.txt"): "content"},
+				initialDirs:     []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{filepath.Join(root, "link_to_dir"): filepath.Join(root, "dir")},
+			},
+			expectMissing: []string{filepath.Join(root, "dir", "file.txt")},
+			expectPresent: []string{
+				filepath.Join(root, "dir"),
+				filepath.Join(root, "link_to_dir"),
+			},
+		},
+		{
+			name: "Remove symlink loop",
+			path: filepath.Join(root, "link1"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link1"): "link2",
+					filepath.Join(root, "link2"): "link1",
+				},
+			},
+			expectMissing: []string{filepath.Join(root, "link1"), filepath.Join(root, "link2")},
+		},
 	}
 
 	for _, tc := range tests {
@@ -271,6 +304,32 @@ func TestFSTestOSWrapper_RemoveAll_MatchesReal(t *testing.T) {
 				initialSymlinks: map[string]string{"link_to_dir": "dir"},
 			}},
 			pathToRemove: filepath.Join("link_to_dir", "subdir"),
+		},
+		{
+			name: "Remove broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{"broken_link": "nonexistent"},
+			}},
+			pathToRemove: "broken_link",
+		},
+		{
+			name: "Remove file through symlinked directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles:    map[string]string{filepath.Join("dir", "file.txt"): "content"},
+				initialDirs:     []string{"dir"},
+				initialSymlinks: map[string]string{"link_to_dir": "dir"},
+			}},
+			pathToRemove: filepath.Join("link_to_dir", "file.txt"),
+		},
+		{
+			name: "Remove symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"link1": "link2",
+					"link2": "link1",
+				},
+			}},
+			pathToRemove: "link1",
 		},
 	}
 
