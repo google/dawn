@@ -32,6 +32,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -246,6 +247,50 @@ func TestFSTestOSWrapper_Walk(t *testing.T) {
 				filepath.Join(root, "dir", "link"),
 			},
 		},
+		{
+			name: "Walk broken symlink",
+			root: filepath.Join(root, "link"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link"): filepath.Join(root, "nonexistent"),
+				},
+			},
+			walkFn: func(t *testing.T, visited *[]string) filepath.WalkFunc {
+				return func(path string, info os.FileInfo, err error) error {
+					require.NoError(t, err)
+					*visited = append(*visited, path)
+					return nil
+				}
+			},
+			expectedPaths: []string{
+				filepath.Join(root, "link"),
+			},
+		},
+		{
+			name: "Walk path with symlink loop",
+			root: filepath.Join(root, "loop1", "foo"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): filepath.Join(root, "loop2"),
+					filepath.Join(root, "loop2"): filepath.Join(root, "loop1"),
+				},
+			},
+			walkFn: func(t *testing.T, visited *[]string) filepath.WalkFunc {
+				return func(path string, info os.FileInfo, err error) error {
+					// We expect an error here because the root path cannot be resolved
+					require.Error(t, err)
+					require.ErrorIs(t, err, syscall.ELOOP)
+					*visited = append(*visited, path)
+					return err
+				}
+			},
+			expectedPaths: []string{
+				filepath.Join(root, "loop1", "foo"),
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -378,6 +423,25 @@ func TestFSTestOSWrapper_Walk_MatchesReal(t *testing.T) {
 				},
 			}},
 			root: "dir",
+		},
+		{
+			name: "Walk broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"link": "nonexistent",
+				},
+			}},
+			root: "link",
+		},
+		{
+			name: "Walk path with symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			root: filepath.Join("loop1", "foo"),
 		},
 	}
 
