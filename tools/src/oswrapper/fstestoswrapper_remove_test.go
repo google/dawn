@@ -142,6 +142,48 @@ func TestFSTestOSWrapper_Remove(t *testing.T) {
 				filepath.Join(root, "dir", "file.txt"),
 			},
 		},
+		{
+			name: "Remove broken symlink",
+			path: filepath.Join(root, "broken_link"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{filepath.Join(root, "broken_link"): "nonexistent"},
+			},
+			expectMissing: []string{filepath.Join(root, "broken_link")},
+		},
+		{
+			name: "Remove symlink loop",
+			path: filepath.Join(root, "loop1"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): filepath.Join(root, "loop2"),
+					filepath.Join(root, "loop2"): filepath.Join(root, "loop1"),
+				},
+			},
+			expectMissing: []string{filepath.Join(root, "loop1"), filepath.Join(root, "loop2")},
+		},
+		{
+			name: "Error removing path with symlink loop in parent",
+			path: filepath.Join(root, "loop1", "file.txt"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): filepath.Join(root, "loop2"),
+					filepath.Join(root, "loop2"): filepath.Join(root, "loop1"),
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
+			},
+		},
+		{
+			name: "Error removing path with broken symlink in parent",
+			path: filepath.Join(root, "broken_link", "file.txt"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{filepath.Join(root, "broken_link"): "nonexistent"},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -237,6 +279,40 @@ func TestFSTestOSWrapper_Remove_MatchesReal(t *testing.T) {
 				initialSymlinks: map[string]string{"link_to_dir": "dir"},
 			}},
 			pathToRemove: filepath.Join("link_to_dir", "file.txt"),
+		},
+		{
+			name: "Remove broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{"broken_link": "nonexistent"},
+			}},
+			pathToRemove: "broken_link",
+		},
+		{
+			name: "Remove symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			pathToRemove: "loop1",
+		},
+		{
+			name: "Error removing path with symlink loop in parent",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			pathToRemove: filepath.Join("loop1", "file.txt"),
+		},
+		{
+			name: "Error removing path with broken symlink in parent",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{"broken_link": "nonexistent"},
+			}},
+			pathToRemove: filepath.Join("broken_link", "file.txt"),
 		},
 	}
 
