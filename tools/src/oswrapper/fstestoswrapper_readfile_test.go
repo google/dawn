@@ -27,12 +27,12 @@
 package oswrapper_test
 
 import (
-  "os"
-  "path/filepath"
-  "syscall"
-  "testing"
+	"os"
+	"path/filepath"
+	"syscall"
+	"testing"
 
-  "github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 // Tests for the ReadFile() function of FSTestOSWrapper.
@@ -44,186 +44,186 @@ import (
 // defined expectations.
 
 func TestFSTestOSWrapper_ReadFile(t *testing.T) {
-  root := getTestRoot()
-  tests := []struct {
-    name            string
-    setup           unittestSetup
-    path            string
-    expectedContent []byte
-    expectedError
-  }{
-    {
-      name: "Read existing file",
-      path: filepath.Join(root, "file.txt"),
-      setup: unittestSetup{
-        initialFiles: map[string]string{filepath.Join(root, "file.txt"): "hello world"},
-      },
-      expectedContent: []byte("hello world"),
-    },
-    {
-      name: "Read non-existent file",
-      path: filepath.Join(root, "nonexistent.txt"),
-      expectedError: expectedError{
-        wantErrIs: os.ErrNotExist,
-      },
-    },
-    {
-      name: "Read a directory",
-      path: filepath.Join(root, "mydir"),
-      setup: unittestSetup{
-        initialDirs: []string{filepath.Join(root, "mydir")},
-      },
-      expectedError: expectedError{
-        wantErrMsg: "is a directory",
-      },
-    },
-    {
-      name: "Read symlink to file",
-      path: filepath.Join(root, "link_to_file"),
-      setup: unittestSetup{
-        initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
-        initialSymlinks: map[string]string{
-          filepath.Join(root, "link_to_file"): "file.txt",
-        },
-      },
-      expectedContent: []byte("content"),
-    },
-    {
-      name: "Read symlink to dir",
-      path: filepath.Join(root, "link_to_dir"),
-      setup: unittestSetup{
-        initialDirs: []string{filepath.Join(root, "dir")},
-        initialSymlinks: map[string]string{
-          filepath.Join(root, "link_to_dir"): "dir",
-        },
-      },
-      expectedError: expectedError{
-        wantErrMsg: "is a directory",
-      },
-    },
-    {
-      name: "Read broken symlink",
-      path: filepath.Join(root, "broken_link"),
-      setup: unittestSetup{
-        initialSymlinks: map[string]string{
-          filepath.Join(root, "broken_link"): "nonexistent",
-        },
-      },
-      expectedError: expectedError{
-        wantErrIs: os.ErrNotExist,
-      },
-    },
-    {
-      name: "Read symlink loop",
-      path: filepath.Join(root, "loop1"),
-      setup: unittestSetup{
-        initialSymlinks: map[string]string{
-          filepath.Join(root, "loop1"): "loop2",
-          filepath.Join(root, "loop2"): "loop1",
-        },
-      },
-      expectedError: expectedError{
-        wantErrIs: syscall.ELOOP,
-      },
-    },
-  }
+	root := getTestRoot()
+	tests := []struct {
+		name            string
+		setup           unittestSetup
+		path            string
+		expectedContent []byte
+		expectedError
+	}{
+		{
+			name: "Read existing file",
+			path: filepath.Join(root, "file.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "hello world"},
+			},
+			expectedContent: []byte("hello world"),
+		},
+		{
+			name: "Read non-existent file",
+			path: filepath.Join(root, "nonexistent.txt"),
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Read a directory",
+			path: filepath.Join(root, "mydir"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "mydir")},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "is a directory",
+			},
+		},
+		{
+			name: "Read symlink to file",
+			path: filepath.Join(root, "link_to_file"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_file"): "file.txt",
+				},
+			},
+			expectedContent: []byte("content"),
+		},
+		{
+			name: "Read symlink to dir",
+			path: filepath.Join(root, "link_to_dir"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "dir")},
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "link_to_dir"): "dir",
+				},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "is a directory",
+			},
+		},
+		{
+			name: "Read broken symlink",
+			path: filepath.Join(root, "broken_link"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "broken_link"): "nonexistent",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Read symlink loop",
+			path: filepath.Join(root, "loop1"),
+			setup: unittestSetup{
+				initialSymlinks: map[string]string{
+					filepath.Join(root, "loop1"): "loop2",
+					filepath.Join(root, "loop2"): "loop1",
+				},
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ELOOP,
+			},
+		},
+	}
 
-  for _, tc := range tests {
-    t.Run(tc.name, func(t *testing.T) {
-      wrapper := tc.setup.setup(t)
-      content, err := wrapper.ReadFile(tc.path)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := tc.setup.setup(t)
+			content, err := wrapper.ReadFile(tc.path)
 
-      if tc.expectedError.Check(t, err) {
-        return
-      }
+			if tc.expectedError.Check(t, err) {
+				return
+			}
 
-      require.Equal(t, tc.expectedContent, content)
-    })
-  }
+			require.Equal(t, tc.expectedContent, content)
+		})
+	}
 }
 
 func TestFSTestOSWrapper_ReadFile_MatchesReal(t *testing.T) {
-  tests := []struct {
-    name  string
-    setup matchesRealSetup
-    path  string
-  }{
-    {
-      name: "Read existing file",
-      setup: matchesRealSetup{unittestSetup{
-        initialFiles: map[string]string{
-          "file.txt": "hello world",
-        },
-      }},
-      path: "file.txt",
-    },
-    {
-      name: "Error on non-existent file",
-      path: "nonexistent.txt",
-    },
-    {
-      name: "Error on path is a directory",
-      setup: matchesRealSetup{unittestSetup{
-        initialDirs: []string{
-          "mydir",
-        },
-      }},
-      path: "mydir",
-    },
-    {
-      name: "Read symlink to file",
-      setup: matchesRealSetup{unittestSetup{
-        initialFiles: map[string]string{"file.txt": "content"},
-        initialSymlinks: map[string]string{
-          "link_to_file": "file.txt",
-        },
-      }},
-      path: "link_to_file",
-    },
-    {
-      name: "Read symlink to dir",
-      setup: matchesRealSetup{unittestSetup{
-        initialDirs: []string{"dir"},
-        initialSymlinks: map[string]string{
-          "link_to_dir": "dir",
-        },
-      }},
-      path: "link_to_dir",
-    },
-    {
-      name: "Read broken symlink",
-      setup: matchesRealSetup{unittestSetup{
-        initialSymlinks: map[string]string{
-          "broken_link": "nonexistent",
-        },
-      }},
-      path: "broken_link",
-    },
-    {
-      name: "Read symlink loop",
-      setup: matchesRealSetup{unittestSetup{
-        initialSymlinks: map[string]string{
-          "loop1": "loop2",
-          "loop2": "loop1",
-        },
-      }},
-      path: "loop1",
-    },
-  }
+	tests := []struct {
+		name  string
+		setup matchesRealSetup
+		path  string
+	}{
+		{
+			name: "Read existing file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "hello world",
+				},
+			}},
+			path: "file.txt",
+		},
+		{
+			name: "Error on non-existent file",
+			path: "nonexistent.txt",
+		},
+		{
+			name: "Error on path is a directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{
+					"mydir",
+				},
+			}},
+			path: "mydir",
+		},
+		{
+			name: "Read symlink to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+				initialSymlinks: map[string]string{
+					"link_to_file": "file.txt",
+				},
+			}},
+			path: "link_to_file",
+		},
+		{
+			name: "Read symlink to dir",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"dir"},
+				initialSymlinks: map[string]string{
+					"link_to_dir": "dir",
+				},
+			}},
+			path: "link_to_dir",
+		},
+		{
+			name: "Read broken symlink",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"broken_link": "nonexistent",
+				},
+			}},
+			path: "broken_link",
+		},
+		{
+			name: "Read symlink loop",
+			setup: matchesRealSetup{unittestSetup{
+				initialSymlinks: map[string]string{
+					"loop1": "loop2",
+					"loop2": "loop1",
+				},
+			}},
+			path: "loop1",
+		},
+	}
 
-  for _, tc := range tests {
-    t.Run(tc.name, func(t *testing.T) {
-      realRoot, realFS, testFS := tc.setup.setup(t)
-      defer os.RemoveAll(realRoot)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			realRoot, realFS, testFS := tc.setup.setup(t)
+			defer os.RemoveAll(realRoot)
 
-      // Execute
-      realContent, realErr := realFS.ReadFile(filepath.Join(realRoot, tc.path))
-      testContent, testErr := testFS.ReadFile(tc.path)
+			// Execute
+			realContent, realErr := realFS.ReadFile(filepath.Join(realRoot, tc.path))
+			testContent, testErr := testFS.ReadFile(tc.path)
 
-      requireErrorsMatch(t, realErr, testErr)
-      if realErr == nil {
-        require.Equal(t, realContent, testContent)
-      }
-    })
-  }
+			requireErrorsMatch(t, realErr, testErr)
+			if realErr == nil {
+				require.Equal(t, realContent, testContent)
+			}
+		})
+	}
 }
