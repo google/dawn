@@ -60,9 +60,6 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_experimental_framebuffer_fetch") {
         return Extension::kChromiumExperimentalFramebufferFetch;
     }
-    if (str == "chromium_experimental_immediate") {
-        return Extension::kChromiumExperimentalImmediate;
-    }
     if (str == "chromium_experimental_pixel_local") {
         return Extension::kChromiumExperimentalPixelLocal;
     }
@@ -104,8 +101,6 @@ std::string_view ToString(Extension value) {
             return "chromium_experimental_dynamic_binding";
         case Extension::kChromiumExperimentalFramebufferFetch:
             return "chromium_experimental_framebuffer_fetch";
-        case Extension::kChromiumExperimentalImmediate:
-            return "chromium_experimental_immediate";
         case Extension::kChromiumExperimentalPixelLocal:
             return "chromium_experimental_pixel_local";
         case Extension::kChromiumExperimentalSubgroupMatrix:
