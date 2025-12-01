@@ -722,13 +722,18 @@ func (w FSTestFilesystemReaderWriter) RemoveAll(path string) error {
 func (w FSTestFilesystemReaderWriter) Symlink(oldname, newname string) error {
 	p := w.CleanPath(newname)
 
-	if _, exists := w.FS[p]; exists {
-		return &os.PathError{Op: "symlink", Path: newname, Err: os.ErrExist}
-	}
+	parent := path.Dir(p)
+	base := path.Base(p)
 
-	parent := filepath.Dir(p)
+	resolvedParent := parent
 	if parent != "." && parent != "" {
-		parentInfo, parentExists := w.FS[parent]
+		var err error
+		resolvedParent, err = w.resolvePath(parent)
+		if err != nil {
+			return &os.PathError{Op: "symlink", Path: newname, Err: err}
+		}
+
+		parentInfo, parentExists := w.FS[resolvedParent]
 		if !parentExists {
 			return &os.PathError{Op: "symlink", Path: newname, Err: os.ErrNotExist}
 		}
@@ -737,11 +742,22 @@ func (w FSTestFilesystemReaderWriter) Symlink(oldname, newname string) error {
 		}
 	}
 
+	var targetPath string
+	if resolvedParent == "." {
+		targetPath = base
+	} else {
+		targetPath = resolvedParent + "/" + base
+	}
+
+	if _, exists := w.FS[targetPath]; exists {
+		return &os.PathError{Op: "symlink", Path: newname, Err: os.ErrExist}
+	}
+
 	// For symlinks, the Data field holds the target path.
 	// We do NOT clean oldname (the target), as it might be a relative path intended
 	// to be resolved relative to the link's location, or an absolute path.
 	// We store it exactly as provided.
-	w.FS[p] = &fstest.MapFile{
+	w.FS[targetPath] = &fstest.MapFile{
 		Data:    []byte(oldname),
 		Mode:    fs.ModeSymlink | 0777,
 		ModTime: time.Now(),

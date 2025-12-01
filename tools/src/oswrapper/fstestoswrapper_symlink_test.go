@@ -50,6 +50,7 @@ func TestFSTestOSWrapper_Symlink(t *testing.T) {
 		setup         unittestSetup
 		oldname       string
 		newname       string
+		expectedKey   string
 		expectedError expectedError
 	}{
 		{
@@ -89,6 +90,16 @@ func TestFSTestOSWrapper_Symlink(t *testing.T) {
 				wantErrMsg: "not a directory",
 			},
 		},
+		{
+			name: "Parent is a symlink to a directory",
+			setup: unittestSetup{
+				initialDirs:     []string{filepath.Join(root, "real_dir")},
+				initialSymlinks: map[string]string{filepath.Join(root, "link_dir"): filepath.Join(root, "real_dir")},
+			},
+			oldname:     "target",
+			newname:     filepath.Join(root, "link_dir", "link"),
+			expectedKey: filepath.Join(root, "real_dir", "link"),
+		},
 	}
 
 	for _, tc := range tests {
@@ -101,11 +112,77 @@ func TestFSTestOSWrapper_Symlink(t *testing.T) {
 			}
 
 			// Verify the symlink entry
-			cleanedPath := wrapper.CleanPath(tc.newname)
+			checkPath := tc.newname
+			if tc.expectedKey != "" {
+				checkPath = tc.expectedKey
+			}
+			cleanedPath := wrapper.CleanPath(checkPath)
 			file, ok := wrapper.FS[cleanedPath]
 			require.True(t, ok, "symlink entry not found in FS map")
 			require.Equal(t, fs.ModeSymlink, file.Mode&fs.ModeSymlink)
 			require.Equal(t, tc.oldname, string(file.Data))
+		})
+	}
+}
+
+func TestFSTestOSWrapper_Symlink_MatchesReal(t *testing.T) {
+	tests := []struct {
+		name    string
+		setup   matchesRealSetup
+		oldname string
+		newname string
+	}{
+		{
+			name:    "Create valid symlink",
+			oldname: "target",
+			newname: "link",
+		},
+		{
+			name:    "Create symlink in subdirectory",
+			setup:   matchesRealSetup{unittestSetup{initialDirs: []string{"subdir"}}},
+			oldname: "../target",
+			newname: filepath.Join("subdir", "link"),
+		},
+		{
+			name:    "Destination exists",
+			setup:   matchesRealSetup{unittestSetup{initialFiles: map[string]string{"exists": ""}}},
+			oldname: "target",
+			newname: "exists",
+		},
+		{
+			name:    "Parent directory does not exist",
+			oldname: "target",
+			newname: filepath.Join("missing", "link"),
+		},
+		{
+			name:    "Parent is not a directory",
+			setup:   matchesRealSetup{unittestSetup{initialFiles: map[string]string{"file": ""}}},
+			oldname: "target",
+			newname: filepath.Join("file", "link"),
+		},
+		{
+			name: "Parent is a symlink to a directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs:     []string{"real_dir"},
+				initialSymlinks: map[string]string{"link_dir": "real_dir"},
+			}},
+			oldname: "target",
+			newname: filepath.Join("link_dir", "link"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			realRoot, realFS, testFS := tc.setup.setup(t)
+			defer os.RemoveAll(realRoot)
+
+			realErr := realFS.Symlink(tc.oldname, filepath.Join(realRoot, tc.newname))
+			testErr := testFS.Symlink(tc.oldname, tc.newname)
+
+			requireErrorsMatch(t, realErr, testErr)
+			if realErr == nil {
+				requireFileSystemsMatch(t, realRoot, testFS)
+			}
 		})
 	}
 }
