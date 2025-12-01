@@ -52,6 +52,7 @@ cc_library(
     "resource_binding.cc",
     "resource_table.cc",
     "shader_io.cc",
+    "unary_polyfill.cc",
     "var_for_dynamic_index.cc",
   ],
   hdrs = [
@@ -68,6 +69,7 @@ cc_library(
     "resource_binding.h",
     "resource_table.h",
     "shader_io.h",
+    "unary_polyfill.h",
     "var_for_dynamic_index.h",
   ],
   deps = [
@@ -122,6 +124,7 @@ cc_library(
     "pass_matrix_by_pointer_test.cc",
     "remove_unreachable_in_loop_continuing_test.cc",
     "shader_io_test.cc",
+    "unary_polyfill_test.cc",
     "var_for_dynamic_index_test.cc",
   ],
   deps = [

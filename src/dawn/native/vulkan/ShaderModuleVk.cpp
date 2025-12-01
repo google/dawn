@@ -212,9 +212,10 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.tintOptions.bindings = std::move(bindings);
     req.tintOptions.resource_binding = std::move(resourceBindingConfig);
 
-    req.tintOptions.disable_robustness = !GetDevice()->IsRobustnessEnabled();
-    req.tintOptions.disable_workgroup_init =
-        GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
+    req.tintOptions.workarounds.polyfill_unary_f32_negation =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanPolyfillF32Negation);
+    req.tintOptions.workarounds.polyfill_f32_abs =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanPolyfillF32Abs);
     req.tintOptions.disable_polyfill_integer_div_mod =
         GetDevice()->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
 

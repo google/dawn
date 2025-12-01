@@ -91,6 +91,12 @@ struct Options {
         /// Set to `true` to always pass matrices to user functions by pointer instead of by value.
         bool pass_matrix_by_pointer = false;
 
+        /// Set to `true` to generate polyfill for f32 negation.
+        bool polyfill_unary_f32_negation = false;
+
+        /// Set to `true` to generate polyfill for f32 abs.
+        bool polyfill_f32_abs = false;
+
         TINT_REFLECT(Workarounds,
                      polyfill_case_switch,
                      scalarize_max_min_clamp,
@@ -98,7 +104,9 @@ struct Options {
                      polyfill_pack_unpack_4x8_norm,
                      subgroup_shuffle_clamped,
                      polyfill_subgroup_broadcast_f16,
-                     pass_matrix_by_pointer);
+                     pass_matrix_by_pointer,
+                     polyfill_unary_f32_negation,
+                     polyfill_f32_abs);
     };
 
     /// Any options which are controlled by the presence/absence of a vulkan extension.

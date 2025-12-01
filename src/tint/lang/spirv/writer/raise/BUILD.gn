@@ -71,6 +71,8 @@ if (tint_build_spv_writer) {
       "resource_table.h",
       "shader_io.cc",
       "shader_io.h",
+      "unary_polyfill.cc",
+      "unary_polyfill.h",
       "var_for_dynamic_index.cc",
       "var_for_dynamic_index.h",
     ]
@@ -123,6 +125,7 @@ if (tint_build_unittests) {
         "pass_matrix_by_pointer_test.cc",
         "remove_unreachable_in_loop_continuing_test.cc",
         "shader_io_test.cc",
+        "unary_polyfill_test.cc",
         "var_for_dynamic_index_test.cc",
       ]
       deps = [

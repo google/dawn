@@ -67,6 +67,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsAndroidImgTec() const;
     bool IsPixel10() const;
     bool IsIntelMesa() const;
+    bool IsAmdMesa() const;
     bool IsAndroidHuawei() const;
     bool IsSwiftshader() const;
 
