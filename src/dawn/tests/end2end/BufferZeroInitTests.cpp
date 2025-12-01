@@ -1307,8 +1307,8 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     // without any copy commands on Metal on AMD GPU.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsAMD());
 
-    // TODO(crbug.com/440123094): Implement QuerySetWGPU
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+    // TODO(crbug.com/463893789): Get rid of explicit WebGPUOnXXX suppressions.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Metal));
 
     // Skip if timestamp feature is not supported on device
     DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::TimestampQuery}));

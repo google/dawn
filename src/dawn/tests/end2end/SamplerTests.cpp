@@ -318,7 +318,7 @@ class StaticSamplerTest : public SamplerTest {
 // modes.
 TEST_P(StaticSamplerTest, AddressMode) {
     DAWN_SUPPRESS_TEST_IF(IsWARP());
-    // TODO(crbug.com/413053623): Fix static sampler feature.
+    // TODO(crbug.com/465184301): Fix static sampler feature.
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     // TODO(crbug.com/459848481): Fails on Win/Snapdragon X Elite w/ D3D12.
@@ -342,7 +342,7 @@ TEST_P(StaticSamplerTest, AddressMode) {
 // correctly.
 TEST_P(StaticSamplerTest, PassThroughUserFunctionParameters) {
     DAWN_SUPPRESS_TEST_IF(IsWARP());
-    // TODO(crbug.com/413053623): Fix static sampler feature.
+    // TODO(crbug.com/465184301): Fix static sampler feature.
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     // TODO(crbug.com/459848481): Fails on Win/Snapdragon X Elite w/ D3D12.

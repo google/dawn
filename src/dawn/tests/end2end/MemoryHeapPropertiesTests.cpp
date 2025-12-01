@@ -78,7 +78,7 @@ TEST_P(MemoryHeapPropertiesTest, GetMemoryHeapProperties) {
     }
 }
 
-// TODO(crbug.com/440123094): Implement adapter nextInChain for WebGPUBackend.
+// TODO(crbug.com/462137660): Implement adapter nextInChain for WebGPUBackend.
 DAWN_INSTANTIATE_TEST(MemoryHeapPropertiesTest,
                       D3D11Backend(),
                       D3D12Backend(),
