@@ -28,6 +28,7 @@
 #include "dawn/native/DynamicArrayState.h"
 
 #include "dawn/common/Enumerator.h"
+#include "dawn/common/Range.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Queue.h"
@@ -285,6 +286,17 @@ bool DynamicArrayState::IsDestroyed() const {
 bool DynamicArrayState::CanBeUpdated(BindingIndex i) const {
     DAWN_ASSERT(!mDestroyed);
     return mBindingState[i].availableAfter <= mDevice->GetQueue()->GetCompletedCommandSerial();
+}
+
+std::optional<BindingIndex> DynamicArrayState::GetFreeSlot() const {
+    // TODO(https://crbug.com/435317394): This is O(n) in the number of bindings. We could make it
+    // O(logN) with a heap of the free slots that's maintained over time.
+    for (BindingIndex i : Range(mAPISize)) {
+        if (CanBeUpdated(i)) {
+            return {i};
+        }
+    }
+    return {};
 }
 
 void DynamicArrayState::Update(BindingIndex i, const BindGroupEntryContents& contents) {

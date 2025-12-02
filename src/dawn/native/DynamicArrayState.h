@@ -75,6 +75,7 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     BufferBase* GetMetadataBuffer() const;
     bool IsDestroyed() const;
     bool CanBeUpdated(BindingIndex i) const;
+    std::optional<BindingIndex> GetFreeSlot() const;
 
     // Methods that mutate the state of bindings in the dynamic array. They keep track of the
     // necessary metadata buffer updates required for dynamic type checks in the shader to match

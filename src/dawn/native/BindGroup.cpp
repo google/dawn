@@ -571,6 +571,18 @@ BindGroupEntryContents ToBindGroupEntryContents(const BindGroupEntry& entry) {
     };
 }
 
+BindGroupEntry ToBindGroupEntry(BindingNumber binding, const BindGroupEntryContents& contents) {
+    return {
+        .nextInChain = contents.nextInChain,
+        .binding = uint32_t(binding),
+        .buffer = contents.buffer,
+        .offset = contents.offset,
+        .size = contents.size,
+        .sampler = contents.sampler,
+        .textureView = contents.textureView,
+    };
+}
+
 }  // anonymous namespace
 
 ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
@@ -925,6 +937,12 @@ Ref<BindGroupBase> BindGroupBase::MakeError(DeviceBase* device,
                 }
             }
 
+            // TODO(https://issues.chromium.org/435317394): Take into accounts that entries that are
+            // listed in range of the dynamic binding array should be marked as used from creation
+            // even for error bind groups. (to match what a client-side state tracking would do).
+            // Port this TO-DO over to GPUResourceTable instead of handling it for the "dynamic
+            // binding array" proposal.
+
             mLayout = descriptor->layout;
             mDynamicArray = AcquireRef(new DynamicArrayState(
                 GetDevice(), BindingIndex(dynamicArraySize),
@@ -991,8 +1009,19 @@ uint32_t BindGroupBase::APIInsertBinding(const BindGroupEntryContents* contents)
         return wgpu::kInvalidBinding;
     }
 
-    // TODO(435317394): Implement bindless bindgroup updates.
-    DAWN_UNREACHABLE();
+    std::optional<BindingIndex> freeSlot = mDynamicArray->GetFreeSlot();
+    if (!freeSlot) {
+        return wgpu::kInvalidBinding;
+    }
+
+    BindingNumber binding =
+        GetLayout()->GetAPIDynamicArrayStart() + BindingNumber(uint32_t(*freeSlot));
+
+    BindGroupEntry entry = ToBindGroupEntry(binding, *contents);
+    wgpu::Status updateStatus = APIUpdate(&entry);
+    DAWN_ASSERT(updateStatus == wgpu::Status::Success);
+
+    return uint32_t(binding);
 }
 
 wgpu::Status BindGroupBase::APIRemoveBinding(uint32_t binding) {

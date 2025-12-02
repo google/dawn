@@ -1804,7 +1804,7 @@ TEST_F(DynamicBindingArrayTests, UpdateRemoveOnInvalidBindgroup) {
     wgpu::Texture tex = device.CreateTexture(&tDesc);
     wgpu::BindGroupEntry entry{.binding = 0, .textureView = tex.CreateView()};
 
-    // Test on a valid bindgroup that doesn't have a dynamic array.
+    // Test on a valid bindgroup that has a dynamic array.
     {
         wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
         wgpu::BindGroup bg = MakeBindGroup(bgl, 3, {});
@@ -1812,7 +1812,7 @@ TEST_F(DynamicBindingArrayTests, UpdateRemoveOnInvalidBindgroup) {
         EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry));
         EXPECT_EQ(wgpu::Status::Success, bg.RemoveBinding(entry.binding));
     }
-    // Test on a invalid bindgroup that doesn't have a dynamic array.
+    // Test on a invalid bindgroup that has a dynamic array.
     {
         wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
         wgpu::BindGroup bg;
@@ -1990,6 +1990,271 @@ TEST_F(DynamicBindingArrayTests, UpdateAfterRemoveRequiresGPUIsFinished_ErrorBin
         } else {
             EXPECT_EQ(wgpu::Status::Error, bg.Update(&entry));
         }
+    }
+}
+
+// Check that InsertBinding on a bindgroup without a dynamic array returns an wgpu::kInvalidBinding.
+TEST_F(DynamicBindingArrayTests, InsertBindingNoDynamicBindingArray) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+    wgpu::BindGroupEntryContents contents = {.textureView = tex.CreateView()};
+
+    // Success case: bind group has a dynamic array and is not an error.
+    {
+        wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+        wgpu::BindGroup bg = MakeBindGroup(bgl, 1, {});
+        EXPECT_EQ(0u, bg.InsertBinding(&contents));
+    }
+
+    // Also a success case: bind group has a dynamic array even if it is an error bind group.
+    {
+        wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+        wgpu::BindGroup bg;
+        ASSERT_DEVICE_ERROR(bg = MakeBindGroup(bgl, 1, {{20, tex.CreateView()}}));
+        ASSERT_DEVICE_ERROR(EXPECT_EQ(0u, bg.InsertBinding(&contents)));
+    }
+
+    // Error case: bind group does not have a dynamic array, and is not an error bind group.
+    {
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(device, {});
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {});
+        EXPECT_EQ(wgpu::kInvalidBinding, bg.InsertBinding(&contents));
+    }
+
+    // Also a success case: bind group does not have a dynamic array even if it is an error bind
+    // group.
+    {
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform}});
+        wgpu::BindGroup bg;
+        ASSERT_DEVICE_ERROR(bg = utils::MakeBindGroup(device, bgl, {}));
+        EXPECT_EQ(wgpu::kInvalidBinding, bg.InsertBinding(&contents));
+    }
+}
+
+// Check that InsertBinding on a destroyed bindgroup returns an wgpu::kInvalidBinding.
+TEST_F(DynamicBindingArrayTests, InsertBindingDestroyed) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+    wgpu::BindGroupEntryContents contents = {.textureView = tex.CreateView()};
+
+    // Success case: bind group has a dynamic array and is not destroyed.
+    {
+        wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+        wgpu::BindGroup bg = MakeBindGroup(bgl, 1, {});
+        EXPECT_EQ(0u, bg.InsertBinding(&contents));
+    }
+
+    // Also a success case: bind group isn't destroyed even if it is an error bind group.
+    {
+        wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+        wgpu::BindGroup bg;
+        ASSERT_DEVICE_ERROR(bg = MakeBindGroup(bgl, 1, {{20, tex.CreateView()}}));
+        ASSERT_DEVICE_ERROR(EXPECT_EQ(0u, bg.InsertBinding(&contents)));
+    }
+
+    // Error case: bind group is destroyed.
+    {
+        wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+        wgpu::BindGroup bg = MakeBindGroup(bgl, 1, {});
+        bg.Destroy();
+        EXPECT_EQ(wgpu::kInvalidBinding, bg.InsertBinding(&contents));
+    }
+
+    // Also a success case: bind group is destroyed even if it is an error bind group.
+    {
+        wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+        wgpu::BindGroup bg;
+        ASSERT_DEVICE_ERROR(bg = MakeBindGroup(bgl, 1, {{20, tex.CreateView()}}));
+        bg.Destroy();
+        EXPECT_EQ(wgpu::kInvalidBinding, bg.InsertBinding(&contents));
+    }
+}
+
+// Check that InsertBinding works (even if it produces a validation error) on error bindgroups.
+TEST_F(DynamicBindingArrayTests, InsertBindingWorksOnErrorBindGroup) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+    wgpu::BindGroupEntryContents contents = {.textureView = tex.CreateView()};
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg;
+    ASSERT_DEVICE_ERROR(bg = MakeBindGroup(bgl, 1, {{20, tex.CreateView()}}));
+    // InsertBinding returns a valid new binding, just that it also produces a validation error.
+    ASSERT_DEVICE_ERROR(EXPECT_EQ(0u, bg.InsertBinding(&contents)));
+}
+
+// Check that InsertBinding correctly takes into account that the dynamic array may not start at 0.
+TEST_F(DynamicBindingArrayTests, InsertBindingDynamicArrayStartNot0) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+    wgpu::BindGroupEntryContents contents = {.textureView = tex.CreateView()};
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture, 42);
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 1, {});
+    EXPECT_EQ(42u, bg.InsertBinding(&contents));
+}
+
+// Check that trying to insert bindings fail when no more are available.
+TEST_F(DynamicBindingArrayTests, InsertBindingFailWhenNoMoreSpace) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+    wgpu::BindGroupEntryContents contents = {.textureView = tex.CreateView()};
+
+    for (bool errorBG : {false, true}) {
+        wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+        wgpu::BindGroup bg;
+        if (errorBG) {
+            ASSERT_DEVICE_ERROR(bg = MakeBindGroup(bgl, 3, {{1000000, tex.CreateView()}}));
+        } else {
+            bg = MakeBindGroup(bgl, 3, {});
+        }
+
+        // Ignore all validation errors caused by using an error bindgroup.
+        utils::ScopedIgnoreValidationErrors ignoreErrors(errorBG ? device : nullptr);
+
+        // There is space for only three bindings.
+        EXPECT_EQ(0u, bg.InsertBinding(&contents));
+        EXPECT_EQ(1u, bg.InsertBinding(&contents));
+        EXPECT_EQ(2u, bg.InsertBinding(&contents));
+        EXPECT_EQ(wgpu::kInvalidBinding, bg.InsertBinding(&contents));
+
+        // Remove one binding (and wait for it to be recycled), it will be available for
+        // InsertBinding after which a new InsertBinding will still run out of space.
+        EXPECT_EQ(wgpu::Status::Success, bg.RemoveBinding(1));
+        UseDynamicArrayInSubmit(bg);
+        WaitForAllOperations();
+
+        EXPECT_EQ(1u, bg.InsertBinding(&contents));
+        EXPECT_EQ(wgpu::kInvalidBinding, bg.InsertBinding(&contents));
+    }
+}
+
+// Check that bindings that are inserted are unavailable for Update() until RemoveBinding.
+TEST_F(DynamicBindingArrayTests, InsertBindingPreventsUpdate) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+    wgpu::BindGroupEntry entry = {.binding = 0, .textureView = tex.CreateView()};
+    wgpu::BindGroupEntryContents contents = {.textureView = tex.CreateView()};
+
+    for (bool errorBG : {false, true}) {
+        wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+        wgpu::BindGroup bg;
+        if (errorBG) {
+            ASSERT_DEVICE_ERROR(bg = MakeBindGroup(bgl, 1, {{1000000, tex.CreateView()}}));
+        } else {
+            bg = MakeBindGroup(bgl, 1, {});
+        }
+
+        // Ignore all validation errors caused by using an error bindgroup.
+        utils::ScopedIgnoreValidationErrors ignoreErrors(errorBG ? device : nullptr);
+
+        EXPECT_EQ(0u, bg.InsertBinding(&contents));
+        EXPECT_EQ(wgpu::Status::Error, bg.Update(&entry));
+
+        // Remove one binding (and wait for it to be recycled), it will be available for Update.
+        EXPECT_EQ(wgpu::Status::Success, bg.RemoveBinding(0));
+        UseDynamicArrayInSubmit(bg);
+        WaitForAllOperations();
+
+        EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry));
+    }
+}
+
+// Check that InsertBinding skips over used slots.
+TEST_F(DynamicBindingArrayTests, InsertBindingSkipsOverUsedSlots) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+    wgpu::BindGroupEntry entry1 = {.binding = 1, .textureView = tex.CreateView()};
+    wgpu::BindGroupEntry entry3 = {.binding = 3, .textureView = tex.CreateView()};
+    wgpu::BindGroupEntryContents contents = {.textureView = tex.CreateView()};
+
+    for (bool errorBG : {false, true}) {
+        // Create a bind group with entry 1 used at creation.
+        wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+        wgpu::BindGroup bg;
+        if (errorBG) {
+            ASSERT_DEVICE_ERROR(
+                bg = MakeBindGroup(bgl, 5, {{1, tex.CreateView()}, {1000000, tex.CreateView()}}));
+            // TODO(435317394): This shouldn't be needed and instead valid bindings should mark the
+            // slot as used on creation?
+            ASSERT_DEVICE_ERROR(EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry1)));
+        } else {
+            bg = MakeBindGroup(bgl, 5, {{1, tex.CreateView()}});
+        }
+
+        // Ignore all validation errors caused by using an error bindgroup.
+        utils::ScopedIgnoreValidationErrors ignoreErrors(errorBG ? device : nullptr);
+
+        EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry3));
+
+        // InsertBinding skips over entries used at creation of by Update()
+        EXPECT_EQ(0u, bg.InsertBinding(&contents));
+        EXPECT_EQ(2u, bg.InsertBinding(&contents));
+        EXPECT_EQ(4u, bg.InsertBinding(&contents));
     }
 }
 
