@@ -62,6 +62,7 @@
     "dawn-try-win-x64-intel-uhd630-rel": "try/dawn-try-win-x64-intel-uhd630-rel/gn-args.json",
     "dawn-try-win-x64-intel-uhd770-rel": "try/dawn-try-win-x64-intel-uhd770-rel/gn-args.json",
     "dawn-try-win-x64-nvidia-gtx1660-asan": "try/dawn-try-win-x64-nvidia-gtx1660-asan/gn-args.json",
+    "dawn-try-win-x64-nvidia-gtx1660-exp-rel": "try/dawn-try-win-x64-nvidia-gtx1660-exp-rel/gn-args.json",
     "dawn-try-win-x64-nvidia-gtx1660-rel": "try/dawn-try-win-x64-nvidia-gtx1660-rel/gn-args.json",
     "dawn-try-win-x64-sws-dbg": "try/dawn-try-win-x64-sws-dbg/gn-args.json",
     "dawn-try-win-x64-sws-msvc-dbg": "try/dawn-try-win-x64-sws-msvc-dbg/gn-args.json",

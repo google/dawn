@@ -3685,6 +3685,7 @@
       }
     ]
   },
+  "dawn-win-x64-nvidia-gtx1660-exp-rel": {},
   "dawn-win-x64-nvidia-gtx1660-rel": {
     "gtest_tests": [
       {

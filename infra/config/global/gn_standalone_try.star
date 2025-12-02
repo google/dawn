@@ -546,6 +546,16 @@ dawn_win_manual_builder(
 )
 
 dawn_win_manual_builder(
+    name = "dawn-try-win-x64-nvidia-gtx1660-exp-rel",
+    description_html = "Tests release Dawn on Windows/x64 on NVIDIA GTX 1660 GPUs w/ experimental OS/driver configs. Manual only.",
+    mirrors = [
+        "ci/dawn-win-x64-builder-rel",
+        "ci/dawn-win-x64-nvidia-gtx1660-exp-rel",
+    ],
+    gn_args = "ci/dawn-win-x64-builder-rel",
+)
+
+dawn_win_manual_builder(
     name = "dawn-try-win-x64-nvidia-gtx1660-rel",
     description_html = "Tests release Dawn on Windows/x64 on NVIDIA GTX 1660 GPUs. Manual only.",
     mirrors = [
