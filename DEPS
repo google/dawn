@@ -69,7 +69,7 @@ vars = {
   'chromium_revision': 'ec72ea842bff17c725a8b3c17af0ae7537bc8bd9',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
-  'checkout_dummy_chromium': False,
+  'checkout_placeholder_chromium': False,
 }
 
 deps = {
@@ -601,9 +601,9 @@ deps = {
   # in order for the Chromium -> Dawn DEPS autoroller to work. Note that this
   # only currently works due to an explicit exception in presubmit checks
   # https://source.chromium.org/chromium/chromium/tools/depot_tools/+/dac161882feaedaabcf99db47726a999e4834a13:presubmit_canned_checks.py;l=2139
-  'third_party/dummy_chromium': {
+  'third_party/placeholder_chromium': {
     'url': '{chromium_git}/chromium/src.git' + '@' + Var('chromium_revision'),
-    'condition': 'checkout_dummy_chromium',
+    'condition': 'checkout_placeholder_chromium',
   },
 }
 
