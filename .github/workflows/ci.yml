@@ -93,14 +93,6 @@ jobs:
       SCCACHE_GHA_ENABLED: "true"
 
     steps:
-      - name: Free disk space on Linux host
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          # Prevent host from running out of space.
-          rm -rf /host/usr/share/dotnet
-          rm -rf /host/usr/local/lib/android
-          rm -rf /host/opt/ghc
-
       - uses: actions/checkout@v4
 
       - name: Extract Windows SDK build version
@@ -114,8 +106,16 @@ jobs:
         with:
           winsdk-build-version: ${{ env.WIN10_SDK_BUILD_VERSION }}
 
+      - name: Free disk space on Linux host
+        if: matrix.container.image == 'dockcross/manylinux_2_28-x64:latest'
+        run: |
+          # Prevent runner from running out of disk space
+          rm -rf /host/usr/share/dotnet
+          rm -rf /host/usr/local/lib/android
+          rm -rf /host/opt/ghc
+
       - name: Set up dependencies on linux
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.container.image == 'dockcross/manylinux_2_28-x64:latest'
         run: >
           dnf install -y mesa-libGL-devel libxcb libxcb-devel libX11-xcb libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel libXext-devel libxkbcommon libxkbcommon-devel libxkbcommon-x11-devel mesa-vulkan-drivers wayland-protocols-devel wayland-devel
 
