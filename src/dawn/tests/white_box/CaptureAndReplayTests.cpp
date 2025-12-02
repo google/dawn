@@ -1917,6 +1917,10 @@ class CaptureAndReplayDrawTests : public CaptureAndReplayTests {
         wgpu::Texture dstTexture = CreateTexture("dstTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
                                                  wgpu::TextureUsage::RenderAttachment);
 
+        wgpu::Texture depthTexture =
+            CreateTexture("depthTexture", {1}, wgpu::TextureFormat::Depth24PlusStencil8,
+                          wgpu::TextureUsage::RenderAttachment);
+
         const char* shader = R"(
             struct VOut {
                 @builtin(position) pos: vec4f,
@@ -1942,7 +1946,11 @@ class CaptureAndReplayDrawTests : public CaptureAndReplayTests {
         desc.vertex.module = module;
         desc.cFragment.module = module;
         desc.cFragment.targetCount = 1;
+        desc.depthStencil = &desc.cDepthStencil;
         desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Uint;
+        desc.cDepthStencil.format = wgpu::TextureFormat::Depth24PlusStencil8;
+        desc.cDepthStencil.depthCompare = wgpu::CompareFunction::Always;
+        desc.cDepthStencil.stencilFront.compare = wgpu::CompareFunction::Equal;
         desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
 
@@ -1950,7 +1958,8 @@ class CaptureAndReplayDrawTests : public CaptureAndReplayTests {
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-            utils::ComboRenderPassDescriptor passDescriptor({dstTexture.CreateView()});
+            utils::ComboRenderPassDescriptor passDescriptor({dstTexture.CreateView()},
+                                                            depthTexture.CreateView());
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
             pass.SetPipeline(pipeline);
             fn(pass);
@@ -2060,6 +2069,19 @@ TEST_P(CaptureAndReplayDrawTests, CaptureSetScissorRect) {
         [&](wgpu::RenderPassEncoder pass) {
             pass.Draw(1, 1, 0x11, 0x22);
             pass.SetScissorRect(0, 0, 0, 0);
+            pass.Draw(1, 1, 0x1, 0x2);
+        },
+        expected);
+}
+
+// Capture SetStencilReference. Draws twice. The second draw should be ignored because
+// it doesn't match the stencil reference.
+TEST_P(CaptureAndReplayDrawTests, CaptureSetStencilReference) {
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
+    TestDrawCommand(
+        [&](wgpu::RenderPassEncoder pass) {
+            pass.Draw(1, 1, 0x11, 0x22);
+            pass.SetStencilReference(1);
             pass.Draw(1, 1, 0x1, 0x2);
         },
         expected);

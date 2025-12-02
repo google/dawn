@@ -616,6 +616,11 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetIndexBuffer,
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetScissorRect,
                                                  SET_SCISSOR_RECT_CMD_DATA_MEMBER){};
 
+#define SET_STENCIL_REFERENCE_CMD_DATA_MEMBER(X) X(uint32_t, reference)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetStencilReference,
+                                                 SET_STENCIL_REFERENCE_CMD_DATA_MEMBER){};
+
 #define SET_VIEWPORT_CMD_DATA_MEMBER(X) \
     X(float, x)                         \
     X(float, y)                         \

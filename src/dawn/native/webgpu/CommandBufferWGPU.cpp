@@ -595,6 +595,16 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
                 Serialize(captureContext, data);
                 break;
             }
+            case Command::SetStencilReference: {
+                const auto& cmd = *commands.NextCommand<SetStencilReferenceCmd>();
+                schema::CommandBufferCommandSetStencilReferenceCmd data{{
+                    .data = {{
+                        .reference = cmd.reference,
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
             case Command::SetViewport: {
                 const auto& cmd = *commands.NextCommand<SetViewportCmd>();
                 schema::CommandBufferCommandSetViewportCmd data{{
