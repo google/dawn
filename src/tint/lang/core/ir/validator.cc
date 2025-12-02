@@ -2970,6 +2970,12 @@ void Validator::CheckWorkgroupSize(const Function* func) {
                 return;
             }
             total_size *= c->Value()->ValueAs<uint64_t>();
+
+            constexpr uint64_t kMaxGridSize = 0xffffffff;
+            if (total_size > kMaxGridSize) {
+                AddError(func) << "workgroup grid size cannot exceed 0x" << std::hex
+                               << kMaxGridSize;
+            }
             continue;
         }
 
@@ -3006,11 +3012,6 @@ void Validator::CheckWorkgroupSize(const Function* func) {
         }
 
         AddError(func) << "@workgroup_size must be an InstructionResult or a Constant";
-    }
-
-    constexpr uint64_t kMaxGridSize = 0xffffffff;
-    if (total_size > kMaxGridSize) {
-        AddError(func) << "workgroup grid size cannot exceed 0x" << std::hex << kMaxGridSize;
     }
 }
 

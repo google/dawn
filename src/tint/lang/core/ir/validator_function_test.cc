@@ -2498,6 +2498,24 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsTooLarge) {
 )")) << res.Failure();
 }
 
+// Test the case where the intermediate workgroup product overflows a uint64_t and wraps back around
+// to be a valid uint32_t value.
+TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsTooLarge_U64Overflow) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize(
+        {b.Constant(1526726656_i), b.Constant(1526726656_i), b.Constant(1526726656_i)});
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:1 error: workgroup grid size cannot exceed 0xffffffff
+%f = @compute @workgroup_size(1526726656i, 1526726656i, 1526726656i) func():void {
+^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_OverrideWithoutAllowOverrides) {
     auto* o = b.Override(ty.u32());
     auto* f = ComputeEntryPoint();
