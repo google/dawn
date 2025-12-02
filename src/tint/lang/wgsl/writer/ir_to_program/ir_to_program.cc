@@ -72,6 +72,7 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/input_attachment.h"
@@ -823,6 +824,10 @@ class State {
                     obj_ty = arr->ElemType();
                     expr = b.IndexAccessor(expr, Expr(index));
                 },
+                [&](const core::type::BindingArray* arr) {
+                    obj_ty = arr->ElemType();
+                    expr = b.IndexAccessor(expr, Expr(index));
+                },
                 [&](const core::type::Struct* s) {
                     if (auto* c = index->As<core::ir::Constant>()) {
                         auto i = c->Value()->ValueAs<uint32_t>();
@@ -1079,6 +1084,17 @@ class State {
                 Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
                 auto el = Type(m->Type());
                 return b.ty.subgroup_matrix(m->Kind(), el, m->Columns(), m->Rows());
+            },  //
+            [&](const core::type::BindingArray* ba) {
+                auto el = Type(ba->ElemType());
+                if (ba->Count()->Is<core::type::RuntimeArrayCount>()) {
+                    TINT_IR_ICE(mod) << core::type::Array::kErrExpectedConstantCount;
+                }
+
+                if (auto* count = ba->Count()->As<core::type::ConstantArrayCount>()) {
+                    return b.ty.binding_array(el, u32(count->value));
+                }
+                TINT_IR_ICE(mod) << core::type::Array::kErrExpectedConstantCount;
             },  //
             TINT_ICE_ON_NO_MATCH);
     }

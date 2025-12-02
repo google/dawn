@@ -32,6 +32,7 @@
 #include <string>
 
 #include "src/tint/lang/core/enums.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -1418,6 +1419,27 @@ TEST_F(IRToProgramTest, TypeConstruct_array) {
     EXPECT_WGSL(R"(
 fn f(i : i32) {
   var v : array<i32, 3u> = array<i32, 3u>(i, i, i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConstruct_binding_array) {
+    auto* el_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    auto* var = Var(ty.ref(handle, ty.binding_array(el_ty, 3u)));
+    var->SetBindingPoint(0, 0);
+
+    mod.root_block->Append(var);
+
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.i32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    EXPECT_WGSL(R"(
+@group(0u) @binding(0u) var v : binding_array<texture_2d<f32>, 3u>;
+
+fn f(i : i32) {
 }
 )");
 }

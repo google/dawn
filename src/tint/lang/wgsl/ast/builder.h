@@ -1295,6 +1295,19 @@ class Builder {
             }
         }
 
+        /// @param el the binding_array element type
+        /// @param size the number of binding array elements
+        /// @returns the binding array
+        template <typename COUNT, typename = DisableIfVectorLike<COUNT>>
+        ast::Type binding_array(ast::Type el, COUNT&& size) const {
+            return ast::Type{builder->Expr(builder->create<ast::TemplatedIdentifier>(
+                builder->source_, builder->Sym("binding_array"),
+                Vector{
+                    el.expr,
+                    builder->Expr(std::forward<COUNT>(size)),
+                }))};
+        }
+
         /// @param type the type
         /// @return an ast::Type of the type declaration.
         ast::Type Of(const ast::TypeDecl* type) const { return (*this)(type->name->symbol); }

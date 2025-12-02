@@ -78,6 +78,11 @@ class IRToProgramTest : public core::ir::IRTestHelper {
         return var;
     }
 
+    /// Creates a new `var` declaration with a name and initializer value, using a reference type.
+    /// @param mv the type
+    /// @returns the instruction
+    core::ir::Var* Var(const core::type::MemoryView* mv) { return b.Var(mv); }
+
     /// Creates a new `var` declaration
     /// @tparam SPACE the var's address space
     /// @tparam T the storage pointer's element type
