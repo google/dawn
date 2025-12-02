@@ -607,6 +607,16 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetVertexBuffer,
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetIndexBuffer,
                                                  SET_INDEX_BUFFER_CMD_DATA_MEMBER){};
 
+#define SET_VIEWPORT_CMD_DATA_MEMBER(X) \
+    X(float, x)                         \
+    X(float, y)                         \
+    X(float, width)                     \
+    X(float, height)                    \
+    X(float, minDepth)                  \
+    X(float, maxDepth)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetViewport, SET_VIEWPORT_CMD_DATA_MEMBER){};
+
 #define DRAW_CMD_DATA_MEMBER(X) \
     X(uint32_t, vertexCount)    \
     X(uint32_t, instanceCount)  \

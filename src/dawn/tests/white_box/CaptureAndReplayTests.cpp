@@ -2036,6 +2036,19 @@ TEST_P(CaptureAndReplayDrawTests, CaptureDrawIndexedIndirect) {
         expected);
 }
 
+// Capture SetViewport. Draws twice. The second draw should be ignored because
+// its out of the viewport.
+TEST_P(CaptureAndReplayDrawTests, CaptureSetViewport) {
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
+    TestDrawCommand(
+        [&](wgpu::RenderPassEncoder pass) {
+            pass.Draw(1, 1, 0x11, 0x22);
+            pass.SetViewport(1, 1, 1, 1, 0, 1);
+            pass.Draw(1, 1, 0x1, 0x2);
+        },
+        expected);
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayDrawTests, WebGPUBackend());
 
 }  // anonymous namespace

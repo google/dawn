@@ -582,6 +582,21 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
                 Serialize(captureContext, schema::CommandBufferCommand::EndOcclusionQuery);
                 break;
             }
+            case Command::SetViewport: {
+                const auto& cmd = *commands.NextCommand<SetViewportCmd>();
+                schema::CommandBufferCommandSetViewportCmd data{{
+                    .data = {{
+                        .x = cmd.x,
+                        .y = cmd.y,
+                        .width = cmd.width,
+                        .height = cmd.height,
+                        .minDepth = cmd.minDepth,
+                        .maxDepth = cmd.maxDepth,
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
             default:
                 DAWN_TRY(CaptureRenderCommand(captureContext, commands, type));
                 break;

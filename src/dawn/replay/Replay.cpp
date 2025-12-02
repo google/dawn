@@ -833,6 +833,13 @@ MaybeError ProcessRenderPassCommands(const Replay& replay,
                 pass.EndOcclusionQuery();
                 break;
             }
+            case schema::CommandBufferCommand::SetViewport: {
+                schema::CommandBufferCommandSetViewportCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                pass.SetViewport(data.x, data.y, data.width, data.height, data.minDepth,
+                                 data.maxDepth);
+                break;
+            }
             default:
                 DAWN_TRY(ProcessRenderCommand(replay, readHead, device, cmd, pass));
                 break;
