@@ -582,6 +582,19 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
                 Serialize(captureContext, schema::CommandBufferCommand::EndOcclusionQuery);
                 break;
             }
+            case Command::SetScissorRect: {
+                const auto& cmd = *commands.NextCommand<SetScissorRectCmd>();
+                schema::CommandBufferCommandSetScissorRectCmd data{{
+                    .data = {{
+                        .x = cmd.x,
+                        .y = cmd.y,
+                        .width = cmd.width,
+                        .height = cmd.height,
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
             case Command::SetViewport: {
                 const auto& cmd = *commands.NextCommand<SetViewportCmd>();
                 schema::CommandBufferCommandSetViewportCmd data{{

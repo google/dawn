@@ -212,6 +212,7 @@ MaybeError GatherReferencedResourcesFromRenderCommand(CaptureContext& captureCon
         }
         case Command::BeginOcclusionQuery:
         case Command::EndOcclusionQuery:
+        case Command::SetScissorRect:
         case Command::SetViewport:
         case Command::Draw:
         case Command::DrawIndexed:

@@ -2049,6 +2049,22 @@ TEST_P(CaptureAndReplayDrawTests, CaptureSetViewport) {
         expected);
 }
 
+// Capture SetScissorRect. Draws twice. The second draw should be ignored because
+// its out of the scissor rect.
+TEST_P(CaptureAndReplayDrawTests, CaptureSetScissorRect) {
+    // TODO(464436694): Zero size scissor fails on Intel Mac for this case.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Metal) && IsIntel());
+
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
+    TestDrawCommand(
+        [&](wgpu::RenderPassEncoder pass) {
+            pass.Draw(1, 1, 0x11, 0x22);
+            pass.SetScissorRect(0, 0, 0, 0);
+            pass.Draw(1, 1, 0x1, 0x2);
+        },
+        expected);
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayDrawTests, WebGPUBackend());
 
 }  // anonymous namespace

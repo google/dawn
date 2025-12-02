@@ -607,6 +607,15 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetVertexBuffer,
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetIndexBuffer,
                                                  SET_INDEX_BUFFER_CMD_DATA_MEMBER){};
 
+#define SET_SCISSOR_RECT_CMD_DATA_MEMBER(X) \
+    X(uint32_t, x)                          \
+    X(uint32_t, y)                          \
+    X(uint32_t, width)                      \
+    X(uint32_t, height)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetScissorRect,
+                                                 SET_SCISSOR_RECT_CMD_DATA_MEMBER){};
+
 #define SET_VIEWPORT_CMD_DATA_MEMBER(X) \
     X(float, x)                         \
     X(float, y)                         \

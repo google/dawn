@@ -833,6 +833,12 @@ MaybeError ProcessRenderPassCommands(const Replay& replay,
                 pass.EndOcclusionQuery();
                 break;
             }
+            case schema::CommandBufferCommand::SetScissorRect: {
+                schema::CommandBufferCommandSetScissorRectCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                pass.SetScissorRect(data.x, data.y, data.width, data.height);
+                break;
+            }
             case schema::CommandBufferCommand::SetViewport: {
                 schema::CommandBufferCommandSetViewportCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
