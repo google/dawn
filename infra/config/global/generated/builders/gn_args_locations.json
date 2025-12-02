@@ -53,6 +53,7 @@
     "dawn-try-mac-arm64-apple-m2-rel": "try/dawn-try-mac-arm64-apple-m2-rel/gn-args.json",
     "dawn-try-mac-x64-amd-5300m-rel": "try/dawn-try-mac-x64-amd-5300m-rel/gn-args.json",
     "dawn-try-mac-x64-amd-555x-rel": "try/dawn-try-mac-x64-amd-555x-rel/gn-args.json",
+    "dawn-try-mac-x64-intel-uhd630-exp-rel": "try/dawn-try-mac-x64-intel-uhd630-exp-rel/gn-args.json",
     "dawn-try-mac-x64-intel-uhd630-rel": "try/dawn-try-mac-x64-intel-uhd630-rel/gn-args.json",
     "dawn-try-mac-x64-sws-dbg": "try/dawn-try-mac-x64-sws-dbg/gn-args.json",
     "dawn-try-mac-x64-sws-rel": "try/dawn-try-mac-x64-sws-rel/gn-args.json",

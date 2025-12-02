@@ -2156,6 +2156,7 @@
       "default"
     ]
   },
+  "dawn-mac-x64-intel-uhd630-exp-rel": {},
   "dawn-mac-x64-intel-uhd630-rel": {
     "gtest_tests": [
       {
