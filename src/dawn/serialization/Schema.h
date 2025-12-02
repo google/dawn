@@ -607,6 +607,11 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetVertexBuffer,
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetIndexBuffer,
                                                  SET_INDEX_BUFFER_CMD_DATA_MEMBER){};
 
+#define SET_BLEND_CONSTANT_CMD_DATA_MEMBER(X) X(Color, color)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetBlendConstant,
+                                                 SET_BLEND_CONSTANT_CMD_DATA_MEMBER){};
+
 #define SET_SCISSOR_RECT_CMD_DATA_MEMBER(X) \
     X(uint32_t, x)                          \
     X(uint32_t, y)                          \

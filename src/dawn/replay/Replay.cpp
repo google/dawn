@@ -833,6 +833,13 @@ MaybeError ProcessRenderPassCommands(const Replay& replay,
                 pass.EndOcclusionQuery();
                 break;
             }
+            case schema::CommandBufferCommand::SetBlendConstant: {
+                schema::CommandBufferCommandSetBlendConstantCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                wgpu::Color color = ToWGPU(data.color);
+                pass.SetBlendConstant(&color);
+                break;
+            }
             case schema::CommandBufferCommand::SetScissorRect: {
                 schema::CommandBufferCommandSetScissorRectCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));

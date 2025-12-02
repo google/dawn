@@ -582,6 +582,16 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
                 Serialize(captureContext, schema::CommandBufferCommand::EndOcclusionQuery);
                 break;
             }
+            case Command::SetBlendConstant: {
+                const auto& cmd = *commands.NextCommand<SetBlendConstantCmd>();
+                schema::CommandBufferCommandSetBlendConstantCmd data{{
+                    .data = {{
+                        .color = ToSchema(cmd.color),
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
             case Command::SetScissorRect: {
                 const auto& cmd = *commands.NextCommand<SetScissorRectCmd>();
                 schema::CommandBufferCommandSetScissorRectCmd data{{
