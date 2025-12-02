@@ -84,6 +84,8 @@ class PhysicalDevice : public d3d::PhysicalDevice {
         wgpu::FeatureName feature,
         const TogglesState& toggles) const override;
 
+    MaybeError ValidateUseOfD3D12() const;
+
     MaybeError InitializeDebugLayerFilters();
     void CleanUpDebugLayerFilters();
 
