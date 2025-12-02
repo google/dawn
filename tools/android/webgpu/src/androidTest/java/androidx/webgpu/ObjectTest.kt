@@ -15,9 +15,9 @@ class ObjectTest {
 
     @Test
     fun sameObjectCompare() {
-        val surface = createInstance().createSurface(SurfaceDescriptor(
+        val surface = createInstance().createSurface(GPUSurfaceDescriptor(
             surfaceSourceAndroidNativeWindow =
-                SurfaceSourceAndroidNativeWindow(0)
+                GPUSurfaceSourceAndroidNativeWindow(0)
         ))
 
         val texture1 = surface.getCurrentTexture().texture
@@ -37,9 +37,9 @@ class ObjectTest {
     fun differentObjectCompare() {
         val instance = createInstance()
 
-        val surfaceDescriptor = SurfaceDescriptor(
+        val surfaceDescriptor = GPUSurfaceDescriptor(
             surfaceSourceAndroidNativeWindow =
-                SurfaceSourceAndroidNativeWindow(0)
+                GPUSurfaceSourceAndroidNativeWindow(0)
         )
 
         val surface1 = instance.createSurface(surfaceDescriptor)

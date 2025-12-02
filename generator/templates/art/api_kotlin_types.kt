@@ -51,7 +51,7 @@
         {{- kotlin_name(type) }}
         {%- if optional or default_value %}?{% endif %}
     {%- elif type.category == 'structure' or type.category == 'callback info' %}
-        {{- type.name.CamelCase() }}{{ '?' if optional }}
+        {{- kotlin_name(type) }}{{ '?' if optional }}
     {%- elif type.category in ['bitmask', 'enum'] -%}
         Int
     {%- elif type.name.get() == 'bool' -%}

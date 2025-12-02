@@ -950,7 +950,7 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
                     if member.type.category in ['bitmask', 'enum']
                     for value in member.type.values if value.value == 0
                 ]
-            return f"{arg.type.name.CamelCase()}({', '.join(constructor_args)})"
+            return f"{kotlin_name(arg.type)}({', '.join(constructor_args)})"
 
         # For bitmasks/enums we insert the full type of the default. No default value doesn't mean
         # no default in the bindings, because it should match the bitmask/enum labeled 'undefined'.
@@ -994,7 +994,7 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
         return None
 
     def kotlin_name(type):
-        return f"{'GPU' if type.category == 'object' else ''}{type.name.CamelCase()}"
+        return f"{'GPU' if type.category in ('object', 'structure') else ''}{type.name.CamelCase()}"
 
     def kotlin_return(method):
         for argument in method.arguments:

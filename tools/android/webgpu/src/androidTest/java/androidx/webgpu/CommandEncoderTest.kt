@@ -46,7 +46,7 @@ class CommandEncoderTest {
     val unusedCommandBuffer = encoder.finish()
 
     val dummyBuffer = device.createBuffer(
-      BufferDescriptor(size = 4, usage = BufferUsage.CopySrc)
+      GPUBufferDescriptor(size = 4, usage = BufferUsage.CopySrc)
     )
     assertThrows(
       "Using a finished encoder should throw an error",
@@ -105,15 +105,15 @@ class CommandEncoderTest {
   /**
    * Verifies that `beginRenderPass` successfully creates a `GPURenderPassEncoder`.
    *
-   * This test provides a valid `RenderPassDescriptor` and asserts that the
+   * This test provides a valid `GPURenderPassDescriptor` and asserts that the
    * returned encoder is not null, confirming the command's successful initiation.
    */
   @Test
   fun testBeginRenderPass() {
     device.pushErrorScope(ErrorFilter.Validation)
     val texture = device.createTexture(
-      TextureDescriptor(
-        size = Extent3D(1, 1, 1),
+      GPUTextureDescriptor(
+        size = GPUExtent3D(1, 1, 1),
         format = TextureFormat.RGBA8Unorm,
         usage = TextureUsage.RenderAttachment
       )
@@ -122,13 +122,13 @@ class CommandEncoderTest {
 
     val encoder = device.createCommandEncoder()
     val passEncoder = encoder.beginRenderPass(
-      RenderPassDescriptor(
+      GPURenderPassDescriptor(
         colorAttachments = arrayOf(
-          RenderPassColorAttachment(
+          GPURenderPassColorAttachment(
             view = textureView,
             loadOp = LoadOp.Clear,
             storeOp = StoreOp.Store,
-            clearValue = Color(0.0, 0.0, 0.0, 1.0)
+            clearValue = GPUColor(0.0, 0.0, 0.0, 1.0)
           )
         )
       )
@@ -155,8 +155,8 @@ class CommandEncoderTest {
     val bufferSize = (textureWidth * textureHeight * bytesPerPixel).toLong()
 
     val renderTexture = device.createTexture(
-      TextureDescriptor(
-        size = Extent3D(textureWidth, textureHeight, 1),
+      GPUTextureDescriptor(
+        size = GPUExtent3D(textureWidth, textureHeight, 1),
         format = textureFormat,
         usage = TextureUsage.RenderAttachment or TextureUsage.CopySrc
       )
@@ -164,21 +164,21 @@ class CommandEncoderTest {
     val textureView = renderTexture.createView()
 
     val readbackBuffer = device.createBuffer(
-      BufferDescriptor(
+      GPUBufferDescriptor(
         size = bufferSize,
         usage = BufferUsage.CopyDst or BufferUsage.MapRead
       )
     )
 
-    val clearColor = Color(0.2, 0.8, 0.6, 1.0)
+    val clearColor = GPUColor(0.2, 0.8, 0.6, 1.0)
 
     val encoder = device.createCommandEncoder()
 
     // This is the operation we are testing.
     val passEncoder = encoder.beginRenderPass(
-      RenderPassDescriptor(
+      GPURenderPassDescriptor(
         colorAttachments = arrayOf(
-          RenderPassColorAttachment(
+          GPURenderPassColorAttachment(
             view = textureView,
             loadOp = LoadOp.Clear,
             storeOp = StoreOp.Store,
@@ -190,12 +190,12 @@ class CommandEncoderTest {
     passEncoder.end()
 
     encoder.copyTextureToBuffer(
-      source = TexelCopyTextureInfo(texture = renderTexture),
-      destination = TexelCopyBufferInfo(
+      source = GPUTexelCopyTextureInfo(texture = renderTexture),
+      destination = GPUTexelCopyBufferInfo(
         buffer = readbackBuffer,
-        layout = TexelCopyBufferLayout()
+        layout = GPUTexelCopyBufferLayout()
       ),
-      copySize = Extent3D(textureWidth, textureHeight, 1)
+      copySize = GPUExtent3D(textureWidth, textureHeight, 1)
     )
 
     val commandBuffer = encoder.finish()
@@ -236,7 +236,7 @@ class CommandEncoderTest {
   @Test
   fun testClearBuffer() {
     val buffer = device.createBuffer(
-      BufferDescriptor(
+      GPUBufferDescriptor(
         size = 16,
         usage = BufferUsage.CopyDst
       )
@@ -264,14 +264,14 @@ class CommandEncoderTest {
   @Test
   fun testResolveQuerySet() {
     val querySet = device.createQuerySet(
-      QuerySetDescriptor(
+      GPUQuerySetDescriptor(
         type = QueryType.Occlusion,
         count = 1
       )
     )
 
     val destination = device.createBuffer(
-      BufferDescriptor(
+      GPUBufferDescriptor(
         size = 8, // Occlusion queries are 64-bit (8 bytes)
         usage = BufferUsage.QueryResolve
       )

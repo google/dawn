@@ -36,7 +36,7 @@ package {{ kotlin_package }}
 {% if main_doc %}
     {{ generate_simple_kdoc(main_doc) }}
 {% endif %}
-public class {{ structure.name.CamelCase() }}
+public class {{ kotlin_name(structure) }}
     {%- for member in kotlin_record_members(structure.members) %}
         {% if kotlin_default(member) is not none %} @JvmOverloads constructor{% break %}{% endif %}
     {%- endfor %}(
@@ -57,7 +57,7 @@ public class {{ structure.name.CamelCase() }}
         {% if chain_struct_doc %}
             {{ generate_simple_kdoc(chain_struct_doc, indent_prefix = "    ", line_wrap_prefix = '\n     * ') }}
         {% endif %}
-        public var {{ structure.name.camelCase() }}: {{ structure.name.CamelCase() }}? = null,
+        public var {{ structure.name.camelCase() }}: {{ kotlin_name(structure) }}? = null,
     {% endfor %}
 )
 {% if ns.callback_count > 1 %}

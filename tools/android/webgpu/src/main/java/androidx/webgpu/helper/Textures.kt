@@ -7,9 +7,9 @@ import androidx.webgpu.*
 import java.nio.ByteBuffer
 
 public fun Bitmap.createGpuTexture(device: GPUDevice): GPUTexture {
-    val size = Extent3D(width = width, height = height)
+    val size = GPUExtent3D(width = width, height = height)
     return device.createTexture(
-        TextureDescriptor(
+        GPUTextureDescriptor(
             size = size,
             format = TextureFormat.RGBA8Unorm,
             usage = TextureUsage.TextureBinding or TextureUsage.CopyDst or
@@ -19,12 +19,12 @@ public fun Bitmap.createGpuTexture(device: GPUDevice): GPUTexture {
         ByteBuffer.allocateDirect(height * width * Int.SIZE_BYTES).let { pixels ->
             copyPixelsToBuffer(pixels)
             device.queue.writeTexture(
-                dataLayout = TexelCopyBufferLayout(
+                dataLayout = GPUTexelCopyBufferLayout(
                     bytesPerRow = width * Int.SIZE_BYTES,
                     rowsPerImage = height
                 ),
                 data = pixels,
-                destination = TexelCopyTextureInfo(texture = texture),
+                destination = GPUTexelCopyTextureInfo(texture = texture),
                 writeSize = size
             )
         }
@@ -38,22 +38,22 @@ public suspend fun GPUTexture.createBitmap(device: GPUDevice): Bitmap {
 
     val size = width * height * Int.SIZE_BYTES
     val readbackBuffer = device.createBuffer(
-        BufferDescriptor(
+        GPUBufferDescriptor(
             size = size.toLong(),
             usage = BufferUsage.CopyDst or BufferUsage.MapRead
         )
     )
     device.queue.submit(arrayOf(device.createCommandEncoder().let {
         it.copyTextureToBuffer(
-            source = TexelCopyTextureInfo(texture = this),
-            destination = TexelCopyBufferInfo(
-                layout = TexelCopyBufferLayout(
+            source = GPUTexelCopyTextureInfo(texture = this),
+            destination = GPUTexelCopyBufferInfo(
+                layout = GPUTexelCopyBufferLayout(
                     offset = 0,
                     bytesPerRow = width * Int.SIZE_BYTES,
                     rowsPerImage = height
                 ), buffer = readbackBuffer
             ),
-            copySize = Extent3D(width = width, height = height)
+            copySize = GPUExtent3D(width = width, height = height)
         )
         it.finish()
     }))

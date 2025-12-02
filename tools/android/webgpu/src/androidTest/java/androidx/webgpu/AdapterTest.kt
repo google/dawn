@@ -61,9 +61,9 @@ class AdapterTest {
 
   private suspend fun requestTestDevice(
     featureToTest: IntArray = intArrayOf(),
-    limits: Limits = Limits(),
+    limits: GPULimits = GPULimits(),
   ): GPUDevice {
-    val descriptor = DeviceDescriptor(
+    val descriptor = GPUDeviceDescriptor(
       requiredFeatures = featureToTest,
       requiredLimits = limits,
       deviceLostCallback = DeviceLostCallback { device, reason, message ->
@@ -167,7 +167,7 @@ class AdapterTest {
     val betterLimit = adapterLimits.maxBindGroups + 1
     assertThrows("Requesting a better limit should fail", DeviceLostException::class.java) {
       runBlocking {
-        requestTestDevice(limits = Limits(maxBindGroups = betterLimit))
+        requestTestDevice(limits = GPULimits(maxBindGroups = betterLimit))
       }
     }
   }
@@ -182,7 +182,7 @@ class AdapterTest {
   fun requestDeviceWithWorseThanDefaultLimitClamps() {
       val worseLimit = kDefaultLimits.getValue("maxBindGroups") - 1
       assert(worseLimit > 0) // Ensure the value is still valid, just worse.
-      val device = runBlocking { requestTestDevice(limits = Limits(maxBindGroups = worseLimit)) }
+      val device = runBlocking { requestTestDevice(limits = GPULimits(maxBindGroups = worseLimit)) }
       val deviceLimits = device.getLimits()
       assertEquals(
         "Device limit should be clamped to the default",
@@ -208,7 +208,7 @@ class AdapterTest {
     ) {
       runBlocking {
         requestTestDevice(
-          limits = Limits(
+          limits = GPULimits(
             minUniformBufferOffsetAlignment = invalidAlignment
           )
         )

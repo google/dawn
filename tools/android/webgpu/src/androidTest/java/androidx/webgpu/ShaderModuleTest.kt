@@ -35,9 +35,9 @@ class ShaderModuleTest {
   }
 
   // The info request should still succeed even if compilation fails.
-  private suspend fun getCompilationInfo(code: String): CompilationInfo {
+  private suspend fun getCompilationInfo(code: String): GPUCompilationInfo {
     val shaderModule =
-      device.createShaderModule(ShaderModuleDescriptor(shaderSourceWGSL = ShaderSourceWGSL(code)))
+      device.createShaderModule(GPUShaderModuleDescriptor(shaderSourceWGSL = GPUShaderSourceWGSL(code)))
     return shaderModule.getCompilationInfo()
   }
 

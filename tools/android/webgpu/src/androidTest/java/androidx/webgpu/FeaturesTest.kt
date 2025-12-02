@@ -20,7 +20,7 @@ class FeaturesTest {
         runBlocking {
             val webGpu =
                 createWebGpu(
-                    deviceDescriptor = DeviceDescriptor(
+                    deviceDescriptor = GPUDeviceDescriptor(
                         requiredFeatures = requiredFeatures,
                         deviceLostCallback = null,
                         deviceLostCallbackExecutor = Executor(Runnable::run),

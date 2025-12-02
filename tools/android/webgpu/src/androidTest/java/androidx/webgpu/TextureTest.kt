@@ -33,8 +33,8 @@ class TextureTest {
 
   @Test
   fun testTextureProperties() {
-    val testTextureDescriptor = TextureDescriptor(
-      size = Extent3D(width = 32, height = 16, depthOrArrayLayers = 1),
+    val testTextureDescriptor = GPUTextureDescriptor(
+      size = GPUExtent3D(width = 32, height = 16, depthOrArrayLayers = 1),
       format = TextureFormat.RGBA8Unorm,
       usage = TextureUsage.TextureBinding or TextureUsage.CopyDst,
       mipLevelCount = 1,
@@ -64,8 +64,8 @@ class TextureTest {
   fun createTexture_withInvalidUsageCombination_fails() {
     // According to the WebGPU specification, a multisampled texture (sampleCount > 1)
     // cannot have the StorageBinding usage flag. This is a guaranteed validation error.
-    val invalidDescriptor = TextureDescriptor(
-      size = Extent3D(width = 32, height = 16, depthOrArrayLayers = 1),
+    val invalidDescriptor = GPUTextureDescriptor(
+      size = GPUExtent3D(width = 32, height = 16, depthOrArrayLayers = 1),
       format = TextureFormat.RGBA8Unorm,  // A standard format is fine.
       sampleCount = 4,  // Multisampled.
       usage = TextureUsage.RenderAttachment or TextureUsage.StorageBinding // Invalid combination
@@ -82,8 +82,8 @@ class TextureTest {
    */
   @Test
   fun useOfDestroyedTextureView_firesUncapturedError() {
-    val textureDescriptor = TextureDescriptor(
-      size = Extent3D(width = 32, height = 16, depthOrArrayLayers = 1),
+    val textureDescriptor = GPUTextureDescriptor(
+      size = GPUExtent3D(width = 32, height = 16, depthOrArrayLayers = 1),
       format = TextureFormat.RGBA8Unorm,
       usage = TextureUsage.RenderAttachment
     )
@@ -96,13 +96,13 @@ class TextureTest {
     val encoder = device.createCommandEncoder()
     try {
       val passEncoder = encoder.beginRenderPass(
-        RenderPassDescriptor(
+        GPURenderPassDescriptor(
           colorAttachments = arrayOf(
-            RenderPassColorAttachment(
+            GPURenderPassColorAttachment(
               view = invalidView,
               loadOp = LoadOp.Clear,
               storeOp = StoreOp.Store,
-              clearValue = Color(r = 1.0, g = 0.0, b = 0.0, a = 1.0)
+              clearValue = GPUColor(r = 1.0, g = 0.0, b = 0.0, a = 1.0)
             )
           )
         )
@@ -127,8 +127,8 @@ class TextureTest {
    */
   @Test
   fun createBitmap_withInvalidWidth_fails() {
-    val descriptor = TextureDescriptor(
-      size = Extent3D(width = 65, height = 16, depthOrArrayLayers = 1),
+    val descriptor = GPUTextureDescriptor(
+      size = GPUExtent3D(width = 65, height = 16, depthOrArrayLayers = 1),
       format = TextureFormat.RGBA8Unorm,
       usage = TextureUsage.CopySrc
     )

@@ -8,21 +8,21 @@ import android.view.Surface
 import androidx.webgpu.GPUAdapter
 import androidx.webgpu.BackendType
 import androidx.webgpu.GPUDevice
-import androidx.webgpu.DeviceDescriptor
+import androidx.webgpu.GPUDeviceDescriptor
 import androidx.webgpu.DeviceLostCallback
 import androidx.webgpu.DeviceLostException
 import androidx.webgpu.DeviceLostReason
 import androidx.webgpu.ErrorType
 import androidx.webgpu.GPUInstance
-import androidx.webgpu.InstanceDescriptor
+import androidx.webgpu.GPUInstanceDescriptor
 import androidx.webgpu.InternalException
 import androidx.webgpu.OutOfMemoryException
-import androidx.webgpu.RequestAdapterOptions
+import androidx.webgpu.GPURequestAdapterOptions
 import androidx.webgpu.RequestAdapterStatus
 import androidx.webgpu.GPUSurface
 import androidx.webgpu.RequestDeviceStatus
-import androidx.webgpu.SurfaceDescriptor
-import androidx.webgpu.SurfaceSourceAndroidNativeWindow
+import androidx.webgpu.GPUSurfaceDescriptor
+import androidx.webgpu.GPUSurfaceSourceAndroidNativeWindow
 import androidx.webgpu.UncapturedErrorCallback
 import androidx.webgpu.UnknownException
 import androidx.webgpu.ValidationException
@@ -41,9 +41,9 @@ public abstract class WebGpu : AutoCloseable {
 
 public suspend fun createWebGpu(
     surface: Surface? = null,
-    instanceDescriptor: InstanceDescriptor = InstanceDescriptor(),
-    requestAdapterOptions: RequestAdapterOptions = RequestAdapterOptions(),
-    deviceDescriptor: DeviceDescriptor = DeviceDescriptor(
+    instanceDescriptor: GPUInstanceDescriptor = GPUInstanceDescriptor(),
+    requestAdapterOptions: GPURequestAdapterOptions = GPURequestAdapterOptions(),
+    deviceDescriptor: GPUDeviceDescriptor = GPUDeviceDescriptor(
         deviceLostCallback = defaultDeviceLostCallback,
         deviceLostCallbackExecutor = Executor(Runnable::run),
         uncapturedErrorCallback = defaultUncapturedErrorCallback,
@@ -56,9 +56,9 @@ public suspend fun createWebGpu(
     val webgpuSurface =
         surface?.let {
             instance.createSurface(
-                SurfaceDescriptor(
+                GPUSurfaceDescriptor(
                     surfaceSourceAndroidNativeWindow =
-                        SurfaceSourceAndroidNativeWindow(windowFromSurface(it))
+                        GPUSurfaceSourceAndroidNativeWindow(windowFromSurface(it))
                 )
             )
         }
@@ -99,14 +99,14 @@ public suspend fun createWebGpu(
 
 private suspend fun requestAdapter(
     instance: GPUInstance,
-    options: RequestAdapterOptions = RequestAdapterOptions(backendType = BackendType.Vulkan),
+    options: GPURequestAdapterOptions = GPURequestAdapterOptions(backendType = BackendType.Vulkan),
 ): GPUAdapter {
     return instance.requestAdapter(options)
 }
 
 private suspend inline fun requestDevice(
     adapter: GPUAdapter,
-    deviceDescriptor: DeviceDescriptor,
+    deviceDescriptor: GPUDeviceDescriptor,
 ): GPUDevice {
     if (deviceDescriptor.deviceLostCallback == null) {
         deviceDescriptor.deviceLostCallback = defaultDeviceLostCallback
