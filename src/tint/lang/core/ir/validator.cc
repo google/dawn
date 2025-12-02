@@ -876,13 +876,21 @@ Result<SuccessType, IOAnnotation> AddIOAnnotationsFromIOAttributes(
     return Success;
 }
 
-/// State for validating blend_src attributes.
+/// State for validating blend_src attributes shared across multiple passes within the same entry
+/// point.
 struct BlendSrcContext {
     Function::PipelineStage stage;
     Hashmap<uint32_t, const CastableBase*, 4> locations;
     Hashset<uint32_t, 2> blend_srcs;
     const core::type::Type* blend_src_type = nullptr;
     IODirection dir;
+};
+
+/// State for validating IO attributes that needs to shared across impl invocations within the same
+/// entry point.
+struct IOAttributeContext {
+    Hashmap<BuiltinValue, uint32_t, 4> input_builtins;
+    Hashmap<BuiltinValue, uint32_t, 4> output_builtins;
 };
 
 /// The core IR validator.
@@ -1144,13 +1152,15 @@ class Validator {
     void ValidateIOAttributes(const Function* func);
 
     /// Implementation for validating the spec rules for IO attribute usage.
+    /// @param ctx context object shared between the multiple invocations of this per entry point
     /// @param msg_anchor the object to anchor the error message to
     /// @param ty the data type being decorated by the attributes
     /// @param attr the attributes to test
     /// @param stage the shader stage the builtin is being used
     /// @param dir is value being used as an input or an output
     /// @param io_kind is the type of shader IO object the attribute is attached to
-    void ValidateIOAttributesImpl(const CastableBase* msg_anchor,
+    void ValidateIOAttributesImpl(IOAttributeContext& ctx,
+                                  const CastableBase* msg_anchor,
                                   const core::type::Type* ty,
                                   const IOAttributes& attr,
                                   Function::PipelineStage stage,
@@ -2776,13 +2786,16 @@ void Validator::ValidateIOAttributes(const Function* func) {
         }
     }
 
+    IOAttributeContext impl_ctx{.input_builtins = {}, .output_builtins = {}};
     // Validate all remaining attributes on IO objects
     for (const auto& task : tasks) {
-        ValidateIOAttributesImpl(task.anchor, task.type, task.attr, stage, task.dir, task.io_kind);
+        ValidateIOAttributesImpl(impl_ctx, task.anchor, task.type, task.attr, stage, task.dir,
+                                 task.io_kind);
     }
 }
 
-void Validator::ValidateIOAttributesImpl(const CastableBase* msg_anchor,
+void Validator::ValidateIOAttributesImpl(IOAttributeContext& ctx,
+                                         const CastableBase* msg_anchor,
                                          const core::type::Type* ty,
                                          const IOAttributes& attr,
                                          Function::PipelineStage stage,
@@ -2793,11 +2806,46 @@ void Validator::ValidateIOAttributesImpl(const CastableBase* msg_anchor,
     const IOAttributeUsage usage = IOAttributeUsageFor(stage, dir);
     WalkTypeAndMembers(
         *this, ty, attr,
-        [msg_anchor, usage, io_kind, skip_builtins](Validator& v, const core::type::Type* t,
-                                                    const IOAttributes& a) {
+        [&ctx, msg_anchor, usage, io_kind, skip_builtins, dir](
+            Validator& v, const core::type::Type* t, const IOAttributes& a) {
             const auto checkers = IOAttributeCheckersFor(a, skip_builtins);
             if (checkers.IsEmpty()) {
                 return;
+            }
+
+            if (a.builtin.has_value() && !skip_builtins) {
+                const auto& builtin = a.builtin.value();
+
+                uint32_t count = 0;
+                switch (dir) {
+                    case IODirection::kInput:
+                        count = ++(ctx.input_builtins.GetOrAddZeroEntry(builtin).value);
+                        break;
+                    case IODirection::kOutput:
+                        count = ++(ctx.output_builtins.GetOrAddZeroEntry(builtin).value);
+                        break;
+                    default:
+                        // This shouldn't ever happen, but this will get caught later in the
+                        // checker, so just ignoring
+                        break;
+                }
+                if (v.capabilities_.Contains(Capability::kAllowClipDistancesOnF32ScalarAndVector) &&
+                    builtin == BuiltinValue::kClipDistances) {
+                    if (count > 2) {
+                        v.AddError(msg_anchor)
+                            << "too many instances of builtin 'clip_distances' on entry point "
+                            << ToString(dir)
+                            << ", only two allowed with 'kAllowClipDistancesOnF32ScalarAndVector' "
+                               "capability enabled";
+                    }
+                } else {
+                    if (count > 1) {
+                        v.AddError(msg_anchor)
+                            << "duplicate instance of builtin '" << ToString(builtin)
+                            << "' on entry point " << ToString(dir)
+                            << ", must be unique per entry point i/o direction";
+                    }
+                }
             }
 
             auto failed = tint::Hashset<const IOAttributeChecker*, 4>();
