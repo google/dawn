@@ -30,27 +30,28 @@ package {{ kotlin_package }}
 
 import dalvik.annotation.optimization.FastNative
 
-{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc with context %}
+public object GPU {
+    {% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc with context %}
 
-{% set all_functions_info = kdocs.functions %}
-{% for function in by_category['function'] if include_method(None, function) %}
-    {% set _kotlin_return = kotlin_return(function) %}
-    //* Generating KDocs
-    {% set function_info = all_functions_info.get(function.name.get()) %}
-    {% set main_doc = function_info.doc if function_info else "" %}
-    {% set return_doc = function_info.returns_doc if function_info else "" %}
-    {% set arg_docs_map = function_info.args if function_info else {} %}
-    {% set function_args = function.arguments | list %}
-    {% if check_if_doc_present(main_doc, return_doc, arg_docs_map, function_args) == 'True' %}
-        {{ generate_kdoc(main_doc, return_doc, arg_docs_map, function_args , line_wrap_prefix = "\n * ") }}
+    {% set all_functions_info = kdocs.functions %}
+    {% for function in by_category['function'] if include_method(None, function) %}
+        {% set _kotlin_return = kotlin_return(function) %}
+        //* Generating KDocs
+        {% set function_info = all_functions_info.get(function.name.get()) %}
+        {% set main_doc = function_info.doc if function_info else "" %}
+        {% set return_doc = function_info.returns_doc if function_info else "" %}
+        {% set arg_docs_map = function_info.args if function_info else {} %}
+        {% set function_args = function.arguments | list %}
+        {% if check_if_doc_present(main_doc, return_doc, arg_docs_map, function_args) == 'True' %}
+            {{ generate_kdoc(main_doc, return_doc, arg_docs_map, function_args , line_wrap_prefix = "\n * ") }}
 
-    {%- endif %}
-    @FastNative
-    {% if function.returns and function.returns.type.name.canonical_case() == 'status' %}
-        @Throws({{"WebGpuException::class"}})
-    {% endif %}
-    {{ kotlin_annotation(_kotlin_return) if _kotlin_return else '' }} public external fun {{ function.name.camelCase() }}(
-        {%- for arg in function.arguments -%}
-            {{- kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{' '}}
-        {%- endfor %}): {{ kotlin_declaration(_kotlin_return) if _kotlin_return else 'Unit' }}
-{% endfor %}
+        {%- endif %}
+        @FastNative
+        {% if function.returns and function.returns.type.name.canonical_case() == 'status' %}
+            @Throws({{"WebGpuException::class"}})
+        {% endif %}
+        {{ kotlin_annotation(_kotlin_return) if _kotlin_return else '' }} public external fun {{ function.name.camelCase() }}(
+            {%- for arg in function.arguments -%}
+                {{- kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{' '}}
+            {%- endfor %}): {{ kotlin_declaration(_kotlin_return) if _kotlin_return else 'Unit' }}
+{% endfor %}}

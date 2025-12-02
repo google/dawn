@@ -26,7 +26,7 @@ import androidx.webgpu.GPUSurfaceSourceAndroidNativeWindow
 import androidx.webgpu.UncapturedErrorCallback
 import androidx.webgpu.UnknownException
 import androidx.webgpu.ValidationException
-import androidx.webgpu.createInstance
+import androidx.webgpu.GPU.createInstance
 import androidx.webgpu.getException
 import androidx.webgpu.helper.Util.windowFromSurface
 import java.util.concurrent.Executor

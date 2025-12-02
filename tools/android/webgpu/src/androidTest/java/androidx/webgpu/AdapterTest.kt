@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.webgpu.WebGpuTestConstants.EMULATOR_TESTS_MIN_API_LEVEL
 import androidx.webgpu.helper.initLibrary
+import androidx.webgpu.GPU.createInstance
 import java.util.concurrent.Executor
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
