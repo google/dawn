@@ -29,9 +29,7 @@
     {%- set type = arg.type %}
     {%- set optional = arg.optional and not strip_optional %}
     {%- set default_value = arg.default_value %}
-    {%- if arg == None -%}
-        Unit
-    {%- elif type.category == 'kotlin type' -%}
+    {%- if type.category == 'kotlin type' -%}
         {{ type.name.get() }}  {#- The name *is* the type #}
     {%- elif arg.type.name.get() == 'string view' -%}
         String{{ '?' if optional }}
