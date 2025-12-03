@@ -219,16 +219,6 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "norm16_texture_formats.md",
       FeatureInfo::FeatureState::Stable}},
-    {Feature::Snorm16TextureFormats,
-     {"Supports R/RG/RGBA16 snorm texture formats",
-      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
-      "norm16_texture_formats.md",
-      FeatureInfo::FeatureState::Stable}},
-    {Feature::Norm16TextureFormats,
-     {"DEPRECATED Supports R/RG/RGBA16 norm texture formats.",
-      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
-      "norm16_texture_formats.md",
-      FeatureInfo::FeatureState::Stable}},
     {Feature::SharedTextureMemoryVkDedicatedAllocation,
      {"Support specifying whether a Vulkan allocation for shared texture memory is a dedicated "
       "memory allocation.",

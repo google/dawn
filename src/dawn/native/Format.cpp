@@ -292,20 +292,9 @@ void ComputeFormatCapabilities(const DeviceBase* device, FormatTable& table) {
     // relevant features are enabled
     InitialCapsAddedBy(Feature::YCbCrVulkanSamplers, {wgpu::TextureFormat::External}, Cap::None);
 
-    InitialCapsAddedBy(Feature::Norm16TextureFormats,
-                       {wgpu::TextureFormat::R16Unorm, wgpu::TextureFormat::RG16Unorm,
-                        wgpu::TextureFormat::RGBA16Unorm, wgpu::TextureFormat::R16Snorm,
-                        wgpu::TextureFormat::RG16Snorm, wgpu::TextureFormat::RGBA16Snorm},
-                       Cap::Renderable | Cap::Multisample | Cap::Resolve);
-
     InitialCapsAddedBy(Feature::Unorm16TextureFormats,
                        {wgpu::TextureFormat::R16Unorm, wgpu::TextureFormat::RG16Unorm,
                         wgpu::TextureFormat::RGBA16Unorm},
-                       Cap::Renderable | Cap::Multisample | Cap::Resolve);
-
-    InitialCapsAddedBy(Feature::Snorm16TextureFormats,
-                       {wgpu::TextureFormat::R16Snorm, wgpu::TextureFormat::RG16Snorm,
-                        wgpu::TextureFormat::RGBA16Snorm},
                        Cap::Renderable | Cap::Multisample | Cap::Resolve);
 
     InitialCapsAddedBy(Feature::CoreFeaturesAndLimits, {wgpu::TextureFormat::BGRA8UnormSrgb},

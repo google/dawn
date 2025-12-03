@@ -554,9 +554,9 @@ class TextureFormatTest : public DawnTest {
             mIsUnorm16TextureFormatsSupported = true;
             requiredFeatures.push_back(wgpu::FeatureName::Unorm16TextureFormats);
         }
-        if (SupportsFeatures({wgpu::FeatureName::Snorm16TextureFormats})) {
+        if (SupportsFeatures({wgpu::FeatureName::TextureFormatsTier1})) {
             mIsSnorm16TextureFormatsSupported = true;
-            requiredFeatures.push_back(wgpu::FeatureName::Snorm16TextureFormats);
+            requiredFeatures.push_back(wgpu::FeatureName::TextureFormatsTier1);
         }
         return requiredFeatures;
     }

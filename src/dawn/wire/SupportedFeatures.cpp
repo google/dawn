@@ -100,9 +100,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_ANGLETextureSharing:
         case WGPUFeatureName_PixelLocalStorageCoherent:
         case WGPUFeatureName_PixelLocalStorageNonCoherent:
-        case WGPUFeatureName_Norm16TextureFormats:
         case WGPUFeatureName_Unorm16TextureFormats:
-        case WGPUFeatureName_Snorm16TextureFormats:
         case WGPUFeatureName_FramebufferFetch:
         case WGPUFeatureName_AdapterPropertiesMemoryHeaps:
         case WGPUFeatureName_AdapterPropertiesD3D:

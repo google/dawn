@@ -397,26 +397,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::Unorm16TextureFormats);
     }
 
-    bool snorm16TextureFormatsSupported = true;
-    for (const auto& snorm16Format :
-         {VK_FORMAT_R16_SNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16B16A16_SNORM}) {
-        VkFormatProperties snorm16Properties;
-        mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(
-            mVkPhysicalDevice, snorm16Format, &snorm16Properties);
-        snorm16TextureFormatsSupported &= IsSubset(
-            static_cast<VkFormatFeatureFlags>(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT |
-                                              VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT |
-                                              VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT),
-            snorm16Properties.optimalTilingFeatures);
-    }
-    if (snorm16TextureFormatsSupported) {
-        EnableFeature(Feature::Snorm16TextureFormats);
-    }
-
-    if (unorm16TextureFormatsSupported && snorm16TextureFormatsSupported) {
-        EnableFeature(Feature::Norm16TextureFormats);
-    }
-
     // 32 bit float channel formats.
     VkFormatProperties r32Properties;
     VkFormatProperties rg32Properties;
