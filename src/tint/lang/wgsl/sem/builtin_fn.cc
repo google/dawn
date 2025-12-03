@@ -97,6 +97,10 @@ bool BuiltinFn::IsTexelBuffer() const {
     return false;
 }
 
+bool BuiltinFn::IsResourceTable() const {
+    return wgsl::IsResourceTable(fn_);
+}
+
 wgsl::LanguageFeature BuiltinFn::RequiredLanguageFeature() const {
     if (fn_ == wgsl::BuiltinFn::kTextureBarrier) {
         return wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures;

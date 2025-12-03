@@ -180,6 +180,11 @@ bool IsSubgroupMatrix(BuiltinFn f);
 /// @returns true if the given `f` is a quadSwap* builtin
 bool IsQuadSwap(BuiltinFn f);
 
+/// Determines if the given `f` is a resource table builtin.
+/// @param f the builtin type
+/// @returns true if the given `f` is a resource table builtin
+bool IsResourceTable(BuiltinFn f);
+
 }  // namespace tint::wgsl
 
 // clang-format on

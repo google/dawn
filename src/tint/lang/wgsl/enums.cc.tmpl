@@ -166,6 +166,16 @@ bool IsSubgroupMatrix(BuiltinFn f) {
     }
 }
 
+bool IsResourceTable(BuiltinFn f) {
+    switch (f) {
+        case BuiltinFn::kGetResource:
+        case BuiltinFn::kHasResource:
+            return true;
+        default:
+            return false;
+    }
+}
+
 }  // namespace tint::wgsl
 
 // clang-format on

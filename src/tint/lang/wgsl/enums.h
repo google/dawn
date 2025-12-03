@@ -119,6 +119,7 @@ enum class Extension : uint8_t {
     kChromiumExperimentalDynamicBinding,
     kChromiumExperimentalFramebufferFetch,
     kChromiumExperimentalPixelLocal,
+    kChromiumExperimentalResourceTable,
     kChromiumExperimentalSubgroupMatrix,
     kChromiumInternalGraphite,
     kChromiumInternalInputAttachments,
@@ -153,6 +154,7 @@ constexpr std::string_view kExtensionStrings[] = {
     "chromium_experimental_dynamic_binding",
     "chromium_experimental_framebuffer_fetch",
     "chromium_experimental_pixel_local",
+    "chromium_experimental_resource_table",
     "chromium_experimental_subgroup_matrix",
     "chromium_internal_graphite",
     "chromium_internal_input_attachments",
@@ -170,6 +172,7 @@ static constexpr Extension kAllExtensions[] = {
     Extension::kChromiumExperimentalDynamicBinding,
     Extension::kChromiumExperimentalFramebufferFetch,
     Extension::kChromiumExperimentalPixelLocal,
+    Extension::kChromiumExperimentalResourceTable,
     Extension::kChromiumExperimentalSubgroupMatrix,
     Extension::kChromiumInternalGraphite,
     Extension::kChromiumInternalInputAttachments,
@@ -874,6 +877,11 @@ bool IsSubgroupMatrix(BuiltinFn f);
 /// @param f the builtin type
 /// @returns true if the given `f` is a quadSwap* builtin
 bool IsQuadSwap(BuiltinFn f);
+
+/// Determines if the given `f` is a resource table builtin.
+/// @param f the builtin type
+/// @returns true if the given `f` is a resource table builtin
+bool IsResourceTable(BuiltinFn f);
 
 }  // namespace tint::wgsl
 

@@ -1,4 +1,4 @@
-enable chromium_experimental_dynamic_binding;
+enable chromium_experimental_resource_table;
 
 @group(1) @binding(0) var<uniform> index : u32;
 

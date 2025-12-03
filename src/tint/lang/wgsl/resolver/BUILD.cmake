@@ -148,6 +148,7 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/resolver_helper_test.h
   lang/wgsl/resolver/resolver_test.cc
   lang/wgsl/resolver/resource_binding_test.cc
+  lang/wgsl/resolver/resource_table_extension_test.cc
   lang/wgsl/resolver/root_identifier_test.cc
   lang/wgsl/resolver/struct_address_space_use_test.cc
   lang/wgsl/resolver/struct_layout_test.cc

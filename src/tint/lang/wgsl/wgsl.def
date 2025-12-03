@@ -101,6 +101,8 @@ enum extension {
   chromium_experimental_barycentric_coord
   // A Chromium-specific extension for dynamic binding
   chromium_experimental_dynamic_binding
+  // A Chromium-specific extensions for resource table
+  chromium_experimental_resource_table
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec

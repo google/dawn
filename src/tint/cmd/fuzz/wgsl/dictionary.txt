@@ -165,6 +165,7 @@
 "chromium_experimental_dynamic_binding"
 "chromium_experimental_framebuffer_fetch"
 "chromium_experimental_pixel_local"
+"chromium_experimental_resource_table"
 "chromium_experimental_subgroup_matrix"
 "chromium_internal_graphite"
 "chromium_internal_input_attachments"

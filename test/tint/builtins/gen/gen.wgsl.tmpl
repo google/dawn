@@ -331,6 +331,11 @@ enable subgroups;
 enable chromium_experimental_dynamic_binding;
 {{    end -}}
 
+{{- /* Emit 'enable chromium_experimental_dynamic_binding' if required */ -}}
+{{-   if or (HasPrefix $builtin_name "getResource") (HasPrefix $builtin_name "hasResource")}}
+enable chromium_experimental_resource_table;
+{{    end -}}
+
 {{- /* Emit 'enable chromium_internal_input_attachments' if required */ -}}
 {{-   if eq "inputAttachmentLoad" $builtin_name}}
 enable chromium_internal_input_attachments;

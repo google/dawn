@@ -2871,7 +2871,7 @@ TEST_F(InspectorGetResourceTableInfoTest, NoResourceBinding) {
 
 TEST_F(InspectorGetResourceTableInfoTest, ResourceTable) {
     auto* src = R"(
-enable chromium_experimental_dynamic_binding;
+enable chromium_experimental_resource_table;
 
 @fragment fn ep() {
   _ = hasResource<texture_2d<f32>>(0);
@@ -2894,7 +2894,7 @@ enable chromium_experimental_dynamic_binding;
 
 TEST_F(InspectorGetResourceTableInfoTest, ResourceTable_Multiple) {
     auto* src = R"(
-enable chromium_experimental_dynamic_binding;
+enable chromium_experimental_resource_table;
 
 @fragment fn ep() {
   _ = textureDimensions(getResource<texture_cube<f32>>(3));
@@ -2923,7 +2923,7 @@ enable chromium_experimental_dynamic_binding;
 
 TEST_F(InspectorGetResourceTableInfoTest, ResourceTable_Nested) {
     auto* src = R"(
-enable chromium_experimental_dynamic_binding;
+enable chromium_experimental_resource_table;
 
 fn nested() {
   _ = textureDimensions(getResource<texture_cube<f32>>(3));

@@ -2193,6 +2193,16 @@ bool Validator::RequiredFeaturesForBuiltinFn(const sem::Call* call) const {
         }
     }
 
+    if (builtin->IsResourceTable()) {
+        if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalResourceTable)) {
+            AddError(call->Declaration()->source)
+                << "cannot call built-in function " << style::Function(builtin->Fn())
+                << " without extension "
+                << style::Code(wgsl::ToString(wgsl::Extension::kChromiumExperimentalResourceTable));
+            return false;
+        }
+    }
+
     const auto feature = builtin->RequiredLanguageFeature();
     if (feature != wgsl::LanguageFeature::kUndefined) {
         if (!allowed_features_.features.count(feature)) {

@@ -99,6 +99,9 @@ class BuiltinFn final : public Castable<BuiltinFn, CallTarget> {
     /// @returns true if builtin is a texel buffer builtin
     bool IsTexelBuffer() const;
 
+    /// @returns true if builtin is a resource table builtin
+    bool IsResourceTable() const;
+
     /// @returns the required language feature of this builtin function. Returns
     /// wgsl::LanguageFeature::kUndefined if no language feature is required.
     wgsl::LanguageFeature RequiredLanguageFeature() const;

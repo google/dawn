@@ -63,6 +63,9 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_experimental_pixel_local") {
         return Extension::kChromiumExperimentalPixelLocal;
     }
+    if (str == "chromium_experimental_resource_table") {
+        return Extension::kChromiumExperimentalResourceTable;
+    }
     if (str == "chromium_experimental_subgroup_matrix") {
         return Extension::kChromiumExperimentalSubgroupMatrix;
     }
@@ -103,6 +106,8 @@ std::string_view ToString(Extension value) {
             return "chromium_experimental_framebuffer_fetch";
         case Extension::kChromiumExperimentalPixelLocal:
             return "chromium_experimental_pixel_local";
+        case Extension::kChromiumExperimentalResourceTable:
+            return "chromium_experimental_resource_table";
         case Extension::kChromiumExperimentalSubgroupMatrix:
             return "chromium_experimental_subgroup_matrix";
         case Extension::kChromiumInternalGraphite:
@@ -1214,6 +1219,16 @@ bool IsSubgroupMatrix(BuiltinFn f) {
         case BuiltinFn::kSubgroupMatrixScalarAdd:
         case BuiltinFn::kSubgroupMatrixScalarSubtract:
         case BuiltinFn::kSubgroupMatrixScalarMultiply:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool IsResourceTable(BuiltinFn f) {
+    switch (f) {
+        case BuiltinFn::kGetResource:
+        case BuiltinFn::kHasResource:
             return true;
         default:
             return false;
