@@ -292,3 +292,71 @@ func TestIntrinsicCache_Sem_ParseError(t *testing.T) {
 	require.Nil(t, sem)
 	require.ErrorContains(t, err, "src/tint/intrinsics.def:1:1")
 }
+
+func TestIntrinsicCache_Table_Caching(t *testing.T) {
+	osw, _, realDawnRoot := setupRunFileTest(t)
+	spy := newSpyFS(osw)
+
+	defPath := filepath.Join(realDawnRoot, "src/tint/intrinsics.def")
+	defContent := `type T`
+	createTemplateFile(t, osw, defPath, defContent)
+
+	cache := &intrinsicCache{
+		path:     "src/tint/intrinsics.def",
+		fsReader: spy,
+	}
+
+	// First call
+	table1, err := cache.Table()
+	require.NoError(t, err)
+	require.NotNil(t, table1)
+	require.NotNil(t, cache.cachedTable)
+	require.Equal(t, 1, spy.readFileCounts[defPath])
+
+	// Second call
+	table2, err := cache.Table()
+	require.NoError(t, err)
+	require.Equal(t, table1, table2)
+	require.Equal(t, 1, spy.readFileCounts[defPath])
+}
+
+func TestIntrinsicCache_Permute_Caching(t *testing.T) {
+	osw, _, realDawnRoot := setupRunFileTest(t)
+	spy := newSpyFS(osw)
+
+	defPath := filepath.Join(realDawnRoot, "src/tint/intrinsics.def")
+	// Define a simple function that can be permuted.
+	defContent := `
+fn F()
+`
+	createTemplateFile(t, osw, defPath, defContent)
+
+	cache := &intrinsicCache{
+		path:     "src/tint/intrinsics.def",
+		fsReader: spy,
+	}
+
+	// Load semantics to get an overload to permute.
+	s, err := cache.Sem()
+	require.NoError(t, err)
+	require.NotEmpty(t, s.Builtins)
+	require.NotEmpty(t, s.Builtins[0].Overloads)
+	require.Equal(t, 1, spy.readFileCounts[defPath])
+	overload := s.Builtins[0].Overloads[0]
+
+	// Reset cachedPermuter to ensure that the lazy initialization is tested.
+	cache.cachedPermuter = nil
+
+	perms1, err := cache.Permute(overload)
+	require.NoError(t, err)
+	require.NotNil(t, perms1)
+	require.NotNil(t, cache.cachedPermuter)
+	// Since cachedSem is already set, no new file read should happen.
+	require.Equal(t, 1, spy.readFileCounts[defPath])
+
+	perms2, err := cache.Permute(overload)
+	require.NoError(t, err)
+	require.Equal(t, perms1, perms2)
+	// Still no file read.
+	require.Equal(t, 1, spy.readFileCounts[defPath])
+}
