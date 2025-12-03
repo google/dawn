@@ -515,7 +515,6 @@
         "category": "structure",
         "chained": "in",
         "chain roots": ["bind group entry"],
-        "tags": ["dawn", "emscripten"],
         "members": [
             {"name": "external texture", "type": "external texture"}
         ]
@@ -535,7 +534,6 @@
         "category": "structure",
         "chained": "in",
         "chain roots": ["bind group layout entry"],
-        "tags": ["dawn", "emscripten"],
         "members": []
     },
 
@@ -1837,7 +1835,6 @@
     },
     "external texture": {
         "category": "object",
-        "tags": ["dawn", "emscripten"],
         "methods": [
             {
                 "name": "set label",
@@ -3938,6 +3935,8 @@
             {"value": 10, "name": "surface color management"},
             {"value": 11, "name": "request adapter WebXR options"},
             {"value": 12, "name": "texture component swizzle descriptor"},
+            {"value": 13, "name": "external texture binding layout"},
+            {"value": 14, "name": "external texture binding entry"},
 
             {"value": 0, "name": "compatibility mode limits", "tags": ["compat"]},
             {"value": 1, "name": "texture binding view dimension descriptor", "tags": ["compat"]},
@@ -3945,8 +3944,6 @@
             {"value": 0, "name": "emscripten surface source canvas HTML selector", "tags": ["emscripten"]},
 
             {"value": 0, "name": "surface descriptor from windows core window", "tags": ["dawn"]},
-            {"value": 1, "name": "external texture binding entry", "tags": ["dawn", "emscripten"]},
-            {"value": 2, "name": "external texture binding layout", "tags": ["dawn", "emscripten"]},
             {"value": 3, "name": "surface descriptor from windows UWP swap chain panel", "tags": ["dawn"]},
             {"value": 4, "name": "dawn texture internal usage descriptor", "tags": ["dawn"]},
             {"value": 5, "name": "dawn encoder internal usage descriptor", "tags": ["dawn"]},
