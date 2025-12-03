@@ -4012,7 +4012,7 @@ void Validator::CheckConstruct(const Construct* construct) {
         auto arg_types = Transform<4>(args, [&](auto* v) { return v->Type(); });
         auto match = table.Lookup(ctor_conv, Vector{vec->Type()}, std::move(arg_types),
                                   core::EvaluationStage::kConstant);
-        if (match != Success) {
+        if (match != Success || vec->Type() != arg_types[0]->DeepestElement()) {
             AddError(construct) << "no matching overload for " << vec->FriendlyName()
                                 << " constructor";
         }

@@ -280,6 +280,40 @@ TEST_F(IR_ValidatorTest, Construct_Array_WrongArgType) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Construct_Vector_1arg_WrongType) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct<vec2<u32>>(b.Zero<vec2<f32>>());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(error: construct: no matching overload for vec2<u32> constructor
+    %2:vec2<u32> = construct vec2<f32>(0.0f)
+                   ^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Construct_Vector_2arg_WrongType) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct<vec2<u32>>(b.Zero<f32>(), b.Zero<f32>());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(error: construct: no matching overload for vec2<u32> constructor
+    %2:vec2<u32> = construct 0.0f, 0.0f
+                   ^^^^^^^^^
+)"));
+}
+
 TEST_F(IR_ValidatorTest, Construct_Matrix_NoArgs) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
