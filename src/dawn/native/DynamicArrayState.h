@@ -65,6 +65,7 @@ BindingIndex GetDefaultBindingCount(wgpu::DynamicBindingKind kind);
 class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayState> {
   public:
     DynamicArrayState(DeviceBase* device, BindingIndex size, wgpu::DynamicBindingKind kind);
+    ~DynamicArrayState() override;
 
     MaybeError Initialize();
     void Destroy();

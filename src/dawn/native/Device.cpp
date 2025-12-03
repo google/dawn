@@ -74,6 +74,7 @@
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundleEncoder.h"
 #include "dawn/native/RenderPipeline.h"
+#include "dawn/native/ResourceTable.h"
 #include "dawn/native/Sampler.h"
 #include "dawn/native/ShaderModuleParseRequest.h"
 #include "dawn/native/SharedBufferMemory.h"
@@ -1704,6 +1705,15 @@ ExternalTextureBase* DeviceBase::APICreateExternalTexture(
     return ReturnToAPI(std::move(result));
 }
 
+ResourceTableBase* DeviceBase::APICreateResourceTable(const ResourceTableDescriptor* descriptor) {
+    Ref<ResourceTableBase> result;
+    if (ConsumedError(CreateResourceTableImpl(descriptor), &result,
+                      "calling %s.CreateResourceTable(%s).", this, descriptor)) {
+        result = ResourceTableBase::MakeError(this);
+    }
+    return ReturnToAPI(std::move(result));
+}
+
 SharedBufferMemoryBase* DeviceBase::APIImportSharedBufferMemory(
     const SharedBufferMemoryDescriptor* descriptor) {
     Ref<SharedBufferMemoryBase> result = nullptr;
@@ -2178,6 +2188,17 @@ ResultOrError<Ref<ExternalTextureBase>> DeviceBase::CreateExternalTextureImpl(
     }
 
     return ExternalTextureBase::Create(this, descriptor);
+}
+
+ResultOrError<Ref<ResourceTableBase>> DeviceBase::CreateResourceTableImpl(
+    const ResourceTableDescriptor* descriptor) {
+    DAWN_TRY(ValidateIsAlive());
+    if (IsValidationEnabled()) {
+        DAWN_TRY_CONTEXT(ValidateResourceTableDescriptor(this, descriptor), "validating %s",
+                         descriptor);
+    }
+
+    return ResourceTableBase::Create(this, descriptor);
 }
 
 ResultOrError<Ref<QuerySetBase>> DeviceBase::CreateQuerySet(const QuerySetDescriptor* descriptor) {

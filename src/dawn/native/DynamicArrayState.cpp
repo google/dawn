@@ -202,6 +202,8 @@ DynamicArrayState::DynamicArrayState(DeviceBase* device,
     mBindingState.resize(mBindings.size());
 }
 
+DynamicArrayState::~DynamicArrayState() = default;
+
 MaybeError DynamicArrayState::Initialize() {
     // Create a storage buffer that will hold the shader-visible metadata for the dynamic array.
     uint32_t metadataArrayLength = uint32_t(mAPISize);

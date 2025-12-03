@@ -1458,6 +1458,14 @@
                 ]
             },
             {
+                "name": "create resource table",
+                "tags": ["dawn"],
+                "returns": "resource table",
+                "args": [
+                    {"name": "descriptor", "type": "resource table descriptor", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "import shared buffer memory",
                 "returns": "shared buffer memory",
                 "tags": ["dawn", "native"],
@@ -3611,7 +3619,6 @@
             {"name": "alpha", "type": "blend component"}
         ]
     },
-
     "render pipeline descriptor": {
         "category": "structure",
         "extensible": "in",
@@ -3625,7 +3632,24 @@
             {"name": "fragment", "type": "fragment state", "annotation": "const*", "optional": true}
         ]
     },
-
+    "resource table descriptor": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "extensible": "in",
+        "members": [
+            {"name": "label", "type": "string view", "optional": true},
+            {"name": "size", "type": "uint32_t"}
+        ]
+    },
+    "resource table": {
+        "category": "object",
+        "tags": ["dawn"],
+        "methods": [
+            {
+                "name": "destroy"
+            }
+        ]
+    },
     "sampler": {
         "category": "object",
         "methods": [

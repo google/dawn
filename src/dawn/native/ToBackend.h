@@ -108,6 +108,11 @@ struct ToBackendTraits<ResourceHeapBase, BackendTraits> {
 };
 
 template <typename BackendTraits>
+struct ToBackendTraits<ResourceTableBase, BackendTraits> {
+    using BackendType = typename BackendTraits::ResourceTableType;
+};
+
+template <typename BackendTraits>
 struct ToBackendTraits<SamplerBase, BackendTraits> {
     using BackendType = typename BackendTraits::SamplerType;
 };
