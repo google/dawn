@@ -3,12 +3,15 @@ package templates
 import (
 	"context"
 	"flag"
+	"math/rand"
 	"path/filepath"
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/gen/common"
+	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
+	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/sem"
 	"github.com/stretchr/testify/require"
 )
 
@@ -359,4 +362,93 @@ fn F()
 	require.Equal(t, perms1, perms2)
 	// Still no file read.
 	require.Equal(t, 1, spy.readFileCounts[defPath])
+}
+
+func TestGenCache_Intrinsics(t *testing.T) {
+	osw, _, _ := setupRunFileTest(t)
+	cache := &genCache{
+		fsReader: osw,
+	}
+
+	// First call for path 1
+	i1 := cache.intrinsics("path/to/def1")
+	require.NotNil(t, i1)
+	require.Equal(t, "path/to/def1", i1.path)
+	require.Equal(t, osw, i1.fsReader)
+
+	// Second call for path 1 should return same instance
+	i2 := cache.intrinsics("path/to/def1")
+	require.True(t, i1 == i2, "Should return the same instance for the same path")
+
+	// Call for path 2 should return new instance
+	i3 := cache.intrinsics("path/to/def2")
+	require.NotNil(t, i3)
+	require.Equal(t, "path/to/def2", i3.path)
+	require.True(t, i1 != i3, "Should return different instance for different path")
+}
+
+func TestGenerator_Scramble(t *testing.T) {
+	// Initialize generator with a fixed seed for deterministic behavior.
+	g := generator{
+		rnd: rand.New(rand.NewSource(123)),
+	}
+
+	initial := "InitialString"
+	avoid := container.NewSet[string]()
+
+	// Test 1: Verify scramble changes the string.
+	scrambled, err := g.scramble(initial, avoid)
+	require.NoError(t, err)
+	require.NotEqual(t, initial, scrambled)
+
+	// Test 2: Verify scramble avoids strings in |avoid|.
+	avoid.Add(scrambled)
+	scrambled2, err := g.scramble(initial, avoid)
+	require.NoError(t, err)
+	require.NotEqual(t, initial, scrambled2)
+	require.NotEqual(t, scrambled, scrambled2)
+	require.False(t, avoid.Contains(scrambled2))
+}
+
+func TestGenerator_SetCommentPrefix(t *testing.T) {
+	g := generator{}
+	require.Empty(t, g.commentPrefix)
+
+	ret := g.setCommentPrefix("// New Prefix")
+	require.Empty(t, ret, "setCommentPrefix should return empty string")
+	require.Equal(t, "// New Prefix", g.commentPrefix)
+}
+
+func TestHelper_Is(t *testing.T) {
+	// Test with sem.EnumEntry
+	isEnumEntry := is(sem.EnumEntry{})
+	require.True(t, isEnumEntry(sem.EnumEntry{}), "Should be true for sem.EnumEntry")
+	require.True(t, isEnumEntry(&sem.EnumEntry{}), "Should be true for *sem.EnumEntry")
+	require.False(t, isEnumEntry(sem.EnumMatcher{}), "Should be false for sem.EnumMatcher")
+
+	// Test with basic types
+	isInt := is(1)
+	require.True(t, isInt(1), "Should be true for int")
+	require.True(t, isInt(100), "Should be true for int")
+	val := 5
+	require.True(t, isInt(&val), "Should be true for *int")
+	require.False(t, isInt("string"), "Should be false for string")
+}
+
+func TestHelper_IsFirstIn(t *testing.T) {
+	slice := []int{1, 2, 3}
+	require.True(t, isFirstIn(1, slice), "1 should be first in [1, 2, 3]")
+	require.False(t, isFirstIn(2, slice), "2 should not be first in [1, 2, 3]")
+
+	empty := []int{}
+	require.False(t, isFirstIn(1, empty), "Should be false for empty slice")
+}
+
+func TestHelper_IsLastIn(t *testing.T) {
+	slice := []int{1, 2, 3}
+	require.True(t, isLastIn(3, slice), "3 should be last in [1, 2, 3]")
+	require.False(t, isLastIn(2, slice), "2 should not be last in [1, 2, 3]")
+
+	empty := []int{}
+	require.False(t, isLastIn(1, empty), "Should be false for empty slice")
 }
