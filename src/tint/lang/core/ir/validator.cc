@@ -82,6 +82,7 @@
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/array_count.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
@@ -2241,6 +2242,11 @@ void Validator::CheckType(const core::type::Type* root,
                         diag() << "runtime arrays must be in the 'storage' address space";
                         return false;
                     }
+                } else if (auto* count = arr->Count()->As<core::type::ConstantArrayCount>()) {
+                    if (count->value == 0) {
+                        diag() << "array requires a constant array size > 0";
+                        return false;
+                    }
                 }
                 return true;
             },
@@ -2329,6 +2335,13 @@ void Validator::CheckType(const core::type::Type* root,
                     diag() << "binding_array count must be a constant expression";
                     return false;
                 }
+
+                auto count = t->Count()->As<core::type::ConstantArrayCount>()->value;
+                if (count == 0) {
+                    diag() << "binding array requires a constant array size > 0";
+                    return false;
+                }
+
                 if (!(addrspace == AddressSpace::kUndefined ||
                       addrspace == AddressSpace::kHandle) &&
                     !capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures)) {
