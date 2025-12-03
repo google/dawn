@@ -152,3 +152,56 @@ func TestCmd_Run_StaleCheck_Clean(t *testing.T) {
 	err = c.Run(ctx, cfg)
 	require.NoError(t, err, "Second run (stale check) should not return error for clean file")
 }
+
+func TestCmd_Run_InvalidTemplateSyntax(t *testing.T) {
+	osw, cfg, realDawnRoot := setupRunFileTest(t)
+	ctx := context.Background()
+
+	tmplPath := filepath.Join(realDawnRoot, "src", "tint", "invalid.tmpl")
+	createTemplateFile(t, osw, tmplPath, `{{ invalid syntax }}`)
+
+	c := &Cmd{}
+	err := c.Run(ctx, cfg)
+	require.Error(t, err, "Run should fail with invalid template syntax")
+	require.Contains(t, err.Error(), "function \"invalid\" not defined")
+}
+
+func TestCmd_Run_MissingIntrinsicDef(t *testing.T) {
+	osw, cfg, realDawnRoot := setupRunFileTest(t)
+	ctx := context.Background()
+
+	tmplPath := filepath.Join(realDawnRoot, "src", "tint", "missing_intrinsics.tmpl")
+	// The template must try to use the intrinsics to trigger the load.
+	createTemplateFile(t, osw, tmplPath, `{{ (LoadIntrinsics "src/tint/missing.def").Sem }}`)
+
+	c := &Cmd{}
+	err := c.Run(ctx, cfg)
+	require.Error(t, err, "Run should fail with missing intrinsic definition")
+	// The error comes from ReadFile failing in intrinsicCache.Sem()
+	require.Contains(t, err.Error(), "does not exist")
+}
+
+func TestCmd_Run_TemplateOutsideProjectRoot(t *testing.T) {
+	osw, cfg, realDawnRoot := setupRunFileTest(t)
+	ctx := context.Background()
+
+	// Create a file outside the project root
+	outsidePath := filepath.Join(filepath.Dir(realDawnRoot), "outside_project.tmpl")
+	createTemplateFile(t, osw, outsidePath, `Outside Template`)
+
+	// Inject args since the existing FlagSet's args cannot be easily modified.
+	// NOTE: This means that this test is incompatible with t.Parallel() since it
+	// is modifying global state.
+	args := []string{outsidePath}
+	origCommandLine := flag.CommandLine
+	defer func() { flag.CommandLine = origCommandLine }()
+
+	flag.CommandLine = flag.NewFlagSet("test", flag.ContinueOnError)
+	err := flag.CommandLine.Parse(args)
+	require.NoError(t, err, "Failed to parse mock flags")
+
+	c := &Cmd{}
+	err = c.Run(ctx, cfg)
+	require.Error(t, err, "Run should fail with template outside project root")
+	require.Contains(t, err.Error(), "is not under project root")
+}
