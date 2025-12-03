@@ -327,6 +327,9 @@ crbug.com/364595481 [ android-pixel-6 ] webgpu:shader,execution,expression,call,
 # Driver crash with multisample texture load on pixel-6
 crbug.com/373670502 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Skip ]
 
+# Flakily kills the test device.
+crbug.com/465497437 [ android android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxBufferSize:createBuffer,at_over:limitTest="atMaximum";testValueName="atLimit" [ Skip ]
+
 ################################################################################
 # Triaged or Manually-Added Flakes and Failures
 ################################################################################
