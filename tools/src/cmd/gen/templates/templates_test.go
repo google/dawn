@@ -40,30 +40,27 @@ func setupRunFileTest(t *testing.T) (oswrapper.FSTestOSWrapper, *common.Config, 
 	return osw, cfg, realDawnRoot
 }
 
+func createTemplateFile(t *testing.T, osw oswrapper.FilesystemWriter, path, content string) {
+	t.Helper()
+	err := osw.MkdirAll(filepath.Dir(path), 0755)
+	require.NoError(t, err, "Failed to create directory for template")
+	err = osw.WriteFile(path, []byte(content), 0644)
+	require.NoError(t, err, "Failed to write template file")
+}
+
 func TestCmd_Run_FileDiscovery(t *testing.T) {
 	osw, cfg, realDawnRoot := setupRunFileTest(t)
 	ctx := context.Background()
 
-	// Create the template file
+	// Create the template files
 	// Note: The glob pattern in templates.go is "src/tint/**.tmpl" and "test/tint/**.tmpl"
 	tmplPath := filepath.Join(realDawnRoot, "src", "tint", "test.tmpl")
-	tmplContent := `Test Template 1`
-	err := osw.MkdirAll(filepath.Dir(tmplPath), 0755)
-	require.NoError(t, err, "Failed to create tmpl dir")
-
-	err = osw.WriteFile(tmplPath, []byte(tmplContent), 0644)
-	require.NoError(t, err, "Failed to write tmpl")
-
-	// Create a second template file in the test directory to verify the other glob pattern
+	createTemplateFile(t, osw, tmplPath, `Test Template 1`)
 	tmplPath2 := filepath.Join(realDawnRoot, "test", "tint", "subdir", "test2.tmpl")
-	tmplContent2 := `Test Template 2`
-	err = osw.MkdirAll(filepath.Dir(tmplPath2), 0755)
-	require.NoError(t, err, "Failed to create tmpl2 dir")
-	err = osw.WriteFile(tmplPath2, []byte(tmplContent2), 0644)
-	require.NoError(t, err, "Failed to write tmpl2")
+	createTemplateFile(t, osw, tmplPath2, `Test Template 2`)
 
 	c := &Cmd{}
-	err = c.Run(ctx, cfg)
+	err := c.Run(ctx, cfg)
 	require.NoError(t, err, "Run failed")
 
 	// Verify output 1
@@ -83,13 +80,8 @@ func TestCmd_Run_ExplicitFiles(t *testing.T) {
 	osw, cfg, realDawnRoot := setupRunFileTest(t)
 	ctx := context.Background()
 
-	// Create the template file
 	tmplPath := filepath.Join(realDawnRoot, "src", "tint", "explicit.tmpl")
-	tmplContent := `Explicit Template`
-	err := osw.MkdirAll(filepath.Dir(tmplPath), 0755)
-	require.NoError(t, err, "Failed to create tmpl dir")
-	err = osw.WriteFile(tmplPath, []byte(tmplContent), 0644)
-	require.NoError(t, err, "Failed to write tmpl")
+	createTemplateFile(t, osw, tmplPath, `Explicit Template`)
 
 	// Inject args since the existing FlagSet's args cannot be easily modified.
 	// NOTE: This means that this test is incompatible with t.Parallel() since it
@@ -99,7 +91,7 @@ func TestCmd_Run_ExplicitFiles(t *testing.T) {
 	defer func() { flag.CommandLine = origCommandLine }()
 
 	flag.CommandLine = flag.NewFlagSet("test", flag.ContinueOnError)
-	err = flag.CommandLine.Parse(args)
+	err := flag.CommandLine.Parse(args)
 	require.NoError(t, err, "Failed to parse mock flags")
 
 	c := &Cmd{}
@@ -113,4 +105,50 @@ func TestCmd_Run_ExplicitFiles(t *testing.T) {
 
 	// Check content
 	require.Contains(t, string(content), "Explicit Template", "Output content mismatch")
+}
+
+func TestCmd_Run_StaleCheck(t *testing.T) {
+	osw, cfg, realDawnRoot := setupRunFileTest(t)
+	ctx := context.Background()
+
+	tmplPath := filepath.Join(realDawnRoot, "src", "tint", "stale.tmpl")
+	createTemplateFile(t, osw, tmplPath, `Stale Template`)
+
+	// Create the output file with different content
+	outPath := filepath.Join(realDawnRoot, "src", "tint", "stale")
+	err := osw.WriteFile(outPath, []byte("Different Content"), 0644)
+	require.NoError(t, err, "Failed to write existing output file")
+
+	cfg.Flags.CheckStale = true
+	c := &Cmd{}
+	err = c.Run(ctx, cfg)
+
+	require.Error(t, err, "Run should have returned an error for stale files")
+	staleFiles, ok := err.(common.StaleFiles)
+	require.True(t, ok, "Error should be of type common.StaleFiles")
+	require.Len(t, staleFiles, 1, "Should have 1 stale file")
+	require.Equal(t, outPath, staleFiles[0], "Stale file path mismatch")
+}
+
+func TestCmd_Run_StaleCheck_Clean(t *testing.T) {
+	osw, cfg, realDawnRoot := setupRunFileTest(t)
+	ctx := context.Background()
+
+	tmplPath := filepath.Join(realDawnRoot, "src", "tint", "clean.tmpl")
+	createTemplateFile(t, osw, tmplPath, `Clean Template`)
+
+	// First run: generate the file
+	c := &Cmd{}
+	err := c.Run(ctx, cfg)
+	require.NoError(t, err, "First run failed")
+
+	// Verify the file exists
+	outPath := filepath.Join(realDawnRoot, "src", "tint", "clean")
+	_, err = osw.ReadFile(outPath)
+	require.NoError(t, err, "Output file should exist after first run")
+
+	// Second run: check for staleness
+	cfg.Flags.CheckStale = true
+	err = c.Run(ctx, cfg)
+	require.NoError(t, err, "Second run (stale check) should not return error for clean file")
 }
