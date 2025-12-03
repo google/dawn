@@ -32,7 +32,6 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"flag"
-	"os"
 )
 
 func init() {
@@ -71,5 +70,5 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return err
 	}
 
-	return os.WriteFile(c.flags.output, []byte(list), 0666)
+	return cfg.OsWrapper.WriteFile(c.flags.output, []byte(list), 0666)
 }
