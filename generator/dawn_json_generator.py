@@ -999,14 +999,9 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
     def kotlin_return(method):
         for argument in method.arguments:
             if argument.annotation == '*':
-                # TODO(b/352048981): Use handwritten methods for container returns to avoid the need
-                # for special casing logic.
                 if method.returns and method.returns.type.name.get(
                 ) == 'size_t':
-                    # Convert the output parameter to a Kotlin return container.
-                    container_type = deepcopy(argument)
-                    container_type.length = 'size_t'
-                    return container_type
+                    unreachable_code("Returning containers is not supported")
                 if ((method.returns == None
                      or method.returns.type.name.get() == 'status')
                         and argument.type.category == 'structure'):
