@@ -4,11 +4,15 @@ struct ResultMatrix {
 
 @group(0u) @binding(2u) var<storage, read_write> resultMatrix : ResultMatrix;
 
-struct SecondMatrix {
+struct FirstMatrix {
   numbers : array<f32>,
 }
 
-@group(0u) @binding(0u) var<storage, read> firstMatrix : SecondMatrix;
+@group(0u) @binding(0u) var<storage, read> firstMatrix : FirstMatrix;
+
+struct SecondMatrix {
+  numbers : array<f32>,
+}
 
 @group(0u) @binding(1u) var<storage, read> secondMatrix : SecondMatrix;
 
