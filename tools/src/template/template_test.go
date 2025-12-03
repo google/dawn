@@ -33,21 +33,16 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/template"
-	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
 )
 
 func check(t *testing.T, content, expected string, fns template.Functions) {
 	t.Helper()
 	w := &bytes.Buffer{}
-	if err := template.FromString("template", content).Run(w, nil, fns); err != nil {
-		t.Errorf("Template.Run() failed with %v", err)
-		return
-	}
+	err := template.FromString("template", content).Run(w, nil, fns)
+	require.NoError(t, err, "Template.Run() failed with %v", err)
 	got := w.String()
-	if diff := cmp.Diff(expected, got); diff != "" {
-		t.Errorf("output was not as expected. Diff:\n%v", diff)
-	}
+	require.Equal(t, expected, got, "Got unexpected diff")
 }
 
 func TestFromFile(t *testing.T) {
