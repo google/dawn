@@ -1198,16 +1198,16 @@ class Validator {
     void CheckVar(const Var* var);
 
     /// Validates annotations related to shader IO
+    /// @param msg_anchor where to attach errors to
     /// @param ty type of the value under test
     /// @param binding_point the binding information associated with the value
     /// @param attr IO attributes associated with the values
     /// @param kind the kind Shader IO being performed
-    /// @returns Success if passes validation, otherwise a Failure with the error reason is returned
-    Result<SuccessType, std::string> ValidateShaderIOAnnotations(
-        const core::type::Type* ty,
-        const std::optional<struct BindingPoint>& binding_point,
-        const core::IOAttributes& attr,
-        ShaderIOKind kind);
+    void ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
+                                     const core::type::Type* ty,
+                                     const std::optional<BindingPoint>& binding_point,
+                                     const IOAttributes& attr,
+                                     ShaderIOKind kind);
 
     /// Validates the blend_src attribute for a given type, responsible for traversal of inner types
     /// and checking rules that span across a multiple attribute instances.
@@ -2572,19 +2572,14 @@ void Validator::CheckFunction(const Function* func) {
         }
 
         if (func->IsEntryPoint()) {
-            {
-                auto result =
-                    ValidateShaderIOAnnotations(param->Type(), param->BindingPoint(),
-                                                param->Attributes(), ShaderIOKind::kInputParam);
-                if (result != Success) {
-                    AddError(param) << result.Failure();
-                }
-            }
+            ValidateShaderIOAnnotations(param, param->Type(), param->BindingPoint(),
+                                        param->Attributes(), ShaderIOKind::kInputParam);
         } else {
             if (param->BindingPoint().has_value()) {
                 AddError(param)
                     << "input param to non-entry point function has a binding point set";
             }
+
             if (param->Builtin().has_value()) {
                 AddError(param) << "builtins can only be decorated on entry point params";
             }
@@ -2631,11 +2626,8 @@ void Validator::CheckFunction(const Function* func) {
     }
 
     if (func->IsEntryPoint()) {
-        auto result = ValidateShaderIOAnnotations(
-            func->ReturnType(), std::nullopt, func->ReturnAttributes(), ShaderIOKind::kResultValue);
-        if (result != Success) {
-            AddError(func) << result.Failure();
-        }
+        ValidateShaderIOAnnotations(func, func->ReturnType(), std::nullopt,
+                                    func->ReturnAttributes(), ShaderIOKind::kResultValue);
 
         WalkTypeAndMembers(
             func, func->ReturnType(), func->ReturnAttributes(),
@@ -3286,12 +3278,8 @@ void Validator::CheckVar(const Var* var) {
 
     if (var->Block() == mod_.root_block) {
         if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) {
-            auto result =
-                ValidateShaderIOAnnotations(var->Result()->Type(), var->BindingPoint(),
-                                            var->Attributes(), ShaderIOKind::kModuleScopeVar);
-            if (result != Success) {
-                AddError(var) << result.Failure();
-            }
+            ValidateShaderIOAnnotations(var, var->Result()->Type(), var->BindingPoint(),
+                                        var->Attributes(), ShaderIOKind::kModuleScopeVar);
         }
     }
 
@@ -3514,11 +3502,11 @@ void Validator::CheckBindingPoint(const CastableBase* anchor,
     }
 }
 
-Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
-    const core::type::Type* ty,
-    const std::optional<struct BindingPoint>& binding_point,
-    const core::IOAttributes& attr,
-    ShaderIOKind kind) {
+void Validator::ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
+                                            const core::type::Type* ty,
+                                            const std::optional<BindingPoint>& binding_point,
+                                            const IOAttributes& attr,
+                                            ShaderIOKind kind) {
     EnumSet<IOAnnotation> annotations;
 
     // Since there is no entries in the set at this point, this should never fail.
@@ -3536,9 +3524,9 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
 
     if (ty->Is<core::type::Void>()) {
         if (!annotations.Empty()) {
-            return ToString(kind) + " with void type should never be annotated";
+            AddError(msg_anchor) << ToString(kind) << " with void type should never be annotated";
         }
-        return Success;
+        return;  // Early return because later rules assume non-void types.
     }
 
     if (attr.location.has_value()) {
@@ -3566,16 +3554,19 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
                 return result;
             };
             if (!is_numeric(ty)) {
-                return ToString(kind) +
-                       " with a location attribute must contain only numeric elements " +
-                       ty->FriendlyName();
+                AddError(msg_anchor)
+                    << ToString(kind)
+                    << " with a location attribute must contain only numeric elements "
+                    << ty->FriendlyName();
+                return;
             }
         } else {
             if (!ty->UnwrapPtrOrRef()->IsNumericScalarOrVector()) {
-                return ToString(kind) +
-                       " with a location attribute must be a numeric scalar or vector, but has "
-                       "type " +
-                       ty->FriendlyName();
+                AddError(msg_anchor) << ToString(kind)
+                                     << " with a location attribute must be a numeric scalar or "
+                                        "vector, but has type "
+                                     << ty->FriendlyName();
+                return;
             }
         }
     }
@@ -3585,26 +3576,31 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
             EnumSet<IOAnnotation> mem_annotations = annotations;
             auto add_result = AddIOAnnotationsFromIOAttributes(mem_annotations, mem->Attributes());
             if (add_result != Success) {
-                return ToString(kind) +
-                       " struct member has same IO annotation, as top-level struct, '" +
-                       ToString(add_result.Failure()) + "'";
+                AddError(msg_anchor)
+                    << ToString(kind)
+                    << " struct member has same IO annotation, as top-level struct, '"
+                    << ToString(add_result.Failure()) << "'";
+                return;
             }
 
             if (mem->Attributes().location.has_value()) {
                 if (capabilities_.Contains(Capability::kAllowLocationForNumericElements)) {
                     if (!mem->Type()->UnwrapPtrOrRef()->IsNumericScalarOrVector() &&
                         !mem->Type()->UnwrapPtrOrRef()->Is<core::type::Struct>()) {
-                        return ToString(kind) +
-                               " struct member with a location attribute must be a numeric scalar, "
-                               "a numeric vector or a struct, but has type " +
-                               mem->Type()->FriendlyName();
+                        AddError(msg_anchor)
+                            << ToString(kind)
+                            << " struct member with a location attribute must be a numeric scalar, "
+                               "a numeric vector or a struct, but has type "
+                            << mem->Type()->FriendlyName();
+                        return;
                     }
                 } else {
                     if (!mem->Type()->UnwrapPtrOrRef()->IsNumericScalarOrVector()) {
-                        return ToString(kind) +
-                               " struct member with a location attribute must be a numeric scalar "
-                               "or vector, but has type " +
-                               mem->Type()->FriendlyName();
+                        AddError(msg_anchor) << ToString(kind)
+                                             << " struct member with a location attribute must be "
+                                                "a numeric scalar or vector, but has type "
+                                             << mem->Type()->FriendlyName();
+                        return;
                     }
                 }
             }
@@ -3618,30 +3614,28 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
             }
 
             if (mem_annotations.Empty()) {
-                return ToString(kind) +
-                       " struct members must have at least one IO annotation, e.g. a binding "
-                       "point, a location, etc";
-            }
-
-            if (mem_annotations.Size() > 1) {
-                return ToString(kind) + " struct member has more than one IO annotation, " +
-                       ToString(mem_annotations);
+                AddError(msg_anchor) << ToString(kind)
+                                     << " struct members must have at least one IO annotation, "
+                                        "e.g. a binding point, a location, etc";
+            } else if (mem_annotations.Size() > 1) {
+                AddError(msg_anchor)
+                    << ToString(kind) << " struct member has more than one IO annotation, "
+                    << ToString(mem_annotations);
             }
         }
     } else {
         if (annotations.Empty()) {
             if (!(capabilities_.Contains(Capability::kAllowUnannotatedModuleIOVariables) &&
                   kind == ShaderIOKind::kModuleScopeVar)) {
-                return ToString(kind) +
-                       " must have at least one IO annotation, e.g. a binding point, a location, "
-                       "etc";
+                AddError(msg_anchor) << ToString(kind)
+                                     << " must have at least one IO annotation, e.g. a binding "
+                                        "point, a location, etc";
             }
-        }
-        if (annotations.Size() > 1) {
-            return ToString(kind) + " has more than one IO annotation, " + ToString(annotations);
+        } else if (annotations.Size() > 1) {
+            AddError(msg_anchor) << ToString(kind) << " has more than one IO annotation, "
+                                 << ToString(annotations);
         }
     }
-    return Success;
 }
 
 void Validator::CheckLet(const Let* l) {
