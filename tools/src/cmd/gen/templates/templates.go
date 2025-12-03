@@ -32,7 +32,6 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
-	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -190,7 +189,7 @@ func (i *intrinsicCache) Sem() (*sem.Sem, error) {
 		// Load the intrinsic definition file
 		defPath := filepath.Join(fileutils.DawnRoot(i.fsReader), i.path)
 
-		defSource, err := os.ReadFile(defPath)
+		defSource, err := i.fsReader.ReadFile(defPath)
 		if err != nil {
 			return nil, err
 		}
