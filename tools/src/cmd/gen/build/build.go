@@ -659,7 +659,7 @@ func emitBuildFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter)
 	// Load the templates
 	templates := container.NewMap[string, *template.Template]()
 	for _, path := range templatePaths {
-		tmpl, err := template.FromFile(path)
+		tmpl, err := template.FromFile(path, fsReaderWriter)
 		if err != nil {
 			return err
 		}

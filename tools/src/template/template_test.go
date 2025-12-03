@@ -31,8 +31,10 @@ import (
 	"bytes"
 	"testing"
 
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/template"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func check(t *testing.T, content, expected string, fns template.Functions) {
@@ -46,6 +48,23 @@ func check(t *testing.T, content, expected string, fns template.Functions) {
 	if diff := cmp.Diff(expected, got); diff != "" {
 		t.Errorf("output was not as expected. Diff:\n%v", diff)
 	}
+}
+
+func TestFromFile(t *testing.T) {
+	fileContent := `
+{{ Contains "hello world" "hello"}}
+{{ Contains "hello world" "fish"}}
+`
+	filePath := "file.tmpl"
+
+	osw := oswrapper.CreateFSTestOSWrapper()
+	osw.WriteFile(filePath, []byte(fileContent), 0644)
+
+	expectedTemplate := template.FromString(filePath, fileContent)
+
+	actualTemplate, err := template.FromFile(filePath, osw)
+	require.NoError(t, err, "Error creating template from file")
+	require.Equal(t, expectedTemplate, actualTemplate)
 }
 
 func TestContains(t *testing.T) {

@@ -32,7 +32,6 @@ package template
 import (
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -53,21 +52,9 @@ type Template struct {
 	content string
 }
 
-// FromFile loads the template file at path and builds and returns a Template
-// using the file content
-// TODO(crbug.com/344014313): Remove this implementation once all uses have
-// been changed to the oswrapper version.
-func FromFile(path string) (*Template, error) {
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	return FromString(path, string(content)), nil
-}
-
-// ReadFile loads the template file at path using the provided FilesystemReader
+// FromFile loads the template file at path using the provided FilesystemReader
 // and builds and returns a Template using the file content
-func ReadFile(path string, fs oswrapper.FilesystemReader) (*Template, error) {
+func FromFile(path string, fs oswrapper.FilesystemReader) (*Template, error) {
 	content, err := fs.ReadFile(path)
 	if err != nil {
 		return nil, err

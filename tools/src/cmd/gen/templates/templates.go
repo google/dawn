@@ -323,7 +323,7 @@ func generate(tmplPath, outPath string, cache *genCache, writeFile WriteFile) er
 			return "", g.writeFile(relPath, content, g.commentPrefix)
 		},
 	}
-	t, err := template.ReadFile(tmplPath, cache.fsReader)
+	t, err := template.FromFile(tmplPath, cache.fsReader)
 	if err != nil {
 		return err
 	}
