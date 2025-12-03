@@ -419,6 +419,10 @@ TEST_P(SurfaceTests, ResizingWindowAndSurface) {
     // TODO(crbug.com/dawn/1205): Currently failing on new NVIDIA GTX 1660s on Linux/Vulkan.
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
 
+    // TODO(crbug.com/465497433): Flakily loses device on Snapdragon X Elite
+    // SoCs.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
+
     wgpu::Surface surface = CreateTestSurface();
 
     for (int i = 0; i < 10; i++) {
