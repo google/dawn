@@ -457,7 +457,7 @@ struct State {
                         auto* mul = b.Multiply(lhs, rhs);
                         auto* sum = b.Access(el_ty, mul, u32(0))->Result();
                         for (uint32_t i = 1; i < vec->Width(); i++) {
-                            sum = b.Add(el_ty, sum, b.Access(el_ty, mul, u32(i)))->Result();
+                            sum = b.Add(sum, b.Access(el_ty, mul, u32(i)))->Result();
                         }
                         b.Return(func, sum);
                     });

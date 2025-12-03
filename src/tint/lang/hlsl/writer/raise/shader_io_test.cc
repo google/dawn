@@ -83,7 +83,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NonStruct) {
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
         b.Append(ifelse->True(), [&] {
-            b.Multiply(position, b.Add(ty.f32(), color1, color2));
+            b.Multiply(position, b.Add(color1, color2));
             b.ExitIf(ifelse);
         });
         b.Return(ep);
@@ -198,7 +198,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Struct) {
             auto* position = b.Access(ty.vec4<f32>(), str_param, 1_i);
             auto* color1 = b.Access(ty.f32(), str_param, 2_i);
             auto* color2 = b.Access(ty.f32(), str_param, 3_i);
-            b.Multiply(position, b.Add(ty.f32(), color1, color2));
+            b.Multiply(position, b.Add(color1, color2));
             b.ExitIf(ifelse);
         });
         b.Return(ep);
@@ -324,7 +324,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Mixed) {
         b.Append(ifelse->True(), [&] {
             auto* position = b.Access(ty.vec4<f32>(), str_param, 0_i);
             auto* color1 = b.Access(ty.f32(), str_param, 1_i);
-            b.Multiply(position, b.Add(ty.f32(), color1, color2));
+            b.Multiply(position, b.Add(color1, color2));
             b.ExitIf(ifelse);
         });
         b.Return(ep);
@@ -1020,7 +1020,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_WithNonSubgroupParam
 
     b.Append(ep->Block(), [&] {
         auto* x = b.Let("x", b.Multiply(subgroup_invocation_id, subgroup_size));
-        b.Let("y", b.Add(ty.u32(), x, b.Access(ty.u32(), invocation_id, 0_u)));
+        b.Let("y", b.Add(x, b.Access(ty.u32(), invocation_id, 0_u)));
         b.Return(ep);
     });
 
@@ -1086,7 +1086,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_WithNonSubgroupParam
 
     b.Append(ep->Block(), [&] {
         auto* x = b.Let("x", b.Multiply(subgroup_invocation_id, subgroup_size));
-        b.Let("y", b.Add(ty.u32(), x, b.Access(ty.u32(), invocation_id, 0_u)));
+        b.Let("y", b.Add(x, b.Access(ty.u32(), invocation_id, 0_u)));
         b.Return(ep);
     });
 
@@ -1152,7 +1152,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_WithNonSubgroupParam
 
     b.Append(ep->Block(), [&] {
         auto* x = b.Let("x", b.Multiply(subgroup_invocation_id, subgroup_size));
-        b.Let("y", b.Add(ty.u32(), x, b.Access(ty.u32(), invocation_id, 0_u)));
+        b.Let("y", b.Add(x, b.Access(ty.u32(), invocation_id, 0_u)));
         b.Return(ep);
     });
 
@@ -3508,7 +3508,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_VertexIndex)
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     b.Append(ep->Block(), [&] {
-        b.Add(ty.u32(), vert_idx, vert_idx);
+        b.Add(vert_idx, vert_idx);
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
     });
 
@@ -3578,7 +3578,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_FirstIndexOffset_Ve
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     b.Append(ep->Block(), [&] {
-        b.Add(ty.u32(), vert_idx, vert_idx);
+        b.Add(vert_idx, vert_idx);
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
     });
 
@@ -3655,7 +3655,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_InstanceInde
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     b.Append(ep->Block(), [&] {
-        b.Add(ty.u32(), inst_idx, inst_idx);
+        b.Add(inst_idx, inst_idx);
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
     });
 
@@ -3725,7 +3725,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_FirstIndexOffset_In
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     b.Append(ep->Block(), [&] {
-        b.Add(ty.u32(), inst_idx, inst_idx);
+        b.Add(inst_idx, inst_idx);
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
     });
 
@@ -3805,7 +3805,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_Both) {
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     b.Append(ep->Block(), [&] {
-        b.Add(ty.u32(), vert_idx, inst_idx);
+        b.Add(vert_idx, inst_idx);
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
     });
 
@@ -3883,7 +3883,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_Immediate_Bo
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     b.Append(ep->Block(), [&] {
-        b.Add(ty.u32(), vert_idx, inst_idx);
+        b.Add(vert_idx, inst_idx);
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
     });
 
@@ -3973,7 +3973,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_BothReorder)
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     b.Append(ep->Block(), [&] {
-        b.Add(ty.u32(), vert_idx, inst_idx);
+        b.Add(vert_idx, inst_idx);
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
     });
 
@@ -4051,7 +4051,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_FirstIndexOffset_Bo
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     b.Append(ep->Block(), [&] {
-        b.Add(ty.u32(), vert_idx, inst_idx);
+        b.Add(vert_idx, inst_idx);
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
     });
 

@@ -543,7 +543,7 @@ TEST_F(IRBinaryRoundtripTest, BinaryOp) {
     auto* y = b.FunctionParam<f32>("y");
     auto* fn = b.Function("Function", ty.f32());
     fn->SetParams({x, y});
-    b.Append(fn->Block(), [&] { b.Return(fn, b.Add<f32>(x, y)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Add(x, y)); });
     RUN_TEST();
 }
 

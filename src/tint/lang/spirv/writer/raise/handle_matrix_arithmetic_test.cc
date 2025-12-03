@@ -47,7 +47,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Add_Mat2x3f) {
     func->SetParams({arg1, arg2});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Add(ty.mat2x3<f32>(), arg1, arg2);
+        auto* result = b.Add(arg1, arg2);
         b.Return(func, result);
     });
 
@@ -88,7 +88,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Add_Mat4x2h) {
     func->SetParams({arg1, arg2});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Add(ty.mat4x2<f16>(), arg1, arg2);
+        auto* result = b.Add(arg1, arg2);
         b.Return(func, result);
     });
 

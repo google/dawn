@@ -83,7 +83,7 @@ TEST_F(MslWriter_ShaderIOTest, Parameters_NonStruct) {
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
         b.Append(ifelse->True(), [&] {
-            b.Multiply(position, b.Add(ty.f32(), color1, color2));
+            b.Multiply(position, b.Add(color1, color2));
             b.ExitIf(ifelse);
         });
         b.Return(ep);
@@ -189,7 +189,7 @@ TEST_F(MslWriter_ShaderIOTest, Parameters_Struct) {
             auto* position = b.Access(ty.vec4<f32>(), str_param, 1_i);
             auto* color1 = b.Access(ty.f32(), str_param, 2_i);
             auto* color2 = b.Access(ty.f32(), str_param, 3_i);
-            b.Multiply(position, b.Add(ty.f32(), color1, color2));
+            b.Multiply(position, b.Add(color1, color2));
             b.ExitIf(ifelse);
         });
         b.Return(ep);
@@ -305,7 +305,7 @@ TEST_F(MslWriter_ShaderIOTest, Parameters_Mixed) {
         b.Append(ifelse->True(), [&] {
             auto* position = b.Access(ty.vec4<f32>(), str_param, 0_i);
             auto* color1 = b.Access(ty.f32(), str_param, 1_i);
-            b.Multiply(position, b.Add(ty.f32(), color1, color2));
+            b.Multiply(position, b.Add(color1, color2));
             b.ExitIf(ifelse);
         });
         b.Return(ep);
@@ -890,7 +890,7 @@ TEST_F(MslWriter_ShaderIOTest, Color_NonStruct) {
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);
 
     b.Append(ep->Block(), [&] {
-        b.Add<f32>(color1, color2);
+        b.Add(color1, color2);
         b.Return(ep);
     });
 
@@ -1156,7 +1156,7 @@ TEST_F(MslWriter_ShaderIOTest, Color_Struct) {
     b.Append(ep->Block(), [&] {
         auto* color1 = b.Access<f32>(str_param, 0_i);
         auto* color2 = b.Access<f32>(str_param, 1_i);
-        b.Add<f32>(color1, color2);
+        b.Add(color1, color2);
         b.Return(ep);
     });
 

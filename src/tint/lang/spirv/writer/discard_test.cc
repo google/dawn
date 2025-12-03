@@ -153,7 +153,7 @@ TEST_F(SpirvWriterTest, Discard_DemoteToHelperWithExtension) {
     b.Append(func->Block(), [&] {
         b.Discard();
         auto* load = b.Load(v);
-        auto* add = b.Add(ty.i32(), load, 1_i);
+        auto* add = b.Add(load, 1_i);
 
         b.Store(v, add);
         b.Return(func);
@@ -175,7 +175,7 @@ TEST_F(SpirvWriterTest, Discard_DemoteToHelperAsTransform) {
     b.Append(func->Block(), [&] {
         b.Discard();
         auto* load = b.Load(v);
-        auto* add = b.Add(ty.i32(), load, 1_i);
+        auto* add = b.Add(load, 1_i);
 
         b.Store(v, add);
         b.Return(func);

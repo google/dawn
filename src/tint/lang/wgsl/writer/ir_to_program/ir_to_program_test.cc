@@ -1070,7 +1070,7 @@ TEST_F(IRToProgramTest, BinaryOp_Add) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.Add(ty.i32(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Add(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -1917,7 +1917,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Increment) {
 
     b.Append(fn->Block(), [&] {
         auto* v = Var<function, i32>("v");
-        b.Store(v, b.Add(ty.i32(), b.Load(v), 1_i));
+        b.Store(v, b.Add(b.Load(v), 1_i));
 
         b.Return(fn);
     });
@@ -1953,7 +1953,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Add) {
 
     b.Append(fn->Block(), [&] {
         auto* v = Var<function, i32>("v");
-        b.Store(v, b.Add(ty.i32(), b.Load(v), 8_i));
+        b.Store(v, b.Add(b.Load(v), 8_i));
 
         b.Return(fn);
     });
@@ -2066,7 +2066,7 @@ TEST_F(IRToProgramTest, LetUsedTwice) {
 
     b.Append(fn->Block(), [&] {
         auto* v = b.Let("v", b.Multiply(i, 2_i));
-        b.Return(fn, b.Add(ty.i32(), v, v));
+        b.Return(fn, b.Add(v, v));
     });
 
     EXPECT_WGSL(R"(
@@ -2696,7 +2696,7 @@ TEST_F(IRToProgramTest, For_Empty) {
             });
 
             b.Append(loop->Continuing(), [&] {
-                b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i));
+                b.Store(i, b.Add(b.Load(i), 1_i));
                 b.NextIteration(loop);
             });
         });
@@ -2728,7 +2728,7 @@ TEST_F(IRToProgramTest, For_Empty_NoInit) {
         });
 
         b.Append(loop->Continuing(), [&] {
-            b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i));
+            b.Store(i, b.Add(b.Load(i), 1_i));
             b.NextIteration(loop);
         });
 
@@ -2800,7 +2800,7 @@ TEST_F(IRToProgramTest, For_ComplexBody) {
             });
 
             b.Append(loop->Continuing(), [&] {
-                b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i));
+                b.Store(i, b.Add(b.Load(i), 1_i));
                 b.NextIteration(loop);
             });
         });
@@ -2852,7 +2852,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoInit) {
         });
 
         b.Append(loop->Continuing(), [&] {
-            b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i));
+            b.Store(i, b.Add(b.Load(i), 1_i));
             b.NextIteration(loop);
         });
 
@@ -2931,7 +2931,7 @@ TEST_F(IRToProgramTest, For_CallInInitCondCont) {
     auto* fn_n = b.Function("n", ty.i32());
     auto* v = b.FunctionParam("v", ty.i32());
     fn_n->SetParams({v});
-    b.Append(fn_n->Block(), [&] { b.Return(fn_n, b.Add(ty.i32(), v, 1_i)); });
+    b.Append(fn_n->Block(), [&] { b.Return(fn_n, b.Add(v, 1_i)); });
 
     auto* fn_f = b.Function("f", ty.void_());
 
@@ -3016,7 +3016,7 @@ TEST_F(IRToProgramTest, For_IncInInit_Cmp) {
 
             b.Append(loop->Initializer(), [&] {
                 auto* load_i = b.Load(i);
-                auto* inc_i = b.Add(ty.u32(), load_i, 1_u);
+                auto* inc_i = b.Add(load_i, 1_u);
                 b.Store(i, inc_i);
                 b.NextIteration(loop);
             });
@@ -3396,7 +3396,7 @@ TEST_F(IRToProgramTest, Loop_VarsDeclaredOutsideAndInside) {
             b.Append(loop->Continuing(), [&] {
                 auto* cont_load_a = b.Load(var_a);
                 auto* cont_load_b = b.Load(var_b);
-                b.Store(var_b, b.Add(ty.i32(), cont_load_a, cont_load_b));
+                b.Store(var_b, b.Add(cont_load_a, cont_load_b));
                 b.NextIteration(loop);
             });
         });
@@ -3531,7 +3531,7 @@ TEST_F(IRToProgramTest, Override_BinaryInitializer) {
         auto* rhs = b.Override("rhs", ty.u32());
         rhs->SetOverrideId(OverrideId{20});
 
-        o = b.Override("o", b.Add<u32>(lhs, rhs));
+        o = b.Override("o", b.Add(lhs, rhs));
     });
 
     auto* fn = b.Function("f", ty.u32());

@@ -635,7 +635,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_SingleValue) {
         loop->Body()->SetParams({loop_param});
 
         b.Append(loop->Body(), [&] {
-            auto* inc = b.Add(ty.i32(), loop_param, 1_i);
+            auto* inc = b.Add(loop_param, 1_i);
             b.Continue(loop, inc);
         });
 
@@ -695,7 +695,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
         loop->Body()->SetParams({loop_param_a, loop_param_b});
 
         b.Append(loop->Body(), [&] {
-            auto* inc = b.Add(ty.i32(), loop_param_a, 1_i);
+            auto* inc = b.Add(loop_param_a, 1_i);
             b.Continue(loop, inc, loop_param_b);
         });
 

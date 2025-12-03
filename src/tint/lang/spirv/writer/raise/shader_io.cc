@@ -211,7 +211,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             auto* vec_xy = builder.Swizzle(ty.vec2f(), value, {0, 1});
             auto* floor_xy = builder.Call(ty.vec2f(), core::BuiltinFn::kFloor, vec_xy);
             auto p5_const = builder.Constant(0.5_f);
-            auto* plus_p5 = builder.Add(ty.vec2f(), floor_xy, builder.Splat(ty.vec2f(), p5_const));
+            auto* plus_p5 = builder.Add(floor_xy, builder.Splat(ty.vec2f(), p5_const));
 
             auto* xyzw_from_user_center = builder.Load(input_vars[center_pos_frag_idx.value()]);
 
@@ -298,7 +298,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // https://www.w3.org/TR/webgpu/#coordinate-systems#:~:text=Viewport%20coordinates
         auto* max_minus_min = builder.Subtract(ty.f32(), max, min);
         auto* rhs = builder.Multiply(max_minus_min, frag_depth);
-        return builder.Add(ty.f32(), min, rhs)->Result();
+        return builder.Add(min, rhs)->Result();
     }
 
     /// Clamp a frag_depth builtin value if necessary.

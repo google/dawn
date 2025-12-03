@@ -622,7 +622,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingVertexAndIndexAttribute_Params) {
     b.Append(ep->Block(), [&] {  //
         auto* f1 = b.Convert<f32>(b.Access<u32>(param, 1_u));
         auto* f2 = b.Convert<f32>(b.Access<i32>(param, 2_u));
-        b.Let("idx_add", b.Add<u32>(vertex_index, instance_index));
+        b.Let("idx_add", b.Add(vertex_index, instance_index));
         b.Return(ep, b.Construct<vec4<f32>>(b.Access<f32>(param, 0_u), f1, f2, 1_f));
     });
 
@@ -732,7 +732,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingVertexAndIndexAttribute_Params_Multi
     ep->SetParams({vertex_index, instance_index, loc0, loc1, loc2, loc3});
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
-        b.Let("idx_add", b.Add<u32>(vertex_index, instance_index));
+        b.Let("idx_add", b.Add(vertex_index, instance_index));
         b.Return(ep, b.Construct<vec4<f32>>(loc0, loc1, loc2, loc3));
     });
 
@@ -818,7 +818,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingVertexIndex_NotUsedByBuffer) {
     ep->SetParams({vertex_index, instance_index, loc0});
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
-        b.Let("idx_add", b.Add<u32>(vertex_index, instance_index));
+        b.Let("idx_add", b.Add(vertex_index, instance_index));
         b.Return(ep, b.Construct<vec4<f32>>(loc0));
     });
 
@@ -877,7 +877,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingInstanceIndex_NotUsedByBuffer) {
     ep->SetParams({vertex_index, instance_index, loc0});
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
-        b.Let("idx_add", b.Add<u32>(vertex_index, instance_index));
+        b.Let("idx_add", b.Add(vertex_index, instance_index));
         b.Return(ep, b.Construct<vec4<f32>>(loc0));
     });
 
@@ -944,7 +944,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingVertexAndIndexAttribute_SameStruct) 
         auto* f2 = b.Convert<f32>(b.Access<i32>(param, 2_u));
         auto* vertex_index = b.Access<u32>(param, 3_u);
         auto* instance_index = b.Access<u32>(param, 4_u);
-        b.Let("idx_add", b.Add<u32>(vertex_index, instance_index));
+        b.Let("idx_add", b.Add(vertex_index, instance_index));
         b.Return(ep, b.Construct<vec4<f32>>(b.Access<f32>(param, 0_u), f1, f2, 1_f));
     });
 
@@ -1066,7 +1066,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingVertexAndIndexAttribute_DifferentStr
         auto* f2 = b.Convert<f32>(b.Access<i32>(param, 2_u));
         auto* vertex_index = b.Access<u32>(indices, 0_u);
         auto* instance_index = b.Access<u32>(indices, 1_u);
-        b.Let("idx_add", b.Add<u32>(vertex_index, instance_index));
+        b.Let("idx_add", b.Add(vertex_index, instance_index));
         b.Return(ep, b.Construct<vec4<f32>>(b.Access<f32>(param, 0_u), f1, f2, 1_f));
     });
 

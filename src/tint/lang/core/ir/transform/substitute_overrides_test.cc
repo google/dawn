@@ -233,7 +233,7 @@ $B1: {  # root
 TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexInitNoOverrides) {
     core::ir::Override* o = nullptr;
     b.Append(mod.root_block, [&] {
-        auto* add = b.Add(ty.u32(), 2_u, 4_u);
+        auto* add = b.Add(2_u, 4_u);
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
@@ -275,7 +275,7 @@ $B1: {  # root
 TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexInitComponentOverride) {
     core::ir::Override* o = nullptr;
     b.Append(mod.root_block, [&] {
-        auto* add = b.Add(ty.u32(), 2_u, 4_u);
+        auto* add = b.Add(2_u, 4_u);
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
@@ -321,7 +321,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexIncludingOverride) {
         auto* x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
 
-        auto* add = b.Add(ty.u32(), x, 4_u);
+        auto* add = b.Add(x, 4_u);
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
@@ -367,7 +367,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithSubgroupShuffle) {
     b.Append(mod.root_block, [&] {
         auto* x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
-        auto* add = b.Add(ty.u32(), x, 4_u);
+        auto* add = b.Add(x, 4_u);
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
         o->SetInitializer(add->Result());
@@ -409,7 +409,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithQuantizeF16) {
         auto* x = b.Override("x", ty.f32());
         x->SetOverrideId({2});
 
-        auto* add = b.Add(ty.f32(), x, 4_f);
+        auto* add = b.Add(x, 4_f);
 
         o = b.Override(Source{{1, 2}}, "a", ty.f32());
         o->SetOverrideId({1});
@@ -452,7 +452,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexGenError) {
         auto* x = b.Override("x", ty.f32());
         x->SetOverrideId({2});
 
-        auto* add = b.Add(ty.f32(), x, f32(std::numeric_limits<float>::max() - 1));
+        auto* add = b.Add(x, f32(std::numeric_limits<float>::max() - 1));
         b.ir.SetSource(add, Source{{1, 2}});
 
         o = b.Override("a", ty.f32());
@@ -494,7 +494,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWorkgroupSize) {
         x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
 
-        auto* add = b.Add(ty.u32(), x, 4_u);
+        auto* add = b.Add(x, 4_u);
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
@@ -542,7 +542,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpression) {
         x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
 
-        auto* add = b.Add(ty.u32(), x, 4_u);
+        auto* add = b.Add(x, 4_u);
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
@@ -647,7 +647,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperand) {
         x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
 
-        auto* add = b.Add(ty.u32(), x, 4_u);
+        auto* add = b.Add(x, 4_u);
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
@@ -657,7 +657,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperand) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Let("y", b.Divide(ty.u32(), 10_u, o));
-        auto* k = b.Add(ty.u32(), 1_u, b.Multiply(2_u, x));
+        auto* k = b.Add(1_u, b.Multiply(2_u, x));
         b.Let("z", b.Multiply(k, o));
         b.Return(func);
     });
@@ -708,7 +708,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandFlipOrder) {
         x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
 
-        auto* add = b.Add(ty.u32(), x, 4_u);
+        auto* add = b.Add(x, 4_u);
 
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
@@ -718,7 +718,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandFlipOrder) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Let("y", b.Divide(ty.u32(), 10_u, o));
-        auto* k = b.Add(ty.u32(), 1_u, b.Multiply(2_u, o));
+        auto* k = b.Add(1_u, b.Multiply(2_u, o));
         b.Let("z", b.Multiply(k, x));
         b.Return(func);
     });
@@ -769,7 +769,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandNonConstFn) {
         x = b.Override("x", ty.f32());
         x->SetOverrideId({2});
 
-        auto* add = b.Add(ty.f32(), x, 4_f);
+        auto* add = b.Add(x, 4_f);
 
         o = b.Override(Source{{1, 2}}, "a", ty.f32());
         o->SetOverrideId({1});
@@ -831,7 +831,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandLet) {
         x = b.Override("x", ty.f32());
         x->SetOverrideId({2});
 
-        auto* add = b.Add(ty.f32(), x, 4_f);
+        auto* add = b.Add(x, 4_f);
 
         o = b.Override(Source{{1, 2}}, "a", ty.f32());
         o->SetOverrideId({1});
@@ -1457,7 +1457,7 @@ TEST_F(IR_SubstituteOverridesTest, ConstExprIfInsideKernel) {
         auto* constexpr_if = b.ConstExprIf(o);
         constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
-            auto* k4 = b.Add(ty.u32(), 10_u, 5_u);
+            auto* k4 = b.Add(10_u, 5_u);
             auto* k = b.Divide(ty.u32(), k4, x);
             auto* k2 = b.Equal(k, 10_u);
             b.ExitIf(constexpr_if, k2);
@@ -1525,7 +1525,7 @@ TEST_F(IR_SubstituteOverridesTest, ConstExpIfDuplicateUsage) {
         constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             auto* k4 = b.Divide(ty.u32(), 10_u, 0_u);
-            auto* k = b.Add(ty.u32(), k4, k4);
+            auto* k = b.Add(k4, k4);
             auto* k2 = b.Equal(k, 10_u);
             b.ExitIf(constexpr_if, k2);
         });

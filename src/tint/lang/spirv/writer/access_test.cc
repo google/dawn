@@ -280,7 +280,7 @@ TEST_F(SpirvWriterTest, Access_Struct_Value_ConstantIndex) {
     b.Append(func->Block(), [&] {
         auto* result_a = b.Access(ty.i32(), str_val, 0_u);
         auto* result_b = b.Access(ty.i32(), str_val, 1_u, 2_u);
-        b.Return(func, b.Add(ty.i32(), result_a, result_b));
+        b.Return(func, b.Add(result_a, result_b));
         mod.SetName(result_a, "result_a");
         mod.SetName(result_b, "result_b");
     });
@@ -309,7 +309,7 @@ TEST_F(SpirvWriterTest, Access_Struct_Pointer_ConstantIndex) {
         auto* result_b = b.Access(ty.ptr<function, vec4<i32>>(), str_var, 1_u);
         auto* val_a = b.Load(result_a);
         auto* val_b = b.Load(result_b);
-        b.Return(func, b.Add(ty.vec4<i32>(), val_a, val_b));
+        b.Return(func, b.Add(val_a, val_b));
         mod.SetName(result_a, "result_a");
         mod.SetName(result_b, "result_b");
     });

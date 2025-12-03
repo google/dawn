@@ -254,7 +254,7 @@ TEST_F(SpirvWriterTest, Function_Parameters) {
     func->SetParams({x, y});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Add(i32, x, y);
+        auto* result = b.Add(x, y);
         b.Return(func, result);
     });
 
@@ -301,7 +301,7 @@ TEST_F(SpirvWriterTest, Function_Call) {
     foo->SetParams({x, y});
 
     b.Append(foo->Block(), [&] {
-        auto* result = b.Add(i32, x, y);
+        auto* result = b.Add(x, y);
         b.Return(foo, result);
     });
 
@@ -540,7 +540,7 @@ TEST_F(SpirvWriterTest, Function_PassMatrixByPointer) {
     target->SetParams({value_a, scalar, value_b});
     b.Append(target->Block(), [&] {
         auto* scale = b.Multiply(value_a, scalar);
-        auto* sum = b.Add(mat_ty, scale, value_b);
+        auto* sum = b.Add(scale, value_b);
         b.Return(target, sum);
     });
 

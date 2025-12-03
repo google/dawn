@@ -371,7 +371,7 @@ struct State {
     core::ir::Value* OffsetToValue(const OffsetData& offset) {
         core::ir::Value* val = b.Value(u32(offset.byte_offset));
         for (core::ir::Value* expr : offset.expr) {
-            val = b.Add(ty.u32(), val, expr)->Result();
+            val = b.Add(val, expr)->Result();
         }
         return val;
     }
@@ -537,9 +537,9 @@ struct State {
             b.Append(fn->Block(), [&] {
                 Vector<core::ir::Value*, 4> values;
                 for (const auto* mem : s->Members()) {
-                    values.Push(MakeLoad(inst, var, mem->Type(),
-                                         b.Add<u32>(p, u32(mem->Offset()))->Result())
-                                    ->Result());
+                    values.Push(
+                        MakeLoad(inst, var, mem->Type(), b.Add(p, u32(mem->Offset()))->Result())
+                            ->Result());
                 }
 
                 b.Return(fn, b.Construct(s, values));
@@ -561,8 +561,7 @@ struct State {
             b.Append(fn->Block(), [&] {
                 for (const auto* mem : s->Members()) {
                     auto* from = b.Access(mem->Type(), obj, u32(mem->Index()));
-                    MakeStore(inst, var, from->Result(),
-                              b.Add<u32>(p, u32(mem->Offset()))->Result());
+                    MakeStore(inst, var, from->Result(), b.Add(p, u32(mem->Offset()))->Result());
                 }
 
                 b.Return(fn);
@@ -593,7 +592,7 @@ struct State {
             b.Append(fn->Block(), [&] {
                 Vector<core::ir::Value*, 4> values;
                 for (size_t i = 0; i < mat->Columns(); ++i) {
-                    auto* add = b.Add<u32>(p, u32(i * mat->ColumnStride()));
+                    auto* add = b.Add(p, u32(i * mat->ColumnStride()));
                     auto* load = MakeLoad(inst, var, mat->ColumnType(), add->Result());
                     values.Push(load->Result());
                 }
@@ -619,7 +618,7 @@ struct State {
                 for (size_t i = 0; i < mat->Columns(); ++i) {
                     auto* from = b.Access(mat->ColumnType(), obj, u32(i));
                     MakeStore(inst, var, from->Result(),
-                              b.Add<u32>(p, u32(i * mat->ColumnStride()))->Result());
+                              b.Add(p, u32(i * mat->ColumnStride()))->Result());
                 }
 
                 b.Return(fn);
@@ -661,7 +660,7 @@ struct State {
                 b.LoopRange(0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
                     auto* access = b.Access(ty.ptr<function>(arr->ElemType()), result_arr, idx);
                     auto* stride = b.Multiply(idx, u32(arr->ImplicitStride()));
-                    auto* byte_offset = b.Add<u32>(p, stride);
+                    auto* byte_offset = b.Add(p, stride);
                     b.Store(access, MakeLoad(inst, var, arr->ElemType(), byte_offset->Result()));
                 });
 
@@ -688,7 +687,7 @@ struct State {
                 b.LoopRange(0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
                     auto* from = b.Access(arr->ElemType(), obj, idx);
                     auto* stride = b.Multiply(idx, u32(arr->ImplicitStride()));
-                    auto* byte_offset = b.Add<u32>(p, stride);
+                    auto* byte_offset = b.Add(p, stride);
                     MakeStore(inst, var, from->Result(), byte_offset->Result());
                 });
 

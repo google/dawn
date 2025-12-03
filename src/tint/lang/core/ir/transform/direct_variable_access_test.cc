@@ -610,7 +610,7 @@ TEST_F(IR_DirectVariableAccessTest_PtrChains, DynamicIndices) {
     auto* fn_third = b.Function("third", ty.i32());
     for (auto fn : {fn_first, fn_second, fn_third}) {
         b.Append(fn->Block(), [&] {
-            b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i));
+            b.Store(i, b.Add(b.Load(i), 1_i));
             b.Return(fn, b.Load(i));
         });
     }
@@ -999,7 +999,7 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, CallChaining) {
         {
             // res += f0(&(*p)[1]);
             auto* call_0 = b.Call(fn_0, b.Access(ty.ptr<uniform, vec4<f32>>(), fn_1_p, 1_i));
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &(*p)[1];
@@ -1007,13 +1007,13 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, CallChaining) {
             auto* p_vec = b.Access(ty.ptr<uniform, vec4<f32>>(), fn_1_p, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // res += f0(&U.arr[2].mat[1]);
             auto* access = b.Access(ty.ptr<uniform, vec4<f32>>(), U, 0_u, 2_i, 0_u, 1_i);
             auto* call_0 = b.Call(fn_0, access);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &U.arr[2].mat[1];
@@ -1021,7 +1021,7 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, CallChaining) {
             auto* p_vec = b.Access(ty.ptr<uniform, vec4<f32>>(), U, 0_u, 2_i, 0_u, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
 
         b.Return(fn_1, b.Load(res));
@@ -1045,7 +1045,7 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, CallChaining) {
         b.ir.SetName(p0_inner, "p0_inner");
         auto* call_0 = b.Call(ty.f32(), fn_2, p0_inner);
         auto* call_1 = b.Call(ty.f32(), fn_1, fn_3_p1);
-        b.Return(fn_3, b.Add(ty.f32(), call_0, call_1));
+        b.Return(fn_3, b.Add(call_0, call_1));
     });
 
     auto* fn_4 = b.Function("f4", ty.f32());
@@ -1582,7 +1582,7 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, CallChaining) {
         {
             // res += f0(&(*p)[1]);
             auto* call_0 = b.Call(fn_0, b.Access(ty.ptr<immediate, vec4<f32>>(), fn_1_p, 1_i));
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &(*p)[1];
@@ -1590,13 +1590,13 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, CallChaining) {
             auto* p_vec = b.Access(ty.ptr<immediate, vec4<f32>>(), fn_1_p, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // res += f0(&U.arr[2].mat[1]);
             auto* access = b.Access(ty.ptr<immediate, vec4<f32>>(), U, 0_u, 2_i, 0_u, 1_i);
             auto* call_0 = b.Call(fn_0, access);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &U.arr[2].mat[1];
@@ -1604,7 +1604,7 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, CallChaining) {
             auto* p_vec = b.Access(ty.ptr<immediate, vec4<f32>>(), U, 0_u, 2_i, 0_u, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
 
         b.Return(fn_1, b.Load(res));
@@ -1628,7 +1628,7 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, CallChaining) {
         b.ir.SetName(p0_inner, "p0_inner");
         auto* call_0 = b.Call(ty.f32(), fn_2, p0_inner);
         auto* call_1 = b.Call(ty.f32(), fn_1, fn_3_p1);
-        b.Return(fn_3, b.Add(ty.f32(), call_0, call_1));
+        b.Return(fn_3, b.Add(call_0, call_1));
     });
 
     auto* fn_4 = b.Function("f4", ty.f32());
@@ -2272,7 +2272,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, CallChaining) {
         {
             // res += f0(&(*p)[1]);
             auto* call_0 = b.Call(fn_0, b.Access(ty.ptr<storage, vec4<f32>, read>(), fn_1_p, 1_i));
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &(*p)[1];
@@ -2280,13 +2280,13 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, CallChaining) {
             auto* p_vec = b.Access(ty.ptr<storage, vec4<f32>, read>(), fn_1_p, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // res += f0(&U.arr[2].mat[1]);
             auto* access = b.Access(ty.ptr<storage, vec4<f32>, read>(), S, 0_u, 2_i, 0_u, 1_i);
             auto* call_0 = b.Call(fn_0, access);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &U.arr[2].mat[1];
@@ -2294,7 +2294,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, CallChaining) {
             auto* p_vec = b.Access(ty.ptr<storage, vec4<f32>, read>(), S, 0_u, 2_i, 0_u, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
 
         b.Return(fn_1, b.Load(res));
@@ -2318,7 +2318,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, CallChaining) {
         b.ir.SetName(p0_inner, "p0_inner");
         auto* call_0 = b.Call(ty.f32(), fn_2, p0_inner);
         auto* call_1 = b.Call(ty.f32(), fn_1, fn_3_p1);
-        b.Return(fn_3, b.Add(ty.f32(), call_0, call_1));
+        b.Return(fn_3, b.Add(call_0, call_1));
     });
 
     auto* fn_4 = b.Function("f4", ty.f32());
@@ -2861,7 +2861,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, CallChaining) {
         {
             // res += f0(&(*p)[1]);
             auto* call_0 = b.Call(fn_0, b.Access(ty.ptr<workgroup, vec4<f32>>(), fn_1_p, 1_i));
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &(*p)[1];
@@ -2869,13 +2869,13 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, CallChaining) {
             auto* p_vec = b.Access(ty.ptr<workgroup, vec4<f32>>(), fn_1_p, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // res += f0(&U.arr[2].mat[1]);
             auto* access = b.Access(ty.ptr<workgroup, vec4<f32>>(), W, 0_u, 2_i, 0_u, 1_i);
             auto* call_0 = b.Call(fn_0, access);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &U.arr[2].mat[1];
@@ -2883,7 +2883,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, CallChaining) {
             auto* p_vec = b.Access(ty.ptr<workgroup, vec4<f32>>(), W, 0_u, 2_i, 0_u, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
 
         b.Return(fn_1, b.Load(res));
@@ -2907,7 +2907,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, CallChaining) {
         b.ir.SetName(p0_inner, "p0_inner");
         auto* call_0 = b.Call(ty.f32(), fn_2, p0_inner);
         auto* call_1 = b.Call(ty.f32(), fn_1, fn_3_p1);
-        b.Return(fn_3, b.Add(ty.f32(), call_0, call_1));
+        b.Return(fn_3, b.Add(call_0, call_1));
     });
 
     auto* fn_4 = b.Function("f4", ty.f32());
@@ -3927,7 +3927,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_CallChaining) {
         {
             // res += f0(&(*p)[1]);
             auto* call_0 = b.Call(fn_0, b.Access(ty.ptr<private_, vec4<f32>>(), fn_1_p, 1_i));
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &(*p)[1];
@@ -3935,13 +3935,13 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_CallChaining) {
             auto* p_vec = b.Access(ty.ptr<private_, vec4<f32>>(), fn_1_p, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // res += f0(&U.arr[2].mat[1]);
             auto* access = b.Access(ty.ptr<private_, vec4<f32>>(), P, 0_u, 2_i, 0_u, 1_i);
             auto* call_0 = b.Call(fn_0, access);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &U.arr[2].mat[1];
@@ -3949,7 +3949,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_CallChaining) {
             auto* p_vec = b.Access(ty.ptr<private_, vec4<f32>>(), P, 0_u, 2_i, 0_u, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
 
         b.Return(fn_1, b.Load(res));
@@ -3973,7 +3973,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_CallChaining) {
         b.ir.SetName(p0_inner, "p0_inner");
         auto* call_0 = b.Call(ty.f32(), fn_2, p0_inner);
         auto* call_1 = b.Call(ty.f32(), fn_1, fn_3_p1);
-        b.Return(fn_3, b.Add(ty.f32(), call_0, call_1));
+        b.Return(fn_3, b.Add(call_0, call_1));
     });
 
     auto* fn_4 = b.Function("f4", ty.f32());
@@ -4236,7 +4236,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_CallChaining) {
         {
             // res += f0(&(*p)[1]);
             auto* call_0 = b.Call(fn_0, b.Access(ty.ptr<private_, vec4<f32>>(), fn_1_p, 1_i));
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &(*p)[1];
@@ -4244,13 +4244,13 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_CallChaining) {
             auto* p_vec = b.Access(ty.ptr<private_, vec4<f32>>(), fn_1_p, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // res += f0(&U.arr[2].mat[1]);
             auto* access = b.Access(ty.ptr<private_, vec4<f32>>(), P, 0_u, 2_i, 0_u, 1_i);
             auto* call_0 = b.Call(fn_0, access);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
         {
             // let p_vec = &U.arr[2].mat[1];
@@ -4258,7 +4258,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_CallChaining) {
             auto* p_vec = b.Access(ty.ptr<private_, vec4<f32>>(), P, 0_u, 2_i, 0_u, 1_i);
             b.ir.SetName(p_vec, "p_vec");
             auto* call_0 = b.Call(fn_0, p_vec);
-            b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+            b.Store(res, b.Add(b.Load(res), call_0));
         }
 
         b.Return(fn_1, b.Load(res));
@@ -4282,7 +4282,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_CallChaining) {
         b.ir.SetName(p0_inner, "p0_inner");
         auto* call_0 = b.Call(ty.f32(), fn_2, p0_inner);
         auto* call_1 = b.Call(ty.f32(), fn_1, fn_3_p1);
-        b.Return(fn_3, b.Add(ty.f32(), call_0, call_1));
+        b.Return(fn_3, b.Add(call_0, call_1));
     });
 
     auto* fn_4 = b.Function("f4", ty.f32());
@@ -5138,7 +5138,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_CallChaining) {
             {
                 // res += f0(&(*p)[1]);
                 auto* call_0 = b.Call(f0, b.Access(ty.ptr<function, vec4<f32>>(), p, 1_i));
-                b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+                b.Store(res, b.Add(b.Load(res), call_0));
             }
             {
                 // let p_vec = &(*p)[1];
@@ -5146,7 +5146,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_CallChaining) {
                 auto* p_vec = b.Access(ty.ptr<function, vec4<f32>>(), p, 1_i);
                 b.ir.SetName(p_vec, "p_vec");
                 auto* call_0 = b.Call(f0, p_vec);
-                b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+                b.Store(res, b.Add(b.Load(res), call_0));
             }
             b.Return(f1, b.Load(res));
         });
@@ -5358,7 +5358,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_CallChaining) {
             {
                 // res += f0(&(*p)[1]);
                 auto* call_0 = b.Call(f0, b.Access(ty.ptr<function, vec4<f32>>(), p, 1_i));
-                b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+                b.Store(res, b.Add(b.Load(res), call_0));
             }
             {
                 // let p_vec = &(*p)[1];
@@ -5366,7 +5366,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_CallChaining) {
                 auto* p_vec = b.Access(ty.ptr<function, vec4<f32>>(), p, 1_i);
                 b.ir.SetName(p_vec, "p_vec");
                 auto* call_0 = b.Call(f0, p_vec);
-                b.Store(res, b.Add(ty.f32(), b.Load(res), call_0));
+                b.Store(res, b.Add(b.Load(res), call_0));
             }
             b.Return(f1, b.Load(res));
         });

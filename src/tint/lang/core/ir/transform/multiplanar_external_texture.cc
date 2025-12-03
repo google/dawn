@@ -231,7 +231,7 @@ struct State {
                         b.InsertBefore(call, [&] {
                             auto* apparent_size = b.Access<vec2<u32>>(params, 12_u);
                             auto* vec2u_1_1 = b.Splat<vec2<u32>>(1_u);
-                            auto* dimensions = b.Add<vec2<u32>>(apparent_size, vec2u_1_1);
+                            auto* dimensions = b.Add(apparent_size, vec2u_1_1);
                             dimensions->SetResult(call->DetachResult());
                         });
                         call->Destroy();
@@ -356,12 +356,10 @@ struct State {
             auto* abs_v = b.Call(vec3f, core::BuiltinFn::kAbs, v);
             auto* sign_v = b.Call(vec3f, core::BuiltinFn::kSign, v);
             auto* cond = b.LessThan(abs_v, D_splat);
-            auto* t = b.Multiply(sign_v, b.Add(vec3f, b.Multiply(C, abs_v), F));
-            auto* f =
-                b.Multiply(sign_v, b.Add(vec3f,
-                                         b.Call(vec3f, core::BuiltinFn::kPow,
-                                                b.Add(vec3f, b.Multiply(A, abs_v), B), G_splat),
-                                         E));
+            auto* t = b.Multiply(sign_v, b.Add(b.Multiply(C, abs_v), F));
+            auto* f = b.Multiply(sign_v, b.Add(b.Call(vec3f, core::BuiltinFn::kPow,
+                                                      b.Add(b.Multiply(A, abs_v), B), G_splat),
+                                               E));
             b.Return(gamma_correction, b.Call(vec3f, core::BuiltinFn::kSelect, f, t, cond));
         });
 

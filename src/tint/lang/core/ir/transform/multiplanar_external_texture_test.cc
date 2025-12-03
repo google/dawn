@@ -993,7 +993,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, MultipleUses) {
             auto* load_d = b.Load(var->Result());
             auto* result_a = b.Call(ty.vec4<f32>(), foo, load_d, sampler, coords_f);
             auto* result_b = b.Call(ty.vec4<f32>(), foo, load_d, sampler, coords_f);
-            b.Return(bar, b.Add(ty.vec4<f32>(), result_a, result_b));
+            b.Return(bar, b.Add(result_a, result_b));
             mod.SetName(result_a, "result_a");
             mod.SetName(result_b, "result_b");
         });

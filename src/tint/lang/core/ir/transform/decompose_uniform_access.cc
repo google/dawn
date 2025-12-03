@@ -150,7 +150,7 @@ struct State {
             if (!val) {
                 val = expr;
             } else {
-                val = b.Add(ty.u32(), val, expr)->Result();
+                val = b.Add(val, expr)->Result();
             }
         }
 

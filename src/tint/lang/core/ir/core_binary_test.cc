@@ -45,13 +45,15 @@ TEST_F(IR_BinaryDeathTest, Fail_NullType) {
         {
             Module mod;
             Builder b{mod};
-            b.Add(nullptr, u32(1), u32(2));
+            auto bin = b.ir.CreateInstruction<ir::CoreBinary>(
+                b.InstructionResult(nullptr), BinaryOp::kAdd, b.Constant(1_u), b.Constant(2_u));
+            b.Append(bin);
         },
         "internal compiler error");
 }
 
 TEST_F(IR_BinaryTest, Result) {
-    auto* a = b.Add(mod.Types().i32(), 4_i, 2_i);
+    auto* a = b.Add(4_i, 2_i);
 
     EXPECT_EQ(a->Results().Length(), 1u);
     EXPECT_TRUE(a->Result()->Is<InstructionResult>());
@@ -247,7 +249,7 @@ TEST_F(IR_BinaryTest, CreateShiftRight) {
 }
 
 TEST_F(IR_BinaryTest, CreateAdd) {
-    auto* inst = b.Add(mod.Types().i32(), 4_i, 2_i);
+    auto* inst = b.Add(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kAdd);

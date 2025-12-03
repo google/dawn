@@ -1054,7 +1054,7 @@ TEST_F(IR_ArrayLengthFromImmediatesTest, ViaParameter_MultipleCallsSameParameter
         auto* len_a = b.Call<u32>(BuiltinFn::kArrayLength, param);
         auto* len_b = b.Call<u32>(BuiltinFn::kArrayLength, param);
         auto* len_c = b.Call<u32>(BuiltinFn::kArrayLength, param);
-        b.Return(bar, b.Add<u32>(len_a, b.Add<u32>(len_b, len_c)));
+        b.Return(bar, b.Add(len_a, b.Add(len_b, len_c)));
     });
 
     auto* foo = b.ComputeFunction("foo");
@@ -1160,7 +1160,7 @@ TEST_F(IR_ArrayLengthFromImmediatesTest, ViaParameter_MultipleCallsDifferentPara
         auto* len_a = b.Call<u32>(BuiltinFn::kArrayLength, param_a);
         auto* len_b = b.Call<u32>(BuiltinFn::kArrayLength, param_b);
         auto* len_c = b.Call<u32>(BuiltinFn::kArrayLength, param_c);
-        b.Return(bar, b.Add<u32>(len_a, b.Add<u32>(len_b, len_c)));
+        b.Return(bar, b.Add(len_a, b.Add(len_b, len_c)));
     });
 
     auto* foo = b.ComputeFunction("foo");

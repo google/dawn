@@ -997,7 +997,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, RuntimeArray) {
     b.Append(f->Block(), [&] {
         auto* access = b.Access<ptr<storage, u32, read_write>>(var, 4_u);
         b.Let("value", b.Load(access));
-        b.Store(access, b.Add<u32>(b.Load(access), 1_u));
+        b.Store(access, b.Add(b.Load(access), 1_u));
         b.Return(f);
     });
 
@@ -1174,7 +1174,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, NaturalStride) {
     b.Append(f->Block(), [&] {
         auto* access = b.Access<ptr<storage, u32, read_write>>(var, 4_u);
         b.Let("value", b.Load(access));
-        b.Store(access, b.Add<u32>(b.Load(access), 1_u));
+        b.Store(access, b.Add(b.Load(access), 1_u));
         b.Return(f);
     });
 

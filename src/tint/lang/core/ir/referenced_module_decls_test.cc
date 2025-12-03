@@ -66,7 +66,7 @@ TEST_F(IR_ReferencedModuleDeclsTest, DirectUse) {
     // Referenced.
     auto* var_a = mod.root_block->Append(b.Var<workgroup, u32>("a"));
     auto* var_b = mod.root_block->Append(b.Var<workgroup, u32>("b"));
-    auto* inst_1 = mod.root_block->Append(b.Add(ty.i32(), 1_i, 2_i));
+    auto* inst_1 = mod.root_block->Append(b.Add(1_i, 2_i));
     auto* over_a = mod.root_block->Append(b.Override("o", inst_1));
     over_a->As<core::ir::Override>()->SetOverrideId(OverrideId{1});
 

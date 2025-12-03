@@ -550,7 +550,7 @@ struct State {
                     auto* e2 = b.Access(elty, v2, u32(i));
                     auto* mul = b.Multiply(e1, e2);
                     if (sum) {
-                        sum = b.Add(elty, sum, mul);
+                        sum = b.Add(sum, mul);
                     } else {
                         sum = mul;
                     }

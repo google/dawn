@@ -121,7 +121,7 @@ struct State {
                         b.InsertBefore(mbc, [&] {
                             Value* curr_offset = mbc->Args()[arg_index];
                             Value* dyn_offset = LoadDynamicOffset(offset_index);
-                            auto* new_offset = b.Add(ty.u32(), curr_offset, dyn_offset);
+                            auto* new_offset = b.Add(curr_offset, dyn_offset);
                             mbc->SetArg(arg_index, new_offset->Result());
                         });
                     };

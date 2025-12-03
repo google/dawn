@@ -313,7 +313,7 @@ struct State {
             core::ir::Value* v =
                 b.Call(vec4f, core::BuiltinFn::kClamp, Vector{arg, neg_one, one})->Result();
             v = b.Multiply(b.Splat(vec4f, 127_f), v)->Result();
-            v = b.Add(vec4f, b.Splat(vec4f, 0.5_f), v)->Result();
+            v = b.Add(b.Splat(vec4f, 0.5_f), v)->Result();
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result();
             v = b.Convert(ty.vec4<i32>(), v)->Result();
             v = b.Bitcast(vec4u, v)->Result();
@@ -345,7 +345,7 @@ struct State {
 
             auto* v = b.Call(vec4f, core::BuiltinFn::kClamp, Vector{arg, zero, one})->Result();
             v = b.Multiply(b.Splat(vec4f, 255_f), v)->Result();
-            v = b.Add(vec4f, b.Splat(vec4f, 0.5_f), v)->Result();
+            v = b.Add(b.Splat(vec4f, 0.5_f), v)->Result();
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result();
             v = b.Convert(vec4u, v)->Result();
             v = b.And(vec4u, v, b.Splat(vec4u, 0xff_u))->Result();
@@ -479,7 +479,6 @@ struct State {
                               b.LessThanEqual(x, V(0x7fffffff)));
             auto* b0 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(x, V(0)));
             Instruction* result = b.Add(
-                uint_ty,
                 b.Or(
                     uint_ty, b16,
                     b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b.Or(uint_ty, b1, b0))))),
@@ -539,7 +538,6 @@ struct State {
                               b.Equal(b.And(uint_ty, x, V(0x00000001)), V(0)));
             auto* b0 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(x, V(0)));
             Instruction* result = b.Add(
-                uint_ty,
                 b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1)))),
                 b0);
             if (result_ty->IsSignedIntegerScalarOrVector()) {
@@ -645,9 +643,9 @@ struct State {
                 auto V = [&](uint32_t u) { return b.MatchWidth(u32(u), result_ty); };
                 b.InsertBefore(call, [&] {
                     auto* s = b.Call<u32>(core::BuiltinFn::kMin, offset, 32_u);
-                    auto* t = b.Call<u32>(core::BuiltinFn::kMin, 32_u, b.Add(ty.u32(), s, count));
+                    auto* t = b.Call<u32>(core::BuiltinFn::kMin, 32_u, b.Add(s, count));
                     auto* shl = b.Subtract<u32>(32_u, t);
-                    auto* shr = b.Add<u32>(shl, s);
+                    auto* shr = b.Add(shl, s);
                     auto* f1 = b.Zero(result_ty);
                     auto* t1 = b.ShiftLeft(result_ty, e, b.Construct(uint_ty, shl));
                     auto* shl_result =
@@ -793,7 +791,7 @@ struct State {
             auto* dpdy = b.Call(type, core::BuiltinFn::kDpdyFine, value);
             auto* abs_dpdx = b.Call(type, core::BuiltinFn::kAbs, dpdx);
             auto* abs_dpdy = b.Call(type, core::BuiltinFn::kAbs, dpdy);
-            auto* result = b.Add(type, abs_dpdx, abs_dpdy);
+            auto* result = b.Add(abs_dpdx, abs_dpdy);
             call->Result()->ReplaceAllUsesWith(result->Result());
         });
         call->Destroy();
@@ -847,7 +845,7 @@ struct State {
                 };
 
                 b.InsertBefore(call, [&] {
-                    auto* oc = b.Add<u32>(offset, count);
+                    auto* oc = b.Add(offset, count);
                     auto* t1 = b.ShiftLeft<u32>(1_u, offset);
                     auto* s1 = b.Call<u32>(core::BuiltinFn::kSelect, b.Zero<u32>(), t1,
                                            b.LessThan(offset, 32_u));

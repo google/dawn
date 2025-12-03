@@ -1256,7 +1256,9 @@ TEST_F(IR_ValidatorTest, Binary_LHS_Nullptr) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    sb.Add(ty.i32(), nullptr, sb.Constant(2_i));
+    auto* bin = mod.CreateInstruction<ir::CoreBinary>(b.InstructionResult(ty.i32()), BinaryOp::kAdd,
+                                                      nullptr, b.Constant(2_i));
+    sb.Append(bin);
     sb.Return(f);
 
     auto res = ir::Validate(mod);
@@ -1272,7 +1274,10 @@ TEST_F(IR_ValidatorTest, Binary_RHS_Nullptr) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    sb.Add(ty.i32(), sb.Constant(2_i), nullptr);
+
+    auto* bin = mod.CreateInstruction<ir::CoreBinary>(b.InstructionResult(ty.i32()), BinaryOp::kAdd,
+                                                      b.Constant(2_i), nullptr);
+    sb.Append(bin);
     sb.Return(f);
 
     auto res = ir::Validate(mod);
@@ -1306,7 +1311,7 @@ TEST_F(IR_ValidatorTest, Binary_MissingOperands) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* add = sb.Add(ty.i32(), sb.Constant(1_i), sb.Constant(2_i));
+    auto* add = sb.Add(sb.Constant(1_i), sb.Constant(2_i));
     add->ClearOperands();
     sb.Return(f);
 
@@ -1323,7 +1328,7 @@ TEST_F(IR_ValidatorTest, Binary_MissingResult) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* add = sb.Add(ty.i32(), sb.Constant(1_i), sb.Constant(2_i));
+    auto* add = sb.Add(sb.Constant(1_i), sb.Constant(2_i));
     add->ClearResults();
     sb.Return(f);
 
@@ -1370,10 +1375,9 @@ TEST_F(IR_ValidatorTest, Binary_LogicalAnd) {
 }
 
 TEST_F(IR_ValidatorTest, Binary_Valid) {
-    auto* i32 = ty.i32();
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Add(i32, b.Constant(1_i), b.Constant(2_i));
+        b.Add(b.Constant(1_i), b.Constant(2_i));
         b.Return(func);
     });
 
@@ -1384,7 +1388,7 @@ TEST_F(IR_ValidatorTest, Binary_Valid) {
 TEST_F(IR_ValidatorTest, Binary_TooManyOperands) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* add = b.Add(ty.i32(), b.Constant(1_i), b.Constant(2_i));
+        auto* add = b.Add(b.Constant(1_i), b.Constant(2_i));
         add->PushOperand(b.Constant(3_i));
         b.Return(func);
     });
@@ -1399,13 +1403,12 @@ TEST_F(IR_ValidatorTest, Binary_TooManyOperands) {
 }
 
 TEST_F(IR_ValidatorTest, Binary_OperandWrongType_Func) {
-    auto* i32 = ty.i32();
     auto* func = b.Function("foo", ty.void_());
     auto* other_func = b.Function("other", ty.void_());
     b.Append(other_func->Block(), [&] { b.Return(other_func); });
 
     b.Append(func->Block(), [&] {
-        b.Add(i32, b.Constant(1_i), other_func);
+        b.Add(b.Constant(1_i), other_func);
         b.Return(func);
     });
 
@@ -1564,8 +1567,8 @@ TEST_F(IR_ValidatorTest, Unary_OperandWrongType) {
 TEST_F(IR_ValidatorTest, Scoping_UseBeforeDecl) {
     auto* f = b.Function("my_func", ty.void_());
 
-    auto* y = b.Add<i32>(2_i, 3_i);
-    auto* x = b.Add<i32>(y, 1_i);
+    auto* y = b.Add(2_i, 3_i);
+    auto* x = b.Add(y, 1_i);
 
     f->Block()->Append(x);
     f->Block()->Append(y);
@@ -1622,7 +1625,7 @@ TEST_F(IR_ValidatorTest, OverrideWithoutCapability) {
 }
 
 TEST_F(IR_ValidatorTest, InstructionInRootBlockWithoutOverrideCap) {
-    b.Append(mod.root_block, [&] { b.Add(ty.u32(), 3_u, 2_u); });
+    b.Append(mod.root_block, [&] { b.Add(3_u, 2_u); });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
@@ -1649,7 +1652,7 @@ TEST_F(IR_ValidatorTest, OverrideWithValue) {
     b.Append(mod.root_block, [&] {
         auto* z = b.Override(ty.u32());
         z->SetOverrideId(OverrideId{2});
-        auto* init = b.Add(ty.u32(), z, 2_u);
+        auto* init = b.Add(z, 2_u);
 
         b.Override("a", init);
     });
@@ -1712,13 +1715,13 @@ TEST_F(IR_ValidatorTest, InstructionInRootBlockOnlyUsedInRootBlock) {
     b.Append(mod.root_block, [&] {
         auto* z = b.Override(ty.u32());
         z->SetOverrideId(OverrideId{2});
-        init = b.Add(ty.u32(), z, 2_u)->Result();
+        init = b.Add(z, 2_u)->Result();
         b.Override("a", init);
     });
 
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
-        b.Add(ty.u32(), init, 2_u);
+        b.Add(init, 2_u);
         b.Return(f);
     });
 

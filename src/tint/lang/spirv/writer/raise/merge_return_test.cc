@@ -44,7 +44,7 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInRootBlock) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({in});
 
-    b.Append(func->Block(), [&] { b.Return(func, b.Add(ty.i32(), in, 1_i)); });
+    b.Append(func->Block(), [&] { b.Return(func, b.Add(in, 1_i)); });
 
     auto* src = R"(
 %foo = func(%2:i32):i32 {
@@ -72,8 +72,8 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInMergeBlock) {
     b.Append(func->Block(), [&] {
         auto* ifelse = b.If(cond);
         ifelse->SetResult(b.InstructionResult(ty.i32()));
-        b.Append(ifelse->True(), [&] { b.ExitIf(ifelse, b.Add(ty.i32(), in, 1_i)); });
-        b.Append(ifelse->False(), [&] { b.ExitIf(ifelse, b.Add(ty.i32(), in, 2_i)); });
+        b.Append(ifelse->True(), [&] { b.ExitIf(ifelse, b.Add(in, 1_i)); });
+        b.Append(ifelse->False(), [&] { b.ExitIf(ifelse, b.Add(in, 2_i)); });
 
         b.Return(func, ifelse->Result());
     });
@@ -118,8 +118,8 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
 
         auto* ifelse = b.If(cond);
         ifelse->SetResult(b.InstructionResult(ty.i32()));
-        b.Append(ifelse->True(), [&] { b.ExitIf(ifelse, b.Add(ty.i32(), in, 1_i)); });
-        b.Append(ifelse->False(), [&] { b.ExitIf(ifelse, b.Add(ty.i32(), in, 2_i)); });
+        b.Append(ifelse->True(), [&] { b.ExitIf(ifelse, b.Add(in, 1_i)); });
+        b.Append(ifelse->False(), [&] { b.ExitIf(ifelse, b.Add(in, 2_i)); });
 
         b.Return(func, ifelse->Result());
     });
@@ -882,7 +882,7 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_ReturnAtAllLevels) {
             b.ExitIf(ifelse_outer);
         });
         b.Store(global, 3_i);
-        b.Return(func, b.Add(ty.i32(), 5_i, 6_i));
+        b.Return(func, b.Add(5_i, 6_i));
     });
 
     auto* src = R"(
@@ -1028,7 +1028,7 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_ReturnOnlyInner) {
             b.ExitIf(ifelse_outer);
         });
         b.Store(global, 3_i);
-        b.Return(func, b.Add(ty.i32(), 5_i, 6_i));
+        b.Return(func, b.Add(5_i, 6_i));
     });
 
     auto* src = R"(
@@ -1285,7 +1285,7 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_ReturnOnlyInner_TrivialMerge) 
             b.Append(ifelse_middle->False(), [&] { b.ExitIf(ifelse_middle); });
             b.ExitIf(ifelse_outer);
         });
-        b.Return(func, b.Add(ty.i32(), 5_i, 6_i));
+        b.Return(func, b.Add(5_i, 6_i));
     });
 
     auto* src = R"(
@@ -1396,14 +1396,13 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_WithBasicBlockArguments) {
                 b.Append(ifelse_inner->True(), [&] { b.Return(func, 1_i); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitIf(ifelse_inner); });
 
-                b.ExitIf(ifelse_middle, b.Add(ty.i32(), 42_i, 1_i));
+                b.ExitIf(ifelse_middle, b.Add(42_i, 1_i));
             });
-            b.Append(ifelse_middle->False(),
-                     [&] { b.ExitIf(ifelse_middle, b.Add(ty.i32(), 43_i, 2_i)); });
-            b.ExitIf(ifelse_outer, b.Add(ty.i32(), ifelse_middle->Result(), 1_i));
+            b.Append(ifelse_middle->False(), [&] { b.ExitIf(ifelse_middle, b.Add(43_i, 2_i)); });
+            b.ExitIf(ifelse_outer, b.Add(ifelse_middle->Result(), 1_i));
         });
 
-        b.Return(func, b.Add(ty.i32(), ifelse_outer->Result(), 1_i));
+        b.Return(func, b.Add(ifelse_outer->Result(), 1_i));
     });
 
     auto* src = R"(

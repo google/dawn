@@ -181,7 +181,7 @@ TEST_F(WgslWriter_RaiseTest, BuiltinShadowedByUserFunction) {
     auto* y = b.FunctionParam<u32>("y");
     user_min->SetParams({x, y});
     b.Append(user_min->Block(), [&] {  //
-        b.Return(user_min, b.Add<u32>(x, y));
+        b.Return(user_min, b.Add(x, y));
     });
 
     auto* f = b.Function("f", ty.void_());

@@ -111,7 +111,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs) {
             auto* position_value = b.Load(position);
             auto* color1_value = b.Load(color1);
             auto* color2_value = b.Load(color2);
-            b.Multiply(position_value, b.Add(ty.f32(), color1_value, color2_value));
+            b.Multiply(position_value, b.Add(color1_value, color2_value));
             b.ExitIf(ifelse);
         });
         b.Return(ep);
@@ -195,7 +195,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByHelper) {
             auto* position_value = b.Load(position);
             auto* color1_value = b.Load(color1);
             auto* color2_value = b.Load(color2);
-            auto* add = b.Add(ty.f32(), color1_value, color2_value);
+            auto* add = b.Add(color1_value, color2_value);
             auto* mul = b.Multiply(position_value, add);
             b.Divide(ty.vec4<f32>(), mul, param);
             b.ExitIf(ifelse);
@@ -402,7 +402,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper) {
     b.Append(foo->Block(), [&] {
         auto* gid_value = b.Load(gid);
         auto* lid_value = b.Load(lid);
-        b.Add(ty.vec3<u32>(), gid_value, lid_value);
+        b.Add(gid_value, lid_value);
         b.Return(foo);
     });
 
@@ -411,7 +411,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper) {
     b.Append(ep->Block(), [&] {
         auto* group_value = b.Load(group_id);
         auto* gid_value = b.Load(gid);
-        b.Add(ty.vec3<u32>(), group_value, gid_value);
+        b.Add(group_value, gid_value);
         b.Call(foo);
         b.Return(ep);
     });
@@ -485,7 +485,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper_ForwardReference
     b.Append(ep->Block(), [&] {
         auto* group_value = b.Load(group_id);
         auto* gid_value = b.Load(gid);
-        b.Add(ty.vec3<u32>(), group_value, gid_value);
+        b.Add(group_value, gid_value);
         b.Call(foo);
         b.Return(ep);
     });
@@ -494,7 +494,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper_ForwardReference
     b.Append(foo->Block(), [&] {
         auto* gid_value = b.Load(gid);
         auto* lid_value = b.Load(lid);
-        b.Add(ty.vec3<u32>(), gid_value, lid_value);
+        b.Add(gid_value, lid_value);
         b.Return(foo);
     });
 
@@ -565,7 +565,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByMultipleEntryPoints) {
     b.Append(foo->Block(), [&] {
         auto* gid_value = b.Load(gid);
         auto* lid_value = b.Load(lid);
-        b.Add(ty.vec3<u32>(), gid_value, lid_value);
+        b.Add(gid_value, lid_value);
         b.Return(foo);
     });
 
@@ -580,7 +580,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByMultipleEntryPoints) {
     auto* ep2 = b.ComputeFunction("main2");
     b.Append(ep2->Block(), [&] {
         auto* group_value = b.Load(group_id);
-        b.Add(ty.vec3<u32>(), group_value, group_value);
+        b.Add(group_value, group_value);
         b.Call(foo);
         b.Return(ep2);
     });
@@ -3775,7 +3775,7 @@ TEST_F(SpirvReader_ShaderIOTest, Input_Array) {
     b.Append(ep->Block(), [&] {
         auto* ld = b.Load(ary);
         auto* access = b.Access(ty.f32(), ld, 1_u);
-        b.Add(ty.f32(), access, access);
+        b.Add(access, access);
         b.Return(ep);
     });
 
@@ -3823,7 +3823,7 @@ TEST_F(SpirvReader_ShaderIOTest, Input_Matrix) {
     b.Append(ep->Block(), [&] {
         auto* ld = b.Load(mat);
         auto* access = b.Access(ty.f32(), ld, 1_u, 1_u);
-        b.Add(ty.f32(), access, access);
+        b.Add(access, access);
         b.Return(ep);
     });
 
@@ -3881,7 +3881,7 @@ TEST_F(SpirvReader_ShaderIOTest, Input_Struct) {
     b.Append(ep->Block(), [&] {
         auto* ld = b.Load(s);
         auto* access = b.Access(ty.f32(), ld, 1_u, 1_u);
-        b.Add(ty.f32(), access, access);
+        b.Add(access, access);
         b.Return(ep);
     });
 
@@ -3949,7 +3949,7 @@ TEST_F(SpirvReader_ShaderIOTest, Input_ArrayOfStruct) {
     b.Append(ep->Block(), [&] {
         auto* ld = b.Load(s);
         auto* access = b.Access(ty.f32(), ld, 1_u, 1_u, 2_u);
-        b.Add(ty.f32(), access, access);
+        b.Add(access, access);
         b.Return(ep);
     });
 

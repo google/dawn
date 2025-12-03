@@ -84,7 +84,7 @@ TEST_F(IR_EvaluatorTest, Unary) {
 }
 
 TEST_F(IR_EvaluatorTest, Binary) {
-    auto* inst = b.Add(mod.Types().i32(), 1_i, 2_i);
+    auto* inst = b.Add(1_i, 2_i);
     auto res = Eval(b, inst);
     ASSERT_EQ(res, Success);
 
@@ -398,7 +398,7 @@ TEST_F(IR_EvaluatorTest, NonConstCallInsideUnary) {
 
 TEST_F(IR_EvaluatorTest, NonConstCallInsideBinaryRHS) {
     auto* dpdx = b.Call(ty.f32(), core::BuiltinFn::kDpdx, 2.0_f);
-    auto* inst = b.Add(ty.f32(), 1.0_f, dpdx);
+    auto* inst = b.Add(1.0_f, dpdx);
 
     auto res = Eval(b, inst);
     ASSERT_EQ(res, Success) << res.Failure();
@@ -409,7 +409,7 @@ TEST_F(IR_EvaluatorTest, NonConstCallInsideBinaryRHS) {
 
 TEST_F(IR_EvaluatorTest, NonConstCallInsideBinaryLHS) {
     auto* dpdx = b.Call(ty.f32(), core::BuiltinFn::kDpdx, 2.0_f);
-    auto* inst = b.Add(ty.f32(), dpdx, 1.0_f);
+    auto* inst = b.Add(dpdx, 1.0_f);
 
     auto res = Eval(b, inst);
     ASSERT_EQ(res, Success) << res.Failure();

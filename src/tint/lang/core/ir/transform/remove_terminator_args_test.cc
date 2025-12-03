@@ -196,7 +196,7 @@ TEST_F(IR_RemoveTerminatorArgsTest, IfResults) {
         });
 
         // Use the results to make sure the uses get updated.
-        b.Add<i32>(res_a, 1_i);
+        b.Add(res_a, 1_i);
         b.Multiply(res_b, 2_u);
 
         b.Return(func);
@@ -277,7 +277,7 @@ TEST_F(IR_RemoveTerminatorArgsTest, SwitchResults) {
         });
 
         // Use the results to make sure the uses get updated.
-        b.Add<i32>(res_a, 1_i);
+        b.Add(res_a, 1_i);
         b.Multiply(res_b, 2_u);
 
         b.Return(func);
@@ -365,7 +365,7 @@ TEST_F(IR_RemoveTerminatorArgsTest, Loop_Results) {
         });
 
         // Use the results to make sure the uses get updated.
-        b.Add<i32>(res_a, 1_i);
+        b.Add(res_a, 1_i);
         b.Multiply(res_b, 2_u);
 
         b.Return(func);
@@ -451,7 +451,7 @@ TEST_F(IR_RemoveTerminatorArgsTest, Loop_BodyParams) {
         });
         b.Append(loop->Body(), [&] {  //
             // Use the parameters to make sure the uses get updated.
-            b.Add<i32>(param_a, 1_i);
+            b.Add(param_a, 1_i);
             b.Multiply(param_b, 2_u);
 
             auto* if_ = b.If(true);
@@ -554,7 +554,7 @@ TEST_F(IR_RemoveTerminatorArgsTest, Loop_ContinuingParams) {
         });
         b.Append(loop->Continuing(), [&] {
             // Use the parameters to make sure the uses get updated.
-            b.Add<i32>(param_a, 1_i);
+            b.Add(param_a, 1_i);
             b.Multiply(param_b, 2_u);
 
             b.BreakIf(loop, true);
@@ -659,7 +659,7 @@ TEST_F(IR_RemoveTerminatorArgsTest, Loop_BreakIfWithTwoArgLists) {
         });
 
         // Use the results to make sure the uses get updated.
-        b.Add<i32>(res_a, 1_i);
+        b.Add(res_a, 1_i);
         b.Multiply(res_b, 2_u);
 
         b.Return(func);
@@ -759,7 +759,7 @@ TEST_F(IR_RemoveTerminatorArgsTest, UndefResults) {
         });
 
         // Use the results to make sure the uses get updated.
-        b.Add<i32>(res_a, 1_i);
+        b.Add(res_a, 1_i);
         b.Multiply(res_b, 2_u);
 
         b.Return(func);
@@ -827,7 +827,7 @@ TEST_F(IR_RemoveTerminatorArgsTest, UndefBlockParams) {
         });
         b.Append(loop->Body(), [&] {  //
             // Use the parameters to make sure the uses get updated.
-            b.Add<i32>(param_a, 1_i);
+            b.Add(param_a, 1_i);
             b.Multiply(param_b, 2_u);
 
             auto* if_ = b.If(true);

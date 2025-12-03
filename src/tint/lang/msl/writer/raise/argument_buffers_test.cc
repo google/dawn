@@ -83,7 +83,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, Private_NoChange) {
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Store(var_a, b.Add<i32>(load_a, load_b));
+        b.Store(var_a, b.Add(load_a, load_b));
         b.Return(func);
     });
 
@@ -137,7 +137,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, Workgroup_NoChange) {
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Store(var_a, b.Add<i32>(load_a, load_b));
+        b.Store(var_a, b.Add(load_a, load_b));
         b.Return(func);
     });
 
@@ -199,7 +199,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, Storage) {
         auto* load_c = b.Load(var_c);
         auto* conv_b = b.Convert(ty.i32(), load_b);
         auto* conv_c = b.Convert(ty.i32(), load_c);
-        auto* add = b.Add<i32>(b.Add<i32>(load_a, conv_b), conv_c);
+        auto* add = b.Add(b.Add(load_a, conv_b), conv_c);
         auto* conv = b.Convert(ty.u32(), add);
         b.Store(var_b, conv);
         b.Return(func);
@@ -288,7 +288,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, Uniform) {
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Add<i32>(load_a, load_b);
+        b.Add(load_a, load_b);
         b.Return(func);
     });
 
@@ -504,7 +504,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, MultipleAddressSpaces) {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
         auto* load_c = b.Load(var_c);
-        b.Store(var_b, b.Add<i32>(load_a, b.Add<i32>(load_b, load_c)));
+        b.Store(var_b, b.Add(load_a, b.Add(load_b, load_c)));
         b.Return(func);
     });
 
@@ -591,7 +591,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, EntryPointHasExistingParameters) {
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Store(var_b, b.Add<i32>(load_a, b.Add<i32>(load_b, param)));
+        b.Store(var_b, b.Add(load_a, b.Add(load_b, param)));
         b.Return(func);
     });
 
@@ -667,7 +667,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, CallFunctionThatUsesVars_NoArgs) {
     b.Append(foo->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Store(var_b, b.Add<i32>(load_a, load_b));
+        b.Store(var_b, b.Add(load_a, load_b));
         b.Return(foo);
     });
 
@@ -760,7 +760,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, CallFunctionThatUsesVars_WithExistingParam
     b.Append(foo->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Store(var_b, b.Add<i32>(load_a, b.Add<i32>(load_b, param)));
+        b.Store(var_b, b.Add(load_a, b.Add(load_b, param)));
         b.Return(foo);
     });
 
@@ -1039,7 +1039,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, CallFunctionThatUsesVars_OutOfOrder) {
     b.Append(foo->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Store(var_b, b.Add<i32>(load_a, load_b));
+        b.Store(var_b, b.Add(load_a, load_b));
         b.Return(foo);
     });
 
@@ -1135,7 +1135,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, CallFunctionThatDoesNotUseVars) {
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Store(var_b, b.Add<i32>(load_a, b.Add<i32>(load_b, b.Call(foo))));
+        b.Store(var_b, b.Add(load_a, b.Add(load_b, b.Call(foo))));
         b.Return(func);
     });
 
@@ -1234,7 +1234,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, CallFunctionWithOnlyTransitiveUses) {
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Store(var_b, b.Add<i32>(load_a, b.Add<i32>(load_b, b.Call(foo))));
+        b.Store(var_b, b.Add(load_a, b.Add(load_b, b.Call(foo))));
         b.Return(func);
     });
 
@@ -1350,7 +1350,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, CallFunctionWithOnlyTransitiveUses_OutOfOr
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Store(var_b, b.Add<i32>(load_a, b.Add<i32>(load_b, b.Call(foo))));
+        b.Store(var_b, b.Add(load_a, b.Add(load_b, b.Call(foo))));
         b.Return(func);
     });
 
@@ -1466,7 +1466,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, VarsWithNoNames) {
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Store(var_b, b.Add<i32>(load_a, b.Add<i32>(load_b, b.Call(foo))));
+        b.Store(var_b, b.Add(load_a, b.Add(load_b, b.Call(foo))));
         b.Return(func);
     });
 
@@ -1580,7 +1580,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, SkipBuffers) {
         auto* load_c = b.Load(var_c);
         auto* conv_b = b.Convert(ty.i32(), load_b);
         auto* conv_c = b.Convert(ty.i32(), load_c);
-        auto* add = b.Add<i32>(b.Add<i32>(load_a, conv_b), conv_c);
+        auto* add = b.Add(b.Add(load_a, conv_b), conv_c);
         auto* conv = b.Convert(ty.u32(), add);
         b.Store(var_b, conv);
         b.Return(func);
@@ -1668,7 +1668,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, DynamicOffset) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);
-        auto* add = b.Add<i32>(load_a, load_a);
+        auto* add = b.Add(load_a, load_a);
         b.Store(var_a, add);
         b.Return(func);
     });
@@ -1734,7 +1734,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, NoDynamicOffset) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);
-        auto* add = b.Add<i32>(load_a, load_a);
+        auto* add = b.Add(load_a, load_a);
         b.Store(var_a, add);
         b.Return(func);
     });

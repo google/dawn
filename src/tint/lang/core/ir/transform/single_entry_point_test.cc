@@ -332,10 +332,10 @@ TEST_F(IR_SingleEntryPointTest, DirectOverridesWithInitializer) {
     b.Append(mod.root_block, [&] {
         init1 = b.Multiply(2_i, 4_i)->Result();
         auto* x = b.Multiply(2_i, 4_i);
-        init2 = b.Add(ty.i32(), x, 4_i)->Result();
+        init2 = b.Add(x, 4_i)->Result();
 
         auto* y = b.Multiply(3_i, 5_i);
-        init3 = b.Add(ty.i32(), y, 5_i)->Result();
+        init3 = b.Add(y, 5_i)->Result();
     });
 
     auto* o1 = Override("o1", 1, init1);
@@ -940,7 +940,7 @@ TEST_F(IR_SingleEntryPointTest, OverrideWithComplexIncludingOverride) {
     b.Append(mod.root_block, [&] {
         auto* x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
-        auto* add = b.Add(ty.u32(), x, 4_u);
+        auto* add = b.Add(x, 4_u);
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
         o->SetInitializer(add->Result());
@@ -1003,7 +1003,7 @@ TEST_F(IR_SingleEntryPointTest, OverrideInitVar) {
     b.Append(mod.root_block, [&] {
         x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
-        auto* add = b.Add(ty.u32(), x, 3_u);
+        auto* add = b.Add(x, 3_u);
         auto* var_local =
             b.Var("a", core::AddressSpace::kPrivate, ty.u32(), core::Access::kReadWrite);
         var_local->SetInitializer(add->Result());
@@ -1055,8 +1055,8 @@ TEST_F(IR_SingleEntryPointTest, OverrideInitVarIntermediateUnused) {
     b.Append(mod.root_block, [&] {
         x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
-        auto* add_a = b.Add(ty.u32(), x, 3_u);
-        auto* add_b = b.Add(ty.u32(), x, 3_u);
+        auto* add_a = b.Add(x, 3_u);
+        auto* add_b = b.Add(x, 3_u);
         auto* var_local =
             b.Var("a", core::AddressSpace::kPrivate, ty.u32(), core::Access::kReadWrite);
         auto* var_local_b =
@@ -1113,7 +1113,7 @@ TEST_F(IR_SingleEntryPointTest, OverideInitVarUnused) {
     b.Append(mod.root_block, [&] {
         x = b.Override("x", ty.u32());
         x->SetOverrideId({2});
-        auto* add = b.Add(ty.u32(), x, 3_u);
+        auto* add = b.Add(x, 3_u);
         auto* var_local =
             b.Var("a", core::AddressSpace::kPrivate, ty.u32(), core::Access::kReadWrite);
         var_local->SetInitializer(add->Result());

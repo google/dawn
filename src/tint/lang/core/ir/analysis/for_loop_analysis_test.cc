@@ -70,7 +70,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition) {
             cont_statement = b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -152,7 +152,7 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformArray) {
             cont_statement = b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(fn_b);
@@ -248,7 +248,7 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformStructure) {
             cont_statement = b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(fn_b);
@@ -351,7 +351,7 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformStructure_WithInfiniteLoopPrevent
             cont_statement = b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(fn_b);
@@ -456,7 +456,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailLet) {
             cont_statement = b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -516,7 +516,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailStore) {
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             auto* as_let = b.Let(10_u);
             condition = b.LessThan(b.Load(idx), as_let);
             ifelse = b.If(condition);
@@ -529,7 +529,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailStore) {
             cont_statement = b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -604,7 +604,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailNonCanonicalIfFlipped) {
             cont_statement = b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -674,7 +674,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailNonCanonicalIfOnlyExit) {
             cont_statement = b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);

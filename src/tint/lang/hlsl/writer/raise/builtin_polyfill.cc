@@ -367,7 +367,7 @@ struct State {
             auto* mul = b.Multiply(args[0], args[0]);
             auto* sub = b.Subtract(result_ty, mul, one);
             auto* sqrt = b.Call(result_ty, core::BuiltinFn::kSqrt, sub);
-            auto* add = b.Add(result_ty, args[0], sqrt);
+            auto* add = b.Add(args[0], sqrt);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kLog, add);
         });
         call->Destroy();
@@ -384,9 +384,9 @@ struct State {
             auto* one =
                 b.MatchWidth(is_f16 ? b.ConstantValue(1_h) : b.ConstantValue(1_f), result_ty);
             auto* mul = b.Multiply(args[0], args[0]);
-            auto* add_one = b.Add(result_ty, mul, one);
+            auto* add_one = b.Add(mul, one);
             auto* sqrt = b.Call(result_ty, core::BuiltinFn::kSqrt, add_one);
-            auto* add = b.Add(result_ty, args[0], sqrt);
+            auto* add = b.Add(args[0], sqrt);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kLog, add);
         });
         call->Destroy();
@@ -405,7 +405,7 @@ struct State {
                 b.MatchWidth(is_f16 ? b.ConstantValue(1_h) : b.ConstantValue(1_f), result_ty);
             auto* half =
                 b.MatchWidth(is_f16 ? b.ConstantValue(0.5_h) : b.ConstantValue(0.5_f), result_ty);
-            auto* one_plus_x = b.Add(result_ty, one, args[0]);
+            auto* one_plus_x = b.Add(one, args[0]);
             auto* one_minus_x = b.Subtract(result_ty, one, args[0]);
             auto* div = b.Divide(result_ty, one_plus_x, one_minus_x);
             auto* log = b.Call(result_ty, core::BuiltinFn::kLog, div);
@@ -1876,7 +1876,7 @@ struct State {
                     inst = b.Subtract(ty.u32(), id, arg2);
                     break;
                 case core::BuiltinFn::kSubgroupShuffleDown:
-                    inst = b.Add(ty.u32(), id, arg2);
+                    inst = b.Add(id, arg2);
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
@@ -1917,7 +1917,7 @@ struct State {
             core::ir::Instruction* inst = nullptr;
             switch (call->Func()) {
                 case core::BuiltinFn::kSubgroupInclusiveAdd:
-                    inst = b.Add(call_type, exclusive_call, arg1);
+                    inst = b.Add(exclusive_call, arg1);
                     break;
                 case core::BuiltinFn::kSubgroupInclusiveMul:
                     inst = b.Multiply(exclusive_call, arg1);

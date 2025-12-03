@@ -3083,7 +3083,7 @@ TEST_F(SpirvReader_AtomicsTest, FunctionParam_MixedCalls) {
 
         auto* one = b.Load(p1);
         auto* two = b.Load(p2);
-        b.Return(f_nonatomic, b.Add(ty.u32(), one, two));
+        b.Return(f_nonatomic, b.Add(one, two));
     });
 
     auto* main = b.ComputeFunction("main");

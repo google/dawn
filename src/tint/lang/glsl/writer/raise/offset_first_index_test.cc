@@ -84,7 +84,7 @@ TEST_F(GlslWriter_OffsetFirstIndexTest, NoModify_BuiltinsWithNoOffsets) {
     b.Append(func->Block(), [&] {
         auto* vertex = b.Load(vertex_idx);
         auto* instance = b.Load(instance_idx);
-        b.Let("add", b.Add<u32>(vertex, instance));
+        b.Let("add", b.Add(vertex, instance));
         b.Return(func, b.Zero(ty.vec4<f32>()));
     });
 
@@ -132,7 +132,7 @@ TEST_F(GlslWriter_OffsetFirstIndexTest, VertexOffset) {
     b.Append(func->Block(), [&] {
         auto* vertex = b.Load(vertex_idx);
         auto* instance = b.Load(instance_idx);
-        b.Let("add", b.Add<u32>(vertex, instance));
+        b.Let("add", b.Add(vertex, instance));
         b.Return(func, b.Zero(ty.vec4<f32>()));
     });
 
@@ -205,7 +205,7 @@ TEST_F(GlslWriter_OffsetFirstIndexTest, InstanceOffset) {
     b.Append(func->Block(), [&] {
         auto* vertex = b.Load(vertex_idx);
         auto* instance = b.Load(instance_idx);
-        b.Let("add", b.Add<u32>(vertex, instance));
+        b.Let("add", b.Add(vertex, instance));
         b.Return(func, b.Zero(ty.vec4<f32>()));
     });
 
@@ -278,7 +278,7 @@ TEST_F(GlslWriter_OffsetFirstIndexTest, VertexAndInstanceOffset) {
     b.Append(func->Block(), [&] {
         auto* vertex = b.Load(vertex_idx);
         auto* instance = b.Load(instance_idx);
-        b.Let("add", b.Add<u32>(vertex, instance));
+        b.Let("add", b.Add(vertex, instance));
         b.Return(func, b.Zero(ty.vec4<f32>()));
     });
 

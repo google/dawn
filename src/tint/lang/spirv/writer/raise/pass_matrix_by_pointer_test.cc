@@ -240,7 +240,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleMatrixValues) {
     target->SetParams({value_a, scalar, value_b});
     b.Append(target->Block(), [&] {
         auto* scale = b.Multiply(value_a, scalar);
-        auto* sum = b.Add(mat_ty, scale, value_b);
+        auto* sum = b.Add(scale, value_b);
         b.Return(target, sum);
     });
 
@@ -319,7 +319,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleParamUses) {
     auto* value = b.FunctionParam("value", mat_ty);
     target->SetParams({value});
     b.Append(target->Block(), [&] {
-        auto* add = b.Add(mat_ty, value, value);
+        auto* add = b.Add(value, value);
         auto* mul = b.Multiply(add, value);
         b.Return(target, mul);
     });
@@ -500,7 +500,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MatrixInArray) {
     b.Append(target->Block(), [&] {
         auto* ma = b.Access(mat_ty, value, 0_u);
         auto* mb = b.Access(mat_ty, value, 1_u);
-        auto* add = b.Add(mat_ty, ma, mb);
+        auto* add = b.Add(ma, mb);
         b.Return(target, add);
     });
 
@@ -665,7 +665,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MatrixArrayOfStructOfArray) {
         auto* ma = b.Access(mat_ty, value, 2_u, 0_u, 0_u);
         auto* mb = b.Access(mat_ty, value, 2_u, 0_u, 1_u);
         auto* s = b.Access(ty.f32(), value, 2_u, 1_u);
-        auto* add = b.Add(mat_ty, ma, mb);
+        auto* add = b.Add(ma, mb);
         auto* mul = b.Multiply(add, s);
         b.Return(target, mul);
     });

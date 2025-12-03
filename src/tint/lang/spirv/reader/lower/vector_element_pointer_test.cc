@@ -226,7 +226,7 @@ TEST_F(SpirvReader_VectorElementPointerTest, MultipleUses) {
         auto* vec = b.Var<function, vec4<u32>>("vec");
         auto* access = b.Access<ptr<function, u32>>(vec, 2_u);
         auto* load = b.Load(access);
-        auto* add = b.Add<u32>(load, 1_u);
+        auto* add = b.Add(load, 1_u);
         b.Store(access, add);
         b.Return(foo);
     });

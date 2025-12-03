@@ -2442,7 +2442,7 @@ TEST_F(GlslWriterTest, AccessToLetWithNestedFunctionParams) {
     b.Append(foo->Block(), [&] {
         auto* arr = b.Var("arr", ty.ptr<function, array<i32, 4>, read_write>());
         auto* c = b.Call(ty.i32(), f);
-        auto* d = b.Add(ty.i32(), c, 1_i);
+        auto* d = b.Add(c, 1_i);
         auto* access = b.Access(ty.ptr<function, i32, read_write>(), arr, d);
         auto* p = b.Let("p", access);
         auto* c2 = b.Call(ty.i32(), g);

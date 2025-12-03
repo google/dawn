@@ -539,7 +539,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // subgroup size (rounding up).
         if (linear_workgroup_size) {
             auto* subgroup_size = GetSubgroupSize(builder);
-            auto* add = builder.Add<u32>(u32(linear_workgroup_size.value() - 1), subgroup_size);
+            auto* add = builder.Add(u32(linear_workgroup_size.value() - 1), subgroup_size);
             return builder.Divide<u32>(add, subgroup_size)->Result();
         }
 
@@ -601,14 +601,14 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             TINT_IR_ASSERT(ir, tint_first_index_offset);
             auto* vertex_index_offset =
                 builder.Access(ty.ptr<uniform, u32>(), tint_first_index_offset, 0_u);
-            v = builder.Add<u32>(v, builder.Load(vertex_index_offset))->Result();
+            v = builder.Add(v, builder.Load(vertex_index_offset))->Result();
         } else if (config.first_index_offset_binding.has_value() &&
                    inputs[idx].attributes.builtin == core::BuiltinValue::kInstanceIndex) {
             // Apply instance_index offset
             TINT_IR_ASSERT(ir, tint_first_index_offset);
             auto* instance_index_offset =
                 builder.Access(ty.ptr<uniform, u32>(), tint_first_index_offset, 1_u);
-            v = builder.Add<u32>(v, builder.Load(instance_index_offset))->Result();
+            v = builder.Add(v, builder.Load(instance_index_offset))->Result();
         } else if (config.first_index_offset.has_value() &&
                    inputs[idx].attributes.builtin == core::BuiltinValue::kVertexIndex) {
             auto* immediate_data = config.immediate_data_layout.var;
@@ -616,7 +616,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 u32(config.immediate_data_layout.IndexOf(config.first_index_offset.value()));
             auto first_index_offset =
                 builder.Access<ptr<immediate, u32>>(immediate_data, first_index_offset_idx);
-            v = builder.Add<u32>(v, builder.Load(first_index_offset))->Result();
+            v = builder.Add(v, builder.Load(first_index_offset))->Result();
         } else if (config.first_instance_offset.has_value() &&
                    inputs[idx].attributes.builtin == core::BuiltinValue::kInstanceIndex) {
             auto* immediate_data = config.immediate_data_layout.var;
@@ -624,7 +624,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 u32(config.immediate_data_layout.IndexOf(config.first_instance_offset.value()));
             auto first_instance_offset =
                 builder.Access<ptr<immediate, u32>>(immediate_data, first_instance_offset_idx);
-            v = builder.Add<u32>(v, builder.Load(first_instance_offset))->Result();
+            v = builder.Add(v, builder.Load(first_instance_offset))->Result();
         }
 
         return v;

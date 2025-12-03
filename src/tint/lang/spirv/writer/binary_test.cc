@@ -379,7 +379,7 @@ TEST_F(SpirvWriterTest, Binary_Chain) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* sub = b.Subtract(ty.i32(), 1_i, 2_i);
-        auto* add = b.Add(ty.i32(), sub, sub);
+        auto* add = b.Add(sub, sub);
         b.Return(func);
         mod.SetName(sub, "sub");
         mod.SetName(add, "add");

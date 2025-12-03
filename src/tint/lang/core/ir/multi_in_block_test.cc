@@ -52,7 +52,7 @@ TEST_F(IR_MultiInBlockTest, CloneInto) {
     auto* loop = b.Loop();
 
     auto* blk = b.MultiInBlock();
-    auto* add = b.Add(mod.Types().i32(), 1_i, 2_i);
+    auto* add = b.Add(1_i, 2_i);
     blk->Append(add);
     auto* param1 = b.BlockParam(mod.Types().i32());
     auto* param2 = b.BlockParam(mod.Types().f32());

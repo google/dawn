@@ -221,7 +221,7 @@ TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryAdd_VectorScalar_Vec4f) {
     func->SetParams({scalar, vector});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Add(ty.vec4<f32>(), vector, scalar);
+        auto* result = b.Add(vector, scalar);
         b.Return(func, result);
     });
 
@@ -257,7 +257,7 @@ TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryAdd_ScalarVector_Vec4f) {
     func->SetParams({scalar, vector});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Add(ty.vec4<f32>(), scalar, vector);
+        auto* result = b.Add(scalar, vector);
         b.Return(func, result);
     });
 

@@ -1120,7 +1120,7 @@ struct State {
                 auto* y = b.Multiply(q, r);
 
                 auto* z = b.Subtract(elem_ty, w, x);
-                return b.Add(elem_ty, z, y);
+                return b.Add(z, y);
             };
 
             // Returns (m * n) + (o * p) - (q * r)
@@ -1129,7 +1129,7 @@ struct State {
                 auto* x = b.Multiply(o, p);
                 auto* y = b.Multiply(q, r);
 
-                auto* z = b.Add(elem_ty, w, x);
+                auto* z = b.Add(w, x);
                 return b.Subtract(elem_ty, z, y);
             };
 

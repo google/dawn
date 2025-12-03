@@ -117,7 +117,7 @@ TEST_F(HlslWriterTest, DynamicOffset_MultipleBuffersWithImmediates) {
     b.Append(func->Block(), [&] {
         auto* val1 = b.Load(sb1);
         auto* val2 = b.Load(sb2);
-        auto* sum = b.Add(ty.i32(), val1, val2);
+        auto* sum = b.Add(val1, val2);
         b.Let("result", sum);
         b.Return(func);
     });

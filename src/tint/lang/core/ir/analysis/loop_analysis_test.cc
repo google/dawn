@@ -58,7 +58,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_IndexLessThanConstant_IncByOne) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -121,7 +121,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_ConstantLessThanIndex_IncByOne) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -184,7 +184,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_IndexGreaterThanConstant_IncByOne) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -249,7 +249,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_IndexLessThanParam_IncByOne) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -313,7 +313,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_IndexLessThanLet_IncByOne) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -377,7 +377,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_IndexLessThanConstant_IncByOne_I32) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Add(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -440,7 +440,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_IndexLessThanConstant_OnePlusIndex) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(1_u, b.Load(idx)));
+            b.Store(idx, b.Add(1_u, b.Load(idx)));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -566,7 +566,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_NonZeroInit) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -632,7 +632,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_BreakInFalse) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -690,7 +690,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_MultipleLoads) {
             idx = b.Var("idx", 0_u);
             auto* load1 = b.Load(idx);
             auto* load2 = b.Load(idx);
-            b.Let("x", b.Add<u32>(load1, load2));
+            b.Let("x", b.Add(load1, load2));
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
@@ -701,14 +701,14 @@ TEST_F(IR_LoopAnalysisTest, Finite_MultipleLoads) {
 
             auto* load1 = b.Load(idx);
             auto* load2 = b.Load(idx);
-            b.Let("x", b.Add<u32>(load1, load2));
+            b.Let("x", b.Add(load1, load2));
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
             auto* load1 = b.Load(idx);
             auto* load2 = b.Load(idx);
-            b.Let("x", b.Add<u32>(load1, load2));
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Let("x", b.Add(load1, load2));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -785,7 +785,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_Bitcasts) {
         b.Append(loop->Continuing(), [&] {  //
             auto* lhs = b.Bitcast<i32>(b.Bitcast<u32>(b.Bitcast<i32>(b.Load(idx))));
             auto* rhs = b.Bitcast<i32>(b.Bitcast<u32>(1_u));
-            b.Store(idx, b.Bitcast<u32>(b.Add<i32>(lhs, rhs)));
+            b.Store(idx, b.Bitcast<u32>(b.Add(lhs, rhs)));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -868,9 +868,9 @@ TEST_F(IR_LoopAnalysisTest, Finite_MultipleVars) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(v1, b.Add<u32>(b.Load(v1), 1_u));
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
-            b.Store(v2, b.Add<u32>(b.Load(v2), 0_u));
+            b.Store(v1, b.Add(b.Load(v1), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
+            b.Store(v2, b.Add(b.Load(v2), 0_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1017,7 +1017,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_IncByZero) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 0_u));
+            b.Store(idx, b.Add(b.Load(idx), 0_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1080,7 +1080,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_IncByTwo) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 2_u));
+            b.Store(idx, b.Add(b.Load(idx), 2_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1145,7 +1145,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_IncByNonConstant) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), inc));
+            b.Store(idx, b.Add(b.Load(idx), inc));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1209,7 +1209,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_EndBoundIsVar) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1274,7 +1274,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_EndBoundIsLetInBody) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1464,7 +1464,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_NonInteger) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<f32>(b.Load(idx), 1_f));
+            b.Store(idx, b.Add(b.Load(idx), 1_f));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1527,7 +1527,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_MissingStore) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Add<u32>(b.Load(idx), 1_u);
+            b.Add(b.Load(idx), 1_u);
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1593,7 +1593,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_ContinueBeforeBreak) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1661,7 +1661,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_IncThenDec) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Subtract<u32>(b.Add<u32>(b.Load(idx), 1_u), 1_u));
+            b.Store(idx, b.Subtract<u32>(b.Add(b.Load(idx), 1_u), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1726,7 +1726,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_AnotherStoreInBody) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1790,7 +1790,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_MultipleStoresInContinuing) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.Store(idx, 0_u);
             b.NextIteration(loop);
         });
@@ -1855,7 +1855,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_ConditionalStore) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            auto* inc = b.Add<u32>(b.Load(idx), 1_u);
+            auto* inc = b.Add(b.Load(idx), 1_u);
             auto* cond_store = b.If(false);
             b.Append(cond_store->True(), [&] {  //
                 b.Store(idx, inc);
@@ -1933,7 +1933,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_ConditionalAdd) {
             auto* cond_add = b.If(false);
             cond_add->SetResult(inc);
             b.Append(cond_add->True(), [&] {  //
-                b.ExitIf(cond_add, b.Add<u32>(load, 1_u));
+                b.ExitIf(cond_add, b.Add(load, 1_u));
             });
             b.Append(cond_add->False(), [&] {  //
                 b.ExitIf(cond_add, load);
@@ -2018,7 +2018,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_PassVarPointerToFunction) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2098,7 +2098,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_PassVarPointerToFunction_ViaLet) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2167,7 +2167,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_VarOutsideInit) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2260,7 +2260,7 @@ TEST_F(IR_LoopAnalysisTest, MultipleLoops) {
             b.Continue(loop_outer_1);
         });
         b.Append(loop_outer_1->Continuing(), [&] {  //
-            b.Store(idx_outer_1, b.Add<u32>(b.Load(idx_outer_1), 1_u));
+            b.Store(idx_outer_1, b.Add(b.Load(idx_outer_1), 1_u));
             b.NextIteration(loop_outer_1);
         });
 
@@ -2288,7 +2288,7 @@ TEST_F(IR_LoopAnalysisTest, MultipleLoops) {
                 b.Continue(loop_inner_2);
             });
             b.Append(loop_inner_2->Continuing(), [&] {  //
-                b.Store(idx_inner_2, b.Add<u32>(b.Load(idx_inner_2), 1_u));
+                b.Store(idx_inner_2, b.Add(b.Load(idx_inner_2), 1_u));
                 b.NextIteration(loop_inner_2);
             });
 
@@ -2438,7 +2438,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_IndexLessThanEqualConstant_IncByOne_I32) {
         });
         b.Append(loop->Continuing(), [&] {
             // idx++
-            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Add(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2509,7 +2509,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_IndexLessThanEqualConstant_IncByOne_U32) {
         });
         b.Append(loop->Continuing(), [&] {
             // idx++
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2580,7 +2580,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_IndexLessThanEqualHighestValue_IncByOn
         });
         b.Append(loop->Continuing(), [&] {
             // idx++
-            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Add(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2651,7 +2651,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_IndexLessThanEqualHighestValue_IncByOn
         });
         b.Append(loop->Continuing(), [&] {
             // idx++
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3290,7 +3290,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_ConstantGreaterThanEqualIndex_IncByOne_I32) {
         });
         b.Append(loop->Continuing(), [&] {
             // idx++
-            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Add(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3361,7 +3361,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_ConstantGreaterThanEqualIndex_IncByOne_U32) {
         });
         b.Append(loop->Continuing(), [&] {
             // idx++
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3432,7 +3432,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_HighestValueGreaterThanEqualIndex_IncB
         });
         b.Append(loop->Continuing(), [&] {
             // idx++
-            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Add(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3503,7 +3503,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_HighestValueGreaterThanEqualIndex_IncB
         });
         b.Append(loop->Continuing(), [&] {
             // idx++
-            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);

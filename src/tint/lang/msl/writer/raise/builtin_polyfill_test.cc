@@ -1051,7 +1051,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Frexp_Scalar) {
                               core::BuiltinFn::kFrexp, value);
         auto* fract = b.Access<f32>(result, 0_u);
         auto* exp = b.Access<i32>(result, 1_u);
-        b.Return(func, b.Add<f32>(fract, b.Convert<f32>(exp)));
+        b.Return(func, b.Add(fract, b.Convert<f32>(exp)));
     });
 
     auto* src = R"(
@@ -1112,7 +1112,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Frexp_Vector) {
                               core::BuiltinFn::kFrexp, value);
         auto* fract = b.Access<vec4<f32>>(result, 0_u);
         auto* whole = b.Access<vec4<i32>>(result, 1_u);
-        b.Return(func, b.Add<vec4<f32>>(fract, b.Convert<vec4<f32>>(whole)));
+        b.Return(func, b.Add(fract, b.Convert<vec4<f32>>(whole)));
     });
 
     auto* src = R"(
@@ -1241,7 +1241,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Modf_Scalar) {
                               core::BuiltinFn::kModf, value);
         auto* fract = b.Access<f32>(result, 0_u);
         auto* whole = b.Access<f32>(result, 1_u);
-        b.Return(func, b.Add<f32>(fract, whole));
+        b.Return(func, b.Add(fract, whole));
     });
 
     auto* src = R"(
@@ -1300,7 +1300,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Modf_Vector) {
                               core::BuiltinFn::kModf, value);
         auto* fract = b.Access<vec4<f32>>(result, 0_u);
         auto* whole = b.Access<vec4<f32>>(result, 1_u);
-        b.Return(func, b.Add<vec4<f32>>(fract, whole));
+        b.Return(func, b.Add(fract, whole));
     });
 
     auto* src = R"(
@@ -3241,7 +3241,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStoreToReadWriteBeforeAndAfterLoad)
         auto* before = b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, t, coords);
         b.Call<void>(core::BuiltinFn::kTextureStore, t, coords, value);
         auto* after = b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, t, coords);
-        b.Return(func, b.Add<vec4<f32>>(before, after));
+        b.Return(func, b.Add(before, after));
     });
 
     auto* src = R"(

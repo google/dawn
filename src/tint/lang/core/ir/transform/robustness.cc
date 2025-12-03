@@ -493,8 +493,8 @@ struct State {
         b.InsertBefore(insertion_point, [&] {
             // The beginning of the last row/column is at `offset + (major_dim-1)*stride`.
             // We then add another `min_stride` elements to get to the end of the accessed memory.
-            auto* last_slice = b.Add<u32>(offset, b.Multiply(stride, u32(major_dim - 1)));
-            auto* end = b.Add<u32>(last_slice, u32(min_stride));
+            auto* last_slice = b.Add(offset, b.Multiply(stride, u32(major_dim - 1)));
+            auto* end = b.Add(last_slice, u32(min_stride));
             auto* in_bounds = b.LessThanEqual(end, array_length);
             if (call->Func() == BuiltinFn::kSubgroupMatrixLoad) {
                 // Declare a variable to hold the result of the load, or a zero-initialized matrix.

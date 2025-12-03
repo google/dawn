@@ -319,7 +319,7 @@ TEST_F(MslWriterTest, LoopInitializer_WithRobustness_DetectedAsFinite) {
                 b.Continue(l);
             });
             b.Append(l->Continuing(), [&] {  //
-                b.Store(v, b.Add<u32>(b.Load(v), 1_u));
+                b.Store(v, b.Add(b.Load(v), 1_u));
                 b.NextIteration(l);
             });
         });

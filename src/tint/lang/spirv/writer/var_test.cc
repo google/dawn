@@ -151,7 +151,7 @@ TEST_F(SpirvWriterTest, PrivateVar_LoadAndStore) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
-        auto* add = b.Add(ty.i32(), load, 1_i);
+        auto* add = b.Add(load, 1_i);
         b.Store(v, add);
         b.Return(func);
         mod.SetName(load, "load");
@@ -188,7 +188,7 @@ TEST_F(SpirvWriterTest, WorkgroupVar_LoadAndStore) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
-        auto* add = b.Add(ty.i32(), load, 1_i);
+        auto* add = b.Add(load, 1_i);
         b.Store(v, add);
         b.Return(func);
         mod.SetName(load, "load");
@@ -258,7 +258,7 @@ TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
-        auto* add = b.Add(ty.i32(), load, 1_i);
+        auto* add = b.Add(load, 1_i);
         b.Store(v, add);
         b.Return(func);
         mod.SetName(load, "load");
@@ -290,7 +290,7 @@ TEST_F(SpirvWriterTest, StorageVar_WithVulkan) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
-        auto* add = b.Add(ty.i32(), load, 1_i);
+        auto* add = b.Add(load, 1_i);
         b.Store(v, add);
         b.Return(func);
         mod.SetName(load, "load");
@@ -355,7 +355,7 @@ TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
-        auto* add = b.Add(ty.i32(), load, 1_i);
+        auto* add = b.Add(load, 1_i);
         b.Store(v, add);
         b.Return(func);
         mod.SetName(load, "load");

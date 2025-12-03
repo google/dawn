@@ -347,7 +347,7 @@ struct State {
             auto offset_value = info.base_offset;
             offset += (info.attr_byte_offset / 4u);
             if (offset > 0) {
-                offset_value = b.Add<u32>(offset_value, u32(offset))->Result();
+                offset_value = b.Add(offset_value, u32(offset))->Result();
             }
             auto* word =
                 b.Load(b.Access<ptr<storage, u32, read>>(info.buffer, offset_value))->Result();

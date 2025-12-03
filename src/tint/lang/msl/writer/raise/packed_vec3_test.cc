@@ -300,7 +300,7 @@ TEST_F(MslWriter_PackedVec3Test, StorageVar_Vec3_LoadElement) {
     b.Append(func->Block(), [&] {  //
         auto* el_0 = b.LoadVectorElement(var, 0_u);
         auto* el_1 = b.LoadVectorElement(var, 1_u);
-        b.Return(func, b.Add<u32>(el_0, el_1));
+        b.Return(func, b.Add(el_0, el_1));
     });
 
     auto* src = R"(
@@ -502,8 +502,7 @@ TEST_F(MslWriter_PackedVec3Test, StorageVar_Mat4x3_LoadColumn) {
         auto* col_1 = b.Load(b.Access(ty.ptr<storage, vec3<f32>>(), var, 1_u));
         auto* col_2 = b.Load(b.Access(ty.ptr<storage, vec3<f32>>(), var, 2_u));
         auto* col_3 = b.Load(b.Access(ty.ptr<storage, vec3<f32>>(), var, 3_u));
-        b.Return(func,
-                 b.Add<vec3<f32>>(b.Add<vec3<f32>>(b.Add<vec3<f32>>(col_0, col_1), col_2), col_3));
+        b.Return(func, b.Add(b.Add(b.Add(col_0, col_1), col_2), col_3));
     });
 
     auto* src = R"(
@@ -577,7 +576,7 @@ TEST_F(MslWriter_PackedVec3Test, StorageVar_Mat4x3_LoadElement) {
         auto* el_1 = b.LoadVectorElement(b.Access(ty.ptr<storage, vec3<f32>>(), var, 1_u), 1_u);
         auto* el_2 = b.LoadVectorElement(b.Access(ty.ptr<storage, vec3<f32>>(), var, 2_u), 2_u);
         auto* el_3 = b.LoadVectorElement(b.Access(ty.ptr<storage, vec3<f32>>(), var, 3_u), 2_u);
-        b.Return(func, b.Add<f32>(b.Add<f32>(b.Add<f32>(el_0, el_1), el_2), el_3));
+        b.Return(func, b.Add(b.Add(b.Add(el_0, el_1), el_2), el_3));
     });
 
     auto* src = R"(
@@ -1030,7 +1029,7 @@ TEST_F(MslWriter_PackedVec3Test, StorageVar_Array_LoadVector) {
     b.Append(func->Block(), [&] {  //
         auto* el_0 = b.Load(b.Access(ty.ptr<storage, vec3<f32>>(), var, 0_u));
         auto* el_1 = b.Load(b.Access(ty.ptr<storage, vec3<f32>>(), var, 1_u));
-        b.Return(func, b.Add<vec3<f32>>(el_0, el_1));
+        b.Return(func, b.Add(el_0, el_1));
     });
 
     auto* src = R"(
@@ -1088,7 +1087,7 @@ TEST_F(MslWriter_PackedVec3Test, StorageVar_Array_LoadElement) {
     b.Append(func->Block(), [&] {  //
         auto* el_0 = b.LoadVectorElement(b.Access(ty.ptr<storage, vec3<f32>>(), var, 0_u), 2_u);
         auto* el_1 = b.LoadVectorElement(b.Access(ty.ptr<storage, vec3<f32>>(), var, 1_u), 2_u);
-        b.Return(func, b.Add<f32>(el_0, el_1));
+        b.Return(func, b.Add(el_0, el_1));
     });
 
     auto* src = R"(
@@ -1835,7 +1834,7 @@ TEST_F(MslWriter_PackedVec3Test, StorageVar_RuntimeArray_LoadVector) {
     b.Append(func->Block(), [&] {  //
         auto* el_0 = b.Load(b.Access(ty.ptr<storage, vec3<f32>>(), var, 0_u));
         auto* el_1 = b.Load(b.Access(ty.ptr<storage, vec3<f32>>(), var, 1_u));
-        b.Return(func, b.Add<vec3<f32>>(el_0, el_1));
+        b.Return(func, b.Add(el_0, el_1));
     });
 
     auto* src = R"(

@@ -711,7 +711,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicAdd) {
             b.ExitIf(ifelse);
         });
         auto* old = b.Call(ty.i32(), core::BuiltinFn::kAtomicAdd, buffer, 42_i);
-        b.Add(ty.i32(), old, 1_i);
+        b.Add(old, 1_i);
         b.Return(ep, 0.5_f);
     });
 
@@ -796,7 +796,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicCompareExchange) {
         auto* result =
             b.Call(core::type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
                    core::BuiltinFn::kAtomicCompareExchangeWeak, buffer, 0_i, 42_i);
-        b.Add(ty.i32(), b.Access(ty.i32(), result, 0_i), 1_i);
+        b.Add(b.Access(ty.i32(), result, 0_i), 1_i);
         b.Return(ep, 0.5_f);
     });
 

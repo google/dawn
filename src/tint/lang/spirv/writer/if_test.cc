@@ -70,7 +70,7 @@ TEST_F(SpirvWriterTest, If_FalseEmpty) {
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         b.Append(i->True(), [&] {
-            b.Add(ty.i32(), 1_i, 1_i);
+            b.Add(1_i, 1_i);
             b.ExitIf(i);
         });
         b.Append(i->False(), [&] {  //
@@ -109,7 +109,7 @@ TEST_F(SpirvWriterTest, If_TrueEmpty) {
             b.ExitIf(i);
         });
         b.Append(i->False(), [&] {
-            b.Add(ty.i32(), 1_i, 1_i);
+            b.Add(1_i, 1_i);
             b.ExitIf(i);
         });
         b.Return(func);

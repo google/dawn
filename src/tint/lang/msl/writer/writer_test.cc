@@ -67,7 +67,7 @@ TEST_F(MslWriterTest, WorkgroupAllocations) {
     b.Append(foo->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
-        b.Store(var_a, b.Add<i32>(load_a, load_b));
+        b.Store(var_a, b.Add(load_a, load_b));
         b.Return(foo);
     });
 

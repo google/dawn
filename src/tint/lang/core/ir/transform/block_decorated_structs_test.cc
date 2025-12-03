@@ -352,7 +352,7 @@ TEST_F(IR_BlockDecoratedStructsTest, MultipleBuffers) {
     b.Append(func->Block(), [&] {
         auto* load_b = b.Load(buffer_b);
         auto* load_c = b.Load(buffer_c);
-        b.Store(buffer_a, b.Add(ty.i32(), load_b, load_c));
+        b.Store(buffer_a, b.Add(load_b, load_c));
         b.Return(func);
     });
 
