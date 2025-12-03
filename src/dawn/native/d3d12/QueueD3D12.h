@@ -55,6 +55,8 @@ class Queue final : public d3d::Queue {
     ResultOrError<Ref<d3d::SharedFence>> GetOrCreateSharedFence() override;
     ID3D12SharingContract* GetSharingContract() const;
 
+    const Ref<SharedFence>& GetSharedFence() const { return mSharedFence; }
+
   private:
     using d3d::Queue::Queue;
     ~Queue() override;

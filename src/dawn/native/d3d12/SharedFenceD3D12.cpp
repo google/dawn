@@ -31,6 +31,7 @@
 
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
+#include "dawn/native/d3d12/QueueD3D12.h"
 #include "dawn/utils/SystemHandle.h"
 
 namespace dawn::native::d3d12 {
@@ -41,6 +42,12 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
     StringView label,
     const SharedFenceDXGISharedHandleDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->handle == nullptr, "shared HANDLE is missing.");
+
+    const auto& queueFence = ToBackend(device->GetQueue())->GetSharedFence();
+    if (queueFence &&
+        ::CompareObjectHandles(queueFence->GetSystemHandle().Get(), descriptor->handle)) {
+        return queueFence;
+    }
 
     utils::SystemHandle ownedHandle = utils::SystemHandle::Duplicate(descriptor->handle);
 

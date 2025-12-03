@@ -664,12 +664,20 @@ MaybeError Buffer::SynchronizeBufferBeforeUseOnGPU() {
         contents->AcquirePendingFences(&fences);
 
         ID3D12CommandQueue* commandQueue = queue->GetCommandQueue();
+        const auto& queueFence = ToBackend(device->GetQueue())->GetSharedFence();
+        const ExecutionSerial queueSubmittedSerial = queue->GetLastSubmittedCommandSerial();
         for (const auto& fence : fences) {
-            DAWN_TRY(CheckHRESULT(commandQueue->Wait(ToBackend(fence.object)->GetD3DFence(),
-                                                     fence.signaledValue),
+            auto d3dFence = ToBackend(fence.object);
+            if (d3dFence.Get() == queueFence.Get()) {
+                // We don't need to wait on the fence that we signaled (self-wait).
+                DAWN_CHECK(ExecutionSerial(fence.signaledValue) <= queueSubmittedSerial);
+                continue;
+            }
+
+            DAWN_TRY(CheckHRESULT(commandQueue->Wait(d3dFence->GetD3DFence(), fence.signaledValue),
                                   "D3D12 fence wait"););
             // Keep D3D12 fence alive until commands complete.
-            device->ReferenceUntilUnused(ToBackend(fence.object)->GetD3DFence());
+            device->ReferenceUntilUnused(d3dFence->GetD3DFence());
         }
 
         mLastUsageSerial = queue->GetPendingCommandSerial();
