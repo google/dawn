@@ -15,7 +15,7 @@ import (
 func setupRunFileTest(t *testing.T) (oswrapper.FSTestOSWrapper, *common.Config, string) {
 	t.Helper()
 
-	// Identify the "real" DawnRoot so we can populate the mock FS such that
+	// Identify the "real" DawnRoot so the mock FS can be populated such that
 	// fileutils.DawnRoot(mockFS) returns it.
 	realOS := oswrapper.GetRealOSWrapper()
 	realDawnRoot := fileutils.DawnRoot(realOS)
@@ -163,7 +163,7 @@ func TestCmd_Run_InvalidTemplateSyntax(t *testing.T) {
 	c := &Cmd{}
 	err := c.Run(ctx, cfg)
 	require.Error(t, err, "Run should fail with invalid template syntax")
-	require.Contains(t, err.Error(), "function \"invalid\" not defined")
+	require.ErrorContains(t, err, "function \"invalid\" not defined")
 }
 
 func TestCmd_Run_MissingIntrinsicDef(t *testing.T) {
@@ -178,7 +178,7 @@ func TestCmd_Run_MissingIntrinsicDef(t *testing.T) {
 	err := c.Run(ctx, cfg)
 	require.Error(t, err, "Run should fail with missing intrinsic definition")
 	// The error comes from ReadFile failing in intrinsicCache.Sem()
-	require.Contains(t, err.Error(), "does not exist")
+	require.ErrorContains(t, err, "does not exist")
 }
 
 func TestCmd_Run_TemplateOutsideProjectRoot(t *testing.T) {
@@ -203,5 +203,92 @@ func TestCmd_Run_TemplateOutsideProjectRoot(t *testing.T) {
 	c := &Cmd{}
 	err = c.Run(ctx, cfg)
 	require.Error(t, err, "Run should fail with template outside project root")
-	require.Contains(t, err.Error(), "is not under project root")
+	require.ErrorContains(t, err, "is not under project root")
+}
+
+// spyFS is a wrapper around FilesystemReader that records calls to ReadFile.
+type spyFS struct {
+	oswrapper.FilesystemReader
+	readFileCounts map[string]int
+	readFileErr    error
+}
+
+func newSpyFS(base oswrapper.FilesystemReader) *spyFS {
+	return &spyFS{
+		FilesystemReader: base,
+		readFileCounts:   make(map[string]int),
+	}
+}
+
+func (s *spyFS) ReadFile(name string) ([]byte, error) {
+	s.readFileCounts[name]++
+	if s.readFileErr != nil {
+		return nil, s.readFileErr
+	}
+	return s.FilesystemReader.ReadFile(name)
+}
+
+func TestIntrinsicCache_Sem_Caching(t *testing.T) {
+	osw, _, realDawnRoot := setupRunFileTest(t)
+	spy := newSpyFS(osw)
+
+	defPath := filepath.Join(realDawnRoot, "src/tint/intrinsics.def")
+	defContent := `type T`
+	createTemplateFile(t, osw, defPath, defContent)
+
+	cache := &intrinsicCache{
+		path:     "src/tint/intrinsics.def",
+		fsReader: spy,
+	}
+
+	// First call should parse and cache
+	sem1, err := cache.Sem()
+	require.NoError(t, err)
+	require.NotNil(t, sem1)
+	require.Equal(t, 1, spy.readFileCounts[defPath])
+
+	// Second call should return cached value without reading file
+	sem2, err := cache.Sem()
+	require.NoError(t, err)
+	require.Equal(t, sem1, sem2)
+	require.Equal(t, 1, spy.readFileCounts[defPath])
+}
+
+func TestIntrinsicCache_Sem_ReadFileError(t *testing.T) {
+	osw, _, realDawnRoot := setupRunFileTest(t)
+	spy := newSpyFS(osw)
+
+	defPath := filepath.Join(realDawnRoot, "src/tint/intrinsics.def")
+	// The file doesn't exist in osw, but also inject an error in spy
+	// to ensure testing of the ReadFile error propagation specifically.
+	expectedErr := filepath.ErrBadPattern // Just a distinctive error
+	spy.readFileErr = expectedErr
+
+	cache := &intrinsicCache{
+		path:     "src/tint/intrinsics.def",
+		fsReader: spy,
+	}
+
+	sem, err := cache.Sem()
+	require.Error(t, err)
+	require.Equal(t, expectedErr, err)
+	require.Nil(t, sem)
+	require.Equal(t, 1, spy.readFileCounts[defPath])
+}
+
+func TestIntrinsicCache_Sem_ParseError(t *testing.T) {
+	osw, _, realDawnRoot := setupRunFileTest(t)
+
+	defPath := filepath.Join(realDawnRoot, "src/tint/intrinsics.def")
+	createTemplateFile(t, osw, defPath, `£`)
+
+	cache := &intrinsicCache{
+		path:     "src/tint/intrinsics.def",
+		fsReader: osw,
+	}
+
+	sem, err := cache.Sem()
+	require.Error(t, err)
+	require.Nil(t, sem)
+	require.ErrorContains(t, err, "src/tint/intrinsics.def:1:1")
 }
