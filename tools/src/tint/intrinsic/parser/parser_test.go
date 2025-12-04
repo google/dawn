@@ -891,3 +891,92 @@ func TestParserError(t *testing.T) {
 		}
 	}
 }
+
+func TestParserWithImports(t *testing.T) {
+	type test struct {
+		location string
+		src      string
+		files    map[string]string
+		expect   ast.AST
+	}
+
+	for _, test := range []test{
+		{
+			fileutils.ThisLine(),
+			`import "foo"`,
+			map[string]string{"foo": "type T"},
+			ast.AST{
+				Types: []ast.TypeDecl{{Name: "T"}},
+			},
+		},
+		{
+			fileutils.ThisLine(),
+			`import "foo"`,
+			map[string]string{
+				"foo": `import "bar"`,
+				"bar": "type T",
+			},
+			ast.AST{
+				Types: []ast.TypeDecl{{Name: "T"}},
+			},
+		},
+	} {
+		fs := oswrapper.CreateFSTestOSWrapper()
+		for path, content := range test.files {
+			if err := fs.WriteFile(path, []byte(content), 0666); err != nil {
+				t.Errorf("%v: WriteFile(%v) error: %v", test.location, path, err)
+				continue
+			}
+		}
+
+		ast, err := parser.Parse(test.src, "root.txt", fs)
+		if err != nil {
+			t.Errorf("%v: Parse(%v) error: %v", test.location, test.src, err)
+			continue
+		}
+
+		if diff := cmp.Diff(test.expect, *ast, ignoreSource); diff != "" {
+			t.Errorf("%v: Parse(%v) diff:\n%v", test.location, test.src, diff)
+		}
+	}
+}
+
+func TestParserImportErrors(t *testing.T) {
+	type test struct {
+		src    string
+		files  map[string]string
+		expect string
+	}
+
+	for _, test := range []test{
+		{
+			`import "missing"`,
+			nil,
+			"root.txt:1:1 failed to load 'missing': open missing: file does not exist",
+		},
+		{
+			`import "broken"`,
+			map[string]string{"broken": "£"},
+			"broken:1:1: unexpected '£'",
+		},
+	} {
+		fs := oswrapper.CreateFSTestOSWrapper()
+		for path, content := range test.files {
+			if err := fs.WriteFile(path, []byte(content), 0666); err != nil {
+				t.Errorf("WriteFile(%v) error: %v", path, err)
+				continue
+			}
+		}
+
+		_, err := parser.Parse(test.src, "root.txt", fs)
+		if err == nil {
+			t.Errorf("Parse(%v) expected error, got nil", test.src)
+			continue
+		}
+
+		gotErr := err.Error()
+		if gotErr != test.expect {
+			t.Errorf("Parse(%v) error mismatch:\nGot:  %v\nWant: %v", test.src, gotErr, test.expect)
+		}
+	}
+}

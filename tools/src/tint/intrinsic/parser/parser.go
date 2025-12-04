@@ -182,13 +182,13 @@ func (p *parser) matcherDecl() ast.MatcherDecl {
 }
 
 func (p *parser) importDecl(out *ast.AST) {
-	p.expect(tok.Import, "import declaration")
+	t := p.expect(tok.Import, "import declaration")
 	path := p.string()
 
 	content, err := p.fsReader.ReadFile(path)
 	if err != nil {
 		p.err = fmt.Errorf("%v failed to load '%v': %w",
-			p.tokens[0].Source, path, err)
+			t.Source, path, err)
 		return
 	}
 
