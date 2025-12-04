@@ -132,6 +132,11 @@ struct Options {
 
     /// The set of options to work around driver issues
     struct Workarounds {
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
+        // structure in writer_fuzz.cc.                                                          //
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
         /// Set to `true` to scalarize max, min, and clamp builtins.
         bool scalarize_max_min_clamp = false;
 
@@ -150,6 +155,11 @@ struct Options {
 
     /// The set of options for things which are only available in certain shader models
     struct Extensions {
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
+        // structure in writer_fuzz.cc.                                                          //
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
         /// Set to `true` to generate polyfill for `dot4I8Packed` and `dot4U8Packed` builtins
         bool polyfill_dot_4x8_packed = false;
 
@@ -171,6 +181,11 @@ struct Options {
     /// @returns this Options
     Options& operator=(const Options&);
 
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
+    // structure in writer_fuzz.cc (if fuzzing is desired).                                  //
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
     /// The entry point to emit
     std::string entry_point_name = {};
 
@@ -189,7 +204,7 @@ struct Options {
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
 
-    /// Set to `true` to run the TruncateInterstageVariables transform.
+    /// Set to `true` to run truncate interstage variables during the shader IO transform.
     bool truncate_interstage_variables = false;
 
     /// Set to `true` to disable the polyfills on integer division and modulo.
