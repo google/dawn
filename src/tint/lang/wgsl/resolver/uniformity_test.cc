@@ -118,6 +118,8 @@ class BasicTest : public UniformityAnalysisTestBase,
         kFuncVarNonUniform,
         kFuncNonUniformRetVal,
         kRWStorageBuffer,
+        // Scope-dependent conditions:
+        kSubgroupId,
         // End of range marker:
         kEndOfConditionRange,
     };
@@ -135,6 +137,7 @@ class BasicTest : public UniformityAnalysisTestBase,
         kStorageBarrier,
         kTextureBarrier,
         kWorkgroupUniformLoad,
+        kLastNonFragmentFunction = kWorkgroupUniformLoad,
         kTextureSample,
         kTextureSampleBias,
         kTextureSampleCompare,
@@ -147,6 +150,7 @@ class BasicTest : public UniformityAnalysisTestBase,
         kFwidth,
         kFwidthCoarse,
         kFwidthFine,
+        kLastNonSubgroupFunction = kFwidthFine,
         // Subgroup functions:
         kSubgroupBallot,
         kSubgroupElect,
@@ -217,6 +221,8 @@ class BasicTest : public UniformityAnalysisTestBase,
                 return "func_nonuniform_retval() == 0";
             case kRWStorageBuffer:
                 return "rw == 0";
+            case kSubgroupId:
+                return "subgroup_id == 0";
             case kEndOfConditionRange:
                 return "<invalid>";
         }
@@ -343,10 +349,20 @@ class BasicTest : public UniformityAnalysisTestBase,
     }
 
     /// @returns true if `c` is a condition that may be non-uniform.
-    static bool MayBeNonUniform(Condition c) { return c > kLastUniformCondition; }
+    static bool MayBeNonUniform(Condition c, Function f) {
+        if (c == kSubgroupId && f > kLastNonSubgroupFunction) {
+            return false;
+        }
+        return c > kLastUniformCondition;
+    }
 
     /// @returns true if `f` is a function call that is required to be uniform.
     static bool RequiredToBeUniform(Function f) { return f > kLastNoRestrictionFunction; }
+
+    /// @returns true if `f` is incompatible to be tested with `c`.
+    static bool ShouldSkip(Function f, Condition c) {
+        return c == kSubgroupId && (f > kLastNonFragmentFunction && f <= kLastNonSubgroupFunction);
+    }
 
     /// Convert a test parameter pair of condition+function to a string that can be used as part of
     /// a test name.
@@ -374,6 +390,7 @@ class BasicTest : public UniformityAnalysisTestBase,
             CASE(kFuncVarNonUniform);
             CASE(kFuncNonUniformRetVal);
             CASE(kRWStorageBuffer);
+            CASE(kSubgroupId);
             case kEndOfConditionRange:
                 break;
         }
@@ -445,6 +462,23 @@ class BasicTest : public UniformityAnalysisTestBase,
 TEST_P(BasicTest, ConditionalFunctionCall) {
     auto condition = static_cast<Condition>(std::get<0>(GetParam()));
     auto function = static_cast<Function>(std::get<1>(GetParam()));
+
+    if (ShouldSkip(function, condition)) {
+        return;
+    }
+
+    std::string function_decl;
+    if (condition == kSubgroupId) {
+        function_decl = R"(
+@compute @workgroup_size(16)
+fn foo(@builtin(subgroup_id) subgroup_id : u32) {
+)";
+    } else {
+        function_decl = R"(
+fn foo() {
+)";
+    }
+
     std::string src = R"(
 enable subgroups;
 enable chromium_experimental_subgroup_matrix;
@@ -471,7 +505,7 @@ fn user_required_to_be_uniform() { workgroupBarrier(); }
 fn func_uniform_retval() -> i32 { return u; }
 fn func_nonuniform_retval() -> i32 { return rw; }
 
-fn foo() {
+)" + function_decl + R"(
   let let_uniform_rhs = 7;
   let let_nonuniform_rhs = rw;
 
@@ -491,10 +525,16 @@ fn foo() {
 }
 )";
 
-    bool should_pass = !(MayBeNonUniform(condition) && RequiredToBeUniform(function));
+    bool should_pass = !(MayBeNonUniform(condition, function) && RequiredToBeUniform(function));
     RunTest(src, should_pass);
     if (!should_pass) {
-        EXPECT_THAT(error_, ::testing::HasSubstr("must only be called from uniform control flow"));
+        if (function > kLastNonSubgroupFunction) {
+            EXPECT_THAT(error_, ::testing::HasSubstr(
+                                    "must only be called from subgroup uniform control flow"));
+        } else {
+            EXPECT_THAT(error_,
+                        ::testing::HasSubstr("must only be called from uniform control flow"));
+        }
     }
 }
 
@@ -11493,7 +11533,7 @@ fn foo() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:18:9 error: 'S' must only be called from uniform control flow
+              R"(test:18:9 error: 'S' must only be called from subgroup uniform control flow
     _ = S();
         ^^^
 
@@ -11524,7 +11564,7 @@ fn foo() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:10:9 error: 'ArrayType' must only be called from uniform control flow
+              R"(test:10:9 error: 'ArrayType' must only be called from subgroup uniform control flow
     _ = ArrayType();
         ^^^^^^^^^^^
 
@@ -13276,6 +13316,210 @@ test:15:11 note: reading from module-scope private variable 'non_uniform' may re
           ^^^^^^^^^^^
 )");
 }
+
+class SubgroupUniformityTest : public UniformityAnalysisTestBase,
+                               public ::testing::TestWithParam<int> {
+  public:
+    /// Enum for the function call statement.
+    enum Function {
+        // Subgroup functions:
+        kSubgroupBallot,
+        kSubgroupElect,
+        kSubgroupBroadcast,
+        kSubgroupBroadcastFirst,
+        kSubgroupShuffle,
+        kSubgroupShuffleXor,
+        kSubgroupShuffleUp,
+        kSubgroupShuffleDown,
+        kSubgroupAdd,
+        kSubgroupInclusiveAdd,
+        kSubgroupExclusiveAdd,
+        kSubgroupMul,
+        kSubgroupInclusiveMul,
+        kSubgroupExclusiveMul,
+        kSubgroupAnd,
+        kSubgroupOr,
+        kSubgroupXor,
+        kSubgroupMin,
+        kSubgroupMax,
+        kSubgroupAll,
+        kSubgroupAny,
+        kQuadBroadcast,
+        kQuadSwapX,
+        kQuadSwapY,
+        kQuadSwapDiagonal,
+        // End of range marker:
+        kEndOfFunctionRange,
+    };
+
+    /// @returns true if `f` is uniform in subgroup scope.
+    static bool UniformSubgroup(Function f) {
+        switch (f) {
+            case kSubgroupAdd:
+            case kSubgroupAll:
+            case kSubgroupAnd:
+            case kSubgroupAny:
+            case kSubgroupBallot:
+            case kSubgroupBroadcast:
+            case kSubgroupBroadcastFirst:
+            case kSubgroupMax:
+            case kSubgroupMin:
+            case kSubgroupMul:
+            case kSubgroupOr:
+            case kSubgroupXor:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /// Convert a function call to its string representation.
+    static std::string FunctionToStr(Function f) {
+        switch (f) {
+            case kSubgroupBallot:
+                return "subgroupBallot(true).x == 0";
+            case kSubgroupElect:
+                return "subgroupElect()";
+            case kSubgroupBroadcast:
+                return "subgroupBroadcast(1.0, 0) == 0";
+            case kSubgroupBroadcastFirst:
+                return "subgroupBroadcastFirst(1.0) == 0";
+            case kSubgroupShuffle:
+                return "subgroupShuffle(1.0, 0) == 0";
+            case kSubgroupShuffleXor:
+                return "subgroupShuffleXor(1.0, 0) == 0";
+            case kSubgroupShuffleUp:
+                return "subgroupShuffleUp(1.0, 1) == 0";
+            case kSubgroupShuffleDown:
+                return "subgroupShuffleDown(1.0, 1) == 0";
+            case kSubgroupAdd:
+                return "subgroupAdd(1.0) == 0";
+            case kSubgroupInclusiveAdd:
+                return "subgroupInclusiveAdd(1.0) == 0";
+            case kSubgroupExclusiveAdd:
+                return "subgroupExclusiveAdd(1.0) == 0";
+            case kSubgroupMul:
+                return "subgroupMul(1.0) == 0";
+            case kSubgroupInclusiveMul:
+                return "subgroupInclusiveMul(1.0) == 0";
+            case kSubgroupExclusiveMul:
+                return "subgroupExclusiveMul(1.0) == 0";
+            case kSubgroupAnd:
+                return "subgroupAnd(1) == 0";
+            case kSubgroupOr:
+                return "subgroupOr(1) == 0";
+            case kSubgroupXor:
+                return "subgroupXor(1) == 0";
+            case kSubgroupMin:
+                return "subgroupMin(1.0) == 0";
+            case kSubgroupMax:
+                return "subgroupMax(1.0) == 0";
+            case kSubgroupAll:
+                return "subgroupAll(true)";
+            case kSubgroupAny:
+                return "subgroupAny(true)";
+            case kQuadBroadcast:
+                return "quadBroadcast(1.0, 0) == 0";
+            case kQuadSwapX:
+                return "quadSwapX(1.0) == 0";
+            case kQuadSwapY:
+                return "quadSwapY(1.0) == 0";
+            case kQuadSwapDiagonal:
+                return "quadSwapDiagonal(1.0) == 0";
+            case kEndOfFunctionRange:
+                return "<invalid>";
+        }
+        return "<invalid>";
+    }
+
+    /// Convert a test parameter function to a string that can be used as part of
+    /// a test name.
+    static std::string ParamsToName(::testing::TestParamInfo<ParamType> params) {
+        Function f = static_cast<Function>(params.param);
+        std::string name;
+#define CASE(c)     \
+    case c:         \
+        name += #c; \
+        break
+
+        switch (f) {
+            CASE(kSubgroupBallot);
+            CASE(kSubgroupElect);
+            CASE(kSubgroupBroadcast);
+            CASE(kSubgroupBroadcastFirst);
+            CASE(kSubgroupShuffle);
+            CASE(kSubgroupShuffleXor);
+            CASE(kSubgroupShuffleUp);
+            CASE(kSubgroupShuffleDown);
+            CASE(kSubgroupAdd);
+            CASE(kSubgroupInclusiveAdd);
+            CASE(kSubgroupExclusiveAdd);
+            CASE(kSubgroupMul);
+            CASE(kSubgroupInclusiveMul);
+            CASE(kSubgroupExclusiveMul);
+            CASE(kSubgroupAnd);
+            CASE(kSubgroupOr);
+            CASE(kSubgroupXor);
+            CASE(kSubgroupMin);
+            CASE(kSubgroupMax);
+            CASE(kSubgroupAll);
+            CASE(kSubgroupAny);
+            CASE(kQuadBroadcast);
+            CASE(kQuadSwapX);
+            CASE(kQuadSwapY);
+            CASE(kQuadSwapDiagonal);
+            case kEndOfFunctionRange:
+                break;
+#undef CASE
+        }
+        return name;
+    }
+};
+
+TEST_P(SubgroupUniformityTest, Workgroup) {
+    auto function = static_cast<Function>(GetParam());
+
+    std::string src = R"(
+enable subgroups;
+
+fn foo() {
+  if ()" + FunctionToStr(function) +
+                      R"() {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_THAT(error_, ::testing::HasSubstr("must only be called from uniform control flow"));
+}
+
+TEST_P(SubgroupUniformityTest, Subgroup) {
+    auto function = static_cast<Function>(GetParam());
+
+    std::string src = R"(
+enable subgroups;
+
+fn foo() {
+  if ()" + FunctionToStr(function) +
+                      R"() {
+    _ = subgroupAny(true);
+  }
+}
+)";
+
+    const bool should_pass = UniformSubgroup(function);
+    RunTest(src, should_pass);
+    if (!should_pass) {
+        EXPECT_THAT(error_,
+                    ::testing::HasSubstr("must only be called from subgroup uniform control flow"));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
+                         SubgroupUniformityTest,
+                         ::testing::Range<int>(0, SubgroupUniformityTest::kEndOfFunctionRange),
+                         SubgroupUniformityTest::ParamsToName);
 
 }  // namespace
 }  // namespace tint::resolver

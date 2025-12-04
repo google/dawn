@@ -41,6 +41,7 @@
     X(kChromiumPrint, ChromiumPrint)                                               \
     X(kUniformBufferStandardLayout, UniformBufferStandardLayout)                   \
     X(kSubgroupId, SubgroupId)                                                     \
+    X(kSubgroupUniformity, SubgroupUniformity)                                     \
     /* ----------------- entries below are only for testing  ------------------ */ \
     X(kChromiumTestingUnimplemented, ChromiumTestingUnimplemented)                 \
     X(kChromiumTestingUnsafeExperimental, ChromiumTestingUnsafeExperimental)       \

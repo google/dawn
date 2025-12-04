@@ -179,7 +179,9 @@ bool Resolver::Resolve() {
         enabled_extensions_.Contains(wgsl::Extension::kChromiumDisableUniformityAnalysis);
     if (result && !disable_uniformity_analysis) {
         // Run the uniformity analysis, which requires a complete semantic module.
-        if (!AnalyzeUniformity(b, dependencies_)) {
+        const bool subgroup_uniformity =
+            allowed_features_.features.count(wgsl::LanguageFeature::kSubgroupUniformity);
+        if (!AnalyzeUniformity(b, dependencies_, subgroup_uniformity)) {
             return false;
         }
     }
