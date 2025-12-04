@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -93,6 +94,7 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
         : DawnPerfTestWithParams(kNumDisptaches, /* allow many steps in flight */ 100) {}
     ~MatrixVectorMultiplyPerf() override = default;
 
+  protected:
     void SetUp() override;
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         mUsingF16 = false;
@@ -119,10 +121,17 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
         return requirements;
     }
 
+    uint64_t GetMaxStorageBufferBindingSizeNeeded() {
+        return BytesPerElement() * GetParam().mRows * GetParam().mCols;
+    }
+
     void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
                            dawn::utils::ComboLimits& required) override {
+        // Tests fail if the device can not be created so don't ask for more than the device
+        // supports.
+        uint64_t needed = GetMaxStorageBufferBindingSizeNeeded();
         required.maxStorageBufferBindingSize =
-            BytesPerElement() * GetParam().mRows * GetParam().mCols;
+            std::min(supported.maxStorageBufferBindingSize, needed);
     }
 
   private:
@@ -156,6 +165,9 @@ void MatrixVectorMultiplyPerf::SetUp() {
                           GetParam().mStoreType == StoreType::F32);
 
     DawnPerfTestWithParams<MatrixVectorMultiplyParams>::SetUp();
+
+    DAWN_TEST_UNSUPPORTED_IF(deviceLimits.maxStorageBufferBindingSize <
+                             GetMaxStorageBufferBindingSizeNeeded());
 
     // Unoptimized variant too slow for bots.
     // Unskip locally with flag --run-suppressed-tests.
