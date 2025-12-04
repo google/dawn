@@ -511,7 +511,7 @@ MaybeError ValidateColorAttachmentDepthSlice(const TextureViewBase* attachment,
     }
 
     DAWN_INVALID_IF(depthSlice == wgpu::kDepthSliceUndefined,
-                    "depthSlice (%u) for a 3D attachment (%s) is undefined.", depthSlice,
+                    "depthSlice is required for a 3D attachment (%s), but it is undefined.",
                     attachment);
 
     const Extent3D& attachmentSize = attachment->GetSingleSubresourceVirtualSize();
