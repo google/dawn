@@ -53,16 +53,16 @@ class SharedFence final : public SharedFenceBase {
         StringView label,
         const SharedFenceVkSemaphoreZirconHandleDescriptor* descriptor);
 
-    const dawn::utils::SystemHandle& GetHandle() const;
+    const utils::SystemHandle& GetHandle() const;
 
   private:
-    SharedFence(Device* device, StringView label, dawn::utils::SystemHandle handle);
+    SharedFence(Device* device, StringView label, utils::SystemHandle handle);
     void DestroyImpl() override;
 
     MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;
 
     wgpu::SharedFenceType mType;
-    dawn::utils::SystemHandle mHandle;
+    utils::SystemHandle mHandle;
 };
 
 }  // namespace dawn::native::vulkan

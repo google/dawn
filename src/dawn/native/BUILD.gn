@@ -553,6 +553,8 @@ source_set("sources") {
       defines += [ "DAWN_USE_BUILT_DXC" ]
       data_deps += [ "$dawn_root/third_party/gn/dxc:copy_dxil_dll" ]
     }
+    include_dirs += [ "$dawn_root/third_party/renderdoc" ]
+    defines += [ "DAWN_ENABLE_RENDERDOC" ]
     libs += [ "dxguid.lib" ]
     sources += [
       "d3d12/BackendD3D12.cpp",
@@ -979,16 +981,6 @@ source_set("sources") {
     }
     if (dawn_enable_spirv_validation) {
       defines += [ "DAWN_ENABLE_SPIRV_VALIDATION" ]
-    }
-
-    # These backends can make use of RenderDoc's API
-    if (dawn_enable_d3d12 || dawn_enable_vulkan) {
-      defines += [ "DAWN_ENABLE_RENDERDOC" ]
-      include_dirs += [ "$dawn_root/third_party/renderdoc" ]
-      sources += [
-        "utils/RenderDoc.cpp",
-        "utils/RenderDoc.h",
-      ]
     }
   }
 }

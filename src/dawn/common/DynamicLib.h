@@ -57,7 +57,6 @@ class DynamicLib {
     bool Open(const std::string& filename,
               std::span<const std::string> searchPaths,
               std::string* error = nullptr);
-    bool OpenLoaded(const std::string& filename, std::string* error = nullptr);
     void Close();
 
     void* GetProc(const std::string& procName, std::string* error = nullptr) const;
@@ -73,7 +72,6 @@ class DynamicLib {
 
   private:
     void* mHandle = nullptr;
-    bool mNeedsClose = false;
 };
 
 }  // namespace dawn

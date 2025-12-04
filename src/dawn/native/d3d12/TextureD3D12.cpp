@@ -55,7 +55,10 @@
 #include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn/native/d3d12/TextureCopySplitter.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
-#include "dawn/native/utils/RenderDoc.h"
+
+#if defined(DAWN_ENABLE_RENDERDOC)
+#include "renderdoc/api/app/renderdoc_app.h"
+#endif
 
 namespace dawn::native::d3d12 {
 
@@ -177,6 +180,28 @@ D3D12_SHADER_COMPONENT_MAPPING D3D12ComponentSwizzle(wgpu::ComponentSwizzle swiz
     }
 }
 
+#if defined(DAWN_ENABLE_RENDERDOC)
+// Keep these versions in sync
+using RenderDocApiType = RENDERDOC_API_1_1_2;
+constexpr auto kRenderDocApiVersion = eRENDERDOC_API_Version_1_1_2;
+RenderDocApiType* GetRenderDocApi(Device* device) {
+    // Use an immediately invoked lambda assigned to a static to ensure function is called only once
+    static RenderDocApiType* renderDocApi = [&]() -> RenderDocApiType* {
+        if (device->IsToggleEnabled(Toggle::EnableRenderDocProcessInjection)) {
+            // See if RenderDoc has injected its DLL into the current process
+            if (HMODULE mod = GetModuleHandleA("renderdoc.dll")) {
+                void* api = nullptr;
+                auto GetApiFunc = (pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
+                GetApiFunc(kRenderDocApiVersion, &api);
+                DAWN_ASSERT(api);
+                return reinterpret_cast<RenderDocApiType*>(api);
+            }
+        }
+        return nullptr;
+    }();
+    return renderDocApi;
+}
+#endif
 }  // namespace
 
 // static
@@ -451,7 +476,7 @@ void Texture::NotifySwapChainPresent() {
     // For RenderDoc, we expect the user to enable and use process injection to inject RenderDoc
     // into the GPU process at startup. We start capturing all frames right away. The user has
     // to kill the process or stop it from rendering (e.g. close or change tabs in Chrome).
-    if (auto renderDocApi = dawn::native::utils::GetRenderDocApi(device)) {
+    if (RenderDocApiType* renderDocApi = GetRenderDocApi(device)) {
         // We signal the end of the current frame and the start of the next.
         // This means we miss capturing the very first frame.
         renderDocApi->EndFrameCapture(device->GetD3D12Device(), NULL);

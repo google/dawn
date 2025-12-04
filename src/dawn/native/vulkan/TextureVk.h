@@ -109,10 +109,6 @@ class Texture : public TextureBase {
 
     void SetLabelHelper(const char* prefix);
 
-    void NotifySwapChainPresent();
-
-    void SetIsExternalSwapchainTexture(bool isSwapChainTexture);
-
     // Dawn API
     void SetLabelImpl() override;
 
@@ -170,8 +166,6 @@ class Texture : public TextureBase {
 
     SubresourceStorage<TextureSyncInfo> mSubresourceLastSyncInfos;
     VkImage mHandle = VK_NULL_HANDLE;
-
-    bool mIsExternalSwapChainTexture = false;
 };
 
 // A texture created and fully owned by Dawn. Typically the result of device.CreateTexture.
