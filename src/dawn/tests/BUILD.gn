@@ -85,6 +85,12 @@ if (!build_with_chromium) {
       "${googletest_dir}/googlemock/include",
       "${googletest_dir}/googletest/include",
     ]
+    if (dawn_standalone && is_clang) {
+      cflags = [
+        # gmock emits deprecated-copy-dtor warnings when using ::testing::Combine
+        "-Wno-deprecated-copy-dtor",
+      ]
+    }
   }
 
   static_library("gmock") {

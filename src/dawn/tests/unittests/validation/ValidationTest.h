@@ -212,7 +212,7 @@ class ValidationTest : public testing::Test {
     bool mExpectDestruction = false;
 };
 
-template <typename T>
-class ValidationTestWithParam : public ValidationTest, public testing::WithParamInterface<T> {};
+template <typename T, typename Base = ValidationTest>
+class ValidationTestWithParam : public Base, public testing::WithParamInterface<T> {};
 
 #endif  // SRC_DAWN_TESTS_UNITTESTS_VALIDATION_VALIDATIONTEST_H_
