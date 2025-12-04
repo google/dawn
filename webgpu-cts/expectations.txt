@@ -105,6 +105,8 @@
 
 # Pixel 4 timeouts
 crbug.com/407076121 [ android-pixel-4 ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
+crbug.com/448716473 [ android-pixel-4 ] webgpu:api,validation,buffer,mapping:gc_behavior,mapAsync:* [ Skip ]
+crbug.com/448716479 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,quadSwap:*;op="quadSwapX";* [ Skip ]
 
 # Pixel 6 timeouts
 crbug.com/407076121 [ android-pixel-6 ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
@@ -114,6 +116,38 @@ crbug.com/407076121 [ intel linux ] webgpu:shader,execution,limits:const_array_e
 
 # SharedWorker is not available on Android
 crbug.com/42241436 [ android webgpu-shared-worker ] * [ Skip ]
+
+# Workgroup memory zero-init failures on Qualcomm GPUs.
+# Fixed on newer Qualcomm drivers.
+crbug.com/42240969 [ android-r qualcomm ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Skip ]
+crbug.com/42240969 [ android-chromium android-pixel-4 android-r angle-opengles graphite-disabled mobile qualcomm target-cpu-32 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Skip ]
+
+# Driver code generation errors that cannot be trivially polyfilled
+crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:* [ Skip ]
+crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:* [ Skip ]
+crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:* [ Skip ]
+crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:* [ Skip ]
+crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicStore:* [ Skip ]
+crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:* [ Skip ]
+crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:* [ Skip ]
+
+# Atomics tests fail with workgroupSize=2 on Android Arm (Pixel 6)
+crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
+crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
+crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=*;mapId="remap";scalarType="*" [ Skip ]
+crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicStore:store_workgroup_basic:workgroupSize=2;dispatchSize=*;mapId="passthrough";scalarType="*" [ Skip ]
+crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
+crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=*;mapId="remap";scalarType="*" [ Skip ]
+crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
+crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
+crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=*;mapId="remap";scalarType="*" [ Skip ]
+crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicStore:store_workgroup_basic:workgroupSize=2;dispatchSize=*;mapId="passthrough";scalarType="*" [ Skip ]
+crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
+crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=*;mapId="remap";scalarType="*" [ Skip ]
+
+# Mac AMD does not correctly respect lodMinClamp/lodMaxClamp
+crbug.com/409266267 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:* [ Skip ]
+
 
 ################################################################################
 # Temporary Skip Expectations
@@ -312,11 +346,6 @@ crbug.com/407109048 [ arm ] webgpu:api,validation,capability_checks,limits,maxBu
 crbug.com/41489034 [ dawn-backend-validation intel ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:format:* [ Skip ]
 crbug.com/41489034 [ dawn-backend-validation intel ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:* [ Skip ]
 
-# Workgroup memory zero-init failures on Qualcomm GPUs.
-# Fixed on newer Qualcomm drivers.
-crbug.com/42240969 [ android qualcomm ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Skip ]
-crbug.com/42240969 [ android-chromium android-pixel-4 android-r angle-opengles graphite-disabled mobile qualcomm target-cpu-32 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Skip ]
-
 ################################################################################
 # Triaged or Manually-Added Flakes and Failures
 ################################################################################
@@ -357,15 +386,6 @@ crbug.com/42240847 [ qualcomm ] webgpu:api,operation,command_buffer,queries,occl
 
 # Failures due to Windows/NVIDIA driver upgrade
 crbug.com/42241352 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 win10 ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ Failure ]
-
-# Driver code generation errors that cannot be trivially polyfilled
-crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:* [ Skip ]
-crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:* [ Skip ]
-crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:* [ Skip ]
-crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:* [ Skip ]
-crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicStore:* [ Skip ]
-crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:* [ Skip ]
-crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:* [ Skip ]
 
 crbug.com/42241372 [ android-14 android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Failure ]
 
@@ -423,19 +443,6 @@ crbug.com/42240846 [ android-t ] webgpu:api,operation,vertex_state,index_format:
 crbug.com/42240846 [ android-t ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="point-list" [ Failure ]
 crbug.com/42240846 [ android-t ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="triangle-list" [ Failure ]
 
-# Atomics tests fail with workgroupSize=2 on Android Arm (Pixel 6)
-crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
-crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
-crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=*;mapId="remap";scalarType="*" [ Skip ]
-crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicStore:store_workgroup_basic:workgroupSize=2;dispatchSize=*;mapId="passthrough";scalarType="*" [ Skip ]
-crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
-crbug.com/42251024 [ android-14 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=*;mapId="remap";scalarType="*" [ Skip ]
-crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
-crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
-crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=*;mapId="remap";scalarType="*" [ Skip ]
-crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicStore:store_workgroup_basic:workgroupSize=2;dispatchSize=*;mapId="passthrough";scalarType="*" [ Skip ]
-crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
-crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=*;mapId="remap";scalarType="*" [ Skip ]
 
 # Shader corr failing very flakily on Android ARM (Pixel 6) (too flaky for RetryOnFailure)
 crbug.com/41479550 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ Failure ]
@@ -792,9 +799,6 @@ crbug.com/461850861 [ android-14 android-pixel-6 arm dawn-no-backend-validation 
 # capability_checks,limits,maxInterStageShaderVariables failure on Android Qualcomm
 crbug.com/407159803 [ android-r qualcomm ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:* [ Failure ]
 
-# Mac AMD does not correctly respect lodMinClamp/lodMaxClamp
-crbug.com/409266267 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:* [ Skip ]
-
 crbug.com/407801079 [ dawn-no-backend-validation no-asan nvidia target-cpu-32 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ Failure ]
 
 # image_copy:mip_levels, BC formats dimension="3d", on AMD mac and Intel linux
@@ -1077,10 +1081,6 @@ crbug.com/459848489 [ android android-brya ] webgpu:api,validation,buffer,create
 crbug.com/459848489 [ android android-brya ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/459848489 [ android android-brya ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 crbug.com/459848489 [ android android-brya ] webgpu:shader,execution,expression,call,builtin,texture* [ RetryOnFailure ]
-
-# Pixel 4 timeouts
-crbug.com/448716473 [ android-pixel-4 ] webgpu:api,validation,buffer,mapping:gc_behavior,mapAsync:* [ Skip ]
-crbug.com/448716479 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,quadSwap:*;op="quadSwapX";* [ Skip ]
 
 # textureLoad failures on mac AMD for depth2plus-stencil8 format
 crbug.com/448397616 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:stage="f";format="depth24plus-stencil8";texture_type="texture_2d_array" [ Failure ]
