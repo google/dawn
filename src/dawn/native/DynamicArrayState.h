@@ -90,11 +90,14 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
 
     // Returns the various type ids that need to be updated in the metadata buffer before the next
     // use of the binding array.
-    struct BindingStateUpdate {
+    struct MetadataUpdate {
         uint32_t offset;
         uint32_t data;
     };
-    std::vector<BindingStateUpdate> AcquireDirtyBindingUpdates();
+    struct BindingUpdates {
+        std::vector<MetadataUpdate> metadataUpdates;
+    };
+    BindingUpdates AcquireDirtyBindingUpdates();
 
   private:
     bool mDestroyed = false;
@@ -107,7 +110,7 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     //
     // struct Metadata {
     //     arrayLength: u32,  //  Doesn't include the default bindings
-    //     bindings: array<u32>,  // `arrayLength` entries
+    //     bindings: array<u32>,  // One entry per binding, including default bindings
     // }
     Ref<BufferBase> mMetadataBuffer;
 

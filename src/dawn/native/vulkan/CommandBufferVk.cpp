@@ -231,50 +231,47 @@ class ImmediateConstantTracker : public T {
 
 // Updates a dynamic array metadata buffer by scheduling a copy for each u32 that needs to be
 // updated.
-// TODO(https://crbug.com/435317394): If we had a way to Dawn reentrantly now, we could use a
+// TODO(https://crbug.com/435317394): If we had a way to use Dawn reentrantly now, we could use a
 // compute shader to dispatch the updates instead of individual copies for each update, and move
 // that logic in the frontend to share it between backends. (also a single dispatch could update
 // multiple metadata buffers potentially).
 MaybeError UpdateDynamicArrayBindings(Device* device,
                                       CommandRecordingContext* recordingContext,
                                       DynamicArrayState* dynamicArray) {
-    std::vector<DynamicArrayState::BindingStateUpdate> updates =
-        dynamicArray->AcquireDirtyBindingUpdates();
-
-    if (updates.empty()) {
-        return {};
-    }
+    DynamicArrayState::BindingUpdates updates = dynamicArray->AcquireDirtyBindingUpdates();
 
     // Allocate enough space for all the data to modify and schedule the copies.
-    DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
-        sizeof(uint32_t) * updates.size(), kCopyBufferToBufferOffsetAlignment,
-        [&](UploadReservation reservation) -> MaybeError {
-            uint32_t* stagedData = static_cast<uint32_t*>(reservation.mappedPointer);
+    if (!updates.metadataUpdates.empty()) {
+        DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+            sizeof(uint32_t) * updates.metadataUpdates.size(), kCopyBufferToBufferOffsetAlignment,
+            [&](UploadReservation reservation) -> MaybeError {
+                uint32_t* stagedData = static_cast<uint32_t*>(reservation.mappedPointer);
 
-            // The metadata buffer will be copied to.
-            Buffer* metadataBuffer = ToBackend(dynamicArray->GetMetadataBuffer());
-            DAWN_ASSERT(metadataBuffer->IsInitialized());
-            metadataBuffer->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
+                // The metadata buffer will be copied to.
+                Buffer* metadataBuffer = ToBackend(dynamicArray->GetMetadataBuffer());
+                DAWN_ASSERT(metadataBuffer->IsInitialized());
+                metadataBuffer->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 
-            // Prepare the copies.
-            std::vector<VkBufferCopy> copies(updates.size());
-            for (auto [i, update] : Enumerate(updates)) {
-                stagedData[i] = update.data;
+                // Prepare the copies.
+                std::vector<VkBufferCopy> copies(updates.metadataUpdates.size());
+                for (auto [i, update] : Enumerate(updates.metadataUpdates)) {
+                    stagedData[i] = update.data;
 
-                VkBufferCopy copy{
-                    .srcOffset = reservation.offsetInBuffer + i * sizeof(uint32_t),
-                    .dstOffset = update.offset,
-                    .size = sizeof(uint32_t),
-                };
-                copies[i] = copy;
-            }
+                    VkBufferCopy copy{
+                        .srcOffset = reservation.offsetInBuffer + i * sizeof(uint32_t),
+                        .dstOffset = update.offset,
+                        .size = sizeof(uint32_t),
+                    };
+                    copies[i] = copy;
+                }
 
-            // Enqueue the copy commands all at once.
-            device->fn.CmdCopyBuffer(recordingContext->commandBuffer,
-                                     ToBackend(reservation.buffer)->GetHandle(),
-                                     metadataBuffer->GetHandle(), copies.size(), copies.data());
-            return {};
-        }));
+                // Enqueue the copy commands all at once.
+                device->fn.CmdCopyBuffer(recordingContext->commandBuffer,
+                                         ToBackend(reservation.buffer)->GetHandle(),
+                                         metadataBuffer->GetHandle(), copies.size(), copies.data());
+                return {};
+            }));
+    }
 
     return {};
 }

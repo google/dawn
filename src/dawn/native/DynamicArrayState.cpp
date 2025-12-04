@@ -206,7 +206,7 @@ DynamicArrayState::~DynamicArrayState() = default;
 
 MaybeError DynamicArrayState::Initialize() {
     // Create a storage buffer that will hold the shader-visible metadata for the dynamic array.
-    uint32_t metadataArrayLength = uint32_t(mAPISize);
+    uint32_t metadataArrayLength = uint32_t(mBindings.size());
     BufferDescriptor metadataDesc{
         .label = "binding array metadata",
         .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst,
@@ -222,7 +222,7 @@ MaybeError DynamicArrayState::Initialize() {
     // also apply the initial dirty bindings in this mapping instead of one the first use of the
     // dynamic binding array.
     uint32_t* data = static_cast<uint32_t*>(mMetadataBuffer->GetMappedRange(0, metadataDesc.size));
-    *data = metadataArrayLength;
+    *data = uint32_t(mAPISize);
     memset(data + 1, 0, metadataDesc.size - sizeof(uint32_t));
     DAWN_TRY(mMetadataBuffer->Unmap());
 
@@ -357,26 +357,20 @@ void DynamicArrayState::OnUnpinned(BindingIndex i, TextureBase* texture) {
     MarkStateDirty(i);
 }
 
-std::vector<DynamicArrayState::BindingStateUpdate> DynamicArrayState::AcquireDirtyBindingUpdates() {
+DynamicArrayState::BindingUpdates DynamicArrayState::AcquireDirtyBindingUpdates() {
     DAWN_ASSERT(!mDestroyed);
 
-    std::vector<BindingStateUpdate> updates;
+    BindingUpdates updates;
     for (BindingIndex dirtyIndex : mDirtyBindings) {
         DAWN_ASSERT(mBindingState[dirtyIndex].dirty);
         mBindingState[dirtyIndex].dirty = false;
-
-        // Don't update metadata for default bindings as that would be past the end of the metadata
-        // buffer that has space only for non-default bindings.
-        if (dirtyIndex >= mAPISize) {
-            continue;
-        }
 
         tint::ResourceType effectiveType = mBindingState[dirtyIndex].pinned
                                                ? mBindingState[dirtyIndex].typeId
                                                : tint::ResourceType::kEmpty;
 
         size_t offset = sizeof(uint32_t) * (uint32_t(dirtyIndex) + 1);
-        updates.push_back({
+        updates.metadataUpdates.push_back({
             .offset = uint32_t(offset),
             .data = uint32_t(effectiveType),
         });
