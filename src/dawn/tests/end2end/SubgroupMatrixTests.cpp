@@ -1170,8 +1170,6 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
             shader << "enable f16;\n";
         }
         shader << "\n";
-        // TODO(454652621): Remove this once Tint understands subgroup-scope uniformity.
-        shader << "diagnostic(off, chromium.subgroup_matrix_uniformity);";
         shader << "alias ComponentType = " << ComponentTypeToWgslType(config.componentType)
                << ";\n";
         shader << "alias ResultComponentType = "
