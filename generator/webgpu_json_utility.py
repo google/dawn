@@ -80,6 +80,54 @@ def is_other_reference_valid(ref, valid_names_normalized):
     else:
         return cleaned_ref.lower() in valid_names_normalized
 
+
+def log_warning(log_file, message):
+    """Appends a warning message to a specified log file."""
+    if log_file:
+        log_file.write(f"WARNING: {message}\n")
+
+
+def check_and_log_incomplete_docs(log_file,
+                                  item_name,
+                                  item_type,
+                                  item_parts,
+                                  part_docs_map,
+                                  part_type='arguments'):
+    """
+    Checks for incomplete documentation for an item's parts (e.g., arguments,
+    members, entries) and logs warnings.
+    """
+    if not item_parts:
+        return True
+
+    missing_parts = []
+    found_parts = []
+    for part in item_parts:
+        part_name_snake = part.name.snake_case()
+
+        part_doc = part_docs_map.get(part_name_snake)
+
+        if not part_doc or not part_doc.strip():
+            missing_parts.append(part.name.get())
+        else:
+            found_parts.append(part.name.get())
+
+    if missing_parts:
+        if not found_parts:
+            log_warning(
+                log_file,
+                f"Missing documentation for all {part_type} of {item_type} '{item_name}'."
+            )
+        else:
+            log_warning(
+                log_file,
+                f"Missing documentation for {part_type} of {item_type} '{item_name}': {', '.join(missing_parts)}. "
+                f"(Found for: {', '.join(found_parts)})")
+        return False
+
+    return True
+
+
 def clean_doc_for_kotlin(doc,
                          valid_names_normalized,
                          enum_names,
@@ -369,6 +417,17 @@ def build_doc_map(by_category, json_data, params=None):
         "constants": process_constant,
     }
 
+    # Create a lookup for API objects from by_category
+    by_category_lookups = {}
+    for category, items in by_category.items():
+        data_category = category_map.get(category)
+        if not data_category:
+            continue
+        name_to_item_map = {}
+        for item in items:
+            name_to_item_map[item.name.get()] = item
+        by_category_lookups[data_category] = name_to_item_map
+
     # Iterate through categorized API data and extract docs from corresponding JSON data.
     for category, items in by_category.items():
         data_category = category_map.get(category)
@@ -381,9 +440,91 @@ def build_doc_map(by_category, json_data, params=None):
             if data_item:
                 handler(data_category, item.name.get(), data_item)
 
+    doc_warn_log_filepath = params.get("doc_warn_log_filepath")
+    if doc_warn_log_filepath:
+        with open(doc_warn_log_filepath, 'w') as log_f:
+            # Log incomplete documentation by iterating through the generated doc_map.
+            log_incomplete_documentation(log_f, doc_map, by_category_lookups)
+
     return cleanup_doc_map(doc_map=doc_map,
                            by_category=by_category,
                            params=params)
+
+
+def log_incomplete_documentation(log_file, doc_map, by_category_lookups):
+    """
+    Logs incomplete documentation by iterating through the generated doc_map.
+    """
+    for data_category, items_in_doc_map in doc_map.items():
+        name_to_obj = by_category_lookups.get(data_category)
+        if not name_to_obj:
+            continue
+        for item_name, doc_node in items_in_doc_map.items():
+            item_obj = name_to_obj.get(item_name)
+            if not item_obj:
+                continue
+
+            # Check for the main documentation of the item.
+            is_main_doc_missing = False
+            if data_category == 'constants':
+                if not doc_node or not doc_node.strip():
+                    is_main_doc_missing = True
+            elif isinstance(doc_node, dict):
+                if not doc_node.get('doc') or not doc_node.get('doc').strip():
+                    is_main_doc_missing = True
+
+            if is_main_doc_missing:
+                log_warning(
+                    log_file,
+                    f"Missing main documentation for {data_category} '{item_name}'."
+                )
+
+            # Check for documentation of item parts (members, arguments, etc.).
+            if data_category == 'structs':
+                check_and_log_incomplete_docs(log_file,
+                                              item_name,
+                                              data_category,
+                                              item_obj.members,
+                                              doc_node.get("members", {}),
+                                              part_type='members')
+            elif data_category in ['callbacks', 'functions']:
+                check_and_log_incomplete_docs(log_file,
+                                              item_name,
+                                              data_category,
+                                              item_obj.arguments,
+                                              doc_node.get("args", {}),
+                                              part_type='arguments')
+            elif data_category == 'objects':
+                method_docs = doc_node.get("methods", {})
+                if not method_docs and item_obj.methods:
+                    log_warning(
+                        log_file,
+                        f"Missing documentation for all methods of object '{item_name}'."
+                    )
+                    continue
+
+                for method_obj in item_obj.methods:
+                    method_name_camel = method_obj.name.camelCase()
+                    method_name_snake = method_obj.name.snake_case()
+                    method_full_name = f"{item_name}.{method_name_camel}"
+
+                    doc_for_method = method_docs.get(method_name_snake)
+
+                    if not doc_for_method or not doc_for_method.get(
+                            'doc') or not doc_for_method.get('doc').strip():
+                        log_warning(
+                            log_file,
+                            f"Missing main documentation for method '{method_full_name}'."
+                        )
+
+                    if doc_for_method:
+                        check_and_log_incomplete_docs(log_file,
+                                                      method_full_name,
+                                                      "method",
+                                                      method_obj.arguments,
+                                                      doc_for_method.get(
+                                                          "args", {}),
+                                                      part_type='arguments')
 
 
 def cleanup_doc_map(doc_map, by_category, params):

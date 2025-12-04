@@ -856,7 +856,10 @@ def analyze_converter_usage(params_kotlin):
                 mark_k2n(arg.type)
 
 
-def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
+def compute_kotlin_params(loaded_json,
+                          kotlin_json,
+                          webgpu_json_data=None,
+                          doc_warn_log_file_path=None):
     params_kotlin = parse_json(loaded_json, enabled_tags=['art'])
     params_kotlin['kotlin_package'] = kotlin_json['kotlin_package']
     params_kotlin['jni_primitives'] = kotlin_json['jni_primitives']
@@ -1071,6 +1074,7 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
         'language': 'kotlin',
         'kdocs_blocklist': kotlin_json['kdocs_blocklist'],
         'kdocs_replacements': kotlin_json['kdocs_replacements'],
+        'doc_warn_log_filepath': doc_warn_log_file_path,
     }
     params_kotlin['kdocs'] = build_doc_map(by_category=by_category,
                                            json_data=webgpu_json_data,
@@ -1435,6 +1439,14 @@ class MultiGeneratorFromDawnJSON(Generator):
             'Comma-separated subset of targets to output. Available targets: '
             + ', '.join(allowed_targets))
 
+        parser.add_argument(
+            '--doc-warn-log-file',
+            default=None,
+            type=str,
+            help=
+            'Path to output file for documentation warnings; ignored if not set.',
+        )
+
     def get_outputs(self, args):
         with open(args.dawn_json) as f:
             loaded_json = json.loads(f.read())
@@ -1454,6 +1466,8 @@ class MultiGeneratorFromDawnJSON(Generator):
         webgpu_json_data = None
         if args.webgpu_json:
             webgpu_json_data = load_json_data(args.webgpu_json)
+
+        doc_warn_log_file_path = args.doc_warn_log_file
 
         renders = []
         imported_templates = []
@@ -1798,7 +1812,8 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'kotlin' in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json,
-                                                  webgpu_json_data)
+                                                  webgpu_json_data,
+                                                  doc_warn_log_file_path)
             kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
             jni_name = params_kotlin['jni_name']
 
@@ -1869,7 +1884,8 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if "jni" in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json,
-                                                  webgpu_json_data)
+                                                  webgpu_json_data,
+                                                  doc_warn_log_file_path)
 
             imported_templates += [
                 "art/api_jni_types.cpp",
