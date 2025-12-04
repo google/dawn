@@ -71,13 +71,16 @@ WireResult Server::DoQueueWriteBuffer(Known<WGPUQueue> queue,
         return WireResult::FatalError;
     }
 
-    MemoryTransferService::WriteHandle* writeHandle = nullptr;
+    MemoryTransferService::WriteHandle* writeHandlePtr = nullptr;
     // Deserialize metadata produced from the client to create a companion server handle.
     if (!mMemoryTransferService->DeserializeWriteHandle(
             writeHandleCreateInfo, static_cast<size_t>(writeHandleCreateInfoLength),
-            &writeHandle)) {
+            &writeHandlePtr)) {
         return WireResult::FatalError;
     }
+
+    // Ensure the WriteHandle gets properly cleaned up when the function returns.
+    std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle(writeHandlePtr);
 
     // Try first to use GetSourceData if the memory transfer service implements
     // it. If so, we can avoid a copy.
@@ -119,13 +122,16 @@ WireResult Server::DoQueueWriteTexture(Known<WGPUQueue> queue,
         return WireResult::FatalError;
     }
 
-    MemoryTransferService::WriteHandle* writeHandle = nullptr;
+    MemoryTransferService::WriteHandle* writeHandlePtr = nullptr;
     // Deserialize metadata produced from the client to create a companion server handle.
     if (!mMemoryTransferService->DeserializeWriteHandle(
             writeHandleCreateInfo, static_cast<size_t>(writeHandleCreateInfoLength),
-            &writeHandle)) {
+            &writeHandlePtr)) {
         return WireResult::FatalError;
     }
+
+    // Ensure the WriteHandle gets properly cleaned up when the function returns.
+    std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle(writeHandlePtr);
 
     // Try first to use GetSourceData if the memory transfer service implements
     // it. If so, we can avoid a copy.
