@@ -503,7 +503,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_IndexLessThanConstant_DecByOne) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1338,7 +1338,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_OneMinusIndex) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Subtract<i32>(1_i, b.Load(idx)));
+            b.Store(idx, b.Subtract(1_i, b.Load(idx)));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1661,7 +1661,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_IncThenDec) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.Store(idx, b.Subtract<u32>(b.Add(b.Load(idx), 1_u), 1_u));
+            b.Store(idx, b.Subtract(b.Add(b.Load(idx), 1_u), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2722,7 +2722,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_ConstantLessThanEqualIndex_DecByOne_I32) {
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2793,7 +2793,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_ConstantLessThanEqualIndex_DecByOne_U32) {
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2864,7 +2864,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_LowestValueLessThanEqualIndex_DecByOne
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2935,7 +2935,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_LowestValueLessThanEqualIndex_DecByOne
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3006,7 +3006,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_IndexGreaterThanEqualConstant_DecByOne_I32) {
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3077,7 +3077,7 @@ TEST_F(IR_LoopAnalysisTest, Finite_IndexGreaterThanEqualConstant_DecByOne_U32) {
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3148,7 +3148,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_IndexGreaterThanEqualLowestValue_DecBy
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3219,7 +3219,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_IndexGreaterThanEqualLowestValue_DecBy
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);

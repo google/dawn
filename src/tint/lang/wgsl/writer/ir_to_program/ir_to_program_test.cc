@@ -1085,7 +1085,7 @@ TEST_F(IRToProgramTest, BinaryOp_Subtract) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.Subtract(ty.i32(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Subtract(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -1935,7 +1935,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Decrement) {
 
     b.Append(fn->Block(), [&] {
         auto* v = Var<function, i32>("v");
-        b.Store(v, b.Subtract(ty.i32(), b.Load(v), 1_i));
+        b.Store(v, b.Subtract(b.Load(v), 1_i));
 
         b.Return(fn);
     });
@@ -1971,7 +1971,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Subtract) {
 
     b.Append(fn->Block(), [&] {
         auto* v = Var<function, i32>("v");
-        b.Store(v, b.Subtract(ty.i32(), b.Load(v), 8_i));
+        b.Store(v, b.Subtract(b.Load(v), 8_i));
 
         b.Return(fn);
     });

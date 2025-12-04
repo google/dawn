@@ -309,7 +309,7 @@ struct State {
 
                     // Use the `arrayLength` builtin to get the limit of a runtime-sized array.
                     auto* length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, object);
-                    return b.Subtract(ty.u32(), length, b.Constant(1_u))->Result();
+                    return b.Subtract(length, b.Constant(1_u))->Result();
                 });
 
             // If there's a dynamic limit that needs enforced, clamp the index operand.
@@ -335,7 +335,7 @@ struct State {
         Value* clamped_level = nullptr;
         auto clamp_level = [&](uint32_t idx) {
             auto* num_levels = b.Call(ty.u32(), core::BuiltinFn::kTextureNumLevels, args[0]);
-            auto* limit = b.Subtract(ty.u32(), num_levels, 1_u);
+            auto* limit = b.Subtract(num_levels, 1_u);
             clamped_level =
                 b.Call(ty.u32(), core::BuiltinFn::kMin, CastToU32(args[idx]), limit)->Result();
             call->SetOperand(CoreBuiltinCall::kArgsOperandOffset + idx, clamped_level);
@@ -349,7 +349,7 @@ struct State {
             auto* dims = clamped_level ? b.Call(type, core::BuiltinFn::kTextureDimensions, args[0],
                                                 clamped_level)
                                        : b.Call(type, core::BuiltinFn::kTextureDimensions, args[0]);
-            auto* limit = b.Subtract(type, dims, one);
+            auto* limit = b.Subtract(dims, one);
             call->SetOperand(
                 CoreBuiltinCall::kArgsOperandOffset + idx,
                 b.Call(type, core::BuiltinFn::kMin, CastToU32(args[idx]), limit)->Result());
@@ -358,7 +358,7 @@ struct State {
         // Helper for clamping the array index.
         auto clamp_array_index = [&](uint32_t idx) {
             auto* num_layers = b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, args[0]);
-            auto* limit = b.Subtract(ty.u32(), num_layers, 1_u);
+            auto* limit = b.Subtract(num_layers, 1_u);
             call->SetOperand(
                 CoreBuiltinCall::kArgsOperandOffset + idx,
                 b.Call(ty.u32(), core::BuiltinFn::kMin, CastToU32(args[idx]), limit)->Result());

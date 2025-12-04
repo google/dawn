@@ -365,7 +365,7 @@ struct State {
             auto* one =
                 b.MatchWidth(is_f16 ? b.ConstantValue(1_h) : b.ConstantValue(1_f), result_ty);
             auto* mul = b.Multiply(args[0], args[0]);
-            auto* sub = b.Subtract(result_ty, mul, one);
+            auto* sub = b.Subtract(mul, one);
             auto* sqrt = b.Call(result_ty, core::BuiltinFn::kSqrt, sub);
             auto* add = b.Add(args[0], sqrt);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kLog, add);
@@ -406,7 +406,7 @@ struct State {
             auto* half =
                 b.MatchWidth(is_f16 ? b.ConstantValue(0.5_h) : b.ConstantValue(0.5_f), result_ty);
             auto* one_plus_x = b.Add(one, args[0]);
-            auto* one_minus_x = b.Subtract(result_ty, one, args[0]);
+            auto* one_minus_x = b.Subtract(one, args[0]);
             auto* div = b.Divide(result_ty, one_plus_x, one_minus_x);
             auto* log = b.Call(result_ty, core::BuiltinFn::kLog, div);
             auto* mul = b.Multiply(log, half);
@@ -464,7 +464,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* original_value = b.Var(ty.ptr(function, type));
             original_value->SetInitializer(b.Zero(type));
-            auto* val = b.Subtract(type, b.Zero(type), args[1]);
+            auto* val = b.Subtract(b.Zero(type), args[1]);
             b.Call<hlsl::ir::BuiltinCall>(ty.void_(), BuiltinFn::kInterlockedAdd, args[0], val,
                                           original_value);
             b.LoadWithResult(call->DetachResult(), original_value)->Result();
@@ -1873,7 +1873,7 @@ struct State {
                     inst = b.Xor(ty.u32(), id, arg2);
                     break;
                 case core::BuiltinFn::kSubgroupShuffleUp:
-                    inst = b.Subtract(ty.u32(), id, arg2);
+                    inst = b.Subtract(id, arg2);
                     break;
                 case core::BuiltinFn::kSubgroupShuffleDown:
                     inst = b.Add(id, arg2);

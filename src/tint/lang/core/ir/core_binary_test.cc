@@ -266,7 +266,7 @@ TEST_F(IR_BinaryTest, CreateAdd) {
 }
 
 TEST_F(IR_BinaryTest, CreateSubtract) {
-    auto* inst = b.Subtract(mod.Types().i32(), 4_i, 2_i);
+    auto* inst = b.Subtract(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kSubtract);

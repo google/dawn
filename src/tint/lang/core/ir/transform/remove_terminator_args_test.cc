@@ -644,7 +644,7 @@ TEST_F(IR_RemoveTerminatorArgsTest, Loop_BreakIfWithTwoArgLists) {
         });
         b.Append(loop->Body(), [&] {
             // Use the parameters to make sure the uses get updated.
-            b.Subtract<f32>(param_a, 1_f);
+            b.Subtract(param_a, 1_f);
             b.Divide<i32>(param_b, 2_i);
 
             auto* if_ = b.If(true);

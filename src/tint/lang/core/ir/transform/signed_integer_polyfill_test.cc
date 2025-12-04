@@ -328,7 +328,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntSub_Scalar) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
-        auto* result = b.Subtract<i32>(lhs, rhs);
+        auto* result = b.Subtract(lhs, rhs);
         b.Return(func, result);
     });
 
@@ -366,7 +366,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Disabled_IntSub_Scalar) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
-        auto* result = b.Subtract<i32>(lhs, rhs);
+        auto* result = b.Subtract(lhs, rhs);
         b.Return(func, result);
     });
 

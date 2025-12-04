@@ -314,8 +314,7 @@ struct State {
                     // The variable is a struct, so subtract the byte offset of the array member.
                     auto* member = str->Members().Back();
                     array_type = member->Type()->As<core::type::Array>();
-                    array_size =
-                        b.Subtract<u32>(total_buffer_size, u32(member->Offset()))->Result();
+                    array_size = b.Subtract(total_buffer_size, u32(member->Offset()))->Result();
                 } else {
                     array_type = info.store_type->As<core::type::Array>();
                 }

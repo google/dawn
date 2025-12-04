@@ -886,25 +886,36 @@ class Builder {
                                 std::forward<RHS>(rhs));
     }
 
-    /// Creates an Subtract operation
-    /// @param type the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
+    /// Creates a Subtract operation
+    /// @param lhs the lhs of the subtract
+    /// @param rhs the rhs of the subtract
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBinary* Subtract(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(BinaryOp::kSubtract, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
-    }
-
-    /// Creates an Subtract operation
-    /// @tparam TYPE the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
-    /// @returns the operation
-    template <typename TYPE, typename LHS, typename RHS>
     ir::CoreBinary* Subtract(LHS&& lhs, RHS&& rhs) {
-        auto* type = ir.Types().Get<TYPE>();
-        return Subtract(type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        CheckForNonDeterministicEvaluation<LHS, RHS>();
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+
+        auto* lhs_type = lhs_value->Type();
+        auto* rhs_type = rhs_value->Type();
+
+        const core::type::Type* result_type = nullptr;
+        if (lhs_type->template Is<core::type::Matrix>()) {
+            result_type = lhs_type;
+        } else if (rhs_type->template Is<core::type::Matrix>()) {
+            result_type = rhs_type;
+        } else if (lhs_type->template Is<core::type::Vector>()) {
+            result_type = lhs_type;
+        } else if (rhs_type->template Is<core::type::Vector>()) {
+            result_type = rhs_type;
+        } else {
+            result_type = lhs_type;
+        }
+
+        return Append(ir.CreateInstruction<ir::CoreBinary>(
+            InstructionResult(result_type), BinaryOp::kSubtract, lhs_value, rhs_value));
     }
 
     /// Creates an Multiply operation

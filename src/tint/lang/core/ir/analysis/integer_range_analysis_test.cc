@@ -802,7 +802,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_MinusOne_sint)
         });
         b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Append(loop->Continuing(), [&] {
-            binary = b.Subtract<i32>(b.Load(idx), 1_i);
+            binary = b.Subtract(b.Load(idx), 1_i);
             b.Store(idx, binary);
             b.NextIteration(loop);
         });
@@ -853,7 +853,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_MinusOne_uint)
         });
         b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Append(loop->Continuing(), [&] {
-            binary = b.Subtract<u32>(b.Load(idx), 1_u);
+            binary = b.Subtract(b.Load(idx), 1_u);
             b.Store(idx, binary);
             b.NextIteration(loop);
         });
@@ -952,7 +952,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_TooManyInstruc
         b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Append(loop->Continuing(), [&] {
             auto* addx = b.Add(b.Load(idx), 1_u);
-            auto* minusx = b.Subtract<u32>(addx, 1_u);
+            auto* minusx = b.Subtract(addx, 1_u);
             b.Store(idx, minusx);
             b.NextIteration(loop);
         });
@@ -1208,7 +1208,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_MinusTwo) {
         b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Append(loop->Continuing(), [&] {
             // idx -= 2u
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 2_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 2_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1258,7 +1258,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_OneMinusLoopCo
         b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Append(loop->Continuing(), [&] {
             // idx = 1u - idx
-            b.Store(idx, b.Subtract<u32>(1_u, b.Load(idx)));
+            b.Store(idx, b.Subtract(1_u, b.Load(idx)));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1362,7 +1362,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_MinusNonConsta
         b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Append(loop->Continuing(), [&] {
             // idx -= end
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), end));
+            b.Store(idx, b.Subtract(b.Load(idx), end));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1659,7 +1659,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_in
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1810,7 +1810,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_in
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2035,7 +2035,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_LessThanEqu
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2110,7 +2110,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_LessThanEqu
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2186,7 +2186,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThan_co
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2262,7 +2262,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThan_co
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2490,7 +2490,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThanEqu
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2566,7 +2566,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThanEqu
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -2794,7 +2794,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_InstructionsOtherTha
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3283,7 +3283,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NonConstCompareWithI
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3421,7 +3421,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_ConstCompareWithNonI
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3751,7 +3751,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThan_Min_I
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3817,7 +3817,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Min_I32_GreaterThan_
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3883,7 +3883,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThan_Ma
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3949,7 +3949,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_I32_LessThan_Ind
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -5314,7 +5314,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThanEqual_cons
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -5385,7 +5385,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_GreaterThanEqual_init_eq
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -5461,7 +5461,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_GreaterThanEqual_init_eq
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -5537,7 +5537,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThanEqual_init_le
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -5608,7 +5608,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThanEqual_init_le
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -5901,7 +5901,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_GreaterThanEqual_m
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -5976,7 +5976,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_GreaterThanEqual_m
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -6335,7 +6335,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThan_constant_
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -6761,7 +6761,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_LessThanEqual_init_e
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -6836,7 +6836,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_LessThanEqual_init_e
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -6912,7 +6912,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThanEqual_init_L
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -6983,7 +6983,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThanEqual_init_L
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -7126,7 +7126,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_min_u32_add_1_LessThanEq
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -7201,7 +7201,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_min_i32_add_1_LessThanEq
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -7430,7 +7430,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -7502,7 +7502,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -7574,7 +7574,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -7796,7 +7796,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_equals
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -7867,7 +7867,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_equals
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -7938,7 +7938,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessTh
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -8009,7 +8009,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessTh
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -8294,7 +8294,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_Gre
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_i));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -8365,7 +8365,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_Gre
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -8436,7 +8436,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_constant_GreaterThan
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -8597,7 +8597,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithoutRange) {
         });
         b.Append(loop->Continuing(), [&] {
             // idx--
-            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -9753,7 +9753,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_U32) {
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
             // add = idx - local_id.x
-            subtract = b.Subtract<u32>(b.Load(idx), access_x);
+            subtract = b.Subtract(b.Load(idx), access_x);
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -9849,7 +9849,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_I32) {
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
-                subtract = b.Subtract<i32>(loadx, loady);
+                subtract = b.Subtract(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -9976,7 +9976,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_U32) {
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
-                subtract = b.Subtract<u32>(loadx, loady);
+                subtract = b.Subtract(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -10087,7 +10087,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Overflow_I32) {
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
             // subtract = idx - kSmallValue
-            subtract = b.Subtract<i32>(b.Load(idx), b.Constant(i32(kSmallValue)));
+            subtract = b.Subtract(b.Load(idx), b.Constant(i32(kSmallValue)));
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -10164,7 +10164,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_I32) {
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
             // subtract = idx - kLargeValue
-            subtract = b.Subtract<i32>(b.Load(idx), b.Constant(i32(kLargeValue)));
+            subtract = b.Subtract(b.Load(idx), b.Constant(i32(kLargeValue)));
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {

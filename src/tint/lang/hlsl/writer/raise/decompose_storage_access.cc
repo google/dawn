@@ -218,7 +218,7 @@ struct State {
 
             inst = b.Load(inst);
             if (offset > 0) {
-                inst = b.Subtract(ty.u32(), inst, u32(offset));
+                inst = b.Subtract(inst, u32(offset));
             }
             auto* div = b.Divide(ty.u32(), inst, u32(arr_ty->ImplicitStride()));
             call->Result()->ReplaceAllUsesWith(div->Result());
@@ -289,7 +289,7 @@ struct State {
             auto* original_value = b.Var(ty.ptr(function, type));
             original_value->SetInitializer(b.Zero(type));
 
-            auto* val = b.Subtract(type, b.Zero(type), args[1]);
+            auto* val = b.Subtract(b.Zero(type), args[1]);
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(
                 ty.void_(), BuiltinFn::kInterlockedAdd, var,
                 b.InsertConvertIfNeeded(type, OffsetToValue(offset)), val, original_value);

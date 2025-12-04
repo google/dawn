@@ -102,13 +102,13 @@ struct State {
             loop->Continuing()->Append(b.NextIteration(loop));
         }
         b.InsertBefore(loop->Continuing()->Front(), [&] {
-            auto* low_inc = b.Subtract<u32>(b.LoadVectorElement(idx, 0_u), 1_u);
+            auto* low_inc = b.Subtract(b.LoadVectorElement(idx, 0_u), 1_u);
             ir.SetName(low_inc->Result(), ir.symbols.New("tint_low_inc"));
             b.StoreVectorElement(idx, 0_u, low_inc);
 
             auto* carry = b.Convert<u32>(b.Equal(low_inc, u32::Highest()));
             ir.SetName(carry->Result(), ir.symbols.New("tint_carry"));
-            b.StoreVectorElement(idx, 1_u, b.Subtract<u32>(b.LoadVectorElement(idx, 1_u), carry));
+            b.StoreVectorElement(idx, 1_u, b.Subtract(b.LoadVectorElement(idx, 1_u), carry));
         });
     }
 };

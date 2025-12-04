@@ -1330,7 +1330,7 @@ class Impl {
             case core::BinaryOp::kAdd:
                 return builder_.Add(lhs, rhs);
             case core::BinaryOp::kSubtract:
-                return builder_.Subtract(ty, lhs, rhs);
+                return builder_.Subtract(lhs, rhs);
             case core::BinaryOp::kMultiply:
                 return builder_.Multiply(lhs, rhs);
             case core::BinaryOp::kDivide:

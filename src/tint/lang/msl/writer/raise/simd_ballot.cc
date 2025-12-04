@@ -143,11 +143,9 @@ struct State {
         //   tint_subgroup_size_mask[1u] = low;
         b.InsertBefore(ep->Block()->Front(), [&] {
             auto* gt32 = b.GreaterThan(subgroup_size, u32(32));
-            auto* high_mask =
-                b.ShiftRight<u32>(u32::Highest(), b.Subtract<u32>(u32(32), subgroup_size));
+            auto* high_mask = b.ShiftRight<u32>(u32::Highest(), b.Subtract(u32(32), subgroup_size));
             auto* high = b.Call<u32>(core::BuiltinFn::kSelect, high_mask, u32::Highest(), gt32);
-            auto* low_mask =
-                b.ShiftRight<u32>(u32::Highest(), b.Subtract<u32>(u32(64), subgroup_size));
+            auto* low_mask = b.ShiftRight<u32>(u32::Highest(), b.Subtract(u32(64), subgroup_size));
             auto* low = b.Call<u32>(core::BuiltinFn::kSelect, u32(0), low_mask, gt32);
             b.StoreVectorElement(subgroup_size_mask, u32(0), high);
             b.StoreVectorElement(subgroup_size_mask, u32(1), low);

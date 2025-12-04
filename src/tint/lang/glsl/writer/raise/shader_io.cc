@@ -207,7 +207,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             auto* z = builder.Swizzle(ty.f32(), value, {2});
             auto* w = builder.Swizzle(ty.f32(), value, {3});
             auto* mul = builder.Multiply(2_f, z);
-            auto* new_z = builder.Subtract(ty.f32(), mul, w);
+            auto* new_z = builder.Subtract(mul, w);
             value = builder.Construct(ty.vec4<f32>(), x, new_y, new_z, w)->Result();
         }
 

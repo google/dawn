@@ -422,7 +422,7 @@ struct State {
             auto* arg1 = builtin->Args()[1];
             if (arg0->Type()->Is<core::type::Scalar>()) {
                 // Calls to `distance` with a scalar argument are replaced with `abs(a - b)`.
-                auto* sub = b.Subtract(builtin->Result()->Type(), arg0, arg1);
+                auto* sub = b.Subtract(arg0, arg1);
                 b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kAbs, sub);
             } else {
                 b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),

@@ -296,7 +296,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         auto* max = builder.Load(builder.Access<ptr<immediate, f32>>(immediate_data, max_idx));
         // Viewport remapping depth normalization equation.
         // https://www.w3.org/TR/webgpu/#coordinate-systems#:~:text=Viewport%20coordinates
-        auto* max_minus_min = builder.Subtract(ty.f32(), max, min);
+        auto* max_minus_min = builder.Subtract(max, min);
         auto* rhs = builder.Multiply(max_minus_min, frag_depth);
         return builder.Add(min, rhs)->Result();
     }

@@ -451,7 +451,7 @@ struct State {
             auto* div = b.Divide(res_ty, x, y);
             auto* floor = b.Call(res_ty, core::BuiltinFn::kFloor, div);
             auto* mul = b.Multiply(y, floor);
-            auto* sub = b.Subtract(res_ty, x, mul);
+            auto* sub = b.Subtract(x, mul);
 
             call->Result()->ReplaceAllUsesWith(sub->Result());
         });
@@ -854,7 +854,7 @@ struct State {
                 auto* v = b.Multiply(I, N)->Result();
                 v = b.Multiply(v, N)->Result();
                 v = b.Multiply(v, 2.0_f)->Result();
-                v = b.Subtract(I->Type(), I, v)->Result();
+                v = b.Subtract(I, v)->Result();
                 call->Result()->ReplaceAllUsesWith(v);
             } else {
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kReflect,
@@ -1110,7 +1110,7 @@ struct State {
             auto sub_mul2 = [&](auto* m, auto* n, auto* o, auto* p) {
                 auto* x = b.Multiply(m, n);
                 auto* y = b.Multiply(o, p);
-                return b.Subtract(elem_ty, x, y);
+                return b.Subtract(x, y);
             };
 
             // Returns (m * n) - (o * p) + (q * r)
@@ -1119,7 +1119,7 @@ struct State {
                 auto* x = b.Multiply(o, p);
                 auto* y = b.Multiply(q, r);
 
-                auto* z = b.Subtract(elem_ty, w, x);
+                auto* z = b.Subtract(w, x);
                 return b.Add(z, y);
             };
 
@@ -1130,7 +1130,7 @@ struct State {
                 auto* y = b.Multiply(q, r);
 
                 auto* z = b.Add(w, x);
-                return b.Subtract(elem_ty, z, y);
+                return b.Subtract(z, y);
             };
 
             switch (mat_ty->Columns()) {
