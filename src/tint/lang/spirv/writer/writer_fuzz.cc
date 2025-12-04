@@ -35,9 +35,76 @@
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 
 namespace tint::spirv::writer {
+
+// Fuzzed options used to init tint::spirv::writer::Options
+struct FuzzedOptions {
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // NOTE: These options should not be reordered or removed as it will change the operation of //
+    // pre-existing fuzzer cases. Always append new options to the end of the list.              //
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    bool strip_all_names;
+    bool disable_robustness;
+    bool disable_workgroup_init;
+    bool disable_polyfill_integer_div_mod;
+    bool enable_integer_range_analysis;
+    bool emit_vertex_point_size;
+    bool apply_pixel_center_polyfill;
+    bool polyfill_case_switch;
+    bool scalarize_max_min_clamp;
+    bool dva_transform_handle;
+    bool polyfill_pack_unpack_4x8_norm;
+    bool subgroup_shuffle_clamped;
+    bool polyfill_subgroup_broadcast_f16;
+    bool pass_matrix_by_pointer;
+    bool polyfill_unary_f32_negation;
+    bool polyfill_f32_abs;
+    bool use_demote_to_helper_invocation;
+    bool use_storage_input_output_16;
+    bool use_zero_initialize_workgroup_memory;
+    bool use_vulkan_memory_model;
+    bool disable_image_robustness;
+    bool disable_runtime_sized_array_index_clamping;
+    bool dot_4x8_packed;
+    std::optional<Options::RangeOffsets> depth_range_offsets;
+    SpvVersion spirv_version;
+    SubstituteOverridesConfig substitute_overrides_config;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(FuzzedOptions,
+                 strip_all_names,
+                 disable_robustness,
+                 disable_workgroup_init,
+                 disable_polyfill_integer_div_mod,
+                 enable_integer_range_analysis,
+                 emit_vertex_point_size,
+                 apply_pixel_center_polyfill,
+                 polyfill_case_switch,
+                 scalarize_max_min_clamp,
+                 dva_transform_handle,
+                 polyfill_pack_unpack_4x8_norm,
+                 subgroup_shuffle_clamped,
+                 polyfill_subgroup_broadcast_f16,
+                 pass_matrix_by_pointer,
+                 polyfill_unary_f32_negation,
+                 polyfill_f32_abs,
+                 use_demote_to_helper_invocation,
+                 use_storage_input_output_16,
+                 use_zero_initialize_workgroup_memory,
+                 use_vulkan_memory_model,
+                 disable_image_robustness,
+                 disable_runtime_sized_array_index_clamping,
+                 dot_4x8_packed,
+                 depth_range_offsets,
+                 spirv_version,
+                 substitute_overrides_config);
+    TINT_REFLECT_HASH_CODE(FuzzedOptions);
+};
+
 namespace {
 
-Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&, Options options) {
+Result<SuccessType> IRFuzzer(core::ir::Module& module,
+                             const fuzz::ir::Context&,
+                             FuzzedOptions fuzzed_options) {
     // TODO(375388101): We cannot run the backend for every entry point in the module unless we
     // clone the whole module each time, so for now we just generate the first entry point.
 
@@ -57,20 +124,50 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&,
         // No entry point, just return success
         return Success;
     }
+
+    // We fuzz options that Dawn will vary depending on the platform and provided toggles.
+    // Options that are entirely controlled by Dawn (e.g. binding points) are not fuzzed.
+    Options options;
     options.entry_point_name = ep_name;
+    options.bindings = GenerateBindings(module, ep_name, false, false);
+    options.strip_all_names = fuzzed_options.strip_all_names;
+    options.disable_robustness = fuzzed_options.disable_robustness;
+    options.disable_workgroup_init = fuzzed_options.disable_workgroup_init;
+    options.disable_polyfill_integer_div_mod = fuzzed_options.disable_polyfill_integer_div_mod;
+    options.enable_integer_range_analysis = fuzzed_options.enable_integer_range_analysis;
+    options.emit_vertex_point_size = fuzzed_options.emit_vertex_point_size;
+    options.apply_pixel_center_polyfill = fuzzed_options.apply_pixel_center_polyfill;
+    options.workarounds.polyfill_case_switch = fuzzed_options.polyfill_case_switch;
+    options.workarounds.scalarize_max_min_clamp = fuzzed_options.scalarize_max_min_clamp;
+    options.workarounds.dva_transform_handle = fuzzed_options.dva_transform_handle;
+    options.workarounds.polyfill_pack_unpack_4x8_norm =
+        fuzzed_options.polyfill_pack_unpack_4x8_norm;
+    options.workarounds.subgroup_shuffle_clamped = fuzzed_options.subgroup_shuffle_clamped;
+    options.workarounds.polyfill_subgroup_broadcast_f16 =
+        fuzzed_options.polyfill_subgroup_broadcast_f16;
+    options.workarounds.pass_matrix_by_pointer = fuzzed_options.pass_matrix_by_pointer;
+    options.workarounds.polyfill_unary_f32_negation = fuzzed_options.polyfill_unary_f32_negation;
+    options.workarounds.polyfill_f32_abs = fuzzed_options.polyfill_f32_abs;
+    options.extensions.use_demote_to_helper_invocation =
+        fuzzed_options.use_demote_to_helper_invocation;
+    options.extensions.use_storage_input_output_16 = fuzzed_options.use_storage_input_output_16;
+    options.extensions.use_zero_initialize_workgroup_memory =
+        fuzzed_options.use_zero_initialize_workgroup_memory;
+    options.extensions.use_vulkan_memory_model = fuzzed_options.use_vulkan_memory_model;
+    options.extensions.disable_image_robustness = fuzzed_options.disable_image_robustness;
+    options.extensions.disable_runtime_sized_array_index_clamping =
+        fuzzed_options.disable_runtime_sized_array_index_clamping;
+    options.extensions.dot_4x8_packed = fuzzed_options.dot_4x8_packed;
+    options.depth_range_offsets = fuzzed_options.depth_range_offsets;
+    options.spirv_version = fuzzed_options.spirv_version;
+    options.substitute_overrides_config = fuzzed_options.substitute_overrides_config;
+
+    options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(module);
 
     auto check = CanGenerate(module, options);
     if (check != Success) {
         return Failure{check.Failure().reason};
     }
-
-    // TODO(454378504): Remove this when we always decompose uniform buffers.
-    if (!options.extensions.decompose_uniform_buffers) {
-        return Failure{"fuzzing requires decomposing uniform buffers"};
-    }
-
-    options.bindings = GenerateBindings(module, ep_name, false, false);
-    options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(module);
 
     auto output = Generate(module, options);
     TINT_ASSERT(output == Success)

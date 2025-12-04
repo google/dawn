@@ -64,10 +64,16 @@ struct Options {
 
         /// Reflect the fields of this class so that it can be used by tint::ForeachField()
         TINT_REFLECT(RangeOffsets, min, max);
+        TINT_REFLECT_HASH_CODE(RangeOffsets);
     };
 
     /// The set of options which control workarounds for driver issues in the SPIR-V generator.
     struct Workarounds {
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
+        // structure in writer_fuzz.cc.                                                          //
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
         /// Set to `true` to generate a polyfill for switch statements using if/else statements.
         bool polyfill_case_switch = false;
 
@@ -111,6 +117,11 @@ struct Options {
 
     /// Any options which are controlled by the presence/absence of a vulkan extension.
     struct Extensions {
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
+        // structure in writer_fuzz.cc.                                                          //
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
         /// Set to `true` to allow for the usage of the demote to helper extension.
         bool use_demote_to_helper_invocation = false;
 
@@ -148,6 +159,11 @@ struct Options {
                      dot_4x8_packed,
                      decompose_uniform_buffers);
     };
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
+    // structure in writer_fuzz.cc (if fuzzing is desired).                                  //
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
     /// The entry point name to generate
     std::string entry_point_name;
