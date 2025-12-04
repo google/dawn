@@ -80,6 +80,11 @@ struct ArgumentBufferInfo {
 struct Options {
     /// The set of options which control workarounds for driver issues.
     struct Workarounds {
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
+        // structure in writer_fuzz.cc.                                                          //
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
         /// Set to `true` to scalarize max min and clamp builtins.
         bool scalarize_max_min_clamp = false;
 
@@ -111,6 +116,11 @@ struct Options {
 
     /// Any options which are controlled by the current Metal version.
     struct Extensions {
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
+        // structure in writer_fuzz.cc.                                                          //
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
         /// Set to `true` to disable demote to helper transform
         bool disable_demote_to_helper = false;
 
@@ -128,6 +138,11 @@ struct Options {
     /// Copy assignment
     /// @returns this Options
     Options& operator=(const Options&);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
+    // structure in writer_fuzz.cc (if fuzzing is desired).                                  //
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
     /// The entry point name to emit.
     std::string entry_point_name = {};
@@ -162,10 +177,6 @@ struct Options {
 
     /// Any used extensions
     Extensions extensions{};
-
-    /// The index to use when generating a UBO to receive storage buffer sizes.
-    /// Defaults to 30, which is the last valid buffer slot.
-    uint32_t buffer_size_ubo_index = 30;
 
     /// The fixed sample mask to combine with fragment shader outputs.
     /// Defaults to 0xFFFFFFFF.
@@ -206,7 +217,6 @@ struct Options {
                  use_argument_buffers,
                  workarounds,
                  extensions,
-                 buffer_size_ubo_index,
                  fixed_sample_mask,
                  pixel_local_attachments,
                  array_length_from_constants,
