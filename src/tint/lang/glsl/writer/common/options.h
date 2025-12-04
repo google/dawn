@@ -134,6 +134,18 @@ struct ArrayLengthFromUniformOptions {
 
 /// Configuration options used for generating GLSL.
 struct Options {
+    /// Constructor
+    Options();
+    /// Destructor
+    ~Options();
+    /// Copy constructor
+    Options(const Options&);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
+    // structure in writer_fuzz.cc (if fuzzing is desired).                                  //
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
     struct RangeOffsets {
         /// The offset of the min_depth immediate data
         uint32_t min = 0;
@@ -142,16 +154,8 @@ struct Options {
 
         /// Reflect the fields of this class so that it can be used by tint::ForeachField()
         TINT_REFLECT(RangeOffsets, min, max);
+        TINT_REFLECT_HASH_CODE(RangeOffsets);
     };
-
-    /// Constructor
-    Options();
-
-    /// Destructor
-    ~Options();
-
-    /// Copy constructor
-    Options(const Options&);
 
     /// Set to `true` to strip all user-declared identifiers from the module.
     bool strip_all_names = false;
