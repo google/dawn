@@ -110,7 +110,8 @@ class BufferUploadPerf : public DawnPerfTestWithParams<BufferUploadParams> {
           data(static_cast<size_t>(GetParam().uploadSize)) {}
     ~BufferUploadPerf() override = default;
 
-    void SetUp() override;
+  protected:
+    void SetUpPerfTest() override;
 
   private:
     void Step() override;
@@ -119,9 +120,7 @@ class BufferUploadPerf : public DawnPerfTestWithParams<BufferUploadParams> {
     std::vector<uint8_t> data;
 };
 
-void BufferUploadPerf::SetUp() {
-    DawnPerfTestWithParams<BufferUploadParams>::SetUp();
-
+void BufferUploadPerf::SetUpPerfTest() {
     wgpu::BufferDescriptor desc = {};
     desc.size = data.size();
     desc.usage = wgpu::BufferUsage::CopyDst;
@@ -176,7 +175,8 @@ class BufferMapExtendedUsagesPerf : public DawnPerfTestWithParams<BufferUploadPa
           data(static_cast<size_t>(GetParam().uploadSize)) {}
     ~BufferMapExtendedUsagesPerf() override = default;
 
-    void SetUp() override;
+  protected:
+    void SetUpPerfTest() override;
 
   private:
     void Step() override;
@@ -202,9 +202,7 @@ std::vector<wgpu::FeatureName> BufferMapExtendedUsagesPerf::GetRequiredFeatures(
     return requiredFeatures;
 }
 
-void BufferMapExtendedUsagesPerf::SetUp() {
-    DawnPerfTestWithParams<BufferUploadParams>::SetUp();
-
+void BufferMapExtendedUsagesPerf::SetUpPerfTest() {
     // Skip all tests if the BufferMapExtendedUsages feature is not supported.
     DAWN_TEST_UNSUPPORTED_IF(GetParam().uploadMethod == UploadMethod::MapWithExtendedUsages &&
                              !device.HasFeature(wgpu::FeatureName::BufferMapExtendedUsages));

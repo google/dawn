@@ -95,7 +95,6 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
     ~MatrixVectorMultiplyPerf() override = default;
 
   protected:
-    void SetUp() override;
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         mUsingF16 = false;
         mUsingSubgroups = false;
@@ -134,6 +133,9 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
             std::min(supported.maxStorageBufferBindingSize, needed);
     }
 
+  protected:
+    void SetUpPerfTest() override;
+
   private:
     void Step() override;
 
@@ -158,13 +160,11 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
     bool mAllFeaturesSupported;
 };
 
-void MatrixVectorMultiplyPerf::SetUp() {
+void MatrixVectorMultiplyPerf::SetUpPerfTest() {
     // TODO(crbug.com/dawn/2508): Fails due to an OS/driver upgrade on Linux/llvmpipe.
     // This must also be checked before SetUp() since the crash happens in SetUp() itself.
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsMesa("23.2.1") && IsMesaSoftware() &&
                           GetParam().mStoreType == StoreType::F32);
-
-    DawnPerfTestWithParams<MatrixVectorMultiplyParams>::SetUp();
 
     DAWN_TEST_UNSUPPORTED_IF(deviceLimits.maxStorageBufferBindingSize <
                              GetMaxStorageBufferBindingSizeNeeded());

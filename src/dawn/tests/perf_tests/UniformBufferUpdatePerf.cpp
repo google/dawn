@@ -143,7 +143,8 @@ class UniformBufferUpdatePerf : public DawnPerfTestWithParams<UniformBufferUpdat
     UniformBufferUpdatePerf() : DawnPerfTestWithParams(kNumIterations, 1) {}
     ~UniformBufferUpdatePerf() override = default;
 
-    void SetUp() override;
+  protected:
+    void SetUpPerfTest() override;
 
   private:
     // Data needed for buffer returning.
@@ -234,9 +235,7 @@ void UniformBufferUpdatePerf::ReturnStagingBuffer(wgpu::Buffer buffer) {
     mMultipleStagingBuffers->push(buffer);
 }
 
-void UniformBufferUpdatePerf::SetUp() {
-    DawnPerfTestWithParams<UniformBufferUpdateParams>::SetUp();
-
+void UniformBufferUpdatePerf::SetUpPerfTest() {
     // Skip all tests if the BufferMapExtendedUsages feature is not supported.
     DAWN_TEST_UNSUPPORTED_IF(GetParam().uploadMethod == UploadMethod::MapWithExtendedUsages &&
                              !device.HasFeature(wgpu::FeatureName::BufferMapExtendedUsages));
