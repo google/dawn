@@ -68,9 +68,9 @@ BindGroup::~BindGroup() = default;
 MaybeError BindGroup::InitializeImpl() {
     DAWN_TRY(InitializeStaticBindings());
 
-    if (HasDynamicArray()) {
-        DAWN_TRY(InitializeDynamicArray());
-    }
+    // Note that dynamic bindings are left uninitialized as initial bindings will have their
+    // descriptors written the first time that this BindGroup is used. The metadata buffer and
+    // shader validation will ensure that uninitialized descriptors are not used.
 
     SetLabelImpl();
     return {};
@@ -217,24 +217,24 @@ MaybeError BindGroup::InitializeStaticBindings() {
     return {};
 }
 
-MaybeError BindGroup::InitializeDynamicArray() {
+void BindGroup::UpdateDynamicArrayBindings(
+    const std::vector<DynamicArrayState::ResourceUpdate>& updates) {
     // This backend only supports DynamicArrayKind::SampledTexture at the moment.
+    DAWN_ASSERT(GetLayout()->HasDynamicArray());
     DAWN_ASSERT(GetLayout()->GetDynamicArrayKind() == wgpu::DynamicBindingKind::SampledTexture);
 
-    // Write only the entries that have bindings present, the availability buffer will prevent
-    // reading entries that aren't written to and may contain garbage.
-    // TODO(crbug.com/435251399): Instead of bespoke initialization, handle the creation like any
-    // other updates to the dynamic array, so as to have a single code path handling updates.
     std::vector<VkDescriptorImageInfo> imageWrites;
     std::vector<uint32_t> arrayElements;
 
-    auto bindings = GetDynamicArrayBindings();
-    for (auto [i, view] : Enumerate(bindings)) {
-        if (view == nullptr) {
+    for (DynamicArrayState::ResourceUpdate update : updates) {
+        // Never remove bindings since we would need to defer this until after the GPU is done
+        // potentially reading the descriptor. The metadata buffer and shader validation will
+        // prevent reading this entry anyway.
+        if (update.textureView == nullptr) {
             continue;
         }
 
-        VkImageView handle = ToBackend(view)->GetHandle();
+        VkImageView handle = ToBackend(update.textureView)->GetHandle();
         if (handle == nullptr) {
             continue;
         }
@@ -242,10 +242,11 @@ MaybeError BindGroup::InitializeDynamicArray() {
         VkDescriptorImageInfo imageWrite = {
             .sampler = VkSampler{},
             .imageView = handle,
-            .imageLayout = VulkanImageLayout(view->GetFormat(), wgpu::TextureUsage::TextureBinding),
+            .imageLayout = VulkanImageLayout(update.textureView->GetFormat(),
+                                             wgpu::TextureUsage::TextureBinding),
         };
         imageWrites.push_back(imageWrite);
-        arrayElements.push_back(uint32_t(i));
+        arrayElements.push_back(uint32_t(update.slot));
     }
 
     std::vector<VkWriteDescriptorSet> writes;
@@ -268,8 +269,6 @@ MaybeError BindGroup::InitializeDynamicArray() {
     Device* device = ToBackend(GetDevice());
     device->fn.UpdateDescriptorSets(device->GetVkDevice(), writes.size(), writes.data(), 0,
                                     nullptr);
-
-    return {};
 }
 
 void BindGroup::DestroyImpl() {

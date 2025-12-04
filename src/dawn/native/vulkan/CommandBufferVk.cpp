@@ -237,8 +237,14 @@ class ImmediateConstantTracker : public T {
 // multiple metadata buffers potentially).
 MaybeError UpdateDynamicArrayBindings(Device* device,
                                       CommandRecordingContext* recordingContext,
-                                      DynamicArrayState* dynamicArray) {
+                                      BindGroup* dynamicArrayBG) {
+    DynamicArrayState* dynamicArray = dynamicArrayBG->GetDynamicArray();
     DynamicArrayState::BindingUpdates updates = dynamicArray->AcquireDirtyBindingUpdates();
+
+    // Update the bindings in the VkDescriptorSet.
+    if (!updates.resourceUpdates.empty()) {
+        dynamicArrayBG->UpdateDynamicArrayBindings(updates.resourceUpdates);
+    }
 
     // Allocate enough space for all the data to modify and schedule the copies.
     if (!updates.metadataUpdates.empty()) {
@@ -285,8 +291,7 @@ MaybeError PrepareResourcesForSyncScope(Device* device,
     // metadata buffers are part of the resources and will be transitioned to Storage if needed
     // then.
     for (BindGroupBase* dynamicArrayBG : scope.dynamicBindingArrays) {
-        DAWN_TRY(UpdateDynamicArrayBindings(device, recordingContext,
-                                            dynamicArrayBG->GetDynamicArray()));
+        DAWN_TRY(UpdateDynamicArrayBindings(device, recordingContext, ToBackend(dynamicArrayBG)));
     }
 
     // Separate barriers with vertex stages in destination stages from all other barriers.

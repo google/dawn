@@ -323,8 +323,8 @@ void DynamicArrayState::Update(BindingIndex i, const BindGroupEntryContents& con
         view->GetTexture()->AddDynamicArraySlot(this, i);
     }
     mBindings[i] = view;
-    // TODO(https://crbug.com/435317394): Track the resources that are added so we can tell the
-    // backend to update them.
+    mBindingState[i].resourceDirty = true;
+    MarkStateDirty(i);
 
     // Update the mBindingState with information for the updated binding.
     tint::ResourceType typeId = ComputeTypeId(view);
@@ -362,18 +362,26 @@ DynamicArrayState::BindingUpdates DynamicArrayState::AcquireDirtyBindingUpdates(
 
     BindingUpdates updates;
     for (BindingIndex dirtyIndex : mDirtyBindings) {
-        DAWN_ASSERT(mBindingState[dirtyIndex].dirty);
-        mBindingState[dirtyIndex].dirty = false;
+        BindingState& state = mBindingState[dirtyIndex];
+        DAWN_ASSERT(state.dirty);
+        state.dirty = false;
 
-        tint::ResourceType effectiveType = mBindingState[dirtyIndex].pinned
-                                               ? mBindingState[dirtyIndex].typeId
-                                               : tint::ResourceType::kEmpty;
+        tint::ResourceType effectiveType = state.pinned ? state.typeId : tint::ResourceType::kEmpty;
 
         size_t offset = sizeof(uint32_t) * (uint32_t(dirtyIndex) + 1);
         updates.metadataUpdates.push_back({
             .offset = uint32_t(offset),
             .data = uint32_t(effectiveType),
         });
+
+        if (state.resourceDirty) {
+            state.resourceDirty = false;
+
+            updates.resourceUpdates.push_back({
+                .slot = dirtyIndex,
+                .textureView = mBindings[dirtyIndex].Get(),
+            });
+        }
     }
     mDirtyBindings.clear();
 
