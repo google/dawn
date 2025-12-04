@@ -53,7 +53,7 @@ import (
 // the test cases in testCases. The results of the tests are streamed to results.
 // Blocks until all the tests have been run.
 func (c *cmd) runTestCasesWithServers(
-	ctx context.Context, testCases []common.TestCase, results chan<- common.Result, fsReader oswrapper.FilesystemReader) {
+	ctx context.Context, testCases []common.TestCase, results chan<- common.Result, fsReaderWriter oswrapper.FilesystemReaderWriter) {
 	// Create a chan of test indices.
 	// This will be read by the test runner goroutines.
 	testCaseIndices := make(chan int, 256)
@@ -71,7 +71,7 @@ func (c *cmd) runTestCasesWithServers(
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := c.runServer(ctx, id, testCases, testCaseIndices, results, fsReader); err != nil {
+			if err := c.runServer(ctx, id, testCases, testCaseIndices, results, fsReaderWriter); err != nil {
 				results <- common.Result{
 					Status: common.Fail,
 					Error:  fmt.Errorf("Test server error: %w", err),
@@ -96,7 +96,7 @@ func (c *cmd) runServer(
 	testCases []common.TestCase,
 	testCaseIndices <-chan int,
 	results chan<- common.Result,
-	fsReader oswrapper.FilesystemReader) error {
+	fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 
 	var port int
 	testCaseLog := &bytes.Buffer{}
@@ -255,8 +255,8 @@ func (c *cmd) runServer(
 			}
 
 			if resp.CoverageData != "" {
-				coverage, covErr := c.coverage.Env.Import(resp.CoverageData, fsReader)
-				os.Remove(resp.CoverageData)
+				coverage, covErr := c.coverage.Env.Import(resp.CoverageData, fsReaderWriter)
+				fsReaderWriter.Remove(resp.CoverageData)
 				if covErr != nil {
 					if res.Message != "" {
 						res.Message += "\n"
