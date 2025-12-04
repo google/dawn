@@ -891,7 +891,8 @@ const WGSLExtensionInfo kExtensions[] = {
     {"chromium_internal_graphite", true, {}, {}},
     {"chromium_experimental_framebuffer_fetch", true, {wgpu::FeatureName::FramebufferFetch}, {}},
     {"chromium_experimental_subgroup_matrix", true, {wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix}, {}},
-    {"chromium_experimental_dynamic_binding", true, {wgpu::FeatureName::ChromiumExperimentalBindless}, {}}
+    {"chromium_experimental_dynamic_binding", true, {wgpu::FeatureName::ChromiumExperimentalBindless}, {}},
+    {"chromium_experimental_resource_table", true, {wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}, {}}
 
     // Currently the following WGSL extensions are not enabled under any situation.
     /*
