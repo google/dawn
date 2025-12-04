@@ -2,6 +2,7 @@
   "gn_args": {
     "dawn_build_node_bindings": true,
     "dawn_use_swiftshader": true,
+    "dcheck_always_on": true,
     "is_clang": false,
     "is_component_build": false,
     "is_debug": false,

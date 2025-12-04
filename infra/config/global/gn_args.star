@@ -170,6 +170,16 @@ gn_args.config(
 )
 
 gn_args.config(
+    name = "release_with_dchecks",
+    args = {
+        "dcheck_always_on": True,
+    },
+    configs = [
+        "release",
+    ],
+)
+
+gn_args.config(
     name = "siso",
     args = {
         "use_reclient": False,

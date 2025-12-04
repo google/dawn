@@ -3,6 +3,7 @@
     "dawn_build_node_bindings": true,
     "dawn_enable_d3d12": false,
     "dawn_use_swiftshader": true,
+    "dcheck_always_on": true,
     "is_clang": true,
     "is_component_build": true,
     "is_debug": false,

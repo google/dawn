@@ -1,6 +1,7 @@
 {
   "gn_args": {
     "dawn_enable_d3d12": false,
+    "dcheck_always_on": true,
     "is_clang": true,
     "is_component_build": false,
     "is_debug": false,
