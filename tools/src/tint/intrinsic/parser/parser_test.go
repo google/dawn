@@ -31,6 +31,7 @@ import (
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/ast"
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/parser"
 	"github.com/google/go-cmp/cmp"
@@ -845,21 +846,19 @@ func TestParser(t *testing.T) {
 				}},
 			}},
 	} {
-		got, err := parser.Parse(test.src, "file.txt")
+		ast, err := parser.Parse(test.src, test.location, oswrapper.CreateFSTestOSWrapper())
 		if err != nil {
-			t.Errorf("\n%v\nWhile parsing:\n%s\nParse() returned error: %v",
-				test.location, test.src, err)
+			t.Errorf("%v: Parse(%v) error: %v", test.location, test.src, err)
 			continue
 		}
 
-		if diff := cmp.Diff(got, &test.expect, ignoreSource); diff != "" {
-			t.Errorf("\n%v\nWhile parsing:\n%s\n\n%s",
-				test.location, test.src, diff)
+		if diff := cmp.Diff(test.expect, *ast, ignoreSource); diff != "" {
+			t.Errorf("%v: Parse(%v) diff:\n%v", test.location, test.src, diff)
 		}
 	}
 }
 
-func TestErrors(t *testing.T) {
+func TestParserError(t *testing.T) {
 	type test struct {
 		src    string
 		expect string
@@ -879,7 +878,7 @@ func TestErrors(t *testing.T) {
 			"test.txt:1:2 expected 'ident' for attribute name, got 'integer'",
 		},
 	} {
-		got, err := parser.Parse(test.src, "test.txt")
+		got, err := parser.Parse(test.src, "test.txt", oswrapper.CreateFSTestOSWrapper())
 		gotErr := ""
 		if err != nil {
 			gotErr = err.Error()

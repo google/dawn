@@ -195,7 +195,7 @@ func (i *intrinsicCache) Sem() (*sem.Sem, error) {
 		}
 
 		// Parse the definition file to produce an AST
-		ast, err := parser.Parse(string(defSource), i.path)
+		ast, err := parser.Parse(string(defSource), i.path, i.fsReader)
 		if err != nil {
 			return nil, err
 		}
