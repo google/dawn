@@ -325,6 +325,33 @@ func GetRawUnsuppressedFailingResults(
 	return getRawResultsImpl(ctx, cfg, client, builds, client.QueryUnsuppressedFailingTestResults)
 }
 
+// getPythonClassFromTestConfig extracts the Python test class from a TestConfig.
+func getPythonClassFromTestConfig(test TestConfig) string {
+	for _, p := range test.Prefixes {
+		if strings.HasPrefix(p, "ninja://") {
+			parts := strings.Split(p, "/")
+			return strings.TrimSuffix(parts[len(parts)-1], ".")
+		}
+	}
+	return ""
+}
+
+// shouldSkipV2Result returns true if the new ID result should be
+// skipped because it belongs to a different test suite.
+func shouldSkipV2Result(isV2Prefix bool, pythonClass string, tags []resultsdb.TagPair) bool {
+	if !isV2Prefix {
+		return false
+	}
+	class := ""
+	for _, tagPair := range tags {
+		if tagPair.Key == "gpu_test_class" {
+			class = tagPair.Value
+			break
+		}
+	}
+	return pythonClass != "" && class != pythonClass
+}
+
 // Helper function to share the implementation between GetRawResults and
 // GetRawUnsuppressedFailingResults.
 func getRawResultsImpl(
@@ -340,13 +367,20 @@ func getRawResultsImpl(
 
 	resultsByExecutionMode := result.ResultsByExecutionMode{}
 	for _, test := range cfg.Tests {
+		pythonClass := getPythonClassFromTestConfig(test)
+
 		results := result.List{}
 		for _, prefix := range test.Prefixes {
+			isV2Prefix := !strings.HasPrefix(prefix, "ninja://")
 
 			err := queryFunc(ctx, builds.ids(), prefix, func(r *resultsdb.QueryResult) error {
 				if time.Since(lastPrintedDot) > 5*time.Second {
 					lastPrintedDot = time.Now()
 					fmt.Printf(".")
+				}
+
+				if shouldSkipV2Result(isV2Prefix, pythonClass, r.Tags) {
+					return nil
 				}
 
 				if !strings.HasPrefix(r.TestId, prefix) {
@@ -649,10 +683,17 @@ func getRecentUniqueSuppressedResults(
 
 	resultsByExecutionMode := result.ResultsByExecutionMode{}
 	for _, test := range cfg.Tests {
+		pythonClass := getPythonClassFromTestConfig(test)
+
 		results := result.List{}
 		for _, prefix := range test.Prefixes {
+			isV2Prefix := !strings.HasPrefix(prefix, "ninja://")
 
 			rowHandler := func(r *resultsdb.QueryResult) error {
+				if shouldSkipV2Result(isV2Prefix, pythonClass, r.Tags) {
+					return nil
+				}
+
 				if !strings.HasPrefix(r.TestId, prefix) {
 					return fmt.Errorf(
 						"Test ID %s did not start with %s even though query should have filtered.",
@@ -663,10 +704,14 @@ func getRecentUniqueSuppressedResults(
 				tags := result.NewTags()
 
 				for _, tagPair := range r.Tags {
-					if tagPair.Key != "typ_tag" {
-						return fmt.Errorf("Got tag key %v when only typ_tag should be present", tagPair.Key)
+					switch tagPair.Key {
+					case "typ_tag":
+						tags.Add(tagPair.Value)
+					case "gpu_test_class":
+						// Used for filtering, but not stored
+					default:
+						return fmt.Errorf("Got unexpected tag key %v", tagPair.Key)
 					}
-					tags.Add(tagPair.Value)
 				}
 
 				results = append(results, result.Result{

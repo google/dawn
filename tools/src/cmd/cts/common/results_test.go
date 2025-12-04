@@ -635,6 +635,80 @@ func TestGetRawResultsBadMayExonerate(t *testing.T) {
 	require.ErrorContains(t, err, `strconv.ParseBool: parsing "yesnt": invalid syntax`)
 }
 
+// Tests that new test IDs are filtered correctly based on their gpu_test_class
+// tag.
+func TestGetRawResultsV2Filtering(t *testing.T) {
+	ctx, _, client, builds := generateGoodGetResultsInputs()
+
+	cfg := Config{
+		Tests: []TestConfig{
+			{
+				ExecutionMode: "core",
+				Prefixes: []string{
+					"ninja://chrome/test:telemetry_gpu_integration_test/gpu_tests.webgpu_cts_integration_test.WebGpuCtsIntegrationTest.",
+					"://chrome/test\\:telemetry_gpu_integration_test!webgpucts:",
+				},
+			},
+			{
+				ExecutionMode: "compat",
+				Prefixes: []string{
+					"ninja://chrome/test:telemetry_gpu_integration_test/gpu_tests.webgpu_compat_cts_integration_test.WebGpuCompatCtsIntegrationTest.",
+					"://chrome/test\\:telemetry_gpu_integration_test!webgpucts:",
+				},
+			},
+		},
+	}
+	v2Prefix := "://chrome/test\\:telemetry_gpu_integration_test!webgpucts:"
+
+	client.ReturnValues = resultsdb.PrefixGroupedQueryResults{
+		v2Prefix: []resultsdb.QueryResult{
+			{
+				TestId: v2Prefix + "test1",
+				Status: "PASS",
+				Tags: []resultsdb.TagPair{
+					{
+						Key:   "gpu_test_class",
+						Value: "gpu_tests.webgpu_cts_integration_test.WebGpuCtsIntegrationTest",
+					},
+				},
+			},
+			{
+				TestId: v2Prefix + "test2",
+				Status: "PASS",
+				Tags: []resultsdb.TagPair{
+					{
+						Key:   "gpu_test_class",
+						Value: "gpu_tests.webgpu_compat_cts_integration_test.WebGpuCompatCtsIntegrationTest",
+					},
+				},
+			},
+			{
+				TestId: v2Prefix + "test3",
+				Status: "PASS",
+				Tags: []resultsdb.TagPair{
+					{
+						Key:   "gpu_test_class",
+						Value: "gpu_tests.webgpu_cts_integration_test.WebGpuCtsIntegrationTest",
+					},
+				},
+			},
+		},
+	}
+
+	results, err := GetRawResults(ctx, cfg, client, builds)
+	require.NoError(t, err)
+
+	coreResults := results["core"]
+	compatResults := results["compat"]
+
+	require.Len(t, coreResults, 2)
+	require.Equal(t, "test1", coreResults[0].Query.String())
+	require.Equal(t, "test3", coreResults[1].Query.String())
+
+	require.Len(t, compatResults, 1)
+	require.Equal(t, "test2", compatResults[0].Query.String())
+}
+
 /*******************************************************************************
  * convertRdbStatus tests
  ******************************************************************************/
@@ -1257,7 +1331,7 @@ func TestCacheRecentUniqueSuppressedResults_GetResultsError(t *testing.T) {
 		ctx, cfg, fileutils.ThisDir(), client, wrapper)
 	require.Nil(t, resultsByExecutionMode)
 	require.ErrorContains(t, err,
-		"Got tag key non_typ_tag when only typ_tag should be present")
+		"Got unexpected tag key non_typ_tag")
 }
 
 func TestCacheRecentUniqueSuppressedResults_Success(t *testing.T) {
@@ -1342,7 +1416,7 @@ func TestGetRecentUniqueSuppressedResults_NonTypTag(t *testing.T) {
 	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg, client)
 	require.Nil(t, resultsByExecutionMode)
 	require.ErrorContains(t, err,
-		"Got tag key non_typ_tag when only typ_tag should be present")
+		"Got unexpected tag key non_typ_tag")
 }
 
 func TestGetRecentUniqueSuppressedResults_Success(t *testing.T) {
