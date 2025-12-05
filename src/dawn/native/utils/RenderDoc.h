@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,46 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_VULKAN_SHAREDTEXTUREFENCEVk_H_
-#define SRC_DAWN_NATIVE_VULKAN_SHAREDTEXTUREFENCEVk_H_
+#ifndef SRC_DAWN_NATIVE_UTILS_RENDERDOC_H_
+#define SRC_DAWN_NATIVE_UTILS_RENDERDOC_H_
 
-#include "dawn/common/Platform.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/SharedFence.h"
-#include "dawn/utils/SystemHandle.h"
+#if defined(DAWN_ENABLE_RENDERDOC)
 
-namespace dawn::native::vulkan {
+#include "dawn/native/Device.h"
 
-class Device;
+#include "renderdoc/api/app/renderdoc_app.h"
 
-class SharedFence final : public SharedFenceBase {
-  public:
-    static ResultOrError<Ref<SharedFence>> Create(
-        Device* device,
-        StringView label,
-        const SharedFenceVkSemaphoreOpaqueFDDescriptor* descriptor);
+namespace dawn::native::utils {
 
-    static ResultOrError<Ref<SharedFence>> Create(Device* device,
-                                                  StringView label,
-                                                  const SharedFenceSyncFDDescriptor* descriptor);
+// Keep these versions in sync.
+using RenderDocApiType = RENDERDOC_API_1_1_2;
+constexpr auto kRenderDocApiVersion = eRENDERDOC_API_Version_1_1_2;
 
-    static ResultOrError<Ref<SharedFence>> Create(
-        Device* device,
-        StringView label,
-        const SharedFenceVkSemaphoreZirconHandleDescriptor* descriptor);
+RenderDocApiType* GetRenderDocApi(DeviceBase* device);
 
-    const dawn::utils::SystemHandle& GetHandle() const;
+}  // namespace dawn::native::utils
 
-  private:
-    SharedFence(Device* device, StringView label, dawn::utils::SystemHandle handle);
-    void DestroyImpl() override;
+#endif  // defined(DAWN_ENABLE_RENDERDOC)
 
-    MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;
-
-    wgpu::SharedFenceType mType;
-    dawn::utils::SystemHandle mHandle;
-};
-
-}  // namespace dawn::native::vulkan
-
-#endif  // SRC_DAWN_NATIVE_VULKAN_SHAREDTEXTUREFENCEVk_H_
+#endif  // SRC_DAWN_NATIVE_UTILS_RENDERDOC_H_

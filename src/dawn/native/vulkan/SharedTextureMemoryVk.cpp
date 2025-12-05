@@ -1010,6 +1010,10 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
     static_cast<SharedTexture*>(texture)->SetPendingAcquire(
         static_cast<VkImageLayout>(vkLayoutBeginState->oldLayout),
         static_cast<VkImageLayout>(vkLayoutBeginState->newLayout));
+
+    // TODO(crbug.com/449708316): Better identify textures used as a swapchain.
+    ToBackend(texture)->SetIsExternalSwapchainTexture(true);
+
     return {};
 }
 
@@ -1079,6 +1083,8 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
                         SharedFence::Create(ToBackend(GetDevice()), "Internal VkSemaphore", &desc));
     }
 #endif
+    ToBackend(texture)->NotifySwapChainPresent();
+
     // All semaphores are binary semaphores.
     return FenceAndSignalValue{std::move(fence), 1};
 }

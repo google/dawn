@@ -31,12 +31,14 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/DynamicLib.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/VulkanBackend.h"
+#include "dawn/native/utils/RenderDoc.h"
 #include "dawn/native/vulkan/BufferVk.h"
 #include "dawn/native/vulkan/CommandBufferVk.h"
 #include "dawn/native/vulkan/CommandRecordingContextVk.h"
@@ -859,6 +861,37 @@ void Texture::SetLabelHelper(const char* prefix) {
     SetDebugName(ToBackend(GetDevice()), mHandle, prefix, GetLabel());
 }
 
+void Texture::NotifySwapChainPresent() {
+    // When using an external swap chain texture, there's no way to determine frame boundaries since
+    // Dawn isn't managing the Vulkan swap chains. In this mode, external tools like RenderDoc
+    // will wait forever for a present that never happens. We handle this by using tool-specific
+    // hooks to inform them of the "presented" texture so it can determine frame
+    // boundaries and use its contents for the UI.
+    if (!mIsExternalSwapChainTexture) {
+        return;
+    }
+
+#if defined(DAWN_ENABLE_RENDERDOC)
+    Device* device = ToBackend(GetDevice());
+
+    // For RenderDoc, we expect the user to enable and use process injection to inject RenderDoc
+    // into the GPU process at startup. We start capturing all frames right away. The user has
+    // to kill the process or stop it from rendering (e.g. close or change tabs in Chrome).
+    if (auto renderDocApi = dawn::native::utils::GetRenderDocApi(device)) {
+        void* renderDocDevicePtr = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(device->GetVkInstance());
+
+        // We signal the end of the current frame and the start of the next.
+        // This means we miss capturing the very first frame.
+        renderDocApi->EndFrameCapture(renderDocDevicePtr, NULL);
+        renderDocApi->StartFrameCapture(renderDocDevicePtr, NULL);
+    }
+#endif
+}
+
+void Texture::SetIsExternalSwapchainTexture(bool isSwapChainTexture) {
+    mIsExternalSwapChainTexture = isSwapChainTexture;
+}
+
 void Texture::SetLabelImpl() {
     SetLabelHelper("Dawn_InternalTexture");
 }
@@ -872,6 +905,7 @@ void Texture::DestroyImpl() {
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the texture since there are no other live refs.
     mHandle = VK_NULL_HANDLE;
+    mIsExternalSwapChainTexture = false;
 
     TextureBase::DestroyImpl();
 }
