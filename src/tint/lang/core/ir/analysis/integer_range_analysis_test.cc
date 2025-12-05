@@ -11385,7 +11385,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_I32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // divide = idx / idy
-                divide = b.Divide<i32>(loadx, loady);
+                divide = b.Divide(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -11513,7 +11513,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_U32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // divide = idx / idy
-                divide = b.Divide<u32>(loadx, loady);
+                divide = b.Divide(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -11641,7 +11641,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_GreaterThanOne) 
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // divide = idx / idy
-                divide = b.Divide<i32>(loadx, loady);
+                divide = b.Divide(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -11769,7 +11769,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_LessThanOne) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // divide = idx / idy
-                divide = b.Divide<i32>(loadx, loady);
+                divide = b.Divide(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -11897,7 +11897,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_I32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // divide = idx / idy
-                divide = b.Divide<i32>(loadx, loady);
+                divide = b.Divide(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -12025,7 +12025,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_U32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // divide = idx / idy
-                divide = b.Divide<u32>(loadx, loady);
+                divide = b.Divide(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -12153,7 +12153,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeLHS) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // divide = idx / idy
-                divide = b.Divide<i32>(loadx, loady);
+                divide = b.Divide(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -12277,7 +12277,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeRHS) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // divide = idx / idy
-                divide = b.Divide<i32>(loadx, loady);
+                divide = b.Divide(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -12401,7 +12401,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_I32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // divide = idx / idy
-                divide = b.Divide<i32>(loadx, loady);
+                divide = b.Divide(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -12525,7 +12525,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_U32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // divide = idx / idy
-                divide = b.Divide<u32>(loadx, loady);
+                divide = b.Divide(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -17091,7 +17091,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_LHS_RHS_F32) {
     func->AppendParam(param);
     b.Append(func->Block(), [&] {
         // modulo = param % 2.0f
-        modulo = b.Modulo<f32>(param, 2_f);
+        modulo = b.Modulo(param, 2_f);
         b.Return(func);
     });
 
@@ -17121,7 +17121,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_LHS_RHS_Vec4I) {
     b.Append(func->Block(), [&] {
         auto* vec4_const = b.Construct(ty.vec4i(), 1_i, 2_i, 3_i, 4_i);
         // modulo = param %
-        modulo = b.Modulo<vec4<i32>>(param, vec4_const);
+        modulo = b.Modulo(param, vec4_const);
         b.Return(func);
     });
 
@@ -17161,7 +17161,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_LHS_Negative_I32) {
         call_min = b.Call<i32>(BuiltinFn::kMin, b.Constant(5_i), call_max);
 
         // modulo = call_min % 2
-        modulo = b.Modulo<i32>(call_min, 2_i);
+        modulo = b.Modulo(call_min, 2_i);
         b.Return(func);
     });
 
@@ -17218,7 +17218,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_NonConstant_I32) {
         call_min_param2 = b.Call<i32>(BuiltinFn::kMin, b.Constant(4_i), call_max_param2);
 
         // modulo = call_min_param1 % call_min_param1
-        modulo = b.Modulo<i32>(call_min_param1, call_min_param2);
+        modulo = b.Modulo(call_min_param1, call_min_param2);
         b.Return(func);
     });
 
@@ -17278,7 +17278,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_NonConstant_U32) {
         call_min_param2 = b.Call<u32>(BuiltinFn::kMin, b.Constant(4_u), call_max_param2);
 
         // modulo = call_min_param1 % call_min_param2
-        modulo = b.Modulo<u32>(call_min_param1, call_min_param2);
+        modulo = b.Modulo(call_min_param1, call_min_param2);
         b.Return(func);
     });
 
@@ -17327,7 +17327,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_Negative_I32) {
         auto* call_min = b.Call<i32>(BuiltinFn::kMin, b.Constant(6_i), call_max);
 
         // modulo = call_min % (-6)
-        modulo = b.Modulo<i32>(call_min, b.Constant(-6_i));
+        modulo = b.Modulo(call_min, b.Constant(-6_i));
         b.Return(func);
     });
 
@@ -17378,7 +17378,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_Zero_I32) {
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
 
             // modulo = call_min % idx
-            modulo = b.Modulo<i32>(call_min, b.Load(idx));
+            modulo = b.Modulo(call_min, b.Load(idx));
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -17471,7 +17471,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_Zero_U32) {
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
 
             // modulo = call_min % idx
-            modulo = b.Modulo<u32>(call_min, b.Load(idx));
+            modulo = b.Modulo(call_min, b.Load(idx));
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -17544,7 +17544,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_LHS_NoRange_I32) {
     func->AppendParam(param);
     b.Append(func->Block(), [&] {
         // modulo = param % 3
-        modulo = b.Modulo<i32>(param, 3_i);
+        modulo = b.Modulo(param, 3_i);
         b.Return(func);
     });
 
@@ -17574,7 +17574,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Success_LHS_NoRange_U32) {
     func->AppendParam(param);
     b.Append(func->Block(), [&] {
         // modulo = param % 3u
-        modulo = b.Modulo<u32>(param, 3_u);
+        modulo = b.Modulo(param, 3_u);
         b.Return(func);
     });
 
@@ -17615,7 +17615,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         auto* call_min = b.Call<i32>(BuiltinFn::kMin, b.Constant(12_i), call_max);
 
         // modulo = call_min % 5
-        modulo = b.Modulo<i32>(call_min, b.Constant(5_i));
+        modulo = b.Modulo(call_min, b.Constant(5_i));
         b.Return(func);
     });
 
@@ -17658,7 +17658,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         auto* call_min = b.Call<u32>(BuiltinFn::kMin, b.Constant(12_u), call_max);
 
         // modulo = call_min % 6
-        modulo = b.Modulo<u32>(call_min, b.Constant(6_u));
+        modulo = b.Modulo(call_min, b.Constant(6_u));
         b.Return(func);
     });
 
@@ -17701,7 +17701,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         auto* call_min = b.Call<i32>(BuiltinFn::kMin, b.Constant(12_i), call_max);
 
         // modulo = call_min % 7
-        modulo = b.Modulo<i32>(call_min, b.Constant(7_i));
+        modulo = b.Modulo(call_min, b.Constant(7_i));
         b.Return(func);
     });
 
@@ -17744,7 +17744,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         auto* call_min = b.Call<u32>(BuiltinFn::kMin, b.Constant(12_u), call_max);
 
         // modulo = call_min % 7
-        modulo = b.Modulo<u32>(call_min, b.Constant(7_u));
+        modulo = b.Modulo(call_min, b.Constant(7_u));
         b.Return(func);
     });
 
@@ -17786,7 +17786,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Success_RHS_Is_One_I32) {
         auto* call_min = b.Call<i32>(BuiltinFn::kMin, b.Constant(9_i), call_max);
 
         // modulo = call_min % 1
-        modulo = b.Modulo<i32>(call_min, b.Constant(1_i));
+        modulo = b.Modulo(call_min, b.Constant(1_i));
         b.Return(func);
     });
 
@@ -17822,7 +17822,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Success_RHS_Is_One_U32) {
     func->AppendParam(param);
     b.Append(func->Block(), [&] {
         // modulo = param % 1u
-        modulo = b.Modulo<u32>(param, 1_u);
+        modulo = b.Modulo(param, 1_u);
         b.Return(func);
     });
 
@@ -17859,7 +17859,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Success_RHS_Is_Highest_I32) {
         auto* call_max = b.Call<i32>(BuiltinFn::kMax, b.Constant(0_i), param);
 
         // modulo = call_max % i32::kHighestValue
-        modulo = b.Modulo<i32>(call_max, i32::Highest());
+        modulo = b.Modulo(call_max, i32::Highest());
         b.Return(func);
     });
 
@@ -17894,7 +17894,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Success_RHS_Is_Highest_U32) {
     func->AppendParam(param);
     b.Append(func->Block(), [&] {
         // modulo = param % u32::kHighestValue
-        modulo = b.Modulo<u32>(param, u32::Highest());
+        modulo = b.Modulo(param, u32::Highest());
         b.Return(func);
     });
 

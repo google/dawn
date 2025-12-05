@@ -220,7 +220,7 @@ struct State {
             if (offset > 0) {
                 inst = b.Subtract(inst, u32(offset));
             }
-            auto* div = b.Divide(ty.u32(), inst, u32(arr_ty->ImplicitStride()));
+            auto* div = b.Divide(inst, u32(arr_ty->ImplicitStride()));
             call->Result()->ReplaceAllUsesWith(div->Result());
         });
         call->Destroy();

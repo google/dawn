@@ -118,7 +118,7 @@ struct State {
     void PreciseFloatMod(core::ir::Binary* binary) {
         auto* type = binary->Result()->Type();
         b.InsertBefore(binary, [&] {
-            auto* div = b.Divide(type, binary->LHS(), binary->RHS());
+            auto* div = b.Divide(binary->LHS(), binary->RHS());
 
             // Force to a `let` to get better generated HLSL
             auto* d = b.Let(type);

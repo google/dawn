@@ -1334,9 +1334,9 @@ class Impl {
             case core::BinaryOp::kMultiply:
                 return builder_.Multiply(lhs, rhs);
             case core::BinaryOp::kDivide:
-                return builder_.Divide(ty, lhs, rhs);
+                return builder_.Divide(lhs, rhs);
             case core::BinaryOp::kModulo:
-                return builder_.Modulo(ty, lhs, rhs);
+                return builder_.Modulo(lhs, rhs);
             case core::BinaryOp::kLogicalAnd:
             case core::BinaryOp::kLogicalOr:
                 TINT_ICE() << "short circuit op should have already been handled";

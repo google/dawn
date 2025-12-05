@@ -178,7 +178,7 @@ struct State {
             b.Append(f->Block(), [&] {
                 core::ir::Value* ret = nullptr;
 
-                ret = b.Divide(type, x, y)->Result();
+                ret = b.Divide(x, y)->Result();
                 ret = b.Call(type, core::BuiltinFn::kTrunc, ret)->Result();
                 ret = b.Multiply(y, ret)->Result();
                 ret = b.Subtract(x, ret)->Result();

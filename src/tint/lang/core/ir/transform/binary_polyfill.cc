@@ -155,12 +155,12 @@ struct State {
 
                 if (binary->Op() == BinaryOp::kDivide) {
                     // Perform the divide with the modified RHS.
-                    b.Return(func, b.Divide(result_ty, lhs, rhs_or_one)->Result());
+                    b.Return(func, b.Divide(lhs, rhs_or_one)->Result());
                 } else if (binary->Op() == BinaryOp::kModulo) {
                     // Calculate the modulo manually, as modulo with negative operands is undefined
                     // behavior for many backends:
                     //   result = lhs - ((lhs / rhs_or_one) * rhs_or_one)
-                    auto* whole = b.Divide(result_ty, lhs, rhs_or_one);
+                    auto* whole = b.Divide(lhs, rhs_or_one);
                     auto* remainder = b.Subtract(lhs, b.Multiply(whole, rhs_or_one));
                     b.Return(func, remainder->Result());
                 }

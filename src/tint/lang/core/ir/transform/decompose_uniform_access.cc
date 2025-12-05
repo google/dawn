@@ -166,7 +166,7 @@ struct State {
             auto v = cnst->Value()->ValueAs<uint32_t>();
             return b.Value(u32(v / 16u));
         }
-        return b.Divide(ty.u32(), val, 16_u)->Result();
+        return b.Divide(val, 16_u)->Result();
     }
 
     // Calculates the index of the vec4u element containing the byte at (byte_idx % 16).
@@ -355,7 +355,7 @@ struct State {
         } else {
             auto* false_ = b.Value(1_u);
             auto* true_ = b.Value(0_u);
-            auto* cond = b.Equal(b.Modulo(ty.u32(), byte_idx, 4_u), 0_u);
+            auto* cond = b.Equal(b.Modulo(byte_idx, 4_u), 0_u);
 
             Vector<core::ir::Value*, 3> args{false_, true_, cond->Result()};
             element_index = b.Call(ty.u32(), core::BuiltinFn::kSelect, args)->Result();

@@ -462,7 +462,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, FloatModF32) {
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2f(), 1_f));
         auto* r = b.Let("right", b.Splat(ty.vec2f(), 2_f));
-        auto* bin = b.Modulo(ty.vec2f(), l, r);
+        auto* bin = b.Modulo(l, r);
         b.Let("val", bin);
         b.Return(func);
     });
@@ -510,7 +510,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, FloatModMixedF32) {
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", 1_f);
         auto* r = b.Let("right", b.Splat(ty.vec2f(), 2_f));
-        auto* bin = b.Modulo(ty.vec2f(), l, r);
+        auto* bin = b.Modulo(l, r);
         b.Let("val", bin);
         b.Return(func);
     });
@@ -559,7 +559,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, FloatModF16) {
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2h(), 1_h));
         auto* r = b.Let("right", b.Splat(ty.vec2h(), 2_h));
-        auto* bin = b.Modulo(ty.vec2h(), l, r);
+        auto* bin = b.Modulo(l, r);
         b.Let("val", bin);
         b.Return(func);
     });

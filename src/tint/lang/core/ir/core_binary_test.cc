@@ -300,7 +300,7 @@ TEST_F(IR_BinaryTest, CreateMultiply) {
 }
 
 TEST_F(IR_BinaryTest, CreateDivide) {
-    auto* inst = b.Divide(mod.Types().i32(), 4_i, 2_i);
+    auto* inst = b.Divide(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kDivide);
@@ -317,7 +317,7 @@ TEST_F(IR_BinaryTest, CreateDivide) {
 }
 
 TEST_F(IR_BinaryTest, CreateModulo) {
-    auto* inst = b.Modulo(mod.Types().i32(), 4_i, 2_i);
+    auto* inst = b.Modulo(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kModulo);

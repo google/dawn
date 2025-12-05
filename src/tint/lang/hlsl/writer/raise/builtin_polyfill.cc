@@ -407,7 +407,7 @@ struct State {
                 b.MatchWidth(is_f16 ? b.ConstantValue(0.5_h) : b.ConstantValue(0.5_f), result_ty);
             auto* one_plus_x = b.Add(one, args[0]);
             auto* one_minus_x = b.Subtract(one, args[0]);
-            auto* div = b.Divide(result_ty, one_plus_x, one_minus_x);
+            auto* div = b.Divide(one_plus_x, one_minus_x);
             auto* log = b.Call(result_ty, core::BuiltinFn::kLog, div);
             auto* mul = b.Multiply(log, half);
 
@@ -1561,7 +1561,7 @@ struct State {
             auto* v = b.ShiftRight(ty.vec2i(), vec, b.Composite(ty.vec2u(), 16_u));
 
             auto* flt = b.Convert(ty.vec2f(), v);
-            auto* scale = b.Divide(ty.vec2f(), flt, 32767_f);
+            auto* scale = b.Divide(flt, 32767_f);
 
             auto* lower = b.Splat(ty.vec2f(), -1_f);
             auto* upper = b.Splat(ty.vec2f(), 1_f);
@@ -1595,7 +1595,7 @@ struct State {
             auto* y = b.ShiftRight(ty.u32(), args[0], 16_u);
             auto* conv = b.Construct(ty.vec2u(), x, y);
             auto* flt_conv = b.Convert(ty.vec2f(), conv);
-            auto* scale = b.Divide(ty.vec2f(), flt_conv, 0xffff_f);
+            auto* scale = b.Divide(flt_conv, 0xffff_f);
 
             call->Result()->ReplaceAllUsesWith(scale->Result());
         });
@@ -1634,7 +1634,7 @@ struct State {
             auto* cons = b.Construct(ty.vec4i(), x, y, z, conv);
             auto* shr = b.ShiftRight(ty.vec4i(), cons, b.Composite(ty.vec4u(), 24_u));
             auto* flt = b.Convert(ty.vec4f(), shr);
-            auto* scale = b.Divide(ty.vec4f(), flt, 127_f);
+            auto* scale = b.Divide(flt, 127_f);
 
             auto* lower = b.Splat(ty.vec4f(), -1_f);
             auto* upper = b.Splat(ty.vec4f(), 1_f);
@@ -1674,7 +1674,7 @@ struct State {
             auto* w = b.ShiftRight(ty.u32(), val, 24_u);
             auto* cons = b.Construct(ty.vec4u(), x, y, z, w);
             auto* conv = b.Convert(ty.vec4f(), cons);
-            auto* scale = b.Divide(ty.vec4f(), conv, 255_f);
+            auto* scale = b.Divide(conv, 255_f);
 
             call->Result()->ReplaceAllUsesWith(scale->Result());
         });

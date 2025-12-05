@@ -448,7 +448,7 @@ struct State {
 
         auto* res_ty = call->Result()->Type();
         b.InsertBefore(call, [&] {
-            auto* div = b.Divide(res_ty, x, y);
+            auto* div = b.Divide(x, y);
             auto* floor = b.Call(res_ty, core::BuiltinFn::kFloor, div);
             auto* mul = b.Multiply(y, floor);
             auto* sub = b.Subtract(x, mul);
@@ -1104,7 +1104,7 @@ struct State {
             } else {
                 TINT_UNREACHABLE();
             }
-            auto* inv_det = b.Divide(elem_ty, one, det);
+            auto* inv_det = b.Divide(one, det);
 
             // Returns (m * n) - (o * p)
             auto sub_mul2 = [&](auto* m, auto* n, auto* o, auto* p) {

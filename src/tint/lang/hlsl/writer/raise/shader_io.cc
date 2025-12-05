@@ -524,7 +524,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             TINT_IR_ASSERT(ir, local_invocation_index_index);
             auto* local_index = GetInput(builder, local_invocation_index_index.value());
             auto* subgroup_size = GetSubgroupSize(builder);
-            return builder.Divide<u32>(local_index, subgroup_size)->Result();
+            return builder.Divide(local_index, subgroup_size)->Result();
         }
 
         // Otherwise, we use the atomic counter that is incremented by each subgroup, and then
@@ -540,7 +540,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         if (linear_workgroup_size) {
             auto* subgroup_size = GetSubgroupSize(builder);
             auto* add = builder.Add(u32(linear_workgroup_size.value() - 1), subgroup_size);
-            return builder.Divide<u32>(add, subgroup_size)->Result();
+            return builder.Divide(add, subgroup_size)->Result();
         }
 
         // Otherwise, we use the atomic counter that is incremented by each subgroup, and then load
@@ -592,7 +592,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             // If this is an input position builtin we need to invert the 'w' component of the
             // vector.
             auto* w = builder.Access(ty.f32(), v, 3_u);
-            auto* div = builder.Divide(ty.f32(), 1.0_f, w);
+            auto* div = builder.Divide(1.0_f, w);
             auto* swizzle = builder.Swizzle(ty.vec3f(), v, {0, 1, 2});
             v = builder.Construct(ty.vec4f(), swizzle, div)->Result();
         } else if (config.first_index_offset_binding.has_value() &&

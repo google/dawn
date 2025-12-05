@@ -1037,7 +1037,7 @@ struct State {
             auto* v = b.ShiftRight(ty.vec2i(), vec, b.Splat(ty.vec2u(), 16_u));
 
             auto* flt = b.Convert(ty.vec2f(), v);
-            auto* scale = b.Divide(ty.vec2f(), flt, 32767_f);
+            auto* scale = b.Divide(flt, 32767_f);
 
             auto* lower = b.Splat(ty.vec2f(), -1_f);
             auto* upper = b.Splat(ty.vec2f(), 1_f);
@@ -1057,7 +1057,7 @@ struct State {
             auto* v = b.ShiftRight(ty.vec2u(), vec, b.Splat(ty.vec2u(), 16_u));
 
             auto* flt = b.Convert(ty.vec2f(), v);
-            auto* scale = b.Divide(ty.vec2f(), flt, 65535_f);
+            auto* scale = b.Divide(flt, 65535_f);
 
             auto* lower = b.Splat(ty.vec2f(), 0_f);
             auto* upper = b.Splat(ty.vec2f(), 1_f);

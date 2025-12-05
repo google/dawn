@@ -197,7 +197,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByHelper) {
             auto* color2_value = b.Load(color2);
             auto* add = b.Add(color1_value, color2_value);
             auto* mul = b.Multiply(position_value, add);
-            b.Divide(ty.vec4f(), mul, param);
+            b.Divide(mul, param);
             b.ExitIf(ifelse);
         });
         b.Return(foo);

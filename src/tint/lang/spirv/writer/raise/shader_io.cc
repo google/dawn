@@ -256,7 +256,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             // Special center position polyfilled from within vertex shader.
             TINT_IR_ASSERT(ir, vert_out_position);
             auto one_div_w =
-                builder.Divide(ty.f32(), 1_f, builder.Swizzle(ty.f32(), vert_out_position, {3u}));
+                builder.Divide(1_f, builder.Swizzle(ty.f32(), vert_out_position, {3u}));
             auto z_div_w =
                 builder.Multiply(one_div_w, builder.Swizzle(ty.f32(), vert_out_position, {2u}));
             value =

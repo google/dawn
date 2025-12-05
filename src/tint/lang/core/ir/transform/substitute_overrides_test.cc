@@ -551,7 +551,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpression) {
 
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Let("y", b.Divide(ty.u32(), 10_u, x));
+        b.Let("y", b.Divide(10_u, x));
         b.Let("z", b.Multiply(5_u, o));
         b.Return(func);
     });
@@ -656,7 +656,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperand) {
 
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Let("y", b.Divide(ty.u32(), 10_u, o));
+        b.Let("y", b.Divide(10_u, o));
         auto* k = b.Add(1_u, b.Multiply(2_u, x));
         b.Let("z", b.Multiply(k, o));
         b.Return(func);
@@ -717,7 +717,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandFlipOrder) {
 
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Let("y", b.Divide(ty.u32(), 10_u, o));
+        b.Let("y", b.Divide(10_u, o));
         auto* k = b.Add(1_u, b.Multiply(2_u, o));
         b.Let("z", b.Multiply(k, x));
         b.Return(func);
@@ -778,7 +778,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandNonConstFn) {
 
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Let("y", b.Divide(ty.f32(), 10_f, x));
+        b.Let("y", b.Divide(10_f, x));
         auto* k = b.Call(ty.f32(), core::BuiltinFn::kDpdx, x);
         b.Let("z", b.Multiply(k, o));
         b.Return(func);
@@ -840,7 +840,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandLet) {
 
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Let("y", b.Divide(ty.f32(), 10_f, x));
+        b.Let("y", b.Divide(10_f, x));
         auto* k = b.Let("k", b.Call(ty.f32(), core::BuiltinFn::kDpdx, x));
         b.Let("z", b.Multiply(k, o));
         b.Return(func);
@@ -1180,7 +1180,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondConstExprSuccess) {
         auto* constexpr_if = b.ConstExprIf(cond);
         constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
-            auto* three = b.Divide(ty.f32(), one_f32, 0.0_f);
+            auto* three = b.Divide(one_f32, 0.0_f);
             auto* four = b.Equal(three, 0.0_f);
             b.ExitIf(constexpr_if, four);
         });
@@ -1244,7 +1244,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondConstExprFailure) {
         auto* constexpr_if = b.ConstExprIf(cond);
         constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
-            auto* three = b.Divide(ty.f32(), one_f32, 0.0_f);
+            auto* three = b.Divide(one_f32, 0.0_f);
             auto* four = b.Equal(three, 0.0_f);
             b.ExitIf(constexpr_if, four);
         });
@@ -1302,7 +1302,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondComplexConstExprSuccess) {
         auto* constexpr_if = b.ConstExprIf(cond);
         constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
-            auto* three = b.Divide(ty.f32(), one_f32, 1.0_f);
+            auto* three = b.Divide(one_f32, 1.0_f);
             auto* four = b.Equal(three, 1.0_f);
             b.ExitIf(constexpr_if, four);
         });
@@ -1371,12 +1371,12 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondComplexConstExprNestedSuccess) {
             auto* constexpr_if_inner = b.ConstExprIf(cond);
             constexpr_if_inner->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(constexpr_if_inner->True(), [&] {
-                auto* bad_eval = b.Divide(ty.f32(), 1.0_f, zero_f32);
+                auto* bad_eval = b.Divide(1.0_f, zero_f32);
                 auto* bad_eval_equal = b.Equal(bad_eval, 1.0_f);
                 b.ExitIf(constexpr_if_inner, bad_eval_equal);
             });
             b.Append(constexpr_if_inner->False(), [&] {
-                auto* bad_eval = b.Divide(ty.f32(), 1.0_f, zero_f32);
+                auto* bad_eval = b.Divide(1.0_f, zero_f32);
                 auto* bad_eval_equal = b.Equal(bad_eval, 1.0_f);
                 b.ExitIf(constexpr_if_inner, bad_eval_equal);
             });
@@ -1458,7 +1458,7 @@ TEST_F(IR_SubstituteOverridesTest, ConstExprIfInsideKernel) {
         constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             auto* k4 = b.Add(10_u, 5_u);
-            auto* k = b.Divide(ty.u32(), k4, x);
+            auto* k = b.Divide(k4, x);
             auto* k2 = b.Equal(k, 10_u);
             b.ExitIf(constexpr_if, k2);
         });
@@ -1524,7 +1524,7 @@ TEST_F(IR_SubstituteOverridesTest, ConstExpIfDuplicateUsage) {
         auto* constexpr_if = b.ConstExprIf(y);
         constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
-            auto* k4 = b.Divide(ty.u32(), 10_u, 0_u);
+            auto* k4 = b.Divide(10_u, 0_u);
             auto* k = b.Add(k4, k4);
             auto* k2 = b.Equal(k, 10_u);
             b.ExitIf(constexpr_if, k2);

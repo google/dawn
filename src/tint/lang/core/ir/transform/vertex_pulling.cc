@@ -678,7 +678,7 @@ struct State {
                     b.And<vec4<u32>>(shr, b.Composite<vec4<u32>>(0x3FF_u, 0x3FF_u, 0x3FF_u, 0x3_u));
                 // vec4f(mask) / vec4f(1023, 1023, 1023, 3);
                 auto* div = b.Composite<vec4<f32>>(1023_f, 1023_f, 1023_f, 3_f);
-                return float_value(b.Divide<vec4<f32>>(b.Convert<vec4<f32>>(mask), div)->Result());
+                return float_value(b.Divide(b.Convert<vec4<f32>>(mask), div)->Result());
             }
         }
         TINT_IR_UNREACHABLE(ir);

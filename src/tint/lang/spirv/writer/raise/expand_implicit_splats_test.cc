@@ -365,7 +365,7 @@ TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryDivide_VectorScalar_Vec4f) {
     func->SetParams({scalar, vector});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Divide(ty.vec4f(), vector, scalar);
+        auto* result = b.Divide(vector, scalar);
         b.Return(func, result);
     });
 
@@ -401,7 +401,7 @@ TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryDivide_ScalarVector_Vec4f) {
     func->SetParams({scalar, vector});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Divide(ty.vec4f(), scalar, vector);
+        auto* result = b.Divide(scalar, vector);
         b.Return(func, result);
     });
 
@@ -437,7 +437,7 @@ TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryModulo_VectorScalar_Vec4f) {
     func->SetParams({scalar, vector});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Modulo(ty.vec4f(), vector, scalar);
+        auto* result = b.Modulo(vector, scalar);
         b.Return(func, result);
     });
 
@@ -473,7 +473,7 @@ TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryModulo_ScalarVector_Vec4f) {
     func->SetParams({scalar, vector});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Modulo(ty.vec4f(), scalar, vector);
+        auto* result = b.Modulo(scalar, vector);
         b.Return(func, result);
     });
 

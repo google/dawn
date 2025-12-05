@@ -46,7 +46,7 @@ TEST_F(HlslWriter_BinaryPolyfillTest, ModF32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({x, y});
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Modulo(ty.f32(), x, y));
+        b.Let("a", b.Modulo(x, y));
         b.Return(func);
     });
 
@@ -85,7 +85,7 @@ TEST_F(HlslWriter_BinaryPolyfillTest, ModF16) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({x, y});
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Modulo(ty.f16(), x, y));
+        b.Let("a", b.Modulo(x, y));
         b.Return(func);
     });
 
@@ -124,7 +124,7 @@ TEST_F(HlslWriter_BinaryPolyfillTest, ModF32Vec3) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({x, y});
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Modulo(ty.vec3f(), x, y));
+        b.Let("a", b.Modulo(x, y));
         b.Return(func);
     });
 
@@ -163,7 +163,7 @@ TEST_F(HlslWriter_BinaryPolyfillTest, ModF16Vec3) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({x, y});
     b.Append(func->Block(), [&] {
-        b.Let("a", b.Modulo(ty.vec3h(), x, y));
+        b.Let("a", b.Modulo(x, y));
         b.Return(func);
     });
 

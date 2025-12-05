@@ -1115,7 +1115,7 @@ TEST_F(IRToProgramTest, BinaryOp_Divide) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.Divide(ty.i32(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Divide(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -1130,7 +1130,7 @@ TEST_F(IRToProgramTest, BinaryOp_Modulo) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.Modulo(ty.i32(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Modulo(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -2007,7 +2007,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Divide) {
 
     b.Append(fn->Block(), [&] {
         auto* v = Var<function, i32>("v");
-        b.Store(v, b.Divide(ty.i32(), b.Load(v), 8_i));
+        b.Store(v, b.Divide(b.Load(v), 8_i));
 
         b.Return(fn);
     });

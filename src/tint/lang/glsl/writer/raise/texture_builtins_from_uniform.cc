@@ -165,8 +165,8 @@ struct State {
         if (path.index != nullptr) {
             offset = b.Add(offset, b.InsertConvertIfNeeded(ty.u32(), path.index))->Result();
         }
-        auto* index_in_array = b.Divide(ty.u32(), offset, u32(4));
-        auto* index_in_vector = b.Modulo(ty.u32(), offset, u32(4));
+        auto* index_in_array = b.Divide(offset, u32(4));
+        auto* index_in_vector = b.Modulo(offset, u32(4));
 
         auto* vec4_ptr =
             b.Access(ty.ptr<uniform>(ty.vec4u()), texture_uniform_data_, u32(0), index_in_array);

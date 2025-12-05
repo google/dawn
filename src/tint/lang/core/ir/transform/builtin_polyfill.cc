@@ -380,7 +380,7 @@ struct State {
             v = b.Bitcast(vec4i, v)->Result();
             v = b.ShiftRight(vec4i, v, b.Splat(vec4u, 24_u))->Result();
             v = b.Convert(vec4f, v)->Result();
-            v = b.Divide(vec4f, v, b.Splat(vec4f, 127_f))->Result();
+            v = b.Divide(v, b.Splat(vec4f, 127_f))->Result();
             v = b.Call(vec4f, core::BuiltinFn::kMax, v, b.Splat(vec4f, -1_f))->Result();
 
             call->Result()->ReplaceAllUsesWith(v);
@@ -400,7 +400,7 @@ struct State {
             v = b.ShiftRight(vec4u, v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
             v = b.And(vec4u, v, b.Splat(vec4u, 0xff_u))->Result();
             v = b.Convert(vec4f, v)->Result();
-            v = b.Divide(vec4f, v, b.Splat(vec4f, 255_f))->Result();
+            v = b.Divide(v, b.Splat(vec4f, 255_f))->Result();
 
             call->Result()->ReplaceAllUsesWith(v);
         });
@@ -592,7 +592,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* dividend = b.Subtract(x_arg, edge0_arg);
             auto* divisor = b.Subtract(edge1_arg, edge0_arg);
-            auto* quotient = b.Divide(type, dividend, divisor);
+            auto* quotient = b.Divide(dividend, divisor);
             auto* t_clamped = b.Call(type, core::BuiltinFn::kClamp, quotient, zero, one);
 
             // Smoothstep is a well defined function.
@@ -949,7 +949,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* dims = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, texture);
             auto* fdims = b.Convert<vec2<f32>>(dims);
-            auto* half_texel = b.Divide<vec2<f32>>(b.Splat<vec2<f32>>(0.5_f), fdims);
+            auto* half_texel = b.Divide(b.Splat<vec2<f32>>(0.5_f), fdims);
             auto* one_minus_half_texel = b.Subtract(b.Splat<vec2<f32>>(1_f), half_texel);
             auto* clamped = b.Call<vec2<f32>>(core::BuiltinFn::kClamp, coords, half_texel,
                                               one_minus_half_texel);

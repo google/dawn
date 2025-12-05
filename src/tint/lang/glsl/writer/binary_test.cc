@@ -214,7 +214,7 @@ TEST_F(GlslWriterTest, Binary_Float_Modulo) {
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2f(), 1_f));
         auto* r = b.Let("right", b.Splat(ty.vec2f(), 2_f));
-        auto* bin = b.Modulo(ty.vec2f(), l, r);
+        auto* bin = b.Modulo(l, r);
         b.Let("val", bin);
         b.Return(func);
     });
