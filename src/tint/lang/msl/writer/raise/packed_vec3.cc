@@ -429,7 +429,7 @@ struct State {
                     // vec3<u32>. We need to unpack the packed_vec3<u32> to a vec3<u32> and then
                     // convert it to a vec3<bool>.
                     auto* unpacked =
-                        b.Call<msl::ir::BuiltinCall>(ty.vec3<u32>(), msl::BuiltinFn::kConvert, load)
+                        b.Call<msl::ir::BuiltinCall>(ty.vec3u(), msl::BuiltinFn::kConvert, load)
                             ->Result();
                     return b.Convert<vec3<bool>>(unpacked)->Result();
                 } else {

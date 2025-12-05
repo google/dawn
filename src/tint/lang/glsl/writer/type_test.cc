@@ -305,7 +305,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Vector_F32) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3f()));
         b.Return(func);
     });
 
@@ -321,7 +321,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Vector_F16) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3h()));
         b.Return(func);
     });
 
@@ -338,7 +338,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Vector_I32) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec2<i32>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec2i()));
         b.Return(func);
     });
 
@@ -354,7 +354,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Vector_U32) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec4<u32>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec4u()));
         b.Return(func);
     });
 
@@ -451,11 +451,10 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_Struct_Nested) {
-    auto* inner =
-        ty.Struct(mod.symbols.New("Inner"), {
-                                                {mod.symbols.Register("x"), ty.u32()},
-                                                {mod.symbols.Register("y"), ty.vec4<f32>()},
-                                            });
+    auto* inner = ty.Struct(mod.symbols.New("Inner"), {
+                                                          {mod.symbols.Register("x"), ty.u32()},
+                                                          {mod.symbols.Register("y"), ty.vec4f()},
+                                                      });
 
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("a"), ty.i32()},

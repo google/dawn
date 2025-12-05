@@ -40,7 +40,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using SpirvReader_VectorElementPointerTest = core::ir::transform::TransformTest;
 
 TEST_F(SpirvReader_VectorElementPointerTest, NonPointerAccess) {
-    auto* vec = b.FunctionParam("vec", ty.vec4<u32>());
+    auto* vec = b.FunctionParam("vec", ty.vec4u());
     auto* foo = b.Function("foo", ty.u32());
     foo->SetParams({vec});
     b.Append(foo->Block(), [&] {
@@ -390,7 +390,7 @@ $B1: {  # root
 TEST_F(SpirvReader_VectorElementPointerTest, ViaStruct) {
     auto* str_ty = ty.Struct(mod.symbols.New("str"), {{
                                                          mod.symbols.New("vec"),
-                                                         ty.vec4<f32>(),
+                                                         ty.vec4f(),
                                                      }});
 
     auto* foo = b.Function("foo", ty.void_());
@@ -492,7 +492,7 @@ str = struct @align(16) {
 TEST_F(SpirvReader_VectorElementPointerTest, PreserveAccessMode) {
     auto* str_ty = ty.Struct(mod.symbols.New("str"), {{
                                                          mod.symbols.New("vec"),
-                                                         ty.vec4<u32>(),
+                                                         ty.vec4u(),
                                                      }});
     auto* var = b.Var("var", ty.ptr(storage, str_ty, read));
     var->SetBindingPoint(0, 0);

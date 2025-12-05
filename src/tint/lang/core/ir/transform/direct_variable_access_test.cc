@@ -462,7 +462,7 @@ TEST_F(IR_DirectVariableAccessTest_PtrChains, ConstantIndices) {
                  U->SetBindingPoint(0, 0);
              });
 
-    auto* fn_a = b.Function("a", ty.vec4<i32>());
+    auto* fn_a = b.Function("a", ty.vec4i());
     auto* fn_a_p = b.FunctionParam("p", ty.ptr<uniform, vec4<i32>>());
     fn_a->SetParams({
         b.FunctionParam("pre", ty.i32()),
@@ -480,7 +480,7 @@ TEST_F(IR_DirectVariableAccessTest_PtrChains, ConstantIndices) {
         b.ir.SetName(p2, "p2");
         auto* p3 = b.Access(ty.ptr<uniform, vec4<i32>>(), p2, 3_i);
         b.ir.SetName(p3, "p3");
-        b.Call(ty.vec4<i32>(), fn_a, 10_i, p3, 20_i);
+        b.Call(ty.vec4i(), fn_a, 10_i, p3, 20_i);
         b.Return(fn_b);
     });
 
@@ -495,7 +495,7 @@ TEST_F(IR_DirectVariableAccessTest_PtrChains, ConstantIndices) {
         b.ir.SetName(p2, "p2");
         auto* p3 = b.Access(ty.ptr<uniform, vec4<i32>>(), p2, 3_i);
         b.ir.SetName(p3, "p3");
-        b.Call(ty.vec4<i32>(), fn_a, 10_i, p3, 20_i);
+        b.Call(ty.vec4i(), fn_a, 10_i, p3, 20_i);
         b.Return(fn_c);
     });
 
@@ -615,7 +615,7 @@ TEST_F(IR_DirectVariableAccessTest_PtrChains, DynamicIndices) {
         });
     }
 
-    auto* fn_a = b.Function("a", ty.vec4<i32>());
+    auto* fn_a = b.Function("a", ty.vec4i());
     auto* fn_a_p = b.FunctionParam("p", ty.ptr<uniform, vec4<i32>>());
     fn_a->SetParams({
         b.FunctionParam("pre", ty.i32()),
@@ -634,7 +634,7 @@ TEST_F(IR_DirectVariableAccessTest_PtrChains, DynamicIndices) {
         auto* third = b.Call(fn_third);
         auto* p2 = b.Access(ty.ptr<uniform, vec4<i32>>(), p1, second, third);
         b.ir.SetName(p2, "p2");
-        b.Call(ty.vec4<i32>(), fn_a, 10_i, p2, 20_i);
+        b.Call(ty.vec4i(), fn_a, 10_i, p2, 20_i);
         b.Return(fn_b);
     });
 
@@ -650,7 +650,7 @@ TEST_F(IR_DirectVariableAccessTest_PtrChains, DynamicIndices) {
         auto* third = b.Call(fn_third);
         auto* p2 = b.Access(ty.ptr<uniform, vec4<i32>>(), p1, second, third);
         b.ir.SetName(p2, "p2");
-        b.Call(ty.vec4<i32>(), fn_a, 10_i, p2, 20_i);
+        b.Call(ty.vec4i(), fn_a, 10_i, p2, 20_i);
         b.Return(fn_c);
     });
 
@@ -900,7 +900,7 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, Param_ptr_vec4i32_Via_array_Dynami
                  U->SetBindingPoint(0, 0);
              });
 
-    auto* fn_a = b.Function("a", ty.vec4<i32>());
+    auto* fn_a = b.Function("a", ty.vec4i());
     auto* fn_a_p = b.FunctionParam("p", ty.ptr<uniform, vec4<i32>>());
     fn_a->SetParams({
         b.FunctionParam("pre", ty.i32()),
@@ -1280,7 +1280,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_UniformAS, CallChaining2) {
-    auto* T3 = ty.vec4<i32>();
+    auto* T3 = ty.vec4i();
     auto* T2 = ty.array(T3, 5);
     auto* T1 = ty.array(T2, 5);
     auto* T = ty.array(T1, 5);
@@ -1484,7 +1484,7 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, Param_ptr_vec4i32_Via_array_Dyna
                  U = b.Var<immediate, array<vec4<i32>, 8>>("U");
              });
 
-    auto* fn_a = b.Function("a", ty.vec4<i32>());
+    auto* fn_a = b.Function("a", ty.vec4i());
     auto* fn_a_p = b.FunctionParam("p", ty.ptr<immediate, vec4<i32>>());
     fn_a->SetParams({
         b.FunctionParam("pre", ty.i32()),
@@ -1863,7 +1863,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_ImmediateAS, CallChaining2) {
-    auto* T3 = ty.vec4<i32>();
+    auto* T3 = ty.vec4i();
     auto* T2 = ty.array(T3, 5);
     auto* T1 = ty.array(T2, 5);
     auto* T = ty.array(T1, 5);
@@ -2553,7 +2553,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_StorageAS, CallChaining2) {
-    auto* T3 = ty.vec4<i32>();
+    auto* T3 = ty.vec4i();
     auto* T2 = ty.array(T3, 5);
     auto* T1 = ty.array(T2, 5);
     auto* T = ty.array(T1, 5);
@@ -2690,7 +2690,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, Param_ptr_vec4i32_Via_array_Stat
                  W = b.Var("W", ty.ptr<workgroup, array<vec4<i32>, 8>>());
              });
 
-    auto* fn_a = b.Function("a", ty.vec4<i32>());
+    auto* fn_a = b.Function("a", ty.vec4i());
     auto* fn_a_p = b.FunctionParam("p", ty.ptr<workgroup, vec4<i32>>());
     fn_a->SetParams({
         b.FunctionParam("pre", ty.i32()),
@@ -3142,7 +3142,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, CallChaining2) {
-    auto* T3 = ty.vec4<i32>();
+    auto* T3 = ty.vec4i();
     auto* T2 = ty.array(T3, 5);
     auto* T1 = ty.array(T2, 5);
     auto* T = ty.array(T1, 5);
@@ -4389,7 +4389,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_CallChaining2) {
-    auto* T3 = ty.vec4<i32>();
+    auto* T3 = ty.vec4i();
     auto* T2 = ty.array(T3, 5);
     auto* T1 = ty.array(T2, 5);
     auto* T = ty.array(T1, 5);
@@ -4511,7 +4511,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_CallChaining2) {
-    auto* T3 = ty.vec4<i32>();
+    auto* T3 = ty.vec4i();
     auto* T2 = ty.array(T3, 5);
     auto* T1 = ty.array(T2, 5);
     auto* T = ty.array(T1, 5);
@@ -5484,7 +5484,7 @@ Outer = struct @align(16) {
 }
 
 TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_CallChaining2) {
-    auto* T3 = ty.vec4<i32>();
+    auto* T3 = ty.vec4i();
     auto* T2 = ty.array(T3, 5);
     auto* T1 = ty.array(T2, 5);
     auto* T = ty.array(T1, 5);
@@ -5595,7 +5595,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_CallChaining2) {
 }
 
 TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_CallChaining2) {
-    auto* T3 = ty.vec4<i32>();
+    auto* T3 = ty.vec4i();
     auto* T2 = ty.array(T3, 5);
     auto* T1 = ty.array(T2, 5);
     auto* T = ty.array(T1, 5);
@@ -5697,8 +5697,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureSampler) {
         auto* t = b.Load(tex);
         auto* s = b.Load(samp);
 
-        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
-                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Let("p", b.Call(ty.vec4f(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2f(), 0_f)));
         b.Return(fn);
     });
 
@@ -5746,8 +5746,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamSampler) {
     b.Append(fn->Block(), [&] {
         auto* t = b.Load(tex);
 
-        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
-                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Let("p", b.Call(ty.vec4f(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2f(), 0_f)));
         b.Return(fn);
     });
 
@@ -5824,8 +5824,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamTextureLoa
     auto* fn = b.Function("f", ty.void_());
     fn->SetParams({t});
     b.Append(fn->Block(), [&] {
-        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, t,
-                          b.Splat(ty.vec2<u32>(), 0_u), 0_u));
+        b.Let("p",
+              b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, t, b.Splat(ty.vec2u(), 0_u), 0_u));
         b.Return(fn);
     });
 
@@ -5902,8 +5902,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureLocalSampler) {
     b.Append(fn->Block(), [&] {
         auto* s = b.Load(samp);
 
-        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
-                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Let("p", b.Call(ty.vec4f(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2f(), 0_f)));
         b.Return(fn);
     });
 
@@ -5983,8 +5983,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureParamSampler) {
     auto* fn = b.Function("f", ty.void_());
     fn->SetParams({t, s});
     b.Append(fn->Block(), [&] {
-        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
-                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Let("p", b.Call(ty.vec4f(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2f(), 0_f)));
         b.Return(fn);
     });
 
@@ -6065,8 +6065,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_MultiFunction) {
     auto* fn = b.Function("f", ty.void_());
     fn->SetParams({t, s});
     b.Append(fn->Block(), [&] {
-        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
-                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Let("p", b.Call(ty.vec4f(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2f(), 0_f)));
         b.Return(fn);
     });
 
@@ -6167,8 +6167,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Disabled_MultiFunction) {
     auto* fn = b.Function("f", ty.void_());
     fn->SetParams({t, s});
     b.Append(fn->Block(), [&] {
-        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
-                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Let("p", b.Call(ty.vec4f(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2f(), 0_f)));
         b.Return(fn);
     });
 
@@ -6244,10 +6244,10 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_DuplicateParam) {
     b.Append(fn->Block(), [&] {
         auto* s = b.Load(samp);
 
-        b.Let("p1", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t1, s,
-                           b.Splat(ty.vec2<f32>(), 0_f)));
-        b.Let("p2", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t2, s,
-                           b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Let("p1", b.Call(ty.vec4f(), core::BuiltinFn::kTextureGather, 0_u, t1, s,
+                           b.Splat(ty.vec2f(), 0_f)));
+        b.Let("p2", b.Call(ty.vec4f(), core::BuiltinFn::kTextureGather, 0_u, t2, s,
+                           b.Splat(ty.vec2f(), 0_f)));
         b.Return(fn);
     });
 
@@ -6337,8 +6337,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_Fork) {
     fn->SetParams({t});
     b.Append(fn->Block(), [&] {
         auto* s = b.Load(samp);
-        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
-                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Let("p", b.Call(ty.vec4f(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2f(), 0_f)));
         b.Return(fn);
     });
 
@@ -6445,7 +6445,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_TextureBindingArrayParam) {
 
     b.Append(fn->Block(), [&] {
         auto* t = b.Access(texture_type, p, 0_i);
-        b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, t, b.Splat(ty.vec2<u32>(), 0_u), 0_u);
+        b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, t, b.Splat(ty.vec2u(), 0_u), 0_u);
         b.Return(fn);
     });
 
@@ -6516,7 +6516,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_TextureFromBindingArrayPara
     fn->SetParams({p});
 
     b.Append(fn->Block(), [&] {
-        b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, p, b.Splat(ty.vec2<u32>(), 0_u), 0_u);
+        b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, p, b.Splat(ty.vec2u(), 0_u), 0_u);
         b.Return(fn);
     });
 
@@ -6733,7 +6733,7 @@ using IR_DirectVariableAccessTest_Complex = TransformTest;
 
 TEST_F(IR_DirectVariableAccessTest_Complex, Param_ptr_mixed_vec4i32_ViaMultiple) {
     auto* str_ = ty.Struct(mod.symbols.New("str"), {
-                                                       {mod.symbols.Register("i"), ty.vec4<i32>()},
+                                                       {mod.symbols.Register("i"), ty.vec4i()},
                                                    });
 
     Var* U = nullptr;
@@ -6774,17 +6774,17 @@ TEST_F(IR_DirectVariableAccessTest_Complex, Param_ptr_mixed_vec4i32_ViaMultiple)
                  W_arr_arr = b.Var<workgroup, array<array<vec4<i32>, 8>, 4>>("W_arr_arr");
              });
 
-    auto* fn_u = b.Function("fn_u", ty.vec4<i32>());
+    auto* fn_u = b.Function("fn_u", ty.vec4i());
     auto* fn_u_p = b.FunctionParam("p", ty.ptr<uniform, vec4<i32>, read>());
     fn_u->SetParams({fn_u_p});
     b.Append(fn_u->Block(), [&] { b.Return(fn_u, b.Load(fn_u_p)); });
 
-    auto* fn_s = b.Function("fn_s", ty.vec4<i32>());
+    auto* fn_s = b.Function("fn_s", ty.vec4i());
     auto* fn_s_p = b.FunctionParam("p", ty.ptr<storage, vec4<i32>, read>());
     fn_s->SetParams({fn_s_p});
     b.Append(fn_s->Block(), [&] { b.Return(fn_s, b.Load(fn_s_p)); });
 
-    auto* fn_w = b.Function("fn_w", ty.vec4<i32>());
+    auto* fn_w = b.Function("fn_w", ty.vec4i());
     auto* fn_w_p = b.FunctionParam("p", ty.ptr<workgroup, vec4<i32>>());
     fn_w->SetParams({fn_w_p});
     b.Append(fn_w->Block(), [&] { b.Return(fn_w, b.Load(fn_w_p)); });

@@ -229,7 +229,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             if (!has_position_member) {
                 core::IOAttributes attrs;
                 attrs.builtin = core::BuiltinValue::kPosition;
-                AddInput(ir.symbols.New("pos"), ty.vec4<f32>(), attrs);
+                AddInput(ir.symbols.New("pos"), ty.vec4f(), attrs);
             }
         }
 
@@ -440,7 +440,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // Create uniform var that will receive the number of workgroups
         core::ir::Var* num_wg_var = nullptr;
         builder.Append(ir.root_block, [&] {
-            num_wg_var = builder.Var("tint_num_workgroups", ty.ptr(uniform, ty.vec3<u32>()));
+            num_wg_var = builder.Var("tint_num_workgroups", ty.ptr(uniform, ty.vec3u()));
         });
         if (config.num_workgroups_binding.has_value()) {
             // If config.num_workgroups_binding holds a value, use it.
@@ -593,8 +593,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             // vector.
             auto* w = builder.Access(ty.f32(), v, 3_u);
             auto* div = builder.Divide(ty.f32(), 1.0_f, w);
-            auto* swizzle = builder.Swizzle(ty.vec3<f32>(), v, {0, 1, 2});
-            v = builder.Construct(ty.vec4<f32>(), swizzle, div)->Result();
+            auto* swizzle = builder.Swizzle(ty.vec3f(), v, {0, 1, 2});
+            v = builder.Construct(ty.vec4f(), swizzle, div)->Result();
         } else if (config.first_index_offset_binding.has_value() &&
                    inputs[idx].attributes.builtin == core::BuiltinValue::kVertexIndex) {
             // Apply vertex_index offset

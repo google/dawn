@@ -40,7 +40,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_RemoveUniformVectorComponentLoadsTest = core::ir::transform::TransformTest;
 
 TEST_F(IR_RemoveUniformVectorComponentLoadsTest, NoModify_NotUniform) {
-    auto* buffer = b.Var("buffer", ty.ptr(storage, ty.vec4<f32>(), read));
+    auto* buffer = b.Var("buffer", ty.ptr(storage, ty.vec4f(), read));
     buffer->SetBindingPoint(0, 0);
     mod.root_block->Append(buffer);
 
@@ -72,7 +72,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_RemoveUniformVectorComponentLoadsTest, Basic) {
-    auto* buffer = b.Var("buffer", ty.ptr(uniform, ty.vec4<f32>()));
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, ty.vec4f()));
     buffer->SetBindingPoint(0, 0);
     mod.root_block->Append(buffer);
 
@@ -117,7 +117,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_RemoveUniformVectorComponentLoadsTest, ViaLet) {
-    auto* buffer = b.Var("buffer", ty.ptr(uniform, ty.vec4<f32>()));
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, ty.vec4f()));
     buffer->SetBindingPoint(0, 0);
     mod.root_block->Append(buffer);
 
@@ -165,17 +165,17 @@ $B1: {  # root
 }
 
 TEST_F(IR_RemoveUniformVectorComponentLoadsTest, Multiple) {
-    auto* buffer = b.Var("buffer", ty.ptr(uniform, ty.vec4<f32>()));
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, ty.vec4f()));
     buffer->SetBindingPoint(0, 0);
     mod.root_block->Append(buffer);
 
-    auto* func = b.Function("foo", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.vec4f());
     b.Append(func->Block(), [&] {
         auto* x = b.LoadVectorElement(buffer, 0_u);
         auto* y = b.LoadVectorElement(buffer, 1_u);
         auto* z = b.LoadVectorElement(buffer, 2_u);
         auto* w = b.LoadVectorElement(buffer, 3_u);
-        auto* c = b.Construct(ty.vec4<f32>(), x, y, z, w);
+        auto* c = b.Construct(ty.vec4f(), x, y, z, w);
         b.Return(func, c);
     });
 

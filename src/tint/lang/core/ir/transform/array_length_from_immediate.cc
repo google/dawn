@@ -297,10 +297,10 @@ struct State {
                 const uint32_t array_index = size_index / 4;
                 const uint32_t vec_index = size_index % 4;
                 auto* buffer_sizes = b.Access(
-                    ty.ptr(immediate, ty.array(ty.vec4<u32>(), buffer_sizes_array_elements_num)),
+                    ty.ptr(immediate, ty.array(ty.vec4u(), buffer_sizes_array_elements_num)),
                     immediate_data_layout.var,
                     u32(immediate_data_layout.IndexOf(buffer_sizes_offset)));
-                auto* vec_ptr = b.Access(ty.ptr(immediate, ty.vec4<u32>()), buffer_sizes->Result(),
+                auto* vec_ptr = b.Access(ty.ptr(immediate, ty.vec4u()), buffer_sizes->Result(),
                                          u32(array_index));
                 auto* total_buffer_size = b.LoadVectorElement(vec_ptr, u32(vec_index))->Result();
 

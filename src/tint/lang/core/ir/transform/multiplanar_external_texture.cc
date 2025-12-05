@@ -239,7 +239,7 @@ struct State {
                         // Convert the coordinates to unsigned integers if necessary.
                         auto* coords = call->Args()[1];
                         if (coords->Type()->IsSignedIntegerVector()) {
-                            auto* convert = b.Convert(ty.vec2<u32>(), coords);
+                            auto* convert = b.Convert(ty.vec2u(), coords);
                             convert->InsertBefore(call);
                             coords = convert->Result();
                         }
@@ -312,12 +312,12 @@ struct State {
                            {sym.Register("gamutConversionMatrix"), ty.mat3x3<f32>()},
                            {sym.Register("sampleTransform"), ty.mat3x2<f32>()},
                            {sym.Register("loadTransform"), ty.mat3x2<f32>()},
-                           {sym.Register("samplePlane0RectMin"), ty.vec2<f32>()},
-                           {sym.Register("samplePlane0RectMax"), ty.vec2<f32>()},
-                           {sym.Register("samplePlane1RectMin"), ty.vec2<f32>()},
-                           {sym.Register("samplePlane1RectMax"), ty.vec2<f32>()},
-                           {sym.Register("apparentSize"), ty.vec2<u32>()},
-                           {sym.Register("plane1CoordFactor"), ty.vec2<f32>()}});
+                           {sym.Register("samplePlane0RectMin"), ty.vec2f()},
+                           {sym.Register("samplePlane0RectMax"), ty.vec2f()},
+                           {sym.Register("samplePlane1RectMin"), ty.vec2f()},
+                           {sym.Register("samplePlane1RectMax"), ty.vec2f()},
+                           {sym.Register("apparentSize"), ty.vec2u()},
+                           {sym.Register("plane1CoordFactor"), ty.vec2f()}});
         }
         return external_texture_params_struct;
     }
@@ -338,12 +338,12 @@ struct State {
         //     let f = sign_v * (pow((params.A * abs_v) + params.B, vec3f(params.G)) + params.E);
         //     return select(f, t, cond);
         //   }
-        gamma_correction = b.Function("tint_GammaCorrection", ty.vec3<f32>());
-        auto* v = b.FunctionParam("v", ty.vec3<f32>());
+        gamma_correction = b.Function("tint_GammaCorrection", ty.vec3f());
+        auto* v = b.FunctionParam("v", ty.vec3f());
         auto* params = b.FunctionParam("params", GammaTransferParams());
         gamma_correction->SetParams({v, params});
         b.Append(gamma_correction->Block(), [&] {
-            auto* vec3f = ty.vec3<f32>();
+            auto* vec3f = ty.vec3f();
             auto* G = b.Access(ty.f32(), params, 0_u);
             auto* A = b.Access(ty.f32(), params, 1_u);
             auto* B = b.Access(ty.f32(), params, 2_u);
@@ -399,22 +399,22 @@ struct State {
         //     }
         //     return color;
         // }
-        texture_load_external = b.Function("tint_TextureLoadExternal", ty.vec4<f32>());
+        texture_load_external = b.Function("tint_TextureLoadExternal", ty.vec4f());
         auto* plane_0 = b.FunctionParam("plane_0", SampledTexture());
         auto* plane_1 = b.FunctionParam("plane_1", SampledTexture());
         auto* params = b.FunctionParam("params", ExternalTextureParams());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2u());
         texture_load_external->SetParams({plane_0, plane_1, params, coords});
         b.Append(texture_load_external->Block(), [&] {
-            auto* vec2f = ty.vec2<f32>();
-            auto* vec3f = ty.vec3<f32>();
-            auto* vec4f = ty.vec4<f32>();
-            auto* vec2u = ty.vec2<u32>();
+            auto* vec2f = ty.vec2f();
+            auto* vec3f = ty.vec3f();
+            auto* vec4f = ty.vec4f();
+            auto* vec2u = ty.vec2u();
             auto* yuv_to_rgb_conversion_only = b.Access(ty.u32(), params, 1_u);
             auto* yuv_to_rgb_conversion = b.Access(ty.mat3x4<f32>(), params, 2_u);
             auto* load_transform_matrix = b.Access(ty.mat3x2<f32>(), params, 7_u);
-            auto* apparent_size = b.Access(ty.vec2<u32>(), params, 12_u);
-            auto* plane1_coord_factor = b.Access(ty.vec2<f32>(), params, 13_u);
+            auto* apparent_size = b.Access(ty.vec2u(), params, 12_u);
+            auto* plane1_coord_factor = b.Access(ty.vec2f(), params, 13_u);
 
             auto* clamped_coords = b.Call(vec2u, core::BuiltinFn::kMin, coords, apparent_size);
             auto* clamped_coords_f = b.Convert(vec2f, clamped_coords);
@@ -519,24 +519,24 @@ struct State {
         //
         //     return color;
         // }
-        texture_sample_external = b.Function("tint_TextureSampleExternal", ty.vec4<f32>());
+        texture_sample_external = b.Function("tint_TextureSampleExternal", ty.vec4f());
         auto* plane_0 = b.FunctionParam("plane_0", SampledTexture());
         auto* plane_1 = b.FunctionParam("plane_1", SampledTexture());
         auto* params = b.FunctionParam("params", ExternalTextureParams());
         auto* sampler = b.FunctionParam("tint_sampler", ty.sampler());
-        auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2f());
         texture_sample_external->SetParams({plane_0, plane_1, params, sampler, coords});
         b.Append(texture_sample_external->Block(), [&] {
-            auto* vec2f = ty.vec2<f32>();
-            auto* vec3f = ty.vec3<f32>();
-            auto* vec4f = ty.vec4<f32>();
+            auto* vec2f = ty.vec2f();
+            auto* vec3f = ty.vec3f();
+            auto* vec4f = ty.vec4f();
             auto* yuv_to_rgb_conversion_only = b.Access(ty.u32(), params, 1_u);
             auto* yuv_to_rgb_conversion = b.Access(ty.mat3x4<f32>(), params, 2_u);
             auto* transformation_matrix = b.Access(ty.mat3x2<f32>(), params, 6_u);
-            auto* sample_plane0_rect_min = b.Access(ty.vec2<f32>(), params, 8_u);
-            auto* sample_plane0_rect_max = b.Access(ty.vec2<f32>(), params, 9_u);
-            auto* sample_plane1_rect_min = b.Access(ty.vec2<f32>(), params, 10_u);
-            auto* sample_plane1_rect_max = b.Access(ty.vec2<f32>(), params, 11_u);
+            auto* sample_plane0_rect_min = b.Access(ty.vec2f(), params, 8_u);
+            auto* sample_plane0_rect_max = b.Access(ty.vec2f(), params, 9_u);
+            auto* sample_plane1_rect_min = b.Access(ty.vec2f(), params, 10_u);
+            auto* sample_plane1_rect_max = b.Access(ty.vec2f(), params, 11_u);
 
             auto* modified_coords =
                 b.Multiply(transformation_matrix, b.Construct(vec3f, coords, 1_f));

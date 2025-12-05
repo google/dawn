@@ -309,11 +309,10 @@ TEST_F(SpirvWriterTest, Spv14_CopyLogical) {
 }
 
 TEST_F(SpirvWriterTest, StripAllNames) {
-    auto* str =
-        ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.Register("a"), ty.i32()},
-                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
-                                               });
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                           {mod.symbols.Register("a"), ty.i32()},
+                                                           {mod.symbols.Register("b"), ty.vec4i()},
+                                                       });
     auto* func = b.ComputeFunction("main");
     auto* idx = b.FunctionParam("idx", ty.u32());
     idx->SetBuiltin(core::BuiltinValue::kLocalInvocationIndex);

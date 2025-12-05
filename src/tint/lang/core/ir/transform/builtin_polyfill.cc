@@ -315,7 +315,7 @@ struct State {
             v = b.Multiply(b.Splat(vec4f, 127_f), v)->Result();
             v = b.Add(b.Splat(vec4f, 0.5_f), v)->Result();
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result();
-            v = b.Convert(ty.vec4<i32>(), v)->Result();
+            v = b.Convert(ty.vec4i(), v)->Result();
             v = b.Bitcast(vec4u, v)->Result();
             v = b.And(vec4u, v, b.Splat(vec4u, 0xff_u))->Result();
             v = b.ShiftLeft(vec4u, v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
@@ -1020,7 +1020,7 @@ struct State {
         //   %result = dot(%x_u8, vec4u(1));
         auto* x = call->Args()[0];
         b.InsertBefore(call, [&] {
-            auto* vec4u = ty.vec4<u32>();
+            auto* vec4u = ty.vec4u();
 
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
@@ -1042,7 +1042,7 @@ struct State {
         //   %result = dot(%x_i8, vec4u(1));
         auto* x = call->Args()[0];
         b.InsertBefore(call, [&] {
-            auto* vec4u = ty.vec4<u32>();
+            auto* vec4u = ty.vec4u();
 
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
@@ -1067,8 +1067,8 @@ struct State {
         //   %result      = dot(%x_u8, vec4u(1));
         auto* x = call->Args()[0];
         b.InsertBefore(call, [&] {
-            auto* vec4i = ty.vec4<i32>();
-            auto* vec4u = ty.vec4<u32>();
+            auto* vec4i = ty.vec4i();
+            auto* vec4u = ty.vec4u();
 
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
@@ -1096,7 +1096,7 @@ struct State {
         //   %result  = dot(%x_u8, vec4u(1));
         auto* x = call->Args()[0];
         b.InsertBefore(call, [&] {
-            auto* vec4u = ty.vec4<u32>();
+            auto* vec4u = ty.vec4u();
 
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
@@ -1121,8 +1121,8 @@ struct State {
         //   %result  = %x_vec4i >> vec4u(24);
         ir::Instruction* result = nullptr;
         b.InsertBefore(call, [&] {
-            auto* vec4i = ty.vec4<i32>();
-            auto* vec4u = ty.vec4<u32>();
+            auto* vec4i = ty.vec4i();
+            auto* vec4u = ty.vec4u();
 
             auto* n = b.Construct(vec4u, b.Constant(u32(24)), b.Constant(u32(16)),
                                   b.Constant(u32(8)), b.Constant(u32(0)));
@@ -1152,7 +1152,7 @@ struct State {
         //   %result  = %x_vec4u & vec4u(0xff);
         ir::Instruction* result = nullptr;
         b.InsertBefore(call, [&] {
-            auto* vec4u = ty.vec4<u32>();
+            auto* vec4u = ty.vec4u();
 
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
@@ -1201,20 +1201,18 @@ struct State {
                         break;
                     }
                     case 3: {  // vec3<f16>
-                        auto* v4f16_val = b.Construct(ty.vec4<f16>(), value, b.Zero(ty.f16()));
-                        auto* v2u32_val = b.Bitcast(ty.vec2<u32>(), v4f16_val);
-                        auto* broadcasted_v2u32 =
-                            b.Call(ty.vec2<u32>(), core::BuiltinFn::kSubgroupBroadcast, v2u32_val,
-                                   lane_id);
-                        auto* broadcasted_v4f16 = b.Bitcast(ty.vec4<f16>(), broadcasted_v2u32);
+                        auto* v4f16_val = b.Construct(ty.vec4h(), value, b.Zero(ty.f16()));
+                        auto* v2u32_val = b.Bitcast(ty.vec2u(), v4f16_val);
+                        auto* broadcasted_v2u32 = b.Call(
+                            ty.vec2u(), core::BuiltinFn::kSubgroupBroadcast, v2u32_val, lane_id);
+                        auto* broadcasted_v4f16 = b.Bitcast(ty.vec4h(), broadcasted_v2u32);
                         result = b.Swizzle(vec_ty, broadcasted_v4f16, {0u, 1u, 2u})->Result();
                         break;
                     }
                     case 4: {  // vec4<f16>
-                        auto* v2u32_val = b.Bitcast(ty.vec2<u32>(), value);
-                        auto* broadcasted_v2u32 =
-                            b.Call(ty.vec2<u32>(), core::BuiltinFn::kSubgroupBroadcast, v2u32_val,
-                                   lane_id);
+                        auto* v2u32_val = b.Bitcast(ty.vec2u(), value);
+                        auto* broadcasted_v2u32 = b.Call(
+                            ty.vec2u(), core::BuiltinFn::kSubgroupBroadcast, v2u32_val, lane_id);
                         result = b.Bitcast(vec_ty, broadcasted_v2u32)->Result();
                         break;
                     }
@@ -1224,11 +1222,11 @@ struct State {
                 }
             } else {  // Scalar f16
                 // Construct a vec2<f16>(0, value), then bitcast to u32.
-                auto* vec_val = b.Construct(ty.vec2<f16>(), value, b.Zero(ty.f16()));
+                auto* vec_val = b.Construct(ty.vec2h(), value, b.Zero(ty.f16()));
                 auto* u32_val = b.Bitcast(ty.u32(), vec_val);
                 auto* broadcasted_u32 =
                     b.Call(ty.u32(), core::BuiltinFn::kSubgroupBroadcast, u32_val, lane_id);
-                auto* broadcasted_vec = b.Bitcast(ty.vec2<f16>(), broadcasted_u32);
+                auto* broadcasted_vec = b.Bitcast(ty.vec2h(), broadcasted_u32);
                 result = b.Access(ty.f16(), broadcasted_vec, 0_u)->Result();
             }
 

@@ -358,7 +358,7 @@ kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadg
 TEST_F(MslWriterTest, EmitType_Vector) {
     auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3f()));
         b.Return(func);
     });
 
@@ -624,9 +624,9 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_NumericTypes) {
     // Note: Skip vec3 and matCx3 types here as they have need special treatment.
     Vector<MemberData, 26> data = {{mod.symbols.Register("a"), ty.i32(), 32},        //
                                    {mod.symbols.Register("b"), ty.f32(), 128, 128},  //
-                                   {mod.symbols.Register("c"), ty.vec2<f32>()},      //
+                                   {mod.symbols.Register("c"), ty.vec2f()},          //
                                    {mod.symbols.Register("d"), ty.u32()},            //
-                                   {mod.symbols.Register("e"), ty.vec4<f32>()},      //
+                                   {mod.symbols.Register("e"), ty.vec4f()},          //
                                    {mod.symbols.Register("f"), ty.u32()},            //
                                    {mod.symbols.Register("g"), ty.mat2x2<f32>()},    //
                                    {mod.symbols.Register("h"), ty.u32()},            //
@@ -939,8 +939,8 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_Vec3) {
 
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("a"), ty.i32()},
-                                                  {mod.symbols.Register("b"), ty.vec3<u32>()},
-                                                  {mod.symbols.Register("c"), ty.vec3<f32>()},
+                                                  {mod.symbols.Register("b"), ty.vec3u()},
+                                                  {mod.symbols.Register("c"), ty.vec3f()},
                                                   {mod.symbols.Register("d"), ty.f32()},
                                                   {mod.symbols.Register("e"), ty.mat2x3<f32>()},
                                                   {mod.symbols.Register("f"), ty.mat3x3<f32>()},
@@ -1034,11 +1034,11 @@ TEST_F(MslWriterTest, AttemptTintPadSymbolCollision) {
     Vector<MemberData, 26> data = {// uses symbols tint_pad_[0..9] and tint_pad_[20..35]
                                    {mod.symbols.Register("tint_pad_2"), ty.i32(), 32},         //
                                    {mod.symbols.Register("tint_pad_20"), ty.f32(), 128, 128},  //
-                                   {mod.symbols.Register("tint_pad_33"), ty.vec2<f32>()},      //
+                                   {mod.symbols.Register("tint_pad_33"), ty.vec2f()},          //
                                    {mod.symbols.Register("tint_pad_1"), ty.u32()},             //
-                                   {mod.symbols.Register("tint_pad_3"), ty.vec3<f32>()},       //
+                                   {mod.symbols.Register("tint_pad_3"), ty.vec3f()},           //
                                    {mod.symbols.Register("tint_pad_7"), ty.u32()},             //
-                                   {mod.symbols.Register("tint_pad_25"), ty.vec4<f32>()},      //
+                                   {mod.symbols.Register("tint_pad_25"), ty.vec4f()},          //
                                    {mod.symbols.Register("tint_pad_5"), ty.u32()},             //
                                    {mod.symbols.Register("tint_pad_27"), ty.mat2x2<f32>()},    //
                                    {mod.symbols.Register("tint_pad_24"), ty.u32()},            //

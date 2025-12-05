@@ -1406,7 +1406,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndex) {
     auto* var = MakeVar("wgvar", ty.bool_());
 
     auto* func = MakeEntryPoint("main", 1, 1, 1);
-    auto* global_id = b.FunctionParam("global_id", ty.vec3<u32>());
+    auto* global_id = b.FunctionParam("global_id", ty.vec3u());
     global_id->SetBuiltin(BuiltinValue::kGlobalInvocationId);
     auto* index = b.FunctionParam("index", ty.u32());
     index->SetBuiltin(BuiltinValue::kLocalInvocationIndex);
@@ -1463,7 +1463,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndexInStruct) {
                                 {
                                     {
                                         mod.symbols.New("global_id"),
-                                        ty.vec3<u32>(),
+                                        ty.vec3u(),
                                         core::IOAttributes{
                                             .builtin = core::BuiltinValue::kGlobalInvocationId,
                                         },

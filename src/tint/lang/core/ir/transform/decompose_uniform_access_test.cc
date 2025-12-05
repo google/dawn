@@ -445,8 +445,8 @@ TEST_F(IR_DecomposeUniformAccessTest, UniformAccessMat2x3F16) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
-        b.Let("b", b.Load(b.Access(ty.ptr(uniform, ty.vec3<f16>()), var, 1_u)));
-        b.Let("c", b.LoadVectorElement(b.Access(ty.ptr(uniform, ty.vec3<f16>()), var, 1_u), 2_u));
+        b.Let("b", b.Load(b.Access(ty.ptr(uniform, ty.vec3h()), var, 1_u)));
+        b.Let("c", b.LoadVectorElement(b.Access(ty.ptr(uniform, ty.vec3h()), var, 1_u), 2_u));
         b.Return(func);
     });
 
@@ -1065,7 +1065,7 @@ $B1: {  # root
 TEST_F(IR_DecomposeUniformAccessTest, UniformAccessChainReused) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("c"), ty.f32()},
-                                                    {mod.symbols.New("d"), ty.vec3<f32>()},
+                                                    {mod.symbols.New("d"), ty.vec3f()},
                                                 });
 
     auto* var = b.Var("v", uniform, sb, core::Access::kRead);
@@ -1074,7 +1074,7 @@ TEST_F(IR_DecomposeUniformAccessTest, UniformAccessChainReused) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* x = b.Access(ty.ptr(uniform, ty.vec3<f32>(), core::Access::kRead), var, 1_u);
+        auto* x = b.Access(ty.ptr(uniform, ty.vec3f(), core::Access::kRead), var, 1_u);
         b.Let("b", b.LoadVectorElement(x, 1_u));
         b.Let("c", b.LoadVectorElement(x, 2_u));
         b.Return(func);

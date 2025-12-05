@@ -60,7 +60,7 @@ Function* IR_ValidatorTest::FragmentEntryPoint(const std::string& name) {
 }
 
 Function* IR_ValidatorTest::VertexEntryPoint(const std::string& name) {
-    auto* f = b.Function(name, ty.vec4<f32>(), Function::PipelineStage::kVertex);
+    auto* f = b.Function(name, ty.vec4f(), Function::PipelineStage::kVertex);
     f->SetReturnBuiltin(BuiltinValue::kPosition);
     return f;
 }
@@ -152,7 +152,7 @@ TEST_F(IR_ValidatorTest, RootBlock_LetWithAllowModuleScopeLets) {
 }
 
 TEST_F(IR_ValidatorTest, RootBlock_Construct) {
-    mod.root_block->Append(b.Construct(ty.vec2<f32>(), 1_f, 2_f));
+    mod.root_block->Append(b.Construct(ty.vec2f(), 1_f, 2_f));
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
@@ -166,7 +166,7 @@ TEST_F(IR_ValidatorTest, RootBlock_Construct) {
 }
 
 TEST_F(IR_ValidatorTest, RootBlock_ConstructWithAllowModuleScopeLets) {
-    mod.root_block->Append(b.Construct(ty.vec2<f32>(), 1_f, 2_f));
+    mod.root_block->Append(b.Construct(ty.vec2f(), 1_f, 2_f));
 
     auto res = ir::Validate(mod, Capabilities{Capability::kAllowModuleScopeLets});
     ASSERT_EQ(res, Success) << res.Failure();
@@ -339,8 +339,8 @@ TEST_F(IR_ValidatorTest, Construct_Matrix_Scalar) {
 TEST_F(IR_ValidatorTest, Construct_Matrix_ColumnVectors) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* v1 = b.Composite(ty.vec2<f32>(), 1_f, 2_f);
-        auto* v2 = b.Composite(ty.vec2<f32>(), 3_f, 4_f);
+        auto* v1 = b.Composite(ty.vec2f(), 1_f, 2_f);
+        auto* v2 = b.Composite(ty.vec2f(), 3_f, 4_f);
         b.Construct(ty.mat2x2<f32>(), v1, v2);
         b.Return(f);
     });
@@ -352,7 +352,7 @@ TEST_F(IR_ValidatorTest, Construct_Matrix_ColumnVectors) {
 TEST_F(IR_ValidatorTest, Construct_Matrix_MixedScalarVector) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        b.Construct(ty.mat2x2<f32>(), 1_f, b.Composite(ty.vec2<f32>(), 2_f, 3_f));
+        b.Construct(ty.mat2x2<f32>(), 1_f, b.Composite(ty.vec2f(), 2_f, 3_f));
         b.Return(f);
     });
 
@@ -709,7 +709,7 @@ TEST_F(IR_ValidatorTest, Convert_ScalarToVec) {
     auto* p = b.FunctionParam("p", ty.f32());
     f->AppendParam(p);
     b.Append(f->Block(), [&] {
-        b.Convert(ty.vec2<f32>(), p);
+        b.Convert(ty.vec2f(), p);
         b.Return(f);
     });
 
@@ -744,10 +744,10 @@ TEST_F(IR_ValidatorTest, Convert_ScalarToMat) {
 
 TEST_F(IR_ValidatorTest, Convert_VecToVec) {
     auto* f = b.Function("f", ty.void_());
-    auto* p = b.FunctionParam("p", ty.vec2<u32>());
+    auto* p = b.FunctionParam("p", ty.vec2u());
     f->AppendParam(p);
     b.Append(f->Block(), [&] {
-        b.Convert(ty.vec2<f32>(), p);
+        b.Convert(ty.vec2f(), p);
         b.Return(f);
     });
 
@@ -757,10 +757,10 @@ TEST_F(IR_ValidatorTest, Convert_VecToVec) {
 
 TEST_F(IR_ValidatorTest, Convert_VecIdentity) {
     auto* f = b.Function("f", ty.void_());
-    auto* p = b.FunctionParam("p", ty.vec3<f32>());
+    auto* p = b.FunctionParam("p", ty.vec3f());
     f->AppendParam(p);
     b.Append(f->Block(), [&] {
-        b.Convert(ty.vec3<f32>(), p);
+        b.Convert(ty.vec3f(), p);
         b.Return(f);
     });
 
@@ -776,10 +776,10 @@ TEST_F(IR_ValidatorTest, Convert_VecIdentity) {
 
 TEST_F(IR_ValidatorTest, Convert_VecToVec_WidthMismatch) {
     auto* f = b.Function("f", ty.void_());
-    auto* p = b.FunctionParam("p", ty.vec2<u32>());
+    auto* p = b.FunctionParam("p", ty.vec2u());
     f->AppendParam(p);
     b.Append(f->Block(), [&] {
-        b.Convert(ty.vec4<f32>(), p);
+        b.Convert(ty.vec4f(), p);
         b.Return(f);
     });
 
@@ -795,7 +795,7 @@ TEST_F(IR_ValidatorTest, Convert_VecToVec_WidthMismatch) {
 
 TEST_F(IR_ValidatorTest, Convert_VecToScalar) {
     auto* f = b.Function("f", ty.void_());
-    auto* p = b.FunctionParam("p", ty.vec2<u32>());
+    auto* p = b.FunctionParam("p", ty.vec2u());
     f->AppendParam(p);
     b.Append(f->Block(), [&] {
         b.Convert(ty.f32(), p);
@@ -814,7 +814,7 @@ TEST_F(IR_ValidatorTest, Convert_VecToScalar) {
 
 TEST_F(IR_ValidatorTest, Convert_VecToMat) {
     auto* f = b.Function("f", ty.void_());
-    auto* p = b.FunctionParam("p", ty.vec2<u32>());
+    auto* p = b.FunctionParam("p", ty.vec2u());
     f->AppendParam(p);
     b.Append(f->Block(), [&] {
         b.Convert(ty.mat3x2<f32>(), p);
@@ -906,7 +906,7 @@ TEST_F(IR_ValidatorTest, Convert_MatToVec) {
     auto* p = b.FunctionParam("p", ty.mat4x4<f32>());
     f->AppendParam(p);
     b.Append(f->Block(), [&] {
-        b.Convert(ty.vec4<f32>(), p);
+        b.Convert(ty.vec4f(), p);
         b.Return(f);
     });
 
@@ -1662,7 +1662,7 @@ TEST_F(IR_ValidatorTest, OverrideWithValue) {
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithInvalidType) {
-    b.Append(mod.root_block, [&] { b.Override(ty.vec3<u32>()); });
+    b.Append(mod.root_block, [&] { b.Override(ty.vec3u()); });
 
     auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
     ASSERT_NE(res, Success);

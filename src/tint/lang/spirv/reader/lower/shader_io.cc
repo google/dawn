@@ -565,7 +565,7 @@ struct State {
                 case core::BuiltinValue::kGlobalInvocationId:
                 case core::BuiltinValue::kWorkgroupId:
                 case core::BuiltinValue::kNumWorkgroups: {
-                    var_type = ty.vec3<u32>();
+                    var_type = ty.vec3u();
                     break;
                 }
                 default: {

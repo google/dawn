@@ -160,7 +160,7 @@ TEST_F(GlslWriterTest, WorkgroupStorageSizeCompoundTypes) {
 TEST_F(GlslWriterTest, WorkgroupStorageSizeAlignmentPadding) {
     // vec3<f32> has an alignment of 16 but a size of 12. We leverage this to test
     // that our padded size calculation for workgroup storage is accurate.
-    auto* var = mod.root_block->Append(b.Var("var_f32", ty.ptr(workgroup, ty.vec3<f32>())));
+    auto* var = mod.root_block->Append(b.Var("var_f32", ty.ptr(workgroup, ty.vec3f())));
 
     auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
     b.Append(func->Block(), [&] {  //

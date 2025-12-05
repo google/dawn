@@ -75,7 +75,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_NonStruct) {
     auto* ep = b.Function("foo", ty.void_());
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
     front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
-    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    auto* position = b.FunctionParam("position", ty.vec4f());
     position->SetBuiltin(core::BuiltinValue::kPosition);
     position->SetInvariant(true);
     auto* color1 = b.FunctionParam("color1", ty.f32());
@@ -164,7 +164,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
                                  },
                                  {
                                      mod.symbols.New("position"),
-                                     ty.vec4<f32>(),
+                                     ty.vec4f(),
                                      core::IOAttributes{
                                          .builtin = core::BuiltinValue::kPosition,
                                          .invariant = true,
@@ -199,7 +199,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(b.Access(ty.bool_(), str_param, 0_i));
         b.Append(ifelse->True(), [&] {
-            auto* position = b.Access(ty.vec4<f32>(), str_param, 1_i);
+            auto* position = b.Access(ty.vec4f(), str_param, 1_i);
             auto* color1 = b.Access(ty.f32(), str_param, 2_i);
             auto* color2 = b.Access(ty.f32(), str_param, 3_i);
             b.Multiply(position, b.Add(color1, color2));
@@ -291,7 +291,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed) {
         ty.Struct(mod.symbols.New("Inputs"), {
                                                  {
                                                      mod.symbols.New("position"),
-                                                     ty.vec4<f32>(),
+                                                     ty.vec4f(),
                                                      core::IOAttributes{
                                                          .builtin = core::BuiltinValue::kPosition,
                                                          .invariant = true,
@@ -321,7 +321,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed) {
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
         b.Append(ifelse->True(), [&] {
-            auto* position = b.Access(ty.vec4<f32>(), str_param, 0_i);
+            auto* position = b.Access(ty.vec4f(), str_param, 0_i);
             auto* color1 = b.Access(ty.f32(), str_param, 1_i);
             b.Multiply(position, b.Add(color1, color2));
             b.ExitIf(ifelse);
@@ -400,13 +400,13 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
-    auto* ep = b.Function("foo", ty.vec4<f32>());
+    auto* ep = b.Function("foo", ty.vec4f());
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     ep->SetReturnInvariant(true);
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+        b.Return(ep, b.Construct(ty.vec4f(), 0.5_f));
     });
 
     auto* src = R"(
@@ -447,12 +447,12 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructLocation) {
-    auto* ep = b.Function("foo", ty.vec4<f32>());
+    auto* ep = b.Function("foo", ty.vec4f());
     ep->SetReturnLocation(1u);
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+        b.Return(ep, b.Construct(ty.vec4f(), 0.5_f));
     });
 
     auto* src = R"(
@@ -497,7 +497,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct) {
                              {
                                  {
                                      mod.symbols.New("position"),
-                                     ty.vec4<f32>(),
+                                     ty.vec4f(),
                                      core::IOAttributes{
                                          .builtin = core::BuiltinValue::kPosition,
                                          .invariant = true,
@@ -528,7 +528,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct) {
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct(str_ty, b.Construct(ty.vec4<f32>(), 0_f), 0.25_f, 0.75_f));
+        b.Return(ep, b.Construct(str_ty, b.Construct(ty.vec4f(), 0_f), 0.25_f, 0.75_f));
     });
 
     auto* src = R"(
@@ -669,7 +669,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer) {
-    auto* vec4f = ty.vec4<f32>();
+    auto* vec4f = ty.vec4f();
     auto* str_ty =
         ty.Struct(mod.symbols.New("Outputs"), {
                                                   {
@@ -859,7 +859,7 @@ TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnVertexInput) {
                                  },
                              });
 
-    auto* ep = b.Function("vert", ty.vec4<f32>());
+    auto* ep = b.Function("vert", ty.vec4f());
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     ep->SetReturnInvariant(true);
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);
@@ -871,7 +871,7 @@ TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnVertexInput) {
     ep->SetParams({str_param, ival});
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+        b.Return(ep, b.Construct(ty.vec4f(), 0.5_f));
     });
 
     auto* src = R"(
@@ -1136,12 +1136,12 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, EmitVertexPointSize) {
-    auto* ep = b.Function("foo", ty.vec4<f32>());
+    auto* ep = b.Function("foo", ty.vec4f());
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+        b.Return(ep, b.Construct(ty.vec4f(), 0.5_f));
     });
 
     auto* src = R"(
@@ -1195,7 +1195,7 @@ TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithoutPolyfill) {
                                                               },
                                                               {
                                                                   mod.symbols.New("out2"),
-                                                                  ty.vec4<f16>(),
+                                                                  ty.vec4h(),
                                                                   core::IOAttributes{
                                                                       .location = 2u,
                                                                   },
@@ -1203,7 +1203,7 @@ TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithoutPolyfill) {
                                                           });
 
     auto* in1 = b.FunctionParam("in1", ty.f16());
-    auto* in2 = b.FunctionParam("in2", ty.vec4<f16>());
+    auto* in2 = b.FunctionParam("in2", ty.vec4h());
     in1->SetLocation(1);
     in2->SetLocation(2);
     auto* func = b.Function("main", outputs, core::ir::Function::PipelineStage::kFragment);
@@ -1279,7 +1279,7 @@ TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithPolyfill) {
                                                               },
                                                               {
                                                                   mod.symbols.New("out2"),
-                                                                  ty.vec4<f16>(),
+                                                                  ty.vec4h(),
                                                                   core::IOAttributes{
                                                                       .location = 2u,
                                                                   },
@@ -1287,7 +1287,7 @@ TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithPolyfill) {
                                                           });
 
     auto* in1 = b.FunctionParam("in1", ty.f16());
-    auto* in2 = b.FunctionParam("in2", ty.vec4<f16>());
+    auto* in2 = b.FunctionParam("in2", ty.vec4h());
     in1->SetLocation(1);
     in2->SetLocation(2);
     auto* func = b.Function("main", outputs, core::ir::Function::PipelineStage::kFragment);
@@ -1357,7 +1357,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_SampleInterpolation) {
-    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    auto* position = b.FunctionParam("position", ty.vec4f());
     position->SetBuiltin(core::BuiltinValue::kPosition);
     auto* color = b.FunctionParam("color", ty.f32());
     color->SetLocation(0);
@@ -1422,7 +1422,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_SampleIndex) {
-    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    auto* position = b.FunctionParam("position", ty.vec4f());
     position->SetBuiltin(core::BuiltinValue::kPosition);
     auto* idx = b.FunctionParam("idx", ty.u32());
     idx->SetBuiltin(core::BuiltinValue::kSampleIndex);
@@ -1485,7 +1485,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_NoModification) {
-    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    auto* position = b.FunctionParam("position", ty.vec4f());
     position->SetBuiltin(core::BuiltinValue::kPosition);
     auto* color = b.FunctionParam("color", ty.f32());
     color->SetLocation(0);
@@ -1564,7 +1564,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_SampleInterpolation_InStruct)
                                  },
                              });
 
-    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    auto* position = b.FunctionParam("position", ty.vec4f());
     position->SetBuiltin(core::BuiltinValue::kPosition);
     auto* str_param = b.FunctionParam("input", str_ty);
 
@@ -1646,7 +1646,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_SampleIndex_InStruct) {
                                  },
                              });
 
-    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    auto* position = b.FunctionParam("position", ty.vec4f());
     position->SetBuiltin(core::BuiltinValue::kPosition);
     auto* str_param = b.FunctionParam("input", str_ty);
 
@@ -1717,7 +1717,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_PositionNotUsed) {
-    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    auto* position = b.FunctionParam("position", ty.vec4f());
     position->SetBuiltin(core::BuiltinValue::kPosition);
     auto* color = b.FunctionParam("color", ty.f32());
     color->SetLocation(0);

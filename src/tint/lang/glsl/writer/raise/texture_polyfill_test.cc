@@ -104,7 +104,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureDimensions_2d_WithoutLod) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
-    auto* func = b.Function("foo", ty.vec2<u32>());
+    auto* func = b.Function("foo", ty.vec2u());
     b.Append(func->Block(), [&] {
         auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, b.Load(var));
         b.Return(func, result);
@@ -153,7 +153,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureDimensions_2d_WithU32Lod) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
-    auto* func = b.Function("foo", ty.vec2<u32>());
+    auto* func = b.Function("foo", ty.vec2u());
     b.Append(func->Block(), [&] {
         auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, b.Load(var), 3_u);
         b.Return(func, result);
@@ -891,7 +891,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureStore1D) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* coords = b.Value(1_i);
-        auto* value = b.Composite(ty.vec4<f32>(), .5_f, 0_f, 0_f, 1_f);
+        auto* value = b.Composite(ty.vec4f(), .5_f, 0_f, 0_f, 1_f);
         b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, value);
         b.Return(func);
     });
@@ -942,8 +942,8 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureStore2D) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Splat(ty.vec2<u32>(), 0_u);
-        auto* value = b.Composite(ty.vec4<i32>(), 5_i, 0_i, 0_i, 1_i);
+        auto* coords = b.Splat(ty.vec2u(), 0_u);
+        auto* value = b.Composite(ty.vec4i(), 5_i, 0_i, 0_i, 1_i);
         b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, value);
         b.Return(func);
     });
@@ -994,8 +994,8 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureStore2DArray) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Splat(ty.vec2<u32>(), 0_u);
-        auto* value = b.Composite(ty.vec4<i32>(), 5_i, 0_i, 0_i, 1_i);
+        auto* coords = b.Splat(ty.vec2u(), 0_u);
+        auto* value = b.Composite(ty.vec4i(), 5_i, 0_i, 0_i, 1_i);
         b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, 1_i, value);
         b.Return(func);
     });
@@ -1047,8 +1047,8 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureStore3D) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Composite(ty.vec3<i32>(), 1_i, 2_i, 3_i);
-        auto* value = b.Composite(ty.vec4<f32>(), .5_f, 0_f, 0_f, 1_f);
+        auto* coords = b.Composite(ty.vec3i(), 1_i, 2_i, 3_i);
+        auto* value = b.Composite(ty.vec4f(), .5_f, 0_f, 0_f, 1_f);
         b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, value);
         b.Return(func);
     });
@@ -1098,8 +1098,8 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureStoreArray) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Composite(ty.vec2<i32>(), 1_i, 2_i);
-        auto* value = b.Composite(ty.vec4<f32>(), .5_f, .4_f, .3_f, 1_f);
+        auto* coords = b.Composite(ty.vec2i(), 1_i, 2_i);
+        auto* value = b.Composite(ty.vec4f(), .5_f, .4_f, .3_f, 1_f);
         b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, 3_u, value);
         b.Return(func);
     });
@@ -1148,7 +1148,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, CombineSamplers_GlobalTextureNoSampler) {
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
-    auto* func = b.Function("foo", ty.vec2<u32>());
+    auto* func = b.Function("foo", ty.vec2u());
     b.Append(func->Block(), [&] {
         auto* tex = b.Load(t);
         auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, tex);
@@ -1206,7 +1206,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGatherCompare_Depth2d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* depth_ref = b.Value(3_f);
 
         auto* t = b.Load(tex);
@@ -1272,7 +1272,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGatherCompare_Depth2dOffset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* depth_ref = b.Value(3_f);
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
@@ -1339,7 +1339,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGatherCompare_DepthCubeArray) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(2.5_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(2.5_f));
         auto* array_idx = b.Value(6_u);
         auto* depth_ref = b.Value(3_f);
 
@@ -1408,7 +1408,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGatherCompare_Depth2dArrayOffset) 
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(6_i);
         auto* depth_ref = b.Value(3_f);
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
@@ -1479,7 +1479,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGather_Alpha) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -1544,7 +1544,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGather_RedOffset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* offset = b.Composite<vec2<i32>>(1_i, 3_i);
 
         auto* t = b.Load(tex);
@@ -1610,7 +1610,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGather_GreenArray) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(1_u);
 
         auto* t = b.Load(tex);
@@ -1680,7 +1680,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGather_BlueArrayOffset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(1_i);
         auto* offset = b.Composite<vec2<i32>>(1_i, 2_i);
 
@@ -1750,7 +1750,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGather_Depth) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -1813,7 +1813,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGather_DepthOffset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* offset = b.Composite<vec2<i32>>(3_i, 4_i);
 
         auto* t = b.Load(tex);
@@ -1878,7 +1878,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGather_DepthArray) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_i);
 
         auto* t = b.Load(tex);
@@ -1945,7 +1945,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGather_DepthArrayOffset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
@@ -2079,7 +2079,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_2d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -2144,7 +2144,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_2d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
@@ -2210,7 +2210,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_2d_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -2278,7 +2278,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_2d_Array_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
@@ -2348,7 +2348,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_3d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -2413,7 +2413,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_3d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* offset = b.Composite<vec3<i32>>(4_i, 5_i, 6_i);
 
         auto* t = b.Load(tex);
@@ -2479,7 +2479,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_Cube) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -2544,7 +2544,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_Cube_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -2611,7 +2611,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_Depth2d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -2676,7 +2676,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_Depth2d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
@@ -2742,7 +2742,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_Depth2d_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -2809,7 +2809,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_Depth2d_Array_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
@@ -2879,7 +2879,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSample_DepthCube_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -2947,7 +2947,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleBias_2d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -3012,7 +3012,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleBias_2d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
@@ -3079,7 +3079,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleBias_2d_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -3148,7 +3148,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleBias_2d_Array_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
@@ -3218,7 +3218,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleBias_3d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -3283,7 +3283,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleBias_3d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* offset = b.Composite<vec3<i32>>(4_i, 5_i, 6_i);
 
         auto* t = b.Load(tex);
@@ -3350,7 +3350,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleBias_Cube) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -3415,7 +3415,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleBias_Cube_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -3548,7 +3548,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_2d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -3613,7 +3613,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_2d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
@@ -3680,7 +3680,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_2d_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -3749,7 +3749,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_2d_Array_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
@@ -3819,7 +3819,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_3d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -3884,7 +3884,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_3d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* offset = b.Composite<vec3<i32>>(4_i, 5_i, 6_i);
 
         auto* t = b.Load(tex);
@@ -3951,7 +3951,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_Cube) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -4016,7 +4016,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_Cube_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -4084,7 +4084,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_Depth2d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -4150,7 +4150,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_Depth2d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
@@ -4217,7 +4217,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_Depth2d_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -4285,7 +4285,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_Depth2d_Array_Offset) 
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
@@ -4355,7 +4355,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleLevel_DepthCube_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -4424,9 +4424,9 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleGrad_2d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
-        auto* ddx = b.Construct(ty.vec2<f32>(), b.Value(3_f), b.Value(4_f));
-        auto* ddy = b.Construct(ty.vec2<f32>(), b.Value(6_f), b.Value(7_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
+        auto* ddx = b.Construct(ty.vec2f(), b.Value(3_f), b.Value(4_f));
+        auto* ddy = b.Construct(ty.vec2f(), b.Value(6_f), b.Value(7_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -4495,9 +4495,9 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleGrad_2d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
-        auto* ddx = b.Construct(ty.vec2<f32>(), b.Value(3_f), b.Value(4_f));
-        auto* ddy = b.Construct(ty.vec2<f32>(), b.Value(6_f), b.Value(7_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
+        auto* ddx = b.Construct(ty.vec2f(), b.Value(3_f), b.Value(4_f));
+        auto* ddy = b.Construct(ty.vec2f(), b.Value(6_f), b.Value(7_f));
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
@@ -4568,10 +4568,10 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleGrad_2d_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
-        auto* ddx = b.Construct(ty.vec2<f32>(), b.Value(3_f), b.Value(4_f));
-        auto* ddy = b.Construct(ty.vec2<f32>(), b.Value(6_f), b.Value(7_f));
+        auto* ddx = b.Construct(ty.vec2f(), b.Value(3_f), b.Value(4_f));
+        auto* ddy = b.Construct(ty.vec2f(), b.Value(6_f), b.Value(7_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -4643,10 +4643,10 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleGrad_2d_Array_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
-        auto* ddx = b.Construct(ty.vec2<f32>(), b.Value(3_f), b.Value(4_f));
-        auto* ddy = b.Construct(ty.vec2<f32>(), b.Value(6_f), b.Value(7_f));
+        auto* ddx = b.Construct(ty.vec2f(), b.Value(3_f), b.Value(4_f));
+        auto* ddy = b.Construct(ty.vec2f(), b.Value(6_f), b.Value(7_f));
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
@@ -4719,9 +4719,9 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleGrad_3d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
-        auto* ddx = b.Construct(ty.vec3<f32>(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
-        auto* ddy = b.Construct(ty.vec3<f32>(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* ddx = b.Construct(ty.vec3f(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
+        auto* ddy = b.Construct(ty.vec3f(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -4790,9 +4790,9 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleGrad_3d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
-        auto* ddx = b.Construct(ty.vec3<f32>(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
-        auto* ddy = b.Construct(ty.vec3<f32>(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* ddx = b.Construct(ty.vec3f(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
+        auto* ddy = b.Construct(ty.vec3f(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
         auto* offset = b.Composite<vec3<i32>>(4_i, 5_i, 6_i);
 
         auto* t = b.Load(tex);
@@ -4863,9 +4863,9 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleGrad_Cube) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
-        auto* ddx = b.Construct(ty.vec3<f32>(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
-        auto* ddy = b.Construct(ty.vec3<f32>(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* ddx = b.Construct(ty.vec3f(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
+        auto* ddy = b.Construct(ty.vec3f(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -4934,10 +4934,10 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleGrad_Cube_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* array_idx = b.Value(4_u);
-        auto* ddx = b.Construct(ty.vec3<f32>(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
-        auto* ddy = b.Construct(ty.vec3<f32>(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
+        auto* ddx = b.Construct(ty.vec3f(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
+        auto* ddy = b.Construct(ty.vec3f(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -5008,7 +5008,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompare_2d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -5073,7 +5073,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompare_2d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
@@ -5139,7 +5139,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompare_2d_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -5207,7 +5207,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompare_2d_Array_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
@@ -5278,7 +5278,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompare_Cube) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -5343,7 +5343,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompare_Cube_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -5411,7 +5411,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_2d) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -5476,7 +5476,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_2d_Offset) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
@@ -5543,7 +5543,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_2d_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -5611,7 +5611,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_2d_Array_Offset
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(4_u);
         auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
@@ -5680,7 +5680,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_Cube) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -5745,7 +5745,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_Cube_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* coords = b.Construct(ty.vec3f(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -5814,7 +5814,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, BindingArray_Texture2d_AccessThroughPoint
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* ptr_texture = b.Access(ty.ptr<handle>(texture_type), textures, 1_u);
         auto* t = b.Load(ptr_texture);
@@ -5880,7 +5880,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, BindingArray_Texture2d_AccessThroughValue
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* textures_value = b.Load(textures);
         auto* t = b.Access(texture_type, textures_value, 1_u);
@@ -5949,7 +5949,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, BindingArray_Texture2d_TwoSampledUses) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* textures_value = b.Load(textures);
         auto* t = b.Access(texture_type, textures_value, 1_u);
@@ -6026,7 +6026,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, BindingArray_Texture2d_SampledAndUnsample
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* sample_coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* sample_coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
 
         auto* textures_value = b.Load(textures);
         auto* t = b.Access(texture_type, textures_value, 1_u);

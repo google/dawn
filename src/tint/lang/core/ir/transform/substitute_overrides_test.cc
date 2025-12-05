@@ -1675,8 +1675,8 @@ TEST_F(IR_SubstituteOverridesTest, OverrideConstruct) {
         auto* o3 = b.Override("o3", ty.f16());
         o3->SetOverrideId({3});
 
-        auto* e = b.Construct(ty.vec4<f16>(), o0, o1, o2, o3);
-        // auto* e = b.Splat(ty.vec4<f16>(), 1.0_h);
+        auto* e = b.Construct(ty.vec4h(), o0, o1, o2, o3);
+        // auto* e = b.Splat(ty.vec4h(), 1.0_h);
         auto* call_func = b.Call(ty.vec4(ty.f16()), core::BuiltinFn::kCeil, e);
         global = b.Var<private_>("global", call_func->Result());
         // global = b.Var<private_>("global", e);//e->Result());

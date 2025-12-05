@@ -244,7 +244,7 @@ TEST_F(IR_ValidatorTest, Function_ParameterDuplicated) {
 TEST_F(IR_ValidatorTest, Function_Param_MultipleIOAnnotations) {
     auto* f = FragmentEntryPoint("my_func");
 
-    auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
+    auto* p = b.FunctionParam("my_param", ty.vec4f());
     p->SetBuiltin(BuiltinValue::kPosition);
     p->SetLocation(0);
     f->SetParams({p});
@@ -270,7 +270,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_MultipleIOAnnotations) {
     attr.color = 0;
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("a"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("a"), ty.vec4f(), attr},
                                                });
     auto* p = b.FunctionParam("my_param", str_ty);
     f->SetParams({p});
@@ -291,7 +291,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_MultipleIOAnnotations) {
 TEST_F(IR_ValidatorTest, Function_Param_MissingIOAnnotations) {
     auto* f = FragmentEntryPoint("my_func");
 
-    auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
+    auto* p = b.FunctionParam("my_param", ty.vec4f());
     f->SetParams({p});
 
     b.Append(f->Block(), [&] { b.Return(f); });
@@ -312,7 +312,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_MissingIOAnnotations) {
 
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("a"), ty.vec4<f32>(), {}},
+                                                   {mod.symbols.New("a"), ty.vec4f(), {}},
                                                });
     auto* p = b.FunctionParam("my_param", str_ty);
     f->SetParams({p});
@@ -336,7 +336,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_DuplicateAnnotations) {
     attr.builtin = BuiltinValue::kPosition;
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("a"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("a"), ty.vec4f(), attr},
                                                });
     auto* p = b.FunctionParam("my_param", str_ty);
     p->SetBuiltin(BuiltinValue::kPosition);
@@ -895,7 +895,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_DifferentMemberTypes) {
 
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("a"), ty.vec4<f32>(), attr0},
+                                                   {mod.symbols.New("a"), ty.vec4f(), attr0},
                                                    {mod.symbols.New("b"), ty.f32(), attr1},
                                                });
     f->SetReturnType(str_ty);
@@ -1619,7 +1619,7 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithVoidType) {
 TEST_F(IR_ValidatorTest, Function_Param_InvariantWithPosition) {
     auto* f = b.Function("my_func", ty.void_(), Function::PipelineStage::kFragment);
 
-    auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
+    auto* p = b.FunctionParam("my_param", ty.vec4f());
     p->SetInvariant(true);
     p->SetBuiltin(BuiltinValue::kPosition);
     f->SetParams({p});
@@ -1632,7 +1632,7 @@ TEST_F(IR_ValidatorTest, Function_Param_InvariantWithPosition) {
 
 TEST_F(IR_ValidatorTest, Function_Param_InvariantWithoutPosition) {
     auto* f = b.Function("my_func", ty.void_());
-    auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
+    auto* p = b.FunctionParam("my_param", ty.vec4f());
     p->SetInvariant(true);
     f->SetParams({p});
 
@@ -1657,7 +1657,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_InvariantWithPosition) {
     attr.builtin = BuiltinValue::kPosition;
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("pos"), ty.vec4f(), attr},
                                                });
     auto* p = b.FunctionParam("my_param", str_ty);
     f->SetParams({p});
@@ -1674,7 +1674,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_InvariantWithoutPosition) {
 
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("pos"), ty.vec4f(), attr},
                                                });
 
     auto* f = b.Function("my_func", ty.void_());
@@ -1699,7 +1699,7 @@ TEST_F(IR_ValidatorTest, Function_Param_StructNested_InvariantWithoutPosition) {
     attr.invariant = true;
 
     auto* inner_ty =
-        ty.Struct(mod.symbols.New("Inner"), {{mod.symbols.New("pos"), ty.vec4<f32>(), attr}});
+        ty.Struct(mod.symbols.New("Inner"), {{mod.symbols.New("pos"), ty.vec4f(), attr}});
 
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {{mod.symbols.New("i"), inner_ty}});
 
@@ -1722,7 +1722,7 @@ TEST_F(IR_ValidatorTest, Function_Param_StructNested_InvariantWithoutPosition) {
 
 TEST_F(IR_ValidatorTest, Function_Param_Color_NonFragment) {
     auto* f = b.ComputeFunction("my_func");
-    auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
+    auto* p = b.FunctionParam("my_param", ty.vec4f());
     p->SetColor(0);
     f->SetParams({p});
 
@@ -1745,7 +1745,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_Color_NonFragment) {
 
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("pos"), ty.vec4f(), attr},
                                                });
 
     auto* f = b.ComputeFunction("my_func");
@@ -1767,13 +1767,13 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_Color_NonFragment) {
 
 TEST_F(IR_ValidatorTest, Function_Return_Color) {
     auto* f = FragmentEntryPoint("my_func");
-    f->SetReturnType(ty.vec4<f32>());
+    f->SetReturnType(ty.vec4f());
 
     IOAttributes attr;
     attr.color = 0;
     f->SetReturnAttributes(attr);
 
-    b.Append(f->Block(), [&] { b.Return(f, b.Zero(ty.vec4<f32>())); });
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero(ty.vec4f())); });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
@@ -1792,7 +1792,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_Color) {
 
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("pos"), ty.vec4f(), attr},
                                                });
 
     auto* f = FragmentEntryPoint("my_func");
@@ -1814,12 +1814,12 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_Color) {
 TEST_F(IR_ValidatorTest, Function_MSV_Color_Output) {
     auto* f = FragmentEntryPoint("my_func");
 
-    auto* v = b.Var("v", AddressSpace::kOut, ty.vec4<f32>());
+    auto* v = b.Var("v", AddressSpace::kOut, ty.vec4f());
     v->SetColor(0);
     mod.root_block->Append(v);
 
     b.Append(f->Block(), [&] {
-        b.Store(v, b.Zero(ty.vec4<f32>()));
+        b.Store(v, b.Zero(ty.vec4f()));
         b.Return(f);
     });
 
@@ -1841,7 +1841,7 @@ TEST_F(IR_ValidatorTest, Function_MSV_Struct_Color_Output) {
     attr.color = 0;
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("col"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("col"), ty.vec4f(), attr},
                                                });
 
     auto* v = b.Var("v", AddressSpace::kOut, str_ty);
@@ -1866,7 +1866,7 @@ TEST_F(IR_ValidatorTest, Function_MSV_Struct_Color_Output) {
 TEST_F(IR_ValidatorTest, Function_MSV_Color_Input_Fragment) {
     auto* f = FragmentEntryPoint("my_func");
 
-    auto* v = b.Var("v", AddressSpace::kIn, ty.vec4<f32>());
+    auto* v = b.Var("v", AddressSpace::kIn, ty.vec4f());
     v->SetColor(0);
     mod.root_block->Append(v);
 
@@ -1886,7 +1886,7 @@ TEST_F(IR_ValidatorTest, Function_MSV_Struct_Color_Input_Fragment) {
     attr.color = 0;
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("col"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("col"), ty.vec4f(), attr},
                                                });
 
     auto* v = b.Var("v", AddressSpace::kIn, str_ty);
@@ -1904,13 +1904,13 @@ TEST_F(IR_ValidatorTest, Function_MSV_Struct_Color_Input_Fragment) {
 TEST_F(IR_ValidatorTest, Function_MSV_Color_Input_NonFragment) {
     auto* f = VertexEntryPoint("my_func");
 
-    auto* v = b.Var("v", AddressSpace::kIn, ty.vec4<f32>());
+    auto* v = b.Var("v", AddressSpace::kIn, ty.vec4f());
     v->SetColor(0);
     mod.root_block->Append(v);
 
     b.Append(f->Block(), [&] {
         b.Load(v);
-        b.Return(f, b.Zero(ty.vec4<f32>()));
+        b.Return(f, b.Zero(ty.vec4f()));
     });
 
     auto res = ir::Validate(mod);
@@ -1931,14 +1931,14 @@ TEST_F(IR_ValidatorTest, Function_MSV_Struct_Color_Input_NonFragment) {
     attr.color = 0;
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("col"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("col"), ty.vec4f(), attr},
                                                });
     auto* v = b.Var("v", AddressSpace::kIn, str_ty);
     mod.root_block->Append(v);
 
     b.Append(f->Block(), [&] {
         b.Store(v, b.Zero(str_ty));
-        b.Return(f, b.Zero(ty.vec4<f32>()));
+        b.Return(f, b.Zero(ty.vec4f()));
     });
 
     auto res = ir::Validate(mod);
@@ -2036,7 +2036,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_MultipleIOAnnotations) {
     attr.location = 0;
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("a"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("a"), ty.vec4f(), attr},
                                                });
     auto* f = b.Function("my_func", str_ty, Function::PipelineStage::kVertex);
     b.Append(f->Block(), [&] { b.Unreachable(); });
@@ -2141,7 +2141,7 @@ TEST_F(IR_ValidatorTest, Function_Return_NonVoid_Struct_MissingIOAnnotations) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_InvariantWithPosition) {
-    auto* f = b.Function("my_func", ty.vec4<f32>(), Function::PipelineStage::kVertex);
+    auto* f = b.Function("my_func", ty.vec4f(), Function::PipelineStage::kVertex);
     f->SetReturnBuiltin(BuiltinValue::kPosition);
     f->SetReturnInvariant(true);
 
@@ -2152,7 +2152,7 @@ TEST_F(IR_ValidatorTest, Function_Return_InvariantWithPosition) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition) {
-    auto* f = b.Function("my_func", ty.vec4<f32>());
+    auto* f = b.Function("my_func", ty.vec4f());
     f->SetReturnInvariant(true);
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
@@ -2174,7 +2174,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithPosition) {
     attr.builtin = BuiltinValue::kPosition;
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("pos"), ty.vec4f(), attr},
                                                });
 
     auto* f = VertexEntryPoint("my_func");
@@ -2193,7 +2193,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition_ViaMSV)
     attr.invariant = true;
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("pos"), ty.vec4f(), attr},
                                                });
 
     auto* v = b.Var("v", AddressSpace::kOut, str_ty);
@@ -2221,7 +2221,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
 
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                                   {mod.symbols.New("pos"), ty.vec4f(), attr},
                                                });
 
     auto* f = VertexEntryPoint("my_func");
@@ -2242,12 +2242,12 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
 TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition_ViaMSV) {
     auto* f = VertexEntryPoint("my_func");
 
-    auto* v = b.Var("v", AddressSpace::kOut, ty.vec4<f32>());
+    auto* v = b.Var("v", AddressSpace::kOut, ty.vec4f());
     v->SetInvariant(true);
     mod.root_block->Append(v);
 
     b.Append(f->Block(), [&] {
-        b.Store(v, b.Zero(ty.vec4<f32>()));
+        b.Store(v, b.Zero(ty.vec4f()));
         b.Return(f);
     });
 
@@ -2554,7 +2554,7 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonRootBlockOverride) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Vertex_BasicPosition) {
-    auto* f = b.Function("my_func", ty.vec4<f32>(), Function::PipelineStage::kVertex);
+    auto* f = b.Function("my_func", ty.vec4f(), Function::PipelineStage::kVertex);
     f->SetReturnBuiltin(BuiltinValue::kPosition);
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -2563,7 +2563,7 @@ TEST_F(IR_ValidatorTest, Function_Vertex_BasicPosition) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Vertex_StructPosition) {
-    auto pos_ty = ty.vec4<f32>();
+    auto pos_ty = ty.vec4f();
     auto pos_attr = IOAttributes();
     pos_attr.builtin = BuiltinValue::kPosition;
 
@@ -2580,7 +2580,7 @@ TEST_F(IR_ValidatorTest, Function_Vertex_StructPosition) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Vertex_StructPositionAndClipDistances) {
-    auto pos_ty = ty.vec4<f32>();
+    auto pos_ty = ty.vec4f();
     auto pos_attr = IOAttributes();
     pos_attr.builtin = BuiltinValue::kPosition;
 
@@ -2625,7 +2625,7 @@ TEST_F(IR_ValidatorTest, Function_Vertex_StructOnlyClipDistances) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Vertex_MissingPosition) {
-    auto* f = b.Function("my_func", ty.vec4<f32>(), Function::PipelineStage::kVertex);
+    auto* f = b.Function("my_func", ty.vec4f(), Function::PipelineStage::kVertex);
     f->SetReturnLocation(0);
 
     b.Append(f->Block(), [&] { b.Unreachable(); });

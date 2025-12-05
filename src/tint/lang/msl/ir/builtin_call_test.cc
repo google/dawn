@@ -64,11 +64,11 @@ TEST_F(IR_MslBuiltinCallTest, Clone) {
 TEST_F(IR_MslBuiltinCallTest, DoesNotMatchMemberFunction) {
     auto* t = b.FunctionParam("t", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
-    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
-    auto* func = b.Function("foo", ty.vec4<f32>());
+    auto* coords = b.FunctionParam("coords", ty.vec2f());
+    auto* func = b.Function("foo", ty.vec4f());
     func->SetParams({t, s, coords});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call<BuiltinCall>(ty.vec4<f32>(), msl::BuiltinFn::kSample, t, s, coords);
+        auto* result = b.Call<BuiltinCall>(ty.vec4f(), msl::BuiltinFn::kSample, t, s, coords);
         b.Return(func, result);
     });
 

@@ -911,18 +911,18 @@ TEST_F(HlslWriterPromoteInitializersTest, LetOfLet) {
     capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
 
     auto* str_ty = ty.Struct(mod.symbols.New("S"), {
-                                                       {mod.symbols.New("a"), ty.vec4<i32>()},
+                                                       {mod.symbols.New("a"), ty.vec4i()},
                                                    });
 
     auto* inner = b.Function("inner", str_ty);
     b.Append(inner->Block(),
-             [&] { b.Return(inner, b.Construct(str_ty, b.Splat(ty.vec4<i32>(), 1_i))); });
+             [&] { b.Return(inner, b.Construct(str_ty, b.Splat(ty.vec4i(), 1_i))); });
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* in = b.Call(inner);
         auto* l = b.Let("a", in);
-        b.Access(ty.vec4<i32>(), l, 0_u);
+        b.Access(ty.vec4i(), l, 0_u);
         b.Return(func);
     });
 

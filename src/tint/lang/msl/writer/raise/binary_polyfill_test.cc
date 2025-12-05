@@ -79,7 +79,7 @@ TEST_F(MslWriter_BinaryPolyfillTest, FMod_Scalar) {
 TEST_F(MslWriter_BinaryPolyfillTest, FMod_Vector) {
     auto* lhs = b.FunctionParam<vec4<f16>>("lhs");
     auto* rhs = b.FunctionParam<vec4<f16>>("rhs");
-    auto* func = b.Function("foo", ty.vec4<f16>());
+    auto* func = b.Function("foo", ty.vec4h());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
         auto* result = b.Modulo<vec4<f16>>(lhs, rhs);

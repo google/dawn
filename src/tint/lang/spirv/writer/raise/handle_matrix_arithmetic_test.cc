@@ -250,8 +250,8 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Mat2x3f_Scalar) {
 
 TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Mat3x4f_Vector) {
     auto* arg1 = b.FunctionParam("arg1", ty.mat3x4<f32>());
-    auto* arg2 = b.FunctionParam("arg2", ty.vec3<f32>());
-    auto* func = b.Function("foo", ty.vec4<f32>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec3f());
+    auto* func = b.Function("foo", ty.vec4f());
     func->SetParams({arg1, arg2});
 
     b.Append(func->Block(), [&] {
@@ -354,9 +354,9 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Scalar_Mat3x2h) {
 }
 
 TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Vector_Mat3x4f) {
-    auto* arg1 = b.FunctionParam("arg1", ty.vec3<f16>());
+    auto* arg1 = b.FunctionParam("arg1", ty.vec3h());
     auto* arg2 = b.FunctionParam("arg2", ty.mat4x3<f16>());
-    auto* func = b.Function("foo", ty.vec4<f16>());
+    auto* func = b.Function("foo", ty.vec4h());
     func->SetParams({arg1, arg2});
 
     b.Append(func->Block(), [&] {

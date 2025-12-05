@@ -213,7 +213,7 @@ $B1: {  # root
 
 TEST_F(MslWriter_ConvertPrintToLogTest, Compute_ExistingBuiltin) {
     auto* func = b.ComputeFunction("foo");
-    auto* id = b.FunctionParam("id", ty.vec3<u32>());
+    auto* id = b.FunctionParam("id", ty.vec3u());
     id->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
     func->AppendParam(id);
     b.Append(func->Block(), [&] {
@@ -297,7 +297,7 @@ $B1: {  # root
 
 TEST_F(MslWriter_ConvertPrintToLogTest, Fragment_ExistingBuiltin) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    auto* position = b.FunctionParam("position", ty.vec4f());
     position->SetBuiltin(core::BuiltinValue::kPosition);
     func->AppendParam(position);
     b.Append(func->Block(), [&] {
@@ -340,7 +340,7 @@ $B1: {  # root
 }
 
 TEST_F(MslWriter_ConvertPrintToLogTest, Vertex) {
-    auto* func = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    auto* func = b.Function("foo", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
     func->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(func->Block(), [&] {
         b.Call<void>(core::BuiltinFn::kPrint, 42_u);
@@ -381,7 +381,7 @@ $B1: {  # root
 }
 
 TEST_F(MslWriter_ConvertPrintToLogTest, Vertex_ExistingBuiltin) {
-    auto* func = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    auto* func = b.Function("foo", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
     func->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     auto* instance = b.FunctionParam("instance", ty.u32());

@@ -187,8 +187,8 @@ TEST_F(GlslWriter_BinaryPolyfillTest, BitwiseBoolOr_Vec) {
 TEST_F(GlslWriter_BinaryPolyfillTest, RelationalEqualF16) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("left", b.Splat(ty.vec2<f16>(), 1_h));
-        auto* r = b.Let("right", b.Splat(ty.vec2<f16>(), 2_h));
+        auto* l = b.Let("left", b.Splat(ty.vec2h(), 1_h));
+        auto* r = b.Let("right", b.Splat(ty.vec2h(), 2_h));
         auto* bin = b.Equal(l, r);
         b.Let("val", bin);
         b.Return(func);
@@ -265,8 +265,8 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalEqualBool) {
 TEST_F(GlslWriter_BinaryPolyfillTest, RelationalNotEqualI32) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("left", b.Splat(ty.vec2<i32>(), 1_i));
-        auto* r = b.Let("right", b.Splat(ty.vec2<i32>(), 2_i));
+        auto* l = b.Let("left", b.Splat(ty.vec2i(), 1_i));
+        auto* r = b.Let("right", b.Splat(ty.vec2i(), 2_i));
         auto* bin = b.NotEqual(l, r);
         b.Let("val", bin);
         b.Return(func);
@@ -304,8 +304,8 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalNotEqualI32) {
 TEST_F(GlslWriter_BinaryPolyfillTest, RelationalLessThanF32) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
-        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
+        auto* l = b.Let("left", b.Splat(ty.vec2f(), 1_f));
+        auto* r = b.Let("right", b.Splat(ty.vec2f(), 2_f));
         auto* bin = b.LessThan(l, r);
         b.Let("val", bin);
         b.Return(func);
@@ -343,8 +343,8 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalLessThanF32) {
 TEST_F(GlslWriter_BinaryPolyfillTest, RelationalLessThanEqualU32) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("left", b.Splat(ty.vec2<u32>(), 1_u));
-        auto* r = b.Let("right", b.Splat(ty.vec2<u32>(), 2_u));
+        auto* l = b.Let("left", b.Splat(ty.vec2u(), 1_u));
+        auto* r = b.Let("right", b.Splat(ty.vec2u(), 2_u));
         auto* bin = b.LessThanEqual(l, r);
         b.Let("val", bin);
         b.Return(func);
@@ -382,8 +382,8 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalLessThanEqualU32) {
 TEST_F(GlslWriter_BinaryPolyfillTest, RelationalGreaterThanF32) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
-        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
+        auto* l = b.Let("left", b.Splat(ty.vec2f(), 1_f));
+        auto* r = b.Let("right", b.Splat(ty.vec2f(), 2_f));
         auto* bin = b.GreaterThan(l, r);
         b.Let("val", bin);
         b.Return(func);
@@ -421,8 +421,8 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalGreaterThanF32) {
 TEST_F(GlslWriter_BinaryPolyfillTest, RelationalGreaterThanEqualF32) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
-        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
+        auto* l = b.Let("left", b.Splat(ty.vec2f(), 1_f));
+        auto* r = b.Let("right", b.Splat(ty.vec2f(), 2_f));
         auto* bin = b.GreaterThanEqual(l, r);
         b.Let("val", bin);
         b.Return(func);
@@ -460,9 +460,9 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalGreaterThanEqualF32) {
 TEST_F(GlslWriter_BinaryPolyfillTest, FloatModF32) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
-        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
-        auto* bin = b.Modulo(ty.vec2<f32>(), l, r);
+        auto* l = b.Let("left", b.Splat(ty.vec2f(), 1_f));
+        auto* r = b.Let("right", b.Splat(ty.vec2f(), 2_f));
+        auto* bin = b.Modulo(ty.vec2f(), l, r);
         b.Let("val", bin);
         b.Return(func);
     });
@@ -509,8 +509,8 @@ TEST_F(GlslWriter_BinaryPolyfillTest, FloatModMixedF32) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", 1_f);
-        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
-        auto* bin = b.Modulo(ty.vec2<f32>(), l, r);
+        auto* r = b.Let("right", b.Splat(ty.vec2f(), 2_f));
+        auto* bin = b.Modulo(ty.vec2f(), l, r);
         b.Let("val", bin);
         b.Return(func);
     });
@@ -557,9 +557,9 @@ TEST_F(GlslWriter_BinaryPolyfillTest, FloatModMixedF32) {
 TEST_F(GlslWriter_BinaryPolyfillTest, FloatModF16) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("left", b.Splat(ty.vec2<f16>(), 1_h));
-        auto* r = b.Let("right", b.Splat(ty.vec2<f16>(), 2_h));
-        auto* bin = b.Modulo(ty.vec2<f16>(), l, r);
+        auto* l = b.Let("left", b.Splat(ty.vec2h(), 1_h));
+        auto* r = b.Let("right", b.Splat(ty.vec2h(), 2_h));
+        auto* bin = b.Modulo(ty.vec2h(), l, r);
         b.Let("val", bin);
         b.Return(func);
     });

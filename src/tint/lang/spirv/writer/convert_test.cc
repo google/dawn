@@ -348,17 +348,17 @@ TEST_F(SpirvWriterTest, Convert_F16_to_U32) {
 }
 
 TEST_F(SpirvWriterTest, Convert_F32_to_I32_Vec2) {
-    auto* func = b.Function("foo", ty.vec2<i32>());
-    func->SetParams({b.FunctionParam("arg", ty.vec2<f32>())});
+    auto* func = b.Function("foo", ty.vec2i());
+    func->SetParams({b.FunctionParam("arg", ty.vec2f())});
     b.Append(func->Block(), [&] {
-        auto* result = b.Convert(ty.vec2<i32>(), func->Params()[0]);
+        auto* result = b.Convert(ty.vec2i(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", b.Call(func, b.Zero(ty.vec2<f32>())));
+        b.Let("x", b.Call(func, b.Zero(ty.vec2f())));
         b.Return(eb);
     });
 
@@ -419,17 +419,17 @@ TEST_F(SpirvWriterTest, Convert_F32_to_I32_Vec2) {
 }
 
 TEST_F(SpirvWriterTest, Convert_F32_to_U32_Vec3) {
-    auto* func = b.Function("foo", ty.vec3<u32>());
-    func->SetParams({b.FunctionParam("arg", ty.vec3<f32>())});
+    auto* func = b.Function("foo", ty.vec3u());
+    func->SetParams({b.FunctionParam("arg", ty.vec3f())});
     b.Append(func->Block(), [&] {
-        auto* result = b.Convert(ty.vec3<u32>(), func->Params()[0]);
+        auto* result = b.Convert(ty.vec3u(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", b.Call(func, b.Zero(ty.vec3<f32>())));
+        b.Let("x", b.Call(func, b.Zero(ty.vec3f())));
         b.Return(eb);
     });
 
@@ -488,17 +488,17 @@ TEST_F(SpirvWriterTest, Convert_F32_to_U32_Vec3) {
 }
 
 TEST_F(SpirvWriterTest, Convert_F16_to_I32_Vec2) {
-    auto* func = b.Function("foo", ty.vec2<i32>());
-    func->SetParams({b.FunctionParam("arg", ty.vec2<f16>())});
+    auto* func = b.Function("foo", ty.vec2i());
+    func->SetParams({b.FunctionParam("arg", ty.vec2h())});
     b.Append(func->Block(), [&] {
-        auto* result = b.Convert(ty.vec2<i32>(), func->Params()[0]);
+        auto* result = b.Convert(ty.vec2i(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", b.Call(func, b.Zero(ty.vec2<f16>())));
+        b.Let("x", b.Call(func, b.Zero(ty.vec2h())));
         b.Return(eb);
     });
 
@@ -561,17 +561,17 @@ TEST_F(SpirvWriterTest, Convert_F16_to_I32_Vec2) {
 }
 
 TEST_F(SpirvWriterTest, Convert_F16_to_U32_Vec4) {
-    auto* func = b.Function("foo", ty.vec4<u32>());
-    func->SetParams({b.FunctionParam("arg", ty.vec4<f16>())});
+    auto* func = b.Function("foo", ty.vec4u());
+    func->SetParams({b.FunctionParam("arg", ty.vec4h())});
     b.Append(func->Block(), [&] {
-        auto* result = b.Convert(ty.vec4<u32>(), func->Params()[0]);
+        auto* result = b.Convert(ty.vec4u(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", b.Call(func, b.Zero(ty.vec4<f16>())));
+        b.Let("x", b.Call(func, b.Zero(ty.vec4h())));
         b.Return(eb);
     });
 

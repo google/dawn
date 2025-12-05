@@ -411,16 +411,16 @@ struct State {
             case VertexFormat::kUint8:
                 return b.And<u32>(load_u32(0), 0xFF_u)->Result();
             case VertexFormat::kUint8x2:
-                return load_ivec(0, 8, ty.vec2<u32>());
+                return load_ivec(0, 8, ty.vec2u());
             case VertexFormat::kUint8x4:
-                return load_ivec(0, 8, ty.vec4<u32>());
+                return load_ivec(0, 8, ty.vec4u());
             case VertexFormat::kUint16:
                 return b.And<u32>(load_u32(0), 0xFFFF_u)->Result();
             case VertexFormat::kUint16x2:
-                return load_ivec(0, 16, ty.vec2<u32>());
+                return load_ivec(0, 16, ty.vec2u());
             case VertexFormat::kUint16x4: {
-                auto* xy = load_ivec(0, 16, ty.vec2<u32>());
-                auto* zw = load_ivec(1, 16, ty.vec2<u32>());
+                auto* xy = load_ivec(0, 16, ty.vec2u());
+                auto* zw = load_ivec(1, 16, ty.vec2u());
                 return b.Construct<vec4<u32>>(xy, zw)->Result();
             }
             case VertexFormat::kUint32:
@@ -453,9 +453,9 @@ struct State {
                 return b.ShiftRight<i32>(b.ShiftLeft<i32>(word, 24_u), 24_u)->Result();
             }
             case VertexFormat::kSint8x2:
-                return load_ivec(0, 8, ty.vec2<i32>());
+                return load_ivec(0, 8, ty.vec2i());
             case VertexFormat::kSint8x4:
-                return load_ivec(0, 8, ty.vec4<i32>());
+                return load_ivec(0, 8, ty.vec4i());
             case VertexFormat::kSint16: {
                 // ****xxxx
                 auto* word = b.Bitcast<i32>(load_u32(0));
@@ -463,10 +463,10 @@ struct State {
                 return b.ShiftRight<i32>(b.ShiftLeft<i32>(word, 16_u), 16_u)->Result();
             }
             case VertexFormat::kSint16x2:
-                return load_ivec(0, 16, ty.vec2<i32>());
+                return load_ivec(0, 16, ty.vec2i());
             case VertexFormat::kSint16x4: {
-                auto* xy = load_ivec(0, 16, ty.vec2<i32>());
-                auto* zw = load_ivec(1, 16, ty.vec2<i32>());
+                auto* xy = load_ivec(0, 16, ty.vec2i());
+                auto* zw = load_ivec(1, 16, ty.vec2i());
                 return b.Construct<vec4<i32>>(xy, zw)->Result();
             }
             case VertexFormat::kSint32:

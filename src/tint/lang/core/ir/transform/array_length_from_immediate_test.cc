@@ -186,7 +186,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -262,7 +262,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -465,7 +465,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -556,7 +556,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -662,7 +662,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -740,7 +740,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -836,7 +836,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -952,7 +952,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -1133,7 +1133,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -1241,7 +1241,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
     Run(ArrayLengthFromImmediates, immediate_data.Get(), buffer_size_start_offset, num_elements,
@@ -1364,7 +1364,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
     Run(ArrayLengthFromImmediates, immediate_data.Get(), buffer_size_start_offset, num_elements,
@@ -1439,7 +1439,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
     Run(ArrayLengthFromImmediates, immediate_data.Get(), buffer_size_start_offset, num_elements,
@@ -1567,7 +1567,7 @@ $B1: {  # root
     uint32_t num_elements = GetBufferSizesNumElements(bindpoint_to_index);
     immediate_data_config.AddInternalImmediateData(buffer_size_start_offset,
                                                    mod.symbols.New("tint_storage_buffer_sizes"),
-                                                   ty.array(ty.vec4<u32>(), num_elements));
+                                                   ty.array(ty.vec4u(), num_elements));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
     Run(ArrayLengthFromImmediates, immediate_data.Get(), buffer_size_start_offset, num_elements,

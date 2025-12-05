@@ -8803,7 +8803,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToFunctionParamNoRange) {
 TEST_F(IR_IntegerRangeAnalysisTest, AccessToNonIntegerFunctionParam) {
     auto* func = b.Function("func", ty.void_());
     Access* access = nullptr;
-    auto* param = b.FunctionParam("param", ty.vec4<f32>());
+    auto* param = b.FunctionParam("param", ty.vec4f());
     func->SetParams({param});
     b.Append(func->Block(), [&] {
         access = b.Access(ty.f32(), param, 0_u);
@@ -14609,7 +14609,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_Vector_I32) {
     func->AppendParam(param);
 
     b.Append(func->Block(), [&] {
-        auto* vec4_const = b.Construct(ty.vec4<i32>(), 1_i, 2_i, 3_i, 4_i);
+        auto* vec4_const = b.Construct(ty.vec4i(), 1_i, 2_i, 3_i, 4_i);
         call_min = b.Call<vec4<i32>>(BuiltinFn::kMin, param, vec4_const);
         b.Return(func);
     });
@@ -14642,7 +14642,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_Vector_U32) {
     func->AppendParam(param);
 
     b.Append(func->Block(), [&] {
-        auto* vec2_const = b.Construct(ty.vec2<u32>(), 1_u, 2_u);
+        auto* vec2_const = b.Construct(ty.vec2u(), 1_u, 2_u);
         call_min = b.Call<vec2<u32>>(BuiltinFn::kMin, param, vec2_const);
         b.Return(func);
     });
@@ -15758,7 +15758,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_Vector_I32) {
     func->AppendParam(param);
 
     b.Append(func->Block(), [&] {
-        auto* vec4_const = b.Construct(ty.vec4<i32>(), 1_i, 2_i, 3_i, 4_i);
+        auto* vec4_const = b.Construct(ty.vec4i(), 1_i, 2_i, 3_i, 4_i);
         call_max = b.Call<vec4<i32>>(BuiltinFn::kMax, param, vec4_const);
         b.Return(func);
     });
@@ -15791,7 +15791,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_Vector_U32) {
     func->AppendParam(param);
 
     b.Append(func->Block(), [&] {
-        auto* vec2_const = b.Construct(ty.vec2<u32>(), 1_u, 2_u);
+        auto* vec2_const = b.Construct(ty.vec2u(), 1_u, 2_u);
         call_max = b.Call<vec2<u32>>(BuiltinFn::kMax, param, vec2_const);
         b.Return(func);
     });
@@ -17119,7 +17119,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_LHS_RHS_Vec4I) {
     auto* param = b.FunctionParam("param", mod.Types().vec4<i32>());
     func->AppendParam(param);
     b.Append(func->Block(), [&] {
-        auto* vec4_const = b.Construct(ty.vec4<i32>(), 1_i, 2_i, 3_i, 4_i);
+        auto* vec4_const = b.Construct(ty.vec4i(), 1_i, 2_i, 3_i, 4_i);
         // modulo = param %
         modulo = b.Modulo<vec4<i32>>(param, vec4_const);
         b.Return(func);

@@ -50,7 +50,7 @@ using IR_MslMemberBuiltinCallTest = core::ir::IRTestHelper;
 TEST_F(IR_MslMemberBuiltinCallTest, Clone) {
     auto* t = b.FunctionParam("t", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
-    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* coords = b.FunctionParam("coords", ty.vec2f());
     auto* builtin =
         b.MemberCall<MemberBuiltinCall>(mod.Types().void_(), BuiltinFn::kSample, t, s, coords);
 

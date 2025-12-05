@@ -203,11 +203,11 @@ TEST_F(BuiltinStructTest, ModfResult_NoClashWithUserDeclaredStruct) {
 
     auto* user_struct = ty.Struct(symbols.New(ToString(BuiltinType::kModfResultVec4F16)),
                                   {
-                                      {symbols.New("fract"), ty.vec4<f16>()},
-                                      {symbols.New("whole"), ty.vec4<f16>()},
+                                      {symbols.New("fract"), ty.vec4h()},
+                                      {symbols.New("whole"), ty.vec4h()},
                                   });
 
-    auto* internal_struct = CreateModfResult(ty, symbols, ty.vec4<f16>());
+    auto* internal_struct = CreateModfResult(ty, symbols, ty.vec4h());
 
     ASSERT_NE(internal_struct, nullptr);
     EXPECT_NE(internal_struct, user_struct);

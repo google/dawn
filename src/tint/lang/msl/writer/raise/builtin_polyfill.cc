@@ -1033,14 +1033,14 @@ struct State {
             auto* conv = b.Convert(ty.i32(), arg);
             auto* x = b.ShiftLeft(ty.i32(), conv, 16_u);
 
-            auto* vec = b.Construct(ty.vec2<i32>(), x, conv);
-            auto* v = b.ShiftRight(ty.vec2<i32>(), vec, b.Splat(ty.vec2<u32>(), 16_u));
+            auto* vec = b.Construct(ty.vec2i(), x, conv);
+            auto* v = b.ShiftRight(ty.vec2i(), vec, b.Splat(ty.vec2u(), 16_u));
 
-            auto* flt = b.Convert(ty.vec2<f32>(), v);
-            auto* scale = b.Divide(ty.vec2<f32>(), flt, 32767_f);
+            auto* flt = b.Convert(ty.vec2f(), v);
+            auto* scale = b.Divide(ty.vec2f(), flt, 32767_f);
 
-            auto* lower = b.Splat(ty.vec2<f32>(), -1_f);
-            auto* upper = b.Splat(ty.vec2<f32>(), 1_f);
+            auto* lower = b.Splat(ty.vec2f(), -1_f);
+            auto* upper = b.Splat(ty.vec2f(), 1_f);
             b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
         });
         builtin->Destroy();
@@ -1053,14 +1053,14 @@ struct State {
         b.InsertBefore(builtin, [&] {
             auto* x = b.ShiftLeft(ty.u32(), arg, 16_u);
 
-            auto* vec = b.Construct(ty.vec2<u32>(), x, arg);
-            auto* v = b.ShiftRight(ty.vec2<u32>(), vec, b.Splat(ty.vec2<u32>(), 16_u));
+            auto* vec = b.Construct(ty.vec2u(), x, arg);
+            auto* v = b.ShiftRight(ty.vec2u(), vec, b.Splat(ty.vec2u(), 16_u));
 
-            auto* flt = b.Convert(ty.vec2<f32>(), v);
-            auto* scale = b.Divide(ty.vec2<f32>(), flt, 65535_f);
+            auto* flt = b.Convert(ty.vec2f(), v);
+            auto* scale = b.Divide(ty.vec2f(), flt, 65535_f);
 
-            auto* lower = b.Splat(ty.vec2<f32>(), 0_f);
-            auto* upper = b.Splat(ty.vec2<f32>(), 1_f);
+            auto* lower = b.Splat(ty.vec2f(), 0_f);
+            auto* upper = b.Splat(ty.vec2f(), 1_f);
             b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
         });
         builtin->Destroy();

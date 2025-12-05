@@ -274,7 +274,7 @@ struct State {
         uint32_t num_elements = (max_index / 4) + 1;
         b.Append(ir.root_block, [&] {
             buffer_sizes_var = b.Var("tint_storage_buffer_sizes",
-                                     ty.ptr<uniform>(ty.array(ty.vec4<u32>(), num_elements)));
+                                     ty.ptr<uniform>(ty.array(ty.vec4u(), num_elements)));
         });
         buffer_sizes_var->SetBindingPoint(ubo_binding.group, ubo_binding.binding);
         return buffer_sizes_var->Result();

@@ -453,11 +453,11 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_Frexp_UserDeclaredResultStruct) {
 TEST_F(IR_ValidatorTest, CallToBuiltin_Modf_UserDeclaredResultStruct) {
     auto* str_ty = ty.Struct(mod.symbols.New("__modf_result_vec4_f32"),
                              {
-                                 {mod.symbols.New("fract"), ty.vec4<f32>()},
-                                 {mod.symbols.New("whole"), ty.vec4<f32>()},
+                                 {mod.symbols.New("fract"), ty.vec4f()},
+                                 {mod.symbols.New("whole"), ty.vec4f()},
                              });
 
-    auto* f = b.Function("f", ty.vec4<f32>());
+    auto* f = b.Function("f", ty.vec4f());
     b.Append(f->Block(), [&] {
         auto* c = b.Call(str_ty, BuiltinFn::kModf, b.Splat<vec4<f32>>(1_f));
         b.Return(f, b.Access<vec4<f32>>(c, 0_u));
@@ -518,7 +518,7 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Component_TooSmall) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* offset = b.Composite<vec2<i32>>(1_i, 3_i);
 
         auto* t = b.Load(tex);
@@ -550,7 +550,7 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Component_TooBig) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* offset = b.Composite<vec2<i32>>(1_i, 3_i);
 
         auto* t = b.Load(tex);
@@ -582,7 +582,7 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Offset_TooSmall) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(1_i);
         auto* offset = b.Composite<vec2<i32>>(1_i, -9_i);
 
@@ -617,7 +617,7 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Offset_TooBig) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(1_i);
         auto* offset = b.Composite<vec2<i32>>(8_i, -2_i);
 

@@ -181,8 +181,8 @@ TEST_P(GlslWriterBinaryRelationalVecTest, Emit) {
 
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
-        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
+        auto* l = b.Let("left", b.Splat(ty.vec2f(), 1_f));
+        auto* r = b.Let("right", b.Splat(ty.vec2f(), 2_f));
         auto* bin = b.Binary(params.op, ty.vec2<bool>(), l, r);
         b.Let("val", bin);
         b.Return(func);
@@ -212,9 +212,9 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(GlslWriterTest, Binary_Float_Modulo) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
-        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
-        auto* bin = b.Modulo(ty.vec2<f32>(), l, r);
+        auto* l = b.Let("left", b.Splat(ty.vec2f(), 1_f));
+        auto* r = b.Let("right", b.Splat(ty.vec2f(), 2_f));
+        auto* bin = b.Modulo(ty.vec2f(), l, r);
         b.Let("val", bin);
         b.Return(func);
     });

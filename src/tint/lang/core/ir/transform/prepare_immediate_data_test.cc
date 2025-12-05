@@ -175,7 +175,7 @@ $B1: {  # root
     PrepareImmediateDataConfig config;
     config.AddInternalImmediateData(0u, mod.symbols.New("internal_constant_a"), ty.i32());
     config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_b"), ty.f32());
-    config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4<f32>());
+    config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4f());
     auto result = Run(config);
     if (result == Success) {
         EXPECT_NE(result->var, nullptr);
@@ -234,7 +234,7 @@ $B1: {  # root
     PrepareImmediateDataConfig config;
     config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_a"), ty.i32());
     config.AddInternalImmediateData(8u, mod.symbols.New("internal_constant_b"), ty.f32());
-    config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4<f32>());
+    config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4f());
     auto result = Run(config);
     if (result == Success) {
         EXPECT_NE(result->var, nullptr);

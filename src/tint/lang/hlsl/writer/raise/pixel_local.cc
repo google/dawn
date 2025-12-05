@@ -143,8 +143,8 @@ struct State {
         // Insert coord decl used to index ROVs at the entry point start
         core::ir::Instruction* coord = nullptr;
         b.InsertBefore(entry_point->Block()->Front(), [&] {
-            coord = b.Access(ty.vec4<f32>(), entry_point_param, u32(position_member->Index()));
-            coord = b.Swizzle(ty.vec2<f32>(), coord, {0, 1});
+            coord = b.Access(ty.vec4f(), entry_point_param, u32(position_member->Index()));
+            coord = b.Swizzle(ty.vec2f(), coord, {0, 1});
             coord = b.Convert<vec2<u32>>(coord);  // Input type to .Load
         });
 

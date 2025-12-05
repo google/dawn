@@ -47,12 +47,12 @@ using TypeStructTest = TestHelper;
 TEST_F(TypeStructTest, Creation) {
     SymbolTable st{};
     Manager ty;
-    auto* s = ty.Get<Struct>(st.New("my_struct"),
-                             tint::Vector{ty.Get<StructMember>(st.New("b"), ty.vec3<f32>(), 0u, 0u,
-                                                               16u, 12u, core::IOAttributes{}),
-                                          ty.Get<StructMember>(st.New("a"), ty.i32(), 1u, 16u, 4u,
-                                                               4u, core::IOAttributes{})},
-                             8u /* size */);
+    auto* s = ty.Get<Struct>(
+        st.New("my_struct"),
+        tint::Vector{
+            ty.Get<StructMember>(st.New("b"), ty.vec3f(), 0u, 0u, 16u, 12u, core::IOAttributes{}),
+            ty.Get<StructMember>(st.New("a"), ty.i32(), 1u, 16u, 4u, 4u, core::IOAttributes{})},
+        8u /* size */);
 
     EXPECT_EQ(s->Align(), 16u);
     EXPECT_EQ(s->Size(), 8u);
@@ -85,7 +85,7 @@ TEST_F(TypeStructTest, Layout) {
                                        Manager::StructMemberDesc{st.New("a"), ty.i32()},
                                        Manager::StructMemberDesc{st.New("b"), ty.u32()},
                                        Manager::StructMemberDesc{st.New("c"), ty.f32()},
-                                       Manager::StructMemberDesc{st.New("d"), ty.vec3<f32>()},
+                                       Manager::StructMemberDesc{st.New("d"), ty.vec3f()},
                                        Manager::StructMemberDesc{st.New("e"), ty.mat4x2<f32>()},
                                    });
 
@@ -139,7 +139,7 @@ TEST_F(TypeStructTest, IsConstructable) {
                                        Manager::StructMemberDesc{st.New("a"), ty.i32()},
                                        Manager::StructMemberDesc{st.New("b"), ty.u32()},
                                        Manager::StructMemberDesc{st.New("c"), ty.f32()},
-                                       Manager::StructMemberDesc{st.New("d"), ty.vec3<f32>()},
+                                       Manager::StructMemberDesc{st.New("d"), ty.vec3f()},
                                        Manager::StructMemberDesc{st.New("e"), ty.mat4x2<f32>()},
                                    });
 
@@ -169,7 +169,7 @@ TEST_F(TypeStructTest, HasCreationFixedFootprint) {
                                        Manager::StructMemberDesc{st.New("a"), ty.i32()},
                                        Manager::StructMemberDesc{st.New("b"), ty.u32()},
                                        Manager::StructMemberDesc{st.New("c"), ty.f32()},
-                                       Manager::StructMemberDesc{st.New("d"), ty.vec3<f32>()},
+                                       Manager::StructMemberDesc{st.New("d"), ty.vec3f()},
                                        Manager::StructMemberDesc{st.New("e"), ty.mat4x2<f32>()},
                                        Manager::StructMemberDesc{st.New("f"), ty.array<f32, 32>()},
                                    });
@@ -199,7 +199,7 @@ TEST_F(TypeStructTest, HasFixedFootprint) {
                                        Manager::StructMemberDesc{st.New("a"), ty.i32()},
                                        Manager::StructMemberDesc{st.New("b"), ty.u32()},
                                        Manager::StructMemberDesc{st.New("c"), ty.f32()},
-                                       Manager::StructMemberDesc{st.New("d"), ty.vec3<f32>()},
+                                       Manager::StructMemberDesc{st.New("d"), ty.vec3f()},
                                        Manager::StructMemberDesc{st.New("e"), ty.mat4x2<f32>()},
                                        Manager::StructMemberDesc{st.New("f"), ty.array<f32, 32>()},
                                    });
@@ -229,7 +229,7 @@ TEST_F(TypeStructTest, Clone) {
     auto* s = ty.Get<Struct>(
         syms.New("my_struct"),
         tint::Vector{
-            ty.Get<StructMember>(syms.New("b"), ty.vec3<f32>(), 0u, 0u, 16u, 12u, attrs_location_2),
+            ty.Get<StructMember>(syms.New("b"), ty.vec3f(), 0u, 0u, 16u, 12u, attrs_location_2),
             ty.Get<StructMember>(syms.New("a"), ty.i32(), 1u, 16u, 4u, 4u, core::IOAttributes{})},
         8u /* size */);
 

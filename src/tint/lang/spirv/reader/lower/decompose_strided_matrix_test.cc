@@ -1457,7 +1457,7 @@ S_1 = struct @align(64) {
 
 TEST_F(SpirvReader_DecomposeStridedMatrixTest, ExistingStridedArray) {
     auto* strided_array = ty.Get<spirv::type::ExplicitLayoutArray>(
-        ty.vec4<f32>(), ty.Get<core::type::ConstantArrayCount>(4u), 64u, 16u);
+        ty.vec4f(), ty.Get<core::type::ConstantArrayCount>(4u), 64u, 16u);
     auto* struct_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
                                                    {mod.symbols.New("a"), ty.u32()},

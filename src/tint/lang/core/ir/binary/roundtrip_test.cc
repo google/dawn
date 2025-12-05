@@ -397,13 +397,13 @@ TEST_F(IRBinaryRoundtripTest, Return_f16) {
 }
 
 TEST_F(IRBinaryRoundtripTest, Return_vec3f_Composite) {
-    auto* fn = b.Function("Function", ty.vec3<f32>());
+    auto* fn = b.Function("Function", ty.vec3f());
     b.Append(fn->Block(), [&] { b.Return(fn, b.Composite<vec3<f32>>(1_f, 2_f, 3_f)); });
     RUN_TEST();
 }
 
 TEST_F(IRBinaryRoundtripTest, Return_vec3f_Splat) {
-    auto* fn = b.Function("Function", ty.vec3<f32>());
+    auto* fn = b.Function("Function", ty.vec3f());
     b.Append(fn->Block(), [&] { b.Return(fn, b.Splat<vec3<f32>>(1_f)); });
     RUN_TEST();
 }
@@ -549,7 +549,7 @@ TEST_F(IRBinaryRoundtripTest, BinaryOp) {
 
 TEST_F(IRBinaryRoundtripTest, Swizzle) {
     auto* x = b.FunctionParam<vec4<f32>>("x");
-    auto* fn = b.Function("Function", ty.vec3<f32>());
+    auto* fn = b.Function("Function", ty.vec3f());
     fn->SetParams({x});
     b.Append(fn->Block(),
              [&] { b.Return(fn, b.Swizzle<vec3<f32>>(x, Vector<uint32_t, 3>{1, 0, 2})); });
@@ -558,7 +558,7 @@ TEST_F(IRBinaryRoundtripTest, Swizzle) {
 
 TEST_F(IRBinaryRoundtripTest, Bitcast) {
     auto* x = b.FunctionParam<vec4<f32>>("x");
-    auto* fn = b.Function("Function", ty.vec4<u32>());
+    auto* fn = b.Function("Function", ty.vec4u());
     fn->SetParams({x});
     b.Append(fn->Block(), [&] { b.Return(fn, b.Bitcast<vec4<u32>>(x)); });
     RUN_TEST();
@@ -566,7 +566,7 @@ TEST_F(IRBinaryRoundtripTest, Bitcast) {
 
 TEST_F(IRBinaryRoundtripTest, Convert) {
     auto* x = b.FunctionParam<vec4<f32>>("x");
-    auto* fn = b.Function("Function", ty.vec4<u32>());
+    auto* fn = b.Function("Function", ty.vec4u());
     fn->SetParams({x});
     b.Append(fn->Block(), [&] { b.Return(fn, b.Convert<vec4<u32>>(x)); });
     RUN_TEST();
@@ -746,7 +746,7 @@ TEST_F(IRBinaryRoundtripTest, InputAttachment) {
         v->SetBindingPoint(10, 20);
         v->SetInputAttachmentIndex(11);
 
-        auto* fn = b.Function("Function", ty.vec4<i32>());
+        auto* fn = b.Function("Function", ty.vec4i());
         b.Append(fn->Block(),
                  [&] { b.Return(fn, b.Call<i32>(core::BuiltinFn::kInputAttachmentLoad, v)); });
     });

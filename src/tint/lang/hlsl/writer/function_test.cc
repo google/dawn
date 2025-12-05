@@ -99,7 +99,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithParams) {
     pos_attrs.builtin = core::BuiltinValue::kPosition;
 
     Vector members{
-        ty.Get<core::type::StructMember>(b.ir.symbols.New("pos"), ty.vec4<f32>(), 0u, 0u, 16u, 16u,
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("pos"), ty.vec4f(), 0u, 0u, 16u, 16u,
                                          pos_attrs),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("Interface"), std::move(members));
@@ -206,7 +206,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithInOutBuiltins) {
     //   return coord.x;
     // }
 
-    auto* coord = b.FunctionParam("coord", ty.vec4<f32>());
+    auto* coord = b.FunctionParam("coord", ty.vec4f());
     coord->SetBuiltin(core::BuiltinValue::kPosition);
 
     auto* func = b.Function("main", ty.f32(), core::ir::Function::PipelineStage::kFragment);
@@ -959,7 +959,7 @@ TEST_F(HlslWriterTest, WorkgroupStorageSizeCompoundTypes) {
 TEST_F(HlslWriterTest, WorkgroupStorageSizeAlignmentPadding) {
     // vec3<f32> has an alignment of 16 but a size of 12. We leverage this to test
     // that our padded size calculation for workgroup storage is accurate.
-    auto* var = mod.root_block->Append(b.Var("var_f32", ty.ptr(workgroup, ty.vec3<f32>())));
+    auto* var = mod.root_block->Append(b.Var("var_f32", ty.ptr(workgroup, ty.vec3f())));
 
     auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
     b.Append(func->Block(), [&] {  //

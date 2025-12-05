@@ -126,7 +126,7 @@ TEST_F(SpirvWriterTest, Access_Array_Pointer_DynamicIndex) {
 
 TEST_F(SpirvWriterTest, Access_Matrix_Value_ConstantIndex) {
     auto* mat_val = b.FunctionParam("mat", ty.mat2x2(ty.f32()));
-    auto* func = b.Function("foo", ty.vec2<f32>());
+    auto* func = b.Function("foo", ty.vec2f());
     func->SetParams({mat_val});
     b.Append(func->Block(), [&] {
         auto* result_vector = b.Access(ty.vec2f(), mat_val, 1_u);
@@ -207,7 +207,7 @@ TEST_F(SpirvWriterTest, Access_Vector_Value_ConstantIndex) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", b.Call(func, b.Zero(ty.vec4<i32>())));
+        b.Let("x", b.Call(func, b.Zero(ty.vec4i())));
         b.Return(eb);
     });
 
@@ -228,7 +228,7 @@ TEST_F(SpirvWriterTest, Access_Vector_Value_DynamicIndex) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", b.Call(func, b.Zero(ty.vec4<i32>()), b.Zero(ty.i32())));
+        b.Let("x", b.Call(func, b.Zero(ty.vec4i()), b.Zero(ty.i32())));
         b.Return(eb);
     });
 
@@ -269,11 +269,10 @@ TEST_F(SpirvWriterTest, Access_NestedVector_Value_DynamicIndex) {
 }
 
 TEST_F(SpirvWriterTest, Access_Struct_Value_ConstantIndex) {
-    auto* str =
-        ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.Register("a"), ty.i32()},
-                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
-                                               });
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                           {mod.symbols.Register("a"), ty.i32()},
+                                                           {mod.symbols.Register("b"), ty.vec4i()},
+                                                       });
     auto* str_val = b.FunctionParam("str", str);
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({str_val});
@@ -297,12 +296,11 @@ TEST_F(SpirvWriterTest, Access_Struct_Value_ConstantIndex) {
 }
 
 TEST_F(SpirvWriterTest, Access_Struct_Pointer_ConstantIndex) {
-    auto* str =
-        ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.Register("a"), ty.i32()},
-                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
-                                               });
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                           {mod.symbols.Register("a"), ty.i32()},
+                                                           {mod.symbols.Register("b"), ty.vec4i()},
+                                                       });
+    auto* func = b.Function("foo", ty.vec4i());
     b.Append(func->Block(), [&] {
         auto* str_var = b.Var("str", ty.ptr(function, str, read_write));
         auto* result_a = b.Access(ty.ptr<function, i32>(), str_var, 0_u);

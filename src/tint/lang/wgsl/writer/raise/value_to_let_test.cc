@@ -2710,8 +2710,8 @@ TEST_F(WgslWriter_ValueToLetTest, Load_Handle) {
     b.Append(fn->Block(), [&] {
         auto* ls = b.Load(sampler);
         auto* lt = b.Load(tex);
-        auto* r = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSample, lt, ls,
-                         b.Splat<vec2<f32>>(0_f));
+        auto* r =
+            b.Call(ty.vec4f(), core::BuiltinFn::kTextureSample, lt, ls, b.Splat<vec2<f32>>(0_f));
         b.ir.SetName(r, "r");
         b.Return(fn);
     });

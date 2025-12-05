@@ -131,7 +131,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Disabled_Negation_I32_Scalar) {
 
 TEST_F(IR_SignedIntegerPolyfillTest, Negation_I32_Vector) {
     auto* value = b.FunctionParam<vec4<i32>>("value");
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4i());
     func->SetParams({value});
     b.Append(func->Block(), [&] {
         auto* result = b.Negation(value);
@@ -168,7 +168,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Negation_I32_Vector) {
 
 TEST_F(IR_SignedIntegerPolyfillTest, Disabled_Negation_I32_Vector) {
     auto* value = b.FunctionParam<vec4<i32>>("value");
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4i());
     func->SetParams({value});
     b.Append(func->Block(), [&] {
         auto* result = b.Negation(value);
@@ -390,7 +390,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Disabled_IntSub_Scalar) {
 TEST_F(IR_SignedIntegerPolyfillTest, IntAdd_Vector) {
     auto* lhs = b.FunctionParam<vec4<i32>>("lhs");
     auto* rhs = b.FunctionParam<vec4<i32>>("rhs");
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4i());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
         auto* result = b.Add(lhs, rhs);
@@ -428,7 +428,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntAdd_Vector) {
 TEST_F(IR_SignedIntegerPolyfillTest, Disabled_IntAdd_Vector) {
     auto* lhs = b.FunctionParam<vec4<i32>>("lhs");
     auto* rhs = b.FunctionParam<vec4<i32>>("rhs");
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4i());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
         auto* result = b.Add(lhs, rhs);
@@ -455,7 +455,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Disabled_IntAdd_Vector) {
 TEST_F(IR_SignedIntegerPolyfillTest, IntAdd_ScalarVector) {
     auto* lhs = b.FunctionParam<i32>("lhs");
     auto* rhs = b.FunctionParam<vec4<i32>>("rhs");
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4i());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
         auto* result = b.Add(lhs, rhs);
@@ -493,7 +493,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntAdd_ScalarVector) {
 TEST_F(IR_SignedIntegerPolyfillTest, Disabled_IntAdd_ScalarVector) {
     auto* lhs = b.FunctionParam<i32>("lhs");
     auto* rhs = b.FunctionParam<vec4<i32>>("rhs");
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4i());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
         auto* result = b.Add(lhs, rhs);
@@ -520,7 +520,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Disabled_IntAdd_ScalarVector) {
 TEST_F(IR_SignedIntegerPolyfillTest, IntAdd_VectorScalar) {
     auto* lhs = b.FunctionParam<vec4<i32>>("lhs");
     auto* rhs = b.FunctionParam<i32>("rhs");
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4i());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
         auto* result = b.Add(lhs, rhs);
@@ -558,7 +558,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntAdd_VectorScalar) {
 TEST_F(IR_SignedIntegerPolyfillTest, Disabled_IntAdd_VectorScalar) {
     auto* lhs = b.FunctionParam<vec4<i32>>("lhs");
     auto* rhs = b.FunctionParam<i32>("rhs");
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4i());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
         auto* result = b.Add(lhs, rhs);
@@ -647,7 +647,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Disabled_IntShift_Scalar) {
 TEST_F(IR_SignedIntegerPolyfillTest, IntShift_Vector) {
     auto* lhs = b.FunctionParam<vec4<i32>>("lhs");
     auto* rhs = b.FunctionParam<vec4<u32>>("rhs");
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4i());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
         auto* result = b.ShiftLeft<vec4<i32>>(lhs, rhs);
@@ -684,7 +684,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntShift_Vector) {
 TEST_F(IR_SignedIntegerPolyfillTest, Disabled_IntShift_Vector) {
     auto* lhs = b.FunctionParam<vec4<i32>>("lhs");
     auto* rhs = b.FunctionParam<vec4<u32>>("rhs");
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4i());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
         auto* result = b.ShiftLeft<vec4<i32>>(lhs, rhs);

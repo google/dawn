@@ -1061,12 +1061,12 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, MultipleVariables_DifferentElement
     var_c->SetBindingPoint(0, 2);
     mod.root_block->Append(var_c);
 
-    auto* array_type_d = Array(ty.vec4<f32>(), 1, 16);
+    auto* array_type_d = Array(ty.vec4f(), 1, 16);
     auto* var_d = b.Var("d", ty.ptr(storage, array_type_d, read_write));
     var_d->SetBindingPoint(0, 3);
     mod.root_block->Append(var_d);
 
-    auto* array_type_e = RuntimeArray(ty.vec2<i32>(), 64);
+    auto* array_type_e = RuntimeArray(ty.vec2i(), 64);
     auto* var_e = b.Var("e", ty.ptr(storage, array_type_e, read_write));
     var_e->SetBindingPoint(0, 4);
     mod.root_block->Append(var_e);
@@ -1223,7 +1223,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, PreserveIOAttributes) {
     auto* struct_ty = ty.Struct(
         mod.symbols.New("MyStruct"),
         {
-            {mod.symbols.New("a"), ty.vec4<f32>(), {.builtin = core::BuiltinValue::kPosition}},
+            {mod.symbols.New("a"), ty.vec4f(), {.builtin = core::BuiltinValue::kPosition}},
             {mod.symbols.New("b"), array_type, {.builtin = core::BuiltinValue::kClipDistances}},
         });
     auto* var = b.Var("var", ty.ptr(private_, struct_ty));

@@ -135,7 +135,7 @@ TEST_F(IR_BuiltinPolyfillTest, Saturate_F16) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Saturate_Vec2F32) {
-    Build(core::BuiltinFn::kSaturate, ty.vec2<f32>(), Vector{ty.vec2<f32>()});
+    Build(core::BuiltinFn::kSaturate, ty.vec2f(), Vector{ty.vec2f()});
     auto* src = R"(
 %foo = func(%arg:vec2<f32>):vec2<f32> {
   $B1: {
@@ -162,7 +162,7 @@ TEST_F(IR_BuiltinPolyfillTest, Saturate_Vec2F32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Saturate_Vec4F16) {
-    Build(core::BuiltinFn::kSaturate, ty.vec4<f16>(), Vector{ty.vec4<f16>()});
+    Build(core::BuiltinFn::kSaturate, ty.vec4h(), Vector{ty.vec4h()});
     auto* src = R"(
 %foo = func(%arg:vec4<f16>):vec4<f16> {
   $B1: {
@@ -265,8 +265,7 @@ TEST_F(IR_BuiltinPolyfillTest, Clamp_F16) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Clamp_Vec2F32) {
-    Build(core::BuiltinFn::kClamp, ty.vec2<f32>(),
-          Vector{ty.vec2<f32>(), ty.vec2<f32>(), ty.vec2<f32>()});
+    Build(core::BuiltinFn::kClamp, ty.vec2f(), Vector{ty.vec2f(), ty.vec2f(), ty.vec2f()});
     auto* src = R"(
 %foo = func(%arg:vec2<f32>, %arg_1:vec2<f32>, %arg_2:vec2<f32>):vec2<f32> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -294,8 +293,7 @@ TEST_F(IR_BuiltinPolyfillTest, Clamp_Vec2F32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Clamp_Vec4F16) {
-    Build(core::BuiltinFn::kClamp, ty.vec4<f16>(),
-          Vector{ty.vec4<f16>(), ty.vec4<f16>(), ty.vec4<f16>()});
+    Build(core::BuiltinFn::kClamp, ty.vec4h(), Vector{ty.vec4h(), ty.vec4h(), ty.vec4h()});
     auto* src = R"(
 %foo = func(%arg:vec4<f16>, %arg_1:vec4<f16>, %arg_2:vec4<f16>):vec4<f16> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -399,8 +397,7 @@ TEST_F(IR_BuiltinPolyfillTest, Clamp_U32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Clamp_Vec2I32) {
-    Build(core::BuiltinFn::kClamp, ty.vec2<i32>(),
-          Vector{ty.vec2<i32>(), ty.vec2<i32>(), ty.vec2<i32>()});
+    Build(core::BuiltinFn::kClamp, ty.vec2i(), Vector{ty.vec2i(), ty.vec2i(), ty.vec2i()});
     auto* src = R"(
 %foo = func(%arg:vec2<i32>, %arg_1:vec2<i32>, %arg_2:vec2<i32>):vec2<i32> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -428,8 +425,7 @@ TEST_F(IR_BuiltinPolyfillTest, Clamp_Vec2I32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Clamp_Vec4U32) {
-    Build(core::BuiltinFn::kClamp, ty.vec4<u32>(),
-          Vector{ty.vec4<u32>(), ty.vec4<u32>(), ty.vec4<u32>()});
+    Build(core::BuiltinFn::kClamp, ty.vec4u(), Vector{ty.vec4u(), ty.vec4u(), ty.vec4u()});
     auto* src = R"(
 %foo = func(%arg:vec4<u32>, %arg_1:vec4<u32>, %arg_2:vec4<u32>):vec4<u32> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -522,8 +518,7 @@ TEST_F(IR_BuiltinPolyfillTest, Smoothstep_F16) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Smoothstep_Vec2F32) {
-    Build(core::BuiltinFn::kSmoothstep, ty.vec2<f32>(),
-          Vector{ty.vec2<f32>(), ty.vec2<f32>(), ty.vec2<f32>()});
+    Build(core::BuiltinFn::kSmoothstep, ty.vec2f(), Vector{ty.vec2f(), ty.vec2f(), ty.vec2f()});
     auto* src = R"(
 %foo = func(%arg:vec2<f32>, %arg_1:vec2<f32>, %arg_2:vec2<f32>):vec2<f32> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -556,8 +551,7 @@ TEST_F(IR_BuiltinPolyfillTest, Smoothstep_Vec2F32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Smoothstep_Vec4F16) {
-    Build(core::BuiltinFn::kSmoothstep, ty.vec4<f16>(),
-          Vector{ty.vec4<f16>(), ty.vec4<f16>(), ty.vec4<f16>()});
+    Build(core::BuiltinFn::kSmoothstep, ty.vec4h(), Vector{ty.vec4h(), ty.vec4h(), ty.vec4h()});
     auto* src = R"(
 %foo = func(%arg:vec4<f16>, %arg_1:vec4<f16>, %arg_2:vec4<f16>):vec4<f16> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -708,7 +702,7 @@ TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_I32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_Vec2U32) {
-    Build(core::BuiltinFn::kCountLeadingZeros, ty.vec2<u32>(), Vector{ty.vec2<u32>()});
+    Build(core::BuiltinFn::kCountLeadingZeros, ty.vec2u(), Vector{ty.vec2u()});
     auto* src = R"(
 %foo = func(%arg:vec2<u32>):vec2<u32> {
   $B1: {
@@ -756,7 +750,7 @@ TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_Vec2U32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_Vec4I32) {
-    Build(core::BuiltinFn::kCountLeadingZeros, ty.vec4<i32>(), Vector{ty.vec4<i32>()});
+    Build(core::BuiltinFn::kCountLeadingZeros, ty.vec4i(), Vector{ty.vec4i()});
     auto* src = R"(
 %foo = func(%arg:vec4<i32>):vec4<i32> {
   $B1: {
@@ -932,7 +926,7 @@ TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_I32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_Vec2U32) {
-    Build(core::BuiltinFn::kCountTrailingZeros, ty.vec2<u32>(), Vector{ty.vec2<u32>()});
+    Build(core::BuiltinFn::kCountTrailingZeros, ty.vec2u(), Vector{ty.vec2u()});
     auto* src = R"(
 %foo = func(%arg:vec2<u32>):vec2<u32> {
   $B1: {
@@ -984,7 +978,7 @@ TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_Vec2U32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_Vec4I32) {
-    Build(core::BuiltinFn::kCountTrailingZeros, ty.vec4<i32>(), Vector{ty.vec4<i32>()});
+    Build(core::BuiltinFn::kCountTrailingZeros, ty.vec4i(), Vector{ty.vec4i()});
     auto* src = R"(
 %foo = func(%arg:vec4<i32>):vec4<i32> {
   $B1: {
@@ -1084,7 +1078,7 @@ TEST_F(IR_BuiltinPolyfillTest, Degrees_F16) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Degrees_Vec2F32) {
-    Build(core::BuiltinFn::kDegrees, ty.vec2<f32>(), Vector{ty.vec2<f32>()});
+    Build(core::BuiltinFn::kDegrees, ty.vec2f(), Vector{ty.vec2f()});
     auto* src = R"(
 %foo = func(%arg:vec2<f32>):vec2<f32> {
   $B1: {
@@ -1111,7 +1105,7 @@ TEST_F(IR_BuiltinPolyfillTest, Degrees_Vec2F32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Degrees_Vec4F16) {
-    Build(core::BuiltinFn::kDegrees, ty.vec4<f16>(), Vector{ty.vec4<f16>()});
+    Build(core::BuiltinFn::kDegrees, ty.vec4h(), Vector{ty.vec4h()});
     auto* src = R"(
 %foo = func(%arg:vec4<f16>):vec4<f16> {
   $B1: {
@@ -1218,8 +1212,7 @@ TEST_F(IR_BuiltinPolyfillTest, ExtractBits_ClampArgs_I32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, ExtractBits_ClampArgs_Vec2U32) {
-    Build(core::BuiltinFn::kExtractBits, ty.vec2<u32>(),
-          Vector{ty.vec2<u32>(), ty.u32(), ty.u32()});
+    Build(core::BuiltinFn::kExtractBits, ty.vec2u(), Vector{ty.vec2u(), ty.u32(), ty.u32()});
     auto* src = R"(
 %foo = func(%arg:vec2<u32>, %arg_1:u32, %arg_2:u32):vec2<u32> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -1249,8 +1242,7 @@ TEST_F(IR_BuiltinPolyfillTest, ExtractBits_ClampArgs_Vec2U32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, ExtractBits_ClampArgs_Vec4I32) {
-    Build(core::BuiltinFn::kExtractBits, ty.vec4<i32>(),
-          Vector{ty.vec4<i32>(), ty.u32(), ty.u32()});
+    Build(core::BuiltinFn::kExtractBits, ty.vec4i(), Vector{ty.vec4i(), ty.u32(), ty.u32()});
     auto* src = R"(
 %foo = func(%arg:vec4<i32>, %arg_1:u32, %arg_2:u32):vec4<i32> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -1362,8 +1354,7 @@ TEST_F(IR_BuiltinPolyfillTest, ExtractBits_Full_I32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, ExtractBits_Full_Vec2U32) {
-    Build(core::BuiltinFn::kExtractBits, ty.vec2<u32>(),
-          Vector{ty.vec2<u32>(), ty.u32(), ty.u32()});
+    Build(core::BuiltinFn::kExtractBits, ty.vec2u(), Vector{ty.vec2u(), ty.u32(), ty.u32()});
     auto* src = R"(
 %foo = func(%arg:vec2<u32>, %arg_1:u32, %arg_2:u32):vec2<u32> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -1404,8 +1395,7 @@ TEST_F(IR_BuiltinPolyfillTest, ExtractBits_Full_Vec2U32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, ExtractBits_Full_Vec4I32) {
-    Build(core::BuiltinFn::kExtractBits, ty.vec4<i32>(),
-          Vector{ty.vec4<i32>(), ty.u32(), ty.u32()});
+    Build(core::BuiltinFn::kExtractBits, ty.vec4i(), Vector{ty.vec4i(), ty.u32(), ty.u32()});
     auto* src = R"(
 %foo = func(%arg:vec4<i32>, %arg_1:u32, %arg_2:u32):vec4<i32> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -1573,7 +1563,7 @@ TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_I32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_Vec2U32) {
-    Build(core::BuiltinFn::kFirstLeadingBit, ty.vec2<u32>(), Vector{ty.vec2<u32>()});
+    Build(core::BuiltinFn::kFirstLeadingBit, ty.vec2u(), Vector{ty.vec2u()});
     auto* src = R"(
 %foo = func(%arg:vec2<u32>):vec2<u32> {
   $B1: {
@@ -1624,7 +1614,7 @@ TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_Vec2U32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_Vec4I32) {
-    Build(core::BuiltinFn::kFirstLeadingBit, ty.vec4<i32>(), Vector{ty.vec4<i32>()});
+    Build(core::BuiltinFn::kFirstLeadingBit, ty.vec4i(), Vector{ty.vec4i()});
     auto* src = R"(
 %foo = func(%arg:vec4<i32>):vec4<i32> {
   $B1: {
@@ -1804,7 +1794,7 @@ TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_I32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_Vec2U32) {
-    Build(core::BuiltinFn::kFirstTrailingBit, ty.vec2<u32>(), Vector{ty.vec2<u32>()});
+    Build(core::BuiltinFn::kFirstTrailingBit, ty.vec2u(), Vector{ty.vec2u()});
     auto* src = R"(
 %foo = func(%arg:vec2<u32>):vec2<u32> {
   $B1: {
@@ -1855,7 +1845,7 @@ TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_Vec2U32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_Vec4I32) {
-    Build(core::BuiltinFn::kFirstTrailingBit, ty.vec4<i32>(), Vector{ty.vec4<i32>()});
+    Build(core::BuiltinFn::kFirstTrailingBit, ty.vec4i(), Vector{ty.vec4i()});
     auto* src = R"(
 %foo = func(%arg:vec4<i32>):vec4<i32> {
   $B1: {
@@ -1959,7 +1949,7 @@ TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_F32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_Vector) {
-    Build(core::BuiltinFn::kFwidthFine, ty.vec4<f32>(), Vector{ty.vec4<f32>()});
+    Build(core::BuiltinFn::kFwidthFine, ty.vec4f(), Vector{ty.vec4f()});
     auto* src = R"(
 %foo = func(%arg:vec4<f32>):vec4<f32> {
   $B1: {
@@ -2070,8 +2060,8 @@ TEST_F(IR_BuiltinPolyfillTest, InsertBits_ClampArgs_I32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, InsertBits_ClampArgs_Vec2U32) {
-    Build(core::BuiltinFn::kInsertBits, ty.vec2<u32>(),
-          Vector{ty.vec2<u32>(), ty.vec2<u32>(), ty.u32(), ty.u32()});
+    Build(core::BuiltinFn::kInsertBits, ty.vec2u(),
+          Vector{ty.vec2u(), ty.vec2u(), ty.u32(), ty.u32()});
     auto* src = R"(
 %foo = func(%arg:vec2<u32>, %arg_1:vec2<u32>, %arg_2:u32, %arg_3:u32):vec2<u32> {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
   $B1: {
@@ -2101,8 +2091,8 @@ TEST_F(IR_BuiltinPolyfillTest, InsertBits_ClampArgs_Vec2U32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, InsertBits_ClampArgs_Vec4I32) {
-    Build(core::BuiltinFn::kInsertBits, ty.vec4<i32>(),
-          Vector{ty.vec4<i32>(), ty.vec4<i32>(), ty.u32(), ty.u32()});
+    Build(core::BuiltinFn::kInsertBits, ty.vec4i(),
+          Vector{ty.vec4i(), ty.vec4i(), ty.u32(), ty.u32()});
     auto* src = R"(
 %foo = func(%arg:vec4<i32>, %arg_1:vec4<i32>, %arg_2:u32, %arg_3:u32):vec4<i32> {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
   $B1: {
@@ -2222,8 +2212,8 @@ TEST_F(IR_BuiltinPolyfillTest, InsertBits_Full_I32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, InsertBits_Full_Vec2U32) {
-    Build(core::BuiltinFn::kInsertBits, ty.vec2<u32>(),
-          Vector{ty.vec2<u32>(), ty.vec2<u32>(), ty.u32(), ty.u32()});
+    Build(core::BuiltinFn::kInsertBits, ty.vec2u(),
+          Vector{ty.vec2u(), ty.vec2u(), ty.u32(), ty.u32()});
     auto* src = R"(
 %foo = func(%arg:vec2<u32>, %arg_1:vec2<u32>, %arg_2:u32, %arg_3:u32):vec2<u32> {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
   $B1: {
@@ -2269,8 +2259,8 @@ TEST_F(IR_BuiltinPolyfillTest, InsertBits_Full_Vec2U32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, InsertBits_Full_Vec4I32) {
-    Build(core::BuiltinFn::kInsertBits, ty.vec4<i32>(),
-          Vector{ty.vec4<i32>(), ty.vec4<i32>(), ty.u32(), ty.u32()});
+    Build(core::BuiltinFn::kInsertBits, ty.vec4i(),
+          Vector{ty.vec4i(), ty.vec4i(), ty.u32(), ty.u32()});
     auto* src = R"(
 %foo = func(%arg:vec4<i32>, %arg_1:vec4<i32>, %arg_2:u32, %arg_3:u32):vec4<i32> {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
   $B1: {
@@ -2319,8 +2309,8 @@ TEST_F(IR_BuiltinPolyfillTest, InsertBits_Full_Vec4I32) {
 
 TEST_F(IR_BuiltinPolyfillTest, TextureSampleBaseClampToEdge_2d_f32_NoPolyfill) {
     auto* texture_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-    Build(core::BuiltinFn::kTextureSampleBaseClampToEdge, ty.vec4<f32>(),
-          Vector{texture_ty, ty.sampler(), ty.vec2<f32>()});
+    Build(core::BuiltinFn::kTextureSampleBaseClampToEdge, ty.vec4f(),
+          Vector{texture_ty, ty.sampler(), ty.vec2f()});
     auto* src = R"(
 %foo = func(%arg:texture_2d<f32>, %arg_1:sampler, %arg_2:vec2<f32>):vec4<f32> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -2413,7 +2403,7 @@ TEST_F(IR_BuiltinPolyfillTest, Radians_F16) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Radians_Vec2F32) {
-    Build(core::BuiltinFn::kRadians, ty.vec2<f32>(), Vector{ty.vec2<f32>()});
+    Build(core::BuiltinFn::kRadians, ty.vec2f(), Vector{ty.vec2f()});
     auto* src = R"(
 %foo = func(%arg:vec2<f32>):vec2<f32> {
   $B1: {
@@ -2440,7 +2430,7 @@ TEST_F(IR_BuiltinPolyfillTest, Radians_Vec2F32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Radians_Vec4F16) {
-    Build(core::BuiltinFn::kRadians, ty.vec4<f16>(), Vector{ty.vec4<f16>()});
+    Build(core::BuiltinFn::kRadians, ty.vec4h(), Vector{ty.vec4h()});
     auto* src = R"(
 %foo = func(%arg:vec4<f16>):vec4<f16> {
   $B1: {
@@ -2468,8 +2458,8 @@ TEST_F(IR_BuiltinPolyfillTest, Radians_Vec4F16) {
 
 TEST_F(IR_BuiltinPolyfillTest, TextureSampleBaseClampToEdge_2d_f32) {
     auto* texture_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-    Build(core::BuiltinFn::kTextureSampleBaseClampToEdge, ty.vec4<f32>(),
-          Vector{texture_ty, ty.sampler(), ty.vec2<f32>()});
+    Build(core::BuiltinFn::kTextureSampleBaseClampToEdge, ty.vec4f(),
+          Vector{texture_ty, ty.sampler(), ty.vec2f()});
     auto* src = R"(
 %foo = func(%arg:texture_2d<f32>, %arg_1:sampler, %arg_2:vec2<f32>):vec4<f32> {  # %arg_1: 'arg', %arg_2: 'arg'
   $B1: {
@@ -2502,8 +2492,8 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleBaseClampToEdge_2d_f32) {
 
 TEST_F(IR_BuiltinPolyfillTest, TextureSampleBiasClampNonArray) {
     auto* texture_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-    Build(core::BuiltinFn::kTextureSampleBias, ty.vec4<f32>(),
-          Vector{texture_ty, ty.sampler(), ty.vec2<f32>(), ty.f32()});
+    Build(core::BuiltinFn::kTextureSampleBias, ty.vec4f(),
+          Vector{texture_ty, ty.sampler(), ty.vec2f(), ty.f32()});
 
     auto* src = R"(
 %foo = func(%arg:texture_2d<f32>, %arg_1:sampler, %arg_2:vec2<f32>, %arg_3:f32):vec4<f32> {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
@@ -2533,8 +2523,8 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleBiasClampNonArray) {
 
 TEST_F(IR_BuiltinPolyfillTest, TextureSampleBiasClampWithArray) {
     auto* texture_ty = ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32());
-    Build(core::BuiltinFn::kTextureSampleBias, ty.vec4<f32>(),
-          Vector{texture_ty, ty.sampler(), ty.vec2<f32>(), ty.i32(), ty.f32()});
+    Build(core::BuiltinFn::kTextureSampleBias, ty.vec4f(),
+          Vector{texture_ty, ty.sampler(), ty.vec2f(), ty.i32(), ty.f32()});
 
     auto* src = R"(
 %foo = func(%arg:texture_2d_array<f32>, %arg_1:sampler, %arg_2:vec2<f32>, %arg_3:i32, %arg_4:f32):vec4<f32> {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg', %arg_4: 'arg'
@@ -2563,7 +2553,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleBiasClampWithArray) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Pack4xI8) {
-    Build(core::BuiltinFn::kPack4XI8, ty.u32(), Vector{ty.vec4<i32>()});
+    Build(core::BuiltinFn::kPack4XI8, ty.u32(), Vector{ty.vec4i()});
 
     auto* src = R"(
 %foo = func(%arg:vec4<i32>):u32 {
@@ -2598,7 +2588,7 @@ TEST_F(IR_BuiltinPolyfillTest, Pack4xI8) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Pack4xU8) {
-    Build(core::BuiltinFn::kPack4XU8, ty.u32(), Vector{ty.vec4<u32>()});
+    Build(core::BuiltinFn::kPack4XU8, ty.u32(), Vector{ty.vec4u()});
 
     auto* src = R"(
 %foo = func(%arg:vec4<u32>):u32 {
@@ -2632,7 +2622,7 @@ TEST_F(IR_BuiltinPolyfillTest, Pack4xU8) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Pack4xI8Clamp) {
-    Build(core::BuiltinFn::kPack4XI8Clamp, ty.u32(), Vector{ty.vec4<i32>()});
+    Build(core::BuiltinFn::kPack4XI8Clamp, ty.u32(), Vector{ty.vec4i()});
 
     auto* src = R"(
 %foo = func(%arg:vec4<i32>):u32 {
@@ -2670,7 +2660,7 @@ TEST_F(IR_BuiltinPolyfillTest, Pack4xI8Clamp) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Pack4xU8Clamp) {
-    Build(core::BuiltinFn::kPack4XU8Clamp, ty.u32(), Vector{ty.vec4<u32>()});
+    Build(core::BuiltinFn::kPack4XU8Clamp, ty.u32(), Vector{ty.vec4u()});
 
     auto* src = R"(
 %foo = func(%arg:vec4<u32>):u32 {
@@ -2705,7 +2695,7 @@ TEST_F(IR_BuiltinPolyfillTest, Pack4xU8Clamp) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Unpack4xI8) {
-    Build(core::BuiltinFn::kUnpack4XI8, ty.vec4<i32>(), Vector{ty.u32()});
+    Build(core::BuiltinFn::kUnpack4XI8, ty.vec4i(), Vector{ty.u32()});
 
     auto* src = R"(
 %foo = func(%arg:u32):vec4<i32> {
@@ -2739,7 +2729,7 @@ TEST_F(IR_BuiltinPolyfillTest, Unpack4xI8) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Unpack4xU8) {
-    Build(core::BuiltinFn::kUnpack4XU8, ty.vec4<u32>(), Vector{ty.u32()});
+    Build(core::BuiltinFn::kUnpack4XU8, ty.vec4u(), Vector{ty.u32()});
 
     auto* src = R"(
 %foo = func(%arg:u32):vec4<u32> {
@@ -2946,7 +2936,7 @@ TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_Scalar) {
 }
 
 TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_Vec2) {
-    Build(ty.vec2<f16>());
+    Build(ty.vec2h());
 
     auto* src = R"(
 %foo = func(%arg:vec2<f16>):vec2<f16> {
@@ -2978,7 +2968,7 @@ TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_Vec2) {
 }
 
 TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_Vec3) {
-    Build(ty.vec3<f16>());
+    Build(ty.vec3h());
 
     auto* src = R"(
 %foo = func(%arg:vec3<f16>):vec3<f16> {
@@ -3012,7 +3002,7 @@ TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_Vec3) {
 }
 
 TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_Vec4) {
-    Build(ty.vec4<f16>());
+    Build(ty.vec4h());
 
     auto* src = R"(
 %foo = func(%arg:vec4<f16>):vec4<f16> {
@@ -3044,7 +3034,7 @@ TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_Vec4) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Reflect_NoPolyfill) {
-    Build(core::BuiltinFn::kReflect, ty.vec2<f32>(), Vector{ty.vec2<f32>(), ty.vec2<f32>()});
+    Build(core::BuiltinFn::kReflect, ty.vec2f(), Vector{ty.vec2f(), ty.vec2f()});
     auto* src = R"(
 %foo = func(%arg:vec2<f32>, %arg_1:vec2<f32>):vec2<f32> {  # %arg_1: 'arg'
   $B1: {
@@ -3065,7 +3055,7 @@ TEST_F(IR_BuiltinPolyfillTest, Reflect_NoPolyfill) {
 
 // Reflect polyfill (reflect_vec2_f32) should only affect vec2<f32>
 TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec2F32) {
-    Build(core::BuiltinFn::kReflect, ty.vec2<f32>(), Vector{ty.vec2<f32>(), ty.vec2<f32>()});
+    Build(core::BuiltinFn::kReflect, ty.vec2f(), Vector{ty.vec2f(), ty.vec2f()});
     auto* src = R"(
 %foo = func(%arg:vec2<f32>, %arg_1:vec2<f32>):vec2<f32> {  # %arg_1: 'arg'
   $B1: {
@@ -3096,7 +3086,7 @@ TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec2F32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec3F32) {
-    Build(core::BuiltinFn::kReflect, ty.vec3<f32>(), Vector{ty.vec3<f32>(), ty.vec3<f32>()});
+    Build(core::BuiltinFn::kReflect, ty.vec3f(), Vector{ty.vec3f(), ty.vec3f()});
     auto* src = R"(
 %foo = func(%arg:vec3<f32>, %arg_1:vec3<f32>):vec3<f32> {  # %arg_1: 'arg'
   $B1: {
@@ -3116,7 +3106,7 @@ TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec3F32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec4F32) {
-    Build(core::BuiltinFn::kReflect, ty.vec4<f32>(), Vector{ty.vec4<f32>(), ty.vec4<f32>()});
+    Build(core::BuiltinFn::kReflect, ty.vec4f(), Vector{ty.vec4f(), ty.vec4f()});
     auto* src = R"(
 %foo = func(%arg:vec4<f32>, %arg_1:vec4<f32>):vec4<f32> {  # %arg_1: 'arg'
   $B1: {
@@ -3136,7 +3126,7 @@ TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec4F32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec2F16) {
-    Build(core::BuiltinFn::kReflect, ty.vec2<f16>(), Vector{ty.vec2<f16>(), ty.vec2<f16>()});
+    Build(core::BuiltinFn::kReflect, ty.vec2h(), Vector{ty.vec2h(), ty.vec2h()});
     auto* src = R"(
 %foo = func(%arg:vec2<f16>, %arg_1:vec2<f16>):vec2<f16> {  # %arg_1: 'arg'
   $B1: {
@@ -3156,7 +3146,7 @@ TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec2F16) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec3F16) {
-    Build(core::BuiltinFn::kReflect, ty.vec3<f16>(), Vector{ty.vec3<f16>(), ty.vec3<f16>()});
+    Build(core::BuiltinFn::kReflect, ty.vec3h(), Vector{ty.vec3h(), ty.vec3h()});
     auto* src = R"(
 %foo = func(%arg:vec3<f16>, %arg_1:vec3<f16>):vec3<f16> {  # %arg_1: 'arg'
   $B1: {
@@ -3176,7 +3166,7 @@ TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec3F16) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec4F16) {
-    Build(core::BuiltinFn::kReflect, ty.vec4<f16>(), Vector{ty.vec4<f16>(), ty.vec4<f16>()});
+    Build(core::BuiltinFn::kReflect, ty.vec4h(), Vector{ty.vec4h(), ty.vec4h()});
     auto* src = R"(
 %foo = func(%arg:vec4<f16>, %arg_1:vec4<f16>):vec4<f16> {  # %arg_1: 'arg'
   $B1: {
@@ -3196,7 +3186,7 @@ TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec4F16) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Pack4x8snorm) {
-    Build(core::BuiltinFn::kPack4X8Snorm, ty.u32(), Vector{ty.vec4<f32>()});
+    Build(core::BuiltinFn::kPack4X8Snorm, ty.u32(), Vector{ty.vec4f()});
     auto* src = R"(
 %foo = func(%arg:vec4<f32>):u32 {
   $B1: {
@@ -3238,7 +3228,7 @@ TEST_F(IR_BuiltinPolyfillTest, Pack4x8snorm) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Pack4x8unorm) {
-    Build(core::BuiltinFn::kPack4X8Unorm, ty.u32(), Vector{ty.vec4<f32>()});
+    Build(core::BuiltinFn::kPack4X8Unorm, ty.u32(), Vector{ty.vec4f()});
     auto* src = R"(
 %foo = func(%arg:vec4<f32>):u32 {
   $B1: {
@@ -3279,7 +3269,7 @@ TEST_F(IR_BuiltinPolyfillTest, Pack4x8unorm) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Unpack4x8snorm) {
-    Build(core::BuiltinFn::kUnpack4X8Snorm, ty.vec4<f32>(), Vector{ty.u32()});
+    Build(core::BuiltinFn::kUnpack4X8Snorm, ty.vec4f(), Vector{ty.u32()});
     auto* src = R"(
 %foo = func(%arg:u32):vec4<f32> {
   $B1: {
@@ -3313,7 +3303,7 @@ TEST_F(IR_BuiltinPolyfillTest, Unpack4x8snorm) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Unpack4x8unorm) {
-    Build(core::BuiltinFn::kUnpack4X8Unorm, ty.vec4<f32>(), Vector{ty.u32()});
+    Build(core::BuiltinFn::kUnpack4X8Unorm, ty.vec4f(), Vector{ty.u32()});
     auto* src = R"(
 %foo = func(%arg:u32):vec4<f32> {
   $B1: {

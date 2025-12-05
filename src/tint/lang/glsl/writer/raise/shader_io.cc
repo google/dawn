@@ -112,7 +112,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                     if (addrspace == core::AddressSpace::kIn &&
                         config.bgra_swizzle_locations.count(*io.attributes.location) != 0) {
                         bgra_swizzle_original_types.Add(*io.attributes.location, io.type);
-                        type = ty.vec4<f32>();
+                        type = ty.vec4f();
                     }
                 }
                 name << name_suffix;
@@ -208,7 +208,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             auto* w = builder.Swizzle(ty.f32(), value, {3});
             auto* mul = builder.Multiply(2_f, z);
             auto* new_z = builder.Subtract(mul, w);
-            value = builder.Construct(ty.vec4<f32>(), x, new_y, new_z, w)->Result();
+            value = builder.Construct(ty.vec4f(), x, new_y, new_z, w)->Result();
         }
 
         builder.Store(to, value);

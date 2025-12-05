@@ -1698,21 +1698,21 @@ TEST_F(IR_Std140Test, NotAllMatricesDecomposed) {
     }
 
     {
-        auto* func = b.Function("load_mat_a", ty.vec4<f32>());
+        auto* func = b.Function("load_mat_a", ty.vec4f());
         b.Append(func->Block(), [&] {
             auto* access_mat = b.Access(ty.ptr(uniform, mat4x4), buffer, 0_u);
             auto* load_mat = b.Load(access_mat);
-            auto* extract_vec = b.Access(ty.vec4<f32>(), load_mat, 0_u);
+            auto* extract_vec = b.Access(ty.vec4f(), load_mat, 0_u);
             b.Return(func, extract_vec);
         });
     }
 
     {
-        auto* func = b.Function("load_mat_b", ty.vec2<f32>());
+        auto* func = b.Function("load_mat_b", ty.vec2f());
         b.Append(func->Block(), [&] {
             auto* access_mat = b.Access(ty.ptr(uniform, mat3x2), buffer, 1_u);
             auto* load_mat = b.Load(access_mat);
-            auto* extract_vec = b.Access(ty.vec2<f32>(), load_mat, 0_u);
+            auto* extract_vec = b.Access(ty.vec2f(), load_mat, 0_u);
             b.Return(func, extract_vec);
         });
     }
@@ -1948,9 +1948,9 @@ TEST_F(IR_Std140Test, F16) {
     b.Append(func->Block(), [&] {
         b.Let("struct", b.Load(buffer));
         b.Let("mat", b.Load(b.Access(ty.ptr(uniform, ty.mat4x4<f16>()), buffer, 3_u)));
-        b.Let("col", b.Load(b.Access(ty.ptr(uniform, ty.vec3<f16>()), buffer, 2_u, 1_u)));
-        b.Let("el", b.LoadVectorElement(b.Access(ty.ptr(uniform, ty.vec4<f16>()), buffer, 1_u, 0_u),
-                                        3_u));
+        b.Let("col", b.Load(b.Access(ty.ptr(uniform, ty.vec3h()), buffer, 2_u, 1_u)));
+        b.Let("el",
+              b.LoadVectorElement(b.Access(ty.ptr(uniform, ty.vec4h()), buffer, 1_u, 0_u), 3_u));
         b.Return(func);
     });
 

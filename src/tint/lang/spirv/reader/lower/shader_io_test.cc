@@ -87,7 +87,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs) {
     auto* front_facing = b.Var("front_facing", ty.ptr(core::AddressSpace::kIn, ty.bool_()));
     front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
 
-    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
+    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4f()));
     position->SetBuiltin(core::BuiltinValue::kPosition);
     position->SetInvariant(true);
 
@@ -168,7 +168,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByHelper) {
     auto* front_facing = b.Var("front_facing", ty.ptr(core::AddressSpace::kIn, ty.bool_()));
     front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
 
-    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
+    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4f()));
     position->SetBuiltin(core::BuiltinValue::kPosition);
     position->SetInvariant(true);
 
@@ -197,7 +197,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByHelper) {
             auto* color2_value = b.Load(color2);
             auto* add = b.Add(color1_value, color2_value);
             auto* mul = b.Multiply(position_value, add);
-            b.Divide(ty.vec4<f32>(), mul, param);
+            b.Divide(ty.vec4f(), mul, param);
             b.ExitIf(ifelse);
         });
         b.Return(foo);
@@ -384,13 +384,13 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper) {
-    auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     gid->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
 
-    auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     lid->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
 
-    auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     group_id->SetBuiltin(core::BuiltinValue::kWorkgroupId);
 
     mod.root_block->Append(gid);
@@ -465,13 +465,13 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper_ForwardReference) {
-    auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     gid->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
 
-    auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     lid->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
 
-    auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     group_id->SetBuiltin(core::BuiltinValue::kWorkgroupId);
 
     mod.root_block->Append(gid);
@@ -547,13 +547,13 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByMultipleEntryPoints) {
-    auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     gid->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
 
-    auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     lid->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
 
-    auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     group_id->SetBuiltin(core::BuiltinValue::kWorkgroupId);
 
     mod.root_block->Append(gid);
@@ -645,7 +645,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, Input_LoadVectorElement) {
-    auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     lid->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
 
     mod.root_block->Append(lid);
@@ -690,12 +690,12 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_LocationOnEachMember) {
         Vector{
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color1"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
                 LocationAttrs(1),
             },
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color2"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
                 LocationAttrs(2u, core::Interpolation{core::InterpolationType::kLinear,
                                                       core::InterpolationSampling::kCentroid}),
             },
@@ -705,7 +705,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_LocationOnEachMember) {
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* ptr = ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>());
+        auto* ptr = ty.ptr(core::AddressSpace::kIn, ty.vec4f());
         auto* color1_value = b.Load(b.Access(ptr, colors, 0_u));
         auto* color2_z_value = b.LoadVectorElement(b.Access(ptr, colors, 1_u), 2_u);
         b.Multiply(color1_value, color2_z_value);
@@ -782,11 +782,11 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_LocationOnVariable) {
         Vector{
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color1"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
             },
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color2"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
                 core::IOAttributes{
                     .interpolation = core::Interpolation{core::InterpolationType::kPerspective,
                                                          core::InterpolationSampling::kCentroid},
@@ -800,7 +800,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_LocationOnVariable) {
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* ptr = ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>());
+        auto* ptr = ty.ptr(core::AddressSpace::kIn, ty.vec4f());
         auto* color1_value = b.Load(b.Access(ptr, colors, 0_u));
         auto* color2_z_value = b.LoadVectorElement(b.Access(ptr, colors, 1_u), 2_u);
         b.Multiply(color1_value, color2_z_value);
@@ -877,12 +877,12 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_InterpolateOnVariable) {
         Vector{
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color1"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
                 LocationAttrs(1),
             },
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color2"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
                 LocationAttrs(2u, core::Interpolation{core::InterpolationType::kLinear,
                                                       core::InterpolationSampling::kSample}),
             },
@@ -895,7 +895,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_InterpolateOnVariable) {
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* ptr = ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>());
+        auto* ptr = ty.ptr(core::AddressSpace::kIn, ty.vec4f());
         auto* color1_value = b.Load(b.Access(ptr, colors, 0_u));
         auto* color2_z_value = b.LoadVectorElement(b.Access(ptr, colors, 1_u), 2_u);
         b.Multiply(color1_value, color2_z_value);
@@ -972,12 +972,12 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_LoadWholeStruct) {
         Vector{
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color1"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
                 LocationAttrs(1),
             },
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color2"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
                 LocationAttrs(2u, core::Interpolation{core::InterpolationType::kLinear,
                                                       core::InterpolationSampling::kCentroid}),
             },
@@ -1057,7 +1057,7 @@ Colors = struct @align(16) {
 }
 
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Builtin) {
-    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     position->SetBuiltin(core::BuiltinValue::kPosition);
 
     mod.root_block->Append(position);
@@ -1108,7 +1108,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Builtin_WithInvariant) {
-    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     position->SetBuiltin(core::BuiltinValue::kPosition);
     position->SetInvariant(true);
 
@@ -1160,7 +1160,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Location) {
-    auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     color->SetLocation(1u);
 
     mod.root_block->Append(color);
@@ -1211,7 +1211,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Location_WithInterpolation) {
-    auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     color->SetLocation(1u);
     color->SetInterpolation(core::Interpolation{core::InterpolationType::kPerspective,
                                                 core::InterpolationSampling::kCentroid});
@@ -1264,14 +1264,14 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, MultipleOutputs) {
-    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     position->SetBuiltin(core::BuiltinValue::kPosition);
     position->SetInvariant(true);
 
-    auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     color1->SetLocation(1u);
 
-    auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     color2->SetLocation(2u);
     color2->SetInterpolation(core::Interpolation{core::InterpolationType::kPerspective,
                                                  core::InterpolationSampling::kCentroid});
@@ -1349,7 +1349,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnEachMember) {
         ty.Struct(mod.symbols.New("Builtins"), Vector{
                                                    core::type::Manager::StructMemberDesc{
                                                        mod.symbols.New("position"),
-                                                       ty.vec4<f32>(),
+                                                       ty.vec4f(),
                                                        BuiltinAttrs(core::BuiltinValue::kPosition),
                                                    },
                                                });
@@ -1358,12 +1358,12 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnEachMember) {
         Vector{
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color1"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
                 LocationAttrs(1),
             },
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color2"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
                 LocationAttrs(2u, core::Interpolation{core::InterpolationType::kPerspective,
                                                       core::InterpolationSampling::kCentroid}),
             },
@@ -1376,7 +1376,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnEachMember) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
-        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
+        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4f());
         b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
         b.Store(b.Access(ptr, colors, 0_u), b.Splat<vec4<f32>>(0.5_f));
         b.Store(b.Access(ptr, colors, 1_u), b.Splat<vec4<f32>>(0.25_f));
@@ -1469,7 +1469,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnVariable) {
         ty.Struct(mod.symbols.New("Builtins"), Vector{
                                                    core::type::Manager::StructMemberDesc{
                                                        mod.symbols.New("position"),
-                                                       ty.vec4<f32>(),
+                                                       ty.vec4f(),
                                                        BuiltinAttrs(core::BuiltinValue::kPosition),
                                                    },
                                                });
@@ -1478,11 +1478,11 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnVariable) {
         Vector{
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color1"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
             },
             core::type::Manager::StructMemberDesc{
                 mod.symbols.New("color2"),
-                ty.vec4<f32>(),
+                ty.vec4f(),
                 core::IOAttributes{
                     .interpolation = core::Interpolation{core::InterpolationType::kPerspective,
                                                          core::InterpolationSampling::kCentroid},
@@ -1499,7 +1499,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnVariable) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
-        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
+        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4f());
         b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
         b.Store(b.Access(ptr, colors, 0_u), b.Splat<vec4<f32>>(0.5_f));
         b.Store(b.Access(ptr, colors, 1_u), b.Splat<vec4<f32>>(0.25_f));
@@ -1592,7 +1592,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_InterpolateOnVariable) {
         ty.Struct(mod.symbols.New("Builtins"), Vector{
                                                    core::type::Manager::StructMemberDesc{
                                                        mod.symbols.New("position"),
-                                                       ty.vec4<f32>(),
+                                                       ty.vec4f(),
                                                        BuiltinAttrs(core::BuiltinValue::kPosition),
                                                    },
                                                });
@@ -1601,12 +1601,12 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_InterpolateOnVariable) {
                   Vector{
                       core::type::Manager::StructMemberDesc{
                           mod.symbols.New("color1"),
-                          ty.vec4<f32>(),
+                          ty.vec4f(),
                           LocationAttrs(2),
                       },
                       core::type::Manager::StructMemberDesc{
                           mod.symbols.New("color2"),
-                          ty.vec4<f32>(),
+                          ty.vec4f(),
                           LocationAttrs(3, core::Interpolation{core::InterpolationType::kFlat}),
                       },
                   });
@@ -1621,7 +1621,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_InterpolateOnVariable) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
-        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
+        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4f());
         b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
         b.Store(b.Access(ptr, colors, 0_u), b.Splat<vec4<f32>>(0.5_f));
         b.Store(b.Access(ptr, colors, 1_u), b.Splat<vec4<f32>>(0.25_f));
@@ -1710,14 +1710,14 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, Outputs_UsedByMultipleEntryPoints) {
-    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     position->SetBuiltin(core::BuiltinValue::kPosition);
     position->SetInvariant(true);
 
-    auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     color1->SetLocation(1u);
 
-    auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     color2->SetLocation(1u);
     color2->SetInterpolation(core::Interpolation{core::InterpolationType::kPerspective,
                                                  core::InterpolationSampling::kCentroid});
@@ -1846,7 +1846,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, Output_LoadAndStore) {
-    auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     color->SetLocation(1u);
 
     mod.root_block->Append(color);
@@ -1906,7 +1906,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, Output_LoadVectorElementAndStoreVectorElement) {
-    auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     color->SetLocation(1u);
 
     mod.root_block->Append(color);
@@ -1966,17 +1966,17 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, Inputs_And_Outputs) {
-    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
+    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4f()));
     position->SetBuiltin(core::BuiltinValue::kPosition);
     position->SetInvariant(true);
 
-    auto* color_in = b.Var("color_in", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
+    auto* color_in = b.Var("color_in", ty.ptr(core::AddressSpace::kIn, ty.vec4f()));
     color_in->SetLocation(0);
 
-    auto* color_out_1 = b.Var("color_out_1", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* color_out_1 = b.Var("color_out_1", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     color_out_1->SetLocation(1);
 
-    auto* color_out_2 = b.Var("color_out_2", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* color_out_2 = b.Var("color_out_2", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     color_out_2->SetLocation(2);
 
     mod.root_block->Append(position);
@@ -2052,7 +2052,7 @@ TEST_F(SpirvReader_ShaderIOTest, InstanceIndex_i32) {
     idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
     mod.root_block->Append(idx);
 
-    auto* pos = b.Var("pos", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* pos = b.Var("pos", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     pos->SetBuiltin(core::BuiltinValue::kPosition);
     mod.root_block->Append(pos);
 
@@ -2061,7 +2061,7 @@ TEST_F(SpirvReader_ShaderIOTest, InstanceIndex_i32) {
         auto* idx_value = b.Load(idx);
         auto* doubled = b.Multiply(idx_value, 2_i);
         auto* conv = b.Convert(ty.f32(), doubled);
-        b.Store(pos, b.Construct(ty.vec4<f32>(), conv));
+        b.Store(pos, b.Construct(ty.vec4f(), conv));
         b.Return(ep);
     });
 
@@ -2118,7 +2118,7 @@ TEST_F(SpirvReader_ShaderIOTest, InstanceIndex_u32) {
     idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
     mod.root_block->Append(idx);
 
-    auto* pos = b.Var("pos", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* pos = b.Var("pos", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     pos->SetBuiltin(core::BuiltinValue::kPosition);
     mod.root_block->Append(pos);
 
@@ -2127,7 +2127,7 @@ TEST_F(SpirvReader_ShaderIOTest, InstanceIndex_u32) {
         auto* idx_value = b.Load(idx);
         auto* doubled = b.Multiply(idx_value, 2_u);
         auto* conv = b.Convert(ty.f32(), doubled);
-        b.Store(pos, b.Construct(ty.vec4<f32>(), conv));
+        b.Store(pos, b.Construct(ty.vec4f(), conv));
         b.Return(ep);
     });
 
@@ -2183,7 +2183,7 @@ TEST_F(SpirvReader_ShaderIOTest, VertexIndex_i32) {
     idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
     mod.root_block->Append(idx);
 
-    auto* pos = b.Var("pos", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* pos = b.Var("pos", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     pos->SetBuiltin(core::BuiltinValue::kPosition);
     mod.root_block->Append(pos);
 
@@ -2192,7 +2192,7 @@ TEST_F(SpirvReader_ShaderIOTest, VertexIndex_i32) {
         auto* idx_value = b.Load(idx);
         auto* doubled = b.Multiply(idx_value, 2_i);
         auto* conv = b.Convert(ty.f32(), doubled);
-        b.Store(pos, b.Construct(ty.vec4<f32>(), conv));
+        b.Store(pos, b.Construct(ty.vec4f(), conv));
         b.Return(ep);
     });
 
@@ -2249,7 +2249,7 @@ TEST_F(SpirvReader_ShaderIOTest, VertexIndex_u32) {
     idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
     mod.root_block->Append(idx);
 
-    auto* pos = b.Var("pos", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* pos = b.Var("pos", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     pos->SetBuiltin(core::BuiltinValue::kPosition);
     mod.root_block->Append(pos);
 
@@ -2258,7 +2258,7 @@ TEST_F(SpirvReader_ShaderIOTest, VertexIndex_u32) {
         auto* idx_value = b.Load(idx);
         auto* doubled = b.Multiply(idx_value, 2_u);
         auto* conv = b.Convert(ty.f32(), doubled);
-        b.Store(pos, b.Construct(ty.vec4<f32>(), conv));
+        b.Store(pos, b.Construct(ty.vec4f(), conv));
         b.Return(ep);
     });
 
@@ -2665,7 +2665,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, LocalInvocationId_i32) {
-    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3<i32>()));
+    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3i()));
     idx->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
     mod.root_block->Append(idx);
 
@@ -2673,7 +2673,7 @@ TEST_F(SpirvReader_ShaderIOTest, LocalInvocationId_i32) {
     ep->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
     b.Append(ep->Block(), [&] {
         auto* idx_value = b.Load(idx);
-        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3<i32>(), 2_i)));
+        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3i(), 2_i)));
         b.Return(ep);
     });
 
@@ -2710,7 +2710,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, LocalInvocationId_u32) {
-    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     idx->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
     mod.root_block->Append(idx);
 
@@ -2718,7 +2718,7 @@ TEST_F(SpirvReader_ShaderIOTest, LocalInvocationId_u32) {
     ep->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
     b.Append(ep->Block(), [&] {
         auto* idx_value = b.Load(idx);
-        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3<u32>(), 2_u)));
+        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3u(), 2_u)));
 
         b.Return(ep);
     });
@@ -2755,7 +2755,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, GlobalInvocationId_i32) {
-    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3<i32>()));
+    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3i()));
     idx->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
     mod.root_block->Append(idx);
 
@@ -2763,7 +2763,7 @@ TEST_F(SpirvReader_ShaderIOTest, GlobalInvocationId_i32) {
     ep->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
     b.Append(ep->Block(), [&] {
         auto* idx_value = b.Load(idx);
-        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3<i32>(), 2_i)));
+        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3i(), 2_i)));
         b.Return(ep);
     });
 
@@ -2800,7 +2800,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, GlobalInvocationId_u32) {
-    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     idx->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
     mod.root_block->Append(idx);
 
@@ -2808,7 +2808,7 @@ TEST_F(SpirvReader_ShaderIOTest, GlobalInvocationId_u32) {
     ep->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
     b.Append(ep->Block(), [&] {
         auto* idx_value = b.Load(idx);
-        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3<u32>(), 2_u)));
+        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3u(), 2_u)));
 
         b.Return(ep);
     });
@@ -2845,7 +2845,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, WorkgroupId_i32) {
-    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3<i32>()));
+    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3i()));
     idx->SetBuiltin(core::BuiltinValue::kWorkgroupId);
     mod.root_block->Append(idx);
 
@@ -2853,7 +2853,7 @@ TEST_F(SpirvReader_ShaderIOTest, WorkgroupId_i32) {
     ep->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
     b.Append(ep->Block(), [&] {
         auto* idx_value = b.Load(idx);
-        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3<i32>(), 2_i)));
+        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3i(), 2_i)));
         b.Return(ep);
     });
 
@@ -2890,7 +2890,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, WorkgroupId_u32) {
-    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     idx->SetBuiltin(core::BuiltinValue::kWorkgroupId);
     mod.root_block->Append(idx);
 
@@ -2898,7 +2898,7 @@ TEST_F(SpirvReader_ShaderIOTest, WorkgroupId_u32) {
     ep->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
     b.Append(ep->Block(), [&] {
         auto* idx_value = b.Load(idx);
-        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3<u32>(), 2_u)));
+        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3u(), 2_u)));
 
         b.Return(ep);
     });
@@ -2935,7 +2935,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, NumWorkgroups_i32) {
-    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3<i32>()));
+    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3i()));
     idx->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
     mod.root_block->Append(idx);
 
@@ -2943,7 +2943,7 @@ TEST_F(SpirvReader_ShaderIOTest, NumWorkgroups_i32) {
     ep->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
     b.Append(ep->Block(), [&] {
         auto* idx_value = b.Load(idx);
-        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3<i32>(), 2_i)));
+        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3i(), 2_i)));
         b.Return(ep);
     });
 
@@ -2980,7 +2980,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, NumWorkgroups_u32) {
-    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3u()));
     idx->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
     mod.root_block->Append(idx);
 
@@ -2988,7 +2988,7 @@ TEST_F(SpirvReader_ShaderIOTest, NumWorkgroups_u32) {
     ep->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
     b.Append(ep->Block(), [&] {
         auto* idx_value = b.Load(idx);
-        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3<u32>(), 2_u)));
+        b.Let("a", b.Multiply(idx_value, b.Splat(ty.vec3u(), 2_u)));
 
         b.Return(ep);
     });
@@ -3256,7 +3256,7 @@ TEST_F(SpirvReader_ShaderIOTest, PointSize_Struct) {
         ty.Struct(mod.symbols.New("Builtins"), Vector{
                                                    core::type::Manager::StructMemberDesc{
                                                        mod.symbols.New("position"),
-                                                       ty.vec4<f32>(),
+                                                       ty.vec4f(),
                                                        BuiltinAttrs(core::BuiltinValue::kPosition),
                                                    },
                                                    core::type::Manager::StructMemberDesc{
@@ -3270,7 +3270,7 @@ TEST_F(SpirvReader_ShaderIOTest, PointSize_Struct) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
-        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
+        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4f());
         b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
         b.Store(b.Access(ty.ptr(core::AddressSpace::kOut, ty.f32()), builtins, 1_u), 1_f);
         b.Return(ep);
@@ -3337,7 +3337,7 @@ TEST_F(SpirvReader_ShaderIOTest, PointSize_Struct_StoreNotOne) {
         ty.Struct(mod.symbols.New("Builtins"), Vector{
                                                    core::type::Manager::StructMemberDesc{
                                                        mod.symbols.New("position"),
-                                                       ty.vec4<f32>(),
+                                                       ty.vec4f(),
                                                        BuiltinAttrs(core::BuiltinValue::kPosition),
                                                    },
                                                    core::type::Manager::StructMemberDesc{
@@ -3351,7 +3351,7 @@ TEST_F(SpirvReader_ShaderIOTest, PointSize_Struct_StoreNotOne) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
-        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
+        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4f());
         b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
         b.Store(b.Access(ty.ptr(core::AddressSpace::kOut, ty.f32()), builtins, 1_u), 2_f);
         b.Return(ep);
@@ -3392,7 +3392,7 @@ TEST_F(SpirvReader_ShaderIOTest, PointSize_Var) {
     auto* o = b.Var("other", ty.ptr<private_, f32>());
     mod.root_block->Append(o);
 
-    auto* pos = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* pos = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     pos->SetBuiltin(core::BuiltinValue::kPosition);
     mod.root_block->Append(pos);
 
@@ -3401,7 +3401,7 @@ TEST_F(SpirvReader_ShaderIOTest, PointSize_Var) {
         auto* v = b.Load(ps);
         b.Store(o, v);
 
-        b.Store(pos, b.Zero(ty.vec4<f32>()));
+        b.Store(pos, b.Zero(ty.vec4f()));
         b.Return(ep);
     });
 
@@ -3453,7 +3453,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, PointSize_Var_StoreNotOne) {
-    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     position->SetBuiltin(core::BuiltinValue::kPosition);
     mod.root_block->Append(position);
 
@@ -3490,7 +3490,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, PointSize_Var_StoreNotOne_ViaLet) {
-    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     position->SetBuiltin(core::BuiltinValue::kPosition);
     mod.root_block->Append(position);
 
@@ -3533,7 +3533,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_UnusedOutputs) {
                                   Vector{
                                       core::type::Manager::StructMemberDesc{
                                           mod.symbols.New("position"),
-                                          ty.vec4<f32>(),
+                                          ty.vec4f(),
                                           BuiltinAttrs(core::BuiltinValue::kPosition),
                                       },
                                       core::type::Manager::StructMemberDesc{
@@ -3557,7 +3557,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_UnusedOutputs) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
-        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
+        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4f());
         b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
         b.Return(ep);
     });
@@ -3623,7 +3623,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_MultipledUsed) {
                                   Vector{
                                       core::type::Manager::StructMemberDesc{
                                           mod.symbols.New("position"),
-                                          ty.vec4<f32>(),
+                                          ty.vec4f(),
                                           BuiltinAttrs(core::BuiltinValue::kPosition),
                                       },
                                       core::type::Manager::StructMemberDesc{
@@ -3637,7 +3637,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_MultipledUsed) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
-        auto* ptr1 = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
+        auto* ptr1 = ty.ptr(core::AddressSpace::kOut, ty.vec4f());
         b.Store(b.Access(ptr1, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
 
         auto* ptr2 = ty.ptr(core::AddressSpace::kOut, ty.array<f32, 3>());
@@ -3710,7 +3710,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_ShaderIOTest, Outputs_ThroughLet) {
-    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
     position->SetBuiltin(core::BuiltinValue::kPosition);
 
     mod.root_block->Append(position);
@@ -3863,11 +3863,11 @@ TEST_F(SpirvReader_ShaderIOTest, Input_Struct) {
     auto* S = ty.Struct(mod.symbols.New("S"), Vector{
                                                   core::type::Manager::StructMemberDesc{
                                                       mod.symbols.New("a"),
-                                                      ty.vec4<f32>(),
+                                                      ty.vec4f(),
                                                   },
                                                   core::type::Manager::StructMemberDesc{
                                                       mod.symbols.New("b"),
-                                                      ty.vec4<f32>(),
+                                                      ty.vec4f(),
                                                   },
                                               });
     auto* s = b.Var("s", ty.ptr(core::AddressSpace::kIn, S));
@@ -3931,11 +3931,11 @@ TEST_F(SpirvReader_ShaderIOTest, Input_ArrayOfStruct) {
     auto* S = ty.Struct(mod.symbols.New("S"), Vector{
                                                   core::type::Manager::StructMemberDesc{
                                                       mod.symbols.New("a"),
-                                                      ty.vec4<f32>(),
+                                                      ty.vec4f(),
                                                   },
                                                   core::type::Manager::StructMemberDesc{
                                                       mod.symbols.New("b"),
-                                                      ty.vec4<f32>(),
+                                                      ty.vec4f(),
                                                   },
                                               });
     auto* s = b.Var("s", ty.ptr(core::AddressSpace::kIn, ty.array(S, 2)));
@@ -4005,7 +4005,7 @@ TEST_F(SpirvReader_ShaderIOTest, Output_StructArrayMatrix) {
                                                   },
                                                   core::type::Manager::StructMemberDesc{
                                                       mod.symbols.New("b"),
-                                                      ty.vec4<f32>(),
+                                                      ty.vec4f(),
                                                   },
                                                   core::type::Manager::StructMemberDesc{
                                                       mod.symbols.New("c"),

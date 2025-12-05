@@ -634,7 +634,7 @@ struct State {
                                 16_u);
 
                             auto* t = b.Or(ty.u32(), z, w);
-                            auto* cons = b.Construct(ty.vec2<u32>(), s, t);
+                            auto* cons = b.Construct(ty.vec2u(), s, t);
                             result = cons->Result();
                             break;
                         }
@@ -1001,11 +1001,11 @@ struct State {
                     } else {
                         lvl = b.InsertConvertIfNeeded(ty.i32(), args[2]);
                     }
-                    call_args.Push(b.Construct(ty.vec2<i32>(), coord, lvl)->Result());
+                    call_args.Push(b.Construct(ty.vec2i(), coord, lvl)->Result());
                     break;
                 }
                 case core::type::TextureDimension::k2d: {
-                    auto* coord = b.InsertConvertIfNeeded(ty.vec2<i32>(), args[1]);
+                    auto* coord = b.InsertConvertIfNeeded(ty.vec2i(), args[1]);
                     if (is_ms) {
                         // Pass coords and sample index as separate parameters
                         call_args.Push(coord);
@@ -1017,12 +1017,12 @@ struct State {
                         } else {
                             lvl = b.InsertConvertIfNeeded(ty.i32(), args[2]);
                         }
-                        call_args.Push(b.Construct(ty.vec3<i32>(), coord, lvl)->Result());
+                        call_args.Push(b.Construct(ty.vec3i(), coord, lvl)->Result());
                     }
                     break;
                 }
                 case core::type::TextureDimension::k2dArray: {
-                    auto* coord = b.InsertConvertIfNeeded(ty.vec2<i32>(), args[1]);
+                    auto* coord = b.InsertConvertIfNeeded(ty.vec2i(), args[1]);
                     auto* ary_idx = b.InsertConvertIfNeeded(ty.i32(), args[2]);
                     core::ir::Value* lvl = nullptr;
                     if (is_storage) {
@@ -1030,18 +1030,18 @@ struct State {
                     } else {
                         lvl = b.InsertConvertIfNeeded(ty.i32(), args[3]);
                     }
-                    call_args.Push(b.Construct(ty.vec4<i32>(), coord, ary_idx, lvl)->Result());
+                    call_args.Push(b.Construct(ty.vec4i(), coord, ary_idx, lvl)->Result());
                     break;
                 }
                 case core::type::TextureDimension::k3d: {
-                    auto* coord = b.InsertConvertIfNeeded(ty.vec3<i32>(), args[1]);
+                    auto* coord = b.InsertConvertIfNeeded(ty.vec3i(), args[1]);
                     core::ir::Value* lvl = nullptr;
                     if (is_storage) {
                         lvl = b.Constant(0_i);
                     } else {
                         lvl = b.InsertConvertIfNeeded(ty.i32(), args[2]);
                     }
-                    call_args.Push(b.Construct(ty.vec4<i32>(), coord, lvl)->Result());
+                    call_args.Push(b.Construct(ty.vec4i(), coord, lvl)->Result());
                     break;
                 }
                 default:
@@ -1153,7 +1153,7 @@ struct State {
                     break;
                 case core::type::TextureDimension::k2dArray:
                     params.Push(
-                        b.Construct(ty.vec3<f32>(), coords, b.Convert<f32>(args[idx++]))->Result());
+                        b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[idx++]))->Result());
                     offset_idx = is_depth ? 4 : 5;
                     break;
                 case core::type::TextureDimension::kCube:
@@ -1161,7 +1161,7 @@ struct State {
                     break;
                 case core::type::TextureDimension::kCubeArray:
                     params.Push(
-                        b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[idx++]))->Result());
+                        b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[idx++]))->Result());
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
@@ -1199,8 +1199,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(
-                        b.Construct(ty.vec3<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
                     params.Push(args[4]);
                     if (args.Length() > 5) {
                         params.Push(args[5]);
@@ -1211,8 +1210,7 @@ struct State {
                     params.Push(args[3]);
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
                     params.Push(args[4]);
                     break;
                 default:
@@ -1248,8 +1246,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(
-                        b.Construct(ty.vec3<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
                     if (args.Length() > 4) {
                         params.Push(args[4]);
                     }
@@ -1262,15 +1259,14 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
             }
 
             core::ir::Instruction* result = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                ty.vec4<f32>(), hlsl::BuiltinFn::kSample, tex, params);
+                ty.vec4f(), hlsl::BuiltinFn::kSample, tex, params);
             if (tex_type->Is<core::type::DepthTexture>()) {
                 // Swizzle x from vec4 result for depth textures
                 TINT_IR_ASSERT(ir, call->Result()->Type()->Is<core::type::F32>());
@@ -1304,8 +1300,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(
-                        b.Construct(ty.vec3<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
                     params.Push(args[4]);
 
                     if (args.Length() > 5) {
@@ -1322,8 +1317,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
                     params.Push(args[4]);
                     break;
                 default:
@@ -1363,8 +1357,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(
-                        b.Construct(ty.vec3<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
                     params.Push(args[4]);
 
                     if (args.Length() > 5) {
@@ -1380,8 +1373,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
                     params.Push(args[4]);
                     break;
                 default:
@@ -1418,8 +1410,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(
-                        b.Construct(ty.vec3<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
                     params.Push(args[4]);
                     params.Push(args[5]);
 
@@ -1438,8 +1429,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
                     params.Push(args[4]);
                     params.Push(args[5]);
                     break;
@@ -1477,8 +1467,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::k2dArray:
-                    params.Push(
-                        b.Construct(ty.vec3<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec3f(), coords, b.Convert<f32>(args[3]))->Result());
                     params.Push(b.InsertConvertIfNeeded(ty.f32(), args[4]));  // Level
                     if (args.Length() > 5) {
                         params.Push(args[5]);
@@ -1494,8 +1483,7 @@ struct State {
                     }
                     break;
                 case core::type::TextureDimension::kCubeArray:
-                    params.Push(
-                        b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[3]))->Result());
+                    params.Push(b.Construct(ty.vec4f(), coords, b.Convert<f32>(args[3]))->Result());
                     params.Push(b.InsertConvertIfNeeded(ty.f32(), args[4]));  // Level
                     break;
                 default:
@@ -1503,7 +1491,7 @@ struct State {
             }
 
             core::ir::Instruction* result = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                ty.vec4<f32>(), hlsl::BuiltinFn::kSampleLevel, tex, params);
+                ty.vec4f(), hlsl::BuiltinFn::kSampleLevel, tex, params);
             if (tex_type->Is<core::type::DepthTexture>()) {
                 // Swizzle x from vec4 result for depth textures
                 TINT_IR_ASSERT(ir, call->Result()->Type()->Is<core::type::F32>());
@@ -1519,7 +1507,7 @@ struct State {
 
         b.InsertBefore(call, [&] {
             auto* bc =
-                b.Call<hlsl::ir::BuiltinCall>(ty.vec2<u32>(), hlsl::BuiltinFn::kF32Tof16, args[0]);
+                b.Call<hlsl::ir::BuiltinCall>(ty.vec2u(), hlsl::BuiltinFn::kF32Tof16, args[0]);
 
             auto* lower = b.Swizzle(ty.u32(), bc, {0});
             auto* upper = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), bc, {1}), 16_u);
@@ -1534,7 +1522,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* x = b.And(ty.u32(), args[0], 0xffff_u);
             auto* y = b.ShiftRight(ty.u32(), args[0], 16_u);
-            auto* conv = b.Construct(ty.vec2<u32>(), x, y);
+            auto* conv = b.Construct(ty.vec2u(), x, y);
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
                                                     hlsl::BuiltinFn::kF16Tof32, conv);
@@ -1545,14 +1533,14 @@ struct State {
     void Pack2x16Snorm(core::ir::CoreBuiltinCall* call) {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
-            auto* clamp_lower = b.Splat(ty.vec2<f32>(), -1_f);
-            auto* clamp_upper = b.Splat(ty.vec2<f32>(), 1_f);
+            auto* clamp_lower = b.Splat(ty.vec2f(), -1_f);
+            auto* clamp_upper = b.Splat(ty.vec2f(), 1_f);
             auto* clamp =
-                b.Call(ty.vec2<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+                b.Call(ty.vec2f(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
             auto* mul = b.Multiply(clamp, 32767_f);
-            auto* round = b.Call(ty.vec2<f32>(), core::BuiltinFn::kRound, mul);
-            auto* conv = b.Convert(ty.vec2<i32>(), round);
-            auto* res = b.And(ty.vec2<i32>(), conv, b.Splat(ty.vec2<i32>(), 0xffff_i));
+            auto* round = b.Call(ty.vec2f(), core::BuiltinFn::kRound, mul);
+            auto* conv = b.Convert(ty.vec2i(), round);
+            auto* res = b.And(ty.vec2i(), conv, b.Splat(ty.vec2i(), 0xffff_i));
 
             auto* lower = b.Swizzle(ty.i32(), res, {0});
             auto* upper = b.ShiftLeft(ty.i32(), b.Swizzle(ty.i32(), res, {1}), 16_u);
@@ -1569,14 +1557,14 @@ struct State {
             auto* conv = b.Convert(ty.i32(), args[0]);
             auto* x = b.ShiftLeft(ty.i32(), conv, 16_u);
 
-            auto* vec = b.Construct(ty.vec2<i32>(), x, conv);
-            auto* v = b.ShiftRight(ty.vec2<i32>(), vec, b.Composite(ty.vec2<u32>(), 16_u));
+            auto* vec = b.Construct(ty.vec2i(), x, conv);
+            auto* v = b.ShiftRight(ty.vec2i(), vec, b.Composite(ty.vec2u(), 16_u));
 
-            auto* flt = b.Convert(ty.vec2<f32>(), v);
-            auto* scale = b.Divide(ty.vec2<f32>(), flt, 32767_f);
+            auto* flt = b.Convert(ty.vec2f(), v);
+            auto* scale = b.Divide(ty.vec2f(), flt, 32767_f);
 
-            auto* lower = b.Splat(ty.vec2<f32>(), -1_f);
-            auto* upper = b.Splat(ty.vec2<f32>(), 1_f);
+            auto* lower = b.Splat(ty.vec2f(), -1_f);
+            auto* upper = b.Splat(ty.vec2f(), 1_f);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
         });
         call->Destroy();
@@ -1585,13 +1573,13 @@ struct State {
     void Pack2x16Unorm(core::ir::CoreBuiltinCall* call) {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
-            auto* clamp_lower = b.Splat(ty.vec2<f32>(), 0_f);
-            auto* clamp_upper = b.Splat(ty.vec2<f32>(), 1_f);
+            auto* clamp_lower = b.Splat(ty.vec2f(), 0_f);
+            auto* clamp_upper = b.Splat(ty.vec2f(), 1_f);
             auto* clamp =
-                b.Call(ty.vec2<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+                b.Call(ty.vec2f(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
             auto* mul = b.Multiply(clamp, 65535_f);
-            auto* round = b.Call(ty.vec2<f32>(), core::BuiltinFn::kRound, mul);
-            auto* conv = b.Convert(ty.vec2<u32>(), round);
+            auto* round = b.Call(ty.vec2f(), core::BuiltinFn::kRound, mul);
+            auto* conv = b.Convert(ty.vec2u(), round);
             auto* lower = b.Swizzle(ty.u32(), conv, {0});
             auto* upper = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), conv, {1}), 16_u);
             auto* result = b.Or(ty.u32(), lower, upper);
@@ -1605,9 +1593,9 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* x = b.And(ty.u32(), args[0], 0xffff_u);
             auto* y = b.ShiftRight(ty.u32(), args[0], 16_u);
-            auto* conv = b.Construct(ty.vec2<u32>(), x, y);
-            auto* flt_conv = b.Convert(ty.vec2<f32>(), conv);
-            auto* scale = b.Divide(ty.vec2<f32>(), flt_conv, 0xffff_f);
+            auto* conv = b.Construct(ty.vec2u(), x, y);
+            auto* flt_conv = b.Convert(ty.vec2f(), conv);
+            auto* scale = b.Divide(ty.vec2f(), flt_conv, 0xffff_f);
 
             call->Result()->ReplaceAllUsesWith(scale->Result());
         });
@@ -1617,14 +1605,14 @@ struct State {
     void Pack4x8Snorm(core::ir::CoreBuiltinCall* call) {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
-            auto* clamp_lower = b.Splat(ty.vec4<f32>(), -1_f);
-            auto* clamp_upper = b.Splat(ty.vec4<f32>(), 1_f);
+            auto* clamp_lower = b.Splat(ty.vec4f(), -1_f);
+            auto* clamp_upper = b.Splat(ty.vec4f(), 1_f);
             auto* clamp =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+                b.Call(ty.vec4f(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
             auto* mul = b.Multiply(clamp, 127_f);
-            auto* round = b.Call(ty.vec4<f32>(), core::BuiltinFn::kRound, mul);
-            auto* conv = b.Convert(ty.vec4<i32>(), round);
-            auto* band = b.And(ty.vec4<i32>(), conv, b.Splat(ty.vec4<i32>(), 0xff_i));
+            auto* round = b.Call(ty.vec4f(), core::BuiltinFn::kRound, mul);
+            auto* conv = b.Convert(ty.vec4i(), round);
+            auto* band = b.And(ty.vec4i(), conv, b.Splat(ty.vec4i(), 0xff_i));
             auto* x = b.Swizzle(ty.i32(), band, {0});
             auto* y = b.ShiftLeft(ty.i32(), b.Swizzle(ty.i32(), band, {1}), 8_u);
             auto* z = b.ShiftLeft(ty.i32(), b.Swizzle(ty.i32(), band, {2}), 16_u);
@@ -1643,13 +1631,13 @@ struct State {
             auto* x = b.ShiftLeft(ty.i32(), conv, 24_u);
             auto* y = b.ShiftLeft(ty.i32(), conv, 16_u);
             auto* z = b.ShiftLeft(ty.i32(), conv, 8_u);
-            auto* cons = b.Construct(ty.vec4<i32>(), x, y, z, conv);
-            auto* shr = b.ShiftRight(ty.vec4<i32>(), cons, b.Composite(ty.vec4<u32>(), 24_u));
-            auto* flt = b.Convert(ty.vec4<f32>(), shr);
-            auto* scale = b.Divide(ty.vec4<f32>(), flt, 127_f);
+            auto* cons = b.Construct(ty.vec4i(), x, y, z, conv);
+            auto* shr = b.ShiftRight(ty.vec4i(), cons, b.Composite(ty.vec4u(), 24_u));
+            auto* flt = b.Convert(ty.vec4f(), shr);
+            auto* scale = b.Divide(ty.vec4f(), flt, 127_f);
 
-            auto* lower = b.Splat(ty.vec4<f32>(), -1_f);
-            auto* upper = b.Splat(ty.vec4<f32>(), 1_f);
+            auto* lower = b.Splat(ty.vec4f(), -1_f);
+            auto* upper = b.Splat(ty.vec4f(), 1_f);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
         });
         call->Destroy();
@@ -1658,13 +1646,13 @@ struct State {
     void Pack4x8Unorm(core::ir::CoreBuiltinCall* call) {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
-            auto* clamp_lower = b.Splat(ty.vec4<f32>(), 0_f);
-            auto* clamp_upper = b.Splat(ty.vec4<f32>(), 1_f);
+            auto* clamp_lower = b.Splat(ty.vec4f(), 0_f);
+            auto* clamp_upper = b.Splat(ty.vec4f(), 1_f);
             auto* clamp =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+                b.Call(ty.vec4f(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
             auto* mul = b.Multiply(clamp, 255_f);
-            auto* round = b.Call(ty.vec4<f32>(), core::BuiltinFn::kRound, mul);
-            auto* conv = b.Convert(ty.vec4<u32>(), round);
+            auto* round = b.Call(ty.vec4f(), core::BuiltinFn::kRound, mul);
+            auto* conv = b.Convert(ty.vec4u(), round);
             auto* x = b.Swizzle(ty.u32(), conv, {0});
             auto* y = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), conv, {1}), 8_u);
             auto* z = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), conv, {2}), 16_u);
@@ -1684,9 +1672,9 @@ struct State {
             auto* y = b.And(ty.u32(), b.ShiftRight(ty.u32(), val, 8_u), 0xff_u);
             auto* z = b.And(ty.u32(), b.ShiftRight(ty.u32(), val, 16_u), 0xff_u);
             auto* w = b.ShiftRight(ty.u32(), val, 24_u);
-            auto* cons = b.Construct(ty.vec4<u32>(), x, y, z, w);
-            auto* conv = b.Convert(ty.vec4<f32>(), cons);
-            auto* scale = b.Divide(ty.vec4<f32>(), conv, 255_f);
+            auto* cons = b.Construct(ty.vec4u(), x, y, z, w);
+            auto* conv = b.Convert(ty.vec4f(), cons);
+            auto* scale = b.Divide(ty.vec4f(), conv, 255_f);
 
             call->Result()->ReplaceAllUsesWith(scale->Result());
         });

@@ -537,7 +537,7 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
     front_facing->SetBuiltin(BuiltinValue::kFrontFacing);
 
-    auto* coord = b.FunctionParam("coord", ty.vec2<i32>());
+    auto* coord = b.FunctionParam("coord", ty.vec2i());
     coord->SetLocation(0);
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetParams({front_facing, coord});

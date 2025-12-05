@@ -67,7 +67,7 @@ TEST_F(MslWriter_ShaderIOTest, Parameters_NonStruct) {
     auto* ep = b.Function("foo", ty.void_());
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
     front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
-    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    auto* position = b.FunctionParam("position", ty.vec4f());
     position->SetBuiltin(core::BuiltinValue::kPosition);
     position->SetInvariant(true);
     auto* color1 = b.FunctionParam("color1", ty.f32());
@@ -151,7 +151,7 @@ TEST_F(MslWriter_ShaderIOTest, Parameters_Struct) {
                                  },
                                  {
                                      mod.symbols.New("position"),
-                                     ty.vec4<f32>(),
+                                     ty.vec4f(),
                                      core::IOAttributes{
                                          .builtin = core::BuiltinValue::kPosition,
                                          .invariant = true,
@@ -186,7 +186,7 @@ TEST_F(MslWriter_ShaderIOTest, Parameters_Struct) {
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(b.Access(ty.bool_(), str_param, 0_i));
         b.Append(ifelse->True(), [&] {
-            auto* position = b.Access(ty.vec4<f32>(), str_param, 1_i);
+            auto* position = b.Access(ty.vec4f(), str_param, 1_i);
             auto* color1 = b.Access(ty.f32(), str_param, 2_i);
             auto* color2 = b.Access(ty.f32(), str_param, 3_i);
             b.Multiply(position, b.Add(color1, color2));
@@ -273,7 +273,7 @@ TEST_F(MslWriter_ShaderIOTest, Parameters_Mixed) {
         ty.Struct(mod.symbols.New("Inputs"), {
                                                  {
                                                      mod.symbols.New("position"),
-                                                     ty.vec4<f32>(),
+                                                     ty.vec4f(),
                                                      core::IOAttributes{
                                                          .builtin = core::BuiltinValue::kPosition,
                                                          .invariant = true,
@@ -303,7 +303,7 @@ TEST_F(MslWriter_ShaderIOTest, Parameters_Mixed) {
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
         b.Append(ifelse->True(), [&] {
-            auto* position = b.Access(ty.vec4<f32>(), str_param, 0_i);
+            auto* position = b.Access(ty.vec4f(), str_param, 0_i);
             auto* color1 = b.Access(ty.f32(), str_param, 1_i);
             b.Multiply(position, b.Add(color1, color2));
             b.ExitIf(ifelse);
@@ -377,13 +377,13 @@ foo_inputs = struct @align(4) {
 }
 
 TEST_F(MslWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
-    auto* ep = b.Function("foo", ty.vec4<f32>());
+    auto* ep = b.Function("foo", ty.vec4f());
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     ep->SetReturnInvariant(true);
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+        b.Return(ep, b.Construct(ty.vec4f(), 0.5_f));
     });
 
     auto* src = R"(
@@ -426,12 +426,12 @@ foo_outputs = struct @align(16) {
 }
 
 TEST_F(MslWriter_ShaderIOTest, ReturnValue_NonStructLocation) {
-    auto* ep = b.Function("foo", ty.vec4<f32>());
+    auto* ep = b.Function("foo", ty.vec4f());
     ep->SetReturnLocation(1u);
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+        b.Return(ep, b.Construct(ty.vec4f(), 0.5_f));
     });
 
     auto* src = R"(
@@ -478,7 +478,7 @@ TEST_F(MslWriter_ShaderIOTest, ReturnValue_Struct) {
                              {
                                  {
                                      mod.symbols.New("position"),
-                                     ty.vec4<f32>(),
+                                     ty.vec4f(),
                                      core::IOAttributes{
                                          .builtin = core::BuiltinValue::kPosition,
                                          .invariant = true,
@@ -509,7 +509,7 @@ TEST_F(MslWriter_ShaderIOTest, ReturnValue_Struct) {
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct(str_ty, b.Construct(ty.vec4<f32>(), 0_f), 0.25_f, 0.75_f));
+        b.Return(ep, b.Construct(str_ty, b.Construct(ty.vec4f(), 0_f), 0.25_f, 0.75_f));
     });
 
     auto* src = R"(
@@ -656,7 +656,7 @@ foo_outputs = struct @align(4) {
 }
 
 TEST_F(MslWriter_ShaderIOTest, Struct_SharedWithBuffer) {
-    auto* vec4f = ty.vec4<f32>();
+    auto* vec4f = ty.vec4f();
     auto* str_ty =
         ty.Struct(mod.symbols.New("Outputs"), {
                                                   {
@@ -750,7 +750,7 @@ $B1: {  # root
 
 // Test that IO attributes are stripped from structures that are not used for the shader interface.
 TEST_F(MslWriter_ShaderIOTest, StructWithAttributes_NotUsedForInterface) {
-    auto* vec4f = ty.vec4<f32>();
+    auto* vec4f = ty.vec4f();
     auto* str_ty =
         ty.Struct(mod.symbols.New("Outputs"), {
                                                   {
@@ -828,12 +828,12 @@ $B1: {  # root
 }
 
 TEST_F(MslWriter_ShaderIOTest, EmitVertexPointSize) {
-    auto* ep = b.Function("foo", ty.vec4<f32>());
+    auto* ep = b.Function("foo", ty.vec4f());
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+        b.Return(ep, b.Construct(ty.vec4f(), 0.5_f));
     });
 
     auto* src = R"(
@@ -939,7 +939,7 @@ TEST_F(MslWriter_ShaderIOTest, UserSuppliedMask_WithoutFixedSampleMask) {
     mask.builtin = core::BuiltinValue::kSampleMask;
     auto* outputs =
         ty.Struct(mod.symbols.New("Outputs"), {
-                                                  {mod.symbols.New("color"), ty.vec4<f32>(), loc},
+                                                  {mod.symbols.New("color"), ty.vec4f(), loc},
                                                   {mod.symbols.New("mask"), ty.u32(), mask},
                                               });
 
@@ -947,8 +947,7 @@ TEST_F(MslWriter_ShaderIOTest, UserSuppliedMask_WithoutFixedSampleMask) {
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep,
-                 b.Construct(outputs, b.Splat(ty.vec4<f32>(), 0.5_f), b.Constant(u32(0x10203040))));
+        b.Return(ep, b.Construct(outputs, b.Splat(ty.vec4f(), 0.5_f), b.Constant(u32(0x10203040))));
     });
 
     auto* src = R"(
@@ -1006,12 +1005,12 @@ foo_outputs = struct @align(16) {
 }
 
 TEST_F(MslWriter_ShaderIOTest, FixedSampleMask) {
-    auto* ep = b.Function("foo", ty.vec4<f32>());
+    auto* ep = b.Function("foo", ty.vec4f());
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);
     ep->SetReturnLocation(0u);
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Splat(ty.vec4<f32>(), 0.5_f));
+        b.Return(ep, b.Splat(ty.vec4f(), 0.5_f));
     });
 
     auto* src = R"(
@@ -1062,7 +1061,7 @@ TEST_F(MslWriter_ShaderIOTest, FixedSampleMask_WithUserSuppliedMask) {
     mask.builtin = core::BuiltinValue::kSampleMask;
     auto* outputs =
         ty.Struct(mod.symbols.New("Outputs"), {
-                                                  {mod.symbols.New("color"), ty.vec4<f32>(), loc},
+                                                  {mod.symbols.New("color"), ty.vec4f(), loc},
                                                   {mod.symbols.New("mask"), ty.u32(), mask},
                                               });
 
@@ -1070,8 +1069,7 @@ TEST_F(MslWriter_ShaderIOTest, FixedSampleMask_WithUserSuppliedMask) {
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);
 
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep,
-                 b.Construct(outputs, b.Splat(ty.vec4<f32>(), 0.5_f), b.Constant(u32(0x10203040))));
+        b.Return(ep, b.Construct(outputs, b.Splat(ty.vec4f(), 0.5_f), b.Constant(u32(0x10203040))));
     });
 
     auto* src = R"(

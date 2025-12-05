@@ -231,23 +231,22 @@ TEST_F(IR_ArrayOffsetFromUniformTest, AllLoadsAndStoresU32) {
     b.Append(func->Block(), [&] {
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.u32(), hlsl::BuiltinFn::kLoad, buffer_ro,
                                                   u32(42));
-        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec2<u32>(), hlsl::BuiltinFn::kLoad2,
-                                                  buffer_ro, u32(43));
-        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec3<u32>(), hlsl::BuiltinFn::kLoad3,
-                                                  buffer_ro, u32(44));
-        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec4<u32>(), hlsl::BuiltinFn::kLoad4,
-                                                  buffer_ro, u32(45));
+        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec2u(), hlsl::BuiltinFn::kLoad2, buffer_ro,
+                                                  u32(43));
+        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec3u(), hlsl::BuiltinFn::kLoad3, buffer_ro,
+                                                  u32(44));
+        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec4u(), hlsl::BuiltinFn::kLoad4, buffer_ro,
+                                                  u32(45));
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kStore, buffer_rw,
                                                   u32(46), 123_u);
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kStore2, buffer_rw,
-                                                  u32(47),
-                                                  b.Composite(ty.vec2<u32>(), 123_u, 124_u));
+                                                  u32(47), b.Composite(ty.vec2u(), 123_u, 124_u));
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kStore3, buffer_rw,
                                                   u32(47),
-                                                  b.Composite(ty.vec3<u32>(), 123_u, 124_u, 125_u));
+                                                  b.Composite(ty.vec3u(), 123_u, 124_u, 125_u));
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(
             ty.void_(), hlsl::BuiltinFn::kStore4, buffer_rw, u32(47),
-            b.Composite(ty.vec4<u32>(), 123_u, 124_u, 125_u, 126_u));
+            b.Composite(ty.vec4u(), 123_u, 124_u, 125_u, 126_u));
         b.Return(func);
     });
 
@@ -344,23 +343,23 @@ TEST_F(IR_ArrayOffsetFromUniformTest, AllLoadsAndStoresF16) {
     b.Append(func->Block(), [&] {
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.f16(), hlsl::BuiltinFn::kLoadF16, buffer_ro,
                                                   42_u);
-        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec2<f16>(), hlsl::BuiltinFn::kLoad2F16,
-                                                  buffer_ro, 43_u);
-        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec3<f16>(), hlsl::BuiltinFn::kLoad3F16,
-                                                  buffer_ro, 44_u);
-        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec4<f16>(), hlsl::BuiltinFn::kLoad4F16,
-                                                  buffer_ro, 45_u);
+        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec2h(), hlsl::BuiltinFn::kLoad2F16, buffer_ro,
+                                                  43_u);
+        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec3h(), hlsl::BuiltinFn::kLoad3F16, buffer_ro,
+                                                  44_u);
+        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec4h(), hlsl::BuiltinFn::kLoad4F16, buffer_ro,
+                                                  45_u);
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kStoreF16, buffer_rw,
                                                   46_u, 123.0_h);
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kStore2F16,
                                                   buffer_rw, 47_u,
-                                                  b.Composite(ty.vec2<f16>(), 123.0_h, 124.0_h));
+                                                  b.Composite(ty.vec2h(), 123.0_h, 124.0_h));
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(
             ty.void_(), hlsl::BuiltinFn::kStore3F16, buffer_rw, 47_u,
-            b.Composite(ty.vec3<f16>(), 123.0_h, 124.0_h, 125.0_h));
+            b.Composite(ty.vec3h(), 123.0_h, 124.0_h, 125.0_h));
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(
             ty.void_(), hlsl::BuiltinFn::kStore4F16, buffer_rw, 47_u,
-            b.Composite(ty.vec4<f16>(), 123.0_h, 124.0_h, 125.0_h, 126.0_h));
+            b.Composite(ty.vec4h(), 123.0_h, 124.0_h, 125.0_h, 126.0_h));
         b.Return(func);
     });
 

@@ -36,11 +36,10 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 TEST_F(HlslWriterTest, StripAllNames) {
-    auto* str =
-        ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.Register("a"), ty.i32()},
-                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
-                                               });
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                           {mod.symbols.Register("a"), ty.i32()},
+                                                           {mod.symbols.Register("b"), ty.vec4i()},
+                                                       });
     auto* foo = b.Function("foo", ty.u32());
     auto* param = b.FunctionParam("param", ty.u32());
     foo->AppendParam(param);

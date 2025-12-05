@@ -76,8 +76,8 @@ TEST_F(SpirvWriter_UnaryPolyfillTest, Negation_Scalar) {
 }
 
 TEST_F(SpirvWriter_UnaryPolyfillTest, Negation_Vector) {
-    auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
-    auto* func = b.Function("foo", ty.vec4<f32>());
+    auto* arg = b.FunctionParam("arg", ty.vec4f());
+    auto* func = b.Function("foo", ty.vec4f());
     func->SetParams({arg});
 
     b.Append(func->Block(), [&] {
@@ -152,12 +152,12 @@ TEST_F(SpirvWriter_UnaryPolyfillTest, Abs_Scalar) {
 }
 
 TEST_F(SpirvWriter_UnaryPolyfillTest, Abs_Vector) {
-    auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
-    auto* func = b.Function("foo", ty.vec4<f32>());
+    auto* arg = b.FunctionParam("arg", ty.vec4f());
+    auto* func = b.Function("foo", ty.vec4f());
     func->SetParams({arg});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kAbs, arg);
+        auto* result = b.Call(ty.vec4f(), core::BuiltinFn::kAbs, arg);
         b.Return(func, result);
     });
 

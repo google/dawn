@@ -64,7 +64,7 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, Basic) {
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4<u32>(), 6));
+                                                   ty.array(ty.vec4u(), 6));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     ASSERT_EQ(immediate_data, Success);
 
@@ -152,7 +152,7 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4<u32>(), 1));
+                                                   ty.array(ty.vec4u(), 1));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -212,7 +212,7 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4<u32>(), 6));
+                                                   ty.array(ty.vec4u(), 6));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -275,7 +275,7 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4<u32>(), 6));
+                                                   ty.array(ty.vec4u(), 6));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -303,23 +303,22 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, AllLoadsAndStoresU32) {
     b.Append(func->Block(), [&] {
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.u32(), hlsl::BuiltinFn::kLoad, buffer_ro,
                                                   u32(42));
-        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec2<u32>(), hlsl::BuiltinFn::kLoad2,
-                                                  buffer_ro, u32(43));
-        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec3<u32>(), hlsl::BuiltinFn::kLoad3,
-                                                  buffer_ro, u32(44));
-        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec4<u32>(), hlsl::BuiltinFn::kLoad4,
-                                                  buffer_ro, u32(45));
+        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec2u(), hlsl::BuiltinFn::kLoad2, buffer_ro,
+                                                  u32(43));
+        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec3u(), hlsl::BuiltinFn::kLoad3, buffer_ro,
+                                                  u32(44));
+        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.vec4u(), hlsl::BuiltinFn::kLoad4, buffer_ro,
+                                                  u32(45));
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kStore, buffer_rw,
                                                   u32(46), 123_u);
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kStore2, buffer_rw,
-                                                  u32(47),
-                                                  b.Composite(ty.vec2<u32>(), 123_u, 124_u));
+                                                  u32(47), b.Composite(ty.vec2u(), 123_u, 124_u));
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kStore3, buffer_rw,
                                                   u32(48),
-                                                  b.Composite(ty.vec3<u32>(), 123_u, 124_u, 125_u));
+                                                  b.Composite(ty.vec3u(), 123_u, 124_u, 125_u));
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(
             ty.void_(), hlsl::BuiltinFn::kStore4, buffer_rw, u32(49),
-            b.Composite(ty.vec4<u32>(), 123_u, 124_u, 125_u, 126_u));
+            b.Composite(ty.vec4u(), 123_u, 124_u, 125_u, 126_u));
         b.Return(func);
     });
 
@@ -405,7 +404,7 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4<u32>(), 15));
+                                                   ty.array(ty.vec4u(), 15));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -453,7 +452,7 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, AllAtomicOps) {
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4<u32>(), 3));
+                                                   ty.array(ty.vec4u(), 3));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -545,7 +544,7 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4<u32>(), 3));
+                                                   ty.array(ty.vec4u(), 3));
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 

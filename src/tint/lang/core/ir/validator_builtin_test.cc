@@ -363,7 +363,7 @@ TEST_F(IR_ValidatorTest, Builtin_ClipDistances_WrongIODirection) {
 
 TEST_F(IR_ValidatorTest, Builtin_ClipDistances_WrongType_Vec) {
     auto* f = VertexEntryPoint();
-    AddBuiltinReturn(f, "distances", BuiltinValue::kClipDistances, ty.vec2<f32>());
+    AddBuiltinReturn(f, "distances", BuiltinValue::kClipDistances, ty.vec2f());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -460,7 +460,7 @@ TEST_F(IR_ValidatorTest, Builtin_NonFragDepth_NonUndefinedDepthMode) {
 
 TEST_F(IR_ValidatorTest, MissingBuiltin_WithFragDepth) {
     auto* f = ComputeEntryPoint();
-    AddReturn(f, "pos", ty.vec4<f32>());
+    AddReturn(f, "pos", ty.vec4f());
     f->SetReturnDepthMode(BuiltinDepthMode::kAny);
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
@@ -568,7 +568,7 @@ TEST_F(IR_ValidatorTest, Builtin_FrontFacing_WrongType) {
 
 TEST_F(IR_ValidatorTest, Builtin_GlobalInvocationId_WrongStage) {
     auto* f = FragmentEntryPoint();
-    AddBuiltinParam(f, "invocation", BuiltinValue::kGlobalInvocationId, ty.vec3<u32>());
+    AddBuiltinParam(f, "invocation", BuiltinValue::kGlobalInvocationId, ty.vec3u());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -586,7 +586,7 @@ TEST_F(IR_ValidatorTest, Builtin_GlobalInvocationId_WrongStage) {
 TEST_F(IR_ValidatorTest, Builtin_GlobalInvocationId_WrongIODirection) {
     // This will also trigger the compute entry points should have void returns check
     auto* f = ComputeEntryPoint();
-    AddBuiltinReturn(f, "invocation", BuiltinValue::kGlobalInvocationId, ty.vec3<u32>());
+    AddBuiltinReturn(f, "invocation", BuiltinValue::kGlobalInvocationId, ty.vec3u());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -667,7 +667,7 @@ TEST_F(IR_ValidatorTest, Builtin_InstanceIndex_WrongType) {
 
 TEST_F(IR_ValidatorTest, Builtin_LocalInvocationId_WrongStage) {
     auto* f = FragmentEntryPoint();
-    AddBuiltinParam(f, "id", BuiltinValue::kLocalInvocationId, ty.vec3<u32>());
+    AddBuiltinParam(f, "id", BuiltinValue::kLocalInvocationId, ty.vec3u());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -685,7 +685,7 @@ TEST_F(IR_ValidatorTest, Builtin_LocalInvocationId_WrongStage) {
 TEST_F(IR_ValidatorTest, Builtin_LocalInvocationId_WrongIODirection) {
     // This will also trigger the compute entry points should have void returns check
     auto* f = ComputeEntryPoint();
-    AddBuiltinReturn(f, "id", BuiltinValue::kLocalInvocationId, ty.vec3<u32>());
+    AddBuiltinReturn(f, "id", BuiltinValue::kLocalInvocationId, ty.vec3u());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -767,7 +767,7 @@ TEST_F(IR_ValidatorTest, Builtin_LocalInvocationIndex_WrongType) {
 
 TEST_F(IR_ValidatorTest, Builtin_NumWorkgroups_WrongStage) {
     auto* f = FragmentEntryPoint();
-    AddBuiltinParam(f, "num", BuiltinValue::kNumWorkgroups, ty.vec3<u32>());
+    AddBuiltinParam(f, "num", BuiltinValue::kNumWorkgroups, ty.vec3u());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -785,7 +785,7 @@ TEST_F(IR_ValidatorTest, Builtin_NumWorkgroups_WrongStage) {
 TEST_F(IR_ValidatorTest, Builtin_NumWorkgroups_WrongIODirection) {
     // This will also trigger the compute entry points should have void returns check
     auto* f = ComputeEntryPoint();
-    AddBuiltinReturn(f, "num", BuiltinValue::kNumWorkgroups, ty.vec3<u32>());
+    AddBuiltinReturn(f, "num", BuiltinValue::kNumWorkgroups, ty.vec3u());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -913,7 +913,7 @@ TEST_F(IR_ValidatorTest, Builtin_VertexIndex_WrongType) {
 
 TEST_F(IR_ValidatorTest, Builtin_WorkgroupId_WrongStage) {
     auto* f = FragmentEntryPoint();
-    AddBuiltinParam(f, "id", BuiltinValue::kWorkgroupId, ty.vec3<u32>());
+    AddBuiltinParam(f, "id", BuiltinValue::kWorkgroupId, ty.vec3u());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -931,7 +931,7 @@ TEST_F(IR_ValidatorTest, Builtin_WorkgroupId_WrongStage) {
 TEST_F(IR_ValidatorTest, Builtin_WorkgroupId_WrongIODirection) {
     // This will also trigger the compute entry points should have void returns check
     auto* f = ComputeEntryPoint();
-    AddBuiltinReturn(f, "id", BuiltinValue::kWorkgroupId, ty.vec3<u32>());
+    AddBuiltinReturn(f, "id", BuiltinValue::kWorkgroupId, ty.vec3u());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -963,7 +963,7 @@ TEST_F(IR_ValidatorTest, Builtin_WorkgroupId_WrongType) {
 
 TEST_F(IR_ValidatorTest, Builtin_Position_WrongStage) {
     auto* f = ComputeEntryPoint();
-    AddBuiltinParam(f, "pos", BuiltinValue::kPosition, ty.vec4<f32>());
+    AddBuiltinParam(f, "pos", BuiltinValue::kPosition, ty.vec4f());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -980,7 +980,7 @@ TEST_F(IR_ValidatorTest, Builtin_Position_WrongStage) {
 
 TEST_F(IR_ValidatorTest, Builtin_Position_WrongIODirectionForVertex) {
     auto* f = VertexEntryPoint();
-    AddBuiltinParam(f, "pos", BuiltinValue::kPosition, ty.vec4<f32>());
+    AddBuiltinParam(f, "pos", BuiltinValue::kPosition, ty.vec4f());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -997,7 +997,7 @@ TEST_F(IR_ValidatorTest, Builtin_Position_WrongIODirectionForVertex) {
 
 TEST_F(IR_ValidatorTest, Builtin_Position_WrongIODirectionForFragment) {
     auto* f = FragmentEntryPoint();
-    AddBuiltinReturn(f, "pos", BuiltinValue::kPosition, ty.vec4<f32>());
+    AddBuiltinReturn(f, "pos", BuiltinValue::kPosition, ty.vec4f());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -1341,7 +1341,7 @@ TEST_F(IR_ValidatorTest, Bitcast_NullResult) {
 
 TEST_F(IR_ValidatorTest, Builtin_NoStage) {
     auto* f = b.Function("f", ty.void_());
-    AddBuiltinParam(f, "id", BuiltinValue::kLocalInvocationId, ty.vec3<u32>());
+    AddBuiltinParam(f, "id", BuiltinValue::kLocalInvocationId, ty.vec3u());
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 

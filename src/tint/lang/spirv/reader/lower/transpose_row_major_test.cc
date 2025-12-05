@@ -309,7 +309,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, ReadUniformSwizzle) {
     b.Append(f->Block(), [&] {
         auto* a = b.Access<ptr<uniform, vec3<f32>>>(var, 0_u, 1_u);
         auto* l = b.Load(a);
-        b.Let("x", b.Swizzle(ty.vec2<f32>(), l, Vector{2u, 0u}));
+        b.Let("x", b.Swizzle(ty.vec2f(), l, Vector{2u, 0u}));
         b.Return(f);
     });
 
@@ -480,7 +480,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, WriteStorageColumn) {
     auto* f = b.ComputeFunction("f");
     b.Append(f->Block(), [&] {
         auto* a = b.Access<ptr<storage, vec3<f32>, read_write>>(var, 0_u, 1_u);
-        auto* c = b.Construct(ty.vec3<f32>(), 1_f, 2_f, 3_f);
+        auto* c = b.Construct(ty.vec3f(), 1_f, 2_f, 3_f);
         b.Store(a, c);
         b.Return(f);
     });
@@ -656,7 +656,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, ExtractFromLoadedStruct) {
         auto* ls = b.Load(var);
         auto* load = b.Let("load", ls);
         b.Let("m", b.Access(ty.mat2x3<f32>(), load, 0_u));
-        b.Let("c", b.Access(ty.vec3<f32>(), load, 0_u, 1_u));
+        b.Let("c", b.Access(ty.vec3f(), load, 0_u, 1_u));
         b.Let("e", b.Access(ty.f32(), load, 0_u, 1_u, 2_u));
         b.Return(f);
     });
@@ -756,7 +756,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, ExtractFromLoadedVector) {
         auto* ls = b.Load(var);
         auto* load = b.Let("load", ls);
         b.Let("m", b.Access(ty.mat2x3<f32>(), load, 0_u));
-        auto* c = b.Let("c", b.Access(ty.vec3<f32>(), load, 0_u, 1_u));
+        auto* c = b.Let("c", b.Access(ty.vec3f(), load, 0_u, 1_u));
         b.Let("e", b.Access(ty.f32(), c, 2_u));
         b.Return(f);
     });
@@ -954,8 +954,8 @@ TEST_F(SpirvReader_TransposeRowMajorTest, DeeplyNested) {
     auto* f = b.ComputeFunction("f");
     b.Append(f->Block(), [&] {
         auto* m = b.Let("m", b.Load(b.Access<ptr<storage, mat4x3<f32>>>(var, 0_u, 1_u, 0_u)));
-        auto* ptr = b.Access(ty.ptr(storage, ty.vec3<f32>(), read_write), var, 0_u, 0_u, 0_u, 3_u);
-        b.Store(ptr, b.Access(ty.vec3<f32>(), m, 2_u));
+        auto* ptr = b.Access(ty.ptr(storage, ty.vec3f(), read_write), var, 0_u, 0_u, 0_u, 3_u);
+        b.Store(ptr, b.Access(ty.vec3f(), m, 2_u));
         b.Return(f);
     });
 
@@ -1632,7 +1632,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, ArrayOfMatrix_NestedArray) {
         b.Store(sarr12, b.Access(ty.mat2x3<f32>(), x, 2_u, 3_u));
 
         auto* sarr231 = b.Access<ptr<storage, vec3<f32>, read_write>>(sarr, 2_u, 3_u, 1_u);
-        b.Store(sarr231, b.Access(ty.vec3<f32>(), x, 4_u, 3_u, 1_u));
+        b.Store(sarr231, b.Access(ty.vec3f(), x, 4_u, 3_u, 1_u));
 
         auto* sarr420 = b.Access<ptr<storage, vec3<f32>, read_write>>(sarr, 4_u, 2_u, 0_u);
         b.StoreVectorElement(sarr420, 1_u, b.Access(ty.f32(), x, 1_u, 3_u, 0_u, 2_u));
@@ -1883,12 +1883,12 @@ TEST_F(SpirvReader_TransposeRowMajorTest, ArrayOfMatrix_RuntimeSizedArray) {
         b.Store(sarr1,
                 b.Load(b.Access(ty.ptr(storage, ty.mat4x3<f32>(), read_write), var, 0_u, 0_u)));
 
-        auto* sarr23 = b.Access(ty.ptr(storage, ty.vec3<f32>(), read_write), var, 0_u, 2_u, 3_u);
+        auto* sarr23 = b.Access(ty.ptr(storage, ty.vec3f(), read_write), var, 0_u, 2_u, 3_u);
         b.Store(sarr23,
-                b.Load(b.Access(ty.ptr(storage, ty.vec3<f32>(), read_write), var, 0_u, 1_u, 2_u)));
+                b.Load(b.Access(ty.ptr(storage, ty.vec3f(), read_write), var, 0_u, 1_u, 2_u)));
 
-        auto* sarr32 = b.Access(ty.ptr(storage, ty.vec3<f32>(), read_write), var, 0_u, 2_u, 3_u);
-        auto* sarr43 = b.Access(ty.ptr(storage, ty.vec3<f32>(), read_write), var, 0_u, 2_u, 3_u);
+        auto* sarr32 = b.Access(ty.ptr(storage, ty.vec3f(), read_write), var, 0_u, 2_u, 3_u);
+        auto* sarr43 = b.Access(ty.ptr(storage, ty.vec3f(), read_write), var, 0_u, 2_u, 3_u);
         b.StoreVectorElement(sarr32, 1_u, b.LoadVectorElement(sarr43, 2_u));
 
         b.Return(f);
@@ -2234,8 +2234,8 @@ TEST_F(SpirvReader_TransposeRowMajorTest, AccessSiblingToMatrix) {
                                                            0u, 16u, 64u, 64u, core::IOAttributes{});
     matrix_member->SetRowMajor();
 
-    auto* vec_member = ty.Get<core::type::StructMember>(mod.symbols.New("c"), ty.vec4<i32>(), 1u,
-                                                        80u, 16u, 16u, core::IOAttributes{});
+    auto* vec_member = ty.Get<core::type::StructMember>(mod.symbols.New("c"), ty.vec4i(), 1u, 80u,
+                                                        16u, 16u, core::IOAttributes{});
 
     auto* strct = ty.Struct(mod.symbols.New("S"), Vector{matrix_member, vec_member});
 

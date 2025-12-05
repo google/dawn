@@ -519,7 +519,7 @@ INSTANTIATE_TEST_SUITE_P(
         ));
 
 TEST_F(HlslWriterTest, VarUniform) {
-    auto* s = b.Var("u", ty.ptr<uniform>(ty.vec4<f32>()));
+    auto* s = b.Var("u", ty.ptr<uniform>(ty.vec4f()));
     s->SetBindingPoint(2, 1);
 
     b.ir.root_block->Append(s);
@@ -543,7 +543,7 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, VarStorageRead) {
-    auto* s = b.Var("u", ty.ptr<storage, core::Access::kRead>(ty.vec4<f32>()));
+    auto* s = b.Var("u", ty.ptr<storage, core::Access::kRead>(ty.vec4f()));
     s->SetBindingPoint(2, 1);
 
     b.ir.root_block->Append(s);
@@ -565,7 +565,7 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, VarStorageReadWrite) {
-    auto* s = b.Var("u", ty.ptr<storage, core::Access::kReadWrite>(ty.vec4<f32>()));
+    auto* s = b.Var("u", ty.ptr<storage, core::Access::kReadWrite>(ty.vec4f()));
     s->SetBindingPoint(2, 1);
 
     b.ir.root_block->Append(s);
@@ -587,7 +587,7 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, VarPrivate) {
-    auto* s = b.Var("u", ty.ptr<private_>(ty.vec4<f32>()));
+    auto* s = b.Var("u", ty.ptr<private_>(ty.vec4f()));
 
     b.ir.root_block->Append(s);
 
@@ -608,7 +608,7 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, VarWorkgroup) {
-    auto* s = b.Var("u", ty.ptr<workgroup>(ty.vec4<f32>()));
+    auto* s = b.Var("u", ty.ptr<workgroup>(ty.vec4f()));
 
     b.ir.root_block->Append(s);
 

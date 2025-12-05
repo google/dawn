@@ -89,7 +89,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, NoModify_MatrixPointer) {
     auto* mat_ty = ty.mat3x3<f32>();
     auto* mat = mod.root_block->Append(b.Var("var", ty.ptr(private_, mat_ty)));
 
-    auto* target = b.Function("target", ty.vec3<f32>());
+    auto* target = b.Function("target", ty.vec3f());
     auto* value = b.FunctionParam("value", ty.ptr(private_, mat_ty));
     target->SetParams({value});
     b.Append(target->Block(), [&] {
@@ -97,9 +97,9 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, NoModify_MatrixPointer) {
         b.Return(target, b.Load(access));
     });
 
-    auto* caller = b.Function("caller", ty.vec3<f32>());
+    auto* caller = b.Function("caller", ty.vec3f());
     b.Append(caller->Block(), [&] {
-        auto* result = b.Call(ty.vec3<f32>(), target, mat);
+        auto* result = b.Call(ty.vec3f(), target, mat);
         b.Return(caller, result);
     });
 

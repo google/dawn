@@ -273,12 +273,12 @@ void main() {
 TEST_F(HlslWriterTest, BinaryF32ModVec3) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
-        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
+        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3f()));
+        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3f()));
 
         auto* l = b.Load(left);
         auto* r = b.Load(right);
-        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3<f32>(), l, r);
+        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3f(), l, r);
 
         b.Let("val", expr1);
         b.Return(func);
@@ -302,12 +302,12 @@ void main() {
 TEST_F(HlslWriterTest, BinaryF16ModVec3) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
-        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
+        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3h()));
+        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3h()));
 
         auto* l = b.Load(left);
         auto* r = b.Load(right);
-        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3<f16>(), l, r);
+        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3h(), l, r);
 
         b.Let("val", expr1);
         b.Return(func);

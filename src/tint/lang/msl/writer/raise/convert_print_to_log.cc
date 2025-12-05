@@ -182,11 +182,10 @@ struct State {
     /// Set up the invocation ID for a compute shader.
     /// @param ep the compute shader entry point
     void SetupComputeInvocationId(core::ir::Function* ep) {
-        invocation_id =
-            b.Var("tint_print_invocation_id", core::AddressSpace::kPrivate, ty.vec3<u32>());
+        invocation_id = b.Var("tint_print_invocation_id", core::AddressSpace::kPrivate, ty.vec3u());
         ir.root_block->Append(invocation_id);
 
-        auto* id = GetBuiltinInput(ep, core::BuiltinValue::kGlobalInvocationId, ty.vec3<u32>());
+        auto* id = GetBuiltinInput(ep, core::BuiltinValue::kGlobalInvocationId, ty.vec3u());
         b.InsertBefore(ep->Block()->Front(), [&] {  //
             b.Store(invocation_id, id);
         });
@@ -195,11 +194,10 @@ struct State {
     /// Set up the invocation ID for a fragment shader.
     /// @param ep the fragment shader entry point
     void SetupFragmentInvocationId(core::ir::Function* ep) {
-        invocation_id =
-            b.Var("tint_print_invocation_id", core::AddressSpace::kPrivate, ty.vec3<f32>());
+        invocation_id = b.Var("tint_print_invocation_id", core::AddressSpace::kPrivate, ty.vec3f());
         ir.root_block->Append(invocation_id);
 
-        auto* pos = GetBuiltinInput(ep, core::BuiltinValue::kPosition, ty.vec4<f32>());
+        auto* pos = GetBuiltinInput(ep, core::BuiltinValue::kPosition, ty.vec4f());
         b.InsertBefore(ep->Block()->Front(), [&] {  //
             b.Store(invocation_id, b.Swizzle<vec3<f32>>(pos, Vector{0u, 1u, 2u}));
         });
@@ -208,8 +206,7 @@ struct State {
     /// Set up the invocation ID for a vertex shader.
     /// @param ep the vertex shader entry point
     void SetupVertexInvocationId(core::ir::Function* ep) {
-        invocation_id =
-            b.Var("tint_print_invocation_id", core::AddressSpace::kPrivate, ty.vec2<u32>());
+        invocation_id = b.Var("tint_print_invocation_id", core::AddressSpace::kPrivate, ty.vec2u());
         ir.root_block->Append(invocation_id);
 
         auto* instance = GetBuiltinInput(ep, core::BuiltinValue::kInstanceIndex, ty.u32());

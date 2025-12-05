@@ -105,13 +105,13 @@ struct State {
         //     return vec4u(simd_vote & tint_subgroup_size_mask, 0, 0);
         //   }
         auto* pred = b.FunctionParam("pred", ty.bool_());
-        subgroup_ballot_polyfill = b.Function("tint_subgroup_ballot", ty.vec4<u32>());
+        subgroup_ballot_polyfill = b.Function("tint_subgroup_ballot", ty.vec4u());
         subgroup_ballot_polyfill->SetParams({pred});
         b.Append(subgroup_ballot_polyfill->Block(), [&] {
             auto* simd_vote =
-                b.Call<msl::ir::BuiltinCall>(ty.vec2<u32>(), msl::BuiltinFn::kSimdBallot, pred);
+                b.Call<msl::ir::BuiltinCall>(ty.vec2u(), msl::BuiltinFn::kSimdBallot, pred);
             auto* masked = b.And<vec2<u32>>(simd_vote, b.Load(subgroup_size_mask));
-            auto* result = b.Construct(ty.vec4<u32>(), masked, u32(0), u32(0));
+            auto* result = b.Construct(ty.vec4u(), masked, u32(0), u32(0));
             b.Return(subgroup_ballot_polyfill, result);
         });
 

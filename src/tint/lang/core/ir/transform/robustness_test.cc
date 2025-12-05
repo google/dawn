@@ -75,7 +75,7 @@ using IR_RobustnessWithIntegerRangeAnalysisTest = TransformTest;
 TEST_F(IR_RobustnessDefaultTest, VectorLoad_ConstIndexViaLet) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
-        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4<u32>()));
+        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4u()));
         auto* idx = b.Let("idx", b.Constant(5_u));
         auto* load = b.LoadVectorElement(vec, idx);
         b.Return(func, load);
@@ -116,7 +116,7 @@ TEST_F(IR_RobustnessDefaultTest, VectorLoad_DynamicIndex) {
     auto* idx = b.FunctionParam("idx", ty.u32());
     func->SetParams({idx});
     b.Append(func->Block(), [&] {
-        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4<u32>()));
+        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4u()));
         auto* load = b.LoadVectorElement(vec, idx);
         b.Return(func, load);
     });
@@ -154,7 +154,7 @@ TEST_F(IR_RobustnessDefaultTest, VectorLoad_DynamicIndex_Signed) {
     auto* idx = b.FunctionParam("idx", ty.i32());
     func->SetParams({idx});
     b.Append(func->Block(), [&] {
-        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4<u32>()));
+        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4u()));
         auto* load = b.LoadVectorElement(vec, idx);
         b.Return(func, load);
     });
@@ -191,7 +191,7 @@ TEST_F(IR_RobustnessDefaultTest, VectorLoad_DynamicIndex_Signed) {
 TEST_F(IR_RobustnessDefaultTest, VectorStore_ConstIndexViaLet) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4<u32>()));
+        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4u()));
         auto* idx = b.Let("idx", b.Constant(5_u));
         b.StoreVectorElement(vec, idx, b.Constant(0_u));
         b.Return(func);
@@ -232,7 +232,7 @@ TEST_F(IR_RobustnessDefaultTest, VectorStore_DynamicIndex) {
     auto* idx = b.FunctionParam("idx", ty.u32());
     func->SetParams({idx});
     b.Append(func->Block(), [&] {
-        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4<u32>()));
+        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4u()));
         b.StoreVectorElement(vec, idx, b.Constant(0_u));
         b.Return(func);
     });
@@ -270,7 +270,7 @@ TEST_F(IR_RobustnessDefaultTest, VectorStore_DynamicIndex_Signed) {
     auto* idx = b.FunctionParam("idx", ty.i32());
     func->SetParams({idx});
     b.Append(func->Block(), [&] {
-        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4<u32>()));
+        auto* vec = b.Var("vec", ty.ptr(function, ty.vec4u()));
         b.StoreVectorElement(vec, idx, b.Constant(0_u));
         b.Return(func);
     });
@@ -305,10 +305,10 @@ TEST_F(IR_RobustnessDefaultTest, VectorStore_DynamicIndex_Signed) {
 }
 
 TEST_F(IR_RobustnessDefaultTest, Matrix_ConstIndex) {
-    auto* func = b.Function("foo", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.vec4f());
     b.Append(func->Block(), [&] {
         auto* mat = b.Var("mat", ty.ptr(function, ty.mat4x4<f32>()));
-        auto* access = b.Access(ty.ptr(function, ty.vec4<f32>()), mat, b.Constant(2_u));
+        auto* access = b.Access(ty.ptr(function, ty.vec4f()), mat, b.Constant(2_u));
         auto* load = b.Load(access);
         b.Return(func, load);
     });
@@ -334,11 +334,11 @@ TEST_F(IR_RobustnessDefaultTest, Matrix_ConstIndex) {
 }
 
 TEST_F(IR_RobustnessDefaultTest, Matrix_ConstIndexViaLet) {
-    auto* func = b.Function("foo", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.vec4f());
     b.Append(func->Block(), [&] {
         auto* mat = b.Var("mat", ty.ptr(function, ty.mat4x4<f32>()));
         auto* idx = b.Let("idx", b.Constant(2_u));
-        auto* access = b.Access(ty.ptr(function, ty.vec4<f32>()), mat, idx);
+        auto* access = b.Access(ty.ptr(function, ty.vec4f()), mat, idx);
         auto* load = b.Load(access);
         b.Return(func, load);
     });
@@ -376,12 +376,12 @@ TEST_F(IR_RobustnessDefaultTest, Matrix_ConstIndexViaLet) {
 }
 
 TEST_F(IR_RobustnessDefaultTest, Matrix_DynamicIndex) {
-    auto* func = b.Function("foo", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.vec4f());
     auto* idx = b.FunctionParam("idx", ty.u32());
     func->SetParams({idx});
     b.Append(func->Block(), [&] {
         auto* mat = b.Var("mat", ty.ptr(function, ty.mat4x4<f32>()));
-        auto* access = b.Access(ty.ptr(function, ty.vec4<f32>()), mat, idx);
+        auto* access = b.Access(ty.ptr(function, ty.vec4f()), mat, idx);
         auto* load = b.Load(access);
         b.Return(func, load);
     });
@@ -417,12 +417,12 @@ TEST_F(IR_RobustnessDefaultTest, Matrix_DynamicIndex) {
 }
 
 TEST_F(IR_RobustnessDefaultTest, Matrix_DynamicIndex_Signed) {
-    auto* func = b.Function("foo", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.vec4f());
     auto* idx = b.FunctionParam("idx", ty.i32());
     func->SetParams({idx});
     b.Append(func->Block(), [&] {
         auto* mat = b.Var("mat", ty.ptr(function, ty.mat4x4<f32>()));
-        auto* access = b.Access(ty.ptr(function, ty.vec4<f32>()), mat, idx);
+        auto* access = b.Access(ty.ptr(function, ty.vec4f()), mat, idx);
         auto* load = b.Load(access);
         b.Return(func, load);
     });
@@ -665,7 +665,7 @@ TEST_F(IR_RobustnessDefaultTest, NestedMixedTypes) {
                                 {
                                     {mod.symbols.Register("arr"), ty.array(ty.mat3x4<f32>(), 4)},
                                 });
-    auto* func = b.Function("foo", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.vec4f());
     auto* idx1 = b.FunctionParam("idx1", ty.u32());
     auto* idx2 = b.FunctionParam("idx2", ty.u32());
     auto* idx3 = b.FunctionParam("idx3", ty.u32());
@@ -723,7 +723,7 @@ structure = struct @align(16) {
 ////////////////////////////////////////////////////////////////
 
 TEST_F(IR_RobustnessDefaultTest, Private_LoadVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(private_, ty.vec4<u32>()));
+    auto* vec = b.Var("vec", ty.ptr(private_, ty.vec4u()));
     mod.root_block->Append(vec);
 
     auto* func = b.Function("foo", ty.u32());
@@ -769,7 +769,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_RobustnessDefaultTest, Private_StoreVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(private_, ty.vec4<u32>()));
+    auto* vec = b.Var("vec", ty.ptr(private_, ty.vec4u()));
     mod.root_block->Append(vec);
 
     auto* func = b.Function("foo", ty.void_());
@@ -864,7 +864,7 @@ $B1: {  # root
 }
 
 TEST_P(IR_RobustnessTest, ImmediateData_LoadVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(immediate, ty.vec4<u32>()));
+    auto* vec = b.Var("vec", ty.ptr(immediate, ty.vec4u()));
     mod.root_block->Append(vec);
 
     auto* func = b.Function("foo", ty.u32());
@@ -961,7 +961,7 @@ $B1: {  # root
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, Storage_LoadVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(storage, ty.vec4<u32>()));
+    auto* vec = b.Var("vec", ty.ptr(storage, ty.vec4u()));
     vec->SetBindingPoint(0, 0);
     mod.root_block->Append(vec);
 
@@ -1012,7 +1012,7 @@ $B1: {  # root
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, Storage_StoreVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(storage, ty.vec4<u32>()));
+    auto* vec = b.Var("vec", ty.ptr(storage, ty.vec4u()));
     vec->SetBindingPoint(0, 0);
     mod.root_block->Append(vec);
 
@@ -1117,7 +1117,7 @@ $B1: {  # root
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, Unifom_LoadVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(uniform, ty.vec4<u32>()));
+    auto* vec = b.Var("vec", ty.ptr(uniform, ty.vec4u()));
     vec->SetBindingPoint(0, 0);
     mod.root_block->Append(vec);
 
@@ -1222,7 +1222,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_RobustnessDefaultTest, Workgroup_LoadVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(workgroup, ty.vec4<u32>()));
+    auto* vec = b.Var("vec", ty.ptr(workgroup, ty.vec4u()));
     mod.root_block->Append(vec);
 
     auto* func = b.Function("foo", ty.u32());
@@ -1268,7 +1268,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_RobustnessDefaultTest, Workgroup_StoreVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(workgroup, ty.vec4<u32>()));
+    auto* vec = b.Var("vec", ty.ptr(workgroup, ty.vec4u()));
     mod.root_block->Append(vec);
 
     auto* func = b.Function("foo", ty.void_());
@@ -1371,12 +1371,12 @@ TEST_F(IR_RobustnessDefaultTest, ConstantVector_DynamicIndex) {
     auto* idx = b.FunctionParam("idx", ty.u32());
     func->SetParams({idx});
     b.Append(func->Block(), [&] {
-        auto* vec = mod.constant_values.Composite(ty.vec4<u32>(), Vector{
-                                                                      mod.constant_values.Get(1_u),
-                                                                      mod.constant_values.Get(2_u),
-                                                                      mod.constant_values.Get(3_u),
-                                                                      mod.constant_values.Get(4_u),
-                                                                  });
+        auto* vec = mod.constant_values.Composite(ty.vec4u(), Vector{
+                                                                  mod.constant_values.Get(1_u),
+                                                                  mod.constant_values.Get(2_u),
+                                                                  mod.constant_values.Get(3_u),
+                                                                  mod.constant_values.Get(4_u),
+                                                              });
         auto* element = b.Access(ty.u32(), b.Constant(vec), idx);
         b.Return(func, element);
     });
@@ -1802,10 +1802,10 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureDimensions) {
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
-    auto* func = b.Function("foo", ty.vec2<u32>());
+    auto* func = b.Function("foo", ty.vec2u());
     b.Append(func->Block(), [&] {
         auto* handle = b.Load(texture);
-        auto* dims = b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, handle);
+        auto* dims = b.Call(ty.vec2u(), core::BuiltinFn::kTextureDimensions, handle);
         b.Return(func, dims);
     });
 
@@ -1842,12 +1842,12 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureDimensions_WithLevel) {
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
-    auto* func = b.Function("foo", ty.vec2<u32>());
+    auto* func = b.Function("foo", ty.vec2u());
     auto* level = b.FunctionParam("level", ty.u32());
     func->SetParams({level});
     b.Append(func->Block(), [&] {
         auto* handle = b.Load(texture);
-        auto* dims = b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, handle, level);
+        auto* dims = b.Call(ty.vec2u(), core::BuiltinFn::kTextureDimensions, handle, level);
         b.Return(func, dims);
     });
 
@@ -1897,27 +1897,25 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Sampled1D) {
     mod.root_block->Append(texture);
 
     {
-        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* func = b.Function("load_signed", ty.vec4f());
         auto* coords = b.FunctionParam("coords", ty.i32());
         auto* level = b.FunctionParam("level", ty.i32());
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
 
     {
-        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* func = b.Function("load_unsigned", ty.vec4f());
         auto* coords = b.FunctionParam("coords", ty.u32());
         auto* level = b.FunctionParam("level", ty.u32());
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -1993,27 +1991,25 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Sampled2D) {
     mod.root_block->Append(texture);
 
     {
-        auto* func = b.Function("load_signed", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* func = b.Function("load_signed", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2i());
         auto* level = b.FunctionParam("level", ty.i32());
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
 
     {
-        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* func = b.Function("load_unsigned", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2u());
         auto* level = b.FunctionParam("level", ty.u32());
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2090,29 +2086,29 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Sampled2DArray) {
     mod.root_block->Append(texture);
 
     {
-        auto* func = b.Function("load_signed", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* func = b.Function("load_signed", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2i());
         auto* layer = b.FunctionParam("layer", ty.i32());
         auto* level = b.FunctionParam("level", ty.i32());
         func->SetParams({coords, layer, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, layer, level);
+                b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, layer, level);
             b.Return(func, texel);
         });
     }
 
     {
-        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* func = b.Function("load_unsigned", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2u());
         auto* layer = b.FunctionParam("layer", ty.u32());
         auto* level = b.FunctionParam("level", ty.u32());
         func->SetParams({coords, layer, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, layer, level);
+                b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, layer, level);
             b.Return(func, texel);
         });
     }
@@ -2195,27 +2191,25 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Sampled3D) {
     mod.root_block->Append(texture);
 
     {
-        auto* func = b.Function("load_signed", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec3<i32>());
+        auto* func = b.Function("load_signed", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec3i());
         auto* level = b.FunctionParam("level", ty.i32());
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
 
     {
-        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec3<u32>());
+        auto* func = b.Function("load_unsigned", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec3u());
         auto* level = b.FunctionParam("level", ty.u32());
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2292,27 +2286,25 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Multisampled2D) {
     mod.root_block->Append(texture);
 
     {
-        auto* func = b.Function("load_signed", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* func = b.Function("load_signed", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2i());
         auto* level = b.FunctionParam("level", ty.i32());
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
 
     {
-        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* func = b.Function("load_unsigned", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2u());
         auto* level = b.FunctionParam("level", ty.u32());
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2382,7 +2374,7 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Depth2D) {
 
     {
         auto* func = b.Function("load_signed", ty.f32());
-        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2i());
         auto* level = b.FunctionParam("level", ty.i32());
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
@@ -2394,7 +2386,7 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Depth2D) {
 
     {
         auto* func = b.Function("load_unsigned", ty.f32());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2u());
         auto* level = b.FunctionParam("level", ty.u32());
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
@@ -2476,7 +2468,7 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Depth2DArray) {
 
     {
         auto* func = b.Function("load_signed", ty.f32());
-        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2i());
         auto* layer = b.FunctionParam("layer", ty.i32());
         auto* level = b.FunctionParam("level", ty.i32());
         func->SetParams({coords, layer, level});
@@ -2490,7 +2482,7 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Depth2DArray) {
 
     {
         auto* func = b.Function("load_unsigned", ty.f32());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2u());
         auto* layer = b.FunctionParam("layer", ty.u32());
         auto* level = b.FunctionParam("level", ty.u32());
         func->SetParams({coords, layer, level});
@@ -2582,7 +2574,7 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_DepthMultisampled2D) {
 
     {
         auto* func = b.Function("load_signed", ty.f32());
-        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2i());
         auto* index = b.FunctionParam("index", ty.i32());
         func->SetParams({coords, index});
         b.Append(func->Block(), [&] {
@@ -2594,7 +2586,7 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_DepthMultisampled2D) {
 
     {
         auto* func = b.Function("load_unsigned", ty.f32());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2u());
         auto* index = b.FunctionParam("index", ty.u32());
         func->SetParams({coords, index});
         b.Append(func->Block(), [&] {
@@ -2667,23 +2659,23 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_External) {
     mod.root_block->Append(texture);
 
     {
-        auto* func = b.Function("load_signed", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* func = b.Function("load_signed", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2i());
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
 
     {
-        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* func = b.Function("load_unsigned", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2u());
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -2754,23 +2746,23 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage1D) {
     mod.root_block->Append(texture);
 
     {
-        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* func = b.Function("load_signed", ty.vec4f());
         auto* coords = b.FunctionParam("coords", ty.i32());
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
 
     {
-        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* func = b.Function("load_unsigned", ty.vec4f());
         auto* coords = b.FunctionParam("coords", ty.u32());
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -2841,23 +2833,23 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage2D) {
     mod.root_block->Append(texture);
 
     {
-        auto* func = b.Function("load_signed", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* func = b.Function("load_signed", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2i());
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
 
     {
-        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* func = b.Function("load_unsigned", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2u());
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -2929,27 +2921,25 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage2DArray) {
     mod.root_block->Append(texture);
 
     {
-        auto* func = b.Function("load_signed", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* func = b.Function("load_signed", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2i());
         auto* layer = b.FunctionParam("layer", ty.i32());
         func->SetParams({coords, layer});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, layer);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, layer);
             b.Return(func, texel);
         });
     }
 
     {
-        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* func = b.Function("load_unsigned", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec2u());
         auto* layer = b.FunctionParam("layer", ty.u32());
         func->SetParams({coords, layer});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel =
-                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, layer);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords, layer);
             b.Return(func, texel);
         });
     }
@@ -3027,23 +3017,23 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage3D) {
     mod.root_block->Append(texture);
 
     {
-        auto* func = b.Function("load_signed", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec3<i32>());
+        auto* func = b.Function("load_signed", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec3i());
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
 
     {
-        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
-        auto* coords = b.FunctionParam("coords", ty.vec3<u32>());
+        auto* func = b.Function("load_unsigned", ty.vec4f());
+        auto* coords = b.FunctionParam("coords", ty.vec3u());
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -3118,8 +3108,8 @@ TEST_P(IR_BindingVariableRobustnessTest, NoModify_TextureStore) {
     mod.root_block->Append(texture);
 
     auto* foo = b.Function("foo", ty.void_());
-    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
-    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    auto* coords = b.FunctionParam("coords", ty.vec2i());
+    auto* value = b.FunctionParam("value", ty.vec4f());
     foo->SetParams({coords, value});
     b.Append(foo->Block(), [&] {
         auto* handle = b.Load(texture);
@@ -3156,8 +3146,8 @@ $B1: {  # root
 
 // Test that ignoring a subset of bindings works
 TEST_P(IR_RobustnessTest, BindingsIgnored_Subset) {
-    auto* vec1 = b.Var("vec1", ty.ptr(storage, ty.vec4<u32>()));
-    auto* vec2 = b.Var("vec2", ty.ptr(storage, ty.vec4<u32>()));
+    auto* vec1 = b.Var("vec1", ty.ptr(storage, ty.vec4u()));
+    auto* vec2 = b.Var("vec2", ty.ptr(storage, ty.vec4u()));
     auto* arr1 = b.Var("arr1", ty.ptr(storage, ty.array<u32, 4>()));
     auto* arr2 = b.Var("arr2", ty.ptr(storage, ty.array<u32, 4>()));
     vec1->SetBindingPoint(1, 2);
@@ -6206,7 +6196,7 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_MaxBound_E
     b.Append(func->Block(), [&] {
         Var* idx = nullptr;
         // v = vec4u()
-        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4u()));
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] {
             // idx = 0u
@@ -6281,7 +6271,7 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_MaxBound_L
     b.Append(func->Block(), [&] {
         Var* idx = nullptr;
         // v = vec3u()
-        auto* v = b.Var("v", ty.ptr(function, ty.vec3<u32>()));
+        auto* v = b.Var("v", ty.ptr(function, ty.vec3u()));
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] {
             // idx = 0u
@@ -6356,7 +6346,7 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_MaxBound_G
     b.Append(func->Block(), [&] {
         Var* idx = nullptr;
         // v = vec4u()
-        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4u()));
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] {
             // idx = 0u
@@ -6433,7 +6423,7 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_IndexNoRan
     func->AppendParam(param);
     b.Append(func->Block(), [&] {
         // v = vec4u()
-        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4u()));
         b.LoadVectorElement(v, param);
         b.Return(func);
     });
@@ -6461,7 +6451,7 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_I32_Negati
     b.Append(func->Block(), [&] {
         Var* idx = nullptr;
         // v = vec4u()
-        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4u()));
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] {
             // idx = -1
@@ -6538,7 +6528,7 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_MaxBound_
     b.Append(func->Block(), [&] {
         Var* idx = nullptr;
         // v = vec4u()
-        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4u()));
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] {
             // idx = 0u
@@ -6613,7 +6603,7 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_MaxBound_
     b.Append(func->Block(), [&] {
         Var* idx = nullptr;
         // v = vec3u()
-        auto* v = b.Var("v", ty.ptr(function, ty.vec3<u32>()));
+        auto* v = b.Var("v", ty.ptr(function, ty.vec3u()));
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] {
             // idx = 0u
@@ -6688,7 +6678,7 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_MaxBound_
     b.Append(func->Block(), [&] {
         Var* idx = nullptr;
         // v = vec4u()
-        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4u()));
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] {
             // idx = 0u
@@ -6765,7 +6755,7 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_IndexNoRa
     func->AppendParam(param);
     b.Append(func->Block(), [&] {
         // v = vec4u()
-        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4u()));
         b.StoreVectorElement(v, param, b.Constant(0_u));
         b.Return(func);
     });
@@ -6793,7 +6783,7 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_I32_Negat
     b.Append(func->Block(), [&] {
         Var* idx = nullptr;
         // v = vec4u()
-        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4u()));
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] {
             // idx = -1

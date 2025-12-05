@@ -151,7 +151,7 @@ $B1: {  # root
 }
 
 TEST_F(MslWriter_SimdBallotTest, SimdBallot_InHelperFunction) {
-    auto* foo = b.Function("foo", ty.vec4<u32>());
+    auto* foo = b.Function("foo", ty.vec4u());
     auto* pred = b.FunctionParam("pred", ty.bool_());
     foo->SetParams({pred});
     b.Append(foo->Block(), [&] {  //

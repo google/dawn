@@ -246,7 +246,7 @@ TEST_F(GlslWriterTest, AccessSwizzleMulti) {
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero<vec4<f32>>());
-        b.Let("b", b.Swizzle(ty.vec4<f32>(), b.Load(v), {3u, 2u, 1u, 0u}));
+        b.Let("b", b.Swizzle(ty.vec4f(), b.Load(v), {3u, 2u, 1u, 0u}));
         b.Return(f);
     });
 
@@ -667,7 +667,7 @@ void main() {
 TEST_F(GlslWriterTest, AccessComplexDynamicAccessChain) {
     auto* S1 = ty.Struct(mod.symbols.New("S1"), {
                                                     {mod.symbols.New("a"), ty.i32()},
-                                                    {mod.symbols.New("b"), ty.vec3<f32>()},
+                                                    {mod.symbols.New("b"), ty.vec3f()},
                                                     {mod.symbols.New("c"), ty.i32()},
                                                 });
     auto* S2 = ty.Struct(mod.symbols.New("S2"), {
@@ -748,7 +748,7 @@ void main() {
 TEST_F(GlslWriterTest, AccessComplexDynamicAccessChainSplit) {
     auto* S1 = ty.Struct(mod.symbols.New("S1"), {
                                                     {mod.symbols.New("a"), ty.i32()},
-                                                    {mod.symbols.New("b"), ty.vec3<f32>()},
+                                                    {mod.symbols.New("b"), ty.vec3f()},
                                                     {mod.symbols.New("c"), ty.i32()},
                                                 });
     auto* S2 = ty.Struct(mod.symbols.New("S2"), {
@@ -1116,8 +1116,8 @@ TEST_F(GlslWriterTest, AccessUniformMat2x3F16) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
-        b.Let("b", b.Load(b.Access(ty.ptr(uniform, ty.vec3<f16>()), var, 1_u)));
-        b.Let("c", b.LoadVectorElement(b.Access(ty.ptr(uniform, ty.vec3<f16>()), var, 1_u), 2_u));
+        b.Let("b", b.Load(b.Access(ty.ptr(uniform, ty.vec3h()), var, 1_u)));
+        b.Let("c", b.LoadVectorElement(b.Access(ty.ptr(uniform, ty.vec3h()), var, 1_u), 2_u));
         b.Return(func);
     });
 
@@ -1708,7 +1708,7 @@ TEST_F(GlslWriterTest, AccessStoreVector) {
     b.ir.root_block->Append(var);
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Store(var, b.Composite(ty.vec3<f32>(), 2_f, 3_f, 4_f));
+        b.Store(var, b.Composite(ty.vec3f(), 2_f, 3_f, 4_f));
         b.Return(func);
     });
 
@@ -1733,7 +1733,7 @@ TEST_F(GlslWriterTest, AccessStoreVectorF16) {
     b.ir.root_block->Append(var);
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Store(var, b.Composite(ty.vec3<f16>(), 2_h, 3_h, 4_h));
+        b.Store(var, b.Composite(ty.vec3h(), 2_h, 3_h, 4_h));
         b.Return(func);
     });
 
@@ -2142,7 +2142,7 @@ void main() {
 TEST_F(GlslWriterTest, AccessStoreStruct) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("s"), ty.f32()},
-                                                          {mod.symbols.New("t"), ty.vec3<f32>()},
+                                                          {mod.symbols.New("t"), ty.vec3f()},
                                                       });
     auto* Outer = ty.Struct(mod.symbols.New("Outer"), {
                                                           {mod.symbols.New("x"), ty.f32()},
@@ -2319,7 +2319,7 @@ void main() {
 TEST_F(GlslWriterTest, AccessChainReused) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.i32()},
-                                                    {mod.symbols.New("b"), ty.vec3<f32>()},
+                                                    {mod.symbols.New("b"), ty.vec3f()},
                                                 });
 
     auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
@@ -2328,7 +2328,7 @@ TEST_F(GlslWriterTest, AccessChainReused) {
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* x = b.Access(ty.ptr(storage, ty.vec3<f32>(), core::Access::kReadWrite), var, 1_u);
+        auto* x = b.Access(ty.ptr(storage, ty.vec3f(), core::Access::kReadWrite), var, 1_u);
         b.Let("b", b.LoadVectorElement(x, 1_u));
         b.Let("c", b.LoadVectorElement(x, 2_u));
         b.Return(func);
@@ -2362,7 +2362,7 @@ void main() {
 TEST_F(GlslWriterTest, AccessUniformChainReused) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("c"), ty.f32()},
-                                                    {mod.symbols.New("d"), ty.vec3<f32>()},
+                                                    {mod.symbols.New("d"), ty.vec3f()},
                                                 });
 
     auto* var = b.Var("v", uniform, sb, core::Access::kRead);
@@ -2371,7 +2371,7 @@ TEST_F(GlslWriterTest, AccessUniformChainReused) {
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* x = b.Access(ty.ptr(uniform, ty.vec3<f32>(), core::Access::kRead), var, 1_u);
+        auto* x = b.Access(ty.ptr(uniform, ty.vec3f(), core::Access::kRead), var, 1_u);
         b.Let("b", b.LoadVectorElement(x, 1_u));
         b.Let("c", b.LoadVectorElement(x, 2_u));
         b.Return(func);

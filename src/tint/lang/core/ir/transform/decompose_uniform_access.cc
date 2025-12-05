@@ -120,7 +120,7 @@ struct State {
 
             // Swap the result type of the `var` to the new result type
             auto array_length = (var_ty->StoreType()->Size() + 15) / 16;
-            result->SetType(ty.ptr(var_ty->AddressSpace(), ty.array(ty.vec4<u32>(), array_length),
+            result->SetType(ty.ptr(var_ty->AddressSpace(), ty.array(ty.vec4u(), array_length),
                                    var_ty->Access()));
         }
     }
@@ -333,7 +333,7 @@ struct State {
                                           const core::type::Type* result_ty,
                                           core::ir::Value* byte_idx) {
         auto* array_idx = OffsetValueToArrayIndex(byte_idx);
-        auto* access = b.Access(ty.ptr(uniform, ty.vec4<u32>()), var, array_idx);
+        auto* access = b.Access(ty.ptr(uniform, ty.vec4u()), var, array_idx);
 
         auto* vec_idx = CalculateVectorOffset(byte_idx);
         core::ir::Instruction* load = b.LoadVectorElement(access, vec_idx);
@@ -386,7 +386,7 @@ struct State {
                                           const core::type::Vector* result_ty,
                                           core::ir::Value* byte_idx) {
         auto* array_idx = OffsetValueToArrayIndex(byte_idx);
-        auto* access = b.Access(ty.ptr(uniform, ty.vec4<u32>()), var, array_idx);
+        auto* access = b.Access(ty.ptr(uniform, ty.vec4u()), var, array_idx);
 
         if (result_ty->DeepestElement()->Is<core::type::F16>()) {
             return MakeVectorLoadF16(access, result_ty, byte_idx);
@@ -397,27 +397,27 @@ struct State {
         if (result_ty->Width() == 4) {
             load = b.Load(access);
         } else if (result_ty->Width() == 3) {
-            load = b.Swizzle(ty.vec3<u32>(), b.Load(access), {0, 1, 2});
+            load = b.Swizzle(ty.vec3u(), b.Load(access), {0, 1, 2});
         } else if (result_ty->Width() == 2) {
             auto* vec_idx = CalculateVectorOffset(byte_idx);
             if (auto* cnst = vec_idx->As<core::ir::Constant>()) {
                 if (cnst->Value()->ValueAs<uint32_t>() == 2u) {
-                    load = b.Swizzle(ty.vec2<u32>(), b.Load(access), {2, 3});
+                    load = b.Swizzle(ty.vec2u(), b.Load(access), {2, 3});
                 } else {
-                    load = b.Swizzle(ty.vec2<u32>(), b.Load(access), {0, 1});
+                    load = b.Swizzle(ty.vec2u(), b.Load(access), {0, 1});
                 }
             } else {
                 auto* ubo = b.Load(access);
                 // if vec_idx == 2 -> zw
-                auto* sw_lhs = b.Swizzle(ty.vec2<u32>(), ubo, {2, 3});
+                auto* sw_lhs = b.Swizzle(ty.vec2u(), ubo, {2, 3});
                 // else -> xy
-                auto* sw_rhs = b.Swizzle(ty.vec2<u32>(), ubo, {0, 1});
+                auto* sw_rhs = b.Swizzle(ty.vec2u(), ubo, {0, 1});
                 auto* cond = b.Equal(vec_idx, 2_u);
 
                 Vector<core::ir::Value*, 3> args{sw_rhs->Result(), sw_lhs->Result(),
                                                  cond->Result()};
 
-                load = b.Call(ty.vec2<u32>(), core::BuiltinFn::kSelect, args);
+                load = b.Call(ty.vec2u(), core::BuiltinFn::kSelect, args);
             }
         } else {
             TINT_IR_UNREACHABLE(ir);
@@ -448,19 +448,19 @@ struct State {
             auto* vec_idx = CalculateVectorOffset(byte_idx);  // 0 or 2
             if (auto* cnst = vec_idx->As<core::ir::Constant>()) {
                 if (cnst->Value()->ValueAs<uint32_t>() == 2u) {
-                    load = b.Swizzle(ty.vec2<u32>(), b.Load(access), {2, 3});
+                    load = b.Swizzle(ty.vec2u(), b.Load(access), {2, 3});
                 } else {
-                    load = b.Swizzle(ty.vec2<u32>(), b.Load(access), {0, 1});
+                    load = b.Swizzle(ty.vec2u(), b.Load(access), {0, 1});
                 }
             } else {
                 auto* ubo = b.Load(access);
                 // if vec_idx == 2 -> zw
-                auto* sw_lhs = b.Swizzle(ty.vec2<u32>(), ubo, {2, 3});
+                auto* sw_lhs = b.Swizzle(ty.vec2u(), ubo, {2, 3});
                 // else -> xy
-                auto* sw_rhs = b.Swizzle(ty.vec2<u32>(), ubo, {0, 1});
+                auto* sw_rhs = b.Swizzle(ty.vec2u(), ubo, {0, 1});
                 auto* cond = b.Equal(vec_idx, 2_u);
                 auto args = Vector{sw_rhs->Result(), sw_lhs->Result(), cond->Result()};
-                load = b.Call(ty.vec2<u32>(), core::BuiltinFn::kSelect, std::move(args));
+                load = b.Call(ty.vec2u(), core::BuiltinFn::kSelect, std::move(args));
             }
             if (result_ty->Width() == 3) {
                 auto* bc = b.Bitcast(ty.vec4(result_ty->Type()), load);

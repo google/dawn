@@ -801,7 +801,7 @@ struct State {
 
         // Call the function.
         // If this is a depth comparison, the result is always f32, otherwise vec4f.
-        auto* result_ty = depth ? static_cast<const core::type::Type*>(ty.f32()) : ty.vec4<f32>();
+        auto* result_ty = depth ? static_cast<const core::type::Type*>(ty.f32()) : ty.vec4f();
         core::ir::Instruction* result =
             b.Call<spirv::ir::BuiltinCall>(result_ty, function, std::move(function_args));
         result->InsertBefore(builtin);
@@ -1093,7 +1093,7 @@ struct State {
 
         // Call the function.
         auto* texture_call = b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec3<u32>(), function, Vector{ty.u32()}, std::move(function_args));
+            ty.vec3u(), function, Vector{ty.u32()}, std::move(function_args));
         texture_call->InsertBefore(builtin);
 
         // Extract the third component to get the number of array layers.
@@ -1131,7 +1131,7 @@ struct State {
 
         auto* texture = builtin->Args()[0];
         // coords for input_attachment are always (0, 0)
-        auto* coords = b.Composite(ty.vec2<i32>(), 0_i, 0_i);
+        auto* coords = b.Composite(ty.vec2i(), 0_i, 0_i);
 
         // Start building the argument list for the builtin.
         // The first two operands are always the texture and then the coordinates.

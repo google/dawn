@@ -850,7 +850,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, CallFunctionThatUsesVars_HandleTypes) {
     mod.root_block->Append(var_t);
     mod.root_block->Append(var_s);
 
-    auto* foo = b.Function("foo", ty.vec4<f32>());
+    auto* foo = b.Function("foo", ty.vec4f());
     auto* param = b.FunctionParam<i32>("param");
     foo->SetParams({param});
     b.Append(foo->Block(), [&] {
@@ -941,7 +941,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, CallFunctionThatUsesVars_HandleTypes_Bindi
     mod.root_block->Append(var_t);
     mod.root_block->Append(var_s);
 
-    auto* foo = b.Function("foo", ty.vec4<f32>());
+    auto* foo = b.Function("foo", ty.vec4f());
     auto* param = b.FunctionParam<i32>("param");
     foo->SetParams({param});
     b.Append(foo->Block(), [&] {

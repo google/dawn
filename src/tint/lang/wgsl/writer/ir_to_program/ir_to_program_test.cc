@@ -168,7 +168,7 @@ fn f() {
 }
 
 TEST_F(IRToProgramTest, EntryPoint_Vertex) {
-    auto* fn = b.Function("f", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    auto* fn = b.Function("f", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
     fn->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     fn->Block()->Append(b.Return(fn, b.Splat<vec4<f32>>(0_f)));
@@ -183,7 +183,7 @@ fn f() -> @builtin(position) vec4<f32> {
 
 TEST_F(IRToProgramTest, EntryPoint_Parameter_BuiltinAndInvariant) {
     auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    auto* param = b.FunctionParam("input", ty.vec4<f32>());
+    auto* param = b.FunctionParam("input", ty.vec4f());
     param->SetBuiltin(core::BuiltinValue::kPosition);
     param->SetInvariant(true);
     fn->SetParams({param});
@@ -260,7 +260,7 @@ fn f() -> @builtin(sample_mask) u32 {
 }
 
 TEST_F(IRToProgramTest, EntryPoint_ReturnAttribute_Invariant) {
-    auto* fn = b.Function("f", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    auto* fn = b.Function("f", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
     fn->SetReturnBuiltin(core::BuiltinValue::kPosition);
     fn->SetReturnInvariant(true);
 
@@ -275,7 +275,7 @@ fn f() -> @builtin(position) @invariant vec4<f32> {
 }
 
 TEST_F(IRToProgramTest, EntryPoint_ReturnAttribute_Location) {
-    auto* fn = b.Function("f", ty.vec4<f32>(), core::ir::Function::PipelineStage::kFragment);
+    auto* fn = b.Function("f", ty.vec4f(), core::ir::Function::PipelineStage::kFragment);
     fn->SetReturnLocation(1);
 
     fn->Block()->Append(b.Return(fn, b.Splat<vec4<f32>>(0_f)));
@@ -301,11 +301,11 @@ core::ir::FunctionParam* MakeBuiltinParam(core::ir::Builder& b,
 TEST_F(IRToProgramTest, EntryPoint_ParameterAttribute_Compute) {
     auto* fn = b.ComputeFunction("f", 3_u, 4_u, 5_u);
     fn->SetParams({
-        MakeBuiltinParam(b, ty.vec3<u32>(), core::BuiltinValue::kLocalInvocationId),
+        MakeBuiltinParam(b, ty.vec3u(), core::BuiltinValue::kLocalInvocationId),
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kLocalInvocationIndex),
-        MakeBuiltinParam(b, ty.vec3<u32>(), core::BuiltinValue::kGlobalInvocationId),
-        MakeBuiltinParam(b, ty.vec3<u32>(), core::BuiltinValue::kWorkgroupId),
-        MakeBuiltinParam(b, ty.vec3<u32>(), core::BuiltinValue::kNumWorkgroups),
+        MakeBuiltinParam(b, ty.vec3u(), core::BuiltinValue::kGlobalInvocationId),
+        MakeBuiltinParam(b, ty.vec3u(), core::BuiltinValue::kWorkgroupId),
+        MakeBuiltinParam(b, ty.vec3u(), core::BuiltinValue::kNumWorkgroups),
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kSubgroupInvocationId),
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kSubgroupSize),
     });
@@ -1615,7 +1615,7 @@ fn f(i : bool) {
 
 TEST_F(IRToProgramTest, TypeConvert_vec3i_to_vec3u) {
     auto* fn = b.Function("f", ty.void_());
-    auto* i = b.FunctionParam("i", ty.vec3<i32>());
+    auto* i = b.FunctionParam("i", ty.vec3i());
     fn->SetParams({i});
 
     b.Append(fn->Block(), [&] {
@@ -1632,7 +1632,7 @@ fn f(i : vec3<i32>) {
 
 TEST_F(IRToProgramTest, TypeConvert_vec3u_to_vec3f) {
     auto* fn = b.Function("f", ty.void_());
-    auto* i = b.FunctionParam("i", ty.vec3<u32>());
+    auto* i = b.FunctionParam("i", ty.vec3u());
     fn->SetParams({i});
 
     b.Append(fn->Block(), [&] {
@@ -2096,10 +2096,10 @@ TEST_F(IRToProgramTest, Load_Reused) {
         auto* tl = b.Load(im);
         auto* sl = b.Load(sampler);
 
-        b.Phony(b.Call<wgsl::ir::BuiltinCall>(ty.vec4<f32>(), wgsl::BuiltinFn::kTextureSample, tl,
-                                              sl, b.Splat(ty.vec2<f32>(), 0_f)));
-        b.Phony(b.Call<wgsl::ir::BuiltinCall>(ty.vec4<f32>(), wgsl::BuiltinFn::kTextureSample, tl,
-                                              sl, b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Phony(b.Call<wgsl::ir::BuiltinCall>(ty.vec4f(), wgsl::BuiltinFn::kTextureSample, tl, sl,
+                                              b.Splat(ty.vec2f(), 0_f)));
+        b.Phony(b.Call<wgsl::ir::BuiltinCall>(ty.vec4f(), wgsl::BuiltinFn::kTextureSample, tl, sl,
+                                              b.Splat(ty.vec2f(), 0_f)));
         b.Return(fn);
     });
 
@@ -3647,8 +3647,8 @@ TEST_F(IRToProgramTest, AllowNonUniformDerivatives) {
         b.Append(if_->True(), [&] {
             auto* tl = b.Load(im);
             auto* sl = b.Load(sampler);
-            b.Phony(b.Call<wgsl::ir::BuiltinCall>(ty.vec4<f32>(), wgsl::BuiltinFn::kTextureSample,
-                                                  tl, sl, b.Splat(ty.vec2<f32>(), 0_f)));
+            b.Phony(b.Call<wgsl::ir::BuiltinCall>(ty.vec4f(), wgsl::BuiltinFn::kTextureSample, tl,
+                                                  sl, b.Splat(ty.vec2f(), 0_f)));
             b.ExitIf(if_);
         });
         b.Return(fn);
@@ -3680,8 +3680,8 @@ TEST_F(IRToProgramTest, AllowNonUniformSubgroups) {
     b.Append(fn->Block(), [&] {  //
         auto* if_ = b.If(b.Load(non_uniform));
         b.Append(if_->True(), [&] {
-            b.Phony(b.Call<wgsl::ir::BuiltinCall>(ty.vec4<u32>(), wgsl::BuiltinFn::kSubgroupBallot,
-                                                  true));
+            b.Phony(
+                b.Call<wgsl::ir::BuiltinCall>(ty.vec4u(), wgsl::BuiltinFn::kSubgroupBallot, true));
             b.ExitIf(if_);
         });
         b.Return(fn);

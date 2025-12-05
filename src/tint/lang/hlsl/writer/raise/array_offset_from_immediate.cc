@@ -207,10 +207,10 @@ struct State {
         const uint32_t array_index = offset_index / 4;
         const uint32_t vec_index = offset_index % 4;
         auto* buffer_offsets = b.Access(
-            ty.ptr(immediate, ty.array(ty.vec4<u32>(), buffer_offsets_array_elements_num)),
+            ty.ptr(immediate, ty.array(ty.vec4u(), buffer_offsets_array_elements_num)),
             immediate_data_layout.var, u32(immediate_data_layout.IndexOf(buffer_offsets_offset)));
         auto* vec_ptr =
-            b.Access(ty.ptr(immediate, ty.vec4<u32>()), buffer_offsets->Result(), u32(array_index));
+            b.Access(ty.ptr(immediate, ty.vec4u()), buffer_offsets->Result(), u32(array_index));
         return b.LoadVectorElement(vec_ptr, u32(vec_index))->Result();
     }
 };

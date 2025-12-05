@@ -240,7 +240,7 @@ TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour, Emit_Vector) {
         auto* l = b.Let("left", b.Splat<vec4<i32>>(1_i));
         auto* r = b.Let("right", b.Splat<vec4<i32>>(3_i));
 
-        auto* bin = b.Binary(params.op, ty.vec4<i32>(), l, r);
+        auto* bin = b.Binary(params.op, ty.vec4i(), l, r);
         b.Let("val", bin);
         b.Return(func);
     });
@@ -425,12 +425,12 @@ kernel void entry() {
 TEST_F(MslWriterTest, BinaryModVec3F32) {
     auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
-        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
+        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3f()));
+        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3f()));
 
         auto* l = b.Load(left);
         auto* r = b.Load(right);
-        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3<f32>(), l, r);
+        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3f(), l, r);
 
         b.Let("val", expr1);
         b.Return(func);
@@ -450,12 +450,12 @@ kernel void entry() {
 TEST_F(MslWriterTest, BinaryModVec3F16) {
     auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
-        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
+        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3h()));
+        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3h()));
 
         auto* l = b.Load(left);
         auto* r = b.Load(right);
-        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3<f16>(), l, r);
+        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3h(), l, r);
 
         b.Let("val", expr1);
         b.Return(func);

@@ -384,7 +384,7 @@ TEST_F(IR_DeadCodeEliminationTest, RemoveMultipleVarPrivate) {
     mod.root_block->Append(buffer1);
     auto* buffer2 = b.Var("buffer2", ty.ptr(core::AddressSpace::kPrivate, ty.f32()));
     mod.root_block->Append(buffer2);
-    auto* buffer3 = b.Var("buffer3", ty.ptr(core::AddressSpace::kPrivate, ty.vec4<f32>()));
+    auto* buffer3 = b.Var("buffer3", ty.ptr(core::AddressSpace::kPrivate, ty.vec4f()));
     mod.root_block->Append(buffer3);
     auto* buffer4 = b.Var("buffer4", ty.ptr(core::AddressSpace::kPrivate, ty.mat2x2<f32>()));
     mod.root_block->Append(buffer4);

@@ -101,7 +101,7 @@ kernel void entry() {
 
 TEST_F(MslWriterTest, VarStruct) {
     auto* s = ty.Struct(mod.symbols.New("MyStruct"), {{mod.symbols.Register("a"), ty.f32()},  //
-                                                      {mod.symbols.Register("b"), ty.vec4<i32>()}});
+                                                      {mod.symbols.Register("b"), ty.vec4i()}});
 
     auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {

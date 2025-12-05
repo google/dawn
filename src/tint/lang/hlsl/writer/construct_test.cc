@@ -203,10 +203,10 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, ConstructVecSingleScalarF32) {
-    auto* f = b.Function("a", ty.vec3<f32>());
+    auto* f = b.Function("a", ty.vec3f());
     b.Append(f->Block(), [&] {
         auto* v = b.Let("v", 2_f);
-        b.Return(f, b.Construct(ty.vec3<f32>(), v));
+        b.Return(f, b.Construct(ty.vec3f(), v));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -231,10 +231,10 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, ConstructVecSingleScalarF16) {
-    auto* f = b.Function("a", ty.vec3<f16>());
+    auto* f = b.Function("a", ty.vec3h());
     b.Append(f->Block(), [&] {
         auto* v = b.Let("v", 2_h);
-        b.Return(f, b.Construct(ty.vec3<f16>(), v));
+        b.Return(f, b.Construct(ty.vec3h(), v));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -290,9 +290,9 @@ TEST_F(HlslWriterTest, ConstructArray) {
     auto* f = b.ComputeFunction("main");
 
     b.Append(f->Block(), [&] {
-        b.Var("v", b.Construct(ty.array<vec3<f32>, 3>(), b.Composite(ty.vec3<f32>(), 1_f, 2_f, 3_f),
-                               b.Composite(ty.vec3<f32>(), 4_f, 5_f, 6_f),
-                               b.Composite(ty.vec3<f32>(), 7_f, 8_f, 9_f)));
+        b.Var("v", b.Construct(ty.array<vec3<f32>, 3>(), b.Composite(ty.vec3f(), 1_f, 2_f, 3_f),
+                               b.Composite(ty.vec3f(), 4_f, 5_f, 6_f),
+                               b.Composite(ty.vec3f(), 7_f, 8_f, 9_f)));
         b.Return(f);
     });
 
@@ -312,14 +312,14 @@ TEST_F(HlslWriterTest, ConstructStruct) {
                                          core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
                                          core::IOAttributes{}),
-        ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), ty.vec3<i32>(), 2u, 8u, 16u, 16u,
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), ty.vec3i(), 2u, 8u, 16u, 16u,
                                          core::IOAttributes{}),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
     auto* f = b.Function("a", strct);
     b.Append(f->Block(), [&] {
-        b.Return(f, b.Construct(strct, 1_i, 2_f, b.Composite(ty.vec3<i32>(), 3_i, 4_i, 5_i)));
+        b.Return(f, b.Construct(strct, 1_i, 2_f, b.Composite(ty.vec3i(), 3_i, 4_i, 5_i)));
     });
 
     auto* eb = b.ComputeFunction("main");

@@ -184,7 +184,7 @@ TEST_F(HlslWriterTest, ArrayLengthMultipleStorageBuffers) {
     auto* SB2 = ty.Struct(mod.symbols.New("SB2"),
                           {
                               {mod.symbols.New("x"), ty.i32()},
-                              {mod.symbols.New("arr2"), ty.runtime_array(ty.vec4<f32>())},
+                              {mod.symbols.New("arr2"), ty.runtime_array(ty.vec4f())},
                           });
     auto* sb1 = b.Var("sb1", ty.ptr(storage, SB1));
     sb1->SetBindingPoint(0, 0);

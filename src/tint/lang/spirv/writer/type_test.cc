@@ -307,11 +307,10 @@ TEST_F(SpirvWriterTest, Type_Array_DefaultStride) {
 }
 
 TEST_F(SpirvWriterTest, Type_Array_ExplicitStride) {
-    auto* str =
-        ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.Register("a"), ty.f32()},
-                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
-                                               });
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                           {mod.symbols.Register("a"), ty.f32()},
+                                                           {mod.symbols.Register("b"), ty.vec4i()},
+                                                       });
     core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
         auto* ex = ty.array(str, 4_u);
@@ -369,11 +368,10 @@ TEST_F(SpirvWriterTest, Type_RuntimeArray_DefaultStride) {
 }
 
 TEST_F(SpirvWriterTest, Type_RuntimeArray_ExplicitStride) {
-    auto* str =
-        ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.Register("a"), ty.f32()},
-                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
-                                               });
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                           {mod.symbols.Register("a"), ty.f32()},
+                                                           {mod.symbols.Register("b"), ty.vec4i()},
+                                                       });
     core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
         auto* ex = ty.runtime_array(str);
@@ -415,11 +413,10 @@ TEST_F(SpirvWriterTest, Type_BindingArray_SampledTexture) {
 }
 
 TEST_F(SpirvWriterTest, Type_Struct_NoExplicitLayout) {
-    auto* str =
-        ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.Register("a"), ty.f32()},
-                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
-                                               });
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                           {mod.symbols.Register("a"), ty.f32()},
+                                                           {mod.symbols.Register("b"), ty.vec4i()},
+                                                       });
     core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
         v = b.Var("v", ty.ptr<private_, read_write>(str));
@@ -440,11 +437,10 @@ TEST_F(SpirvWriterTest, Type_Struct_NoExplicitLayout) {
 }
 
 TEST_F(SpirvWriterTest, Type_Struct) {
-    auto* str =
-        ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.Register("a"), ty.f32()},
-                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
-                                               });
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                           {mod.symbols.Register("a"), ty.f32()},
+                                                           {mod.symbols.Register("b"), ty.vec4i()},
+                                                       });
     core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
         v = b.Var("v", ty.ptr<storage>(str));

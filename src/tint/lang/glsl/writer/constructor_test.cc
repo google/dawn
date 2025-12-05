@@ -231,9 +231,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Constructor_Type_Vec_F32) {
-    auto* func = b.Function("a", ty.vec3<f32>());
+    auto* func = b.Function("a", ty.vec3f());
     b.Append(func->Block(), [&] {  //
-        b.Return(func, b.Construct(ty.vec3<f32>(), 1.0_f, 2.0_f, 3.0_f));
+        b.Return(func, b.Construct(ty.vec3f(), 1.0_f, 2.0_f, 3.0_f));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -255,9 +255,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Constructor_Type_Vec_F16) {
-    auto* func = b.Function("a", ty.vec3<f16>());
+    auto* func = b.Function("a", ty.vec3h());
     b.Append(func->Block(), [&] {  //
-        b.Return(func, b.Construct(ty.vec3<f16>(), 1_h, 2_h, 3_h));
+        b.Return(func, b.Construct(ty.vec3h(), 1_h, 2_h, 3_h));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -280,9 +280,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Constructor_Type_Vec_Empty_F32) {
-    auto* func = b.Function("a", ty.vec3<f32>());
+    auto* func = b.Function("a", ty.vec3f());
     b.Append(func->Block(), [&] {  //
-        b.Return(func, b.Construct(ty.vec3<f32>()));
+        b.Return(func, b.Construct(ty.vec3f()));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -304,9 +304,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Constructor_Type_Vec_Empty_F16) {
-    auto* func = b.Function("a", ty.vec3<f16>());
+    auto* func = b.Function("a", ty.vec3h());
     b.Append(func->Block(), [&] {  //
-        b.Return(func, b.Construct(ty.vec3<f16>()));
+        b.Return(func, b.Construct(ty.vec3h()));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -329,9 +329,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_F32_Literal) {
-    auto* func = b.Function("a", ty.vec3<f32>());
+    auto* func = b.Function("a", ty.vec3f());
     b.Append(func->Block(), [&] {  //
-        b.Return(func, b.Splat(ty.vec3<f32>(), 2_f));
+        b.Return(func, b.Splat(ty.vec3f(), 2_f));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -353,9 +353,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_F16_Literal) {
-    auto* func = b.Function("a", ty.vec3<f16>());
+    auto* func = b.Function("a", ty.vec3h());
     b.Append(func->Block(), [&] {  //
-        b.Return(func, b.Splat(ty.vec3<f16>(), 2_h));
+        b.Return(func, b.Splat(ty.vec3h(), 2_h));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -378,10 +378,10 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_F32_Var) {
-    auto* func = b.Function("a", ty.vec3<f32>());
+    auto* func = b.Function("a", ty.vec3f());
     b.Append(func->Block(), [&] {  //
         auto* v = b.Var("v", 2_f);
-        b.Return(func, b.Construct(ty.vec3<f32>(), b.Load(v)));
+        b.Return(func, b.Construct(ty.vec3f(), b.Load(v)));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -404,10 +404,10 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_F16_Var) {
-    auto* func = b.Function("a", ty.vec3<f16>());
+    auto* func = b.Function("a", ty.vec3h());
     b.Append(func->Block(), [&] {  //
         auto* v = b.Var("v", 2_h);
-        b.Return(func, b.Construct(ty.vec3<f16>(), b.Load(v)));
+        b.Return(func, b.Construct(ty.vec3h(), b.Load(v)));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -455,9 +455,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_Int) {
-    auto* func = b.Function("a", ty.vec3<i32>());
+    auto* func = b.Function("a", ty.vec3i());
     b.Append(func->Block(), [&] {  //
-        b.Return(func, b.Splat(ty.vec3<i32>(), 2_i));
+        b.Return(func, b.Splat(ty.vec3i(), 2_i));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -479,9 +479,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_UInt) {
-    auto* func = b.Function("a", ty.vec3<u32>());
+    auto* func = b.Function("a", ty.vec3u());
     b.Append(func->Block(), [&] {  //
-        b.Return(func, b.Construct(ty.vec3<u32>(), 2_u));
+        b.Return(func, b.Construct(ty.vec3u(), 2_u));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -505,8 +505,8 @@ void main() {
 TEST_F(GlslWriterTest, Constructor_Type_Mat_F32) {
     auto* func = b.Function("a", ty.mat2x3<f32>());
     b.Append(func->Block(), [&] {  //
-        auto* v1 = b.Let("v1", b.Construct(ty.vec3<f32>(), 1_f, 2_f, 3_f));
-        auto* v2 = b.Let("v2", b.Construct(ty.vec3<f32>(), 3_f, 4_f, 5_f));
+        auto* v1 = b.Let("v1", b.Construct(ty.vec3f(), 1_f, 2_f, 3_f));
+        auto* v2 = b.Let("v2", b.Construct(ty.vec3f(), 3_f, 4_f, 5_f));
         b.Return(func, b.Construct(ty.mat2x3<f32>(), v1, v2));
     });
 
@@ -533,8 +533,8 @@ void main() {
 TEST_F(GlslWriterTest, Constructor_Type_Mat_F16) {
     auto* func = b.Function("a", ty.mat2x3<f16>());
     b.Append(func->Block(), [&] {  //
-        auto* v1 = b.Let("v1", b.Construct(ty.vec3<f16>(), 1_h, 2_h, 3_h));
-        auto* v2 = b.Let("v2", b.Construct(ty.vec3<f16>(), 3_h, 4_h, 5_h));
+        auto* v1 = b.Let("v1", b.Construct(ty.vec3h(), 1_h, 2_h, 3_h));
+        auto* v2 = b.Let("v2", b.Construct(ty.vec3h(), 3_h, 4_h, 5_h));
         b.Return(func, b.Construct(ty.mat2x3<f16>(), v1, v2));
     });
 
@@ -568,11 +568,10 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Complex_F32) {
     //   );
     auto* func = b.Function("a", ty.mat4x4<f32>());
     b.Append(func->Block(), [&] {  //
-        auto* v1 = b.Construct(ty.vec4<f32>(), 2.0_f, 3.0_f, 4.0_f, 8.0_f);
-        auto* v2 = b.Construct(ty.vec4<f32>());
-        auto* v3 = b.Splat(ty.vec4<f32>(), 7.0_f);
-        auto* v4 =
-            b.Construct(ty.vec4<f32>(), b.Construct(ty.vec4<f32>(), 42.0_f, 21.0_f, 6.0_f, -5.0_f));
+        auto* v1 = b.Construct(ty.vec4f(), 2.0_f, 3.0_f, 4.0_f, 8.0_f);
+        auto* v2 = b.Construct(ty.vec4f());
+        auto* v3 = b.Splat(ty.vec4f(), 7.0_f);
+        auto* v4 = b.Construct(ty.vec4f(), b.Construct(ty.vec4f(), 42.0_f, 21.0_f, 6.0_f, -5.0_f));
         b.Return(func, b.Construct(ty.mat4x4<f32>(), v1, v2, v3, v4));
     });
 
@@ -605,11 +604,10 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Complex_F16) {
     //   );
     auto* func = b.Function("a", ty.mat4x4<f16>());
     b.Append(func->Block(), [&] {  //
-        auto* v1 = b.Construct(ty.vec4<f16>(), 2.0_h, 3.0_h, 4.0_h, 8.0_h);
-        auto* v2 = b.Construct(ty.vec4<f16>());
-        auto* v3 = b.Splat(ty.vec4<f16>(), 7.0_h);
-        auto* v4 =
-            b.Construct(ty.vec4<f16>(), b.Construct(ty.vec4<f16>(), 42.0_h, 21.0_h, 6.0_h, -5.0_h));
+        auto* v1 = b.Construct(ty.vec4h(), 2.0_h, 3.0_h, 4.0_h, 8.0_h);
+        auto* v2 = b.Construct(ty.vec4h());
+        auto* v3 = b.Splat(ty.vec4h(), 7.0_h);
+        auto* v4 = b.Construct(ty.vec4h(), b.Construct(ty.vec4h(), 42.0_h, 21.0_h, 6.0_h, -5.0_h));
         b.Return(func, b.Construct(ty.mat4x4<f16>(), v1, v2, v3, v4));
     });
 
@@ -745,9 +743,9 @@ void main() {
 TEST_F(GlslWriterTest, Constructor_Type_Array) {
     auto* func = b.Function("a", ty.array<vec3<f32>, 3>());
     b.Append(func->Block(), [&] {  //
-        auto* v1 = b.Let("v1", b.Construct(ty.vec3<f32>(), 1_f, 2_f, 3_f));
-        auto* v2 = b.Let("v2", b.Construct(ty.vec3<f32>(), 4_f, 5_f, 6_f));
-        auto* v3 = b.Let("v3", b.Construct(ty.vec3<f32>(), 7_f, 8_f, 9_f));
+        auto* v1 = b.Let("v1", b.Construct(ty.vec3f(), 1_f, 2_f, 3_f));
+        auto* v2 = b.Let("v2", b.Construct(ty.vec3f(), 4_f, 5_f, 6_f));
+        auto* v3 = b.Let("v3", b.Construct(ty.vec3f(), 7_f, 8_f, 9_f));
         b.Return(func, b.Construct(ty.array<vec3<f32>, 3>(), v1, v2, v3));
     });
 
@@ -800,12 +798,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Struct) {
     auto* str = ty.Struct(mod.symbols.New("S"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.f32()},
-                                                    {mod.symbols.New("c"), ty.vec3<i32>()},
+                                                    {mod.symbols.New("c"), ty.vec3i()},
                                                 });
 
     auto* func = b.Function("a", str);
     b.Append(func->Block(), [&] {  //
-        b.Return(func, b.Construct(str, 1_i, 2_f, b.Construct(ty.vec3<i32>(), 3_i, 4_i, 5_i)));
+        b.Return(func, b.Construct(str, 1_i, 2_f, b.Construct(ty.vec3i(), 3_i, 4_i, 5_i)));
     });
 
     auto* eb = b.ComputeFunction("main");
@@ -837,7 +835,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Struct_Empty) {
     auto* str = ty.Struct(mod.symbols.New("S"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.f32()},
-                                                    {mod.symbols.New("c"), ty.vec3<i32>()},
+                                                    {mod.symbols.New("c"), ty.vec3i()},
                                                 });
 
     auto* func = b.Function("a", str);

@@ -34,7 +34,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 TEST_F(SpirvWriterTest, Construct_Vector) {
-    auto* func = b.Function("foo", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4i());
     func->SetParams({
         b.FunctionParam("a", ty.i32()),
         b.FunctionParam("b", ty.i32()),
@@ -42,7 +42,7 @@ TEST_F(SpirvWriterTest, Construct_Vector) {
         b.FunctionParam("d", ty.i32()),
     });
     b.Append(func->Block(), [&] {
-        auto* result = b.Construct(ty.vec4<i32>(), func->Params());
+        auto* result = b.Construct(ty.vec4i(), func->Params());
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -61,9 +61,9 @@ TEST_F(SpirvWriterTest, Construct_Vector) {
 TEST_F(SpirvWriterTest, Construct_Matrix) {
     auto* func = b.Function("foo", ty.mat3x4<f32>());
     func->SetParams({
-        b.FunctionParam("a", ty.vec4<f32>()),
-        b.FunctionParam("b", ty.vec4<f32>()),
-        b.FunctionParam("c", ty.vec4<f32>()),
+        b.FunctionParam("a", ty.vec4f()),
+        b.FunctionParam("b", ty.vec4f()),
+        b.FunctionParam("c", ty.vec4f()),
     });
     b.Append(func->Block(), [&] {
         auto* result = b.Construct(ty.mat3x4<f32>(), func->Params());
@@ -73,8 +73,7 @@ TEST_F(SpirvWriterTest, Construct_Matrix) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x",
-              b.Call(func, b.Zero(ty.vec4<f32>()), b.Zero(ty.vec4<f32>()), b.Zero(ty.vec4<f32>())));
+        b.Let("x", b.Call(func, b.Zero(ty.vec4f()), b.Zero(ty.vec4f()), b.Zero(ty.vec4f())));
         b.Return(eb);
     });
 
@@ -108,17 +107,16 @@ TEST_F(SpirvWriterTest, Construct_Array) {
 }
 
 TEST_F(SpirvWriterTest, Construct_Struct) {
-    auto* str =
-        ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.Register("a"), ty.i32()},
-                                                   {mod.symbols.Register("b"), ty.u32()},
-                                                   {mod.symbols.Register("c"), ty.vec4<f32>()},
-                                               });
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                           {mod.symbols.Register("a"), ty.i32()},
+                                                           {mod.symbols.Register("b"), ty.u32()},
+                                                           {mod.symbols.Register("c"), ty.vec4f()},
+                                                       });
     auto* func = b.Function("foo", str);
     func->SetParams({
         b.FunctionParam("a", ty.i32()),
         b.FunctionParam("b", ty.u32()),
-        b.FunctionParam("c", ty.vec4<f32>()),
+        b.FunctionParam("c", ty.vec4f()),
     });
     b.Append(func->Block(), [&] {
         auto* result = b.Construct(str, func->Params());
@@ -128,7 +126,7 @@ TEST_F(SpirvWriterTest, Construct_Struct) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.u32()), b.Zero(ty.vec4<f32>())));
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.u32()), b.Zero(ty.vec4f())));
         b.Return(eb);
     });
 
@@ -155,16 +153,16 @@ TEST_F(SpirvWriterTest, Construct_Scalar_Identity) {
 }
 
 TEST_F(SpirvWriterTest, Construct_Vector_Identity) {
-    auto* func = b.Function("foo", ty.vec4<i32>());
-    func->SetParams({b.FunctionParam("arg", ty.vec4<i32>())});
+    auto* func = b.Function("foo", ty.vec4i());
+    func->SetParams({b.FunctionParam("arg", ty.vec4i())});
     b.Append(func->Block(), [&] {
-        auto* result = b.Construct(ty.vec4<i32>(), func->Params()[0]);
+        auto* result = b.Construct(ty.vec4i(), func->Params()[0]);
         b.Return(func, result);
     });
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", b.Call(func, b.Zero(ty.vec4<i32>())));
+        b.Let("x", b.Call(func, b.Zero(ty.vec4i())));
         b.Return(eb);
     });
 

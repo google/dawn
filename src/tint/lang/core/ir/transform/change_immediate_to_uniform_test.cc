@@ -517,7 +517,7 @@ $B1: {  # root
 TEST_F(IRChangeImmediateToUniformTest, PushConstantAccessChainReused) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("c"), ty.f32()},
-                                                    {mod.symbols.New("d"), ty.vec3<f32>()},
+                                                    {mod.symbols.New("d"), ty.vec3f()},
                                                 });
 
     auto* var = b.Var("v", immediate, sb, core::Access::kRead);
@@ -525,7 +525,7 @@ TEST_F(IRChangeImmediateToUniformTest, PushConstantAccessChainReused) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* x = b.Access(ty.ptr(immediate, ty.vec3<f32>(), core::Access::kRead), var, 1_u);
+        auto* x = b.Access(ty.ptr(immediate, ty.vec3f(), core::Access::kRead), var, 1_u);
         b.Let("b", b.LoadVectorElement(x, 1_u));
         b.Let("c", b.LoadVectorElement(x, 2_u));
         b.Return(func);

@@ -592,8 +592,8 @@ TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_NoDva) {
     auto* fn = b.Function("f", ty.void_());
     fn->SetParams({t});
     b.Append(fn->Block(), [&] {
-        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, t,
-                          b.Splat(ty.vec2<u32>(), 0_u), 0_u));
+        b.Let("p",
+              b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, t, b.Splat(ty.vec2u(), 0_u), 0_u));
         b.Return(fn);
     });
 
@@ -624,8 +624,8 @@ TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_Dva) {
     auto* fn = b.Function("f", ty.void_());
     fn->SetParams({t});
     b.Append(fn->Block(), [&] {
-        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, t,
-                          b.Splat(ty.vec2<u32>(), 0_u), 0_u));
+        b.Let("p",
+              b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, t, b.Splat(ty.vec2u(), 0_u), 0_u));
         b.Return(fn);
     });
 

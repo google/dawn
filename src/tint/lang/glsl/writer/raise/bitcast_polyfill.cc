@@ -179,11 +179,11 @@ struct State {
                     } else if (src_vec->Width() == 4) {
                         auto* left =
                             b.Call<glsl::ir::BuiltinCall>(ty.u32(), glsl::BuiltinFn::kPackFloat2X16,
-                                                          b.Swizzle(ty.vec2<f16>(), src, {0, 1}));
+                                                          b.Swizzle(ty.vec2h(), src, {0, 1}));
                         auto* right =
                             b.Call<glsl::ir::BuiltinCall>(ty.u32(), glsl::BuiltinFn::kPackFloat2X16,
-                                                          b.Swizzle(ty.vec2<f16>(), src, {2, 3}));
-                        packed = b.Construct(ty.vec2<u32>(), left, right)->Result();
+                                                          b.Swizzle(ty.vec2h(), src, {2, 3}));
+                        packed = b.Construct(ty.vec2u(), left, right)->Result();
                     } else {
                         TINT_IR_UNREACHABLE(ir);
                     }
@@ -244,15 +244,15 @@ struct State {
                     core::ir::Value* val = nullptr;
                     if (conv->Type()->Is<core::type::Vector>()) {
                         auto* left = b.Call<glsl::ir::BuiltinCall>(
-                            ty.vec2<f16>(), glsl::BuiltinFn::kUnpackFloat2X16,
+                            ty.vec2h(), glsl::BuiltinFn::kUnpackFloat2X16,
                             b.Swizzle(ty.u32(), conv, {0}));
                         auto* right = b.Call<glsl::ir::BuiltinCall>(
-                            ty.vec2<f16>(), glsl::BuiltinFn::kUnpackFloat2X16,
+                            ty.vec2h(), glsl::BuiltinFn::kUnpackFloat2X16,
                             b.Swizzle(ty.u32(), conv, {1}));
 
                         val = b.Construct(dst_type, left, right)->Result();
                     } else {
-                        val = b.Call<glsl::ir::BuiltinCall>(ty.vec2<f16>(),
+                        val = b.Call<glsl::ir::BuiltinCall>(ty.vec2h(),
                                                             glsl::BuiltinFn::kUnpackFloat2X16, conv)
                                   ->Result();
                     }
