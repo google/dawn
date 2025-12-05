@@ -744,6 +744,10 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     }
     limits->v1.maxUniformBufferBindingSize = maxUniformBufferSize;
 
+    // Vulkan has no such limit; set it to 32 (the byte width of the largest format) multiplied by
+    // the maximum number of attachments in order to make it a no-op.
+    limits->v1.maxColorAttachmentBytesPerSample = 32 * vkLimits.maxColorAttachments;
+
     // Validate against maxFragmentCombinedOutputResources, tightening the limits when necessary.
     const uint32_t minFragmentCombinedOutputResources =
         baseLimits.v1.maxStorageBuffersPerShaderStage +

@@ -387,8 +387,9 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     DAWN_TRY_ASSIGN(maxDrawBuffers, Get(gl, GL_MAX_DRAW_BUFFERS));
     limits->v1.maxColorAttachments = std::min(maxColorAttachments, maxDrawBuffers);
 
-    // TODO(crbug.com/dawn/1834): determine if GL has an equivalent value here.
-    //    limits->v1.maxColorAttachmentBytesPerSample = WGPU_LIMIT_U32_UNDEFINED;
+    // OpenGL has no such limit; set it to 16 (the byte width of the largest format) multiplied by
+    // the maximum number of attachments in order to make it a no-op.
+    limits->v1.maxColorAttachmentBytesPerSample = 16 * maxColorAttachments;
 
     DAWN_TRY_ASSIGN(limits->v1.maxComputeWorkgroupStorageSize,
                     Get(gl, GL_MAX_COMPUTE_SHARED_MEMORY_SIZE));
