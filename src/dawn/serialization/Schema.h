@@ -558,6 +558,13 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetComputePipeline,
 
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetBindGroup, SET_BIND_GROUP_CMD_DATA_MEMBER){};
 
+#define SET_CLEAR_BUFFER_CMD_DATA_MEMBER(X) \
+    X(ObjectId, bufferId)                   \
+    X(uint64_t, offset)                     \
+    X(uint64_t, size)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(ClearBuffer, SET_CLEAR_BUFFER_CMD_DATA_MEMBER){};
+
 #define DISPATCH_CMD_DATA_MEMBER(X) \
     X(uint32_t, x)                  \
     X(uint32_t, y)                  \

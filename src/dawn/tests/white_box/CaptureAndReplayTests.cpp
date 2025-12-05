@@ -2019,6 +2019,33 @@ TEST_P(CaptureAndReplayTests, CaptureDispatchIndirect) {
     ExpectBufferEQ(replay.get(), label, expected);
 }
 
+// Capture ClearBuffer.
+TEST_P(CaptureAndReplayTests, CaptureClearBuffer) {
+    const uint32_t myData[] = {0x11111111, 0x22222222, 0x33333333};
+    wgpu::Buffer buffer = CreateBuffer("buf", sizeof(myData),
+                                       wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
+    queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.ClearBuffer(buffer, 4, 4);
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    const uint8_t expected[] = {0x11, 0x11, 0x11, 0x11, 0, 0, 0, 0, 0x33, 0x33, 0x33, 0x33};
+    ExpectBufferEQ(replay.get(), "buf", expected);
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 class CaptureAndReplayDrawTests : public CaptureAndReplayTests {

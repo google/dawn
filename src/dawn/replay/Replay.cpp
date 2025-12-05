@@ -942,6 +942,13 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                 DAWN_TRY(ProcessRenderPassCommands(replay, readHead, device, pass));
                 break;
             }
+            case schema::CommandBufferCommand::ClearBuffer: {
+                schema::CommandBufferCommandClearBufferCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                encoder.ClearBuffer(replay.GetObjectById<wgpu::Buffer>(data.bufferId), data.offset,
+                                    data.size);
+                break;
+            }
             case schema::CommandBufferCommand::CopyBufferToBuffer: {
                 schema::CommandBufferCommandCopyBufferToBufferCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));

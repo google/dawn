@@ -720,6 +720,7 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
                                                                  usedResources));
                 break;
             }
+            case Command::ClearBuffer:
             case Command::CopyBufferToBuffer:
             case Command::CopyBufferToTexture:
             case Command::CopyTextureToBuffer:
@@ -844,6 +845,18 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                         .source = ToSchema(captureContext, cmd.source),
                         .destination = ToSchema(captureContext, cmd.destination),
                         .copySize = ToSchema(cmd.copySize),
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
+            case Command::ClearBuffer: {
+                const auto& cmd = *commands.NextCommand<ClearBufferCmd>();
+                schema::CommandBufferCommandClearBufferCmd data{{
+                    .data = {{
+                        .bufferId = captureContext.GetId(cmd.buffer.Get()),
+                        .offset = cmd.offset,
+                        .size = cmd.size,
                     }},
                 }};
                 Serialize(captureContext, data);
