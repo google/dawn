@@ -2,6 +2,7 @@
   "ci": {
     "dawn-linux-x64-builder-dbg": "ci/dawn-linux-x64-builder-dbg/gn-args.json",
     "dawn-linux-x64-builder-rel": "ci/dawn-linux-x64-builder-rel/gn-args.json",
+    "dawn-linux-x64-builder-tsan": "ci/dawn-linux-x64-builder-tsan/gn-args.json",
     "dawn-linux-x64-fuzz-dbg": "ci/dawn-linux-x64-fuzz-dbg/gn-args.json",
     "dawn-linux-x64-fuzz-rel": "ci/dawn-linux-x64-fuzz-rel/gn-args.json",
     "dawn-linux-x64-sws-clusterfuzz": "ci/dawn-linux-x64-sws-clusterfuzz/gn-args.json",

@@ -106,6 +106,16 @@
           'isolated_scripts': 'swiftshader_isolated_scripts',
         },
       },
+      'dawn-linux-x64-sws-tsan': {
+        'os_type': 'linux',
+        'mixins': [
+          'gpu-swarming-pool',
+          'no_gpu',
+          'linux-jammy',
+          'x86-64',
+        ],
+        'test_suites': {},
+      },
       'dawn-linux-x86-builder-dbg': {
         'additional_compile_targets': [
           'default',

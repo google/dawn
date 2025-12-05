@@ -144,6 +144,44 @@ dawn_linux_parent_builder(
 )
 
 dawn_linux_parent_builder(
+    name = "dawn-linux-x64-builder-tsan",
+    description_html = "Compiles release Dawn test binaries for Linux/x64 w/ TSAN enabled",
+    schedule = "triggered",
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+            apply_configs = [
+                # dawn_node is intentionally omitted since none of the tests
+                # that are run with TSAN use node.
+                "dawn_wasm",
+            ],
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.LINUX,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            "dawn_swiftshader",
+            "linux_clang",
+            "minimal_symbols",
+            "non_component",
+            "release_with_dchecks",
+            "tsan",
+            "x64",
+        ],
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "linux|build|clang|tsan",
+        short_name = "x64",
+    ),
+)
+
+dawn_linux_parent_builder(
     name = "dawn-linux-x86-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Linux/x86",
     schedule = "triggered",
@@ -893,6 +931,30 @@ ci.thin_tester(
     ),
     console_view_entry = consoles.console_view_entry(
         category = "linux|test|clang|rel|x64",
+        short_name = "sws",
+    ),
+)
+
+ci.thin_tester(
+    name = "dawn-linux-x64-sws-tsan",
+    description_html = "Tests release Dawn on Linux/x64 with SwiftShader with TSAN",
+    parent = "dawn-linux-x64-builder-tsan",
+    builder_spec = builder_config.builder_spec(
+        execution_mode = builder_config.execution_mode.TEST,
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.LINUX,
+        ),
+        run_tests_serially = True,
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "linux|test|clang|tsan|x64",
         short_name = "sws",
     ),
 )

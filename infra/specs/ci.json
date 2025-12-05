@@ -1176,6 +1176,7 @@
       }
     ]
   },
+  "dawn-linux-x64-sws-tsan": {},
   "dawn-linux-x86-builder-dbg": {
     "additional_compile_targets": [
       "default"
