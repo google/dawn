@@ -132,6 +132,10 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
 
     // The list of bindings that need to be updated before the next use of the dynamic array.
     std::vector<BindingIndex> mDirtyBindings;
+
+    // Helper method that does the bulk of the shared work between Update and RemoveBinding.
+    void SetEntry(BindingIndex i, const BindGroupEntryContents& contents);
+
     void MarkStateDirty(BindingIndex i);
     void SetMetadata(BindingIndex i, tint::ResourceType typeId, bool pinned);
 };

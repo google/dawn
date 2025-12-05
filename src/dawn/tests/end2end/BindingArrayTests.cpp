@@ -642,6 +642,12 @@ class DynamicBindingArrayTests : public DawnTest {
         DawnTest::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(
             !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalBindless}));
+
+        // TODO(https://issues.chromium.org/435317394): The Subzero compiler used by Swiftshader
+        // produces bad code and crashes on some VK_EXT_descriptor_indexing workloads. Skip tests on
+        // it, but still run them with Swiftshader LLVM 10.0. On ARM64 the only supported compiler
+        // is LLVM10.0 so use that signal to choose when Swiftshader can be tested.
+        DAWN_SUPPRESS_TEST_IF(IsSwiftshader() && !DAWN_PLATFORM_IS(ARM64));
     }
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
@@ -777,6 +783,93 @@ class DynamicBindingArrayTests : public DawnTest {
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
+    }
+
+    wgpu::TextureView MakePinnedU8View(uint8_t value) {
+        // Create the texture.
+        wgpu::TextureDescriptor tDesc{
+            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst,
+            .size = {1, 1},
+            .format = wgpu::TextureFormat::R8Uint,
+        };
+        wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+        // Write the u8
+        wgpu::TexelCopyTextureInfo srcInfo = utils::CreateTexelCopyTextureInfo(tex);
+        wgpu::TexelCopyBufferLayout dstInfo = {};
+        wgpu::Extent3D copySize = {1, 1, 1};
+        queue.WriteTexture(&srcInfo, &value, 1, &dstInfo, &copySize);
+
+        // Return a view to the pinned texture.
+        tex.Pin(wgpu::TextureUsage::TextureBinding);
+        return tex.CreateView();
+    }
+
+    // Test that `dynamicArray` (with layout `bgl`), has a texture_2d<u32> iff the `expected` has a
+    // value, and that the textures have the expected value, if any.
+    void TestHasU8Bindings(wgpu::BindGroupLayout bgl,
+                           wgpu::BindGroup dynamicArray,
+                           std::vector<std::optional<uint8_t>> expected) {
+        // Create the test pipeline.
+        std::array<wgpu::BindGroupLayout, 2> bgls = {
+            bgl,
+            utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}}),
+        };
+        wgpu::PipelineLayoutDescriptor plDesc = {
+            .bindGroupLayoutCount = 2,
+            .bindGroupLayouts = bgls.data(),
+        };
+
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_dynamic_binding;
+            @group(0) @binding(0) var bindings : resource_binding;
+            @group(1) @binding(0) var<storage, read_write> results : array<u32>;
+
+            @compute @workgroup_size(1) fn main() {
+                for (var i = 0u; i < arrayLength(bindings); i++) {
+                    if !hasBinding<texture_2d<u32>>(bindings, i) {
+                        results[i] = 0xBEEF;
+                    } else {
+                        results[i] = textureLoad(getBinding<texture_2d<u32>>(bindings, i), vec2(0), 0).x;
+                    }
+                }
+            }
+        )");
+
+        wgpu::ComputePipelineDescriptor csDesc = {.layout = device.CreatePipelineLayout(&plDesc),
+                                                  .compute = {
+                                                      .module = module,
+                                                  }};
+        wgpu::ComputePipeline testPipeline = device.CreateComputePipeline(&csDesc);
+
+        // Create the result buffer.
+        wgpu::BufferDescriptor bDesc = {
+            .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+            .size = sizeof(uint32_t) * expected.size(),
+        };
+        wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+        wgpu::BindGroup resultBG = utils::MakeBindGroup(device, bgls[1], {{0, resultBuffer}});
+
+        // Run the test.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, dynamicArray);
+        pass.SetBindGroup(1, resultBG);
+        pass.SetPipeline(testPipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
+
+        // Check we have the expected results.
+        std::vector<uint32_t> expectedU32;
+        for (auto optValue : expected) {
+            expectedU32.push_back(optValue ? *optValue : 0xBEEFu);
+        }
+
+        EXPECT_BUFFER_U32_RANGE_EQ(expectedU32.data(), resultBuffer, 0, expectedU32.size());
     }
 };
 
@@ -1787,6 +1880,102 @@ TEST_P(DynamicBindingArrayTests, UpdateAfterRemoveRequiresGPUIsFinished_ErrorBin
             EXPECT_EQ(wgpu::Status::Error, bg.Update(&entry));
         }
     }
+}
+
+// Check that Update and InsertBinding make the new binding visible in the dynamic binding array.
+TEST_P(DynamicBindingArrayTests, UpdateAndInsertBindingMakeBindingVisible) {
+    // TODO(435317394): Implemented bindless in the wire.
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 2, {});
+
+    // Before we do anything, the dynamic binding array has no valid entries.
+    TestHasU8Bindings(bgl, bg, {{}, {}});
+
+    // Update makes the entry visible.
+    wgpu::BindGroupEntry entry = {.binding = 0, .textureView = MakePinnedU8View(17)};
+    EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry));
+    TestHasU8Bindings(bgl, bg, {{17}, {}});
+
+    // InsertBinding makes the entry visible.
+    wgpu::BindGroupEntryContents contents = {.textureView = MakePinnedU8View(42)};
+    EXPECT_EQ(1u, bg.InsertBinding(&contents));
+    TestHasU8Bindings(bgl, bg, {{17}, {42}});
+}
+
+// Check that RemoveBinding instantly makes the binding not visible, both for bindings set at
+// creation and with Update() / InsertBinding()
+TEST_P(DynamicBindingArrayTests, RemoveBindingMakeBindingInvalid) {
+    // TODO(435317394): Implemented bindless in the wire.
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    // Create a dynamic array with all three entries set in different ways.
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 3, {{0, MakePinnedU8View(100)}});
+
+    wgpu::BindGroupEntry entry = {.binding = 1, .textureView = MakePinnedU8View(101)};
+    EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry));
+
+    wgpu::BindGroupEntryContents contents = {.textureView = MakePinnedU8View(102)};
+    EXPECT_EQ(2u, bg.InsertBinding(&contents));
+
+    // Before we remove bindings, they are all valid.
+    TestHasU8Bindings(bgl, bg, {{100}, {101}, {102}});
+
+    // RemoveBinding immediately makes bindings invalid.
+    EXPECT_EQ(wgpu::Status::Success, bg.RemoveBinding(1));
+    TestHasU8Bindings(bgl, bg, {{100}, {}, {102}});
+    EXPECT_EQ(wgpu::Status::Success, bg.RemoveBinding(0));
+    TestHasU8Bindings(bgl, bg, {{}, {}, {102}});
+    EXPECT_EQ(wgpu::Status::Success, bg.RemoveBinding(2));
+    TestHasU8Bindings(bgl, bg, {{}, {}, {}});
+}
+
+// Check that removing a binding and adding a different one works.
+TEST_P(DynamicBindingArrayTests, ReplaceBinding) {
+    // TODO(435317394): Implemented bindless in the wire.
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    // Create a dynamic array with all three entries set in different ways.
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 1, {{0, MakePinnedU8View(19)}});
+
+    // Test removing a binding that was previously there.
+    TestHasU8Bindings(bgl, bg, {{19}});
+    EXPECT_EQ(wgpu::Status::Success, bg.RemoveBinding(0));
+    TestHasU8Bindings(bgl, bg, {{}});
+
+    /// Add it back a new entry, the shader should be seeing the updated entry.
+    WaitForAllOperations();
+
+    wgpu::BindGroupEntry entry = {.binding = 0, .textureView = MakePinnedU8View(23)};
+    EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry));
+    TestHasU8Bindings(bgl, bg, {{23}});
+}
+
+// Check that removing a binding and adding it back works.
+TEST_P(DynamicBindingArrayTests, ReplaceWithSameBinding) {
+    // TODO(435317394): Implemented bindless in the wire.
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    wgpu::TextureView view = MakePinnedU8View(19);
+
+    // Create a dynamic array with all three entries set in different ways.
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 1, {{0, view}});
+
+    // Test removing a binding that was previously there.
+    TestHasU8Bindings(bgl, bg, {{19}});
+    EXPECT_EQ(wgpu::Status::Success, bg.RemoveBinding(0));
+    TestHasU8Bindings(bgl, bg, {{}});
+
+    /// Add it back a new entry, the shader should be seeing the updated entry.
+    WaitForAllOperations();
+
+    wgpu::BindGroupEntry entry = {.binding = 0, .textureView = view};
+    EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry));
+    TestHasU8Bindings(bgl, bg, {{19}});
 }
 
 DAWN_INSTANTIATE_TEST(DynamicBindingArrayTests, D3D12Backend(), MetalBackend(), VulkanBackend());

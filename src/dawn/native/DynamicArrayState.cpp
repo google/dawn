@@ -304,9 +304,20 @@ std::optional<BindingIndex> DynamicArrayState::GetFreeSlot() const {
 void DynamicArrayState::Update(BindingIndex i, const BindGroupEntryContents& contents) {
     DAWN_ASSERT(CanBeUpdated(i));
     DAWN_ASSERT(mBindingState[i].typeId == tint::ResourceType::kEmpty);
-
     mBindingState[i].availableAfter = kMaxExecutionSerial;
+    SetEntry(i, contents);
+}
 
+void DynamicArrayState::Remove(BindingIndex i) {
+    // Prevent all accesses to the binding which means it will be possible to update it once all
+    // current GPU work is finished.
+    mBindingState[i].availableAfter = mDevice->GetQueue()->GetLastSubmittedCommandSerial();
+
+    // Set the entry to be empty, which will unlink previously set resources.
+    SetEntry(i, {});
+}
+
+void DynamicArrayState::SetEntry(BindingIndex i, const BindGroupEntryContents& contents) {
     // TODO(435317394): Support bindings that aren't TextureViews
     DAWN_ASSERT(contents.buffer == nullptr && contents.sampler == nullptr);
     TextureViewBase* view = contents.textureView;
@@ -330,13 +341,6 @@ void DynamicArrayState::Update(BindingIndex i, const BindGroupEntryContents& con
     tint::ResourceType typeId = ComputeTypeId(view);
     bool pinned = view != nullptr && view->GetTexture()->HasPinnedUsage();
     SetMetadata(i, typeId, pinned);
-}
-
-void DynamicArrayState::Remove(BindingIndex i) {
-    // Prevent all accesses to the binding which means it will be possible to update it once all
-    // current GPU work is finished.
-    mBindingState[i].availableAfter = mDevice->GetQueue()->GetLastSubmittedCommandSerial();
-    SetMetadata(i, tint::ResourceType::kEmpty, false);
 }
 
 void DynamicArrayState::OnPinned(BindingIndex i, TextureBase* texture) {
