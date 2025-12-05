@@ -1966,6 +1966,59 @@ TEST_P(CaptureAndReplayTests, CaptureSetBlendConstant) {
     ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
+// Capture DispatchIndirect.
+TEST_P(CaptureAndReplayTests, CaptureDispatchIndirect) {
+    const char* shader = R"(
+        @group(0) @binding(0) var<storage, read_write> result : u32;
+
+        @compute @workgroup_size(1) fn main() {
+            result = 0x44332211;
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    const uint32_t myData[] = {0x1, 0x1, 0x1};
+    wgpu::Buffer indirectBuffer = CreateBuffer(
+        "indirect", sizeof(myData), wgpu::BufferUsage::Indirect | wgpu::BufferUsage::CopyDst);
+    queue.WriteBuffer(indirectBuffer, 0, &myData, sizeof(myData));
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = module;
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    const char* label = "MyBuffer";
+    wgpu::Buffer buffer = CreateBuffer(label, 4, wgpu::BufferUsage::Storage);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {
+                                                         {0, buffer},
+                                                     });
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, bindGroup);
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroupsIndirect(indirectBuffer, 0);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectBufferEQ(replay.get(), label, expected);
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 class CaptureAndReplayDrawTests : public CaptureAndReplayTests {

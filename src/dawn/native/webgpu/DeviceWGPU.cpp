@@ -306,7 +306,7 @@ bool Device::CanResolveSubRect() const {
     return true;
 }
 
-bool Device::NeedsIndirectDrawGPUValidation() const {
+bool Device::NeedsIndirectGPUValidation() const {
     // WebGPU backend never actually dispatch compute pass to validate indirect draw cmds,
     // since the inner backend will take care of it.
     return false;

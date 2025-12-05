@@ -343,9 +343,10 @@ ResultOrError<wgpu::Buffer> CreateBuffer(wgpu::Device device,
     schema::Buffer buf;
     DAWN_TRY(Deserialize(readHead, &buf));
 
-    wgpu::BufferUsage usage = (buf.usage & wgpu::BufferUsage::MapRead)
-                                  ? buf.usage
-                                  : (buf.usage | wgpu::BufferUsage::CopySrc);
+    wgpu::BufferUsage usage =
+        (buf.usage & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite))
+            ? buf.usage
+            : (buf.usage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
     // Remap mappable write buffers as CopySrc|CopyDst as we use WriteBuffer to set their contents.
     if (usage == (wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc)) {
@@ -786,6 +787,13 @@ MaybeError ProcessComputePassCommands(const Replay& replay,
                 schema::CommandBufferCommandDispatchCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 pass.DispatchWorkgroups(data.x, data.y, data.z);
+                break;
+            }
+            case schema::CommandBufferCommand::DispatchIndirect: {
+                schema::CommandBufferCommandDispatchIndirectCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                pass.DispatchWorkgroupsIndirect(replay.GetObjectById<wgpu::Buffer>(data.bufferId),
+                                                data.offset);
                 break;
             }
             case schema::CommandBufferCommand::PushDebugGroup:

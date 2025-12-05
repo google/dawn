@@ -61,7 +61,7 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
 
     float GetTimestampPeriodInNS() const override;
 
-    bool NeedsIndirectDrawGPUValidation() const override;
+    bool NeedsIndirectGPUValidation() const override;
 
     WGPUInstance GetInnerInstance() const;
 

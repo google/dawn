@@ -223,7 +223,7 @@ void RenderEncoderBase::APIDrawIndirect(BufferBase* indirectBuffer, uint64_t ind
             bool duplicateBaseVertexInstance =
                 GetDevice()->ShouldDuplicateParametersForDrawIndirect(
                     mCommandBufferState.GetRenderPipeline());
-            if (NeedsIndirectDrawGPUValidation() &&
+            if (NeedsIndirectGPUValidation() &&
                 (IsValidationEnabled() || duplicateBaseVertexInstance)) {
                 // Later, EncodeIndirectDrawValidationCommands will allocate a scratch storage
                 // buffer which will store the validated or duplicated indirect data. The buffer
@@ -286,7 +286,7 @@ void RenderEncoderBase::APIDrawIndexedIndirect(BufferBase* indirectBuffer,
                     mCommandBufferState.GetRenderPipeline());
             bool applyIndexBufferOffsetToFirstIndex =
                 GetDevice()->ShouldApplyIndexBufferOffsetToFirstIndex();
-            if (NeedsIndirectDrawGPUValidation() &&
+            if (NeedsIndirectGPUValidation() &&
                 (IsValidationEnabled() || duplicateBaseVertexInstance ||
                  applyIndexBufferOffsetToFirstIndex)) {
                 // Later, EncodeIndirectDrawValidationCommands will allocate a scratch storage
@@ -399,7 +399,7 @@ void RenderEncoderBase::APIMultiDrawIndirect(BufferBase* indirectBuffer,
                 mCommandBufferState.GetRenderPipeline()->GetPrimitiveTopology(),
                 duplicateBaseVertexInstance, cmd);
 
-            if (NeedsIndirectDrawGPUValidation() &&
+            if (NeedsIndirectGPUValidation() &&
                 (IsValidationEnabled() ||
                  GetDevice()->MayRequireDuplicationOfIndirectParameters())) {
                 // We only set usage as `kIndirectBufferForFrontendValidation` because
@@ -509,7 +509,7 @@ void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
                 mCommandBufferState.GetRenderPipeline()->GetPrimitiveTopology(),
                 duplicateBaseVertexInstance, cmd);
 
-            if (NeedsIndirectDrawGPUValidation() &&
+            if (NeedsIndirectGPUValidation() &&
                 (IsValidationEnabled() ||
                  GetDevice()->MayRequireDuplicationOfIndirectParameters())) {
                 // We only set usage as `kIndirectBufferForFrontendValidation` because

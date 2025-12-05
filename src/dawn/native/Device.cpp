@@ -2574,7 +2574,7 @@ bool DeviceBase::CanAddStorageUsageToBufferWithoutSideEffects(wgpu::BufferUsage 
     return true;
 }
 
-bool DeviceBase::NeedsIndirectDrawGPUValidation() const {
+bool DeviceBase::NeedsIndirectGPUValidation() const {
     return true;
 }
 

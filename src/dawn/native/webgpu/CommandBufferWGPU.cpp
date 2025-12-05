@@ -532,6 +532,17 @@ MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& c
                 Serialize(captureContext, data);
                 break;
             }
+            case Command::DispatchIndirect: {
+                const auto& cmd = *commands.NextCommand<DispatchIndirectCmd>();
+                schema::CommandBufferCommandDispatchIndirectCmd data{{
+                    .data = {{
+                        .bufferId = captureContext.GetId(cmd.indirectBuffer),
+                        .offset = cmd.indirectOffset,
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
             default: {
                 if (!CaptureDebugCommand(captureContext, commands, type)) {
                     return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");

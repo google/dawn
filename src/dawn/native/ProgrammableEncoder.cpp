@@ -49,7 +49,7 @@ ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device,
     : ApiObjectBase(device, label),
       mEncodingContext(encodingContext),
       mValidationEnabled(device->IsValidationEnabled()),
-      mNeedsIndirectDrawGPUValidation(device->NeedsIndirectDrawGPUValidation()) {}
+      mNeedsIndirectGPUValidation(device->NeedsIndirectGPUValidation()) {}
 
 ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device,
                                          EncodingContext* encodingContext,
@@ -58,14 +58,14 @@ ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device,
     : ApiObjectBase(device, errorTag, label),
       mEncodingContext(encodingContext),
       mValidationEnabled(device->IsValidationEnabled()),
-      mNeedsIndirectDrawGPUValidation(device->NeedsIndirectDrawGPUValidation()) {}
+      mNeedsIndirectGPUValidation(device->NeedsIndirectGPUValidation()) {}
 
 bool ProgrammableEncoder::IsValidationEnabled() const {
     return mValidationEnabled;
 }
 
-bool ProgrammableEncoder::NeedsIndirectDrawGPUValidation() const {
-    return mNeedsIndirectDrawGPUValidation;
+bool ProgrammableEncoder::NeedsIndirectGPUValidation() const {
+    return mNeedsIndirectGPUValidation;
 }
 
 MaybeError ProgrammableEncoder::ValidateProgrammableEncoderEnd() const {
