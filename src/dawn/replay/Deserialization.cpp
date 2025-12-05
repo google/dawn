@@ -43,6 +43,10 @@ MaybeError Deserialize(ReadHead& s, int32_t* v) {
     return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
 }
 
+MaybeError Deserialize(ReadHead& s, uint8_t* v) {
+    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
+}
+
 MaybeError Deserialize(ReadHead& s, uint16_t* v) {
     return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
 }

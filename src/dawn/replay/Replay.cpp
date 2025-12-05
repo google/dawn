@@ -402,6 +402,7 @@ ResultOrError<wgpu::PipelineLayout> CreatePipelineLayout(const Replay& replay,
         .label = wgpu::StringView(label),
         .bindGroupLayoutCount = bindGroupLayouts.size(),
         .bindGroupLayouts = bindGroupLayouts.data(),
+        .immediateSize = layout.immediateSize,
     };
     wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&desc);
     return {pipelineLayout};
@@ -421,6 +422,31 @@ ResultOrError<wgpu::QuerySet> CreateQuerySet(const Replay& replay,
     };
     wgpu::QuerySet querySet = device.CreateQuerySet(&desc);
     return {querySet};
+}
+
+template <typename T>
+MaybeError ProcessSharedCommands(const Replay& replay,
+                                 T pass,
+                                 schema::CommandBufferCommand cmd,
+                                 ReadHead& readHead) {
+    switch (cmd) {
+        case schema::CommandBufferCommand::SetBindGroup: {
+            schema::CommandBufferCommandSetBindGroupCmdData data;
+            DAWN_TRY(Deserialize(readHead, &data));
+            pass.SetBindGroup(data.index, replay.GetObjectById<wgpu::BindGroup>(data.bindGroupId),
+                              data.dynamicOffsets.size(), data.dynamicOffsets.data());
+            break;
+        }
+        case schema::CommandBufferCommand::SetImmediates: {
+            schema::CommandBufferCommandSetImmediatesCmdData data;
+            DAWN_TRY(Deserialize(readHead, &data));
+            pass.SetImmediates(data.offset, data.data.data(), data.data.size());
+            break;
+        }
+        default:
+            DAWN_UNREACHABLE();
+    }
+    return {};
 }
 
 template <typename T>
@@ -460,13 +486,6 @@ MaybeError ProcessRenderCommand(const Replay& replay,
             schema::CommandBufferCommandSetRenderPipelineCmdData data;
             DAWN_TRY(Deserialize(readHead, &data));
             pass.SetPipeline(replay.GetObjectById<wgpu::RenderPipeline>(data.pipelineId));
-            break;
-        }
-        case schema::CommandBufferCommand::SetBindGroup: {
-            schema::CommandBufferCommandSetBindGroupCmdData data;
-            DAWN_TRY(Deserialize(readHead, &data));
-            pass.SetBindGroup(data.index, replay.GetObjectById<wgpu::BindGroup>(data.bindGroupId),
-                              data.dynamicOffsets.size(), data.dynamicOffsets.data());
             break;
         }
         case schema::CommandBufferCommand::SetVertexBuffer: {
@@ -510,6 +529,10 @@ MaybeError ProcessRenderCommand(const Replay& replay,
                                      data.indirectOffset);
             break;
         }
+        case schema::CommandBufferCommand::SetBindGroup:
+        case schema::CommandBufferCommand::SetImmediates:
+            DAWN_TRY(ProcessSharedCommands(replay, pass, cmd, readHead));
+            break;
         case schema::CommandBufferCommand::PushDebugGroup:
         case schema::CommandBufferCommand::InsertDebugMarker:
         case schema::CommandBufferCommand::PopDebugGroup:
@@ -775,14 +798,6 @@ MaybeError ProcessComputePassCommands(const Replay& replay,
                 pass.SetPipeline(replay.GetObjectById<wgpu::ComputePipeline>(data.pipelineId));
                 break;
             }
-            case schema::CommandBufferCommand::SetBindGroup: {
-                schema::CommandBufferCommandSetBindGroupCmdData data;
-                DAWN_TRY(Deserialize(readHead, &data));
-                pass.SetBindGroup(data.index,
-                                  replay.GetObjectById<wgpu::BindGroup>(data.bindGroupId),
-                                  data.dynamicOffsets.size(), data.dynamicOffsets.data());
-                break;
-            }
             case schema::CommandBufferCommand::Dispatch: {
                 schema::CommandBufferCommandDispatchCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
@@ -796,6 +811,10 @@ MaybeError ProcessComputePassCommands(const Replay& replay,
                                                 data.offset);
                 break;
             }
+            case schema::CommandBufferCommand::SetBindGroup:
+            case schema::CommandBufferCommand::SetImmediates:
+                DAWN_TRY(ProcessSharedCommands(replay, pass, cmd, readHead));
+                break;
             case schema::CommandBufferCommand::PushDebugGroup:
             case schema::CommandBufferCommand::InsertDebugMarker:
             case schema::CommandBufferCommand::PopDebugGroup:

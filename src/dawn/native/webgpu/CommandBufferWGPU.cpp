@@ -504,22 +504,6 @@ MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& c
                 Serialize(captureContext, data);
                 break;
             }
-            case Command::SetBindGroup: {
-                const auto& cmd = *commands.NextCommand<SetBindGroupCmd>();
-                const uint32_t* dynamicOffsetsData =
-                    cmd.dynamicOffsetCount > 0 ? commands.NextData<uint32_t>(cmd.dynamicOffsetCount)
-                                               : nullptr;
-                schema::CommandBufferCommandSetBindGroupCmd data{{
-                    .data = {{
-                        .index = uint32_t(cmd.index),
-                        .bindGroupId = captureContext.GetId(cmd.group),
-                        .dynamicOffsets = std::vector<uint32_t>(
-                            dynamicOffsetsData, dynamicOffsetsData + cmd.dynamicOffsetCount),
-                    }},
-                }};
-                Serialize(captureContext, data);
-                break;
-            }
             case Command::Dispatch: {
                 const auto& cmd = *commands.NextCommand<DispatchCmd>();
                 schema::CommandBufferCommandDispatchCmd data{{
@@ -543,12 +527,17 @@ MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& c
                 Serialize(captureContext, data);
                 break;
             }
-            default: {
-                if (!CaptureDebugCommand(captureContext, commands, type)) {
-                    return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");
-                }
+            case Command::SetBindGroup:
+            case Command::SetImmediates:
+                CaptureSharedCommand(captureContext, commands, type);
                 break;
-            }
+            case Command::PushDebugGroup:
+            case Command::PopDebugGroup:
+            case Command::InsertDebugMarker:
+                CaptureDebugCommand(captureContext, commands, type);
+                break;
+            default:
+                return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");
         }
     }
     return {};
@@ -910,12 +899,13 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                 Serialize(captureContext, data);
                 break;
             }
-            default: {
-                if (!CaptureDebugCommand(captureContext, commands, type)) {
-                    return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");
-                }
+            case Command::PushDebugGroup:
+            case Command::PopDebugGroup:
+            case Command::InsertDebugMarker:
+                CaptureDebugCommand(captureContext, commands, type);
                 break;
-            }
+            default:
+                return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");
         }
     }
     Serialize(captureContext, schema::CommandBufferCommand::End);

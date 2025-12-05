@@ -45,6 +45,7 @@ class ReadHead;
 
 MaybeError ReadBytes(ReadHead& s, void* data, size_t size);
 MaybeError Deserialize(ReadHead& s, int32_t* v);
+MaybeError Deserialize(ReadHead& s, uint8_t* v);
 MaybeError Deserialize(ReadHead& s, uint16_t* v);
 MaybeError Deserialize(ReadHead& s, uint32_t* v);
 MaybeError Deserialize(ReadHead& s, uint64_t* v);

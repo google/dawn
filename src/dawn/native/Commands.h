@@ -391,8 +391,8 @@ struct SetImmediatesCmd {
     SetImmediatesCmd();
     ~SetImmediatesCmd();
 
-    uint64_t offset;
-    uint64_t size;
+    uint32_t offset;
+    uint32_t size;
 };
 
 struct SetIndexBufferCmd {

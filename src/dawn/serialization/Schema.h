@@ -281,7 +281,9 @@ DAWN_REPLAY_MAKE_BINDGROUP_LAYOUT_VARIANT(TextureBinding, TEXTURE_BIND_GROUP_LAY
 
 DAWN_REPLAY_SERIALIZABLE(struct, BindGroupLayout, BIND_GROUP_LAYOUT_MEMBER){};
 
-#define PIPELINE_LAYOUT_MEMBER(X) X(std::vector<ObjectId>, bindGroupLayoutIds)
+#define PIPELINE_LAYOUT_MEMBER(X)                \
+    X(std::vector<ObjectId>, bindGroupLayoutIds) \
+    X(uint32_t, immediateSize)
 
 DAWN_REPLAY_SERIALIZABLE(struct, PipelineLayout, PIPELINE_LAYOUT_MEMBER){};
 
@@ -557,6 +559,12 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetComputePipeline,
     X(std::vector<uint32_t>, dynamicOffsets)
 
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetBindGroup, SET_BIND_GROUP_CMD_DATA_MEMBER){};
+
+#define SET_IMMEDIATES_CMD_DATA_MEMBER(X) \
+    X(uint32_t, offset)                   \
+    X(std::vector<uint8_t>, data)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetImmediates, SET_IMMEDIATES_CMD_DATA_MEMBER){};
 
 #define SET_CLEAR_BUFFER_CMD_DATA_MEMBER(X) \
     X(ObjectId, bufferId)                   \

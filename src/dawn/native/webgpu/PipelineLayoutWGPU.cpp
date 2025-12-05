@@ -96,6 +96,7 @@ MaybeError PipelineLayout::CaptureCreationParameters(CaptureContext& captureCont
 
     schema::PipelineLayout data{{
         .bindGroupLayoutIds = bindGroupLayoutIds,
+        .immediateSize = GetImmediateDataRangeByteSize(),
     }};
     Serialize(captureContext, data);
     return {};

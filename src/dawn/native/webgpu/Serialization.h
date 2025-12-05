@@ -44,6 +44,7 @@ class CaptureContext;
 void WriteBytes(CaptureContext& context, const void* data, size_t size);
 
 void Serialize(CaptureContext& context, int32_t v);
+void Serialize(CaptureContext& context, uint8_t v);
 void Serialize(CaptureContext& context, uint16_t v);
 void Serialize(CaptureContext& context, uint32_t v);
 void Serialize(CaptureContext& context, uint64_t v);

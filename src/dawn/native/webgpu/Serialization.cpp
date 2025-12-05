@@ -41,6 +41,10 @@ void Serialize(CaptureContext& context, int32_t v) {
     WriteBytes(context, reinterpret_cast<const char*>(&v), sizeof(v));
 }
 
+void Serialize(CaptureContext& context, uint8_t v) {
+    WriteBytes(context, reinterpret_cast<const char*>(&v), sizeof(v));
+}
+
 void Serialize(CaptureContext& context, uint16_t v) {
     WriteBytes(context, reinterpret_cast<const char*>(&v), sizeof(v));
 }

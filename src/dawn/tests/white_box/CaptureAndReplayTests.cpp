@@ -2046,6 +2046,143 @@ TEST_P(CaptureAndReplayTests, CaptureClearBuffer) {
     ExpectBufferEQ(replay.get(), "buf", expected);
 }
 
+TEST_P(CaptureAndReplayTests, SetImmediateComputePass) {
+    const char* shader = R"(
+        var<immediate> value: u32;
+        @group(0) @binding(0) var<storage, read_write> result : u32;
+
+        @compute @workgroup_size(1) fn main() {
+            result = value;
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    wgpu::BindGroupLayoutEntry entries[1];
+    entries[0].binding = 0;
+    entries[0].visibility = wgpu::ShaderStage::Compute;
+    entries[0].buffer.type = wgpu::BufferBindingType::Storage;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = entries;
+    wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&bglDesc);
+
+    wgpu::PipelineLayoutDescriptor plDesc;
+    plDesc.label = "immediatePipelineLayout";
+    plDesc.bindGroupLayoutCount = 1;
+    plDesc.bindGroupLayouts = &layout;
+    plDesc.immediateSize = 4;
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&plDesc);
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.label = "immediatePipeline";
+    csDesc.layout = pipelineLayout;
+    csDesc.compute.module = module;
+
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    const char* label = "MyBuffer";
+    wgpu::Buffer buffer = CreateBuffer(label, 4, wgpu::BufferUsage::Storage);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {
+                                                         {0, buffer},
+                                                     });
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, bindGroup);
+        pass.SetPipeline(pipeline);
+        const uint8_t data[] = {0x11, 0x22, 0x33, 0x44};
+        pass.SetImmediates(0, data, sizeof(data));
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectBufferEQ(replay.get(), label, expected);
+}
+
+TEST_P(CaptureAndReplayTests, SetImmediateRenderPass) {
+    const char* shader = R"(
+        var<immediate> value: u32;
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0, 1);
+        }
+
+        @fragment fn fs() -> @location(0) vec4u {
+            return vec4u(value);
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    wgpu::BindGroupLayoutEntry entries[1];
+    entries[0].binding = 0;
+    entries[0].visibility = wgpu::ShaderStage::Compute;
+    entries[0].buffer.type = wgpu::BufferBindingType::Storage;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = entries;
+    wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&bglDesc);
+
+    wgpu::PipelineLayoutDescriptor plDesc;
+    plDesc.label = "immediatePipelineLayout";
+    plDesc.bindGroupLayoutCount = 0;
+    plDesc.immediateSize = 4;
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&plDesc);
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+    desc.cFragment.targetCount = 1;
+    desc.cTargets[0].format = wgpu::TextureFormat::R32Uint;
+    desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+    wgpu::Texture dstTexture = CreateTexture("dstTexture", {1}, wgpu::TextureFormat::R32Uint,
+                                             wgpu::TextureUsage::RenderAttachment);
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor passDescriptor({dstTexture.CreateView()});
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+        pass.SetPipeline(pipeline);
+        const uint8_t data[] = {0x11, 0x22, 0x33, 0x44};
+        pass.SetImmediates(0, data, sizeof(data));
+        pass.Draw(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    const uint32_t expected[] = {0x44332211};
+    ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 class CaptureAndReplayDrawTests : public CaptureAndReplayTests {
