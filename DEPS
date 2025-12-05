@@ -382,7 +382,7 @@ deps = {
   'third_party/emsdk': {
     # Note: Always use an emsdk hash referring to a tagged release, just so
     # emsdk and emscripten are always in sync with an exact release.
-    'url': '{chromium_git}/external/github.com/emscripten-core/emsdk.git@eff90ca04a3785f571a8095b3a42b63799cf384a',
+    'url': '{chromium_git}/external/github.com/emscripten-core/emsdk.git@e4fe26ef59168ff44f4c23c466e497bf60b3411e',
     'condition': 'dawn_wasm',
   },
 
