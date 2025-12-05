@@ -1,7 +1,7 @@
 //
 // any
 //
-#version 310 es
+#version 460
 precision highp float;
 precision highp int;
 
@@ -22,8 +22,7 @@ void main() {
 //
 // less
 //
-#version 310 es
-#extension GL_EXT_conservative_depth: require
+#version 460
 precision highp float;
 precision highp int;
 
@@ -45,8 +44,7 @@ void main() {
 //
 // greater
 //
-#version 310 es
-#extension GL_EXT_conservative_depth: require
+#version 460
 precision highp float;
 precision highp int;
 

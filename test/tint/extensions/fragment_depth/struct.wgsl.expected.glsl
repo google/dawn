@@ -27,6 +27,7 @@ void main() {
 // less
 //
 #version 310 es
+#extension GL_EXT_conservative_depth: require
 precision highp float;
 precision highp int;
 
@@ -41,6 +42,7 @@ struct FragDepthLessOutput {
 };
 
 layout(location = 0) uniform tint_immediate_struct tint_immediates;
+layout(depth_less) out float gl_FragDepth;
 FragDepthLessOutput less_inner() {
   return FragDepthLessOutput(1.0f);
 }
@@ -52,6 +54,7 @@ void main() {
 // greater
 //
 #version 310 es
+#extension GL_EXT_conservative_depth: require
 precision highp float;
 precision highp int;
 
@@ -66,6 +69,7 @@ struct FragDepthGreaterOutput {
 };
 
 layout(location = 0) uniform tint_immediate_struct tint_immediates;
+layout(depth_greater) out float gl_FragDepth;
 FragDepthGreaterOutput greater_inner() {
   return FragDepthGreaterOutput(1.0f);
 }

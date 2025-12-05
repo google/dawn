@@ -1,0 +1,57 @@
+//
+// any
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct any_outputs {
+  float tint_symbol [[depth(any)]];
+};
+
+float any_inner() {
+  return 1.0f;
+}
+
+fragment any_outputs any() {
+  any_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = any_inner();
+  return tint_wrapper_result;
+}
+//
+// less
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct less_outputs {
+  float tint_symbol [[depth(less)]];
+};
+
+float less_inner() {
+  return 1.0f;
+}
+
+fragment less_outputs less() {
+  less_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = less_inner();
+  return tint_wrapper_result;
+}
+//
+// greater
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct greater_outputs {
+  float tint_symbol [[depth(greater)]];
+};
+
+float greater_inner() {
+  return 1.0f;
+}
+
+fragment greater_outputs greater() {
+  greater_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = greater_inner();
+  return tint_wrapper_result;
+}
