@@ -12,6 +12,8 @@ has been written yet.
 
 The usage is restricted to `fragment` shaders.
 
+| Backend | Type | Requirements |
+|---------|------|--------------|
 | SPIR-V | `vec3f` | `VK_KHR_fragment_shader_barycentric`. Available as the `BaryCoordKHR` builtin |
 | HLSL | `vec3f` | Requires D3D12, HLSL 6.1. Available as the `SV_Barycentrics` semantic |
 | GLSL | `vec3f` | `GLSL_EXT_fragment_shader_barycentric` (Requires GLSL 4.50 and later, ESSL 3.2 and later). Available as the `gl_BaryCoordEXT` builtin |
@@ -25,6 +27,8 @@ experimental extension it would be `enable chromium_experimental_barycentric_coo
 Additionally, anywhere that barycentrics are supported they support perspective corrected and non-perspective correct
 values are available. Most backends support multiple interpolation modes, but only centroid is available everywhere.
 
+| Backend | Supported Interpolation Modes |
+|---------|-------------------------------|
 | SPIR-V | `BaryCoordKHR`, `BaryCoordNoPerspKHR`, both can be decorated with the `Centroid` or `Sample` interpolation qualifiers |
 | HLSL | `float3 b : SV_Barycentrics` (default, perspective correct), `noperspective float3 b : SV_Barycentrics`. Interpolation modes like `linear`, `centroid`, and `sample` are supported |
 | GLSL | `gl_BaryCoordEXT`, `gl_BaryCoordNoPerspEXT`, both can be decorated with the centroid or sample interpolation qualifiers |
@@ -36,6 +40,8 @@ This extension adds a new `builtin_value_name` entry for `barycentric_coord`.
 
 An entry is added to the _Built-in input and output values_ table:
 
+| Category | Value |
+|----------|-------|
 | Name | `barycentric_coord` |
 | Stage | `fragment` |
 | Direction | `input` |
@@ -62,6 +68,6 @@ An entry is added to the _Built-in input and output values_ table:
   * [Shader Model 6.1](https://github.com/microsoft/DirectXShaderCompiler/wiki/Shader-Model-6.1)
 * [Metal p.119](https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf)
 * [MTLDevice supportsShaderBarycentricCoordinates](https://developer.apple.com/documentation/metal/mtldevice/supportsshaderbarycentriccoordinates)
-* [Vulkan VK_KHR_fragment_shader_barycentric](https://registry.khronos.org/vulkan/specs/latest/man/html/VK_KHR_fragment_shader_barycentric.html)
+* [Vulkan VK_KHR_fragment_shader_barycentric](https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_fragment_shader_barycentric.html)
   * [SPIR-V VK_KHR_fragment_shader_barycentric](https://github.khronos.org/SPIRV-Registry/extensions/KHR/SPV_KHR_fragment_shader_barycentric.html)
 * [GLSL_EXT_fragment_shader_barycentric](https://github.com/KhronosGroup/GLSL/blob/main/extensions/ext/GLSL_EXT_fragment_shader_barycentric.txt)
