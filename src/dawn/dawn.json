@@ -2837,6 +2837,15 @@
             }
         ]
     },
+    "pipeline layout resource table": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "chained": "in",
+        "chain roots": ["pipeline layout descriptor"],
+        "members": [
+            {"name": "uses resource table", "type": "bool", "default": "false"}
+        ]
+    },
     "pipeline layout descriptor": {
         "category": "structure",
         "extensible": "in",
@@ -4049,7 +4058,8 @@
             {"value": 80, "name": "shared buffer memory D3D12 shared memory file mapping handle descriptor", "tags": ["dawn", "native"]},
             {"value": 81, "name": "shared texture memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
             {"value": 82, "name": "request adapter options angle virtualization group", "tags": ["dawn", "native"]},
-            {"value": 83, "name": "resource table limits", "tags": ["dawn"]}
+            {"value": 83, "name": "resource table limits", "tags": ["dawn"]},
+            {"value": 84, "name": "pipeline layout resource table", "tags": ["dawn"]}
         ]
     },
     "texture": {

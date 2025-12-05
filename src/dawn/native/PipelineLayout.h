@@ -100,6 +100,8 @@ class PipelineLayoutBase : public ApiObjectBase,
     uint32_t GetNumStorageBufferBindingsInFragmentStage() const;
     uint32_t GetNumStorageTextureBindingsInFragmentStage() const;
 
+    bool UsesResourceTable() const;
+
     // Utility functions to compute inherited bind groups.
     // Returns the inherited bind groups as a mask.
     BindGroupMask InheritedGroupsMask(const PipelineLayoutBase* other) const;
@@ -130,6 +132,7 @@ class PipelineLayoutBase : public ApiObjectBase,
     uint32_t mNumStorageTextureBindingsInFragmentStage = 0;
     std::vector<wgpu::TextureFormat> mStorageAttachmentSlots;
     uint32_t mImmediateDataRangeByteSize = 0;
+    bool mUsesResourceTable = false;
 };
 
 }  // namespace dawn::native

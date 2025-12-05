@@ -76,6 +76,12 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
         DAWN_TRY(ValidatePLSInfo(device, pls->totalPixelLocalStorageSize,
                                  {attachments.data(), attachments.size()}));
     }
+    if (auto* rt = unpacked.Get<PipelineLayoutResourceTable>()) {
+        DAWN_INVALID_IF(rt->usesResourceTable &&
+                            !device->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
+                        "Resource table used without the %s feature enabled.",
+                        wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
+    }
 
     DAWN_INVALID_IF(descriptor->bindGroupLayoutCount > kMaxBindGroups,
                     "bindGroupLayoutCount (%i) is larger than the maximum allowed (%i).",
@@ -163,6 +169,10 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
             size_t slot = pls->storageAttachments[i].offset / kPLSSlotByteSize;
             mStorageAttachmentSlots[slot] = pls->storageAttachments[i].format;
         }
+    }
+    // Gather the resource table information.
+    if (auto* rt = descriptor.Get<PipelineLayoutResourceTable>()) {
+        mUsesResourceTable = rt->usesResourceTable;
     }
 
     BindingCounts bindingCounts = {};
@@ -580,6 +590,9 @@ size_t PipelineLayoutBase::ComputeContentHash() {
     // Hash the immediate data range byte size
     recorder.Record(mImmediateDataRangeByteSize);
 
+    // Hash the resource table state
+    recorder.Record(mUsesResourceTable);
+
     return recorder.GetContentHash();
 }
 
@@ -613,6 +626,11 @@ bool PipelineLayoutBase::EqualityFunc::operator()(const PipelineLayoutBase* a,
         return false;
     }
 
+    // Check resource table
+    if (a->mUsesResourceTable != b->mUsesResourceTable) {
+        return false;
+    }
+
     return true;
 }
 
@@ -634,6 +652,10 @@ uint32_t PipelineLayoutBase::GetNumStorageBufferBindingsInFragmentStage() const 
 
 uint32_t PipelineLayoutBase::GetNumStorageTextureBindingsInFragmentStage() const {
     return mNumStorageTextureBindingsInFragmentStage;
+}
+
+bool PipelineLayoutBase::UsesResourceTable() const {
+    return mUsesResourceTable;
 }
 
 }  // namespace dawn::native
