@@ -132,6 +132,12 @@ void EmitJson(const tint::Program& program) {
                   << "\"stage\": \"" << tint::cmd::EntryPointStageToString(entry_point.stage)
                   << "\",\n";
 
+        if (entry_point.workgroup_size) {
+            std::cout << "\"workgroup_size\": [";
+            std::cout << entry_point.workgroup_size->x << ", " << entry_point.workgroup_size->y
+                      << ", " << entry_point.workgroup_size->z << "],\n";
+        }
+
         std::cout << "\"input_variables\": [";
         bool input_first = true;
         for (const auto& var : entry_point.input_variables) {

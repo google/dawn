@@ -272,6 +272,12 @@ void PrintInspectorData(tint::inspector::Inspector& inspector) {
         std::cout << "Entry Point = " << entry_point.name << " ("
                   << EntryPointStageToString(entry_point.stage) << ")\n";
 
+        if (entry_point.workgroup_size) {
+            std::cout << "  Workgroup Size (" << entry_point.workgroup_size->x << ", "
+                      << entry_point.workgroup_size->y << ", " << entry_point.workgroup_size->z
+                      << ")\n";
+        }
+
         if (!entry_point.input_variables.empty()) {
             std::cout << "  Input Variables:\n";
 
