@@ -1257,9 +1257,7 @@ void CommandEncoder::TrackUsedQuerySet(QuerySetBase* querySet) {
 void CommandEncoder::TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex) {
     DAWN_ASSERT(querySet != nullptr);
 
-    if (GetDevice()->IsValidationEnabled()) {
-        TrackUsedQuerySet(querySet);
-    }
+    TrackUsedQuerySet(querySet);
 
     // Set the query at queryIndex to available for resolving in query set.
     querySet->SetQueryAvailability(queryIndex, true);
