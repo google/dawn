@@ -425,6 +425,14 @@ ResultOrError<wgpu::QuerySet> CreateQuerySet(const Replay& replay,
 }
 
 template <typename T>
+MaybeError ProcessWriteTimestamp(const Replay& replay, T pass, ReadHead& readHead) {
+    schema::CommandBufferCommandWriteTimestampCmdData data;
+    DAWN_TRY(Deserialize(readHead, &data));
+    pass.WriteTimestamp(replay.GetObjectById<wgpu::QuerySet>(data.querySetId), data.queryIndex);
+    return {};
+}
+
+template <typename T>
 MaybeError ProcessSharedCommands(const Replay& replay,
                                  T pass,
                                  schema::CommandBufferCommand cmd,
@@ -811,6 +819,9 @@ MaybeError ProcessComputePassCommands(const Replay& replay,
                                                 data.offset);
                 break;
             }
+            case schema::CommandBufferCommand::WriteTimestamp:
+                DAWN_TRY(ProcessWriteTimestamp(replay, pass, readHead));
+                break;
             case schema::CommandBufferCommand::SetBindGroup:
             case schema::CommandBufferCommand::SetImmediates:
                 DAWN_TRY(ProcessSharedCommands(replay, pass, cmd, readHead));
@@ -886,6 +897,9 @@ MaybeError ProcessRenderPassCommands(const Replay& replay,
                                  data.maxDepth);
                 break;
             }
+            case schema::CommandBufferCommand::WriteTimestamp:
+                DAWN_TRY(ProcessWriteTimestamp(replay, pass, readHead));
+                break;
             default:
                 DAWN_TRY(ProcessRenderCommand(replay, readHead, device, cmd, pass));
                 break;
@@ -1016,6 +1030,9 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                                         data.destinationOffset);
                 break;
             }
+            case schema::CommandBufferCommand::WriteTimestamp:
+                DAWN_TRY(ProcessWriteTimestamp(replay, encoder, readHead));
+                break;
             case schema::CommandBufferCommand::PushDebugGroup:
             case schema::CommandBufferCommand::InsertDebugMarker:
             case schema::CommandBufferCommand::PopDebugGroup:

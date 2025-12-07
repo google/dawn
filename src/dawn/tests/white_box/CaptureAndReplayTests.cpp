@@ -2366,5 +2366,66 @@ TEST_P(CaptureAndReplayDrawTests, CaptureSetStencilReference) {
 
 DAWN_INSTANTIATE_TEST(CaptureAndReplayDrawTests, WebGPUBackend());
 
+class CaptureAndReplayTimestampTests : public CaptureAndReplayTests {
+  protected:
+    void SetUp() override {
+        CaptureAndReplayTests::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(
+            !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses}));
+    }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses})) {
+            requiredFeatures.push_back(
+                wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses);
+            requiredFeatures.push_back(wgpu::FeatureName::TimestampQuery);
+        }
+        return requiredFeatures;
+    }
+};
+
+// Test WriteTimestamp in compute pass, render pass, and
+// command buffer. We don't expect any results. We only
+// expect it doesn't get any errors.
+TEST_P(CaptureAndReplayTimestampTests, WriteTimestamp) {
+    wgpu::QuerySetDescriptor qsDesc;
+    qsDesc.label = "myQuerySet";
+    qsDesc.count = 3;
+    qsDesc.type = wgpu::QueryType::Timestamp;
+    wgpu::QuerySet querySet = device.CreateQuerySet(&qsDesc);
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.WriteTimestamp(querySet, 0);
+        {
+            utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+            pass.WriteTimestamp(querySet, 1);
+            pass.End();
+        }
+        {
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.WriteTimestamp(querySet, 2);
+            pass.End();
+        }
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    // just expect no errors.
+}
+
+DAWN_INSTANTIATE_TEST(CaptureAndReplayTimestampTests, WebGPUBackend());
+
 }  // anonymous namespace
 }  // namespace dawn

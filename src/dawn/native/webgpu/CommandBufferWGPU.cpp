@@ -485,6 +485,17 @@ MaybeError GatherReferencedResourcesFromRenderPass(CaptureContext& captureContex
     return {};
 }
 
+void CaptureTimestampWriteCommand(CaptureContext& captureContext, CommandIterator& commands) {
+    const auto& cmd = *commands.NextCommand<WriteTimestampCmd>();
+    schema::CommandBufferCommandWriteTimestampCmd data{{
+        .data = {{
+            .querySetId = captureContext.GetId(cmd.querySet),
+            .queryIndex = cmd.queryIndex,
+        }},
+    }};
+    Serialize(captureContext, data);
+}
+
 MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& commands) {
     Command type;
     while (commands.NextCommandId(&type)) {
@@ -527,6 +538,9 @@ MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& c
                 Serialize(captureContext, data);
                 break;
             }
+            case Command::WriteTimestamp:
+                CaptureTimestampWriteCommand(captureContext, commands);
+                break;
             case Command::SetBindGroup:
             case Command::SetImmediates:
                 CaptureSharedCommand(captureContext, commands, type);
@@ -630,6 +644,9 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
                 Serialize(captureContext, data);
                 break;
             }
+            case Command::WriteTimestamp:
+                CaptureTimestampWriteCommand(captureContext, commands);
+                break;
             default:
                 DAWN_TRY(CaptureRenderCommand(captureContext, commands, type));
                 break;
@@ -661,6 +678,9 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
     }
     for (auto texture : resourceUsages.topLevelTextures) {
         DAWN_TRY(captureContext.AddResource(ToBackend(texture)));
+    }
+    for (auto querySet : resourceUsages.usedQuerySets) {
+        DAWN_TRY(captureContext.AddResource(ToBackend(querySet)));
     }
     DAWN_TRY(AddReferencedPassResourceUsages(captureContext, resourceUsages.renderPasses));
     for (const auto& pass : resourceUsages.computePasses) {
@@ -714,6 +734,7 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
             case Command::CopyBufferToTexture:
             case Command::CopyTextureToBuffer:
             case Command::CopyTextureToTexture:
+            case Command::WriteTimestamp:
             case Command::PushDebugGroup:
             case Command::InsertDebugMarker:
             case Command::PopDebugGroup:
@@ -899,6 +920,9 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                 Serialize(captureContext, data);
                 break;
             }
+            case Command::WriteTimestamp:
+                CaptureTimestampWriteCommand(captureContext, commands);
+                break;
             case Command::PushDebugGroup:
             case Command::PopDebugGroup:
             case Command::InsertDebugMarker:
