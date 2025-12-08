@@ -1050,14 +1050,6 @@ dawn_json_generator("webgpu_dawn_native_proc_gen") {
   outputs = [ "src/dawn/native/webgpu_dawn_native_proc.cpp" ]
 }
 
-source_set("webgpu_dawn_native_proc_sources") {
-  sources = get_target_outputs(":webgpu_dawn_native_proc_gen")
-  deps = [
-    ":headers",
-    ":webgpu_dawn_native_proc_gen",
-  ]
-}
-
 dawn_component("webgpu_dawn") {
   # For a single library - build `webgpu_dawn_shared` with GN args:
   #   dawn_complete_static_libs = true - to package a single lib
@@ -1075,9 +1067,11 @@ dawn_component("webgpu_dawn") {
   #      It should be built separately.
   DEFINE_PREFIX = "WGPU"
   output_name = "webgpu_dawn"
+  sources = get_target_outputs(":webgpu_dawn_native_proc_gen")
 
   deps = [
+    ":headers",
     ":static",
-    ":webgpu_dawn_native_proc_sources",
+    ":webgpu_dawn_native_proc_gen",
   ]
 }
