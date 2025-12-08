@@ -406,6 +406,16 @@ dawn_linux_manual_builder(
 )
 
 dawn_linux_manual_builder(
+    name = "dawn-try-linux-x64-sws-tsan",
+    description_html = "Tests release Dawn on Linux/x64 with SwiftShader with TSAN. Manual only.",
+    mirrors = [
+        "ci/dawn-linux-x64-builder-tsan",
+        "ci/dawn-linux-x64-sws-tsan",
+    ],
+    gn_args = "ci/dawn-linux-x64-builder-tsan",
+)
+
+dawn_linux_manual_builder(
     name = "dawn-try-linux-x86-sws-dbg",
     description_html = "Tests debug Dawn on Linux/x86 with SwiftShader. Manual only.",
     mirrors = [
