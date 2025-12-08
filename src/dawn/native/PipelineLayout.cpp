@@ -495,11 +495,27 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     desc.bindGroupLayoutCount = static_cast<uint32_t>(kMaxBindGroupsTyped);
     desc.immediateSize = immediateDataRangeByteSize;
 
+    // Check if at least one stage uses a resource table
+    bool usesResourceTable = false;
+    for (const StageAndDescriptor& stage : stages) {
+        const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
+        if (metadata.usesResourceTable) {
+            usesResourceTable = true;
+            break;
+        }
+    }
+    PipelineLayoutResourceTable resourceTable;
+    if (usesResourceTable) {
+        resourceTable.usesResourceTable = true;
+        resourceTable.nextInChain = desc.nextInChain;
+        desc.nextInChain = &resourceTable;
+    }
+
     Ref<PipelineLayoutBase> result;
     DAWN_TRY_ASSIGN(result, device->CreatePipelineLayout(&desc, pipelineCompatibilityToken));
     DAWN_ASSERT(!result->IsError());
 
-    // That the auto pipeline layout is compatible with the current pipeline.
+    // Validate that the auto pipeline layout is compatible with the current pipeline.
     // Note: the currently specified rules can generate invalid default layouts.
     // Hopefully the spec will be updated to prevent this.
     // See: https://github.com/gpuweb/gpuweb/issues/4952

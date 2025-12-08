@@ -161,15 +161,36 @@ TEST_F(ResourceTableValidationTest_PipelineCreation, ShaderNoResourceTableWithLa
 
 // Test that an auto-generated pipeline with a shader that uses a resource table has a
 // PipelineLayoutResourceTable with usesResourceTable == true.
-// TODO(crbug.com/463925499): Enable once pipeline layout defaulting is implemented
-TEST_F(ResourceTableValidationTest_PipelineCreation,
-       DISABLED_ShaderGeneratesLayoutWithResourceTable) {
+TEST_F(ResourceTableValidationTest_PipelineCreation, ShaderGeneratesLayoutWithResourceTable) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;
         @compute @workgroup_size(1) fn main() {
             _ = hasResource<texture_2d<f32>>(0);
-            _ = getResource<texture_3d<i32>>(1);
+        }
+    )");
+
+    csDesc.layout = nullptr;  // Auto
+    device.CreateComputePipeline(&csDesc);
+    // TODO(crbug.com/463925499): Check that resulting pipeline requires a dispatch time resource
+    // table to be set
+}
+
+// Test that an auto-generated pipeline with a multi-stage shader where only one stage uses a
+// resource table has a PipelineLayoutResourceTable with usesResourceTable == true.
+TEST_F(ResourceTableValidationTest_PipelineCreation,
+       OneShaderStageGeneratesLayoutWithResourceTable) {
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0.5, 0.5);
+        }
+        @compute @workgroup_size(1) fn compute_main() {
+            _ = hasResource<texture_2d<f32>>(0);
+        }
+        @fragment fn fs() -> @location(0) vec4f {
+            return vec4f(1.0, 0.0, 0.0, 1.0);
         }
     )");
 
