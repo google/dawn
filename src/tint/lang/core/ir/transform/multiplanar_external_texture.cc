@@ -416,7 +416,7 @@ struct State {
             auto* apparent_size = b.Access(ty.vec2u(), params, 12_u);
             auto* plane1_coord_factor = b.Access(ty.vec2f(), params, 13_u);
 
-            auto* clamped_coords = b.Call(vec2u, core::BuiltinFn::kMin, coords, apparent_size);
+            auto* clamped_coords = b.Min(coords, apparent_size);
             auto* clamped_coords_f = b.Convert(vec2f, clamped_coords);
             auto* modified_coords =
                 b.Multiply(load_transform_matrix, b.Construct(vec3f, clamped_coords_f, 1_f));
@@ -540,8 +540,8 @@ struct State {
 
             auto* modified_coords =
                 b.Multiply(transformation_matrix, b.Construct(vec3f, coords, 1_f));
-            auto* plane0_clamped = b.Call(vec2f, core::BuiltinFn::kClamp, modified_coords,
-                                          sample_plane0_rect_min, sample_plane0_rect_max);
+            auto* plane0_clamped =
+                b.Clamp(modified_coords, sample_plane0_rect_min, sample_plane0_rect_max);
 
             auto* rgb_result = b.InstructionResult(vec3f);
             auto* alpha_result = b.InstructionResult(ty.f32());
@@ -562,8 +562,8 @@ struct State {
                                    b.Call(vec4f, core::BuiltinFn::kTextureSampleLevel, plane_0,
                                           sampler, plane0_clamped, 0_f),
                                    0_u);
-                auto* plane1_clamped = b.Call(vec2f, core::BuiltinFn::kClamp, modified_coords,
-                                              sample_plane1_rect_min, sample_plane1_rect_max);
+                auto* plane1_clamped =
+                    b.Clamp(modified_coords, sample_plane1_rect_min, sample_plane1_rect_max);
 
                 // Sample the uv value from the second plane.
                 auto* uv = b.Swizzle(vec2f,

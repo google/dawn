@@ -755,9 +755,7 @@ struct State {
                 const uint32_t kArrayIndex = 2;
                 auto* index_arg = builtin->Args()[kArrayIndex];
                 if (index_arg->Type()->IsSignedIntegerScalar()) {
-                    builtin->SetArg(kArrayIndex, b.Call(ty.i32(), core::BuiltinFn::kMax, index_arg,
-                                                        b.Zero<i32>())
-                                                     ->Result());
+                    builtin->SetArg(kArrayIndex, b.Max(index_arg, b.Zero<i32>())->Result());
                 }
             }
         });
@@ -1041,7 +1039,7 @@ struct State {
 
             auto* lower = b.Splat(ty.vec2f(), -1_f);
             auto* upper = b.Splat(ty.vec2f(), 1_f);
-            b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
+            b.Clamp(scale, lower, upper)->SetResult(builtin->DetachResult());
         });
         builtin->Destroy();
     }
@@ -1061,7 +1059,7 @@ struct State {
 
             auto* lower = b.Splat(ty.vec2f(), 0_f);
             auto* upper = b.Splat(ty.vec2f(), 1_f);
-            b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
+            b.Clamp(scale, lower, upper)->SetResult(builtin->DetachResult());
         });
         builtin->Destroy();
     }

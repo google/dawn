@@ -384,12 +384,12 @@ struct State {
                 if (sm_ty->Type()->Is<core::type::I8>()) {
                     value = b.CallExplicit<spirv::ir::BuiltinCall>(
                                  ty.i8(), spirv::BuiltinFn::kSConvert, Vector{ty.i8()},
-                                 b.Call(ty.i32(), core::BuiltinFn::kClamp, value, -128_i, 127_i))
+                                 b.Clamp(value, -128_i, 127_i))
                                 ->Result();
                 } else if (sm_ty->Type()->Is<core::type::U8>()) {
                     value = b.CallExplicit<spirv::ir::BuiltinCall>(
                                  ty.u8(), spirv::BuiltinFn::kUConvert, Vector{ty.u8()},
-                                 b.Call(ty.u32(), core::BuiltinFn::kClamp, value, 0_u, 255_u))
+                                 b.Clamp(value, 0_u, 255_u))
                                 ->Result();
                 }
             });
@@ -1370,12 +1370,12 @@ struct State {
             if (sm_ty->Type()->Is<core::type::I8>()) {
                 scalar = b.CallExplicit<spirv::ir::BuiltinCall>(
                               ty.i8(), spirv::BuiltinFn::kSConvert, Vector{ty.i8()},
-                              b.Call(ty.i32(), core::BuiltinFn::kClamp, scalar, -128_i, 127_i))
+                              b.Clamp(scalar, -128_i, 127_i))
                              ->Result();
             } else if (sm_ty->Type()->Is<core::type::U8>()) {
                 scalar = b.CallExplicit<spirv::ir::BuiltinCall>(
                               ty.u8(), spirv::BuiltinFn::kUConvert, Vector{ty.u8()},
-                              b.Call(ty.u32(), core::BuiltinFn::kClamp, scalar, 0_u, 255_u))
+                              b.Clamp(scalar, 0_u, 255_u))
                              ->Result();
             }
 

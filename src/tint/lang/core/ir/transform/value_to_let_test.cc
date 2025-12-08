@@ -941,9 +941,9 @@ TEST_F(IR_ValueToLetTest, NameMe1) {
 TEST_F(IR_ValueToLetTest, NameMe2) {
     auto* fn = b.Function("F", ty.void_());
     b.Append(fn->Block(), [&] {
-        auto* i = b.Name("i", b.Call<i32>(core::BuiltinFn::kMax, 1_i, 2_i));
+        auto* i = b.Name("i", b.Max(1_i, 2_i));
         auto* v = b.Var<function>("v", i);
-        auto* x = b.Name("x", b.Call<i32>(core::BuiltinFn::kMax, 3_i, 4_i));
+        auto* x = b.Name("x", b.Max(3_i, 4_i));
         auto* y = b.Name("y", b.Load(v));
         auto* z = b.Name("z", b.Add(y, x));
         b.Store(v, z);

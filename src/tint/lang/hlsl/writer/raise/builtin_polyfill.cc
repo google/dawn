@@ -1535,8 +1535,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* clamp_lower = b.Splat(ty.vec2f(), -1_f);
             auto* clamp_upper = b.Splat(ty.vec2f(), 1_f);
-            auto* clamp =
-                b.Call(ty.vec2f(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+            auto* clamp = b.Clamp(args[0], clamp_lower, clamp_upper);
             auto* mul = b.Multiply(clamp, 32767_f);
             auto* round = b.Call(ty.vec2f(), core::BuiltinFn::kRound, mul);
             auto* conv = b.Convert(ty.vec2i(), round);
@@ -1565,7 +1564,7 @@ struct State {
 
             auto* lower = b.Splat(ty.vec2f(), -1_f);
             auto* upper = b.Splat(ty.vec2f(), 1_f);
-            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
+            b.Clamp(scale, lower, upper)->SetResult(call->DetachResult());
         });
         call->Destroy();
     }
@@ -1575,8 +1574,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* clamp_lower = b.Splat(ty.vec2f(), 0_f);
             auto* clamp_upper = b.Splat(ty.vec2f(), 1_f);
-            auto* clamp =
-                b.Call(ty.vec2f(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+            auto* clamp = b.Clamp(args[0], clamp_lower, clamp_upper);
             auto* mul = b.Multiply(clamp, 65535_f);
             auto* round = b.Call(ty.vec2f(), core::BuiltinFn::kRound, mul);
             auto* conv = b.Convert(ty.vec2u(), round);
@@ -1607,8 +1605,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* clamp_lower = b.Splat(ty.vec4f(), -1_f);
             auto* clamp_upper = b.Splat(ty.vec4f(), 1_f);
-            auto* clamp =
-                b.Call(ty.vec4f(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+            auto* clamp = b.Clamp(args[0], clamp_lower, clamp_upper);
             auto* mul = b.Multiply(clamp, 127_f);
             auto* round = b.Call(ty.vec4f(), core::BuiltinFn::kRound, mul);
             auto* conv = b.Convert(ty.vec4i(), round);
@@ -1638,7 +1635,7 @@ struct State {
 
             auto* lower = b.Splat(ty.vec4f(), -1_f);
             auto* upper = b.Splat(ty.vec4f(), 1_f);
-            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
+            b.Clamp(scale, lower, upper)->SetResult(call->DetachResult());
         });
         call->Destroy();
     }
@@ -1648,8 +1645,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* clamp_lower = b.Splat(ty.vec4f(), 0_f);
             auto* clamp_upper = b.Splat(ty.vec4f(), 1_f);
-            auto* clamp =
-                b.Call(ty.vec4f(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+            auto* clamp = b.Clamp(args[0], clamp_lower, clamp_upper);
             auto* mul = b.Multiply(clamp, 255_f);
             auto* round = b.Call(ty.vec4f(), core::BuiltinFn::kRound, mul);
             auto* conv = b.Convert(ty.vec4u(), round);

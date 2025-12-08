@@ -50,7 +50,7 @@ TEST_F(IR_BuiltinScalarizeTest, Clamp_VectorOperands_Scalarize) {
     func->SetParams({x, low, high});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec2f(), core::BuiltinFn::kClamp, x, low, high);
+        auto* result = b.Clamp(x, low, high);
         b.Return(func, result);
     });
 
@@ -95,7 +95,7 @@ TEST_F(IR_BuiltinScalarizeTest, Clamp_VectorOperands_AlreadyScalarize) {
     func->SetParams({x, low, high});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.f32(), core::BuiltinFn::kClamp, x, low, high);
+        auto* result = b.Clamp(x, low, high);
         b.Return(func, result);
     });
 
@@ -132,7 +132,7 @@ TEST_F(IR_BuiltinScalarizeTest, Clamp_VectorOperands_LeaveVectorized) {
     func->SetParams({x, low, high});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec2f(), core::BuiltinFn::kClamp, x, low, high);
+        auto* result = b.Clamp(x, low, high);
         b.Return(func, result);
     });
 
@@ -168,7 +168,7 @@ TEST_F(IR_BuiltinScalarizeTest, Max_VectorOperands_Scalarize) {
     func->SetParams({x, y});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec3f(), core::BuiltinFn::kMax, x, y);
+        auto* result = b.Max(x, y);
         b.Return(func, result);
     });
 
@@ -213,7 +213,7 @@ TEST_F(IR_BuiltinScalarizeTest, Max_VectorOperands_LeaveVectorized) {
     func->SetParams({x, y});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec3f(), core::BuiltinFn::kMax, x, y);
+        auto* result = b.Max(x, y);
         b.Return(func, result);
     });
 
@@ -249,7 +249,7 @@ TEST_F(IR_BuiltinScalarizeTest, Min_VectorOperands_Scalarize) {
     func->SetParams({x, y});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4h(), core::BuiltinFn::kMin, x, y);
+        auto* result = b.Min(x, y);
         b.Return(func, result);
     });
 
@@ -297,7 +297,7 @@ TEST_F(IR_BuiltinScalarizeTest, Min_VectorOperands_LeaveVectorized) {
     func->SetParams({x, y});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4h(), core::BuiltinFn::kMin, x, y);
+        auto* result = b.Min(x, y);
         b.Return(func, result);
     });
 

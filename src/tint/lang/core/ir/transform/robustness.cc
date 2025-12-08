@@ -214,7 +214,7 @@ struct State {
             clamped_idx = b.Constant(u32(const_idx->Value()->ValueAs<uint32_t>()));
         } else if (IndexMayOutOfBound(idx, limit)) {
             // Clamp it to the dynamic limit.
-            clamped_idx = b.Call(ty.u32(), core::BuiltinFn::kMin, CastToU32(idx), limit)->Result();
+            clamped_idx = b.Min(CastToU32(idx), limit)->Result();
         }
 
         if (clamped_idx != nullptr) {
@@ -336,8 +336,7 @@ struct State {
         auto clamp_level = [&](uint32_t idx) {
             auto* num_levels = b.Call(ty.u32(), core::BuiltinFn::kTextureNumLevels, args[0]);
             auto* limit = b.Subtract(num_levels, 1_u);
-            clamped_level =
-                b.Call(ty.u32(), core::BuiltinFn::kMin, CastToU32(args[idx]), limit)->Result();
+            clamped_level = b.Min(CastToU32(args[idx]), limit)->Result();
             call->SetOperand(CoreBuiltinCall::kArgsOperandOffset + idx, clamped_level);
         };
 
@@ -350,18 +349,16 @@ struct State {
                                                 clamped_level)
                                        : b.Call(type, core::BuiltinFn::kTextureDimensions, args[0]);
             auto* limit = b.Subtract(dims, one);
-            call->SetOperand(
-                CoreBuiltinCall::kArgsOperandOffset + idx,
-                b.Call(type, core::BuiltinFn::kMin, CastToU32(args[idx]), limit)->Result());
+            call->SetOperand(CoreBuiltinCall::kArgsOperandOffset + idx,
+                             b.Min(CastToU32(args[idx]), limit)->Result());
         };
 
         // Helper for clamping the array index.
         auto clamp_array_index = [&](uint32_t idx) {
             auto* num_layers = b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, args[0]);
             auto* limit = b.Subtract(num_layers, 1_u);
-            call->SetOperand(
-                CoreBuiltinCall::kArgsOperandOffset + idx,
-                b.Call(ty.u32(), core::BuiltinFn::kMin, CastToU32(args[idx]), limit)->Result());
+            call->SetOperand(CoreBuiltinCall::kArgsOperandOffset + idx,
+                             b.Min(CastToU32(args[idx]), limit)->Result());
         };
 
         // Select which arguments to clamp based on the function overload.
@@ -440,7 +437,7 @@ struct State {
                 stride = b.Constant(u32(min_stride));
             }
         } else {
-            stride = b.Call(ty.u32(), core::BuiltinFn::kMax, stride, u32(min_stride))->Result();
+            stride = b.Max(stride, u32(min_stride))->Result();
         }
         call->SetArg(stride_index, stride);
 

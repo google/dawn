@@ -229,7 +229,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         auto max_idx = u32(config.immediate_data_layout.IndexOf(config.depth_range_offsets->max));
         auto* min = builder.Load(builder.Access<ptr<immediate, f32>>(immediate_data, min_idx));
         auto* max = builder.Load(builder.Access<ptr<immediate, f32>>(immediate_data, max_idx));
-        return builder.Call<f32>(core::BuiltinFn::kClamp, frag_depth, min, max)->Result();
+        return builder.Clamp(frag_depth, min, max)->Result();
     }
 
     /// @copydoc ShaderIO::BackendState::NeedsVertexPointSize

@@ -149,8 +149,7 @@ struct State {
             auto* value = b.FunctionParam("value", src_ty);
             func->SetParams({value});
             b.Append(func->Block(), [&] {
-                auto* clamped = b.Call(src_ty, core::BuiltinFn::kClamp, value, limits.low_limit_f,
-                                       limits.high_limit_f);
+                auto* clamped = b.Clamp(value, limits.low_limit_f, limits.high_limit_f);
                 auto* converted = b.Convert(res_ty, clamped);
 
                 b.Return(func, converted->Result());

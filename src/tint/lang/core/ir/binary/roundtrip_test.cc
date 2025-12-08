@@ -488,7 +488,7 @@ TEST_F(IRBinaryRoundtripTest, UserCall) {
 
 TEST_F(IRBinaryRoundtripTest, BuiltinCall) {
     auto* fn = b.Function("Function", ty.f32());
-    b.Append(fn->Block(), [&] { b.Return(fn, b.Call<i32>(core::BuiltinFn::kMax, 1_i, 2_i)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Max(1_i, 2_i)); });
     RUN_TEST();
 }
 

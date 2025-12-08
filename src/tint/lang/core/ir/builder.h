@@ -919,8 +919,8 @@ class Builder {
     }
 
     /// Creates an Multiply operation
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
+    /// @param lhs the lhs of the multiply
+    /// @param rhs the rhs of the multiply
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* Multiply(LHS&& lhs, RHS&& rhs) {
@@ -965,8 +965,8 @@ class Builder {
     }
 
     /// Creates an Divide operation
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
+    /// @param lhs the lhs of the divide
+    /// @param rhs the rhs of the divide
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* Divide(LHS&& lhs, RHS&& rhs) {
@@ -997,8 +997,8 @@ class Builder {
     }
 
     /// Creates an Modulo operation
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
+    /// @param lhs the lhs of the modulo
+    /// @param rhs the rhs of the modulo
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* Modulo(LHS&& lhs, RHS&& rhs) {
@@ -1026,6 +1026,54 @@ class Builder {
 
         return Append(ir.CreateInstruction<ir::CoreBinary>(
             InstructionResult(result_type), BinaryOp::kModulo, lhs_value, rhs_value));
+    }
+
+    /// Creates a Min operation
+    /// @param lhs the lhs of the min
+    /// @param rhs the rhs of the min
+    /// @returns the operation
+    template <typename LHS, typename RHS>
+    ir::CoreBuiltinCall* Min(LHS&& lhs, RHS&& rhs) {
+        CheckForNonDeterministicEvaluation<LHS, RHS>();
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+
+        return Call(lhs_value->Type(), core::BuiltinFn::kMin, lhs_value, rhs_value);
+    }
+
+    /// Creates a Max operation
+    /// @param lhs the lhs of the max
+    /// @param rhs the rhs of the max
+    /// @returns the operation
+    template <typename LHS, typename RHS>
+    ir::CoreBuiltinCall* Max(LHS&& lhs, RHS&& rhs) {
+        CheckForNonDeterministicEvaluation<LHS, RHS>();
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+
+        return Call(lhs_value->Type(), core::BuiltinFn::kMax, lhs_value, rhs_value);
+    }
+
+    /// Creates a Clamp operation
+    /// @param val the value to clamp
+    /// @param min the min value
+    /// @param max the max value
+    /// @returns the operation
+    template <typename VAL, typename MIN, typename MAX>
+    ir::CoreBuiltinCall* Clamp(VAL&& val, MIN&& min, MAX&& max) {
+        CheckForNonDeterministicEvaluation<VAL, MIN, MAX>();
+        auto* val_value = Value(std::forward<VAL>(val));
+        auto* min_value = Value(std::forward<MIN>(min));
+        auto* max_value = Value(std::forward<MAX>(max));
+        TINT_ASSERT(val_value);
+        TINT_ASSERT(min_value);
+        TINT_ASSERT(max_value);
+
+        return Call(val_value->Type(), core::BuiltinFn::kClamp, val_value, min_value, max_value);
     }
 
     /// Creates an op for `op val`
