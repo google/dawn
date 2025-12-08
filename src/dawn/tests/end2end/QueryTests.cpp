@@ -99,7 +99,7 @@ class OcclusionExpectation : public detail::Expectation {
 class OcclusionQueryTests : public QueryTests {
   protected:
     void SetUp() override {
-        DawnTest::SetUp();
+        QueryTests::SetUp();
 
         // Create basic render pipeline
         vsModule = utils::CreateShaderModule(device, R"(
@@ -621,10 +621,27 @@ class TimestampExpectation : public detail::Expectation {
     }
 };
 
-class TimestampQueryTests : public QueryTests {
+class TimestampQueryTestsBase : public QueryTests {
   protected:
     void SetUp() override {
-        DawnTest::SetUp();
+        QueryTests::SetUp();
+
+        // TODO(crbug.com/458607667): Timestamp tests are flaky on WARP.
+        DAWN_SUPPRESS_TEST_IF(IsWARP());
+    }
+
+    wgpu::QuerySet CreateQuerySetForTimestamp(uint32_t queryCount) {
+        wgpu::QuerySetDescriptor descriptor;
+        descriptor.count = queryCount;
+        descriptor.type = wgpu::QueryType::Timestamp;
+        return device.CreateQuerySet(&descriptor);
+    }
+};
+
+class TimestampQueryTests : public TimestampQueryTestsBase {
+  protected:
+    void SetUp() override {
+        TimestampQueryTestsBase::SetUp();
 
         // Skip all tests if timestamp feature is not supported
         DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::TimestampQuery}));
@@ -646,13 +663,6 @@ class TimestampQueryTests : public QueryTests {
             requiredFeatures.push_back(wgpu::FeatureName::TimestampQuery);
         }
         return requiredFeatures;
-    }
-
-    wgpu::QuerySet CreateQuerySetForTimestamp(uint32_t queryCount) {
-        wgpu::QuerySetDescriptor descriptor;
-        descriptor.count = queryCount;
-        descriptor.type = wgpu::QueryType::Timestamp;
-        return device.CreateQuerySet(&descriptor);
     }
 
     wgpu::RenderPipeline CreateRenderPipeline(bool hasFragmentStage = true) {
@@ -854,10 +864,6 @@ TEST_P(TimestampQueryTests, QuerySetCreation) {
 
 // Test calling timestamp query from command encoder
 TEST_P(TimestampQueryTests, TimestampOnCommandEncoder) {
-    // TODO(crbug.com/458607667): Flaky on WARP, but seemingly only on Debug
-    // builds built with MSVC.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP() && IsWebGPUOnWebGPU());
-
     constexpr uint32_t kQueryCount = 2;
 
     // Write timestamp with different query indexes
@@ -918,10 +924,6 @@ TEST_P(TimestampQueryTests, TimestampWritesQueryIndexOnComputePass) {
 
 // Test timestampWrites with timestamp location in compute pass descriptor
 TEST_P(TimestampQueryTests, TimestampWritesLocationOnComputePass) {
-    // TODO(crbug.com/458607667): Flaky on WARP, but seemingly only on Debug
-    // builds built with MSVC.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
-
     constexpr uint32_t kQueryCount = 2;
 
     // Set timestampWrites with only one value of ComputePassTimestampLocation
@@ -1083,8 +1085,6 @@ TEST_P(TimestampQueryTests, ResolveWithoutWritten) {
 
 // Test resolving timestamp query to one slot in the buffer
 TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());  // Flaky on WARP
-
     constexpr uint32_t kQueryCount = 2;
     constexpr uint64_t kBufferSize = kQueryCount * sizeof(uint64_t) + kMinDestinationOffset;
     constexpr uint64_t kCount = kQueryCount + kMinCount;
@@ -1171,10 +1171,10 @@ TEST_P(TimestampQueryTests, ManyWriteTimestampDistinctQuerySets) {
     }
 }
 
-class TimestampQueryInsidePassesTests : public TimestampQueryTests {
+class TimestampQueryInsidePassesTests : public TimestampQueryTestsBase {
   protected:
     void SetUp() override {
-        DawnTest::SetUp();
+        TimestampQueryTestsBase::SetUp();
 
         // Skip all tests if timestamp feature is not supported
         DAWN_TEST_UNSUPPORTED_IF(
@@ -1197,8 +1197,6 @@ class TimestampQueryInsidePassesTests : public TimestampQueryTests {
 
 // Test calling timestamp query from render pass encoder
 TEST_P(TimestampQueryInsidePassesTests, FromOnRenderPass) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());  // Flaky on WARP
-
     constexpr uint32_t kQueryCount = 2;
 
     // Write timestamp with different query indexes
@@ -1246,7 +1244,6 @@ TEST_P(TimestampQueryInsidePassesTests, FromOnRenderPass) {
 TEST_P(TimestampQueryInsidePassesTests, FromComputePass) {
     // TODO(crbug.com/dawn/1852): Flaky negative timestamps on Mac AMD and Windows WARP.
     DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     constexpr uint32_t kQueryCount = 2;
 
