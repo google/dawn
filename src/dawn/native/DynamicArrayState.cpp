@@ -285,80 +285,80 @@ bool DynamicArrayState::IsDestroyed() const {
     return mDestroyed;
 }
 
-bool DynamicArrayState::CanBeUpdated(BindingIndex i) const {
+bool DynamicArrayState::CanBeUpdated(BindingIndex slot) const {
     DAWN_ASSERT(!mDestroyed);
-    return mBindingState[i].availableAfter <= mDevice->GetQueue()->GetCompletedCommandSerial();
+    return mBindingState[slot].availableAfter <= mDevice->GetQueue()->GetCompletedCommandSerial();
 }
 
 std::optional<BindingIndex> DynamicArrayState::GetFreeSlot() const {
     // TODO(https://crbug.com/435317394): This is O(n) in the number of bindings. We could make it
     // O(logN) with a heap of the free slots that's maintained over time.
-    for (BindingIndex i : Range(mAPISize)) {
-        if (CanBeUpdated(i)) {
-            return {i};
+    for (BindingIndex slot : Range(mAPISize)) {
+        if (CanBeUpdated(slot)) {
+            return {slot};
         }
     }
     return {};
 }
 
-void DynamicArrayState::Update(BindingIndex i, const BindGroupEntryContents& contents) {
-    DAWN_ASSERT(CanBeUpdated(i));
-    DAWN_ASSERT(mBindingState[i].typeId == tint::ResourceType::kEmpty);
-    mBindingState[i].availableAfter = kMaxExecutionSerial;
-    SetEntry(i, contents);
+void DynamicArrayState::Update(BindingIndex slot, const BindGroupEntryContents& contents) {
+    DAWN_ASSERT(CanBeUpdated(slot));
+    DAWN_ASSERT(mBindingState[slot].typeId == tint::ResourceType::kEmpty);
+    mBindingState[slot].availableAfter = kMaxExecutionSerial;
+    SetEntry(slot, contents);
 }
 
-void DynamicArrayState::Remove(BindingIndex i) {
+void DynamicArrayState::Remove(BindingIndex slot) {
     // Prevent all accesses to the binding which means it will be possible to update it once all
     // current GPU work is finished.
-    mBindingState[i].availableAfter = mDevice->GetQueue()->GetLastSubmittedCommandSerial();
+    mBindingState[slot].availableAfter = mDevice->GetQueue()->GetLastSubmittedCommandSerial();
 
     // Set the entry to be empty, which will unlink previously set resources.
-    SetEntry(i, {});
+    SetEntry(slot, {});
 }
 
-void DynamicArrayState::SetEntry(BindingIndex i, const BindGroupEntryContents& contents) {
+void DynamicArrayState::SetEntry(BindingIndex slot, const BindGroupEntryContents& contents) {
     // TODO(435317394): Support bindings that aren't TextureViews
     DAWN_ASSERT(contents.buffer == nullptr && contents.sampler == nullptr);
     TextureViewBase* view = contents.textureView;
 
-    if (mBindings[i] == view) {
+    if (mBindings[slot] == view) {
         return;
     }
 
     // Update the mBindings slot but also the mapping to the slot that are stored in the textures.
-    if (mBindings[i] != nullptr) {
-        mBindings[i]->GetTexture()->RemoveDynamicArraySlot(this, i);
+    if (mBindings[slot] != nullptr) {
+        mBindings[slot]->GetTexture()->RemoveDynamicArraySlot(this, slot);
     }
     if (view != nullptr) {
-        view->GetTexture()->AddDynamicArraySlot(this, i);
+        view->GetTexture()->AddDynamicArraySlot(this, slot);
     }
-    mBindings[i] = view;
-    mBindingState[i].resourceDirty = true;
-    MarkStateDirty(i);
+    mBindings[slot] = view;
+    mBindingState[slot].resourceDirty = true;
+    MarkStateDirty(slot);
 
     // Update the mBindingState with information for the updated binding.
     tint::ResourceType typeId = ComputeTypeId(view);
     bool pinned = view != nullptr && view->GetTexture()->HasPinnedUsage();
-    SetMetadata(i, typeId, pinned);
+    SetMetadata(slot, typeId, pinned);
 }
 
-void DynamicArrayState::OnPinned(BindingIndex i, TextureBase* texture) {
+void DynamicArrayState::OnPinned(BindingIndex slot, TextureBase* texture) {
     DAWN_ASSERT(!mDestroyed);
-    DAWN_ASSERT(mBindings[i] != nullptr);
-    DAWN_ASSERT(mBindings[i]->GetTexture() == texture);
-    DAWN_ASSERT(!mBindingState[i].pinned);
-    mBindingState[i].pinned = true;
-    MarkStateDirty(i);
+    DAWN_ASSERT(mBindings[slot] != nullptr);
+    DAWN_ASSERT(mBindings[slot]->GetTexture() == texture);
+    DAWN_ASSERT(!mBindingState[slot].pinned);
+    mBindingState[slot].pinned = true;
+    MarkStateDirty(slot);
 }
 
-void DynamicArrayState::OnUnpinned(BindingIndex i, TextureBase* texture) {
+void DynamicArrayState::OnUnpinned(BindingIndex slot, TextureBase* texture) {
     DAWN_ASSERT(!mDestroyed);
-    DAWN_ASSERT(mBindings[i] != nullptr);
-    DAWN_ASSERT(mBindings[i]->GetTexture() == texture);
-    DAWN_ASSERT(mBindingState[i].pinned);
-    mBindingState[i].pinned = false;
-    MarkStateDirty(i);
+    DAWN_ASSERT(mBindings[slot] != nullptr);
+    DAWN_ASSERT(mBindings[slot]->GetTexture() == texture);
+    DAWN_ASSERT(mBindingState[slot].pinned);
+    mBindingState[slot].pinned = false;
+    MarkStateDirty(slot);
 }
 
 DynamicArrayState::BindingUpdates DynamicArrayState::AcquireDirtyBindingUpdates() {
@@ -392,19 +392,19 @@ DynamicArrayState::BindingUpdates DynamicArrayState::AcquireDirtyBindingUpdates(
     return updates;
 }
 
-void DynamicArrayState::MarkStateDirty(BindingIndex i) {
-    if (!mBindingState[i].dirty) {
-        mDirtyBindings.push_back(i);
-        mBindingState[i].dirty = true;
+void DynamicArrayState::MarkStateDirty(BindingIndex slot) {
+    if (!mBindingState[slot].dirty) {
+        mDirtyBindings.push_back(slot);
+        mBindingState[slot].dirty = true;
     }
 }
 
-void DynamicArrayState::SetMetadata(BindingIndex i, tint::ResourceType typeId, bool pinned) {
-    BindingState& state = mBindingState[i];
+void DynamicArrayState::SetMetadata(BindingIndex slot, tint::ResourceType typeId, bool pinned) {
+    BindingState& state = mBindingState[slot];
     if (state.typeId != typeId || state.pinned != pinned) {
         state.typeId = typeId;
         state.pinned = pinned;
-        MarkStateDirty(i);
+        MarkStateDirty(slot);
     }
 }
 

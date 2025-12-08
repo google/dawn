@@ -75,7 +75,7 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     ityp::span<BindingIndex, const Ref<TextureViewBase>> GetBindings() const;
     BufferBase* GetMetadataBuffer() const;
     bool IsDestroyed() const;
-    bool CanBeUpdated(BindingIndex i) const;
+    bool CanBeUpdated(BindingIndex slot) const;
     std::optional<BindingIndex> GetFreeSlot() const;
 
     // Methods that mutate the state of bindings in the dynamic array. They keep track of the
@@ -83,10 +83,10 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     // what's in the binding array.
     // `contents` can contain no resources, this is useful to mark the slot used even when an error
     // happens, to match what client-side validation would do.
-    void Update(BindingIndex i, const BindGroupEntryContents& contents);
-    void Remove(BindingIndex i);
-    void OnPinned(BindingIndex i, TextureBase* texture);
-    void OnUnpinned(BindingIndex i, TextureBase* texture);
+    void Update(BindingIndex slot, const BindGroupEntryContents& contents);
+    void Remove(BindingIndex slot);
+    void OnPinned(BindingIndex slot, TextureBase* texture);
+    void OnUnpinned(BindingIndex slot, TextureBase* texture);
 
     // Returns the various type ids that need to be updated in the metadata buffer before the next
     // use of the binding array.
@@ -134,10 +134,10 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     std::vector<BindingIndex> mDirtyBindings;
 
     // Helper method that does the bulk of the shared work between Update and RemoveBinding.
-    void SetEntry(BindingIndex i, const BindGroupEntryContents& contents);
+    void SetEntry(BindingIndex slot, const BindGroupEntryContents& contents);
 
-    void MarkStateDirty(BindingIndex i);
-    void SetMetadata(BindingIndex i, tint::ResourceType typeId, bool pinned);
+    void MarkStateDirty(BindingIndex slot);
+    void SetMetadata(BindingIndex slot, tint::ResourceType typeId, bool pinned);
 };
 
 class DynamicArrayDefaultBindings : public NonMovable {
