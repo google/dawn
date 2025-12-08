@@ -60,7 +60,23 @@ public class DeviceLostException(
 /**
  * Base class for exceptions that can happen at runtime.
  */
-public open class WebGpuRuntimeException(message: String): Exception(message)
+public open class WebGpuRuntimeException(message: String): Exception(message) {
+    public companion object {
+        /**
+         * Create the exception for the appropriate error type.
+         * @param type The [{{ kotlin_name(ns.error) }}].
+         * @param message A human-readable message describing the error.
+         */
+        @JvmStatic
+        internal fun create(@{{ kotlin_name(ns.error) }} type: Int, message: String): WebGpuRuntimeException =
+            when (type) {
+                {% for value in ns.error.values if value.name.get() != "no error" %}
+                    {{ kotlin_name(ns.error) }}.{{value.name.CamelCase()}} -> {{value.name.CamelCase()}}Exception(message)
+                {% endfor %}
+                else -> UnknownException(message)
+            }
+    }
+}
 
 {% for value in ns.error.values if value.name.get() != "no error" %}
     /**
@@ -71,19 +87,6 @@ public open class WebGpuRuntimeException(message: String): Exception(message)
     public class {{value.name.CamelCase()}}Exception(message: String) : WebGpuRuntimeException(message);
 
 {% endfor %}
-
-/**
- * Create the exception for the appropriate error type.
- * @param type The [{{ kotlin_name(ns.error) }}].
- * @param message A human-readable message describing the device loss.
- */
-public fun getException(@{{ kotlin_name(ns.error) }} type: Int, message: String): WebGpuRuntimeException =
-    when (type) {
-        {% for value in ns.error.values if value.name.get() != "no error" %}
-            {{ kotlin_name(ns.error) }}.{{value.name.CamelCase()}} -> {{value.name.CamelCase()}}Exception(message)
-        {% endfor %}
-        else -> UnknownException(message)
-    }
 
 //* Generate a custom exception for every enum ending 'status'.
 //* 'status' is renamed 'web gpu status'.

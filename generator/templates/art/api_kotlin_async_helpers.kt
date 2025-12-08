@@ -94,7 +94,7 @@ package {{ kotlin_package }}
                         {% if ns.payload_arg and ns.payload_arg.type.name.get() == 'error type' %}
                             //* If the payload is a Dawn error type, create the matching exception.
                             else if ({{ as_varName(ns.payload_arg.name) }} != ErrorType.NoError) {
-                                it.resumeWithException(getException({{ as_varName(ns.payload_arg.name) }}, {{ as_varName(ns.message_arg.name) }}))
+                                it.resumeWithException(WebGpuRuntimeException.create({{ as_varName(ns.payload_arg.name) }}, {{ as_varName(ns.message_arg.name) }}))
                             }
                         {% endif %}
                         {% if ns.payload_arg.optional %}

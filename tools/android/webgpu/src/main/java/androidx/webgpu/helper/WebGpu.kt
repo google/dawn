@@ -27,7 +27,7 @@ import androidx.webgpu.UncapturedErrorCallback
 import androidx.webgpu.UnknownException
 import androidx.webgpu.ValidationException
 import androidx.webgpu.GPU.createInstance
-import androidx.webgpu.getException
+import androidx.webgpu.WebGpuRuntimeException
 import androidx.webgpu.helper.Util.windowFromSurface
 import java.util.concurrent.Executor
 
@@ -121,7 +121,7 @@ private suspend inline fun requestDevice(
 private val defaultUncapturedErrorCallback
     get(): UncapturedErrorCallback {
         return UncapturedErrorCallback { _, type, message ->
-            throw getException(type, message)
+            throw WebGpuRuntimeException.create(type, message)
         }
     }
 
