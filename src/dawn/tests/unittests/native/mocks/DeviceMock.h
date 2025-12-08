@@ -112,6 +112,10 @@ class DeviceMock : public DeviceBase {
                 CreateUninitializedRenderPipelineImpl,
                 (const UnpackedPtr<RenderPipelineDescriptor>&),
                 (override));
+    MOCK_METHOD(ResultOrError<Ref<ResourceTableBase>>,
+                CreateResourceTableImpl,
+                (const ResourceTableDescriptor*),
+                (override));
     MOCK_METHOD(ResultOrError<Ref<SamplerBase>>,
                 CreateSamplerImpl,
                 (const SamplerDescriptor*),

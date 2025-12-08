@@ -1446,6 +1446,14 @@ QuerySetBase* DeviceBase::APICreateQuerySet(const QuerySetDescriptor* descriptor
     }
     return ReturnToAPI(std::move(result));
 }
+ResourceTableBase* DeviceBase::APICreateResourceTable(const ResourceTableDescriptor* descriptor) {
+    Ref<ResourceTableBase> result;
+    if (ConsumedError(CreateResourceTable(descriptor), &result,
+                      "calling %s.CreateResourceTable(%s).", this, descriptor)) {
+        result = ResourceTableBase::MakeError(this);
+    }
+    return ReturnToAPI(std::move(result));
+}
 SamplerBase* DeviceBase::APICreateSampler(const SamplerDescriptor* descriptor) {
     Ref<SamplerBase> result;
     if (ConsumedError(CreateSampler(descriptor), &result, "calling %s.CreateSampler(%s).", this,
@@ -1702,15 +1710,6 @@ ExternalTextureBase* DeviceBase::APICreateExternalTexture(
         result = ExternalTextureBase::MakeError(this);
     }
 
-    return ReturnToAPI(std::move(result));
-}
-
-ResourceTableBase* DeviceBase::APICreateResourceTable(const ResourceTableDescriptor* descriptor) {
-    Ref<ResourceTableBase> result;
-    if (ConsumedError(CreateResourceTableImpl(descriptor), &result,
-                      "calling %s.CreateResourceTable(%s).", this, descriptor)) {
-        result = ResourceTableBase::MakeError(this);
-    }
     return ReturnToAPI(std::move(result));
 }
 
@@ -2194,17 +2193,6 @@ ResultOrError<Ref<ExternalTextureBase>> DeviceBase::CreateExternalTextureImpl(
     return ExternalTextureBase::Create(this, descriptor);
 }
 
-ResultOrError<Ref<ResourceTableBase>> DeviceBase::CreateResourceTableImpl(
-    const ResourceTableDescriptor* descriptor) {
-    DAWN_TRY(ValidateIsAlive());
-    if (IsValidationEnabled()) {
-        DAWN_TRY_CONTEXT(ValidateResourceTableDescriptor(this, descriptor), "validating %s",
-                         descriptor);
-    }
-
-    return ResourceTableBase::Create(this, descriptor);
-}
-
 ResultOrError<Ref<QuerySetBase>> DeviceBase::CreateQuerySet(const QuerySetDescriptor* descriptor) {
     DAWN_TRY(ValidateIsAlive());
     if (IsValidationEnabled()) {
@@ -2284,6 +2272,17 @@ ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateUninitializedRenderPipe
                                    this, *descriptor, &appliedDescriptor, allowInternalBinding));
 
     return CreateUninitializedRenderPipelineImpl(Unpack(&appliedDescriptor));
+}
+
+ResultOrError<Ref<ResourceTableBase>> DeviceBase::CreateResourceTable(
+    const ResourceTableDescriptor* descriptor) {
+    DAWN_TRY(ValidateIsAlive());
+    if (IsValidationEnabled()) {
+        DAWN_TRY_CONTEXT(ValidateResourceTableDescriptor(this, descriptor), "validating %s",
+                         descriptor);
+    }
+
+    return CreateResourceTableImpl(descriptor);
 }
 
 ResultOrError<Ref<SamplerBase>> DeviceBase::CreateSampler(const SamplerDescriptor* descriptorOrig) {

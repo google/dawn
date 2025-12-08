@@ -43,6 +43,7 @@
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderPipeline.h"
+#include "dawn/native/ResourceTable.h"
 #include "dawn/native/RingBufferAllocator.h"
 #include "dawn/native/Sampler.h"
 #include "dawn/native/ShaderModule.h"
@@ -65,6 +66,7 @@ using PipelineLayout = PipelineLayoutBase;
 class QuerySet;
 class Queue;
 class RenderPipeline;
+class ResourceTable;
 using Sampler = SamplerBase;
 class ShaderModule;
 class SwapChain;
@@ -83,6 +85,7 @@ struct NullBackendTraits {
     using QuerySetType = QuerySet;
     using QueueType = Queue;
     using RenderPipelineType = RenderPipeline;
+    using ResourceTableType = ResourceTable;
     using SamplerType = Sampler;
     using ShaderModuleType = ShaderModule;
     using SwapChainType = SwapChain;
@@ -157,6 +160,8 @@ class Device final : public DeviceBase {
         const QuerySetDescriptor* descriptor) override;
     Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor) override;
+    ResultOrError<Ref<ResourceTableBase>> CreateResourceTableImpl(
+        const ResourceTableDescriptor* descriptor) override;
     ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(const SamplerDescriptor* descriptor) override;
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
@@ -318,6 +323,11 @@ class RenderPipeline final : public RenderPipelineBase {
     using RenderPipelineBase::RenderPipelineBase;
 
     MaybeError InitializeImpl() override;
+};
+
+class ResourceTable final : public ResourceTableBase {
+  public:
+    ResourceTable(Device* device, const ResourceTableDescriptor* descriptor);
 };
 
 class ShaderModule final : public ShaderModuleBase {

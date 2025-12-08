@@ -45,6 +45,7 @@ class QuerySet;
 class Queue;
 class RenderPipeline;
 class ResourceHeap;
+class ResourceTable;
 class Sampler;
 class ShaderModule;
 class SharedTextureMemory;
@@ -67,6 +68,7 @@ struct VulkanBackendTraits {
     using QueueType = Queue;
     using RenderPipelineType = RenderPipeline;
     using ResourceHeapType = ResourceHeap;
+    using ResourceTableType = ResourceTable;
     using SamplerType = Sampler;
     using ShaderModuleType = ShaderModule;
     using SharedTextureMemoryType = SharedTextureMemory;

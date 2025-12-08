@@ -233,6 +233,8 @@ class DeviceBase : public ErrorSink,
     ResultOrError<Ref<RenderPipelineBase>> CreateUninitializedRenderPipeline(
         const RenderPipelineDescriptor* descriptor,
         bool allowInternalBinding = false);
+    ResultOrError<Ref<ResourceTableBase>> CreateResourceTable(
+        const ResourceTableDescriptor* descriptor);
     ResultOrError<Ref<SamplerBase>> CreateSampler(const SamplerDescriptor* descriptor = nullptr);
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
@@ -517,12 +519,12 @@ class DeviceBase : public ErrorSink,
         const UnpackedPtr<BufferDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<ExternalTextureBase>> CreateExternalTextureImpl(
         const ExternalTextureDescriptor* descriptor);
-    virtual ResultOrError<Ref<ResourceTableBase>> CreateResourceTableImpl(
-        const ResourceTableDescriptor* descriptor);
     virtual ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutImpl(
         const UnpackedPtr<PipelineLayoutDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
         const QuerySetDescriptor* descriptor) = 0;
+    virtual ResultOrError<Ref<ResourceTableBase>> CreateResourceTableImpl(
+        const ResourceTableDescriptor* descriptor) = 0;
     virtual ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
         const SamplerDescriptor* descriptor) = 0;
     virtual ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(

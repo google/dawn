@@ -40,8 +40,6 @@ MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
 
 class ResourceTableBase : public ApiObjectBase {
   public:
-    static ResultOrError<Ref<ResourceTableBase>> Create(DeviceBase* device,
-                                                        const ResourceTableDescriptor* descriptor);
     static Ref<ResourceTableBase> MakeError(DeviceBase* device, StringView label = {});
 
     ObjectType GetType() const override;
@@ -49,8 +47,10 @@ class ResourceTableBase : public ApiObjectBase {
     // Dawn API
     void APIDestroy();
 
-  private:
+  protected:
     ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor);
+
+  private:
     ResourceTableBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
     void DestroyImpl() override;
 

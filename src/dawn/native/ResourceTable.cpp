@@ -57,14 +57,6 @@ ResourceTableBase::ResourceTableBase(DeviceBase* device, ObjectBase::ErrorTag ta
     : ApiObjectBase(device, tag, label), mDestroyed(true) {}
 
 // static
-ResultOrError<Ref<ResourceTableBase>> ResourceTableBase::Create(
-    DeviceBase* device,
-    const ResourceTableDescriptor* descriptor) {
-    Ref<ResourceTableBase> resourceTable = AcquireRef(new ResourceTableBase(device, descriptor));
-    return std::move(resourceTable);
-}
-
-// static
 Ref<ResourceTableBase> ResourceTableBase::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new ResourceTableBase(device, ObjectBase::kError, label));
 }

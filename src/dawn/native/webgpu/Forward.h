@@ -45,6 +45,7 @@ class QuerySet;
 class Queue;
 class RenderBundle;
 class RenderPipeline;
+class ResourceTable;
 class Sampler;
 class ShaderModule;
 class SwapChain;
@@ -64,6 +65,7 @@ struct WebGPUBackendTraits {
     using QueueType = Queue;
     using RenderBundleType = RenderBundle;
     using RenderPipelineType = RenderPipeline;
+    using ResourceTableType = ResourceTable;
     using SamplerType = Sampler;
     using ShaderModuleType = ShaderModule;
     using SwapChainType = SwapChain;
