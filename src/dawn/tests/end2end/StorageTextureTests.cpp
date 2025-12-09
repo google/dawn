@@ -1770,7 +1770,6 @@ TEST_P(ReadWriteStorageTextureTests, ReadMipLevel0WriteMipLevel1) {
 TEST_P(ReadWriteStorageTextureTests, ReadMipLevel2AsBothTextureBindingAndStorageBinding) {
     // This asserts in TextureVK.cpp, see https://crbug.com/392121643
     DAWN_SUPPRESS_TEST_IF(IsVulkan());
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Vulkan));
 
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
         @binding(0) @group(0) var<storage, read_write> buf : array<vec4u>;

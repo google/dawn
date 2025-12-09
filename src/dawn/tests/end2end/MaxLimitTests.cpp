@@ -123,7 +123,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
     // TODO(crbug.com/dawn/1217): Remove this suppression.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Vulkan));
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsWebGPUOnWebGPU());
 
     // TODO(crbug.com/dawn/1705): Use a zero buffer to clear buffers. Otherwise, the test
     // OOMs.

@@ -273,12 +273,16 @@ class DawnTestBase {
     bool IsD3D12() const;
     bool IsMetal() const;
     bool IsNull() const;
-    bool IsWebGPUOnWebGPU() const;
-    bool IsWebGPUOn(wgpu::BackendType backend) const;
-    bool IsWebGPUOnSwiftshader() const;
     bool IsOpenGL() const;
     bool IsOpenGLES() const;
     bool IsVulkan() const;
+    // You should only use this if you really care that it's specifically WebGPUOnWebGPU.
+    // Otherwise you should use one of the other backend checks.
+    bool IsWebGPUOnWebGPU() const;
+    // Use this specifically to check that it's WebGPUOnWebGPU with a specific backend
+    bool IsWebGPUOn(wgpu::BackendType backend) const;
+    // Checks the actual backend, even on WebGPUOnWebGPU
+    bool IsBackend(wgpu::BackendType backend) const;
 
     bool IsAMD() const;
     bool IsApple() const;
@@ -362,6 +366,9 @@ class DawnTestBase {
   protected:
     wgpu::Instance instance;
     wgpu::Adapter adapter;
+    // wgpu::AdapterInfo needs to be a unique_ptr because it has a destructor
+    // that must be called before the device/instance has been freed.
+    std::unique_ptr<wgpu::AdapterInfo> mAdapterInfo;
     dawn::utils::ComboLimits adapterLimits;
     wgpu::Device device;
     dawn::utils::ComboLimits deviceLimits;

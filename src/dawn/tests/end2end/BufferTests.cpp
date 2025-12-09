@@ -776,7 +776,7 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
 
     // With Vulkan Queue::WriteBuffers() doesn't encode any commands which need to be waited on so
     // MapAsync() can happen immediately. On other platforms that isn't the case.
-    bool mapCompletesFirst = IsVulkan();
+    bool mapCompletesFirst = IsVulkan() && !IsWebGPUOnWebGPU();
 
     // 1. submission without using buffer.
     SubmitCommandBuffer({});

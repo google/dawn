@@ -122,7 +122,9 @@ class PipelineCachingTests : public DawnTest {
     };
     const EntryCounts counts = {
         // pipeline caching is only implemented on D3D12/Vulkan
-        IsD3D12() || IsVulkan() ? 1u : 0u,
+        IsWebGPUOnWebGPU()        ? 0u
+        : IsD3D12() || IsVulkan() ? 1u
+                                  : 0u,
         // WebGPU backend simply passthrough but doesn't compile shader binary to store in blob
         // cache.
         IsWebGPUOnWebGPU() ? 0u : 1u,

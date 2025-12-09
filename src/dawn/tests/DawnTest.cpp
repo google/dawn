@@ -947,20 +947,24 @@ DawnTestBase::~DawnTestBase() {
     gCurrentTest = nullptr;
 }
 
+bool DawnTestBase::IsBackend(wgpu::BackendType backend) const {
+    return mParam.adapterProperties.backendType == backend || IsWebGPUOn(backend);
+}
+
 bool DawnTestBase::IsD3D11() const {
-    return mParam.adapterProperties.backendType == wgpu::BackendType::D3D11;
+    return IsBackend(wgpu::BackendType::D3D11);
 }
 
 bool DawnTestBase::IsD3D12() const {
-    return mParam.adapterProperties.backendType == wgpu::BackendType::D3D12;
+    return IsBackend(wgpu::BackendType::D3D12);
 }
 
 bool DawnTestBase::IsMetal() const {
-    return mParam.adapterProperties.backendType == wgpu::BackendType::Metal;
+    return IsBackend(wgpu::BackendType::Metal);
 }
 
 bool DawnTestBase::IsNull() const {
-    return mParam.adapterProperties.backendType == wgpu::BackendType::Null;
+    return IsBackend(wgpu::BackendType::Null);
 }
 
 bool DawnTestBase::IsWebGPUOnWebGPU() const {
@@ -971,54 +975,49 @@ bool DawnTestBase::IsWebGPUOn(wgpu::BackendType backend) const {
     return IsWebGPUOnWebGPU() && mParam.adapterProperties.innerBackendType == backend;
 }
 
-bool DawnTestBase::IsWebGPUOnSwiftshader() const {
-    return IsWebGPUOnWebGPU() && IsSwiftshader();
-}
-
 bool DawnTestBase::IsOpenGL() const {
-    return mParam.adapterProperties.backendType == wgpu::BackendType::OpenGL;
+    return IsBackend(wgpu::BackendType::OpenGL);
 }
 
 bool DawnTestBase::IsOpenGLES() const {
-    return mParam.adapterProperties.backendType == wgpu::BackendType::OpenGLES;
+    return IsBackend(wgpu::BackendType::OpenGLES);
 }
 
 bool DawnTestBase::IsVulkan() const {
-    return mParam.adapterProperties.backendType == wgpu::BackendType::Vulkan;
+    return IsBackend(wgpu::BackendType::Vulkan);
 }
 
 bool DawnTestBase::IsAMD() const {
-    return gpu_info::IsAMD(mParam.adapterProperties.vendorID);
+    return gpu_info::IsAMD(mAdapterInfo->vendorID);
 }
 
 bool DawnTestBase::IsApple() const {
-    return gpu_info::IsApple(mParam.adapterProperties.vendorID);
+    return gpu_info::IsApple(mAdapterInfo->vendorID);
 }
 
 bool DawnTestBase::IsARM() const {
-    return gpu_info::IsARM(mParam.adapterProperties.vendorID);
+    return gpu_info::IsARM(mAdapterInfo->vendorID);
 }
 
 bool DawnTestBase::IsImgTec() const {
-    return gpu_info::IsImgTec(mParam.adapterProperties.vendorID);
+    return gpu_info::IsImgTec(mAdapterInfo->vendorID);
 }
 
 bool DawnTestBase::IsIntel() const {
-    return gpu_info::IsIntel(mParam.adapterProperties.vendorID);
+    return gpu_info::IsIntel(mAdapterInfo->vendorID);
 }
 
 bool DawnTestBase::IsNvidia() const {
-    return gpu_info::IsNvidia(mParam.adapterProperties.vendorID);
+    return gpu_info::IsNvidia(mAdapterInfo->vendorID);
 }
 
 bool DawnTestBase::IsQualcomm() const {
-    return gpu_info::IsQualcommPCI(mParam.adapterProperties.vendorID) ||
-           gpu_info::IsQualcommACPI(mParam.adapterProperties.vendorID);
+    return gpu_info::IsQualcommPCI(mAdapterInfo->vendorID) ||
+           gpu_info::IsQualcommACPI(mAdapterInfo->vendorID);
 }
 
 bool DawnTestBase::IsSwiftshader() const {
-    return gpu_info::IsGoogleSwiftshader(mParam.adapterProperties.vendorID,
-                                         mParam.adapterProperties.deviceID);
+    return gpu_info::IsGoogleSwiftshader(mAdapterInfo->vendorID, mAdapterInfo->deviceID);
 }
 
 bool DawnTestBase::IsANGLE() const {
@@ -1031,38 +1030,28 @@ bool DawnTestBase::IsANGLESwiftShader() const {
 }
 
 bool DawnTestBase::IsWARP() const {
-    return gpu_info::IsMicrosoftWARP(mParam.adapterProperties.vendorID,
-                                     mParam.adapterProperties.deviceID);
+    return gpu_info::IsMicrosoftWARP(mAdapterInfo->vendorID, mAdapterInfo->deviceID);
 }
 
 bool DawnTestBase::IsMesaSoftware() const {
-    return gpu_info::IsMesaSoftware(mParam.adapterProperties.vendorID,
-                                    mParam.adapterProperties.deviceID);
+    return gpu_info::IsMesaSoftware(mAdapterInfo->vendorID, mAdapterInfo->deviceID);
 }
 
 bool DawnTestBase::IsIntelGen9() const {
-    return gpu_info::IsIntelGen9(mParam.adapterProperties.vendorID,
-                                 mParam.adapterProperties.deviceID);
+    return gpu_info::IsIntelGen9(mAdapterInfo->vendorID, mAdapterInfo->deviceID);
 }
 
 bool DawnTestBase::IsIntelGen12() const {
-    return gpu_info::IsIntelGen12LP(mParam.adapterProperties.vendorID,
-                                    mParam.adapterProperties.deviceID) ||
-           gpu_info::IsIntelGen12HP(mParam.adapterProperties.vendorID,
-                                    mParam.adapterProperties.deviceID);
+    return gpu_info::IsIntelGen12LP(mAdapterInfo->vendorID, mAdapterInfo->deviceID) ||
+           gpu_info::IsIntelGen12HP(mAdapterInfo->vendorID, mAdapterInfo->deviceID);
 }
 
 bool DawnTestBase::IsIntelGen12OrLater() const {
-    return gpu_info::IsIntelGen12LP(mParam.adapterProperties.vendorID,
-                                    mParam.adapterProperties.deviceID) ||
-           gpu_info::IsIntelGen12HP(mParam.adapterProperties.vendorID,
-                                    mParam.adapterProperties.deviceID) ||
-           gpu_info::IsIntelXeLPG(mParam.adapterProperties.vendorID,
-                                  mParam.adapterProperties.deviceID) ||
-           gpu_info::IsIntelXe2LPG(mParam.adapterProperties.vendorID,
-                                   mParam.adapterProperties.deviceID) ||
-           gpu_info::IsIntelXe2HPG(mParam.adapterProperties.vendorID,
-                                   mParam.adapterProperties.deviceID);
+    return gpu_info::IsIntelGen12LP(mAdapterInfo->vendorID, mAdapterInfo->deviceID) ||
+           gpu_info::IsIntelGen12HP(mAdapterInfo->vendorID, mAdapterInfo->deviceID) ||
+           gpu_info::IsIntelXeLPG(mAdapterInfo->vendorID, mAdapterInfo->deviceID) ||
+           gpu_info::IsIntelXe2LPG(mAdapterInfo->vendorID, mAdapterInfo->deviceID) ||
+           gpu_info::IsIntelXe2HPG(mAdapterInfo->vendorID, mAdapterInfo->deviceID);
 }
 
 bool DawnTestBase::IsWindows() const {
@@ -1484,6 +1473,8 @@ void DawnTestBase::SetUp() {
         mBackendAdapter.SetUseTieredLimits(true);
     }
     adapter.GetLimits(adapterLimits.GetLinked());
+    mAdapterInfo = std::make_unique<wgpu::AdapterInfo>();
+    adapter.GetInfo(mAdapterInfo.get());
 
     device = CreateDevice();
 
@@ -1512,6 +1503,8 @@ void DawnTestBase::TearDown() {
         float real_time_taken = mTimer->GetElapsedTime();
         EXPECT_GE(mExpectedTimeMaxSec, real_time_taken);
     }
+
+    mAdapterInfo = nullptr;
 }
 
 void DawnTestBase::DestroyDevice(wgpu::Device deviceToDestroy) {

@@ -1232,7 +1232,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSamp
     // the shader-output mask (emulting the sampleMask from RenderPipeline) and alpha-to-coverage
     // at the same time. See the issue: https://github.com/gpuweb/gpuweb/issues/959.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && !IsApple());
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Metal) && !IsApple());
 
 #if DAWN_PLATFORM_IS(32_BIT)
     // TODO(crbug.com/458113207): Flaky on 32-bit w/ WARP.
