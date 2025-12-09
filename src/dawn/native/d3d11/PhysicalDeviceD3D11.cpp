@@ -348,6 +348,16 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::ClearColorWithDraw, true);
     }
 
+    // TODO(crbug.com/458062283): older intel drivers seems to produce buggy shaders. Especially if
+    // they are very complex. Current workaround is disable FXC optimizations.
+    if (gpu_info::IsIntel(vendorId) &&
+        gpu_info::GetIntelGen(vendorId, deviceId) <= gpu_info::IntelGen::Gen9) {
+        const gpu_info::IntelWindowsDriverVersion kKnownGoodDriverVersion = {31, 0, 101, 2121};
+        if (gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) < kKnownGoodDriverVersion) {
+            deviceToggles->Default(Toggle::D3DSkipShaderOptimizations, true);
+        }
+    }
+
     // Enable the integer range analysis for shader robustness by default if the corresponding
     // platform feature is enabled.
     deviceToggles->Default(
