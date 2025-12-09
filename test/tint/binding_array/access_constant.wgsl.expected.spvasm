@@ -24,9 +24,10 @@
        %void = OpTypeVoid
          %10 = OpTypeFunction %void
 %_ptr_UniformConstant_4 = OpTypePointer UniformConstant %4
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
         %int = OpTypeInt 32 1
       %int_0 = OpConstant %int 0
-     %uint_1 = OpConstant %uint 1
      %v2uint = OpTypeVector %uint 2
          %27 = OpConstantComposite %v2uint %uint_1 %uint_1
       %v2int = OpTypeVector %int 2
@@ -34,17 +35,16 @@
     %v4float = OpTypeVector %float 4
          %fs = OpFunction %void None %10
          %11 = OpLabel
-         %14 = OpBitcast %uint %int_0
-         %12 = OpAccessChain %_ptr_UniformConstant_4 %sampled_textures %14
-         %17 = OpLoad %4 %12 None
-         %18 = OpImageQueryLevels %uint %17
-         %19 = OpISub %uint %18 %uint_1
-         %21 = OpBitcast %uint %int_0
-         %22 = OpExtInst %uint %23 UMin %21 %19
-         %24 = OpImageQuerySizeLod %v2uint %17 %22
+         %12 = OpAccessChain %_ptr_UniformConstant_4 %sampled_textures %uint_0
+         %15 = OpLoad %4 %12 None
+         %16 = OpImageQueryLevels %uint %15
+         %17 = OpISub %uint %16 %uint_1
+         %19 = OpBitcast %uint %int_0
+         %22 = OpExtInst %uint %23 UMin %19 %17
+         %24 = OpImageQuerySizeLod %v2uint %15 %22
          %26 = OpISub %v2uint %24 %27
          %28 = OpBitcast %v2uint %29
          %31 = OpExtInst %v2uint %23 UMin %28 %26
-%texture_load = OpImageFetch %v4float %17 %31 Lod %22
+%texture_load = OpImageFetch %v4float %15 %31 Lod %22
                OpReturn
                OpFunctionEnd

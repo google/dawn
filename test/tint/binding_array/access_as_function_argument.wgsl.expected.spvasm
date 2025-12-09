@@ -35,6 +35,7 @@
     %v4float = OpTypeVector %float 4
          %32 = OpTypeFunction %void
 %_ptr_UniformConstant_4 = OpTypePointer UniformConstant %4
+     %uint_0 = OpConstant %uint 0
 %do_texture_load = OpFunction %void None %11
           %t = OpFunctionParameter %4
          %12 = OpLabel
@@ -51,8 +52,7 @@
                OpFunctionEnd
          %fs = OpFunction %void None %32
          %33 = OpLabel
-         %36 = OpBitcast %uint %int_0
-         %34 = OpAccessChain %_ptr_UniformConstant_4 %sampled_textures %36
+         %34 = OpAccessChain %_ptr_UniformConstant_4 %sampled_textures %uint_0
          %37 = OpLoad %4 %34 None
          %38 = OpFunctionCall %void %do_texture_load %37
                OpReturn

@@ -1131,9 +1131,16 @@ class Printer {
             return Value(idx);
         }
 
-        // If the index isn't a unsigned value, then bitcast it to unsigned. A negative
-        // value is never allowed as a constant access index in SPIR-V. This cast fixes that
+        // If the index isn't a unsigned value, then convert it to unsigned. A negative
+        // value is never allowed as a constant access index in SPIR-V. This conversion fixes that
         // potential issue.
+
+        // If the index was a constant, keep it as a constant as is required for struct members.
+        if (auto* c = idx->As<core::ir::Constant>()) {
+            return Constant(ir_.constant_values.Get(c->Value()->ValueAs<u32>()));
+        }
+
+        // Use a bitcast for runtime values.
         uint32_t spv_id = module_.NextId();
         current_function_.PushInst(spv::Op::OpBitcast,
                                    {Type(ir_.Types().u32()), spv_id, Value(idx)});

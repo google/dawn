@@ -295,6 +295,33 @@ TEST_F(SpirvWriterTest, Access_Struct_Value_ConstantIndex) {
     EXPECT_INST("%result_b = OpCompositeExtract %int %str 1 2");
 }
 
+TEST_F(SpirvWriterTest, Access_Struct_Value_ConstantIndex_Signed) {
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                           {mod.symbols.Register("a"), ty.i32()},
+                                                           {mod.symbols.Register("b"), ty.vec4i()},
+                                                       });
+    auto* str_val = b.FunctionParam("str", str);
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({str_val});
+    b.Append(func->Block(), [&] {
+        auto* result_a = b.Access(ty.i32(), str_val, 0_i);
+        auto* result_b = b.Access(ty.i32(), str_val, 1_i, 2_i);
+        b.Return(func, b.Add(result_a, result_b));
+        mod.SetName(result_a, "result_a");
+        mod.SetName(result_b, "result_b");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(str)));
+        b.Return(eb);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result_a = OpCompositeExtract %int %str 0");
+    EXPECT_INST("%result_b = OpCompositeExtract %int %str 1 2");
+}
+
 TEST_F(SpirvWriterTest, Access_Struct_Pointer_ConstantIndex) {
     auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
                                                            {mod.symbols.Register("a"), ty.i32()},
@@ -305,6 +332,34 @@ TEST_F(SpirvWriterTest, Access_Struct_Pointer_ConstantIndex) {
         auto* str_var = b.Var("str", ty.ptr(function, str, read_write));
         auto* result_a = b.Access(ty.ptr<function, i32>(), str_var, 0_u);
         auto* result_b = b.Access(ty.ptr<function, vec4<i32>>(), str_var, 1_u);
+        auto* val_a = b.Load(result_a);
+        auto* val_b = b.Load(result_b);
+        b.Return(func, b.Add(val_a, val_b));
+        mod.SetName(result_a, "result_a");
+        mod.SetName(result_b, "result_b");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result_a = OpAccessChain %_ptr_Function_int %str %uint_0");
+    EXPECT_INST("%result_b = OpAccessChain %_ptr_Function_v4int %str %uint_1");
+}
+
+TEST_F(SpirvWriterTest, Access_Struct_Pointer_ConstantIndex_Signed) {
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                           {mod.symbols.Register("a"), ty.i32()},
+                                                           {mod.symbols.Register("b"), ty.vec4i()},
+                                                       });
+    auto* func = b.Function("foo", ty.vec4i());
+    b.Append(func->Block(), [&] {
+        auto* str_var = b.Var("str", ty.ptr(function, str, read_write));
+        auto* result_a = b.Access(ty.ptr<function, i32>(), str_var, 0_i);
+        auto* result_b = b.Access(ty.ptr<function, vec4<i32>>(), str_var, 1_i);
         auto* val_a = b.Load(result_a);
         auto* val_b = b.Load(result_b);
         b.Return(func, b.Add(val_a, val_b));
