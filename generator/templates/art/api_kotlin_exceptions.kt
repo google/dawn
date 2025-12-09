@@ -68,7 +68,7 @@ public open class WebGpuRuntimeException(message: String): Exception(message) {
          * @param message A human-readable message describing the error.
          */
         @JvmStatic
-        internal fun create(@{{ kotlin_name(ns.error) }} type: Int, message: String): WebGpuRuntimeException =
+        public fun create(@{{ kotlin_name(ns.error) }} type: Int, message: String): WebGpuRuntimeException =
             when (type) {
                 {% for value in ns.error.values if value.name.get() != "no error" %}
                     {{ kotlin_name(ns.error) }}.{{value.name.CamelCase()}} -> {{value.name.CamelCase()}}Exception(message)
