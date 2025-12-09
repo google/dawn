@@ -150,6 +150,44 @@ and use `find_package(Dawn)` in your CMake project to discover Dawn and link wit
 the `dawn::webgpu_dawn` target. Please see [Quickstart with CMake](./quickstart-cmake.md)
 for step-by-step instructions.
 
+### Using ccache for CMake builds
+There is a substantial number of source files that are needed to be
+built for Dawn and its dependencies (~thousands), which can lead to
+long compile times on resource bound machines (i.e. laptops),
+especially when performing clean builds. The general advice for this
+situation is use the gn build with a remote compile system like siso,
+if available.
+
+An alternative if remote compilation isn't available, or if using
+CMake is essential for your workflow, is to use
+[ccache](https://ccache.dev/) to avoid rebuilding targets. For full
+details on using ccache see the project's documentation, but below is
+an example of how to use it on a Debian based Linux dev env.
+
+```sh
+# One time Install and setup of ccache
+apt-get install ccache
+ccache -F 0 -M 0  # Sets the number of files and size of the cache to unlimited, the default is 5 GiB. Choose values that make sense for your situation.
+
+# Setup CMake + Ninja building using cccache
+mkdir -p out/cache
+cd out/cache
+cmake -GNinja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache <Any other CMake flags> ../.
+ninja # or autoninja
+
+# Optional: In another terminal, monitor the status of the cache. (Will have a lot of misses on the first run)
+watch ccache -s
+```
+
+Using ccache will not help with the initial build of Dawn, since the
+targets still need to be built at least once locally, but subsequent
+builds, even after a clean operation should be much faster. Some
+operations like linking are not cache-able, so will need to be run on
+every build, but the bulk of file compilations should be
+cache-able. Updating the repo, editing source files, and changing build
+flags will all cause misses, since entries in the cache are based on
+flags + contents of the source file.
+
 ### Fuzzers on MacOS
 As of Late Oct 2025, fuzzing on a dev Mac is not in a good state.
 
