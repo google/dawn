@@ -632,7 +632,8 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         }
     }
 
-    if (HasFeature(Feature::ChromiumExperimentalBindless)) {
+    if (HasFeature(Feature::ChromiumExperimentalBindless) ||
+        HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
         usedKnobs.descriptorIndexingFeatures = mDeviceInfo.descriptorIndexingFeatures;
         featuresChain.Add(&usedKnobs.descriptorIndexingFeatures);
     }
