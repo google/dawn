@@ -61,7 +61,7 @@ TEST_F(IR_BinaryTest, Result) {
 }
 
 TEST_F(IR_BinaryTest, CreateAnd) {
-    auto* inst = b.And(mod.Types().i32(), 4_i, 2_i);
+    auto* inst = b.And(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
@@ -79,7 +79,7 @@ TEST_F(IR_BinaryTest, CreateAnd) {
 }
 
 TEST_F(IR_BinaryTest, CreateOr) {
-    auto* inst = b.Or(mod.Types().i32(), 4_i, 2_i);
+    auto* inst = b.Or(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kOr);
@@ -96,7 +96,7 @@ TEST_F(IR_BinaryTest, CreateOr) {
 }
 
 TEST_F(IR_BinaryTest, CreateXor) {
-    auto* inst = b.Xor(mod.Types().i32(), 4_i, 2_i);
+    auto* inst = b.Xor(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kXor);
@@ -334,7 +334,7 @@ TEST_F(IR_BinaryTest, CreateModulo) {
 }
 
 TEST_F(IR_BinaryTest, Binary_Usage) {
-    auto* inst = b.And(mod.Types().i32(), 4_i, 2_i);
+    auto* inst = b.And(4_i, 2_i);
 
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
 
@@ -347,7 +347,7 @@ TEST_F(IR_BinaryTest, Binary_Usage) {
 
 TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
     auto val = 4_i;
-    auto* inst = b.And(mod.Types().i32(), val, val);
+    auto* inst = b.And(val, val);
 
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
     ASSERT_EQ(inst->LHS(), inst->RHS());
@@ -360,7 +360,7 @@ TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
 TEST_F(IR_BinaryTest, Binary_Usage_SetOperand) {
     auto* rhs_a = b.Constant(2_i);
     auto* rhs_b = b.Constant(3_i);
-    auto* inst = b.And(mod.Types().i32(), 4_i, rhs_a);
+    auto* inst = b.And(4_i, rhs_a);
 
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
 
@@ -374,7 +374,7 @@ TEST_F(IR_BinaryTest, Binary_Usage_SetOperand) {
 TEST_F(IR_BinaryTest, Clone) {
     auto* lhs = b.Constant(2_i);
     auto* rhs = b.Constant(4_i);
-    auto* inst = b.And(mod.Types().i32(), lhs, rhs);
+    auto* inst = b.And(lhs, rhs);
 
     auto* c = clone_ctx.Clone(inst);
 

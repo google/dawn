@@ -116,7 +116,7 @@ TEST_F(MslWriter_BinaryPolyfillTest, NoModify_I32And) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
-        auto* result = b.And<i32>(lhs, rhs);
+        auto* result = b.And(lhs, rhs);
         b.Return(func, result);
     });
 
@@ -143,7 +143,7 @@ TEST_F(MslWriter_BinaryPolyfillTest, BoolAnd_Scalar) {
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
-        auto* result = b.And<bool>(lhs, rhs);
+        auto* result = b.And(lhs, rhs);
         b.Return(func, result);
     });
 
@@ -180,7 +180,7 @@ TEST_F(MslWriter_BinaryPolyfillTest, BoolAnd_Vector) {
     auto* func = b.Function("foo", ty.vec4<bool>());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
-        auto* result = b.And<vec4<bool>>(lhs, rhs);
+        auto* result = b.And(lhs, rhs);
         b.Return(func, result);
     });
 
@@ -217,7 +217,7 @@ TEST_F(MslWriter_BinaryPolyfillTest, BoolOr_Scalar) {
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
-        auto* result = b.Or<bool>(lhs, rhs);
+        auto* result = b.Or(lhs, rhs);
         b.Return(func, result);
     });
 
@@ -254,7 +254,7 @@ TEST_F(MslWriter_BinaryPolyfillTest, BoolOr_Vector) {
     auto* func = b.Function("foo", ty.vec4<bool>());
     func->SetParams({lhs, rhs});
     b.Append(func->Block(), [&] {
-        auto* result = b.Or<vec4<bool>>(lhs, rhs);
+        auto* result = b.Or(lhs, rhs);
         b.Return(func, result);
     });
 

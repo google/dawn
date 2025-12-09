@@ -316,7 +316,7 @@ struct State {
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result();
             v = b.Convert(ty.vec4i(), v)->Result();
             v = b.Bitcast(vec4u, v)->Result();
-            v = b.And(vec4u, v, b.Splat(vec4u, 0xff_u))->Result();
+            v = b.And(v, b.Splat(vec4u, 0xff_u))->Result();
             v = b.ShiftLeft(vec4u, v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
 
             auto* x = b.Access(ty.u32(), v, 0_u);
@@ -324,7 +324,7 @@ struct State {
             auto* z = b.Access(ty.u32(), v, 2_u);
             auto* w = b.Access(ty.u32(), v, 3_u);
 
-            v = b.Or(ty.u32(), x, b.Or(ty.u32(), y, b.Or(ty.u32(), z, w)))->Result();
+            v = b.Or(x, b.Or(y, b.Or(z, w)))->Result();
 
             call->Result()->ReplaceAllUsesWith(v);
         });
@@ -347,7 +347,7 @@ struct State {
             v = b.Add(b.Splat(vec4f, 0.5_f), v)->Result();
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result();
             v = b.Convert(vec4u, v)->Result();
-            v = b.And(vec4u, v, b.Splat(vec4u, 0xff_u))->Result();
+            v = b.And(v, b.Splat(vec4u, 0xff_u))->Result();
             v = b.ShiftLeft(vec4u, v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
 
             auto* x = b.Access(ty.u32(), v, 0_u);
@@ -355,7 +355,7 @@ struct State {
             auto* z = b.Access(ty.u32(), v, 2_u);
             auto* w = b.Access(ty.u32(), v, 3_u);
 
-            v = b.Or(ty.u32(), x, b.Or(ty.u32(), y, b.Or(ty.u32(), z, w)))->Result();
+            v = b.Or(x, b.Or(y, b.Or(z, w)))->Result();
 
             call->Result()->ReplaceAllUsesWith(v);
         });
@@ -397,7 +397,7 @@ struct State {
 
             auto* v = b.Construct(vec4u, arg)->Result();
             v = b.ShiftRight(vec4u, v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
-            v = b.And(vec4u, v, b.Splat(vec4u, 0xff_u))->Result();
+            v = b.And(v, b.Splat(vec4u, 0xff_u))->Result();
             v = b.Convert(vec4f, v)->Result();
             v = b.Divide(v, b.Splat(vec4f, 255_f))->Result();
 
@@ -474,11 +474,7 @@ struct State {
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
                               b.LessThanEqual(x, V(0x7fffffff)));
             auto* b0 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(x, V(0)));
-            Instruction* result = b.Add(
-                b.Or(
-                    uint_ty, b16,
-                    b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b.Or(uint_ty, b1, b0))))),
-                b0);
+            Instruction* result = b.Add(b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b.Or(b1, b0))))), b0);
             if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }
@@ -519,23 +515,21 @@ struct State {
                 x = b.Bitcast(uint_ty, x)->Result();
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
-                               b.Equal(b.And(uint_ty, x, V(0x0000ffff)), V(0)));
+                               b.Equal(b.And(x, V(0x0000ffff)), V(0)));
             x = b.ShiftRight(uint_ty, x, b16)->Result();
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(8),
-                              b.Equal(b.And(uint_ty, x, V(0x000000ff)), V(0)));
+                              b.Equal(b.And(x, V(0x000000ff)), V(0)));
             x = b.ShiftRight(uint_ty, x, b8)->Result();
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(4),
-                              b.Equal(b.And(uint_ty, x, V(0x0000000f)), V(0)));
+                              b.Equal(b.And(x, V(0x0000000f)), V(0)));
             x = b.ShiftRight(uint_ty, x, b4)->Result();
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(2),
-                              b.Equal(b.And(uint_ty, x, V(0x00000003)), V(0)));
+                              b.Equal(b.And(x, V(0x00000003)), V(0)));
             x = b.ShiftRight(uint_ty, x, b2)->Result();
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
-                              b.Equal(b.And(uint_ty, x, V(0x00000001)), V(0)));
+                              b.Equal(b.And(x, V(0x00000001)), V(0)));
             auto* b0 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(x, V(0)));
-            Instruction* result = b.Add(
-                b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1)))),
-                b0);
+            Instruction* result = b.Add(b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b1)))), b0);
             if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }
@@ -693,21 +687,20 @@ struct State {
                         ->Result();
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(16), V(0),
-                               b.Equal(b.And(uint_ty, x, V(0xffff0000)), V(0)));
+                               b.Equal(b.And(x, V(0xffff0000)), V(0)));
             x = b.ShiftRight(uint_ty, x, b16)->Result();
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(8), V(0),
-                              b.Equal(b.And(uint_ty, x, V(0x0000ff00)), V(0)));
+                              b.Equal(b.And(x, V(0x0000ff00)), V(0)));
             x = b.ShiftRight(uint_ty, x, b8)->Result();
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(4), V(0),
-                              b.Equal(b.And(uint_ty, x, V(0x000000f0)), V(0)));
+                              b.Equal(b.And(x, V(0x000000f0)), V(0)));
             x = b.ShiftRight(uint_ty, x, b4)->Result();
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(2), V(0),
-                              b.Equal(b.And(uint_ty, x, V(0x0000000c)), V(0)));
+                              b.Equal(b.And(x, V(0x0000000c)), V(0)));
             x = b.ShiftRight(uint_ty, x, b2)->Result();
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(1), V(0),
-                              b.Equal(b.And(uint_ty, x, V(0x00000002)), V(0)));
-            Instruction* result =
-                b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1))));
+                              b.Equal(b.And(x, V(0x00000002)), V(0)));
+            Instruction* result = b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b1))));
             result =
                 b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff), b.Equal(x, V(0)));
             if (result_ty->IsSignedIntegerScalarOrVector()) {
@@ -750,21 +743,20 @@ struct State {
                 x = b.Bitcast(uint_ty, x)->Result();
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
-                               b.Equal(b.And(uint_ty, x, V(0x0000ffff)), V(0)));
+                               b.Equal(b.And(x, V(0x0000ffff)), V(0)));
             x = b.ShiftRight(uint_ty, x, b16)->Result();
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(8),
-                              b.Equal(b.And(uint_ty, x, V(0x000000ff)), V(0)));
+                              b.Equal(b.And(x, V(0x000000ff)), V(0)));
             x = b.ShiftRight(uint_ty, x, b8)->Result();
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(4),
-                              b.Equal(b.And(uint_ty, x, V(0x0000000f)), V(0)));
+                              b.Equal(b.And(x, V(0x0000000f)), V(0)));
             x = b.ShiftRight(uint_ty, x, b4)->Result();
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(2),
-                              b.Equal(b.And(uint_ty, x, V(0x00000003)), V(0)));
+                              b.Equal(b.And(x, V(0x00000003)), V(0)));
             x = b.ShiftRight(uint_ty, x, b2)->Result();
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
-                              b.Equal(b.And(uint_ty, x, V(0x00000001)), V(0)));
-            Instruction* result =
-                b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1))));
+                              b.Equal(b.And(x, V(0x00000001)), V(0)));
+            Instruction* result = b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b1))));
             result =
                 b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff), b.Equal(x, V(0)));
             if (result_ty->IsSignedIntegerScalarOrVector()) {
@@ -847,14 +839,14 @@ struct State {
                                            b.LessThan(oc, 32_u));
                     auto* mask_lhs = b.Subtract(s1, 1_u);
                     auto* mask_rhs = b.Subtract(s2, 1_u);
-                    auto* mask = b.Xor<u32>(mask_lhs, mask_rhs);
+                    auto* mask = b.Xor(mask_lhs, mask_rhs);
                     auto* f3 = b.Zero(result_ty);
                     auto* t3 = b.ShiftLeft(result_ty, newbits, b.Construct(uint_ty, offset));
                     auto* s3 = b.Call(result_ty, core::BuiltinFn::kSelect, f3, t3,
                                       b.LessThan(offset, 32_u));
-                    auto* result_lhs = b.And(result_ty, s3, mask_as_result_type(mask));
-                    auto* result_rhs = b.And(result_ty, e, mask_as_result_type(b.Complement(mask)));
-                    auto* result = b.Or(result_ty, result_lhs, result_rhs);
+                    auto* result_lhs = b.And(s3, mask_as_result_type(mask));
+                    auto* result_rhs = b.And(e, mask_as_result_type(b.Complement(mask)));
+                    auto* result = b.Or(result_lhs, result_rhs);
                     result->SetResult(call->DetachResult());
                 });
                 call->Destroy();
@@ -1018,8 +1010,8 @@ struct State {
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
             auto* x_u32 = b.Bitcast(vec4u, x);
-            auto* x_u8 = b.ShiftLeft(
-                vec4u, b.And(vec4u, x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
+            auto* x_u8 =
+                b.ShiftLeft(vec4u, b.And(x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, x_u8,
                              b.Construct(vec4u, (b.Constant(u32(1)))));
         });
@@ -1039,8 +1031,7 @@ struct State {
 
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
-            auto* x_u8 =
-                b.ShiftLeft(vec4u, b.And(vec4u, x, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
+            auto* x_u8 = b.ShiftLeft(vec4u, b.And(x, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, x_u8,
                              b.Construct(vec4u, (b.Constant(u32(1)))));
         });
@@ -1069,8 +1060,8 @@ struct State {
             auto* max_i8_vec4 = b.Construct(vec4i, b.Constant(i32(127)));
             auto* x_clamp = b.Clamp(x, min_i8_vec4, max_i8_vec4);
             auto* x_u32 = b.Bitcast(vec4u, x_clamp);
-            auto* x_u8 = b.ShiftLeft(
-                vec4u, b.And(vec4u, x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
+            auto* x_u8 =
+                b.ShiftLeft(vec4u, b.And(x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, x_u8,
                              b.Construct(vec4u, (b.Constant(u32(1)))));
         });
@@ -1151,7 +1142,7 @@ struct State {
                                   b.Constant(u32(16)), b.Constant(u32(24)));
             auto* x_splat = b.Construct(vec4u, x);
             auto* x_vec4u = b.ShiftRight(vec4u, x_splat, n);
-            result = b.And(vec4u, x_vec4u, b.Construct(vec4u, b.Constant(u32(0xff))));
+            result = b.And(x_vec4u, b.Construct(vec4u, b.Constant(u32(0xff))));
         });
         return result;
     }

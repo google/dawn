@@ -165,7 +165,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // If this a sample mask builtin, combine with the fixed sample mask if provided.
         if (config.fixed_sample_mask != UINT32_MAX &&
             outputs[idx].attributes.builtin == core::BuiltinValue::kSampleMask) {
-            value = builder.And<u32>(value, u32(config.fixed_sample_mask))->Result();
+            value = builder.And(value, u32(config.fixed_sample_mask))->Result();
         }
         output_values[idx] = value;
     }

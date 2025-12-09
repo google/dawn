@@ -110,7 +110,7 @@ struct State {
         b.Append(subgroup_ballot_polyfill->Block(), [&] {
             auto* simd_vote =
                 b.Call<msl::ir::BuiltinCall>(ty.vec2u(), msl::BuiltinFn::kSimdBallot, pred);
-            auto* masked = b.And<vec2<u32>>(simd_vote, b.Load(subgroup_size_mask));
+            auto* masked = b.And(simd_vote, b.Load(subgroup_size_mask));
             auto* result = b.Construct(ty.vec4u(), masked, u32(0), u32(0));
             b.Return(subgroup_ballot_polyfill, result);
         });

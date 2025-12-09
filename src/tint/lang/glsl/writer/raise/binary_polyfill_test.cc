@@ -43,7 +43,7 @@ using GlslWriter_BinaryPolyfillTest = core::ir::transform::TransformTest;
 TEST_F(GlslWriter_BinaryPolyfillTest, BitwiseBoolAnd) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("x", b.And(ty.bool_(), true, false));
+        b.Let("x", b.And(true, false));
         b.Return(func);
     });
 
@@ -80,7 +80,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, BitwiseBoolAnd_Vec) {
     b.Append(func->Block(), [&] {
         auto* lhs = b.Splat(ty.vec2<bool>(), true);
         auto* rhs = b.Splat(ty.vec2<bool>(), false);
-        b.Let("x", b.And(ty.vec2<bool>(), lhs, rhs));
+        b.Let("x", b.And(lhs, rhs));
         b.Return(func);
     });
 
@@ -115,7 +115,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, BitwiseBoolAnd_Vec) {
 TEST_F(GlslWriter_BinaryPolyfillTest, BitwiseBoolOr) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("x", b.Or(ty.bool_(), true, false));
+        b.Let("x", b.Or(true, false));
         b.Return(func);
     });
 
@@ -152,7 +152,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, BitwiseBoolOr_Vec) {
     b.Append(func->Block(), [&] {
         auto* lhs = b.Splat(ty.vec2<bool>(), true);
         auto* rhs = b.Splat(ty.vec2<bool>(), false);
-        b.Let("x", b.Or(ty.vec2<bool>(), lhs, rhs));
+        b.Let("x", b.Or(lhs, rhs));
         b.Return(func);
     });
 

@@ -155,10 +155,10 @@ struct State {
             core::ir::Value* result = nullptr;
             switch (binary->Op()) {
                 case core::BinaryOp::kAnd:
-                    result = b.And(res_ty, lhs, rhs)->Result();
+                    result = b.And(lhs, rhs)->Result();
                     break;
                 case core::BinaryOp::kOr:
-                    result = b.Or(res_ty, lhs, rhs)->Result();
+                    result = b.Or(lhs, rhs)->Result();
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);

@@ -1306,11 +1306,11 @@ class Impl {
                                    core::BinaryOp op) {
         switch (op) {
             case core::BinaryOp::kAnd:
-                return builder_.And(ty, lhs, rhs);
+                return builder_.And(lhs, rhs);
             case core::BinaryOp::kOr:
-                return builder_.Or(ty, lhs, rhs);
+                return builder_.Or(lhs, rhs);
             case core::BinaryOp::kXor:
-                return builder_.Xor(ty, lhs, rhs);
+                return builder_.Xor(lhs, rhs);
             case core::BinaryOp::kEqual:
                 return builder_.Equal(lhs, rhs);
             case core::BinaryOp::kNotEqual:

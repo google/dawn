@@ -142,14 +142,13 @@ struct State {
 
                 // Select either the RHS or a constant one value if the RHS is zero.
                 // If this is a signed operation, we also check for `INT_MIN / -1`.
-                auto* bool_ty = ty.MatchWidth(ty.bool_(), result_ty);
                 auto* cond = b.Equal(rhs, zero);
                 if (is_signed) {
                     auto* lowest = b.MatchWidth(i32::Lowest(), result_ty);
                     auto* minus_one = b.MatchWidth(-1_i, result_ty);
                     auto* lhs_is_lowest = b.Equal(lhs, lowest);
                     auto* rhs_is_minus_one = b.Equal(rhs, minus_one);
-                    cond = b.Or(bool_ty, cond, b.And(bool_ty, lhs_is_lowest, rhs_is_minus_one));
+                    cond = b.Or(cond, b.And(lhs_is_lowest, rhs_is_minus_one));
                 }
                 auto* rhs_or_one = b.Call(result_ty, core::BuiltinFn::kSelect, rhs, one, cond);
 
@@ -191,7 +190,7 @@ struct State {
         auto* lhs = binary->LHS();
         auto* rhs = binary->RHS();
         auto mask = u32(lhs->Type()->DeepestElement()->Size() * 8 - 1);
-        auto* masked = b.And(rhs->Type(), rhs, b.MatchWidth(mask, rhs->Type()));
+        auto* masked = b.And(rhs, b.MatchWidth(mask, rhs->Type()));
         masked->InsertBefore(binary);
         binary->SetOperand(ir::CoreBinary::kRhsOperandOffset, masked->Result());
     }

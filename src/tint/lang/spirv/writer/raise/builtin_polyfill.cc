@@ -1173,7 +1173,7 @@ struct State {
             auto* mask_max_subgroup_size =
                 b.Constant(core::u32(tint::internal_limits::kMaxSubgroupSize - 1));
             b.InsertBefore(builtin, [&] {
-                auto* clamp_via_masking_and = b.And<u32>(shuffle_id, mask_max_subgroup_size);
+                auto* clamp_via_masking_and = b.And(shuffle_id, mask_max_subgroup_size);
                 builtin->SetArg(1, clamp_via_masking_and->Result());
             });
         }

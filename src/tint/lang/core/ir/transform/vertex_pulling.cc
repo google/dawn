@@ -409,13 +409,13 @@ struct State {
             // Formats that are always u32 in the shader (or vectors of u32).
             // Shift/mask values to expand to 32-bits.
             case VertexFormat::kUint8:
-                return b.And<u32>(load_u32(0), 0xFF_u)->Result();
+                return b.And(load_u32(0), 0xFF_u)->Result();
             case VertexFormat::kUint8x2:
                 return load_ivec(0, 8, ty.vec2u());
             case VertexFormat::kUint8x4:
                 return load_ivec(0, 8, ty.vec4u());
             case VertexFormat::kUint16:
-                return b.And<u32>(load_u32(0), 0xFFFF_u)->Result();
+                return b.And(load_u32(0), 0xFFFF_u)->Result();
             case VertexFormat::kUint16x2:
                 return load_ivec(0, 16, ty.vec2u());
             case VertexFormat::kUint16x4: {
@@ -674,8 +674,7 @@ struct State {
                 auto* shr =
                     b.ShiftRight<vec4<u32>>(u32s, b.Composite<vec4<u32>>(0_u, 10_u, 20_u, 30_u));
                 // mask = shr & vec4u(0x3FF, 0x3FF, 0x3FF, 0x3);
-                auto* mask =
-                    b.And<vec4<u32>>(shr, b.Composite<vec4<u32>>(0x3FF_u, 0x3FF_u, 0x3FF_u, 0x3_u));
+                auto* mask = b.And(shr, b.Composite<vec4<u32>>(0x3FF_u, 0x3FF_u, 0x3FF_u, 0x3_u));
                 // vec4f(mask) / vec4f(1023, 1023, 1023, 3);
                 auto* div = b.Composite<vec4<f32>>(1023_f, 1023_f, 1023_f, 3_f);
                 return float_value(b.Divide(b.Convert<vec4<f32>>(mask), div)->Result());

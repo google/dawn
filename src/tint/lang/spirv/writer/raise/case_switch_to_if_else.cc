@@ -128,7 +128,7 @@ struct State {
                     for (auto& sel : c.selectors) {
                         auto* curr_selector = b.Equal(switch_cond, sel.val->As<core::ir::Value>());
                         if (case_cond) {
-                            case_cond = b.Or(ty.bool_(), curr_selector, case_cond)->Result();
+                            case_cond = b.Or(curr_selector, case_cond)->Result();
                         } else {
                             case_cond = curr_selector->Result();
                         }
