@@ -6,10 +6,8 @@ as input and [`tint_ir_fuzzer`](#tint_ir_fuzzer) which takes a
 protobuf binary file as input.
 
 Both fuzzers are implemented using
-[libFuzzer](https://llvm.org/docs/LibFuzzer.html), and are intended to
-be automatically and continuously run by Chromium's ClusterFuzz
-infrastructure. Currently only `tint_wgsl_fuzzer` is deployed on
-ClusterFuzz.
+[libFuzzer](https://llvm.org/docs/LibFuzzer.html), and are
+continuously run by Chromium's ClusterFuzz infrastructure.
 
 [Fuzzer targets are automatically found via `gn
 refs`](https://chromium.googlesource.com/chromium/src/+/HEAD/testing/libfuzzer/libFuzzer_integration.md). See
@@ -81,7 +79,6 @@ Examples of IR mode:
 tools/run fuzz -ir
 tools/run fuzz -ir -inputs out/Fuzzer/ir_corpus
 tools/run fuzz -ir -check
-
 ```
 
 `-ir` mode without any provided inputs will convert the default WGSL
@@ -401,9 +398,6 @@ The `tint_ir_fuzzer` will do the following:
   the initial validation missed an illegal state.
 
 #### Working with test cases
-
-[Note: The tooling related to working with `tint_ir_fuzz` test cases
-is a WIP and may not be complete]
 
 Since the input test cases for `tint_ir_fuzzer` are in a non-human
 readable format, there is additional tooling needed for working with
