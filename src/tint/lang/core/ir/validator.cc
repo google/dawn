@@ -3142,6 +3142,10 @@ void Validator::BeginBlock(const Block* blk) {
                 param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); },
                 Capabilities{Capability::kAllowRefTypes});
 
+            if (param->Type()->Is<core::type::Void>()) {
+                AddError(param) << "block parameter type cannot be void";
+            }
+
             scope_stack_.Add(param);
         }
     }

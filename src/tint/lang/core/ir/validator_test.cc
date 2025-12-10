@@ -1104,6 +1104,28 @@ TEST_F(IR_ValidatorTest, Block_ParameterUsedInMultipleBlocks) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Block_Parameter_Void) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* p = b.BlockParam("my_param", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* l = b.Loop();
+        b.Append(l->Initializer(), [&] { b.NextIteration(l, nullptr); });
+        l->Body()->SetParams({p});
+        b.Append(l->Body(), [&] { b.Continue(l); });
+        b.Append(l->Continuing(), [&] { b.NextIteration(l, p); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:7:12 error: block parameter type cannot be void
+      $B3 (%my_param:void): {  # body
+           ^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Instruction_AppendedDead) {
     auto* f = b.Function("my_func", ty.void_());
 
