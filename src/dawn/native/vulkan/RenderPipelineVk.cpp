@@ -374,8 +374,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
     uint32_t stageCount = 0;
 
-    auto AddShaderStage = [&](SingleShaderStage stage, VkShaderStageFlagBits vkStage,
-                              bool emitPointSize) -> MaybeError {
+    auto AddShaderStage = [&](SingleShaderStage stage, bool emitPointSize) -> MaybeError {
         const ProgrammableStage& programmableStage = GetStage(stage);
         ShaderModule::ModuleAndSpirv moduleAndSpirv;
         DAWN_TRY_ASSIGN(moduleAndSpirv,
@@ -394,7 +393,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         shaderStage->pNext = nullptr;
         shaderStage->flags = 0;
         shaderStage->pSpecializationInfo = nullptr;
-        shaderStage->stage = vkStage;
+        shaderStage->stage = VulkanShaderStage(stage);
         // string_view returned by GetIsolatedEntryPointName() points to a null-terminated string.
         shaderStage->pName = device->GetIsolatedEntryPointName().data();
 
@@ -403,12 +402,12 @@ MaybeError RenderPipeline::InitializeImpl() {
     };
 
     // Add the vertex stage that's always present.
-    DAWN_TRY(AddShaderStage(SingleShaderStage::Vertex, VK_SHADER_STAGE_VERTEX_BIT,
+    DAWN_TRY(AddShaderStage(SingleShaderStage::Vertex,
                             GetPrimitiveTopology() == wgpu::PrimitiveTopology::PointList));
 
     // Add the fragment stage if present.
     if (GetStageMask() & wgpu::ShaderStage::Fragment) {
-        DAWN_TRY(AddShaderStage(SingleShaderStage::Fragment, VK_SHADER_STAGE_FRAGMENT_BIT,
+        DAWN_TRY(AddShaderStage(SingleShaderStage::Fragment,
                                 /*emitPointSize*/ false));
     }
 

@@ -135,6 +135,26 @@ VkImageAspectFlags VulkanAspectMask(const Aspect& aspects) {
     return flags;
 }
 
+VkShaderStageFlags VulkanShaderStages(wgpu::ShaderStage stages) {
+    VkShaderStageFlags flags = 0;
+
+    if (stages & wgpu::ShaderStage::Vertex) {
+        flags |= VK_SHADER_STAGE_VERTEX_BIT;
+    }
+    if (stages & wgpu::ShaderStage::Fragment) {
+        flags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+    }
+    if (stages & wgpu::ShaderStage::Compute) {
+        flags |= VK_SHADER_STAGE_COMPUTE_BIT;
+    }
+
+    return flags;
+}
+
+VkShaderStageFlagBits VulkanShaderStage(SingleShaderStage stage) {
+    return static_cast<VkShaderStageFlagBits>(VulkanShaderStages(StageBit(stage)));
+}
+
 // Vulkan SPEC requires the source/destination region specified by each element of
 // pRegions must be a region that is contained within srcImage/dstImage. Here the size of
 // the image refers to the virtual size, while Dawn validates texture copy extent with the

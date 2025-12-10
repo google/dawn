@@ -47,22 +47,6 @@ namespace dawn::native::vulkan {
 
 namespace {
 
-VkShaderStageFlags VulkanShaderStageFlags(wgpu::ShaderStage stages) {
-    VkShaderStageFlags flags = 0;
-
-    if (stages & wgpu::ShaderStage::Vertex) {
-        flags |= VK_SHADER_STAGE_VERTEX_BIT;
-    }
-    if (stages & wgpu::ShaderStage::Fragment) {
-        flags |= VK_SHADER_STAGE_FRAGMENT_BIT;
-    }
-    if (stages & wgpu::ShaderStage::Compute) {
-        flags |= VK_SHADER_STAGE_COMPUTE_BIT;
-    }
-
-    return flags;
-}
-
 // Helper function (and result structure) that precomputes all the information related to static
 // bindings that might be for Vulkan BindGroupLayout. It is useful to share logic between
 // StaticBindingOnly and DynamicArray BindGroupLayouts but route the data to different places.
@@ -111,7 +95,7 @@ VulkanStaticBindings ComputeVulkanStaticBindings(const BindGroupLayoutInternalBa
             .binding = uint32_t(bindingIndex),
             .descriptorType = VulkanDescriptorType(bindingInfo),
             .descriptorCount = uint32_t(bindingInfo.arraySize),
-            .stageFlags = VulkanShaderStageFlags(bindingInfo.visibility),
+            .stageFlags = VulkanShaderStages(bindingInfo.visibility),
             .pImmutableSamplers = nullptr,
         };
         size_t descriptorCount = vkBinding.descriptorCount;
@@ -358,7 +342,7 @@ MaybeError BindGroupLayoutDynamicArray::Initialize() {
         // an upper limit of the variable count.
         .descriptorCount =
             GetDevice()->GetLimits().dynamicBindingArrayLimits.maxDynamicBindingArraySize,
-        .stageFlags = VulkanShaderStageFlags(kAllStages),
+        .stageFlags = VulkanShaderStages(kAllStages),
         .pImmutableSamplers = nullptr,
     };
     bindings.push_back(dynamicArray);

@@ -119,6 +119,9 @@ VkFilter ToVulkanSamplerFilter(wgpu::FilterMode filter);
 
 VkImageAspectFlags VulkanAspectMask(const Aspect& aspects);
 
+VkShaderStageFlags VulkanShaderStages(wgpu::ShaderStage stages);
+VkShaderStageFlagBits VulkanShaderStage(SingleShaderStage stage);
+
 TexelExtent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy,
                                        const TexelExtent3D& copySize);
 
