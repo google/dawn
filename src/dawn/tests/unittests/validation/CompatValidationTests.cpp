@@ -1731,7 +1731,7 @@ class CompatTextureViewDimensionValidationTests : public CompatTextureViewValida
             CreateTextureWithViewDimension(depth, dimension, textureBindingViewDimension);
         } else {
             ASSERT_DEVICE_ERROR(
-                CreateTextureWithViewDimension(depth, dimension, textureBindingViewDimension);
+                CreateTextureWithViewDimension(depth, dimension, textureBindingViewDimension),
                 testing::HasSubstr(expectedSubstr));
         }
     }
@@ -1752,7 +1752,7 @@ class CompatTextureViewDimensionValidationTests : public CompatTextureViewValida
         bool success) {
         TestCreateTextureWithViewDimensionImpl(depth, dimension, textureBindingViewDimension,
                                                success,
-                                               "is only compatible with depthOrArrayLayers ==");
+                                               "is only compatible with depthOrArrayLayers equals");
     }
 
     wgpu::Texture CreateTextureWithViewDimension(
