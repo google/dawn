@@ -51,7 +51,9 @@ ResourceTableBase::ResourceTableBase(DeviceBase* device, const ResourceTableDesc
     : ApiObjectBase(device, descriptor->label),
       mDynamicArray(AcquireRef(new DynamicArrayState(device,
                                                      BindingIndex(descriptor->size),
-                                                     wgpu::DynamicBindingKind::SampledTexture))) {}
+                                                     wgpu::DynamicBindingKind::SampledTexture))) {
+    GetObjectTrackingList()->Track(this);
+}
 
 ResourceTableBase::ResourceTableBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
     : ApiObjectBase(device, tag, label), mDestroyed(true) {}
@@ -74,6 +76,12 @@ void ResourceTableBase::DestroyImpl() {
 
 void ResourceTableBase::APIDestroy() {
     Destroy();  // Calls DestroyImpl
+}
+
+MaybeError ResourceTableBase::ValidateCanUseInSubmitNow() const {
+    DAWN_ASSERT(!IsError());
+    DAWN_INVALID_IF(mDestroyed, "%s used while destroyed.", this);
+    return {};
 }
 
 }  // namespace dawn::native

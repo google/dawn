@@ -58,6 +58,7 @@
 #include "dawn/native/RenderPassEncoder.h"
 #include "dawn/native/RenderPassWorkaroundsHelper.h"
 #include "dawn/native/RenderPipeline.h"
+#include "dawn/native/ResourceTable.h"
 #include "dawn/native/ValidationUtils.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/native/dawn_platform.h"
@@ -1241,9 +1242,12 @@ void CommandEncoder::DestroyImpl() {
 }
 
 CommandBufferResourceUsage CommandEncoder::AcquireResourceUsages() {
-    return CommandBufferResourceUsage{
-        mEncodingContext.AcquireRenderPassUsages(), mEncodingContext.AcquireComputePassUsages(),
-        std::move(mTopLevelBuffers), std::move(mTopLevelTextures), std::move(mUsedQuerySets)};
+    return CommandBufferResourceUsage{mEncodingContext.AcquireRenderPassUsages(),
+                                      mEncodingContext.AcquireComputePassUsages(),
+                                      std::move(mTopLevelBuffers),
+                                      std::move(mTopLevelTextures),
+                                      std::move(mUsedQuerySets),
+                                      std::move(mUsedResourceTables)};
 }
 
 CommandIterator CommandEncoder::AcquireCommands() {
@@ -2172,6 +2176,29 @@ void CommandEncoder::APIResolveQuerySet(QuerySetBase* querySet,
         },
         "encoding %s.ResolveQuerySet(%s, %u, %u, %s, %u).", this, querySet, firstQuery, queryCount,
         destination, destinationOffset);
+}
+
+void CommandEncoder::APISetResourceTable(ResourceTableBase* table) {
+    mEncodingContext.TryEncode(
+        this,
+        [&](CommandAllocator* allocator) -> MaybeError {
+            if (GetDevice()->IsValidationEnabled()) {
+                if (table) {
+                    DAWN_TRY(GetDevice()->ValidateObject(table));
+                }
+                DAWN_INVALID_IF(
+                    !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
+                    "setResourceTable requires the %s feature enabled.",
+                    wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
+            }
+
+            mResourceTable = table;
+            if (table) {
+                mUsedResourceTables.insert(table);
+            }
+            return {};
+        },
+        "encoding %s.SetResourceTable(%s, %u).", this, table);
 }
 
 void CommandEncoder::APIWriteBuffer(BufferBase* buffer,

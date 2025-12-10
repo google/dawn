@@ -1025,6 +1025,13 @@
                 "args": [
                     {"name": "label", "type": "string view"}
                 ]
+            },
+            {
+                "name": "set resource table",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "table", "type": "resource table", "optional": true}
+                ]
             }
         ]
     },

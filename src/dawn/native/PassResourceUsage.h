@@ -44,6 +44,7 @@ namespace dawn::native {
 class BufferBase;
 class QuerySetBase;
 class TextureBase;
+class ResourceTableBase;
 
 // Info about how a buffer is used and in which shader stages
 struct BufferSyncInfo {
@@ -116,6 +117,7 @@ struct CommandBufferResourceUsage {
     absl::flat_hash_set<BufferBase*> topLevelBuffers;
     absl::flat_hash_set<TextureBase*> topLevelTextures;
     absl::flat_hash_set<QuerySetBase*> usedQuerySets;
+    absl::flat_hash_set<ResourceTableBase*> usedResourceTables;
 };
 
 }  // namespace dawn::native

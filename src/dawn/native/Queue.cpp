@@ -58,6 +58,7 @@
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/RenderPassEncoder.h"
 #include "dawn/native/RenderPipeline.h"
+#include "dawn/native/ResourceTable.h"
 #include "dawn/native/Texture.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
@@ -535,6 +536,9 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
         }
         for (const QuerySetBase* querySet : usages.usedQuerySets) {
             DAWN_TRY(querySet->ValidateCanUseInSubmitNow());
+        }
+        for (const ResourceTableBase* resourceTable : usages.usedResourceTables) {
+            DAWN_TRY(resourceTable->ValidateCanUseInSubmitNow());
         }
 
         // Validate that pinned textures are only used with their pinned usage. This is done in a

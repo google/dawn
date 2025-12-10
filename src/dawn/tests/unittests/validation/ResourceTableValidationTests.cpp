@@ -84,12 +84,8 @@ TEST_F(ResourceTableValidationTest, Destroy) {
     resourceTable.Destroy();
 }
 
-// Tests for pipeline creation with resource tables
-using ResourceTableValidationTest_PipelineCreation = ResourceTableValidationTest;
-using ResourceTableValidationTestDisabled_PipelineCreation = ResourceTableValidationTestDisabled;
-
 // Control case where enabling use of a resource table with the feature enabled is valid.
-TEST_F(ResourceTableValidationTest_PipelineCreation, SuccessWithFeatureEnabled) {
+TEST_F(ResourceTableValidationTest, PipelineCreation_SuccessWithFeatureEnabled) {
     wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
     pipelineLayoutDescriptor.bindGroupLayoutCount = 0;
     wgpu::PipelineLayoutResourceTable resourceTable;
@@ -99,7 +95,7 @@ TEST_F(ResourceTableValidationTest_PipelineCreation, SuccessWithFeatureEnabled) 
 }
 
 // Error case where enabling use of a resource table with the feature disabled is an error.
-TEST_F(ResourceTableValidationTestDisabled_PipelineCreation, FailureWithFeatureDisabled) {
+TEST_F(ResourceTableValidationTestDisabled, PipelineCreation_FailureWithFeatureDisabled) {
     wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
     pipelineLayoutDescriptor.bindGroupLayoutCount = 0;
     wgpu::PipelineLayoutResourceTable resourceTable;
@@ -115,7 +111,7 @@ TEST_F(ResourceTableValidationTestDisabled_PipelineCreation, FailureWithFeatureD
 }
 
 // Test that a shader using a resource table requires a layout with one.
-TEST_F(ResourceTableValidationTest_PipelineCreation, ShaderRequiresLayoutWithResourceTable) {
+TEST_F(ResourceTableValidationTest, PipelineCreation_ShaderRequiresLayoutWithResourceTable) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;
@@ -142,7 +138,7 @@ TEST_F(ResourceTableValidationTest_PipelineCreation, ShaderRequiresLayoutWithRes
 
 // Test that it is valid to have a layout specifying a resource table with a shader that
 // doesn't have one.
-TEST_F(ResourceTableValidationTest_PipelineCreation, ShaderNoResourceTableWithLayoutThatHasOne) {
+TEST_F(ResourceTableValidationTest, PipelineCreation_ShaderNoResourceTableWithLayoutThatHasOne) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         @compute @workgroup_size(1) fn main() {
@@ -161,7 +157,7 @@ TEST_F(ResourceTableValidationTest_PipelineCreation, ShaderNoResourceTableWithLa
 
 // Test that an auto-generated pipeline with a shader that uses a resource table has a
 // PipelineLayoutResourceTable with usesResourceTable == true.
-TEST_F(ResourceTableValidationTest_PipelineCreation, ShaderGeneratesLayoutWithResourceTable) {
+TEST_F(ResourceTableValidationTest, PipelineCreation_ShaderGeneratesLayoutWithResourceTable) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;
@@ -178,8 +174,8 @@ TEST_F(ResourceTableValidationTest_PipelineCreation, ShaderGeneratesLayoutWithRe
 
 // Test that an auto-generated pipeline with a multi-stage shader where only one stage uses a
 // resource table has a PipelineLayoutResourceTable with usesResourceTable == true.
-TEST_F(ResourceTableValidationTest_PipelineCreation,
-       OneShaderStageGeneratesLayoutWithResourceTable) {
+TEST_F(ResourceTableValidationTest,
+       PipelineCreation_OneShaderStageGeneratesLayoutWithResourceTable) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;
@@ -198,6 +194,113 @@ TEST_F(ResourceTableValidationTest_PipelineCreation,
     device.CreateComputePipeline(&csDesc);
     // TODO(crbug.com/463925499): Check that resulting pipeline requires a dispatch time resource
     // table to be set
+}
+
+// Tests calling CommandEncoder::SetResourceTable
+TEST_F(ResourceTableValidationTest, CommandEncoder_SetResourceTable) {
+    // Failure case: invalid encoder state
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.Finish();
+        ASSERT_DEVICE_ERROR(encoder.SetResourceTable(nullptr));
+    }
+
+    // Failure case: invalid resource table
+    {
+        wgpu::ResourceTableDescriptor descriptor;
+        descriptor.size = kMaxResourceTableSize + 1u;  // Invalid size
+        wgpu::ResourceTable resourceTable;
+        ASSERT_DEVICE_ERROR(resourceTable = device.CreateResourceTable(&descriptor));
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Success case: valid resource table
+    {
+        wgpu::ResourceTableDescriptor descriptor;
+        descriptor.size = 1;
+        wgpu::ResourceTable resourceTable = device.CreateResourceTable(&descriptor);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable);
+        encoder.Finish();
+    }
+
+    // Success case: null resource table
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(nullptr);
+        encoder.Finish();
+    }
+}
+
+// Tests calling CommandEncoder::SetResourceTable when the feature is disabled
+TEST_F(ResourceTableValidationTestDisabled, CommandEncoder_SetResourceTable) {
+    // Failure case: feature is disabled
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.SetResourceTable(nullptr);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Tests that the resource table can be used in submit
+TEST_F(ResourceTableValidationTest, Submit_CanUseInSubmit) {
+    // Success case: resource table can be used in submit
+    {
+        wgpu::ResourceTableDescriptor descriptor;
+        descriptor.size = 1u;
+        wgpu::ResourceTable resourceTable = device.CreateResourceTable(&descriptor);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
+    }
+
+    // Failure case: resource table has been destroyed
+    {
+        wgpu::ResourceTableDescriptor descriptor;
+        descriptor.size = 1u;
+        wgpu::ResourceTable resourceTable = device.CreateResourceTable(&descriptor);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        resourceTable.Destroy();  // Destroy it
+        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+    }
+
+    // Failure case: one of multiple resource tables has been destroyed
+    {
+        wgpu::ResourceTableDescriptor descriptor;
+        descriptor.size = 1u;
+        wgpu::ResourceTable resourceTable1 = device.CreateResourceTable(&descriptor);
+        wgpu::ResourceTable resourceTable2 = device.CreateResourceTable(&descriptor);
+        wgpu::ResourceTable resourceTable3 = device.CreateResourceTable(&descriptor);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable1);
+        encoder.SetResourceTable(resourceTable2);
+        encoder.SetResourceTable(resourceTable3);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        resourceTable2.Destroy();  // Destroy one
+        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+    }
+
+    // Failure case: resource table must still be valid if set, then nullptr is set
+    {
+        wgpu::ResourceTableDescriptor descriptor;
+        descriptor.size = 1u;
+        wgpu::ResourceTable resourceTable = device.CreateResourceTable(&descriptor);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable);
+        encoder.SetResourceTable(nullptr);  // Clear it
+        wgpu::CommandBuffer commands = encoder.Finish();
+        resourceTable.Destroy();  // Destroy it
+        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+    }
 }
 
 }  // namespace

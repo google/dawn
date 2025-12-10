@@ -47,6 +47,8 @@ class ResourceTableBase : public ApiObjectBase {
     // Dawn API
     void APIDestroy();
 
+    MaybeError ValidateCanUseInSubmitNow() const;
+
   protected:
     ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor);
 
