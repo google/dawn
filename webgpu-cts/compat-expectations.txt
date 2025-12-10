@@ -653,6 +653,9 @@ crbug.com/384676198 [ android-pixel-6 android-t ] webgpu:api,operation,command_b
 crbug.com/384672477 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ RetryOnFailure ]
 crbug.com/384672477 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 
+# Flaky due to OS upgrade from `android-t`
+crbug.com/467430936 [ android-pixel-6 android-14 ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:*;format="stencil8";filt="nearest";*;offset=false [ RetryOnFailure ]
+
 # Compressed texture image_copy failures on Pixel 6
 crbug.com/364917742 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:*;format="astc-*-unorm";dimension="2d" [ Failure ]
 crbug.com/364917742 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:*;format="astc-*-unorm";dimension="3d" [ Failure ]
