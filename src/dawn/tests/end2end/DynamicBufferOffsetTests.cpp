@@ -455,7 +455,7 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsRenderPipeline) {
     // devices.
     DAWN_SUPPRESS_TEST_IF(IsApple());
     // TODO(crbug.com/40287156): Remove when test is no longer flaky on Pixel 6
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsAndroid() && IsARM());
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
     // TODO(42242119): fail on Qualcomm Adreno X1.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
