@@ -262,6 +262,16 @@ bool ContextEGL::IsInScopedMakeCurrent() const {
     return gCurrentContextInScope == this;
 }
 
+bool ContextEGL::IsNotCurrentOnAnotherThread() const {
+#if defined(DAWN_ENABLE_ASSERTS)
+    return mCurrentThread == std::thread::id() || mCurrentThread == std::this_thread::get_id();
+#else
+    // For non-assert builds, assuming not current on another thread.
+    // This function is intended to be used by DAWN_ASSERT.
+    return true;
+#endif
+}
+
 void ContextEGL::DeprecatedMakeCurrent() {
     IgnoreErrors(MakeContextCurrent(mDisplay.Get(), mState));
 }
@@ -334,6 +344,9 @@ MaybeError ContextEGL::ScopedMakeCurrent::Initialize() {
     mPrevState.drawSurface = mContext->mDisplay->egl.GetCurrentSurface(EGL_DRAW);
     mPrevState.readSurface = mContext->mDisplay->egl.GetCurrentSurface(EGL_READ);
 
+    // Assert that the context is not current on another thread.
+    DAWN_ASSERT(mContext->IsNotCurrentOnAnotherThread());
+
     if (mPrevState != mContext->mState) {
         auto result = MakeContextCurrent(mContext->mDisplay.Get(), mContext->mState);
         if (DAWN_UNLIKELY(result.IsError())) {
@@ -341,6 +354,11 @@ MaybeError ContextEGL::ScopedMakeCurrent::Initialize() {
             return result;
         }
     }
+
+#if defined(DAWN_ENABLE_ASSERTS)
+    mContext->mCurrentThread = std::this_thread::get_id();
+#endif
+
     gCurrentContextInScope = mContext;
     return {};
 }
@@ -354,6 +372,10 @@ MaybeError ContextEGL::ScopedMakeCurrent::End() {
     if (mContext->mBindContextOnlyDuringUse && mPrevState != mContext->mState) {
         // Unmake current this context so that other threads can use it.
         result = MakeContextCurrent(mContext->mDisplay.Get(), mPrevState);
+
+#if defined(DAWN_ENABLE_ASSERTS)
+        mContext->mCurrentThread = {};
+#endif
     }
     gCurrentContextInScope = nullptr;
     mContext = nullptr;

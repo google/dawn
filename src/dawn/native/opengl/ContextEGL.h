@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <mutex>
+#include <thread>
 #include <utility>
 
 #include "dawn/common/NonMovable.h"
@@ -117,6 +118,8 @@ class ContextEGL : NonMovable {
                           bool forceES31AndMinExtensions,
                           EGLint angleVirtualizationGroup);
 
+    bool IsNotCurrentOnAnotherThread() const;
+
     // This mutex is used to make sure only one thread can enter ScopedMakeCurrent at a time.
     std::mutex mExclusiveMakeCurrentMutex;
 
@@ -129,6 +132,11 @@ class ContextEGL : NonMovable {
     // multiple threads at the same time. But if one thread locks the context, then unbinds it, that
     // will allow the context to be used on another thread.
     const bool mBindContextOnlyDuringUse = false;
+
+    // For debugging purpose, storing the id of the thread that has the context current.
+#if defined(DAWN_ENABLE_ASSERTS)
+    std::thread::id mCurrentThread;
+#endif
 };
 
 }  // namespace dawn::native::opengl
