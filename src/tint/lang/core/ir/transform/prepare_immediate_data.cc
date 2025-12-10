@@ -55,7 +55,7 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
-    ImmediateDataLayout Run() {
+    Result<ImmediateDataLayout> Run() {
         if (config.internal_immediate_data.empty()) {
             return ImmediateDataLayout{};
         }
@@ -93,8 +93,11 @@ struct State {
         // Create the structure and immediate data variable.
         for (auto& internal : config.internal_immediate_data) {
             if (!members.IsEmpty()) {
-                TINT_IR_ASSERT(ir,
-                               internal.first >= members.Back()->Offset() + members.Back()->Size());
+                if (members.Back()->Offset() + members.Back()->Size() > internal.first) {
+                    return Failure("immediate offset for '" + internal.second.name.Name() +
+                                   "' overlaps with previous member '" +
+                                   members.Back()->Name().Name() + "'");
+                }
             }
 
             auto index = static_cast<uint32_t>(members.Length());
