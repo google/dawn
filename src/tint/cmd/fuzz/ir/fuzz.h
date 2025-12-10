@@ -29,7 +29,6 @@
 #define SRC_TINT_CMD_FUZZ_IR_FUZZ_H_
 
 #include <functional>
-#include <iostream>
 #include <span>
 #include <string>
 #include <tuple>
@@ -84,19 +83,14 @@ struct IRFuzzer {
             auto fn_with_decode = [fn](core::ir::Module& module, const Context& context,
                                        std::span<const std::byte> data) -> Result<SuccessType> {
                 if (data.empty()) {
-                    if (context.options.verbose) {
-                        std::cout << "   - Data expected but no data provided.\n";
-                    }
-                    return Failure{"Invalid data"};
+                    return Failure{"Data expected but no data provided."};
                 }
 
                 bytes::BufferReader reader{data};
                 auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader);
                 if (data_args != Success) {
-                    if (context.options.verbose) {
-                        std::cout << "   - Failed to decode fuzzer argument data.\n";
-                    }
-                    return data_args.Failure();
+                    return Failure("Failed to decode fuzzer argument data: " +
+                                   data_args.Failure().reason);
                 }
 
                 auto all_args =

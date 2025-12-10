@@ -157,10 +157,10 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     }
 
     auto output = Generate(module, options);
-    TINT_ASSERT(output == Success)
-        << "Generate() failed after CanGenerate() succeeded: " << output.Failure().reason;
-
-    if (output == Success && context.options.dump) {
+    if (output != Success) {
+        return output.Failure();
+    }
+    if (context.options.dump) {
         std::cout << "Dumping generated HLSL:\n" << output->hlsl << "\n";
     }
 

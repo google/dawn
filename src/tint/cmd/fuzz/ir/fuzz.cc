@@ -109,7 +109,10 @@ void Register(const IRFuzzer& fuzzer) {
             ir_context.options.verbose = context.options.verbose;
             ir_context.options.dxc = context.options.dxc;
             ir_context.options.dump = context.options.dump;
-            [[maybe_unused]] auto result = fn(ir.Get(), ir_context, data);
+            auto result = fn(ir.Get(), ir_context, data);
+            if (result != Success && context.options.verbose) {
+                std::cout << "   " << result.Failure() << "\n";
+            }
         },
     });
 #endif

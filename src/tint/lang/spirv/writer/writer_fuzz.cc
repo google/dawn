@@ -170,8 +170,9 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     }
 
     auto output = Generate(module, options);
-    TINT_ASSERT(output == Success)
-        << "Generate() failed after CanGenerate() succeeded: " << output.Failure().reason;
+    if (output != Success) {
+        return output.Failure();
+    }
 
     spv_target_env target_env = SPV_ENV_VULKAN_1_1;
     switch (options.spirv_version) {
