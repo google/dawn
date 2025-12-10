@@ -69,14 +69,38 @@ class Device final : public DeviceBase {
     MaybeError Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor);
 
     // Queues up GL work to be executed later in FlushPendingGLCommands().
-    // If the device is already executing GL works, the work will be executed immediately.
-    // This can happen when a pending task indirectly creates temporary resources.
+    // Special cases:
+    // - The work will run immediately if GLDefer toggle is disabled.
+    // - If EnqueueGL() is called inside a pending task, the work will be executed immediately.
+    //   This could happen when a pending task indirectly creates temporary resources.
+    //   For example:
+    //    - device->EnqueueGL([device] (const auto& gl) {
+    //           texture = device->CreateTexture(...);
+    //           gl.BindTexture(texture->GetHandle());
+    //           gl.TexImage2D(...);
+    //      });
+    //    - Inside Device::CreateTexture():
+    //      device->EnqueueGL([device] (const auto& gl) {
+    //           glTexture = gl.GenTextures(...);
+    //      });
+    //    - In this case, the 2nd EnqueueGL's work will run immediately.
     template <typename Fn>
     MaybeError EnqueueGL(ExecutionQueueBase::SubmitMode submitMode, Fn&& work) {
+        // First special case: run immediately if defer mode is disabled.
+        if (!IsToggleEnabled(Toggle::GLDefer)) {
+            // We use ExecuteGL to ensure the GL context is made current.
+            return ExecuteGL(submitMode, std::forward<Fn>(work));
+        }
+
         MarkGLUsed(submitMode);
+
+        // 2nd special case: if a task is enqueued inside another task, then run it immediately
+        // instead of deferring it. This can be detected by checking IsInScopedMakeCurrent().
         if (mContext->IsInScopedMakeCurrent()) {
             return work(mGL);
         }
+
+        // Otherwise, queue up the work.
         mPendingGLWorkList.Use([&](auto workList) { workList->push_back(std::forward<Fn>(work)); });
         return {};
     }

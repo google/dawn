@@ -190,6 +190,7 @@ enum class Toggle {
     D3D11DelayFlushToGPU,
     IgnoreImportedAHardwareBufferVulkanImageSize,
     GLAllowContextOnMultiThreads,
+    GLDefer,
 
     EnumCount,
     InvalidEnum = EnumCount,
