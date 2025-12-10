@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_EXPAND_IMPLICIT_SPLATS_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_RAISE_EXPAND_IMPLICIT_SPLATS_H_
 
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/result.h"
 
@@ -44,6 +45,7 @@ const core::ir::Capabilities kExpandImplicitSplatsCapabilities{
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
     core::ir::Capability::kAllowNonCoreTypes,
     core::ir::Capability::kAllow8BitIntegers,
+    core::ir::Capability::kAllowAnyInputAttachmentIndexType,
 };
 
 /// ExpandImplicitSplats is a transform that expands implicit vector splat operands in construct

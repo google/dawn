@@ -587,7 +587,7 @@ TEST_F(IR_ValidatorTest, Construct_TextureInStruct_WithCapability) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersAndHandlesInStructures});
+    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -598,7 +598,7 @@ TEST_F(IR_ValidatorTest, Construct_NonConstructible_WithStructCapability) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersAndHandlesInStructures});
+    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
                                           R"(:3:15 error: construct: type is not constructible

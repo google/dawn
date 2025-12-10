@@ -509,7 +509,7 @@ TEST_F(IR_ValidatorTest, StructMember_Pointer_WithCapability) {
     mod.root_block->Append(v);
 
     Capabilities caps;
-    caps.Add(Capability::kAllowPointersAndHandlesInStructures);
+    caps.Add(Capability::kMslAllowEntryPointInterface);
 
     auto res = ir::Validate(mod, caps);
     ASSERT_EQ(res, Success);
@@ -543,7 +543,7 @@ TEST_F(IR_ValidatorTest, StructMember_Texture_WithCapability) {
     mod.root_block->Append(v);
 
     Capabilities caps;
-    caps.Add(Capability::kAllowPointersAndHandlesInStructures);
+    caps.Add(Capability::kMslAllowEntryPointInterface);
 
     auto res = ir::Validate(mod, caps);
     ASSERT_EQ(res, Success);
@@ -575,7 +575,7 @@ TEST_F(IR_ValidatorTest, StructMember_Sampler_WithCapability) {
     mod.root_block->Append(v);
 
     Capabilities caps;
-    caps.Add(Capability::kAllowPointersAndHandlesInStructures);
+    caps.Add(Capability::kMslAllowEntryPointInterface);
 
     auto res = ir::Validate(mod, caps);
     ASSERT_EQ(res, Success);

@@ -154,7 +154,7 @@ Result<SuccessType> ChangeImmediateToUniform(core::ir::Module& ir,
                                     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
                                     core::ir::Capability::kAllowDuplicateBindings,
                                     core::ir::Capability::kAllowNonCoreTypes,
-                                    core::ir::Capability::kAllowPointersAndHandlesInStructures,
+                                    core::ir::Capability::kMslAllowEntryPointInterface,
                                 });
     if (result != Success) {
         return result.Failure();

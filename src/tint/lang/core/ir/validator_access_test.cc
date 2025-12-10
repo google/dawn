@@ -516,7 +516,7 @@ TEST_F(IR_ValidatorTest, Access_ExtractPointerFromStruct) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersAndHandlesInStructures});
+    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

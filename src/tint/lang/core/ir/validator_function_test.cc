@@ -363,7 +363,7 @@ TEST_F(IR_ValidatorTest, Function_Param_WorkgroupPlusOtherIOAnnotation) {
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowWorkspacePointerInputToEntryPoint});
+    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -387,7 +387,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_WorkgroupPlusOtherIOAnnotations) 
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersAndHandlesInStructures});
+    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -1967,6 +1967,54 @@ TEST_F(IR_ValidatorTest, Function_Param_BindingPointWithoutCapability) {
                     R"(:1:17 error: input param to non-entry point function has a binding point set
 %my_func = func(%my_param:ptr<uniform, i32, read> [@binding_point(0, 0)]):void {
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_EntryPointParam_BindingPointWithoutCapability) {
+    auto* f = ComputeEntryPoint("my_func");
+    auto* p = b.FunctionParam("my_param", ty.ptr<uniform, i32>());
+    p->SetBindingPoint(0, 0);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:1:54 error: binding_points are only valid on resource variables
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:ptr<uniform, i32, read> [@binding_point(0, 0)]):void {
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_EntryPointParam_BindingPointWithCapability) {
+    auto* f = ComputeEntryPoint("my_func");
+    auto* p = b.FunctionParam("my_param", ty.ptr<uniform, i32>());
+    p->SetBindingPoint(0, 0);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_Color_InvalidType) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("my_param", ty.mat4x4(ty.f32()));
+    p->SetColor(0);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:1:27 error: color must be a scalar or vector
+%my_func = @fragment func(%my_param:mat4x4<f32> [@color(0)]):void {
+                          ^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 

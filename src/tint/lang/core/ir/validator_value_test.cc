@@ -249,7 +249,7 @@ TEST_F(IR_ValidatorTest, Var_Private_InsideFunctionScopeWithCapability) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPrivateVarsInFunctions});
+    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

@@ -44,11 +44,9 @@ namespace tint::msl::writer {
 const core::ir::Capabilities kPrinterCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow64BitIntegers,
-    core::ir::Capability::kAllowPointersAndHandlesInStructures,
-    core::ir::Capability::kAllowPrivateVarsInFunctions,
     core::ir::Capability::kAllowAnyLetType,
     core::ir::Capability::kAllowModuleScopeLets,
-    core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
+    core::ir::Capability::kMslAllowEntryPointInterface,
     core::ir::Capability::kAllowNonCoreTypes,
 };
 

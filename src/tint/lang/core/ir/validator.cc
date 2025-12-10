@@ -428,7 +428,7 @@ struct BuiltInChecker {
 
     /// Implements logic for checking if the given type is valid or not. Is not a data entry (i.e. a
     /// type or set of types), because types are part of the IR module and created at runtime.
-    using TypeCheckFn = bool(const core::type::Type* type);
+    using TypeCheckFn = bool(const core::type::Type* type, const Capabilities& cap);
 
     /// @see #TypeCheckFn
     TypeCheckFn* const type_check;
@@ -440,8 +440,10 @@ struct BuiltInChecker {
 
 constexpr BuiltInChecker kPointSizeChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::F32>(); },
-    .type_error = "__point_size must be a f32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::F32>();
+    },
+    .type_error = "must be a f32",
 };
 
 /// returns true if the number of elements in @p ty is valid for use in clip_distances without
@@ -453,29 +455,28 @@ constexpr auto ClipDistancesElementsCheck = [](const core::type::Type* ty) -> bo
 
 constexpr BuiltInChecker kClipDistancesChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool {
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
         return ty->Is<core::type::Array>() && ClipDistancesElementsCheck(ty);
     },
-    .type_error = "clip_distances must be an array<f32, N>, where N <= 8",
+    .type_error = "must be an array<f32, N>, where N <= 8",
 };
 
 constexpr BuiltInChecker kClipDistancesAllowF32ScalarAndVectorChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool {
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
         return ((ty->Is<core::type::Array>() || ty->Is<core::type::Vector>()) &&
                 ClipDistancesElementsCheck(ty)) ||
                ty->Is<core::type::F32>();
     },
-    .type_error =
-        "clip_distances must be a f32 or either a vecN<f32> or an array<f32, N>, where N <= 8",
+    .type_error = "must be a f32 or either a vecN<f32> or an array<f32, N>, where N <= 8",
 };
 
 constexpr BuiltInChecker kCullDistanceChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool {
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
         return ty->Is<core::type::Array>() && ty->DeepestElement()->Is<core::type::F32>();
     },
-    .type_error = "__cull_distance must be an array of f32",
+    .type_error = "must be an array of f32",
 };
 
 constexpr BuiltInChecker kFragDepthChecker{
@@ -483,126 +484,150 @@ constexpr BuiltInChecker kFragDepthChecker{
     .valid_depth_modes =
         EnumSet<BuiltinDepthMode>{BuiltinDepthMode::kUndefined, BuiltinDepthMode::kAny,
                                   BuiltinDepthMode::kGreater, BuiltinDepthMode::kLess},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::F32>(); },
-    .type_error = "frag_depth must be a f32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::F32>();
+    },
+    .type_error = "must be a f32",
 };
 
 constexpr BuiltInChecker kFrontFacingChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::Bool>(); },
-    .type_error = "front_facing must be a bool",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::Bool>();
+    },
+    .type_error = "must be a bool",
 };
 
 constexpr BuiltInChecker kGlobalInvocationIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool {
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
     },
-    .type_error = "global_invocation_id must be an vec3<u32>",
+    .type_error = "must be an vec3<u32>",
 };
 
 constexpr BuiltInChecker kInstanceIndexChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
-    .type_error = "instance_index must be an u32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::U32>();
+    },
+    .type_error = "must be an u32",
 };
 
 constexpr BuiltInChecker kLocalInvocationIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool {
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
     },
-    .type_error = "local_invocation_id must be an vec3<u32>",
+    .type_error = "must be an vec3<u32>",
 };
 
 constexpr BuiltInChecker kLocalInvocationIndexChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
-    .type_error = "local_invocation_index must be an u32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::U32>();
+    },
+    .type_error = "must be an u32",
 };
 
 constexpr BuiltInChecker kNumSubgroupsChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
-    .type_error = "num_subgroups must be an u32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::U32>();
+    },
+    .type_error = "must be an u32",
 };
 
 constexpr BuiltInChecker kNumWorkgroupsChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool {
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
     },
-    .type_error = "num_workgroups must be an vec3<u32>",
+    .type_error = "must be an vec3<u32>",
 };
 
 constexpr BuiltInChecker kPositionChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage,
                                               IOAttributeUsage::kFragmentInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool {
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
         return ty->IsFloatVector() && ty->Elements().count == 4;
     },
-    .type_error = "position must be an vec4<f32>",
+    .type_error = "must be an vec4<f32>",
 };
 
 constexpr BuiltInChecker kSampleIndexChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
-    .type_error = "sample_index must be an u32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::U32>();
+    },
+    .type_error = "must be an u32",
 };
 
 constexpr BuiltInChecker kSampleMaskChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage,
                                               IOAttributeUsage::kFragmentOutputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
-    .type_error = "sample_mask must be an u32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::U32>();
+    },
+    .type_error = "must be an u32",
 };
 
 constexpr BuiltInChecker kSubgroupIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
-    .type_error = "subgroup_id must be an u32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::U32>();
+    },
+    .type_error = "must be an u32",
 };
 
 constexpr BuiltInChecker kSubgroupInvocationIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage,
                                               IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
-    .type_error = "subgroup_invocation_id must be an u32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::U32>();
+    },
+    .type_error = "must be an u32",
 };
 
 constexpr BuiltInChecker kSubgroupSizeChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage,
                                               IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
-    .type_error = "subgroup_size must be an u32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::U32>();
+    },
+    .type_error = "must be an u32",
 };
 
 constexpr BuiltInChecker kVertexIndexChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
-    .type_error = "vertex_index must be an u32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::U32>();
+    },
+    .type_error = "must be an u32",
 };
 
 constexpr BuiltInChecker kWorkgroupIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool {
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
     },
-    .type_error = "workgroup_id must be an vec3<u32>",
+    .type_error = "must be an vec3<u32>",
 };
 
 constexpr BuiltInChecker kPrimitiveIndexChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
-    .type_error = "primitive_index must be an u32",
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->Is<core::type::U32>();
+    },
+    .type_error = "must be an u32",
 };
 
 constexpr BuiltInChecker kBarycentricCoordChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
-    .type_check = [](const core::type::Type* ty) -> bool {
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
         return ty->IsFloatVector() && ty->Elements().count == 3;
     },
-    .type_error = "barycentric_coord must be an vec3<f32>",
+    .type_error = "must be an vec3<f32>",
 };
 
 /// @returns an appropriate BuiltInCheck for @p builtin, ICEs when one isn't defined
@@ -678,6 +703,17 @@ struct IOAttributeChecker {
 
     /// The validation function.
     CheckFn* const check;
+
+    /// Implements logic for checking if the given type is valid or not. Is not a data entry (i.e. a
+    /// type or set of types), because types are part of the IR module and created at runtime.
+    using TypeCheckFn = bool(const core::type::Type* type, const Capabilities& cap);
+
+    /// @see #TypeCheckFn
+    TypeCheckFn* const type_check;
+
+    /// Message for logging if the type check fails. Cannot be easily generated at runtime, because
+    /// the type check is a function, not just a data entry.
+    const char* type_error;
 };
 
 constexpr IOAttributeChecker kInvariantChecker{
@@ -695,6 +731,8 @@ constexpr IOAttributeChecker kInvariantChecker{
         }
         return Success;
     },
+    .type_check = kPositionChecker.type_check,
+    .type_error = kPositionChecker.type_error,
 };
 
 constexpr IOAttributeChecker kBuiltinChecker{
@@ -732,8 +770,10 @@ constexpr IOAttributeChecker kBuiltinChecker{
             return msg.str();
         }
 
-        if (!checker.type_check(ty)) {
-            return std::string(checker.type_error);
+        if (!checker.type_check(ty, cap)) {
+            std::stringstream msg;
+            msg << ToString(builtin) << " " << checker.type_error;
+            return msg.str();
         }
 
         const auto depth_mode = attr.depth_mode.value_or(BuiltinDepthMode::kUndefined);
@@ -752,6 +792,8 @@ constexpr IOAttributeChecker kBuiltinChecker{
 
         return Success;
     },
+    .type_check = [](const core::type::Type*, const Capabilities&) -> bool { return true; },
+    .type_error = nullptr,
 };
 
 constexpr IOAttributeChecker kColorChecker{
@@ -760,19 +802,31 @@ constexpr IOAttributeChecker kColorChecker{
     .valid_io_kinds =
         EnumSet<ShaderIOKind>{ShaderIOKind::kInputParam, ShaderIOKind::kModuleScopeVar},
     .check = [](const core::type::Type*, const IOAttributes&, const Capabilities&, IOAttributeUsage)
-        -> Result<SuccessType, std::string> { return Success; }};
+        -> Result<SuccessType, std::string> { return Success; },
+    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+        return ty->IsNumericScalarOrVector();
+    },
+    .type_error = "must be a scalar or vector",
+};
 
 constexpr IOAttributeChecker kInputAttachmentIndexChecker{
     .kind = IOAttributeKind::kInputAttachmentIndex,
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentResourceUsage},
     .valid_io_kinds = EnumSet<ShaderIOKind>{ShaderIOKind::kModuleScopeVar},
     .check = [](const core::type::Type*, const IOAttributes&, const Capabilities&, IOAttributeUsage)
-        -> Result<SuccessType, std::string> { return Success; }};
+        -> Result<SuccessType, std::string> { return Success; },
+    .type_check = [](const core::type::Type* ty, const Capabilities& cap) -> bool {
+        return cap.Contains(Capability::kAllowAnyInputAttachmentIndexType) ||
+               ty->Is<core::type::InputAttachment>();
+    },
+    .type_error = "must be an input_attachment",
+};
 
 constexpr IOAttributeChecker kDepthModeChecker{
     .kind = IOAttributeKind::kDepthMode,
     .valid_usages = kBuiltinChecker.valid_usages,
     .valid_io_kinds = kBuiltinChecker.valid_io_kinds,
+    // kBuiltInChecker does the checking of the depth_mode value for the specific builtin.
     .check = [](const core::type::Type*,
                 const IOAttributes& attr,
                 const Capabilities&,
@@ -780,9 +834,11 @@ constexpr IOAttributeChecker kDepthModeChecker{
         if (!attr.builtin.has_value()) {
             return {"cannot have a depth_mode without a builtin"};
         }
-        return Success;  // kBuiltInChecker does the checking of the depth_mode value for the
-                         // specific builtin.
-    }};
+        return Success;
+    },
+    .type_check = [](const core::type::Type*, const Capabilities&) -> bool { return true; },
+    .type_error = nullptr,
+};
 
 // kBlendSrcChecker, kLocationChecker, kInterpolationChecker, and kBindingPointChecker are
 // intentionally not implemented
@@ -1256,10 +1312,12 @@ class Validator {
     /// Validates binding_point attributes on entry point IO.
     /// @param anchor where to attach error messages to.
     /// @param ty the type of the IO object
-    /// @param attr the IO attributes of the object.
+    /// @param attr the IO attributes of the object
+    /// @param io_kind the type of shader IO object binding point is attached to
     void CheckBindingPoint(const CastableBase* anchor,
                            const core::type::Type* ty,
-                           const IOAttributes& attr);
+                           const IOAttributes& attr,
+                           const ShaderIOKind& io_kind);
 
     /// Validates the given let
     /// @param l the let to validate
@@ -2052,7 +2110,7 @@ void Validator::CheckType(const core::type::Type* root,
                         return false;
                     }
 
-                    if (!capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures)) {
+                    if (!capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
                         if (member->Type()->Is<core::type::Pointer>()) {
                             diag() << "struct member " << member->Index()
                                    << " cannot be a pointer type";
@@ -2344,7 +2402,7 @@ void Validator::CheckType(const core::type::Type* root,
 
                 if (!(addrspace == AddressSpace::kUndefined ||
                       addrspace == AddressSpace::kHandle) &&
-                    !capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures)) {
+                    !capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
                     diag() << "invalid address space for binding_array : " << addrspace;
                     return false;
                 }
@@ -2546,7 +2604,7 @@ void Validator::CheckFunction(const Function* func) {
 
             auto struct_ty = param->Type()->As<core::type::Struct>();
             if (!allowed_ptr_to_handle &&
-                (!capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures) ||
+                (!capabilities_.Contains(Capability::kMslAllowEntryPointInterface) ||
                  (struct_ty == nullptr) ||
                  struct_ty->Members().Any([](const core::type::StructMember* m) {
                      return !IsValidFunctionParamType(m->Type());
@@ -2598,7 +2656,7 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
-        if (!capabilities_.Contains(Capability::kAllowWorkspacePointerInputToEntryPoint) &&
+        if (!capabilities_.Contains(Capability::kMslAllowEntryPointInterface) &&
             func->IsEntryPoint()) {
             if (mv && mv->Is<core::type::Pointer>() && address_space == AddressSpace::kWorkgroup) {
                 AddError(param) << "input param to entry point cannot be a ptr in the 'workgroup' "
@@ -2787,7 +2845,7 @@ void Validator::ValidateIOAttributes(const Function* func) {
         // Validate all the binding_point usages, and ensure things that require binding_point have
         // them.
         for (const auto& task : tasks) {
-            CheckBindingPoint(task.anchor, task.type, task.attr);
+            CheckBindingPoint(task.anchor, task.type, task.attr, task.io_kind);
         }
     }
 
@@ -2900,9 +2958,19 @@ void Validator::ValidateIOAttributesImpl(IOAttributeContext& ctx,
                     continue;
                 }
 
+                if (!checker->type_check(t, v.capabilities_)) {
+                    failed.Add(checker);
+                    v.AddError(msg_anchor) << ToString(checker->kind) << " " << checker->type_error;
+                }
+            }
+
+            for (const auto& checker : checkers) {
+                if (failed.Contains(checker)) {
+                    continue;
+                }
+
                 if (auto res = checker->check(t, a, v.capabilities_, usage); res != Success) {
                     failed.Add(checker);
-
                     v.AddError(msg_anchor) << res.Failure();
                 }
             }
@@ -3211,7 +3279,7 @@ void Validator::CheckVar(const Var* var) {
     }
 
     if (var->Block() != mod_.root_block && mv->AddressSpace() != AddressSpace::kFunction) {
-        if (!capabilities_.Contains(Capability::kAllowPrivateVarsInFunctions) ||
+        if (!capabilities_.Contains(Capability::kMslAllowEntryPointInterface) ||
             mv->AddressSpace() != AddressSpace::kPrivate) {
             AddError(var) << "vars in a function scope must be in the 'function' address space";
             return;
@@ -3239,7 +3307,8 @@ void Validator::CheckVar(const Var* var) {
         }
     }
 
-    CheckBindingPoint(var, var->Result(0)->Type(), var->Attributes());
+    CheckBindingPoint(var, var->Result(0)->Type(), var->Attributes(),
+                      ShaderIOKind::kModuleScopeVar);
 
     if (var->Block() == mod_.root_block && mv->AddressSpace() == AddressSpace::kFunction) {
         AddError(var) << "vars in the 'function' address space must be in a function scope";
@@ -3478,7 +3547,8 @@ void Validator::CheckInterpolation(const CastableBase* anchor,
 
 void Validator::CheckBindingPoint(const CastableBase* anchor,
                                   const core::type::Type* ty,
-                                  const IOAttributes& attr) {
+                                  const IOAttributes& attr,
+                                  const ShaderIOKind& io_kind) {
     const auto& binding_point = attr.binding_point;
     auto address_space = AddressSpace::kUndefined;
     if (const auto* mv = ty->As<core::type::MemoryView>()) {
@@ -3488,6 +3558,11 @@ void Validator::CheckBindingPoint(const CastableBase* anchor,
         if (ty->IsHandle()) {
             address_space = AddressSpace::kHandle;
         }
+    }
+
+    if (binding_point.has_value() && io_kind != ShaderIOKind::kModuleScopeVar &&
+        !capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
+        AddError(anchor) << "binding_points are only valid on resource variables";
     }
 
     switch (address_space) {
@@ -3618,7 +3693,7 @@ void Validator::ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
                 }
             }
 
-            if (capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures)) {
+            if (capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
                 if (auto* mv = mem->Type()->As<core::type::MemoryView>()) {
                     if (mv->AddressSpace() == AddressSpace::kWorkgroup) {
                         mem_annotations.Add(IOAnnotation::kWorkgroup);
@@ -3958,7 +4033,7 @@ void Validator::CheckConstruct(const Construct* construct) {
         // We only allow `construct` to create non-constructible types when they are structures that
         // contain pointers and handle types, with the corresponding capability enabled.
         if (!(result_type->Is<core::type::Struct>() &&
-              capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures))) {
+              capabilities_.Contains(Capability::kMslAllowEntryPointInterface))) {
             AddError(construct) << "type is not constructible";
             return;
         }
@@ -4728,7 +4803,7 @@ bool Validator::CanLoad(const core::type::Type* ty) {
         [&](const core::type::Struct* str) {
             for (auto* member : str->Members()) {
                 if (member->Type()->Is<core::type::Pointer>() &&
-                    capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures)) {
+                    capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
                     continue;
                 }
                 if (!CanLoad(member->Type())) {

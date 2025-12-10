@@ -56,14 +56,10 @@ enum class Capability : uint8_t {
     kAllowMultipleEntryPoints,
     /// Allow overrides
     kAllowOverrides,
-    /// Allows pointers and handle addressspace variables inside structures.
-    kAllowPointersAndHandlesInStructures,
     /// Allows ref types
     kAllowRefTypes,
     /// Allows access instructions to create pointers to vector elements.
     kAllowVectorElementPointer,
-    /// Allows private address space variables in function scopes.
-    kAllowPrivateVarsInFunctions,
     /// Allows phony assignment instructions to be used.
     kAllowPhonyInstructions,
     /// Allows lets to have any type, used by MSL backend for module scoped vars
@@ -71,9 +67,6 @@ enum class Capability : uint8_t {
     /// Allows input_attachment_index to be associated with any type, used by
     /// SPIRV backend for spirv.image.
     kAllowAnyInputAttachmentIndexType,
-    /// Allows workgroup address space pointers as entry point inputs. Used by
-    /// the MSL backend.
-    kAllowWorkspacePointerInputToEntryPoint,
     /// Allows binding points to be non-unique. Used after BindingRemapper is
     /// invoked by MSL & GLSL backends.
     kAllowDuplicateBindings,
@@ -95,6 +88,11 @@ enum class Capability : uint8_t {
     /// other.
     /// TODO(448417342): Validate in/out address space usage based on this capability
     kLoosenValidationForShaderIO,
+    /// Allows MSL specific entry point variance.
+    /// Specifically pointers and handle address space variables inside structures, private address
+    /// space variables in function scopes, workgroup address space pointers as entry point inputs,
+    /// binding point on non-module scope variables in entry point interface.
+    kMslAllowEntryPointInterface,
 };
 
 /// Capabilities is a set of Capability
