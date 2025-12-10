@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': 'd0342043510313adac09332b12d59fc4faaebfc2',
+  'chromium_revision': '49ac5d1eecf88c1448513193233e7ed238752773',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -74,7 +74,7 @@ vars = {
 
 deps = {
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@fc67fc1cee41cc9d1250368774bc0158b3542097',
+    'url': '{chromium_git}/chromium/src/buildtools@d7c2ffbac256d8c5ef718126e9d412f36c4ff777',
     'condition': 'dawn_standalone',
   },
   'third_party/clang-format/script': {
@@ -107,12 +107,12 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@4c6437f269f13d74bea98c625828146b53e2b340',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@b48cbb3e60a0f96597657c7b66738ead6b50a229',
     'condition': 'dawn_standalone',
   },
 
   'third_party/libc++/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@e82038b2e906a946e51ceb74ca855f44b0e58c3a',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@c5dd8ade977af3a7441bbf99a2dcac2d5820e702',
     'condition': 'dawn_standalone',
   },
 
@@ -248,7 +248,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@1c04a8fd6704d507b0d20c9b362a8d42bf18ff44',
+    'url': '{chromium_git}/chromium/src/testing@aad16809e3195963334c7eee46e3aca819864752',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
