@@ -601,6 +601,46 @@ def topo_sort_structure(structs):
     return result
 
 
+# Sort objects so that if object A has a member function with an optional
+# argument of type object B, then B is listed before A. We do this because
+# optional object arguments are emitted as 'Func(B const& arg = nullptr)`, and
+# this requires that B's definition be known so that the compiler can generate
+# the call to B's implicit std::nullptr constructor.
+#
+# See the comment for topo_sort_structure for how this sorts topologically.
+def topo_sort_object(objects):
+    for object in objects:
+        object.visited = False
+        object.subdag_depth = 0
+
+    def compute_depth(object):
+        if object.visited:
+            return object.subdag_depth
+
+        max_dependent_depth = 0
+        for method in object.methods:
+            for arg in method.arguments:
+                if arg.type.category == 'object':
+                    if arg.optional:
+                        max_dependent_depth = max(max_dependent_depth,
+                                                  compute_depth(arg.type) + 1)
+
+        object.subdag_depth = max_dependent_depth
+        object.visited = True
+        return object.subdag_depth
+
+    for object in objects:
+        compute_depth(object)
+
+    result = sorted(objects, key=lambda object: object.subdag_depth)
+
+    for object in objects:
+        del object.visited
+        del object.subdag_depth
+
+    return result
+
+
 def parse_json(json, enabled_tags, disabled_tags=None):
     is_enabled = lambda json_data: item_is_enabled(
         enabled_tags, json_data) and not item_is_disabled(
@@ -666,6 +706,7 @@ def parse_json(json, enabled_tags, disabled_tags=None):
         key=lambda f: f.name.get() == 'get proc address')
 
     by_category['structure'] = topo_sort_structure(by_category['structure'])
+    by_category['object'] = topo_sort_object(by_category['object'])
 
     for struct in by_category['structure']:
         struct.update_metadata()
