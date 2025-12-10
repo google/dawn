@@ -154,6 +154,7 @@ if (tint_build_unittests) {
       "struct_layout_test.cc",
       "struct_pipeline_stage_use_test.cc",
       "subgroup_matrix_test.cc",
+      "subgroup_size_control_extension_test.cc",
       "subgroups_extension_test.cc",
       "texel_buffer_test.cc",
       "type_validation_test.cc",

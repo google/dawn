@@ -294,6 +294,15 @@ bool Validator::Enables(VectorRef<const ast::Enable*> enables) const {
         }
     }
 
+    if (enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl) &&
+        !enabled_extensions_.Contains(wgsl::Extension::kSubgroups)) {
+        AddError(source_of(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl))
+            << "extension "
+            << style::Code(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl)
+            << " cannot be used without extension " << style::Code(wgsl::Extension::kSubgroups);
+        return false;
+    }
+
     return true;
 }
 
