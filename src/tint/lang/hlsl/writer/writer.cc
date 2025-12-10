@@ -147,49 +147,63 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     }
 
     // Check for unsupported shader IO builtins.
+    auto check_io_attributes = [&](const core::IOAttributes& attributes) -> Result<SuccessType> {
+        if (attributes.color.has_value()) {
+            return Failure("@color attribute is not supported by the HLSL backend");
+        }
+        if (attributes.builtin == core::BuiltinValue::kSubgroupId ||
+            attributes.builtin == core::BuiltinValue::kSubgroupInvocationId ||
+            attributes.builtin == core::BuiltinValue::kSubgroupSize ||
+            attributes.builtin == core::BuiltinValue::kNumSubgroups) {
+            if (options.compiler == Options::Compiler::kFXC) {
+                return Failure("subgroups are not supported by FXC");
+            }
+        }
+        if (attributes.builtin == core::BuiltinValue::kBarycentricCoord &&
+            options.compiler == Options::Compiler::kFXC) {
+            return Failure("barycentric_coord is not supported by the FXC HLSL backend");
+        }
+        if (options.truncate_interstage_variables) {
+            if (attributes.location >= 30u) {
+                return Failure("too many locations for interstage variable truncation");
+            }
+        }
+        return Success;
+    };
     for (auto& func : ir.functions) {
         if (!func->IsEntryPoint()) {
             continue;
         }
 
+        // Check input attributes.
         for (auto* param : func->Params()) {
             if (auto* str = param->Type()->As<core::type::Struct>()) {
                 for (auto* member : str->Members()) {
-                    if (member->Attributes().color.has_value()) {
-                        return Failure("@color attribute is not supported by the HLSL backend");
-                    }
-                    if (member->Attributes().builtin == core::BuiltinValue::kSubgroupId ||
-                        member->Attributes().builtin == core::BuiltinValue::kSubgroupInvocationId ||
-                        member->Attributes().builtin == core::BuiltinValue::kSubgroupSize ||
-                        member->Attributes().builtin == core::BuiltinValue::kNumSubgroups) {
-                        if (options.compiler == Options::Compiler::kFXC) {
-                            return Failure("subgroups are not supported by FXC");
-                        }
-                    }
-
-                    if (member->Attributes().builtin == core::BuiltinValue::kBarycentricCoord &&
-                        options.compiler == Options::Compiler::kFXC) {
-                        return Failure(
-                            "barycentric_coord is not supported by the FXC HLSL backend");
+                    auto res = check_io_attributes(member->Attributes());
+                    if (res != Success) {
+                        return res;
                     }
                 }
             } else {
-                if (param->Color().has_value()) {
-                    return Failure("@color attribute is not supported by the HLSL backend");
+                auto res = check_io_attributes(param->Attributes());
+                if (res != Success) {
+                    return res;
                 }
-                if (param->Builtin() == core::BuiltinValue::kSubgroupId ||
-                    param->Builtin() == core::BuiltinValue::kSubgroupInvocationId ||
-                    param->Builtin() == core::BuiltinValue::kSubgroupSize ||
-                    param->Builtin() == core::BuiltinValue::kNumSubgroups) {
-                    if (options.compiler == Options::Compiler::kFXC) {
-                        return Failure("subgroups are not supported by FXC");
-                    }
-                }
+            }
+        }
 
-                if (param->Builtin() == core::BuiltinValue::kBarycentricCoord &&
-                    options.compiler == Options::Compiler::kFXC) {
-                    return Failure("barycentric_coord is not supported by the FXC HLSL backend");
+        // Check output attributes.
+        if (auto* str = func->ReturnType()->As<core::type::Struct>()) {
+            for (auto* member : str->Members()) {
+                auto res = check_io_attributes(member->Attributes());
+                if (res != Success) {
+                    return res;
                 }
+            }
+        } else {
+            auto res = check_io_attributes(func->ReturnAttributes());
+            if (res != Success) {
+                return res;
             }
         }
     }
