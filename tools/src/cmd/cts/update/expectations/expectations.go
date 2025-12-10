@@ -134,7 +134,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	for _, expectationsFilename := range c.flags.expectations {
 		// Load the expectations file
 		log.Printf("loading expectations %s...\n", expectationsFilename)
-		ex, err := expectations.Load(expectationsFilename)
+		ex, err := expectations.Load(expectationsFilename, cfg.OsWrapper)
 		if err != nil {
 			return err
 		}
@@ -165,7 +165,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		diag.Print(os.Stdout, expectationsFilename)
 
 		// Save the updated expectations file
-		err = ex.Save(expectationsFilename)
+		err = ex.Save(expectationsFilename, cfg.OsWrapper)
 		if err != nil {
 			break
 		}
