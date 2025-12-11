@@ -25,47 +25,46 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_RESOURCETABLE_H_
-#define SRC_DAWN_NATIVE_RESOURCETABLE_H_
+#ifndef SRC_DAWN_NATIVE_VULKAN_RESOURCETABLEVK_H_
+#define SRC_DAWN_NATIVE_VULKAN_RESOURCETABLEVK_H_
 
-#include "dawn/native/DynamicArrayState.h"
-#include "dawn/native/ObjectBase.h"
+#include <memory>
 
-#include "dawn/native/dawn_platform.h"
+#include "dawn/common/vulkan_platform.h"
+#include "dawn/native/Error.h"
+#include "dawn/native/ResourceTable.h"
+#include "dawn/native/vulkan/DescriptorSetAllocation.h"
 
-namespace dawn::native {
+namespace dawn::native::vulkan {
 
-MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
-                                           const ResourceTableDescriptor* descriptor);
+class Device;
+class DescriptorSetAllocatorDynamicArray;
 
-class ResourceTableBase : public ApiObjectBase {
+class ResourceTable final : public ResourceTableBase {
   public:
-    static Ref<ResourceTableBase> MakeError(DeviceBase* device, StringView label = {});
+    static ResultOrError<Ref<ResourceTable>> Create(Device* device,
+                                                    const ResourceTableDescriptor* descriptor);
 
-    ObjectType GetType() const override;
-
-    // Dawn API
-    void APIDestroy();
-
-    MaybeError ValidateCanUseInSubmitNow() const;
+    // All the resource tables share the same VkDescriptorSetLayout so it is cached on the device.
+    static ResultOrError<VkDescriptorSetLayout> MakeDescriptorSetLayout(Device* device);
 
   protected:
-    ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor);
-
-    MaybeError Initialize();
     void DestroyImpl() override;
-
-    DynamicArrayState* GetDynamicArrayState();
+    void SetLabelImpl() override;
 
   private:
-    ResourceTableBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
+    ~ResourceTable() override;
 
-    // TODO(https://issues.chromium.org/463925499): Inline the functionality of DynamicArrayState in
-    // ResourceTable once bindless bindgroup support is removed.
-    Ref<DynamicArrayState> mDynamicArray;
-    bool mDestroyed = false;
+    using ResourceTableBase::ResourceTableBase;
+    MaybeError Initialize();
+
+    // TODO(https://issues.chromium.org/463925499): Inline the functionality of
+    // DescriptorSetAllocatorDynamicArray in ResourceTable once bindless bindgroup support is
+    // removed.
+    std::unique_ptr<DescriptorSetAllocatorDynamicArray> mDSAllocator;
+    DescriptorSetAllocation mAllocation;
 };
 
-}  // namespace dawn::native
+}  // namespace dawn::native::vulkan
 
-#endif  // SRC_DAWN_NATIVE_RESOURCETABLE_H_
+#endif  // SRC_DAWN_NATIVE_VULKAN_RESOURCETABLEVK_H_

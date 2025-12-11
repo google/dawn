@@ -271,6 +271,10 @@ BindingIndex DynamicArrayState::GetAPISize() const {
     return mAPISize;
 }
 
+BindingIndex DynamicArrayState::GetSizeWithDefaultBindings() const {
+    return mBindings.size();
+}
+
 ityp::span<BindingIndex, const Ref<TextureViewBase>> DynamicArrayState::GetBindings() const {
     DAWN_ASSERT(!mDestroyed);
     return {mBindings.data(), mBindings.size()};

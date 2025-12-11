@@ -464,7 +464,8 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
     mDynamicUploader = std::make_unique<DynamicUploader>(this);
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
-    if (HasFeature(Feature::ChromiumExperimentalBindless)) {
+    if (HasFeature(Feature::ChromiumExperimentalBindless) ||
+        HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
         mDynamicArrayDefaultBindings = std::make_unique<DynamicArrayDefaultBindings>();
     }
 
@@ -1056,7 +1057,8 @@ InternalPipelineStore* DeviceBase::GetInternalPipelineStore() {
 }
 
 DynamicArrayDefaultBindings* DeviceBase::GetDynamicArrayDefaultBindings() {
-    DAWN_ASSERT(HasFeature(Feature::ChromiumExperimentalBindless));
+    DAWN_ASSERT(HasFeature(Feature::ChromiumExperimentalBindless) ||
+                HasFeature(Feature::ChromiumExperimentalSamplingResourceTable));
     DAWN_ASSERT(mDynamicArrayDefaultBindings != nullptr);
     return mDynamicArrayDefaultBindings.get();
 }

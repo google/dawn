@@ -695,6 +695,7 @@ source_set("end2end_tests_sources") {
     "end2end/RenderPassLoadOpTests.cpp",
     "end2end/RenderPassTests.cpp",
     "end2end/RequiredBufferSizeInCopyTests.cpp",
+    "end2end/ResourceTableTests.cpp",
     "end2end/SamplerFilterAnisotropicTests.cpp",
     "end2end/SamplerTests.cpp",
     "end2end/ScissorTests.cpp",

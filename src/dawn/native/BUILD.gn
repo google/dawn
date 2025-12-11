@@ -899,6 +899,8 @@ source_set("sources") {
       "vulkan/ResourceHeapVk.h",
       "vulkan/ResourceMemoryAllocatorVk.cpp",
       "vulkan/ResourceMemoryAllocatorVk.h",
+      "vulkan/ResourceTableVk.cpp",
+      "vulkan/ResourceTableVk.h",
       "vulkan/SamplerVk.cpp",
       "vulkan/SamplerVk.h",
       "vulkan/ShaderModuleVk.cpp",
