@@ -200,8 +200,14 @@ MaybeError Buffer::CaptureContentIfNeeded(CaptureContext& captureContext,
                                           bool newResource) {
     // TODO(451338754): If it's a new resource and we know the buffer is all zero then don't
     // capture.
-    bool unwritableOnPlayback = GetUsage() & wgpu::BufferUsage::MapWrite;
+    wgpu::BufferUsage usage = GetUsage();
+    bool unwritableOnPlayback = usage & wgpu::BufferUsage::MapWrite;
     if (!newResource || unwritableOnPlayback) {
+        return {};
+    }
+    // A MapRead buffer is never used as input since it's only allowed CopyDst
+    // so we don't need its contents.
+    if (usage & wgpu::BufferUsage::MapRead) {
         return {};
     }
     schema::RootCommandWriteBufferCmd cmd{{

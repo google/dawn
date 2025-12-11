@@ -424,6 +424,41 @@ TEST_P(CaptureAndReplayTests, CaptureWithMapWriteDuringCapture) {
     ExpectBufferEQ(replay.get(), dstLabel, expected);
 }
 
+// Capture a buffer with MapRead.
+TEST_P(CaptureAndReplayTests, CaptureWithMapRead) {
+    const char* srcLabel = "srcBuffer";
+    const char* dstLabel = "dstBuffer";
+    const uint8_t myData[] = {0x55, 0x66, 0x77, 0x88};
+
+    wgpu::Buffer srcBuffer =
+        CreateBuffer(srcLabel, 4, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
+    queue.WriteBuffer(srcBuffer, 0, &myData, sizeof(myData));
+
+    wgpu::Buffer dstBuffer =
+        CreateBuffer(dstLabel, 4, wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst);
+
+    auto recorder = Recorder::CreateAndStart(device);
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(srcBuffer, 0, dstBuffer, 0, sizeof(myData));
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    // We can't use ExpectBufferEQ here because it uses a copy and `dstBuffer`
+    // does not have CopySrc. So, let's do it ourselves.
+    MapAsyncAndWait(dstBuffer, wgpu::MapMode::Read, 0, sizeof(myData));
+    auto actual = static_cast<const uint8_t*>(dstBuffer.GetConstMappedRange(0, sizeof(myData)));
+    std::span<const uint8_t> actual_span(actual, std::size(myData));
+    ASSERT_THAT(actual_span, ::testing::ElementsAreArray(myData));
+}
+
 TEST_P(CaptureAndReplayTests, CaptureCopyBufferToBuffer) {
     const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
 
