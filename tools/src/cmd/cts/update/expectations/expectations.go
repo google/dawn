@@ -100,8 +100,6 @@ func loadTestList(path string, fsReader oswrapper.FilesystemReader) ([]query.Que
 	return out, nil
 }
 
-// TODO(crbug.com/344014313): Add unittests once expectations.Load() and
-// expectations.Save() use dependency injection.
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if len(c.flags.expectations) == 0 {
 		c.flags.expectations = common.DefaultExpectationsPaths(cfg.OsWrapper)
