@@ -112,7 +112,7 @@ func (r *ResultSource) getResultsImpl(ctx context.Context, cfg Config, auth auth
 
 	// If a file was specified, then load that.
 	if r.File != "" {
-		return result.Load(r.File)
+		return result.LoadWithWrapper(r.File, cfg.OsWrapper)
 	}
 
 	// Initialize the buildbucket and resultdb clients

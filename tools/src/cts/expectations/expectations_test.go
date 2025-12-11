@@ -32,10 +32,88 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
 )
+
+/*******************************************************************************
+ * Load/Save tests
+ ******************************************************************************/
+
+func TestLoad(t *testing.T) {
+	content := `# comment
+crbug.com/1234 [ linux ] query [ Failure ]
+`
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	path := "expectations.txt"
+	require.NoError(t, wrapper.WriteFile(path, []byte(content), 0666))
+
+	ex, err := Load(path, wrapper)
+	require.NoError(t, err)
+
+	expected := Content{
+		Chunks: []Chunk{
+			{
+				Comments: []string{"# comment"},
+				Expectations: Expectations{
+					{
+						Line:   2,
+						Bug:    "crbug.com/1234",
+						Tags:   result.NewTags("linux"),
+						Query:  "query",
+						Status: []string{"Failure"},
+					},
+				},
+			},
+		},
+	}
+	require.Equal(t, expected, ex)
+}
+
+func TestLoad_BinaryFile(t *testing.T) {
+	// Creating a file with invalid UTF-8 sequence
+	content := []byte{0xff, 0xfe, 0xfd}
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	path := "expectations.txt"
+	require.NoError(t, wrapper.WriteFile(path, content, 0666))
+
+	_, err := Load(path, wrapper)
+	require.Error(t, err)
+}
+
+func TestSave(t *testing.T) {
+	ex := Content{
+		Chunks: []Chunk{
+			{
+				Comments: []string{"# comment"},
+				Expectations: Expectations{
+					{
+						Line:   2,
+						Bug:    "crbug.com/1234",
+						Tags:   result.NewTags("linux"),
+						Query:  "query",
+						Status: []string{"Failure"},
+					},
+				},
+			},
+		},
+	}
+
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	path := "expectations.txt"
+
+	err := ex.Save(path, wrapper)
+	require.NoError(t, err)
+
+	data, err := wrapper.ReadFile(path)
+	require.NoError(t, err)
+
+	expected := `# comment
+crbug.com/1234 [ linux ] query [ Failure ]
+`
+	require.Equal(t, expected, string(data))
+}
 
 /*******************************************************************************
  * Content tests
@@ -127,9 +205,7 @@ crbug.com/3 [ intel ] d [ Failure ]
 	}
 	expectations.Format()
 
-	if diff := cmp.Diff(expectations.String(), expected_content); diff != "" {
-		t.Errorf("Format produced unexpected output: %v", diff)
-	}
+	require.Equal(t, expected_content, expectations.String())
 }
 
 // Tests that expectations for unknown tests are properly removed, even if they

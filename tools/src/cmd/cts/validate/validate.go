@@ -107,7 +107,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	// Print any diagnostics
 	diags.Print(os.Stdout, c.flags.slow)
 	if numErrs := diags.NumErrors(); numErrs > 0 {
-		return fmt.Errorf("%v errors found", numErrs)
+		return fmt.Errorf("%v errors found in %v", numErrs, c.flags.slow)
 	}
 
 	fmt.Println("no issues found")
