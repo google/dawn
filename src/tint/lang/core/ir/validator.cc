@@ -4527,6 +4527,9 @@ void Validator::CheckSwitch(const Switch* s) {
                     AddError(s) << "multiple default selectors in switch";
                 }
                 found_default = true;
+            } else if (!sel.val->Type()->IsIntegerScalar()) {
+                AddError(s) << "case selector type " << NameOf(sel.val->Type())
+                            << " must be an integer scalar";
             }
         }
     }

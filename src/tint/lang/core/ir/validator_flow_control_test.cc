@@ -2251,6 +2251,22 @@ TEST_F(IR_ValidatorTest, Switch_NoDefaultCase) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Switch_InvalidCaseSelectorType) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* s = b.Switch(1_i);
+        b.Append(b.DefaultCase(s), [&] { b.ExitSwitch(s); });
+        b.Append(b.Case(s, {b.Constant(true)}), [&] { b.ExitSwitch(s); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("error: switch: case selector type 'bool' must be an integer scalar"));
+}
+
 TEST_F(IR_ValidatorTest, Switch_MultipleDefaultCases) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
