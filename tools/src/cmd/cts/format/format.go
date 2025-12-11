@@ -63,8 +63,6 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	return nil, nil
 }
 
-// TODO(crbug.com/344014313): Add unittest coverage once expectations.Load() and
-// expectations.Save() use dependency injection.
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	for _, path := range strings.Split(c.flags.expectations, ",") {
 		path := strings.TrimSpace(path)

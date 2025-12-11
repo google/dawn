@@ -29,12 +29,34 @@ package format
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"github.com/stretchr/testify/require"
 )
+
+type mockOSWrapper struct {
+	oswrapper.OSWrapper
+	readFileErr error
+	createErr   error
+}
+
+func (m *mockOSWrapper) ReadFile(name string) ([]byte, error) {
+	if m.readFileErr != nil {
+		return nil, m.readFileErr
+	}
+	return m.OSWrapper.ReadFile(name)
+}
+
+func (m *mockOSWrapper) Create(name string) (oswrapper.File, error) {
+	if m.createErr != nil {
+		return nil, m.createErr
+	}
+	return m.OSWrapper.Create(name)
+}
 
 func TestFormat(t *testing.T) {
 	unformatted := `# Tags
@@ -65,4 +87,95 @@ crbug.com/456 [ linux ] q [ Failure ]
 	data, err := wrapper.ReadFile(path)
 	require.NoError(t, err)
 	require.Equal(t, formatted, string(data))
+}
+
+func TestFormat_MultipleFiles(t *testing.T) {
+	content1 := `# Tags
+# tags: [ linux mac ]
+
+crbug.com/456 [ linux ] q [ Failure ]
+`
+	content2 := `# Tags
+# tags: [ win android ]
+
+crbug.com/789 [ android ] q [ Failure ]
+`
+	formatted1 := `# Tags
+# tags: [ linux mac ]
+
+crbug.com/456 [ linux ] q [ Failure ]
+`
+	formatted2 := `# Tags
+# tags: [ win android ]
+
+crbug.com/789 [ android ] q [ Failure ]
+`
+
+	path1 := "expectations1.txt"
+	path2 := "expectations2.txt"
+
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	require.NoError(t, wrapper.WriteFile(path1, []byte(content1), 0666))
+	require.NoError(t, wrapper.WriteFile(path2, []byte(content2), 0666))
+
+	cfg := common.Config{
+		OsWrapper: wrapper,
+	}
+	c := &cmd{}
+	c.flags.expectations = strings.Join([]string{path1, path2}, ",")
+
+	err := c.Run(context.Background(), cfg)
+	require.NoError(t, err)
+
+	data1, err := wrapper.ReadFile(path1)
+	require.NoError(t, err)
+	require.Equal(t, formatted1, string(data1))
+
+	data2, err := wrapper.ReadFile(path2)
+	require.NoError(t, err)
+	require.Equal(t, formatted2, string(data2))
+}
+
+func TestFormat_LoadError(t *testing.T) {
+	wrapper := &mockOSWrapper{
+		OSWrapper:   oswrapper.CreateFSTestOSWrapper(),
+		readFileErr: errors.New("read error"),
+	}
+
+	path := "expectations.txt"
+	cfg := common.Config{
+		OsWrapper: wrapper,
+	}
+	c := &cmd{}
+	c.flags.expectations = path
+
+	err := c.Run(context.Background(), cfg)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "read error")
+}
+
+func TestFormat_SaveError(t *testing.T) {
+	innerWrapper := oswrapper.CreateFSTestOSWrapper()
+	path := "expectations.txt"
+	content := `# Tags
+# tags: [ linux ]
+
+crbug.com/123 [ linux ] q [ Failure ]
+`
+	require.NoError(t, innerWrapper.WriteFile(path, []byte(content), 0666))
+
+	wrapper := &mockOSWrapper{
+		OSWrapper: innerWrapper,
+		createErr: errors.New("create error"),
+	}
+
+	cfg := common.Config{
+		OsWrapper: wrapper,
+	}
+	c := &cmd{}
+	c.flags.expectations = path
+
+	err := c.Run(context.Background(), cfg)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "create error")
 }
