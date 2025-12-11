@@ -97,6 +97,7 @@ if (NOT EMSCRIPTEN)
   add_subdirectory(platform)
   add_subdirectory(wire)
   add_subdirectory(native)
+  add_subdirectory(replay)
 endif()
 
 if (DAWN_BUILD_BENCHMARKS)
