@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "dawn/tests/DawnTest.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
 namespace {
@@ -58,6 +59,21 @@ class ResourceTableTests : public DawnTest {
         desc.size = size;
         return device.CreateResourceTable(&desc);
     }
+
+    wgpu::PipelineLayout MakePipelineLayoutWithTable(std::vector<wgpu::BindGroupLayout> bgls = {},
+                                                     uint32_t immediateSize = 0) {
+        wgpu::PipelineLayoutResourceTable plTable;
+        plTable.usesResourceTable = true;
+
+        wgpu::PipelineLayoutDescriptor desc{
+            .nextInChain = &plTable,
+            .bindGroupLayoutCount = bgls.size(),
+            .bindGroupLayouts = bgls.data(),
+            .immediateSize = immediateSize,
+        };
+
+        return device.CreatePipelineLayout(&desc);
+    }
 };
 
 // Test that creating resource tables doesn't crash in backends.
@@ -70,6 +86,24 @@ TEST_P(ResourceTableTests, ResourceTableCreation) {
 
     // Creating a resource table with the maximum number of entries.
     MakeResourceTable(kMaxResourceTableSize);
+}
+
+// Test that creating pipeline layouts with resources tables doesn't crash in backends.
+TEST_P(ResourceTableTests, PipelineLayoutWithResourceTableCreation) {
+    // Make layouts with no BGLs with / without immediates.
+    MakePipelineLayoutWithTable({}, 0);
+    MakePipelineLayoutWithTable({}, 4);
+
+    // Make layouts with one BGL, with / without immediates.
+    wgpu::BindGroupLayout testBgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform}});
+    MakePipelineLayoutWithTable({testBgl}, 0);
+    MakePipelineLayoutWithTable({testBgl}, 4);
+
+    // Make layouts with max BGLs (3 because the resource tables "consumes" one bind group), with /
+    // without immediates.
+    MakePipelineLayoutWithTable({testBgl, testBgl, testBgl}, 0);
+    MakePipelineLayoutWithTable({testBgl, testBgl, testBgl}, 4);
 }
 
 DAWN_INSTANTIATE_TEST(ResourceTableTests, D3D12Backend(), MetalBackend(), VulkanBackend());

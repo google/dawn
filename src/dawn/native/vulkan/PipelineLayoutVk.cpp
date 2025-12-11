@@ -52,14 +52,23 @@ ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
 ResultOrError<Ref<RefCountedVkHandle<VkPipelineLayout>>> PipelineLayout::CreateVkPipelineLayout(
     uint32_t immediateConstantSize) {
     // Compute the array of VkDescriptorSetLayouts that will be chained in the create info.
+    ityp::array<BindGroupIndex, VkDescriptorSetLayout, size_t(kMaxBindGroupsTyped) + 1> setLayouts;
+
+    // The first VkDescriptorSetLayout is the one for the resource table if needed.
+    BindGroupIndex startOfBindGroups{0};
+    if (UsesResourceTable()) {
+        startOfBindGroups = BindGroupIndex(1);
+        setLayouts[BindGroupIndex(0)] = ToBackend(GetDevice())->GetResourceTableLayout();
+    }
+
+    // The all the descriptor sets for BindGroupLayouts, including the empty BGLs.
     BindGroupMask bindGroupMask = GetBindGroupLayoutsMask();
     BindGroupIndex highestBindGroupIndex = GetHighestBitIndexPlusOne(bindGroupMask);
-    PerBindGroup<VkDescriptorSetLayout> setLayouts;
     for (BindGroupIndex i : Range(highestBindGroupIndex)) {
         if (bindGroupMask[i]) {
-            setLayouts[i] = ToBackend(GetBindGroupLayout(i))->GetHandle();
+            setLayouts[startOfBindGroups + i] = ToBackend(GetBindGroupLayout(i))->GetHandle();
         } else {
-            setLayouts[i] =
+            setLayouts[startOfBindGroups + i] =
                 ToBackend(GetDevice()->GetEmptyBindGroupLayout()->GetInternalBindGroupLayout())
                     ->GetHandle();
         }
@@ -69,7 +78,7 @@ ResultOrError<Ref<RefCountedVkHandle<VkPipelineLayout>>> PipelineLayout::CreateV
     createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     createInfo.pNext = nullptr;
     createInfo.flags = 0;
-    createInfo.setLayoutCount = static_cast<uint32_t>(highestBindGroupIndex);
+    createInfo.setLayoutCount = static_cast<uint32_t>(highestBindGroupIndex + startOfBindGroups);
     createInfo.pSetLayouts = AsVkArray(setLayouts.data());
     createInfo.pushConstantRangeCount = 0;
     createInfo.pPushConstantRanges = nullptr;
