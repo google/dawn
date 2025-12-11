@@ -114,7 +114,9 @@
           'linux-jammy',
           'x86-64',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'gtest_tests': 'dawn_end2end_sws_tsan_gtests',
+        },
       },
       'dawn-linux-x86-builder-dbg': {
         'additional_compile_targets': [

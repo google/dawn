@@ -67,6 +67,22 @@ ADDITIONAL_MIXINS = {
             '--gtest_filter=-*WebGPU_WebGPU_backend_on*',
         ],
     },
+    'dawn_end2end_sws_tsan_gtest_common_args': {
+        'args': [
+            # We are only want to run on SwiftShader for now. Since SwiftShader
+            # is only meant as a temporary solution, this should either be
+            # removed in favor of LLVMPipe or TSAN testing should run on
+            # real hardware.
+            '--adapter-vendor-id=0x1AE0',
+            # //testing/test_env.py automatically tries to run an additional
+            # symbolization script if sanitizers are enabled, but this script
+            # implicitly depends on tests producing Chromium's proprietary
+            # test result format instead of the one natively produced by gtest.
+            # TSAN stacks are still usable without this extra symbolization,
+            # though.
+            '--skip-symbolization-script=1',
+        ],
+    },
     'no_swarming': {
         'swarming': {
             'can_use_on_swarming_builders': False,
