@@ -29,6 +29,7 @@ package validate
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
@@ -113,4 +114,37 @@ func TestValidate_InvalidSlow(t *testing.T) {
 
 	err := c.Run(context.Background(), cfg)
 	require.ErrorContains(t, err, "1 errors found in slow.txt")
+}
+
+func TestValidate_LoadExpectationsFail(t *testing.T) {
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+
+	cfg := common.Config{
+		OsWrapper: wrapper,
+	}
+	c := &cmd{}
+	c.flags.expectations = []string{"missing_expectations.txt"}
+	c.flags.slow = "slow.txt"
+
+	err := c.Run(context.Background(), cfg)
+	require.ErrorIs(t, err, os.ErrNotExist)
+}
+
+func TestValidate_LoadSlowExpectationsFail(t *testing.T) {
+	content := ""
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	path := "expectations.txt"
+	require.NoError(t, wrapper.WriteFile(path, []byte(content), 0666))
+
+	slowPath := "missing_slow.txt"
+
+	cfg := common.Config{
+		OsWrapper: wrapper,
+	}
+	c := &cmd{}
+	c.flags.expectations = []string{path}
+	c.flags.slow = slowPath
+
+	err := c.Run(context.Background(), cfg)
+	require.ErrorIs(t, err, os.ErrNotExist)
 }

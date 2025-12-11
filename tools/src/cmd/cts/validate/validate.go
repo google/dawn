@@ -75,8 +75,6 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	return nil, nil
 }
 
-// TODO(crbug.com/344014313): Add unittests once expectations.Load() uses
-// dependency injection.
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if len(c.flags.expectations) == 0 {
 		c.flags.expectations = common.DefaultExpectationsPaths(cfg.OsWrapper)
