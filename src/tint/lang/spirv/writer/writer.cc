@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "src/tint/lang/core/ir/analysis/subgroup_matrix.h"
+#include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -110,6 +111,18 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
         if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
             return Failure("pixel_local address space is not supported by the SPIR-V backend");
+        }
+    }
+
+    // Check for calls to unsupported builtin functions.
+    for (auto* inst : ir.Instructions()) {
+        auto* call = inst->As<core::ir::CoreBuiltinCall>();
+        if (!call) {
+            continue;
+        }
+
+        if (call->Func() == core::BuiltinFn::kPrint) {
+            return Failure("print is not supported by the SPIR-V backend");
         }
     }
 

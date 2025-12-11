@@ -79,6 +79,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             call->Func() == core::BuiltinFn::kHasResource) {
             return Failure("resource tables not supported by the HLSL backend");
         }
+        if (call->Func() == core::BuiltinFn::kPrint) {
+            return Failure("print is not supported by the HLSL backend");
+        }
     }
 
     core::ir::Function* ep_func = nullptr;
