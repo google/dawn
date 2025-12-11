@@ -41,15 +41,92 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/resultsdb"
 	"github.com/stretchr/testify/require"
+	"go.chromium.org/luci/auth"
 )
 
 // TODO(crbug.com/342554800): Add test coverage for:
-//   ResultSource.GetResults (requires breaking out into helper functions)
-//   ResultSource.GetUnsuppressedFailingResults (ditto)
+//   GetResults (w/o file provided, requires refactoring and network access abstraction)
+//   GetUnsuppressedFailingResults (w/o file provided, ditto)
 //   LatestCTSRoll
 //   LatestPatchset
 //   MostRecentResultsForChange (requires os abstraction crbug.com/344014313)
 //   MostRecentUnsuppressedFailingResultsForChange (ditto)
+
+/*******************************************************************************
+ * ResultSource tests
+ ******************************************************************************/
+
+func TestGetResults_FileAndPatchsetMutuallyExclusive(t *testing.T) {
+	testGetResults_FileAndPatchsetMutuallyExclusive_Impl(t, false)
+}
+
+func TestGetUnsuppressedFailingResults_FileAndPatchsetMutuallyExclusive(t *testing.T) {
+	testGetResults_FileAndPatchsetMutuallyExclusive_Impl(t, true)
+}
+
+func testGetResults_FileAndPatchsetMutuallyExclusive_Impl(t *testing.T, unsuppressedOnly bool) {
+	ctx := context.Background()
+	r := ResultSource{
+		File: "results.txt",
+		Patchset: gerrit.Patchset{
+			Change: 123,
+		},
+	}
+
+	var err error
+	if unsuppressedOnly {
+		_, err = r.GetUnsuppressedFailingResults(ctx, Config{}, auth.Options{})
+	} else {
+		_, err = r.GetResults(ctx, Config{}, auth.Options{})
+	}
+
+	require.Error(t, err)
+	require.ErrorContains(t, err, "invalid command line args")
+}
+
+func TestGetResults_FileWithWrapper(t *testing.T) {
+	testGetResults_FileWithWrapper_Impl(t, false)
+}
+
+func TestGetUnsuppressedFailingResults_FileWithWrapper(t *testing.T) {
+	testGetResults_FileWithWrapper_Impl(t, true)
+}
+
+func testGetResults_FileWithWrapper_Impl(t *testing.T, unsuppressedOnly bool) {
+	ctx := context.Background()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	cfg := Config{
+		OsWrapper: wrapper,
+	}
+	r := ResultSource{
+		File: "results.txt",
+	}
+
+	resultsList := result.List{
+		{
+			Query:        query.Parse("test_1"),
+			Tags:         result.NewTags("tag_1"),
+			Status:       result.Failure,
+			Duration:     0,
+			MayExonerate: false,
+		},
+	}
+	expectedResults := result.ResultsByExecutionMode{
+		"execution_mode": resultsList,
+	}
+	err := result.SaveWithWrapper("results.txt", expectedResults, wrapper)
+	require.NoErrorf(t, err, "Got error writing results: %v", err)
+
+	var resultsByExecutionMode result.ResultsByExecutionMode
+	if unsuppressedOnly {
+		resultsByExecutionMode, err = r.GetUnsuppressedFailingResults(ctx, cfg, auth.Options{})
+	} else {
+		resultsByExecutionMode, err = r.GetResults(ctx, cfg, auth.Options{})
+	}
+
+	require.NoError(t, err)
+	require.Equal(t, expectedResults, resultsByExecutionMode)
+}
 
 /*******************************************************************************
  * CacheResults tests

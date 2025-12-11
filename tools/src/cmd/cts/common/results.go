@@ -100,6 +100,8 @@ func (r *ResultSource) GetUnsuppressedFailingResults(ctx context.Context, cfg Co
 	return r.getResultsImpl(ctx, cfg, auth, MostRecentUnsuppressedFailingResultsForChange, CacheUnsuppressedFailingResults)
 }
 
+// TODO(crbug.com/460178080): Add test coverage once network access (most notably the Gerrit
+// interaction) is abstracted away.
 // Helper function to share the implementation between GetResults and GetUnsuppressedFailingResults.
 func (r *ResultSource) getResultsImpl(ctx context.Context, cfg Config, auth auth.Options,
 	getRecentResults mostRecentResultsFunc, cacheResults cacheResultsFunc) (result.ResultsByExecutionMode, error) {
