@@ -280,6 +280,24 @@ TEST_F(IR_ValidatorTest, Construct_Array_WrongArgType) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Construct_Array_WrongArgCount) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct<array<u32, 4>>(1_u, 2_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:3:24 error: construct: array has 4 elements, but construct provides 2 arguments
+    %2:array<u32, 4> = construct 1u, 2u
+                       ^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Construct_Vector_1arg_WrongType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {

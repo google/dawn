@@ -2166,7 +2166,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_2) {
     auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {
         auto* pos = b.Construct(ty.vec4f(), 0.5_f);
-        auto* cd = b.Construct(ty.array<f32, 2>(), 0.0_f);
+        auto* cd = b.Construct(ty.array<f32, 2>(), 0.0_f, 1.0_f);
         b.Return(ep, b.Construct(str_ty, pos, cd));
     });
 
@@ -2179,7 +2179,7 @@ Outputs = struct @align(16) {
 %foo = @vertex func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 2> = construct 0.0f
+    %3:array<f32, 2> = construct 0.0f, 1.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2201,7 +2201,7 @@ foo_outputs = struct @align(16) {
 %foo_inner = func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 2> = construct 0.0f
+    %3:array<f32, 2> = construct 0.0f, 1.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2242,7 +2242,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_3) {
     auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {
         auto* pos = b.Construct(ty.vec4f(), 0.5_f);
-        auto* cd = b.Construct(ty.array<f32, 3>(), 0.0_f);
+        auto* cd = b.Construct(ty.array<f32, 3>(), 0.0_f, 1.0_f, 2.0_f);
         b.Return(ep, b.Construct(str_ty, pos, cd));
     });
 
@@ -2255,7 +2255,7 @@ Outputs = struct @align(16) {
 %foo = @vertex func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 3> = construct 0.0f
+    %3:array<f32, 3> = construct 0.0f, 1.0f, 2.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2277,7 +2277,7 @@ foo_outputs = struct @align(16) {
 %foo_inner = func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 3> = construct 0.0f
+    %3:array<f32, 3> = construct 0.0f, 1.0f, 2.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2319,7 +2319,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_4) {
     auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {
         auto* pos = b.Construct(ty.vec4f(), 0.5_f);
-        auto* cd = b.Construct(ty.array<f32, 4>(), 0.0_f);
+        auto* cd = b.Construct(ty.array<f32, 4>(), 0.0_f, 1.0_f, 2.0_f, 3.0_f);
         b.Return(ep, b.Construct(str_ty, pos, cd));
     });
 
@@ -2332,7 +2332,7 @@ Outputs = struct @align(16) {
 %foo = @vertex func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 4> = construct 0.0f
+    %3:array<f32, 4> = construct 0.0f, 1.0f, 2.0f, 3.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2354,7 +2354,7 @@ foo_outputs = struct @align(16) {
 %foo_inner = func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 4> = construct 0.0f
+    %3:array<f32, 4> = construct 0.0f, 1.0f, 2.0f, 3.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2397,7 +2397,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_5) {
     auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {
         auto* pos = b.Construct(ty.vec4f(), 0.5_f);
-        auto* cd = b.Construct(ty.array<f32, 5>(), 0.0_f);
+        auto* cd = b.Construct(ty.array<f32, 5>(), 0.0_f, 1.0_f, 2.0_f, 3.0_f, 4.0_f);
         b.Return(ep, b.Construct(str_ty, pos, cd));
     });
 
@@ -2410,7 +2410,7 @@ Outputs = struct @align(16) {
 %foo = @vertex func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 5> = construct 0.0f
+    %3:array<f32, 5> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2433,7 +2433,7 @@ foo_outputs = struct @align(16) {
 %foo_inner = func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 5> = construct 0.0f
+    %3:array<f32, 5> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2477,7 +2477,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_6) {
     auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {
         auto* pos = b.Construct(ty.vec4f(), 0.5_f);
-        auto* cd = b.Construct(ty.array<f32, 6>(), 0.0_f);
+        auto* cd = b.Construct(ty.array<f32, 6>(), 0.0_f, 1.0_f, 2.0_f, 3.0_f, 4.0_f, 5.0_f);
         b.Return(ep, b.Construct(str_ty, pos, cd));
     });
 
@@ -2490,7 +2490,7 @@ Outputs = struct @align(16) {
 %foo = @vertex func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 6> = construct 0.0f
+    %3:array<f32, 6> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2513,7 +2513,7 @@ foo_outputs = struct @align(16) {
 %foo_inner = func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 6> = construct 0.0f
+    %3:array<f32, 6> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2559,7 +2559,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_7) {
     auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {
         auto* pos = b.Construct(ty.vec4f(), 0.5_f);
-        auto* cd = b.Construct(ty.array<f32, 7>(), 0.0_f);
+        auto* cd = b.Construct(ty.array<f32, 7>(), 0.0_f, 1.0_f, 2.0_f, 3.0_f, 4.0_f, 5.0_f, 6.0_f);
         b.Return(ep, b.Construct(str_ty, pos, cd));
     });
 
@@ -2572,7 +2572,7 @@ Outputs = struct @align(16) {
 %foo = @vertex func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 7> = construct 0.0f
+    %3:array<f32, 7> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2595,7 +2595,7 @@ foo_outputs = struct @align(16) {
 %foo_inner = func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 7> = construct 0.0f
+    %3:array<f32, 7> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2642,7 +2642,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_8) {
     auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {
         auto* pos = b.Construct(ty.vec4f(), 0.5_f);
-        auto* cd = b.Construct(ty.array<f32, 8>(), 0.0_f);
+        auto* cd =
+            b.Construct(ty.array<f32, 8>(), 0.0_f, 1.0_f, 2.0_f, 3.0_f, 4.0_f, 5.0_f, 6.0_f, 7.0_f);
         b.Return(ep, b.Construct(str_ty, pos, cd));
     });
 
@@ -2655,7 +2656,7 @@ Outputs = struct @align(16) {
 %foo = @vertex func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 8> = construct 0.0f
+    %3:array<f32, 8> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2678,7 +2679,7 @@ foo_outputs = struct @align(16) {
 %foo_inner = func():Outputs {
   $B1: {
     %2:vec4<f32> = construct 0.5f
-    %3:array<f32, 8> = construct 0.0f
+    %3:array<f32, 8> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f
     %4:Outputs = construct %2, %3
     ret %4
   }
@@ -2725,7 +2726,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_FirstMember) {
                   });
     auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {
-        auto* cd = b.Construct(ty.array<f32, 5>(), 0.0_f);
+        auto* cd = b.Construct(ty.array<f32, 5>(), 0.0_f, 1.0_f, 2.0_f, 3.0_f, 4.0_f);
         auto* pos = b.Construct(ty.vec4f(), 0.5_f);
         b.Return(ep, b.Construct(str_ty, cd, pos));
     });
@@ -2738,7 +2739,7 @@ Outputs = struct @align(16) {
 
 %foo = @vertex func():Outputs {
   $B1: {
-    %2:array<f32, 5> = construct 0.0f
+    %2:array<f32, 5> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f
     %3:vec4<f32> = construct 0.5f
     %4:Outputs = construct %2, %3
     ret %4
@@ -2761,7 +2762,7 @@ foo_outputs = struct @align(16) {
 
 %foo_inner = func():Outputs {
   $B1: {
-    %2:array<f32, 5> = construct 0.0f
+    %2:array<f32, 5> = construct 0.0f, 1.0f, 2.0f, 3.0f, 4.0f
     %3:vec4<f32> = construct 0.5f
     %4:Outputs = construct %2, %3
     ret %4

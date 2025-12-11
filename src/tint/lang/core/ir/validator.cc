@@ -4112,7 +4112,13 @@ void Validator::CheckConstruct(const Construct* construct) {
             AddError(construct) << "no matching overload for " << mat->FriendlyName()
                                 << " constructor";
         }
-    } else if (result_type->Is<core::type::Array>()) {
+    } else if (auto* arr = result_type->As<core::type::Array>()) {
+        if (args.Length() != arr->ConstantCount()) {
+            AddError(construct) << "array has " << arr->ConstantCount().value()
+                                << " elements, but construct provides " << args.Length()
+                                << " arguments";
+            return;
+        }
         check_args_match_elements();
     } else if (auto* str = As<core::type::Struct>(result_type)) {
         auto members = str->Members();
