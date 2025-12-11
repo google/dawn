@@ -303,6 +303,7 @@ bool TextureViewsAllMatch(const VectorOfTextureViews& views) {
 enum ValidationAspect {
     VALIDATION_ASPECT_PIPELINE,
     VALIDATION_ASPECT_BIND_GROUPS,
+    VALIDATION_ASPECT_RESOURCE_TABLES,
     VALIDATION_ASPECT_VERTEX_BUFFERS,
     VALIDATION_ASPECT_INDEX_BUFFER,
 
@@ -311,19 +312,21 @@ enum ValidationAspect {
 static_assert(VALIDATION_ASPECT_COUNT == CommandBufferStateTracker::kNumAspects);
 
 static constexpr CommandBufferStateTracker::ValidationAspects kDispatchAspects =
-    1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS;
+    1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
+    1 << VALIDATION_ASPECT_RESOURCE_TABLES;
 
 static constexpr CommandBufferStateTracker::ValidationAspects kDrawAspects =
     1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
-    1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
+    1 << VALIDATION_ASPECT_RESOURCE_TABLES | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
 
 static constexpr CommandBufferStateTracker::ValidationAspects kDrawIndexedAspects =
     1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS |
-    1 << VALIDATION_ASPECT_VERTEX_BUFFERS | 1 << VALIDATION_ASPECT_INDEX_BUFFER;
+    1 << VALIDATION_ASPECT_RESOURCE_TABLES | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
+    1 << VALIDATION_ASPECT_INDEX_BUFFER;
 
 static constexpr CommandBufferStateTracker::ValidationAspects kLazyAspects =
-    1 << VALIDATION_ASPECT_BIND_GROUPS | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
-    1 << VALIDATION_ASPECT_INDEX_BUFFER;
+    1 << VALIDATION_ASPECT_BIND_GROUPS | 1 << VALIDATION_ASPECT_RESOURCE_TABLES |
+    1 << VALIDATION_ASPECT_VERTEX_BUFFERS | 1 << VALIDATION_ASPECT_INDEX_BUFFER;
 
 CommandBufferStateTracker::CommandBufferStateTracker() = default;
 
@@ -546,6 +549,14 @@ void CommandBufferStateTracker::RecomputeLazyAspects(ValidationAspects aspects) 
         }
     }
 
+    if (aspects[VALIDATION_ASPECT_RESOURCE_TABLES]) {
+        // If current pipeline uses a resource table, make sure one has been set on the command
+        // encoder
+        if (!mLastPipelineLayout->UsesResourceTable() || mResourceTable) {
+            mAspects.set(VALIDATION_ASPECT_RESOURCE_TABLES);
+        }
+    }
+
     if (aspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
         RenderPipelineBase* lastRenderPipeline = GetRenderPipeline();
 
@@ -597,6 +608,13 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
         // If this is reached, make sure lazy aspects and the error checks above are consistent.
         DAWN_UNREACHABLE();
         return DAWN_VALIDATION_ERROR("Index buffer is invalid.");
+    }
+
+    if (aspects[VALIDATION_ASPECT_RESOURCE_TABLES]) {
+        return DAWN_VALIDATION_ERROR(
+            "The current pipeline (%s) was created with `usesResourceTable` but no resource table "
+            "was set on the command encoder.",
+            mLastPipeline);
     }
 
     if (aspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
@@ -750,6 +768,11 @@ void CommandBufferStateTracker::SetBindGroup(BindGroupIndex index,
     mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
 }
 
+void CommandBufferStateTracker::SetResourceTable(ResourceTableBase* resourceTable) {
+    mResourceTable = resourceTable;
+    mAspects.reset(VALIDATION_ASPECT_RESOURCE_TABLES);
+}
+
 void CommandBufferStateTracker::SetIndexBuffer(BufferBase* buffer,
                                                wgpu::IndexFormat format,
                                                uint64_t offset,
@@ -834,6 +857,7 @@ void CommandBufferStateTracker::End() {
     mLastPipeline = nullptr;
     mMinBufferSizes = nullptr;
     mBindgroups.fill(nullptr);
+    mResourceTable = nullptr;
 }
 
 }  // namespace dawn::native

@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
@@ -300,6 +301,164 @@ TEST_F(ResourceTableValidationTest, Submit_CanUseInSubmit) {
         wgpu::CommandBuffer commands = encoder.Finish();
         resourceTable.Destroy();  // Destroy it
         ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+    }
+}
+
+// Tests that the resource table can be used in dispatch
+TEST_F(ResourceTableValidationTest, Submit_DispatchRequiresResourceTable) {
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+        @compute @workgroup_size(1) fn main() {
+            _ = hasResource<texture_2d<f32>>(0);
+        }
+    )");
+
+    wgpu::PipelineLayoutResourceTable plResourceTable;
+    plResourceTable.usesResourceTable = true;
+
+    wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
+    pipelineLayoutDescriptor.bindGroupLayoutCount = 0;
+    pipelineLayoutDescriptor.nextInChain = &plResourceTable;
+
+    csDesc.layout = device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    wgpu::ResourceTableDescriptor descriptor;
+    descriptor.size = 1u;
+    wgpu::ResourceTable resourceTable = device.CreateResourceTable(&descriptor);
+    wgpu::ResourceTable resourceTable2 = device.CreateResourceTable(&descriptor);
+
+    // Success case: `usesResourceTable` is enabled, and one has been set on the encoder
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable);
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
+    }
+
+    // Failure case: `usesResourceTable` is enabled, but none has been set on the encoder
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        ASSERT_DEVICE_ERROR(wgpu::CommandBuffer commands = encoder.Finish());
+    }
+
+    // Failure case: `usesResourceTable` is enabled, one then nullptr set on the encoder
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable);  // Set a valid one
+        encoder.SetResourceTable(nullptr);        // Then clear it
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        ASSERT_DEVICE_ERROR(wgpu::CommandBuffer commands = encoder.Finish());
+    }
+
+    // Success case: `usesResourceTable` is enabled, one then nullptr then another set on the
+    // encoder
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable);   // Set a valid one
+        encoder.SetResourceTable(nullptr);         // Then clear it
+        encoder.SetResourceTable(resourceTable2);  // Then set another valid one
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
+    }
+}
+
+// Tests that the resource table can be used in draw
+TEST_F(ResourceTableValidationTest, Submit_DrawRequiresResourceTable) {
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.layout = nullptr;
+    pDesc.vertex.module = utils::CreateShaderModule(device, R"(
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f();
+        }
+    )");
+    pDesc.cFragment.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+        @fragment fn fs() -> @location(0) vec4f {
+            _ = hasResource<texture_2d<f32>>(0);
+            return vec4f();
+        }
+    )");
+
+    wgpu::PipelineLayoutResourceTable plResourceTable;
+    plResourceTable.usesResourceTable = true;
+
+    wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
+    pipelineLayoutDescriptor.bindGroupLayoutCount = 0;
+    pipelineLayoutDescriptor.nextInChain = &plResourceTable;
+
+    pDesc.layout = device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
+
+    wgpu::ResourceTableDescriptor descriptor;
+    descriptor.size = 1u;
+    wgpu::ResourceTable resourceTable = device.CreateResourceTable(&descriptor);
+    wgpu::ResourceTable resourceTable2 = device.CreateResourceTable(&descriptor);
+    auto rp = utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+
+    // Success case: `usesResourceTable` is enabled, and one has been set on the encoder
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.Draw(1);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
+    }
+
+    // Failure case: `usesResourceTable` is enabled, but none has been set on the encoder
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.Draw(1);
+        pass.End();
+        ASSERT_DEVICE_ERROR(wgpu::CommandBuffer commands = encoder.Finish());
+    }
+
+    // Failure case: `usesResourceTable` is enabled, one then nullptr set on the encoder
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable);  // Set a valid one
+        encoder.SetResourceTable(nullptr);        // Then clear it
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.Draw(1);
+        pass.End();
+        ASSERT_DEVICE_ERROR(wgpu::CommandBuffer commands = encoder.Finish());
+    }
+
+    // Success case: `usesResourceTable` is enabled, one then nullptr then another set on the
+    // encoder
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(resourceTable);   // Set a valid one
+        encoder.SetResourceTable(nullptr);         // Then clear it
+        encoder.SetResourceTable(resourceTable2);  // Then set another valid one
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.Draw(1);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
     }
 }
 

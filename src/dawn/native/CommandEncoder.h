@@ -133,6 +133,8 @@ class CommandEncoder final : public ApiObjectBase {
 
     [[nodiscard]] InternalUsageScope MakeInternalUsageScope();
 
+    ResourceTableBase* GetResourceTable() const { return mResourceTable; }
+
   private:
     CommandEncoder(DeviceBase* device, const UnpackedPtr<CommandEncoderDescriptor>& descriptor);
     CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);

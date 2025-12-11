@@ -130,6 +130,9 @@ ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
     : ProgrammableEncoder(device, descriptor->label, encodingContext),
       mCommandEncoder(commandEncoder) {
     GetObjectTrackingList()->Track(this);
+    if (auto* resourceTable = mCommandEncoder->GetResourceTable()) {
+        mCommandBufferState.SetResourceTable(resourceTable);
+    }
 }
 
 ComputePassEncoder::~ComputePassEncoder() {
