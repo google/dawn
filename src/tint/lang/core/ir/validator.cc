@@ -790,6 +790,11 @@ constexpr IOAttributeChecker kBuiltinChecker{
             return msg.str();
         }
 
+        if (builtin == BuiltinValue::kPointSize &&
+            !cap.Contains(Capability::kAllowPointSizeBuiltin)) {
+            return std::string{"use of point_size builtin requires kAllowPointSizeBuiltin"};
+        }
+
         return Success;
     },
     .type_check = [](const core::type::Type*, const Capabilities&) -> bool { return true; },

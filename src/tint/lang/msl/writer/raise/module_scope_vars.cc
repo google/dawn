@@ -344,6 +344,7 @@ Result<SuccessType> ModuleScopeVars(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "msl.ModuleScopeVars",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllow8BitIntegers,
+                                              core::ir::Capability::kAllowPointSizeBuiltin,
                                               core::ir::Capability::kMslAllowEntryPointInterface,
                                               core::ir::Capability::kAllowDuplicateBindings,
                                               core::ir::Capability::kAllowNonCoreTypes,

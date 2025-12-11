@@ -151,6 +151,7 @@ Result<SuccessType> SignedIntegerPolyfill(core::ir::Module& ir,
                                     core::ir::Capability::kAllowDuplicateBindings,
                                     core::ir::Capability::kAllow8BitIntegers,
                                     core::ir::Capability::kAllow64BitIntegers,
+                                    core::ir::Capability::kAllowPointSizeBuiltin,
                                     core::ir::Capability::kAllowVectorElementPointer,
                                     core::ir::Capability::kAllowHandleVarsWithoutBindings,
                                     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
@@ -161,7 +162,7 @@ Result<SuccessType> SignedIntegerPolyfill(core::ir::Module& ir,
                                     core::ir::Capability::kAllowNonCoreTypes,
                                 });
     if (result != Success) {
-        return result.Failure();
+        return result;
     }
 
     State{ir, cfg}.Process();

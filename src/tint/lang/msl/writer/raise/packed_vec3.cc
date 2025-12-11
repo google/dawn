@@ -681,6 +681,7 @@ Result<SuccessType> PackedVec3(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "msl.PackedVec3",
                                           tint::core::ir::Capabilities{
                                               core::ir::Capability::kAllow8BitIntegers,
+                                              tint::core::ir::Capability::kAllowPointSizeBuiltin,
                                               tint::core::ir::Capability::kAllowDuplicateBindings,
                                               core::ir::Capability::kAllowNonCoreTypes,
                                           });

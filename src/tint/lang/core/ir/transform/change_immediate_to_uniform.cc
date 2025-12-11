@@ -151,6 +151,7 @@ Result<SuccessType> ChangeImmediateToUniform(core::ir::Module& ir,
         ValidateAndDumpIfNeeded(ir, "core.ChangeImmediateToUniform",
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllow8BitIntegers,
+                                    core::ir::Capability::kAllowPointSizeBuiltin,
                                     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
                                     core::ir::Capability::kAllowDuplicateBindings,
                                     core::ir::Capability::kAllowNonCoreTypes,

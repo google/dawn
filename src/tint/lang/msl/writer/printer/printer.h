@@ -42,12 +42,13 @@ namespace tint::msl::writer {
 
 // The capabilities that might be needed due to raising.
 const core::ir::Capabilities kPrinterCapabilities{
-    core::ir::Capability::kAllow8BitIntegers,
-    core::ir::Capability::kAllow64BitIntegers,
-    core::ir::Capability::kAllowAnyLetType,
-    core::ir::Capability::kAllowModuleScopeLets,
-    core::ir::Capability::kMslAllowEntryPointInterface,
-    core::ir::Capability::kAllowNonCoreTypes,
+    core::ir::Capability::kAllow8BitIntegers,            //
+    core::ir::Capability::kAllow64BitIntegers,           //
+    core::ir::Capability::kAllowAnyLetType,              //
+    core::ir::Capability::kAllowPointSizeBuiltin,        //
+    core::ir::Capability::kAllowModuleScopeLets,         //
+    core::ir::Capability::kMslAllowEntryPointInterface,  //
+    core::ir::Capability::kAllowNonCoreTypes,            //
 };
 
 /// @param module the Tint IR module to generate

@@ -1273,6 +1273,54 @@ TEST_F(IR_ValidatorTest, Builtin_NumSubgroups_WrongType) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Builtin_PointSize_WithoutCapability) {
+    const auto position_attr = IOAttributes{.builtin = core::BuiltinValue::kPosition};
+    const auto point_size_attr = IOAttributes{.builtin = core::BuiltinValue::kPointSize};
+    auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"),
+                             {
+                                 {mod.symbols.New("pos"), ty.vec4<f32>(), position_attr},
+                                 {mod.symbols.New("size"), ty.f32(), point_size_attr},
+                             });
+
+    auto* f = VertexEntryPoint();
+    f->SetReturnType(str_ty);
+    f->SetReturnAttributes({});
+
+    b.Append(f->Block(), [&] {  //
+        b.Return(f, b.Zero(str_ty));
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:6:1 error: use of point_size builtin requires kAllowPointSizeBuiltin
+%f = @vertex func():OutputStruct {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Builtin_PointSize_WithCapability) {
+    const auto position_attr = IOAttributes{.builtin = core::BuiltinValue::kPosition};
+    const auto point_size_attr = IOAttributes{.builtin = core::BuiltinValue::kPointSize};
+    auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"),
+                             {
+                                 {mod.symbols.New("pos"), ty.vec4<f32>(), position_attr},
+                                 {mod.symbols.New("size"), ty.f32(), point_size_attr},
+                             });
+
+    auto* f = VertexEntryPoint();
+    f->SetReturnType(str_ty);
+    f->SetReturnAttributes({});
+
+    b.Append(f->Block(), [&] {  //
+        b.Return(f, b.Zero(str_ty));
+    });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointSizeBuiltin});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Bitcast_MissingArg) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
