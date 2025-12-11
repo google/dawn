@@ -171,7 +171,7 @@ crbug.com/42240909 [ android ] webgpu:web_platform,canvas,configure:usage:* [ Sk
 crbug.com/42240909 [ android ] webgpu:web_platform,canvas,configure:viewFormats:* [ Skip ]
 
 # sample_mask tests causing instability
-crbug.com/42251115 [ qualcomm ] webgpu:api,operation,render_pipeline,sample_mask:* [ Skip ]
+crbug.com/42251115 [ qualcomm android ] webgpu:api,operation,render_pipeline,sample_mask:* [ Skip ]
 
 # D3D12 create command queue failed with DXGI_ERROR_DEVICE_REMOVED. Skipped because these tests likely cause downstream flakes.
 crbug.com/41491936 [ nvidia-0x2184 win10 ] webgpu:api,validation,capability_checks,* [ Skip ]
@@ -382,7 +382,7 @@ crbug.com/42240657 [ angle-d3d11 intel-0x4680 no-asan release-x64 renderer-skia-
 crbug.com/42240657 [ intel-gen-9 release renderer-skia-gl ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;* [ Failure ]
 
 # Occlusion query with alpha to coverage failing on Android Qualcomm (Pixel 4)
-crbug.com/42240847 [ qualcomm ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
+crbug.com/42240847 [ qualcomm android ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
 
 # Failures due to Windows/NVIDIA driver upgrade
 crbug.com/42241352 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 win10 ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ Failure ]
