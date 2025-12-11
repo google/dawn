@@ -25,39 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_REPLAY_CAPTURE_H_
-#define SRC_DAWN_REPLAY_CAPTURE_H_
+#ifndef INCLUDE_DAWN_REPLAY_DAWN_REPLAY_EXPORT_H_
+#define INCLUDE_DAWN_REPLAY_DAWN_REPLAY_EXPORT_H_
 
-#include <istream>
-#include <memory>
-#include <vector>
+#if defined(DAWN_REPLAY_SHARED_LIBRARY)
+#if defined(_WIN32)
+#if defined(DAWN_REPLAY_IMPLEMENTATION)
+#define DAWN_REPLAY_EXPORT __declspec(dllexport)
+#else
+#define DAWN_REPLAY_EXPORT __declspec(dllimport)
+#endif
+#else  // defined(_WIN32)
+#if defined(DAWN_REPLAY_IMPLEMENTATION)
+#define DAWN_REPLAY_EXPORT __attribute__((visibility("default")))
+#else
+#define DAWN_REPLAY_EXPORT
+#endif
+#endif  // defined(_WIN32)
+#else   // defined(DAWN_REPLAY_SHARED_LIBRARY)
+#define DAWN_REPLAY_EXPORT
+#endif  // defined(DAWN_REPLAY_SHARED_LIBRARY)
 
-#include "dawn/replay/ReadHead.h"
-#include "dawn/replay/Replay.h"
-
-namespace dawn::replay {
-
-// For now we just expect to load the entire capture into memory.
-// In the future we'd expect to be able to stream it though we may
-// have to scan it once to find all the commands for a UI.
-class CaptureImpl : public Capture {
-  public:
-    static std::unique_ptr<CaptureImpl> Create(CaptureStream& commandStream,
-                                               size_t commandSize,
-                                               CaptureStream& contentStream,
-                                               size_t contentSize);
-    ~CaptureImpl() override;
-
-    ReadHead GetCommandReadHead() const;
-    ReadHead GetContentReadHead() const;
-
-  private:
-    CaptureImpl(std::vector<uint8_t> commands, std::vector<uint8_t> content);
-
-    std::vector<uint8_t> mCommands;
-    std::vector<uint8_t> mContent;
-};
-
-}  // namespace dawn::replay
-
-#endif  // SRC_DAWN_REPLAY_CAPTURE_H_
+#endif  // INCLUDE_DAWN_REPLAY_DAWN_REPLAY_EXPORT_H_

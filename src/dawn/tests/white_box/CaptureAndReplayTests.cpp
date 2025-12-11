@@ -29,10 +29,10 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "dawn/native/WebGPUBackend.h"
-#include "dawn/replay/Capture.h"
 #include "dawn/replay/Replay.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/tests/MockCallback.h"
@@ -64,12 +64,13 @@ class CaptureAndReplayTests : public DawnTest {
             std::istringstream commandIStream(mCommandData);
             std::istringstream contentIStream(mContentData);
 
-            std::unique_ptr<replay::Capture> capture = replay::Capture::Create(
-                commandIStream, mCommandData.size(), contentIStream, mContentData.size());
-            std::unique_ptr<replay::Replay> replay = replay::Replay::Create(device, capture.get());
+            auto capture = replay::Capture::Create(commandIStream, mCommandData.size(),
+                                                   contentIStream, mContentData.size());
+            std::unique_ptr<replay::Replay> replay =
+                replay::Replay::Create(device, std::move(capture));
 
-            auto result = replay->Play();
-            EXPECT_TRUE(result.IsSuccess());
+            bool result = replay->Play();
+            EXPECT_TRUE(result);
             return replay;
         }
 

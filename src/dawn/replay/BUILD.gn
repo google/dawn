@@ -31,6 +31,8 @@ import("${dawn_root}/scripts/dawn_component.gni")
 
 static_library("replay") {
   sources = [
+    "${dawn_root}/include/dawn/replay/Replay.h",
+    "${dawn_root}/include/dawn/replay/dawn_replay_export.h",
     "Capture.cpp",
     "Capture.h",
     "Deserialization.cpp",
@@ -40,7 +42,7 @@ static_library("replay") {
     "ReadHead.cpp",
     "ReadHead.h",
     "Replay.cpp",
-    "Replay.h",
+    "ReplayImpl.h",
   ]
 
   deps = [

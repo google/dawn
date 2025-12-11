@@ -25,20 +25,19 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_REPLAY_REPLAY_H_
-#define SRC_DAWN_REPLAY_REPLAY_H_
-
-#include <webgpu/webgpu_cpp.h>
+#ifndef SRC_DAWN_REPLAY_REPLAYIMPL_H_
+#define SRC_DAWN_REPLAY_REPLAYIMPL_H_
 
 #include <memory>
 #include <ranges>
 #include <string>
+#include <utility>
 #include <variant>
-#include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "dawn/replay/Capture.h"
-#include "dawn/replay/Deserialization.h"
+#include "dawn/replay/Replay.h"
+#include "dawn/webgpu_cpp.h"
 
 namespace dawn::replay {
 
@@ -65,9 +64,10 @@ struct LabeledResource {
 
 // Replays a capture. For now we only support replaying the entire capture.
 // In the future we'd like to be able to replay up to a certain point.
-class Replay {
+class ReplayImpl : public Replay {
   public:
-    static std::unique_ptr<Replay> Create(wgpu::Device device, const Capture* capture);
+    static std::unique_ptr<ReplayImpl> Create(wgpu::Device device,
+                                              std::unique_ptr<Capture> capture);
 
     MaybeError Play();
 
@@ -99,13 +99,13 @@ class Replay {
     }
 
   private:
-    Replay(wgpu::Device device, const Capture* capture);
+    ReplayImpl(wgpu::Device device, std::unique_ptr<CaptureImpl> capture);
 
     MaybeError CreateResource(wgpu::Device device, ReadHead& readHead);
     MaybeError SetLabel(schema::ObjectId id, schema::ObjectType type, const std::string& label);
 
     wgpu::Device mDevice;
-    const Capture* mCapture;
+    std::unique_ptr<const CaptureImpl> mCapture;
 
     using IdToResourceMap = absl::flat_hash_map<schema::ObjectId, LabeledResource>;
     IdToResourceMap mResources;
@@ -113,4 +113,4 @@ class Replay {
 
 }  // namespace dawn::replay
 
-#endif  // SRC_DAWN_REPLAY_REPLAY_H_
+#endif  // SRC_DAWN_REPLAY_REPLAYIMPL_H_

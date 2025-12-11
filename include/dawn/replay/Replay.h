@@ -25,49 +25,45 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/replay/Capture.h"
+#ifndef INCLUDE_DAWN_REPLAY_REPLAY_H_
+#define INCLUDE_DAWN_REPLAY_REPLAY_H_
 
-#include <span>
-#include <sstream>
-#include <utility>
+#include <istream>
+#include <memory>
+
+#include "dawn/replay/dawn_replay_export.h"
+#include "dawn/webgpu_cpp.h"
 
 namespace dawn::replay {
 
-Capture::~Capture() = default;
+using CaptureStream = std::istream;
 
-std::unique_ptr<Capture> Capture::Create(CaptureStream& commandStream,
-                                         size_t commandSize,
-                                         CaptureStream& contentStream,
-                                         size_t contentSize) {
-    return CaptureImpl::Create(commandStream, commandSize, contentStream, contentSize);
-}
+// The public API of a Capture.
+// In the future it should have calls to get information (e.g. number of commands)
+class DAWN_REPLAY_EXPORT Capture {
+  public:
+    static std::unique_ptr<Capture> Create(CaptureStream& commandStream,
+                                           size_t commandSize,
+                                           CaptureStream& contentStream,
+                                           size_t contentSize);
+    virtual ~Capture() = 0;
+};
 
-std::unique_ptr<CaptureImpl> CaptureImpl::Create(CaptureStream& commandStream,
-                                                 size_t commandSize,
-                                                 CaptureStream& contentStream,
-                                                 size_t contentSize) {
-    std::vector<uint8_t> commands;
-    commands.resize(commandSize);
-    commandStream.read(reinterpret_cast<char*>(commands.data()), commandSize);
+// The public API of a replay controller of a capture.
+// In the future it should have a finer-grained control calls of a capture (e.g. step, play to a
+// certain point)
+class DAWN_REPLAY_EXPORT Replay {
+  public:
+    static std::unique_ptr<Replay> Create(wgpu::Device device, std::unique_ptr<Capture> capture);
+    virtual ~Replay() = 0;
 
-    std::vector<uint8_t> content;
-    content.resize(contentSize);
-    contentStream.read(reinterpret_cast<char*>(content.data()), contentSize);
+    template <typename T>
+    T GetObjectByLabel(const char* label) const;
 
-    return std::unique_ptr<CaptureImpl>(new CaptureImpl(std::move(commands), std::move(content)));
-}
-
-CaptureImpl::CaptureImpl(std::vector<uint8_t> commands, std::vector<uint8_t> content)
-    : mCommands(std::move(commands)), mContent(std::move(content)) {}
-
-CaptureImpl::~CaptureImpl() {}
-
-ReadHead CaptureImpl::GetCommandReadHead() const {
-    return ReadHead(mCommands);
-}
-
-ReadHead CaptureImpl::GetContentReadHead() const {
-    return ReadHead(mContent);
-}
+    // Returns if play is successful.
+    bool Play();
+};
 
 }  // namespace dawn::replay
+
+#endif  // INCLUDE_DAWN_REPLAY_REPLAY_H_
