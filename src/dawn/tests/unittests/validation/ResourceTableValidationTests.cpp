@@ -156,9 +156,9 @@ TEST_F(ResourceTableValidationTest, PipelineCreation_ShaderNoResourceTableWithLa
     device.CreateComputePipeline(&csDesc);
 }
 
-// Test that an auto-generated pipeline with a shader that uses a resource table has a
+// Test that an defaulted pipeline layout with a shader that uses a resource table has a
 // PipelineLayoutResourceTable with usesResourceTable == true.
-TEST_F(ResourceTableValidationTest, PipelineCreation_ShaderGeneratesLayoutWithResourceTable) {
+TEST_F(ResourceTableValidationTest, PipelineCreation_DefaultedLayoutWithResourceTable) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;
@@ -173,10 +173,9 @@ TEST_F(ResourceTableValidationTest, PipelineCreation_ShaderGeneratesLayoutWithRe
     // table to be set
 }
 
-// Test that an auto-generated pipeline with a multi-stage shader where only one stage uses a
+// Test that an defaulted pipeline layout with a multi-stage shader where only one stage uses a
 // resource table has a PipelineLayoutResourceTable with usesResourceTable == true.
-TEST_F(ResourceTableValidationTest,
-       PipelineCreation_OneShaderStageGeneratesLayoutWithResourceTable) {
+TEST_F(ResourceTableValidationTest, PipelineCreation_OneShaderDefaultedLayoutWithResourceTable) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;
@@ -195,6 +194,104 @@ TEST_F(ResourceTableValidationTest,
     device.CreateComputePipeline(&csDesc);
     // TODO(crbug.com/463925499): Check that resulting pipeline requires a dispatch time resource
     // table to be set
+}
+
+// Test that a resource table uses up a BindGroupLayout slot
+TEST_F(ResourceTableValidationTest, PipelineCreation_ResourceTableUsesBindGroupLayoutSlot) {
+    // Control case: max bgls, no resource table
+    {
+        std::vector bgLayout(kMaxBindGroups, utils::MakeBindGroupLayout(device, {}));
+        wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
+        pipelineLayoutDescriptor.bindGroupLayoutCount = bgLayout.size();
+        pipelineLayoutDescriptor.bindGroupLayouts = bgLayout.data();
+        device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+    }
+
+    // Failure case: not enough room for bgls and a resource table
+    {
+        std::vector bgLayout(kMaxBindGroups, utils::MakeBindGroupLayout(device, {}));
+        wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
+        pipelineLayoutDescriptor.bindGroupLayoutCount = bgLayout.size();
+        pipelineLayoutDescriptor.bindGroupLayouts = bgLayout.data();
+        wgpu::PipelineLayoutResourceTable resourceTable;
+        resourceTable.usesResourceTable = true;
+        pipelineLayoutDescriptor.nextInChain = &resourceTable;
+        ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&pipelineLayoutDescriptor));
+    }
+
+    // Success case: enough room for bgls and a resource table
+    {
+        std::vector bgLayout(kMaxBindGroups - 1, utils::MakeBindGroupLayout(device, {}));
+        wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
+        pipelineLayoutDescriptor.bindGroupLayoutCount = bgLayout.size();
+        pipelineLayoutDescriptor.bindGroupLayouts = bgLayout.data();
+        wgpu::PipelineLayoutResourceTable resourceTable;
+        resourceTable.usesResourceTable = true;
+        pipelineLayoutDescriptor.nextInChain = &resourceTable;
+        device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+    }
+}
+
+// Test that an defaulted pipeline layout with a resource table uses up a BindGroupLayout slot
+TEST_F(ResourceTableValidationTest,
+       PipelineCreation_DefaultedLayoutWithResourceTableUsesBindGroupLayoutSlot) {
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.layout = nullptr;  // Auto
+
+    // Control case: max bgls, no resource table
+    {
+        csDesc.compute.module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_resource_table;
+            @group(0) @binding(0) var<uniform> a : u32;
+            @group(1) @binding(0) var<uniform> b : u32;
+            @group(2) @binding(0) var<uniform> c : u32;
+            @group(3) @binding(0) var<uniform> d : u32;
+            @compute @workgroup_size(1) fn main() {
+                // _ = hasResource<texture_2d<f32>>(0);
+                _ = a;
+                _ = b;
+                _ = c;
+                _ = d;
+            }
+        )");
+        device.CreateComputePipeline(&csDesc);
+    }
+
+    // Failure case: not enough room for bgls and a resource table
+    {
+        csDesc.compute.module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_resource_table;
+            @group(0) @binding(0) var<uniform> a : u32;
+            @group(1) @binding(0) var<uniform> b : u32;
+            @group(2) @binding(0) var<uniform> c : u32;
+            @group(3) @binding(0) var<uniform> d : u32;
+            @compute @workgroup_size(1) fn main() {
+                _ = hasResource<texture_2d<f32>>(0);
+                _ = a;
+                _ = b;
+                _ = c;
+                _ = d;
+            }
+        )");
+        ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&csDesc));
+    }
+
+    // Success case: enough room for bgls and a resource table
+    {
+        csDesc.compute.module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_resource_table;
+            @group(0) @binding(0) var<uniform> a : u32;
+            @group(1) @binding(0) var<uniform> b : u32;
+            @group(2) @binding(0) var<uniform> c : u32;
+            @compute @workgroup_size(1) fn main() {
+                _ = hasResource<texture_2d<f32>>(0);
+                _ = a;
+                _ = b;
+                _ = c;
+            }
+        )");
+        device.CreateComputePipeline(&csDesc);
+    }
 }
 
 // Tests calling CommandEncoder::SetResourceTable

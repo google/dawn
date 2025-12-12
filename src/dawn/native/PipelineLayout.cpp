@@ -76,16 +76,25 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
         DAWN_TRY(ValidatePLSInfo(device, pls->totalPixelLocalStorageSize,
                                  {attachments.data(), attachments.size()}));
     }
+    bool usesResourceTable = false;
     if (auto* rt = unpacked.Get<PipelineLayoutResourceTable>()) {
         DAWN_INVALID_IF(rt->usesResourceTable &&
                             !device->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
                         "Resource table used without the %s feature enabled.",
                         wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
+        usesResourceTable = rt->usesResourceTable;
     }
 
-    DAWN_INVALID_IF(descriptor->bindGroupLayoutCount > kMaxBindGroups,
-                    "bindGroupLayoutCount (%i) is larger than the maximum allowed (%i).",
-                    descriptor->bindGroupLayoutCount, kMaxBindGroups);
+    if (usesResourceTable) {
+        DAWN_INVALID_IF(descriptor->bindGroupLayoutCount + 1 > kMaxBindGroups,
+                        "bindGroupLayoutCount (%i) + 1 for the resource table is larger than the "
+                        "maximum allowed (%i).",
+                        descriptor->bindGroupLayoutCount, kMaxBindGroups);
+    } else {
+        DAWN_INVALID_IF(descriptor->bindGroupLayoutCount > kMaxBindGroups,
+                        "bindGroupLayoutCount (%i) is larger than the maximum allowed (%i).",
+                        descriptor->bindGroupLayoutCount, kMaxBindGroups);
+    }
 
     BindingCounts bindingCounts = {};
     for (uint32_t i = 0; i < descriptor->bindGroupLayoutCount; ++i) {
@@ -383,11 +392,17 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     // there's no issue with using the same struct multiple times.
     ExternalTextureBindingLayout externalTextureBindingLayout;
 
+    bool usesResourceTable = false;
     uint32_t immediateDataRangeByteSize = 0;
 
     // Loops over all the reflected BindGroupLayoutEntries from shaders.
     for (const StageAndDescriptor& stage : stages) {
         const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
+
+        // Check if at least one stage uses a resource table
+        if (metadata.usesResourceTable) {
+            usesResourceTable = true;
+        }
 
         // TODO(dawn:1704): Find if we can usefully deduce the PLS for the pipeline layout.
         DAWN_INVALID_IF(
@@ -495,20 +510,19 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     desc.bindGroupLayoutCount = static_cast<uint32_t>(kMaxBindGroupsTyped);
     desc.immediateSize = immediateDataRangeByteSize;
 
-    // Check if at least one stage uses a resource table
-    bool usesResourceTable = false;
-    for (const StageAndDescriptor& stage : stages) {
-        const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
-        if (metadata.usesResourceTable) {
-            usesResourceTable = true;
-            break;
-        }
-    }
     PipelineLayoutResourceTable resourceTable;
     if (usesResourceTable) {
         resourceTable.usesResourceTable = true;
         resourceTable.nextInChain = desc.nextInChain;
         desc.nextInChain = &resourceTable;
+
+        // The resource table uses one BGL entry, so remove the last one, only if it's empty, to
+        // make room for it. If it's not empty, this means kMaxBindGroups were referenced in the
+        // shader, which will trigger a validation error in CreatePipelineLayout that too many BGLs
+        // are used with the resource table.
+        if (desc.bindGroupLayouts[desc.bindGroupLayoutCount - 1]->IsEmpty()) {
+            desc.bindGroupLayoutCount--;
+        }
     }
 
     Ref<PipelineLayoutBase> result;
