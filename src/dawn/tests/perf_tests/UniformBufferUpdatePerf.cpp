@@ -240,6 +240,10 @@ void UniformBufferUpdatePerf::SetUpPerfTest() {
     DAWN_TEST_UNSUPPORTED_IF(GetParam().uploadMethod == UploadMethod::MapWithExtendedUsages &&
                              !device.HasFeature(wgpu::FeatureName::BufferMapExtendedUsages));
 
+    // TODO(crbug.com/468353718): Flakily calls a pure virtual function on Mac/AMD.
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() &&
+                          GetParam().uploadMethod == UploadMethod::MultipleStagingBuffer);
+
     // Create the color / depth stencil attachments.
     wgpu::TextureDescriptor descriptor = {};
     descriptor.dimension = wgpu::TextureDimension::e2D;
