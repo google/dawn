@@ -67,7 +67,7 @@ ObjectType ResourceTableBase::GetType() const {
     return ObjectType::ResourceTable;
 }
 
-MaybeError ResourceTableBase::Initialize() {
+MaybeError ResourceTableBase::InitializeBase() {
     return mDynamicArray->Initialize();
 }
 

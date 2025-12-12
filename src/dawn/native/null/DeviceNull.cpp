@@ -234,7 +234,9 @@ Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
 }
 ResultOrError<Ref<ResourceTableBase>> Device::CreateResourceTableImpl(
     const ResourceTableDescriptor* descriptor) {
-    return AcquireRef(new ResourceTable(this, descriptor));
+    Ref<ResourceTable> table = AcquireRef(new ResourceTable(this, descriptor));
+    DAWN_TRY(table->Initialize());
+    return table;
 }
 ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
     return AcquireRef(new Sampler(this, descriptor));
@@ -531,6 +533,10 @@ MaybeError RenderPipeline::InitializeImpl() {
 
 ResourceTable::ResourceTable(Device* device, const ResourceTableDescriptor* descriptor)
     : ResourceTableBase(device, descriptor) {}
+
+MaybeError ResourceTable::Initialize() {
+    return ResourceTableBase::InitializeBase();
+}
 
 // SwapChain
 

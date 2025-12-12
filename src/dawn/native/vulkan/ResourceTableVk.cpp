@@ -97,7 +97,7 @@ ResultOrError<VkDescriptorSetLayout> ResourceTable::MakeDescriptorSetLayout(Devi
 ResourceTable::~ResourceTable() = default;
 
 MaybeError ResourceTable::Initialize() {
-    DAWN_TRY(ResourceTableBase::Initialize());
+    DAWN_TRY(ResourceTableBase::InitializeBase());
 
     Device* device = ToBackend(GetDevice());
 

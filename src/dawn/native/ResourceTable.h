@@ -52,7 +52,7 @@ class ResourceTableBase : public ApiObjectBase {
   protected:
     ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor);
 
-    MaybeError Initialize();
+    MaybeError InitializeBase();
     void DestroyImpl() override;
 
     DynamicArrayState* GetDynamicArrayState();

@@ -328,6 +328,8 @@ class RenderPipeline final : public RenderPipelineBase {
 class ResourceTable final : public ResourceTableBase {
   public:
     ResourceTable(Device* device, const ResourceTableDescriptor* descriptor);
+
+    MaybeError Initialize();
 };
 
 class ShaderModule final : public ShaderModuleBase {
