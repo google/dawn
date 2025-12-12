@@ -602,7 +602,7 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     return {};
 }
 
-void Buffer::UnmapImpl(BufferState oldState) {
+void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
     // We keep CPU-visible memory mapped at all times but need to flush writes to GPU memory here.
     if (!mHostCoherent && IsMappedState(oldState) && MapMode() == wgpu::MapMode::Write) {
         Device* device = ToBackend(GetDevice());

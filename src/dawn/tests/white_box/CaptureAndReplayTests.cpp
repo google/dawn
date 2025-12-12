@@ -2219,6 +2219,22 @@ TEST_P(CaptureAndReplayTests, SetImmediateRenderPass) {
     ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
+// Make sure it does not capture the unmap of a buffer if that unmap is triggered by the buffer
+// destroy.
+TEST_P(CaptureAndReplayTests, MappedBufferDestroyed) {
+    auto recorder = Recorder::CreateAndStart(device);
+
+    {
+        // Create a buffer mapped at creation and then release it.
+        wgpu::Buffer buffer = CreateBuffer("MyBuffer", 4, wgpu::BufferUsage::CopyDst, true);
+    }
+
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    // just expect no errors
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 class CaptureAndReplayDrawTests : public CaptureAndReplayTests {

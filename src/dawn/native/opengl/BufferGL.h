@@ -61,7 +61,7 @@ class Buffer final : public BufferBase {
     ~Buffer() override;
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
     MaybeError FinalizeMapImpl(BufferState newState) override;
-    void UnmapImpl(BufferState oldState) override;
+    void UnmapImpl(BufferState oldState, BufferState newState) override;
     void DestroyImpl() override;
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;

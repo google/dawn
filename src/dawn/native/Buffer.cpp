@@ -108,7 +108,7 @@ class ErrorBuffer final : public BufferBase {
 
     void* GetMappedPointerImpl() override { return mFakeMappedData.get(); }
 
-    void UnmapImpl(BufferState oldState) override { mFakeMappedData.reset(); }
+    void UnmapImpl(BufferState oldState, BufferState newState) override { mFakeMappedData.reset(); }
 
     std::unique_ptr<uint8_t[]> mFakeMappedData;
 };
@@ -836,7 +836,8 @@ MaybeError BufferBase::Unmap(bool forDestroy) {
     switch (mState.load(std::memory_order::acquire)) {
         case BufferState::Mapped:
             DAWN_TRY(TransitionState(BufferState::Mapped, BufferState::InsideOperation));
-            UnmapImpl(BufferState::Mapped);
+            UnmapImpl(BufferState::Mapped,
+                      forDestroy ? BufferState::Destroyed : BufferState::Unmapped);
             break;
         case BufferState::MappedAtCreation:
             DAWN_TRY(TransitionState(BufferState::MappedAtCreation, BufferState::InsideOperation));
@@ -851,7 +852,8 @@ MaybeError BufferBase::Unmap(bool forDestroy) {
                 }
             }
             if (mSize != 0 && IsCPUWritableAtCreation()) {
-                UnmapImpl(BufferState::MappedAtCreation);
+                UnmapImpl(BufferState::MappedAtCreation,
+                          forDestroy ? BufferState::Destroyed : BufferState::Unmapped);
             }
             break;
         case BufferState::InsideOperation:
@@ -902,7 +904,8 @@ MaybeError BufferBase::UnmapInternal(bool forDestroy) {
 
         if (event) {
             // Continue early unmap after releasing the mutex.
-            UnmapImpl(BufferState::PendingMap);
+            UnmapImpl(BufferState::PendingMap,
+                      forDestroy ? BufferState::Destroyed : BufferState::Unmapped);
             mState.store(BufferState::Unmapped, std::memory_order::release);
 
             GetDevice()->DeferIfLocked(

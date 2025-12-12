@@ -191,7 +191,8 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // Performs backend specific work to unmap. `oldState` is the state of the buffer before unmap
     // operation started. The device mutex is not locked when this is called so the implementation
     // should lock if required.
-    virtual void UnmapImpl(BufferState oldState) = 0;
+    // `newState` is the state of the buffer after unmap operation completed.
+    virtual void UnmapImpl(BufferState oldState, BufferState newState) = 0;
 
     virtual bool IsCPUWritableAtCreation() const = 0;
     MaybeError CopyFromStagingBuffer();

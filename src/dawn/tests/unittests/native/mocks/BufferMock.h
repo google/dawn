@@ -56,7 +56,7 @@ class BufferMock : public BufferBase {
                 (override));
     MOCK_METHOD(MaybeError, FinalizeMapImpl, (BufferState newState), (override));
     MOCK_METHOD(void*, GetMappedPointerImpl, (), (override));
-    MOCK_METHOD(void, UnmapImpl, (BufferState fromState), (override));
+    MOCK_METHOD(void, UnmapImpl, (BufferState fromState, BufferState newState), (override));
 
     MOCK_METHOD(bool, IsCPUWritableAtCreation, (), (const, override));
 

@@ -208,7 +208,7 @@ void* Buffer::GetMappedPointerImpl() {
     return [*mMtlBuffer contents];
 }
 
-void Buffer::UnmapImpl(BufferState oldState) {
+void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
     // Nothing to do, Metal StorageModeShared buffers are always mapped.
 }
 

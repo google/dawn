@@ -246,7 +246,7 @@ void* Buffer::GetMappedPointerImpl() {
     return mMappedData;
 }
 
-void Buffer::UnmapImpl(BufferState oldState) {
+void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
     auto deviceGuard = GetDevice()->GetGuard();
 
     const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();

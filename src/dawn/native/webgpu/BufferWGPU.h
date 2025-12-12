@@ -52,7 +52,7 @@ class Buffer final : public BufferBase, public RecordableObject, public ObjectWG
 
   private:
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-    void UnmapImpl(BufferState oldState) override;
+    void UnmapImpl(BufferState oldState, BufferState newState) override;
     MaybeError FinalizeMapImpl(BufferState newState) override;
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;
