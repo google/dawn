@@ -247,6 +247,8 @@ void* Buffer::GetMappedPointerImpl() {
 }
 
 void Buffer::UnmapImpl(BufferState oldState) {
+    auto deviceGuard = GetDevice()->GetGuard();
+
     const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
 
     DAWN_GL_TRY_IGNORE_ERRORS(gl, BindBuffer(GL_ARRAY_BUFFER, mBuffer));

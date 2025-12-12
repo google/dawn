@@ -519,6 +519,7 @@ void Buffer::UnmapImpl(BufferState oldState) {
     // When buffers are mapped, they are locked to keep them in resident memory. We must unlock
     // them when they are unmapped.
     if (mResourceAllocation.GetInfo().mMethod != AllocationMethod::kExternal) {
+        auto deviceGuard = GetDevice()->GetGuard();
         Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
         ToBackend(GetDevice())->GetResidencyManager()->UnlockAllocation(heap);
     }

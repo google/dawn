@@ -39,6 +39,7 @@
 #include "dawn/common/Alloc.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
+#include "dawn/common/Log.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/CallbackTaskManager.h"
@@ -46,6 +47,7 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/DynamicUploader.h"
+#include "dawn/native/Error.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/EventManager.h"
 #include "dawn/native/Instance.h"
@@ -62,6 +64,10 @@
 namespace dawn::native {
 
 namespace {
+
+std::unique_ptr<ErrorData> ConcurrentUseError() {
+    return DAWN_VALIDATION_ERROR("Concurrent buffer operations are not allowed");
+}
 
 class ErrorBuffer final : public BufferBase {
   public:
@@ -456,30 +462,40 @@ BufferBase::~BufferBase() {
 }
 
 void BufferBase::DestroyImpl() {
-    bool needsUnmap = false;
-    switch (mState.load(std::memory_order::acquire)) {
-        case BufferState::Mapped:
-        case BufferState::PendingMap: {
-            needsUnmap = true;
-            break;
-        }
-        case BufferState::MappedAtCreation: {
-            if (mStagingBuffer != nullptr) {
-                mStagingBuffer = nullptr;
-            } else if (mSize != 0) {
-                needsUnmap = true;
+    // If the initial state is Unmapped the compared_exchange() should be successful. If not the
+    // current state has been loaded in `state` and loop body handles anything needed like unmapping
+    // the buffer.
+    BufferState state = BufferState::Unmapped;
+    while (
+        !mState.compare_exchange_weak(state, BufferState::Destroyed, std::memory_order_acq_rel)) {
+        switch (state) {
+            case BufferState::Mapped:
+            case BufferState::PendingMap:
+            case BufferState::MappedAtCreation: {
+                [[maybe_unused]] bool hadError =
+                    GetDevice()->ConsumedError(UnmapInternal(true), "calling %s.Destroy().", this);
+                state = mState.load(std::memory_order_acquire);
+                break;
             }
-            break;
+            case BufferState::InsideOperation: {
+                // This is never supposed to happen but another operation is happening concurrently
+                // with API Destroy() call.
+                [[maybe_unused]] bool hadError =
+                    GetDevice()->ConsumedError(ConcurrentUseError(), "calling %s.Destroy().", this);
+                while (mState.load(std::memory_order_acquire) == BufferState::InsideOperation) {
+                    // Spin loop instead of wait() to avoid overhead of signal in map/unmap.
+                }
+                break;
+            }
+            case BufferState::Destroyed:
+                DAWN_UNREACHABLE();
+            case BufferState::HostMappedPersistent:
+            case BufferState::Unmapped:
+            case BufferState::SharedMemoryNoAccess:
+                // Buffer is ready to be destroyed.
+                break;
         }
-        default:
-            break;
     }
-    if (needsUnmap) {
-        [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
-            UnmapInternal("Buffer was destroyed before mapping was resolved."),
-            "calling %s.Destroy().", this);
-    }
-    mState.store(BufferState::Destroyed, std::memory_order::release);
 
     mTexelBufferViews.Destroy();
 }
@@ -526,6 +542,7 @@ wgpu::BufferMapState BufferBase::APIGetMapState() const {
             return wgpu::BufferMapState::Pending;
         case BufferState::Unmapped:
         case BufferState::Destroyed:
+        case BufferState::InsideOperation:
         case BufferState::SharedMemoryNoAccess:
             return wgpu::BufferMapState::Unmapped;
         case BufferState::HostMappedPersistent:
@@ -653,6 +670,8 @@ MaybeError BufferBase::ValidateCanUseOnQueueNow() const {
             return DAWN_VALIDATION_ERROR("%s used in submit while pending map.", this);
         case BufferState::SharedMemoryNoAccess:
             return DAWN_VALIDATION_ERROR("%s used in submit without shared memory access.", this);
+        case BufferState::InsideOperation:
+            return ConcurrentUseError();
         case BufferState::HostMappedPersistent:
         case BufferState::Unmapped:
             return {};
@@ -689,6 +708,8 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
                 case BufferState::Mapped:
                 case BufferState::MappedAtCreation:
                     return DAWN_VALIDATION_ERROR("%s is already mapped.", this);
+                case BufferState::InsideOperation:
+                    return ConcurrentUseError();
                 case BufferState::PendingMap:
                     return DAWN_VALIDATION_ERROR("%s already has an outstanding map pending.",
                                                  this);
@@ -702,7 +723,11 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
                     break;
             }
 
-            DAWN_TRY(MapAsyncImpl(mode, offset, size));
+            DAWN_TRY(TransitionState(BufferState::Unmapped, BufferState::InsideOperation));
+            DAWN_TRY_WITH_CLEANUP(MapAsyncImpl(mode, offset, size), {
+                // Reset state since an error stopped this from reaching pending map state.
+                mState.store(BufferState::Unmapped, std::memory_order::release);
+            });
             return {};
         }();
 
@@ -785,6 +810,8 @@ uint64_t BufferBase::APIGetSize() const {
 MaybeError BufferBase::CopyFromStagingBuffer() {
     DAWN_ASSERT(mStagingBuffer != nullptr && mSize != 0);
 
+    auto deviceGuard = GetDevice()->GetGuard();
+
     DAWN_TRY(
         GetDevice()->CopyFromStagingToBuffer(mStagingBuffer.Get(), 0, this, 0, GetAllocatedSize()));
     mStagingBuffer = nullptr;
@@ -798,41 +825,54 @@ void BufferBase::APIUnmap() {
         return;
     }
     auto unmap = [&]() -> MaybeError {
-        DAWN_TRY(UnmapInternal("Buffer was unmapped before mapping was resolved."));
+        DAWN_TRY(UnmapInternal(false));
         return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
     };
     [[maybe_unused]] bool hadError =
         GetDevice()->ConsumedError(unmap(), "calling %s.Unmap().", this);
 }
 
-MaybeError BufferBase::Unmap() {
+MaybeError BufferBase::Unmap(bool forDestroy) {
     switch (mState.load(std::memory_order::acquire)) {
         case BufferState::Mapped:
+            DAWN_TRY(TransitionState(BufferState::Mapped, BufferState::InsideOperation));
             UnmapImpl(BufferState::Mapped);
             break;
         case BufferState::MappedAtCreation:
+            DAWN_TRY(TransitionState(BufferState::MappedAtCreation, BufferState::InsideOperation));
             if (mStagingBuffer != nullptr) {
-                DAWN_TRY(CopyFromStagingBuffer());
+                if (forDestroy) {
+                    // No need to upload staging contents if the buffer is being destroyed.
+                    mStagingBuffer = nullptr;
+                } else {
+                    DAWN_TRY_WITH_CLEANUP(CopyFromStagingBuffer(), {
+                        mState.store(BufferState::MappedAtCreation, std::memory_order::release);
+                    });
+                }
             }
             if (mSize != 0 && IsCPUWritableAtCreation()) {
                 UnmapImpl(BufferState::MappedAtCreation);
             }
             break;
+        case BufferState::InsideOperation:
+            return ConcurrentUseError();
         case BufferState::Unmapped:
+            return {};
         case BufferState::HostMappedPersistent:
         case BufferState::SharedMemoryNoAccess:
             break;
         case BufferState::PendingMap:
         case BufferState::Destroyed:
-            // Internal code should never be trying to unmap a pending or destroyed buffer.
-            DAWN_UNREACHABLE();
+            // UnmapInternal() already handled waiting for PendingMap to be done so there must have
+            // been a concurrent operation that changes state between the two atomic loads.
+            return ConcurrentUseError();
     }
 
     mState.store(BufferState::Unmapped, std::memory_order::release);
     return {};
 }
 
-MaybeError BufferBase::UnmapInternal(std::string_view earlyUnmapMessage) {
+MaybeError BufferBase::UnmapInternal(bool forDestroy) {
     BufferState state = mState.load(std::memory_order::acquire);
 
     // If the buffer is already destroyed, we don't need to do anything.
@@ -851,7 +891,12 @@ MaybeError BufferBase::UnmapInternal(std::string_view earlyUnmapMessage) {
             if (event) {
                 // This modifies status in MapAsyncEvent which signals the map has been aborted. It
                 // must happen with mutex locked.
-                event->UnmapEarly(earlyUnmapMessage);
+                event->UnmapEarly(forDestroy ? "Buffer was destroyed before mapping was resolved."
+                                             : "Buffer was unmapped before mapping was resolved.");
+
+                BufferState exchangedState =
+                    mState.exchange(BufferState::InsideOperation, std::memory_order_acq_rel);
+                DAWN_CHECK(exchangedState == BufferState::PendingMap);
             }
         }
 
@@ -871,7 +916,7 @@ MaybeError BufferBase::UnmapInternal(std::string_view earlyUnmapMessage) {
         mState.wait(BufferState::PendingMap, std::memory_order_acquire);
     }
 
-    DAWN_TRY(Unmap());
+    DAWN_TRY(Unmap(forDestroy));
     return {};
 }
 
@@ -936,6 +981,7 @@ bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) co
 
         case BufferState::PendingMap:
         case BufferState::Unmapped:
+        case BufferState::InsideOperation:
         case BufferState::SharedMemoryNoAccess:
         case BufferState::Destroyed:
             return false;
@@ -1051,6 +1097,14 @@ TexelBufferViewBase* BufferBase::APICreateTexelView(const TexelBufferViewDescrip
 
 ApiObjectList* BufferBase::GetTexelBufferViewTrackingList() {
     return &mTexelBufferViews;
+}
+
+MaybeError BufferBase::TransitionState(BufferState currentState, BufferState desiredState) {
+    if (mState.compare_exchange_strong(currentState, desiredState, std::memory_order_acq_rel)) {
+        return {};
+    }
+
+    return ConcurrentUseError();
 }
 
 }  // namespace dawn::native

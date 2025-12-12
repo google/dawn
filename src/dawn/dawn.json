@@ -769,7 +769,8 @@
                 "returns": "buffer map state"
             },
             {
-                "name": "unmap"
+                "name": "unmap",
+                "no autolock": true
             },
             {
                 "name": "destroy"

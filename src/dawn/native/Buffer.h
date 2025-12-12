@@ -83,6 +83,10 @@ ResultOrError<UnpackedPtr<TexelBufferViewDescriptor>> ValidateTexelBufferViewDes
 class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
   public:
     enum class BufferState {
+        // MapAsync() or Unmap() is in progress.
+        // TODO(crbug.com/467247254): See if ConcurrentAccessGuard<T> can be used be implemented and
+        // used instead of having an InsideOperation state.
+        InsideOperation,
         Unmapped,
         PendingMap,
         Mapped,
@@ -130,7 +134,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // Internal non-reentrant version of Unmap. This is used in workarounds or additional copies.
     // Note that this will fail if the map event is pending since that should never happen
     // internally.
-    MaybeError Unmap();
+    MaybeError Unmap(bool forDestroy = false);
 
     void DumpMemoryStatistics(dawn::native::MemoryDump* dump, const char* prefix) const;
 
@@ -184,7 +188,9 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // `newState` is the state the buffer will be in after this returns.
     virtual MaybeError FinalizeMapImpl(BufferState newState) = 0;
     virtual void* GetMappedPointerImpl() = 0;
-    // `oldState` is the state of the buffer before unmap operation started.
+    // Performs backend specific work to unmap. `oldState` is the state of the buffer before unmap
+    // operation started. The device mutex is not locked when this is called so the implementation
+    // should lock if required.
     virtual void UnmapImpl(BufferState oldState) = 0;
 
     virtual bool IsCPUWritableAtCreation() const = 0;
@@ -193,43 +199,19 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     MaybeError ValidateMapAsync(wgpu::MapMode mode, size_t offset, size_t size) const;
     MaybeError ValidateUnmap() const;
     bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
-    MaybeError UnmapInternal(std::string_view earlyUnmapMessage);
+    MaybeError UnmapInternal(bool forDestroy);
 
     // Updates internal state to reflect that the buffer is now mapped.
     MaybeError FinalizeMap(BufferState newState);
+
+    // Atomically exchanges `currentState` to `desiredState`. Returns a validation error indicating
+    // concurrent use if another thread has modified `mState` and compare_exchange() failed.
+    MaybeError TransitionState(BufferState currentState, BufferState desiredState);
 
     const uint64_t mSize = 0;
     const wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
     const wgpu::BufferUsage mInternalUsage = wgpu::BufferUsage::None;
     bool mIsDataInitialized = false;
-
-    // The following members are mutable state of the buffer w.r.t mapping. They are all loosely
-    // guarded by |mBufferState| by update ordering.
-
-    // Currently, our API relies on the fact that there is a device level lock that synchronizes
-    // everything. For API*MappedRange calls, however, it is more efficient to not acquire the
-    // device-wide lock since we cannot actually protect against racing w.r.t Unmap, i.e. a user
-    // can call an API*MappedRange function, save the pointer, call Unmap, and now the user is
-    // holding an invalid pointer. While a buffer state change is always guarded by the
-    // device-lock, we can implement the necessary validations for the API*MappedRange calls
-    // without acquiring the lock by ensuring that:
-    //   1) For MapAsync, we only set |mBufferState| = Mapped AFTER we update the other members.
-    //   2) For *MappedRange functions, we always check |mBufferState| = Mapped before checking
-    //      other members for validation.
-    // With those assumptions in place, we can guarantee that if *MappedRange is successful,
-    // that MapAsync must have succeeded. We cannot guarantee, however, that Unmap did not race
-    // with *MappedRange, but that is the responsibility of the caller.
-    std::atomic<BufferState> mState = BufferState::Unmapped;
-
-    // A recursive buffer used to implement mappedAtCreation for buffers with non-mappable
-    // usage. It is transiently allocated and released when the mappedAtCreation-buffer is
-    // unmapped. Because this buffer itself is directly mappable, it will not create another
-    // staging buffer recursively.
-    Ref<BufferBase> mStagingBuffer = nullptr;
-
-    // Track texel buffer views created from this buffer so they can be destroyed when the buffer is
-    // destroyed.
-    ApiObjectList mTexelBufferViews;
 
     // Once MapAsync() returns a future there is a possible race between MapAsyncEvent completing
     // and the buffer being unmapped as they can happen on different threads. `mPendingMapMutex`
@@ -240,6 +222,39 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // Ref<MapAsyncEvent> which doesn't allow resetting the Ref.
     Mutex mPendingMapMutex;
     Ref<MapAsyncEvent> mPendingMapEvent;
+
+    // Track texel buffer views created from this buffer so they can be destroyed when the buffer is
+    // destroyed.
+    ApiObjectList mTexelBufferViews;
+
+    // The following members are mutable state of the buffer w.r.t mapping. Access to the buffer is
+    // required to be externally synchronized so there shouldn't be races accessing these member
+    // variables. However, the variables are all loosely guarded by `mState` update ordering to
+    // guard against concurrent access to the buffer.
+    //
+    // The follow semantics are used:
+    // 1. On MapAsync() set state to InsideOperation before modifying any other members. If there is
+    //    a race modifying the state compare_exchange() will fail and a validation error is thrown.
+    //    After modifying all member variables set state to PendingMap.
+    // 2. When MapAsyncEvent completes set state to Mapped after all other work is finished.
+    // 3. For *MappedRange() functions check that state is Mapped before checking other members for
+    //    validation.
+    // 4. For Unmap() set state to InsideOperation before modifying any other member variables. If
+    //    there is a race modifying state compare_exchange() will fail and a validation error is
+    //    thrown. After the buffer is unmapped set state to Unmapped.
+    // 5. For Destroy() check if the state is InsideOperation and if so spin loop until the
+    //    concurrent operation is finished. This prevents destruction in the middle of an operation.
+    //
+    // With those `mState` changes in place, we can guarantee that if GetMappedRange() is
+    // successful, that MapAsync() must have succeeded. We cannot guarantee, however, that Unmap()
+    // did not race with GetMappedRange(), but that is the responsibility of the caller.
+    std::atomic<BufferState> mState = BufferState::Unmapped;
+
+    // A recursive buffer used to implement mappedAtCreation for buffers with non-mappable
+    // usage. It is transiently allocated and released when the mappedAtCreation-buffer is
+    // unmapped. Because this buffer itself is directly mappable, it will not create another
+    // staging buffer recursively.
+    Ref<BufferBase> mStagingBuffer = nullptr;
 
     // Mapping specific states.
     wgpu::MapMode mMapMode = wgpu::MapMode::None;
