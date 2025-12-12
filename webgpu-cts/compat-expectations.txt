@@ -90,7 +90,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2025-12-03 07:31:15AM
+# Last rolled: 2025-12-11 08:19:44PM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -554,7 +554,6 @@ crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,built
 crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
 
-
 # 'asin' failures on Intel
 crbug.com/341327470 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,asin:f32:* [ Failure ]
 crbug.com/341327470 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,asin:f32:inputSource="storage_r";vectorize="_undef_" [ Failure ]
@@ -654,7 +653,7 @@ crbug.com/384672477 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,ImageB
 crbug.com/384672477 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 
 # Flaky due to OS upgrade from `android-t`
-crbug.com/467430936 [ android-pixel-6 android-14 ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:*;format="stencil8";filt="nearest";*;offset=false [ RetryOnFailure ]
+crbug.com/467430936 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:*;format="stencil8";filt="nearest";*;offset=false [ RetryOnFailure ]
 
 # Compressed texture image_copy failures on Pixel 6
 crbug.com/364917742 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:*;format="astc-*-unorm";dimension="2d" [ Failure ]
@@ -1671,6 +1670,7 @@ crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,canvas:copy_con
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgba8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgba8unorm-srgb";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r16float";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r8unorm";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rg8unorm";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgb10a2unorm";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
