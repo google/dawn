@@ -61,6 +61,9 @@ default_args = {
 
   # Dawn needs to stay in C++20 for longer than Chromium due to some partners.
   use_cxx23 = false
+
+  # Use Siso instead of Ninja.
+  use_siso = true
 }
 
 # Export compile_commands.json to build dir for all generated targets.
