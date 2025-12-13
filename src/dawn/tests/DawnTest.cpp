@@ -69,6 +69,11 @@
 #include "dawn/native/OpenGLBackend.h"
 #endif  // DAWN_ENABLE_BACKEND_OPENGL
 
+#if DAWN_PLATFORM_IS(WINDOWS)
+#include <comdef.h>
+#include <versionhelpers.h>
+#endif
+
 namespace dawn {
 namespace {
 
@@ -1057,6 +1062,53 @@ bool DawnTestBase::IsIntelGen12OrLater() const {
 bool DawnTestBase::IsWindows() const {
 #if DAWN_PLATFORM_IS(WINDOWS)
     return true;
+#else
+    return false;
+#endif
+}
+
+bool DawnTestBase::IsWindows11() const {
+#if DAWN_PLATFORM_IS(WINDOWS)
+    // Windows 10 and 11 have the same version number and only differ by build number
+    if (!IsWindows10OrGreater()) {
+        return false;
+    }
+
+    // Referenced from base/win/registry.cc in Chromium
+    auto ReadFromSZRegistryKey = [](HKEY registerKey, const char* registerKeyName) -> uint64_t {
+        DWORD valueType;
+        DWORD returnSize;
+        if (RegQueryValueExA(registerKey, registerKeyName, nullptr, &valueType, nullptr,
+                             &returnSize) != ERROR_SUCCESS) {
+            return 0;
+        }
+        std::vector<char> returnStringValue(returnSize);
+        auto hr = RegQueryValueExA(registerKey, registerKeyName, nullptr, &valueType,
+                                   reinterpret_cast<LPBYTE>(returnStringValue.data()), &returnSize);
+        if (hr != ERROR_SUCCESS || valueType != REG_SZ) {
+            return 0;
+        }
+        constexpr int32_t kRadix = 10;
+        return strtol(returnStringValue.data(), nullptr, kRadix);
+    };
+
+    // Referenced from base/win/windows_version.cc in Chromium
+    auto GetCurrentBuildNumber = [&]() -> uint64_t {
+        constexpr wchar_t kRegKeyWindowsNTCurrentVersion[] =
+            L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion";
+        HKEY hKey;
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, kRegKeyWindowsNTCurrentVersion, 0, KEY_QUERY_VALUE,
+                          &hKey) != ERROR_SUCCESS) {
+            return false;
+        }
+        uint64_t v = ReadFromSZRegistryKey(hKey, "CurrentBuildNumber");
+        RegCloseKey(hKey);
+        return v;
+    };
+
+    static uint64_t currentBuildNumber = GetCurrentBuildNumber();
+    return currentBuildNumber >= 22000u;
+
 #else
     return false;
 #endif
