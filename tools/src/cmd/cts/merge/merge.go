@@ -35,6 +35,7 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 )
 
 func init() {
@@ -72,10 +73,10 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	}
 
 	// Open output file
-	output := os.Stdout
+	var output oswrapper.File = os.Stdout
 	if c.flags.output != "-" {
 		var err error
-		output, err = os.Create(c.flags.output)
+		output, err = cfg.OsWrapper.Create(c.flags.output)
 		if err != nil {
 			return fmt.Errorf("failed to open output file '%v': %w", c.flags.output, err)
 		}
