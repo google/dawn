@@ -691,6 +691,12 @@ crbug.com/407076123 [ android-14 android-pixel-6 ] webgpu:api,validation,createB
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 
+# maxTextureDimension3D was out of date in CTS. Bumped Dawn to match correct value.
+# These suppressions are needed to land dawn fix while waiting for CTS to roll.
+crbug.com/468386040 webgpu:api,validation,capability_checks,limits,maxTextureDimension3D:* [ Failure ]
+crbug.com/468386040 webgpu:api,operation,adapter,requestDevice:* [ Failure ]
+crbug.com/468386040 webgpu:idl,javascript:limits:* [ Failure ]
+
 # Not implemented yet
 crbug.com/342840940 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 release ubuntu ] webgpu:api,validation,capability_checks,features,texture_formats:check_capability_guarantees: [ Failure ]
 

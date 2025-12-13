@@ -108,7 +108,7 @@
 #define LIMITS_TEXTURE_DIMENSIONS(X) \
     X(v1, Maximum,                       maxTextureDimension1D,      4096,      8192,      16384) \
     X(v1, Maximum,                       maxTextureDimension2D,      4096,      8192,      16384) \
-    X(v1, Maximum,                       maxTextureDimension3D,      1024,      2048,       2048) \
+    X(v1, Maximum,                       maxTextureDimension3D,      2048,      2048,       2048) \
     X(v1, Maximum,                       maxTextureArrayLayers,       256,       256,       2048)
 
 // Tiered limits for immediate data sizes.
