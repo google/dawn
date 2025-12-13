@@ -1348,8 +1348,8 @@ class BufferMapExtendedUsagesTests : public DawnTest {
         DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::BufferMapExtendedUsages}));
 
         // TODO(crbug.com/465167911): Flakily gets unexpected nullptrs on
-        // Snapdragon X Elite SoCs w/ D3D11.
-        DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
+        // Snapdragon X Elite SoCs.
+        DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
     }
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
