@@ -114,7 +114,7 @@ func testGetResults_FileWithWrapper_Impl(t *testing.T, unsuppressedOnly bool) {
 	expectedResults := result.ResultsByExecutionMode{
 		"execution_mode": resultsList,
 	}
-	err := result.SaveWithWrapper("results.txt", expectedResults, wrapper)
+	err := result.Save("results.txt", expectedResults, wrapper)
 	require.NoErrorf(t, err, "Got error writing results: %v", err)
 
 	var resultsByExecutionMode result.ResultsByExecutionMode
@@ -206,7 +206,7 @@ func testCacheResults_CacheHit_Impl(t *testing.T, unsuppressedOnly bool) {
 	}
 
 	cachePath := filepath.Join(cacheDir, partialCacheFilePath)
-	err := result.SaveWithWrapper(cachePath, cachedResults, wrapper)
+	err := result.Save(cachePath, cachedResults, wrapper)
 	require.NoErrorf(t, err, "Got error writing results: %v", err)
 
 	resultsByExecutionMode, err := testedFunc(ctx, cfg, patchset, cacheDir, client, BuildsByName{})
@@ -1345,7 +1345,7 @@ func TestCacheRecentUniqueSuppressedResults_CacheHit(t *testing.T) {
 	// exact time the day changes so the file is created on a different day than
 	// it's read, but that seems exceedingly unlikely in practice.
 	year, month, day := time.Now().Date()
-	result.SaveWithWrapper(
+	result.Save(
 		filepath.Join(
 			fileutils.ThisDir(),
 			"expectation-affected-ci-results",
@@ -1376,7 +1376,7 @@ func TestCacheRecentUniqueSuppressedResults_CacheSkippedIfUnspecified(t *testing
 	})
 
 	year, month, day := time.Now().Date()
-	result.SaveWithWrapper(
+	result.Save(
 		filepath.Join(
 			"expectation-affected-ci-results",
 			fmt.Sprintf("%d-%d-%d.txt", year, month, day)),

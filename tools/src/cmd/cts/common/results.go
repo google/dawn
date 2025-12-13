@@ -114,7 +114,7 @@ func (r *ResultSource) getResultsImpl(ctx context.Context, cfg Config, auth auth
 
 	// If a file was specified, then load that.
 	if r.File != "" {
-		return result.LoadWithWrapper(r.File, cfg.OsWrapper)
+		return result.Load(r.File, cfg.OsWrapper)
 	}
 
 	// Initialize the buildbucket and resultdb clients
@@ -233,7 +233,7 @@ func cacheResultsImpl(
 		path := filepath.Join(dir, strconv.Itoa(ps.Change), fmt.Sprintf("ps-%v%v.txt", ps.Patchset, fileSuffix))
 		if _, err := cfg.OsWrapper.Stat(path); err == nil {
 			log.Printf("loading cached results from cl %v ps %v...", ps.Change, ps.Patchset)
-			return result.LoadWithWrapper(path, cfg.OsWrapper)
+			return result.Load(path, cfg.OsWrapper)
 		}
 		cachePath = path
 	}
@@ -251,7 +251,7 @@ func cacheResultsImpl(
 		resultsByExecutionMode[i] = results
 	}
 
-	if err := result.SaveWithWrapper(cachePath, resultsByExecutionMode, cfg.OsWrapper); err != nil {
+	if err := result.Save(cachePath, resultsByExecutionMode, cfg.OsWrapper); err != nil {
 		log.Println("failed to save results to cache: %w", err)
 	}
 
@@ -645,7 +645,7 @@ func CacheRecentUniqueSuppressedResults(
 		path := filepath.Join(dir, "expectation-affected-ci-results", fmt.Sprintf("%d-%d-%d.txt", year, month, day))
 		if _, err := osWrapper.Stat(path); err == nil {
 			log.Println("loading cached results for today")
-			return result.LoadWithWrapper(path, osWrapper)
+			return result.Load(path, osWrapper)
 		}
 		cachePath = path
 	}
@@ -663,7 +663,7 @@ func CacheRecentUniqueSuppressedResults(
 		resultsByExecutionMode[i] = results
 	}
 
-	if err := result.SaveWithWrapper(cachePath, resultsByExecutionMode, osWrapper); err != nil {
+	if err := result.Save(cachePath, resultsByExecutionMode, osWrapper); err != nil {
 		log.Printf("failed to save results to cache: %v", err)
 	}
 

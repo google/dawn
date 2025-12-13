@@ -61,7 +61,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	resultsByExecutionMode := make(result.ResultsByExecutionMode)
 	for _, path := range flag.Args() {
 		// Load results
-		r, err := result.Load(path)
+		r, err := result.Load(path, cfg.OsWrapper)
 		if err != nil {
 			return fmt.Errorf("while reading '%v': %w", path, err)
 		}
