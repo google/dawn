@@ -106,6 +106,46 @@ TEST_P(ResourceTableTests, PipelineLayoutWithResourceTableCreation) {
     MakePipelineLayoutWithTable({testBgl, testBgl, testBgl}, 4);
 }
 
+// Test that creating pipelines that use resource tables doesn't crash in backends.
+TEST_P(ResourceTableTests, ShaderWithResourceTableCreation) {
+    wgpu::ComputePipelineDescriptor csDesc;
+
+    // Test compiling a pipeline using only the resource table.
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+        @compute @workgroup_size(1) fn main() {
+            _ = hasResource<texture_2d<f32>>(0);
+        }
+    )");
+    device.CreateComputePipeline(&csDesc);
+
+    // Test compiling a pipeline using the resource table and a bindgroup.
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+        @group(0) @binding(0) var t0 : texture_2d<f32>;
+        @compute @workgroup_size(1) fn main() {
+            _ = hasResource<texture_2d<f32>>(0);
+            _ = t0;
+        }
+    )");
+    device.CreateComputePipeline(&csDesc);
+
+    // Test compiling a pipeline using the resource table and many bindgroup.
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+        @group(0) @binding(0) var t0 : texture_2d<f32>;
+        @group(1) @binding(0) var t1 : texture_2d<f32>;
+        @group(2) @binding(0) var t2 : texture_2d<f32>;
+        @compute @workgroup_size(1) fn main() {
+            _ = hasResource<texture_2d<f32>>(0);
+            _ = t0;
+            _ = t1;
+            _ = t2;
+        }
+    )");
+    device.CreateComputePipeline(&csDesc);
+}
+
 DAWN_INSTANTIATE_TEST(ResourceTableTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 }  // anonymous namespace

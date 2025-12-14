@@ -132,10 +132,27 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 #if TINT_BUILD_SPV_WRITER
     // Creation of module and spirv is deferred to this point when using tint generator
 
+    // The first VkDescriptorSetLayout is the one for the resource table if needed and pushes the
+    // bindings for all other bindgroups by 1.
+    BindGroupIndex startOfBindGroups{0};
+    std::optional<tint::ResourceTableConfig> resourceTableConfig = std::nullopt;
+    if (layout->UsesResourceTable()) {
+        startOfBindGroups = BindGroupIndex(1);
+
+        // TODO(https://issues.chromium.org/435317394): Update to not pass a DynamicBindingKind once
+        // support for dynamic binding arrays is removed.
+        auto bindingTypeOrder = GetDefaultBindingOrder(wgpu::DynamicBindingKind::SampledTexture);
+        resourceTableConfig = tint::ResourceTableConfig{
+            .resource_table_binding = tint::BindingPoint(0, 1),
+            .storage_buffer_binding = tint::BindingPoint(0, 0),
+            .default_binding_type_order = {bindingTypeOrder.begin(), bindingTypeOrder.end()},
+        };
+    }
+
     tint::Bindings bindings =
         GenerateBindingRemapping(layout, stage, [&](BindGroupIndex group, BindingIndex index) {
             return tint::BindingPoint{
-                .group = uint32_t(group),
+                .group = uint32_t(startOfBindGroups + group),
                 .binding = uint32_t(index),
             };
         });
@@ -150,7 +167,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             const auto& bindingInfo = bgl->GetBindingInfo(index);
 
             if (auto samplerIndex = bgl->GetStaticSamplerIndexForTexture(index)) {
-                tint::BindingPoint wgslBindingPoint = {.group = uint32_t(group),
+                tint::BindingPoint wgslBindingPoint = {.group = uint32_t(startOfBindGroups + group),
                                                        .binding = uint32_t(bindingInfo.binding)};
                 bindings.texture[wgslBindingPoint].binding = uint32_t(samplerIndex.value());
                 staticallyPairedTextureBindingPoints.insert(wgslBindingPoint);
@@ -167,6 +184,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         if (!bgl->HasDynamicArray()) {
             continue;
         }
+        DAWN_ASSERT(startOfBindGroups == BindGroupIndex(0));
 
         tint::BindingPoint wgslDynamicArrayBindPoint = {
             .group = uint32_t(group), .binding = uint32_t(bgl->GetAPIDynamicArrayStart())};
@@ -217,6 +235,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     };
     req.tintOptions.bindings = std::move(bindings);
     req.tintOptions.resource_binding = std::move(resourceBindingConfig);
+    req.tintOptions.resource_table = std::move(resourceTableConfig);
 
     req.tintOptions.workarounds.polyfill_unary_f32_negation =
         GetDevice()->IsToggleEnabled(Toggle::VulkanPolyfillF32Negation);
