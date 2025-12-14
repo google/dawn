@@ -1616,6 +1616,21 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithVoidType) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_EntryPointParameterWithPointerType) {
+    auto* f = b.Function("my_func", ty.void_(), Function::PipelineStage::kFragment);
+    auto* p = b.FunctionParam("my_param", ty.ptr<function, u32>());
+    f->SetParams({p});
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:1:27 error: entry point parameters cannot be pointers
+%my_func = @fragment func(%my_param:ptr<function, u32, read_write>):void {
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_Param_InvariantWithPosition) {
     auto* f = b.Function("my_func", ty.void_(), Function::PipelineStage::kFragment);
 

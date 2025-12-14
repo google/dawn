@@ -2618,6 +2618,12 @@ void Validator::CheckFunction(const Function* func) {
                                 << ", must be constructible, a pointer, or a handle";
             }
         }
+        if (func->IsEntryPoint() &&
+            !capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
+            if (param->Type()->Is<core::type::Pointer>()) {
+                AddError(param) << "entry point parameters cannot be pointers";
+            }
+        }
 
         if (func->IsFragment()) {
             WalkTypeAndMembers(param, param->Type(), param->Attributes(),
