@@ -53,13 +53,13 @@ import (
 // These function signatures are to facilitate code reuse between the code paths
 // for getting all results and for only getting unsuppressed failures.
 // For MostRecentResultsForChange/MostRecentUnsuppressedFailingResultsForChange.
-type mostRecentResultsFunc = func(context.Context, Config, string, *gerrit.Gerrit, *buildbucket.Buildbucket, resultsdb.Querier, int) (result.ResultsByExecutionMode, gerrit.Patchset, error)
+type mostRecentResultsFunc = func(context.Context, Config, string, *gerrit.Gerrit, *buildbucket.Buildbucket, int) (result.ResultsByExecutionMode, gerrit.Patchset, error)
 
 // For CacheResults/CacheUnsuppressedFailingResults.
-type cacheResultsFunc = func(context.Context, Config, gerrit.Patchset, string, resultsdb.Querier, BuildsByName) (result.ResultsByExecutionMode, error)
+type cacheResultsFunc = func(context.Context, Config, gerrit.Patchset, string, BuildsByName) (result.ResultsByExecutionMode, error)
 
 // For GetRawResults/GetRawUnsuppressedFailingResults.
-type getRawResultsFunc = func(context.Context, Config, resultsdb.Querier, BuildsByName) (result.ResultsByExecutionMode, error)
+type getRawResultsFunc = func(context.Context, Config, BuildsByName) (result.ResultsByExecutionMode, error)
 
 // ResultSource describes the source of CTS test results.
 // ResultSource is commonly used by command line flags for specifying from
@@ -122,10 +122,13 @@ func (r *ResultSource) getResultsImpl(ctx context.Context, cfg Config, auth auth
 	if err != nil {
 		return nil, err
 	}
+	// TODO(crbug.com/344014313): Have the caller provide the client via Config
+	// instead of creating it here.
 	client, err := resultsdb.NewBigQueryClient(ctx, resultsdb.DefaultQueryProject)
 	if err != nil {
 		return nil, err
 	}
+	cfg.Querier = client
 
 	// If no change was specified, then pull the results from the most recent
 	// CTS roll.
@@ -141,7 +144,7 @@ func (r *ResultSource) getResultsImpl(ctx context.Context, cfg Config, auth auth
 		}
 		fmt.Printf("scanning for latest patchset of %v...\n", latest.Number)
 		var resultsByExecutionMode result.ResultsByExecutionMode
-		resultsByExecutionMode, *ps, err = getRecentResults(ctx, cfg, r.CacheDir, instance, bb, client, latest.Number)
+		resultsByExecutionMode, *ps, err = getRecentResults(ctx, cfg, r.CacheDir, instance, bb, latest.Number)
 		if err != nil {
 			return nil, err
 		}
@@ -171,16 +174,13 @@ func (r *ResultSource) getResultsImpl(ctx context.Context, cfg Config, auth auth
 		return nil, err
 	}
 
-	resultsByExecutionMode, err := cacheResults(ctx, cfg, *ps, r.CacheDir, client, builds)
+	resultsByExecutionMode, err := cacheResults(ctx, cfg, *ps, r.CacheDir, builds)
 	if err != nil {
 		return nil, err
 	}
 
 	return resultsByExecutionMode, nil
 }
-
-// TODO(crbug.com/344014313): Switch to using the resultsdb.Querier contained
-// within the provided Config instead of taking a separate argument.
 
 // CacheResults looks in the cache at 'cacheDir' for the results for the given patchset.
 // If the cache contains the results, then these are loaded, transformed with CleanResults() and
@@ -192,10 +192,9 @@ func CacheResults(
 	cfg Config,
 	ps gerrit.Patchset,
 	cacheDir string,
-	client resultsdb.Querier,
 	builds BuildsByName) (result.ResultsByExecutionMode, error) {
 
-	return cacheResultsImpl(ctx, cfg, ps, cacheDir, "", client, builds, GetRawResults)
+	return cacheResultsImpl(ctx, cfg, ps, cacheDir, "", builds, GetRawResults)
 }
 
 // CacheUnsuppressedFailingResults looks in the cache at 'cacheDir' for the
@@ -210,10 +209,9 @@ func CacheUnsuppressedFailingResults(
 	cfg Config,
 	ps gerrit.Patchset,
 	cacheDir string,
-	client resultsdb.Querier,
 	builds BuildsByName) (result.ResultsByExecutionMode, error) {
 
-	return cacheResultsImpl(ctx, cfg, ps, cacheDir, "-unsuppressed-failures", client, builds, GetRawUnsuppressedFailingResults)
+	return cacheResultsImpl(ctx, cfg, ps, cacheDir, "-unsuppressed-failures", builds, GetRawUnsuppressedFailingResults)
 }
 
 // Helper function to share the implementation between CacheResults and CacheUnsuppressedFailingResults.
@@ -223,7 +221,6 @@ func cacheResultsImpl(
 	ps gerrit.Patchset,
 	cacheDir string,
 	fileSuffix string,
-	client resultsdb.Querier,
 	builds BuildsByName,
 	getRawResults getRawResultsFunc) (result.ResultsByExecutionMode, error) {
 
@@ -239,7 +236,7 @@ func cacheResultsImpl(
 	}
 
 	log.Printf("fetching results from cl %v ps %v...", ps.Change, ps.Patchset)
-	resultsByExecutionMode, err := getRawResults(ctx, cfg, client, builds)
+	resultsByExecutionMode, err := getRawResults(ctx, cfg, builds)
 	if err != nil {
 		return nil, err
 	}
@@ -263,10 +260,9 @@ func cacheResultsImpl(
 func GetResults(
 	ctx context.Context,
 	cfg Config,
-	client resultsdb.Querier,
 	builds BuildsByName) (result.ResultsByExecutionMode, error) {
 
-	return getResultsImpl(ctx, cfg, client, builds, GetRawResults)
+	return getResultsImpl(ctx, cfg, builds, GetRawResults)
 }
 
 // GetUnsuppressedFailingResults calls GetRawUnsuppressedFailingResults() to
@@ -275,21 +271,19 @@ func GetResults(
 func GetUnsuppressedFailingResults(
 	ctx context.Context,
 	cfg Config,
-	client resultsdb.Querier,
 	builds BuildsByName) (result.ResultsByExecutionMode, error) {
 
-	return getResultsImpl(ctx, cfg, client, builds, GetRawUnsuppressedFailingResults)
+	return getResultsImpl(ctx, cfg, builds, GetRawUnsuppressedFailingResults)
 }
 
 // Helper function to share the implementation between GetResults and GetUnsuppressedFailingResults.
 func getResultsImpl(
 	ctx context.Context,
 	cfg Config,
-	client resultsdb.Querier,
 	builds BuildsByName,
 	getRawResults getRawResultsFunc) (result.ResultsByExecutionMode, error) {
 
-	resultsByExecutionMode, err := getRawResults(ctx, cfg, client, builds)
+	resultsByExecutionMode, err := getRawResults(ctx, cfg, builds)
 	if err != nil {
 		return nil, err
 	}
@@ -309,10 +303,9 @@ func getResultsImpl(
 func GetRawResults(
 	ctx context.Context,
 	cfg Config,
-	client resultsdb.Querier,
 	builds BuildsByName) (result.ResultsByExecutionMode, error) {
 
-	return getRawResultsImpl(ctx, cfg, client, builds, client.QueryTestResults)
+	return getRawResultsImpl(ctx, cfg, builds, cfg.Querier.QueryTestResults)
 }
 
 // GetRawUnsuppressedFailingResults fetches the unsuppressed failing results
@@ -321,10 +314,9 @@ func GetRawResults(
 func GetRawUnsuppressedFailingResults(
 	ctx context.Context,
 	cfg Config,
-	client resultsdb.Querier,
 	builds BuildsByName) (result.ResultsByExecutionMode, error) {
 
-	return getRawResultsImpl(ctx, cfg, client, builds, client.QueryUnsuppressedFailingTestResults)
+	return getRawResultsImpl(ctx, cfg, builds, cfg.Querier.QueryUnsuppressedFailingTestResults)
 }
 
 // getPythonClassFromTestConfig extracts the Python test class from a TestConfig.
@@ -359,7 +351,6 @@ func shouldSkipV2Result(isV2Prefix bool, pythonClass string, tags []resultsdb.Ta
 func getRawResultsImpl(
 	ctx context.Context,
 	cfg Config,
-	client resultsdb.Querier,
 	builds BuildsByName,
 	queryFunc resultsdb.QueryFunc) (result.ResultsByExecutionMode, error) {
 
@@ -492,10 +483,9 @@ func MostRecentResultsForChange(
 	cacheDir string,
 	g *gerrit.Gerrit,
 	bb *buildbucket.Buildbucket,
-	client resultsdb.Querier,
 	change int) (result.ResultsByExecutionMode, gerrit.Patchset, error) {
 
-	return mostRecentResultsForChangeImpl(ctx, cfg, cacheDir, g, bb, client, change, CacheResults)
+	return mostRecentResultsForChangeImpl(ctx, cfg, cacheDir, g, bb, change, CacheResults)
 }
 
 // MostRecentUnsuppressedFailingResultsForChange returns the unsuppressed
@@ -507,10 +497,9 @@ func MostRecentUnsuppressedFailingResultsForChange(
 	cacheDir string,
 	g *gerrit.Gerrit,
 	bb *buildbucket.Buildbucket,
-	client resultsdb.Querier,
 	change int) (result.ResultsByExecutionMode, gerrit.Patchset, error) {
 
-	return mostRecentResultsForChangeImpl(ctx, cfg, cacheDir, g, bb, client, change, CacheUnsuppressedFailingResults)
+	return mostRecentResultsForChangeImpl(ctx, cfg, cacheDir, g, bb, change, CacheUnsuppressedFailingResults)
 }
 
 // Helper function to share the implementation between MostRecentResultsForChange
@@ -521,7 +510,6 @@ func mostRecentResultsForChangeImpl(
 	cacheDir string,
 	g *gerrit.Gerrit,
 	bb *buildbucket.Buildbucket,
-	client resultsdb.Querier,
 	change int,
 	cacheResults cacheResultsFunc) (result.ResultsByExecutionMode, gerrit.Patchset, error) {
 
@@ -540,7 +528,7 @@ func mostRecentResultsForChangeImpl(
 				return nil, gerrit.Patchset{}, err
 			}
 
-			results, err := cacheResults(ctx, cfg, ps, cacheDir, client, builds)
+			results, err := cacheResults(ctx, cfg, ps, cacheDir, builds)
 			if err != nil {
 				return nil, gerrit.Patchset{}, err
 			}
@@ -592,11 +580,10 @@ func CacheRecentUniqueSuppressedCoreResults(
 	ctx context.Context,
 	cfg Config,
 	cacheDir string,
-	client resultsdb.Querier,
 	osWrapper oswrapper.OSWrapper) (result.List, error) {
 
 	resultsByExecutionMode, err := CacheRecentUniqueSuppressedResults(
-		ctx, cfg, cacheDir, client, osWrapper)
+		ctx, cfg, cacheDir, osWrapper)
 	if err != nil {
 		return nil, err
 	}
@@ -611,11 +598,10 @@ func CacheRecentUniqueSuppressedCompatResults(
 	ctx context.Context,
 	cfg Config,
 	cacheDir string,
-	client resultsdb.Querier,
 	osWrapper oswrapper.OSWrapper) (result.List, error) {
 
 	resultsByExecutionMode, err := CacheRecentUniqueSuppressedResults(
-		ctx, cfg, cacheDir, client, osWrapper)
+		ctx, cfg, cacheDir, osWrapper)
 	if err != nil {
 		return nil, err
 	}
@@ -634,7 +620,6 @@ func CacheRecentUniqueSuppressedResults(
 	ctx context.Context,
 	cfg Config,
 	cacheDir string,
-	client resultsdb.Querier,
 	osWrapper oswrapper.OSWrapper) (result.ResultsByExecutionMode, error) {
 
 	// Load cached results if they are available.
@@ -652,7 +637,7 @@ func CacheRecentUniqueSuppressedResults(
 
 	// Retrieve, clean, and cache results.
 	log.Println("fetching results from recent CI builds")
-	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg, client)
+	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -678,8 +663,7 @@ func CacheRecentUniqueSuppressedResults(
 // GetRawResults functions.
 func getRecentUniqueSuppressedResults(
 	ctx context.Context,
-	cfg Config,
-	client resultsdb.Querier) (result.ResultsByExecutionMode, error) {
+	cfg Config) (result.ResultsByExecutionMode, error) {
 
 	log.Println("fetching results from resultdb...")
 
@@ -729,7 +713,7 @@ func getRecentUniqueSuppressedResults(
 				return nil
 			}
 
-			err := client.QueryRecentUniqueSuppressedTestResults(ctx, prefix, rowHandler)
+			err := cfg.Querier.QueryRecentUniqueSuppressedTestResults(ctx, prefix, rowHandler)
 			if err != nil {
 				return nil, err
 			}

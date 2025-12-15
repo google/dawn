@@ -141,10 +141,10 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	var uniqueResults result.List
 	if c.flags.checkCompatExpectations {
 		uniqueResults, err = common.CacheRecentUniqueSuppressedCompatResults(
-			ctx, cfg, c.flags.cacheDir, cfg.Querier, cfg.OsWrapper)
+			ctx, cfg, c.flags.cacheDir, cfg.OsWrapper)
 	} else {
 		uniqueResults, err = common.CacheRecentUniqueSuppressedCoreResults(
-			ctx, cfg, c.flags.cacheDir, cfg.Querier, cfg.OsWrapper)
+			ctx, cfg, c.flags.cacheDir, cfg.OsWrapper)
 	}
 	if err != nil {
 		return err

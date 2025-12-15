@@ -180,6 +180,7 @@ func testCacheResults_CacheHit_Impl(t *testing.T, unsuppressedOnly bool) {
 	}
 
 	ctx, cfg, wrapper, patchset, cacheDir := getCacheResultsSharedSetupData()
+	cfg.Querier = &client
 
 	// Return bad data to ensure that no querying occurs when the cache is hit.
 	*clientDataField = resultsdb.PrefixGroupedQueryResults{
@@ -209,7 +210,7 @@ func testCacheResults_CacheHit_Impl(t *testing.T, unsuppressedOnly bool) {
 	err := result.Save(cachePath, cachedResults, wrapper)
 	require.NoErrorf(t, err, "Got error writing results: %v", err)
 
-	resultsByExecutionMode, err := testedFunc(ctx, cfg, patchset, cacheDir, client, BuildsByName{})
+	resultsByExecutionMode, err := testedFunc(ctx, cfg, patchset, cacheDir, BuildsByName{})
 	require.NoErrorf(t, err, "Got error caching results: %v", err)
 	require.Equal(t, cachedResults, resultsByExecutionMode)
 }
@@ -235,6 +236,7 @@ func testCacheResults_GetRawResultsError_Impl(t *testing.T, unsuppressedOnly boo
 	}
 
 	ctx, cfg, _, patchset, cacheDir := getCacheResultsSharedSetupData()
+	cfg.Querier = &client
 
 	*clientDataField = resultsdb.PrefixGroupedQueryResults{
 		"prefix": []resultsdb.QueryResult{
@@ -247,7 +249,7 @@ func testCacheResults_GetRawResultsError_Impl(t *testing.T, unsuppressedOnly boo
 		},
 	}
 
-	resultsByExecutionMode, err := testedFunc(ctx, cfg, patchset, cacheDir, client, BuildsByName{})
+	resultsByExecutionMode, err := testedFunc(ctx, cfg, patchset, cacheDir, BuildsByName{})
 	require.Nil(t, resultsByExecutionMode)
 	require.ErrorContains(t, err,
 		"Test ID bad_test did not start with prefix even though query should have filtered.")
@@ -274,6 +276,7 @@ func testCacheResults_Success_Impl(t *testing.T, unsuppressedOnly bool) {
 	}
 
 	ctx, cfg, _, patchset, cacheDir := getCacheResultsSharedSetupData()
+	cfg.Querier = &client
 
 	*clientDataField = resultsdb.PrefixGroupedQueryResults{
 		"prefix": []resultsdb.QueryResult{
@@ -345,15 +348,16 @@ func testCacheResults_Success_Impl(t *testing.T, unsuppressedOnly bool) {
 
 	// Check that the initial results are retrieved and cleaned properly.
 	resultsByExecutionMode, err := testedFunc(
-		ctx, cfg, patchset, cacheDir, client, BuildsByName{})
+		ctx, cfg, patchset, cacheDir, BuildsByName{})
 	require.NoErrorf(t, err, "Got error caching results: %v", err)
 	require.Equal(t, expectedResults, resultsByExecutionMode)
 
 	// Check that the results were cached and that hitting the cache still results
 	// in cleaned data.
 	client = resultsdb.MockBigQueryClient{}
+	cfg.Querier = &client
 	resultsByExecutionMode, err = testedFunc(
-		ctx, cfg, patchset, cacheDir, client, BuildsByName{})
+		ctx, cfg, patchset, cacheDir, BuildsByName{})
 	require.NoErrorf(t, err, "Got error caching results: %v", err)
 	require.Equal(t, expectedResults, resultsByExecutionMode)
 }
@@ -388,6 +392,7 @@ func generateGoodGetResultsInputs() (
 			},
 		},
 	}
+	cfg.Querier = client
 
 	builds := make(BuildsByName)
 
@@ -453,7 +458,7 @@ func TestGetResultsHappyPath(t *testing.T) {
 	expectedResults := make(result.ResultsByExecutionMode)
 	expectedResults["execution_mode"] = expectedResultsList
 
-	results, err := GetResults(ctx, cfg, client, builds)
+	results, err := GetResults(ctx, cfg, builds)
 	require.NoError(t, err)
 	require.Equal(t, expectedResults, results)
 }
@@ -463,7 +468,7 @@ func TestGetResultsGetRawResultsErrorSurfaced(t *testing.T) {
 	ctx, cfg, client, builds := generateGoodGetResultsInputs()
 	client.ReturnValues["prefix"][0].TestId = "bad_test"
 
-	results, err := GetResults(ctx, cfg, client, builds)
+	results, err := GetResults(ctx, cfg, builds)
 	require.Nil(t, results)
 	require.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
 }
@@ -498,6 +503,7 @@ func generateGoodGetUnsuppressedFailingResultsInputs() (
 			},
 		},
 	}
+	cfg.Querier = client
 
 	builds := make(BuildsByName)
 
@@ -563,7 +569,7 @@ func TestGetUnsuppressedFailingResultsHappyPath(t *testing.T) {
 	expectedResults := make(result.ResultsByExecutionMode)
 	expectedResults["execution_mode"] = expectedResultsList
 
-	results, err := GetUnsuppressedFailingResults(ctx, cfg, client, builds)
+	results, err := GetUnsuppressedFailingResults(ctx, cfg, builds)
 	require.NoError(t, err)
 	require.Equal(t, expectedResults, results)
 }
@@ -573,7 +579,7 @@ func TestGetUnsuppressedFailingResultsGetRawResultsErrorSurfaced(t *testing.T) {
 	ctx, cfg, client, builds := generateGoodGetUnsuppressedFailingResultsInputs()
 	client.UnsuppressedFailureReturnValues["prefix"][0].TestId = "bad_test"
 
-	results, err := GetUnsuppressedFailingResults(ctx, cfg, client, builds)
+	results, err := GetUnsuppressedFailingResults(ctx, cfg, builds)
 	require.Nil(t, results)
 	require.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
 }
@@ -667,7 +673,7 @@ func TestGetRawResultsHappyPath(t *testing.T) {
 	expectedResults := make(result.ResultsByExecutionMode)
 	expectedResults["execution_mode"] = expectedResultsList
 
-	results, err := GetRawResults(ctx, cfg, client, builds)
+	results, err := GetRawResults(ctx, cfg, builds)
 	require.NoError(t, err)
 	require.Equal(t, expectedResults, results)
 }
@@ -677,7 +683,7 @@ func TestGetRawResultsPrefixMismatch(t *testing.T) {
 	ctx, cfg, client, builds := generateGoodGetResultsInputs()
 	client.ReturnValues["prefix"][0].TestId = "bad_test"
 
-	results, err := GetRawResults(ctx, cfg, client, builds)
+	results, err := GetRawResults(ctx, cfg, builds)
 	require.Nil(t, results)
 	require.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
 }
@@ -692,7 +698,7 @@ func TestGetRawResultsBadJavaScriptDuration(t *testing.T) {
 		},
 	}
 
-	results, err := GetRawResults(ctx, cfg, client, builds)
+	results, err := GetRawResults(ctx, cfg, builds)
 	require.Nil(t, results)
 	require.ErrorContains(t, err, `time: unknown unit "foo" in duration "1000foo"`)
 }
@@ -707,7 +713,7 @@ func TestGetRawResultsBadMayExonerate(t *testing.T) {
 		},
 	}
 
-	results, err := GetRawResults(ctx, cfg, client, builds)
+	results, err := GetRawResults(ctx, cfg, builds)
 	require.Nil(t, results)
 	require.ErrorContains(t, err, `strconv.ParseBool: parsing "yesnt": invalid syntax`)
 }
@@ -735,6 +741,7 @@ func TestGetRawResultsV2Filtering(t *testing.T) {
 			},
 		},
 	}
+	cfg.Querier = client
 	v2Prefix := "://chrome/test\\:telemetry_gpu_integration_test!webgpucts:"
 
 	client.ReturnValues = resultsdb.PrefixGroupedQueryResults{
@@ -772,7 +779,7 @@ func TestGetRawResultsV2Filtering(t *testing.T) {
 		},
 	}
 
-	results, err := GetRawResults(ctx, cfg, client, builds)
+	results, err := GetRawResults(ctx, cfg, builds)
 	require.NoError(t, err)
 
 	coreResults := results["core"]
@@ -925,7 +932,7 @@ func TestGetRawUnsuppressedFailingResultsHappyPath(t *testing.T) {
 	expectedResults := make(result.ResultsByExecutionMode)
 	expectedResults["execution_mode"] = expectedResultsList
 
-	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, client, builds)
+	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, builds)
 	require.NoError(t, err)
 	require.Equal(t, expectedResults, results)
 }
@@ -935,7 +942,7 @@ func TestGetRawUnsuppressedFailingResultsPrefixMismatch(t *testing.T) {
 	ctx, cfg, client, builds := generateGoodGetUnsuppressedFailingResultsInputs()
 	client.UnsuppressedFailureReturnValues["prefix"][0].TestId = "bad_test"
 
-	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, client, builds)
+	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, builds)
 	require.Nil(t, results)
 	require.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
 }
@@ -950,7 +957,7 @@ func TestGetRawUnsuppressedFailingResultsBadJavaScriptDuration(t *testing.T) {
 		},
 	}
 
-	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, client, builds)
+	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, builds)
 	require.Nil(t, results)
 	require.ErrorContains(t, err, `time: unknown unit "foo" in duration "1000foo"`)
 }
@@ -965,7 +972,7 @@ func TestGetRawUnsuppressedFailingResultsBadMayExonerate(t *testing.T) {
 		},
 	}
 
-	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, client, builds)
+	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, builds)
 	require.Nil(t, results)
 	require.ErrorContains(t, err, `strconv.ParseBool: parsing "yesnt": invalid syntax`)
 }
@@ -1280,9 +1287,10 @@ func TestCacheRecentUniqueSuppressedCoreResults_ErrorSurfaced(t *testing.T) {
 	client := resultsdb.MockBigQueryClient{
 		RecentUniqueSuppressedReturnValues: results,
 	}
+	cfg.Querier = &client
 
 	resultsList, err := CacheRecentUniqueSuppressedCoreResults(
-		ctx, cfg, fileutils.ThisDir(), client, wrapper)
+		ctx, cfg, fileutils.ThisDir(), wrapper)
 	require.Nil(t, resultsList)
 	require.ErrorContains(t, err,
 		"Test ID bad_test did not start with core_prefix even though query should have filtered.")
@@ -1296,9 +1304,10 @@ func TestCacheRecentUniqueSuppressedCoreResults_Success(t *testing.T) {
 	client := resultsdb.MockBigQueryClient{
 		RecentUniqueSuppressedReturnValues: getMultiPrefixQueryResults(),
 	}
+	cfg.Querier = &client
 
 	resultsList, err := CacheRecentUniqueSuppressedCoreResults(
-		ctx, cfg, fileutils.ThisDir(), client, wrapper)
+		ctx, cfg, fileutils.ThisDir(), wrapper)
 	require.NoErrorf(t, err, "Error getting results: %v", err)
 	require.Equal(t, resultsList, getExpectedMultiPrefixResults()["core"])
 }
@@ -1313,9 +1322,10 @@ func TestCAcheRecentUniqueSuppressedCompatResults_ErrorSurfaced(t *testing.T) {
 	client := resultsdb.MockBigQueryClient{
 		RecentUniqueSuppressedReturnValues: results,
 	}
+	cfg.Querier = &client
 
 	resultsList, err := CacheRecentUniqueSuppressedCoreResults(
-		ctx, cfg, fileutils.ThisDir(), client, wrapper)
+		ctx, cfg, fileutils.ThisDir(), wrapper)
 	require.Nil(t, resultsList)
 	require.ErrorContains(t, err,
 		"Test ID bad_test did not start with compat_prefix even though query should have filtered.")
@@ -1329,9 +1339,10 @@ func TestCacheRecentUniqueSuppressedCompatResults_Success(t *testing.T) {
 	client := resultsdb.MockBigQueryClient{
 		RecentUniqueSuppressedReturnValues: getMultiPrefixQueryResults(),
 	}
+	cfg.Querier = &client
 
 	resultsList, err := CacheRecentUniqueSuppressedCompatResults(
-		ctx, cfg, fileutils.ThisDir(), client, wrapper)
+		ctx, cfg, fileutils.ThisDir(), wrapper)
 	require.NoErrorf(t, err, "Error getting results: %v", err)
 	require.Equal(t, resultsList, getExpectedMultiPrefixResults()["compat"])
 }
@@ -1354,9 +1365,10 @@ func TestCacheRecentUniqueSuppressedResults_CacheHit(t *testing.T) {
 		wrapper)
 
 	client := resultsdb.MockBigQueryClient{}
+	cfg.Querier = &client
 
 	resultsByExecutionMode, err := CacheRecentUniqueSuppressedResults(
-		ctx, cfg, fileutils.ThisDir(), client, wrapper)
+		ctx, cfg, fileutils.ThisDir(), wrapper)
 	require.NoErrorf(t, err, "Error getting results: %v", err)
 	require.Equal(t, getExpectedMultiPrefixResults(), resultsByExecutionMode)
 }
@@ -1386,9 +1398,10 @@ func TestCacheRecentUniqueSuppressedResults_CacheSkippedIfUnspecified(t *testing
 	client := resultsdb.MockBigQueryClient{
 		RecentUniqueSuppressedReturnValues: getMultiPrefixQueryResults(),
 	}
+	cfg.Querier = &client
 
 	resultsByExecutionMode, err := CacheRecentUniqueSuppressedResults(
-		ctx, cfg, "", client, wrapper)
+		ctx, cfg, "", wrapper)
 	require.NoErrorf(t, err, "Error getting results: %v", err)
 	require.Equal(t, getExpectedMultiPrefixResults(), resultsByExecutionMode)
 }
@@ -1403,9 +1416,10 @@ func TestCacheRecentUniqueSuppressedResults_GetResultsError(t *testing.T) {
 	client := resultsdb.MockBigQueryClient{
 		RecentUniqueSuppressedReturnValues: modifiedQueryResults,
 	}
+	cfg.Querier = &client
 
 	resultsByExecutionMode, err := CacheRecentUniqueSuppressedResults(
-		ctx, cfg, fileutils.ThisDir(), client, wrapper)
+		ctx, cfg, fileutils.ThisDir(), wrapper)
 	require.Nil(t, resultsByExecutionMode)
 	require.ErrorContains(t, err,
 		"Got unexpected tag key non_typ_tag")
@@ -1418,9 +1432,10 @@ func TestCacheRecentUniqueSuppressedResults_Success(t *testing.T) {
 	client := resultsdb.MockBigQueryClient{
 		RecentUniqueSuppressedReturnValues: getMultiPrefixQueryResults(),
 	}
+	cfg.Querier = &client
 
 	resultsByExecutionMode, err := CacheRecentUniqueSuppressedResults(
-		ctx, cfg, fileutils.ThisDir(), client, wrapper)
+		ctx, cfg, fileutils.ThisDir(), wrapper)
 	require.NoErrorf(t, err, "Error getting results: %v", err)
 	require.Equal(t, getExpectedMultiPrefixResults(), resultsByExecutionMode)
 }
@@ -1453,8 +1468,9 @@ func TestGetRecentUniqueSuppressedResults_PrefixMismatch(t *testing.T) {
 			},
 		},
 	}
+	cfg.Querier = &client
 
-	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg, client)
+	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg)
 	require.Nil(t, resultsByExecutionMode)
 	require.ErrorContains(t, err,
 		"Test ID bad_test did not start with prefix even though query should have filtered.")
@@ -1489,8 +1505,9 @@ func TestGetRecentUniqueSuppressedResults_NonTypTag(t *testing.T) {
 			},
 		},
 	}
+	cfg.Querier = &client
 
-	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg, client)
+	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg)
 	require.Nil(t, resultsByExecutionMode)
 	require.ErrorContains(t, err,
 		"Got unexpected tag key non_typ_tag")
@@ -1558,6 +1575,7 @@ func TestGetRecentUniqueSuppressedResults_Success(t *testing.T) {
 			},
 		},
 	}
+	cfg.Querier = &client
 
 	expectedResults := result.ResultsByExecutionMode{
 		"execution_mode": result.List{
@@ -1592,7 +1610,7 @@ func TestGetRecentUniqueSuppressedResults_Success(t *testing.T) {
 		},
 	}
 
-	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg, client)
+	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg)
 	require.NoErrorf(t, err, "Got error getting results: %v", err)
 	require.Equal(t, expectedResults, resultsByExecutionMode)
 }
