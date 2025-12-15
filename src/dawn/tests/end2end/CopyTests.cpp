@@ -3515,6 +3515,10 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mTextureFormat == wgpu::TextureFormat::Stencil8 &&
                              (IsOpenGL() || IsOpenGLES()));
 
+    // TODO(crbug.com/468035609): Fails on Win11/NVIDIA GTX 1660.
+    DAWN_SUPPRESS_TEST_IF(GetParam().mTextureFormat == wgpu::TextureFormat::Stencil8 &&
+                          IsWindows11() && IsNvidia() && IsD3D12() && IsBackendValidationEnabled());
+
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 
     const uint32_t texelBlockSize = utils::GetTexelBlockSizeInBytes(format);

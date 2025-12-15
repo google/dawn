@@ -1005,6 +1005,9 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretionResolveAttachment) {
     // View format reinterpretation is unsupported in Compatibility mode.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
+    // TODO(crbug.com/468047552): Fails on Win11/NVIDIA GTX 1660.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsNvidia() && IsD3D12() && IsBackendValidationEnabled());
+
     // Test will resolve into an SRGB view
     wgpu::TextureViewDescriptor viewDesc = {};
     viewDesc.format = wgpu::TextureFormat::RGBA8UnormSrgb;

@@ -519,6 +519,9 @@ class MultisampleResolveFormatsTest : public TextureFormatsTier1Test {
 // Test that r8snorm format has multisample and resolve capability
 // if 'texture-formats-tier1' is enabled.
 TEST_P(MultisampleResolveFormatsTest, R8SnormMultisampleResolve) {
+    // TODO(crbug.com/468047551): Fails on Win11/NVIDIA GTX 1660.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsNvidia() && IsD3D12() && IsBackendValidationEnabled());
+
     std::vector<float> expectedDrawColor = {1.0f};
     RunMultisampleResolveFormatsTest(wgpu::TextureFormat::R8Snorm, expectedDrawColor);
 }
@@ -526,6 +529,9 @@ TEST_P(MultisampleResolveFormatsTest, R8SnormMultisampleResolve) {
 // Test that rg8snorm format has multisample and resolve capability
 // if 'texture-formats-tier1' is enabled.
 TEST_P(MultisampleResolveFormatsTest, RG8SnormMultisampleResolve) {
+    // TODO(crbug.com/468047551): Fails on Win11/NVIDIA GTX 1660.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsNvidia() && IsD3D12() && IsBackendValidationEnabled());
+
     std::vector<float> expectedDrawColor = {1.0f, -0.5f};
     RunMultisampleResolveFormatsTest(wgpu::TextureFormat::RG8Snorm, expectedDrawColor);
 }
@@ -533,6 +539,9 @@ TEST_P(MultisampleResolveFormatsTest, RG8SnormMultisampleResolve) {
 // Test that rgba8snorm format has multisample and resolve capability
 // if 'texture-formats-tier1' is enabled.
 TEST_P(MultisampleResolveFormatsTest, RGBA8SnormMultisampleResolve) {
+    // TODO(crbug.com/468047551): Fails on Win11/NVIDIA GTX 1660.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsNvidia() && IsD3D12() && IsBackendValidationEnabled());
+
     std::vector<float> expectedDrawColor = {1.0f, -0.5f, -1.0f, 0.5f};
     RunMultisampleResolveFormatsTest(wgpu::TextureFormat::RGBA8Snorm, expectedDrawColor);
 }

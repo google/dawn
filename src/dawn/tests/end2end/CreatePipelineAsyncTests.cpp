@@ -965,6 +965,9 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithDepthStencilState) 
 
 // Verify calling CreateRenderPipelineAsync() with multisample.Count > 1 works on all backends.
 TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineWithMultisampleState) {
+    // TODO(crbug.com/468047555): Fails on Win11/NVIDIA GTX 1660.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsNvidia() && IsD3D12() && IsBackendValidationEnabled());
+
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.size = {1, 1, 1};
     textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;

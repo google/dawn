@@ -51,6 +51,10 @@ class MultisampledRenderingTest : public DawnTest {
         DawnTest::SetUp();
 
         InitTexturesForTest();
+
+        // TODO(crbug.com/468061892): Fails on Windows 11/NVIDIA GTX 1660.
+        DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsNvidia() && IsD3D12() &&
+                              IsBackendValidationEnabled());
     }
 
     void InitTexturesForTest() {

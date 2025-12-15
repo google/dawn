@@ -335,7 +335,9 @@
         'mixins': [
           'win10_nvidia_gtx_1660_experimental',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'gtest_tests': 'real_hardware_win_gtests',
+        },
       },
       'dawn-win-x64-nvidia-gtx1660-rel': {
         'os_type': 'win',

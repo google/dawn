@@ -103,6 +103,9 @@ class DrawTest : public DawnTest {
 
 // The basic triangle draw.
 TEST_P(DrawTest, Uint32) {
+    // TODO(crbug.com/468047553): Fails on Win11/NVIDIA GTX 1660.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsNvidia() && IsD3D12() && IsBackendValidationEnabled());
+
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
 
