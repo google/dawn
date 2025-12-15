@@ -1213,15 +1213,31 @@ class State {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     bool IsWGSLSafe(std::string_view name) {
-        // Make sure the name starts with an alphabetic character and then only contains
-        // alphanumeric characters or underscores after that.
-        if (name.empty() || !std::isalpha(static_cast<unsigned char>(name[0])) ||
-            !std::all_of(name.begin(), name.end(),
+        if (name.empty()) {
+            return false;
+        }
+
+        // Make sure the name starts with an alphabetic character or an underscore.
+        if (name[0] == '_') {
+            // Single underscores or names with two leading underscores are not allowed.
+            if (name.length() == 1) {
+                return false;
+            } else if (name[1] == '_') {
+                return false;
+            }
+        } else if (!std::isalpha(static_cast<unsigned char>(name[0]))) {
+            return false;
+        }
+
+        // Every other character must be alphanumeric or an underscore.
+        if (!std::all_of(name.begin(), name.end(),
                          [](unsigned char c) {  //
                              return std::isalnum(c) || c == '_';
                          })) {
             return false;
         }
+
+        // Check for any kind of reserved identifier.
         return !IsReserved(name) && !IsKeyword(name) && !IsEnumName(name) && !IsTypeName(name);
     }
 

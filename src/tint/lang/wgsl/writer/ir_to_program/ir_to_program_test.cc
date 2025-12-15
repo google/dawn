@@ -949,6 +949,7 @@ TEST_F(IRToProgramTest, InvalidCharacters) {
         Var("a", true);
         Var("A", true);
         Var("a_", true);
+        Var("_a", true);
         Var("a1", true);
         Var("struct_a", true);
         b.Return(fn);
@@ -966,6 +967,7 @@ fn f() {
   var a : bool = true;
   var A : bool = true;
   var a_ : bool = true;
+  var _a : bool = true;
   var a1 : bool = true;
   var struct_a : bool = true;
 }

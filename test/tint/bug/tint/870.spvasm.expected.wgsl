@@ -5,11 +5,11 @@ struct sspp962805860buildInformationS {
   orientation : array<i32, 6u>,
 }
 
-struct S {
+struct _B4_BuildInformation {
   passthru : sspp962805860buildInformationS,
 }
 
-@group(0u) @binding(2u) var<storage, read> sspp962805860buildInformation : S;
+@group(0u) @binding(2u) var<storage, read> sspp962805860buildInformation : _B4_BuildInformation;
 
 @fragment
 fn main() {

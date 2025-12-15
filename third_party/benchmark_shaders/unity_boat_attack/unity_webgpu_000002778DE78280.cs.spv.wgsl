@@ -6,11 +6,11 @@ var<private> u_xlati4 : i32;
 
 var<private> u_xlat4 : f32;
 
-struct S {
-  m : array<u32>,
+struct _Input {
+  _Input_buf : array<u32>,
 }
 
-@group(0u) @binding(0u) var<storage, read> v : S;
+@group(0u) @binding(0u) var<storage, read> v : _Input;
 
 struct tint_symbol {
   value : array<u32, 1u>,
@@ -28,11 +28,11 @@ var<private> u_xlati0 : i32;
 
 var<private> u_xlati2 : i32;
 
-struct S_1 {
-  m_1 : array<u32>,
+struct _Output_origX0X {
+  _Output_origX0X_buf : array<u32>,
 }
 
-@group(0u) @binding(1u) var<storage, read_write> v_1 : S_1;
+@group(0u) @binding(1u) var<storage, read_write> v_1 : _Output_origX0X;
 
 @compute @workgroup_size(128u, 1u, 1u)
 fn main(@builtin(local_invocation_index) gl_LocalInvocationIndex : u32, @builtin(global_invocation_id) gl_GlobalInvocationID : vec3<u32>) {
@@ -46,7 +46,7 @@ fn main(@builtin(local_invocation_index) gl_LocalInvocationIndex : u32, @builtin
   var u_xlat_precise_uvec4 : vec4<u32>;
   u_xlatu0 = (vec2<u32>(gl_LocalInvocationIndex, gl_LocalInvocationIndex) & vec2<u32>(31u, 96u));
   u_xlati4 = (bitcast<i32>(gl_GlobalInvocationID.x) << bitcast<u32>(2i));
-  u_xlat4 = bitcast<f32>(v.m[((u_xlati4 >> bitcast<u32>(2i)) + 0i)]);
+  u_xlat4 = bitcast<f32>(v._Input_buf[((u_xlati4 >> bitcast<u32>(2i)) + 0i)]);
   u_xlati4 = bitcast<i32>(select(0u, 4294967295u, (bitcast<i32>(u_xlat4) == bitcast<i32>(gl_LocalInvocationIndex))));
   param = 0i;
   param_1 = u_xlati4;
@@ -103,7 +103,7 @@ fn main(@builtin(local_invocation_index) gl_LocalInvocationIndex : u32, @builtin
   u_xlati0 = select(0i, 1i, u_xlatb0);
   u_xlati2 = (bitcast<i32>(gl_LocalInvocationIndex) << bitcast<u32>(2i));
   let v_3 = (u_xlati2 >> bitcast<u32>(2i));
-  v_1.m_1[v_3] = bitcast<u32>(u_xlati0);
+  v_1._Output_origX0X_buf[v_3] = bitcast<u32>(u_xlati0);
 }
 
 fn v_2(base : ptr<function, i32>, insert : ptr<function, i32>, offset : ptr<function, i32>, bits : ptr<function, i32>) -> i32 {

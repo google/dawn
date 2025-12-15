@@ -68,70 +68,70 @@ fn test_int_S1_c0_b() -> bool {
 fn main_inner(sk_Clockwise : bool, vcolor_S0 : vec4<f32>) {
   var outputColor_S0 : vec4<f32>;
   var output_S1 : vec4<f32>;
-  var v_17 : f32;
-  var v_18 : bool;
-  var v_19 : vec4<f32>;
-  var v_20 : vec4<f32>;
+  var _8_unknown : f32;
+  var _9_ok : bool;
+  var _10_val : vec4<f32>;
+  var v_17 : vec4<f32>;
   outputColor_S0 = vcolor_S0;
-  let v_21 = v.unknownInput_S1_c0;
-  v_17 = v_21;
-  v_18 = true;
-  var v_22 : bool;
+  let v_18 = v.unknownInput_S1_c0;
+  _8_unknown = v_18;
+  _9_ok = true;
+  var v_19 : bool;
   if (true) {
-    v_22 = all(((vec4<f32>() / vec4<f32>(v_21, v_21, v_21, v_21)) == vec4<f32>()));
+    v_19 = all(((vec4<f32>() / vec4<f32>(v_18, v_18, v_18, v_18)) == vec4<f32>()));
   } else {
-    v_22 = false;
+    v_19 = false;
   }
-  let v_23 = v_22;
-  v_18 = v_23;
-  let v_24 = vec4<f32>(v_21, v_21, v_21, v_21);
-  v_19 = v_24;
-  let v_25 = (v_24 + vec4<f32>(1.0f));
-  v_19 = v_25;
-  let v_26 = (v_25 - vec4<f32>(1.0f));
-  v_19 = v_26;
-  let v_27 = (v_26 + vec4<f32>(1.0f));
-  v_19 = v_27;
-  let v_28 = (v_27 - vec4<f32>(1.0f));
-  v_19 = v_28;
-  var v_29 : bool;
-  if (v_23) {
-    v_29 = all((v_28 == v_24));
+  let v_20 = v_19;
+  _9_ok = v_20;
+  let v_21 = vec4<f32>(v_18, v_18, v_18, v_18);
+  _10_val = v_21;
+  let v_22 = (v_21 + vec4<f32>(1.0f));
+  _10_val = v_22;
+  let v_23 = (v_22 - vec4<f32>(1.0f));
+  _10_val = v_23;
+  let v_24 = (v_23 + vec4<f32>(1.0f));
+  _10_val = v_24;
+  let v_25 = (v_24 - vec4<f32>(1.0f));
+  _10_val = v_25;
+  var v_26 : bool;
+  if (v_20) {
+    v_26 = all((v_25 == v_21));
   } else {
-    v_29 = false;
+    v_26 = false;
   }
-  let v_30 = v_29;
-  v_18 = v_30;
-  let v_31 = (v_28 * vec4<f32>(2.0f));
-  v_19 = v_31;
-  let v_32 = (v_31 / vec4<f32>(2.0f));
-  v_19 = v_32;
-  let v_33 = (v_32 * vec4<f32>(2.0f));
-  v_19 = v_33;
-  let v_34 = (v_33 / vec4<f32>(2.0f));
-  v_19 = v_34;
-  var v_35 : bool;
-  if (v_30) {
-    v_35 = all((v_34 == v_24));
+  let v_27 = v_26;
+  _9_ok = v_27;
+  let v_28 = (v_25 * vec4<f32>(2.0f));
+  _10_val = v_28;
+  let v_29 = (v_28 / vec4<f32>(2.0f));
+  _10_val = v_29;
+  let v_30 = (v_29 * vec4<f32>(2.0f));
+  _10_val = v_30;
+  let v_31 = (v_30 / vec4<f32>(2.0f));
+  _10_val = v_31;
+  var v_32 : bool;
+  if (v_27) {
+    v_32 = all((v_31 == v_21));
   } else {
-    v_35 = false;
+    v_32 = false;
   }
-  let v_36 = v_35;
-  v_18 = v_36;
-  var v_37 : bool;
-  if (v_36) {
-    v_37 = test_int_S1_c0_b();
+  let v_33 = v_32;
+  _9_ok = v_33;
+  var v_34 : bool;
+  if (v_33) {
+    v_34 = test_int_S1_c0_b();
   } else {
-    v_37 = false;
+    v_34 = false;
   }
-  if (v_37) {
-    v_20 = v.ucolorGreen_S1_c0;
+  if (v_34) {
+    v_17 = v.ucolorGreen_S1_c0;
   } else {
-    v_20 = v.ucolorRed_S1_c0;
+    v_17 = v.ucolorRed_S1_c0;
   }
-  let v_38 = v_20;
-  output_S1 = v_38;
-  sk_FragColor = v_38;
+  let v_35 = v_17;
+  output_S1 = v_35;
+  sk_FragColor = v_35;
 }
 
 @fragment
