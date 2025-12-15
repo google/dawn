@@ -204,7 +204,7 @@ TEST_F(ResourceTableValidationTest, PipelineCreation_OneShaderDefaultedLayoutWit
 }
 
 // Test that a resource table uses up a BindGroupLayout slot
-TEST_F(ResourceTableValidationTest, PipelineCreation_ResourceTableUsesBindGroupLayoutSlot) {
+TEST_F(ResourceTableValidationTest, PipelineLayoutCreation_ResourceTableUsesBindGroupLayoutSlot) {
     // Control case: max bgls, no resource table
     {
         std::vector bgLayout(kMaxBindGroups, utils::MakeBindGroupLayout(device, {}));
@@ -236,6 +236,55 @@ TEST_F(ResourceTableValidationTest, PipelineCreation_ResourceTableUsesBindGroupL
         resourceTable.usesResourceTable = true;
         pipelineLayoutDescriptor.nextInChain = &resourceTable;
         device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+    }
+}
+
+// Test that a resource table uses up a storage buffer binding
+TEST_F(ResourceTableValidationTest, PipelineLayoutCreation_ResourceTableUsesOneStorageBuffer) {
+    const uint32_t maxStorageBuffers = deviceLimits.maxStorageBuffersPerShaderStage;
+    std::vector<wgpu::BindGroupLayoutEntry> storageBufferEntries(maxStorageBuffers);
+    for (size_t i = 0; i < storageBufferEntries.size(); i++) {
+        storageBufferEntries[i].buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
+        storageBufferEntries[i].visibility =
+            wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute;
+        storageBufferEntries[i].binding = i;
+    }
+
+    // Success case: exactly maxStorageBuffers are used (1 for the resource table, max - 1 for BGL
+    // entries).
+    {
+        wgpu::BindGroupLayoutDescriptor bglDesc = {
+            .entryCount = maxStorageBuffers - 1,
+            .entries = storageBufferEntries.data(),
+        };
+        wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
+
+        wgpu::PipelineLayoutResourceTable resourceTable;
+        resourceTable.usesResourceTable = true;
+        wgpu::PipelineLayoutDescriptor plDesc = {
+            .nextInChain = &resourceTable,
+            .bindGroupLayoutCount = 1,
+            .bindGroupLayouts = &bgl,
+        };
+        device.CreatePipelineLayout(&plDesc);
+    }
+
+    // Error case: the resource table additional storage buffer make the layout go over the limit.
+    {
+        wgpu::BindGroupLayoutDescriptor bglDesc = {
+            .entryCount = maxStorageBuffers,
+            .entries = storageBufferEntries.data(),
+        };
+        wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
+
+        wgpu::PipelineLayoutResourceTable resourceTable;
+        resourceTable.usesResourceTable = true;
+        wgpu::PipelineLayoutDescriptor plDesc = {
+            .nextInChain = &resourceTable,
+            .bindGroupLayoutCount = 1,
+            .bindGroupLayouts = &bgl,
+        };
+        ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&plDesc));
     }
 }
 

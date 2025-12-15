@@ -57,6 +57,9 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
     UnpackedPtr<PipelineLayoutDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
+    // A binding count that will be updated as we validate the various parts ot the pipeline layout.
+    BindingCounts bindingCounts{};
+
     // Validation for any pixel local storage.
     if (auto* pls = unpacked.Get<PipelineLayoutPixelLocalStorage>()) {
         absl::InlinedVector<StorageAttachmentInfoForValidation, 4> attachments;
@@ -76,6 +79,8 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
         DAWN_TRY(ValidatePLSInfo(device, pls->totalPixelLocalStorageSize,
                                  {attachments.data(), attachments.size()}));
     }
+
+    // Validation for the resource table, if any.
     bool usesResourceTable = false;
     if (auto* rt = unpacked.Get<PipelineLayoutResourceTable>()) {
         DAWN_INVALID_IF(rt->usesResourceTable &&
@@ -83,8 +88,22 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
                         "Resource table used without the %s feature enabled.",
                         wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
         usesResourceTable = rt->usesResourceTable;
+
+        // Add to the limits the storage buffer that will be used for the availability data of the
+        // resource table. Set a minimum binding size so as to not increment unverifiedBufferCount.
+        BindGroupLayoutEntry availabilityEntry{
+            .binding = 0,
+            .visibility = kAllStages,
+            .buffer =
+                {
+                    .type = wgpu::BufferBindingType::ReadOnlyStorage,
+                    .minBindingSize = 4,
+                },
+        };
+        IncrementBindingCounts(&bindingCounts, Unpack(&availabilityEntry));
     }
 
+    // Validation for the bind group layouts.
     if (usesResourceTable) {
         DAWN_INVALID_IF(descriptor->bindGroupLayoutCount + 1 > kMaxBindGroups,
                         "bindGroupLayoutCount (%i) + 1 for the resource table is larger than the "
@@ -96,7 +115,6 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
                         descriptor->bindGroupLayoutCount, kMaxBindGroups);
     }
 
-    BindingCounts bindingCounts = {};
     for (uint32_t i = 0; i < descriptor->bindGroupLayoutCount; ++i) {
         if (descriptor->bindGroupLayouts[i] == nullptr) {
             continue;
@@ -114,8 +132,6 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
                                                     ->GetValidationBindingCounts());
     }
 
-    DAWN_TRY(ValidateBindingCounts(device->GetLimits(), bindingCounts, device->GetAdapter()));
-
     // Validate immediateSize.
     if (descriptor->immediateSize) {
         DAWN_INVALID_IF(!device->GetInstance()->HasFeature(
@@ -127,6 +143,7 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
                         descriptor->immediateSize, maxImmediateSize);
     }
 
+    DAWN_TRY(ValidateBindingCounts(device->GetLimits(), bindingCounts, device->GetAdapter()));
     return unpacked;
 }
 
