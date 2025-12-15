@@ -86,7 +86,7 @@ TEST_F(ResourceTableValidationTest, Destroy) {
 }
 
 // Control case where enabling use of a resource table with the feature enabled is valid.
-TEST_F(ResourceTableValidationTest, PipelineCreation_SuccessWithFeatureEnabled) {
+TEST_F(ResourceTableValidationTest, PipelineLayoutCreation_SuccessWithFeatureEnabled) {
     wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
     pipelineLayoutDescriptor.bindGroupLayoutCount = 0;
     wgpu::PipelineLayoutResourceTable resourceTable;
@@ -96,7 +96,7 @@ TEST_F(ResourceTableValidationTest, PipelineCreation_SuccessWithFeatureEnabled) 
 }
 
 // Error case where enabling use of a resource table with the feature disabled is an error.
-TEST_F(ResourceTableValidationTestDisabled, PipelineCreation_FailureWithFeatureDisabled) {
+TEST_F(ResourceTableValidationTestDisabled, PipelineLayoutCreation_FailureWithFeatureDisabled) {
     wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
     pipelineLayoutDescriptor.bindGroupLayoutCount = 0;
     wgpu::PipelineLayoutResourceTable resourceTable;
@@ -109,6 +109,17 @@ TEST_F(ResourceTableValidationTestDisabled, PipelineCreation_FailureWithFeatureD
     // Success case
     resourceTable.usesResourceTable = false;
     device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+}
+
+// Error case where compiling a shader using the resource table with the extension disabled is an
+// error.
+TEST_F(ResourceTableValidationTestDisabled, WGSLEnableNotAllowed) {
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+        @compute @workgroup_size(1) fn main() {
+            _ = hasResource<texture_2d<f32>>(0);
+        }
+    )"));
 }
 
 // Test that a shader using a resource table requires a layout with one.
