@@ -1346,6 +1346,29 @@ TEST_F(IR_ValidatorTest, ContinuingUseValueAfterContinue) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, ContinuingBadTerminator) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Body(), [&] {  //
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {  //
+            b.Return(f);
+        });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:7:7 error: loop continuing terminator can only be next_iteration or break_if
+      $B3: {  # continuing
+      ^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, BreakIf_UndefCondition) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {

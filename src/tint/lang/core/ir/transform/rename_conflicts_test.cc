@@ -461,7 +461,8 @@ TEST_F(IRToProgramRenameConflictsTest, LoopBodyVar_ShadowedBy_LoopContVar) {
                 b.ir.SetName(inner, "v");
 
                 auto* load_inner = b.Load(inner);
-                b.Return(fn, b.Add(load_outer, load_inner));
+                b.Let("add", b.Add(load_outer, load_inner));
+                b.NextIteration(loop);
             });
         });
 
@@ -484,7 +485,8 @@ TEST_F(IRToProgramRenameConflictsTest, LoopBodyVar_ShadowedBy_LoopContVar) {
         %v_1:ptr<function, i32, read_write> = var undef  # %v_1: 'v'
         %5:i32 = load %v_1
         %6:i32 = add %3, %5
-        ret %6
+        %add:i32 = let %6
+        next_iteration  # -> $B3
       }
     }
     unreachable
@@ -509,7 +511,8 @@ TEST_F(IRToProgramRenameConflictsTest, LoopBodyVar_ShadowedBy_LoopContVar) {
         %v_1:ptr<function, i32, read_write> = var undef
         %5:i32 = load %v_1
         %6:i32 = add %3, %5
-        ret %6
+        %add:i32 = let %6
+        next_iteration  # -> $B3
       }
     }
     unreachable

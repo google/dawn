@@ -4513,6 +4513,11 @@ void Validator::CheckLoopContinuing(const Loop* loop) {
             }
         }
     }
+
+    if (!loop->Continuing()->Terminator()->IsAnyOf<NextIteration, BreakIf>()) {
+        AddError(loop->Continuing())
+            << "loop continuing terminator can only be next_iteration or break_if";
+    }
 }
 
 void Validator::CheckSwitch(const Switch* s) {
