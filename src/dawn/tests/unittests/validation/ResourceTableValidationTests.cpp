@@ -581,5 +581,274 @@ TEST_F(ResourceTableValidationTest, Submit_DrawRequiresResourceTable) {
     }
 }
 
+// Test that pinning / unpinning is valid for a simple case. This is a control for the test that
+// errors are produced when the feature is not enabled.
+TEST_F(ResourceTableValidationTest, PinUnpinTextureSuccess) {
+    wgpu::TextureDescriptor desc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&desc);
+
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    tex.Unpin();
+}
+
+// Test that calling pin/unpin is an error when the feature is not enabled.
+TEST_F(ResourceTableValidationTestDisabled, PinUnpinTextureSuccess) {
+    wgpu::TextureDescriptor desc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&desc);
+
+    ASSERT_DEVICE_ERROR(tex.Pin(wgpu::TextureUsage::TextureBinding));
+    ASSERT_DEVICE_ERROR(tex.Unpin());
+}
+
+// Test the validation of the usage parameter of Pin.
+TEST_F(ResourceTableValidationTest, PinUnpinTextureUsageConstraint) {
+    wgpu::TextureDescriptor desc{
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+
+    desc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
+                 wgpu::TextureUsage::StorageBinding;
+    wgpu::Texture testTexture = device.CreateTexture(&desc);
+
+    desc.usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture renderOnlyTexture = device.CreateTexture(&desc);
+
+    // Control case, pinning the sampled texture to TextureBinding is valid.
+    testTexture.Pin(wgpu::TextureUsage::TextureBinding);
+
+    // Error case, pinning to a usage not in the texture is invalid.
+    ASSERT_DEVICE_ERROR(renderOnlyTexture.Pin(wgpu::TextureUsage::TextureBinding));
+
+    // Error case, pinning to an invalid usage is invalid.
+    ASSERT_DEVICE_ERROR(testTexture.Pin(static_cast<wgpu::TextureUsage>(0x8000'0000)));
+
+    // Error case, pinning must be to a shader usage.
+    ASSERT_DEVICE_ERROR(testTexture.Pin(wgpu::TextureUsage::CopySrc));
+
+    // Error case, pinning must be to a shader usage.
+    // TODO(https://crbug.com/435317394): Lift this constraint and allow other shader usages.
+    ASSERT_DEVICE_ERROR(testTexture.Pin(wgpu::TextureUsage::StorageBinding));
+}
+
+// Test that pinning / unpinning don't need to be balanced.
+TEST_F(ResourceTableValidationTest, PinUnpinUnbalancedIsValid) {
+    wgpu::TextureDescriptor desc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&desc);
+
+    // Pinning right after creation is valid.
+    tex.Unpin();
+
+    // Pinning twice is valid.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    // TODO(https://crbug.com/435317394): Use a different usage here when another is valid.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+
+    // Unpinning twice (plus one more to make sure we are unbalanced) is valid.
+    tex.Unpin();
+    tex.Unpin();
+    tex.Unpin();
+}
+
+// Test that pinning is not allowed on a destroyed texture.
+TEST_F(ResourceTableValidationTest, PinDestroyedTextureInvalid) {
+    wgpu::TextureDescriptor desc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&desc);
+
+    // Success case, pinning before Destroy() is valid.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    tex.Unpin();
+
+    // Error case, pinning a destroyed texture is not allowed.
+    tex.Destroy();
+    ASSERT_DEVICE_ERROR(tex.Pin(wgpu::TextureUsage::TextureBinding));
+}
+
+enum class TestPinState { Default, Pinned, Unpinned };
+std::array<TestPinState, 3> kAllTestPinStates = {TestPinState::Default, TestPinState::Pinned,
+                                                 TestPinState::Unpinned};
+wgpu::Texture CreateTextureWithPinState(const wgpu::Device& device,
+                                        TestPinState pin,
+                                        wgpu::TextureUsage usage) {
+    wgpu::TextureDescriptor desc{
+        .usage = usage,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&desc);
+
+    switch (pin) {
+        case TestPinState::Default:
+            break;
+        case TestPinState::Pinned:
+            tex.Pin(wgpu::TextureUsage::TextureBinding);
+            break;
+        case TestPinState::Unpinned:
+            tex.Pin(wgpu::TextureUsage::TextureBinding);
+            tex.Unpin();
+            break;
+    }
+
+    return tex;
+}
+
+// Test that pinning prevents usage in WriteTexture
+TEST_F(ResourceTableValidationTest, PinValidationUsageWriteTexture) {
+    for (auto pin : kAllTestPinStates) {
+        wgpu::Texture tex = CreateTextureWithPinState(
+            device, pin, wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst);
+
+        wgpu::TexelCopyTextureInfo dst = {
+            .texture = tex,
+        };
+        wgpu::TexelCopyBufferLayout dataLayout = {};
+        wgpu::Extent3D copySize = {0, 0, 0};
+
+        if (pin == TestPinState::Pinned) {
+            ASSERT_DEVICE_ERROR(
+                device.GetQueue().WriteTexture(&dst, nullptr, 0, &dataLayout, &copySize));
+        } else {
+            device.GetQueue().WriteTexture(&dst, nullptr, 0, &dataLayout, &copySize);
+        }
+    }
+}
+
+// Test that pinning prevents usage in an encoder copy command
+TEST_F(ResourceTableValidationTest, PinValidationUsageEncoderCopy) {
+    wgpu::TextureDescriptor desc{
+        .usage = wgpu::TextureUsage::CopyDst,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture texDst = device.CreateTexture(&desc);
+
+    for (auto pin : kAllTestPinStates) {
+        wgpu::Texture tex = CreateTextureWithPinState(
+            device, pin, wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc);
+
+        wgpu::TexelCopyTextureInfo src = {
+            .texture = tex,
+        };
+        wgpu::TexelCopyTextureInfo dst = {
+            .texture = texDst,
+        };
+        wgpu::Extent3D copySize = {0, 0, 0};
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToTexture(&src, &dst, &copySize);
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        if (pin == TestPinState::Pinned) {
+            ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+        } else {
+            device.GetQueue().Submit(1, &commands);
+        }
+    }
+}
+
+// Test that pinning prevents usage in a dispatch if it is not the pinned usage.
+TEST_F(ResourceTableValidationTest, PinValidationUsageDispatch) {
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var t_sampled : texture_2d<f32>;
+        @compute @workgroup_size(1) fn sample() {
+            _ = t_sampled;
+        }
+
+        @group(0) @binding(0) var t_ro_storage : texture_storage_2d<r32float, read>;
+        @compute @workgroup_size(1) fn ro_storage() {
+            _ = t_ro_storage;
+        }
+    )");
+
+    csDesc.compute.entryPoint = "sample";
+    wgpu::ComputePipeline samplePipeline = device.CreateComputePipeline(&csDesc);
+    csDesc.compute.entryPoint = "ro_storage";
+    wgpu::ComputePipeline storagePipeline = device.CreateComputePipeline(&csDesc);
+
+    for (auto pin : kAllTestPinStates) {
+        wgpu::Texture tex = CreateTextureWithPinState(
+            device, pin, wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding);
+
+        for (bool sample : {false, true}) {
+            wgpu::ComputePipeline pipeline = sample ? samplePipeline : storagePipeline;
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, tex.CreateView()},
+                                                      });
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bg);
+            pass.DispatchWorkgroups(1);
+            pass.End();
+            wgpu::CommandBuffer commands = encoder.Finish();
+
+            if (pin == TestPinState::Pinned && !sample) {
+                ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+            } else {
+                device.GetQueue().Submit(1, &commands);
+            }
+        }
+    }
+}
+
+// Test that pinning prevents usage in a render pass if it is not the pinned usage.
+TEST_F(ResourceTableValidationTest, PinValidationUsageRenderPass) {
+    wgpu::BindGroupLayout sampleLayout = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::UnfilterableFloat},
+                });
+    wgpu::BindGroupLayout storageLayout = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly,
+                     wgpu::TextureFormat::R32Float},
+                });
+
+    for (auto pin : kAllTestPinStates) {
+        wgpu::Texture tex = CreateTextureWithPinState(
+            device, pin, wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding);
+
+        for (bool sample : {false, true}) {
+            wgpu::BindGroupLayout bgl = sample ? sampleLayout : storageLayout;
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl,
+                                                      {
+                                                          {0, tex.CreateView()},
+                                                      });
+
+            utils::BasicRenderPass rp = utils::CreateBasicRenderPass(device, 1, 1);
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+            pass.SetBindGroup(0, bg);
+            pass.End();
+            wgpu::CommandBuffer commands = encoder.Finish();
+
+            if (pin == TestPinState::Pinned && !sample) {
+                ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+            } else {
+                device.GetQueue().Submit(1, &commands);
+            }
+        }
+    }
+}
+
 }  // namespace
 }  // namespace dawn

@@ -1651,9 +1651,11 @@ void TextureBase::UnpinImpl() {
 }
 
 MaybeError TextureBase::ValidatePin(wgpu::TextureUsage usage) const {
-    DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::ChromiumExperimentalBindless),
-                    "Texture pinning used without %s enabled.",
-                    wgpu::FeatureName::ChromiumExperimentalBindless);
+    DAWN_INVALID_IF(
+        !GetDevice()->HasFeature(Feature::ChromiumExperimentalBindless) &&
+            !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
+        "Texture pinning used without %s enabled.",
+        wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
 
     DAWN_INVALID_IF(mState.destroyed || !mState.hasAccess,
                     "Texture is destroyed or without access.");
@@ -1674,9 +1676,11 @@ MaybeError TextureBase::ValidatePin(wgpu::TextureUsage usage) const {
 }
 
 MaybeError TextureBase::ValidateUnpin() const {
-    DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::ChromiumExperimentalBindless),
-                    "Texture unpinning used without %s enabled.",
-                    wgpu::FeatureName::ChromiumExperimentalBindless);
+    DAWN_INVALID_IF(
+        !GetDevice()->HasFeature(Feature::ChromiumExperimentalBindless) &&
+            !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
+        "Texture unpinning used without %s enabled.",
+        wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
     return {};
 }
 

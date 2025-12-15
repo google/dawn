@@ -548,7 +548,8 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
         // textures are not destroyed by turning the sets of resources in the PassUsageTracker into
         // maps of resources to usages, and doing a single bitmask check to know if there's an error
         // before finding out the reason why there is an error.
-        if (GetDevice()->HasFeature(Feature::ChromiumExperimentalBindless)) {
+        if (GetDevice()->HasFeature(Feature::ChromiumExperimentalBindless) ||
+            GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
             for (const TextureBase* texture : usages.topLevelTextures) {
                 DAWN_INVALID_IF(texture->HasPinnedUsage(),
                                 "%s is pinned to %s while used in a CommandEncoder command.",
