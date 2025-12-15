@@ -3360,6 +3360,13 @@ void Validator::CheckVar(const Var* var) {
         }
     }
 
+    if (mv->AddressSpace() == AddressSpace::kImmediate) {
+        if (mv->StoreType() && !mv->StoreType()->IsHostShareable()) {
+            AddError(var) << "vars in the 'immediate' address space must be host-shareable";
+            return;
+        }
+    }
+
     if (var->InputAttachmentIndex().has_value()) {
         if (mv->AddressSpace() != AddressSpace::kHandle) {
             AddError(var) << "'@input_attachment_index' is not valid for non-handle var";

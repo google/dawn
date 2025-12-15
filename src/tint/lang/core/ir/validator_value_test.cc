@@ -507,6 +507,21 @@ TEST_F(IR_ValidatorTest, Var_Uniform_NotHostShareable) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Var_Immediate_NotHostShareable) {
+    auto* v = b.Var<immediate, bool>();
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:2:35 error: var: vars in the 'immediate' address space must be host-shareable
+  %1:ptr<immediate, bool, read> = var undef
+                                  ^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Var_Storage_NotHostShareable) {
     auto* v = b.Var<storage, bool, read>();
     v->SetBindingPoint(0, 0);
