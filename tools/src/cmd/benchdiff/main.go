@@ -37,6 +37,7 @@ import (
 	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/bench"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 )
 
 var (
@@ -60,14 +61,14 @@ func main() {
 
 	pathA, pathB := args[0], args[1]
 
-	if err := run(pathA, pathB); err != nil {
+	if err := run(pathA, pathB, oswrapper.GetRealOSWrapper()); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(-1)
 	}
 }
 
-func run(pathA, pathB string) error {
-	fileA, err := os.ReadFile(pathA)
+func run(pathA, pathB string, osWrapper oswrapper.OSWrapper) error {
+	fileA, err := osWrapper.ReadFile(pathA)
 	if err != nil {
 		return err
 	}
@@ -76,7 +77,7 @@ func run(pathA, pathB string) error {
 		return err
 	}
 
-	fileB, err := os.ReadFile(pathB)
+	fileB, err := osWrapper.ReadFile(pathB)
 	if err != nil {
 		return err
 	}
