@@ -61,26 +61,26 @@
                   UNIMPLEMENTED_MACRO))                                                  \
     (__VA_ARGS__)
 
-#define ASSERT_DEVICE_ERROR_IMPL_1_(statement)                  \
-    StartExpectDeviceError();                                   \
-    statement;                                                  \
-    device.Tick();                                              \
-    FlushWire();                                                \
-    if (!EndExpectDeviceError()) {                              \
-        FAIL() << "Expected device error in:\n " << #statement; \
-    }                                                           \
-    do {                                                        \
+#define ASSERT_DEVICE_ERROR_IMPL_1_(statement)                         \
+    StartExpectDeviceError();                                          \
+    statement;                                                         \
+    device.Tick();                                                     \
+    FlushWire();                                                       \
+    if (!EndExpectDeviceError()) {                                     \
+        ADD_FAILURE() << "Expected device error in:\n " << #statement; \
+    }                                                                  \
+    do {                                                               \
     } while (0)
 
-#define ASSERT_DEVICE_ERROR_IMPL_2_(statement, matcher)         \
-    StartExpectDeviceError(matcher);                            \
-    statement;                                                  \
-    device.Tick();                                              \
-    FlushWire();                                                \
-    if (!EndExpectDeviceError()) {                              \
-        FAIL() << "Expected device error in:\n " << #statement; \
-    }                                                           \
-    do {                                                        \
+#define ASSERT_DEVICE_ERROR_IMPL_2_(statement, matcher)                \
+    StartExpectDeviceError(matcher);                                   \
+    statement;                                                         \
+    device.Tick();                                                     \
+    FlushWire();                                                       \
+    if (!EndExpectDeviceError()) {                                     \
+        ADD_FAILURE() << "Expected device error in:\n " << #statement; \
+    }                                                                  \
+    do {                                                               \
     } while (0)
 
 // Skip a test when the given condition is satisfied.
