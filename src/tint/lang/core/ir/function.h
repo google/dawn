@@ -134,6 +134,26 @@ class Function : public Castable<Function, Value> {
         }};
     }
 
+    /// Sets the subgroup size
+    /// @param size the new subgroup size
+    void SetSubgroupSize(Value* size) { subgroup_size_ = size; }
+
+    /// @returns the subgroup size information
+    std::optional<Value*> SubgroupSize() const { return subgroup_size_; }
+
+    /// @returns the subgroup size information as `uint32_t` values. Note, this requires the value
+    /// to be constant.
+    std::optional<uint32_t> SubgroupSizeAsConst() const {
+        if (!subgroup_size_.has_value()) {
+            return std::nullopt;
+        }
+
+        auto* value = subgroup_size_.value()->As<core::ir::Constant>();
+        TINT_ASSERT(value);
+
+        return value->Value()->ValueAs<uint32_t>();
+    }
+
     /// @param type the return type for the function
     void SetReturnType(const core::type::Type* type) { return_.type = type; }
 
@@ -224,6 +244,7 @@ class Function : public Castable<Function, Value> {
   private:
     PipelineStage pipeline_stage_ = PipelineStage::kUndefined;
     std::optional<std::array<Value*, 3>> workgroup_size_;
+    std::optional<Value*> subgroup_size_;
 
     struct {
         const core::type::Type* type = nullptr;

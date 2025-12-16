@@ -687,6 +687,7 @@ enum class Attribute : uint8_t {
     kLocation,
     kMustUse,
     kSize,
+    kSubgroupSize,
     kVertex,
     kWorkgroupSize,
 };
@@ -726,6 +727,7 @@ constexpr std::string_view kAttributeStrings[] = {
     "location",
     "must_use",
     "size",
+    "subgroup_size",
     "vertex",
     "workgroup_size",
 };

@@ -1083,6 +1083,7 @@ static constexpr AttributeCase kValidAttributeCases[] = {
     {"location", Attribute::kLocation},
     {"must_use", Attribute::kMustUse},
     {"size", Attribute::kSize},
+    {"subgroup_size", Attribute::kSubgroupSize},
     {"vertex", Attribute::kVertex},
     {"workgroup_size", Attribute::kWorkgroupSize},
 };
@@ -1136,12 +1137,15 @@ static constexpr AttributeCase kInvalidAttributeCases[] = {
     {"dzIp", Attribute::kUndefined},
     {"ize", Attribute::kUndefined},
     {"LN", Attribute::kUndefined},
-    {"r", Attribute::kUndefined},
-    {"vxxGteqqR", Attribute::kUndefined},
-    {"GGerteS", Attribute::kUndefined},
-    {"oqkccr8up_size", Attribute::kUndefined},
-    {"workgroup_sze", Attribute::kUndefined},
-    {"woppkgroup_sie", Attribute::kUndefined},
+    {"bgoupsiz", Attribute::kUndefined},
+    {"sxxbgrup_RRGizqq", Attribute::kUndefined},
+    {"GGubgrSup_size", Attribute::kUndefined},
+    {"88ccte", Attribute::kUndefined},
+    {"vrtex", Attribute::kUndefined},
+    {"perttx", Attribute::kUndefined},
+    {"workgr00up_siqFF55", Attribute::kUndefined},
+    {"workgroupsize", Attribute::kUndefined},
+    {"wokgroup_sie", Attribute::kUndefined},
 };
 
 using AttributeParseTest = testing::TestWithParam<AttributeCase>;

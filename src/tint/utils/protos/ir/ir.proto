@@ -269,6 +269,7 @@ message Function {
     optional Interpolation return_interpolation = 8;
     optional BuiltinValue return_builtin = 9;
     bool return_invariant = 10;
+    optional uint32 subgroup_size = 11;
 }
 
 enum PipelineStage {

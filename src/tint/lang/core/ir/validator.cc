@@ -1205,6 +1205,10 @@ class Validator {
     /// @param func the function to validate
     void CheckWorkgroupSize(const Function* func);
 
+    /// Validates the subgroup_size attribute for a given function
+    /// @param func the function to validate
+    void CheckSubgroupSize(const Function* func);
+
     /// Validates the specific function as a vertex entry point
     /// @param ep the function to validate
     void CheckPositionPresentForVertexOutput(const Function* ep);
@@ -2700,6 +2704,8 @@ void Validator::CheckFunction(const Function* func) {
 
     CheckWorkgroupSize(func);
 
+    CheckSubgroupSize(func);
+
     if (func->Stage() == Function::PipelineStage::kCompute) {
         if (DAWN_UNLIKELY(func->ReturnType() && !func->ReturnType()->Is<core::type::Void>())) {
             AddError(func) << "compute entry point must not have a return type, found "
@@ -3097,6 +3103,69 @@ void Validator::CheckWorkgroupSize(const Function* func) {
 
         AddError(func) << "@workgroup_size must be an InstructionResult or a Constant";
     }
+}
+
+void Validator::CheckSubgroupSize(const Function* func) {
+    // @subgroup_size is optional
+    if (!func->SubgroupSize().has_value()) {
+        return;
+    }
+
+    if (!func->IsCompute()) {
+        AddError(func) << "@subgroup_size only valid on compute entry point";
+        return;
+    }
+
+    auto subgroup_size = func->SubgroupSize().value();
+    if (!subgroup_size->Type()) {
+        AddError(func) << "a @subgroup_size param is missing a type";
+        return;
+    }
+
+    auto* ty = subgroup_size->Type();
+    if (!ty->IsAnyOf<core::type::I32, core::type::U32>()) {
+        AddError(func) << "@subgroup_size param must be an 'i32' or 'u32', received " << NameOf(ty);
+        return;
+    }
+
+    if (auto* c = subgroup_size->As<ir::Constant>()) {
+        int64_t value = c->Value()->ValueAs<int64_t>();
+        if (value <= 0) {
+            AddError(func) << "@subgroup_size param must be greater than 0";
+            return;
+        }
+
+        if (!IsPowerOfTwo<int64_t>(value)) {
+            AddError(func) << "@subgroup_size param must be a power of 2";
+            return;
+        }
+
+        return;
+    }
+
+    if (!capabilities_.Contains(Capability::kAllowOverrides)) {
+        AddError(func) << "@subgroup_size param is not a constant value, and IR capability "
+                          "'kAllowOverrides' is not set";
+        return;
+    }
+
+    if (auto* r = subgroup_size->As<ir::InstructionResult>()) {
+        if (!r->Instruction()) {
+            AddError(func) << "instruction for @subgroup_size param is not defined";
+            return;
+        }
+
+        if (r->Instruction()->Block() != mod_.root_block) {
+            AddError(func) << "@subgroup_size param defined by non-module scope value";
+            return;
+        }
+
+        if (r->Instruction()->Is<core::ir::Override>()) {
+            return;
+        }
+    }
+
+    AddError(func) << "@subgroup_size must be an InstructionResult or a Constant";
 }
 
 void Validator::CheckPositionPresentForVertexOutput(const Function* ep) {

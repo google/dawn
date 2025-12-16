@@ -343,6 +343,12 @@ void Disassembler::EmitFunction(const Function* func) {
         EmitValue(arr[2]);
         out_ << ")";
     }
+    if (func->SubgroupSize()) {
+        auto subgroup_size = func->SubgroupSize().value();
+        out_ << " " << StyleAttribute("@subgroup_size") << "(";
+        EmitValue(subgroup_size);
+        out_ << ")";
+    }
 
     out_ << " " << StyleKeyword("func") << "(";
 

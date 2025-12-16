@@ -283,6 +283,11 @@ struct Decoder {
                                      Value(wg_size_in.z()));
         }
 
+        if (fn_in.has_subgroup_size()) {
+            uint32_t subgroup_size_in = fn_in.subgroup_size();
+            fn_out->SetSubgroupSize(Value(subgroup_size_in));
+        }
+
         Vector<FunctionParam*, 8> params_out;
         for (auto param_in : fn_in.parameters()) {
             auto* param_out = ValueAs<FunctionParam>(param_in);

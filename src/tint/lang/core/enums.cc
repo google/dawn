@@ -1163,6 +1163,9 @@ Attribute ParseAttribute(std::string_view str) {
     if (str == "size") {
         return Attribute::kSize;
     }
+    if (str == "subgroup_size") {
+        return Attribute::kSubgroupSize;
+    }
     if (str == "vertex") {
         return Attribute::kVertex;
     }
@@ -1207,6 +1210,8 @@ std::string_view ToString(Attribute value) {
             return "must_use";
         case Attribute::kSize:
             return "size";
+        case Attribute::kSubgroupSize:
+            return "subgroup_size";
         case Attribute::kVertex:
             return "vertex";
         case Attribute::kWorkgroupSize:

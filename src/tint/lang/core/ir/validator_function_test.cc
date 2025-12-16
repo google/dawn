@@ -2616,6 +2616,155 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonRootBlockOverride) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_SubgroupSize_NonCompute) {
+    auto* f = FragmentEntryPoint();
+    f->SetSubgroupSize(b.Constant(16_i));
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:1 error: @subgroup_size only valid on compute entry point
+%f = @fragment @subgroup_size(16i) func():void {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamWrongType) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
+    f->SetSubgroupSize(b.Constant(1_f));
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:1:1 error: @subgroup_size param must be an 'i32' or 'u32', received 'f32'
+%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(1.0f) func():void {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamTooSmall) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
+    f->SetSubgroupSize(b.Constant(-16_i));
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:1 error: @subgroup_size param must be greater than 0
+%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(-16i) func():void {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamZero) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
+    f->SetSubgroupSize(b.Constant(0_u));
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:1 error: @subgroup_size param must be greater than 0
+%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(0u) func():void {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamNonPowerOfTwo) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
+    f->SetSubgroupSize(b.Constant(15_u));
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:1 error: @subgroup_size param must be a power of 2
+%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(15u) func():void {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamPowerOfTwo) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
+    f->SetSubgroupSize(b.Constant(32_u));
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Function_SubgroupSize_OverrideWithoutAllowOverrides) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
+
+    auto* o = b.Override(ty.u32());
+    f->SetSubgroupSize(o->Result());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:1:1 error: @subgroup_size param is not a constant value, and IR capability 'kAllowOverrides' is not set
+%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(%2) func():void {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_SubgroupSize_NonRootBlockOverride) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
+
+    Override* o;
+    b.Append(f->Block(), [&] {
+        o = b.Override(ty.u32());
+        b.Return(f);
+    });
+    f->SetSubgroupSize(o->Result());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:1:1 error: @subgroup_size param defined by non-module scope value
+%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(%2) func():void {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_SubgroupSize_RootBlockOverride) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
+
+    auto* o = b.Override(ty.u32());
+    o->SetOverrideId(OverrideId{1});
+    mod.root_block->Append(o);
+    f->SetSubgroupSize(o->Result());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    ASSERT_EQ(res, Success);
+}
+
 TEST_F(IR_ValidatorTest, Function_Vertex_BasicPosition) {
     auto* f = b.Function("my_func", ty.vec4f(), Function::PipelineStage::kVertex);
     f->SetReturnBuiltin(BuiltinValue::kPosition);

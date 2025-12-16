@@ -150,6 +150,9 @@ struct Encoder {
             wg_size_out.set_y(Value((*wg_size_in)[1]));
             wg_size_out.set_z(Value((*wg_size_in)[2]));
         }
+        if (auto subgroup_size_in = fn_in->SubgroupSize()) {
+            fn_out->set_subgroup_size(Value(*subgroup_size_in));
+        }
         for (auto* param_in : fn_in->Params()) {
             fn_out->add_parameters(Value(param_in));
         }
