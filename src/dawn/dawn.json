@@ -340,7 +340,7 @@
                 "tags": ["dawn"],
                 "returns": "uint32_t",
                 "args": [
-                    {"name": "contents", "type": "bind group entry contents", "annotation": "const*"}
+                    {"name": "contents", "type": "binding resource", "annotation": "const*"}
                 ]
             },
             {
@@ -373,16 +373,9 @@
         ]
     },
     "bind group entry contents": {
-        "category": "structure",
-        "extensible": "in",
+        "category": "typedef",
         "tags": ["dawn"],
-        "members": [
-            {"name": "buffer", "type": "buffer", "optional": true},
-            {"name": "offset", "type": "uint64_t", "default": "0"},
-            {"name": "size", "type": "uint64_t", "default": "whole size"},
-            {"name": "sampler", "type": "sampler", "optional": true},
-            {"name": "texture view", "type": "texture view", "optional": true}
-        ]
+        "type": "binding resource"
     },
     "bind group dynamic binding array": {
         "category": "structure",
@@ -3664,7 +3657,44 @@
         "methods": [
             {
                 "name": "destroy"
+            },
+            {
+                "name": "update",
+                "tags": ["dawn"],
+                "returns": "status",
+                "args": [
+                    {"name": "slot", "type": "uint32_t"},
+                    {"name": "resource", "type": "binding resource", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "insert binding",
+                "tags": ["dawn"],
+                "returns": "uint32_t",
+                "args": [
+                    {"name": "resource", "type": "binding resource", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "remove binding",
+                "tags": ["dawn"],
+                "returns": "status",
+                "args": [
+                    {"name": "slot", "type": "uint32_t"}
+                ]
             }
+        ]
+    },
+    "binding resource": {
+        "category": "structure",
+        "extensible": "in",
+        "tags": ["dawn"],
+        "members": [
+            {"name": "buffer", "type": "buffer", "optional": true},
+            {"name": "offset", "type": "uint64_t", "default": "0"},
+            {"name": "size", "type": "uint64_t", "default": "whole size"},
+            {"name": "sampler", "type": "sampler", "optional": true},
+            {"name": "texture view", "type": "texture view", "optional": true}
         ]
     },
     "sampler": {

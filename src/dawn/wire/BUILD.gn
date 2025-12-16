@@ -123,6 +123,8 @@ dawn_component("wire") {
     "client/RenderBundleEncoder.h",
     "client/RenderPassEncoder.cpp",
     "client/RenderPassEncoder.h",
+    "client/ResourceTable.cpp",
+    "client/ResourceTable.h",
     "client/ShaderModule.cpp",
     "client/ShaderModule.h",
     "client/Surface.cpp",

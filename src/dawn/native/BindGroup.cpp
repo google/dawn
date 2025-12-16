@@ -179,7 +179,7 @@ MaybeError ValidateTextureBindGroupEntry(const DeviceBase* device, const BindGro
     DAWN_INVALID_IF(entry.nextInChain != nullptr, "nextInChain must be nullptr.");
 
     TextureViewBase* view = entry.textureView;
-    DAWN_TRY(device->ValidateObject(entry.textureView));
+    DAWN_TRY(device->ValidateObject(view));
 
     Aspect aspect = view->GetAspects();
     DAWN_INVALID_IF(!HasOneBit(aspect), "Multiple aspects (%s) selected in %s.", aspect, view);

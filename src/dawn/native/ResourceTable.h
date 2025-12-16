@@ -38,6 +38,10 @@ namespace dawn::native {
 MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
                                            const ResourceTableDescriptor* descriptor);
 
+// TODO(https://issues.chromium.org/463925499): Once bindless bindgroup support is removed, make
+// this into a new typed integer type instead of an alias to BindingIndex.
+using ResourceTableSlot = BindingIndex;
+
 class ResourceTableBase : public ApiObjectBase {
   public:
     static Ref<ResourceTableBase> MakeError(DeviceBase* device,
@@ -47,6 +51,9 @@ class ResourceTableBase : public ApiObjectBase {
 
     // Dawn API
     void APIDestroy();
+    wgpu::Status APIUpdate(uint32_t slot, const BindingResource* resource);
+    uint32_t APIInsertBinding(const BindingResource* resource);
+    wgpu::Status APIRemoveBinding(uint32_t slot);
 
     MaybeError ValidateCanUseInSubmitNow() const;
 
@@ -62,6 +69,8 @@ class ResourceTableBase : public ApiObjectBase {
     ResourceTableBase(DeviceBase* device,
                       const ResourceTableDescriptor* descriptor,
                       ObjectBase::ErrorTag tag);
+
+    bool IsValidSlot(ResourceTableSlot slot) const;
 
     // TODO(https://issues.chromium.org/463925499): Inline the functionality of DynamicArrayState in
     // ResourceTable once bindless bindgroup support is removed.

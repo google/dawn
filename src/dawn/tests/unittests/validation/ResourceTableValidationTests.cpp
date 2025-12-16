@@ -30,14 +30,76 @@
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/ScopedIgnoreValidationErrors.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
 namespace {
 
 class ResourceTableValidationTest : public ValidationTest {
+  protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         return {wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable};
+    }
+
+    wgpu::ResourceTable MakeResourceTable(uint32_t size) {
+        wgpu::ResourceTableDescriptor desc;
+        desc.size = size;
+        return device.CreateResourceTable(&desc);
+    }
+
+    wgpu::ResourceTable MakeErrorResourceTable(uint32_t size) {
+        wgpu::RenderPassMaxDrawCount maxDraw;
+        maxDraw.maxDrawCount = 1000;
+        wgpu::ResourceTableDescriptor desc{
+            .nextInChain = &maxDraw,
+            .size = size,
+        };
+
+        wgpu::ResourceTable table;
+        ASSERT_DEVICE_ERROR(table = device.CreateResourceTable(&desc));
+        return table;
+    }
+
+    enum class Mutator : uint8_t {
+        Update,
+        InsertBinding,
+    };
+    void TestMutator(Mutator mutator, const wgpu::BindingResource* resource, bool success) {
+        wgpu::ResourceTable table = MakeResourceTable(1);
+
+        switch (mutator) {
+            case Mutator::Update: {
+                wgpu::Status status;
+                if (success) {
+                    status = table.Update(0, resource);
+                } else {
+                    ASSERT_DEVICE_ERROR(status = table.Update(0, resource));
+                }
+                EXPECT_EQ(status, wgpu::Status::Success);
+                break;
+            }
+
+            case Mutator::InsertBinding: {
+                uint32_t slot = wgpu::kInvalidBinding;
+                if (success) {
+                    slot = table.InsertBinding(resource);
+                } else {
+                    ASSERT_DEVICE_ERROR(slot = table.InsertBinding(resource));
+                }
+                EXPECT_EQ(slot, 0u);
+                break;
+            }
+        }
+    }
+
+    // Helper to make sure that the resource table is marked as used. Even if internally Dawn
+    // doesn't track this, it makes tests more clearly correct.
+    void UseResourceTableInSubmit(wgpu::ResourceTable table) {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceTable(table);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
     }
 };
 
@@ -97,6 +159,11 @@ TEST_F(ResourceTableValidationTest, NextInChain) {
 
 // Test the Destroy call on a ResourceTable
 TEST_F(ResourceTableValidationTest, Destroy) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
     wgpu::ResourceTableDescriptor descriptor;
     descriptor.size = 1u;
     wgpu::ResourceTable resourceTable = device.CreateResourceTable(&descriptor);
@@ -458,6 +525,11 @@ TEST_F(ResourceTableValidationTestDisabled, CommandEncoder_SetResourceTable) {
 
 // Tests that the resource table can be used in submit
 TEST_F(ResourceTableValidationTest, Submit_CanUseInSubmit) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
     // Success case: resource table can be used in submit
     {
         wgpu::ResourceTableDescriptor descriptor;
@@ -954,6 +1026,478 @@ TEST_F(ResourceTableValidationTest, PinValidationUsageRenderPass) {
                 device.GetQueue().Submit(1, &commands);
             }
         }
+    }
+}
+
+// Checks that only texture views are allowed as resources in mutators for SamplingResourceTable.
+// TODO(https://issues.chromium.org/435317394): Support samplers in SamplingResourceTable.
+TEST_F(ResourceTableValidationTest, MutatorBindingKindValidation) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // Create the texture to put in the table.
+    wgpu::TextureDescriptor tDesc = {
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::Texture texture = device.CreateTexture(&tDesc);
+
+    // Create the buffer to put in the table.
+    wgpu::BufferDescriptor bDesc{
+        .usage = wgpu::BufferUsage::Storage,
+        .size = 4,
+    };
+    wgpu::Buffer buffer = device.CreateBuffer(&bDesc);
+
+    // Create the sampler to put in the table.
+    wgpu::Sampler sampler = device.CreateSampler();
+
+    for (auto mutator : {Mutator::Update, Mutator::InsertBinding}) {
+        // Control case: putting only a texture is valid.
+        {
+            wgpu::BindingResource resource = {.textureView = texture.CreateView()};
+            TestMutator(mutator, &resource, true);
+        }
+
+        // Error case: a buffer is an error.
+        {
+            wgpu::BindingResource resource = {.buffer = buffer};
+            TestMutator(mutator, &resource, false);
+        }
+
+        // Error case: a sampler is an error.
+        // TODO(https://issues.chromium.org/435317394): Support samplers in SamplingResourceTable.
+        {
+            wgpu::BindingResource resource = {.sampler = sampler};
+            TestMutator(mutator, &resource, false);
+        }
+
+        // Error case: both a sampler and a texture at the same time is an error.
+        {
+            wgpu::BindingResource resource = {.sampler = sampler,
+                                              .textureView = texture.CreateView()};
+            TestMutator(mutator, &resource, false);
+        }
+    }
+}
+
+// Check that the view must have only the TextureBinding usage for SamplingResourceTable.
+// TODO(https://issues.chromium.org/435317394): Support storage textures in FullResourceTable
+// TODO(https://issues.chromium.org/382544164): Support texel buffers in FullResourceTable
+TEST_F(ResourceTableValidationTest, MutatorTextureViewMustBeOnlyTextureBinding) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // Create the texture to put in the table.
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding |
+                 wgpu::TextureUsage::StorageBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    for (auto mutator : {Mutator::Update, Mutator::InsertBinding}) {
+        // Control case: limiting the usage to TextureBinding is valid.
+        {
+            wgpu::TextureViewDescriptor vDesc{
+                .usage = wgpu::TextureUsage::TextureBinding,
+            };
+            wgpu::BindingResource resource = {.textureView = tex.CreateView(&vDesc)};
+            TestMutator(mutator, &resource, true);
+        }
+
+        // Error case: having unrelated usages in the view is not allowed. RenderAttachment case.
+        {
+            wgpu::TextureViewDescriptor vDesc{
+                .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
+            };
+            wgpu::BindingResource resource = {.textureView = tex.CreateView(&vDesc)};
+            TestMutator(mutator, &resource, false);
+        }
+
+        // Error case: having unrelated usages in the view is not allowed. StorageBinding case.
+        {
+            wgpu::TextureViewDescriptor vDesc{
+                .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding,
+            };
+            wgpu::BindingResource resource = {.textureView = tex.CreateView(&vDesc)};
+            TestMutator(mutator, &resource, false);
+        }
+
+        // Error case: the defaulted texture usages don't contain TextureBinding.
+        {
+            wgpu::TextureDescriptor tDesc2 = tDesc;
+            tDesc2.usage = wgpu::TextureUsage::CopyDst;
+            wgpu::BindingResource resource = {.textureView =
+                                                  device.CreateTexture(&tDesc2).CreateView()};
+            TestMutator(mutator, &resource, false);
+        }
+    }
+}
+
+// Check that the texture view must have a single aspect for mutators.
+TEST_F(ResourceTableValidationTest, MutatorTextureViewMustBeSingleAspect) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // Create the texture to put in the table.
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::Depth24PlusStencil8,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    for (auto mutator : {Mutator::Update, Mutator::InsertBinding}) {
+        // Success case, only the depth aspect is selected.
+        {
+            wgpu::TextureViewDescriptor vDesc{
+                .aspect = wgpu::TextureAspect::DepthOnly,
+            };
+            wgpu::BindingResource resource = {.textureView = tex.CreateView(&vDesc)};
+            TestMutator(mutator, &resource, true);
+        }
+
+        // Success case, only the stencil aspect is selected.
+        {
+            wgpu::TextureViewDescriptor vDesc{
+                .aspect = wgpu::TextureAspect::StencilOnly,
+            };
+            wgpu::BindingResource resource = {.textureView = tex.CreateView(&vDesc)};
+            TestMutator(mutator, &resource, true);
+        }
+
+        // Error case: both aspects are selected.
+        {
+            wgpu::BindingResource resource = {.textureView = tex.CreateView()};
+            TestMutator(mutator, &resource, false);
+        }
+    }
+}
+
+// Test that it is not allowed to call Update, RemoveBinding or InsertBinding after the table is
+// destroyed.
+TEST_F(ResourceTableValidationTest, MutatorsAfterDestroy) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // Create the texture to put in the table.
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::BindingResource resource = {.textureView = device.CreateTexture(&tDesc).CreateView()};
+
+    // This is "content timeline" validation so it works the same on error tables and valid tables,
+    // and we ignore device-timeline validation errors, they are not what we are testing here.
+    for (auto table : {MakeResourceTable(7), MakeErrorResourceTable(7)}) {
+        utils::ScopedIgnoreValidationErrors ignoreErrors(device);
+
+        // Add a few bindings just to test RemoveBinding
+        EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
+        EXPECT_EQ(wgpu::Status::Success, table.Update(1, &resource));
+
+        // Success cases, calling mutators before destroying is valid.
+        EXPECT_EQ(wgpu::Status::Success, table.Update(2, &resource));
+        EXPECT_NE(wgpu::kInvalidBinding, table.InsertBinding(&resource));
+        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+
+        // Error case, after destruction all mutators return errors.
+        table.Destroy();
+        EXPECT_EQ(wgpu::Status::Error, table.Update(6, &resource));
+        EXPECT_EQ(wgpu::kInvalidBinding, table.InsertBinding(&resource));
+        EXPECT_EQ(wgpu::Status::Error, table.RemoveBinding(1));
+    }
+}
+
+// Test that it is not allowed to call Update, RemoveBinding with slots past the end.
+TEST_F(ResourceTableValidationTest, MutatorsAfterTableEnd) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // Create the texture to put in the table.
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::BindingResource resource = {.textureView = device.CreateTexture(&tDesc).CreateView()};
+
+    // This is "content timeline" validation so it works the same on error tables and valid tables,
+    // and we ignore device-timeline validation errors, they are not what we are testing here.
+    for (auto table : {MakeResourceTable(42), MakeErrorResourceTable(42)}) {
+        utils::ScopedIgnoreValidationErrors ignoreErrors(device);
+
+        // Success cases, calling mutators with slots in bounds.
+        EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
+        EXPECT_EQ(wgpu::Status::Success, table.Update(41, &resource));
+        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(41));
+
+        // Error case, calling mutators with out of bounds slots.
+        EXPECT_EQ(wgpu::Status::Error, table.Update(42, &resource));
+        EXPECT_EQ(wgpu::Status::Error, table.RemoveBinding(42));
+    }
+}
+
+// Test that Update/RemoveBinding return success but generates a validation error when used on an
+// invalid table.
+TEST_F(ResourceTableValidationTest, MutatorsOnInvalidTable) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // Create the texture to put in the table.
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::BindingResource resource = {.textureView = device.CreateTexture(&tDesc).CreateView()};
+
+    // Test on a valid table.
+    {
+        wgpu::ResourceTable table = MakeResourceTable(3);
+
+        EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
+        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+        EXPECT_NE(wgpu::kInvalidBinding, table.InsertBinding(&resource));
+    }
+
+    // Test on an invalid table.
+    {
+        wgpu::ResourceTable table = MakeErrorResourceTable(3);
+
+        ASSERT_DEVICE_ERROR(EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource)));
+        ASSERT_DEVICE_ERROR(EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0)));
+        ASSERT_DEVICE_ERROR(EXPECT_NE(wgpu::kInvalidBinding, table.InsertBinding(&resource)));
+    }
+
+    // Test on an invalid table due to being too large.
+    {
+        wgpu::ResourceTable table;
+        ASSERT_DEVICE_ERROR(table = MakeResourceTable(kMaxResourceTableSize + 1));
+
+        EXPECT_EQ(wgpu::Status::Error, table.Update(0, &resource));
+        EXPECT_EQ(wgpu::Status::Error, table.RemoveBinding(0));
+        EXPECT_EQ(wgpu::kInvalidBinding, table.InsertBinding(&resource));
+    }
+}
+
+// Test that Update() can be called on a table slot if it has never been used before.
+TEST_F(ResourceTableValidationTest, UpdateBindingWhenNeverUsed) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::BindingResource resource = {.textureView = device.CreateTexture(&tDesc).CreateView()};
+
+    // This is "content timeline" validation so it works the same on error tables and valid tables,
+    // and we ignore device-timeline validation errors, they are not what we are testing here.
+    for (auto table : {MakeResourceTable(3), MakeErrorResourceTable(3)}) {
+        utils::ScopedIgnoreValidationErrors ignoreErrors(device);
+
+        // Updating slot 0 when it has never been used is valid, but a second time is an error.
+        EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
+        EXPECT_EQ(wgpu::Status::Error, table.Update(0, &resource));
+
+        // Even after using the table, a previously unused entry is valid to update.
+        UseResourceTableInSubmit(table);
+        EXPECT_EQ(wgpu::Status::Success, table.Update(1, &resource));
+    }
+}
+
+// Test that Remove() can be called on a table slot even when it was never used.
+TEST_F(ResourceTableValidationTest, RemoveBindingWhenNeverUsed) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    // This is "content timeline" validation so it works the same on error tables and valid tables,
+    // and we ignore device-timeline validation errors, they are not what we are testing here.
+    for (auto table : {MakeResourceTable(3), MakeErrorResourceTable(3)}) {
+        utils::ScopedIgnoreValidationErrors ignoreErrors(device);
+        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+    }
+}
+
+// Check that a table slot can be updated only after all commands submitted prior to RemoveBinding
+// are completed.
+TEST_F(ResourceTableValidationTest, UpdateAfterRemoveRequiresGPUIsFinished) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::BindingResource resource = {.textureView = device.CreateTexture(&tDesc).CreateView()};
+
+    // This is "content timeline" validation so it works the same on error tables and valid tables,
+    // and we ignore device-timeline validation errors, they are not what we are testing here.
+    for (auto table : {MakeResourceTable(1), MakeErrorResourceTable(1)}) {
+        utils::ScopedIgnoreValidationErrors ignoreErrors(device);
+
+        // Removing while the table is still potentially in used by the GPU is an error. But
+        // immediately after we know that the GPU is finished, it is valid.
+        EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
+
+        bool updateValid = false;
+        UseResourceTableInSubmit(table);
+        device.GetQueue().OnSubmittedWorkDone(
+            wgpu::CallbackMode::AllowSpontaneous,
+            [&](wgpu::QueueWorkDoneStatus, wgpu::StringView) { updateValid = true; });
+        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+
+        // The null backend happens to call OnSubmittedWorkDone immediately because commands take 0
+        // time. This test is duplicated in the end2end tests where OnSubmittedWorkDone won't fire
+        // immediately.
+        // TODO(435317394): Actually duplicate in the end2end tests.
+        if (updateValid) {
+            EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
+            updateValid = false;
+        } else {
+            EXPECT_EQ(wgpu::Status::Error, table.Update(0, &resource));
+        }
+
+        WaitForAllOperations();
+
+        if (updateValid) {
+            EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
+        } else {
+            EXPECT_EQ(wgpu::Status::Error, table.Update(0, &resource));
+        }
+    }
+}
+
+// Check that trying to insert bindings fail when no more are available.
+TEST_F(ResourceTableValidationTest, InsertBindingFailWhenNoMoreSpace) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::BindingResource resource = {.textureView = device.CreateTexture(&tDesc).CreateView()};
+
+    // This is "content timeline" validation so it works the same on error tables and valid tables,
+    // and we ignore device-timeline validation errors, they are not what we are testing here.
+    for (auto table : {MakeResourceTable(3), MakeErrorResourceTable(3)}) {
+        utils::ScopedIgnoreValidationErrors ignoreErrors(device);
+
+        // There is space for only three resources.
+        EXPECT_EQ(0u, table.InsertBinding(&resource));
+        EXPECT_EQ(1u, table.InsertBinding(&resource));
+        EXPECT_EQ(2u, table.InsertBinding(&resource));
+        EXPECT_EQ(wgpu::kInvalidBinding, table.InsertBinding(&resource));
+
+        // Remove one binding (and wait for it to be recycled), it will be available for
+        // InsertBinding after which a new InsertBinding will still run out of space.
+        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(1));
+        UseResourceTableInSubmit(table);
+        WaitForAllOperations();
+
+        EXPECT_EQ(1u, table.InsertBinding(&resource));
+        EXPECT_EQ(wgpu::kInvalidBinding, table.InsertBinding(&resource));
+    }
+}
+
+// Check that bindings that are inserted are unavailable for Update() until RemoveBinding.
+TEST_F(ResourceTableValidationTest, InsertBindingPreventsUpdate) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::BindingResource resource = {.textureView = device.CreateTexture(&tDesc).CreateView()};
+
+    // This is "content timeline" validation so it works the same on error tables and valid tables,
+    // and we ignore device-timeline validation errors, they are not what we are testing here.
+    for (auto table : {MakeResourceTable(1), MakeErrorResourceTable(1)}) {
+        utils::ScopedIgnoreValidationErrors ignoreErrors(device);
+
+        EXPECT_EQ(0u, table.InsertBinding(&resource));
+        EXPECT_EQ(wgpu::Status::Error, table.Update(0, &resource));
+
+        // Remove one binding (and wait for it to be recycled), it will be available for Update.
+        EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
+        UseResourceTableInSubmit(table);
+        WaitForAllOperations();
+
+        EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
+    }
+}
+
+// Check that InsertBinding skips over used slots.
+TEST_F(ResourceTableValidationTest, InsertBindingSkipsOverUsedSlots) {
+    // TODO(435317394): Implemented bindless in the wire.
+    if (UsesWire()) {
+        GTEST_SKIP();
+    }
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::BindingResource resource = {.textureView = device.CreateTexture(&tDesc).CreateView()};
+
+    // This is "content timeline" validation so it works the same on error tables and valid tables,
+    // and we ignore device-timeline validation errors, they are not what we are testing here.
+    for (auto table : {MakeResourceTable(5), MakeErrorResourceTable(5)}) {
+        utils::ScopedIgnoreValidationErrors ignoreErrors(device);
+        EXPECT_EQ(wgpu::Status::Success, table.Update(1, &resource));
+        EXPECT_EQ(wgpu::Status::Success, table.Update(3, &resource));
+
+        // InsertBinding skips over entries used by Update()
+        EXPECT_EQ(0u, table.InsertBinding(&resource));
+        EXPECT_EQ(2u, table.InsertBinding(&resource));
+        EXPECT_EQ(4u, table.InsertBinding(&resource));
+
+        // Remove bindings in inverse order.
+        for (uint32_t i : {4, 3, 2}) {
+            EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(i));
+        }
+        UseResourceTableInSubmit(table);
+        WaitForAllOperations();
+
+        // InsertBinding should still return the min available slot.
+        EXPECT_EQ(2u, table.InsertBinding(&resource));
+        EXPECT_EQ(3u, table.InsertBinding(&resource));
+        EXPECT_EQ(4u, table.InsertBinding(&resource));
     }
 }
 
