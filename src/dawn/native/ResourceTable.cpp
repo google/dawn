@@ -41,9 +41,12 @@ MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
                     "Resource table used without the %s feature enabled.",
                     wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
 
+    DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain is not nullptr.");
+
     DAWN_INVALID_IF(descriptor->size > device->GetLimits().resourceTableLimits.maxResourceTableSize,
                     "Resource table size (%u) is larger than maxResourceTableSize (%u)",
                     descriptor->size, device->GetLimits().resourceTableLimits.maxResourceTableSize);
+
     return {};
 }
 

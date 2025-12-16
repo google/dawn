@@ -72,6 +72,29 @@ TEST_F(ResourceTableValidationTest, InvalidSize) {
     ASSERT_DEVICE_ERROR(device.CreateResourceTable(&descriptor));
 }
 
+// Test that setting nextInChain to anything is an error
+TEST_F(ResourceTableValidationTest, NextInChain) {
+    // Control case, nextInChain = nullptr is valid.
+    {
+        wgpu::ResourceTableDescriptor descriptor{
+            .nextInChain = nullptr,
+            .size = 3,
+        };
+        device.CreateResourceTable(&descriptor);
+    }
+
+    // Control case, nextInChain = non null is invalid.
+    {
+        wgpu::RenderPassMaxDrawCount maxDraw;
+        maxDraw.maxDrawCount = 1000;
+        wgpu::ResourceTableDescriptor descriptor{
+            .nextInChain = &maxDraw,
+            .size = 3,
+        };
+        ASSERT_DEVICE_ERROR(device.CreateResourceTable(&descriptor));
+    }
+}
+
 // Test the Destroy call on a ResourceTable
 TEST_F(ResourceTableValidationTest, Destroy) {
     wgpu::ResourceTableDescriptor descriptor;
