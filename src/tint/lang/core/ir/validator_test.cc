@@ -1238,6 +1238,24 @@ TEST_F(IR_ValidatorTest, Instruction_TooManyResultInstruction) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Instruction_VoidResultWithName) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* result = b.Call<void>(core::BuiltinFn::kWorkgroupBarrier);
+        mod.SetName(result, "result");
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: workgroupBarrier: void results must not have names
+    %result:void = workgroupBarrier
+    ^^^^^^^^^^^^)"))
+        << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Instruction_DeadOperand) {
     auto* f = b.Function("my_func", ty.void_());
 

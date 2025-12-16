@@ -1945,6 +1945,11 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
         }
     }
 
+    if (result->Type()->Is<core::type::Void>() && mod_.NameOf(result)) {
+        AddResultError(inst, idx) << "void results must not have names";
+        return false;
+    }
+
     return true;
 }
 

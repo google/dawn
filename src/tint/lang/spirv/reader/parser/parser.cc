@@ -1513,7 +1513,7 @@ class Parser {
         AddValue(result_id, inst->Result());
 
         Symbol name = GetSymbolFor(result_id);
-        if (name.IsValid()) {
+        if (name.IsValid() && !inst->Result()->Type()->Is<core::type::Void>()) {
             ir_.SetName(inst, name);
         }
     }

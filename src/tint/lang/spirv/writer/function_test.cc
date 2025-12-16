@@ -324,13 +324,12 @@ TEST_F(SpirvWriterTest, Function_Call_Void) {
 
     auto* bar = b.ComputeFunction("main");
     b.Append(bar->Block(), [&] {
-        auto* result = b.Call(ty.void_(), foo);
+        b.Call(ty.void_(), foo);
         b.Return(bar);
-        mod.SetName(result, "result");
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpFunctionCall %void %foo");
+    EXPECT_INST("%7 = OpFunctionCall %void %foo");
 }
 
 TEST_F(SpirvWriterTest, Function_ShaderIO_VertexPointSize) {
