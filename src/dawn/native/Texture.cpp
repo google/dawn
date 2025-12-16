@@ -449,6 +449,11 @@ MaybeError ValidateTextureUsageConstraints(
         DAWN_INVALID_IF(!IsSubset(usage, kAttachmentUsages),
                         "The texture usage (%s) includes both %s and non-attachment usages (%s).",
                         usage, kTransientAttachment, usage & ~kAttachmentUsages);
+
+        DAWN_INVALID_IF(
+            textureDimension != wgpu::TextureDimension::e2D,
+            "The dimension (%s) of a texture with usage (%s) which includes %s is not 2D.",
+            textureDimension, usage, wgpu::TextureUsage::TransientAttachment);
     }
 
     if (!allowedSharedTextureMemoryUsage) {
