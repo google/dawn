@@ -50,6 +50,8 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
                                  Device* device,
                                  BeginRenderPassCmd* renderPass);
 
+void RecordEndRenderPass(CommandRecordingContext* recordingContext, Device* device);
+
 class CommandBuffer final : public CommandBufferBase {
   public:
     static Ref<CommandBuffer> Create(CommandEncoder* encoder,

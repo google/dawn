@@ -186,7 +186,9 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
      VulkanVersion_1_3},
     {DeviceExt::Maintenance4, "VK_KHR_maintenance4", VulkanVersion_1_3},
     {DeviceExt::SubgroupSizeControl, "VK_EXT_subgroup_size_control", VulkanVersion_1_3},
-    {DeviceExt::DynamicRendering, "VK_KHR_dynamic_rendering", VulkanVersion_1_3},
+    // TODO(crbug.com/463893794): Should be promoted in VulkanVersion_1_3 but that prevents the
+    // extension methods from loading on higher version devices.
+    {DeviceExt::DynamicRendering, "VK_KHR_dynamic_rendering", NeverPromoted},
 
     {DeviceExt::PipelineRobustness, "VK_EXT_pipeline_robustness", VulkanVersion_1_4},
     {DeviceExt::Maintenance5, "VK_KHR_maintenance5", VulkanVersion_1_4},

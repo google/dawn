@@ -508,22 +508,24 @@ TEST_P(ReadOnlyDepthAndStencilAttachmentTests, BothReadOnlySampleStencil) {
     CheckFullColor(render2.color, {0, 0, 0, 0});
 }
 
-DAWN_INSTANTIATE_TEST_P(ReadOnlyDepthAttachmentTests,
-                        {D3D11Backend(), D3D12Backend(),
-                         D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
-                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
-                        std::vector<wgpu::TextureFormat>(utils::kDepthFormats.begin(),
-                                                         utils::kDepthFormats.end()));
-DAWN_INSTANTIATE_TEST_P(ReadOnlyStencilAttachmentTests,
-                        {D3D11Backend(), D3D12Backend(),
-                         D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
-                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
-                        std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
-                                                         utils::kStencilFormats.end()));
+DAWN_INSTANTIATE_TEST_P(
+    ReadOnlyDepthAttachmentTests,
+    {D3D11Backend(), D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
+     OpenGLBackend(), OpenGLESBackend(), VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
+     VulkanBackend({}, {"vulkan_use_dynamic_rendering"}), WebGPUBackend()},
+    std::vector<wgpu::TextureFormat>(utils::kDepthFormats.begin(), utils::kDepthFormats.end()));
+DAWN_INSTANTIATE_TEST_P(
+    ReadOnlyStencilAttachmentTests,
+    {D3D11Backend(), D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
+     OpenGLBackend(), OpenGLESBackend(), VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
+     VulkanBackend({}, {"vulkan_use_dynamic_rendering"}), WebGPUBackend()},
+    std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(), utils::kStencilFormats.end()));
 DAWN_INSTANTIATE_TEST_P(ReadOnlyDepthAndStencilAttachmentTests,
                         {D3D11Backend(), D3D12Backend(),
                          D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
-                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
+                         OpenGLBackend(), OpenGLESBackend(),
+                         VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
+                         VulkanBackend({}, {"vulkan_use_dynamic_rendering"}), WebGPUBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kDepthAndStencilFormats.begin(),
                                                          utils::kDepthAndStencilFormats.end()));
 

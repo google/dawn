@@ -648,6 +648,12 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         featuresChain.Add(&usedKnobs.descriptorIndexingFeatures);
     }
 
+    if (IsToggleEnabled(Toggle::VulkanUseDynamicRendering)) {
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::DynamicRendering));
+        usedKnobs.dynamicRenderingFeatures = mDeviceInfo.dynamicRenderingFeatures;
+        featuresChain.Add(&usedKnobs.dynamicRenderingFeatures);
+    }
+
     // Find a universal queue family
     {
         // Note that GRAPHICS and COMPUTE imply TRANSFER so we don't need to check for it.

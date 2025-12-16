@@ -184,20 +184,9 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderTarget, kRTSize - 1, 1);
 }
 
-DAWN_INSTANTIATE_TEST(RenderPassTest,
-                      D3D11Backend(),
-                      D3D12Backend(),
-                      D3D12Backend({}, {"use_d3d12_render_pass"}),
-                      MetalBackend(),
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      VulkanBackend(),
-                      WebGPUBackend());
-
 // Test that clearing the lower mips of an R8Unorm texture works. This is a regression test for
 // dawn:1071 where Intel Metal devices fail to do that correctly, requiring a workaround.
-class RenderPassTest_RegressionDawn1071 : public RenderPassTest {};
-TEST_P(RenderPassTest_RegressionDawn1071, ClearLowestMipOfR8Unorm) {
+TEST_P(RenderPassTest, ClearLowestMipOfR8Unorm) {
     const uint32_t kLastMipLevel = 2;
 
     // Create the texture and buffer used for readback.
@@ -245,20 +234,9 @@ TEST_P(RenderPassTest_RegressionDawn1071, ClearLowestMipOfR8Unorm) {
     EXPECT_BUFFER_U8_EQ(255, buf, 0);
 }
 
-DAWN_INSTANTIATE_TEST(RenderPassTest_RegressionDawn1071,
-                      D3D11Backend(),
-                      D3D12Backend(),
-                      MetalBackend(),
-                      MetalBackend({"metal_render_r8_rg8_unorm_small_mip_to_temp_texture"}),
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      VulkanBackend(),
-                      WebGPUBackend());
-
 // Test that clearing a depth16unorm texture with multiple subresources works. This is a regression
 // test for dawn:1389 where Intel Metal devices fail to do that correctly, requiring a workaround.
-class RenderPassTest_RegressionDawn1389 : public RenderPassTest {};
-TEST_P(RenderPassTest_RegressionDawn1389, ClearMultisubresourceAfterWriteDepth16Unorm) {
+TEST_P(RenderPassTest, ClearMultisubresourceAfterWriteDepth16Unorm) {
     // TODO(dawn:1705): fix this test for Intel D3D11.
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
@@ -386,14 +364,22 @@ TEST_P(RenderPassTest_RegressionDawn1389, ClearMultisubresourceAfterWriteDepth16
     }
 }
 
-DAWN_INSTANTIATE_TEST(RenderPassTest_RegressionDawn1389,
+DAWN_INSTANTIATE_TEST(RenderPassTest,
                       D3D11Backend(),
                       D3D12Backend(),
+                      D3D12Backend({}, {"use_d3d12_render_pass"}),
                       MetalBackend(),
+
+                      // for dawn:1071 regression
+                      MetalBackend({"metal_render_r8_rg8_unorm_small_mip_to_temp_texture"}),
+
+                      // for dawn:1389 regression
                       MetalBackend({"use_blit_for_buffer_to_depth_texture_copy"}),
+
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend(),
+                      VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
+                      VulkanBackend({}, {"vulkan_use_dynamic_rendering"}),
                       WebGPUBackend());
 
 }  // anonymous namespace

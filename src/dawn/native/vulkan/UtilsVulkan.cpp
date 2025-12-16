@@ -155,6 +155,34 @@ VkShaderStageFlagBits VulkanShaderStage(SingleShaderStage stage) {
     return static_cast<VkShaderStageFlagBits>(VulkanShaderStages(StageBit(stage)));
 }
 
+VkAttachmentLoadOp VulkanAttachmentLoadOp(wgpu::LoadOp op) {
+    switch (op) {
+        case wgpu::LoadOp::Load:
+            return VK_ATTACHMENT_LOAD_OP_LOAD;
+        case wgpu::LoadOp::Clear:
+            return VK_ATTACHMENT_LOAD_OP_CLEAR;
+        case wgpu::LoadOp::ExpandResolveTexture:
+            return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        case wgpu::LoadOp::Undefined:
+            DAWN_UNREACHABLE();
+            return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    }
+}
+
+VkAttachmentStoreOp VulkanAttachmentStoreOp(wgpu::StoreOp op) {
+    // TODO(crbug.com/dawn/485): return STORE_OP_STORE_NONE_QCOM if the device has required
+    // extension.
+    switch (op) {
+        case wgpu::StoreOp::Store:
+            return VK_ATTACHMENT_STORE_OP_STORE;
+        case wgpu::StoreOp::Discard:
+            return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        case wgpu::StoreOp::Undefined:
+            DAWN_UNREACHABLE();
+            return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    }
+}
+
 // Vulkan SPEC requires the source/destination region specified by each element of
 // pRegions must be a region that is contained within srcImage/dstImage. Here the size of
 // the image refers to the virtual size, while Dawn validates texture copy extent with the

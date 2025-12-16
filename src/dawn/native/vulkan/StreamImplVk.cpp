@@ -362,7 +362,15 @@ void stream::Stream<VkGraphicsPipelineCreateInfo>::Write(stream::Sink* sink,
              t.pInputAssemblyState, t.pTessellationState, t.pViewportState, t.pRasterizationState,
              t.pMultisampleState, t.pDepthStencilState, t.pColorBlendState, t.pDynamicState,
              t.subpass);
-    SerializePnext<VkPipelineRobustnessCreateInfo>(sink, &t);
+    SerializePnext<VkPipelineRobustnessCreateInfo, VkPipelineRenderingCreateInfoKHR>(sink, &t);
+}
+
+template <>
+void stream::Stream<VkPipelineRenderingCreateInfoKHR>::Write(
+    stream::Sink* sink,
+    const VkPipelineRenderingCreateInfoKHR& t) {
+    StreamIn(sink, t.viewMask, Iterable(t.pColorAttachmentFormats, t.colorAttachmentCount),
+             t.depthAttachmentFormat, t.stencilAttachmentFormat);
 }
 
 }  // namespace dawn::native

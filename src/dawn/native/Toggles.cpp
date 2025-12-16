@@ -722,6 +722,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Enables RenderDoc process injection. If RenderDoc is used to inject into the GPU process, "
       "send RenderDoc frame capture info.",
       "https://crbug.com/449708316", ToggleStage::Device}},
+    {Toggle::VulkanUseDynamicRendering,
+     {"vulkan_use_dynamic_rendering",
+      "Makes use of VK_KHR_dynamic_rendering to implement WebGPU RenderPass.",
+      "https://crbug.com/dawn/463893794", ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

@@ -33,41 +33,12 @@
 #include "dawn/common/Range.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
+#include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
 
 namespace dawn::native::vulkan {
 
 namespace {
-VkAttachmentLoadOp VulkanAttachmentLoadOp(wgpu::LoadOp op) {
-    switch (op) {
-        case wgpu::LoadOp::Load:
-            return VK_ATTACHMENT_LOAD_OP_LOAD;
-        case wgpu::LoadOp::Clear:
-            return VK_ATTACHMENT_LOAD_OP_CLEAR;
-        case wgpu::LoadOp::ExpandResolveTexture:
-            return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        case wgpu::LoadOp::Undefined:
-            DAWN_UNREACHABLE();
-            break;
-    }
-    DAWN_UNREACHABLE();
-}
-
-VkAttachmentStoreOp VulkanAttachmentStoreOp(wgpu::StoreOp op) {
-    // TODO(crbug.com/dawn/485): return STORE_OP_STORE_NONE_QCOM if the device has required
-    // extension.
-    switch (op) {
-        case wgpu::StoreOp::Store:
-            return VK_ATTACHMENT_STORE_OP_STORE;
-        case wgpu::StoreOp::Discard:
-            return VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        case wgpu::StoreOp::Undefined:
-            DAWN_UNREACHABLE();
-            break;
-    }
-    DAWN_UNREACHABLE();
-}
-
 void InitializeLoadResolveSubpassDependencies(
     absl::InlinedVector<VkSubpassDependency, 2>* subpassDependenciesOut) {
     VkSubpassDependency dependencies[2];

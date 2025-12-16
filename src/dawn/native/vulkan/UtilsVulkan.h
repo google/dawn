@@ -122,6 +122,9 @@ VkImageAspectFlags VulkanAspectMask(const Aspect& aspects);
 VkShaderStageFlags VulkanShaderStages(wgpu::ShaderStage stages);
 VkShaderStageFlagBits VulkanShaderStage(SingleShaderStage stage);
 
+VkAttachmentLoadOp VulkanAttachmentLoadOp(wgpu::LoadOp op);
+VkAttachmentStoreOp VulkanAttachmentStoreOp(wgpu::StoreOp op);
+
 TexelExtent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy,
                                        const TexelExtent3D& copySize);
 

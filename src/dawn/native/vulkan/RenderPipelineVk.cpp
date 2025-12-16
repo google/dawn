@@ -423,7 +423,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     inputAssembly.primitiveRestartEnable =
         ShouldEnablePrimitiveRestart(GetPrimitiveTopology()) ? VK_TRUE : VK_FALSE;
 
-    // A placeholder viewport/scissor info. The validation layers force use to provide at least
+    // A placeholder viewport/scissor info. The validation layers force us to provide at least
     // one scissor and one viewport here, even if we choose to make them dynamic.
     VkViewport viewportDesc;
     viewportDesc.x = 0.0f;
@@ -534,14 +534,86 @@ MaybeError RenderPipeline::InitializeImpl() {
     dynamic.dynamicStateCount = sizeof(dynamicStates) / sizeof(dynamicStates[0]);
     dynamic.pDynamicStates = dynamicStates;
 
-    // Get a VkRenderPass that matches the attachment formats for this pipeline.
-    // VkRenderPass compatibility rules let us provide placeholder data for a bunch of arguments.
-    // Load and store ops are all equivalent, though we still specify ExpandResolveTexture as that
-    // controls the use of input attachments. Single subpass VkRenderPasses are compatible
-    // irrespective of resolve attachments being used, but for ExpandResolveTexture that uses two
-    // subpasses we need to specify which attachments will be resolved.
+    DAWN_TRY(PipelineVk::InitializeBase(layout, mImmediateMask));
+
+    // The create info chains in a bunch of things created on the stack here or inside state
+    // objects.
+    VkGraphicsPipelineCreateInfo createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    createInfo.pNext = nullptr;
+    createInfo.flags = 0;
+    createInfo.stageCount = stageCount;
+    createInfo.pStages = shaderStages.data();
+    createInfo.pVertexInputState = &vertexInputCreateInfo;
+    createInfo.pInputAssemblyState = &inputAssembly;
+    createInfo.pTessellationState = nullptr;
+    createInfo.pViewportState = &viewport;
+    createInfo.pRasterizationState = &rasterization;
+    createInfo.pMultisampleState = &multisample;
+    createInfo.pDepthStencilState = &depthStencilState;
+    createInfo.pColorBlendState =
+        (GetStageMask() & wgpu::ShaderStage::Fragment) ? &colorBlend : nullptr;
+    createInfo.pDynamicState = &dynamic;
+    createInfo.layout = GetVkLayout();
+    createInfo.basePipelineHandle = VkPipeline{};
+    createInfo.basePipelineIndex = -1;
+    PNextChainBuilder createInfoChain(&createInfo);
+
     RenderPassCache::RenderPassInfo renderPassInfo;
-    {
+    VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo;
+    PerColorAttachment<VkFormat> colorAttachmentFormats;
+
+    if (device->IsToggleEnabled(Toggle::VulkanUseDynamicRendering)) {
+        // Dynamic rendering doesn't need a VkRenderPass object, just a description of the
+        // attachments formats that will be used with this pipeline.
+        VkRenderPass nullRenderPass = VK_NULL_HANDLE;
+        createInfo.renderPass = nullRenderPass;
+
+        createInfoChain.Add(&pipelineRenderingCreateInfo,
+                            VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR);
+
+        pipelineRenderingCreateInfo.viewMask = 0;
+        pipelineRenderingCreateInfo.colorAttachmentCount = 0;
+        pipelineRenderingCreateInfo.depthAttachmentFormat = VK_FORMAT_UNDEFINED;
+        pipelineRenderingCreateInfo.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
+
+        // Initialize all potential color attachment formats to undefined, which allows the
+        // attachments to be sparse.
+        colorAttachmentFormats.fill(VK_FORMAT_UNDEFINED);
+
+        // Set the formats of the color attachments in use.
+        ColorAttachmentMask attachmentMask = GetColorAttachmentsMask();
+        for (auto i : attachmentMask) {
+            colorAttachmentFormats[i] = VulkanImageFormat(device, GetColorAttachmentFormat(i));
+        }
+
+        pipelineRenderingCreateInfo.colorAttachmentCount =
+            static_cast<uint32_t>(GetHighestBitIndexPlusOne(attachmentMask));
+        pipelineRenderingCreateInfo.pColorAttachmentFormats = colorAttachmentFormats.data();
+
+        // Set the formats of the depth/stencil attachment.
+        if (HasDepthStencilAttachment()) {
+            wgpu::TextureFormat dsFormat = GetDepthStencilFormat();
+            const Format& internalFormat = device->GetValidInternalFormat(dsFormat);
+            VkFormat vkDsFormat = VulkanImageFormat(device, dsFormat);
+
+            if (internalFormat.HasDepth()) {
+                pipelineRenderingCreateInfo.depthAttachmentFormat = vkDsFormat;
+            }
+            if (internalFormat.HasStencil()) {
+                pipelineRenderingCreateInfo.stencilAttachmentFormat = vkDsFormat;
+            }
+        }
+
+        // TODO(crbug.com/463893794): Handle ExpandResolveTexture.
+    } else {
+        // Get a VkRenderPass that matches the attachment formats for this pipeline.
+        // VkRenderPass compatibility rules let us provide placeholder data for a bunch of
+        // arguments. Load and store ops are all equivalent, though we still specify
+        // ExpandResolveTexture as that controls the use of input attachments. Single subpass
+        // VkRenderPasses are compatible irrespective of resolve attachments being used, but for
+        // ExpandResolveTexture that uses two subpasses we need to specify which attachments will
+        // be resolved.
         RenderPassCacheQuery query;
         ColorAttachmentMask resolveMask =
             GetAttachmentState()->GetExpandResolveInfo().resolveTargetsMask;
@@ -572,32 +644,9 @@ MaybeError RenderPipeline::InitializeImpl() {
             StreamIn(&mCacheKey, query);
         }
         DAWN_TRY_ASSIGN(renderPassInfo, device->GetRenderPassCache()->GetRenderPass(query));
-    }
-    DAWN_TRY(PipelineVk::InitializeBase(layout, mImmediateMask));
 
-    // The create info chains in a bunch of things created on the stack here or inside state
-    // objects.
-    VkGraphicsPipelineCreateInfo createInfo;
-    createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    createInfo.pNext = nullptr;
-    createInfo.flags = 0;
-    createInfo.stageCount = stageCount;
-    createInfo.pStages = shaderStages.data();
-    createInfo.pVertexInputState = &vertexInputCreateInfo;
-    createInfo.pInputAssemblyState = &inputAssembly;
-    createInfo.pTessellationState = nullptr;
-    createInfo.pViewportState = &viewport;
-    createInfo.pRasterizationState = &rasterization;
-    createInfo.pMultisampleState = &multisample;
-    createInfo.pDepthStencilState = &depthStencilState;
-    createInfo.pColorBlendState =
-        (GetStageMask() & wgpu::ShaderStage::Fragment) ? &colorBlend : nullptr;
-    createInfo.pDynamicState = &dynamic;
-    createInfo.layout = GetVkLayout();
-    createInfo.renderPass = renderPassInfo.renderPass;
-    createInfo.basePipelineHandle = VkPipeline{};
-    createInfo.basePipelineIndex = -1;
-    PNextChainBuilder createInfoChain(&createInfo);
+        createInfo.renderPass = renderPassInfo.renderPass;
+    }
 
     // - If the pipeline uses input attachments in shader, currently this is only used by
     //   ExpandResolveTexture subpass, hence we need to set the subpass to 0.

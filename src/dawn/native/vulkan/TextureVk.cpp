@@ -1234,7 +1234,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
 
                     DAWN_TRY(
                         RecordBeginRenderPass(recordingContext, ToBackend(GetDevice()), &beginCmd));
-                    ToBackend(GetDevice())->fn.CmdEndRenderPass(recordingContext->commandBuffer);
+                    RecordEndRenderPass(recordingContext, ToBackend(GetDevice()));
                 }
             }
         }

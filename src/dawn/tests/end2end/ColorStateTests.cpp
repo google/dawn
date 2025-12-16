@@ -1283,7 +1283,8 @@ DAWN_INSTANTIATE_TEST(ColorStateTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend(),
+                      VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
+                      VulkanBackend({}, {"vulkan_use_dynamic_rendering"}),
                       WebGPUBackend());
 
 }  // anonymous namespace

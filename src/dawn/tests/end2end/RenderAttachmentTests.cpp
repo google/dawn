@@ -91,6 +91,102 @@ TEST_P(RenderAttachmentTest, MoreFragmentOutputsThanAttachments) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderTarget, 0, 0);
 }
 
+class ExpectRGBA8 : public detail::CustomTextureExpectation {
+  public:
+    explicit ExpectRGBA8(const utils::RGBA8 color)
+        : mColorValue((color.r << 0) | (color.g << 8) | (color.b << 16) | (color.a << 24)) {}
+
+    uint32_t DataSize() override { return sizeof(uint32_t); }
+
+    testing::AssertionResult Check(const void* data, size_t size) override {
+        DAWN_ASSERT(size % DataSize() == 0 && size > 0);
+
+        const uint32_t* actual = static_cast<const uint32_t*>(data);
+        for (size_t i = 0; i < size / DataSize(); ++i) {
+            if (actual[i] != mColorValue) {
+                return testing::AssertionFailure()
+                       << "Expected data[" << i << "] to match value " << mColorValue << " ("
+                       << (mColorValue & 0xFF) << ", " << ((mColorValue >> 8) & 0xFF) << ", "
+                       << ((mColorValue >> 16) & 0xFF) << ", " << ((mColorValue >> 24) & 0xFF)
+                       << "), actual " << actual[i] << " (" << (actual[i] & 0xFF) << ", "
+                       << ((actual[i] >> 8) & 0xFF) << ", " << ((actual[i] >> 16) & 0xFF) << ", "
+                       << ((actual[i] >> 24) & 0xFF) << ")\n";
+            }
+        }
+
+        return testing::AssertionSuccess();
+    }
+
+  private:
+    const uint32_t mColorValue;
+};
+
+// Tests that individual depth slices of a 3D texture can be bound as color attachments.
+TEST_P(RenderAttachmentTest, DepthSlice) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        @vertex
+        fn main() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 1.0);
+        })");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        struct Output {
+            @location(0) color0 : vec4f,
+            @location(1) color1 : vec4f,
+            @location(2) color2 : vec4f,
+        }
+
+        @fragment
+        fn main() -> Output {
+            var output : Output;
+            output.color0 = vec4f(1.0, 0.0, 0.0, 1.0);
+            output.color1 = vec4f(0.0, 1.0, 0.0, 1.0);
+            output.color2 = vec4f(0.0, 0.0, 1.0, 1.0);
+            return output;
+        })");
+
+    // Unlike the previous test, all three outputs are used by the pipeline here.
+    utils::ComboRenderPipelineDescriptor pipelineDesc;
+    pipelineDesc.vertex.module = vsModule;
+    pipelineDesc.cFragment.module = fsModule;
+    pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    pipelineDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    pipelineDesc.cTargets[1].format = wgpu::TextureFormat::RGBA8Unorm;
+    pipelineDesc.cTargets[2].format = wgpu::TextureFormat::RGBA8Unorm;
+    pipelineDesc.cFragment.targetCount = 3;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.dimension = wgpu::TextureDimension::e3D;
+    textureDesc.size = {1, 1, 3};
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture renderTarget0 = device.CreateTexture(&textureDesc);
+    wgpu::Texture renderTarget1 = device.CreateTexture(&textureDesc);
+    wgpu::Texture renderTarget2 = device.CreateTexture(&textureDesc);
+
+    utils::ComboRenderPassDescriptor renderPass(
+        {renderTarget0.CreateView(), renderTarget1.CreateView(), renderTarget2.CreateView()});
+    renderPass.cColorAttachments[0].depthSlice = 0;
+    renderPass.cColorAttachments[1].depthSlice = 1;
+    renderPass.cColorAttachments[2].depthSlice = 2;
+
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+    pass.SetPipeline(pipeline);
+    pass.Draw(1);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_TEXTURE_EQ(new ExpectRGBA8(utils::RGBA8::kRed), renderTarget0, {0, 0, 0}, {1, 1, 1}, 0);
+    EXPECT_TEXTURE_EQ(new ExpectRGBA8(utils::RGBA8::kGreen), renderTarget1, {0, 0, 1}, {1, 1, 1},
+                      0);
+    EXPECT_TEXTURE_EQ(new ExpectRGBA8(utils::RGBA8::kBlue), renderTarget2, {0, 0, 2}, {1, 1, 1}, 0);
+}
+
 DAWN_INSTANTIATE_TEST(RenderAttachmentTest,
                       D3D11Backend(),
                       D3D12Backend(),
@@ -98,7 +194,8 @@ DAWN_INSTANTIATE_TEST(RenderAttachmentTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend(),
+                      VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
+                      VulkanBackend({}, {"vulkan_use_dynamic_rendering"}),
                       WebGPUBackend());
 
 }  // anonymous namespace
