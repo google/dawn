@@ -1650,6 +1650,34 @@ TEST_F(IR_ValidatorTest, Scoping_UseAfterNestedDecl_InTerminator) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Scoping_UseBeforeDecl_InControlFlow) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* decl = b.Let("decl", 42_u);
+    auto* if_ = b.If(true);
+    b.Append(if_->True(), [&] {
+        b.Let("use", decl);
+        b.ExitIf(if_);
+    });
+    f->Block()->Append(if_);
+    f->Block()->Append(decl);
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:5:24 error: let: %decl is not in scope
+        %use:u32 = let %decl
+                       ^^^^^
+
+:4:7 note: in block
+      $B2: {  # true
+      ^^^
+
+:9:5 note: %decl declared here
+    %decl:u32 = let 42u
+    ^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, OverrideWithoutCapability) {
     b.Append(mod.root_block, [&] { b.Override("a", 1_u); });
 

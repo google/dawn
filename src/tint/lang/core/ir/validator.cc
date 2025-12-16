@@ -3186,10 +3186,12 @@ void Validator::EndBlock() {
 
 void Validator::QueueInstructions(const Instruction* inst) {
     tasks_.Push([this, inst] {
-        CheckInstruction(inst);
+        // Tasks are processed LIFO, so push the next instruction to the stack before checking the
+        // current instruction, which may need to add more blocks to the stack itself.
         if (inst->next) {
             QueueInstructions(inst->next);
         }
+        CheckInstruction(inst);
     });
 }
 
