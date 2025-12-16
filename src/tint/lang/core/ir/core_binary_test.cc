@@ -215,7 +215,7 @@ TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateShiftLeft) {
-    auto* inst = b.ShiftLeft(mod.Types().i32(), 4_i, 2_i);
+    auto* inst = b.ShiftLeft(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kShiftLeft);
@@ -232,7 +232,7 @@ TEST_F(IR_BinaryTest, CreateShiftLeft) {
 }
 
 TEST_F(IR_BinaryTest, CreateShiftRight) {
-    auto* inst = b.ShiftRight(mod.Types().i32(), 4_i, 2_i);
+    auto* inst = b.ShiftRight(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kShiftRight);

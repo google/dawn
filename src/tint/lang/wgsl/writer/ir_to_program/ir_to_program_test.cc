@@ -1282,7 +1282,7 @@ TEST_F(IRToProgramTest, BinaryOp_ShiftLeft) {
     auto* pb = b.FunctionParam("b", ty.u32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.ShiftLeft(ty.i32(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.ShiftLeft(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : u32) -> i32 {
@@ -1297,7 +1297,7 @@ TEST_F(IRToProgramTest, BinaryOp_ShiftRight) {
     auto* pb = b.FunctionParam("b", ty.u32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.ShiftRight(ty.i32(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.ShiftRight(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : u32) -> i32 {

@@ -1029,10 +1029,10 @@ struct State {
         auto* arg = builtin->Args()[0];
         b.InsertBefore(builtin, [&] {
             auto* conv = b.Convert(ty.i32(), arg);
-            auto* x = b.ShiftLeft(ty.i32(), conv, 16_u);
+            auto* x = b.ShiftLeft(conv, 16_u);
 
             auto* vec = b.Construct(ty.vec2i(), x, conv);
-            auto* v = b.ShiftRight(ty.vec2i(), vec, b.Splat(ty.vec2u(), 16_u));
+            auto* v = b.ShiftRight(vec, b.Splat(ty.vec2u(), 16_u));
 
             auto* flt = b.Convert(ty.vec2f(), v);
             auto* scale = b.Divide(flt, 32767_f);
@@ -1049,10 +1049,10 @@ struct State {
     void Unpack2x16Unorm(core::ir::CoreBuiltinCall* builtin) {
         auto* arg = builtin->Args()[0];
         b.InsertBefore(builtin, [&] {
-            auto* x = b.ShiftLeft(ty.u32(), arg, 16_u);
+            auto* x = b.ShiftLeft(arg, 16_u);
 
             auto* vec = b.Construct(ty.vec2u(), x, arg);
-            auto* v = b.ShiftRight(ty.vec2u(), vec, b.Splat(ty.vec2u(), 16_u));
+            auto* v = b.ShiftRight(vec, b.Splat(ty.vec2u(), 16_u));
 
             auto* flt = b.Convert(ty.vec2f(), v);
             auto* scale = b.Divide(flt, 65535_f);

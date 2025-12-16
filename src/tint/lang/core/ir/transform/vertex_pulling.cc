@@ -355,7 +355,7 @@ struct State {
             // at the first byte. The shift amount is the offset of the byte within a word
             // multiplied by 8 to get the bit offset.
             if (info.attr_byte_offset & 3) {
-                word = b.ShiftRight<u32>(word, u32((info.attr_byte_offset & 3) * 8))->Result();
+                word = b.ShiftRight(word, u32((info.attr_byte_offset & 3) * 8))->Result();
             }
             return word;
         };
@@ -379,22 +379,22 @@ struct State {
             switch (vec->Width()) {
                 case 2:
                     if (bits == 8) {
-                        shift_left = b.ShiftLeft(vec, splat, b.Composite(uvec, 24_u, 16_u));
+                        shift_left = b.ShiftLeft(splat, b.Composite(uvec, 24_u, 16_u));
                     } else if (bits == 16) {
-                        shift_left = b.ShiftLeft(vec, splat, b.Composite(uvec, 16_u, 0_u));
+                        shift_left = b.ShiftLeft(splat, b.Composite(uvec, 16_u, 0_u));
                     } else {
                         TINT_IR_UNREACHABLE(ir);
                     }
                     break;
                 case 4:
                     TINT_IR_ASSERT(ir, bits == 8);
-                    shift_left = b.ShiftLeft(vec, splat, b.Composite(uvec, 24_u, 16_u, 8_u, 0_u));
+                    shift_left = b.ShiftLeft(splat, b.Composite(uvec, 24_u, 16_u, 8_u, 0_u));
                     break;
                 default:
                     TINT_IR_UNREACHABLE(ir);
             }
             // 0000xxxx, 0000yyyy
-            return b.ShiftRight(vec, shift_left, b.Splat(uvec, u32(32 - bits)))->Result();
+            return b.ShiftRight(shift_left, b.Splat(uvec, u32(32 - bits)))->Result();
         };
         // Helper to convert a value to f16 if required by the shader, otherwise returns the f32.
         auto float_value = [&](core::ir::Value* value) -> core::ir::Value* {
@@ -450,7 +450,7 @@ struct State {
                 // ******xx
                 auto* word = b.Bitcast<i32>(load_u32(0));
                 // 000000xx
-                return b.ShiftRight<i32>(b.ShiftLeft<i32>(word, 24_u), 24_u)->Result();
+                return b.ShiftRight(b.ShiftLeft(word, 24_u), 24_u)->Result();
             }
             case VertexFormat::kSint8x2:
                 return load_ivec(0, 8, ty.vec2i());
@@ -460,7 +460,7 @@ struct State {
                 // ****xxxx
                 auto* word = b.Bitcast<i32>(load_u32(0));
                 // 0000xxxx
-                return b.ShiftRight<i32>(b.ShiftLeft<i32>(word, 16_u), 16_u)->Result();
+                return b.ShiftRight(b.ShiftLeft(word, 16_u), 16_u)->Result();
             }
             case VertexFormat::kSint16x2:
                 return load_ivec(0, 16, ty.vec2i());
@@ -671,8 +671,7 @@ struct State {
             case VertexFormat::kUnorm10_10_10_2: {
                 auto* u32s = b.Construct<vec4<u32>>(load_u32(0));
                 // shr = u32s >> vec4u(0, 10, 20, 30);
-                auto* shr =
-                    b.ShiftRight<vec4<u32>>(u32s, b.Composite<vec4<u32>>(0_u, 10_u, 20_u, 30_u));
+                auto* shr = b.ShiftRight(u32s, b.Composite<vec4<u32>>(0_u, 10_u, 20_u, 30_u));
                 // mask = shr & vec4u(0x3FF, 0x3FF, 0x3FF, 0x3);
                 auto* mask = b.And(shr, b.Composite<vec4<u32>>(0x3FF_u, 0x3FF_u, 0x3FF_u, 0x3_u));
                 // vec4f(mask) / vec4f(1023, 1023, 1023, 3);

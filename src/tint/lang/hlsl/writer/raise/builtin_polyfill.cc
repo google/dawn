@@ -616,8 +616,7 @@ struct State {
                                                                  hlsl::BuiltinFn::kF32Tof16, cast));
 
                     auto* x = b.And(b.Swizzle(ty.u32(), r, {0_u}), 0xffff_u);
-                    auto* y =
-                        b.ShiftLeft(ty.u32(), b.And(b.Swizzle(ty.u32(), r, {1_u}), 0xffff_u), 16_u);
+                    auto* y = b.ShiftLeft(b.And(b.Swizzle(ty.u32(), r, {1_u}), 0xffff_u), 16_u);
 
                     auto* s = b.Or(x, y);
                     core::ir::InstructionResult* result = nullptr;
@@ -629,8 +628,8 @@ struct State {
                         }
                         case 4: {
                             auto* z = b.And(b.Swizzle(ty.u32(), r, {2_u}), 0xffff_u);
-                            auto* w = b.ShiftLeft(
-                                ty.u32(), b.And(b.Swizzle(ty.u32(), r, {3_u}), 0xffff_u), 16_u);
+                            auto* w =
+                                b.ShiftLeft(b.And(b.Swizzle(ty.u32(), r, {3_u}), 0xffff_u), 16_u);
 
                             auto* t = b.Or(z, w);
                             auto* cons = b.Construct(ty.vec2u(), s, t);
@@ -727,7 +726,7 @@ struct State {
                     auto* t_low = b.Let(
                         "t_low", b.Call<hlsl::ir::BuiltinCall>(float_ty, BuiltinFn::kF16Tof32, l));
 
-                    auto* h = b.And(b.ShiftRight(uint_ty, v, shift), mask);
+                    auto* h = b.And(b.ShiftRight(v, shift), mask);
                     auto* t_high = b.Let(
                         "t_high", b.Call<hlsl::ir::BuiltinCall>(float_ty, BuiltinFn::kF16Tof32, h));
 
@@ -1509,7 +1508,7 @@ struct State {
                 b.Call<hlsl::ir::BuiltinCall>(ty.vec2u(), hlsl::BuiltinFn::kF32Tof16, args[0]);
 
             auto* lower = b.Swizzle(ty.u32(), bc, {0});
-            auto* upper = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), bc, {1}), 16_u);
+            auto* upper = b.ShiftLeft(b.Swizzle(ty.u32(), bc, {1}), 16_u);
             auto* res = b.Or(lower, upper);
             call->Result()->ReplaceAllUsesWith(res->Result());
         });
@@ -1520,7 +1519,7 @@ struct State {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
             auto* x = b.And(args[0], 0xffff_u);
-            auto* y = b.ShiftRight(ty.u32(), args[0], 16_u);
+            auto* y = b.ShiftRight(args[0], 16_u);
             auto* conv = b.Construct(ty.vec2u(), x, y);
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
@@ -1541,7 +1540,7 @@ struct State {
             auto* res = b.And(conv, b.Splat(ty.vec2i(), 0xffff_i));
 
             auto* lower = b.Swizzle(ty.i32(), res, {0});
-            auto* upper = b.ShiftLeft(ty.i32(), b.Swizzle(ty.i32(), res, {1}), 16_u);
+            auto* upper = b.ShiftLeft(b.Swizzle(ty.i32(), res, {1}), 16_u);
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(), hlsl::BuiltinFn::kAsuint,
                                                     b.Or(lower, upper));
@@ -1553,10 +1552,10 @@ struct State {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
             auto* conv = b.Convert(ty.i32(), args[0]);
-            auto* x = b.ShiftLeft(ty.i32(), conv, 16_u);
+            auto* x = b.ShiftLeft(conv, 16_u);
 
             auto* vec = b.Construct(ty.vec2i(), x, conv);
-            auto* v = b.ShiftRight(ty.vec2i(), vec, b.Composite(ty.vec2u(), 16_u));
+            auto* v = b.ShiftRight(vec, b.Composite(ty.vec2u(), 16_u));
 
             auto* flt = b.Convert(ty.vec2f(), v);
             auto* scale = b.Divide(flt, 32767_f);
@@ -1578,7 +1577,7 @@ struct State {
             auto* round = b.Call(ty.vec2f(), core::BuiltinFn::kRound, mul);
             auto* conv = b.Convert(ty.vec2u(), round);
             auto* lower = b.Swizzle(ty.u32(), conv, {0});
-            auto* upper = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), conv, {1}), 16_u);
+            auto* upper = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {1}), 16_u);
             auto* result = b.Or(lower, upper);
             call->Result()->ReplaceAllUsesWith(result->Result());
         });
@@ -1589,7 +1588,7 @@ struct State {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
             auto* x = b.And(args[0], 0xffff_u);
-            auto* y = b.ShiftRight(ty.u32(), args[0], 16_u);
+            auto* y = b.ShiftRight(args[0], 16_u);
             auto* conv = b.Construct(ty.vec2u(), x, y);
             auto* flt_conv = b.Convert(ty.vec2f(), conv);
             auto* scale = b.Divide(flt_conv, 0xffff_f);
@@ -1610,9 +1609,9 @@ struct State {
             auto* conv = b.Convert(ty.vec4i(), round);
             auto* band = b.And(conv, b.Splat(ty.vec4i(), 0xff_i));
             auto* x = b.Swizzle(ty.i32(), band, {0});
-            auto* y = b.ShiftLeft(ty.i32(), b.Swizzle(ty.i32(), band, {1}), 8_u);
-            auto* z = b.ShiftLeft(ty.i32(), b.Swizzle(ty.i32(), band, {2}), 16_u);
-            auto* w = b.ShiftLeft(ty.i32(), b.Swizzle(ty.i32(), band, {3}), 24_u);
+            auto* y = b.ShiftLeft(b.Swizzle(ty.i32(), band, {1}), 8_u);
+            auto* z = b.ShiftLeft(b.Swizzle(ty.i32(), band, {2}), 16_u);
+            auto* w = b.ShiftLeft(b.Swizzle(ty.i32(), band, {3}), 24_u);
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(), hlsl::BuiltinFn::kAsuint,
                                                     b.Or(x, b.Or(y, b.Or(z, w))));
         });
@@ -1623,11 +1622,11 @@ struct State {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
             auto* conv = b.Convert(ty.i32(), args[0]);
-            auto* x = b.ShiftLeft(ty.i32(), conv, 24_u);
-            auto* y = b.ShiftLeft(ty.i32(), conv, 16_u);
-            auto* z = b.ShiftLeft(ty.i32(), conv, 8_u);
+            auto* x = b.ShiftLeft(conv, 24_u);
+            auto* y = b.ShiftLeft(conv, 16_u);
+            auto* z = b.ShiftLeft(conv, 8_u);
             auto* cons = b.Construct(ty.vec4i(), x, y, z, conv);
-            auto* shr = b.ShiftRight(ty.vec4i(), cons, b.Composite(ty.vec4u(), 24_u));
+            auto* shr = b.ShiftRight(cons, b.Composite(ty.vec4u(), 24_u));
             auto* flt = b.Convert(ty.vec4f(), shr);
             auto* scale = b.Divide(flt, 127_f);
 
@@ -1648,9 +1647,9 @@ struct State {
             auto* round = b.Call(ty.vec4f(), core::BuiltinFn::kRound, mul);
             auto* conv = b.Convert(ty.vec4u(), round);
             auto* x = b.Swizzle(ty.u32(), conv, {0});
-            auto* y = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), conv, {1}), 8_u);
-            auto* z = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), conv, {2}), 16_u);
-            auto* w = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), conv, {3}), 24_u);
+            auto* y = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {1}), 8_u);
+            auto* z = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {2}), 16_u);
+            auto* w = b.ShiftLeft(b.Swizzle(ty.u32(), conv, {3}), 24_u);
             auto* res = b.Or(x, b.Or(y, b.Or(z, w)));
 
             call->Result()->ReplaceAllUsesWith(res->Result());
@@ -1663,9 +1662,9 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* val = args[0];
             auto* x = b.And(val, 0xff_u);
-            auto* y = b.And(b.ShiftRight(ty.u32(), val, 8_u), 0xff_u);
-            auto* z = b.And(b.ShiftRight(ty.u32(), val, 16_u), 0xff_u);
-            auto* w = b.ShiftRight(ty.u32(), val, 24_u);
+            auto* y = b.And(b.ShiftRight(val, 8_u), 0xff_u);
+            auto* z = b.And(b.ShiftRight(val, 16_u), 0xff_u);
+            auto* w = b.ShiftRight(val, 24_u);
             auto* cons = b.Construct(ty.vec4u(), x, y, z, w);
             auto* conv = b.Convert(ty.vec4f(), cons);
             auto* scale = b.Divide(conv, 255_f);

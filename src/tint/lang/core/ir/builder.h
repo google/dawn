@@ -790,45 +790,33 @@ class Builder {
     }
 
     /// Creates an ShiftLeft operation
-    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBinary* ShiftLeft(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(BinaryOp::kShiftLeft, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
-    }
-
-    /// Creates an ShiftLeft operation
-    /// @tparam TYPE the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
-    /// @returns the operation
-    template <typename TYPE, typename LHS, typename RHS>
     ir::CoreBinary* ShiftLeft(LHS&& lhs, RHS&& rhs) {
-        auto* type = ir.Types().Get<TYPE>();
-        return ShiftLeft(type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        CheckForNonDeterministicEvaluation<LHS, RHS>();
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+        return Append(ir.CreateInstruction<ir::CoreBinary>(
+            InstructionResult(lhs_value->Type()), BinaryOp::kShiftLeft, lhs_value, rhs_value));
     }
 
     /// Creates an ShiftRight operation
-    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBinary* ShiftRight(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(BinaryOp::kShiftRight, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
-    }
-
-    /// Creates an ShiftRight operation
-    /// @tparam TYPE the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
-    /// @returns the operation
-    template <typename TYPE, typename LHS, typename RHS>
     ir::CoreBinary* ShiftRight(LHS&& lhs, RHS&& rhs) {
-        auto* type = ir.Types().Get<TYPE>();
-        return ShiftRight(type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        CheckForNonDeterministicEvaluation<LHS, RHS>();
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+        return Append(ir.CreateInstruction<ir::CoreBinary>(
+            InstructionResult(lhs_value->Type()), BinaryOp::kShiftRight, lhs_value, rhs_value));
     }
 
     /// Creates an Add operation

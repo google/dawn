@@ -471,13 +471,11 @@ class Impl {
         auto b = builder_.Append(current_block_);
         if (auto* v = std::get_if<core::ir::Value*>(&lhs)) {
             auto* load = b.Load(*v);
-            auto* ty = load->Result()->Type();
-            auto* inst = current_block_->Append(BinaryOp(ty, load->Result(), rhs, op));
+            auto* inst = current_block_->Append(BinaryOp(load->Result(), rhs, op));
             b.Store(*v, inst);
         } else if (auto ref = std::get_if<VectorRefElementAccess>(&lhs)) {
             auto* load = b.LoadVectorElement(ref->vector, ref->index);
-            auto* ty = load->Result()->Type();
-            auto* inst = b.Append(BinaryOp(ty, load->Result(), rhs, op));
+            auto* inst = b.Append(BinaryOp(load->Result(), rhs, op));
             b.StoreVectorElement(ref->vector, ref->index, inst);
         }
     }
@@ -913,8 +911,6 @@ class Impl {
             }
 
             void EmitBinary(const ast::BinaryExpression* b) {
-                auto* b_sem = impl.program_.Sem().Get(b);
-                auto* ty = b_sem->Type()->Clone(impl.clone_ctx_.type_ctx);
                 auto lhs = GetValue(b->lhs);
                 if (!lhs) {
                     return;
@@ -923,7 +919,7 @@ class Impl {
                 if (!rhs) {
                     return;
                 }
-                auto* inst = impl.BinaryOp(ty, lhs, rhs, b->op);
+                auto* inst = impl.BinaryOp(lhs, rhs, b->op);
                 if (!inst) {
                     return;
                 }
@@ -1300,10 +1296,7 @@ class Impl {
             TINT_ICE_ON_NO_MATCH);
     }
 
-    core::ir::CoreBinary* BinaryOp(const core::type::Type* ty,
-                                   core::ir::Value* lhs,
-                                   core::ir::Value* rhs,
-                                   core::BinaryOp op) {
+    core::ir::CoreBinary* BinaryOp(core::ir::Value* lhs, core::ir::Value* rhs, core::BinaryOp op) {
         switch (op) {
             case core::BinaryOp::kAnd:
                 return builder_.And(lhs, rhs);
@@ -1324,9 +1317,9 @@ class Impl {
             case core::BinaryOp::kGreaterThanEqual:
                 return builder_.GreaterThanEqual(lhs, rhs);
             case core::BinaryOp::kShiftLeft:
-                return builder_.ShiftLeft(ty, lhs, rhs);
+                return builder_.ShiftLeft(lhs, rhs);
             case core::BinaryOp::kShiftRight:
-                return builder_.ShiftRight(ty, lhs, rhs);
+                return builder_.ShiftRight(lhs, rhs);
             case core::BinaryOp::kAdd:
                 return builder_.Add(lhs, rhs);
             case core::BinaryOp::kSubtract:

@@ -1412,7 +1412,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_NeitherAddNorM
         b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Append(loop->Continuing(), [&] {
             // idx << 1ui;
-            b.Store(idx, b.ShiftLeft<u32>(b.Load(idx), 1_u));
+            b.Store(idx, b.ShiftLeft(b.Load(idx), 1_u));
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -3138,7 +3138,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_BinaryOpIsNotCompari
         });
         b.Append(loop->Body(), [&] {
             // shl = idx << 1
-            auto* shl = b.ShiftLeft<i32>(b.Load(idx), 1_u);
+            auto* shl = b.ShiftLeft(b.Load(idx), 1_u);
             binary = b.LessThan(10_i, shl);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
@@ -12649,7 +12649,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_U32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftLeft = idx << idy
-                shiftLeft = b.ShiftLeft<u32>(loadx, loady);
+                shiftLeft = b.ShiftLeft(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -12778,7 +12778,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_I32_NonZero) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftLeft = idx << idy
-                shiftLeft = b.ShiftLeft<i32>(loadx, loady);
+                shiftLeft = b.ShiftLeft(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -12907,7 +12907,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_I32_Zero) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftLeft = idx << idy
-                shiftLeft = b.ShiftLeft<i32>(loadx, loady);
+                shiftLeft = b.ShiftLeft(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -13036,7 +13036,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_Negative) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftLeft = idx << idy
-                shiftLeft = b.ShiftLeft<i32>(loadx, loady);
+                shiftLeft = b.ShiftLeft(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -13160,7 +13160,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_NoLessThan32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftLeft = idx << idy
-                shiftLeft = b.ShiftLeft<u32>(loadx, loady);
+                shiftLeft = b.ShiftLeft(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -13284,7 +13284,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_NoLessThan32) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftLeft = idx << idy
-                shiftLeft = b.ShiftLeft<i32>(loadx, loady);
+                shiftLeft = b.ShiftLeft(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -13408,7 +13408,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_Overflow) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftLeft = idx << idy
-                shiftLeft = b.ShiftLeft<u32>(loadx, loady);
+                shiftLeft = b.ShiftLeft(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -13518,7 +13518,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_HighestValue_Overflow)
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
 
             auto* loadx = b.Load(idx);
-            shiftLeft = b.ShiftLeft<u32>(u32::Highest(), loadx);
+            shiftLeft = b.ShiftLeft(u32::Highest(), loadx);
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -13608,7 +13608,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_Overflow) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftLeft = idx << idy
-                shiftLeft = b.ShiftLeft<i32>(loadx, loady);
+                shiftLeft = b.ShiftLeft(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -13718,7 +13718,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_HighestValue_Overflow)
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
 
             auto* loadx = b.Load(idx);
-            shiftLeft = b.ShiftLeft<i32>(i32::Highest(), loadx);
+            shiftLeft = b.ShiftLeft(i32::Highest(), loadx);
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {
@@ -13808,7 +13808,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_U32_NonZero) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftRight = idx >> idy
-                shiftRight = b.ShiftRight<u32>(loadx, loady);
+                shiftRight = b.ShiftRight(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -13937,7 +13937,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_I32_NonZero) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftRight = idx >> idy
-                shiftRight = b.ShiftRight<i32>(loadx, loady);
+                shiftRight = b.ShiftRight(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -14066,7 +14066,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_U32_Zero) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftRight = idx >> idy
-                shiftRight = b.ShiftRight<u32>(loadx, loady);
+                shiftRight = b.ShiftRight(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -14195,7 +14195,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_I32_Zero) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftRight = idx >> idy
-                shiftRight = b.ShiftRight<i32>(loadx, loady);
+                shiftRight = b.ShiftRight(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -14324,7 +14324,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_I32_Negative) {
                 auto* loadx = b.Load(idx);
                 auto* loady = b.Load(idy);
                 // shiftRight = idx >> idy
-                shiftRight = b.ShiftRight<i32>(loadx, loady);
+                shiftRight = b.ShiftRight(loadx, loady);
                 b.Continue(loop2);
             });
             b.Append(loop2->Continuing(), [&] {
@@ -14435,7 +14435,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_U32_NoLessThan32) {
             auto* loadx = b.Load(idx);
 
             // shiftRight = u32::HighestValue >> idx
-            shiftRight = b.ShiftRight<u32>(u32::Highest(), loadx);
+            shiftRight = b.ShiftRight(u32::Highest(), loadx);
 
             b.Continue(loop);
         });
@@ -14513,7 +14513,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_I32_NoLessThan32) {
             auto* loadx = b.Load(idx);
 
             // shiftRight = i32::Highest() >> idx
-            shiftRight = b.ShiftRight<i32>(i32::Highest(), loadx);
+            shiftRight = b.ShiftRight(i32::Highest(), loadx);
 
             b.Continue(loop);
         });

@@ -178,7 +178,7 @@ struct State {
         }
         // Note: Using bitwise-and and shift instead of modulo and divide here was necessary to
         // avoid an FXC miscompile. See https://crbug.com/454366353.
-        return b.ShiftRight(ty.u32(), b.And(byte_idx, 15_u), 2_u)->Result();
+        return b.ShiftRight(b.And(byte_idx, 15_u), 2_u)->Result();
     }
 
     void Access(core::ir::Access* a,

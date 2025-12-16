@@ -317,7 +317,7 @@ struct State {
             v = b.Convert(ty.vec4i(), v)->Result();
             v = b.Bitcast(vec4u, v)->Result();
             v = b.And(v, b.Splat(vec4u, 0xff_u))->Result();
-            v = b.ShiftLeft(vec4u, v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
+            v = b.ShiftLeft(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
 
             auto* x = b.Access(ty.u32(), v, 0_u);
             auto* y = b.Access(ty.u32(), v, 1_u);
@@ -348,7 +348,7 @@ struct State {
             v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result();
             v = b.Convert(vec4u, v)->Result();
             v = b.And(v, b.Splat(vec4u, 0xff_u))->Result();
-            v = b.ShiftLeft(vec4u, v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
+            v = b.ShiftLeft(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
 
             auto* x = b.Access(ty.u32(), v, 0_u);
             auto* y = b.Access(ty.u32(), v, 1_u);
@@ -375,9 +375,9 @@ struct State {
             // Shift left to put the 8th bit of each number into the sign bit location, we then
             // convert to an i32 and shift back, so the sign bit will be set as needed. The bits
             // outside the bottom 8 are then masked off.
-            v = b.ShiftLeft(vec4u, v, b.Construct(vec4u, 24_u, 16_u, 8_u, 0_u))->Result();
+            v = b.ShiftLeft(v, b.Construct(vec4u, 24_u, 16_u, 8_u, 0_u))->Result();
             v = b.Bitcast(vec4i, v)->Result();
-            v = b.ShiftRight(vec4i, v, b.Splat(vec4u, 24_u))->Result();
+            v = b.ShiftRight(v, b.Splat(vec4u, 24_u))->Result();
             v = b.Convert(vec4f, v)->Result();
             v = b.Divide(v, b.Splat(vec4f, 127_f))->Result();
             v = b.Max(v, b.Splat(vec4f, -1_f))->Result();
@@ -396,7 +396,7 @@ struct State {
             auto* vec4u = ty.vec4u();
 
             auto* v = b.Construct(vec4u, arg)->Result();
-            v = b.ShiftRight(vec4u, v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
+            v = b.ShiftRight(v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result();
             v = b.And(v, b.Splat(vec4u, 0xff_u))->Result();
             v = b.Convert(vec4f, v)->Result();
             v = b.Divide(v, b.Splat(vec4f, 255_f))->Result();
@@ -461,16 +461,16 @@ struct State {
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
                                b.LessThanEqual(x, V(0x0000ffff)));
-            x = b.ShiftLeft(uint_ty, x, b16)->Result();
+            x = b.ShiftLeft(x, b16)->Result();
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(8),
                               b.LessThanEqual(x, V(0x00ffffff)));
-            x = b.ShiftLeft(uint_ty, x, b8)->Result();
+            x = b.ShiftLeft(x, b8)->Result();
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(4),
                               b.LessThanEqual(x, V(0x0fffffff)));
-            x = b.ShiftLeft(uint_ty, x, b4)->Result();
+            x = b.ShiftLeft(x, b4)->Result();
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(2),
                               b.LessThanEqual(x, V(0x3fffffff)));
-            x = b.ShiftLeft(uint_ty, x, b2)->Result();
+            x = b.ShiftLeft(x, b2)->Result();
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
                               b.LessThanEqual(x, V(0x7fffffff)));
             auto* b0 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(x, V(0)));
@@ -516,16 +516,16 @@ struct State {
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
                                b.Equal(b.And(x, V(0x0000ffff)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b16)->Result();
+            x = b.ShiftRight(x, b16)->Result();
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(8),
                               b.Equal(b.And(x, V(0x000000ff)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b8)->Result();
+            x = b.ShiftRight(x, b8)->Result();
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(4),
                               b.Equal(b.And(x, V(0x0000000f)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b4)->Result();
+            x = b.ShiftRight(x, b4)->Result();
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(2),
                               b.Equal(b.And(x, V(0x00000003)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b2)->Result();
+            x = b.ShiftRight(x, b2)->Result();
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
                               b.Equal(b.And(x, V(0x00000001)), V(0)));
             auto* b0 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(x, V(0)));
@@ -635,12 +635,11 @@ struct State {
                     auto* shl = b.Subtract(32_u, t);
                     auto* shr = b.Add(shl, s);
                     auto* f1 = b.Zero(result_ty);
-                    auto* t1 = b.ShiftLeft(result_ty, e, b.Construct(uint_ty, shl));
+                    auto* t1 = b.ShiftLeft(e, b.Construct(uint_ty, shl));
                     auto* shl_result =
                         b.Call(result_ty, core::BuiltinFn::kSelect, f1, t1, b.LessThan(shl, 32_u));
-                    auto* f2 =
-                        b.ShiftRight(result_ty, b.ShiftRight(result_ty, shl_result, V(31)), V(1));
-                    auto* t2 = b.ShiftRight(result_ty, shl_result, b.Construct(uint_ty, shr));
+                    auto* f2 = b.ShiftRight(b.ShiftRight(shl_result, V(31)), V(1));
+                    auto* t2 = b.ShiftRight(shl_result, b.Construct(uint_ty, shr));
                     b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, f2, t2,
                                      b.LessThan(shr, 32_u));
                 });
@@ -688,16 +687,16 @@ struct State {
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(16), V(0),
                                b.Equal(b.And(x, V(0xffff0000)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b16)->Result();
+            x = b.ShiftRight(x, b16)->Result();
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(8), V(0),
                               b.Equal(b.And(x, V(0x0000ff00)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b8)->Result();
+            x = b.ShiftRight(x, b8)->Result();
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(4), V(0),
                               b.Equal(b.And(x, V(0x000000f0)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b4)->Result();
+            x = b.ShiftRight(x, b4)->Result();
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(2), V(0),
                               b.Equal(b.And(x, V(0x0000000c)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b2)->Result();
+            x = b.ShiftRight(x, b2)->Result();
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(1), V(0),
                               b.Equal(b.And(x, V(0x00000002)), V(0)));
             Instruction* result = b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b1))));
@@ -744,16 +743,16 @@ struct State {
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
                                b.Equal(b.And(x, V(0x0000ffff)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b16)->Result();
+            x = b.ShiftRight(x, b16)->Result();
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(8),
                               b.Equal(b.And(x, V(0x000000ff)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b8)->Result();
+            x = b.ShiftRight(x, b8)->Result();
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(4),
                               b.Equal(b.And(x, V(0x0000000f)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b4)->Result();
+            x = b.ShiftRight(x, b4)->Result();
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(2),
                               b.Equal(b.And(x, V(0x00000003)), V(0)));
-            x = b.ShiftRight(uint_ty, x, b2)->Result();
+            x = b.ShiftRight(x, b2)->Result();
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
                               b.Equal(b.And(x, V(0x00000001)), V(0)));
             Instruction* result = b.Or(b16, b.Or(b8, b.Or(b4, b.Or(b2, b1))));
@@ -831,17 +830,17 @@ struct State {
 
                 b.InsertBefore(call, [&] {
                     auto* oc = b.Add(offset, count);
-                    auto* t1 = b.ShiftLeft<u32>(1_u, offset);
+                    auto* t1 = b.ShiftLeft(1_u, offset);
                     auto* s1 = b.Call<u32>(core::BuiltinFn::kSelect, b.Zero<u32>(), t1,
                                            b.LessThan(offset, 32_u));
-                    auto* t2 = b.ShiftLeft<u32>(1_u, oc);
+                    auto* t2 = b.ShiftLeft(1_u, oc);
                     auto* s2 = b.Call<u32>(core::BuiltinFn::kSelect, b.Zero<u32>(), t2,
                                            b.LessThan(oc, 32_u));
                     auto* mask_lhs = b.Subtract(s1, 1_u);
                     auto* mask_rhs = b.Subtract(s2, 1_u);
                     auto* mask = b.Xor(mask_lhs, mask_rhs);
                     auto* f3 = b.Zero(result_ty);
-                    auto* t3 = b.ShiftLeft(result_ty, newbits, b.Construct(uint_ty, offset));
+                    auto* t3 = b.ShiftLeft(newbits, b.Construct(uint_ty, offset));
                     auto* s3 = b.Call(result_ty, core::BuiltinFn::kSelect, f3, t3,
                                       b.LessThan(offset, 32_u));
                     auto* result_lhs = b.And(s3, mask_as_result_type(mask));
@@ -1010,8 +1009,7 @@ struct State {
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
             auto* x_u32 = b.Bitcast(vec4u, x);
-            auto* x_u8 =
-                b.ShiftLeft(vec4u, b.And(x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
+            auto* x_u8 = b.ShiftLeft(b.And(x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, x_u8,
                              b.Construct(vec4u, (b.Constant(u32(1)))));
         });
@@ -1031,7 +1029,7 @@ struct State {
 
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
-            auto* x_u8 = b.ShiftLeft(vec4u, b.And(x, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
+            auto* x_u8 = b.ShiftLeft(b.And(x, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, x_u8,
                              b.Construct(vec4u, (b.Constant(u32(1)))));
         });
@@ -1060,8 +1058,7 @@ struct State {
             auto* max_i8_vec4 = b.Construct(vec4i, b.Constant(i32(127)));
             auto* x_clamp = b.Clamp(x, min_i8_vec4, max_i8_vec4);
             auto* x_u32 = b.Bitcast(vec4u, x_clamp);
-            auto* x_u8 =
-                b.ShiftLeft(vec4u, b.And(x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
+            auto* x_u8 = b.ShiftLeft(b.And(x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, x_u8,
                              b.Construct(vec4u, (b.Constant(u32(1)))));
         });
@@ -1087,7 +1084,7 @@ struct State {
             auto* min_u8_vec4 = b.Construct(vec4u, b.Constant(u32(0)));
             auto* max_u8_vec4 = b.Construct(vec4u, b.Constant(u32(255)));
             auto* x_clamp = b.Clamp(x, min_u8_vec4, max_u8_vec4);
-            auto* x_u8 = b.ShiftLeft(vec4u, x_clamp, n);
+            auto* x_u8 = b.ShiftLeft(x_clamp, n);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, x_u8,
                              b.Construct(vec4u, (b.Constant(u32(1)))));
         });
@@ -1111,8 +1108,8 @@ struct State {
             auto* n = b.Construct(vec4u, b.Constant(u32(24)), b.Constant(u32(16)),
                                   b.Constant(u32(8)), b.Constant(u32(0)));
             auto* x_splat = b.Construct(vec4u, x);
-            auto* x_vec4i = b.Bitcast(vec4i, b.ShiftLeft(vec4u, x_splat, n));
-            result = b.ShiftRight(vec4i, x_vec4i, b.Construct(vec4u, b.Constant(u32(24))));
+            auto* x_vec4i = b.Bitcast(vec4i, b.ShiftLeft(x_splat, n));
+            result = b.ShiftRight(x_vec4i, b.Construct(vec4u, b.Constant(u32(24))));
         });
         return result;
     }
@@ -1141,7 +1138,7 @@ struct State {
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
             auto* x_splat = b.Construct(vec4u, x);
-            auto* x_vec4u = b.ShiftRight(vec4u, x_splat, n);
+            auto* x_vec4u = b.ShiftRight(x_splat, n);
             result = b.And(x_vec4u, b.Construct(vec4u, b.Constant(u32(0xff))));
         });
         return result;
