@@ -634,6 +634,7 @@ source_set("end2end_tests_sources") {
     "end2end/CopyExternalTextureForBrowserTests.cpp",
     "end2end/CopyTests.cpp",
     "end2end/CopyTextureForBrowserTests.cpp",
+    "end2end/CreateDestroyTests.cpp",
     "end2end/CreatePipelineAsyncTests.cpp",
     "end2end/CullingTests.cpp",
     "end2end/DebugMarkerTests.cpp",
