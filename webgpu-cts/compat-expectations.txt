@@ -90,7 +90,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2025-12-11 08:19:44PM
+# Last rolled: 2025-12-16 07:37:58AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -1669,6 +1669,7 @@ crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,createTexture:mipLevelC
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="2d";format="depth16unorm" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="2d";format="rg8sint" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="3d";format="astc-5x4-unorm-srgb" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="r32float";dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rgba8unorm";dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux renderer-skia-vulkan ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="flipY";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="rg16float";dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r8unorm";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
