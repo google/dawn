@@ -1452,7 +1452,7 @@ ResourceTableBase* DeviceBase::APICreateResourceTable(const ResourceTableDescrip
     Ref<ResourceTableBase> result;
     if (ConsumedError(CreateResourceTable(descriptor), &result,
                       "calling %s.CreateResourceTable(%s).", this, descriptor)) {
-        result = ResourceTableBase::MakeError(this);
+        result = ResourceTableBase::MakeError(this, descriptor);
     }
     return ReturnToAPI(std::move(result));
 }

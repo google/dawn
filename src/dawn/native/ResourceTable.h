@@ -40,7 +40,8 @@ MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
 
 class ResourceTableBase : public ApiObjectBase {
   public:
-    static Ref<ResourceTableBase> MakeError(DeviceBase* device, StringView label = {});
+    static Ref<ResourceTableBase> MakeError(DeviceBase* device,
+                                            const ResourceTableDescriptor* descriptor);
 
     ObjectType GetType() const override;
 
@@ -58,12 +59,13 @@ class ResourceTableBase : public ApiObjectBase {
     DynamicArrayState* GetDynamicArrayState();
 
   private:
-    ResourceTableBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
+    ResourceTableBase(DeviceBase* device,
+                      const ResourceTableDescriptor* descriptor,
+                      ObjectBase::ErrorTag tag);
 
     // TODO(https://issues.chromium.org/463925499): Inline the functionality of DynamicArrayState in
     // ResourceTable once bindless bindgroup support is removed.
     Ref<DynamicArrayState> mDynamicArray;
-    bool mDestroyed = false;
 };
 
 }  // namespace dawn::native

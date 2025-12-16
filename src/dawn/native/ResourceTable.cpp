@@ -58,12 +58,23 @@ ResourceTableBase::ResourceTableBase(DeviceBase* device, const ResourceTableDesc
     GetObjectTrackingList()->Track(this);
 }
 
-ResourceTableBase::ResourceTableBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
-    : ApiObjectBase(device, tag, label), mDestroyed(true) {}
+ResourceTableBase::ResourceTableBase(DeviceBase* device,
+                                     const ResourceTableDescriptor* descriptor,
+                                     ObjectBase::ErrorTag tag)
+    : ApiObjectBase(device, tag, descriptor->label) {
+    // Create a DynamicArrayState even for an error resource table because we need to do state
+    // tracking used for the validation of synchronous errors. However skip creating it for tables
+    // above the limit because that's caught on the content-timeline as well.
+    if (descriptor->size <= device->GetLimits().resourceTableLimits.maxResourceTableSize) {
+        mDynamicArray = AcquireRef(new DynamicArrayState(device, BindingIndex(descriptor->size),
+                                                         wgpu::DynamicBindingKind::SampledTexture));
+    }
+}
 
 // static
-Ref<ResourceTableBase> ResourceTableBase::MakeError(DeviceBase* device, StringView label) {
-    return AcquireRef(new ResourceTableBase(device, ObjectBase::kError, label));
+Ref<ResourceTableBase> ResourceTableBase::MakeError(DeviceBase* device,
+                                                    const ResourceTableDescriptor* descriptor) {
+    return AcquireRef(new ResourceTableBase(device, descriptor, ObjectBase::kError));
 }
 
 ObjectType ResourceTableBase::GetType() const {
@@ -79,19 +90,22 @@ DynamicArrayState* ResourceTableBase::GetDynamicArrayState() {
 }
 
 void ResourceTableBase::DestroyImpl() {
-    if (mDynamicArray) {
+    if (!mDynamicArray->IsDestroyed()) {
         mDynamicArray->Destroy();
     }
-    mDestroyed = true;
 }
 
 void ResourceTableBase::APIDestroy() {
-    Destroy();  // Calls DestroyImpl
+    // Don't just call Destroy() because it skips running on error objects.
+    if (!mDynamicArray->IsDestroyed()) {
+        mDynamicArray->Destroy();
+    }
 }
 
 MaybeError ResourceTableBase::ValidateCanUseInSubmitNow() const {
     DAWN_ASSERT(!IsError());
-    DAWN_INVALID_IF(mDestroyed, "%s used while destroyed.", this);
+    DAWN_ASSERT(mDynamicArray != nullptr);
+    DAWN_INVALID_IF(mDynamicArray->IsDestroyed(), "%s used while destroyed.", this);
     return {};
 }
 
