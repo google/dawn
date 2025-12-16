@@ -437,11 +437,7 @@ def _get_remote_head_revision(remote_url: str) -> str:
         remote_url,
         'HEAD',
     ]
-    proc = subprocess.run(cmd,
-                          check=True,
-                          text=True,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.STDOUT)
+    proc = subprocess.run(cmd, check=True, capture_output=True, text=True)
     head_revision = proc.stdout.strip().split()[0]
     return head_revision
 
