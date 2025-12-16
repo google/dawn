@@ -423,11 +423,9 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::DisableBaseInstance, !haveBaseVertexBaseInstance);
     }
 
-    // Vertex buffer robustness is implemented by using programmable vertex pulling. Enable
-    // that code path if it isn't explicitly disabled.
-    if (!deviceToggles->IsEnabled(Toggle::DisableRobustness)) {
-        deviceToggles->Default(Toggle::MetalEnableVertexPulling, true);
-    }
+    // Vertex buffer robustness is implemented by using programmable vertex pulling. The
+    // VertexPulling transform also handles non-4-byte aligned vertex buffer accesses.
+    deviceToggles->Default(Toggle::MetalEnableVertexPulling, true);
 
     // Shader `discard_fragment` changed semantics to be uniform in Metal 2.3+. See section 6.10.1.3
     // of the Metal Spec (v3.2).
