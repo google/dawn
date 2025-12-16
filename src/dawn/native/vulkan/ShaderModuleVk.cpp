@@ -360,10 +360,15 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         "Vulkan.CompileShaderToSPIRV");
 
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
-    // Validate and if required dump the compiled SPIR-V code.
-    const bool spv14 = GetDevice()->IsToggleEnabled(Toggle::UseSpirv14);
-    DAWN_TRY(
-        ValidateSpirv(GetDevice(), compilation->spirv.data(), compilation->spirv.size(), spv14));
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "Vulkan.ValidateSpirv");
+
+        // Validate and if required dump the compiled SPIR-V code.
+        const bool spv14 = GetDevice()->IsToggleEnabled(Toggle::UseSpirv14);
+        DAWN_TRY(ValidateSpirv(GetDevice(), compilation->spirv.data(), compilation->spirv.size(),
+                               spv14));
+    }
+
     if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
         DumpSpirv(GetDevice(), compilation->spirv.data(), compilation->spirv.size());
     }
