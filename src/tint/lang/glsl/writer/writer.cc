@@ -215,6 +215,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                 if (member->Attributes().builtin == core::BuiltinValue::kClipDistances) {
                     return Failure("clip_distances is not supported by the GLSL backend");
                 }
+                if (member->Attributes().builtin == core::BuiltinValue::kCullDistance) {
+                    return Failure("cull_distance is not supported by the GLSL backend");
+                }
             }
         }
     }

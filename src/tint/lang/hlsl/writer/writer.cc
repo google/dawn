@@ -166,6 +166,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             options.compiler == Options::Compiler::kFXC) {
             return Failure("barycentric_coord is not supported by the FXC HLSL backend");
         }
+        if (attributes.builtin == core::BuiltinValue::kCullDistance) {
+            return Failure("cull_distance is not supported by the HLSL backend");
+        }
         if (options.truncate_interstage_variables) {
             if (attributes.location >= 30u) {
                 return Failure("too many locations for interstage variable truncation");

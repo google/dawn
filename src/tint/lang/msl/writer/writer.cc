@@ -80,11 +80,52 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
     }
 
+    // Check for unsupported shader IO builtins.
+    auto check_io_attributes = [&](const core::IOAttributes& attributes) -> Result<SuccessType> {
+        if (attributes.builtin == core::BuiltinValue::kCullDistance) {
+            return Failure("cull_distance is not supported by the MSL backend");
+        }
+        return Success;
+    };
+
     core::ir::Function* ep_func = nullptr;
     for (auto* f : ir.functions) {
         if (!f->IsEntryPoint()) {
             continue;
         }
+
+        // Check input attributes.
+        for (auto* param : f->Params()) {
+            if (auto* str = param->Type()->As<core::type::Struct>()) {
+                for (auto* member : str->Members()) {
+                    auto res = check_io_attributes(member->Attributes());
+                    if (res != Success) {
+                        return res;
+                    }
+                }
+            } else {
+                auto res = check_io_attributes(param->Attributes());
+                if (res != Success) {
+                    return res;
+                }
+            }
+        }
+
+        // Check output attributes.
+        if (auto* str = f->ReturnType()->As<core::type::Struct>()) {
+            for (auto* member : str->Members()) {
+                auto res = check_io_attributes(member->Attributes());
+                if (res != Success) {
+                    return res;
+                }
+            }
+        } else {
+            auto res = check_io_attributes(f->ReturnAttributes());
+            if (res != Success) {
+                return res;
+            }
+        }
+
         if (ir.NameOf(f).NameView() == options.entry_point_name) {
             ep_func = f;
             break;
