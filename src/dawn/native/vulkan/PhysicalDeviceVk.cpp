@@ -976,7 +976,9 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // TODO(crbug.com/437807243): If newer driver version without bug is released then we can
         // gate this on driver version.
         deviceToggles->Default(Toggle::VulkanIncompletePipelineCacheWorkaround, true);
+    }
 
+    if (gpu_info::IsImgTec(GetVendorId())) {
         // crbug.com/443906252: Polyfill for case switch with large ranges.
         deviceToggles->Default(Toggle::VulkanPolyfillSwitchWithIf, true);
     }
