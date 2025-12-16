@@ -1705,36 +1705,45 @@ void Validator::RunStructuralSoundnessChecks() {
 }
 
 diag::Diagnostic& Validator::AddError(const Instruction* inst) {
-    diagnostics_.ReserveAdditional(2);  // Ensure diagnostics don't resize alive after AddNote()
     auto src = Disassemble().InstructionSource(inst);
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (!block_stack_.IsEmpty()) {
         AddNote(block_stack_.Back()) << "in block";
+
+        // Adding the note may trigger a resize and invalidate the error diagnostic reference, so we
+        // need to get a new reference to the error diagnostic here.
+        return *(diagnostics_.end() - 2);
     }
     return diag;
 }
 
 diag::Diagnostic& Validator::AddError(const Instruction* inst, size_t idx) {
-    diagnostics_.ReserveAdditional(2);  // Ensure diagnostics don't resize alive after AddNote()
     auto src =
         Disassemble().OperandSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (!block_stack_.IsEmpty()) {
         AddNote(block_stack_.Back()) << "in block";
+
+        // Adding the note may trigger a resize and invalidate the error diagnostic reference, so we
+        // need to get a new reference to the error diagnostic here.
+        return *(diagnostics_.end() - 2);
     }
     return diag;
 }
 
 diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx) {
-    diagnostics_.ReserveAdditional(2);  // Ensure diagnostics don't resize alive after AddNote()
     auto src =
         Disassemble().ResultSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (!block_stack_.IsEmpty()) {
         AddNote(block_stack_.Back()) << "in block";
+
+        // Adding the note may trigger a resize and invalidate the error diagnostic reference, so we
+        // need to get a new reference to the error diagnostic here.
+        return *(diagnostics_.end() - 2);
     }
     return diag;
 }
@@ -3254,6 +3263,10 @@ void Validator::EndBlock() {
 }
 
 void Validator::QueueInstructions(const Instruction* inst) {
+    if (diagnostics_.ContainsErrors()) {
+        return;
+    }
+
     tasks_.Push([this, inst] {
         // Tasks are processed LIFO, so push the next instruction to the stack before checking the
         // current instruction, which may need to add more blocks to the stack itself.

@@ -974,7 +974,11 @@ TEST_F(IR_ValidatorTest, Continue_InLoopInit) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* loop = b.Loop();
-        b.Append(loop->Initializer(), [&] { b.Continue(loop); });
+        b.Append(loop->Initializer(), [&]() {
+            auto* if_ = b.If(true);
+            b.Append(if_->True(), [&]() { b.Continue(loop); });
+            b.NextIteration(loop);
+        });
         b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Return(f);
     });
@@ -982,9 +986,9 @@ TEST_F(IR_ValidatorTest, Continue_InLoopInit) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:5:9 error: continue: must only be called from loop body
-        continue  # -> $B4
-        ^^^^^^^^
+                testing::HasSubstr(R"(:7:13 error: continue: must only be called from loop body
+            continue  # -> $B5
+            ^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1005,16 +1009,20 @@ TEST_F(IR_ValidatorTest, Continue_InLoopContinuing) {
     b.Append(f->Block(), [&] {
         auto* loop = b.Loop();
         b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
-        b.Append(loop->Continuing(), [&] { b.Continue(loop); });
+        b.Append(loop->Continuing(), [&]() {
+            auto* if_ = b.If(true);
+            b.Append(if_->True(), [&]() { b.Continue(loop); });
+            b.NextIteration(loop);
+        });
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:8:9 error: continue: must only be called from loop body
-        continue  # -> $B3
-        ^^^^^^^^
+                testing::HasSubstr(R"(:10:13 error: continue: must only be called from loop body
+            continue  # -> $B3
+            ^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1856,28 +1864,6 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverLoop) {
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuing) {
     auto* loop = b.Loop();
 
-    loop->Continuing()->Append(b.ExitLoop(loop));
-    loop->Body()->Append(b.Continue(loop));
-
-    auto* f = b.Function("my_func", ty.void_());
-
-    b.Append(f->Block(), [&] {
-        b.Append(loop);
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:8:9 error: exit_loop: loop exit jumps out of continuing block
-        exit_loop  # loop_1
-        ^^^^^^^^^
-)")) << res.Failure();
-}
-
-TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuingNested) {
-    auto* loop = b.Loop();
-
     b.Append(loop->Continuing(), [&]() {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&]() { b.ExitLoop(loop); });
@@ -1904,31 +1890,6 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuingNested) {
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializer) {
-    auto* loop = b.Loop();
-
-    loop->Initializer()->Append(b.ExitLoop(loop));
-    loop->Continuing()->Append(b.NextIteration(loop));
-
-    b.Append(loop->Body(), [&] { b.Continue(loop); });
-
-    auto* f = b.Function("my_func", ty.void_());
-
-    b.Append(f->Block(), [&] {
-        b.Append(loop);
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(R"(:5:9 error: exit_loop: loop exit not permitted in loop initializer
-        exit_loop  # loop_1
-        ^^^^^^^^^
-)")) << res.Failure();
-}
-
-TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializerNested) {
     auto* loop = b.Loop();
 
     b.Append(loop->Initializer(), [&]() {
