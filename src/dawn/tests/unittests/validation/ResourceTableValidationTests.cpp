@@ -350,6 +350,41 @@ TEST_F(ResourceTableValidationTest,
     }
 }
 
+// Test that GetBindGroupLayout is valid for one less BGL if resource tables are used.
+TEST_F(ResourceTableValidationTest, GetBindGroupLayoutValidForOneLessIndex) {
+    // Default behavior case: GetBGL is valid until kMaxBindGroups - 1 when no resource table is
+    // used.
+    {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.layout = nullptr;
+        csDesc.compute.module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_resource_table;
+            @compute @workgroup_size(1) fn main() {
+            }
+        )");
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+        pipeline.GetBindGroupLayout(kMaxBindGroups - 1);
+        ASSERT_DEVICE_ERROR(pipeline.GetBindGroupLayout(kMaxBindGroups));
+    }
+
+    // Resource table case: GetBGL is valid until kMaxBindGroups - 2.
+    {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.layout = nullptr;
+        csDesc.compute.module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_resource_table;
+            @compute @workgroup_size(1) fn main() {
+                _ = hasResource<texture_2d<f32>>(0);
+            }
+        )");
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+        pipeline.GetBindGroupLayout(kMaxBindGroups - 2);
+        ASSERT_DEVICE_ERROR(pipeline.GetBindGroupLayout(kMaxBindGroups - 1));
+    }
+}
+
 // Tests calling CommandEncoder::SetResourceTable
 TEST_F(ResourceTableValidationTest, CommandEncoder_SetResourceTable) {
     // Failure case: invalid encoder state

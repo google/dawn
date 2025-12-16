@@ -342,9 +342,18 @@ MaybeError PipelineBase::ValidateGetBindGroupLayout(BindGroupIndex groupIndex) {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
     DAWN_TRY(GetDevice()->ValidateObject(mLayout.Get()));
-    DAWN_INVALID_IF(groupIndex >= kMaxBindGroupsTyped,
-                    "Bind group layout index (%u) exceeds the maximum number of bind groups (%u).",
-                    groupIndex, kMaxBindGroups);
+
+    if (mLayout->UsesResourceTable()) {
+        DAWN_INVALID_IF(groupIndex >= kMaxBindGroupsTyped - BindGroupIndex(1),
+                        "Bind group layout index (%u) exceeds or equals the maximum number of bind "
+                        "groups (%u) - 1 (one slot reserved for the resource table).",
+                        groupIndex, kMaxBindGroups);
+    } else {
+        DAWN_INVALID_IF(groupIndex >= kMaxBindGroupsTyped,
+                        "Bind group layout index (%u) exceeds or equals the maximum number of bind "
+                        "groups (%u).",
+                        groupIndex, kMaxBindGroups);
+    }
     return {};
 }
 
