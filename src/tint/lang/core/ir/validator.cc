@@ -3139,6 +3139,11 @@ void Validator::CheckSubgroupSize(const Function* func) {
     }
 
     auto subgroup_size = func->SubgroupSize().value();
+    if (subgroup_size == nullptr) {
+        AddError(func) << "a @subgroup_size param must have a value";
+        return;
+    }
+
     if (!subgroup_size->Type()) {
         AddError(func) << "a @subgroup_size param is missing a type";
         return;

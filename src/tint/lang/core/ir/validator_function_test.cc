@@ -2631,6 +2631,22 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_NonCompute) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_SubgroupSize_Nullptr) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
+    f->SetSubgroupSize(nullptr);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:1:1 error: a @subgroup_size param must have a value
+%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(undef) func():void {
+^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamWrongType) {
     auto* f = ComputeEntryPoint();
     f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
