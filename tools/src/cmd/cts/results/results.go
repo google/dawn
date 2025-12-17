@@ -31,6 +31,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 
 	"dawn.googlesource.com/dawn/tools/src/auth"
@@ -87,13 +88,14 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	}
 
 	// Open output file
-	output := os.Stdout
+	var output io.Writer = os.Stdout
 	if c.flags.output != "-" {
-		output, err = os.Create(c.flags.output)
+		f, err := cfg.OsWrapper.Create(c.flags.output)
 		if err != nil {
 			return fmt.Errorf("failed to open output file '%v': %w", c.flags.output, err)
 		}
-		defer output.Close()
+		defer f.Close()
+		output = f
 	}
 
 	return result.Write(output, results)
