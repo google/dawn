@@ -34,6 +34,7 @@
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/RenderPipeline.h"
+#include "dawn/native/ResourceTable.h"
 #include "dawn/native/Texture.h"
 
 namespace dawn::native {
@@ -234,6 +235,11 @@ void FreeCommands(CommandIterator* commands) {
                 cmd->~SetVertexBufferCmd();
                 break;
             }
+            case Command::SetResourceTable: {
+                SetResourceTableCmd* cmd = commands->NextCommand<SetResourceTableCmd>();
+                cmd->~SetResourceTableCmd();
+                break;
+            }
             case Command::WriteBuffer: {
                 WriteBufferCmd* write = commands->NextCommand<WriteBufferCmd>();
                 commands->NextData<uint8_t>(write->size);
@@ -409,6 +415,11 @@ void SkipCommand(CommandIterator* commands, Command type) {
             break;
         }
 
+        case Command::SetResourceTable: {
+            commands->NextCommand<SetResourceTableCmd>();
+            break;
+        }
+
         case Command::WriteBuffer:
             commands->NextCommand<WriteBufferCmd>();
             break;
@@ -515,6 +526,9 @@ SetIndexBufferCmd::~SetIndexBufferCmd() = default;
 
 SetVertexBufferCmd::SetVertexBufferCmd() = default;
 SetVertexBufferCmd::~SetVertexBufferCmd() = default;
+
+SetResourceTableCmd::SetResourceTableCmd() = default;
+SetResourceTableCmd::~SetResourceTableCmd() = default;
 
 WriteBufferCmd::WriteBufferCmd() = default;
 WriteBufferCmd::~WriteBufferCmd() = default;

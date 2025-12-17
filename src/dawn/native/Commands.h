@@ -89,6 +89,7 @@ enum class Command {
     SetImmediates,
     SetIndexBuffer,
     SetVertexBuffer,
+    SetResourceTable,
     WriteBuffer,
     WriteTimestamp,
 };
@@ -413,6 +414,13 @@ struct SetVertexBufferCmd {
     Ref<BufferBase> buffer;
     uint64_t offset;
     uint64_t size;
+};
+
+struct SetResourceTableCmd {
+    SetResourceTableCmd();
+    ~SetResourceTableCmd();
+
+    Ref<ResourceTableBase> table;
 };
 
 struct WriteBufferCmd {

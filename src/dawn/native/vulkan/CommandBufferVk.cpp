@@ -1235,6 +1235,11 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 break;
             }
 
+            case Command::SetResourceTable: {
+                // TODO(https://issues.chromium.org/435317394): Add support for resource tables.
+                return DAWN_UNIMPLEMENTED_ERROR("SetResourceTable unimplemented.");
+            }
+
             default:
                 break;
         }

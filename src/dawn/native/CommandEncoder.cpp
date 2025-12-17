@@ -2196,6 +2196,10 @@ void CommandEncoder::APISetResourceTable(ResourceTableBase* table) {
             if (table) {
                 mUsedResourceTables.insert(table);
             }
+            SetResourceTableCmd* cmd =
+                allocator->Allocate<SetResourceTableCmd>(Command::SetResourceTable);
+            cmd->table = table;
+
             return {};
         },
         "encoding %s.SetResourceTable(%s, %u).", this, table);
