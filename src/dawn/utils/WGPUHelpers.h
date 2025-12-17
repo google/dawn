@@ -49,13 +49,16 @@ wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const std::str
 wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,
                                   const void* data,
                                   uint64_t size,
-                                  wgpu::BufferUsage usage);
+                                  wgpu::BufferUsage usage,
+                                  std::string_view label = "");
 
 template <typename T>
 wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,
                                   wgpu::BufferUsage usage,
-                                  std::initializer_list<T> data) {
-    return CreateBufferFromData(device, data.begin(), uint32_t(sizeof(T) * data.size()), usage);
+                                  std::initializer_list<T> data,
+                                  std::string_view label = "") {
+    return CreateBufferFromData(device, data.begin(), uint32_t(sizeof(T) * data.size()), usage,
+                                label);
 }
 
 wgpu::TexelCopyBufferInfo CreateTexelCopyBufferInfo(

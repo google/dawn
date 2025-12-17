@@ -201,6 +201,9 @@ class DAWN_NATIVE_EXPORT Instance {
     // Make mImpl->mPlatform point to an object inside Dawn in case it becomes a dangling pointer
     void DisconnectDawnPlatform();
 
+    // Used by DawnTest, NOT thread-safe.
+    void SetPlatformForTesting(dawn::platform::Platform* platform);
+
   private:
     InstanceBase* mImpl = nullptr;
 };

@@ -790,6 +790,14 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Allows the GL backend to defer GL commands until Queue::Submit is called. This includes "
       "backend resource creations which will also be deferred.",
       "https://crbug.com/dawn/451928481", ToggleStage::Device}},
+    {Toggle::WebGPUEnableForCheckCaptureReplay,
+     {"enable_for_check_capture_replay",
+      "The allowlist toggle to turn on certain tests that pass when --check-capture-replay is on."
+      "As of now there are too many tests to suppress under --check-capture-replay is on, include "
+      "this flag as forceEnabledWorkarounds to turn it on."
+      "This toggle itself does nothing."
+      "Once WebGPU backend is fully implemented we can remove this toggle and related logic.",
+      "https://crbug.com/dawn/462149555", ToggleStage::Device}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 

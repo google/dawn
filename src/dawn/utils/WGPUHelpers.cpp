@@ -56,8 +56,10 @@ wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const std::str
 wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,
                                   const void* data,
                                   uint64_t size,
-                                  wgpu::BufferUsage usage) {
+                                  wgpu::BufferUsage usage,
+                                  std::string_view label) {
     wgpu::BufferDescriptor descriptor;
+    descriptor.label = label;
     descriptor.size = size;
     descriptor.usage = usage | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);

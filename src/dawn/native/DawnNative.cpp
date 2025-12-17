@@ -195,6 +195,10 @@ void Instance::DisconnectDawnPlatform() {
     mImpl->DisconnectDawnPlatform();
 }
 
+void Instance::SetPlatformForTesting(dawn::platform::Platform* platform) {
+    mImpl->SetPlatformForTesting(platform);
+}
+
 size_t GetLazyClearCountForTesting(WGPUDevice device) {
     return FromAPI(device)->GetLazyClearCountForTesting();
 }

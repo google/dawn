@@ -30,6 +30,7 @@
 
 #include <istream>
 #include <memory>
+#include <string_view>
 
 #include "dawn/replay/dawn_replay_export.h"
 #include "dawn/webgpu_cpp.h"
@@ -58,7 +59,7 @@ class DAWN_REPLAY_EXPORT Replay {
     virtual ~Replay() = 0;
 
     template <typename T>
-    T GetObjectByLabel(const char* label) const;
+    T GetObjectByLabel(std::string_view label) const;
 
     // Returns if play is successful.
     bool Play();

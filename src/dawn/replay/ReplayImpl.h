@@ -31,6 +31,7 @@
 #include <memory>
 #include <ranges>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 
@@ -75,7 +76,7 @@ class ReplayImpl : public Replay {
     // found. Note: We don't too much care this is slow as mostly used for
     // testing and debugging.
     template <typename T>
-    T GetObjectByLabel(const char* label) const {
+    T GetObjectByLabel(std::string_view label) const {
         auto isLabel = [label](const LabeledResource& res) { return res.label == label; };
         auto resourcesWithMachingLabel =
             mResources | std::views::values | std::views::filter(isLabel);

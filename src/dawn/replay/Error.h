@@ -101,9 +101,9 @@ using ResultOrError = Result<T, ErrorData>;
 #define DAWN_UNIMPLEMENTED_ERROR(MESSAGE) \
     DAWN_MAKE_ERROR(InternalErrorType::Internal, std::string("Unimplemented: ") + MESSAGE)
 
-// DAWN_OUT_OF_MEMORY_ERROR means we ran out of memory. It may be used as a signal internally in
-// Dawn to free up unused resources. Or, it may bubble up to the application to signal an allocation
-// was too large or they should free some existing resources.
+// DAWN_OUT_OF_MEMORY_ERROR means we ran out of memory. It may be used as a signal internally
+// in Dawn to free up unused resources. Or, it may bubble up to the application to signal an
+// allocation was too large or they should free some existing resources.
 #define DAWN_OUT_OF_MEMORY_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::OutOfMemory, MESSAGE)
 
 #define DAWN_CONCAT1(x, y) x##y
@@ -129,8 +129,8 @@ using ResultOrError = Result<T, ErrorData>;
     for (;;)                                                                    \
     break
 
-// DAWN_TRY_ASSIGN is the same as DAWN_TRY for ResultOrError and assigns the success value, if
-// any, to VAR.
+// DAWN_TRY_ASSIGN is the same as DAWN_TRY for ResultOrError and assigns the success
+// value, if any, to VAR.
 #define DAWN_TRY_ASSIGN(VAR, EXPR) DAWN_TRY_ASSIGN_WITH_CLEANUP(VAR, EXPR, {})
 #define DAWN_TRY_ASSIGN_CONTEXT(VAR, EXPR, ...) \
     DAWN_TRY_ASSIGN_WITH_CLEANUP(               \

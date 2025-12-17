@@ -194,6 +194,9 @@ enum class Toggle {
     GLAllowContextOnMultiThreads,
     GLDefer,
 
+    // Once WebGPU backend is fully implemented we can remove this toggle and related logic.
+    WebGPUEnableForCheckCaptureReplay,
+
     EnumCount,
     InvalidEnum = EnumCount,
 };

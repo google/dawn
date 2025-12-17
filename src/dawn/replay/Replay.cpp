@@ -52,7 +52,7 @@ std::unique_ptr<Replay> Replay::Create(wgpu::Device device, std::unique_ptr<Capt
 }
 
 template <typename T>
-T Replay::GetObjectByLabel(const char* label) const {
+T Replay::GetObjectByLabel(std::string_view label) const {
     if (auto* impl = static_cast<const ReplayImpl*>(this)) {
         return impl->GetObjectByLabel<T>(label);
     }
@@ -67,24 +67,28 @@ bool Replay::Play() {
     return false;
 }
 
-template wgpu::BindGroup Replay::GetObjectByLabel<wgpu::BindGroup>(const char* label) const;
+template wgpu::BindGroup Replay::GetObjectByLabel<wgpu::BindGroup>(std::string_view label) const;
 template wgpu::BindGroupLayout Replay::GetObjectByLabel<wgpu::BindGroupLayout>(
-    const char* label) const;
-template wgpu::Buffer Replay::GetObjectByLabel<wgpu::Buffer>(const char* label) const;
-template wgpu::CommandBuffer Replay::GetObjectByLabel<wgpu::CommandBuffer>(const char* label) const;
+    std::string_view label) const;
+template wgpu::Buffer Replay::GetObjectByLabel<wgpu::Buffer>(std::string_view label) const;
+template wgpu::CommandBuffer Replay::GetObjectByLabel<wgpu::CommandBuffer>(
+    std::string_view label) const;
 template wgpu::ComputePipeline Replay::GetObjectByLabel<wgpu::ComputePipeline>(
-    const char* label) const;
-template wgpu::Device Replay::GetObjectByLabel<wgpu::Device>(const char* label) const;
+    std::string_view label) const;
+template wgpu::Device Replay::GetObjectByLabel<wgpu::Device>(std::string_view label) const;
 template wgpu::PipelineLayout Replay::GetObjectByLabel<wgpu::PipelineLayout>(
-    const char* label) const;
-template wgpu::QuerySet Replay::GetObjectByLabel<wgpu::QuerySet>(const char* label) const;
-template wgpu::RenderBundle Replay::GetObjectByLabel<wgpu::RenderBundle>(const char* label) const;
+    std::string_view label) const;
+template wgpu::QuerySet Replay::GetObjectByLabel<wgpu::QuerySet>(std::string_view label) const;
+template wgpu::RenderBundle Replay::GetObjectByLabel<wgpu::RenderBundle>(
+    std::string_view label) const;
 template wgpu::RenderPipeline Replay::GetObjectByLabel<wgpu::RenderPipeline>(
-    const char* label) const;
-template wgpu::Sampler Replay::GetObjectByLabel<wgpu::Sampler>(const char* label) const;
-template wgpu::ShaderModule Replay::GetObjectByLabel<wgpu::ShaderModule>(const char* label) const;
-template wgpu::Texture Replay::GetObjectByLabel<wgpu::Texture>(const char* label) const;
-template wgpu::TextureView Replay::GetObjectByLabel<wgpu::TextureView>(const char* label) const;
+    std::string_view label) const;
+template wgpu::Sampler Replay::GetObjectByLabel<wgpu::Sampler>(std::string_view label) const;
+template wgpu::ShaderModule Replay::GetObjectByLabel<wgpu::ShaderModule>(
+    std::string_view label) const;
+template wgpu::Texture Replay::GetObjectByLabel<wgpu::Texture>(std::string_view label) const;
+template wgpu::TextureView Replay::GetObjectByLabel<wgpu::TextureView>(
+    std::string_view label) const;
 
 namespace {
 

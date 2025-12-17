@@ -136,6 +136,8 @@ DAWN_INSTANTIATE_TEST(BasicTests,
                       OpenGLESBackend(),
                       VulkanBackend(),
                       WebGPUBackend());
+// TODO(crbug.com/462149555): Add a WebGPUBackend({"enable_for_check_capture_replay"}) to check
+// capture and replay on end2end tests.
 
 }  // anonymous namespace
 }  // namespace dawn
