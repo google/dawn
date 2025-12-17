@@ -157,7 +157,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		{name: "npm", path: c.flags.npmPath},
 		{name: "node", path: c.flags.nodePath},
 	} {
-		if _, err := os.Stat(tool.path); err != nil {
+		if _, err := cfg.OsWrapper.Stat(tool.path); err != nil {
 			return fmt.Errorf("failed to find path to %v: %v. %v", tool.name, err, tool.hint)
 		}
 	}
@@ -199,11 +199,11 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	}
 
 	// Create a temporary directory for local checkouts
-	tmpDir, err := os.MkdirTemp("", "dawn-cts-roll")
+	tmpDir, err := cfg.OsWrapper.MkdirTemp("", "dawn-cts-roll")
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(tmpDir)
+	defer cfg.OsWrapper.RemoveAll(tmpDir)
 	ctsDir := filepath.Join(tmpDir, "cts")
 
 	// Construct the roller, and roll
