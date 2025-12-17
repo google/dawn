@@ -1,13 +1,5 @@
-#version 310 es
-precision highp float;
-precision highp int;
+SKIP: FAILED
 
-in vec4 f_Input;
-void g(float a) {
-}
-void f_inner(vec4 fbf) {
-  g(fbf.y);
-}
-void main() {
-  f_inner(f_Input);
-}
+@color attribute is not supported by the GLSL backend
+
+tint executable returned error: exit status 1

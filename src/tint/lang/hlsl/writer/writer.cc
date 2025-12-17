@@ -176,30 +176,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
         return Success;
     };
-    for (auto& func : ir.functions) {
-        if (!func->IsEntryPoint()) {
-            continue;
-        }
-
-        // Check input attributes.
-        for (auto* param : func->Params()) {
-            if (auto* str = param->Type()->As<core::type::Struct>()) {
-                for (auto* member : str->Members()) {
-                    auto res = check_io_attributes(member->Attributes());
-                    if (res != Success) {
-                        return res;
-                    }
-                }
-            } else {
-                auto res = check_io_attributes(param->Attributes());
-                if (res != Success) {
-                    return res;
-                }
-            }
-        }
-
-        // Check output attributes.
-        if (auto* str = func->ReturnType()->As<core::type::Struct>()) {
+    // Check input attributes.
+    for (auto* param : ep_func->Params()) {
+        if (auto* str = param->Type()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
                 auto res = check_io_attributes(member->Attributes());
                 if (res != Success) {
@@ -207,10 +186,24 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                 }
             }
         } else {
-            auto res = check_io_attributes(func->ReturnAttributes());
+            auto res = check_io_attributes(param->Attributes());
             if (res != Success) {
                 return res;
             }
+        }
+    }
+    // Check output attributes.
+    if (auto* str = ep_func->ReturnType()->As<core::type::Struct>()) {
+        for (auto* member : str->Members()) {
+            auto res = check_io_attributes(member->Attributes());
+            if (res != Success) {
+                return res;
+            }
+        }
+    } else {
+        auto res = check_io_attributes(ep_func->ReturnAttributes());
+        if (res != Success) {
+            return res;
         }
     }
 
