@@ -91,36 +91,6 @@ TEST_P(RenderAttachmentTest, MoreFragmentOutputsThanAttachments) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderTarget, 0, 0);
 }
 
-class ExpectRGBA8 : public detail::CustomTextureExpectation {
-  public:
-    explicit ExpectRGBA8(const utils::RGBA8 color)
-        : mColorValue((color.r << 0) | (color.g << 8) | (color.b << 16) | (color.a << 24)) {}
-
-    uint32_t DataSize() override { return sizeof(uint32_t); }
-
-    testing::AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size % DataSize() == 0 && size > 0);
-
-        const uint32_t* actual = static_cast<const uint32_t*>(data);
-        for (size_t i = 0; i < size / DataSize(); ++i) {
-            if (actual[i] != mColorValue) {
-                return testing::AssertionFailure()
-                       << "Expected data[" << i << "] to match value " << mColorValue << " ("
-                       << (mColorValue & 0xFF) << ", " << ((mColorValue >> 8) & 0xFF) << ", "
-                       << ((mColorValue >> 16) & 0xFF) << ", " << ((mColorValue >> 24) & 0xFF)
-                       << "), actual " << actual[i] << " (" << (actual[i] & 0xFF) << ", "
-                       << ((actual[i] >> 8) & 0xFF) << ", " << ((actual[i] >> 16) & 0xFF) << ", "
-                       << ((actual[i] >> 24) & 0xFF) << ")\n";
-            }
-        }
-
-        return testing::AssertionSuccess();
-    }
-
-  private:
-    const uint32_t mColorValue;
-};
-
 // Tests that individual depth slices of a 3D texture can be bound as color attachments.
 TEST_P(RenderAttachmentTest, DepthSlice) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
@@ -181,10 +151,9 @@ TEST_P(RenderAttachmentTest, DepthSlice) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_TEXTURE_EQ(new ExpectRGBA8(utils::RGBA8::kRed), renderTarget0, {0, 0, 0}, {1, 1, 1}, 0);
-    EXPECT_TEXTURE_EQ(new ExpectRGBA8(utils::RGBA8::kGreen), renderTarget1, {0, 0, 1}, {1, 1, 1},
-                      0);
-    EXPECT_TEXTURE_EQ(new ExpectRGBA8(utils::RGBA8::kBlue), renderTarget2, {0, 0, 2}, {1, 1, 1}, 0);
+    EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8::kRed, renderTarget0, 0, 0, 0);
+    EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8::kGreen, renderTarget1, 0, 0, 1);
+    EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8::kBlue, renderTarget2, 0, 0, 2);
 }
 
 DAWN_INSTANTIATE_TEST(RenderAttachmentTest,

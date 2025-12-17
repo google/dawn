@@ -125,6 +125,10 @@
 #define EXPECT_PIXEL_RGBA8_BETWEEN(color0, color1, texture, x, y) \
     AddTextureBetweenColorsExpectation(__FILE__, __LINE__, color0, color1, texture, x, y)
 
+// Test a pixel of the mip level 0 of a 3D texture.
+#define EXPECT_PIXEL_3D_RGBA8_EQ(expected, texture, x, y, z) \
+    AddTextureExpectation(__FILE__, __LINE__, expected, texture, {x, y, z})
+
 #define EXPECT_TEXTURE_EQ(...) AddTextureExpectation(__FILE__, __LINE__, __VA_ARGS__)
 
 #define EXPECT_TEXTURE_FLOAT16_EQ(...) \
