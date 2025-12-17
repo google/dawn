@@ -207,6 +207,14 @@ wgpu::Status ResourceTableBase::APIRemoveBinding(uint32_t slotIn) {
     return wgpu::Status::Success;
 }
 
+uint32_t ResourceTableBase::APIGetSize() const {
+    if (mDynamicArray == nullptr) {
+        return 0;
+    }
+
+    return uint32_t(mDynamicArray->GetAPISize());
+}
+
 MaybeError ResourceTableBase::ValidateCanUseInSubmitNow() const {
     DAWN_ASSERT(!IsError());
     DAWN_ASSERT(mDynamicArray != nullptr);

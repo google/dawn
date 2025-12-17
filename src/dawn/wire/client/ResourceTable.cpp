@@ -57,4 +57,9 @@ WGPUStatus ResourceTable::APIRemoveBinding(uint32_t slot) {
     DAWN_UNREACHABLE();
 }
 
+uint32_t ResourceTable::APIGetSize() const {
+    // TODO(435317394): Implemented resource tables in the wire.
+    DAWN_UNREACHABLE();
+}
+
 }  // namespace dawn::wire::client

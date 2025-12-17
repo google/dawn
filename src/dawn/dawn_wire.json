@@ -292,6 +292,7 @@
             "RenderBundleEncoderSetImmediates",
             "RenderPassEncoderSetImmediates",
             "ResourceTableDestroy",
+            "ResourceTableGetSize",
             "ResourceTableInsertBinding",
             "ResourceTableRemoveBinding",
             "ResourceTableUpdate",

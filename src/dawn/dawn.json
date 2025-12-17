@@ -3656,6 +3656,11 @@
         "tags": ["dawn"],
         "methods": [
             {
+                "name": "get size",
+                "no autolock": true,
+                "returns": "uint32_t"
+            },
+            {
                 "name": "destroy"
             },
             {

@@ -45,6 +45,7 @@ class ResourceTable final : public ObjectBase {
     WGPUStatus APIUpdate(uint32_t slot, const WGPUBindingResource* resource);
     uint32_t APIInsertBinding(const WGPUBindingResource* resource);
     WGPUStatus APIRemoveBinding(uint32_t slot);
+    uint32_t APIGetSize() const;
 };
 
 }  // namespace dawn::wire::client

@@ -54,6 +54,7 @@ class ResourceTableBase : public ApiObjectBase {
     wgpu::Status APIUpdate(uint32_t slot, const BindingResource* resource);
     uint32_t APIInsertBinding(const BindingResource* resource);
     wgpu::Status APIRemoveBinding(uint32_t slot);
+    uint32_t APIGetSize() const;
 
     MaybeError ValidateCanUseInSubmitNow() const;
 
