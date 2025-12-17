@@ -748,6 +748,12 @@ MaybeError ValidateTextureDescriptor(
     DAWN_TRY(ValidateTextureUsageConstraints(device, descriptor->dimension, usage, format,
                                              std::move(allowedSharedTextureMemoryUsage)));
 
+    DAWN_INVALID_IF(
+        usage & wgpu::TextureUsage::TransientAttachment &&
+            (descriptor->size.depthOrArrayLayers != 1 || descriptor->mipLevelCount != 1),
+        "The texture size depthOrArrayLayers (%u) and mipLevelCount (%u) must be 1.",
+        descriptor->size.depthOrArrayLayers, descriptor->mipLevelCount);
+
     DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
     if (!device->HasFlexibleTextureViews()) {
         const auto textureBindingViewDimension =
