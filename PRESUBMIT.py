@@ -263,6 +263,23 @@ def CheckNoStaleGen(input_api, output_api):
     return results
 
 
+def CheckGeneratedJsonUpToDate(input_api, output_api):
+    """Verifies that generated JSON files match .pyl contents.
+
+    Run on DEPS changes since changes to the //testing entry can cause Swarming
+    dimensions to be out of date.
+    """
+    if 'DEPS' not in input_api.AffectedFiles(include_deletes=True):
+        return []
+
+    sys.path += [input_api.change.RepositoryRoot()]
+
+    import test_spec_presubmit_support
+
+    return test_spec_presubmit_support.validate_test_specs(
+        input_api, output_api)
+
+
 def CheckWebgpuHeaderDiff(input_api, output_api):
     """Checks that generated WebGPU C Headers are not stale."""
     results = []

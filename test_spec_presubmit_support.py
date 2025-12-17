@@ -24,21 +24,20 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""
-See http://dev.chromium.org/developers/how-tos/depottools/presubmit-scripts
-for more details on the presubmit API built into depot_tools.
-"""
-
-import sys
-
-PRESUBMIT_VERSION = '2.0.0'
+"""Test spec-related presubmit code shared across multiple presubmit files."""
 
 
-def CheckGeneratedJsonUpToDate(input_api, output_api):
-    """Verifies that generated JSON files match .pyl contents."""
-    sys.path += [input_api.change.RepositoryRoot()]
-
-    import test_spec_presubmit_support
-
-    return test_spec_presubmit_support.validate_test_specs(
-        input_api, output_api)
+def validate_test_specs(input_api, output_api):
+    """Verifies that //infra/specs is up to date."""
+    script_path = input_api.os_path.join(input_api.change.RepositoryRoot(),
+                                         'infra', 'specs',
+                                         'generate_test_spec_json.py')
+    command = input_api.Command(name='validate_generated_json',
+                                cmd=[
+                                    input_api.python3_executable,
+                                    script_path,
+                                    '--verify-only',
+                                ],
+                                kwargs={},
+                                message=output_api.PresubmitError)
+    return input_api.RunTests([command])
