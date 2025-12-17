@@ -33,8 +33,11 @@
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/core_builtin_call.h"
+#include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
@@ -733,6 +736,14 @@ struct State {
         auto* coords = next_arg();
         auto* texture_ty = texture->Type()->As<spirv::type::Image>();
 
+        const bool is_depth_3d_cube_array = texture_ty->GetArrayed() == type::Arrayed::kArrayed &&
+                                            texture_ty->GetDepth() == type::Depth::kDepth &&
+                                            texture_ty->GetDim() == type::Dim::kCube;
+        const bool polyfill_depth_cube_array =
+            config.texture_sample_compare_depth_cube_array && is_depth_3d_cube_array &&
+            (builtin->Func() == core::BuiltinFn::kTextureSampleCompare ||
+             builtin->Func() == core::BuiltinFn::kTextureSampleCompareLevel);
+
         // Use OpSampledImage to create an OpTypeSampledImage object.
         auto* sampled_image = b.CallExplicit<spirv::ir::BuiltinCall>(
             ty.Get<type::SampledImage>(texture_ty), spirv::BuiltinFn::kOpSampledImage,
@@ -761,14 +772,20 @@ struct State {
                 operands.offset = next_arg();
                 break;
             case core::BuiltinFn::kTextureSampleCompare:
-                function = spirv::BuiltinFn::kImageSampleDrefImplicitLod;
+                function = polyfill_depth_cube_array
+                               ? spirv::BuiltinFn::kImageDrefGather
+                               : spirv::BuiltinFn::kImageSampleDrefImplicitLod;
                 depth = next_arg();
                 operands.offset = next_arg();
                 break;
             case core::BuiltinFn::kTextureSampleCompareLevel:
-                function = spirv::BuiltinFn::kImageSampleDrefExplicitLod;
+                function = polyfill_depth_cube_array
+                               ? spirv::BuiltinFn::kImageDrefGather
+                               : spirv::BuiltinFn::kImageSampleDrefExplicitLod;
                 depth = next_arg();
-                operands.lod = b.Constant(0_f);
+                if (!polyfill_depth_cube_array) {
+                    operands.lod = b.Constant(0_f);
+                }
                 operands.offset = next_arg();
                 break;
             case core::BuiltinFn::kTextureSampleGrad:
@@ -801,7 +818,10 @@ struct State {
 
         // Call the function.
         // If this is a depth comparison, the result is always f32, otherwise vec4f.
-        auto* result_ty = depth ? static_cast<const core::type::Type*>(ty.f32()) : ty.vec4f();
+        auto* result_ty = (depth && !polyfill_depth_cube_array)
+                              ? static_cast<const core::type::Type*>(ty.f32())
+                              : ty.vec4f();
+
         core::ir::Instruction* result =
             b.Call<spirv::ir::BuiltinCall>(result_ty, function, std::move(function_args));
         result->InsertBefore(builtin);
@@ -811,6 +831,29 @@ struct State {
         if (!depth && texture_ty->GetDepth() == type::Depth::kDepth) {
             result = b.Access(ty.f32(), result, 0_u);
             result->InsertBefore(builtin);
+        }
+
+        if (polyfill_depth_cube_array) {
+            core::ir::Instruction* close_to_pcf_result = nullptr;
+            b.InsertAfter(result, [&] {
+                // This is an imperfect polyfill for builtin intrinsic to do PCF style shadows.
+                // See: crbug.com/467015399
+                // To do a complete polyfill we would have to properly do bilinear interpolation of
+                // the TextureGatherCompare result which we do not do as there is no trivial way to
+                // do it for a cubemap.
+
+                // We do a textureGatherCompare and then dot with a vec4f(0.25) to get the average
+                // result. This will give PCF-like shadows but they will not be as smooth as the
+                // result from the original TextureSampleCompare. We also only sample mip0 which is
+                // identical to TextureSampleCompareLevel but not TextureSampleCompare.
+                close_to_pcf_result =
+                    b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kDot, result,
+                                                   b.Splat(ty.vec4f(), b.Constant(0.25_f)));
+            });
+
+            close_to_pcf_result->SetResult(builtin->DetachResult());
+            builtin->Destroy();
+            return;
         }
 
         result->SetResult(builtin->DetachResult());

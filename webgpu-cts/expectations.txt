@@ -149,6 +149,10 @@ crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin
 # Mac AMD does not correctly respect lodMinClamp/lodMaxClamp
 crbug.com/409266267 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:* [ Skip ]
 
+# textureSampleCompare(Level):arrayed_3d_coords on Pixel 4
+crbug.com/408250014 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_3d_coords:* [ Skip ]
+crbug.com/408250014 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_3d_coords:* [ Skip ]
+
 ################################################################################
 # Temporary Skip Expectations
 #
@@ -512,10 +516,6 @@ crbug.com/42241269 [ amd mac ] webgpu:shader,execution,zero_init:compute,zero_in
 
 crbug.com/373670513 [ android-pixel-6 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
 crbug.com/373485785 [ intel win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
-
-# textureSampleCompare(Level):arrayed_3d_coords on Pixel 4
-crbug.com/408250014 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_3d_coords:* [ Failure ]
-crbug.com/408250014 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_3d_coords:* [ Failure ]
 
 # textureSampleCompareLevel failures with offset=true, in compute shader only, on Mac Intel
 crbug.com/408250017 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:stage="c";*;offset=true [ Failure ]

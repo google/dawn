@@ -5621,5 +5621,190 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixConstruct_u8) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_DepthCubeArray_Polyfill) {
+    capabilities = core::ir::Capability::kAllowNonCoreTypes;
+
+    auto* t = b.FunctionParam("t", ty.depth_texture(core::type::TextureDimension::kCubeArray));
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec3f());
+    auto* array_idx = b.FunctionParam("array_idx", ty.i32());
+    auto* depth = b.FunctionParam("depth", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({t, s, coords, array_idx, depth});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), core::BuiltinFn::kTextureSampleCompare, t, s, coords,
+                              array_idx, depth);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_cube_array, %s:sampler_comparison, %coords:vec3<f32>, %array_idx:i32, %depth:f32):f32 {
+  $B1: {
+    %7:f32 = textureSampleCompare %t, %s, %coords, %array_idx, %depth
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec3<f32>, %array_idx:i32, %depth:f32):f32 {
+  $B1: {
+    %7:spirv.sampled_image<spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %8:f32 = convert %array_idx
+    %9:vec4<f32> = construct %coords, %8
+    %10:vec4<f32> = spirv.image_dref_gather %7, %9, %depth, 0u
+    %11:f32 = spirv.dot %10, vec4<f32>(0.25f)
+    ret %11
+  }
+}
+)";
+
+    PolyfillConfig config;
+    config.texture_sample_compare_depth_cube_array = true;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_DepthCubeArray_Polyfill) {
+    capabilities = core::ir::Capability::kAllowNonCoreTypes;
+
+    auto* t = b.FunctionParam("t", ty.depth_texture(core::type::TextureDimension::kCubeArray));
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec3f());
+    auto* array_idx = b.FunctionParam("array_idx", ty.i32());
+    auto* depth = b.FunctionParam("depth", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({t, s, coords, array_idx, depth});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), core::BuiltinFn::kTextureSampleCompareLevel, t, s, coords,
+                              array_idx, depth);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_cube_array, %s:sampler_comparison, %coords:vec3<f32>, %array_idx:i32, %depth:f32):f32 {
+  $B1: {
+    %7:f32 = textureSampleCompareLevel %t, %s, %coords, %array_idx, %depth
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec3<f32>, %array_idx:i32, %depth:f32):f32 {
+  $B1: {
+    %7:spirv.sampled_image<spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %8:f32 = convert %array_idx
+    %9:vec4<f32> = construct %coords, %8
+    %10:vec4<f32> = spirv.image_dref_gather %7, %9, %depth, 0u
+    %11:f32 = spirv.dot %10, vec4<f32>(0.25f)
+    ret %11
+  }
+}
+)";
+
+    PolyfillConfig config;
+    config.texture_sample_compare_depth_cube_array = true;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_DepthCubeArray_Polyfill_Disabled) {
+    capabilities = core::ir::Capability::kAllowNonCoreTypes;
+
+    auto* t = b.FunctionParam("t", ty.depth_texture(core::type::TextureDimension::kCubeArray));
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec3f());
+    auto* array_idx = b.FunctionParam("array_idx", ty.i32());
+    auto* depth = b.FunctionParam("depth", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({t, s, coords, array_idx, depth});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), core::BuiltinFn::kTextureSampleCompare, t, s, coords,
+                              array_idx, depth);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_cube_array, %s:sampler_comparison, %coords:vec3<f32>, %array_idx:i32, %depth:f32):f32 {
+  $B1: {
+    %7:f32 = textureSampleCompare %t, %s, %coords, %array_idx, %depth
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec3<f32>, %array_idx:i32, %depth:f32):f32 {
+  $B1: {
+    %7:spirv.sampled_image<spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %8:f32 = convert %array_idx
+    %9:vec4<f32> = construct %coords, %8
+    %10:f32 = spirv.image_sample_dref_implicit_lod %7, %9, %depth, 0u
+    ret %10
+  }
+}
+)";
+    PolyfillConfig config;
+    config.texture_sample_compare_depth_cube_array = false;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest,
+       TextureSampleCompareLevel_DepthCubeArray_Polyfill_Disabled) {
+    capabilities = core::ir::Capability::kAllowNonCoreTypes;
+
+    auto* t = b.FunctionParam("t", ty.depth_texture(core::type::TextureDimension::kCubeArray));
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec3f());
+    auto* array_idx = b.FunctionParam("array_idx", ty.i32());
+    auto* depth = b.FunctionParam("depth", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({t, s, coords, array_idx, depth});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), core::BuiltinFn::kTextureSampleCompareLevel, t, s, coords,
+                              array_idx, depth);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_cube_array, %s:sampler_comparison, %coords:vec3<f32>, %array_idx:i32, %depth:f32):f32 {
+  $B1: {
+    %7:f32 = textureSampleCompareLevel %t, %s, %coords, %array_idx, %depth
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec3<f32>, %array_idx:i32, %depth:f32):f32 {
+  $B1: {
+    %7:spirv.sampled_image<spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %8:f32 = convert %array_idx
+    %9:vec4<f32> = construct %coords, %8
+    %10:f32 = spirv.image_sample_dref_explicit_lod %7, %9, %depth, 2u, 0.0f
+    ret %10
+  }
+}
+)";
+
+    PolyfillConfig config;
+    config.texture_sample_compare_depth_cube_array = false;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
 }  // namespace
 }  // namespace tint::spirv::writer::raise

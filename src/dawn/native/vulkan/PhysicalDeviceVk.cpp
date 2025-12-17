@@ -969,6 +969,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // Qualcomm's shader compiler returns an internal error when binding_array<texture*> is
         // passed by argument to functions.
         deviceToggles->Default(Toggle::VulkanDirectVariableAccessTransformHandle, true);
+
+        // Qualcomm has compiler error only in 32 bit. Modern devices (64 bit, adreno 8xx) do not
+        // exhibit this compiler error.
+#if DAWN_PLATFORM_IS(32_BIT)
+        deviceToggles->Default(Toggle::VulkanSampleCompareDepthCubeArrayWorkaround, true);
+#endif
     }
 
     if (IsPixel10()) {

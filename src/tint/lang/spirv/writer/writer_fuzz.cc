@@ -68,6 +68,7 @@ struct FuzzedOptions {
     std::optional<Options::RangeOffsets> depth_range_offsets;
     SpvVersion spirv_version;
     SubstituteOverridesConfig substitute_overrides_config;
+    bool texture_sample_compare_depth_cube_array;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
@@ -96,7 +97,8 @@ struct FuzzedOptions {
                  dot_4x8_packed,
                  depth_range_offsets,
                  spirv_version,
-                 substitute_overrides_config);
+                 substitute_overrides_config,
+                 texture_sample_compare_depth_cube_array);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
 };
 
@@ -161,6 +163,8 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.depth_range_offsets = fuzzed_options.depth_range_offsets;
     options.spirv_version = fuzzed_options.spirv_version;
     options.substitute_overrides_config = fuzzed_options.substitute_overrides_config;
+    options.workarounds.texture_sample_compare_depth_cube_array =
+        fuzzed_options.texture_sample_compare_depth_cube_array;
 
     options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(module);
 

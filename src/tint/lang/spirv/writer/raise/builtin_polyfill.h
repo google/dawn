@@ -43,6 +43,7 @@ struct PolyfillConfig {
     bool use_vulkan_memory_model = false;
     SpvVersion version = SpvVersion::kSpv13;
     bool subgroup_shuffle_clamped = false;
+    bool texture_sample_compare_depth_cube_array = false;
 };
 
 /// BuiltinPolyfill is a transform that replaces calls to builtins with polyfills and calls to
