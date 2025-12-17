@@ -40,7 +40,6 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kTexelBuffers:
         case LanguageFeature::kFragmentDepth:
         case LanguageFeature::kImmediateAddressSpace:
-        case LanguageFeature::kSubgroupUniformity:
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////
@@ -58,6 +57,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
         case LanguageFeature::kUniformBufferStandardLayout:
         case LanguageFeature::kSubgroupId:
+        case LanguageFeature::kSubgroupUniformity:
             return FeatureStatus::kShippedWithKillswitch;
 
             ////////////////////////////////////////////////////////////////////
