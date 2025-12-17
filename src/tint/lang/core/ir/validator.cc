@@ -134,6 +134,8 @@ struct ValidatedType {
 
 namespace {
 
+using SupportedStages = tint::EnumSet<Function::PipelineStage>;
+
 /// @returns a human-readable string of all the entries in a EnumSet
 template <typename T>
 std::string ToString(const EnumSet<T>& values) {
@@ -984,9 +986,9 @@ class Validator {
     /// Depends on CheckStructuralSoundness() having previously been run
     void CheckForOrphanedInstructions();
 
-    /// Checks that there are no discards called by non-fragment entrypoints
+    /// Checks that entry points do not use instructions that are not supported by their stage.
     /// Depends on CheckStructuralSoundness() having previously been run
-    void CheckForNonFragmentDiscards();
+    void CheckStageRestrictedInstructions();
 
     /// @returns the IR disassembly, performing a disassemble if this is the first call.
     ir::Disassembler& Disassemble();
@@ -1598,7 +1600,7 @@ class Validator {
     core::type::Manager type_mgr_ = core::type::Manager::Wrap(mod_.Types());
     Hashmap<const ir::Block*, const ir::Function*, 64> block_to_function_{};
     Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
-    Hashset<const ir::Discard*, 4> discards_;
+    Hashmap<const ir::Instruction*, SupportedStages, 4> stage_restricted_instructions_;
     core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
     Hashset<OverrideId, 8> seen_override_ids_;
     Hashset<std::string, 4> entry_point_names_;
@@ -1622,7 +1624,7 @@ Result<SuccessType> Validator::Run() {
 
     CheckForRecursion();
     CheckForOrphanedInstructions();
-    CheckForNonFragmentDiscards();
+    CheckStageRestrictedInstructions();
 
     if (diagnostics_.ContainsErrors()) {
         diagnostics_.AddNote(Source{}) << "# Disassembly\n" << Disassemble().Text();
@@ -1660,20 +1662,26 @@ void Validator::CheckForOrphanedInstructions() {
     }
 }
 
-void Validator::CheckForNonFragmentDiscards() {
+void Validator::CheckStageRestrictedInstructions() {
     if (diagnostics_.ContainsErrors()) {
         return;
     }
 
-    // Check for discards in non-fragments
-    for (const auto& d : discards_) {
-        const auto* f = ContainingFunction(d);
-        if (f->IsEntryPoint() && !f->IsFragment()) {
-            AddError(d) << "cannot be called in non-fragment entry point";
+    // Check for instructions being used in stages that do not support them.
+    for (const auto& i : stage_restricted_instructions_) {
+        const auto& inst = i.key;
+        const auto& stages = i.value;
+        const auto* f = ContainingFunction(inst);
+        if (f == nullptr) {
+            continue;
+        }
+
+        if (f->IsEntryPoint() && !stages.Contains(f->Stage())) {
+            AddError(inst) << "cannot be used in a " << f->Stage() << " shader";
         } else {
             for (const Function* ep : ContainingEndPoints(f)) {
-                if (!ep->IsFragment()) {
-                    AddError(d) << "cannot be called in non-fragment entry point";
+                if (!stages.Contains(ep->Stage())) {
+                    AddError(inst) << "cannot be used in a " << ep->Stage() << " shader";
                 }
             }
         }
@@ -3875,14 +3883,15 @@ void Validator::CheckLet(const Let* l) {
 
 void Validator::CheckCall(const Call* call) {
     tint::Switch(
-        call,                                                                   //
-        [&](const Bitcast* b) { CheckBitcast(b); },                             //
-        [&](const BuiltinCall* c) { CheckBuiltinCall(c); },                     //
-        [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },         //
-        [&](const Construct* c) { CheckConstruct(c); },                         //
-        [&](const Convert* c) { CheckConvert(c); },                             //
-        [&](const Discard* d) {                                                 //
-            discards_.Add(d);                                                   //
+        call,                                                            //
+        [&](const Bitcast* b) { CheckBitcast(b); },                      //
+        [&](const BuiltinCall* c) { CheckBuiltinCall(c); },              //
+        [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },  //
+        [&](const Construct* c) { CheckConstruct(c); },                  //
+        [&](const Convert* c) { CheckConvert(c); },                      //
+        [&](const Discard* d) {                                          //
+            stage_restricted_instructions_.Add(
+                d, SupportedStages{Function::PipelineStage::kFragment});        //
             CheckDiscard(d);                                                    //
         },                                                                      //
         [&](const UserCall* c) {                                                //
@@ -4037,6 +4046,20 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
     if (auto* bc = call->As<CoreBuiltinCall>()) {
         CheckCoreBuiltinCall(bc, builtin.Get());
     }
+
+    // Track the stages that this builtin call is limited to, so that we can check them against the
+    // entry points that they are used from.
+    SupportedStages stages;
+    if (builtin->info->flags.Contains(intrinsic::OverloadFlag::kSupportsComputePipeline)) {
+        stages.Add(Function::PipelineStage::kCompute);
+    }
+    if (builtin->info->flags.Contains(intrinsic::OverloadFlag::kSupportsFragmentPipeline)) {
+        stages.Add(Function::PipelineStage::kFragment);
+    }
+    if (builtin->info->flags.Contains(intrinsic::OverloadFlag::kSupportsVertexPipeline)) {
+        stages.Add(Function::PipelineStage::kVertex);
+    }
+    stage_restricted_instructions_.Add(call, stages);
 }
 
 void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,

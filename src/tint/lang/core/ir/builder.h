@@ -293,6 +293,13 @@ class Builder {
         return ir_func;
     }
 
+    /// Creates a fragment function
+    /// @param name the function name
+    /// @returns the function
+    ir::Function* FragmentFunction(std::string_view name, const core::type::Type* return_type) {
+        return Function(name, return_type, Function::PipelineStage::kFragment);
+    }
+
     /// Creates an if instruction
     /// @param condition the if condition
     /// @returns the instruction

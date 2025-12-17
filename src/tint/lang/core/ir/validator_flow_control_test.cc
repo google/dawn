@@ -121,9 +121,8 @@ TEST_F(IR_ValidatorTest, Discard_NotInFragmentViaFunction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(R"(:3:5 error: discard: cannot be called in non-fragment entry point
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: discard: cannot be used in a compute shader
     discard
     ^^^^^^^
 )")) << res.Failure();
@@ -139,11 +138,56 @@ TEST_F(IR_ValidatorTest, Discard_NotInFragmentViaEntryPoint) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(R"(:3:5 error: discard: cannot be called in non-fragment entry point
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: discard: cannot be used in a compute shader
     discard
     ^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, FragmentOnlyBuiltin_NotInFragment) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Call<f32>(BuiltinFn::kDpdx, 1.0_f);
+        b.Return(func);
+    });
+
+    auto* ep = ComputeEntryPoint("ep");
+
+    b.Append(ep->Block(), [&] {
+        b.Call(func);
+        b.Return(ep);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:14 error: dpdx: cannot be used in a compute shader
+    %2:f32 = dpdx 1.0f
+             ^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, ComputeOnlyBuiltin_NotInCompute) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Call<void>(BuiltinFn::kWorkgroupBarrier);
+        b.Return(func);
+    });
+
+    auto* ep = FragmentEntryPoint("ep");
+    b.Append(ep->Block(), [&] {
+        b.Call(func);
+        b.Return(ep);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:3:15 error: workgroupBarrier: cannot be used in a fragment shader
+    %2:void = workgroupBarrier
+              ^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 

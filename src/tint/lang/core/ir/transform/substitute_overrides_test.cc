@@ -600,7 +600,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionNonConstBuiltin) {
         x->SetOverrideId({2});
     });
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.FragmentFunction("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("y", b.Call(ty.f32(), core::BuiltinFn::kDpdx, b.Multiply(x, 4_f)));
         b.Return(func);
@@ -776,7 +776,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandNonConstFn) {
         o->SetInitializer(add->Result());
     });
 
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.FragmentFunction("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("y", b.Divide(10_f, x));
         auto* k = b.Call(ty.f32(), core::BuiltinFn::kDpdx, x);
@@ -791,7 +791,7 @@ $B1: {  # root
   %a:f32 = override %2 @id(1)
 }
 
-%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = @fragment func():void {
   $B2: {
     %5:f32 = div 10.0f, %x
     %y:f32 = let %5
@@ -804,7 +804,7 @@ $B1: {  # root
 )";
 
     auto* expect = R"(
-%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = @fragment func():void {
   $B1: {
     %y:f32 = let 2.0f
     %3:f32 = dpdx 5.0f
@@ -838,7 +838,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandLet) {
         o->SetInitializer(add->Result());
     });
 
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.FragmentFunction("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("y", b.Divide(10_f, x));
         auto* k = b.Let("k", b.Call(ty.f32(), core::BuiltinFn::kDpdx, x));
@@ -853,7 +853,7 @@ $B1: {  # root
   %a:f32 = override %2 @id(1)
 }
 
-%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = @fragment func():void {
   $B2: {
     %5:f32 = div 10.0f, %x
     %y:f32 = let %5
@@ -867,7 +867,7 @@ $B1: {  # root
 )";
 
     auto* expect = R"(
-%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+%foo = @fragment func():void {
   $B1: {
     %y:f32 = let 2.0f
     %3:f32 = dpdx 5.0f
