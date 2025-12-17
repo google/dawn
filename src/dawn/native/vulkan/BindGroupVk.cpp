@@ -227,13 +227,6 @@ void BindGroup::UpdateDynamicArrayBindings(
     std::vector<uint32_t> arrayElements;
 
     for (DynamicArrayState::ResourceUpdate update : updates) {
-        // Never remove bindings since we would need to defer this until after the GPU is done
-        // potentially reading the descriptor. The metadata buffer and shader validation will
-        // prevent reading this entry anyway.
-        if (update.textureView == nullptr) {
-            continue;
-        }
-
         VkImageView handle = ToBackend(update.textureView)->GetHandle();
         if (handle == nullptr) {
             continue;

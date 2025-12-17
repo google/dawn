@@ -376,20 +376,29 @@ DynamicArrayState::BindingUpdates DynamicArrayState::AcquireDirtyBindingUpdates(
 
         tint::ResourceType effectiveType = state.pinned ? state.typeId : tint::ResourceType::kEmpty;
 
+        // Add the update for the metadata buffer.
         size_t offset = sizeof(uint32_t) * (uint32_t(dirtyIndex) + 1);
         updates.metadataUpdates.push_back({
             .offset = uint32_t(offset),
             .data = uint32_t(effectiveType),
         });
 
-        if (state.resourceDirty) {
-            state.resourceDirty = false;
-
-            updates.resourceUpdates.push_back({
-                .slot = dirtyIndex,
-                .textureView = mBindings[dirtyIndex].Get(),
-            });
+        // Compute whether a resource update is needed and skip adding it if unnecessary.
+        if (!state.resourceDirty) {
+            continue;
         }
+        state.resourceDirty = false;
+
+        // Don't add updates for removing resources because the shader-side validation will prevent
+        // accesses anyway.
+        if (mBindings[dirtyIndex] == nullptr) {
+            continue;
+        }
+
+        updates.resourceUpdates.push_back({
+            .slot = dirtyIndex,
+            .textureView = mBindings[dirtyIndex].Get(),
+        });
     }
     mDirtyBindings.clear();
 
