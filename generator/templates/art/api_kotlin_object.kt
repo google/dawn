@@ -35,7 +35,7 @@ import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 {% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc, generate_simple_kdoc with context %}
-{% from 'art/api_kotlin_async_helpers.kt' import async_wrapper with context %}
+{% from 'art/api_kotlin_async_helpers.kt' import async_wrapper, analyze_callback with context %}
 
 //* Generating KDocs
 {% set all_objects_info = kdocs.objects%}
@@ -71,7 +71,14 @@ public class {{ kotlin_name(obj) }} private constructor(public val handle: Long)
         {{ kotlin_annotation(_kotlin_return) if _kotlin_return else '' }} public external fun {{ method.name.camelCase() }}(
         //* TODO(b/341923892): rework async methods to use futures.
         {%- for arg in kotlin_record_members(method.arguments) %}
-            {{- kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{ ' ' }}
+            {%- if arg.type.category == 'callback function' -%}
+                {% set ns = namespace() %}
+                {{ analyze_callback(arg, ns) }}
+                {% set generic_T = kotlin_declaration(ns.payload_arg, true) if ns.payload_arg else 'Unit' %}
+                callback: GPURequestCallback<{{kotlin_annotation(ns.payload_arg)}} {{ generic_T }}>,{{ ' ' }}
+            {%- else -%}
+                {{- kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{ ' ' }}
+            {%- endif -%}
         {%- endfor -%}): {{ kotlin_declaration(_kotlin_return) if _kotlin_return else 'Unit' }}
 
         {% if method.name.chunks[0] == 'get' and not method.arguments %}

@@ -41,7 +41,7 @@
     };
 {% endmacro %}
 
-{% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members) %}
+{% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members,is_structure_converter=False) %}
     inline void {{function_name}}(JNIContext* c, const {{kotlin_name}}& inStruct, {{struct_name}}* outStruct) {
         JNIEnv* env = c->env;
         JNIClasses* classes = JNIClasses::getInstance(env);
@@ -90,36 +90,87 @@
                             }
                             JNIClasses* classes = JNIClasses::getInstance(env);
 
-                            {% for callbackArg in kotlin_record_members(member.type.arguments) -%}
-                                {{ convert_to_kotlin(callbackArg.name.camelCase(),
-                                                      '_' + callbackArg.name.camelCase(),
-                                                      'input->' + callbackArg.length.name.camelCase() if callbackArg.length.name,
-                                                      callbackArg) }}
-                            {% endfor %}
+                            {# Determine the type of Runnable we are building (Structure vs Generic)     #}
+
+                            {%- set info = namespace(mode='standard', class='gpuCallbackRunnable', sig='', has_err=false) -%}
+                            {%- set vars = namespace(status='0', msg=none, load=none, type=none) -%}
+
+                            {# Detect ErrorType #}
+                            {%- for arg in kotlin_record_members(member.type.arguments) -%}
+                                {%- if arg.type.name.get() == 'error type' %}
+                                    {% set info.has_err = true %}
+                                {% endif -%}
+                            {%- endfor -%}
+
+                            {# Determine Initial Mode/Signature #}
+                            {%- if is_structure_converter -%}
+                                {%- set info.mode = 'structure' -%}
+                                {%- set info.class = member.type.name.camelCase() + 'Runnable' -%}
+                                {%- set sb = namespace(v='(L' + jni_name(member.type) + ';') -%}
+                                {%- for arg in kotlin_record_members(member.type.arguments) %}
+                                    {% set sb.v = sb.v + jni_signature(arg) %}
+                                {% endfor -%}
+                                {%- set info.sig = sb.v + ')V' -%}
+                            {%- elif info.has_err -%}
+                                {%- set info.mode = 'error' -%}
+                                {%- set info.class = 'gpuCallbackErrorTypeRunnable' -%}
+                                {%- set info.sig = '(Landroidx/webgpu/GPURequestCallback;IILjava/lang/String;)V' -%}
+                            {%- else -%}
+                                {# Default to Standard, might verify to Void later #}
+                                {%- set info.sig = '(Landroidx/webgpu/GPURequestCallback;ILjava/lang/String;Ljava/lang/Object;)V' -%}
+                            {%- endif -%}
+
+                            {# Generate the C++ variable conversions (e.g. _status, _message) #}
+                            {%- for arg in kotlin_record_members(member.type.arguments) -%}
+                                {{ convert_to_kotlin(arg.name.camelCase(), '_' + arg.name.camelCase(), 'input->' + arg.length.name.camelCase() if arg.length.name, arg) }}
+                                {%- set vName = '_' + arg.name.camelCase() -%}
+                                {%- set aName = arg.name.get() -%}
+                                {%- if aName == 'status' %}
+                                    {% set vars.status = vName %}
+                                {%- elif aName == 'message' %}
+                                    {% set vars.msg = vName %}
+                                {%- elif aName == 'type' %}
+                                    {% set vars.type = vName %}
+                                {%- else %}
+                                    {% set vars.load = vName %}
+                                {%- endif -%}
+                            {%- endfor -%}
+
+
+                            {# Handle missing strings for Generics #}
+                            {%- if info.mode != 'structure' -%}
+                                {%- if vars.msg is none -%}
+                                    jstring _empty_msg = env->NewStringUTF("");
+                                    {%- set vars.msg = '_empty_msg' -%}
+                                {%- endif -%}
+                                {# If Standard mode but no payload found -> Switch to Void #}
+                                {%- if info.mode == 'standard' and vars.load is none -%}
+                                    {%- set info.mode = 'void' -%}
+                                    {%- set info.class = 'gpuCallbackVoidRunnable' -%}
+                                    {%- set info.sig = '(Landroidx/webgpu/GPURequestCallback;ILjava/lang/String;)V' -%}
+                                {%- endif -%}
+                            {%- endif -%}
+
 
                             jclass executorClass = env->FindClass("java/util/concurrent/Executor");
-                            jmethodID executeMethodID = env->GetMethodID(executorClass,
-                                                                         "execute",
-                                                                         "(Ljava/lang/Runnable;)V");
-                            jmethodID methodId = env->GetMethodID(
-                                classes->{{ member.type.name.camelCase() }}Runnable,
-                                "<init>", "(L{{ jni_name(member.type, member.category) }};
-                              {%- for callbackArg in kotlin_record_members(member.type.arguments) -%}
-                                  {{- jni_signature(callbackArg) -}}
-                              {%- endfor %})V");
+                            jmethodID executeMethodID = env->GetMethodID(executorClass, "execute", "(Ljava/lang/Runnable;)V");
+                            jmethodID runCtor = env->GetMethodID(classes->{{ info.class }}, "<init>", "{{ info.sig }}");
 
-                            jobject runnable =
-                                env->NewObject(classes->{{ member.type.name.camelCase() }}Runnable,
-                                                methodId,
-                                                userData1->callback
-                                                {%- for callbackArg in kotlin_record_members(member.type.arguments) %}
-                                                    {{- ', ' }}
-                                                    {%- if member.type.category == 'kotlin type' -%}
-                                                        {{ unreachable_code() }}
-                                                    {%- else -%}
-                                                        _{{ callbackArg.name.camelCase() }}
-                                                    {%- endif -%}
-                                                {%- endfor %});
+                            jobject runnable = env->NewObject(classes->{{ info.class }}, runCtor, userData1->callback
+                            {%- if info.mode == 'structure' -%}
+                                {%- for arg in kotlin_record_members(member.type.arguments) -%}
+                                    {%- if member.type.category != 'kotlin type' %}
+                                        , _{{ arg.name.camelCase() }}
+                                    {% endif -%}
+                                {%- endfor -%}
+                            {%- elif info.mode == 'error' -%}
+                                , {{ vars.status }}, {{ vars.type }}, {{ vars.msg }}
+                                {%- elif info.mode == 'void' -%}
+                                , {{ vars.status }}, {{ vars.msg }}
+                            {%- else -%}
+                                , {{ vars.status }}, {{ vars.msg }}, {{ vars.load }}
+                            {%- endif -%}
+                            );
 
                             env->CallVoidMethod(userData1->executor, executeMethodID, runnable);
                         };

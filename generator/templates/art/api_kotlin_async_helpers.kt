@@ -29,18 +29,25 @@ package {{ kotlin_package }}
 
 {% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc with context %}
 
-{% set all_objects = kdocs.objects %}
-{% macro async_wrapper(obj, method, callback_arg) %}
-    {% set ns = namespace(status_arg = none, message_arg = none, payload_arg = none) %}
+{% macro analyze_callback(callback_arg, output_ns) %}
+    {% set output_ns.status_arg = none %}
+    {% set output_ns.message_arg = none %}
+    {% set output_ns.payload_arg = none %}
     {% for arg in kotlin_record_members(callback_arg.type.arguments) %}
         {% if arg.name.get() == 'status' %}
-            {% set ns.status_arg = arg %}
+            {% set output_ns.status_arg = arg %}
         {% elif arg.name.get() == 'message' %}
-            {% set ns.message_arg = arg %}
+            {% set output_ns.message_arg = arg %}
         {% else %}
-            {% set ns.payload_arg = arg %}
+            {% set output_ns.payload_arg = arg %}
         {% endif %}
     {% endfor %}
+{% endmacro %}
+
+{% set all_objects = kdocs.objects %}
+{% macro async_wrapper(obj, method, callback_arg) %}
+    {% set ns = namespace() %}
+    {{ analyze_callback(callback_arg, ns) }}
 
     //* Generating KDocs
     {% set object_info = all_objects.get(obj.name.get()) %}
@@ -72,45 +79,17 @@ package {{ kotlin_package }}
         ) %}
             {{ kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},
         {%- endfor %}): {{ kotlin_annotation(ns.payload_arg) + ' ' + kotlin_declaration(ns.payload_arg, true) if ns.payload_arg else 'Unit' -}}
-                = suspendCancellableCoroutine {
+        = awaitGPURequest { callback ->
             {{ method.name.camelCase() }}(
             {%- for arg in kotlin_record_members(method.arguments) %}
                 {%- if arg.type.category == 'kotlin type' and arg.type.name.get() == 'java.util.concurrent.Executor' -%}
                     Executor(Runnable::run),
-                {%- elif arg.name.get() == callback_arg.name.get() %}{
-                    {%- for arg in kotlin_record_members(callback_arg.type.arguments) %}
-                        {{- as_varName(arg.name) }},
-                    {%- endfor %} ->
-                        if (!it.isActive) {
-                            // Coroutine was aborted.
-                        }
-                        //* Throw the associated custom exception if the status is not 'success'.
-                        else if ({{ as_varName(ns.status_arg.name) }} != {{ ns.status_arg.name.CamelCase() }}.Success) {
-                            it.resumeWithException({{ exception_name}} (
-                                {%- if ns.status_arg %}status = {{ as_varName(ns.status_arg.name) }},{% endif %}
-                                {%- if ns.message_arg %}reason = {{ as_varName(ns.message_arg.name) }}{% endif -%}
-                            ))
-                        }
-                        {% if ns.payload_arg and ns.payload_arg.type.name.get() == 'error type' %}
-                            //* If the payload is a Dawn error type, create the matching exception.
-                            else if ({{ as_varName(ns.payload_arg.name) }} != ErrorType.NoError) {
-                                it.resumeWithException(WebGpuRuntimeException.create({{ as_varName(ns.payload_arg.name) }}, {{ as_varName(ns.message_arg.name) }}))
-                            }
-                        {% endif %}
-                        {% if ns.payload_arg.optional %}
-                            else if ({{ as_varName(ns.payload_arg.name) }} == null) {
-                                it.resumeWithException({{ exception_name}}(
-                                  {%- if ns.status_arg %}status = {{ as_varName(ns.status_arg.name) }}, {% endif %}
-                                      reason = "Null value returned"))
-                            }
-                        {% endif %}
-                        else {
-                            it.resume({{ as_varName(ns.payload_arg.name) if ns.payload_arg else 'Unit' }})
-                        }
-                    }
+                {%- elif arg.name.get() == callback_arg.name.get() -%}
+                    callback
                 {%- else -%}
-                    {{- as_varName(arg.name) }},
+                    {{ as_varName(arg.name) }},
                 {%- endif %}
-            {%- endfor %})
+            {%- endfor -%}
+          )
     }
 {% endmacro %}

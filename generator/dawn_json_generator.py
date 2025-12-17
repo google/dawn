@@ -1097,6 +1097,22 @@ def compute_kotlin_params(loaded_json,
         return customize_enums.get(enum.name.get(),
                                    {}).get('omitted') is not True
 
+    def include_callback(function):
+        structures = params_kotlin['by_category']['structure']
+        function_pointers = params_kotlin['by_category']['function pointer']
+        if any(member.name.get() == function.name.get()
+               for member in function_pointers):
+            return True
+
+        included_callbacks = list()
+        for struct in structures:
+            if include_structure(struct):
+                for member in kotlin_record_members(struct.members):
+                    if member.type.category == 'callback function':
+                        included_callbacks.append(member.name.get())
+
+        return function.name.get() in included_callbacks
+
     def jni_name(type, category=None):
         if type.category == 'kotlin type':
             # Standard library Kotlin class (with namespace) just needs converting.
@@ -1129,12 +1145,17 @@ def compute_kotlin_params(loaded_json,
     params_kotlin['include_enum'] = include_enum
     params_kotlin['kotlin_record_members'] = kotlin_record_members
     params_kotlin['jni_name'] = jni_name
-    params_kotlin['has_kotlin_classes'] = by_category['callback function'] + [
-        enum for enum in by_category['enum'] if include_enum(enum)
-    ] + by_category['function pointer'] + by_category['object'] + [
-        structure for structure in by_category['structure']
-        if include_structure(structure)
-    ]
+    params_kotlin['include_callback'] = include_callback
+
+    params_kotlin['has_kotlin_classes'] = (
+        [
+            callback for callback in by_category['callback function'] +
+            by_category['function pointer'] if include_callback(callback)
+        ] + [enum for enum in by_category['enum'] if include_enum(enum)] +
+        by_category['object'] + [
+            structure for structure in by_category['structure']
+            if include_structure(structure)
+        ])
 
     analyze_converter_usage(params_kotlin)
 
@@ -1864,6 +1885,8 @@ class MultiGeneratorFromDawnJSON(Generator):
             ]
 
             by_category = params_kotlin['by_category']
+            include_callback = params_kotlin['include_callback']
+
             for structure in by_category['structure']:
                 if params_kotlin['include_structure'](structure):
                     renders.append(
@@ -1885,15 +1908,17 @@ class MultiGeneratorFromDawnJSON(Generator):
                         }]))
             for function_pointer in (by_category['function pointer'] +
                                      by_category['callback function']):
-                renders.append(
-                    FileRender(
-                        'art/api_kotlin_function_pointer.kt', 'java/' +
-                        jni_name(function_pointer,
-                                 category='function pointer') + '.kt', [
-                                     RENDER_PARAMS_BASE, params_kotlin, {
-                                         'function_pointer': function_pointer
-                                     }
-                                 ]))
+                if include_callback(function_pointer):
+                    renders.append(
+                        FileRender(
+                            'art/api_kotlin_function_pointer.kt', 'java/' +
+                            jni_name(function_pointer,
+                                     category='function pointer') + '.kt',
+                            [
+                                RENDER_PARAMS_BASE, params_kotlin, {
+                                    'function_pointer': function_pointer
+                                }
+                            ]))
 
             renders.append(
                 FileRender('art/api_kotlin_exceptions.kt',
@@ -1903,6 +1928,10 @@ class MultiGeneratorFromDawnJSON(Generator):
             renders.append(
                 FileRender('art/api_kotlin_functions.kt',
                            'java/' + kt_file_path + '/Functions.kt',
+                           [RENDER_PARAMS_BASE, params_kotlin]))
+            renders.append(
+                FileRender('art/api_kotlin_callback.kt',
+                           'java/' + kt_file_path + '/GPURequestCallback.kt',
                            [RENDER_PARAMS_BASE, params_kotlin]))
 
             for enum in (params_kotlin['by_category']['bitmask'] +

@@ -40,6 +40,10 @@ JNIClasses::JNIClasses(JNIEnv* env) {
             {{ entity.name.camelCase() }}Runnable = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("{{ jni_name(entity) }}Runnable")));
         {%endif %}
     {% endfor %}
+    gpuCallbackRunnable = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("androidx/webgpu/GPURequestCallbackRunnable")));
+    gpuCallbackErrorTypeRunnable = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("androidx/webgpu/GPURequestCallbackErrorTypeRunnable")));
+    gpuCallbackVoidRunnable = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("androidx/webgpu/GPURequestCallbackVoidRunnable")));
+
 }
 
 }  // namespace dawn::kotlin_api

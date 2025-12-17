@@ -42,6 +42,9 @@ class JNIClasses {
                 jclass {{ entity.name.camelCase() }}Runnable;
             {%endif %}
         {% endfor %}
+        jclass gpuCallbackRunnable;
+        jclass gpuCallbackErrorTypeRunnable;
+        jclass gpuCallbackVoidRunnable;
     private:
         JNIClasses(JNIEnv *env);
 };

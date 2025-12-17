@@ -165,7 +165,7 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
         {% set KotlinRecord = "KotlinRecord" + structure.name.CamelCase() %}
         {{ define_kotlin_record_structure(KotlinRecord, structure.members)}}
 
-        {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, Struct, structure.members)}}
+        {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, Struct, structure.members, is_structure_converter=True)}}
         void ToNative(JNIContext* c, JNIEnv* env, jobject obj, {{ as_cType(structure.name) }}* converted) {
             JNIClasses* classes = JNIClasses::getInstance(env);
             jclass clz = classes->{{ structure.name.camelCase() }};
