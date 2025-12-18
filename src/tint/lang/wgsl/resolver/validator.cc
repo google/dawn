@@ -56,6 +56,7 @@
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
+#include "src/tint/lang/wgsl/ast/subgroup_size_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
@@ -1354,6 +1355,22 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
                     AddError(attr->source)
                         << style::Attribute("@must_use")
                         << " can only be applied to functions that return a value";
+                    return false;
+                }
+                return true;
+            },
+            [&](const ast::SubgroupSizeAttribute*) {
+                if (!enabled_extensions_.Contains(
+                        wgsl::Extension::kChromiumExperimentalSubgroupSizeControl)) {
+                    AddError(attr->source)
+                        << "use of " << style::Attribute("@subgroup_size")
+                        << " requires enabling extension "
+                        << style::Code("chromium_experimental_subgroup_size_control");
+                    return false;
+                }
+                if (decl->PipelineStage() != ast::PipelineStage::kCompute) {
+                    AddError(attr->source) << style::Attribute("@subgroup_size")
+                                           << " is only valid for compute stages";
                     return false;
                 }
                 return true;

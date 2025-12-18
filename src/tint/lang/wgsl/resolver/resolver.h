@@ -440,6 +440,10 @@ class Resolver {
     /// @returns the workgroup size on success.
     tint::Result<sem::WorkgroupSize> WorkgroupAttribute(const ast::WorkgroupAttribute* attr);
 
+    /// Resolves the `@sugbroup_size` attribute @p attr
+    /// @returns the subgroup size on success.
+    tint::Result<uint32_t> SubgroupSizeAttribute(const ast::SubgroupSizeAttribute* attr);
+
     /// Resolves the `@diagnostic` attribute @p attr
     /// @returns true on success, false on failure
     bool DiagnosticAttribute(const ast::DiagnosticAttribute* attr);

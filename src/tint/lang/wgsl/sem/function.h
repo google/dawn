@@ -84,6 +84,13 @@ class Function final : public Castable<Function, CallTarget> {
         workgroup_size_ = std::move(workgroup_size);
     }
 
+    /// Sets the subgroup size for the function.
+    /// @param subgroup_size the new subgroup size of the function
+    void SetSubgroupSize(uint32_t subgroup_size) { subgroup_size_ = subgroup_size; }
+
+    /// @returns the subgroup size for the functions.
+    std::optional<uint32_t> SubgroupSize() const { return subgroup_size_; }
+
     /// @returns all directly referenced global variables
     const UniqueVector<const GlobalVariable*, 4>& DirectlyReferencedGlobals() const {
         return directly_referenced_globals_;
@@ -225,6 +232,7 @@ class Function final : public Castable<Function, CallTarget> {
     const ast::Function* const declaration_;
 
     sem::WorkgroupSize workgroup_size_;
+    std::optional<uint32_t> subgroup_size_;
     UniqueVector<const GlobalVariable*, 4> directly_referenced_globals_;
     UniqueVector<const GlobalVariable*, 8> transitively_referenced_globals_;
     UniqueVector<const Function*, 8> transitively_called_functions_;

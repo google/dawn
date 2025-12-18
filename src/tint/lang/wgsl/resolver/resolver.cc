@@ -889,6 +889,14 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
                 func->SetWorkgroupSize(value.Get());
                 return true;
             },
+            [&](const ast::SubgroupSizeAttribute* attr) {
+                auto value = SubgroupSizeAttribute(attr);
+                if (value != Success) {
+                    return false;
+                }
+                func->SetSubgroupSize(value.Get());
+                return true;
+            },
             [&](Default) {
                 ErrorInvalidAttribute(attribute, StyledText{} << "functions");
                 return false;
@@ -3975,6 +3983,60 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
     }
 
     return ws;
+}
+
+tint::Result<uint32_t> Resolver::SubgroupSizeAttribute(const ast::SubgroupSizeAttribute* attr) {
+    auto value = attr->subgroup_size;
+
+    auto err_bad_expr = [&]() {
+        AddError(attr->source) << style::Attribute("@subgroup_size")
+                               << " argument must be a constant or override-expression of type "
+                               << style::Type("abstract-integer") << ", " << style::Type("i32")
+                               << " or " << style::Type("u32");
+    };
+
+    const auto* expr = ValueExpression(value);
+    if (!expr) {
+        return Failure{};
+    }
+    auto* type = expr->Type();
+    if (!type->IsAnyOf<core::type::I32, core::type::U32, core::type::AbstractInt>()) {
+        err_bad_expr();
+        return Failure{};
+    }
+
+    if (expr->Stage() != core::EvaluationStage::kConstant &&
+        expr->Stage() != core::EvaluationStage::kOverride) {
+        err_bad_expr();
+        return Failure{};
+    }
+
+    // If all arguments are abstract-integers, then materialize to i32.
+    if (type->Is<core::type::AbstractInt>()) {
+        type = b.create<core::type::I32>();
+    }
+
+    auto* materialized = Materialize(expr, type);
+    if (!materialized) {
+        return Failure{};
+    }
+
+    uint32_t subgroup_size = 0u;
+    if (auto* constant_value = materialized->ConstantValue()) {
+        if (constant_value->ValueAs<AInt>() < 1) {
+            AddError(attr->source)
+                << style::Attribute("@subgroup_size") << " argument must be at least 1";
+            return Failure{};
+        }
+        subgroup_size = constant_value->ValueAs<u32>();
+        if (!IsPowerOfTwo(subgroup_size)) {
+            AddError(attr->source)
+                << style::Attribute("@subgroup_size") << " argument must be a power of 2";
+            return Failure{};
+        }
+    }
+
+    return subgroup_size;
 }
 
 bool Resolver::DiagnosticAttribute(const ast::DiagnosticAttribute* attr) {

@@ -50,6 +50,7 @@
 #include "src/tint/lang/wgsl/ast/loop_statement.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
+#include "src/tint/lang/wgsl/ast/subgroup_size_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/lang/wgsl/ast/var.h"
@@ -3154,6 +3155,8 @@ Maybe<const ast::Attribute*> Parser::attribute() {
             return create<ast::WorkgroupAttribute>(t.source(), args[0],
                                                    args.Length() > 1 ? args[1] : nullptr,
                                                    args.Length() > 2 ? args[2] : nullptr);
+        case core::Attribute::kSubgroupSize:
+            return create<ast::SubgroupSizeAttribute>(t.source(), args[0]);
         default:
             return Failure::kNoMatch;
     }

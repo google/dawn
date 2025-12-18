@@ -54,5 +54,142 @@ TEST_F(SubgroupSizeControlExtensionTest,
         R"(error: extension 'chromium_experimental_subgroup_size_control' cannot be used without extension 'subgroups')");
 }
 
+TEST_F(SubgroupSizeControlExtensionTest, RequiresExtension) {
+    // Test without enabling the extension
+    Enable(wgsl::Extension::kSubgroups);
+    Func("main", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+             SubgroupSize(Source{{12, 34}}, Expr(16_i)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: use of '@subgroup_size' requires enabling extension 'chromium_experimental_subgroup_size_control')");
+}
+
+TEST_F(SubgroupSizeControlExtensionTest, ValidWithExtension) {
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl);
+
+    Func("main", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+             SubgroupSize(Expr(16_i)),
+         });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(SubgroupSizeControlExtensionTest, NotAnEntryPoint) {
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl);
+
+    Func("main", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
+             SubgroupSize(Source{{12, 34}}, Expr(16_i)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: '@subgroup_size' is only valid for compute stages)");
+}
+
+TEST_F(SubgroupSizeControlExtensionTest, NotAComputeShader) {
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl);
+
+    Func("main", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
+             Stage(ast::PipelineStage::kFragment),
+             SubgroupSize(Source{{12, 34}}, Expr(16_i)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: '@subgroup_size' is only valid for compute stages)");
+}
+
+TEST_F(SubgroupSizeControlExtensionTest, InvalidValue_Negative) {
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl);
+
+    Func("main", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+             SubgroupSize(Source{{12, 34}}, Expr(-1_i)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: '@subgroup_size' argument must be at least 1)");
+}
+
+TEST_F(SubgroupSizeControlExtensionTest, InvalidValue_Zero) {
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl);
+
+    Func("main", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+             SubgroupSize(Source{{12, 34}}, Expr(0_i)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: '@subgroup_size' argument must be at least 1)");
+}
+
+TEST_F(SubgroupSizeControlExtensionTest, InvalidValue_NotAPowerOfTwo) {
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl);
+
+    Func("main", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+             SubgroupSize(Source{{12, 34}}, Expr(15_i)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: '@subgroup_size' argument must be a power of 2)");
+}
+
+TEST_F(SubgroupSizeControlExtensionTest, InvalidValue_Float) {
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl);
+
+    Func("main", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+             SubgroupSize(Source{{12, 34}}, Expr(16.5_f)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: '@subgroup_size' argument must be a constant or override-expression of type 'abstract-integer', 'i32' or 'u32')");
+}
+
+TEST_F(SubgroupSizeControlExtensionTest, DuplicateAttribute) {
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl);
+
+    Func("main", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+             SubgroupSize(Source{{12, 34}}, Expr(16_i)),
+             SubgroupSize(Source{{56, 78}}, Expr(32_i)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(56:78 error: duplicate subgroup_size attribute
+12:34 note: first attribute declared here)");
+}
+
 }  // namespace
 }  // namespace tint::resolver

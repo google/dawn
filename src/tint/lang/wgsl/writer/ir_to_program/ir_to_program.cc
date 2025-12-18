@@ -308,6 +308,10 @@ class State {
                 auto wgsize = fn->WorkgroupSize().value();
                 attrs.Push(b.Stage(ast::PipelineStage::kCompute));
                 attrs.Push(b.WorkgroupSize(Expr(wgsize[0]), Expr(wgsize[1]), Expr(wgsize[2])));
+                if (fn->SubgroupSize().has_value()) {
+                    auto sgsize = fn->SubgroupSize().value();
+                    attrs.Push(b.SubgroupSize(Expr(sgsize)));
+                }
                 break;
             }
             case core::ir::Function::PipelineStage::kFragment:

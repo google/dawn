@@ -86,6 +86,7 @@
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_size_attribute.h"
+#include "src/tint/lang/wgsl/ast/subgroup_size_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/templated_identifier.h"
 #include "src/tint/lang/wgsl/ast/type.h"
@@ -3316,6 +3317,23 @@ class Builder {
         return create<ast::WorkgroupAttribute>(source_, Expr(std::forward<EXPR_X>(x)),
                                                Expr(std::forward<EXPR_Y>(y)),
                                                Expr(std::forward<EXPR_Z>(z)));
+    }
+
+    /// Creates an ast::SubgroupSizeAttribute
+    /// @param source the source information
+    /// @param subgroup_size the subgroup size value expression
+    /// @returns the subgroup size attribute pointer
+    template <typename EXPR>
+    const ast::SubgroupSizeAttribute* SubgroupSize(const Source& source, EXPR&& subgroup_size) {
+        return create<ast::SubgroupSizeAttribute>(source, std::forward<EXPR>(subgroup_size));
+    }
+
+    /// Creates an ast::SubgroupSizeAttribute
+    /// @param subgroup_size the subgroup size value expression
+    /// @returns the subgroup size attribute pointer
+    template <typename EXPR>
+    const ast::SubgroupSizeAttribute* SubgroupSize(EXPR&& subgroup_size) {
+        return SubgroupSize(source_, Expr(std::forward<EXPR>(subgroup_size)));
     }
 
     /// Passthrough overload

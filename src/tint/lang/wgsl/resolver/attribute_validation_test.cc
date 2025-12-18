@@ -71,6 +71,7 @@ enum class AttributeKind {
     kSize,
     kStageCompute,
     kWorkgroupSize,
+    kSubgroupSize,
 };
 static std::ostream& operator<<(std::ostream& o, AttributeKind k) {
     switch (k) {
@@ -106,6 +107,8 @@ static std::ostream& operator<<(std::ostream& o, AttributeKind k) {
             return o << "@compute";
         case AttributeKind::kWorkgroupSize:
             return o << "@workgroup_size";
+        case AttributeKind::kSubgroupSize:
+            return o << "@subgroup_size";
     }
     TINT_UNREACHABLE();
 }
@@ -195,6 +198,10 @@ static std::vector<TestParams> OnlyDiagnosticValidFor(std::string thing) {
             TestParams{
                 {AttributeKind::kBinding, AttributeKind::kGroup},
                 "1:2 error: '@binding' is not valid for " + thing,
+            },
+            TestParams{
+                {AttributeKind::kSubgroupSize},
+                "1:2 error: '@subgroup_size' is not valid for " + thing,
             }};
 }
 
@@ -239,7 +246,9 @@ const ast::Attribute* CreateAttribute(const Source& source,
         case AttributeKind::kStageCompute:
             return builder.Stage(source, ast::PipelineStage::kCompute);
         case AttributeKind::kWorkgroupSize:
-            return builder.create<ast::WorkgroupAttribute>(source, builder.Expr(1_i));
+            return builder.WorkgroupSize(source, builder.Expr(1_i));
+        case AttributeKind::kSubgroupSize:
+            return builder.SubgroupSize(source, builder.Expr(16_i));
     }
     TINT_UNREACHABLE() << kind;
 }
@@ -255,6 +264,10 @@ struct TestWithParams : ResolverTestWithParam<TestParams> {
                 break;
             case AttributeKind::kInputAttachmentIndex:
                 Enable(wgsl::Extension::kChromiumInternalInputAttachments);
+                break;
+            case AttributeKind::kSubgroupSize:
+                Enable(wgsl::Extension::kSubgroups);
+                Enable(wgsl::Extension::kChromiumExperimentalSubgroupSizeControl);
                 break;
             default:
                 break;
@@ -371,6 +384,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is only valid for compute stages)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is only valid for compute stages)",
         }));
 
 using NonVoidFunctionAttributeTest = TestWithParams;
@@ -452,6 +469,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is only valid for compute stages)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is only valid for compute stages)",
         }));
 }  // namespace FunctionTests
 
@@ -535,6 +556,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for function parameters)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for function parameters)",
         }));
 
 using FunctionReturnTypeAttributeTest = TestWithParams;
@@ -616,6 +641,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for non-entry point function return types)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for non-entry point function return types)",
         }));
 }  // namespace FunctionInputAndOutputTests
 
@@ -702,6 +731,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for function parameters)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for function parameters)",
         }));
 
 using FragmentShaderParameterAttributeTest = TestWithParams;
@@ -799,6 +832,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for function parameters)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for function parameters)",
         }));
 
 using VertexShaderParameterAttributeTest = TestWithParams;
@@ -902,6 +939,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for function parameters)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for function parameters)",
         }));
 
 using ComputeShaderReturnTypeAttributeTest = TestWithParams;
@@ -987,6 +1028,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for entry point return types)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for entry point return types)",
         }));
 
 using FragmentShaderReturnTypeAttributeTest = TestWithParams;
@@ -1085,6 +1130,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kBinding, AttributeKind::kGroup},
             R"(1:2 error: '@binding' is not valid for entry point return types)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for entry point return types)",
         }));
 
 using VertexShaderReturnTypeAttributeTest = TestWithParams;
@@ -1183,6 +1232,10 @@ INSTANTIATE_TEST_SUITE_P(
             {AttributeKind::kLocation, AttributeKind::kLocation},
             R"(3:4 error: duplicate location attribute
 1:2 note: first attribute declared here)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for entry point return types)",
         }));
 
 }  // namespace EntryPointInputAndOutputTests
@@ -1267,6 +1320,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kBinding, AttributeKind::kGroup},
             R"(1:2 error: '@binding' is not valid for 'struct' declarations)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for 'struct' declarations)",
         }));
 
 using StructMemberAttributeTest = TestWithParams;
@@ -1360,6 +1417,10 @@ INSTANTIATE_TEST_SUITE_P(
             {AttributeKind::kAlign, AttributeKind::kAlign},
             R"(3:4 error: duplicate align attribute
 1:2 note: first attribute declared here)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for 'struct' members)",
         }));
 
 TEST_F(StructMemberAttributeTest, Align_Attribute_Const) {
@@ -1615,6 +1676,10 @@ INSTANTIATE_TEST_SUITE_P(
             {AttributeKind::kBinding, AttributeKind::kGroup, AttributeKind::kBinding},
             R"(5:6 error: duplicate binding attribute
 1:2 note: first attribute declared here)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for module-scope 'var')",
         }));
 
 TEST_F(VariableAttributeTest, LocalVar) {
@@ -1710,6 +1775,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kBinding, AttributeKind::kGroup},
             R"(1:2 error: '@binding' is not valid for 'const' declaration)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for 'const' declaration)",
         }));
 
 using OverrideAttributeTest = TestWithParams;
@@ -1788,6 +1857,10 @@ INSTANTIATE_TEST_SUITE_P(
             {AttributeKind::kId, AttributeKind::kId},
             R"(3:4 error: duplicate id attribute
 1:2 note: first attribute declared here)",
+        },
+        TestParams{
+            {AttributeKind::kSubgroupSize},
+            R"(1:2 error: '@subgroup_size' is not valid for 'override' declaration)",
         }));
 
 using SwitchStatementAttributeTest = TestWithParams;
