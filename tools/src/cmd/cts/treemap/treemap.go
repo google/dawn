@@ -36,7 +36,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -91,8 +90,8 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	return []string{"[cases | timing]"}, nil
 }
 
-// TODO(crbug.com/344014313): Split this up into testable helper functions and
-// add coverage (browser.Open() likely prevents testing of Run() itself).
+// TODO(crbug.com/416755658): Add unittest coverage once browser.Open() uses
+// dependency injection for its exec call.
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	ctx, stop := context.WithCancel(ctx)
 	defer stop()
@@ -127,7 +126,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	// Kick the server
 	handler := http.NewServeMux()
 	handler.HandleFunc("/index.html", func(w http.ResponseWriter, r *http.Request) {
-		f, err := os.Open(filepath.Join(fileutils.ThisDir(), "treemap.html"))
+		f, err := cfg.OsWrapper.Open(filepath.Join(fileutils.ThisDir(), "treemap.html"))
 		if err != nil {
 			fmt.Fprint(w, "file not found")
 			w.WriteHeader(http.StatusNotFound)
@@ -161,7 +160,8 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	return nil
 }
 
-// TODO(crbug.com/344014313): Add unittests for this function.
+// TODO(crbug.com/416755658): Add unittests for this function once GenTestList
+// used dependency injection for its exec call.
 // loadCasesData creates the JSON payload for a cases visualization
 func loadCasesData(testQuery string, fsReader oswrapper.FilesystemReader) (string, error) {
 	testlist, err := common.GenTestList(context.Background(), common.DefaultCTSPath(fsReader), fileutils.NodePath(fsReader), testQuery)
