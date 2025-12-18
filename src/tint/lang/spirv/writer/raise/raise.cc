@@ -189,7 +189,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::Bgra8UnormPolyfill, module);
 
-    if (options.extensions.decompose_uniform_buffers) {
+    if (!options.extensions.use_uniform_buffers) {
         // DecomposeUniformAccess must come before BlockDecoratedStructs, which will wrap the
         // uniform variable in a structure.
         RUN_TRANSFORM(core::ir::transform::DecomposeUniformAccess, module);

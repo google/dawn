@@ -150,7 +150,7 @@ TEST_F(SpirvWriterTest, Type_F16_WithoutDecomposeUniformBuffers) {
     });
 
     Options options;
-    options.extensions.decompose_uniform_buffers = false;
+    options.extensions.use_uniform_buffers = true;
 
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("OpCapability Float16");

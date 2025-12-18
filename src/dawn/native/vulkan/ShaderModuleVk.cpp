@@ -271,8 +271,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
     req.tintOptions.extensions.use_zero_initialize_workgroup_memory =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
-    req.tintOptions.extensions.decompose_uniform_buffers =
-        GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
+    req.tintOptions.extensions.use_uniform_buffers =
+        !GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
 
     req.tintOptions.workarounds.subgroup_shuffle_clamped =
         GetDevice()->IsToggleEnabled(Toggle::SubgroupShuffleClamped);

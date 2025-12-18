@@ -151,8 +151,9 @@ struct Options {
         /// Set to `true` to generate polyfill for `dot4I8Packed` and `dot4U8Packed` builtins
         bool dot_4x8_packed = false;
 
-        /// Set to `true` to decompose uniform buffers into array<vec4u, ...>.
-        bool decompose_uniform_buffers = true;
+        /// Set to `true` to use the uniform buffer directly, `false` to decompose into array<vec4u,
+        /// ...>.
+        bool use_uniform_buffers = false;
 
         TINT_REFLECT(Extensions,
                      use_demote_to_helper_invocation,
@@ -162,7 +163,7 @@ struct Options {
                      disable_image_robustness,
                      disable_runtime_sized_array_index_clamping,
                      dot_4x8_packed,
-                     decompose_uniform_buffers);
+                     use_uniform_buffers);
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////

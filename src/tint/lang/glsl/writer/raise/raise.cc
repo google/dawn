@@ -178,7 +178,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module, dva_config);
     }
 
-    if (options.decompose_uniform_buffers) {
+    if (!options.use_uniform_buffers) {
         // DecomposeUniformAccess must come before BlockDecoratedStructs, which will wrap the
         // uniform variable in a structure. It must come after DirectVariableAccess which removes
         // uniform buffers passed as function parameters.

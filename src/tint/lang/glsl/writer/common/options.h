@@ -175,8 +175,9 @@ struct Options {
     /// Set to `true` to run ArrayLengthFromTransform workaround
     bool use_array_length_from_uniform = false;
 
-    /// Set to `true` to decompose uniform buffers into array<vec4u, ...>.
-    bool decompose_uniform_buffers = true;
+    /// Set to `true` to use the uniform buffer directly, `false` to decompose into array<vec4u,
+    /// ...>.
+    bool use_uniform_buffers = false;
 
     /// The entry point name to emit
     std::string entry_point_name;
@@ -227,7 +228,7 @@ struct Options {
                  disable_workgroup_init,
                  disable_polyfill_integer_div_mod,
                  use_array_length_from_uniform,
-                 decompose_uniform_buffers,
+                 use_uniform_buffers,
                  entry_point_name,
                  version,
                  first_vertex_offset,

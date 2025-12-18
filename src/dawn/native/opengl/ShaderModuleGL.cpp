@@ -475,8 +475,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.tintOptions.enable_integer_range_analysis =
         GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
-    req.tintOptions.decompose_uniform_buffers =
-        GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
+    req.tintOptions.use_uniform_buffers =
+        !GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
 
     CacheResult<GLSLCompilation> compilationResult;
     DAWN_TRY_LOAD_OR_RUN(
