@@ -379,6 +379,9 @@ TEST_P(EventCompletionTests, WorkDoneSimple) {
 
 // WorkDone event before device loss, wait afterward.
 TEST_P(EventCompletionTests, WorkDoneAcrossDeviceLoss) {
+    // TODO(crbug.com/469831341): Flaky on Snapdragon X Elite devices w/ D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
+
     TrivialSubmit();
     TrackForTest(OnSubmittedWorkDone(wgpu::QueueWorkDoneStatus::Success));
     TestWaitAll();
@@ -399,6 +402,9 @@ TEST_P(EventCompletionTests, WorkDoneTwice) {
                           GetParam().mWaitTypeAndCallbackMode ==
                               WaitTypeAndCallbackMode::Spin_AllowSpontaneous);
 
+    // TODO(crbug.com/469831341): Flaky on Snapdragon X Elite devices w/ D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
+
     TrivialSubmit();
     TrackForTest(OnSubmittedWorkDone(wgpu::QueueWorkDoneStatus::Success));
     TrackForTest(OnSubmittedWorkDone(wgpu::QueueWorkDoneStatus::Success));
@@ -416,6 +422,9 @@ TEST_P(EventCompletionTests, WorkDoneNoWork) {
 
 // WorkDone event after all work has completed already.
 TEST_P(EventCompletionTests, WorkDoneAlreadyCompleted) {
+    // TODO(crbug.com/469831341): Flaky on Snapdragon X Elite devices w/ D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
+
     TrivialSubmit();
     TrackForTest(OnSubmittedWorkDone(wgpu::QueueWorkDoneStatus::Success));
     TestWaitAll();
