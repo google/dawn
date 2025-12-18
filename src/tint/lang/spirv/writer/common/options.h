@@ -199,7 +199,7 @@ struct Options {
     bool disable_polyfill_integer_div_mod = false;
 
     /// Set to `true` to enable integer range analysis in robustness transform.
-    bool enable_integer_range_analysis = true;
+    bool disable_integer_range_analysis = false;
 
     /// Set to `true` to generate a PointSize builtin and have it set to 1.0
     /// from all vertex shaders in the module.
@@ -239,7 +239,7 @@ struct Options {
                  disable_robustness,
                  disable_workgroup_init,
                  disable_polyfill_integer_div_mod,
-                 enable_integer_range_analysis,
+                 disable_integer_range_analysis,
                  emit_vertex_point_size,
                  polyfill_pixel_center,
                  workarounds,

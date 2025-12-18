@@ -136,7 +136,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.disable_robustness = fuzzed_options.disable_robustness;
     options.disable_workgroup_init = fuzzed_options.disable_workgroup_init;
     options.disable_polyfill_integer_div_mod = fuzzed_options.disable_polyfill_integer_div_mod;
-    options.enable_integer_range_analysis = fuzzed_options.enable_integer_range_analysis;
+    options.disable_integer_range_analysis = !fuzzed_options.enable_integer_range_analysis;
     options.emit_vertex_point_size = fuzzed_options.emit_vertex_point_size;
     options.polyfill_pixel_center = fuzzed_options.polyfill_pixel_center;
     options.workarounds.polyfill_case_switch = fuzzed_options.polyfill_case_switch;

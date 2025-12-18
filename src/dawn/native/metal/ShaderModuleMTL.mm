@@ -305,8 +305,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.disable_workgroup_init = device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.tintOptions.disable_polyfill_integer_div_mod =
         device->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
-    req.tintOptions.enable_integer_range_analysis =
-        device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
+    req.tintOptions.disable_integer_range_analysis =
+        !device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
     req.tintOptions.fixed_sample_mask = sampleMask;
     req.tintOptions.emit_vertex_point_size =

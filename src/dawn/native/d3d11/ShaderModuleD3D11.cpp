@@ -134,6 +134,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.disable_workgroup_init =
         device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.hlsl.tintOptions.bindings = std::move(bindings);
+    req.hlsl.tintOptions.disable_integer_range_analysis =
+        !device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
     req.hlsl.tintOptions.immediate_binding_point =
         tint::BindingPoint{0, PipelineLayout::kReservedConstantBufferSlot};

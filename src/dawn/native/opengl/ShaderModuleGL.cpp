@@ -472,8 +472,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.tintOptions.disable_polyfill_integer_div_mod =
         GetDevice()->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
 
-    req.tintOptions.enable_integer_range_analysis =
-        GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
+    req.tintOptions.disable_integer_range_analysis =
+        !GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
     req.tintOptions.use_uniform_buffers =
         !GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);

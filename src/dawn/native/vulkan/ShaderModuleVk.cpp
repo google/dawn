@@ -250,8 +250,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.tintOptions.spirv_version = GetDevice()->IsToggleEnabled(Toggle::UseSpirv14)
                                         ? tint::spirv::writer::SpvVersion::kSpv14
                                         : tint::spirv::writer::SpvVersion::kSpv13;
-    req.tintOptions.enable_integer_range_analysis =
-        GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
+    req.tintOptions.disable_integer_range_analysis =
+        !GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
     req.tintOptions.extensions.use_vulkan_memory_model =
         GetDevice()->IsToggleEnabled(Toggle::UseVulkanMemoryModel);

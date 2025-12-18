@@ -115,7 +115,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.entry_point_name = ep_name;
     options.strip_all_names = fuzzed_options.strip_all_names;
     options.disable_robustness = fuzzed_options.disable_robustness;
-    options.enable_integer_range_analysis = fuzzed_options.enable_integer_range_analysis;
+    options.disable_integer_range_analysis = !fuzzed_options.enable_integer_range_analysis;
     options.disable_workgroup_init = fuzzed_options.disable_workgroup_init;
     options.truncate_interstage_variables = fuzzed_options.truncate_interstage_variables;
     options.disable_polyfill_integer_div_mod = fuzzed_options.disable_polyfill_integer_div_mod;

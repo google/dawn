@@ -98,7 +98,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         }
         config.disable_runtime_sized_array_index_clamping =
             options.extensions.disable_runtime_sized_array_index_clamping;
-        config.use_integer_range_analysis = options.enable_integer_range_analysis;
+        config.use_integer_range_analysis = !options.disable_integer_range_analysis;
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
 
         RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);

@@ -164,7 +164,7 @@ struct Options {
     bool disable_robustness = false;
 
     /// Set to `true` to enable integer range analysis in robustness transform.
-    bool enable_integer_range_analysis = true;
+    bool disable_integer_range_analysis = false;
 
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
@@ -224,7 +224,7 @@ struct Options {
     TINT_REFLECT(Options,
                  strip_all_names,
                  disable_robustness,
-                 enable_integer_range_analysis,
+                 disable_integer_range_analysis,
                  disable_workgroup_init,
                  disable_polyfill_integer_div_mod,
                  use_array_length_from_uniform,

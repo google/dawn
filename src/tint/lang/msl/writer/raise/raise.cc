@@ -135,7 +135,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     if (!options.disable_robustness) {
         core::ir::transform::RobustnessConfig config{};
-        config.use_integer_range_analysis = options.enable_integer_range_analysis;
+        config.use_integer_range_analysis = !options.disable_integer_range_analysis;
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
 
         RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);

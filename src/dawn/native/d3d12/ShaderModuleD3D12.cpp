@@ -247,8 +247,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.hlsl.tintOptions.disable_polyfill_integer_div_mod =
         device->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
-    req.hlsl.tintOptions.enable_integer_range_analysis =
-        device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
+    req.hlsl.tintOptions.disable_integer_range_analysis =
+        !device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
     req.hlsl.tintOptions.bindings = std::move(bindings);
     req.hlsl.tintOptions.ignored_by_robustness_transform = std::move(ignored_by_robustness);
