@@ -907,6 +907,13 @@ crbug.com/469125054 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.81
 crbug.com/469125054 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,operation,rendering,draw:arguments:*;instance_count=0;*;indirect=false;vertex_buffer_offset=32;index_buffer_offset=0;* [ Failure ]
 crbug.com/469125054 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,operation,rendering,draw:arguments:*;instance_count=0;*;indirect=false;vertex_buffer_offset=0;index_buffer_offset=16;* [ Failure ]
 crbug.com/469125054 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,operation,rendering,draw:arguments:*;instance_count=0;*;indirect=false;vertex_buffer_offset=32;index_buffer_offset=16;* [ Failure ]
+crbug.com/469831347 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="*";format="depth*" [ Failure ]
+crbug.com/469831347 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="*";format="stencil8" [ Failure ]
+crbug.com/469819315 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,operation,texture_view,format_reinterpretation:render_and_resolve_attachment:format="bgra8unorm-srgb";sampleCount=4 [ Failure ]
+crbug.com/469819315 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,operation,texture_view,format_reinterpretation:render_and_resolve_attachment:format="rgba8unorm-srgb";sampleCount=4 [ Failure ]
+crbug.com/469819316 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,operation,texture_view,write:format:method="render-pass-resolve";*sampleCount=1;* [ Failure ]
+crbug.com/469819317 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:type="draw";* [ Failure ]
+crbug.com/469819317 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:type="drawIndexed";* [ Failure ]
 
 # Intel linux copyTextureToTexture with compressed textures, dim=2d, dim=3d
 crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-12x10-unorm";dstFormat="astc-12x10-unorm";dimension="3d" [ Failure ]
