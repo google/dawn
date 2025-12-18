@@ -243,6 +243,10 @@ void UniformBufferUpdatePerf::SetUpPerfTest() {
     // TODO(crbug.com/468353718): Flakily calls a pure virtual function on Mac/AMD.
     DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() &&
                           GetParam().uploadMethod == UploadMethod::MultipleStagingBuffer);
+    // TODO(crbug.com/468353718): Same as above, but on the integrated GPU of
+    // the AMD laptops.
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsIntel() && GetParam().uploadSize == UploadSize::Full &&
+                          GetParam().uniformBuffer == UniformBuffer::Multiple);
 
     // Create the color / depth stencil attachments.
     wgpu::TextureDescriptor descriptor = {};
