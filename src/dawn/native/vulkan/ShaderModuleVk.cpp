@@ -245,7 +245,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
 
     req.tintOptions.emit_vertex_point_size = emitPointSize;
-    req.tintOptions.apply_pixel_center_polyfill = isSampled;
+    req.tintOptions.polyfill_pixel_center = isSampled;
 
     req.tintOptions.spirv_version = GetDevice()->IsToggleEnabled(Toggle::UseSpirv14)
                                         ? tint::spirv::writer::SpvVersion::kSpv14

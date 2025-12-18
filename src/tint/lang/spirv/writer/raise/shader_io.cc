@@ -124,11 +124,11 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                   core::Access access,
                   const char* name_suffix) {
         if (func->IsVertex() && addrspace == core::AddressSpace::kOut &&
-            config.apply_pixel_center_polyfill) {
+            config.polyfill_pixel_center) {
             center_pos_vert_idx = AddCenterPosInterpolant(entries, addrspace);
 
         } else if (func->IsFragment() && addrspace == core::AddressSpace::kIn &&
-                   config.apply_pixel_center_polyfill) {
+                   config.polyfill_pixel_center) {
             center_pos_frag_idx = AddCenterPosInterpolant(entries, addrspace);
         }
 

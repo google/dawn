@@ -1417,7 +1417,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.apply_pixel_center_polyfill = true;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1480,7 +1480,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.apply_pixel_center_polyfill = true;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1543,7 +1543,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.apply_pixel_center_polyfill = true;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1630,7 +1630,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.apply_pixel_center_polyfill = true;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1712,7 +1712,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.apply_pixel_center_polyfill = true;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1777,7 +1777,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.apply_pixel_center_polyfill = true;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());

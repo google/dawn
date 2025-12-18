@@ -48,7 +48,7 @@ struct FuzzedOptions {
     bool disable_polyfill_integer_div_mod;
     bool enable_integer_range_analysis;
     bool emit_vertex_point_size;
-    bool apply_pixel_center_polyfill;
+    bool polyfill_pixel_center;
     bool polyfill_case_switch;
     bool scalarize_max_min_clamp;
     bool dva_transform_handle;
@@ -78,7 +78,7 @@ struct FuzzedOptions {
                  disable_polyfill_integer_div_mod,
                  enable_integer_range_analysis,
                  emit_vertex_point_size,
-                 apply_pixel_center_polyfill,
+                 polyfill_pixel_center,
                  polyfill_case_switch,
                  scalarize_max_min_clamp,
                  dva_transform_handle,
@@ -138,7 +138,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.disable_polyfill_integer_div_mod = fuzzed_options.disable_polyfill_integer_div_mod;
     options.enable_integer_range_analysis = fuzzed_options.enable_integer_range_analysis;
     options.emit_vertex_point_size = fuzzed_options.emit_vertex_point_size;
-    options.apply_pixel_center_polyfill = fuzzed_options.apply_pixel_center_polyfill;
+    options.polyfill_pixel_center = fuzzed_options.polyfill_pixel_center;
     options.workarounds.polyfill_case_switch = fuzzed_options.polyfill_case_switch;
     options.workarounds.scalarize_max_min_clamp = fuzzed_options.scalarize_max_min_clamp;
     options.workarounds.dva_transform_handle = fuzzed_options.dva_transform_handle;

@@ -205,7 +205,7 @@ struct Options {
     bool emit_vertex_point_size = true;
 
     /// Set to `true` to apply builtin 'position' pixel center emulation.
-    bool apply_pixel_center_polyfill = false;
+    bool polyfill_pixel_center = false;
 
     /// Any workarounds to enable/disable.
     Workarounds workarounds{};
@@ -240,7 +240,7 @@ struct Options {
                  disable_polyfill_integer_div_mod,
                  enable_integer_range_analysis,
                  emit_vertex_point_size,
-                 apply_pixel_center_polyfill,
+                 polyfill_pixel_center,
                  workarounds,
                  extensions,
                  depth_range_offsets,
