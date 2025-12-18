@@ -1056,10 +1056,8 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
 // Test using one multisampled color attachment with resolve target can render correctly
 // with alphaToCoverageEnabled.
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverage) {
-#if DAWN_PLATFORM_IS(32_BIT)
-    // TODO(crbug.com/458113207): Flaky on 32-bit w/ WARP.
+    // TODO(crbug.com/458113207): Flaky w/ WARP.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
-#endif
 
     constexpr bool kTestDepth = false;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
@@ -1110,6 +1108,9 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCo
     // TODO(dawn:1550) Workaround introduces a bug on Qualcomm GPUs, but is necessary for ARM GPUs.
     DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
                              HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
+
+    // TODO(crbug.com/458113207): Flaky w/ WARP.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -1237,10 +1238,8 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSamp
     // at the same time. See the issue: https://github.com/gpuweb/gpuweb/issues/959.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && !IsApple());
 
-#if DAWN_PLATFORM_IS(32_BIT)
-    // TODO(crbug.com/458113207): Flaky on 32-bit w/ WARP.
+    // TODO(crbug.com/458113207): Flaky w/ WARP.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
-#endif
 
     constexpr bool kTestDepth = false;
     constexpr float kMSAACoverage = 0.50f;
@@ -1282,6 +1281,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSamp
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndRasterizationMask) {
     // TODO(dawn:1550) Fails on ARM-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
+
+    // TODO(crbug.com/458113207): Flaky w/ WARP.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
     constexpr bool kTestDepth = false;
     constexpr float kMSAACoverage = 0.50f;
