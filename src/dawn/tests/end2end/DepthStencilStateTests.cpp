@@ -42,6 +42,9 @@ class DepthStencilStateTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
+        // TODO(crbug.com/458102531): Flaky on WARP.
+        DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
+
         wgpu::TextureDescriptor renderTargetDescriptor;
         renderTargetDescriptor.dimension = wgpu::TextureDimension::e2D;
         renderTargetDescriptor.size.width = kRTSize;
@@ -443,8 +446,6 @@ TEST_P(DepthStencilStateTest, DepthAlways) {
 }
 
 TEST_P(DepthStencilStateTest, DepthEqual) {
-    // TODO(crbug.com/458102531): Flaky on WARP.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
     CheckDepthCompareFunction(wgpu::CompareFunction::Equal, false, true, false);
 }
 
@@ -461,14 +462,10 @@ TEST_P(DepthStencilStateTest, DepthLess) {
 }
 
 TEST_P(DepthStencilStateTest, DepthLessEqual) {
-    // TODO(crbug.com/458102531): Flaky on WARP.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
     CheckDepthCompareFunction(wgpu::CompareFunction::LessEqual, true, true, false);
 }
 
 TEST_P(DepthStencilStateTest, DepthNever) {
-    // TODO(crbug.com/458102531): Flaky on WARP.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
     CheckDepthCompareFunction(wgpu::CompareFunction::Never, false, false, false);
 }
 
