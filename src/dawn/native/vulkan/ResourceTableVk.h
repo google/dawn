@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_VULKAN_RESOURCETABLEVK_H_
 
 #include <memory>
+#include <vector>
 
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
@@ -39,6 +40,7 @@ namespace dawn::native::vulkan {
 
 class Device;
 class DescriptorSetAllocatorDynamicArray;
+struct CommandRecordingContext;
 
 class ResourceTable final : public ResourceTableBase {
   public:
@@ -47,6 +49,11 @@ class ResourceTable final : public ResourceTableBase {
 
     // All the resource tables share the same VkDescriptorSetLayout so it is cached on the device.
     static ResultOrError<VkDescriptorSetLayout> MakeDescriptorSetLayout(Device* device);
+
+    // Apply updates to resources or to the metadata buffers that are pending.
+    MaybeError ApplyPendingUpdates(CommandRecordingContext* recordingContext);
+
+    VkDescriptorSet GetHandle() const;
 
   protected:
     void DestroyImpl() override;
@@ -57,6 +64,10 @@ class ResourceTable final : public ResourceTableBase {
 
     using ResourceTableBase::ResourceTableBase;
     MaybeError Initialize();
+
+    MaybeError UpdateMetadataBuffer(CommandRecordingContext* recordingContext,
+                                    const std::vector<DynamicArrayState::MetadataUpdate>& updates);
+    void UpdateResourceBindings(const std::vector<DynamicArrayState::ResourceUpdate>& updates);
 
     // TODO(https://issues.chromium.org/463925499): Inline the functionality of
     // DescriptorSetAllocatorDynamicArray in ResourceTable once bindless bindgroup support is

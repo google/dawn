@@ -32,6 +32,7 @@
 
 #include "dawn/common/Enumerator.h"
 #include "dawn/tests/DawnTest.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/ScopedIgnoreValidationErrors.h"
 #include "dawn/utils/WGPUHelpers.h"
 
@@ -42,6 +43,9 @@ class ResourceTableTests : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
+        // TODO(435317394): Implemented bindless in the wire.
+        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
         DAWN_TEST_UNSUPPORTED_IF(
             !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
 
@@ -346,9 +350,6 @@ TEST_P(ResourceTableTests, PinningBalancedInBackends) {
 
 // Test WGSL `hasResource` reflects the state of the resource table.
 TEST_P(ResourceTableTests, HasResourceOneTexturePinUnpin) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -372,9 +373,6 @@ TEST_P(ResourceTableTests, HasResourceOneTexturePinUnpin) {
 
 // Test that calling texture.Destroy() implicitly unpins it.
 TEST_P(ResourceTableTests, HasResourceOneTexturePinDestroy) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -398,9 +396,6 @@ TEST_P(ResourceTableTests, HasResourceOneTexturePinDestroy) {
 
 // Test that a texture used multiple times in the same table has its availability correctly updated.
 TEST_P(ResourceTableTests, HasResourceSameTextureMultipleTimesPinUnpin) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -428,9 +423,6 @@ TEST_P(ResourceTableTests, HasResourceSameTextureMultipleTimesPinUnpin) {
 // Test that updating a table with an already destroyed texture works, but doesn't show that entry
 // as available.
 TEST_P(ResourceTableTests, HasResourceUpdateWithTextureAlreadyDestroyed) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -447,9 +439,6 @@ TEST_P(ResourceTableTests, HasResourceUpdateWithTextureAlreadyDestroyed) {
 
 // Test that a texture used in multiple resource tables has its availability correctly updated.
 TEST_P(ResourceTableTests, HasResourceSameTextureMultipleTables) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -476,9 +465,6 @@ TEST_P(ResourceTableTests, HasResourceSameTextureMultipleTables) {
 
 // Test that texture availabililty is controlled per-texture.
 TEST_P(ResourceTableTests, HasResourceMultipleTexturesTable) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -790,9 +776,6 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
 
 // Test that hasResource() works as expected for all supported types in WGSL.
 TEST_P(ResourceTableTests, HasResourceTextureCompatibilityAllTypes) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
     auto textureCases = MakeTextureDescForTypeIDCases();
 
     // Make a resource table with all of our test texture views.
@@ -815,9 +798,6 @@ TEST_P(ResourceTableTests, HasResourceTextureCompatibilityAllTypes) {
 
 // Test that calling hasResource() with values outside of the resource table size returns false.
 TEST_P(ResourceTableTests, HasBindingOOBIsFalse) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
     // Create the test pipeline
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;
@@ -891,9 +871,6 @@ TEST_P(ResourceTableTests, HasBindingOOBIsFalse) {
 // test (that's for the CTS) but tries to check a few different interesting cases (MS, DS, Cube, 2D
 // array).
 TEST_P(ResourceTableTests, DefaultBindingsAreZeroAndSizeOne) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
     // Create the test pipeline
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;
@@ -972,9 +949,6 @@ TEST_P(ResourceTableTests, DefaultBindingsAreZeroAndSizeOne) {
 
 // Check that Pin forces zero-initialization of the resources.
 TEST_P(ResourceTableTests, PinDoesZeroInit) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
     // Create the pipeline reading back from the texture.
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;
@@ -1084,9 +1058,6 @@ TEST_P(ResourceTableTests, PinDoesZeroInit) {
 // Check that a resource table slot can be updated only after all commands submitted prior to
 // RemoveBinding are completed.
 TEST_P(ResourceTableTests, UpdateAfterRemoveRequiresGPUIsFinished) {
-    // TODO(435317394): Implemented bindless in the wire.
-    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -1126,8 +1097,6 @@ TEST_P(ResourceTableTests, UpdateAfterRemoveRequiresGPUIsFinished) {
 // Check that a resource table slot can be updated only after all commands submitted prior to
 // RemoveBinding are completed.
 TEST_P(ResourceTableTests, UpdateAfterRemoveRequiresGPUIsFinished_ErrorBindGroup) {
-    // TODO(435317394): Implemented bindless in the wire.
-    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     wgpu::TextureDescriptor tDesc{
@@ -1184,12 +1153,6 @@ TEST_P(ResourceTableTests, UpdateAfterRemoveRequiresGPUIsFinished_ErrorBindGroup
 
 // Check that Update and InsertBinding make the new binding visible in the resource table.
 TEST_P(ResourceTableTests, UpdateAndInsertBindingMakeBindingVisible) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
-    // TODO(435317394): Implemented bindless in the wire.
-    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-
     wgpu::ResourceTable table = MakeResourceTable(2);
 
     // Before we do anything, the table has no valid entries.
@@ -1209,12 +1172,6 @@ TEST_P(ResourceTableTests, UpdateAndInsertBindingMakeBindingVisible) {
 // Check that RemoveBinding instantly makes the binding not visible, both for entries added with
 // Update and InsertBinding.
 TEST_P(ResourceTableTests, RemoveBindingMakeBindingInvalid) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
-    // TODO(435317394): Implemented bindless in the wire.
-    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-
     // Fill a resource table with both Update and InsertBinding.
     wgpu::ResourceTable table = MakeResourceTable(2);
 
@@ -1236,12 +1193,6 @@ TEST_P(ResourceTableTests, RemoveBindingMakeBindingInvalid) {
 
 // Check that removing a binding and adding a different one works.
 TEST_P(ResourceTableTests, ReplaceBinding) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
-    // TODO(435317394): Implemented bindless in the wire.
-    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-
     // Create the test resource table.
     wgpu::ResourceTable table = MakeResourceTable(1);
     wgpu::BindingResource resource = {.textureView = MakePinnedU8View(19)};
@@ -1262,12 +1213,6 @@ TEST_P(ResourceTableTests, ReplaceBinding) {
 
 // Check that removing a binding and adding it back works.
 TEST_P(ResourceTableTests, ReplaceWithSameBinding) {
-    // TODO(https://issues.chromium.org/463925499): Remove suppression once supported.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-
-    // TODO(435317394): Implemented bindless in the wire.
-    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-
     // Create the test resource table.
     wgpu::ResourceTable table = MakeResourceTable(1);
     wgpu::BindingResource resource = {.textureView = MakePinnedU8View(19)};
@@ -1283,6 +1228,116 @@ TEST_P(ResourceTableTests, ReplaceWithSameBinding) {
 
     EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
     TestHasU8Bindings(table, {{19}});
+}
+
+// Check that logic to dirty or reuse VkDescriptorSet takes into account the resource table in the
+// Vulkan backend.
+TEST_P(ResourceTableTests, SwitchUseResourceTableAndNot) {
+    // Swiftshader doesn't support variable count descriptor sets used in draw operations. In
+    // vk::DescriptorSet::ParseDescriptors it iterates over all the descriptors to prep various
+    // things but iterates over the whole size defined in the vkDescriptorSetLayout instead of
+    // taking into account the variable count.
+    DAWN_SUPPRESS_TEST_IF(IsSwiftshader());
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0.5, 0.5);
+        }
+
+        @group(0) @binding(0) var<storage, read_write> results : array<u32>;
+        var<immediate> resultIndex : u32;
+
+        @fragment fn yes_resource_table() -> @location(0) vec4f {
+            results[resultIndex] = 10 + u32(hasResource<texture_2d<f32>>(resultIndex));
+            return vec4();
+        }
+
+        @fragment fn no_resource_table() -> @location(0) vec4f {
+            results[resultIndex] = 42;
+            return vec4();
+        }
+    )");
+
+    wgpu::BindGroupLayout resultBGL = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
+
+    wgpu::RenderPipeline resourceTablePipeline;
+    {
+        utils::ComboRenderPipelineDescriptor desc;
+        desc.layout = MakePipelineLayoutWithTable({resultBGL}, 4);
+        desc.vertex.module = module;
+        desc.cFragment.module = module;
+        desc.cFragment.entryPoint = "yes_resource_table";
+        desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        resourceTablePipeline = device.CreateRenderPipeline(&desc);
+    }
+
+    wgpu::RenderPipeline noResourceTablePipeline;
+    {
+        utils::ComboRenderPipelineDescriptor desc;
+        desc.layout = utils::MakeBasicPipelineLayout(device, &resultBGL, 4);
+        desc.vertex.module = module;
+        desc.cFragment.module = module;
+        desc.cFragment.entryPoint = "no_resource_table";
+        desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        noResourceTablePipeline = device.CreateRenderPipeline(&desc);
+    }
+
+    // Create the result buffer resource.
+    wgpu::BufferDescriptor bDesc = {
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = sizeof(uint32_t) * 3,
+    };
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+    wgpu::BindGroup resultBG = utils::MakeBindGroup(device, resultBGL, {{0, resultBuffer}});
+
+    // Create and populate the resource table.
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::ResourceTable table = MakeResourceTable(0);
+
+    // Encode render commands that switch between the two pipelines. The resultBGL index in the
+    // Vulkan backend will be pushed by 1 if the pipeline uses the resource table, so we check that
+    // the invalidation of VkDescriptorSet inheritance works correctly.
+    uint32_t resultIndex = 0;
+    auto rp = utils::CreateBasicRenderPass(device, 1, 1);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.SetResourceTable(table);
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+    pass.SetBindGroup(0, resultBG);
+
+    // Start by not using the resource table.
+    pass.SetPipeline(noResourceTablePipeline);
+    pass.SetImmediates(0, &resultIndex, sizeof(resultIndex));
+    pass.Draw(1);
+    resultIndex++;
+
+    // Switch to using the resource table.
+    pass.SetPipeline(resourceTablePipeline);
+    pass.SetImmediates(0, &resultIndex, sizeof(resultIndex));
+    pass.Draw(1);
+    resultIndex++;
+
+    // And back to not using it.
+    pass.SetPipeline(noResourceTablePipeline);
+    pass.SetImmediates(0, &resultIndex, sizeof(resultIndex));
+    pass.Draw(1);
+    resultIndex++;
+
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(42, resultBuffer, 0);
+    EXPECT_BUFFER_U32_EQ(10, resultBuffer, 4);
+    EXPECT_BUFFER_U32_EQ(42, resultBuffer, 8);
 }
 
 DAWN_INSTANTIATE_TEST(ResourceTableTests, D3D12Backend(), MetalBackend(), VulkanBackend());

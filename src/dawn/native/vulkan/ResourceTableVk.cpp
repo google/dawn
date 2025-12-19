@@ -27,9 +27,14 @@
 
 #include "dawn/native/vulkan/ResourceTableVk.h"
 
+#include <vector>
+
+#include "dawn/common/Enumerator.h"
 #include "dawn/native/DynamicArrayState.h"
+#include "dawn/native/DynamicUploader.h"
 #include "dawn/native/vulkan/DescriptorSetAllocator.h"
 #include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
 
@@ -138,6 +143,121 @@ MaybeError ResourceTable::Initialize() {
     device->fn.UpdateDescriptorSets(device->GetVkDevice(), 1, &write, 0, nullptr);
 
     return {};
+}
+
+// Apply updates to resources or to the metadata buffers that are pending.
+MaybeError ResourceTable::ApplyPendingUpdates(CommandRecordingContext* recordingContext) {
+    DynamicArrayState::BindingUpdates updates =
+        GetDynamicArrayState()->AcquireDirtyBindingUpdates();
+
+    if (!updates.metadataUpdates.empty()) {
+        DAWN_TRY(UpdateMetadataBuffer(recordingContext, updates.metadataUpdates));
+    }
+    if (!updates.resourceUpdates.empty()) {
+        UpdateResourceBindings(updates.resourceUpdates);
+    }
+
+    return {};
+}
+
+MaybeError ResourceTable::UpdateMetadataBuffer(
+    CommandRecordingContext* recordingContext,
+    const std::vector<DynamicArrayState::MetadataUpdate>& updates) {
+    // Updates a dynamic array metadata buffer by scheduling a copy for each u32 that needs to be
+    // updated.
+    // TODO(https://crbug.com/435317394): If we had a way to use Dawn reentrantly now, we could use
+    // a compute shader to dispatch the updates instead of individual copies for each update, and
+    // move that logic in the frontend to share it between backends. (also a single dispatch could
+    // update multiple metadata buffers potentially).
+    Device* device = ToBackend(GetDevice());
+
+    // Allocate enough space for all the data to modify and schedule the copies.
+    return device->GetDynamicUploader()->WithUploadReservation(
+        sizeof(uint32_t) * updates.size(), kCopyBufferToBufferOffsetAlignment,
+        [&](UploadReservation reservation) -> MaybeError {
+            uint32_t* stagedData = static_cast<uint32_t*>(reservation.mappedPointer);
+
+            // The metadata buffer will be copied to.
+            Buffer* metadataBuffer = ToBackend(GetDynamicArrayState()->GetMetadataBuffer());
+            DAWN_ASSERT(metadataBuffer->IsInitialized());
+            metadataBuffer->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
+
+            // Prepare the copies.
+            std::vector<VkBufferCopy> copies(updates.size());
+            for (auto [i, update] : Enumerate(updates)) {
+                stagedData[i] = update.data;
+
+                VkBufferCopy copy{
+                    .srcOffset = reservation.offsetInBuffer + i * sizeof(uint32_t),
+                    .dstOffset = update.offset,
+                    .size = sizeof(uint32_t),
+                };
+                copies[i] = copy;
+            }
+
+            // Enqueue the copy commands all at once.
+            device->fn.CmdCopyBuffer(recordingContext->commandBuffer,
+                                     ToBackend(reservation.buffer)->GetHandle(),
+                                     metadataBuffer->GetHandle(), copies.size(), copies.data());
+
+            // Transition the buffer back to be used as storage as that's how it will be used for
+            // shader-side validation.
+            metadataBuffer->TransitionUsageNow(recordingContext, kReadOnlyStorageBuffer,
+                                               kAllStages);
+
+            return {};
+        });
+}
+
+void ResourceTable::UpdateResourceBindings(
+    const std::vector<DynamicArrayState::ResourceUpdate>& updates) {
+    std::vector<VkDescriptorImageInfo> imageWrites;
+    std::vector<uint32_t> arrayElements;
+
+    for (DynamicArrayState::ResourceUpdate update : updates) {
+        // TODO(https://issues.chromium.org/435317394): Support samplers updates.
+        // TODO(https://issues.chromium.org/435317394): Support buffer, texel buffers and storage
+        // textures.
+
+        VkImageView handle = ToBackend(update.textureView)->GetHandle();
+        if (handle == nullptr) {
+            continue;
+        }
+
+        VkDescriptorImageInfo imageWrite = {
+            .sampler = VkSampler{},
+            .imageView = handle,
+            .imageLayout = VulkanImageLayout(update.textureView->GetFormat(),
+                                             wgpu::TextureUsage::TextureBinding),
+        };
+        imageWrites.push_back(imageWrite);
+        arrayElements.push_back(uint32_t(update.slot));
+    }
+
+    std::vector<VkWriteDescriptorSet> writes;
+    for (size_t i = 0; i < imageWrites.size(); i++) {
+        VkWriteDescriptorSet write{
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .pNext = nullptr,
+            .dstSet = mAllocation.set,
+            .dstBinding = 1,
+            .dstArrayElement = arrayElements[i],
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+            .pImageInfo = &imageWrites[i],
+            .pBufferInfo = nullptr,
+            .pTexelBufferView = nullptr,
+        };
+        writes.push_back(write);
+    }
+
+    Device* device = ToBackend(GetDevice());
+    device->fn.UpdateDescriptorSets(device->GetVkDevice(), writes.size(), writes.data(), 0,
+                                    nullptr);
+}
+
+VkDescriptorSet ResourceTable::GetHandle() const {
+    return mAllocation.set;
 }
 
 void ResourceTable::DestroyImpl() {
