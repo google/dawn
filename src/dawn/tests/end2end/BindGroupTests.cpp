@@ -1808,6 +1808,56 @@ TEST_P(BindGroupTests, BindingInvisibleInFragmentStage) {
     EXPECT_BUFFER_U32_EQ(1u, storageBuffer, 0);
 }
 
+// Test that overwriting a lower-index bindgroup doesn't cause issues in backends.
+TEST_P(BindGroupTests, OverwritingLowerIndexBG) {
+    wgpu::ComputePipelineDescriptor cpDesc;
+    cpDesc.compute.module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var<storage, read> input : u32;
+        @group(1) @binding(0) var<storage, read_write> output : u32;
+        @compute @workgroup_size(1) fn copy() {
+            output = output + input;
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
+
+    uint32_t value = 23;
+    wgpu::Buffer inputBuffer =
+        utils::CreateBufferFromData(device, &value, sizeof(value), wgpu::BufferUsage::Storage);
+
+    wgpu::BufferDescriptor outputDesc = {
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = sizeof(uint32_t),
+    };
+    wgpu::Buffer outputBuffer = device.CreateBuffer(&outputDesc);
+
+    wgpu::BindGroup inputBG =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, inputBuffer}});
+    wgpu::BindGroup outputBG =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(1), {{0, outputBuffer}});
+    wgpu::BindGroup emptyBG =
+        utils::MakeBindGroup(device, utils::MakeBindGroupLayout(device, {}), {});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, inputBG);
+    pass.SetBindGroup(1, outputBG);
+    pass.DispatchWorkgroups(1);
+
+    // Overwrite the lower index BG before putting its value back. In Vulkan it would have ended up
+    // "disturbing" BG 1 so this test checks that this is correctly handled.
+    pass.SetBindGroup(0, emptyBG);
+    pass.SetBindGroup(0, inputBG);
+    pass.DispatchWorkgroups(1);
+
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(23 * 2, outputBuffer, 0);
+}
+
 DAWN_INSTANTIATE_TEST(BindGroupTests,
                       D3D11Backend(),
                       D3D12Backend(),
