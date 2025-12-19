@@ -93,6 +93,9 @@ WireResult Server::DoQueueWriteBuffer(Known<WGPUQueue> queue,
 
     // Otherwise, fall back to DeserializeDataUpdate.
     auto backingData = std::unique_ptr<char[]>(AllocNoThrow<char>(size));
+    if (!backingData) {
+        return WireResult::FatalError;
+    }
     writeHandle->SetTarget(backingData.get());
     writeHandle->SetDataLength(size);
 
@@ -144,6 +147,9 @@ WireResult Server::DoQueueWriteTexture(Known<WGPUQueue> queue,
 
     // Otherwise, fall back to DeserializeDataUpdate.
     auto backingData = std::unique_ptr<char[]>(AllocNoThrow<char>(dataSize));
+    if (!backingData) {
+        return WireResult::FatalError;
+    }
     writeHandle->SetTarget(backingData.get());
     writeHandle->SetDataLength(dataSize);
 
