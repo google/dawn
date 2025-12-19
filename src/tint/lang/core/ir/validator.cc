@@ -2679,6 +2679,12 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
+        if (address_space == AddressSpace::kPixelLocal) {
+            if (!mv->StoreType()->Is<core::type::Struct>()) {
+                AddError(param) << "pixel_local param must be of type struct";
+            }
+        }
+
         if (func->IsEntryPoint()) {
             ValidateShaderIOAnnotations(param, param->Type(), param->BindingPoint(),
                                         param->Attributes(), ShaderIOKind::kInputParam);

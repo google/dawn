@@ -3044,4 +3044,20 @@ TEST_F(IR_ValidatorTest, Function_IndirectRecursion) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_ParamPixelLocal) {
+    auto* f = FragmentEntryPoint();
+    auto* p = b.FunctionParam("invalid", ty.ptr<core::AddressSpace::kPixelLocal>(ty.i32()));
+    f->AppendParam(p);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:1:21 error: pixel_local param must be of type struct
+%f = @fragment func(%invalid:ptr<pixel_local, i32, read_write>):void {
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 }  // namespace tint::core::ir
