@@ -31,7 +31,6 @@
 #include "dawn/wire/client/ObjectBase.h"
 
 #include "dawn/wire/client/Adapter.h"
-#include "dawn/wire/client/BindGroup.h"
 #include "dawn/wire/client/Buffer.h"
 #include "dawn/wire/client/ComputePassEncoder.h"
 #include "dawn/wire/client/Device.h"

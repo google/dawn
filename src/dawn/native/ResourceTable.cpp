@@ -98,9 +98,7 @@ MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
 
 ResourceTableBase::ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor)
     : ApiObjectBase(device, descriptor->label),
-      mDynamicArray(AcquireRef(new DynamicArrayState(device,
-                                                     BindingIndex(descriptor->size),
-                                                     wgpu::DynamicBindingKind::SampledTexture))) {
+      mDynamicArray(AcquireRef(new DynamicArrayState(device, BindingIndex(descriptor->size)))) {
     GetObjectTrackingList()->Track(this);
 }
 
@@ -112,8 +110,7 @@ ResourceTableBase::ResourceTableBase(DeviceBase* device,
     // tracking used for the validation of synchronous errors. However skip creating it for tables
     // above the limit because that's caught on the content-timeline as well.
     if (descriptor->size <= device->GetLimits().resourceTableLimits.maxResourceTableSize) {
-        mDynamicArray = AcquireRef(new DynamicArrayState(device, BindingIndex(descriptor->size),
-                                                         wgpu::DynamicBindingKind::SampledTexture));
+        mDynamicArray = AcquireRef(new DynamicArrayState(device, BindingIndex(descriptor->size)));
     }
 }
 

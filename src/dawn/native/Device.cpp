@@ -464,8 +464,7 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
     mDynamicUploader = std::make_unique<DynamicUploader>(this);
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
-    if (HasFeature(Feature::ChromiumExperimentalBindless) ||
-        HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
+    if (HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
         mDynamicArrayDefaultBindings = std::make_unique<DynamicArrayDefaultBindings>();
     }
 
@@ -1057,8 +1056,7 @@ InternalPipelineStore* DeviceBase::GetInternalPipelineStore() {
 }
 
 DynamicArrayDefaultBindings* DeviceBase::GetDynamicArrayDefaultBindings() {
-    DAWN_ASSERT(HasFeature(Feature::ChromiumExperimentalBindless) ||
-                HasFeature(Feature::ChromiumExperimentalSamplingResourceTable));
+    DAWN_ASSERT(HasFeature(Feature::ChromiumExperimentalSamplingResourceTable));
     DAWN_ASSERT(mDynamicArrayDefaultBindings != nullptr);
     return mDynamicArrayDefaultBindings.get();
 }
@@ -1276,7 +1274,7 @@ BindGroupBase* DeviceBase::APICreateBindGroup(const BindGroupDescriptor* descrip
     Ref<BindGroupBase> result;
     if (ConsumedError(CreateBindGroup(descriptor), &result, "calling %s.CreateBindGroup(%s).", this,
                       descriptor)) {
-        return ReturnToAPI(BindGroupBase::MakeError(this, descriptor));
+        return ReturnToAPI(BindGroupBase::MakeError(this, descriptor->label));
     }
     return ReturnToAPI(std::move(result));
 }
@@ -1838,10 +1836,6 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     }
     if (mEnabledFeatures.IsEnabled(Feature::PrimitiveIndex)) {
         mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kPrimitiveIndex);
-    }
-    if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalBindless)) {
-        mWGSLAllowedFeatures.extensions.insert(
-            tint::wgsl::Extension::kChromiumExperimentalDynamicBinding);
     }
     if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalSamplingResourceTable)) {
         mWGSLAllowedFeatures.extensions.insert(

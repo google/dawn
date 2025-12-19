@@ -50,9 +50,10 @@ namespace dawn::native {
 
 // Returns the order in which we will put the default bindings at the end of the dynamic binding
 // array.
-ityp::span<BindingIndex, const tint::ResourceType> GetDefaultBindingOrder(
-    wgpu::DynamicBindingKind kind);
-BindingIndex GetDefaultBindingCount(wgpu::DynamicBindingKind kind);
+// TODO(https://issues.chromium.org/463925499): Take the device in parameter to know if we have
+// sampling vs. full resource table.
+ityp::span<BindingIndex, const tint::ResourceType> GetDefaultBindingOrder();
+BindingIndex GetDefaultBindingCount();
 
 // An optional component of a BindGroup that's used to track the resources that are in the dynamic
 // binding array part. It helps maintain the metadata buffer that's used in shaders to know if it is
@@ -62,15 +63,16 @@ BindingIndex GetDefaultBindingCount(wgpu::DynamicBindingKind kind);
 // DynamicArrayState has a single strong reference owned by the BindGroup that created it, however
 // all resources contained in the dynamic array need WeakRefs to update it on Pin/Unpin. (They use
 // WeakRef to avoid a reference cycle between the dynamic array and its bindings).
+// TODO(https://issues.chromium.org/463925499): Inline all this in ResourceTable and adapt the
+// terminology.
 class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayState> {
   public:
-    DynamicArrayState(DeviceBase* device, BindingIndex size, wgpu::DynamicBindingKind kind);
+    DynamicArrayState(DeviceBase* device, BindingIndex size);
     ~DynamicArrayState() override;
 
     MaybeError Initialize();
     void Destroy();
 
-    wgpu::DynamicBindingKind GetKind() const;
     BindingIndex GetAPISize() const;
     BindingIndex GetSizeWithDefaultBindings() const;
     ityp::span<BindingIndex, const Ref<TextureViewBase>> GetBindings() const;
@@ -84,7 +86,7 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     // what's in the binding array.
     // `contents` can contain no resources, this is useful to mark the slot used even when an error
     // happens, to match what client-side validation would do.
-    void Update(BindingIndex slot, const BindGroupEntryContents& contents);
+    void Update(BindingIndex slot, const BindingResource& contents);
     void Remove(BindingIndex slot);
     void OnPinned(BindingIndex slot, TextureBase* texture);
     void OnUnpinned(BindingIndex slot, TextureBase* texture);
@@ -107,7 +109,6 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
 
   private:
     bool mDestroyed = false;
-    wgpu::DynamicBindingKind mKind;
     BindingIndex mAPISize;
     raw_ptr<DeviceBase> mDevice;
 
@@ -135,7 +136,7 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     std::vector<BindingIndex> mDirtyBindings;
 
     // Helper method that does the bulk of the shared work between Update and RemoveBinding.
-    void SetEntry(BindingIndex slot, const BindGroupEntryContents& contents);
+    void SetEntry(BindingIndex slot, const BindingResource& contents);
 
     void MarkStateDirty(BindingIndex slot);
     void SetMetadata(BindingIndex slot, tint::ResourceType typeId, bool pinned);

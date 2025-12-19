@@ -96,7 +96,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     GetDefaultLimitsForSupportedFeatureLevel(limits);
     limits->v1.maxImmediateSize = kMaxImmediateDataBytes;
-    limits->dynamicBindingArrayLimits.maxDynamicBindingArraySize = kMaxDynamicBindingArraySize;
     limits->resourceTableLimits.maxResourceTableSize = kMaxResourceTableSize;
     return {};
 }

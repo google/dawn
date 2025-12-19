@@ -1036,7 +1036,7 @@ void TextureBase::DestroyImpl() {
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the texture since there are no other live refs.
 
-    // Destroying the texture implicitly unpins it so it can no longer be used via a dynamic binding
+    // Destroying the texture implicitly unpins it so it can no longer be used via a resource table
     // array.
     Unpin();
 
@@ -1249,7 +1249,7 @@ void TextureBase::SetInitialized(bool initialized) {
 
 ExecutionSerial TextureBase::OnEndAccess() {
     // Ending access on the texture implicitly unpins it such that before it can be used in a
-    // dynamic array again, it must be re-pinned (which requires the access to have been restarted
+    // resource table again, it must be re-pinned (which requires the access to have been restarted
     // as well).
     Unpin();
 
@@ -1662,11 +1662,9 @@ void TextureBase::UnpinImpl() {
 }
 
 MaybeError TextureBase::ValidatePin(wgpu::TextureUsage usage) const {
-    DAWN_INVALID_IF(
-        !GetDevice()->HasFeature(Feature::ChromiumExperimentalBindless) &&
-            !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
-        "Texture pinning used without %s enabled.",
-        wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
+    DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
+                    "Texture pinning used without %s enabled.",
+                    wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
 
     DAWN_INVALID_IF(mState.destroyed || !mState.hasAccess,
                     "Texture is destroyed or without access.");
@@ -1687,11 +1685,9 @@ MaybeError TextureBase::ValidatePin(wgpu::TextureUsage usage) const {
 }
 
 MaybeError TextureBase::ValidateUnpin() const {
-    DAWN_INVALID_IF(
-        !GetDevice()->HasFeature(Feature::ChromiumExperimentalBindless) &&
-            !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
-        "Texture unpinning used without %s enabled.",
-        wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
+    DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
+                    "Texture unpinning used without %s enabled.",
+                    wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
     return {};
 }
 

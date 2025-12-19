@@ -34,7 +34,6 @@
 #include "dawn/common/Range.h"
 #include "dawn/common/ityp_vector.h"
 #include "dawn/native/CacheKey.h"
-#include "dawn/native/DynamicArrayState.h"
 #include "dawn/native/vulkan/DescriptorSetAllocator.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
@@ -48,8 +47,7 @@ namespace dawn::native::vulkan {
 namespace {
 
 // Helper function (and result structure) that precomputes all the information related to static
-// bindings that might be for Vulkan BindGroupLayout. It is useful to share logic between
-// StaticBindingOnly and DynamicArray BindGroupLayouts but route the data to different places.
+// bindings that might be for Vulkan BindGroupLayout.
 struct VulkanStaticBindings {
     ityp::vector<BindingIndex, VkDescriptorSetLayoutBinding> bindings;
     absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType;
@@ -133,16 +131,6 @@ VulkanStaticBindings ComputeVulkanStaticBindings(const BindGroupLayoutInternalBa
     return res;
 }
 
-VkDescriptorType VulkanDescriptorType(wgpu::DynamicBindingKind kind) {
-    switch (kind) {
-        case wgpu::DynamicBindingKind::SampledTexture: {
-            return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-            case wgpu::DynamicBindingKind::Undefined:
-                DAWN_UNREACHABLE();
-        }
-    }
-}
-
 }  // anonymous namespace
 
 VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
@@ -193,14 +181,6 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
 ResultOrError<Ref<BindGroupLayout>> BindGroupLayout::Create(
     Device* device,
     const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor) {
-    // Determine which subclass of BindGroupLayout to create.
-    if (descriptor.Has<BindGroupLayoutDynamicBindingArray>()) {
-        Ref<BindGroupLayoutDynamicArray> bgl =
-            AcquireRef(new BindGroupLayoutDynamicArray(device, descriptor));
-        DAWN_TRY(bgl->Initialize());
-        return bgl;
-    }
-
     Ref<BindGroupLayoutStaticBindingOnly> bgl =
         AcquireRef(new BindGroupLayoutStaticBindingOnly(device, descriptor));
     DAWN_TRY(bgl->Initialize());
@@ -313,92 +293,6 @@ void BindGroupLayoutStaticBindingOnly::DeallocateDescriptorSet(
 }
 
 void BindGroupLayoutStaticBindingOnly::DestroyImpl() {
-    BindGroupLayout::DestroyImpl();
-
-    mDescriptorSetAllocator = nullptr;
-}
-
-// BindGroupLayoutDynamicArray
-//
-BindGroupLayoutDynamicArray::BindGroupLayoutDynamicArray(
-    DeviceBase* device,
-    const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor)
-    : BindGroupLayout(device, descriptor) {}
-
-BindGroupLayoutDynamicArray::~BindGroupLayoutDynamicArray() = default;
-
-MaybeError BindGroupLayoutDynamicArray::Initialize() {
-    mDescriptorSetAllocator = DescriptorSetAllocatorDynamicArray::Create(ToBackend(GetDevice()));
-
-    VulkanStaticBindings staticBindings = ComputeVulkanStaticBindings(this);
-    mStaticDescriptorCountPerType = std::move(staticBindings.descriptorCountPerType);
-    std::vector<VkDescriptorSetLayoutBinding> bindings = std::move(staticBindings.bindings);
-
-    // Add the last binding, which is the dynamic array.
-    VkDescriptorSetLayoutBinding dynamicArray{
-        .binding = uint32_t(GetDynamicArrayStart()),
-        .descriptorType = VulkanDescriptorType(GetDynamicArrayKind()),
-        // With VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT, descriptorCount is treated as
-        // an upper limit of the variable count.
-        .descriptorCount =
-            GetDevice()->GetLimits().dynamicBindingArrayLimits.maxDynamicBindingArraySize,
-        .stageFlags = VulkanShaderStages(kAllStages),
-        .pImmutableSamplers = nullptr,
-    };
-    bindings.push_back(dynamicArray);
-
-    // To specify the VkDescriptorSetLayoutBindingFlagsCreateInfo on one of the bindings, Vulkan
-    // requires that the structure be provided for all bindings. Static bindings don't need any
-    // flags but dynamic arrays in the last binding use all the VK_KHR_descriptor_indexing flags.
-    std::vector<VkDescriptorBindingFlags> flags(bindings.size(), 0);
-    flags[flags.size() - 1] = VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT |
-                              VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT |
-                              VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
-                              VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT;
-    VkDescriptorSetLayoutBindingFlagsCreateInfo flagCreateInfo{
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO,
-        .pNext = nullptr,
-        .bindingCount = uint32_t(flags.size()),
-        .pBindingFlags = flags.data(),
-    };
-
-    VkDescriptorSetLayoutCreateInfo createInfo{
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .pNext = &flagCreateInfo,
-        .flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT,
-        .bindingCount = uint32_t(bindings.size()),
-        .pBindings = bindings.data(),
-    };
-
-    return BindGroupLayout::Initialize(&createInfo,
-                                       std::move(staticBindings.textureToStaticSamplerIndex));
-}
-
-ResultOrError<Ref<BindGroup>> BindGroupLayoutDynamicArray::AllocateBindGroup(
-    const UnpackedPtr<BindGroupDescriptor>& descriptor) {
-    Device* device = ToBackend(GetDevice());
-
-    uint32_t variableSize = 0;
-    if (auto* dynamicArray = descriptor.Get<BindGroupDynamicBindingArray>()) {
-        variableSize = dynamicArray->dynamicArraySize +
-                       uint32_t(GetDefaultBindingCount(GetDynamicArrayKind()));
-    }
-
-    DescriptorSetAllocation descriptorSetAllocation;
-    DAWN_TRY_ASSIGN(descriptorSetAllocation,
-                    mDescriptorSetAllocator->Allocate(GetHandle(), mStaticDescriptorCountPerType,
-                                                      VulkanDescriptorType(GetDynamicArrayKind()),
-                                                      variableSize));
-
-    return AcquireRef(mBindGroupAllocator->Allocate(device, descriptor, descriptorSetAllocation));
-}
-
-void BindGroupLayoutDynamicArray::DeallocateDescriptorSet(
-    DescriptorSetAllocation* descriptorSetAllocation) {
-    mDescriptorSetAllocator->Deallocate(descriptorSetAllocation);
-}
-
-void BindGroupLayoutDynamicArray::DestroyImpl() {
     BindGroupLayout::DestroyImpl();
 
     mDescriptorSetAllocator = nullptr;

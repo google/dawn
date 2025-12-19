@@ -149,9 +149,7 @@ tint::ResourceType ComputeTypeId(const TextureViewBase* view) {
 
 }  // anonymous namespace
 
-ityp::span<BindingIndex, const tint::ResourceType> GetDefaultBindingOrder(
-    wgpu::DynamicBindingKind kind) {
-    DAWN_ASSERT(kind == wgpu::DynamicBindingKind::SampledTexture);
+ityp::span<BindingIndex, const tint::ResourceType> GetDefaultBindingOrder() {
     static constexpr auto kSampledTextureBindings = std::array{
         tint::ResourceType::kTexture1d_f32,
         tint::ResourceType::kTexture2d_f32,
@@ -188,15 +186,13 @@ ityp::span<BindingIndex, const tint::ResourceType> GetDefaultBindingOrder(
     return {kSampledTextureBindings.data(), BindingIndex(uint32_t(kSampledTextureBindings.size()))};
 }
 
-BindingIndex GetDefaultBindingCount(wgpu::DynamicBindingKind kind) {
-    return GetDefaultBindingOrder(kind).size();
+BindingIndex GetDefaultBindingCount() {
+    return GetDefaultBindingOrder().size();
 }
 
-DynamicArrayState::DynamicArrayState(DeviceBase* device,
-                                     BindingIndex size,
-                                     wgpu::DynamicBindingKind kind)
-    : mKind(kind), mAPISize(size), mDevice(device) {
-    mBindings.resize(size + GetDefaultBindingCount(mKind));
+DynamicArrayState::DynamicArrayState(DeviceBase* device, BindingIndex size)
+    : mAPISize(size), mDevice(device) {
+    mBindings.resize(size + GetDefaultBindingCount());
 
     DAWN_ASSERT(ComputeTypeId(nullptr) == BindingState{}.typeId);
     mBindingState.resize(mBindings.size());
@@ -233,7 +229,7 @@ MaybeError DynamicArrayState::Initialize() {
         mDevice->GetDynamicArrayDefaultBindings()->GetOrCreateSampledTextureDefaults(mDevice));
 
     for (auto [i, defaultBinding] : Enumerate(defaultBindings)) {
-        BindGroupEntryContents entryContents = {
+        BindingResource entryContents = {
             .textureView = defaultBinding.Get(),
         };
         Update(mAPISize + i, entryContents);
@@ -261,10 +257,6 @@ void DynamicArrayState::Destroy() {
     }
 
     mDestroyed = true;
-}
-
-wgpu::DynamicBindingKind DynamicArrayState::GetKind() const {
-    return mKind;
 }
 
 BindingIndex DynamicArrayState::GetAPISize() const {
@@ -305,7 +297,7 @@ std::optional<BindingIndex> DynamicArrayState::GetFreeSlot() const {
     return {};
 }
 
-void DynamicArrayState::Update(BindingIndex slot, const BindGroupEntryContents& contents) {
+void DynamicArrayState::Update(BindingIndex slot, const BindingResource& contents) {
     DAWN_ASSERT(CanBeUpdated(slot));
     DAWN_ASSERT(mBindingState[slot].typeId == tint::ResourceType::kEmpty);
     mBindingState[slot].availableAfter = kMaxExecutionSerial;
@@ -321,7 +313,7 @@ void DynamicArrayState::Remove(BindingIndex slot) {
     SetEntry(slot, {});
 }
 
-void DynamicArrayState::SetEntry(BindingIndex slot, const BindGroupEntryContents& contents) {
+void DynamicArrayState::SetEntry(BindingIndex slot, const BindingResource& contents) {
     // TODO(435317394): Support bindings that aren't TextureViews
     DAWN_ASSERT(contents.buffer == nullptr && contents.sampler == nullptr);
     TextureViewBase* view = contents.textureView;
@@ -439,8 +431,7 @@ DynamicArrayDefaultBindings::GetOrCreateSampledTextureDefaults(DeviceBase* devic
         // Check that the binding we will have will match the order of default textures that we will
         // give to the shader compilation.
         DAWN_ASSERT(ComputeTypeId(view.Get()) ==
-                    GetDefaultBindingOrder(
-                        wgpu::DynamicBindingKind::SampledTexture)[mSampledTextureDefaults.size()]);
+                    GetDefaultBindingOrder()[mSampledTextureDefaults.size()]);
         mSampledTextureDefaults.push_back(view);
 
         return {};

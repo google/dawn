@@ -281,6 +281,7 @@ class DeviceBase : public ErrorSink,
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
 
     InternalPipelineStore* GetInternalPipelineStore();
+    // TODO(https://issues.chromium.org/463925499): Rename for ResourceTable.
     DynamicArrayDefaultBindings* GetDynamicArrayDefaultBindings();
 
     // For Dawn Wire

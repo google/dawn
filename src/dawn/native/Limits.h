@@ -44,7 +44,6 @@ struct CombinedLimits {
     CompatibilityModeLimits compat;
     DawnHostMappedPointerLimits hostMappedPointerLimits;
     DawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits;
-    DynamicBindingArrayLimits dynamicBindingArrayLimits;
     ResourceTableLimits resourceTableLimits;
 };
 

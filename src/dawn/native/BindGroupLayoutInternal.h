@@ -93,11 +93,10 @@ enum BindingTypeOrder : uint32_t {
 // BGEntries when bindingArraySize > 1. To make handling more regular, a fake BGLEntry is created
 // for each array element such that most code doesn't need to be aware of bindingArraySize.
 //
-// We also need to have private bindings that cannot be set by the users: dynamic binding array or
-// ExternalTextures add additional bindings for their inner workings which are private to Dawn.
-// Conversely ExternalTexture is a pure frontend object and doesn't exist in backends, so
-// dawn::native must mostly be unaware about it. This is where |BindingIndex| and |APIBindingIndex|
-// are different:
+// We also need to have private bindings that cannot be set by the users: ExternalTextures add
+// additional bindings for their inner workings which are private to Dawn. Conversely
+// ExternalTexture is a pure frontend object and doesn't exist in backends, so dawn::native must
+// mostly be unaware about it. This is where |BindingIndex| and |APIBindingIndex| are different:
 //
 //  - |APIBindingIndex| are user-facing bindings and cannot be used to access private bindings. It
 //  is used in code for BindGroup validation and opertations and when reflecting/validating WGSL
@@ -124,7 +123,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     // A map from the BindingNumber to its packed APIBindingIndex.
     using BindingMap = std::map<BindingNumber, APIBindingIndex>;
 
-    // Getters for static bindings
+    // Getters for bindings
     const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const;
     const BindingInfo& GetAPIBindingInfo(APIBindingIndex bindingIndex) const;
     const BindingMap& GetBindingMap() const;
@@ -151,14 +150,6 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     BeginEndRange<BindingIndex> GetStaticSamplerIndices() const;
     BeginEndRange<BindingIndex> GetNonStaticSamplerIndices() const;
     BeginEndRange<BindingIndex> GetInputAttachmentIndices() const;
-
-    // Getters for the dynamic binding array.
-    bool HasDynamicArray() const;
-    BindingNumber GetAPIDynamicArrayStart() const;
-    BindingIndex GetDynamicArrayStart() const;
-    BindingIndex GetDynamicBindingIndex(BindingNumber binding) const;
-    BindingIndex GetDynamicArrayMetadataBinding() const;
-    wgpu::DynamicBindingKind GetDynamicArrayKind() const;
 
     // Functions necessary for the unordered_set<BGLBase*>-based cache.
     size_t ComputeContentHash() override;
@@ -241,13 +232,6 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
 
     BindingCounts mValidationBindingCounts = {};
     bool mNeedsCrossBindingValidation = false;
-
-    // Information about the dynamic binding array part of the BGL.
-    bool mHasDynamicArray = false;
-    BindingNumber mAPIDynamicArrayStart{0};
-    BindingIndex mDynamicArrayStart{0};
-    BindingIndex mDynamicArrayMetadataBinding{0};
-    wgpu::DynamicBindingKind mDynamicArrayKind = wgpu::DynamicBindingKind::Undefined;
 };
 
 }  // namespace dawn::native

@@ -139,9 +139,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     if (layout->UsesResourceTable()) {
         startOfBindGroups = BindGroupIndex(1);
 
-        // TODO(https://issues.chromium.org/435317394): Update to not pass a DynamicBindingKind once
-        // support for dynamic binding arrays is removed.
-        auto bindingTypeOrder = GetDefaultBindingOrder(wgpu::DynamicBindingKind::SampledTexture);
+        auto bindingTypeOrder = GetDefaultBindingOrder();
         resourceTableConfig = tint::ResourceTableConfig{
             .resource_table_binding = tint::BindingPoint(0, 1),
             .storage_buffer_binding = tint::BindingPoint(0, 0),
@@ -175,41 +173,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         }
     }
 
-    // Add options for dynamic binding arrays. They need remapping like all regular bindings but
-    // also need to give information about additional bindings for the metadata buffer and the
-    // default bindings.
-    tint::ResourceBindingConfig resourceBindingConfig;
-    for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
-        const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
-        if (!bgl->HasDynamicArray()) {
-            continue;
-        }
-        DAWN_ASSERT(startOfBindGroups == BindGroupIndex(0));
-
-        tint::BindingPoint wgslDynamicArrayBindPoint = {
-            .group = uint32_t(group), .binding = uint32_t(bgl->GetAPIDynamicArrayStart())};
-        tint::BindingPoint remappedDynamicArrayBindPoint = {
-            .group = uint32_t(group),
-            .binding = uint32_t(bgl->GetDynamicArrayStart()),
-        };
-        tint::BindingPoint metadataBindPoint = {
-            .group = uint32_t(group),
-            .binding = uint32_t(bgl->GetDynamicArrayMetadataBinding()),
-        };
-
-        // TODO(https://crbug.com/442483669): This uses the texture binding remapper support to
-        // remap a `resource_binding`. It is a hack until Tint adds support for `resource_binding`
-        // to the binding remapper.
-        bindings.texture.emplace(wgslDynamicArrayBindPoint, remappedDynamicArrayBindPoint);
-
-        // The resourceBindingConfig only uses remapped bind points.
-        auto bindingTypeOrder = GetDefaultBindingOrder(bgl->GetDynamicArrayKind());
-        resourceBindingConfig.bindings[remappedDynamicArrayBindPoint] = {
-            .storage_buffer_binding = metadataBindPoint,
-            .default_binding_type_order = {bindingTypeOrder.begin(), bindingTypeOrder.end()},
-        };
-    }
-
     const bool hasInputAttachment = !bindings.input_attachment.empty();
 
     SpirvCompilationRequest req = {};
@@ -234,7 +197,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         .map = BuildSubstituteOverridesTransformConfig(programmableStage),
     };
     req.tintOptions.bindings = std::move(bindings);
-    req.tintOptions.resource_binding = std::move(resourceBindingConfig);
     req.tintOptions.resource_table = std::move(resourceTableConfig);
 
     req.tintOptions.workarounds.polyfill_unary_f32_negation =

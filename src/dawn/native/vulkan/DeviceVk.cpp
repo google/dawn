@@ -482,11 +482,10 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
             featuresChain.Add(&usedKnobs.pipelineRobustnessFeatures);
         }
 
-        // robustBufferAccess requires robustBufferAccessUpdateAfterBind to be used with bindless
-        // enabled. If it is not available, we manual implement robustness for shader buffers and
-        // rely on pipelineRobustness for vertex buffer robustness.
-        if ((HasFeature(Feature::ChromiumExperimentalBindless) ||
-             HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) &&
+        // robustBufferAccess requires robustBufferAccessUpdateAfterBind to be used with descriptor
+        // indexing enabled. If it is not available, we manual implement robustness for shader
+        // buffers and rely on pipelineRobustness for vertex buffer robustness.
+        if ((HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) &&
             !mDeviceInfo.descriptorIndexingProperties.robustBufferAccessUpdateAfterBind) {
             usedKnobs.features.robustBufferAccess = VK_FALSE;
             usedKnobs.robustness2Features.robustBufferAccess2 = VK_FALSE;
@@ -642,8 +641,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         }
     }
 
-    if (HasFeature(Feature::ChromiumExperimentalBindless) ||
-        HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
+    if (HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
         usedKnobs.descriptorIndexingFeatures = mDeviceInfo.descriptorIndexingFeatures;
         featuresChain.Add(&usedKnobs.descriptorIndexingFeatures);
     }

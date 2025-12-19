@@ -116,11 +116,6 @@
 #define LIMITS_IMMEDIATE_SIZE(X) \
   X(v1, Maximum, maxImmediateSize,      0,    kMaxImmediateDataBytes)
 
-// Limits for the dynamic binding array.
-//                                                                   compat  tier0
-#define LIMITS_DYNAMIC_BINDING_ARRAY(X) \
-  X(dynamicBindingArrayLimits, Maximum, maxDynamicBindingArraySize,       0,    50'000)
-
 // Limits for the resource table.
 //                                                                   compat     tier0
 #define LIMITS_RESOURCE_TABLE(X) \
@@ -155,7 +150,6 @@
     X(LIMITS_INTER_STAGE_SHADER_VARIABLES) \
     X(LIMITS_TEXTURE_DIMENSIONS)           \
     X(LIMITS_IMMEDIATE_SIZE)               \
-    X(LIMITS_DYNAMIC_BINDING_ARRAY)        \
     X(LIMITS_RESOURCE_TABLE)               \
     X(LIMITS_OTHER)
 
@@ -170,7 +164,6 @@
     LIMITS_INTER_STAGE_SHADER_VARIABLES(X) \
     LIMITS_TEXTURE_DIMENSIONS(X)           \
     LIMITS_IMMEDIATE_SIZE(X)               \
-    LIMITS_DYNAMIC_BINDING_ARRAY(X)        \
     LIMITS_RESOURCE_TABLE(X)               \
     LIMITS_OTHER(X)
 
@@ -292,10 +285,6 @@ MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
         out->compat = *compatibilityModeLimits;
         out->compat.nextInChain = nullptr;
     }
-    if (auto* dynamicBindingArrayLimits = unpacked.Get<DynamicBindingArrayLimits>()) {
-        out->dynamicBindingArrayLimits = *dynamicBindingArrayLimits;
-        out->dynamicBindingArrayLimits.nextInChain = nullptr;
-    }
     if (auto* resourceTableLimits = unpacked.Get<ResourceTableLimits>()) {
         out->resourceTableLimits = *resourceTableLimits;
         out->resourceTableLimits.nextInChain = nullptr;
@@ -330,10 +319,6 @@ void UnpackLimitsIn(const Limits* chainedLimits, CombinedLimits* out) {
     if (auto* compatibilityModeLimits = unpacked.Get<CompatibilityModeLimits>()) {
         out->compat = *compatibilityModeLimits;
         out->compat.nextInChain = nullptr;
-    }
-    if (auto* dynamicBindingArrayLimits = unpacked.Get<DynamicBindingArrayLimits>()) {
-        out->dynamicBindingArrayLimits = *dynamicBindingArrayLimits;
-        out->dynamicBindingArrayLimits.nextInChain = nullptr;
     }
     if (auto* resourceTableLimits = unpacked.Get<ResourceTableLimits>()) {
         out->resourceTableLimits = *resourceTableLimits;
@@ -577,9 +562,6 @@ MaybeError FillLimits(Limits* outputLimits,
     FillExtensionLimits(unpacked.Get<DawnHostMappedPointerLimits>(),
                         &CombinedLimits::hostMappedPointerLimits,
                         wgpu::FeatureName::HostMappedPointer);
-    FillExtensionLimits(unpacked.Get<DynamicBindingArrayLimits>(),
-                        &CombinedLimits::dynamicBindingArrayLimits,
-                        wgpu::FeatureName::ChromiumExperimentalBindless);
     FillExtensionLimits(unpacked.Get<ResourceTableLimits>(), &CombinedLimits::resourceTableLimits,
                         wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
     return {};

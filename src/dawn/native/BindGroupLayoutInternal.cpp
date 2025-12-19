@@ -344,37 +344,6 @@ ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDes
     // A running total of the number of bindings used by the layout.
     BindingCounts bindingCounts = {};
 
-    // Handle the dynamic binding array first to also extract information needed to validate the
-    // rest of the bindings.
-    std::optional<BindingNumber> startOfDynamicArray = {};
-    if (auto* dynamic = descriptor.Get<BindGroupLayoutDynamicBindingArray>()) {
-        DAWN_INVALID_IF(!device->HasFeature(Feature::ChromiumExperimentalBindless),
-                        "Dynamic binding array used without the %s feature enabled.",
-                        wgpu::FeatureName::ChromiumExperimentalBindless);
-        DAWN_INVALID_IF(dynamic->dynamicArray.nextInChain != nullptr,
-                        "DynamicBindingArrayLayout::nextInChain must be nullptr");
-
-        startOfDynamicArray = BindingNumber(dynamic->dynamicArray.start);
-        DAWN_TRY(ValidateDynamicBindingKind(dynamic->dynamicArray.kind));
-
-        DAWN_INVALID_IF(startOfDynamicArray >= kMaxBindingsPerBindGroupTyped,
-                        "dynamic array start (%u) exceeds the maxBindingsPerBindGroup limit (%u).",
-                        startOfDynamicArray.value(), kMaxBindingsPerBindGroup);
-
-        // Add to the limits the storage buffer that will be used for the availability data of the
-        // dynamic array. Set a minimum binding size so as to not increment unverifiedBufferCount.
-        BindGroupLayoutEntry availabilityEntry{
-            .binding = 0,
-            .visibility = kAllStages,
-            .buffer =
-                {
-                    .type = wgpu::BufferBindingType::ReadOnlyStorage,
-                    .minBindingSize = 4,
-                },
-        };
-        IncrementBindingCounts(&bindingCounts, Unpack(&availabilityEntry));
-    }
-
     // Map of binding number to entry index.
     std::map<BindingNumber, uint32_t> bindingMap;
 
@@ -404,12 +373,6 @@ ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDes
                             uint32_t(arraySize) + uint32_t(bindingNumber),
                             kMaxBindingsPerBindGroupTyped);
         }
-
-        DAWN_INVALID_IF(startOfDynamicArray.has_value() &&
-                            bindingNumber + arraySize > startOfDynamicArray.value(),
-                        "On entries[%u]: the range of binding used [%u, %u) conflicts with the "
-                        "dynamic binding array that starts at binding %u.",
-                        i, bindingNumber, bindingNumber + arraySize, startOfDynamicArray.value());
 
         // Check that the same binding is not set twice. bindingNumber + arraySize cannot overflow
         // as they are both smaller than kMaxBindingsPerBindGroupTyped.
@@ -542,7 +505,6 @@ bool SortBindingsCompare(const BindingInfo& a, const BindingInfo& b) {
 struct ExpandedBindingInfo {
     BindGroupLayoutInternalBase::BindingMap apiBindingMap;
     ityp::vector<BindingIndex, BindingInfo> entries;
-    std::optional<BindingIndex> dynamicArrayMetadata;
 };
 ExpandedBindingInfo ConvertAndExpandBGLEntries(
     const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor) {
@@ -619,24 +581,6 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
         }
     }
 
-    // Add an internal entry for the metadata buffer of the dynamic array if needed. Remember the
-    // BindingNumber to convert it to a BindingIndex after sorting of bindings.
-    BindingNumber dynamicArrayMetadataBindingNumber;
-    if (descriptor.Has<BindGroupLayoutDynamicBindingArray>()) {
-        dynamicArrayMetadataBindingNumber = nextOpenBindingNumberForNewEntry--;
-        BindingInfo metadataEntry = {
-            .binding = dynamicArrayMetadataBindingNumber,
-            .visibility = kAllStages,
-            .bindingLayout = BufferBindingInfo{{
-                .type = wgpu::BufferBindingType::ReadOnlyStorage,
-                // This is an internal buffer so it doesn't need its minBindingSize runtime-checked.
-                .minBindingSize = 4,
-                .hasDynamicOffset = false,
-            }}};
-        entries.push_back(metadataEntry);
-        internalEntries.insert(dynamicArrayMetadataBindingNumber);
-    }
-
     // Reorder bindings internally and compute the complete BindingNumber->BindingIndex map.
     std::sort(entries.begin(), entries.end(), SortBindingsCompare);
 
@@ -675,11 +619,6 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
         APIBindingIndex index = APIBindingIndex(uint32_t(i));
         const auto& [_, inserted] = result.apiBindingMap.emplace(binding.binding, index);
         DAWN_ASSERT(inserted);
-    }
-
-    // Return the location of the metadata buffer in the reordered bindings.
-    if (descriptor.Has<BindGroupLayoutDynamicBindingArray>()) {
-        result.dynamicArrayMetadata = fullBindingMap[dynamicArrayMetadataBindingNumber];
     }
 
     result.entries = std::move(entries);
@@ -775,17 +714,6 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
         UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&descriptor->entries[i]);
         IncrementBindingCounts(&mValidationBindingCounts, entry);
     }
-
-    // Handle the dynamic binding array if there is one.
-    if (auto* dynamic = descriptor.Get<BindGroupLayoutDynamicBindingArray>()) {
-        mHasDynamicArray = true;
-        mAPIDynamicArrayStart = BindingNumber(dynamic->dynamicArray.start);
-        mDynamicArrayKind = dynamic->dynamicArray.kind;
-        mDynamicArrayMetadataBinding = unpackedBindings.dynamicArrayMetadata.value();
-
-        // Pack the dynamic array to start right after static bindings.
-        mDynamicArrayStart = mBindingInfo.size();
-    }
 }
 
 BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
@@ -849,43 +777,6 @@ BindingIndex BindGroupLayoutInternalBase::AsBindingIndex(APIBindingIndex binding
     return index;
 }
 
-bool BindGroupLayoutInternalBase::HasDynamicArray() const {
-    DAWN_ASSERT(!IsError());
-    return mHasDynamicArray;
-}
-
-BindingNumber BindGroupLayoutInternalBase::GetAPIDynamicArrayStart() const {
-    DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(mHasDynamicArray);
-    return mAPIDynamicArrayStart;
-}
-
-BindingIndex BindGroupLayoutInternalBase::GetDynamicArrayStart() const {
-    DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(mHasDynamicArray);
-    return mDynamicArrayStart;
-}
-
-BindingIndex BindGroupLayoutInternalBase::GetDynamicBindingIndex(BindingNumber binding) const {
-    DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(mHasDynamicArray);
-    DAWN_ASSERT(binding >= mAPIDynamicArrayStart);
-    uint32_t indexInArray = uint32_t(binding - mAPIDynamicArrayStart);
-    return BindingIndex(indexInArray);
-}
-
-BindingIndex BindGroupLayoutInternalBase::GetDynamicArrayMetadataBinding() const {
-    DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(mHasDynamicArray);
-    return mDynamicArrayMetadataBinding;
-}
-
-wgpu::DynamicBindingKind BindGroupLayoutInternalBase::GetDynamicArrayKind() const {
-    DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(mHasDynamicArray);
-    return mDynamicArrayKind;
-}
-
 void BindGroupLayoutInternalBase::ReduceMemoryUsage() {}
 
 size_t BindGroupLayoutInternalBase::ComputeContentHash() {
@@ -934,8 +825,6 @@ size_t BindGroupLayoutInternalBase::ComputeContentHash() {
             });
     }
 
-    recorder.Record(mHasDynamicArray, mAPIDynamicArrayStart, mDynamicArrayKind);
-
     return recorder.GetContentHash();
 }
 
@@ -953,18 +842,12 @@ bool BindGroupLayoutInternalBase::EqualityFunc::operator()(
     if (a->mBindingMap != b->mBindingMap) {
         return false;
     }
-
-    if (a->mHasDynamicArray != b->mHasDynamicArray ||
-        a->mDynamicArrayKind != b->mDynamicArrayKind ||
-        a->mAPIDynamicArrayStart != b->mAPIDynamicArrayStart) {
-        return false;
-    }
     return true;
 }
 
 bool BindGroupLayoutInternalBase::IsEmpty() const {
     DAWN_ASSERT(!IsError());
-    return mBindingInfo.empty() && !mHasDynamicArray;
+    return mBindingInfo.empty();
 }
 
 BindingIndex BindGroupLayoutInternalBase::GetBindingCount() const {

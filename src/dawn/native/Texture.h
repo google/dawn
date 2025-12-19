@@ -215,6 +215,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     MaybeError Pin(wgpu::TextureUsage usage);
     void Unpin();
+    // TODO(https://issues.chromium.org/463925499): Use resource table terminology instead.
     void AddDynamicArraySlot(DynamicArrayState* dynamicArray, BindingIndex i);
     void RemoveDynamicArraySlot(DynamicArrayState* dynamicArray, BindingIndex i);
 

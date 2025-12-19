@@ -53,8 +53,6 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo);
 // Backend BindGroupLayout implementation for Vulkan. In addition to containing a BindGroupAllocator
 // for the CPU-side tracking data, it has a DescriptorSetAllocator that handles efficient allocation
 // of the corresponding VkDescriptorSets.
-// Note that this is a base class for two different implementations depending on whether the layout
-// contains a dynamic binding array.
 class BindGroupLayout : public BindGroupLayoutInternalBase {
   public:
     static ResultOrError<Ref<BindGroupLayout>> Create(
@@ -98,6 +96,8 @@ class BindGroupLayout : public BindGroupLayoutInternalBase {
 };
 
 // BGL implementation with fast VkDescriptorSet allocation used when we only have static bindings.
+// TODO(https://issues.chromium.org/463925499): Re-inline all in BindGroupLayout since it is the
+// only child class.
 class BindGroupLayoutStaticBindingOnly final : public BindGroupLayout {
   public:
     BindGroupLayoutStaticBindingOnly(DeviceBase* device,
@@ -114,26 +114,6 @@ class BindGroupLayoutStaticBindingOnly final : public BindGroupLayout {
     void DestroyImpl() override;
 
     Ref<DescriptorSetAllocator> mDescriptorSetAllocator;
-};
-
-// BGL implementation that supports dynamic binding arrays.
-class BindGroupLayoutDynamicArray final : public BindGroupLayout {
-  public:
-    BindGroupLayoutDynamicArray(DeviceBase* device,
-                                const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
-
-    MaybeError Initialize();
-
-    ResultOrError<Ref<BindGroup>> AllocateBindGroup(
-        const UnpackedPtr<BindGroupDescriptor>& descriptor) override;
-    void DeallocateDescriptorSet(DescriptorSetAllocation* descriptorSetAllocation) override;
-
-  private:
-    ~BindGroupLayoutDynamicArray() override;
-    void DestroyImpl() override;
-
-    absl::flat_hash_map<VkDescriptorType, uint32_t> mStaticDescriptorCountPerType;
-    std::unique_ptr<DescriptorSetAllocatorDynamicArray> mDescriptorSetAllocator;
 };
 
 }  // namespace dawn::native::vulkan

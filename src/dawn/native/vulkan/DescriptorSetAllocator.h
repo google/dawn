@@ -110,6 +110,7 @@ class DescriptorSetAllocator : public RefCounted {
 // A simpler descriptor set allocator for use specifically with dynamic arrays. It doesn't do any
 // reuse because the size of the pools required vary (and we expect few dynamic arrays to be
 // created).
+// TODO(https://issues.chromium.org/463925499): Inline in ResourceTable which is the only user.
 class DescriptorSetAllocatorDynamicArray {
   public:
     static std::unique_ptr<DescriptorSetAllocatorDynamicArray> Create(Device* device);

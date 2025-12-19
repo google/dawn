@@ -620,7 +620,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
         // We need to check all the limits for numbers of bindings related to bindless.
         constexpr uint32_t kRequiredLimit =
-            kMaxDynamicBindingArraySize + kReservedDynamicBindingArrayEntries;
+            kMaxResourceTableSize + kReservedDynamicBindingArrayEntries;
         bool hasLimit =
             vkProperties.maxPerStageDescriptorUpdateAfterBindSamplers >= kRequiredLimit &&
             vkProperties.maxPerStageDescriptorUpdateAfterBindSampledImages >= kRequiredLimit &&
@@ -649,7 +649,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
         if (hasUpdateAfterBind && hasOtherFeatures && hasLimit && canSupportRobustness) {
             EnableFeature(Feature::ChromiumExperimentalSamplingResourceTable);
-            EnableFeature(Feature::ChromiumExperimentalBindless);
         }
 
         // TODO(https://issues.chromium.org/435317394): add support for heterogeneous bindless by
@@ -892,8 +891,6 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
         vkMax = std::max(vkMax, vkProperties.maxDescriptorSetUpdateAfterBindSampledImages);
         vkMax = std::max(vkMax, vkProperties.maxUpdateAfterBindDescriptorsInAllPools);
 
-        limits->dynamicBindingArrayLimits.maxDynamicBindingArraySize =
-            vkMax - kReservedDynamicBindingArrayEntries;
         limits->resourceTableLimits.maxResourceTableSize =
             vkMax - kReservedDynamicBindingArrayEntries;
     }

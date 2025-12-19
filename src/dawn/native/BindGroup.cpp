@@ -43,7 +43,6 @@
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Device.h"
-#include "dawn/native/DynamicArrayState.h"
 #include "dawn/native/ExternalTexture.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectType_autogen.h"
@@ -481,108 +480,6 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
     return {};
 }
 
-MaybeError ValidateDynamicBindingArrayEntry(const DeviceBase* device,
-                                            wgpu::DynamicBindingKind kind,
-                                            const BindGroupEntry& entry) {
-    switch (kind) {
-        case wgpu::DynamicBindingKind::SampledTexture: {
-            DAWN_TRY(ValidateTextureBindGroupEntry(device, entry));
-            TextureViewBase* view = entry.textureView;
-            DAWN_INVALID_IF(
-                (view->GetUsage() & kTextureViewOnlyUsages) != wgpu::TextureUsage::TextureBinding,
-                "%s's usages (%s) are not exactly %s.", view,
-                view->GetUsage() & kTextureViewOnlyUsages, wgpu::TextureUsage::TextureBinding);
-            DAWN_INVALID_IF(view->IsYCbCr(), "%s is YCbCr.", view);
-            break;
-        }
-
-        case wgpu::DynamicBindingKind::Undefined:
-            DAWN_UNREACHABLE();
-    }
-
-    return {};
-}
-
-MaybeError ValidateBindGroupDynamicBindingArray(const DeviceBase* device,
-                                                const UnpackedPtr<BindGroupDescriptor> descriptor,
-                                                UsageValidationMode mode) {
-    auto* dynamic = descriptor.Get<BindGroupDynamicBindingArray>();
-    DAWN_ASSERT(dynamic != nullptr);
-
-    BindGroupLayoutInternalBase* layout = descriptor->layout->GetInternalBindGroupLayout();
-    const BindGroupLayoutInternalBase::BindingMap& staticBindingMap = layout->GetBindingMap();
-
-    DAWN_INVALID_IF(!device->HasFeature(Feature::ChromiumExperimentalBindless),
-                    "Dynamic binding array used without the %s feature enabled.",
-                    wgpu::FeatureName::ChromiumExperimentalBindless);
-
-    DAWN_INVALID_IF(
-        !layout->HasDynamicArray(),
-        "dynamicArraySize specified when the layout (%s) doesn't contain a dynamic binding array.",
-        layout);
-
-    const uint32_t maxDynamicBindingArraySize =
-        device->GetLimits().dynamicBindingArrayLimits.maxDynamicBindingArraySize;
-    DAWN_INVALID_IF(dynamic->dynamicArraySize > maxDynamicBindingArraySize,
-                    "dynamicArraySize (%u) exceeds the maxDynamicBindingArraySize limit (%u).",
-                    dynamic->dynamicArraySize, maxDynamicBindingArraySize);
-
-    const BindingNumber dynamicArrayStart = layout->GetAPIDynamicArrayStart();
-    const BindingNumber dynamicArraySize = BindingNumber(dynamic->dynamicArraySize);
-
-    // Validate that any non-static entry fits in the dynamic binding array and that they match its
-    // kind as well.
-    absl::flat_hash_set<BindingNumber> dynamicBindingsSeen;
-    for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        const BindGroupEntry& entry = descriptor->entries[i];
-        BindingNumber binding = BindingNumber(entry.binding);
-
-        // Skip static entries to only look at dynamic entries, or invalid ones.
-        if (staticBindingMap.contains(binding)) {
-            continue;
-        }
-
-        DAWN_INVALID_IF(binding - dynamicArrayStart >= dynamicArraySize,
-                        "In entries[%u], binding index %u doesn't fit in the dynamic binding "
-                        "array range of indices [%u, %u).",
-                        i, binding, dynamicArrayStart, dynamicArrayStart + dynamicArraySize);
-
-        DAWN_INVALID_IF(dynamicBindingsSeen.contains(binding),
-                        "In entries[%u], binding index %u already used by a previous entry.", i,
-                        binding);
-        dynamicBindingsSeen.insert(binding);
-
-        DAWN_TRY_CONTEXT(
-            ValidateDynamicBindingArrayEntry(device, layout->GetDynamicArrayKind(), entry),
-            "validating that entries[%i] can be used in the dynamic binding array.", i);
-    }
-
-    return {};
-}
-
-BindGroupEntryContents ToBindGroupEntryContents(const BindGroupEntry& entry) {
-    return {
-        .nextInChain = entry.nextInChain,
-        .buffer = entry.buffer,
-        .offset = entry.offset,
-        .size = entry.size,
-        .sampler = entry.sampler,
-        .textureView = entry.textureView,
-    };
-}
-
-BindGroupEntry ToBindGroupEntry(BindingNumber binding, const BindGroupEntryContents& contents) {
-    return {
-        .nextInChain = contents.nextInChain,
-        .binding = uint32_t(binding),
-        .buffer = contents.buffer,
-        .offset = contents.offset,
-        .size = contents.size,
-        .sampler = contents.sampler,
-        .textureView = contents.textureView,
-    };
-}
-
 }  // anonymous namespace
 
 ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
@@ -595,35 +492,25 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
     DAWN_TRY(device->ValidateObject(descriptor->layout));
     BindGroupLayoutInternalBase* layout = descriptor->layout->GetInternalBindGroupLayout();
 
-    const BindGroupLayoutInternalBase::BindingMap& staticBindingMap = layout->GetBindingMap();
-    DAWN_ASSERT(staticBindingMap.size() <= kMaxBindingsPerPipelineLayout);
+    const BindGroupLayoutInternalBase::BindingMap& bindingMap = layout->GetBindingMap();
+    DAWN_ASSERT(bindingMap.size() <= kMaxBindingsPerPipelineLayout);
 
-    // Validate the static entries first as that's the common case that should be optimized for.
-    // Validation of the dynamic entries is done with a second iteration over the entries, only if
-    // needed.
-    uint32_t staticEntryCount = 0;
+    // Validate individual entries.
     bool needsCrossBindingValidation = layout->NeedsCrossBindingValidation();
     ityp::bitset<APIBindingIndex, kMaxBindingsPerPipelineLayout> bindingsSet;
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
         const BindGroupEntry& entry = descriptor->entries[i];
         BindingNumber binding = BindingNumber(entry.binding);
 
-        // Do a single combined check for the entry being dynamic or a non-existent one to avoid
-        // doing an extra branch in the static binding case.
-        const auto& it = staticBindingMap.find(binding);
-        if (it == staticBindingMap.end()) {
-            if (descriptor.Has<BindGroupDynamicBindingArray>() &&
-                binding >= layout->GetAPIDynamicArrayStart()) {
-                continue;
-            }
+        const auto& it = bindingMap.find(binding);
+        if (it == bindingMap.end()) {
             return DAWN_VALIDATION_ERROR(
                 "In entries[%u], binding index %u not present in the bind group layout."
                 "\nExpected layout: %s",
                 i, binding, layout->EntriesToString());
         }
-        staticEntryCount++;
 
-        // Check for redundant static entries.
+        // Check for redundant entries.
         APIBindingIndex bindingIndex = it->second;
         DAWN_INVALID_IF(bindingsSet[bindingIndex],
                         "In entries[%u], binding index %u already used by a previous entry", i,
@@ -682,38 +569,29 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
             "validating entries[%u] against %s.", i, bindingInfo);
     }
 
-    // Check that we have all the required static entries.
+    // Check that we have all the required entries.
     // NOTE: Static sampler layout bindings should not have bind group entries, as the sampler is
     // specified in the layout itself.
-    const auto expectedStaticEntryCount =
+    const auto expectedEntryCount =
         layout->GetUnexpandedBindingCount() - layout->GetStaticSamplerCount();
 
     DAWN_INVALID_IF(
-        staticEntryCount != expectedStaticEntryCount,
+        descriptor->entryCount != expectedEntryCount,
         "Number of entries (%u) did not match the expected number of entries (%u) for %s."
         "\nExpected layout: %s",
-        descriptor->entryCount, expectedStaticEntryCount, layout, layout->EntriesToString());
+        descriptor->entryCount, expectedEntryCount, layout, layout->EntriesToString());
 
     // This should always be true because
     //  - numBindings has to match between the bind group and its layout.
     //  - Each binding must be set at most once
     //
     // We don't validate the equality because it wouldn't be possible to cover it with a test.
-    DAWN_ASSERT(bindingsSet.count() == expectedStaticEntryCount);
+    DAWN_ASSERT(bindingsSet.count() == expectedEntryCount);
 
     if (needsCrossBindingValidation) {
         // This additional validation is only needed when there are static samplers used with a
         // single texture binding and/or there are YCbCr textures.
         DAWN_TRY(ValidateStaticSamplersWithSampledTextures(descriptor, layout));
-    }
-
-    // Validate the dynamic entries.
-    if (descriptor.Has<BindGroupDynamicBindingArray>()) {
-        DAWN_TRY(ValidateBindGroupDynamicBindingArray(device, descriptor, mode));
-    } else {
-        DAWN_INVALID_IF(
-            layout->HasDynamicArray(),
-            "dynamicArraySize is not specified when the layout contains a dynamic binding array.");
     }
 
     return descriptor;
@@ -739,22 +617,10 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
         new (&mBindingData.bindings[i]) Ref<ObjectBase>();
     }
 
-    // Get the dynamic array start or a fake start that will make sure no binding gets accounted as
-    // being in the dynamic array. This keeps the condition in the loop below simple.
-    BindingNumber dynamicArrayStart = std::numeric_limits<BindingNumber>::max();
-    if (layout->HasDynamicArray()) {
-        dynamicArrayStart = layout->GetAPIDynamicArrayStart();
-    }
-
-    // Gather static bindings.
+    // Gather bindings.
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
         UnpackedPtr<BindGroupEntry> entry = Unpack(&descriptor->entries[i]);
         BindingNumber binding = BindingNumber(entry->binding);
-
-        if (binding >= dynamicArrayStart) {
-            continue;
-        }
-
         APIBindingIndex apiBindingIndex = layout->GetAPIBindingIndex(binding);
 
         DAWN_TRY(MatchVariant(
@@ -858,31 +724,6 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
                                                     mBindingData.bufferData[bindingIndex].size;
                                             });
 
-    // Gather dynamic binding entries in a second loop to put the handling off the critical path.
-    if (auto* dynamic = descriptor.Get<BindGroupDynamicBindingArray>()) {
-        mDynamicArray = AcquireRef(new DynamicArrayState(
-            GetDevice(), BindingIndex(dynamic->dynamicArraySize), layout->GetDynamicArrayKind()));
-        DAWN_TRY(mDynamicArray->Initialize());
-
-        for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-            UnpackedPtr<BindGroupEntry> entry = Unpack(&descriptor->entries[i]);
-            BindingNumber binding = BindingNumber(entry->binding);
-
-            if (binding < layout->GetAPIDynamicArrayStart()) {
-                continue;
-            }
-
-            BindGroupEntryContents entryContents = ToBindGroupEntryContents(**entry);
-            mDynamicArray->Update(layout->GetDynamicBindingIndex(binding), entryContents);
-        }
-
-        // Add the metadata storage buffer in the static bindings.
-        BindingIndex metadataIndex = layout->GetDynamicArrayMetadataBinding();
-        mBindingData.bindings[metadataIndex] = mDynamicArray->GetMetadataBuffer();
-        mBindingData.bufferData[metadataIndex].offset = 0;
-        mBindingData.bufferData[metadataIndex].size = mDynamicArray->GetMetadataBuffer()->GetSize();
-    }
-
     DAWN_TRY(InitializeImpl());
 
     return {};
@@ -897,146 +738,25 @@ void BindGroupBase::DestroyImpl() {
             mBindingData.bindings[i].~Ref<ObjectBase>();
         }
     }
-
-    if (mDynamicArray != nullptr && !mDynamicArray->IsDestroyed()) {
-        DAWN_ASSERT(!IsError());
-        mDynamicArray->Destroy();
-    }
 }
 
 BindGroupBase::BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
     : ApiObjectBase(device, tag, label), mBindingData() {}
 
 // static
-Ref<BindGroupBase> BindGroupBase::MakeError(DeviceBase* device,
-                                            const BindGroupDescriptor* descriptor) {
+Ref<BindGroupBase> BindGroupBase::MakeError(DeviceBase* device, StringView label) {
     class ErrorBindGroupBase final : public BindGroupBase {
       public:
-        explicit ErrorBindGroupBase(DeviceBase* device, const BindGroupDescriptor* descriptor)
-            : BindGroupBase(device, ObjectBase::kError, descriptor->label) {
-            // Create a DynamicArrayState even for an error bindgroup because we need to do state
-            // tracking used for the validation of synchronous errors.
-            BindGroupLayoutBase* layout = descriptor->layout;
-            if (!layout->IsError() && layout->GetInternalBindGroupLayout()->HasDynamicArray()) {
-                SetErrorDynamicArrayState(descriptor);
-            }
-        }
-
-        void SetErrorDynamicArrayState(const BindGroupDescriptor* descriptor) {
-            // Avoid allocating tons of memory if dynamicArraySize is huge, instead clamp to
-            // maxDynamicBindingArraySize.
-            uint32_t dynamicArraySize =
-                GetDevice()->GetLimits().dynamicBindingArrayLimits.maxDynamicBindingArraySize;
-
-            for (const wgpu::ChainedStruct* chain = descriptor->nextInChain; chain != nullptr;
-                 chain = chain->nextInChain) {
-                if (chain->sType == wgpu::SType::BindGroupDynamicBindingArray) {
-                    auto* dynamic = reinterpret_cast<const BindGroupDynamicBindingArray*>(chain);
-                    dynamicArraySize = std::min(dynamicArraySize, dynamic->dynamicArraySize);
-                    break;
-                }
-            }
-
-            // TODO(https://issues.chromium.org/435317394): Take into accounts that entries that are
-            // listed in range of the dynamic binding array should be marked as used from creation
-            // even for error bind groups. (to match what a client-side state tracking would do).
-            // Port this TO-DO over to GPUResourceTable instead of handling it for the "dynamic
-            // binding array" proposal.
-
-            mLayout = descriptor->layout;
-            mDynamicArray = AcquireRef(new DynamicArrayState(
-                GetDevice(), BindingIndex(dynamicArraySize),
-                mLayout->GetInternalBindGroupLayout()->GetDynamicArrayKind()));
-        }
-
+        explicit ErrorBindGroupBase(DeviceBase* device, StringView label)
+            : BindGroupBase(device, ObjectBase::kError, label) {}
         MaybeError InitializeImpl() override { DAWN_UNREACHABLE(); }
     };
 
-    return AcquireRef(new ErrorBindGroupBase(device, descriptor));
+    return AcquireRef(new ErrorBindGroupBase(device, label));
 }
 
 ObjectType BindGroupBase::GetType() const {
     return ObjectType::BindGroup;
-}
-
-void BindGroupBase::APIDestroy() {
-    if (GetDevice()->IsValidationEnabled() &&
-        GetDevice()->ConsumedError(ValidateDestroy(), "validating %s.Destroy()", this)) {
-        return;
-    }
-
-    // Destroy only the dynamic array part. Static bindings are always supposed to be valid so that
-    // SetBindGroup can iterate them without first checking if the BindGroup is destroyed. This also
-    // makes the behavior match between the bind groups with only static bindings and the static
-    // bindings part of the bind groups with dynamic arrays.
-    if (!mDynamicArray->IsDestroyed()) {
-        mDynamicArray->Destroy();
-    }
-}
-
-wgpu::Status BindGroupBase::APIUpdate(const BindGroupEntry* entry) {
-    std::optional<BindingIndex> slot = GetValidDynamicArraySlotFor(BindingNumber(entry->binding));
-    if (!slot.has_value()) {
-        return wgpu::Status::Error;
-    }
-
-    // Prevent replacing a binding that may be in use by the GPU.
-    if (!mDynamicArray->CanBeUpdated(slot.value())) {
-        return wgpu::Status::Error;
-    }
-
-    // Perform validation that produces a validation error, but unconditionally mark the slot as
-    // used since we need to match client-side validation that doesn't perform these checks.
-    if (GetDevice()->ConsumedError(  //
-            ([&]() -> MaybeError {
-                DAWN_TRY(GetDevice()->ValidateObject(this));
-                return ValidateDynamicBindingArrayEntry(GetDevice(), mDynamicArray->GetKind(),
-                                                        *entry);
-            })(),
-            "validating %s.Update()", this)) {
-        BindGroupEntryContents nothing = {};
-        mDynamicArray->Update(slot.value(), nothing);
-    } else {
-        BindGroupEntryContents entryContents = ToBindGroupEntryContents(*entry);
-        mDynamicArray->Update(slot.value(), entryContents);
-    }
-
-    return wgpu::Status::Success;
-}
-
-uint32_t BindGroupBase::APIInsertBinding(const BindGroupEntryContents* contents) {
-    if (mDynamicArray == nullptr || mDynamicArray->IsDestroyed()) {
-        return wgpu::kInvalidBinding;
-    }
-
-    std::optional<BindingIndex> freeSlot = mDynamicArray->GetFreeSlot();
-    if (!freeSlot) {
-        return wgpu::kInvalidBinding;
-    }
-
-    BindingNumber binding =
-        GetLayout()->GetAPIDynamicArrayStart() + BindingNumber(uint32_t(*freeSlot));
-
-    BindGroupEntry entry = ToBindGroupEntry(binding, *contents);
-    wgpu::Status updateStatus = APIUpdate(&entry);
-    DAWN_ASSERT(updateStatus == wgpu::Status::Success);
-
-    return uint32_t(binding);
-}
-
-wgpu::Status BindGroupBase::APIRemoveBinding(uint32_t binding) {
-    std::optional<BindingIndex> slot = GetValidDynamicArraySlotFor(BindingNumber(binding));
-    if (!slot.has_value()) {
-        return wgpu::Status::Error;
-    }
-
-    // Always remove the binding, even if a validation error happens, so that we match client-side
-    // validation.
-    mDynamicArray->Remove(slot.value());
-
-    [[maybe_unused]] bool error = GetDevice()->ConsumedError(
-        GetDevice()->ValidateObject(this), "validating %s.RemoveBinding(%u)", this, binding);
-    return wgpu::Status::Success;
 }
 
 BindGroupLayoutBase* BindGroupBase::GetFrontendLayout() {
@@ -1118,61 +838,6 @@ const std::vector<Ref<ExternalTextureBase>>& BindGroupBase::GetBoundExternalText
 void BindGroupBase::ForEachUnverifiedBufferBindingIndex(
     std::function<void(BindingIndex, uint32_t)> fn) const {
     ForEachUnverifiedBufferBindingIndexImpl(GetLayout(), fn);
-}
-
-bool BindGroupBase::HasDynamicArray() const {
-    DAWN_ASSERT(!IsError());
-    return mDynamicArray != nullptr;
-}
-
-ityp::span<BindingIndex, const Ref<TextureViewBase>> BindGroupBase::GetDynamicArrayBindings()
-    const {
-    DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(HasDynamicArray());
-    return mDynamicArray->GetBindings();
-}
-
-MaybeError BindGroupBase::ValidateCanUseOnQueueNow() const {
-    DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(HasDynamicArray());
-
-    DAWN_INVALID_IF(mDynamicArray->IsDestroyed(), "Destroyed bind group %s used in a submit.",
-                    this);
-    return {};
-}
-
-DynamicArrayState* BindGroupBase::GetDynamicArray() const {
-    DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(HasDynamicArray());
-    return mDynamicArray.Get();
-}
-
-MaybeError BindGroupBase::ValidateDestroy() const {
-    // On the queue we only validate that dynamic array bind groups are alive in a submit because
-    // validating for all bind groups would be too expensive. For that reason only allow dynamic
-    // arrays to be destroyed early.
-    DAWN_INVALID_IF(mDynamicArray == nullptr, "%s doesn't contain a dynamic array.", this);
-    return {};
-}
-
-std::optional<BindingIndex> BindGroupBase::GetValidDynamicArraySlotFor(
-    BindingNumber binding) const {
-    // Some validation is required to return a synchronous error. It needs to be able to run even on
-    // error BindGroups because it must act the same way as an implementation running on top of the
-    // wire client-side and doesn't know if objects are errors or not.
-    if (mDynamicArray == nullptr || mDynamicArray->IsDestroyed()) {
-        return {};
-    }
-
-    if (binding < GetLayout()->GetAPIDynamicArrayStart()) {
-        return {};
-    }
-    BindingIndex slot = GetLayout()->GetDynamicBindingIndex(binding);
-    if (slot >= mDynamicArray->GetAPISize()) {
-        return {};
-    }
-
-    return slot;
 }
 
 }  // namespace dawn::native
