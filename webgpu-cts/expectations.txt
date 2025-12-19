@@ -914,6 +914,13 @@ crbug.com/469819315 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.81
 crbug.com/469819316 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,operation,texture_view,write:format:method="render-pass-resolve";*sampleCount=1;* [ Failure ]
 crbug.com/469819317 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:type="draw";* [ Failure ]
 crbug.com/469819317 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:type="drawIndexed";* [ Failure ]
+crbug.com/470127836 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 webgpu-dxc-disabled ] webgpu:api,validation,capability_checks,limits,max*,at_over:* [ Failure ]
+crbug.com/470131712 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_aspects:format="stencil8" [ Failure ]
+crbug.com/470131712 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:texture_format_compatibility:srcFormat="stencil8";dstFormat="stencil8" [ Failure ]
+crbug.com/470115242 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,queue,destroyed,texture:beginRenderPass: [ Failure ]
+crbug.com/470127837 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:shader,validation,decl,var:binding_collisions:a_group=1;b_group=1;a_binding=0;b_binding=0;b_use="different" [ Failure ]
+crbug.com/470115243 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:web_platform,copyToTexture,Image* [ RetryOnFailure ]
+
 
 # Intel linux copyTextureToTexture with compressed textures, dim=2d, dim=3d
 crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-12x10-unorm";dstFormat="astc-12x10-unorm";dimension="3d" [ Failure ]
