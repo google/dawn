@@ -602,35 +602,47 @@ bool CopySrcNeedsInternalTextureBindingUsage(const DeviceBase* device, const For
     return false;
 }
 
-wgpu::TextureViewDimension ResolveDefaultCompatiblityTextureBindingViewDimension(
+wgpu::TextureViewDimension ResolveDefaultCompatiblityTextureBindingViewDimensionImpl(
     const DeviceBase* device,
-    const UnpackedPtr<TextureDescriptor>& descriptor) {
+    wgpu::TextureDimension dimension,
+    uint32_t depthOrArrayLayers,
+    wgpu::TextureViewDimension textureBindingViewDimension) {
     // In non-compatibility mode this value is not used so return undefined so that it is not
     // used by mistake.
     if (device->HasFlexibleTextureViews()) {
         return wgpu::TextureViewDimension::Undefined;
     }
 
-    auto textureBindingViewDimension = wgpu::TextureViewDimension::Undefined;
-    if (auto* subDesc = descriptor.Get<TextureBindingViewDimensionDescriptor>()) {
-        textureBindingViewDimension = subDesc->textureBindingViewDimension;
-    }
     if (textureBindingViewDimension != wgpu::TextureViewDimension::Undefined) {
         return textureBindingViewDimension;
     }
 
-    switch (descriptor->dimension) {
+    switch (dimension) {
         case wgpu::TextureDimension::e1D:
             return wgpu::TextureViewDimension::e1D;
         case wgpu::TextureDimension::e2D:
-            return descriptor->size.depthOrArrayLayers == 1 ? wgpu::TextureViewDimension::e2D
-                                                            : wgpu::TextureViewDimension::e2DArray;
+            return depthOrArrayLayers == 1 ? wgpu::TextureViewDimension::e2D
+                                           : wgpu::TextureViewDimension::e2DArray;
         case wgpu::TextureDimension::e3D:
             return wgpu::TextureViewDimension::e3D;
         case wgpu::TextureDimension::Undefined:
         default:
-            DAWN_UNREACHABLE();
+            // We could get here on an error texture.
+            return wgpu::TextureViewDimension::Undefined;
     }
+}
+
+wgpu::TextureViewDimension ResolveDefaultCompatiblityTextureBindingViewDimension(
+    const DeviceBase* device,
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
+    auto textureBindingViewDimension = wgpu::TextureViewDimension::Undefined;
+    if (auto* subDesc = descriptor.Get<TextureBindingViewDimensionDescriptor>()) {
+        textureBindingViewDimension = subDesc->textureBindingViewDimension;
+    }
+
+    return ResolveDefaultCompatiblityTextureBindingViewDimensionImpl(
+        device, descriptor->dimension, descriptor->size.depthOrArrayLayers,
+        textureBindingViewDimension);
 }
 
 wgpu::TextureUsage AddInternalUsages(const DeviceBase* device,
@@ -1022,7 +1034,21 @@ TextureBase::TextureBase(DeviceBase* device,
       mMipLevelCount(descriptor->mipLevelCount),
       mSampleCount(descriptor->sampleCount),
       mUsage(descriptor->usage),
-      mFormatEnumForReflection(descriptor->format) {}
+      mFormatEnumForReflection(descriptor->format) {
+    auto textureBindingViewDimension = wgpu::TextureViewDimension::Undefined;
+    for (const wgpu::ChainedStruct* chain = descriptor->nextInChain; chain != nullptr;
+         chain = chain->nextInChain) {
+        if (chain->sType == wgpu::SType::TextureBindingViewDimensionDescriptor) {
+            textureBindingViewDimension =
+                reinterpret_cast<const TextureBindingViewDimensionDescriptor*>(chain)
+                    ->textureBindingViewDimension;
+        }
+    }
+
+    mCompatibilityTextureBindingViewDimension =
+        ResolveDefaultCompatiblityTextureBindingViewDimensionImpl(
+            device, mDimension, mBaseSize.depthOrArrayLayers, textureBindingViewDimension);
+}
 
 void TextureBase::DestroyImpl() {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
@@ -1542,6 +1568,10 @@ wgpu::TextureFormat TextureBase::APIGetFormat() const {
 
 wgpu::TextureUsage TextureBase::APIGetUsage() const {
     return mUsage;
+}
+
+wgpu::TextureViewDimension TextureBase::APIGetTextureBindingViewDimension() const {
+    return mCompatibilityTextureBindingViewDimension;
 }
 
 void TextureBase::APIPin(wgpu::TextureUsage usage) {

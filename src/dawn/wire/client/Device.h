@@ -77,6 +77,8 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     WGPUFuture APICreateRenderPipelineAsync(
         WGPURenderPipelineDescriptor const* descriptor,
         const WGPUCreateRenderPipelineAsyncCallbackInfo& callbackInfo);
+    WGPUTexture APICreateTexture(const WGPUTextureDescriptor* descriptor);
+    WGPUTexture APICreateErrorTexture(const WGPUTextureDescriptor* descriptor);
 
     WGPUStatus APIGetLimits(WGPULimits* limits) const;
     WGPUFuture APIGetLostFuture();

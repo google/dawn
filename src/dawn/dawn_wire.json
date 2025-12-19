@@ -304,13 +304,16 @@
             "TextureGetSampleCount",
             "TextureGetDimension",
             "TextureGetFormat",
-            "TextureGetUsage"
+            "TextureGetUsage",
+            "TextureGetTextureBindingViewDimension"
         ],
         "client_handwritten_commands": [
             "AdapterGetInstance",
             "BufferDestroy",
             "BufferUnmap",
             "DeviceCreateErrorBuffer",
+            "DeviceCreateErrorTexture",
+            "DeviceCreateTexture",
             "DeviceDestroy",
             "DeviceGetQueue",
             "DeviceGetSupportedSurfaceUsage",
