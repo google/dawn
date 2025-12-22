@@ -344,6 +344,50 @@ TEST_P(CacheRequestTests, CacheHitError) {
     EXPECT_FALSE(result.IsCached());
 }
 
+// Test that a cache miss occurs if the two LoadData calls return different sizes.
+TEST_P(CacheRequestTests, CacheHitDifferentLoadSizes) {
+    // Make a request.
+    CacheRequestForTesting req;
+    req.a = 1;
+    req.b = 0.2;
+    req.c = {3, 4, 5};
+
+    unsigned int* cPtr = req.c.data();
+
+    static StrictMock<MockFunction<int(Blob)>> cacheHitFn;
+    static StrictMock<MockFunction<int(CacheRequestForTesting)>> cacheMissFn;
+
+    // Mock a cache hit, but with different sizes returned from LoadData.
+    const size_t kExpectedSize = 10;
+    const size_t kActualSize = 5;
+    EXPECT_CALL(mMockCache, LoadData(_, _, nullptr, 0)).WillOnce(Return(kExpectedSize));
+    EXPECT_CALL(mMockCache, LoadData(_, _, _, kExpectedSize)).WillOnce(Return(kActualSize));
+
+    // Expect the cache miss handler since the load sizes were different.
+    int rv = 79;
+    EXPECT_CALL(cacheMissFn, Call(_)).WillOnce(WithArg<0>([=](CacheRequestForTesting req) {
+        // Expect the request contents to be the same. The data pointer for |c| is also the same
+        // since it was moved.
+        EXPECT_EQ(req.a, 1);
+        EXPECT_FLOAT_EQ(req.b, 0.2);
+        EXPECT_EQ(req.c.data(), cPtr);
+        return rv;
+    }));
+
+    // Load the request.
+    auto result = LoadOrRun(
+                      GetDevice(), std::move(req),
+                      [](Blob blob) -> int { return cacheHitFn.Call(std::move(blob)); },
+                      [](CacheRequestForTesting req) -> ResultOrError<int> {
+                          return cacheMissFn.Call(std::move(req));
+                      })
+                      .AcquireSuccess();
+
+    // Expect the result to store the value from the miss handler.
+    EXPECT_EQ(*result, rv);
+    EXPECT_FALSE(result.IsCached());
+}
+
 // Test the expected code path when hash validation is enabled, there is a cache hit but the hash
 // validation fails. This should be treated as a cache miss, and the cache miss handler should be
 // called.
