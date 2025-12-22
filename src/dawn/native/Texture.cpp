@@ -756,7 +756,8 @@ MaybeError ValidateTextureDescriptor(
             "validating viewFormats[%u]", i);
     }
 
-    DAWN_INVALID_IF(usage == wgpu::TextureUsage::None, "The texture usage must not be 0.");
+    DAWN_INVALID_IF(descriptor->usage == wgpu::TextureUsage::None,
+                    "The texture usage must not be 0.");
     DAWN_TRY(ValidateTextureUsageConstraints(device, descriptor->dimension, usage, format,
                                              std::move(allowedSharedTextureMemoryUsage)));
 
