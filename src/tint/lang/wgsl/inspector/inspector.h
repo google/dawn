@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_WGSL_INSPECTOR_INSPECTOR_H_
 #define SRC_TINT_LANG_WGSL_INSPECTOR_INSPECTOR_H_
 
+#include <array>
+#include <bitset>
 #include <map>
 #include <string>
 #include <tuple>
@@ -48,6 +50,13 @@ namespace tint::inspector {
 
 /// A temporary alias to sem::SamplerTexturePair. [DEPRECATED]
 using SamplerTexturePair = sem::SamplerTexturePair;
+
+/// The maximum size of the immediate buffer in bytes.
+constexpr size_t kMaxImmediateSize = 64;
+/// The size of a single slot in the immediate buffer in bytes.
+constexpr size_t kImmediateSlotSize = 4;
+/// The number of slots in the immediate buffer.
+constexpr size_t kImmediateSlotCount = kMaxImmediateSize / kImmediateSlotSize;
 
 /// Extracts information from a program
 class Inspector {
@@ -103,6 +112,12 @@ class Inspector {
     std::vector<SamplerTexturePair> GetSamplerAndNonSamplerTextureUses(
         const std::string& entry_point,
         const BindingPoint& non_sampler_placeholder);
+
+    /// @param entry_point name of the entry point to get information about
+    /// @returns a bitset where the nth bit is true if the nth 4-byte slot of the immediate block
+    /// may be used by the entry point. Returns an empty bitset if the immediate block is not
+    /// referenced.
+    std::bitset<kImmediateSlotCount> GetImmediateBlockInfo(const std::string& entry_point);
 
     /// @returns vector of all valid extension names used by the program. There
     /// will be no duplicated names in the returned vector even if an extension

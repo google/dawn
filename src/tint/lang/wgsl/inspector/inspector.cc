@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 
+#include <functional>
 #include <unordered_set>
 #include <utility>
 
@@ -42,6 +43,7 @@
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/resource_type.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
@@ -722,6 +724,63 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
     }
 
     return metadata;
+}
+
+std::bitset<kImmediateSlotCount> Inspector::GetImmediateBlockInfo(const std::string& entry_point) {
+    auto* func = FindEntryPointByName(entry_point);
+    if (!func) {
+        return {};
+    }
+
+    auto* func_sem = program_.Sem().Get(func);
+
+    const sem::GlobalVariable* immediate_var = nullptr;
+    for (const sem::Variable* var : func_sem->TransitivelyReferencedGlobals()) {
+        if (var->AddressSpace() == core::AddressSpace::kImmediate) {
+            immediate_var = var->As<sem::GlobalVariable>();
+            break;
+        }
+    }
+
+    if (!immediate_var) {
+        return {};
+    }
+
+    auto* mv = immediate_var->Type()->As<core::type::MemoryView>();
+    auto* type = mv->StoreType();
+
+    std::bitset<kImmediateSlotCount> accessible_slots;
+
+    std::function<void(const core::type::Type*, uint32_t)> mark_slots =
+        [&](const core::type::Type* t, uint32_t offset) {
+            tint::Switch(
+                t,
+                [&](const sem::Struct* str) {
+                    for (auto* member : str->Members()) {
+                        mark_slots(member->Type(), offset + member->Offset());
+                    }
+                },
+                [&](const core::type::Matrix* mat) {
+                    uint32_t col_stride = mat->ColumnStride();
+                    for (uint32_t i = 0; i < mat->Columns(); i++) {
+                        mark_slots(mat->ColumnType(), offset + i * col_stride);
+                    }
+                },
+                [&](const core::type::Type* other) {
+                    uint32_t s = other->Size();
+                    uint32_t start_slot = offset / kImmediateSlotSize;
+                    uint32_t end_byte = offset + s;
+                    uint32_t end_slot = (end_byte - 1) / kImmediateSlotSize;
+                    for (uint32_t i = start_slot; i <= end_slot; i++) {
+                        TINT_ASSERT(i < accessible_slots.size());
+                        accessible_slots[i] = true;
+                    }
+                });
+        };
+
+    mark_slots(type, 0);
+
+    return accessible_slots;
 }
 
 std::vector<std::string> Inspector::GetUsedExtensionNames() {
