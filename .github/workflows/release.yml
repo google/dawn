@@ -27,6 +27,7 @@ jobs:
           path: |
             ${{ steps.build.outputs.REMOTE_PORT_FILE }}
             ${{ steps.build.outputs.PKG_FILE }}
+            RELEASE_INFO.md
 
   build-native:
     uses: ./.github/workflows/ci.yml
@@ -49,6 +50,7 @@ jobs:
         with:
           tag_name: ${{ needs.build-wasm.outputs.PKG_VERSION }}
           name: ${{ needs.build-wasm.outputs.PKG_VERSION }}
+          body_path: artifacts/emdawnwebgpu/RELEASE_INFO.md
           files: |
             artifacts/**/Dawn-*.tar.gz
             artifacts/**/dawn-android-*.tar.gz
