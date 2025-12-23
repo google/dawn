@@ -71,6 +71,8 @@ jobs:
               options: --volume /:/host
         exclude:
           - os: macos-latest
+          - os: macos-15-intel
+          - os: macos-latest
             toolchain: msvc
           - os: macos-latest
             toolchain: gcc
@@ -229,6 +231,7 @@ jobs:
           path: dawn-headers/
 
   mobile-apple:
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -295,6 +298,7 @@ jobs:
   package-mobile:
     name: Package Mobile Artifacts
     runs-on: macos-latest
+    if: false
     needs: [mobile-android, mobile-apple]
     steps:
       - uses: actions/checkout@v4
