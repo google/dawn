@@ -36,10 +36,24 @@ jobs:
       # 7. <MacOS x64, Debug, latest Clang compiler toolchain on the default runner image, default generator>
       # 8. <MacOS x64, Release, latest Clang compiler toolchain on the default runner image, default generator>
       matrix:
-        os: [windows-latest, ubuntu-latest]#, macos-latest, macos-15-intel]
+        os: [windows-latest, ubuntu-latest, macos-latest, macos-15-intel]
         build_type: [Debug, Release]
         toolchain: [gcc, clang, msvc]
         include:
+          - os: macos-latest
+            toolchain: clang
+            c_compiler: clang
+            cpp_compiler: clang++
+            env:
+              MACOSX_DEPLOYMENT_TARGET: "12.0"
+            container: null
+          - os: macos-15-intel
+            toolchain: clang
+            c_compiler: clang
+            cpp_compiler: clang++
+            env:
+              MACOSX_DEPLOYMENT_TARGET: "12.0"
+            container: null
           - os: windows-latest
             toolchain: msvc
             c_compiler: cl
@@ -218,7 +232,6 @@ jobs:
           path: dawn-headers-${{ github.sha }}.tar.gz
 
   mobile-apple:
-    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -285,7 +298,6 @@ jobs:
   package-mobile:
     name: Package Mobile Artifacts
     runs-on: macos-latest
-    if: false
     needs: [mobile-android, mobile-apple]
     steps:
       - uses: actions/checkout@v4
