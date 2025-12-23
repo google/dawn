@@ -71,8 +71,6 @@ jobs:
               options: --volume /:/host
         exclude:
           - os: macos-latest
-          - os: macos-15-intel
-          - os: macos-latest
             toolchain: msvc
           - os: macos-latest
             toolchain: gcc
