@@ -53,4 +53,5 @@ jobs:
             artifacts/**/Dawn-*.tar.gz
             artifacts/**/dawn-android-*.tar.gz
             artifacts/**/dawn-apple-*.xcframework.tar.gz
+            artifacts/**/dawn-headers-*.tar.gz
             artifacts/emdawnwebgpu/*
