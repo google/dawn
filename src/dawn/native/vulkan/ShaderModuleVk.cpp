@@ -199,6 +199,10 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.tintOptions.bindings = std::move(bindings);
     req.tintOptions.resource_table = std::move(resourceTableConfig);
 
+    req.tintOptions.disable_robustness = !GetDevice()->IsRobustnessEnabled();
+    req.tintOptions.disable_workgroup_init =
+        GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
+
     req.tintOptions.workarounds.polyfill_unary_f32_negation =
         GetDevice()->IsToggleEnabled(Toggle::VulkanPolyfillF32Negation);
     req.tintOptions.workarounds.polyfill_f32_abs =
