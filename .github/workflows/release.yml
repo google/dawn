@@ -1,9 +1,9 @@
-name: Release
+name: release
 
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '50 5 * * *'  # 05:50 UTC
+    - cron: '50 5 * * *'  # 05:50 UTC (21:50 PST, 22:50 PDT)
 
 permissions:
   contents: write
