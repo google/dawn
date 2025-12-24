@@ -198,7 +198,7 @@ function(tint_default_compile_options TARGET)
       endif()
     endif()
   endif()
-  
+
   if (WIN32)
     target_compile_definitions(${TARGET} INTERFACE "NOMINMAX")
   endif()
