@@ -729,6 +729,7 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
                                                                  usedResources));
                 break;
             }
+            case Command::WriteBuffer:
             case Command::ClearBuffer:
             case Command::CopyBufferToBuffer:
             case Command::CopyBufferToTexture:
@@ -867,6 +868,19 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                         .bufferId = captureContext.GetId(cmd.buffer.Get()),
                         .offset = cmd.offset,
                         .size = cmd.size,
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
+            case Command::WriteBuffer: {
+                const auto& cmd = *commands.NextCommand<WriteBufferCmd>();
+                auto values = mCommands.NextData<uint8_t>(cmd.size);
+                schema::CommandBufferCommandWriteBufferCmd data{{
+                    .data = {{
+                        .bufferId = captureContext.GetId(cmd.buffer.Get()),
+                        .bufferOffset = cmd.offset,
+                        .data = std::vector<uint8_t>(values, values + cmd.size),
                     }},
                 }};
                 Serialize(captureContext, data);

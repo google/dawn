@@ -1090,6 +1090,13 @@ MaybeError ProcessEncoderCommands(const ReplayImpl& replay,
                                         data.destinationOffset);
                 break;
             }
+            case schema::CommandBufferCommand::WriteBuffer: {
+                schema::CommandBufferCommandWriteBufferCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                wgpu::Buffer buffer = replay.GetObjectById<wgpu::Buffer>(data.bufferId);
+                encoder.WriteBuffer(buffer, data.bufferOffset, data.data.data(), data.data.size());
+                break;
+            }
             case schema::CommandBufferCommand::WriteTimestamp:
                 DAWN_TRY(ProcessWriteTimestamp(replay, encoder, readHead));
                 break;
