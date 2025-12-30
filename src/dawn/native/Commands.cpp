@@ -420,9 +420,13 @@ void SkipCommand(CommandIterator* commands, Command type) {
             break;
         }
 
-        case Command::WriteBuffer:
-            commands->NextCommand<WriteBufferCmd>();
+        case Command::WriteBuffer: {
+            auto cmd = commands->NextCommand<WriteBufferCmd>();
+            if (cmd->size > 0) {
+                commands->NextData<uint8_t>(cmd->size);
+            }
             break;
+        }
 
         case Command::WriteTimestamp: {
             commands->NextCommand<WriteTimestampCmd>();
