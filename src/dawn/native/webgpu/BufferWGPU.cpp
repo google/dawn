@@ -241,8 +241,9 @@ MaybeError Buffer::AddContentToCapture(CaptureContext& captureContext) {
     auto& wgpu = device->wgpu;
 
     CaptureContext::ScopedContentWriter writer(captureContext);
-    for (uint64_t offset = 0; offset < GetSize(); offset += CaptureContext::kCopyBufferSize) {
-        uint64_t copySize = std::min(CaptureContext::kCopyBufferSize, GetSize() - offset);
+    uint64_t bufferSize = GetSize();
+    for (uint64_t offset = 0; offset < bufferSize; offset += CaptureContext::kCopyBufferSize) {
+        uint64_t copySize = std::min(CaptureContext::kCopyBufferSize, bufferSize - offset);
 
         WGPUCommandEncoder encoder = wgpu.deviceCreateCommandEncoder(innerDevice, nullptr);
         wgpu.commandEncoderCopyBufferToBuffer(encoder, srcBuffer, offset, copyBuffer, 0, copySize);
@@ -265,8 +266,8 @@ MaybeError Buffer::AddContentToCapture(CaptureContext& captureContext) {
 
         // We read this back synchronously. I'm not sure we could do much more.
         WGPUFutureWaitInfo waitInfo = {};
-        waitInfo.future = wgpu.bufferMapAsync(copyBuffer, WGPUMapMode_Read, offset,
-                                              CaptureContext::kCopyBufferSize, innerCallbackInfo);
+        waitInfo.future =
+            wgpu.bufferMapAsync(copyBuffer, WGPUMapMode_Read, 0, copySize, innerCallbackInfo);
         wgpu.instanceWaitAny(device->GetInnerInstance(), 1, &waitInfo, UINT64_MAX);
 
         DAWN_ASSERT(mapAsyncResult.status == WGPUMapAsyncStatus_Success);
