@@ -231,8 +231,10 @@ MaybeError ReadContentIntoTexture(const ReplayImpl& replay,
                                   ReadHead& readHead,
                                   wgpu::Device device,
                                   const schema::RootCommandWriteTextureCmdData& cmdData) {
+    const uint64_t dataSize = (cmdData.dataSize + 3) & ~3;
+
     const uint32_t* data;
-    DAWN_TRY_ASSIGN(data, readHead.GetData(cmdData.dataSize));
+    DAWN_TRY_ASSIGN(data, readHead.GetData(dataSize));
 
     wgpu::TexelCopyTextureInfo dst = ToWGPU(replay, cmdData.destination);
     wgpu::TexelCopyBufferLayout layout = ToWGPU(cmdData.layout);

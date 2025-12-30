@@ -240,6 +240,7 @@ MaybeError Buffer::AddContentToCapture(CaptureContext& captureContext) {
     WGPUDevice innerDevice = device->GetInnerHandle();
     auto& wgpu = device->wgpu;
 
+    CaptureContext::ScopedContentWriter writer(captureContext);
     for (uint64_t offset = 0; offset < GetSize(); offset += CaptureContext::kCopyBufferSize) {
         uint64_t copySize = std::min(CaptureContext::kCopyBufferSize, GetSize() - offset);
 
@@ -275,7 +276,7 @@ MaybeError Buffer::AddContentToCapture(CaptureContext& captureContext) {
         }
 
         const void* data = wgpu.bufferGetConstMappedRange(copyBuffer, 0, copySize);
-        captureContext.WriteContentBytes(data, copySize);
+        writer.WriteContentBytes(data, copySize);
         wgpu.bufferUnmap(copyBuffer);
     }
 
