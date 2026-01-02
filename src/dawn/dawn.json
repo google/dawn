@@ -4089,11 +4089,6 @@
                 "returns": "texture usage"
             },
             {
-                "name": "get texture binding view dimension",
-                "no autolock": true,
-                "returns": "texture view dimension"
-            },
-            {
                 "name": "destroy"
             },
             {
