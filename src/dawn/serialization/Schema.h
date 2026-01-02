@@ -520,6 +520,14 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(CopyTextureToBuffer,
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(CopyTextureToTexture,
                                                  COPY_TEXTURE_TO_TEXTURE_CMD_DATA_MEMBER){};
 
+#define WRITE_BUFFER_CMD_ENCODER_DATA_MEMBER(X) \
+    X(ObjectId, bufferId)                       \
+    X(uint64_t, bufferOffset)                   \
+    X(std::vector<uint8_t>, data)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(WriteBuffer,
+                                                 WRITE_BUFFER_CMD_ENCODER_DATA_MEMBER){};
+
 #define BEGIN_COMPUTE_PASS_CMD_DATA_MEMBER(X) \
     X(std::string, label)                     \
     X(TimestampWrites, timestampWrites)

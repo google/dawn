@@ -231,6 +231,9 @@ MaybeError GatherReferencedResourcesFromRenderCommand(CaptureContext& captureCon
         }
         case Command::SetBindGroup: {
             auto cmd = commands.NextCommand<SetBindGroupCmd>();
+            if (cmd->dynamicOffsetCount > 0) {
+                commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+            }
             usedResources.bindGroups.push_back(cmd->group.Get());
             break;
         }

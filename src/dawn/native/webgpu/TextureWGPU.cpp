@@ -183,6 +183,7 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
             TexelExtent3D(GetMipLevelSingleSubresourcePhysicalSize(mipLevel, Aspect::Color));
         auto blockSize = blockInfo.ToBlock(size);
         uint32_t usedBytesPerRow = uint32_t(blockInfo.ToBytes(blockSize.width));
+        uint32_t mappableBytesPerRow = RoundUp(usedBytesPerRow, 4);
 
         schema::RootCommandWriteTextureCmd cmd{{
             .data = {{
@@ -207,6 +208,8 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
             }},
         }};
         Serialize(captureContext, cmd);
+
+        CaptureContext::ScopedContentWriter writer(captureContext);
 
         uint32_t alignedBytesPerRow = Align(usedBytesPerRow, 256);
         BlockCount maxBlockRowsPerRead{CaptureContext::kCopyBufferSize / alignedBytesPerRow};
@@ -275,10 +278,11 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
                 }
 
                 // We only write out the beginning of each row, the rest is padding.
+
                 for (BlockCount blockRow{0}; blockRow < blockRows; ++blockRow) {
                     const void* data = wgpu.bufferGetConstMappedRange(
-                        copyBuffer, uint32_t(blockRow) * alignedBytesPerRow, usedBytesPerRow);
-                    captureContext.WriteContentBytes(data, usedBytesPerRow);
+                        copyBuffer, uint32_t(blockRow) * alignedBytesPerRow, mappableBytesPerRow);
+                    writer.WriteContentBytes(data, usedBytesPerRow);
                 }
                 wgpu.bufferUnmap(copyBuffer);
             }

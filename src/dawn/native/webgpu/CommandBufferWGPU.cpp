@@ -432,6 +432,9 @@ MaybeError GatherReferencedResourcesFromComputePass(CaptureContext& captureConte
             }
             case Command::SetBindGroup: {
                 auto cmd = commands.NextCommand<SetBindGroupCmd>();
+                if (cmd->dynamicOffsetCount > 0) {
+                    commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+                }
                 usedResources.bindGroups.push_back(cmd->group.Get());
                 break;
             }
@@ -729,6 +732,7 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
                                                                  usedResources));
                 break;
             }
+            case Command::WriteBuffer:
             case Command::ClearBuffer:
             case Command::CopyBufferToBuffer:
             case Command::CopyBufferToTexture:
@@ -872,6 +876,19 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                 Serialize(captureContext, data);
                 break;
             }
+            case Command::WriteBuffer: {
+                const auto& cmd = *commands.NextCommand<WriteBufferCmd>();
+                auto values = mCommands.NextData<uint8_t>(cmd.size);
+                schema::CommandBufferCommandWriteBufferCmd data{{
+                    .data = {{
+                        .bufferId = captureContext.GetId(cmd.buffer.Get()),
+                        .bufferOffset = cmd.offset,
+                        .data = std::vector<uint8_t>(values, values + cmd.size),
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
             case Command::BeginComputePass: {
                 const auto& cmd = *commands.NextCommand<BeginComputePassCmd>();
                 schema::CommandBufferCommandBeginComputePassCmd data{{
@@ -887,9 +904,19 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
             }
             case Command::BeginRenderPass: {
                 const auto& cmd = *commands.NextCommand<BeginRenderPassCmd>();
-                std::vector<schema::ColorAttachment> colorAttachments;
-                for (ColorAttachmentIndex i : cmd.attachmentState->GetColorAttachmentsMask()) {
-                    colorAttachments.push_back(ToSchema(captureContext, cmd.colorAttachments[i]));
+
+                // The front end does not store the number of attachments but the API requires that
+                // we provide them for sparse attachments so we initialize colorAttachments with
+                // enough slots to cover all used slots and fill them with a state that will be set
+                // to unused on replay.
+                ColorAttachmentMask attachmentMask = cmd.attachmentState->GetColorAttachmentsMask();
+                ColorAttachmentIndex attachmentCount = GetHighestBitIndexPlusOne(attachmentMask);
+
+                std::vector<schema::ColorAttachment> colorAttachments(size_t(attachmentCount),
+                                                                      schema::ColorAttachment{});
+                for (ColorAttachmentIndex slot : attachmentMask) {
+                    colorAttachments[size_t(slot)] =
+                        ToSchema(captureContext, cmd.colorAttachments[slot]);
                 }
                 schema::CommandBufferCommandBeginRenderPassCmd data{{
                     .data = {{

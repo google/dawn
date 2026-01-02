@@ -254,18 +254,41 @@ MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureCont
     ProgrammableStage empty;
     const ProgrammableStage& fragment =
         HasStage(SingleShaderStage::Fragment) ? GetStage(SingleShaderStage::Fragment) : empty;
-    std::vector<schema::ColorTargetState> targets;
+
+    static const schema::BlendComponent kDefaultBlendComponent{{
+        .operation = wgpu::BlendOperation::Add,
+        .srcFactor = wgpu::BlendFactor::One,
+        .dstFactor = wgpu::BlendFactor::Zero,
+    }};
+    static const schema::ColorTargetState kDefaultColorTargetState{{
+        .format = wgpu::TextureFormat::Undefined,
+        .blend{{
+            .color = kDefaultBlendComponent,
+            .alpha = kDefaultBlendComponent,
+        }},
+        .writeMask = wgpu::ColorWriteMask::None,
+    }};
+
+    // The front end does not store the number of attachments but the API requires that we
+    // provide them for sparse attachments so we initialize targets with enough slots
+    // to cover all used slots and fill them with a state that will be set to unused
+    // on replay.
+    ColorAttachmentMask attachmentMask = GetColorAttachmentsMask();
+    ColorAttachmentIndex attachmentCount = GetHighestBitIndexPlusOne(attachmentMask);
+    std::vector<schema::ColorTargetState> targets(size_t(attachmentCount),
+                                                  kDefaultColorTargetState);
+
     if (fragment.module != nullptr) {
-        for (auto slot : GetColorAttachmentsMask()) {
+        for (auto slot : attachmentMask) {
             const auto& target = *GetColorTargetState(slot);
-            targets.push_back({{
+            targets[size_t(slot)] = {{
                 .format = target.format,
                 .blend{{
                     .color = ToSchema(target.blend ? &target.blend->color : nullptr),
                     .alpha = ToSchema(target.blend ? &target.blend->alpha : nullptr),
                 }},
                 .writeMask = target.writeMask,
-            }});
+            }};
         }
     }
 

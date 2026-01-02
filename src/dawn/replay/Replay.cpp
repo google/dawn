@@ -231,8 +231,10 @@ MaybeError ReadContentIntoTexture(const ReplayImpl& replay,
                                   ReadHead& readHead,
                                   wgpu::Device device,
                                   const schema::RootCommandWriteTextureCmdData& cmdData) {
+    const uint64_t dataSize = (cmdData.dataSize + 3) & ~3;
+
     const uint32_t* data;
-    DAWN_TRY_ASSIGN(data, readHead.GetData(cmdData.dataSize));
+    DAWN_TRY_ASSIGN(data, readHead.GetData(dataSize));
 
     wgpu::TexelCopyTextureInfo dst = ToWGPU(replay, cmdData.destination);
     wgpu::TexelCopyBufferLayout layout = ToWGPU(cmdData.layout);
@@ -1086,6 +1088,13 @@ MaybeError ProcessEncoderCommands(const ReplayImpl& replay,
                                         data.firstQuery, data.queryCount,
                                         replay.GetObjectById<wgpu::Buffer>(data.destinationId),
                                         data.destinationOffset);
+                break;
+            }
+            case schema::CommandBufferCommand::WriteBuffer: {
+                schema::CommandBufferCommandWriteBufferCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                wgpu::Buffer buffer = replay.GetObjectById<wgpu::Buffer>(data.bufferId);
+                encoder.WriteBuffer(buffer, data.bufferOffset, data.data.data(), data.data.size());
                 break;
             }
             case schema::CommandBufferCommand::WriteTimestamp:

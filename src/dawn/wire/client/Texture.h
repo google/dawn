@@ -38,12 +38,9 @@ class Device;
 
 class Texture final : public ObjectBase {
   public:
-    static WGPUTexture Create(Device* device, const WGPUTextureDescriptor* descriptor);
     static WGPUTexture CreateError(Device* device, const WGPUTextureDescriptor* descriptor);
 
-    Texture(const ObjectBaseParams& params,
-            const Device* device,
-            const WGPUTextureDescriptor* descriptor);
+    Texture(const ObjectBaseParams& params, const WGPUTextureDescriptor* descriptor);
     ~Texture() override;
 
     ObjectType GetObjectType() const override;
@@ -57,7 +54,6 @@ class Texture final : public ObjectBase {
     WGPUTextureDimension APIGetDimension() const;
     WGPUTextureFormat APIGetFormat() const;
     WGPUTextureUsage APIGetUsage() const;
-    WGPUTextureViewDimension APIGetTextureBindingViewDimension() const;
 
   private:
     WGPUExtent3D mSize;
@@ -66,7 +62,6 @@ class Texture final : public ObjectBase {
     WGPUTextureDimension mDimension;
     WGPUTextureFormat mFormat;
     WGPUTextureUsage mUsage;
-    WGPUTextureViewDimension mTextureBindingViewDimension;
 };
 
 }  // namespace dawn::wire::client

@@ -249,7 +249,6 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     wgpu::TextureDimension APIGetDimension() const;
     wgpu::TextureFormat APIGetFormat() const;
     wgpu::TextureUsage APIGetUsage() const;
-    wgpu::TextureViewDimension APIGetTextureBindingViewDimension() const;
 
   protected:
     TextureBase(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor);

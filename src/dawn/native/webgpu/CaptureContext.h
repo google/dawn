@@ -66,6 +66,22 @@ class CaptureContext {
                             std::ostream& contentStream);
     ~CaptureContext();
 
+    // Content is padded to 4 byte blocks. This class automates writing the
+    // padding.
+    class ScopedContentWriter {
+      public:
+        ScopedContentWriter(const ScopedContentWriter&) = delete;
+        ScopedContentWriter& operator=(const ScopedContentWriter&) = delete;
+
+        explicit ScopedContentWriter(CaptureContext& context);
+        ~ScopedContentWriter();
+        void WriteContentBytes(const void* data, size_t size);
+
+      private:
+        uint64_t mBytesWritten = 0;
+        CaptureContext& mContext;
+    };
+
     static constexpr uint64_t kCopyBufferSize = 1024 * 1024;
 
     // Add resources both, creates an id for the resource AND captures its
@@ -156,7 +172,6 @@ class CaptureContext {
     }
 
     void WriteCommandBytes(const void* data, size_t size);
-    void WriteContentBytes(const void* data, size_t size);
 
     MaybeError CaptureQueueWriteBuffer(Buffer* buffer,
                                        uint64_t bufferOffset,
@@ -173,6 +188,9 @@ class CaptureContext {
                                         const TexelExtent3D& writeSizePixel);
 
     WGPUBuffer GetCopyBuffer();
+
+  protected:
+    void WriteContentBytes(const void* data, size_t size);
 
   private:
     MaybeError CaptureCreation(schema::ObjectId id,

@@ -45,6 +45,23 @@
 
 namespace dawn::native::webgpu {
 
+CaptureContext::ScopedContentWriter::ScopedContentWriter(CaptureContext& context)
+    : mContext(context) {}
+
+CaptureContext::ScopedContentWriter::~ScopedContentWriter() {
+    uint64_t offset = mBytesWritten % 4;
+    if (offset) {
+        static char zero[3] = {0};
+        uint64_t paddingNeeded = 4 - offset;
+        mContext.WriteContentBytes(zero, paddingNeeded);
+    }
+}
+
+void CaptureContext::ScopedContentWriter::WriteContentBytes(const void* data, size_t size) {
+    mContext.WriteContentBytes(data, size);
+    mBytesWritten += size;
+}
+
 MaybeError CaptureContext::CaptureCreation(schema::ObjectId id,
                                            const std::string& label,
                                            RecordableObject* object) {
@@ -146,7 +163,9 @@ MaybeError CaptureContext::CaptureQueueWriteTexture(const TexelCopyTextureInfo& 
         }},
     }};
     Serialize(*this, cmd);
-    WriteContentBytes(data, dataSize);
+
+    CaptureContext::ScopedContentWriter writer(*this);
+    writer.WriteContentBytes(data, dataSize);
     return {};
 }
 
