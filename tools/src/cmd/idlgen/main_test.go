@@ -28,7 +28,10 @@
 package main
 
 import (
+	"path/filepath"
+	"strings"
 	"testing"
+	"text/template"
 
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"github.com/ben-clayton/webidlparser/ast"
@@ -393,6 +396,313 @@ func TestMemberExtraction(t *testing.T) {
 		require.Len(t, methods, 2)
 		require.Equal(t, "derivedMethod", methods[0].Name)
 		require.Equal(t, "baseMethod", methods[1].Name)
+	})
+}
+
+func TestGeneratorEval(t *testing.T) {
+	tests := []struct {
+		name         string
+		templateName string
+		args         []interface{}
+		expected     string
+		expectError  string
+		setup        func(*template.Template)
+	}{
+		{
+			name:         "SingleArgument",
+			templateName: "Simple",
+			args:         []interface{}{"Hello"},
+			expected:     "Hello",
+		},
+		{
+			name:         "MapArguments",
+			templateName: "WithMap",
+			args:         []interface{}{"Key", "foo", "Value", "bar"},
+			expected:     "foo=bar",
+		},
+		{
+			name:         "TemplateNotFound",
+			templateName: "Missing",
+			args:         []interface{}{"arg"},
+			expectError:  "template 'Missing' not found",
+		},
+		{
+			name:         "InvalidArgCount",
+			templateName: "WithMap",
+			args:         []interface{}{"Key", "foo", "Value"},
+			expectError:  "Eval expects a single argument or list name-value pairs",
+		},
+		{
+			name:         "InvalidArgType",
+			templateName: "WithMap",
+			args:         []interface{}{123, "foo", "Value", "bar"},
+			expectError:  "Eval argument 0 is not a string",
+		},
+		{
+			name:         "ExecutionError",
+			templateName: "Fail",
+			args:         []interface{}{map[string]string{}},
+			expectError:  "while evaluating 'Fail'",
+			setup: func(t *template.Template) {
+				t.Option("missingkey=error")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpl := template.New("root")
+			_, err := tmpl.Parse(`
+{{define "Simple"}}{{.}}{{end}}
+{{define "WithMap"}}{{.Key}}={{.Value}}{{end}}
+{{define "Fail"}}{{ .MissingField }}{{end}}
+`)
+			require.NoError(t, err)
+
+			if tt.setup != nil {
+				tt.setup(tmpl)
+			}
+			g := generator{
+				t: tmpl,
+			}
+
+			out, err := g.eval(tt.templateName, tt.args...)
+			if tt.expectError != "" {
+				require.Error(t, err)
+				require.ErrorContains(t, err, tt.expectError)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tt.expected, out)
+			}
+		})
+	}
+}
+
+func TestGeneratorInclude(t *testing.T) {
+	tests := []struct {
+		name           string
+		fileName       string
+		fileContent    string
+		includePath    string
+		expectError    string
+		verifyTemplate string // Template to execute to verify the include worked
+		verifyOutput   string // Expected output from verifyTemplate
+	}{
+		{
+			name:           "Success",
+			fileName:       "included.tmpl",
+			fileContent:    `{{define "Included"}}Included Content{{end}}`,
+			includePath:    "included.tmpl",
+			verifyTemplate: `{{template "Included"}}`,
+			verifyOutput:   "Included Content",
+		},
+		{
+			name:        "MissingFile",
+			includePath: "missing.tmpl",
+			expectError: "open templates/missing.tmpl",
+		},
+		{
+			name:        "ParseError",
+			fileName:    "invalid.tmpl",
+			fileContent: "{{",
+			includePath: "invalid.tmpl",
+			expectError: "template: invalid.tmpl:1: unclosed action",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			wrapper := oswrapper.CreateFSTestOSWrapper()
+			workingDir := "templates"
+			require.NoError(t, wrapper.Mkdir(workingDir, 0755))
+
+			if tt.fileName != "" {
+				err := wrapper.WriteFile(filepath.Join(workingDir, tt.fileName), []byte(tt.fileContent), 0644)
+				require.NoError(t, err)
+			}
+
+			tmpl := template.New("root")
+			g := generator{
+				t:          tmpl,
+				workingDir: workingDir,
+				osWrapper:  wrapper,
+				funcs:      map[string]interface{}{},
+			}
+
+			out, err := g.include(tt.includePath)
+			if tt.expectError != "" {
+				require.Error(t, err)
+				require.ErrorContains(t, err, tt.expectError)
+			} else {
+				require.NoError(t, err)
+				require.Empty(t, out)
+
+				if tt.verifyTemplate != "" {
+					t2, err := tmpl.Parse(tt.verifyTemplate)
+					require.NoError(t, err)
+
+					sb := strings.Builder{}
+					err = t2.Execute(&sb, nil)
+					require.NoError(t, err)
+					require.Equal(t, tt.verifyOutput, sb.String())
+				}
+			}
+		})
+	}
+}
+
+func TestIs(t *testing.T) {
+	isInterface := is(ast.Interface{})
+	isInterfaceOrNamespace := is(ast.Interface{}, ast.Namespace{})
+
+	iface := &ast.Interface{}
+	namespace := &ast.Namespace{}
+	dictionary := &ast.Dictionary{}
+
+	require.True(t, isInterface(iface))
+	require.True(t, isInterface(*iface))
+	require.False(t, isInterface(namespace))
+	require.False(t, isInterface(dictionary))
+
+	require.True(t, isInterfaceOrNamespace(iface))
+	require.True(t, isInterfaceOrNamespace(namespace))
+	require.False(t, isInterfaceOrNamespace(dictionary))
+}
+
+func TestIsInitializer(t *testing.T) {
+	constructor := &ast.Member{
+		Type: &ast.TypeName{Name: "constructor"},
+	}
+	regularMember := &ast.Member{
+		Type: &ast.TypeName{Name: "void"},
+	}
+	notMember := &ast.Interface{}
+
+	require.True(t, isInitializer(constructor))
+	require.False(t, isInitializer(regularMember))
+	require.False(t, isInitializer(notMember))
+}
+
+func TestIsUndefinedType(t *testing.T) {
+	undefined := &ast.TypeName{Name: "undefined"}
+	notUndefined := &ast.TypeName{Name: "void"}
+	notTypeName := &ast.SequenceType{}
+
+	require.True(t, isUndefinedType(undefined))
+	require.False(t, isUndefinedType(notUndefined))
+	require.False(t, isUndefinedType(notTypeName))
+}
+
+func TestHasAnnotation(t *testing.T) {
+	annotated := []*ast.Annotation{
+		{Name: "Annotated"},
+		{Name: "WithValue"},
+	}
+
+	t.Run("Interface", func(t *testing.T) {
+		node := &ast.Interface{Annotations: annotated}
+		require.True(t, hasAnnotation(node, "Annotated"))
+		require.True(t, hasAnnotation(node, "WithValue"))
+		require.False(t, hasAnnotation(node, "Missing"))
+	})
+
+	t.Run("Member", func(t *testing.T) {
+		node := &ast.Member{Annotations: annotated}
+		require.True(t, hasAnnotation(node, "Annotated"))
+		require.True(t, hasAnnotation(node, "WithValue"))
+		require.False(t, hasAnnotation(node, "Missing"))
+	})
+
+	t.Run("Namespace", func(t *testing.T) {
+		node := &ast.Namespace{Annotations: annotated}
+		require.True(t, hasAnnotation(node, "Annotated"))
+		require.True(t, hasAnnotation(node, "WithValue"))
+		require.False(t, hasAnnotation(node, "Missing"))
+	})
+
+	t.Run("Parameter", func(t *testing.T) {
+		node := &ast.Parameter{Annotations: annotated}
+		require.True(t, hasAnnotation(node, "Annotated"))
+		require.True(t, hasAnnotation(node, "WithValue"))
+		require.False(t, hasAnnotation(node, "Missing"))
+	})
+
+	t.Run("Typedef", func(t *testing.T) {
+		// Test Annotations field
+		node := &ast.Typedef{Annotations: annotated}
+		require.True(t, hasAnnotation(node, "Annotated"))
+		require.True(t, hasAnnotation(node, "WithValue"))
+		require.False(t, hasAnnotation(node, "Missing"))
+
+		// Test TypeAnnotations field
+		nodeTypeAnnote := &ast.Typedef{TypeAnnotations: annotated}
+		require.True(t, hasAnnotation(nodeTypeAnnote, "Annotated"))
+		require.True(t, hasAnnotation(node, "WithValue"))
+		require.False(t, hasAnnotation(nodeTypeAnnote, "Missing"))
+
+		// Test both
+		nodeBoth := &ast.Typedef{
+			Annotations:     []*ast.Annotation{{Name: "A1"}},
+			TypeAnnotations: []*ast.Annotation{{Name: "A2"}},
+		}
+		require.True(t, hasAnnotation(nodeBoth, "A1"))
+		require.True(t, hasAnnotation(nodeBoth, "A2"))
+		require.False(t, hasAnnotation(nodeBoth, "Missing"))
+	})
+}
+
+func TestPromiseDetection_HappyPath(t *testing.T) {
+	tests := []struct {
+		method    string
+		isPromise bool
+	}{
+		{"asyncMethod", true},
+		{"syncMethod", false},
+		{"asyncValue", true},
+		{"syncValue", false},
+	}
+
+	idl := `
+		interface Test {
+			Promise<void> asyncMethod();
+			void syncMethod();
+			Promise<long> asyncValue();
+			long syncValue();
+		};
+	`
+	parsed := parser.Parse(idl)
+	require.Empty(t, parsed.Errors)
+	_, decls := simplify(parsed)
+	testIface := decls["Test"].(*ast.Interface)
+
+	methods := methodsOf(testIface)
+	methodMap := make(map[string]*Method)
+	for _, m := range methods {
+		methodMap[m.Name] = m
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.method, func(t *testing.T) {
+			method := methodMap[tt.method]
+			require.NotNil(t, method)
+			retType := method.Overloads[0].Type
+			require.Equal(t, tt.isPromise, isPromiseType(retType), "isPromiseType failed for %s", tt.method)
+			require.Equal(t, tt.isPromise, returnsPromise(method), "returnsPromise failed for %s", tt.method)
+		})
+	}
+}
+
+func TestPromiseDetection_InconsistentOverloads(t *testing.T) {
+	// Manually construct a method with inconsistent overloads
+	method := &Method{
+		Name: "mixedMethod",
+		Overloads: []*ast.Member{
+			{Type: &ast.ParametrizedType{Name: "Promise", Elems: []ast.Type{&ast.TypeName{Name: "void"}}}},
+			{Type: &ast.TypeName{Name: "void"}},
+		},
+	}
+	require.Panics(t, func() {
+		returnsPromise(method)
 	})
 }
 
