@@ -231,11 +231,9 @@ class ImmediateConstantTracker : public T {
     ImmediateConstantTracker() = default;
 
     void Apply(Device* device, VkCommandBuffer commandBuffer) {
-        auto* lastPipeline = this->mLastPipeline;
-        if (!lastPipeline) {
-            return;
-        }
+        DAWN_ASSERT(this->mLastPipeline != nullptr);
 
+        auto* lastPipeline = this->mLastPipeline;
         const ImmediateConstantMask& pipelineMask = lastPipeline->GetImmediateMask();
         ImmediateConstantMask uploadBits = this->mDirty & lastPipeline->GetImmediateMask();
         for (auto&& [offset, size] : IterateRanges(uploadBits)) {

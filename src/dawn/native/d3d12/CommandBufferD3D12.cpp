@@ -414,9 +414,9 @@ class ImmediateConstantTracker : public T {
 
     // Calling this after BindGroupTrackerBase::Apply() to update root signature.
     void Apply(CommandRecordingContext* commandContext) {
-        auto* lastPipeline = this->mLastPipeline;
-        DAWN_ASSERT(lastPipeline != nullptr);
+        DAWN_ASSERT(this->mLastPipeline != nullptr);
 
+        auto* lastPipeline = this->mLastPipeline;
         ImmediateConstantMask pipelineMask = lastPipeline->GetImmediateMask();
         ImmediateConstantMask uploadBits = this->mDirty & pipelineMask;
         for (auto&& [offset, size] : IterateRanges(uploadBits)) {

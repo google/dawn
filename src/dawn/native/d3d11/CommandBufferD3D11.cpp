@@ -224,12 +224,9 @@ class ImmediateConstantTracker : public T {
     ImmediateConstantTracker() = default;
 
     MaybeError Apply(const ScopedSwapStateCommandRecordingContext* commandContext) {
-        auto* lastPipeline = this->mLastPipeline;
-        if (!lastPipeline) {
-            return {};
-        }
+        DAWN_ASSERT(this->mLastPipeline != nullptr);
 
-        ImmediateConstantMask pipelineMask = lastPipeline->GetImmediateMask();
+        ImmediateConstantMask pipelineMask = this->mLastPipeline->GetImmediateMask();
         ImmediateConstantMask uploadBits = this->mDirty & pipelineMask;
         for (auto&& [offset, size] : IterateRanges(uploadBits)) {
             uint32_t immediateContentStartOffset =
