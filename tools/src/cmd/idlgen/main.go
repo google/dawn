@@ -75,7 +75,7 @@ func run(args []string, osWrapper oswrapper.OSWrapper) error {
 	idlFiles := flagSet.Args()
 
 	// Check all required arguments are provided
-	if templatePath == "" || outputPath == "" || len(idlFiles) == 0 {
+	if templatePath == "" || len(idlFiles) == 0 {
 		return showUsage()
 	}
 
