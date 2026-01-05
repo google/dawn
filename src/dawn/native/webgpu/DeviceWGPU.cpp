@@ -204,7 +204,7 @@ Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
 }
 ResultOrError<Ref<ResourceTableBase>> Device::CreateResourceTableImpl(
     const ResourceTableDescriptor* descriptor) {
-    // TODO(https://issues.chromium.org/435317394): Implement resource tables in WebGPUOnWebGPU.
+    // TODO(https://issues.chromium.org/473442434): Implement resource tables in WebGPUOnWebGPU.
     return DAWN_UNIMPLEMENTED_ERROR("ResourceTable is not implemented in WebGPUOnWebGPU");
 }
 ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {

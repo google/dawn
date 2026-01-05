@@ -650,7 +650,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
             EnableFeature(Feature::ChromiumExperimentalSamplingResourceTable);
         }
 
-        // TODO(https://issues.chromium.org/435317394): add support for heterogeneous bindless by
+        // TODO(https://issues.chromium.org/473444515): add support for heterogeneous bindless by
         // checking both for storage buffers/images limits and some support for heterogeneous
         // bindings via VK_EXT_mutable_descriptor_type, VK_EXT_descriptor_buffer or descriptor
         // heaps.

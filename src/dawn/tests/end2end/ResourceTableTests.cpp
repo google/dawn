@@ -43,7 +43,7 @@ class ResourceTableTests : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-        // TODO(435317394): Implemented bindless in the wire.
+        // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
         DAWN_TEST_UNSUPPORTED_IF(
@@ -565,8 +565,8 @@ struct TextureDescForTypeIDCase {
 std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
     std::vector<TextureDescForTypeIDCase> cases;
 
-    // TODO(https://crbug.com/435317394): Add tests of filterable vs. unfilterable floats when
-    // get/hasBinding is able to make the difference.
+    // TODO(https://issues.chromium.org/473354065): Add tests of filterable vs. unfilterable floats
+    // when get/hasBinding is able to make the difference.
 
     // Regular 1D textures.
     cases.push_back({
@@ -700,8 +700,8 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
     });
 
     // Depth textures (including multisampled).
-    // TODO(https://crbug.com/435317394): In the future we should allow depth textures to be used as
-    // texture_*<f32>.
+    // TODO(https://issues.chromium.org/473354065): In the future we should allow depth textures to
+    // be used as texture_*<f32>.
     cases.push_back({
         .wgslTypes = {{"texture_depth_2d"}},
         .format = wgpu::TextureFormat::Depth32Float,

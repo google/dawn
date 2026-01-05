@@ -1673,8 +1673,9 @@ MaybeError TextureBase::ValidatePin(wgpu::TextureUsage usage) const {
     DAWN_INVALID_IF(!IsSubset(usage, kShaderTextureUsages),
                     "Pinned usages %s contain non-shader usages.", usage);
 
-    // TODO(https://crbug.com/435317394): Support pinning for readonly storage and storage as well.
-    // This might require adding readonly storage in the API so it can be specified.
+    // TODO(https://issues.chromium.org/473459218): Support pinning for readonly storage and
+    // storage as well. This might require adding readonly storage in the API so it can be
+    // specified.
     DAWN_INVALID_IF(
         usage != wgpu::TextureUsage::TextureBinding,
         "Pinned usages %s is not %s (which is required in the current bindless prototype).", usage,

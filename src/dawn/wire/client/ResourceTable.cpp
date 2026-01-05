@@ -38,27 +38,27 @@ ObjectType ResourceTable::GetObjectType() const {
 }
 
 void ResourceTable::APIDestroy() {
-    // TODO(435317394): Implemented resource tables in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented resource tables in the wire.
     DAWN_UNREACHABLE();
 }
 
 WGPUStatus ResourceTable::APIUpdate(uint32_t slot, const WGPUBindingResource* resource) {
-    // TODO(435317394): Implemented resource tables in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented resource tables in the wire.
     DAWN_UNREACHABLE();
 }
 
 uint32_t ResourceTable::APIInsertBinding(const WGPUBindingResource* resource) {
-    // TODO(435317394): Implemented resource tables in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented resource tables in the wire.
     DAWN_UNREACHABLE();
 }
 
 WGPUStatus ResourceTable::APIRemoveBinding(uint32_t slot) {
-    // TODO(435317394): Implemented resource tables in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented resource tables in the wire.
     DAWN_UNREACHABLE();
 }
 
 uint32_t ResourceTable::APIGetSize() const {
-    // TODO(435317394): Implemented resource tables in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented resource tables in the wire.
     DAWN_UNREACHABLE();
 }
 

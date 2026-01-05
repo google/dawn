@@ -47,10 +47,10 @@ tint::ResourceType ComputeTypeId(const TextureViewBase* view) {
     }
     const TextureBase* texture = view->GetTexture();
 
-    // TODO(https://crbug.com/435317394): In the future we should allow the same compatibility rules
-    // that exist between TextureView and BGLEntry. This means that a depth texture can be either a
-    // texture_depth_2d, or a texture_2d<f32> (unfilterable). We should also find a way to
-    // differentiate unfilterable and filterable texture_2d<f32>.
+    // TODO(https://issues.chromium.org/473354065): In the future we should allow the same
+    // compatibility rules that exist between TextureView and BGLEntry. This means that a depth
+    // texture can be either a texture_depth_2d, or a texture_2d<f32> (unfilterable). We should
+    // also find a way to differentiate unfilterable and filterable texture_2d<f32>.
 
     if (texture->IsMultisampledTexture()) {
         DAWN_ASSERT(view->GetDimension() == wgpu::TextureViewDimension::e2D);
@@ -158,17 +158,17 @@ MaybeError ValidateBindingResource(const DeviceBase* device, const BindingResour
     DAWN_INVALID_IF(resourceCount != 1,
                     "%i resources are specified (when there must be exactly 1).", resourceCount);
 
-    // TODO(https://issues.chromium.org/435317394): Support buffers in FullResourceTable.
+    // TODO(https://issues.chromium.org/473444515): Support buffers in FullResourceTable.
     if (resource->buffer != nullptr) {
         return DAWN_VALIDATION_ERROR("Buffers are not supported.");
     }
 
-    // TODO(https://issues.chromium.org/435317394): Support samplers in SamplingResourceTable.
+    // TODO(https://issues.chromium.org/473354063): Support samplers in SamplingResourceTable.
     if (resource->sampler != nullptr) {
         return DAWN_VALIDATION_ERROR("Samplers are not supported.");
     }
 
-    // TODO(https://issues.chromium.org/435317394): Support texel buffers in FullResourceTable.
+    // TODO(https://issues.chromium.org/473444515): Support texel buffers in FullResourceTable.
 
     if (resource->textureView != nullptr) {
         TextureViewBase* view = resource->textureView;
@@ -178,7 +178,7 @@ MaybeError ValidateBindingResource(const DeviceBase* device, const BindingResour
         DAWN_INVALID_IF(!HasOneBit(aspect),
                         "Multiple aspects (%s) selected in %s. Expected only 1.", aspect, view);
 
-        // TODO(https://issues.chromium.org/435317394): Support storage textures in
+        // TODO(https://issues.chromium.org/473444515): Support storage textures in
         // FullResourceTable
         DAWN_INVALID_IF(
             (view->GetUsage() & kTextureViewOnlyUsages) != wgpu::TextureUsage::TextureBinding,
@@ -493,7 +493,7 @@ void ResourceTableBase::Remove(ResourceTableSlot slot) {
 }
 
 void ResourceTableBase::SetEntry(ResourceTableSlot slot, const BindingResource* contents) {
-    // TODO(435317394): Support resources that aren't TextureViews
+    // TODO(https://issues.chromium.org/473354063): Support resources that aren't TextureViews
     DAWN_ASSERT(contents->buffer == nullptr && contents->sampler == nullptr);
     TextureViewBase* view = contents->textureView;
 

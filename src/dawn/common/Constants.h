@@ -112,9 +112,9 @@ static constexpr uint32_t kMaxDynamicUniformBuffersPerPipelineLayout = 16u;
 static constexpr uint32_t kMaxDynamicStorageBuffersPerPipelineLayout = 16u;
 
 // Default limit for the ResourceTable size.
-// TODO(https://issues.chromium.org/issues/435317394): Update once the spec decides on a value.
+// TODO(https://issues.chromium.org/465122000): Update once the spec decides on a value.
 static constexpr uint32_t kMaxResourceTableSize = 50'000;
-// TODO(https://issues.chromium.org/issues/435317394): Find if this is a reasonable amount to
+// TODO(https://issues.chromium.org/465122000): Find if this is a reasonable amount to
 // reserve for placeholders.
 static constexpr uint32_t kReservedResourceTableSlots = 1000;
 

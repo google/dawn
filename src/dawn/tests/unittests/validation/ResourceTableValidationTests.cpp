@@ -159,7 +159,7 @@ TEST_F(ResourceTableValidationTest, NextInChain) {
 
 // Test the Destroy call on a ResourceTable
 TEST_F(ResourceTableValidationTest, Destroy) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -525,7 +525,7 @@ TEST_F(ResourceTableValidationTestDisabled, CommandEncoder_SetResourceTable) {
 
 // Tests that the resource table can be used in submit
 TEST_F(ResourceTableValidationTest, Submit_CanUseInSubmit) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -814,7 +814,8 @@ TEST_F(ResourceTableValidationTest, PinUnpinTextureUsageConstraint) {
     ASSERT_DEVICE_ERROR(testTexture.Pin(wgpu::TextureUsage::CopySrc));
 
     // Error case, pinning must be to a shader usage.
-    // TODO(https://crbug.com/435317394): Lift this constraint and allow other shader usages.
+    // TODO(https://issues.chromium.org/473459218): Lift this constraint and allow other shader
+    // usages.
     ASSERT_DEVICE_ERROR(testTexture.Pin(wgpu::TextureUsage::StorageBinding));
 }
 
@@ -832,7 +833,8 @@ TEST_F(ResourceTableValidationTest, PinUnpinUnbalancedIsValid) {
 
     // Pinning twice is valid.
     tex.Pin(wgpu::TextureUsage::TextureBinding);
-    // TODO(https://crbug.com/435317394): Use a different usage here when another is valid.
+    // TODO(https://issues.chromium.org/473459218): Use a different usage here when another is
+    // valid.
     tex.Pin(wgpu::TextureUsage::TextureBinding);
 
     // Unpinning twice (plus one more to make sure we are unbalanced) is valid.
@@ -1030,9 +1032,9 @@ TEST_F(ResourceTableValidationTest, PinValidationUsageRenderPass) {
 }
 
 // Checks that only texture views are allowed as resources in mutators for SamplingResourceTable.
-// TODO(https://issues.chromium.org/435317394): Support samplers in SamplingResourceTable.
+// TODO(https://issues.chromium.org/473354063): Support samplers in SamplingResourceTable.
 TEST_F(ResourceTableValidationTest, MutatorBindingKindValidation) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1069,7 +1071,7 @@ TEST_F(ResourceTableValidationTest, MutatorBindingKindValidation) {
         }
 
         // Error case: a sampler is an error.
-        // TODO(https://issues.chromium.org/435317394): Support samplers in SamplingResourceTable.
+        // TODO(https://issues.chromium.org/473354063): Support samplers in SamplingResourceTable.
         {
             wgpu::BindingResource resource = {.sampler = sampler};
             TestMutator(mutator, &resource, false);
@@ -1085,10 +1087,10 @@ TEST_F(ResourceTableValidationTest, MutatorBindingKindValidation) {
 }
 
 // Check that the view must have only the TextureBinding usage for SamplingResourceTable.
-// TODO(https://issues.chromium.org/435317394): Support storage textures in FullResourceTable
+// TODO(https://issues.chromium.org/473444515): Support storage textures in FullResourceTable
 // TODO(https://issues.chromium.org/382544164): Support texel buffers in FullResourceTable
 TEST_F(ResourceTableValidationTest, MutatorTextureViewMustBeOnlyTextureBinding) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1143,7 +1145,7 @@ TEST_F(ResourceTableValidationTest, MutatorTextureViewMustBeOnlyTextureBinding) 
 
 // Check that the texture view must have a single aspect for mutators.
 TEST_F(ResourceTableValidationTest, MutatorTextureViewMustBeSingleAspect) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1186,7 +1188,7 @@ TEST_F(ResourceTableValidationTest, MutatorTextureViewMustBeSingleAspect) {
 // Test that it is not allowed to call Update, RemoveBinding or InsertBinding after the table is
 // destroyed.
 TEST_F(ResourceTableValidationTest, MutatorsAfterDestroy) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1223,7 +1225,7 @@ TEST_F(ResourceTableValidationTest, MutatorsAfterDestroy) {
 
 // Test that it is not allowed to call Update, RemoveBinding with slots past the end.
 TEST_F(ResourceTableValidationTest, MutatorsAfterTableEnd) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1256,7 +1258,7 @@ TEST_F(ResourceTableValidationTest, MutatorsAfterTableEnd) {
 // Test that Update/RemoveBinding return success but generates a validation error when used on an
 // invalid table.
 TEST_F(ResourceTableValidationTest, MutatorsOnInvalidTable) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1300,7 +1302,7 @@ TEST_F(ResourceTableValidationTest, MutatorsOnInvalidTable) {
 
 // Test that Update() can be called on a table slot if it has never been used before.
 TEST_F(ResourceTableValidationTest, UpdateBindingWhenNeverUsed) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1329,7 +1331,7 @@ TEST_F(ResourceTableValidationTest, UpdateBindingWhenNeverUsed) {
 
 // Test that Remove() can be called on a table slot even when it was never used.
 TEST_F(ResourceTableValidationTest, RemoveBindingWhenNeverUsed) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1345,7 +1347,7 @@ TEST_F(ResourceTableValidationTest, RemoveBindingWhenNeverUsed) {
 // Check that a table slot can be updated only after all commands submitted prior to RemoveBinding
 // are completed.
 TEST_F(ResourceTableValidationTest, UpdateAfterRemoveRequiresGPUIsFinished) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1376,7 +1378,6 @@ TEST_F(ResourceTableValidationTest, UpdateAfterRemoveRequiresGPUIsFinished) {
         // The null backend happens to call OnSubmittedWorkDone immediately because commands take 0
         // time. This test is duplicated in the end2end tests where OnSubmittedWorkDone won't fire
         // immediately.
-        // TODO(435317394): Actually duplicate in the end2end tests.
         if (updateValid) {
             EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
             updateValid = false;
@@ -1396,7 +1397,7 @@ TEST_F(ResourceTableValidationTest, UpdateAfterRemoveRequiresGPUIsFinished) {
 
 // Check that trying to insert bindings fail when no more are available.
 TEST_F(ResourceTableValidationTest, InsertBindingFailWhenNoMoreSpace) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1432,7 +1433,7 @@ TEST_F(ResourceTableValidationTest, InsertBindingFailWhenNoMoreSpace) {
 
 // Check that bindings that are inserted are unavailable for Update() until RemoveBinding.
 TEST_F(ResourceTableValidationTest, InsertBindingPreventsUpdate) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1463,7 +1464,7 @@ TEST_F(ResourceTableValidationTest, InsertBindingPreventsUpdate) {
 
 // Check that InsertBinding skips over used slots.
 TEST_F(ResourceTableValidationTest, InsertBindingSkipsOverUsedSlots) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1503,7 +1504,7 @@ TEST_F(ResourceTableValidationTest, InsertBindingSkipsOverUsedSlots) {
 
 // Test the value returned by GetSize right after creating the table.
 TEST_F(ResourceTableValidationTest, GetSizeAfterCreation) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }
@@ -1533,7 +1534,7 @@ TEST_F(ResourceTableValidationTest, GetSizeAfterCreation) {
 
 // Test the value returned by GetSize after calling Destroy() should return the same value.
 TEST_F(ResourceTableValidationTest, GetSizeAfterDestroy) {
-    // TODO(435317394): Implemented bindless in the wire.
+    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
     if (UsesWire()) {
         GTEST_SKIP();
     }

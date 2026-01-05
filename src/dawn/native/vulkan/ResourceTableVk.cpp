@@ -192,10 +192,10 @@ MaybeError ResourceTable::ApplyPendingUpdates(CommandRecordingContext* recording
 MaybeError ResourceTable::UpdateMetadataBuffer(CommandRecordingContext* recordingContext,
                                                const std::vector<MetadataUpdate>& updates) {
     // Updates the metadata buffer by scheduling a copy for each u32 that needs to be updated.
-    // TODO(https://crbug.com/435317394): If we had a way to use Dawn reentrantly now, we could use
-    // a compute shader to dispatch the updates instead of individual copies for each update, and
-    // move that logic in the frontend to share it between backends. (also a single dispatch could
-    // update multiple metadata buffers potentially).
+    // TODO(https://issues.chromium.org/473442435): If we had a way to use Dawn reentrantly now, we
+    // could use a compute shader to dispatch the updates instead of individual copies for each
+    // update, and move that logic in the frontend to share it between backends. (also a single
+    // dispatch could update multiple metadata buffers potentially).
     Device* device = ToBackend(GetDevice());
 
     // Allocate enough space for all the data to modify and schedule the copies.
@@ -241,8 +241,8 @@ void ResourceTable::UpdateResourceBindings(const std::vector<ResourceUpdate>& up
     std::vector<uint32_t> arrayElements;
 
     for (const ResourceUpdate& update : updates) {
-        // TODO(https://issues.chromium.org/435317394): Support samplers updates.
-        // TODO(https://issues.chromium.org/435317394): Support buffer, texel buffers and storage
+        // TODO(https://issues.chromium.org/473354063): Support samplers updates.
+        // TODO(https://issues.chromium.org/473444515): Support buffer, texel buffers and storage
         // textures.
 
         VkImageView handle = ToBackend(update.textureView)->GetHandle();
