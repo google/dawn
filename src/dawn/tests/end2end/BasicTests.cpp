@@ -128,16 +128,17 @@ TEST_P(BasicTests, GetInstanceFeatures) {
         wgpu::HasInstanceFeature(wgpu::InstanceFeatureName(WGPUInstanceFeatureName_Force32)));
 }
 
-DAWN_INSTANTIATE_TEST(BasicTests,
-                      D3D11Backend(),
-                      D3D12Backend(),
-                      MetalBackend(),
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      VulkanBackend(),
-                      WebGPUBackend());
-// TODO(crbug.com/462149555): Add a WebGPUBackend({"enable_for_check_capture_replay"}) to check
-// capture and replay on end2end tests.
+DAWN_INSTANTIATE_TEST(
+    BasicTests,
+    D3D11Backend(),
+    D3D12Backend(),
+    MetalBackend(),
+    OpenGLBackend(),
+    OpenGLESBackend(),
+    VulkanBackend(),
+    WebGPUBackend(),
+    // TODO(crbug.com/462149555): Remove when the temp enable_for_check_capture_replay is removed.
+    WebGPUBackend({"enable_for_check_capture_replay"}));
 
 }  // anonymous namespace
 }  // namespace dawn

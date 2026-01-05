@@ -103,6 +103,21 @@
           'shards': 2,
         },
       },
+      'dawn_end2end_capture_replay_tests': {
+        'args': [
+          '--check-capture-replay',
+        ],
+        'mixins': [
+          'dawn_end2end_real_hardware_gtests_common_args',
+          'result_adapter_gtest_json',
+          'true_noop_merge',
+        ],
+        'test': 'dawn_end2end_tests',
+        'swarming': {
+          # Primarily needed for Windows.
+          'shards': 2,
+        },
+      },
     },
     'dawn_end2end_real_hardware_win_only_gtests': {
       'dawn_end2end_no_dxc_tests': {
