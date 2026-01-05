@@ -43,7 +43,6 @@
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
-#include "src/tint/lang/core/ir/transform/resource_binding_helper.h"
 #include "src/tint/lang/core/ir/transform/resource_table_helper.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/f16.h"
@@ -879,7 +878,6 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
     }
 
     gen_options.bindings = tint::GenerateBindings(ir, options.ep_name, false, false);
-    gen_options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(ir);
     gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(ir);
 
     // Enable the Vulkan Memory Model if needed.

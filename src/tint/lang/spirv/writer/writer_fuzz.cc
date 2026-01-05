@@ -30,7 +30,6 @@
 #include "src/tint/api/helpers/generate_bindings.h"
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/transform/resource_binding_helper.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 
@@ -165,8 +164,6 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.substitute_overrides_config = fuzzed_options.substitute_overrides_config;
     options.workarounds.texture_sample_compare_depth_cube_array =
         fuzzed_options.texture_sample_compare_depth_cube_array;
-
-    options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(module);
 
     auto check = CanGenerate(module, options);
     if (check != Success) {

@@ -25,49 +25,49 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_RESOURCE_TABLE_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_RESOURCE_TABLE_H_
+#ifndef SRC_TINT_LANG_SPIRV_TYPE_RESOURCE_TABLE_H_
+#define SRC_TINT_LANG_SPIRV_TYPE_RESOURCE_TABLE_H_
 
-#include <vector>
+#include <string>
 
-#include "src/tint/api/common/resource_table_config.h"
-#include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/type.h"
-#include "src/tint/utils/containers/hashmap.h"
-#include "src/tint/utils/result.h"
 
-// Forward declarations.
-namespace tint::core::ir {
-class Module;
-}  // namespace tint::core::ir
+namespace tint::spirv::type {
 
-namespace tint::core::ir::transform {
-
-// Backend specific override methods for resource table
-class ResourceTableHelper {
+/// ResourceTable represents an OpTypeRuntimeArray of resources
+class ResourceTable final : public Castable<ResourceTable, core::type::Type> {
   public:
-    virtual ~ResourceTableHelper();
+    /// Constructor
+    /// @param binding_type the type of the table
+    explicit ResourceTable(const core::type::Type* binding_type);
 
-    // Returns a map of types to the var which is used to access the memory of that type
-    virtual Hashmap<const core::type::Type*, core::ir::Var*, 4> GenerateVars(
-        core::ir::Builder& b,
-        const BindingPoint& bp,
-        const std::vector<ResourceType>& types) const = 0;
+    /// @param other the other node to compare against
+    /// @returns true if the this type is equal to @p other
+    bool Equals(const UniqueNode& other) const override;
+
+    const core::type::Type* GetBindingType() const { return binding_type_; }
+
+    /// @copydoc core::type::Type::Elements
+    core::type::TypeAndCount Elements(const core::type::Type* type_if_invalid = nullptr,
+                                      uint32_t count_if_invalid = 0) const override;
+
+    /// @copydoc core::type::Type::Element
+    const core::type::Type* Element(uint32_t index) const override;
+
+    /// @returns the friendly name for this type
+    std::string FriendlyName() const override;
+
+    bool IsHandle() const override { return true; }
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    ResourceTable* Clone(core::type::CloneContext& ctx) const override;
+
+  private:
+    const core::type::Type* binding_type_;
 };
 
-/// This transform updates the provided IR to support resource_table restrictions/requirements.
-///
-/// We re-write the `getResource` and `hasResource` calls to use the provided storage buffer to
-/// validate the requested types.
-///
-/// @param module the module to transform
-/// @param config the transform configuration
-/// @param helper the resource binding helper
-/// @returns success or failure
-Result<SuccessType> ResourceTable(core::ir::Module& module,
-                                  const ResourceTableConfig& config,
-                                  ResourceTableHelper* helper);
+}  // namespace tint::spirv::type
 
-}  // namespace tint::core::ir::transform
-
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_RESOURCE_TABLE_H_
+#endif  // SRC_TINT_LANG_SPIRV_TYPE_RESOURCE_TABLE_H_

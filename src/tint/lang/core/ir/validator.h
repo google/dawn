@@ -78,9 +78,6 @@ enum class Capability : uint8_t {
     kAllowStructMatrixDecorations,
     /// Allows @location on structs, matrices, and arrays that have numeric elements
     kAllowLocationForNumericElements,
-    /// Allows resource_binding to be used. Should not be present after
-    /// core::core::ir::transform::ResourceBinding runs
-    kAllowResourceBinding,
     /// Allows a pointer to a handle type
     kAllowPointerToHandle,
     /// Allows ShaderIO specific features, like blend_src on non-struct members.

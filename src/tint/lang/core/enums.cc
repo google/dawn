@@ -628,9 +628,6 @@ BuiltinType ParseBuiltinType(std::string_view str) {
     if (str == "ptr") {
         return BuiltinType::kPtr;
     }
-    if (str == "resource_binding") {
-        return BuiltinType::kResourceBinding;
-    }
     if (str == "sampler") {
         return BuiltinType::kSampler;
     }
@@ -883,8 +880,6 @@ std::string_view ToString(BuiltinType value) {
             return "mat4x4h";
         case BuiltinType::kPtr:
             return "ptr";
-        case BuiltinType::kResourceBinding:
-            return "resource_binding";
         case BuiltinType::kSampler:
             return "sampler";
         case BuiltinType::kSamplerComparison:
@@ -1804,12 +1799,6 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "print") {
         return BuiltinFn::kPrint;
     }
-    if (name == "hasBinding") {
-        return BuiltinFn::kHasBinding;
-    }
-    if (name == "getBinding") {
-        return BuiltinFn::kGetBinding;
-    }
     if (name == "hasResource") {
         return BuiltinFn::kHasResource;
     }
@@ -2129,10 +2118,6 @@ const char* str(BuiltinFn i) {
             return "subgroupMatrixScalarMultiply";
         case BuiltinFn::kPrint:
             return "print";
-        case BuiltinFn::kHasBinding:
-            return "hasBinding";
-        case BuiltinFn::kGetBinding:
-            return "getBinding";
         case BuiltinFn::kHasResource:
             return "hasResource";
         case BuiltinFn::kGetResource:

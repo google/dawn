@@ -29,7 +29,7 @@
 
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/resource_type.h"
-#include "src/tint/lang/spirv/type/resource_binding.h"
+#include "src/tint/lang/spirv/type/resource_table.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -46,7 +46,7 @@ Hashmap<const core::type::Type*, core::ir::Var*, 4> ResourceTableHelper::Generat
     for (auto& type : types) {
         auto* t = core::type::ResourceTypeToType(b.ir.Types(), type);
 
-        auto* spv_ty = b.ir.Types().Get<spirv::type::ResourceBinding>(t);
+        auto* spv_ty = b.ir.Types().Get<spirv::type::ResourceTable>(t);
         auto* v = b.Var(b.ir.Types().ptr(handle, spv_ty));
         v->SetBindingPoint(bp.group, bp.binding);
         res.Add(t, v);

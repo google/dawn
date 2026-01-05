@@ -78,7 +78,6 @@ struct State {
 Result<SuccessType> ValidateSubgroupMatrix(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "msl.ValidateSubgroupMatrix",
                                           tint::core::ir::Capabilities{
-                                              core::ir::Capability::kAllowResourceBinding,
                                               core::ir::Capability::kAllow8BitIntegers,
                                           });
     if (result != Success) {

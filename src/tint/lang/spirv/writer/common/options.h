@@ -34,7 +34,6 @@
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/api/common/bindings.h"
-#include "src/tint/api/common/resource_binding_config.h"
 #include "src/tint/api/common/resource_table_config.h"
 #include "src/tint/api/common/substitute_overrides_config.h"
 #include "src/tint/utils/reflection.h"
@@ -220,9 +219,6 @@ struct Options {
     /// SPIR-V binary version.
     SpvVersion spirv_version = SpvVersion::kSpv13;
 
-    /// Resource binding information
-    std::optional<ResourceBindingConfig> resource_binding = std::nullopt;
-
     /// Resource table information
     std::optional<ResourceTableConfig> resource_table = std::nullopt;
 
@@ -246,7 +242,6 @@ struct Options {
                  extensions,
                  depth_range_offsets,
                  spirv_version,
-                 resource_binding,
                  resource_table,
                  substitute_overrides_config);
 };

@@ -45,7 +45,6 @@
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/reference.h"
-#include "src/tint/lang/core/type/resource_binding.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 
@@ -973,32 +972,6 @@ TEST_F(IR_ValidatorTest, BindingArrayInvalidAddressSpace) {
             R"(:2:3 error: var: handle types can only be declared in the 'handle' address space
   %m:ptr<workgroup, binding_array<texture_2d<f32>, 4>, read_write> = var undef
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"));
-}
-
-TEST_F(IR_ValidatorTest, ResourceBinding_WithoutCapabilityFails) {
-    b.Append(mod.root_block, [&] {
-        auto* var = b.Var("m", AddressSpace::kHandle, ty.Get<core::type::ResourceBinding>());
-        var->SetBindingPoint(0, 0);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(
-            R"(:2:3 error: var: resource_binding type can only be used with kAllowResourceBinding capability
-  %m:ptr<handle, resource_binding, read> = var undef @binding_point(0, 0)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"));
-}
-
-TEST_F(IR_ValidatorTest, ResourceBinding_WithCapabilityPasses) {
-    b.Append(mod.root_block, [&] {
-        auto* var = b.Var("m", AddressSpace::kHandle, ty.Get<core::type::ResourceBinding>());
-        var->SetBindingPoint(0, 0);
-    });
-
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowResourceBinding});
-    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 using Type_MultisampledTextureTypeAndDimension =

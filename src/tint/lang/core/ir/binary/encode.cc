@@ -398,9 +398,6 @@ struct Encoder {
                 [&](const core::type::BindingArray* a) {
                     TypeBindingArray(*type_out.mutable_binding_array(), a);
                 },
-                [&](const core::type::ResourceBinding* a) {
-                    TypeResourceBinding(*type_out.mutable_resource_binding(), a);
-                },
                 [&](const core::type::DepthTexture* t) {
                     TypeDepthTexture(*type_out.mutable_depth_texture(), t);
                 },
@@ -530,8 +527,6 @@ struct Encoder {
             },
             TINT_ICE_ON_NO_MATCH);
     }
-
-    void TypeResourceBinding(pb::TypeResourceBinding&, const core::type::ResourceBinding*) {}
 
     void TypeDepthTexture(pb::TypeDepthTexture& texture_out,
                           const core::type::DepthTexture* texture_in) {
@@ -1409,10 +1404,6 @@ struct Encoder {
                 return pb::BuiltinFn::subgroup_matrix_scalar_multiply;
             case core::BuiltinFn::kPrint:
                 return pb::BuiltinFn::print;
-            case core::BuiltinFn::kHasBinding:
-                return pb::BuiltinFn::has_binding;
-            case core::BuiltinFn::kGetBinding:
-                return pb::BuiltinFn::get_binding;
             case core::BuiltinFn::kHasResource:
                 return pb::BuiltinFn::has_resource;
             case core::BuiltinFn::kGetResource:

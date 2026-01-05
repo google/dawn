@@ -44,7 +44,6 @@
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
 #include "src/tint/lang/core/ir/transform/remove_uniform_vector_component_loads.h"
-#include "src/tint/lang/core/ir/transform/resource_binding.h"
 #include "src/tint/lang/core/ir/transform/resource_table.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
@@ -63,7 +62,6 @@
 #include "src/tint/lang/spirv/writer/raise/merge_return.h"
 #include "src/tint/lang/spirv/writer/raise/pass_matrix_by_pointer.h"
 #include "src/tint/lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.h"
-#include "src/tint/lang/spirv/writer/raise/resource_binding.h"
 #include "src/tint/lang/spirv/writer/raise/resource_table.h"
 #include "src/tint/lang/spirv/writer/raise/shader_io.h"
 #include "src/tint/lang/spirv/writer/raise/unary_polyfill.h"
@@ -102,12 +100,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
 
         RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
-    }
-
-    if (options.resource_binding.has_value()) {
-        spirv::writer::raise::ResourceBindingHelper helper;
-        RUN_TRANSFORM(core::ir::transform::ResourceBinding, module,
-                      options.resource_binding.value(), &helper);
     }
 
     if (options.resource_table.has_value()) {

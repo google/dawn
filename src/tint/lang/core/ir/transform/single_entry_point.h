@@ -42,7 +42,6 @@ namespace tint::core::ir::transform {
 const Capabilities kSingleEntryPointCapabilities{
     Capability::kAllowMultipleEntryPoints,
     Capability::kAllowOverrides,
-    Capability::kAllowResourceBinding,
     Capability::kAllow8BitIntegers,
 };
 

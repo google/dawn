@@ -68,7 +68,6 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
         case BuiltinFn::kTextureSampleLevel:
         case BuiltinFn::kTextureSampleBaseClampToEdge:
         case BuiltinFn::kTextureLoad:
-        case BuiltinFn::kGetBinding:
         case BuiltinFn::kGetResource:
             return Accesses{Access::kLoad};
 
@@ -218,7 +217,6 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
         case BuiltinFn::kSubgroupMatrixScalarAdd:
         case BuiltinFn::kSubgroupMatrixScalarSubtract:
         case BuiltinFn::kSubgroupMatrixScalarMultiply:
-        case BuiltinFn::kHasBinding:
         case BuiltinFn::kHasResource:
         case BuiltinFn::kNone:
             break;

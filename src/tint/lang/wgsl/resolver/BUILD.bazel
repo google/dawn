@@ -146,7 +146,6 @@ cc_library(
     "resolver_helper_test.cc",
     "resolver_helper_test.h",
     "resolver_test.cc",
-    "resource_binding_test.cc",
     "resource_table_extension_test.cc",
     "root_identifier_test.cc",
     "struct_address_space_use_test.cc",

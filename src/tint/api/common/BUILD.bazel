@@ -45,7 +45,6 @@ cc_library(
     "binding_point.h",
     "bindings.h",
     "override_id.h",
-    "resource_binding_config.h",
     "resource_table_config.h",
     "resource_type.h",
     "subgroup_matrix.h",

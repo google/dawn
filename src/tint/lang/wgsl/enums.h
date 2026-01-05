@@ -464,8 +464,6 @@ enum class BuiltinFn : uint8_t {
     kSubgroupMatrixScalarMultiply,
     kPrint,
     kTintMaterialize,
-    kHasBinding,
-    kGetBinding,
     kHasResource,
     kGetResource,
     kNone,
@@ -647,8 +645,6 @@ constexpr BuiltinFn kBuiltinFns[] = {
     BuiltinFn::kSubgroupMatrixScalarMultiply,
     BuiltinFn::kPrint,
     BuiltinFn::kTintMaterialize,
-    BuiltinFn::kHasBinding,
-    BuiltinFn::kGetBinding,
     BuiltinFn::kHasResource,
     BuiltinFn::kGetResource,
 };
@@ -811,8 +807,6 @@ constexpr const char* kBuiltinFnStrings[] = {
     "subgroupMatrixScalarMultiply",
     "print",
     "__tint_materialize",
-    "hasBinding",
-    "getBinding",
     "hasResource",
     "getResource",
 };

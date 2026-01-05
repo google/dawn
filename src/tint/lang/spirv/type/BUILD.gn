@@ -49,8 +49,8 @@ libtint_source_set("type") {
     "explicit_layout_array.h",
     "image.cc",
     "image.h",
-    "resource_binding.cc",
-    "resource_binding.h",
+    "resource_table.cc",
+    "resource_table.h",
     "sampled_image.cc",
     "sampled_image.h",
   ]

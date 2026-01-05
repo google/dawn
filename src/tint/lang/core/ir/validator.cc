@@ -2446,14 +2446,6 @@ void Validator::CheckType(const core::type::Type* root,
                 }
                 return true;
             },
-            [&](const core::type::ResourceBinding*) {
-                if (!capabilities_.Contains(Capability::kAllowResourceBinding)) {
-                    diag() << "resource_binding type can only be used with kAllowResourceBinding "
-                              "capability";
-                    return false;
-                }
-                return true;
-            },
             [](Default) { return true; });
     };
 

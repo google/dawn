@@ -285,8 +285,7 @@ TEST_F(ResolverBuiltinArrayTest, ArrayLength_Error_ArraySized) {
     EXPECT_EQ(r()->error(),
               R"(error: no matching call to 'arrayLength(ptr<private, array<i32, 4>, read_write>)'
 
-3 candidate functions:
- • 'arrayLength(resource_binding  ✗ ) -> u32'
+2 candidate functions:
  • 'arrayLength(ptr<storage, array<T>, R>  ✗ ) -> u32' where:
       ✗  'R' is 'read'
  • 'arrayLength(ptr<storage, array<T>, W>  ✗ ) -> u32' where:

@@ -64,8 +64,9 @@ message Type {
         TypeBuiltinStruct builtin_struct = 19;
         TypeBindingArray binding_array = 20;
         TypeTexelBuffer texel_buffer = 21;
-        TypeResourceBinding resource_binding = 22;
     }
+    reserved 22;
+    reserved "resource_binding";
 }
 
 // Non-compound types
@@ -739,8 +740,10 @@ enum BuiltinFn {
     subgroup_matrix_multiply = 147;
     subgroup_matrix_multiply_accumulate = 148;
     print = 149;
-    has_binding = 150;
-    get_binding = 151;
+    reserved 150;
+    reserved "has_binding";
+    reserved 151;
+    reserved "get_binding";
     subgroup_matrix_scalar_add = 152;
     subgroup_matrix_scalar_multiply = 153;
     subgroup_matrix_scalar_subtract = 154;

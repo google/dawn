@@ -47,7 +47,6 @@ namespace tint::core::ir::transform {
 /// bindings, so in theory shouldn't need the capability to allow
 /// them.
 const Capabilities kBindingRemapperCapabilities{
-    Capability::kAllowResourceBinding,
     Capability::kAllow8BitIntegers,
 };
 

@@ -37,11 +37,11 @@
 
 namespace tint {
 
-// Configuration for the resource binding transform.
+// Configuration for the resource table transform.
 //
-// The resource binding transform assumes that for each resource_binding there will be an
+// The resource table transform assumes that for each resource table entry there will be an
 // entry in the `bindings` hash map. That binding will provide information on the storage buffer
-// attached for the resource binding. Specifically, the storage buffer should have a format of:
+// attached for the resource table. Specifically, the storage buffer should have a format of:
 //
 // ```
 // struct SB {
@@ -65,7 +65,7 @@ struct ResourceTableConfig {
     // texture type (or out of bounds).
     //
     // These `default_binding_type_order` entries will be used when we need to substitute in a
-    // default binding. So, we assume that Dawn is providing the `resource_binding` memory as:
+    // default binding. So, we assume that Dawn is providing the resource table memory as:
     //
     // `[user 1 (2d_i32), user 2 (3d_f32), user 3 (1d_u32), 1d_u32_default, 2d_f32_default,
     //  3d_f32_default]`

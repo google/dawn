@@ -202,8 +202,6 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kSubgroupMatrixScalarSubtract)
         CASE(kSubgroupMatrixScalarMultiply)
         CASE(kPrint)
-        CASE(kHasBinding)
-        CASE(kGetBinding)
         CASE(kHasResource)
         CASE(kGetResource)
         case core::BuiltinFn::kNone:

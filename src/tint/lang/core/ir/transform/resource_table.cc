@@ -61,8 +61,6 @@ struct State {
 
     /// Process the module.
     void Process() {
-        std::vector<core::ir::Var*> resource_bindings;
-
         Hashmap<const core::type::Type*, core::ir::Var*, 4> var_for_type;
         core::ir::Var* sb = nullptr;
         b.Append(ir.root_block, [&] {

@@ -83,7 +83,6 @@ using InspectorGetEntryPointTest = InspectorTest;
 using InspectorOverridesTest = InspectorTest;
 using InspectorGetConstantNameToIdMapTest = InspectorTest;
 using InspectorGetResourceBindingsTest = InspectorTest;
-using InspectorGetResourceBindingInfoTest = InspectorTest;
 using InspectorGetResourceTableInfoTest = InspectorTest;
 using InspectorGetUsedExtensionNamesTest = InspectorTest;
 using InspectorGetBlendSrcTest = InspectorTest;
@@ -2867,24 +2866,6 @@ TEST_F(InspectorGetResourceBindingsTest, BindingArray_Simple) {
     EXPECT_EQ(5u, result[0].array_size.value());
 }
 
-TEST_F(InspectorGetResourceBindingsTest, BindingArray_ResourceBinding) {
-    auto* src = R"(
-enable chromium_experimental_dynamic_binding;
-
-@group(0) @binding(1) var toto: resource_binding;;
-@fragment fn ep() {
-  _ = textureDimensions(getBinding<texture_2d<f32>>(toto, 3));
-}
-)";
-
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetResourceBindings("ep");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
-    EXPECT_EQ(0u, result.size());
-}
-
 TEST_F(InspectorGetResourceBindingsTest, BindingArray_InFunction) {
     auto* src = R"(
 @group(0) @binding(1) var toto: binding_array<texture_2d<f32>, 5>;
@@ -2908,94 +2889,6 @@ fn f() {
     EXPECT_EQ(1u, result[0].binding);
     EXPECT_TRUE(result[0].array_size.has_value());
     EXPECT_EQ(5u, result[0].array_size.value());
-}
-
-TEST_F(InspectorGetResourceBindingInfoTest, NoResourceBinding) {
-    auto* src = R"(
-@group(0) @binding(1) var toto: texture_2d<f32>;
-@fragment fn ep() {
-  _ = textureDimensions(toto);
-}
-)";
-
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetResourceBindingInfo("ep");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
-    EXPECT_TRUE(result.empty());
-}
-
-TEST_F(InspectorGetResourceBindingInfoTest, ResourceBinding) {
-    auto* src = R"(
-enable chromium_experimental_dynamic_binding;
-
-@group(0) @binding(1) var toto: resource_binding;
-@fragment fn ep() {
-  _ = hasBinding<texture_2d<f32>>(toto, 0);
-  _ = getBinding<texture_3d<i32>>(toto, 1);
-}
-)";
-
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetResourceBindingInfo("ep");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
-    ASSERT_EQ(1u, result.size());
-
-    EXPECT_EQ(0u, result[0].group);
-    EXPECT_EQ(1u, result[0].binding);
-    ASSERT_EQ(2u, result[0].type_info.size());
-
-    std::sort(result[0].type_info.begin(), result[0].type_info.end());
-    EXPECT_EQ(ResourceType::kTexture2d_f32, result[0].type_info[0]);
-    EXPECT_EQ(ResourceType::kTexture3d_i32, result[0].type_info[1]);
-}
-
-TEST_F(InspectorGetResourceBindingInfoTest, ResourceBinding_Multiple) {
-    auto* src = R"(
-enable chromium_experimental_dynamic_binding;
-
-@group(1) @binding(1) var toto: resource_binding;
-@group(2) @binding(0) var moto: resource_binding;
-@group(0) @binding(1) var zoto: resource_binding;
-@fragment fn ep() {
-  _ = textureDimensions(getBinding<texture_cube<f32>>(toto, 3));
-  _ = textureDimensions(getBinding<texture_1d<f32>>(moto, 3));
-
-  _ = hasBinding<texture_2d<f32>>(zoto, 0);
-  _ = getBinding<texture_3d<f32>>(zoto, 1);
-}
-)";
-
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetResourceBindingInfo("ep");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
-    ASSERT_EQ(3u, result.size());
-
-    auto& arr = result[0];
-    EXPECT_EQ(1u, arr.group);
-    EXPECT_EQ(1u, arr.binding);
-    EXPECT_EQ(1u, arr.type_info.size());
-    EXPECT_EQ(ResourceType::kTextureCube_f32, arr.type_info[0]);
-
-    arr = result[1];
-    EXPECT_EQ(2u, arr.group);
-    EXPECT_EQ(0u, arr.binding);
-    EXPECT_EQ(1u, arr.type_info.size());
-    EXPECT_EQ(ResourceType::kTexture1d_f32, arr.type_info[0]);
-
-    arr = result[2];
-    EXPECT_EQ(0u, arr.group);
-    EXPECT_EQ(1u, arr.binding);
-    EXPECT_EQ(2u, arr.type_info.size());
-
-    std::sort(arr.type_info.begin(), arr.type_info.end());
-    EXPECT_EQ(ResourceType::kTexture2d_f32, arr.type_info[0]);
-    EXPECT_EQ(ResourceType::kTexture3d_f32, arr.type_info[1]);
 }
 
 TEST_F(InspectorGetResourceTableInfoTest, NoResourceBinding) {

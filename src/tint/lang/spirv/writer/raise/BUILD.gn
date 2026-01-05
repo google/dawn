@@ -65,8 +65,6 @@ if (tint_build_spv_writer) {
       "raise.h",
       "remove_unreachable_in_loop_continuing.cc",
       "remove_unreachable_in_loop_continuing.h",
-      "resource_binding.cc",
-      "resource_binding.h",
       "resource_table.cc",
       "resource_table.h",
       "shader_io.cc",

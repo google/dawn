@@ -60,9 +60,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             // TODO(crbug/382544164): Prototype texel buffer feature
             return Failure("texel buffers are not supported by the MSL backend");
         }
-        if (ty->Is<core::type::ResourceBinding>()) {
-            return Failure("resource_binding not supported by the MSL backend");
-        }
         if (ty->Is<core::type::InputAttachment>()) {
             return Failure("input_attachment not supported by the MSL backend");
         }

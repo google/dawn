@@ -123,10 +123,5 @@ TEST_F(ValidatorIsStorableTest, BindingArray) {
     EXPECT_TRUE(v()->IsStorable(arr));
 }
 
-TEST_F(ValidatorIsStorableTest, ResourceBinding) {
-    auto* arr = create<core::type::ResourceBinding>();
-    EXPECT_TRUE(v()->IsStorable(arr));
-}
-
 }  // namespace
 }  // namespace tint::resolver

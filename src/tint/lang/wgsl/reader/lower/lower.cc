@@ -199,8 +199,6 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
         CASE(kSubgroupMatrixScalarSubtract)
         CASE(kSubgroupMatrixScalarMultiply)
         CASE(kPrint)
-        CASE(kHasBinding)
-        CASE(kGetBinding)
         CASE(kHasResource)
         CASE(kGetResource)
         case tint::wgsl::BuiltinFn::kBitcast:               // should lower to ir::Bitcast
@@ -220,7 +218,6 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowMultipleEntryPoints,
                                               core::ir::Capability::kAllowOverrides,
-                                              core::ir::Capability::kAllowResourceBinding,
                                               core::ir::Capability::kAllow8BitIntegers,
                                           });
     if (res != Success) {

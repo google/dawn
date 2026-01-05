@@ -45,7 +45,6 @@ namespace tint::core::ir::transform {
 /// The capabilities that the transform can support.
 const Capabilities kRobustnessCapabilities{
     Capability::kAllowDuplicateBindings,
-    Capability::kAllowResourceBinding,
     Capability::kAllow8BitIntegers,
 };
 

@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,33 +25,47 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_PREVENT_INFINITE_LOOPS_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_PREVENT_INFINITE_LOOPS_H_
+#include "src/tint/lang/spirv/type/resource_table.h"
 
-#include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/result.h"
+#include <sstream>
 
-// Forward declarations.
-namespace tint::core::ir {
-class Module;
+#include "src/tint/lang/core/type/manager.h"
+
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::type::ResourceTable);
+
+namespace tint::spirv::type {
+
+ResourceTable::ResourceTable(const core::type::Type* binding_type)
+    : Base(static_cast<size_t>(Hash(tint::TypeCode::Of<ResourceTable>().bits, binding_type)),
+           core::type::Flags{}),
+      binding_type_(binding_type) {}
+
+bool ResourceTable::Equals(const UniqueNode& other) const {
+    if (auto* o = other.As<ResourceTable>()) {
+        return o->binding_type_ == binding_type_;
+    }
+    return false;
 }
 
-namespace tint::core::ir::transform {
+std::string ResourceTable::FriendlyName() const {
+    std::stringstream str;
+    str << "spirv.resource_table<" << binding_type_->FriendlyName() << ">";
+    return str.str();
+}
 
-/// The capabilities that the transform can support.
-const Capabilities kPreventInfiniteLoopsCapabilities{
-    Capability::kAllowDuplicateBindings,
-    Capability::kAllow8BitIntegers,
-};
+core::type::TypeAndCount ResourceTable::Elements(
+    [[maybe_unused]] const core::type::Type* type_if_unused,
+    uint32_t count_if_invalid) const {
+    return {binding_type_, count_if_invalid};
+}
 
-/// PreventInfiniteLoops is a transform that injects an additional exit condition into loops that
-/// may be infinite, to prevent downstream compilers from making bad assumptions due to the
-/// undefined behavior of infinite loops.
-///
-/// @param module the module to transform
-/// @returns success or failure
-Result<SuccessType> PreventInfiniteLoops(Module& module);
+const core::type::Type* ResourceTable::Element([[maybe_unused]] uint32_t index) const {
+    return binding_type_;
+}
 
-}  // namespace tint::core::ir::transform
+ResourceTable* ResourceTable::Clone(core::type::CloneContext& ctx) const {
+    auto* binding_type = binding_type_->Clone(ctx);
+    return ctx.dst.mgr->Get<ResourceTable>(binding_type);
+}
 
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_PREVENT_INFINITE_LOOPS_H_
+}  // namespace tint::spirv::type
