@@ -2673,6 +2673,11 @@ var LibraryWebGPU = {
     return texture.sampleCount;
   },
 
+  wgpuTextureGetTextureBindingViewDimension: (texturePtr) => {
+    var texture = WebGPU.getJsObject(texturePtr);
+    return WebGPU.TextureViewDimension.indexOf(texture.textureBindingViewDimension);
+  },
+
   wgpuTextureGetUsage: (texturePtr) => {
     var texture = WebGPU.getJsObject(texturePtr);
     return texture.usage;
