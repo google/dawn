@@ -317,14 +317,7 @@ FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
     FutureID futureID = mNextFutureID++;
     event->mFutureID = futureID;
 
-    // Handle the event now if it's spontaneous and ready.
-    if (event->mCallbackMode == wgpu::CallbackMode::AllowSpontaneous) {
-        if (event->IsReadyToComplete()) {
-            event->EnsureComplete(EventCompletionType::Ready);
-            return futureID;
-        }
-    }
-
+    // For queue events, we schedule a task to set the event ready w.r.t the completion serial.
     if (const auto* queueAndSerial = event->GetIfQueueAndSerial()) {
         if (auto q = queueAndSerial->queue.Promote()) {
             q->TrackSerialTask(queueAndSerial->completionSerial, [this, event]() {
@@ -341,6 +334,16 @@ FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
     }
 
     mEvents.Use([&](auto events) {
+        // For ready spontaneous events, handle the event now. Note that we need to do the check in
+        // a |Use| scope of |mEvents| to ensure that other threads that may reference the returned
+        // Future will reflect the proper state of the event.
+        if (event->mCallbackMode == wgpu::CallbackMode::AllowSpontaneous) {
+            if (event->IsReadyToComplete()) {
+                event->EnsureComplete(EventCompletionType::Ready);
+                return;
+            }
+        }
+
         if (!events->has_value()) {
             // We are shutting down, so if the event isn't spontaneous, call the callback now.
             if (event->mCallbackMode != wgpu::CallbackMode::AllowSpontaneous) {

@@ -125,11 +125,6 @@ void CheckMapping(const void* actual, const void* expected, size_t size) {
 
 // Test that the simplest map read works
 TEST_P(BufferMappingTests, MapRead_Basic) {
-    // TODO(crbug.com/469328928, crbug.com/465497435): Flakily times out on
-    // Snapdragon X Elite SoCs, suspected of causing a crash in global test
-    // teardown as a result.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
-
     wgpu::Buffer buffer = CreateMapReadBuffer(4);
 
     const uint32_t myData = 0x01020304;
@@ -144,11 +139,6 @@ TEST_P(BufferMappingTests, MapRead_Basic) {
 
 // Test map-reading a zero-sized buffer.
 TEST_P(BufferMappingTests, MapRead_ZeroSized) {
-    // TODO(crbug.com/469328928, crbug.com/465497435): Flakily times out on
-    // Snapdragon X Elite SoCs, suspected of causing a crash in global test
-    // teardown as a result.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
-
     wgpu::Buffer buffer = CreateMapReadBuffer(0);
 
     MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, wgpu::kWholeMapSize);
@@ -158,11 +148,6 @@ TEST_P(BufferMappingTests, MapRead_ZeroSized) {
 
 // Test map-reading with a non-zero offset
 TEST_P(BufferMappingTests, MapRead_NonZeroOffset) {
-    // TODO(crbug.com/469328928, crbug.com/465497435): Flakily times out on
-    // Snapdragon X Elite SoCs, suspected of causing a crash in global test
-    // teardown as a result.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
-
     uint32_t myData[3] = {0x01020304, 0x05060708, 0x090A0B0C};
 
     wgpu::Buffer buffer = CreateMapReadBuffer(sizeof(myData));
@@ -180,11 +165,6 @@ TEST_P(BufferMappingTests, MapRead_NonZeroOffset) {
 
 // Map read and unmap twice. Test that both of these two iterations work.
 TEST_P(BufferMappingTests, MapRead_Twice) {
-    // TODO(crbug.com/469328928, crbug.com/465497435): Flakily times out on
-    // Snapdragon X Elite SoCs, suspected of causing a crash in global test
-    // teardown as a result.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
-
     wgpu::Buffer buffer = CreateMapReadBuffer(4);
 
     uint32_t myData = 0x01020304;
@@ -204,11 +184,6 @@ TEST_P(BufferMappingTests, MapRead_Twice) {
 
 // Map read and test multiple get mapped range data
 TEST_P(BufferMappingTests, MapRead_MultipleMappedRange) {
-    // TODO(crbug.com/469328928, crbug.com/465497435): Flakily times out on
-    // Snapdragon X Elite SoCs, suspected of causing a crash in global test
-    // teardown as a result.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
-
     wgpu::Buffer buffer = CreateMapReadBuffer(12);
 
     uint32_t myData[] = {0x00010203, 0x04050607, 0x08090a0b};
@@ -224,11 +199,6 @@ TEST_P(BufferMappingTests, MapRead_MultipleMappedRange) {
 
 // Test map-reading a large buffer.
 TEST_P(BufferMappingTests, MapRead_Large) {
-    // TODO(crbug.com/469328928, crbug.com/465497435): Flakily times out on
-    // Snapdragon X Elite SoCs, suspected of causing a crash in global test
-    // teardown as a result.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
-
     constexpr uint32_t kDataSize = 1000 * 1000;
     constexpr size_t kByteSize = kDataSize * sizeof(uint32_t);
     wgpu::Buffer buffer = CreateMapReadBuffer(kByteSize);
@@ -264,11 +234,6 @@ TEST_P(BufferMappingTests, MapRead_Large) {
 
 // Test that GetConstMappedRange works inside map-read callback
 TEST_P(BufferMappingTests, MapRead_InCallback) {
-    // TODO(crbug.com/469328928, crbug.com/465497435): Flakily times out on
-    // Snapdragon X Elite SoCs, suspected of causing a crash in global test
-    // teardown as a result.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
-
     constexpr size_t kBufferSize = 12;
     wgpu::Buffer buffer = CreateMapReadBuffer(kBufferSize);
 
@@ -1373,10 +1338,6 @@ class BufferMapExtendedUsagesTests : public DawnTest {
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
         // Skip all tests if the required feature is not supported.
         DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::BufferMapExtendedUsages}));
-
-        // TODO(crbug.com/465167911): Flakily gets unexpected nullptrs on
-        // Snapdragon X Elite SoCs.
-        DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
     }
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {

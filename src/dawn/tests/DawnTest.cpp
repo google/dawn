@@ -2087,34 +2087,14 @@ void DawnTestBase::MapAsyncAndWait(const wgpu::Buffer& buffer,
     if (!UsesWire()) {
         // We use a new mock callback here so that the validation on the call happens as soon as the
         // scope of this call ends.
-        auto mockCb =
-            std::make_shared<MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>>();
-        EXPECT_CALL(*mockCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
+        MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)> mockCb;
+        EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
 
-        // TODO(crbug.com/460743383): This is a workaround for teardown causing WaitAny to return
-        // without calling the callback. Revert this to the state before
-        // https://dawn-review.googlesource.com/c/dawn/+/273736 when this is fixed.
-        // The mock callback is local to this function, but the async map request can live longer
-        // if the test times out. To prevent a use-after-free, we use a shared pointer to
-        // control the mock callback's availability.
-        wgpu::WaitStatus status = instance.WaitAny(
-            buffer.MapAsync(mapMode, offset, size, wgpu::CallbackMode::WaitAnyOnly,
-                            [mockCb](wgpu::MapAsyncStatus status, wgpu::StringView message) {
-                                if (mockCb != nullptr) {
-                                    mockCb->Callback()(status, message);
-                                }
-                            }),
-            UINT64_MAX);
-
-        // Disarm the callback. Since we need to verify expectations on the
-        // callback after disarming it, swap with a nullptr instead of simply
-        // setting it to null directly.
-        auto swappedCb =
-            std::make_shared<MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>>();
-        swappedCb.reset();
-        mockCb.swap(swappedCb);
-        testing::Mock::VerifyAndClearExpectations(swappedCb.get());
-        ASSERT_EQ(status, wgpu::WaitStatus::Success);
+        ASSERT_EQ(
+            instance.WaitAny(buffer.MapAsync(mapMode, offset, size, wgpu::CallbackMode::WaitAnyOnly,
+                                             mockCb.Callback()),
+                             UINT64_MAX),
+            wgpu::WaitStatus::Success);
     } else {
         bool done = false;
         buffer.MapAsync(mapMode, offset, size, wgpu::CallbackMode::AllowProcessEvents,
