@@ -822,14 +822,52 @@ class Parser {
                 return core::TexelFormat::kRgba8Sint;
             case spv::ImageFormat::R8:
                 return core::TexelFormat::kR8Unorm;
+            case spv::ImageFormat::R8i:
+                return core::TexelFormat::kR8Sint;
+            case spv::ImageFormat::R8ui:
+                return core::TexelFormat::kR8Uint;
+            case spv::ImageFormat::R8Snorm:
+                return core::TexelFormat::kR8Snorm;
+            case spv::ImageFormat::Rg8:
+                return core::TexelFormat::kRg8Unorm;
+            case spv::ImageFormat::Rg8Snorm:
+                return core::TexelFormat::kRg8Snorm;
+            case spv::ImageFormat::Rg8i:
+                return core::TexelFormat::kRg8Sint;
+            case spv::ImageFormat::Rg8ui:
+                return core::TexelFormat::kRg8Uint;
 
             // 16 bit channels
+            case spv::ImageFormat::R16:
+                return core::TexelFormat::kR16Unorm;
+            case spv::ImageFormat::R16f:
+                return core::TexelFormat::kR16Float;
+            case spv::ImageFormat::R16i:
+                return core::TexelFormat::kR16Sint;
+            case spv::ImageFormat::R16ui:
+                return core::TexelFormat::kR16Uint;
+            case spv::ImageFormat::R16Snorm:
+                return core::TexelFormat::kR16Snorm;
+            case spv::ImageFormat::Rgba16:
+                return core::TexelFormat::kRgba16Unorm;
             case spv::ImageFormat::Rgba16ui:
                 return core::TexelFormat::kRgba16Uint;
             case spv::ImageFormat::Rgba16i:
                 return core::TexelFormat::kRgba16Sint;
             case spv::ImageFormat::Rgba16f:
                 return core::TexelFormat::kRgba16Float;
+            case spv::ImageFormat::Rgba16Snorm:
+                return core::TexelFormat::kRgba16Snorm;
+            case spv::ImageFormat::Rg16:
+                return core::TexelFormat::kRg16Unorm;
+            case spv::ImageFormat::Rg16i:
+                return core::TexelFormat::kRg16Sint;
+            case spv::ImageFormat::Rg16ui:
+                return core::TexelFormat::kRg16Uint;
+            case spv::ImageFormat::Rg16f:
+                return core::TexelFormat::kRg16Float;
+            case spv::ImageFormat::Rg16Snorm:
+                return core::TexelFormat::kRg16Snorm;
 
             // 32 bit channels
             case spv::ImageFormat::R32ui:
@@ -850,6 +888,12 @@ class Parser {
                 return core::TexelFormat::kRgba32Sint;
             case spv::ImageFormat::Rgba32f:
                 return core::TexelFormat::kRgba32Float;
+            case spv::ImageFormat::Rgb10A2:
+                return core::TexelFormat::kRgb10A2Unorm;
+            case spv::ImageFormat::Rgb10a2ui:
+                return core::TexelFormat::kRgb10A2Uint;
+            case spv::ImageFormat::R11fG11fB10f:
+                return core::TexelFormat::kRg11B10Ufloat;
             default:
                 break;
         }
