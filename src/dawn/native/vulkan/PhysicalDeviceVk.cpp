@@ -619,8 +619,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
                                 vkFeatures.descriptorBindingVariableDescriptorCount;
 
         // We need to check all the limits for numbers of bindings related to bindless.
-        constexpr uint32_t kRequiredLimit =
-            kMaxResourceTableSize + kReservedDynamicBindingArrayEntries;
+        constexpr uint32_t kRequiredLimit = kMaxResourceTableSize + kReservedResourceTableSlots;
         bool hasLimit =
             vkProperties.maxPerStageDescriptorUpdateAfterBindSamplers >= kRequiredLimit &&
             vkProperties.maxPerStageDescriptorUpdateAfterBindSampledImages >= kRequiredLimit &&
@@ -891,8 +890,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
         vkMax = std::max(vkMax, vkProperties.maxDescriptorSetUpdateAfterBindSampledImages);
         vkMax = std::max(vkMax, vkProperties.maxUpdateAfterBindDescriptorsInAllPools);
 
-        limits->resourceTableLimits.maxResourceTableSize =
-            vkMax - kReservedDynamicBindingArrayEntries;
+        limits->resourceTableLimits.maxResourceTableSize = vkMax - kReservedResourceTableSlots;
     }
 
     return {};

@@ -215,9 +215,8 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     MaybeError Pin(wgpu::TextureUsage usage);
     void Unpin();
-    // TODO(https://issues.chromium.org/463925499): Use resource table terminology instead.
-    void AddDynamicArraySlot(DynamicArrayState* dynamicArray, BindingIndex i);
-    void RemoveDynamicArraySlot(DynamicArrayState* dynamicArray, BindingIndex i);
+    void AddResourceTableSlotUse(DynamicArrayState* dynamicArray, BindingIndex i);
+    void RemoveResourceTableSlotUse(DynamicArrayState* dynamicArray, BindingIndex i);
 
     ResultOrError<Ref<TextureViewBase>> CreateView(
         const TextureViewDescriptor* descriptor = nullptr);
@@ -310,17 +309,19 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     std::unique_ptr<TextureViewCache> mTextureViewCache;
 
     // Keep a hash set of the places this texture is bound to in DynamicArrayStates.
-    struct DynamicArraySlot {
+    struct ResourceTableSlotUse {
         WeakRef<DynamicArrayState> dynamicArray;
         BindingIndex slot;
 
         struct HashFuncs {
-            size_t operator()(const DynamicArraySlot& query) const;
-            bool operator()(const DynamicArraySlot& a, const DynamicArraySlot& b) const;
+            size_t operator()(const ResourceTableSlotUse& query) const;
+            bool operator()(const ResourceTableSlotUse& a, const ResourceTableSlotUse& b) const;
         };
     };
-    absl::flat_hash_set<DynamicArraySlot, DynamicArraySlot::HashFuncs, DynamicArraySlot::HashFuncs>
-        mDynamicArraySlots;
+    absl::flat_hash_set<ResourceTableSlotUse,
+                        ResourceTableSlotUse::HashFuncs,
+                        ResourceTableSlotUse::HashFuncs>
+        mResourceTableSlotUses;
 
     // TODO(crbug.com/dawn/845): Use a more optimized data structure to save space
     std::vector<bool> mIsSubresourceContentInitializedAtIndex;

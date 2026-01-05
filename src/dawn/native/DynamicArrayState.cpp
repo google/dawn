@@ -226,7 +226,7 @@ MaybeError DynamicArrayState::Initialize() {
     ityp::span<BindingIndex, Ref<TextureViewBase>> defaultBindings;
     DAWN_TRY_ASSIGN(
         defaultBindings,
-        mDevice->GetDynamicArrayDefaultBindings()->GetOrCreateSampledTextureDefaults(mDevice));
+        mDevice->GetResourceTableDefaultResources()->GetOrCreateSampledTextureDefaults(mDevice));
 
     for (auto [i, defaultBinding] : Enumerate(defaultBindings)) {
         BindingResource entryContents = {
@@ -243,7 +243,7 @@ void DynamicArrayState::Destroy() {
 
     for (auto [i, view] : Enumerate(mBindings)) {
         if (view != nullptr) {
-            view->GetTexture()->RemoveDynamicArraySlot(this, i);
+            view->GetTexture()->RemoveResourceTableSlotUse(this, i);
         }
     }
 
@@ -324,10 +324,10 @@ void DynamicArrayState::SetEntry(BindingIndex slot, const BindingResource& conte
 
     // Update the mBindings slot but also the mapping to the slot that are stored in the textures.
     if (mBindings[slot] != nullptr) {
-        mBindings[slot]->GetTexture()->RemoveDynamicArraySlot(this, slot);
+        mBindings[slot]->GetTexture()->RemoveResourceTableSlotUse(this, slot);
     }
     if (view != nullptr) {
-        view->GetTexture()->AddDynamicArraySlot(this, slot);
+        view->GetTexture()->AddResourceTableSlotUse(this, slot);
     }
     mBindings[slot] = view;
     mBindingState[slot].resourceDirty = true;
@@ -413,10 +413,10 @@ void DynamicArrayState::SetMetadata(BindingIndex slot, tint::ResourceType typeId
     }
 }
 
-// DynamicArrayDefaultBindings
+// ResourceTableDefaultResources
 
 ResultOrError<ityp::span<BindingIndex, Ref<TextureViewBase>>>
-DynamicArrayDefaultBindings::GetOrCreateSampledTextureDefaults(DeviceBase* device) {
+ResourceTableDefaultResources::GetOrCreateSampledTextureDefaults(DeviceBase* device) {
     if (!mSampledTextureDefaults.empty()) {
         return {{mSampledTextureDefaults.data(), mSampledTextureDefaults.size()}};
     }

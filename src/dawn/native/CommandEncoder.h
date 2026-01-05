@@ -143,9 +143,7 @@ class CommandEncoder final : public ApiObjectBase {
 
     MaybeError ValidateFinish() const;
 
-    // TODO(crbug.com/463925499): UAF is currently possible as nothing in the CommandEncoder takes a
-    // ref to the resource table. This will be fixed when we serialize the command in the command
-    // allocator.
+    // An owning Ref<> is part of the CommandAllocator.
     raw_ptr<ResourceTableBase> mResourceTable = nullptr;
 
     EncodingContext mEncodingContext;

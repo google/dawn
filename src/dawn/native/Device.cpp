@@ -465,7 +465,7 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
     if (HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
-        mDynamicArrayDefaultBindings = std::make_unique<DynamicArrayDefaultBindings>();
+        mResourceTableDefaultResources = std::make_unique<ResourceTableDefaultResources>();
     }
 
     DAWN_ASSERT(GetPlatform() != nullptr);
@@ -690,7 +690,7 @@ void DeviceBase::Destroy() {
     // implementations of DestroyImpl checks that we are disconnected before doing work.
     mState = State::Disconnected;
 
-    mDynamicArrayDefaultBindings = nullptr;
+    mResourceTableDefaultResources = nullptr;
     mDynamicUploader = nullptr;
     mEmptyBindGroupLayout = nullptr;
     mEmptyPipelineLayout = nullptr;
@@ -1055,10 +1055,10 @@ InternalPipelineStore* DeviceBase::GetInternalPipelineStore() {
     return mInternalPipelineStore.get();
 }
 
-DynamicArrayDefaultBindings* DeviceBase::GetDynamicArrayDefaultBindings() {
+ResourceTableDefaultResources* DeviceBase::GetResourceTableDefaultResources() {
     DAWN_ASSERT(HasFeature(Feature::ChromiumExperimentalSamplingResourceTable));
-    DAWN_ASSERT(mDynamicArrayDefaultBindings != nullptr);
-    return mDynamicArrayDefaultBindings.get();
+    DAWN_ASSERT(mResourceTableDefaultResources != nullptr);
+    return mResourceTableDefaultResources.get();
 }
 
 bool DeviceBase::HasPendingTasks() {

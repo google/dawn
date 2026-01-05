@@ -1576,8 +1576,8 @@ MaybeError TextureBase::Pin(wgpu::TextureUsage usage) {
     // Call OnPinned for each of the slots. We would like to prune the entries to now destroyed
     // DynamicArrayStates using the `it = set.erase(it)` std:: idiom, but that's not possible with
     // absl::flat_hash_set. Instead track a list of entries to prune and do it in a second pass.
-    std::vector<DynamicArraySlot> slotsToPrune;
-    for (const auto& slot : mDynamicArraySlots) {
+    std::vector<ResourceTableSlotUse> slotsToPrune;
+    for (const auto& slot : mResourceTableSlotUses) {
         if (Ref<DynamicArrayState> dynamicArray = slot.dynamicArray.Promote()) {
             dynamicArray->OnPinned(slot.slot, this);
         } else {
@@ -1585,7 +1585,7 @@ MaybeError TextureBase::Pin(wgpu::TextureUsage usage) {
         }
     }
     for (const auto& slot : slotsToPrune) {
-        mDynamicArraySlots.erase(slot);
+        mResourceTableSlotUses.erase(slot);
     }
 
     return {};
@@ -1618,8 +1618,8 @@ void TextureBase::Unpin() {
     // Call OnUnpinned for each of the slots. We would like to prune the entries to now destroyed
     // DynamicArrayStates using the `it = set.erase(it)` std:: idiom, but that's not possible with
     // absl::flat_hash_set. Instead track a list of entries to prune and do it in a second pass.
-    std::vector<DynamicArraySlot> slotsToPrune;
-    for (const auto& slot : mDynamicArraySlots) {
+    std::vector<ResourceTableSlotUse> slotsToPrune;
+    for (const auto& slot : mResourceTableSlotUses) {
         if (Ref<DynamicArrayState> dynamicArray = slot.dynamicArray.Promote()) {
             dynamicArray->OnUnpinned(slot.slot, this);
         } else {
@@ -1627,34 +1627,35 @@ void TextureBase::Unpin() {
         }
     }
     for (const auto& slot : slotsToPrune) {
-        mDynamicArraySlots.erase(slot);
+        mResourceTableSlotUses.erase(slot);
     }
 }
 
-void TextureBase::AddDynamicArraySlot(DynamicArrayState* dynamicArray, BindingIndex i) {
+void TextureBase::AddResourceTableSlotUse(DynamicArrayState* dynamicArray, BindingIndex i) {
     DAWN_ASSERT(!IsError());
     // Note that this can be called after the texture is destroyed.
-    DynamicArraySlot slot = {dynamicArray, i};
-    auto [_, inserted] = mDynamicArraySlots.insert(slot);
+    ResourceTableSlotUse slot = {dynamicArray, i};
+    auto [_, inserted] = mResourceTableSlotUses.insert(slot);
     DAWN_ASSERT(inserted);
 }
 
-void TextureBase::RemoveDynamicArraySlot(DynamicArrayState* dynamicArray, BindingIndex i) {
+void TextureBase::RemoveResourceTableSlotUse(DynamicArrayState* dynamicArray, BindingIndex i) {
     DAWN_ASSERT(!IsError());
     // Note that this can be called after the texture is destroyed.
-    DynamicArraySlot slot = {dynamicArray, i};
-    bool removed = mDynamicArraySlots.erase(slot);
+    ResourceTableSlotUse slot = {dynamicArray, i};
+    bool removed = mResourceTableSlotUses.erase(slot);
     DAWN_ASSERT(removed);
 }
 
-size_t TextureBase::DynamicArraySlot::HashFuncs::operator()(const DynamicArraySlot& query) const {
+size_t TextureBase::ResourceTableSlotUse::HashFuncs::operator()(
+    const ResourceTableSlotUse& query) const {
     size_t hash = 0;
     HashCombine(&hash, query.dynamicArray, query.slot);
     return hash;
 }
 
-bool TextureBase::DynamicArraySlot::HashFuncs::operator()(const DynamicArraySlot& a,
-                                                          const DynamicArraySlot& b) const {
+bool TextureBase::ResourceTableSlotUse::HashFuncs::operator()(const ResourceTableSlotUse& a,
+                                                              const ResourceTableSlotUse& b) const {
     return std::tie(a.dynamicArray, a.slot) == std::tie(b.dynamicArray, b.slot);
 }
 

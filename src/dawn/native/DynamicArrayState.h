@@ -142,7 +142,7 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     void SetMetadata(BindingIndex slot, tint::ResourceType typeId, bool pinned);
 };
 
-class DynamicArrayDefaultBindings : public NonMovable {
+class ResourceTableDefaultResources : public NonMovable {
   public:
     ResultOrError<ityp::span<BindingIndex, Ref<TextureViewBase>>> GetOrCreateSampledTextureDefaults(
         DeviceBase* device);

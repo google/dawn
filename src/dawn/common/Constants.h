@@ -111,15 +111,12 @@ static constexpr uint32_t kTimestampQuantizationMask = 0xFFFF0000;
 static constexpr uint32_t kMaxDynamicUniformBuffersPerPipelineLayout = 16u;
 static constexpr uint32_t kMaxDynamicStorageBuffersPerPipelineLayout = 16u;
 
-// Default limit for dynamic binding arrays.
-// TODO(https://issues.chromium.org/issues/435317394): Find if this is a reasonable amount to
-// reserve for placeholders.
-// TODO(https://issues.chromium.org/463925499): Rename to match resource table terminology.
-static constexpr uint32_t kReservedDynamicBindingArrayEntries = 1000;
-
 // Default limit for the ResourceTable size.
 // TODO(https://issues.chromium.org/issues/435317394): Update once the spec decides on a value.
 static constexpr uint32_t kMaxResourceTableSize = 50'000;
+// TODO(https://issues.chromium.org/issues/435317394): Find if this is a reasonable amount to
+// reserve for placeholders.
+static constexpr uint32_t kReservedResourceTableSlots = 1000;
 
 }  // namespace dawn
 

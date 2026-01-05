@@ -79,12 +79,12 @@ class AttachmentStateBlueprint;
 class Blob;
 class BlobCache;
 class CallbackTaskManager;
-class DynamicArrayDefaultBindings;
 class DynamicUploader;
 class ErrorScope;
 class ErrorScopeStack;
-class SharedTextureMemory;
 class OwnedCompilationMessages;
+class ResourceTableDefaultResources;
+class SharedTextureMemoryBase;
 struct CallbackTask;
 struct InternalPipelineStore;
 struct ShaderModuleParseResult;
@@ -281,8 +281,7 @@ class DeviceBase : public ErrorSink,
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
 
     InternalPipelineStore* GetInternalPipelineStore();
-    // TODO(https://issues.chromium.org/463925499): Rename for ResourceTable.
-    DynamicArrayDefaultBindings* GetDynamicArrayDefaultBindings();
+    ResourceTableDefaultResources* GetResourceTableDefaultResources();
 
     // For Dawn Wire
     BufferBase* APICreateErrorBuffer(const BufferDescriptor* desc);
@@ -659,7 +658,7 @@ class DeviceBase : public ErrorSink,
     FeaturesSet mEnabledFeatures;
     tint::wgsl::AllowedFeatures mWGSLAllowedFeatures;
 
-    std::unique_ptr<DynamicArrayDefaultBindings> mDynamicArrayDefaultBindings;
+    std::unique_ptr<ResourceTableDefaultResources> mResourceTableDefaultResources;
     std::unique_ptr<InternalPipelineStore> mInternalPipelineStore;
     Ref<BufferBase> mTemporaryUniformBuffer;
 
