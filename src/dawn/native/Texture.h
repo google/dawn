@@ -51,8 +51,8 @@
 
 namespace dawn::native {
 
-class DynamicArrayState;
 class MemoryDump;
+class ResourceTableBase;
 
 enum class AllowMultiPlanarTextureFormat {
     No,
@@ -215,8 +215,8 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     MaybeError Pin(wgpu::TextureUsage usage);
     void Unpin();
-    void AddResourceTableSlotUse(DynamicArrayState* dynamicArray, ResourceTableSlot slot);
-    void RemoveResourceTableSlotUse(DynamicArrayState* dynamicArray, ResourceTableSlot slot);
+    void AddResourceTableSlotUse(ResourceTableBase* table, ResourceTableSlot slot);
+    void RemoveResourceTableSlotUse(ResourceTableBase* table, ResourceTableSlot slot);
 
     ResultOrError<Ref<TextureViewBase>> CreateView(
         const TextureViewDescriptor* descriptor = nullptr);
@@ -308,9 +308,9 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
         LRUCache<TextureViewQuery, Ref<TextureViewBase>, TextureViewCacheFuncs>;
     std::unique_ptr<TextureViewCache> mTextureViewCache;
 
-    // Keep a hash set of the places this texture is bound to in DynamicArrayStates.
+    // Keep a hash set of the places this texture is bound to in ResourceTables.
     struct ResourceTableSlotUse {
-        WeakRef<DynamicArrayState> dynamicArray;
+        WeakRef<ResourceTableBase> table;
         ResourceTableSlot slot;
 
         struct HashFuncs {

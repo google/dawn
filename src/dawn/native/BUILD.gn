@@ -270,8 +270,6 @@ source_set("sources") {
     "Device.h",
     "DeviceGuard.cpp",
     "DeviceGuard.h",
-    "DynamicArrayState.cpp",
-    "DynamicArrayState.h",
     "DynamicUploader.cpp",
     "DynamicUploader.h",
     "EncodingContext.cpp",

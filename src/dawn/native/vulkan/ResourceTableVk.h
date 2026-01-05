@@ -38,7 +38,6 @@
 namespace dawn::native::vulkan {
 
 class Device;
-class DescriptorSetAllocatorDynamicArray;
 struct CommandRecordingContext;
 
 class ResourceTable final : public ResourceTableBase {
@@ -65,8 +64,8 @@ class ResourceTable final : public ResourceTableBase {
     MaybeError Initialize();
 
     MaybeError UpdateMetadataBuffer(CommandRecordingContext* recordingContext,
-                                    const std::vector<DynamicArrayState::MetadataUpdate>& updates);
-    void UpdateResourceBindings(const std::vector<DynamicArrayState::ResourceUpdate>& updates);
+                                    const std::vector<MetadataUpdate>& updates);
+    void UpdateResourceBindings(const std::vector<ResourceUpdate>& updates);
 
     VkDescriptorPool mPool = VK_NULL_HANDLE;
     VkDescriptorSet mSet = VK_NULL_HANDLE;

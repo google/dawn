@@ -1210,7 +1210,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     }
 
     // Resource table reflection.
-    // TODO(crbug.com/463925499): Check that the list of uses of the resource table are
+    // TODO(crbug.com/435317394): Check that the list of uses of the resource table are
     // 1) compatible with the bindless feature enabled (sampling vs. full)
     // 2) potentially that each type used is enabled by whatever feature enables it (for example
     // texel buffers might require an extension)

@@ -28,21 +28,73 @@
 #ifndef SRC_DAWN_NATIVE_RESOURCETABLE_H_
 #define SRC_DAWN_NATIVE_RESOURCETABLE_H_
 
-#include "dawn/native/DynamicArrayState.h"
+#include <vector>
+
+#include "dawn/common/NonMovable.h"
+#include "dawn/common/Ref.h"
+#include "dawn/common/WeakRefSupport.h"
+#include "dawn/common/ityp_span.h"
+#include "dawn/common/ityp_vector.h"
+#include "dawn/native/Error.h"
+#include "dawn/native/Forward.h"
+#include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/dawn_platform.h"
 
+namespace tint {
+enum class ResourceType : uint32_t;
+}  // namespace tint
+
 namespace dawn::native {
+
+// Returns the order in which we will put the default bindings at the end of the dynamic binding
+// array.
+// TODO(https://issues.chromium.org/463925499): Take the device in parameter to know if we have
+// sampling vs. full resource table.
+ityp::span<ResourceTableSlot, const tint::ResourceType> GetDefaultResourceOrder();
+ResourceTableSlot GetDefaultResourceCount();
 
 MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
                                            const ResourceTableDescriptor* descriptor);
 
-class ResourceTableBase : public ApiObjectBase {
+// ResourceTableBase implements the frontend tracking for GPUResourceTable, a sparse array of
+// heterogeneous resources that can be accessed in shaders. It needs logic for multiple aspects:
+//
+//  - Its content at a slot can only be updated when known unused, and part of the validation for
+//    the mutation needs to run immediately to match what would happen on the WebGPU "content
+//    timeline".
+//  - Error resource table still need to work for that "content-timeline" validation.
+//  - A metadata buffer is kept up to date, that tells the shader-side validation if and how a slot
+//    may be accessed. Tint enum values are used since Tint is the place where shader-side
+//    validation is implemented..
+//  - The updates of resources in slots and of the metadata buffer are batched.
+//  - Textures must be pinned to be accessible via the resource table, which requires
+//    bidirectional communication so that textures know in which slot they are and notify them of
+//    pinning/unpinning. This is why ResourceTable is WeakRefSupport.
+//  - Default resources are inserted at the end of the table, in a way invisible to the
+//    application, which means that there are two different sizes for the table (the API visible
+//    size and the real one).
+class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTableBase> {
   public:
     static Ref<ResourceTableBase> MakeError(DeviceBase* device,
                                             const ResourceTableDescriptor* descriptor);
 
     ObjectType GetType() const override;
+
+    // Return the API visible size that was passed in the descriptor (or 0 for destroyed tables).
+    ResourceTableSlot GetAPISize() const;
+    // Return the size, taking into account space needed for default resources. Most code outside
+    // validation should use this getter for the size.
+    ResourceTableSlot GetSizeWithDefaultResources() const;
+
+    BufferBase* GetMetadataBuffer() const;
+    bool IsDestroyed() const;
+    MaybeError ValidateCanUseInSubmitNow() const;
+
+    // Methods used by resources to notify when pinning state changes, which in turns may need to
+    // update the contents of the metadata buffer.
+    void OnPinned(ResourceTableSlot slot, TextureBase* texture);
+    void OnUnpinned(ResourceTableSlot slot, TextureBase* texture);
 
     // Dawn API
     void APIDestroy();
@@ -51,15 +103,35 @@ class ResourceTableBase : public ApiObjectBase {
     wgpu::Status APIRemoveBinding(uint32_t slot);
     uint32_t APIGetSize() const;
 
-    MaybeError ValidateCanUseInSubmitNow() const;
-
   protected:
     ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor);
 
     MaybeError InitializeBase();
     void DestroyImpl() override;
 
-    DynamicArrayState* GetDynamicArrayState();
+    // Methods that mutate the state of resources in the table. They keep track of the necessary
+    // metadata buffer updates required for dynamic type checks in the shader to match what's in the
+    // table. `contents` can contain no resources, this is useful to mark the slot used even when an
+    // error happens, to match what client-side validation would do.
+    void Update(ResourceTableSlot slot, const BindingResource* contents);
+    void Remove(ResourceTableSlot slot);
+
+    // AcquireDirtySlotUpdates returns all the batched updates that need to be applied before uses
+    // of the ResourceTable (since the last call to AcquireDirtySlotUpdates or creation of the
+    // ResourceTable).
+    struct MetadataUpdate {
+        uint32_t offset;
+        uint32_t data;
+    };
+    struct ResourceUpdate {
+        ResourceTableSlot slot;
+        TextureViewBase* textureView = nullptr;
+    };
+    struct Updates {
+        std::vector<MetadataUpdate> metadataUpdates;
+        std::vector<ResourceUpdate> resourceUpdates;
+    };
+    Updates AcquireDirtySlotUpdates();
 
   private:
     ResourceTableBase(DeviceBase* device,
@@ -68,9 +140,48 @@ class ResourceTableBase : public ApiObjectBase {
 
     bool IsValidSlot(ResourceTableSlot slot) const;
 
-    // TODO(https://issues.chromium.org/463925499): Inline the functionality of DynamicArrayState in
-    // ResourceTable once bindless bindgroup support is removed.
-    Ref<DynamicArrayState> mDynamicArray;
+    // Helper method that does the bulk of the shared work between Update and RemoveBinding.
+    void SetEntry(ResourceTableSlot slot, const BindingResource* contents);
+
+    // Helper method that must be called when anything in the SlotState changes (except
+    // `availableAfter`), so that the slot updates are included in the next batch of updates.
+    void MarkStateDirty(ResourceTableSlot slot);
+
+    ResourceTableSlot mAPISize = ResourceTableSlot(0);
+    bool mDestroyed = false;
+
+    // Buffer that contains a WGSL metadata struct of the following shape:
+    //
+    // struct Metadata {
+    //     arrayLength: u32,  //  Doesn't include the default resources
+    //     slots: array<u32>,  // One entry per slot, including slots for default resources
+    // }
+    Ref<BufferBase> mMetadataBuffer;
+
+    struct SlotState {
+        Ref<TextureViewBase> resource;
+        // Matches the value of the Tint enum for type IDs but kept as u32 to keep usage of Tint
+        // headers local.
+        tint::ResourceType typeId = tint::ResourceType(0);
+        ExecutionSerial availableAfter = kBeginningOfGPUTime;
+        bool dirty = false;
+        bool resourceDirty = false;  // resourceDirty implies dirty.
+        bool pinned = false;
+    };
+    ityp::vector<ResourceTableSlot, SlotState> mSlots;
+
+    // The list of slots that need to be updated before the next use of the dynamic array.
+    std::vector<ResourceTableSlot> mDirtySlots;
+};
+
+// Used to cache the default resources on the device so they can be reused between resource tables.
+class ResourceTableDefaultResources : public NonMovable {
+  public:
+    ResultOrError<ityp::span<ResourceTableSlot, Ref<TextureViewBase>>>
+    GetOrCreateSampledTextureDefaults(DeviceBase* device);
+
+  private:
+    ityp::vector<ResourceTableSlot, Ref<TextureViewBase>> mSampledTextureDefaults;
 };
 
 }  // namespace dawn::native

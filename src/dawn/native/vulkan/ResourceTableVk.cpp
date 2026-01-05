@@ -30,7 +30,6 @@
 #include <vector>
 
 #include "dawn/common/Enumerator.h"
-#include "dawn/native/DynamicArrayState.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
@@ -66,7 +65,7 @@ ResultOrError<VkDescriptorSetLayout> ResourceTable::MakeDescriptorSetLayout(Devi
              .binding = 1,
              .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
              .descriptorCount = device->GetLimits().resourceTableLimits.maxResourceTableSize +
-                                kReservedResourceTableSlots,
+                                uint32_t(GetDefaultResourceCount()),
              .stageFlags = VulkanShaderStages(kAllStages),
              .pImmutableSamplers = nullptr,
          }}};
@@ -105,7 +104,7 @@ MaybeError ResourceTable::Initialize() {
 
     Device* device = ToBackend(GetDevice());
 
-    uint32_t sampledImageCount = uint32_t(GetDynamicArrayState()->GetSizeWithDefaultBindings());
+    uint32_t sampledImageCount = uint32_t(GetSizeWithDefaultResources());
 
     // Allocate mPool.
     {
@@ -152,7 +151,7 @@ MaybeError ResourceTable::Initialize() {
     // Only write the metadata buffer in mSet initially, all the other bindings will be written as
     // needed when they are inserted in the ResourceTable.
     {
-        Buffer* metadataBuffer = ToBackend(GetDynamicArrayState()->GetMetadataBuffer());
+        Buffer* metadataBuffer = ToBackend(GetMetadataBuffer());
         VkDescriptorBufferInfo bufferInfo = {
             .buffer = metadataBuffer->GetHandle(),
             .offset = 0,
@@ -178,8 +177,7 @@ MaybeError ResourceTable::Initialize() {
 
 // Apply updates to resources or to the metadata buffers that are pending.
 MaybeError ResourceTable::ApplyPendingUpdates(CommandRecordingContext* recordingContext) {
-    DynamicArrayState::BindingUpdates updates =
-        GetDynamicArrayState()->AcquireDirtyBindingUpdates();
+    Updates updates = AcquireDirtySlotUpdates();
 
     if (!updates.metadataUpdates.empty()) {
         DAWN_TRY(UpdateMetadataBuffer(recordingContext, updates.metadataUpdates));
@@ -191,11 +189,9 @@ MaybeError ResourceTable::ApplyPendingUpdates(CommandRecordingContext* recording
     return {};
 }
 
-MaybeError ResourceTable::UpdateMetadataBuffer(
-    CommandRecordingContext* recordingContext,
-    const std::vector<DynamicArrayState::MetadataUpdate>& updates) {
-    // Updates a dynamic array metadata buffer by scheduling a copy for each u32 that needs to be
-    // updated.
+MaybeError ResourceTable::UpdateMetadataBuffer(CommandRecordingContext* recordingContext,
+                                               const std::vector<MetadataUpdate>& updates) {
+    // Updates the metadata buffer by scheduling a copy for each u32 that needs to be updated.
     // TODO(https://crbug.com/435317394): If we had a way to use Dawn reentrantly now, we could use
     // a compute shader to dispatch the updates instead of individual copies for each update, and
     // move that logic in the frontend to share it between backends. (also a single dispatch could
@@ -209,7 +205,7 @@ MaybeError ResourceTable::UpdateMetadataBuffer(
             uint32_t* stagedData = static_cast<uint32_t*>(reservation.mappedPointer);
 
             // The metadata buffer will be copied to.
-            Buffer* metadataBuffer = ToBackend(GetDynamicArrayState()->GetMetadataBuffer());
+            Buffer* metadataBuffer = ToBackend(GetMetadataBuffer());
             DAWN_ASSERT(metadataBuffer->IsInitialized());
             metadataBuffer->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 
@@ -240,12 +236,11 @@ MaybeError ResourceTable::UpdateMetadataBuffer(
         });
 }
 
-void ResourceTable::UpdateResourceBindings(
-    const std::vector<DynamicArrayState::ResourceUpdate>& updates) {
+void ResourceTable::UpdateResourceBindings(const std::vector<ResourceUpdate>& updates) {
     std::vector<VkDescriptorImageInfo> imageWrites;
     std::vector<uint32_t> arrayElements;
 
-    for (DynamicArrayState::ResourceUpdate update : updates) {
+    for (const ResourceUpdate& update : updates) {
         // TODO(https://issues.chromium.org/435317394): Support samplers updates.
         // TODO(https://issues.chromium.org/435317394): Support buffer, texel buffers and storage
         // textures.

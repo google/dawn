@@ -58,7 +58,6 @@
 #include "dawn/native/CompilationMessages.h"
 #include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/native/DynamicArrayState.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ErrorData.h"
