@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
   workflow_dispatch:
+  workflow_call:
 
 concurrency:
   # Use github.run_id on main branch
@@ -219,13 +220,14 @@ jobs:
         if: matrix.arch == 'arm64-v8a'
         run: |
           cmake --install ${{ matrix.output_dir }} --prefix dawn-headers
+          cmake -E tar cvzf dawn-headers-${{ github.sha }}.tar.gz dawn-headers/
 
       - name: Upload headers (from arm64-v8a build only)
         if: matrix.arch == 'arm64-v8a'
         uses: actions/upload-artifact@v4
         with:
           name: dawn-headers-${{ github.sha }}
-          path: dawn-headers/
+          path: dawn-headers-${{ github.sha }}.tar.gz
 
   mobile-apple:
     strategy:
