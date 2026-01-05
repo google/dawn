@@ -691,7 +691,7 @@ var (
 	reIrregularWhiteSpace = regexp.MustCompile(`§.`)
 )
 
-// cleanUpString creates a string by removing  all extra spaces, newlines and tabs
+// cleanUpString creates a string by removing all extra spaces, newlines and tabs
 // form input string 'in' and returns it
 // This is done so that the uniqueID does not change because of a change in white spaces
 //
@@ -904,7 +904,7 @@ func validationTestPlan(rules []rule, path string, start int, end int, fsWriter 
 			return err
 		}
 		section := sectionDims[0]
-		if section < start || section >= end {
+		if section < start || section > end {
 			continue
 		}
 		content[section] = append(content[section], testPlan(r))
@@ -969,7 +969,7 @@ func executionTestPlan(rules []rule, path string, fsWriter oswrapper.FilesystemW
 			index = sectionDims[1]
 		}
 
-		if index < 0 && index >= len(content) {
+		if index < 0 || index >= len(content) {
 			return fmt.Errorf("cannot append to content, index %v out of range 0..%v",
 				index, len(content)-1)
 		}
