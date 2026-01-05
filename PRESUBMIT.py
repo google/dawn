@@ -157,12 +157,15 @@ def _CalculateEnumeratedEntriesAndTypes(lines):
     prefix_stack = []
     prefix_str = ""
     enumerated_entries = {}
+    oneof_scopes = set()
     types = []
     for l in lines:
         l = l.strip().rstrip()
         l = l.split("//", 1)[0]
         while l:
             if match := re.search(push_re, l):
+                if l[:match.start()].strip() == "oneof":
+                    oneof_scopes.add('.'.join(prefix_stack + [match.group(1)]))
                 prefix_stack.append(match.group(1))
                 prefix_str = '.'.join(prefix_stack)
                 types.append(prefix_str)
@@ -183,12 +186,12 @@ def _CalculateEnumeratedEntriesAndTypes(lines):
                 continue
             if match := re.search(pop_re, l):
                 prefix_stack.pop()
-                prefix_str = '_'.join(prefix_stack)
+                prefix_str = '.'.join(prefix_stack)
                 l = match.group(1)
                 continue
             l = ""
 
-    return enumerated_entries, types
+    return enumerated_entries, types, oneof_scopes
 
 
 def CheckIRBinaryCompatibility(input_api, output_api):
@@ -207,22 +210,31 @@ def CheckIRBinaryCompatibility(input_api, output_api):
                 )
             ]
         proto_file = file.AbsoluteLocalPath()
-        old_entries, old_types = _CalculateEnumeratedEntriesAndTypes(
+        old_entries, old_types, old_oneofs = _CalculateEnumeratedEntriesAndTypes(
             file.OldContents())
-        new_entries, new_types = _CalculateEnumeratedEntriesAndTypes(
+        new_entries, new_types, new_oneofs = _CalculateEnumeratedEntriesAndTypes(
             file.NewContents())
 
     changes = []
+
     for k in old_entries:
         if k not in new_entries:
             entry_prefix = k.rsplit('.', 1)[0]
             reserved = new_entries.get(f"{entry_prefix}.reserved", [])
             if old_entries[k] in reserved:
                 continue
+
+            if entry_prefix in old_oneofs:
+                parent_prefix = entry_prefix.rsplit('.', 1)[0]
+                reserved = new_entries.get(f"{parent_prefix}.reserved", [])
+                if old_entries[k] in reserved:
+                    continue
+
             changes.append(
                 f"entry '{k}' has been removed without reserving, old={old_entries[k]}"
             )
             continue
+
         if old_entries[k] != new_entries[k]:
             changes.append(
                 f"entry '{k}' has changed, old={old_entries[k]}, new={new_entries[k]}"
