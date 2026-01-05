@@ -75,7 +75,7 @@ class Device final : public DeviceBase {
     const VulkanGlobalInfo& GetGlobalInfo() const;
     VkDevice GetVkDevice() const;
     uint32_t GetGraphicsQueueFamily() const;
-    VkDescriptorSetLayout GetResourceTableLayout() const;
+    const VkDescriptorSetLayout& GetResourceTableLayout() const;
 
     MutexProtected<FencedDeleter>& GetFencedDeleter() const;
     FramebufferCache* GetFramebufferCache() const;

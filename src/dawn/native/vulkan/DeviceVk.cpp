@@ -389,7 +389,7 @@ uint32_t Device::GetGraphicsQueueFamily() const {
     return mMainQueueFamily;
 }
 
-VkDescriptorSetLayout Device::GetResourceTableLayout() const {
+const VkDescriptorSetLayout& Device::GetResourceTableLayout() const {
     DAWN_ASSERT(HasFeature(Feature::ChromiumExperimentalSamplingResourceTable));
     return mResourceTableLayout;
 }

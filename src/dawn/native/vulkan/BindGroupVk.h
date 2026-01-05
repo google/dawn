@@ -51,8 +51,6 @@ class BindGroup final : public BindGroupBase, public PlacementAllocated {
 
     VkDescriptorSet GetHandle() const;
 
-    void UpdateDynamicArrayBindings(const std::vector<DynamicArrayState::ResourceUpdate>& updates);
-
   private:
     ~BindGroup() override;
 
@@ -62,8 +60,6 @@ class BindGroup final : public BindGroupBase, public PlacementAllocated {
 
     // Dawn API
     void SetLabelImpl() override;
-
-    MaybeError InitializeStaticBindings();
 
     // The descriptor set in this allocation outlives the BindGroup because it is owned by
     // the BindGroupLayout which is referenced by the BindGroup.

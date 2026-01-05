@@ -34,7 +34,6 @@
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ResourceTable.h"
-#include "dawn/native/vulkan/DescriptorSetAllocation.h"
 
 namespace dawn::native::vulkan {
 
@@ -69,11 +68,8 @@ class ResourceTable final : public ResourceTableBase {
                                     const std::vector<DynamicArrayState::MetadataUpdate>& updates);
     void UpdateResourceBindings(const std::vector<DynamicArrayState::ResourceUpdate>& updates);
 
-    // TODO(https://issues.chromium.org/463925499): Inline the functionality of
-    // DescriptorSetAllocatorDynamicArray in ResourceTable once bindless bindgroup support is
-    // removed.
-    std::unique_ptr<DescriptorSetAllocatorDynamicArray> mDSAllocator;
-    DescriptorSetAllocation mAllocation;
+    VkDescriptorPool mPool = VK_NULL_HANDLE;
+    VkDescriptorSet mSet = VK_NULL_HANDLE;
 };
 
 }  // namespace dawn::native::vulkan

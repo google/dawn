@@ -181,8 +181,7 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
 ResultOrError<Ref<BindGroupLayout>> BindGroupLayout::Create(
     Device* device,
     const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor) {
-    Ref<BindGroupLayoutStaticBindingOnly> bgl =
-        AcquireRef(new BindGroupLayoutStaticBindingOnly(device, descriptor));
+    Ref<BindGroupLayout> bgl = AcquireRef(new BindGroupLayout(device, descriptor));
     DAWN_TRY(bgl->Initialize());
     return bgl;
 }
@@ -194,18 +193,30 @@ BindGroupLayout::BindGroupLayout(DeviceBase* device,
 
 BindGroupLayout::~BindGroupLayout() = default;
 
-MaybeError BindGroupLayout::Initialize(
-    const VkDescriptorSetLayoutCreateInfo* createInfo,
-    absl::flat_hash_map<BindingIndex, BindingIndex> textureToStaticSamplerIndex) {
+MaybeError BindGroupLayout::Initialize() {
+    Device* device = ToBackend(GetDevice());
+
+    VulkanStaticBindings bindings = ComputeVulkanStaticBindings(this);
+
+    mDescriptorSetAllocator =
+        DescriptorSetAllocator::Create(device, std::move(bindings.descriptorCountPerType));
+
+    mTextureToStaticSamplerIndex = std::move(bindings.textureToStaticSamplerIndex);
+
+    VkDescriptorSetLayoutCreateInfo createInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .bindingCount = uint32_t(bindings.bindings.size()),
+        .pBindings = bindings.bindings.data(),
+    };
+
     // Record cache key information now since the createInfo is not stored.
     StreamIn(&mCacheKey, createInfo);
 
-    Device* device = ToBackend(GetDevice());
-    DAWN_TRY(CheckVkSuccess(
-        device->fn.CreateDescriptorSetLayout(device->GetVkDevice(), createInfo, nullptr, &*mHandle),
-        "CreateDescriptorSetLayout"));
-
-    mTextureToStaticSamplerIndex = std::move(textureToStaticSamplerIndex);
+    DAWN_TRY(CheckVkSuccess(device->fn.CreateDescriptorSetLayout(device->GetVkDevice(), &createInfo,
+                                                                 nullptr, &*mHandle),
+                            "CreateDescriptorSetLayout"));
 
     SetLabelImpl();
 
@@ -223,16 +234,30 @@ void BindGroupLayout::DestroyImpl() {
         device->fn.DestroyDescriptorSetLayout(device->GetVkDevice(), mHandle, nullptr);
         mHandle = VK_NULL_HANDLE;
     }
+
+    mDescriptorSetAllocator = nullptr;
 }
 
 VkDescriptorSetLayout BindGroupLayout::GetHandle() const {
     return mHandle;
 }
 
+ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
+    const UnpackedPtr<BindGroupDescriptor>& descriptor) {
+    DescriptorSetAllocation descriptorSetAllocation;
+    DAWN_TRY_ASSIGN(descriptorSetAllocation, mDescriptorSetAllocator->Allocate(GetHandle()));
+
+    return AcquireRef(
+        mBindGroupAllocator->Allocate(ToBackend(GetDevice()), descriptor, descriptorSetAllocation));
+}
+
 void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup) {
     mBindGroupAllocator->Deallocate(bindGroup);
 }
 
+void BindGroupLayout::DeallocateDescriptorSet(DescriptorSetAllocation* descriptorSetAllocation) {
+    mDescriptorSetAllocator->Deallocate(descriptorSetAllocation);
+}
 
 void BindGroupLayout::ReduceMemoryUsage() {
     mBindGroupAllocator->DeleteEmptySlabs();
@@ -248,54 +273,6 @@ std::optional<BindingIndex> BindGroupLayout::GetStaticSamplerIndexForTexture(
 
 void BindGroupLayout::SetLabelImpl() {
     SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_BindGroupLayout", GetLabel());
-}
-
-// BindGroupLayoutStaticBindingOnly
-
-BindGroupLayoutStaticBindingOnly::BindGroupLayoutStaticBindingOnly(
-    DeviceBase* device,
-    const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor)
-    : BindGroupLayout(device, descriptor) {}
-
-BindGroupLayoutStaticBindingOnly::~BindGroupLayoutStaticBindingOnly() = default;
-
-MaybeError BindGroupLayoutStaticBindingOnly::Initialize() {
-    VulkanStaticBindings bindings = ComputeVulkanStaticBindings(this);
-
-    mDescriptorSetAllocator = DescriptorSetAllocator::Create(
-        ToBackend(GetDevice()), std::move(bindings.descriptorCountPerType));
-
-    VkDescriptorSetLayoutCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.bindingCount = uint32_t(bindings.bindings.size()),
-        createInfo.pBindings = bindings.bindings.data(),
-    };
-
-    return BindGroupLayout::Initialize(&createInfo,
-                                       std::move(bindings.textureToStaticSamplerIndex));
-}
-
-ResultOrError<Ref<BindGroup>> BindGroupLayoutStaticBindingOnly::AllocateBindGroup(
-    const UnpackedPtr<BindGroupDescriptor>& descriptor) {
-    Device* device = ToBackend(GetDevice());
-
-    DescriptorSetAllocation descriptorSetAllocation;
-    DAWN_TRY_ASSIGN(descriptorSetAllocation, mDescriptorSetAllocator->Allocate(GetHandle()));
-
-    return AcquireRef(mBindGroupAllocator->Allocate(device, descriptor, descriptorSetAllocation));
-}
-
-void BindGroupLayoutStaticBindingOnly::DeallocateDescriptorSet(
-    DescriptorSetAllocation* descriptorSetAllocation) {
-    mDescriptorSetAllocator->Deallocate(descriptorSetAllocation);
-}
-
-void BindGroupLayoutStaticBindingOnly::DestroyImpl() {
-    BindGroupLayout::DestroyImpl();
-
-    mDescriptorSetAllocator = nullptr;
 }
 
 }  // namespace dawn::native::vulkan

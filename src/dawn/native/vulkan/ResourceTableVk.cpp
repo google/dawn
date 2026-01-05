@@ -32,7 +32,6 @@
 #include "dawn/common/Enumerator.h"
 #include "dawn/native/DynamicArrayState.h"
 #include "dawn/native/DynamicUploader.h"
-#include "dawn/native/vulkan/DescriptorSetAllocator.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
@@ -106,41 +105,73 @@ MaybeError ResourceTable::Initialize() {
 
     Device* device = ToBackend(GetDevice());
 
-    // Allocate the VkDescriptorSet used for this resource table.
-    mDSAllocator = DescriptorSetAllocatorDynamicArray::Create(device);
+    uint32_t sampledImageCount = uint32_t(GetDynamicArrayState()->GetSizeWithDefaultBindings());
 
-    // The only non-dynamic binding (using the terminology of DescriptorSetAllocatorDynamicArray) is
-    // the metadata buffer.
-    absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType;
-    descriptorCountPerType[VK_DESCRIPTOR_TYPE_STORAGE_BUFFER] = 1;
+    // Allocate mPool.
+    {
+        std::array<VkDescriptorPoolSize, 2> sizes = {
+            VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},  // The metadata buffer.
+            VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, sampledImageCount},
+        };
 
-    DAWN_TRY_ASSIGN(
-        mAllocation,
-        mDSAllocator->Allocate(device->GetResourceTableLayout(), descriptorCountPerType,
-                               VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-                               uint32_t(GetDynamicArrayState()->GetSizeWithDefaultBindings())));
+        VkDescriptorPoolCreateInfo createInfo{
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
+            .maxSets = 1,
+            .poolSizeCount = uint32_t(sizes.size()),
+            .pPoolSizes = sizes.data(),
+        };
 
-    // Only write the metadata buffer in the VkDescriptorSet initially, all the other bindings will
-    // be written as needed when they are inserted in the ResourceTable.
-    Buffer* metadataBuffer = ToBackend(GetDynamicArrayState()->GetMetadataBuffer());
-    VkDescriptorBufferInfo bufferInfo = {
-        .buffer = metadataBuffer->GetHandle(),
-        .offset = 0,
-        .range = metadataBuffer->GetSize(),
-    };
-    VkWriteDescriptorSet write = {
-        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-        .pNext = nullptr,
-        .dstSet = mAllocation.set,
-        .dstBinding = 0,
-        .dstArrayElement = 0,
-        .descriptorCount = 1,
-        .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        .pImageInfo = nullptr,
-        .pBufferInfo = &bufferInfo,
-        .pTexelBufferView = nullptr,
-    };
-    device->fn.UpdateDescriptorSets(device->GetVkDevice(), 1, &write, 0, nullptr);
+        DAWN_TRY(CheckVkSuccess(
+            device->fn.CreateDescriptorPool(device->GetVkDevice(), &createInfo, nullptr, &*mPool),
+            "CreateDescriptorPool"));
+    }
+
+    // Allocate mSet from mPool.
+    {
+        VkDescriptorSetVariableDescriptorCountAllocateInfo variableCountInfo{
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO,
+            .pNext = nullptr,
+            .descriptorSetCount = 1,
+            .pDescriptorCounts = &sampledImageCount,
+        };
+        VkDescriptorSetAllocateInfo allocateInfo{
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+            .pNext = &variableCountInfo,
+            .descriptorPool = mPool,
+            .descriptorSetCount = 1,
+            .pSetLayouts = &device->GetResourceTableLayout().GetHandle(),
+        };
+
+        DAWN_TRY(CheckVkSuccess(
+            device->fn.AllocateDescriptorSets(device->GetVkDevice(), &allocateInfo, &*mSet),
+            "AllocateDescriptorSets"));
+    }
+
+    // Only write the metadata buffer in mSet initially, all the other bindings will be written as
+    // needed when they are inserted in the ResourceTable.
+    {
+        Buffer* metadataBuffer = ToBackend(GetDynamicArrayState()->GetMetadataBuffer());
+        VkDescriptorBufferInfo bufferInfo = {
+            .buffer = metadataBuffer->GetHandle(),
+            .offset = 0,
+            .range = metadataBuffer->GetSize(),
+        };
+        VkWriteDescriptorSet write = {
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .pNext = nullptr,
+            .dstSet = mSet,
+            .dstBinding = 0,
+            .dstArrayElement = 0,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+            .pImageInfo = nullptr,
+            .pBufferInfo = &bufferInfo,
+            .pTexelBufferView = nullptr,
+        };
+        device->fn.UpdateDescriptorSets(device->GetVkDevice(), 1, &write, 0, nullptr);
+    }
 
     return {};
 }
@@ -239,7 +270,7 @@ void ResourceTable::UpdateResourceBindings(
         VkWriteDescriptorSet write{
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
             .pNext = nullptr,
-            .dstSet = mAllocation.set,
+            .dstSet = mSet,
             .dstBinding = 1,
             .dstArrayElement = arrayElements[i],
             .descriptorCount = 1,
@@ -257,18 +288,21 @@ void ResourceTable::UpdateResourceBindings(
 }
 
 VkDescriptorSet ResourceTable::GetHandle() const {
-    return mAllocation.set;
+    return mSet;
 }
 
 void ResourceTable::DestroyImpl() {
-    mDSAllocator->Deallocate(&mAllocation);
-    mDSAllocator = nullptr;
+    if (mPool != VK_NULL_HANDLE) {
+        ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mPool);
+        mPool = VK_NULL_HANDLE;
+        mSet = VK_NULL_HANDLE;
+    }
 
     ResourceTableBase::DestroyImpl();
 }
 
 void ResourceTable::SetLabelImpl() {
-    SetDebugName(ToBackend(GetDevice()), mAllocation.set, "Dawn_ResourceTable", GetLabel());
+    SetDebugName(ToBackend(GetDevice()), mSet, "Dawn_ResourceTable", GetLabel());
 }
 
 }  // namespace dawn::native::vulkan

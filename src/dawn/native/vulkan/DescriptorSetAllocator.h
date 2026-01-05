@@ -107,34 +107,6 @@ class DescriptorSetAllocator : public RefCounted {
     const raw_ptr<Device> mDevice;
 };
 
-// A simpler descriptor set allocator for use specifically with dynamic arrays. It doesn't do any
-// reuse because the size of the pools required vary (and we expect few dynamic arrays to be
-// created).
-// TODO(https://issues.chromium.org/463925499): Inline in ResourceTable which is the only user.
-class DescriptorSetAllocatorDynamicArray {
-  public:
-    static std::unique_ptr<DescriptorSetAllocatorDynamicArray> Create(Device* device);
-
-    explicit DescriptorSetAllocatorDynamicArray(Device* device);
-    ~DescriptorSetAllocatorDynamicArray();
-
-    ResultOrError<DescriptorSetAllocation> Allocate(
-        VkDescriptorSetLayout dsLayout,
-        const absl::flat_hash_map<VkDescriptorType, uint32_t>& descriptorCountPerType,
-        VkDescriptorType variableType,
-        uint32_t variableCount);
-    void Deallocate(DescriptorSetAllocation* allocationInfo);
-
-  private:
-    std::vector<uint32_t> mAvailableSlots;
-    std::vector<VkDescriptorPool> mPools;
-
-    // Used to guard all public member functions.
-    Mutex mMutex;
-
-    const raw_ptr<Device> mDevice;
-};
-
 }  // namespace dawn::native::vulkan
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_DESCRIPTORSETALLOCATOR_H_

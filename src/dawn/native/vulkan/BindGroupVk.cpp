@@ -66,14 +66,6 @@ BindGroup::BindGroup(Device* device,
 BindGroup::~BindGroup() = default;
 
 MaybeError BindGroup::InitializeImpl() {
-    DAWN_TRY(InitializeStaticBindings());
-
-    SetLabelImpl();
-    return {};
-}
-
-// TODO(https://issues.chromium.org/463925499): Re-inline in InitializeImpl.
-MaybeError BindGroup::InitializeStaticBindings() {
     const auto* layout = ToBackend(GetLayout());
 
     // Now do a write of a single descriptor set with all possible chained data allocated on the
@@ -211,6 +203,7 @@ MaybeError BindGroup::InitializeStaticBindings() {
     // TODO(https://crbug.com/42242088): Batch these updates
     device->fn.UpdateDescriptorSets(device->GetVkDevice(), numWrites, writes.data(), 0, nullptr);
 
+    SetLabelImpl();
     return {};
 }
 
