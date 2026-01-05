@@ -1631,19 +1631,16 @@ void TextureBase::Unpin() {
     }
 }
 
-void TextureBase::AddResourceTableSlotUse(DynamicArrayState* dynamicArray, BindingIndex i) {
+void TextureBase::AddResourceTableSlotUse(DynamicArrayState* dynamicArray, ResourceTableSlot slot) {
     DAWN_ASSERT(!IsError());
-    // Note that this can be called after the texture is destroyed.
-    ResourceTableSlotUse slot = {dynamicArray, i};
-    auto [_, inserted] = mResourceTableSlotUses.insert(slot);
+    auto [_, inserted] = mResourceTableSlotUses.insert({dynamicArray, slot});
     DAWN_ASSERT(inserted);
 }
 
-void TextureBase::RemoveResourceTableSlotUse(DynamicArrayState* dynamicArray, BindingIndex i) {
+void TextureBase::RemoveResourceTableSlotUse(DynamicArrayState* dynamicArray,
+                                             ResourceTableSlot slot) {
     DAWN_ASSERT(!IsError());
-    // Note that this can be called after the texture is destroyed.
-    ResourceTableSlotUse slot = {dynamicArray, i};
-    bool removed = mResourceTableSlotUses.erase(slot);
+    bool removed = mResourceTableSlotUses.erase({dynamicArray, slot});
     DAWN_ASSERT(removed);
 }
 

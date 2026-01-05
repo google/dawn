@@ -149,7 +149,7 @@ tint::ResourceType ComputeTypeId(const TextureViewBase* view) {
 
 }  // anonymous namespace
 
-ityp::span<BindingIndex, const tint::ResourceType> GetDefaultBindingOrder() {
+ityp::span<ResourceTableSlot, const tint::ResourceType> GetDefaultBindingOrder() {
     static constexpr auto kSampledTextureBindings = std::array{
         tint::ResourceType::kTexture1d_f32,
         tint::ResourceType::kTexture2d_f32,
@@ -183,14 +183,15 @@ ityp::span<BindingIndex, const tint::ResourceType> GetDefaultBindingOrder() {
         tint::ResourceType::kTextureDepthMultisampled2d,
     };
 
-    return {kSampledTextureBindings.data(), BindingIndex(uint32_t(kSampledTextureBindings.size()))};
+    return {kSampledTextureBindings.data(),
+            ResourceTableSlot(uint32_t(kSampledTextureBindings.size()))};
 }
 
-BindingIndex GetDefaultBindingCount() {
+ResourceTableSlot GetDefaultBindingCount() {
     return GetDefaultBindingOrder().size();
 }
 
-DynamicArrayState::DynamicArrayState(DeviceBase* device, BindingIndex size)
+DynamicArrayState::DynamicArrayState(DeviceBase* device, ResourceTableSlot size)
     : mAPISize(size), mDevice(device) {
     mBindings.resize(size + GetDefaultBindingCount());
 
@@ -223,7 +224,7 @@ MaybeError DynamicArrayState::Initialize() {
     DAWN_TRY(mMetadataBuffer->Unmap());
 
     // Add the default bindings at the end of mBindings
-    ityp::span<BindingIndex, Ref<TextureViewBase>> defaultBindings;
+    ityp::span<ResourceTableSlot, Ref<TextureViewBase>> defaultBindings;
     DAWN_TRY_ASSIGN(
         defaultBindings,
         mDevice->GetResourceTableDefaultResources()->GetOrCreateSampledTextureDefaults(mDevice));
@@ -259,15 +260,15 @@ void DynamicArrayState::Destroy() {
     mDestroyed = true;
 }
 
-BindingIndex DynamicArrayState::GetAPISize() const {
+ResourceTableSlot DynamicArrayState::GetAPISize() const {
     return mAPISize;
 }
 
-BindingIndex DynamicArrayState::GetSizeWithDefaultBindings() const {
+ResourceTableSlot DynamicArrayState::GetSizeWithDefaultBindings() const {
     return mBindings.size();
 }
 
-ityp::span<BindingIndex, const Ref<TextureViewBase>> DynamicArrayState::GetBindings() const {
+ityp::span<ResourceTableSlot, const Ref<TextureViewBase>> DynamicArrayState::GetBindings() const {
     DAWN_ASSERT(!mDestroyed);
     return {mBindings.data(), mBindings.size()};
 }
@@ -281,15 +282,15 @@ bool DynamicArrayState::IsDestroyed() const {
     return mDestroyed;
 }
 
-bool DynamicArrayState::CanBeUpdated(BindingIndex slot) const {
+bool DynamicArrayState::CanBeUpdated(ResourceTableSlot slot) const {
     DAWN_ASSERT(!mDestroyed);
     return mBindingState[slot].availableAfter <= mDevice->GetQueue()->GetCompletedCommandSerial();
 }
 
-std::optional<BindingIndex> DynamicArrayState::GetFreeSlot() const {
+std::optional<ResourceTableSlot> DynamicArrayState::GetFreeSlot() const {
     // TODO(https://crbug.com/435317394): This is O(n) in the number of bindings. We could make it
     // O(logN) with a heap of the free slots that's maintained over time.
-    for (BindingIndex slot : Range(mAPISize)) {
+    for (ResourceTableSlot slot : Range(mAPISize)) {
         if (CanBeUpdated(slot)) {
             return {slot};
         }
@@ -297,14 +298,14 @@ std::optional<BindingIndex> DynamicArrayState::GetFreeSlot() const {
     return {};
 }
 
-void DynamicArrayState::Update(BindingIndex slot, const BindingResource& contents) {
+void DynamicArrayState::Update(ResourceTableSlot slot, const BindingResource& contents) {
     DAWN_ASSERT(CanBeUpdated(slot));
     DAWN_ASSERT(mBindingState[slot].typeId == tint::ResourceType::kEmpty);
     mBindingState[slot].availableAfter = kMaxExecutionSerial;
     SetEntry(slot, contents);
 }
 
-void DynamicArrayState::Remove(BindingIndex slot) {
+void DynamicArrayState::Remove(ResourceTableSlot slot) {
     // Prevent all accesses to the binding which means it will be possible to update it once all
     // current GPU work is finished.
     mBindingState[slot].availableAfter = mDevice->GetQueue()->GetLastSubmittedCommandSerial();
@@ -313,7 +314,7 @@ void DynamicArrayState::Remove(BindingIndex slot) {
     SetEntry(slot, {});
 }
 
-void DynamicArrayState::SetEntry(BindingIndex slot, const BindingResource& contents) {
+void DynamicArrayState::SetEntry(ResourceTableSlot slot, const BindingResource& contents) {
     // TODO(435317394): Support bindings that aren't TextureViews
     DAWN_ASSERT(contents.buffer == nullptr && contents.sampler == nullptr);
     TextureViewBase* view = contents.textureView;
@@ -339,7 +340,7 @@ void DynamicArrayState::SetEntry(BindingIndex slot, const BindingResource& conte
     SetMetadata(slot, typeId, pinned);
 }
 
-void DynamicArrayState::OnPinned(BindingIndex slot, TextureBase* texture) {
+void DynamicArrayState::OnPinned(ResourceTableSlot slot, TextureBase* texture) {
     DAWN_ASSERT(!mDestroyed);
     DAWN_ASSERT(mBindings[slot] != nullptr);
     DAWN_ASSERT(mBindings[slot]->GetTexture() == texture);
@@ -348,7 +349,7 @@ void DynamicArrayState::OnPinned(BindingIndex slot, TextureBase* texture) {
     MarkStateDirty(slot);
 }
 
-void DynamicArrayState::OnUnpinned(BindingIndex slot, TextureBase* texture) {
+void DynamicArrayState::OnUnpinned(ResourceTableSlot slot, TextureBase* texture) {
     DAWN_ASSERT(!mDestroyed);
     DAWN_ASSERT(mBindings[slot] != nullptr);
     DAWN_ASSERT(mBindings[slot]->GetTexture() == texture);
@@ -361,7 +362,7 @@ DynamicArrayState::BindingUpdates DynamicArrayState::AcquireDirtyBindingUpdates(
     DAWN_ASSERT(!mDestroyed);
 
     BindingUpdates updates;
-    for (BindingIndex dirtyIndex : mDirtyBindings) {
+    for (ResourceTableSlot dirtyIndex : mDirtyBindings) {
         BindingState& state = mBindingState[dirtyIndex];
         DAWN_ASSERT(state.dirty);
         state.dirty = false;
@@ -397,14 +398,16 @@ DynamicArrayState::BindingUpdates DynamicArrayState::AcquireDirtyBindingUpdates(
     return updates;
 }
 
-void DynamicArrayState::MarkStateDirty(BindingIndex slot) {
+void DynamicArrayState::MarkStateDirty(ResourceTableSlot slot) {
     if (!mBindingState[slot].dirty) {
         mDirtyBindings.push_back(slot);
         mBindingState[slot].dirty = true;
     }
 }
 
-void DynamicArrayState::SetMetadata(BindingIndex slot, tint::ResourceType typeId, bool pinned) {
+void DynamicArrayState::SetMetadata(ResourceTableSlot slot,
+                                    tint::ResourceType typeId,
+                                    bool pinned) {
     BindingState& state = mBindingState[slot];
     if (state.typeId != typeId || state.pinned != pinned) {
         state.typeId = typeId;
@@ -415,7 +418,7 @@ void DynamicArrayState::SetMetadata(BindingIndex slot, tint::ResourceType typeId
 
 // ResourceTableDefaultResources
 
-ResultOrError<ityp::span<BindingIndex, Ref<TextureViewBase>>>
+ResultOrError<ityp::span<ResourceTableSlot, Ref<TextureViewBase>>>
 ResourceTableDefaultResources::GetOrCreateSampledTextureDefaults(DeviceBase* device) {
     if (!mSampledTextureDefaults.empty()) {
         return {{mSampledTextureDefaults.data(), mSampledTextureDefaults.size()}};

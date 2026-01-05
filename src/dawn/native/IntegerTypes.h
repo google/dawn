@@ -70,6 +70,9 @@ using BindGroupMask = ityp::bitset<BindGroupIndex, kMaxBindGroups>;
 template <typename Value>
 using PerBindGroup = ityp::array<BindGroupIndex, Value, kMaxBindGroups>;
 
+// The index of a resource in a ResourceTable, both on the API and shader side.
+using ResourceTableSlot = TypedInteger<struct ResourceTableSlotT, uint32_t>;
+
 // Immediate data constant index get mapped to a packed range of indices
 using ImmediateConstantIndex = TypedInteger<struct ImmediateConstantIndexT, uint32_t>;
 constexpr ImmediateConstantIndex kMaxImmediateConstantIndexTyped =

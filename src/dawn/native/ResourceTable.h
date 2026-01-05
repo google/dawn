@@ -30,17 +30,12 @@
 
 #include "dawn/native/DynamicArrayState.h"
 #include "dawn/native/ObjectBase.h"
-
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 
 MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
                                            const ResourceTableDescriptor* descriptor);
-
-// TODO(https://issues.chromium.org/463925499): Once bindless bindgroup support is removed, make
-// this into a new typed integer type instead of an alias to BindingIndex.
-using ResourceTableSlot = BindingIndex;
 
 class ResourceTableBase : public ApiObjectBase {
   public:

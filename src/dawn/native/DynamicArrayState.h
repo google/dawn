@@ -52,8 +52,8 @@ namespace dawn::native {
 // array.
 // TODO(https://issues.chromium.org/463925499): Take the device in parameter to know if we have
 // sampling vs. full resource table.
-ityp::span<BindingIndex, const tint::ResourceType> GetDefaultBindingOrder();
-BindingIndex GetDefaultBindingCount();
+ityp::span<ResourceTableSlot, const tint::ResourceType> GetDefaultBindingOrder();
+ResourceTableSlot GetDefaultBindingCount();
 
 // An optional component of a BindGroup that's used to track the resources that are in the dynamic
 // binding array part. It helps maintain the metadata buffer that's used in shaders to know if it is
@@ -67,29 +67,29 @@ BindingIndex GetDefaultBindingCount();
 // terminology.
 class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayState> {
   public:
-    DynamicArrayState(DeviceBase* device, BindingIndex size);
+    DynamicArrayState(DeviceBase* device, ResourceTableSlot size);
     ~DynamicArrayState() override;
 
     MaybeError Initialize();
     void Destroy();
 
-    BindingIndex GetAPISize() const;
-    BindingIndex GetSizeWithDefaultBindings() const;
-    ityp::span<BindingIndex, const Ref<TextureViewBase>> GetBindings() const;
+    ResourceTableSlot GetAPISize() const;
+    ResourceTableSlot GetSizeWithDefaultBindings() const;
+    ityp::span<ResourceTableSlot, const Ref<TextureViewBase>> GetBindings() const;
     BufferBase* GetMetadataBuffer() const;
     bool IsDestroyed() const;
-    bool CanBeUpdated(BindingIndex slot) const;
-    std::optional<BindingIndex> GetFreeSlot() const;
+    bool CanBeUpdated(ResourceTableSlot slot) const;
+    std::optional<ResourceTableSlot> GetFreeSlot() const;
 
     // Methods that mutate the state of bindings in the dynamic array. They keep track of the
     // necessary metadata buffer updates required for dynamic type checks in the shader to match
     // what's in the binding array.
     // `contents` can contain no resources, this is useful to mark the slot used even when an error
     // happens, to match what client-side validation would do.
-    void Update(BindingIndex slot, const BindingResource& contents);
-    void Remove(BindingIndex slot);
-    void OnPinned(BindingIndex slot, TextureBase* texture);
-    void OnUnpinned(BindingIndex slot, TextureBase* texture);
+    void Update(ResourceTableSlot slot, const BindingResource& contents);
+    void Remove(ResourceTableSlot slot);
+    void OnPinned(ResourceTableSlot slot, TextureBase* texture);
+    void OnUnpinned(ResourceTableSlot slot, TextureBase* texture);
 
     // Returns the various type ids that need to be updated in the metadata buffer before the next
     // use of the binding array.
@@ -98,7 +98,7 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
         uint32_t data;
     };
     struct ResourceUpdate {
-        BindingIndex slot;
+        ResourceTableSlot slot;
         TextureViewBase* textureView = nullptr;
     };
     struct BindingUpdates {
@@ -109,10 +109,10 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
 
   private:
     bool mDestroyed = false;
-    BindingIndex mAPISize;
+    ResourceTableSlot mAPISize;
     raw_ptr<DeviceBase> mDevice;
 
-    ityp::vector<BindingIndex, Ref<TextureViewBase>> mBindings;
+    ityp::vector<ResourceTableSlot, Ref<TextureViewBase>> mBindings;
     // Buffer that contains a WGSL metadata struct of the following shape:
     //
     // struct Metadata {
@@ -130,25 +130,25 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
         bool resourceDirty = false;  // resourceDirty implies dirty.
         bool pinned = false;
     };
-    ityp::vector<BindingIndex, BindingState> mBindingState;
+    ityp::vector<ResourceTableSlot, BindingState> mBindingState;
 
     // The list of bindings that need to be updated before the next use of the dynamic array.
-    std::vector<BindingIndex> mDirtyBindings;
+    std::vector<ResourceTableSlot> mDirtyBindings;
 
     // Helper method that does the bulk of the shared work between Update and RemoveBinding.
-    void SetEntry(BindingIndex slot, const BindingResource& contents);
+    void SetEntry(ResourceTableSlot slot, const BindingResource& contents);
 
-    void MarkStateDirty(BindingIndex slot);
-    void SetMetadata(BindingIndex slot, tint::ResourceType typeId, bool pinned);
+    void MarkStateDirty(ResourceTableSlot slot);
+    void SetMetadata(ResourceTableSlot slot, tint::ResourceType typeId, bool pinned);
 };
 
 class ResourceTableDefaultResources : public NonMovable {
   public:
-    ResultOrError<ityp::span<BindingIndex, Ref<TextureViewBase>>> GetOrCreateSampledTextureDefaults(
-        DeviceBase* device);
+    ResultOrError<ityp::span<ResourceTableSlot, Ref<TextureViewBase>>>
+    GetOrCreateSampledTextureDefaults(DeviceBase* device);
 
   private:
-    ityp::vector<BindingIndex, Ref<TextureViewBase>> mSampledTextureDefaults;
+    ityp::vector<ResourceTableSlot, Ref<TextureViewBase>> mSampledTextureDefaults;
 };
 
 }  // namespace dawn::native

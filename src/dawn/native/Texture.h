@@ -215,8 +215,8 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     MaybeError Pin(wgpu::TextureUsage usage);
     void Unpin();
-    void AddResourceTableSlotUse(DynamicArrayState* dynamicArray, BindingIndex i);
-    void RemoveResourceTableSlotUse(DynamicArrayState* dynamicArray, BindingIndex i);
+    void AddResourceTableSlotUse(DynamicArrayState* dynamicArray, ResourceTableSlot slot);
+    void RemoveResourceTableSlotUse(DynamicArrayState* dynamicArray, ResourceTableSlot slot);
 
     ResultOrError<Ref<TextureViewBase>> CreateView(
         const TextureViewDescriptor* descriptor = nullptr);
@@ -311,7 +311,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     // Keep a hash set of the places this texture is bound to in DynamicArrayStates.
     struct ResourceTableSlotUse {
         WeakRef<DynamicArrayState> dynamicArray;
-        BindingIndex slot;
+        ResourceTableSlot slot;
 
         struct HashFuncs {
             size_t operator()(const ResourceTableSlotUse& query) const;
