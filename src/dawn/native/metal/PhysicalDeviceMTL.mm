@@ -697,7 +697,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::RG11B10UfloatRenderable);
     EnableFeature(Feature::BGRA8UnormStorage);
     EnableFeature(Feature::DualSourceBlending);
-    EnableFeature(Feature::R8UnormStorage);
     EnableFeature(Feature::ShaderModuleCompilationOptions);
     EnableFeature(Feature::DawnLoadResolveTexture);
     EnableFeature(Feature::ClipDistances);

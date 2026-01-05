@@ -155,7 +155,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::Unorm16TextureFormats);
     EnableFeature(Feature::AdapterPropertiesMemoryHeaps);
     EnableFeature(Feature::AdapterPropertiesD3D);
-    EnableFeature(Feature::R8UnormStorage);
     EnableFeature(Feature::ShaderModuleCompilationOptions);
     EnableFeature(Feature::DawnLoadResolveTexture);
     EnableFeature(Feature::DawnPartialLoadResolveTexture);

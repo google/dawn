@@ -375,10 +375,6 @@ void ComputeFormatCapabilities(const DeviceBase* device, FormatTable& table) {
             Cap::StorageRW);
     }
 
-    if (device->HasFeature(Feature::R8UnormStorage)) {
-        AddCaps({wgpu::TextureFormat::R8Unorm}, Cap::StorageROnly | Cap::StorageWOnly);
-    }
-
     if (device->HasFeature(Feature::BGRA8UnormStorage)) {
         AddCaps({wgpu::TextureFormat::BGRA8Unorm}, Cap::StorageWOnly);
     }

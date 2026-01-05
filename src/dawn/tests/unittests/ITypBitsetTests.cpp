@@ -325,7 +325,7 @@ TEST_F(ITypBitsetIteratorTest, Iterator_Large) {
     std::set<native::Feature> originalValues;
     originalValues.insert(native::Feature::Depth32FloatStencil8);
     originalValues.insert(native::Feature::Subgroups);
-    originalValues.insert(native::Feature::R8UnormStorage);
+    originalValues.insert(native::Feature::TextureFormatsTier1);
     originalValues.insert(native::Feature::MultiDrawIndirect);
 
     for (native::Feature value : originalValues) {
@@ -359,7 +359,7 @@ TEST_F(ITypBitsetIteratorTest, NonLValueBitset_Large) {
 
     mLargeStateBits.set(native::Feature::Depth32FloatStencil8);
     mLargeStateBits.set(native::Feature::Subgroups);
-    mLargeStateBits.set(native::Feature::R8UnormStorage);
+    mLargeStateBits.set(native::Feature::TextureFormatsTier1);
     mLargeStateBits.set(native::Feature::MultiDrawIndirect);
 
     otherBits.set(native::Feature::ShaderF16);

@@ -325,10 +325,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::DualSourceBlending);
     }
 
-    if (mDeviceInfo.features.shaderStorageImageExtendedFormats == VK_TRUE) {
-        EnableFeature(Feature::R8UnormStorage);
-    }
-
     if (mDeviceInfo.features.shaderClipDistance == VK_TRUE) {
         EnableFeature(Feature::ClipDistances);
     }
