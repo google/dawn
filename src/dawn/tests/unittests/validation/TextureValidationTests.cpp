@@ -712,6 +712,78 @@ TEST_F(TextureValidationTest, UseASTCFormatWithoutEnablingFeature) {
     }
 }
 
+class TextureCompatValidationTest : public ValidationTest {
+  protected:
+    bool UseCompatibilityMode() const override { return true; }
+
+    wgpu::TextureDescriptor CreateDefaultTextureDescriptor() {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size.width = 1;
+        descriptor.size.height = 1;
+        descriptor.size.depthOrArrayLayers = 1;
+        descriptor.mipLevelCount = 1;
+        descriptor.sampleCount = 1;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+        descriptor.usage = wgpu::TextureUsage::TextureBinding;
+        return descriptor;
+    }
+};
+
+TEST_F(TextureCompatValidationTest, TextureBindingViewDimension1DDefaultsTo1D) {
+    wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+    descriptor.dimension = wgpu::TextureDimension::e1D;
+    wgpu::Texture tex = device.CreateTexture(&descriptor);
+
+    EXPECT_EQ(wgpu::TextureViewDimension::e1D, tex.GetTextureBindingViewDimension());
+}
+
+TEST_F(TextureCompatValidationTest, TextureBindingViewDimension2DDefaultsTo2D) {
+    wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    wgpu::Texture tex = device.CreateTexture(&descriptor);
+
+    EXPECT_EQ(wgpu::TextureViewDimension::e2D, tex.GetTextureBindingViewDimension());
+}
+
+TEST_F(TextureCompatValidationTest, TextureBindingViewDimension2DWith2PlusLayersDefaultsTo2D) {
+    wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.size.depthOrArrayLayers = 2;
+    wgpu::Texture tex = device.CreateTexture(&descriptor);
+
+    EXPECT_EQ(wgpu::TextureViewDimension::e2DArray, tex.GetTextureBindingViewDimension());
+}
+
+TEST_F(TextureCompatValidationTest, TextureBindingViewDimension3DDefaultsTo3D) {
+    wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+    descriptor.dimension = wgpu::TextureDimension::e3D;
+    wgpu::Texture tex = device.CreateTexture(&descriptor);
+
+    EXPECT_EQ(wgpu::TextureViewDimension::e3D, tex.GetTextureBindingViewDimension());
+}
+
+TEST_F(TextureCompatValidationTest, TextureBindingViewDimensionInvalidDefaultsToUndefined) {
+    wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+    descriptor.dimension = static_cast<wgpu::TextureDimension>(12345);
+
+    wgpu::Texture tex;
+    ASSERT_DEVICE_ERROR(tex = device.CreateTexture(&descriptor));
+
+    EXPECT_EQ(wgpu::TextureViewDimension::Undefined, tex.GetTextureBindingViewDimension());
+}
+
+TEST_F(TextureCompatValidationTest, TextureBindingViewDimensionInvalidFormatStillSetsDimension) {
+    wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+    descriptor.format = static_cast<wgpu::TextureFormat>(12345);
+    descriptor.size.depthOrArrayLayers = 2;
+
+    wgpu::Texture tex;
+    ASSERT_DEVICE_ERROR(tex = device.CreateTexture(&descriptor));
+
+    EXPECT_EQ(wgpu::TextureViewDimension::e2DArray, tex.GetTextureBindingViewDimension());
+}
+
 class D32S8TextureFormatsValidationTests : public TextureValidationTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
@@ -1027,6 +1099,8 @@ static void CheckTextureMatchesDescriptor(const wgpu::Texture& tex,
     }
     EXPECT_EQ(desc.usage, tex.GetUsage());
     EXPECT_EQ(desc.format, tex.GetFormat());
+    // This is undefined in core, set in compat.
+    EXPECT_EQ(wgpu::TextureViewDimension::Undefined, tex.GetTextureBindingViewDimension());
 }
 
 // Test that the texture creation parameters are correctly reflected for succesfully created

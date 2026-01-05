@@ -96,7 +96,7 @@ ReservedBuffer Client::ReserveBuffer(WGPUDevice device, const WGPUBufferDescript
 }
 
 ReservedTexture Client::ReserveTexture(WGPUDevice device, const WGPUTextureDescriptor* descriptor) {
-    Ref<Texture> texture = Make<Texture>(descriptor);
+    Ref<Texture> texture = Make<Texture>(FromAPI(device), descriptor);
 
     ReservedTexture result;
     result.handle = texture->GetWireHandle(this);

@@ -395,6 +395,14 @@ WGPUBuffer Device::APICreateErrorBuffer(const WGPUBufferDescriptor* descriptor) 
     return Buffer::CreateError(this, descriptor);
 }
 
+WGPUTexture Device::APICreateTexture(const WGPUTextureDescriptor* descriptor) {
+    return Texture::Create(this, descriptor);
+}
+
+WGPUTexture Device::APICreateErrorTexture(const WGPUTextureDescriptor* descriptor) {
+    return Texture::CreateError(this, descriptor);
+}
+
 WGPUAdapter Device::APIGetAdapter() const {
     Ref<Adapter> adapter = mAdapter;
     return ReturnToAPI(std::move(adapter));
