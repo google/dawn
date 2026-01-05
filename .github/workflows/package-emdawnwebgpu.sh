@@ -69,7 +69,6 @@ EMSDK_VERSION=$(python3 tools/activate-emsdk --get-emsdk-version)
 # Create zip
 cat << EOF > out/wasm/emdawnwebgpu_pkg/VERSION.txt
 Dawn release ${PKG_VERSION} at revision <https://dawn.googlesource.com/dawn/+log/${SHA}>.
-Built/tested with emsdk release ${EMSDK_VERSION}.
 EOF
 (cd out/wasm && zip -9roX - emdawnwebgpu_pkg > "../../${PKG_FILE}")
 PKG_FILE_SHA512=$(python3 -c 'import hashlib, sys; print(hashlib.sha512(sys.stdin.buffer.read()).hexdigest())' < "${PKG_FILE}")
@@ -126,11 +125,22 @@ def clear(ports, settings, shared):
 EOF
 
 # Create RELEASE_INFO.md
+# TODO(crbug.com/430624000): This is not specific to Emdawnwebgpu, move it
+# out of this script, and ideally include it in every release artifact.
+# (Also rename release artifacts for consistency.)
 cat << EOF > RELEASE_INFO.md
 $(cat out/wasm/emdawnwebgpu_pkg/VERSION.txt)
 
+Only dawn.googlesource.com Git source code is official. Nightly releases of
+native binaries and Emdawnwebgpu are built on GitHub, provided as a best-effort
+service. They are not signed or guaranteed by Google or the Dawn team.
+
+## Emdawnwebgpu
+
 Use either the \`emdawnwebgpu-*.remoteport.py\` file (Emscripten 4.0.10+) or the \`emdawnwebgpu_pkg-*.zip\`.
 For full instructions, see the [README](https://dawn.googlesource.com/dawn/+/${SHA}/src/emdawnwebgpu/pkg/README.md) which is included in both files.
+
+Tested against emsdk release ${EMSDK_VERSION}.
 EOF
 
 # Save version numbers for later steps
