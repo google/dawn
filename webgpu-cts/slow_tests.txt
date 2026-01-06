@@ -100,3 +100,9 @@ crbug.com/42241379 [ win intel angle-d3d11 asan ] webgpu:shader,validation,expre
 
 # FXC times out on the large shader produced by this test
 crbug.com/402178306 [ webgpu-dxc-disabled win ] webgpu:shader,execution,limits:struct_members: [ Slow ]
+
+# Close to the timeout, crbug.com/472640587
+[ android ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=3;rows=3 [ Slow ]
+[ android ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=3;rows=4 [ Slow ]
+[ android ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=3 [ Slow ]
+[ android ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ Slow ]
