@@ -1,9 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
+  # Only run on demand and when publishing a nightly release. (We don't rely on
+  # GitHub Actions to test PRs, because that all happens in Gerrit.)
   workflow_dispatch:
   workflow_call:
 
