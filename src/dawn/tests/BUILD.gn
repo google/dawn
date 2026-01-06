@@ -540,10 +540,6 @@ source_set("test_infra_sources") {
     "${dawn_root}/src/dawn/wire",
   ]
 
-  if (dawn_enable_webgpu_on_webgpu) {
-    deps += [ "${dawn_root}/src/dawn/replay" ]
-  }
-
   public = [
     "AdapterTestConfig.h",
     "DawnTest.h",
@@ -559,6 +555,10 @@ source_set("test_infra_sources") {
 
   if (dawn_supports_glfw_for_windowing) {
     public_deps += [ "${dawn_root}/src/dawn/glfw" ]
+  }
+
+  if (dawn_enable_webgpu_on_webgpu) {
+    public_deps += [ "${dawn_root}/src/dawn/replay" ]
   }
 
   sources = [
@@ -787,6 +787,10 @@ source_set("end2end_tests_sources") {
     ]
   }
 
+  if (dawn_enable_webgpu_on_webgpu) {
+    sources += [ "end2end/CaptureAndReplayTests.cpp" ]
+  }
+
   if (dawn_enable_d3d11 || dawn_enable_d3d12 ||
       (dawn_enable_vulkan && is_chromeos) || dawn_enable_metal) {
     sources += [
@@ -834,11 +838,6 @@ source_set("white_box_tests_sources") {
     "white_box/WaitListEventTests.cpp",
   ]
   libs = []
-
-  if (dawn_enable_webgpu_on_webgpu) {
-    deps += [ "${dawn_root}/src/dawn/replay" ]
-    sources += [ "white_box/CaptureAndReplayTests.cpp" ]
-  }
 
   if (is_mac || is_ios) {
     sources += [ "white_box/SharedTextureMemoryTests_apple.mm" ]
