@@ -3,18 +3,16 @@ package androidx.webgpu
 import android.graphics.Color
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.webgpu.ApiLevelSkipRule
+import androidx.test.filters.SdkSuppress
 import androidx.webgpu.GPUColor
 import androidx.webgpu.helper.toGPUColor
 import org.junit.Assert.assertEquals
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ExtensionsTest {
 
-    @get:Rule val apiSkipRule = ApiLevelSkipRule()
     private val delta = 1e-6
 
     @Test
@@ -45,7 +43,7 @@ class ExtensionsTest {
     }
 
     @Test
-    @ApiRequirement(minApi = Build.VERSION_CODES.O)
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
     fun testLongToGpuColor() {
         // Create a long color for opaque blue
         val blueLong = Color.pack(0.0f, 0.0f, 1.0f)
