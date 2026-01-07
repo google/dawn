@@ -560,7 +560,13 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
             argument = access->Object();
         }
 
-        // Handle parameter can only be identifiers.
+        // The handle param could come in a few different forms, either it's associated to a
+        // `GlobalVariable` or as a `Parameter`. Those are the more common case. With
+        // `texture_and_sampler_let` it can also come through a chain of let assignments, so we have
+        // to walk through any `LocalVariable` entries until we get to first non-`LocalVariable`.
+        // The last option is that as we walk up the let chain, we no longer find a `RootIdentifier`
+        // this can happen when a `getResource` is assigned into a `let`. In that case, we just
+        // bail out early and return an empty set as there _is no_ global handle argument.
         auto* identifier = argument->RootIdentifier();
 
         // With `texture_and_sampler_let` the variable maybe in a let and we need to trace the
@@ -568,8 +574,9 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
         auto* local = identifier->As<sem::LocalVariable>();
         while (local != nullptr) {
             identifier = local->Initializer()->RootIdentifier();
-            TINT_ASSERT(identifier);
-
+            if (!identifier) {
+                return scratch_global;
+            }
             local = identifier->As<sem::LocalVariable>();
         }
 
@@ -589,9 +596,6 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
     // set of statically determined globals for the texture and sampler arguments.
     auto RecordBuiltinCallMetadata = [&](const sem::Call* call, const sem::BuiltinFn* builtin,
                                          const GlobalSet& textures, const GlobalSet& samplers) {
-        // All builtins with samplers also take a texture.
-        TINT_ASSERT(!textures.IsEmpty());
-
         // Compute the statically used texture+sampler pairs.
         for (const auto* sampler : samplers) {
             auto sampler_binding_point = sampler->Attributes().binding_point.value();

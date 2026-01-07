@@ -1626,6 +1626,25 @@ fn callee_func() { _ = foo; }
     EXPECT_TRUE(ep.is_id_specified);
 }
 
+TEST_F(InspectorGetEntryPointTest, HasTextureFromGetResource) {
+    std::string shader = R"(
+enable chromium_experimental_resource_table;
+
+const kHouseTexture = 2u;
+
+@fragment fn fs() {
+    let td = getResource<texture_depth_2d>(kHouseTexture);
+    _ = textureLoad(td, vec2(0), 0);
+}
+    )";
+    Inspector& inspector = Initialize(shader);
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    // Resource table information doesn't set the flag.
+    EXPECT_FALSE(inspector.GetEntryPoint("lfs").has_texture_load_with_depth_texture);
+}
+
 TEST_F(InspectorGetEntryPointTest, HasTextureLoadWithDepthTexture) {
     std::string shader = R"(
         @group(0) @binding(0) var td : texture_depth_2d;
