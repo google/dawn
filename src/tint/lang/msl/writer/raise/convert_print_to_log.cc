@@ -185,8 +185,8 @@ struct State {
         invocation_id = b.Var("tint_print_invocation_id", core::AddressSpace::kPrivate, ty.vec3u());
         ir.root_block->Append(invocation_id);
 
-        auto* id = GetBuiltinInput(ep, core::BuiltinValue::kGlobalInvocationId, ty.vec3u());
         b.InsertBefore(ep->Block()->Front(), [&] {  //
+            auto* id = GetBuiltinInput(ep, core::BuiltinValue::kGlobalInvocationId, ty.vec3u());
             b.Store(invocation_id, id);
         });
     }
@@ -197,8 +197,8 @@ struct State {
         invocation_id = b.Var("tint_print_invocation_id", core::AddressSpace::kPrivate, ty.vec3f());
         ir.root_block->Append(invocation_id);
 
-        auto* pos = GetBuiltinInput(ep, core::BuiltinValue::kPosition, ty.vec4f());
         b.InsertBefore(ep->Block()->Front(), [&] {  //
+            auto* pos = GetBuiltinInput(ep, core::BuiltinValue::kPosition, ty.vec4f());
             b.Store(invocation_id, b.Swizzle<vec3<f32>>(pos, Vector{0u, 1u, 2u}));
         });
     }
@@ -209,9 +209,9 @@ struct State {
         invocation_id = b.Var("tint_print_invocation_id", core::AddressSpace::kPrivate, ty.vec2u());
         ir.root_block->Append(invocation_id);
 
-        auto* instance = GetBuiltinInput(ep, core::BuiltinValue::kInstanceIndex, ty.u32());
-        auto* vertex = GetBuiltinInput(ep, core::BuiltinValue::kVertexIndex, ty.u32());
         b.InsertBefore(ep->Block()->Front(), [&] {  //
+            auto* instance = GetBuiltinInput(ep, core::BuiltinValue::kInstanceIndex, ty.u32());
+            auto* vertex = GetBuiltinInput(ep, core::BuiltinValue::kVertexIndex, ty.u32());
             b.Store(invocation_id, b.Construct<vec2<u32>>(instance, vertex));
         });
     }
