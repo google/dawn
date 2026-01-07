@@ -350,6 +350,13 @@ std::string GetDeviceDebugPrefixFromDebugName(const char* debugName) {
     return std::string(debugName, length);
 }
 
+std::string FormatAPIVersion(uint32_t version) {
+    std::ostringstream versionString;
+    versionString << VK_API_VERSION_MAJOR(version) << "." << VK_API_VERSION_MINOR(version) << "."
+                  << VK_API_VERSION_PATCH(version);
+    return versionString.str();
+}
+
 std::vector<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
     const VulkanFunctions& fn,
     VkPhysicalDevice vkPhysicalDevice,

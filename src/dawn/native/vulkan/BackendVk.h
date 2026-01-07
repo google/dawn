@@ -45,6 +45,13 @@
 
 namespace dawn::native::vulkan {
 
+// The required version of Vulkan the driver must support in order for Dawn to use the Vulkan
+// backend. If this value is updated ensure that appropriate adjustments are made to
+// VulkanExtensions.h/cpp and VulkanFunctions.h/cpp.
+// Vulkan 1.1 is required due to poor quality of some Vulkan 1.0 drivers.
+// See crbug.com/850881, crbug.com/863086, crbug.com/1465064, crbug.com/346990068
+static constexpr uint32_t kRequiredVulkanVersion = VK_API_VERSION_1_1;
+
 enum class ICD {
     None,
     SwiftShader,

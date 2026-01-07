@@ -109,9 +109,7 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
         // test them.
         return mGbmDevice != nullptr &&
                (mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::ExternalMemoryFD) &&
-                mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::ImageDrmFormatModifier)) &&
-               (!params.useDedicatedAllocation ||
-                mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::DedicatedAllocation));
+                mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::ImageDrmFormatModifier));
     }
 
     std::unique_ptr<ExternalTexture> CreateTexture(uint32_t width,

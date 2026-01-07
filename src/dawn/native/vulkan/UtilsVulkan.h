@@ -182,6 +182,8 @@ void SetDebugName(Device* device,
 std::string GetNextDeviceDebugPrefix();
 std::string GetDeviceDebugPrefixFromDebugName(const char* debugName);
 
+std::string FormatAPIVersion(uint32_t version);
+
 // Get the properties for the given format.
 // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDrmFormatModifierPropertiesEXT.html
 std::vector<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(

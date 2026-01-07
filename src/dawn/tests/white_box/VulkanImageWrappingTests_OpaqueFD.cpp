@@ -106,9 +106,7 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
     }
 
     bool SupportsTestParams(const TestParams& params) const override {
-        return mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::ExternalMemoryFD) &&
-               (!params.useDedicatedAllocation ||
-                mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::DedicatedAllocation));
+        return mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::ExternalMemoryFD);
     }
 
     std::unique_ptr<ExternalTexture> CreateTexture(uint32_t width,

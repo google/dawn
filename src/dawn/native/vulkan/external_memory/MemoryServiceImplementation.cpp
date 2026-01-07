@@ -43,10 +43,6 @@ bool ServiceImplementation::RequiresDedicatedAllocation(const ExternalImageDescr
             return false;
 
         case NeedsDedicatedAllocation::Detect:
-            if (!mDevice->GetDeviceInfo().HasExt(DeviceExt::DedicatedAllocation)) {
-                return false;
-            }
-
             VkMemoryDedicatedRequirements dedicatedRequirements;
             dedicatedRequirements.sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS;
             dedicatedRequirements.pNext = nullptr;

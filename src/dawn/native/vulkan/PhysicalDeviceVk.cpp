@@ -209,15 +209,9 @@ MaybeError PhysicalDevice::InitializeImpl() {
     mSubgroupMaxSize = mDeviceInfo.subgroupSizeControlProperties.maxSubgroupSize;
 
     // Check for essential Vulkan extensions and features
-    // Needed for viewport Y-flip.
-    if (!mDeviceInfo.HasExt(DeviceExt::Maintenance1)) {
-        return DAWN_INTERNAL_ERROR("Vulkan 1.1 or Vulkan 1.0 with KHR_Maintenance1 required.");
-    }
 
-    // Needed for separate depth/stencilReadOnly
-    if (!mDeviceInfo.HasExt(DeviceExt::Maintenance2)) {
-        return DAWN_INTERNAL_ERROR("Vulkan 1.1 or Vulkan 1.0 with KHR_Maintenance2 required.");
-    }
+    // Dawn requires at least Vulkan 1.1
+    DAWN_ASSERT(mDeviceInfo.properties.apiVersion >= VK_API_VERSION_1_1);
 
     // Needed for security
     if (!mDeviceInfo.features.robustBufferAccess) {
@@ -337,7 +331,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
     bool shaderF16Enabled = false;
     if (mDeviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
-        mDeviceInfo.HasExt(DeviceExt::_16BitStorage) &&
         mDeviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
         mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE) {
         EnableFeature(Feature::ShaderF16);
@@ -354,8 +347,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::DepthClipControl);
     }
 
-    if (mDeviceInfo.HasExt(DeviceExt::SamplerYCbCrConversion) &&
-        mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer) &&
+    if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer) &&
         mDeviceInfo.samplerYCbCrConversionFeatures.samplerYcbcrConversion == VK_TRUE) {
         EnableFeature(Feature::YCbCrVulkanSamplers);
     }
@@ -838,7 +830,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
     if (mDeviceInfo.HasExt(DeviceExt::Maintenance4)) {
         limits->v1.maxBufferSize = mDeviceInfo.propertiesMaintenance4.maxBufferSize;
-    } else if (mDeviceInfo.HasExt(DeviceExt::Maintenance3)) {
+    } else {
         limits->v1.maxBufferSize = mDeviceInfo.propertiesMaintenance3.maxMemoryAllocationSize;
     }
     if (limits->v1.maxBufferSize < baseLimits.v1.maxBufferSize) {

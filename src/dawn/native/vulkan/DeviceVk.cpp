@@ -422,25 +422,17 @@ void Device::EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator) {
 ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysicalDevice) {
     VulkanDeviceKnobs usedKnobs = {};
 
-    // Default to asking for all available known extensions.
+    // Ask for all available known extensions.
     usedKnobs.extensions = mDeviceInfo.extensions;
 
-    // However only request the extensions that haven't been promoted in the device's apiVersion
     std::vector<const char*> extensionNames;
     for (DeviceExt ext : usedKnobs.extensions) {
         const DeviceExtInfo& info = GetDeviceExtInfo(ext);
-
-        if (info.versionPromoted > mDeviceInfo.properties.apiVersion) {
-            extensionNames.push_back(info.name);
-        }
+        extensionNames.push_back(info.name);
     }
 
     // Some device features can only be enabled using a VkPhysicalDeviceFeatures2 struct, which
-    // is supported by the VK_EXT_get_physical_properties2 instance extension, which was
-    // promoted as a core API in Vulkan 1.1.
-    //
-    // Prepare a VkPhysicalDeviceFeatures2 struct for this use case, it will only be populated
-    // if HasExt(DeviceExt::GetPhysicalDeviceProperties2) is true.
+    // is promoted as a core API in Vulkan 1.1.
     VkPhysicalDeviceFeatures2 features2 = {};
     features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     features2.pNext = nullptr;
@@ -566,7 +558,6 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     if (HasFeature(Feature::ShaderF16)) {
         DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ShaderFloat16Int8) &&
                     mDeviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
-                    usedKnobs.HasExt(DeviceExt::_16BitStorage) &&
                     mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE);
         if (!IsToggleEnabled(Toggle::DecomposeUniformBuffers)) {
             DAWN_ASSERT(mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess ==
@@ -611,7 +602,6 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     if (HasFeature(Feature::YCbCrVulkanSamplers) &&
-        mDeviceInfo.HasExt(DeviceExt::SamplerYCbCrConversion) &&
         mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer)) {
         usedKnobs.samplerYCbCrConversionFeatures.samplerYcbcrConversion = VK_TRUE;
         featuresChain.Add(&usedKnobs.samplerYCbCrConversionFeatures,
@@ -685,9 +675,11 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         queuesToRequest.push_back(queueCreateInfo);
     }
 
+    features2.features = usedKnobs.features;
+
     VkDeviceCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.pNext = nullptr;
+    createInfo.pNext = &features2;
     createInfo.flags = 0;
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queuesToRequest.size());
     createInfo.pQueueCreateInfos = queuesToRequest.data();
@@ -695,17 +687,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     createInfo.ppEnabledLayerNames = nullptr;
     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionNames.size());
     createInfo.ppEnabledExtensionNames = extensionNames.data();
-
-    // When we have DeviceExt::GetPhysicalDeviceProperties2, use features2 so that features not
-    // covered by VkPhysicalDeviceFeatures can be enabled.
-    if (mDeviceInfo.HasExt(DeviceExt::GetPhysicalDeviceProperties2)) {
-        features2.features = usedKnobs.features;
-        createInfo.pNext = &features2;
-        createInfo.pEnabledFeatures = nullptr;
-    } else {
-        DAWN_ASSERT(features2.pNext == nullptr);
-        createInfo.pEnabledFeatures = &usedKnobs.features;
-    }
+    createInfo.pEnabledFeatures = nullptr;
 
     DAWN_TRY(CheckVkSuccess(fn.CreateDevice(vkPhysicalDevice, &createInfo, nullptr, &mVkDevice),
                             "vkCreateDevice"));

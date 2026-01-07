@@ -381,10 +381,13 @@ MaybeError VulkanInstance::Initialize(const InstanceBase* instance, ICD icd) {
     DAWN_TRY(mFunctions.LoadGlobalProcs(mVulkanLib));
 
     DAWN_TRY_ASSIGN(mGlobalInfo, GatherGlobalInfo(mFunctions));
-    if (icd != ICD::SwiftShader && mGlobalInfo.apiVersion < VK_MAKE_API_VERSION(0, 1, 1, 0)) {
-        // See crbug.com/850881, crbug.com/863086, crbug.com/1465064, crbug.com/346990068
-        return DAWN_INTERNAL_ERROR(
-            "Vulkan 1.0 driver is unsupported. At least Vulkan 1.1 is required.");
+
+    if (mGlobalInfo.apiVersion < kRequiredVulkanVersion) {
+        std::ostringstream versionError;
+        versionError << "Vulkan " << FormatAPIVersion(mGlobalInfo.apiVersion)
+                     << " driver is unsupported. At least Vulkan "
+                     << FormatAPIVersion(kRequiredVulkanVersion) << " is required.";
+        return DAWN_INTERNAL_ERROR(versionError.str());
     }
 
     VulkanGlobalKnobs usedGlobalKnobs = {};
@@ -443,10 +446,7 @@ ResultOrError<VulkanGlobalKnobs> VulkanInstance::CreateVkInstance(const Instance
     std::vector<const char*> extensionNames;
     for (InstanceExt ext : extensionsToRequest) {
         const InstanceExtInfo& info = GetInstanceExtInfo(ext);
-
-        if (info.versionPromoted > mGlobalInfo.apiVersion) {
-            extensionNames.push_back(info.name);
-        }
+        extensionNames.push_back(info.name);
     }
 
     VkApplicationInfo appInfo;
@@ -456,7 +456,7 @@ ResultOrError<VulkanGlobalKnobs> VulkanInstance::CreateVkInstance(const Instance
     appInfo.applicationVersion = 0;
     appInfo.pEngineName = "Dawn";
     appInfo.engineVersion = 0;
-    appInfo.apiVersion = std::min(mGlobalInfo.apiVersion, VK_API_VERSION_1_4);
+    appInfo.apiVersion = kRequiredVulkanVersion;
 
     VkInstanceCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
