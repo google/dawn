@@ -58,7 +58,7 @@ class ComputePipeline final : public ComputePipelineBase {
   private:
     ~ComputePipeline() override;
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     using ComputePipelineBase::ComputePipelineBase;
     ComPtr<ID3D12PipelineState> mPipelineState;

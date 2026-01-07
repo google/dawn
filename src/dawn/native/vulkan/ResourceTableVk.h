@@ -54,7 +54,7 @@ class ResourceTable final : public ResourceTableBase {
     VkDescriptorSet GetHandle() const;
 
   protected:
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     void SetLabelImpl() override;
 
   private:

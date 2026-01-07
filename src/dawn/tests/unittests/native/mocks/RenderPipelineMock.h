@@ -46,7 +46,7 @@ class RenderPipelineMock : public RenderPipelineBase {
     ~RenderPipelineMock() override;
 
     MOCK_METHOD(MaybeError, InitializeImpl, (), (override));
-    MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 
   protected:
     RenderPipelineMock(DeviceMock* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);

@@ -896,7 +896,7 @@ void Texture::SetLabelImpl() {
     SetLabelHelper("Dawn_InternalTexture");
 }
 
-void Texture::DestroyImpl() {
+void Texture::DestroyImpl(DestroyReason reason) {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
     // - It may be called if the texture is explicitly destroyed with APIDestroy.
     //   This case is NOT thread-safe and needs proper synchronization with other
@@ -907,7 +907,7 @@ void Texture::DestroyImpl() {
     mHandle = VK_NULL_HANDLE;
     mIsExternalSwapChainTexture = false;
 
-    TextureBase::DestroyImpl();
+    TextureBase::DestroyImpl(reason);
 }
 
 VkImage Texture::GetHandle() const {
@@ -1564,7 +1564,7 @@ MaybeError InternalTexture::Initialize(VkImageUsageFlags extraUsages) {
     return {};
 }
 
-void InternalTexture::DestroyImpl() {
+void InternalTexture::DestroyImpl(DestroyReason reason) {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
     // - It may be called if the texture is explicitly destroyed with APIDestroy.
     //   This case is NOT thread-safe and needs proper synchronization with other
@@ -1580,7 +1580,7 @@ void InternalTexture::DestroyImpl() {
     device->GetResourceMemoryAllocator()->Deallocate(&mMemoryAllocation);
     mMemoryAllocation = ResourceMemoryAllocation();
 
-    Texture::DestroyImpl();
+    Texture::DestroyImpl(reason);
 }
 
 //
@@ -1618,7 +1618,7 @@ ImportedTextureBase::~ImportedTextureBase() {
     }
 }
 
-void ImportedTextureBase::DestroyImpl() {
+void ImportedTextureBase::DestroyImpl(DestroyReason reason) {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
     // - It may be called if the texture is explicitly destroyed with APIDestroy.
     //   This case is NOT thread-safe and needs proper synchronization with other
@@ -1630,7 +1630,7 @@ void ImportedTextureBase::DestroyImpl() {
         ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mPendingSemaphore);
         mPendingSemaphore = VK_NULL_HANDLE;
     }
-    Texture::DestroyImpl();
+    Texture::DestroyImpl(reason);
 }
 
 void ImportedTextureBase::TransitionEagerlyForExport(CommandRecordingContext* recordingContext) {
@@ -1861,7 +1861,7 @@ ResultOrError<Ref<ExternalVkImageTexture>> ExternalVkImageTexture::Create(
     return texture;
 }
 
-void ExternalVkImageTexture::DestroyImpl() {
+void ExternalVkImageTexture::DestroyImpl(DestroyReason reason) {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
     // - It may be called if the texture is explicitly destroyed with APIDestroy.
     //   This case is NOT thread-safe and needs proper synchronization with other
@@ -1879,7 +1879,7 @@ void ExternalVkImageTexture::DestroyImpl() {
         mExternalAllocation = VK_NULL_HANDLE;
     }
 
-    ImportedTextureBase::DestroyImpl();
+    ImportedTextureBase::DestroyImpl(reason);
 }
 
 MaybeError ExternalVkImageTexture::Initialize(const ExternalImageDescriptorVk* descriptor,
@@ -2006,7 +2006,7 @@ ResultOrError<Ref<SharedTexture>> SharedTexture::Create(
     return texture;
 }
 
-void SharedTexture::DestroyImpl() {
+void SharedTexture::DestroyImpl(DestroyReason reason) {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
     // - It may be called if the texture is explicitly destroyed with APIDestroy.
     //   This case is NOT thread-safe and needs proper synchronization with other
@@ -2016,7 +2016,7 @@ void SharedTexture::DestroyImpl() {
     //   other threads using the texture since there are no other live refs.
     mSharedTextureMemoryObjects = {};
 
-    ImportedTextureBase::DestroyImpl();
+    ImportedTextureBase::DestroyImpl(reason);
 }
 
 void SharedTexture::Initialize(SharedTextureMemory* memory) {
@@ -2133,7 +2133,7 @@ TextureView::TextureView(TextureBase* texture,
     : TextureViewBase(texture, descriptor), mTextureViewId(textureViewId) {}
 TextureView::~TextureView() {}
 
-void TextureView::DestroyImpl() {
+void TextureView::DestroyImpl(DestroyReason reason) {
     Device* device = ToBackend(GetTexture()->GetDevice());
 
     if (mSamplerYCbCrConversion != VK_NULL_HANDLE) {

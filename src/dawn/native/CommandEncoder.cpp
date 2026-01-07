@@ -1237,7 +1237,7 @@ ObjectType CommandEncoder::GetType() const {
     return ObjectType::CommandEncoder;
 }
 
-void CommandEncoder::DestroyImpl() {
+void CommandEncoder::DestroyImpl(DestroyReason reason) {
     mEncodingContext.Destroy();
 }
 

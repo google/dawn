@@ -73,7 +73,7 @@ bool BindGroupLayoutBase::IsLayoutEqual(const BindGroupLayoutBase* other,
     return GetInternalBindGroupLayout() == other->GetInternalBindGroupLayout();
 }
 
-void BindGroupLayoutBase::DestroyImpl() {}
+void BindGroupLayoutBase::DestroyImpl(DestroyReason reason) {}
 
 void BindGroupLayoutBase::SetLabelImpl() {
     // Note: Internal BindGroups are deduplicated so if a user

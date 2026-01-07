@@ -51,7 +51,7 @@ class ComputePipeline final : public ComputePipelineBase, public PipelineGL {
   private:
     using ComputePipelineBase::ComputePipelineBase;
     ~ComputePipeline() override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 };
 
 }  // namespace dawn::native::opengl

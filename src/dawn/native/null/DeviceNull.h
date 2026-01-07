@@ -176,7 +176,7 @@ class Device final : public DeviceBase {
         TextureBase* texture,
         const UnpackedPtr<TextureViewDescriptor>& descriptor) override;
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
 
@@ -273,7 +273,7 @@ class Buffer final : public BufferBase {
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
     MaybeError FinalizeMapImpl(BufferState newState) override;
     void UnmapImpl(BufferState oldState, BufferState newState) override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;
     void* GetMappedPointerImpl() override;

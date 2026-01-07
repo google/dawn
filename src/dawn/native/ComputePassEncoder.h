@@ -88,7 +88,7 @@ class ComputePassEncoder final : public ProgrammableEncoder {
                        StringView label);
 
   private:
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     ResultOrError<std::pair<Ref<BufferBase>, uint64_t>> TransformIndirectDispatchBuffer(
         Ref<BufferBase> indirectBuffer,

@@ -55,7 +55,7 @@ class ComputePipeline final : public ComputePipelineBase, public PipelineVk {
 
   private:
     ~ComputePipeline() override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     using ComputePipelineBase::ComputePipelineBase;
 
     VkPipeline mHandle = VK_NULL_HANDLE;

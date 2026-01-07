@@ -86,7 +86,7 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(Device* device,
     return fence;
 }
 
-void SharedFence::DestroyImpl() {
+void SharedFence::DestroyImpl(DestroyReason reason) {
     mFence = nullptr;
 }
 

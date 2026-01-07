@@ -59,7 +59,7 @@ class ErrorSharedTextureMemory : public SharedTextureMemoryBase {
                                                      UnpackedPtr<EndAccessState>& state) override {
         DAWN_UNREACHABLE();
     }
-    void DestroyImpl() override {}
+    void DestroyImpl(DestroyReason reason) override {}
 };
 
 }  // namespace

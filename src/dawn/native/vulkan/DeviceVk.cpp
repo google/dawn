@@ -971,7 +971,7 @@ void Device::CheckDebugMessagesAfterDestruction() const {
     DAWN_ASSERT(false);
 }
 
-void Device::DestroyImpl() {
+void Device::DestroyImpl(DestroyReason reason) {
     DAWN_ASSERT(GetState() == State::Disconnected);
 
     // We failed during initialization so early that we don't even have a VkDevice. There is

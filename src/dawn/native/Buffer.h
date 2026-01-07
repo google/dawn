@@ -163,7 +163,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     BufferBase(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& descriptor);
     BufferBase(DeviceBase* device, const BufferDescriptor* descriptor, ObjectBase::ErrorTag tag);
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     ~BufferBase() override;
 

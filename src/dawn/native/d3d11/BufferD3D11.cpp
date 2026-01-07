@@ -236,7 +236,7 @@ class StagingBuffer final : public Buffer {
         : Buffer(device, descriptor, /*internalMappableFlags=*/kMappableBufferUsages) {}
 
   private:
-    void DestroyImpl() override {
+    void DestroyImpl(DestroyReason reason) override {
         // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
         // - It may be called if the buffer is explicitly destroyed with APIDestroy.
         //   This case is NOT thread-safe and needs proper synchronization with other
@@ -244,7 +244,7 @@ class StagingBuffer final : public Buffer {
         // - It may be called when the last ref to the buffer is dropped and the buffer
         //   is implicitly destroyed. This case is thread-safe because there are no
         //   other threads using the buffer since there are no other live refs.
-        Buffer::DestroyImpl();
+        Buffer::DestroyImpl(reason);
 
         mD3d11Buffer = nullptr;
     }
@@ -563,7 +563,7 @@ void* Buffer::GetMappedPointerImpl() {
     return mMappedData;
 }
 
-void Buffer::DestroyImpl() {
+void Buffer::DestroyImpl(DestroyReason reason) {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
     // - It may be called if the buffer is explicitly destroyed with APIDestroy.
     //   This case is NOT thread-safe and needs proper synchronization with other
@@ -571,7 +571,7 @@ void Buffer::DestroyImpl() {
     // - It may be called when the last ref to the buffer is dropped and the buffer
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the buffer since there are no other live refs.
-    BufferBase::DestroyImpl();
+    BufferBase::DestroyImpl(reason);
 }
 
 MaybeError Buffer::EnsureDataInitialized(const ScopedCommandRecordingContext* commandContext) {
@@ -835,7 +835,7 @@ GPUUsableBuffer::GPUUsableBuffer(DeviceBase* device,
 
 GPUUsableBuffer::~GPUUsableBuffer() = default;
 
-void GPUUsableBuffer::DestroyImpl() {
+void GPUUsableBuffer::DestroyImpl(DestroyReason reason) {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
     // - It may be called if the buffer is explicitly destroyed with APIDestroy.
     //   This case is NOT thread-safe and needs proper synchronization with other
@@ -843,7 +843,7 @@ void GPUUsableBuffer::DestroyImpl() {
     // - It may be called when the last ref to the buffer is dropped and the buffer
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the buffer since there are no other live refs.
-    Buffer::DestroyImpl();
+    Buffer::DestroyImpl(reason);
 
     mSRVCache.clear();
     mUAVCache.clear();

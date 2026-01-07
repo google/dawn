@@ -64,7 +64,7 @@ class QuerySetBase : public ApiObjectBase {
                  const QuerySetDescriptor* descriptor,
                  ObjectBase::ErrorTag tag);
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     ~QuerySetBase() override;
 

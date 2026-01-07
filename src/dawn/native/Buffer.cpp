@@ -461,7 +461,7 @@ BufferBase::~BufferBase() {
                  GetDevice()->GetState() == DeviceBase::State::Destroyed));
 }
 
-void BufferBase::DestroyImpl() {
+void BufferBase::DestroyImpl(DestroyReason reason) {
     // If the initial state is Unmapped the compared_exchange() should be successful. If not the
     // current state has been loaded in `state` and loop body handles anything needed like unmapping
     // the buffer.

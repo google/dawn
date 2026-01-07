@@ -76,7 +76,7 @@ class BindGroupLayout : public BindGroupLayoutInternalBase {
     ~BindGroupLayout() override;
 
     MaybeError Initialize();
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
 

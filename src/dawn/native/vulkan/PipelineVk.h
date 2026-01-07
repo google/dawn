@@ -50,7 +50,7 @@ class PipelineVk {
   protected:
     MaybeError InitializeBase(PipelineLayout* layout,
                               const ImmediateConstantMask& immediateConstantMask);
-    void DestroyImpl();
+    void DestroyImpl(DestroyReason reason);
 
   private:
     Ref<RefCountedVkHandle<VkPipelineLayout>> mVkPipelineLayout;

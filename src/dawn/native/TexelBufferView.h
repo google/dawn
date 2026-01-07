@@ -56,7 +56,7 @@ class TexelBufferViewBase : public ApiObjectBase {
     uint64_t GetSize() const;
 
   protected:
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
   private:
     ApiObjectList* GetObjectTrackingList() override;

@@ -487,8 +487,8 @@ MaybeError RenderPipeline::InitializeImpl() {
 
 RenderPipeline::~RenderPipeline() = default;
 
-void RenderPipeline::DestroyImpl() {
-    RenderPipelineBase::DestroyImpl();
+void RenderPipeline::DestroyImpl(DestroyReason reason) {
+    RenderPipelineBase::DestroyImpl(reason);
     ToBackend(GetDevice())->ReferenceUntilUnused(mPipelineState);
 }
 

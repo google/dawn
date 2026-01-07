@@ -89,7 +89,7 @@ class Texture final : public TextureBase {
     void InitializeAsWrapping(const UnpackedPtr<TextureDescriptor>& descriptor,
                               NSPRef<id<MTLTexture>> wrapped);
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     void SetLabelImpl() override;
 
     MaybeError ClearTexture(CommandRecordingContext* commandContext,
@@ -123,7 +123,7 @@ class TextureView final : public TextureViewBase {
   private:
     using TextureViewBase::TextureViewBase;
     MaybeError Initialize(const UnpackedPtr<TextureViewDescriptor>& descriptor);
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     void SetLabelImpl() override;
 
     std::optional<MTLTextureSwizzleChannels> ComputeMetalSwizzle();

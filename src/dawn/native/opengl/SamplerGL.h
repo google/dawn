@@ -47,7 +47,7 @@ class Sampler final : public SamplerBase {
     ~Sampler() override;
 
     MaybeError Initialize(const SamplerDescriptor* descriptor);
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     GLuint mHandle = 0;
 };

@@ -45,7 +45,7 @@ class Sampler final : public SamplerBase {
 
   private:
     ~Sampler() override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     using SamplerBase::SamplerBase;
     MaybeError Initialize(const SamplerDescriptor* descriptor);
 

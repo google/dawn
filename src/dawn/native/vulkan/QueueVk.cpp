@@ -403,7 +403,7 @@ ResultOrError<VkFence> Queue::GetUnusedFence() {
     return fence;
 }
 
-void Queue::DestroyImpl() {
+void Queue::DestroyImpl(DestroyReason reason) {
     Device* device = ToBackend(GetDevice());
     VkDevice vkDevice = device->GetVkDevice();
 
@@ -444,7 +444,7 @@ void Queue::DestroyImpl() {
         unusedFences->clear();
     });
 
-    QueueBase::DestroyImpl();
+    QueueBase::DestroyImpl(reason);
 }
 
 ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial waitSerial,

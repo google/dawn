@@ -470,7 +470,7 @@ void Device::AppendDeviceLostMessage(ErrorData* error) {
     }
 }
 
-void Device::DestroyImpl() {
+void Device::DestroyImpl(DestroyReason reason) {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
     // - It may be called if the device is explicitly destroyed with APIDestroy.
     //   This case is NOT thread-safe and needs proper synchronization with other
@@ -483,7 +483,7 @@ void Device::DestroyImpl() {
     mImplicitPixelLocalStorageAttachmentTextureViews = {};
     mStagingBuffers.clear();
 
-    Base::DestroyImpl();
+    Base::DestroyImpl(reason);
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {

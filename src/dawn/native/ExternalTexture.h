@@ -88,7 +88,7 @@ class ExternalTextureBase : public ApiObjectBase {
 
   protected:
     ExternalTextureBase(DeviceBase* device, const ExternalTextureDescriptor* descriptor);
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     MaybeError Initialize(DeviceBase* device, const ExternalTextureDescriptor* descriptor);
 

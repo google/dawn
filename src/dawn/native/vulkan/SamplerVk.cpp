@@ -132,8 +132,8 @@ MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
 
 Sampler::~Sampler() = default;
 
-void Sampler::DestroyImpl() {
-    SamplerBase::DestroyImpl();
+void Sampler::DestroyImpl(DestroyReason reason) {
+    SamplerBase::DestroyImpl(reason);
     if (mSamplerYCbCrConversion != VK_NULL_HANDLE) {
         ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mSamplerYCbCrConversion);
         mSamplerYCbCrConversion = VK_NULL_HANDLE;

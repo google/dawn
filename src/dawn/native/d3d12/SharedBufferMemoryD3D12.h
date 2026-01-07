@@ -64,7 +64,7 @@ class SharedBufferMemory final : public SharedBufferMemoryBase {
                        std::unique_ptr<Heap> heap,
                        ComPtr<ID3D12Resource> resource);
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     ResultOrError<Ref<BufferBase>> CreateBufferImpl(
         const UnpackedPtr<BufferDescriptor>& descriptor) override;

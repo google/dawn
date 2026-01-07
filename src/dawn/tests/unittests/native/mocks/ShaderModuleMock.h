@@ -46,7 +46,7 @@ class ShaderModuleMock : public ShaderModuleBase {
 
     ~ShaderModuleMock() override;
 
-    MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 
   protected:
     ShaderModuleMock(DeviceMock* device, const UnpackedPtr<ShaderModuleDescriptor>& descriptor);

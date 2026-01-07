@@ -57,7 +57,7 @@ class SharedFence final : public SharedFenceBase {
 
   private:
     SharedFence(Device* device, StringView label, dawn::utils::SystemHandle handle);
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;
 

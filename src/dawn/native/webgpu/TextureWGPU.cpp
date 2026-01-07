@@ -92,8 +92,8 @@ Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descripto
     DAWN_ASSERT(mInnerHandle);
 }
 
-void Texture::DestroyImpl() {
-    TextureBase::DestroyImpl();
+void Texture::DestroyImpl(DestroyReason reason) {
+    TextureBase::DestroyImpl(reason);
     auto& wgpu = ToBackend(GetDevice())->wgpu;
     wgpu.textureDestroy(mInnerHandle);
 }

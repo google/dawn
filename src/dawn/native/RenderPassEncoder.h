@@ -104,7 +104,7 @@ class RenderPassEncoder final : public RenderEncoderBase {
                       StringView label);
 
   private:
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);
 

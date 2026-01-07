@@ -127,7 +127,7 @@ class Texture final : public TextureBase {
 
     // Dawn API
     void SetLabelImpl() override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     MaybeError ClearTexture(CommandRecordingContext* commandContext,
                             const SubresourceRange& range,

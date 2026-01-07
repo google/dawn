@@ -286,14 +286,14 @@ VkDescriptorSet ResourceTable::GetHandle() const {
     return mSet;
 }
 
-void ResourceTable::DestroyImpl() {
+void ResourceTable::DestroyImpl(DestroyReason reason) {
     if (mPool != VK_NULL_HANDLE) {
         ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mPool);
         mPool = VK_NULL_HANDLE;
         mSet = VK_NULL_HANDLE;
     }
 
-    ResourceTableBase::DestroyImpl();
+    ResourceTableBase::DestroyImpl(reason);
 }
 
 void ResourceTable::SetLabelImpl() {

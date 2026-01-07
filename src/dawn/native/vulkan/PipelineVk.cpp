@@ -41,7 +41,7 @@ MaybeError PipelineVk::InitializeBase(PipelineLayout* layout,
     return {};
 }
 
-void PipelineVk::DestroyImpl() {
+void PipelineVk::DestroyImpl(DestroyReason reason) {
     mVkPipelineLayout = nullptr;
 }
 

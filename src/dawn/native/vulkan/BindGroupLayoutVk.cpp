@@ -223,8 +223,8 @@ MaybeError BindGroupLayout::Initialize() {
     return {};
 }
 
-void BindGroupLayout::DestroyImpl() {
-    BindGroupLayoutInternalBase::DestroyImpl();
+void BindGroupLayout::DestroyImpl(DestroyReason reason) {
+    BindGroupLayoutInternalBase::DestroyImpl(reason);
 
     Device* device = ToBackend(GetDevice());
 

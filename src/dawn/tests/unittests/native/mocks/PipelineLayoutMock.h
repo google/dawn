@@ -41,7 +41,7 @@ class PipelineLayoutMock : public PipelineLayoutBase {
     PipelineLayoutMock(DeviceMock* device, const PipelineLayoutDescriptor* descriptor);
     ~PipelineLayoutMock() override;
 
-    MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 };
 
 }  // namespace dawn::native

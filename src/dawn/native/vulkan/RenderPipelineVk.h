@@ -54,7 +54,7 @@ class RenderPipeline final : public RenderPipelineBase, public PipelineVk {
 
   private:
     ~RenderPipeline() override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     using RenderPipelineBase::RenderPipelineBase;
 
     struct PipelineVertexInputStateCreateInfoTemporaryAllocations {

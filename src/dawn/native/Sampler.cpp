@@ -112,7 +112,7 @@ SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringVie
 
 SamplerBase::~SamplerBase() = default;
 
-void SamplerBase::DestroyImpl() {
+void SamplerBase::DestroyImpl(DestroyReason reason) {
     Uncache();
 }
 

@@ -243,7 +243,7 @@ class Device final : public DeviceBase {
         const ExternalImageDescriptor* descriptor,
         GLuint texture);
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     void MarkGLUsed(ExecutionQueueBase::SubmitMode submitMode) const;
 

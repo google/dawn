@@ -975,7 +975,7 @@ uint32_t SharedTextureMemory::GetQueueFamilyIndex() const {
     return mQueueFamilyIndex;
 }
 
-void SharedTextureMemory::DestroyImpl() {
+void SharedTextureMemory::DestroyImpl(DestroyReason reason) {
     mVkImage = nullptr;
     mVkDeviceMemory = nullptr;
 }

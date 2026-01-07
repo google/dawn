@@ -105,7 +105,7 @@ DeviceBase* ObjectBase::GetDevice() const {
 
 void ApiObjectList::Track(ApiObjectBase* object) {
     if (mMarkedDestroyed.load(std::memory_order_acquire)) {
-        object->DestroyImpl();
+        object->DestroyImpl(DestroyReason::Placeholder);
         return;
     }
     mObjects.Use([&object](auto lockedObjects) { lockedObjects->Prepend(object); });
@@ -115,7 +115,7 @@ bool ApiObjectList::Untrack(ApiObjectBase* object) {
     return mObjects.Use([&object](auto lockedObjects) { return object->RemoveFromList(); });
 }
 
-void ApiObjectList::Destroy() {
+void ApiObjectList::Destroy(DestroyReason reason) {
     std::vector<ApiObjectBase*> objectsToDestroy;
     mObjects.Use([&objectsToDestroy, this](auto lockedObjects) {
         mMarkedDestroyed.store(true, std::memory_order_release);
@@ -138,7 +138,7 @@ void ApiObjectList::Destroy() {
     });
 
     for (ApiObjectBase* object : objectsToDestroy) {
-        object->DestroyImpl();
+        object->DestroyImpl(reason);
         // `object` may be deleted here if last real reference was dropped on another thread.
         object->Release();
     }
@@ -207,11 +207,11 @@ ApiObjectList* ApiObjectBase::GetObjectTrackingList() {
     return GetDevice()->GetObjectTrackingList(GetType());
 }
 
-void ApiObjectBase::Destroy() {
+void ApiObjectBase::Destroy(DestroyReason reason) {
     ApiObjectList* list = GetObjectTrackingList();
     DAWN_ASSERT(list != nullptr);
     if (list->Untrack(this)) {
-        DestroyImpl();
+        DestroyImpl(reason);
     }
 }
 

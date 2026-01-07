@@ -310,8 +310,8 @@ Texture::Texture(Device* device,
 
 Texture::~Texture() {}
 
-void Texture::DestroyImpl() {
-    TextureBase::DestroyImpl();
+void Texture::DestroyImpl(DestroyReason reason) {
+    TextureBase::DestroyImpl(reason);
     if (mOwnsHandle == OwnsHandle::Yes) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
         DAWN_GL_TRY_IGNORE_ERRORS(gl, DeleteTextures(1, &mHandle));
@@ -667,8 +667,8 @@ TextureView::TextureView(TextureBase* texture,
 
 TextureView::~TextureView() {}
 
-void TextureView::DestroyImpl() {
-    TextureViewBase::DestroyImpl();
+void TextureView::DestroyImpl(DestroyReason reason) {
+    TextureViewBase::DestroyImpl(reason);
     if (mOwnsHandle == OwnsHandle::Yes) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
         DAWN_GL_TRY_IGNORE_ERRORS(gl, DeleteTextures(1, &mHandle));

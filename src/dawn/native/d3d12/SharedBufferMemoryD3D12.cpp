@@ -158,7 +158,7 @@ SharedBufferMemory::SharedBufferMemory(Device* device,
       mHeap(std::move(heap)),
       mResource(std::move(resource)) {}
 
-void SharedBufferMemory::DestroyImpl() {
+void SharedBufferMemory::DestroyImpl(DestroyReason reason) {
     ToBackend(GetDevice())->ReferenceUntilUnused(std::move(mResource));
 }
 

@@ -121,7 +121,7 @@ class PipelineLayoutBase : public ApiObjectBase,
 
   protected:
     PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     PerBindGroup<Ref<BindGroupLayoutBase>> mBindGroupLayouts;
     BindGroupMask mMask;

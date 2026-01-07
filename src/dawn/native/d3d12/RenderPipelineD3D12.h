@@ -61,7 +61,7 @@ class RenderPipeline final : public RenderPipelineBase {
   private:
     ~RenderPipeline() override;
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     using RenderPipelineBase::RenderPipelineBase;
     D3D12_INPUT_LAYOUT_DESC ComputeInputLayout(

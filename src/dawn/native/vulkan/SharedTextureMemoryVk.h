@@ -66,7 +66,7 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
                         StringView label,
                         const SharedTextureMemoryProperties& properties,
                         uint32_t queueFamilyIndex);
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) override;

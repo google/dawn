@@ -70,7 +70,7 @@ class CommandBufferBase : public ApiObjectBase {
     CommandIterator* GetCommandIteratorForTesting();
 
   protected:
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     CommandIterator mCommands;
 

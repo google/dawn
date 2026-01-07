@@ -55,7 +55,7 @@ class QuerySet final : public QuerySetBase {
     ~QuerySet() override;
 
     // Dawn API
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     NSPRef<id<MTLBuffer>> mVisibilityBuffer;
 

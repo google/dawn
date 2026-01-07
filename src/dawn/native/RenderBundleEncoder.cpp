@@ -125,10 +125,10 @@ RenderBundleEncoder::~RenderBundleEncoder() {
     mEncodingContext = nullptr;
 }
 
-void RenderBundleEncoder::DestroyImpl() {
+void RenderBundleEncoder::DestroyImpl(DestroyReason reason) {
     mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     mCommandBufferState.End();
-    RenderEncoderBase::DestroyImpl();
+    RenderEncoderBase::DestroyImpl(reason);
     mBundleEncodingContext.Destroy();
 }
 

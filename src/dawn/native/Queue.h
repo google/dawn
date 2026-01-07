@@ -113,7 +113,7 @@ class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
     QueueBase(DeviceBase* device, const QueueDescriptor* descriptor);
     QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     virtual MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) = 0;
     virtual MaybeError WriteBufferImpl(BufferBase* buffer,

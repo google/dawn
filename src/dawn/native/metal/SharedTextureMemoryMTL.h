@@ -68,7 +68,7 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
     // initialization.
     MaybeError Initialize();
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) override;

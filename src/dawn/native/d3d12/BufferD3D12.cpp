@@ -531,7 +531,7 @@ void* Buffer::GetMappedPointerImpl() {
     return mMappedData;
 }
 
-void Buffer::DestroyImpl() {
+void Buffer::DestroyImpl(DestroyReason reason) {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
     // - It may be called if the buffer is explicitly destroyed with APIDestroy.
     //   This case is NOT thread-safe and needs proper synchronization with other
@@ -545,7 +545,7 @@ void Buffer::DestroyImpl() {
         // which parts to flush, so we set it to an empty range to prevent flushes.
         mWrittenMappedRange = {0, 0};
     }
-    BufferBase::DestroyImpl();
+    BufferBase::DestroyImpl(reason);
 
     ToBackend(GetDevice())->DeallocateMemory(mResourceAllocation);
 

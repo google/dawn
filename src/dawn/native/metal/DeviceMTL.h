@@ -140,7 +140,7 @@ class Device final : public DeviceBase {
     void StopTrace();
     bool mTraceInProgress = false;
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     NSPRef<id<MTLDevice>> mMtlDevice;
 

@@ -79,7 +79,7 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
                         SharedTextureMemoryProperties properties,
                         ComPtr<ID3D11Resource> resource);
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) override;

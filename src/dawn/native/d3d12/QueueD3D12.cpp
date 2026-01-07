@@ -80,7 +80,7 @@ MaybeError Queue::Initialize() {
     return OpenPendingCommands();
 }
 
-void Queue::DestroyImpl() {
+void Queue::DestroyImpl(DestroyReason reason) {
     // Immediately forget about all pending commands for the case where device is lost on its
     // own and WaitForIdleForDestruction isn't called.
     mPendingCommands.Release();

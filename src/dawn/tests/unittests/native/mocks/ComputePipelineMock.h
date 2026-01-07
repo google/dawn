@@ -47,7 +47,7 @@ class ComputePipelineMock : public ComputePipelineBase {
     ~ComputePipelineMock() override;
 
     MOCK_METHOD(MaybeError, InitializeImpl, (), (override));
-    MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 
   protected:
     ComputePipelineMock(DeviceBase* device,

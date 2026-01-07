@@ -50,7 +50,7 @@ class SharedTextureMemoryEGL final : public SharedTextureMemory {
                            const SharedTextureMemoryProperties& properties,
                            ::EGLImage image);
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
   private:
     ::EGLImage mEGLImage = nullptr;

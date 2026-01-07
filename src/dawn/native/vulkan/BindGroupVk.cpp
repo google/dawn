@@ -207,8 +207,8 @@ MaybeError BindGroup::InitializeImpl() {
     return {};
 }
 
-void BindGroup::DestroyImpl() {
-    BindGroupBase::DestroyImpl();
+void BindGroup::DestroyImpl(DestroyReason reason) {
+    BindGroupBase::DestroyImpl(reason);
     ToBackend(GetLayout())->DeallocateDescriptorSet(&mDescriptorSetAllocation);
 }
 

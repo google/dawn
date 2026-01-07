@@ -254,7 +254,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     TextureBase(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor);
     ~TextureBase() override;
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     void AddInternalUsage(wgpu::TextureUsage usage);
     void SetSharedResourceMemoryContentsForTesting(Ref<SharedResourceMemoryContents> contents);
 
@@ -380,7 +380,7 @@ class TextureViewBase : public ApiObjectBase {
     virtual YCbCrVkDescriptor GetYCbCrVkDescriptor() const;
 
   protected:
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
   private:
     TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);

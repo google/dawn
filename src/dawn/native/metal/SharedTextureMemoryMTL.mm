@@ -155,8 +155,8 @@ SharedTextureMemory::SharedTextureMemory(Device* device,
       mMtlFormat(mtlFormat),
       mMtlUsage(mtlUsage) {}
 
-void SharedTextureMemory::DestroyImpl() {
-    SharedTextureMemoryBase::DestroyImpl();
+void SharedTextureMemory::DestroyImpl(DestroyReason reason) {
+    SharedTextureMemoryBase::DestroyImpl(reason);
     mIOSurface = nullptr;
 }
 

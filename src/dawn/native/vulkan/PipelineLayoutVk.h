@@ -60,7 +60,7 @@ class PipelineLayout final : public PipelineLayoutBase {
 
   private:
     ~PipelineLayout() override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     using PipelineLayoutBase::PipelineLayoutBase;
     MaybeError Initialize();

@@ -47,7 +47,7 @@ Device::~Device() {
     Destroy();
 }
 
-void Device::DestroyImpl() {}
+void Device::DestroyImpl(DestroyReason reason) {}
 
 const PlatformFunctions* Device::GetFunctions() const {
     return ToBackend(GetPhysicalDevice())->GetBackend()->GetFunctions();

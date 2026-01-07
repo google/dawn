@@ -107,7 +107,7 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor);
 
     MaybeError InitializeBase();
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     // Methods that mutate the state of resources in the table. They keep track of the necessary
     // metadata buffer updates required for dynamic type checks in the shader to match what's in the

@@ -47,7 +47,7 @@ class BufferMock : public BufferBase {
                std::optional<uint64_t> allocatedSize = std::nullopt);
     ~BufferMock() override;
 
-    MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 
     MOCK_METHOD(MaybeError, MapAtCreationImpl, (), (override));
     MOCK_METHOD(MaybeError,

@@ -731,7 +731,7 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
 
 BindGroupBase::~BindGroupBase() = default;
 
-void BindGroupBase::DestroyImpl() {
+void BindGroupBase::DestroyImpl(DestroyReason reason) {
     if (mLayout != nullptr) {
         DAWN_ASSERT(!IsError());
         for (BindingIndex i{0}; i < GetLayout()->GetBindingCount(); ++i) {

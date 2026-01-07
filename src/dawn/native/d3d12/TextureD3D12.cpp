@@ -346,8 +346,8 @@ Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descripto
 
 Texture::~Texture() = default;
 
-void Texture::DestroyImpl() {
-    TextureBase::DestroyImpl();
+void Texture::DestroyImpl(DestroyReason reason) {
+    TextureBase::DestroyImpl(reason);
     ToBackend(GetDevice())->DeallocateMemory(mResourceAllocation);
     // Set mIsExternalSwapChainTexture to false to prevent ever calling
     // ID3D12SharingContract::Present again.

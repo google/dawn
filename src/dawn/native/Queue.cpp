@@ -145,7 +145,7 @@ QueueBase::~QueueBase() {
     DAWN_ASSERT(mTasksInFlight->Empty());
 }
 
-void QueueBase::DestroyImpl() {}
+void QueueBase::DestroyImpl(DestroyReason reason) {}
 
 // static
 Ref<QueueBase> QueueBase::MakeError(DeviceBase* device, StringView label) {

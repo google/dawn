@@ -67,7 +67,7 @@ class BindGroup final : public BindGroupBase, public PlacementAllocated {
     ~BindGroup() override;
 
     MaybeError InitializeImpl() override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     void DeleteThis() override;
 
     Ref<SamplerHeapCacheEntry> mSamplerAllocationEntry;

@@ -179,7 +179,7 @@ SharedTextureMemory::SharedTextureMemory(Device* device,
     }
 }
 
-void SharedTextureMemory::DestroyImpl() {
+void SharedTextureMemory::DestroyImpl(DestroyReason reason) {
     mKeyedMutex = nullptr;
     mResource = nullptr;
 }

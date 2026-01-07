@@ -421,7 +421,7 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     int GetTintProgramRecreateCountForTesting() const;
 
   protected:
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
   private:
     ShaderModuleBase(DeviceBase* device,

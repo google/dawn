@@ -79,7 +79,7 @@ class Queue : public d3d::Queue {
                                 const TexelCopyBufferLayout& dataLayout,
                                 const Extent3D& writeSizePixel) override;
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     bool HasPendingCommands() const override;
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestructionImpl() override;

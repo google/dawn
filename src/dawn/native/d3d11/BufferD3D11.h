@@ -152,7 +152,7 @@ class Buffer : public BufferBase {
            wgpu::BufferUsage internalMappableFlags);
     ~Buffer() override;
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     virtual MaybeError InitializeInternal() = 0;
 
@@ -233,7 +233,7 @@ class GPUUsableBuffer final : public Buffer {
     class Storage;
 
     // Dawn API
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     void SetLabelImpl() override;
 
     MaybeError InitializeInternal() override;

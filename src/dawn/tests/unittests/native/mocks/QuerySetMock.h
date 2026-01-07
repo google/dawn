@@ -40,7 +40,7 @@ class QuerySetMock : public QuerySetBase {
     QuerySetMock(DeviceMock* device, const QuerySetDescriptor* descriptor);
     ~QuerySetMock() override;
 
-    MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 };
 
 }  // namespace dawn::native

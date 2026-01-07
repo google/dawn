@@ -164,7 +164,7 @@ Ref<ComputePassEncoder> ComputePassEncoder::MakeError(DeviceBase* device,
         new ComputePassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError, label));
 }
 
-void ComputePassEncoder::DestroyImpl() {
+void ComputePassEncoder::DestroyImpl(DestroyReason reason) {
     mCommandBufferState.End();
 
     // Ensure that the pass has exited. This is done for passes only since validation requires

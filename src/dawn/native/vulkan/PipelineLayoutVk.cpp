@@ -155,8 +155,8 @@ VkShaderStageFlags PipelineLayout::GetImmediateDataRangeStage() const {
 
 PipelineLayout::~PipelineLayout() = default;
 
-void PipelineLayout::DestroyImpl() {
-    PipelineLayoutBase::DestroyImpl();
+void PipelineLayout::DestroyImpl(DestroyReason reason) {
+    PipelineLayoutBase::DestroyImpl(reason);
     mVkPipelineLayouts->clear();
 }
 

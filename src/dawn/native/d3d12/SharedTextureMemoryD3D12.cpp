@@ -127,7 +127,7 @@ SharedTextureMemory::CreateSharedTextureMemoryFromD3D12Resource(
     return result;
 }
 
-void SharedTextureMemory::DestroyImpl() {
+void SharedTextureMemory::DestroyImpl(DestroyReason reason) {
     ToBackend(GetDevice())->ReferenceUntilUnused(std::move(mResource));
     mKeyedMutex = nullptr;
 }

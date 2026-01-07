@@ -72,7 +72,7 @@ class SamplerBase : public ApiObjectBase,
     uint16_t GetMaxAnisotropy() const { return mMaxAnisotropy; }
 
   protected:
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
   private:
     SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);

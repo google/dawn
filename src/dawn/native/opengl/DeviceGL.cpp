@@ -525,7 +525,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
     return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer to texture.");
 }
 
-void Device::DestroyImpl() {
+void Device::DestroyImpl(DestroyReason reason) {
     DAWN_ASSERT(GetState() == State::Disconnected);
 
     mTextureBuiltinsBuffer = nullptr;

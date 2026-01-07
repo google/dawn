@@ -174,8 +174,8 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
     mMappedData = nullptr;
 }
 
-void Buffer::DestroyImpl() {
-    BufferBase::DestroyImpl();
+void Buffer::DestroyImpl(DestroyReason reason) {
+    BufferBase::DestroyImpl(reason);
     auto& wgpu = ToBackend(GetDevice())->wgpu;
     wgpu.bufferDestroy(mInnerHandle);
 }

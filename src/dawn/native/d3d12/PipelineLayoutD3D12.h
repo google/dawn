@@ -109,7 +109,7 @@ class PipelineLayout final : public PipelineLayoutBase {
     ~PipelineLayout() override = default;
     using PipelineLayoutBase::PipelineLayoutBase;
     MaybeError Initialize();
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     PerBindGroup<uint32_t> mCbvUavSrvRootParameterInfo;
     PerBindGroup<uint32_t> mSamplerRootParameterInfo;

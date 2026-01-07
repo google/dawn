@@ -74,7 +74,7 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(Device* device,
     return fence;
 }
 
-void SharedFence::DestroyImpl() {
+void SharedFence::DestroyImpl(DestroyReason reason) {
     ToBackend(GetDevice())->ReferenceUntilUnused(std::move(mFence));
     mFence = nullptr;
 }

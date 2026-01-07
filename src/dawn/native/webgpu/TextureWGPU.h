@@ -52,7 +52,7 @@ class Texture final : public TextureBase, public RecordableObject, public Object
 
   private:
     Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor);
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     void SetLabelImpl() override;
 };
 

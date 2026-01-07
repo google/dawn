@@ -97,7 +97,7 @@ class RenderEncoderBase : public ProgrammableEncoder {
                       ErrorTag errorTag,
                       StringView label);
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     CommandBufferStateTracker mCommandBufferState;
     RenderPassResourceUsageTracker mUsageTracker;

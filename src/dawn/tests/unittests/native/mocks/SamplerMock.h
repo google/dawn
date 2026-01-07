@@ -40,7 +40,7 @@ class SamplerMock : public SamplerBase {
     SamplerMock(DeviceMock* device, const SamplerDescriptor* descriptor);
     ~SamplerMock() override;
 
-    MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 };
 
 }  // namespace dawn::native

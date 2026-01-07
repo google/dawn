@@ -445,7 +445,7 @@ void ExternalTextureBase::APIDestroy() {
     Destroy();
 }
 
-void ExternalTextureBase::DestroyImpl() {
+void ExternalTextureBase::DestroyImpl(DestroyReason reason) {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
     // - It may be called if the texture is explicitly destroyed with APIDestroy.
     //   This case is NOT thread-safe and needs proper synchronization with other

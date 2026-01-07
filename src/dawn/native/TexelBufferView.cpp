@@ -112,7 +112,7 @@ uint64_t TexelBufferViewBase::GetSize() const {
     return mSize;
 }
 
-void TexelBufferViewBase::DestroyImpl() {}
+void TexelBufferViewBase::DestroyImpl(DestroyReason reason) {}
 
 ApiObjectList* TexelBufferViewBase::GetObjectTrackingList() {
     if (mBuffer != nullptr) {

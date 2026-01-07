@@ -57,7 +57,7 @@ class RenderPipeline final : public RenderPipelineBase, public PipelineGL {
   private:
     RenderPipeline(Device* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
     ~RenderPipeline() override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     MaybeError CreateVAOForVertexState(const OpenGLFunctions& gl);
 

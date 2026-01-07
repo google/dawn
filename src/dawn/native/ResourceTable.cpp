@@ -349,7 +349,7 @@ MaybeError ResourceTableBase::InitializeBase() {
     return {};
 }
 
-void ResourceTableBase::DestroyImpl() {
+void ResourceTableBase::DestroyImpl(DestroyReason reason) {
     DAWN_ASSERT(!mDestroyed);
 
     for (auto [i, slot] : Enumerate(mSlots)) {

@@ -52,12 +52,12 @@ QuerySet::QuerySet(Device* device, const QuerySetDescriptor* descriptor)
 
 QuerySet::~QuerySet() = default;
 
-void QuerySet::DestroyImpl() {
+void QuerySet::DestroyImpl(DestroyReason reason) {
     const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
     if (mQueries.size() > 0) {
         DAWN_GL_TRY_IGNORE_ERRORS(gl, DeleteQueries(mQueries.size(), mQueries.data()));
     }
-    QuerySetBase::DestroyImpl();
+    QuerySetBase::DestroyImpl(reason);
 }
 
 GLuint QuerySet::Get(uint32_t index) const {

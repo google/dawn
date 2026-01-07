@@ -42,7 +42,7 @@ class CommandBufferMock : public CommandBufferBase {
                       const CommandBufferDescriptor* descriptor);
     ~CommandBufferMock() override;
 
-    MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 };
 
 }  // namespace dawn::native

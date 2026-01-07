@@ -103,8 +103,8 @@ Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
 
 Sampler::~Sampler() = default;
 
-void Sampler::DestroyImpl() {
-    SamplerBase::DestroyImpl();
+void Sampler::DestroyImpl(DestroyReason reason) {
+    SamplerBase::DestroyImpl(reason);
     const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
     DAWN_GL_TRY_IGNORE_ERRORS(gl, DeleteSamplers(1, &mHandle));
 }

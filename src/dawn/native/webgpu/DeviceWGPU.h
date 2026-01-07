@@ -133,7 +133,7 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
                                             const TextureCopy& dst,
                                             const Extent3D& copySizePixels) override;
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     void SetLabelImpl() override;
 };
 

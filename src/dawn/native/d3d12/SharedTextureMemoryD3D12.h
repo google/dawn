@@ -70,7 +70,7 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
         ComPtr<ID3D12Resource> d3d12Resource,
         Ref<d3d::KeyedMutex> keyedMutex);
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) override;

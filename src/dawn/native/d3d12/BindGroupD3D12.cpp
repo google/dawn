@@ -251,8 +251,8 @@ MaybeError BindGroup::InitializeImpl() {
     return {};
 }
 
-void BindGroup::DestroyImpl() {
-    BindGroupBase::DestroyImpl();
+void BindGroup::DestroyImpl(DestroyReason reason) {
+    BindGroupBase::DestroyImpl(reason);
     ToBackend(GetLayout())->DeallocateDescriptor(&mCPUViewAllocation);
     DAWN_ASSERT(!mCPUViewAllocation.IsValid());
 }

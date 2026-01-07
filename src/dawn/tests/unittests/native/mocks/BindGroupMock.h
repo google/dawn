@@ -42,7 +42,7 @@ class BindGroupMock : private null::BindGroupDataHolder, public BindGroupBase {
     ~BindGroupMock() override;
 
     MOCK_METHOD(MaybeError, InitializeImpl, (), (override));
-    MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 };
 
 }  // namespace dawn::native

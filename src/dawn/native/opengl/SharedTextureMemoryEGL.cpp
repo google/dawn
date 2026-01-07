@@ -86,7 +86,7 @@ SharedTextureMemoryEGL::SharedTextureMemoryEGL(Device* device,
                                                ::EGLImage image)
     : SharedTextureMemory(device, label, properties), mEGLImage(image) {}
 
-void SharedTextureMemoryEGL::DestroyImpl() {
+void SharedTextureMemoryEGL::DestroyImpl(DestroyReason reason) {
     if (mEGLImage) {
         Device* device = ToBackend(GetDevice());
         const EGLFunctions& egl = device->GetEGL(false);

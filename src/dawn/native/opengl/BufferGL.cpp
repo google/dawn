@@ -256,10 +256,10 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
     mMappedData = nullptr;
 }
 
-void Buffer::DestroyImpl() {
+void Buffer::DestroyImpl(DestroyReason reason) {
     const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
 
-    BufferBase::DestroyImpl();
+    BufferBase::DestroyImpl(reason);
     DAWN_GL_TRY_IGNORE_ERRORS(gl, DeleteBuffers(1, &mBuffer));
     mBuffer = 0;
 }

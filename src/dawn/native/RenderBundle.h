@@ -75,7 +75,7 @@ class RenderBundleBase : public ApiObjectBase {
     const IndirectDrawMetadata& GetIndirectDrawMetadata();
 
   protected:
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
   private:
     RenderBundleBase(DeviceBase* device, ErrorTag errorTag, StringView label);

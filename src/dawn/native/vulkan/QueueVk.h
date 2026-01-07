@@ -69,7 +69,7 @@ class Queue final : public QueueBase {
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestructionImpl() override;
     MaybeError SubmitPendingCommandsImpl() override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     // Dawn API
     void SetLabelImpl() override;

@@ -68,7 +68,7 @@ Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(devi
 
 Queue::~Queue() = default;
 
-void Queue::DestroyImpl() {
+void Queue::DestroyImpl(DestroyReason reason) {
     // Forget all pending commands.
     mCommandContext.AcquireCommands();
     UpdateCommandsScheduledEvents(kMaxExecutionSerial);

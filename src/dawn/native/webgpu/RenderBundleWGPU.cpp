@@ -222,8 +222,8 @@ RenderBundle::RenderBundle(RenderBundleEncoderBase* encoder,
     device->wgpu.renderBundleEncoderRelease(innerRenderBundleEncoder);
 }
 
-void RenderBundle::DestroyImpl() {
-    RenderBundleBase::DestroyImpl();
+void RenderBundle::DestroyImpl(DestroyReason reason) {
+    RenderBundleBase::DestroyImpl(reason);
     ToBackend(GetDevice())->wgpu.renderBundleRelease(mInnerHandle);
     mInnerHandle = nullptr;
 }

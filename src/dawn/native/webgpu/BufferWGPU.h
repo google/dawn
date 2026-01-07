@@ -57,7 +57,7 @@ class Buffer final : public BufferBase, public RecordableObject, public ObjectWG
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;
     void* GetMappedPointerImpl() override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     void SetLabelImpl() override;
 
     MaybeError AddContentToCapture(CaptureContext& captureContext);

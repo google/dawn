@@ -76,7 +76,7 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
 SharedFence::SharedFence(Device* device, StringView label, dawn::utils::SystemHandle handle)
     : SharedFenceBase(device, label), mHandle(std::move(handle)) {}
 
-void SharedFence::DestroyImpl() {
+void SharedFence::DestroyImpl(DestroyReason reason) {
     mHandle.Close();
 }
 

@@ -43,7 +43,7 @@ class ExternalTextureMock : public ExternalTextureBase {
 
     ~ExternalTextureMock() override;
 
-    MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 
   protected:
     ExternalTextureMock(DeviceMock* device, const ExternalTextureDescriptor* descriptor);

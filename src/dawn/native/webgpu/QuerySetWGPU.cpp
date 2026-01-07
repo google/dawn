@@ -54,11 +54,11 @@ QuerySet::QuerySet(Device* device, const QuerySetDescriptor* descriptor)
 
 QuerySet::~QuerySet() = default;
 
-void QuerySet::DestroyImpl() {
+void QuerySet::DestroyImpl(DestroyReason reason) {
     Device* device = ToBackend(GetDevice());
     device->wgpu.querySetDestroy(mInnerHandle);
     mInnerHandle = nullptr;
-    QuerySetBase::DestroyImpl();
+    QuerySetBase::DestroyImpl(reason);
 }
 
 void QuerySet::SetLabelImpl() {

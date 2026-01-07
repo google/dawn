@@ -69,7 +69,7 @@ class Texture final : public TextureBase {
   private:
     ~Texture() override;
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     MaybeError ClearTexture(const OpenGLFunctions& gl,
                             const SubresourceRange& range,
                             TextureBase::ClearValue clearValue);
@@ -99,7 +99,7 @@ class TextureView final : public TextureViewBase {
                 OwnsHandle ownsHandle);
 
     ~TextureView() override;
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     GLenum GetInternalFormat() const;
 
     // TODO(crbug.com/dawn/1355): Delete this handle on texture destroy.

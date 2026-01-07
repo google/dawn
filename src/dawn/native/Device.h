@@ -490,7 +490,7 @@ class DeviceBase : public ErrorSink,
     MaybeError Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor,
                           Ref<QueueBase> defaultQueue);
     void DestroyObjects();
-    void Destroy();
+    void Destroy(DestroyReason reason = DestroyReason::Placeholder);
 
     virtual MaybeError GetAHardwareBufferPropertiesImpl(
         void* handle,
@@ -604,7 +604,7 @@ class DeviceBase : public ErrorSink,
 
     // DestroyImpl is used to clean up and release resources used by device, does not wait for
     // GPU or check errors.
-    virtual void DestroyImpl() = 0;
+    virtual void DestroyImpl(DestroyReason reason) = 0;
 
     virtual MaybeError CopyFromStagingToTextureImpl(BufferBase* source,
                                                     const TexelCopyBufferLayout& src,

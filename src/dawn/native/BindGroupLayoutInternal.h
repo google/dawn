@@ -198,7 +198,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     virtual void ReduceMemoryUsage();
 
   protected:
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
 
     template <typename BindGroup>
     SlabAllocator<BindGroup> MakeFrontendBindGroupAllocator(size_t size) {

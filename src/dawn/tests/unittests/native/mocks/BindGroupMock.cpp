@@ -33,7 +33,9 @@ BindGroupMock::BindGroupMock(DeviceMock* device, const UnpackedPtr<BindGroupDesc
     : BindGroupDataHolder(descriptor->layout->GetInternalBindGroupLayout()->GetBindingDataSize()),
       BindGroupBase(device, descriptor, mBindingDataAllocation) {
     ON_CALL(*this, InitializeImpl).WillByDefault([]() -> MaybeError { return {}; });
-    ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->BindGroupBase::DestroyImpl(); });
+    ON_CALL(*this, DestroyImpl).WillByDefault([this](DestroyReason reason) {
+        this->BindGroupBase::DestroyImpl(reason);
+    });
 }
 
 BindGroupMock::~BindGroupMock() = default;

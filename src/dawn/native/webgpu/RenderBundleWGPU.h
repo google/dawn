@@ -55,7 +55,7 @@ class RenderBundle final : public RenderBundleBase,
     MaybeError CaptureCreationParameters(CaptureContext& context) override;
 
   private:
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     void SetLabelImpl() override;
 };
 

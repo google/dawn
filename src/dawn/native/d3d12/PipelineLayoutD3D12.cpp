@@ -420,8 +420,8 @@ MaybeError PipelineLayout::Initialize() {
     return {};
 }
 
-void PipelineLayout::DestroyImpl() {
-    PipelineLayoutBase::DestroyImpl();
+void PipelineLayout::DestroyImpl(DestroyReason reason) {
+    PipelineLayoutBase::DestroyImpl(reason);
 
     Device* device = ToBackend(GetDevice());
     device->ReferenceUntilUnused(mRootSignature);

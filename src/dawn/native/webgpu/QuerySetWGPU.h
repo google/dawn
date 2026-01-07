@@ -50,7 +50,7 @@ class QuerySet final : public QuerySetBase,
     QuerySet(Device* device, const QuerySetDescriptor* descriptor);
     ~QuerySet() override;
 
-    void DestroyImpl() override;
+    void DestroyImpl(DestroyReason reason) override;
     void SetLabelImpl() override;
 };
 
