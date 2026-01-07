@@ -170,7 +170,7 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfAccess) {
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: cannot use access 'read_write' as value)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot use access enumerant 'read_write' as value)");
 }
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfAddressSpace) {

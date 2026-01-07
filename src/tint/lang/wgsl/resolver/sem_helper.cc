@@ -112,7 +112,7 @@ StyledText SemHelper::Describe(const sem::Expression* expr) const {
             text << "builtin function " << style::Function(fn->Value());
         },
         [&](const sem::BuiltinEnumExpression<core::Access>* access) {
-            text << "access " << style::Enum(access->Value());
+            text << "access enumerant " << style::Enum(access->Value());
         },
         [&](const sem::BuiltinEnumExpression<core::AddressSpace>* addr) {
             text << "address space " << style::Enum(addr->Value());
