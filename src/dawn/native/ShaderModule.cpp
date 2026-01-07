@@ -449,7 +449,7 @@ MaybeError ParseWGSL(std::unique_ptr<tint::Source::File> file,
     tint::Program program = tint::wgsl::reader::Parse(file.get(), options);
 
     // Store the compilation messages into outputParseResult.
-    DAWN_TRY(outputParseResult->compilationMessages.AddMessages(program.Diagnostics()));
+    outputParseResult->compilationMessages.AddMessages(program.Diagnostics());
 
     // If WGSL parsing succeed, store the generated Tint program with no validation error.
     if (program.IsValid()) {
@@ -491,7 +491,7 @@ MaybeError ParseSPIRV(const std::vector<uint32_t>& spirv,
         tint::Program program = wgslResult.Move();
 
         // Store the compilation messages into outputParseResult.
-        DAWN_TRY(outputParseResult->compilationMessages.AddMessages(program.Diagnostics()));
+        outputParseResult->compilationMessages.AddMessages(program.Diagnostics());
 
         outputParseResult->tintProgram = UnsafeUnserializedValue<std::optional<Ref<TintProgram>>>(
             AcquireRef(new TintProgram(std::move(program), nullptr)));

@@ -861,6 +861,50 @@ TEST_F(ShaderModuleValidationTest, CreateErrorShaderModule) {
     FlushWire();
 }
 
+// Test that creating shader modules with invalid UTF-8 is an error.
+TEST_F(ShaderModuleValidationTest, UnicodeValidity) {
+    // Referenced from src/tint/utils/text/unicode_test.cc
+    constexpr std::array<const char*, 14> kValidTestCases = {{
+        "", "abc", "\xe4\xbd\xa0\xe5\xa5\xbd\xe4\xb8\x96\xe7\x95\x8c",
+        "def\xf0\x9f\x91\x8b\xf0\x9f\x8c\x8e",
+        "\xed\x9f\xbf",      // CodePoint == 0xD7FF
+        "\xed\x9f\xbe",      // CodePoint == 0xD7FF - 1
+        "\xee\x80\x80",      // CodePoint == 0xE000
+        "\xee\x80\x81",      // CodePoint == 0xE000 + 1
+        "\xef\xbf\xbf",      // CodePoint == 0xFFFF
+        "\xef\xbf\xbe",      // CodePoint == 0xFFFF - 1
+        "\xf0\x90\x80\x80",  // CodePoint == 0x10000
+        "\xf0\x90\x80\x81",  // CodePoint == 0x10000 + 1
+
+        // Surrogates are technically invalid code points but most software supports them (including
+        // Tint). WGSL coming from JS should never contain surrogates because the JS strings are
+        // valid UTF-16.
+        "\xed\xa0\x80",  // CodePoint == 0xD7FF + 1
+        "\xed\xbf\xbf",  // CodePoint == 0xE000 - 1
+    }};
+    constexpr std::array<const char*, 9> kErrorTestCases = {{
+        "\xd0",              // 2-bytes, missing second byte
+        "\xe8\x8f",          // 3-bytes, missing third byte
+        "\xf4\x8f\x8f",      // 4-bytes, missing fourth byte
+        "\xd0\x7f",          // 2-bytes, second byte MSB unset
+        "\xe8\x7f\x8f",      // 3-bytes, second byte MSB unset
+        "\xe8\x8f\x7f",      // 3-bytes, third byte MSB unset
+        "\xf4\x7f\x8f\x8f",  // 4-bytes, second byte MSB unset
+        "\xf4\x8f\x7f\x8f",  // 4-bytes, third byte MSB unset
+        "\xf4\x8f\x8f\x7f",  // 4-bytes, fourth byte MSB unset
+    }};
+
+    // Puts the UTF-8 in a comment as that's where arbitrary (valid) UTF-8 is allowed.
+    const std::string kPrefix = "@compute @workgroup_size(1) fn main () {} \n //";
+
+    for (const char* testCase : kValidTestCases) {
+        utils::CreateShaderModule(device, kPrefix + testCase);
+    }
+    for (const char* testCase : kErrorTestCases) {
+        ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, kPrefix + testCase));
+    }
+}
+
 struct WGSLExtensionInfo {
     const char* wgslName;
     // Is this WGSL extension experimental, i.e. guarded by AllowUnsafeAPIs toggle
