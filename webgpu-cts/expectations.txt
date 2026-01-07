@@ -500,7 +500,7 @@ crbug.com/407133969 [ apple mac ] webgpu:web_platform,external_texture,video:imp
 crbug.com/407133969 [ asan dawn-no-backend-validation no-clang-coverage nvidia-0x2184 release-x64 target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:* [ Failure ]
 
 # D3D debug layer bug which reports that the same subresource of a 3d texture cannot be written twice.
-crbug.com/42241218 [ dawn-backend-validation win10 ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:sameTexture=true [ Failure ]
+crbug.com/42241218 [ dawn-backend-validation win ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:sameTexture=true [ Failure ]
 
 # Derivative tests
 crbug.com/42251283 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
@@ -932,6 +932,7 @@ crbug.com/473854525 [ qualcomm-0x36334330 win ] webgpu:api,operation,render_pipe
 crbug.com/473854526 [ dawn-backend-validation qualcomm-0x36334330 win ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:*;sampleCount=1;rasterizationMask=0 [ Failure ]
 crbug.com/473854526 [ dawn-backend-validation qualcomm-0x36334330 win ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:*;sampleCount=1;rasterizationMask=1 [ Failure ]
 crbug.com/473854526 [ dawn-backend-validation qualcomm-0x36334330 win ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:*;sampleCount=4;* [ Failure ]
+crbug.com/473827154 [ qualcomm-0x36334330 win ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:format="depth*";func="textureGatherCompare" [ Failure ]
 crbug.com/473827154 [ qualcomm-0x36334330 win ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:format="depth*";func="textureSampleCompare*" [ Failure ]
 crbug.com/473827156 [ qualcomm-0x36334330 win ] webgpu:api,validation,capability_checks,* [ RetryOnFailure ]
 crbug.com/442950558 [ qualcomm-0x36334330 win ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:* [ RetryOnFailure ]
