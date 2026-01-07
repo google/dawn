@@ -142,7 +142,7 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	var maxTableWidth int
 	var server bool
 	numCPU := runtime.NumCPU()
-	verbose, generateExpected, generateSkip := false, false, false
+	verbose, generateExpected, generateSkip, updateSkip := false, false, false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, hlsl-dxc, hlsl-fxc, glsl")
 	flag.StringVar(&ignore, "ignore", "**.expected.*", "files to ignore in globs")
 	flag.StringVar(&dxcPath, "dxcompiler", "", "path to DXC DLL for validating HLSL output")
@@ -151,7 +151,8 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
 	flag.BoolVar(&verbose, "verbose", false, "print all run tests, including rows that all pass")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
-	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
+	flag.BoolVar(&generateSkip, "generate-skip", false, "create new expected outputs that fail with SKIP")
+	flag.BoolVar(&updateSkip, "update-skip", false, "update all expected outputs that fail with SKIP")
 	flag.BoolVar(&server, "server", true, "run Tint in server mode")
 	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
 	flag.IntVar(&maxTableWidth, "table-width", terminalWidth, "maximum width of the results table")
@@ -329,6 +330,7 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 		xcrunPath:        xcrunPath,
 		generateExpected: generateExpected,
 		generateSkip:     generateSkip,
+		updateSkip:       updateSkip,
 		validationCache:  validationCache,
 		server:           server,
 	}
@@ -669,6 +671,7 @@ type runConfig struct {
 	xcrunPath        string
 	generateExpected bool
 	generateSkip     bool
+	updateSkip       bool
 	validationCache  validationCache
 	server           bool
 }
@@ -726,7 +729,7 @@ func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter,
 		}
 
 		// If the test is known to fail and we are not regenerating expectations, just skip the test.
-		if isSkipTest && !cfg.generateExpected && !cfg.generateSkip {
+		if isSkipTest && !cfg.generateExpected && !cfg.updateSkip {
 			if isSkipInvalidTest {
 				return status{code: invalid, timeTaken: 0}
 			} else {
@@ -852,7 +855,7 @@ func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter,
 			//       --- Below this point the test has failed ---
 		case isSkipTest:
 			// Do not update expected if timeout test actually timed out.
-			if cfg.generateSkip && !(isSkipTimeoutTest && timedOut) {
+			if cfg.updateSkip && !(isSkipTimeoutTest && timedOut) {
 				saveExpectedFile(expectedFilePath, "SKIP: "+skipStr+"\n\n"+out)
 			}
 			if isSkipInvalidTest {
