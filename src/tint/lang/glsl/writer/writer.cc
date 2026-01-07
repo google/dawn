@@ -73,6 +73,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         if (!f->IsEntryPoint()) {
             continue;
         }
+        if (f->SubgroupSize().has_value()) {
+            return Failure("subgroups are not supported by the GLSL backend");
+        }
         if (ir.NameOf(f).NameView() == options.entry_point_name) {
             ep_func = f;
             break;

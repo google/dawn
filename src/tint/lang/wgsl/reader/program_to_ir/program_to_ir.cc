@@ -81,6 +81,7 @@
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/statement.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
+#include "src/tint/lang/wgsl/ast/subgroup_size_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/templated_identifier.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
@@ -300,6 +301,14 @@ class Impl {
                     ir_func->SetWorkgroupSize(value_x,
                                               attr->y ? EmitValueExpression(attr->y) : one_const,
                                               attr->z ? EmitValueExpression(attr->z) : one_const);
+
+                    const auto subgroup_attr =
+                        ast::GetAttribute<ast::SubgroupSizeAttribute>(ast_func->attributes);
+                    if (subgroup_attr) {
+                        auto* subgroup_size = EmitValueExpression(subgroup_attr->subgroup_size);
+                        ir_func->SetSubgroupSize(subgroup_size);
+                    }
+
                     break;
                 }
                 default: {

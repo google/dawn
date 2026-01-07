@@ -819,6 +819,13 @@ class Printer {
                 output_.workgroup_info.y = wg_size[1];
                 output_.workgroup_info.z = wg_size[2];
 
+                // Store the subgroup size information away to return from the generator when the
+                // `@subgroup_size` attribute is used.
+                const auto const_sg_size = func->SubgroupSizeAsConst();
+                if (const_sg_size.has_value()) {
+                    output_.workgroup_info.subgroup_size = const_sg_size;
+                }
+
                 module_.PushExecutionMode(
                     spv::Op::OpExecutionMode,
                     {id, U32Operand(SpvExecutionModeLocalSize), const_wg_size->at(0),

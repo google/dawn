@@ -154,6 +154,9 @@ class Function : public Castable<Function, Value> {
         return value->Value()->ValueAs<uint32_t>();
     }
 
+    /// Clears the subgroup size.
+    void ClearSubgroupSize() { subgroup_size_ = {}; }
+
     /// @param type the return type for the function
     void SetReturnType(const core::type::Type* type) { return_.type = type; }
 

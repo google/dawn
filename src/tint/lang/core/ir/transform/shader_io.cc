@@ -122,14 +122,16 @@ struct State {
             return;
         }
 
-        // Rename the old function and remove its pipeline stage and workgroup size, as we will be
-        // wrapping it with a new entry point.
+        // Rename the old function and remove its pipeline stage, workgroup size and subgroup size,
+        // as we will be wrapping it with a new entry point.
         auto name = ir.NameOf(ep).Name();
         auto stage = ep->Stage();
         auto wgsize = ep->WorkgroupSize();
+        auto sgsize = ep->SubgroupSize();
         ir.SetName(ep, name + "_inner");
         ep->SetStage(Function::PipelineStage::kUndefined);
         ep->ClearWorkgroupSize();
+        ep->ClearSubgroupSize();
 
         // Create the entry point wrapper function.
         auto* wrapper_ep = b.Function(name, new_ret_ty);
@@ -137,6 +139,9 @@ struct State {
         wrapper_ep->SetStage(stage);
         if (wgsize) {
             wrapper_ep->SetWorkgroupSize((*wgsize)[0], (*wgsize)[1], (*wgsize)[2]);
+        }
+        if (sgsize) {
+            wrapper_ep->SetSubgroupSize(*sgsize);
         }
         auto wrapper = b.Append(wrapper_ep->Block());
 

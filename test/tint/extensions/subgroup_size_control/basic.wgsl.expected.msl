@@ -1,0 +1,5 @@
+SKIP: FAILED
+
+subgroup_size attribute is not supported by the MSL backend
+
+tint executable returned error: exit status 1

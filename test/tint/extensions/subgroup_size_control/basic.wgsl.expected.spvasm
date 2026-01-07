@@ -1,0 +1,61 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 31
+; Schema: 0
+               OpCapability Shader
+               OpCapability GroupNonUniform
+         %22 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %main_subgroup_invocation_id_Input %main_subgroup_size_Input
+               OpExecutionMode %main LocalSize 32 1 1
+               OpMemberName %buffer_block_tint_explicit_layout 0 "inner"
+               OpName %buffer_block_tint_explicit_layout "buffer_block_tint_explicit_layout"
+               OpName %main_subgroup_invocation_id_Input "main_subgroup_invocation_id_Input"
+               OpName %main_subgroup_size_Input "main_subgroup_size_Input"
+               OpName %main_inner "main_inner"
+               OpName %sg_id "sg_id"
+               OpName %sg_size "sg_size"
+               OpName %main "main"
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %buffer_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %buffer_block_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
+               OpDecorate %main_subgroup_invocation_id_Input BuiltIn SubgroupLocalInvocationId
+               OpDecorate %main_subgroup_size_Input BuiltIn SubgroupSize
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%buffer_block_tint_explicit_layout = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_buffer_block_tint_explicit_layout = OpTypePointer StorageBuffer %buffer_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_buffer_block_tint_explicit_layout StorageBuffer
+%_ptr_Input_uint = OpTypePointer Input %uint
+%main_subgroup_invocation_id_Input = OpVariable %_ptr_Input_uint Input
+%main_subgroup_size_Input = OpVariable %_ptr_Input_uint Input
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void %uint %uint
+%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+         %26 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %13
+      %sg_id = OpFunctionParameter %uint
+    %sg_size = OpFunctionParameter %uint
+         %14 = OpLabel
+         %15 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %1 %uint_0
+         %18 = OpArrayLength %uint %1 0
+         %19 = OpISub %uint %18 %uint_1
+         %21 = OpExtInst %uint %22 UMin %sg_id %19
+         %23 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %21
+               OpStore %23 %sg_size None
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %26
+         %27 = OpLabel
+         %28 = OpLoad %uint %main_subgroup_invocation_id_Input None
+         %29 = OpLoad %uint %main_subgroup_size_Input None
+         %30 = OpFunctionCall %void %main_inner %28 %29
+               OpReturn
+               OpFunctionEnd

@@ -166,8 +166,8 @@ struct State {
             return res;
         }
 
-        // Workgroup size MUST be evaluated prior to 'propagate' because workgroup size parameters
-        // are not proper usages.
+        // Workgroup size and subgroup size MUST be evaluated prior to 'propagate' because workgroup
+        // size and subgroup size parameters are not proper usages.
         for (auto func : ir.functions) {
             if (!func->IsCompute()) {
                 continue;
@@ -185,6 +185,15 @@ struct State {
                 new_wg[i] = new_value.Get();
             }
             func->SetWorkgroupSize(new_wg);
+
+            auto sgs = func->SubgroupSize();
+            if (sgs.has_value()) {
+                auto new_sg = CalculateOverride(sgs.value());
+                if (new_sg != Success) {
+                    return new_sg.Failure();
+                }
+                func->SetSubgroupSize(new_sg.Get());
+            }
         }
 
         // Replace array types MUST be evaluate prior to 'propagate' because array count values are

@@ -31,6 +31,7 @@
 #include <stddef.h>
 
 #include <cstdint>
+#include <optional>
 #include <vector>
 
 #include "src/tint/api/common/subgroup_matrix.h"
@@ -63,6 +64,9 @@ struct Output {
 
         /// The needed workgroup storage size
         size_t storage_size = 0;
+
+        /// The `@subgroup_size` attribute
+        std::optional<uint32_t> subgroup_size = {};
     };
 
     /// The generated SPIR-V.

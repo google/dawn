@@ -70,6 +70,7 @@
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_size_attribute.h"
+#include "src/tint/lang/wgsl/ast/subgroup_size_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/templated_identifier.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
@@ -550,6 +551,11 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
             [&](const ast::InputAttachmentIndexAttribute* index) {
                 out << "input_attachment_index(";
                 EmitExpression(out, index->expr);
+                out << ")";
+            },
+            [&](const ast::SubgroupSizeAttribute* subgroup_size) {
+                out << "subgroup_size(";
+                EmitExpression(out, subgroup_size->subgroup_size);
                 out << ")";
             },  //
             TINT_ICE_ON_NO_MATCH);

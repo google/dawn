@@ -91,6 +91,11 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             continue;
         }
 
+        // Check `@subgroup_size` attribute.
+        if (f->SubgroupSize().has_value()) {
+            return Failure("subgroup_size attribute is not supported by the MSL backend");
+        }
+
         // Check input attributes.
         for (auto* param : f->Params()) {
             if (auto* str = param->Type()->As<core::type::Struct>()) {
