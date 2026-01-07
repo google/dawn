@@ -337,6 +337,8 @@ exec("//gn_args.star")
 
 # Handle any other builders defined in other files.
 exec("//chromium_try.star")
+exec("//cmake_ci.star")
+exec("//cmake_try.star")
 exec("//legacy_builders.star")
 exec("//gn_standalone_ci.star")
 exec("//gn_standalone_try.star")

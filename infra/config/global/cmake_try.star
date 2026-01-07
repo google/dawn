@@ -1,0 +1,111 @@
+# Copyright 2026 The Dawn & Tint Authors
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its
+#    contributors may be used to endorse or promote products derived from
+#    this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+"""Try Dawn builders using CMake for the build system instead of GN."""
+
+load("@chromium-luci//builders.star", "cpu", "os")
+load("@chromium-luci//try.star", "try_")
+load("//constants.star", "siso")
+
+try_.defaults.set(
+    executable = "recipe:dawn/cmake",
+    builder_group = "try",
+    bucket = "try",
+    # TODO(crbug.com/459517292): Switch this to the GPU pool once we confirm
+    # we have enough capacity. Also update the builderless dimension since
+    # luci.flex.* does not expose that.
+    pool = "luci.flex.try",
+    builderless = None,
+    build_numbers = True,
+    list_view = "try",
+    cq_group = "Dawn-CQ",
+    contact_team_email = "chrome-gpu-infra@google.com",
+    service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+    siso_project = siso.project.DEFAULT_UNTRUSTED,
+    siso_remote_jobs = siso.remote_jobs.DEFAULT,
+)
+
+## Templates
+
+def apply_cq_builder_defaults(kwargs):
+    # There are fewer optimizations such as the use of `gn analyze` for CMake
+    # builders, so allow more concurrent builds than GN equivalents.
+    kwargs.setdefault("max_concurrent_builds", 5)
+
+    # TODO(crbug.com/459517292): Add this once we confirm that CMake builders
+    # defined this way are equivalent to the old approach.
+    # kwargs.setdefault("tryjob", try_.job(
+    #     location_filters = exclusion_filters.cmake_cq_file_exclusions,
+    # ))
+    return kwargs
+
+def apply_linux_cq_builder_defaults(kwargs):
+    """Sets default arguments for Linux CMake CQ builders.
+
+    Args:
+        kwargs: The kwargs for creating a try builder.
+
+    Returns:
+        |kwargs| with Linux/CMake defaults set.
+    """
+    kwargs = apply_cq_builder_defaults(kwargs)
+    kwargs.setdefault("cpu", cpu.X86_64)
+    kwargs.setdefault("os", os.LINUX_NOBLE)
+    kwargs.setdefault("ssd", None)
+    return kwargs
+
+def add_builder_to_main_and_milestone_cq_groups(kwargs):
+    # Dawn standalone builders run fine unbranched on branched CLs.
+    try_.builder(**kwargs)
+    # TODO(crbug.com/459517292): Add this once we confirm that CMake builders
+    # defined this way are equivalent to the old approach.
+    # for milestone in ACTIVE_MILESTONES.keys():
+    #     luci.cq_tryjob_verifier(
+    #         cq_group = "Dawn-CQ-" + milestone,
+    #         builder = "dawn:try/" + kwargs["name"],
+    #     )
+
+def dawn_linux_cmake_cq_tester(**kwargs):
+    kwargs = apply_linux_cq_builder_defaults(kwargs)
+    add_builder_to_main_and_milestone_cq_groups(kwargs)
+
+## CQ Builders
+
+dawn_linux_cmake_cq_tester(
+    name = "dawn-cq-linux-x64-sws-cmake-rel",
+    description_html = "Compiles and tests release Dawn test binaries for Linux/x64 using CMake and Clang. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-linux-x64-sws-cmake-rel",
+    ],
+    properties = {
+        "asan": False,
+        "clang": True,
+        "debug": False,
+        "target_cpu": "x64",
+        "ubsan": False,
+    },
+)
