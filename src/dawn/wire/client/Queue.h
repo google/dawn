@@ -29,6 +29,7 @@
 #define SRC_DAWN_WIRE_CLIENT_QUEUE_H_
 
 #include <webgpu/webgpu.h>
+#include <atomic>
 
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/client/ObjectBase.h"
@@ -42,7 +43,11 @@ class Queue final : public ObjectWithEventsBase {
 
     ObjectType GetObjectType() const override;
 
+    uint64_t GetLastSubmitIndex() const;
+    uint64_t GetCompletedSubmitIndex() const;
+
     // Dawn API
+    void APISubmit(size_t commandCount, const WGPUCommandBuffer* commands);
     WGPUFuture APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo);
     void APIWriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* data, size_t size);
     void APIWriteTexture(const WGPUTexelCopyTextureInfo* destination,
@@ -50,6 +55,10 @@ class Queue final : public ObjectWithEventsBase {
                          size_t dataSize,
                          const WGPUTexelCopyBufferLayout* dataLayout,
                          const WGPUExtent3D* writeSize);
+
+  private:
+    uint64_t mLastSubmitIndex = 0;
+    std::atomic<uint64_t> mCompletedSubmitIndex = 0;
 };
 
 }  // namespace dawn::wire::client

@@ -44,6 +44,7 @@ using testing::InvokeWithoutArgs;
 using testing::Ne;
 using testing::NonEmptySizedString;
 using testing::Return;
+using testing::Sequence;
 using testing::SizedString;
 
 class WireWriteBufferTests : public WireTest {};
@@ -260,6 +261,49 @@ TEST_F(WireQueueTests, DeviceThenDefaultQueueReleased) {
 
     // Indicate to the fixture that the device was already released.
     DefaultApiDeviceWasReleased();
+}
+
+// Test that QueueSubmit does an implicit call to OnSubmittedWorkDone for its own tracking, and that
+// the call is received before any user call to OnSubmittedWorkDone.
+TEST_P(WireQueueTests, QueueSubmitDoesOnSubmittedWorkDone) {
+    Sequence s;
+
+    uint32_t callbackIndex = 0;
+
+    queue.Submit(0, nullptr);
+    EXPECT_CALL(api, QueueSubmit(apiQueue, _, _)).InSequence(s);
+    // The OnSubmittedWorkDone from the QueueSubmit will be answered with Success.
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _))
+        .InSequence(s)
+        .WillOnce(InvokeWithoutArgs([&] {
+            api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Success,
+                                                     kEmptyOutputStringView);
+            ASSERT_EQ(0u, callbackIndex);
+            callbackIndex++;
+        }));
+
+    // The user one will be answered with an error
+    OnSubmittedWorkDone();
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _))
+        .InSequence(s)
+        .WillOnce(InvokeWithoutArgs([&] {
+            api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error,
+                                                     ToOutputStringView("Some message"));
+            ASSERT_EQ(1u, callbackIndex);
+        }));
+
+    FlushClient();
+    FlushFutures();
+
+    // Check that the user callback indeed got an error, so the second callback went to the user
+    // OnSubmittedWorkDone, and the first one went to the implicit OnSubmittedWorkDone in
+    // QueueSubmit.
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::QueueWorkDoneStatus::Error, SizedString("Some message")))
+            .Times(1);
+
+        FlushCallbacks();
+    });
 }
 
 // Only one default queue is supported now so we cannot test ~Queue triggering ClearAllCallbacks

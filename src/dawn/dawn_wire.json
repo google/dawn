@@ -320,6 +320,7 @@
             "DeviceInjectError",
             "InstanceProcessEvents",
             "InstanceWaitAny",
+            "QueueSubmit",
             "SurfaceConfigure",
             "SurfacePresent",
             "SurfaceUnconfigure"
