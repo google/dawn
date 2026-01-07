@@ -205,6 +205,7 @@ enum class LanguageFeature : uint8_t {
     kSubgroupId,
     kSubgroupUniformity,
     kTexelBuffers,
+    kTextureAndSamplerLet,
     kUniformBufferStandardLayout,
     kUnrestrictedPointerParameters,
 };
@@ -234,6 +235,7 @@ constexpr std::string_view kLanguageFeatureStrings[] = {
     "subgroup_id",
     "subgroup_uniformity",
     "texel_buffers",
+    "texture_and_sampler_let",
     "uniform_buffer_standard_layout",
     "unrestricted_pointer_parameters",
 };
@@ -255,6 +257,7 @@ static constexpr LanguageFeature kAllLanguageFeatures[] = {
     LanguageFeature::kSubgroupId,
     LanguageFeature::kSubgroupUniformity,
     LanguageFeature::kTexelBuffers,
+    LanguageFeature::kTextureAndSamplerLet,
     LanguageFeature::kUniformBufferStandardLayout,
     LanguageFeature::kUnrestrictedPointerParameters,
 };

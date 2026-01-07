@@ -493,6 +493,7 @@
 "texture_2d"
 "texture_2d_array"
 "texture_3d"
+"texture_and_sampler_let"
 "texture_cube"
 "texture_cube_array"
 "texture_depth_2d"

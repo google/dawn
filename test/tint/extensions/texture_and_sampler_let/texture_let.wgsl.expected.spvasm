@@ -1,0 +1,60 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 39
+; Schema: 0
+               OpCapability Shader
+               OpCapability ImageQuery
+         %21 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %tex "tex"
+               OpName %store "store"
+               OpName %main "main"
+               OpName %res "res"
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+               OpDecorate %store DescriptorSet 1
+               OpDecorate %store Binding 0
+               OpDecorate %store Coherent
+      %float = OpTypeFloat 32
+          %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+        %tex = OpVariable %_ptr_UniformConstant_3 UniformConstant
+          %7 = OpTypeImage %float 2D 0 0 0 2 R32f
+%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+      %store = OpVariable %_ptr_UniformConstant_7 UniformConstant
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+     %v2uint = OpTypeVector %uint 2
+         %25 = OpConstantComposite %v2uint %uint_1 %uint_1
+      %v2int = OpTypeVector %int 2
+      %int_1 = OpConstant %int 1
+         %27 = OpConstantComposite %v2int %int_1 %int_1
+    %v4float = OpTypeVector %float 4
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %38 = OpConstantNull %v2int
+       %main = OpFunction %void None %10
+         %11 = OpLabel
+        %res = OpVariable %_ptr_Function_v4float Function
+         %12 = OpLoad %3 %tex None
+         %13 = OpImageQueryLevels %uint %12
+         %15 = OpISub %uint %13 %uint_1
+         %17 = OpBitcast %uint %int_0
+         %20 = OpExtInst %uint %21 UMin %17 %15
+         %22 = OpImageQuerySizeLod %v2uint %12 %20
+         %24 = OpISub %v2uint %22 %25
+         %26 = OpBitcast %v2uint %27
+         %30 = OpExtInst %v2uint %21 UMin %26 %24
+         %31 = OpImageFetch %v4float %12 %30 Lod %20
+               OpStore %res %31
+         %35 = OpLoad %7 %store None
+         %36 = OpLoad %v4float %res None
+               OpImageWrite %35 %38 %36 None
+               OpReturn
+               OpFunctionEnd

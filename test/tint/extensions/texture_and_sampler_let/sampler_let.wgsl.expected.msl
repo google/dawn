@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> tex;
+  sampler sam;
+  texture2d<float, access::read_write> store;
+};
+
+fragment void v(texture2d<float, access::sample> tex [[texture(0)]], sampler sam [[sampler(0)]], texture2d<float, access::read_write> store [[texture(1)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tex=tex, .sam=sam, .store=store};
+  float4 res = tint_module_vars.tex.sample(tint_module_vars.sam, float2(1.0f), level(0.0f), int2(1));
+  float4 const v_1 = res;
+  const_cast<texture2d<float, access::read_write>thread &>(tint_module_vars.store).fence();
+  tint_module_vars.store.write(v_1, uint2(int2(0)));
+  const_cast<texture2d<float, access::read_write>thread &>(tint_module_vars.store).fence();
+}

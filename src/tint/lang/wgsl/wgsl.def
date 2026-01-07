@@ -120,6 +120,7 @@ enum language_feature {
   subgroup_uniformity
   fragment_depth
   immediate_address_space
+  texture_and_sampler_let
 
   // Non-standard language features for Chromium developers.
   chromium_print

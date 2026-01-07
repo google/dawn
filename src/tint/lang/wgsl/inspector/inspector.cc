@@ -563,6 +563,16 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
         // Handle parameter can only be identifiers.
         auto* identifier = argument->RootIdentifier();
 
+        // With `texture_and_sampler_let` the variable maybe in a let and we need to trace the
+        // initializer of the let.
+        auto* local = identifier->As<sem::LocalVariable>();
+        while (local != nullptr) {
+            identifier = local->Initializer()->RootIdentifier();
+            TINT_ASSERT(identifier);
+
+            local = identifier->As<sem::LocalVariable>();
+        }
+
         return tint::Switch(
             identifier,
             [&](const sem::GlobalVariable* global) {

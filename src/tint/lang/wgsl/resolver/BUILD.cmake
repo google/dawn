@@ -156,6 +156,7 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/subgroup_size_control_extension_test.cc
   lang/wgsl/resolver/subgroups_extension_test.cc
   lang/wgsl/resolver/texel_buffer_test.cc
+  lang/wgsl/resolver/texture_and_sampler_let_extension_test.cc
   lang/wgsl/resolver/type_validation_test.cc
   lang/wgsl/resolver/unresolved_identifier_test.cc
   lang/wgsl/resolver/validation_test.cc

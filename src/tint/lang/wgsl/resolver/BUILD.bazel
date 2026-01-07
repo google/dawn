@@ -155,6 +155,7 @@ cc_library(
     "subgroup_size_control_extension_test.cc",
     "subgroups_extension_test.cc",
     "texel_buffer_test.cc",
+    "texture_and_sampler_let_extension_test.cc",
     "type_validation_test.cc",
     "unresolved_identifier_test.cc",
     "validation_test.cc",

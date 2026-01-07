@@ -1267,6 +1267,14 @@ class Impl {
                     return;
                 }
 
+                // If we've emitted a texture or a sampler to the let then we have
+                // `texture_and_sampler_let` enabled and we want to just strip the let and use the
+                // originating value.
+                if (init->Type()->IsAnyOf<core::type::Texture, core::type::Sampler>()) {
+                    scopes_.Set(l->name->symbol, init);
+                    return;
+                }
+
                 auto* let = current_block_->Append(builder_.Let(l->name->symbol.Name(), init));
 
                 // Store the results of the initialization

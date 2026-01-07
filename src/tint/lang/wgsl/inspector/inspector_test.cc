@@ -1667,6 +1667,56 @@ TEST_F(InspectorGetEntryPointTest, HasTextureLoadWithDepthTexture) {
                     .has_texture_load_with_depth_texture);
 }
 
+TEST_F(InspectorGetEntryPointTest, HasTextureLoadWithDepthTextureThroughLet) {
+    std::string shader = R"(
+        @group(0) @binding(0) var td : texture_depth_2d;
+        @group(0) @binding(1) var tdm : texture_depth_multisampled_2d;
+        @group(0) @binding(2) var t : texture_2d<f32>;
+        @group(0) @binding(3) var s : sampler;
+
+        @compute @workgroup_size(1) fn load_texture_depth() {
+            let a = td;
+            _ = textureLoad(a, vec2(0), 0);
+        }
+        @compute @workgroup_size(1) fn load_texture_depth_multisample() {
+            let a = td;
+            _ = textureLoad(a, vec2(0), 0);
+        }
+        @compute @workgroup_size(1) fn load_texture_2d() {
+            let a = t;
+            _ = textureLoad(a, vec2(0), 0);
+        }
+        @fragment fn sample_texture_depth() -> @location(0) u32 {
+            let a = td;
+            let b = a;
+            let c = b;
+            _ = textureSample(c, s, vec2(0));
+            return 0;
+        }
+        fn load_texture_depth_arg(tex : texture_depth_2d) {
+           let a = tex;
+            _ = textureLoad(a, vec2(0), 0);
+        }
+        @compute @workgroup_size(1) fn load_texture_depth_in_function() {
+            let a = td;
+            let b = a;
+            load_texture_depth_arg(b);
+        }
+    )";
+    Inspector& inspector = Initialize(shader);
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    EXPECT_TRUE(inspector.GetEntryPoint("load_texture_depth").has_texture_load_with_depth_texture);
+    EXPECT_TRUE(inspector.GetEntryPoint("load_texture_depth_multisample")
+                    .has_texture_load_with_depth_texture);
+    EXPECT_FALSE(inspector.GetEntryPoint("load_texture_2d").has_texture_load_with_depth_texture);
+    EXPECT_FALSE(
+        inspector.GetEntryPoint("sample_texture_depth").has_texture_load_with_depth_texture);
+    EXPECT_TRUE(inspector.GetEntryPoint("load_texture_depth_in_function")
+                    .has_texture_load_with_depth_texture);
+}
+
 TEST_F(InspectorGetEntryPointTest, HasDepthTextureWithNonComparisonSampler) {
     std::string shader = R"(
         @group(0) @binding(0) var td : texture_depth_2d;

@@ -36,7 +36,7 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-struct ResolverVariableValidationTest : public resolver::TestHelper, public testing::Test {};
+using ResolverVariableValidationTest = ResolverTest;
 
 TEST_F(ResolverVariableValidationTest, VarNoInitializerNoType) {
     // var a;
@@ -164,8 +164,12 @@ TEST_F(ResolverVariableValidationTest, LetTypeNotConstructible) {
     auto* t2 = Let(Source{{56, 78}}, "t2", Expr(t1));
     WrapInFunction(t2);
 
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "56:78 error: texture_2d<f32> cannot be used as the type of a 'let'");
+    wgsl::AllowedFeatures allowed_features{};
+    Resolver resolver{this, allowed_features};
+
+    EXPECT_FALSE(resolver.Resolve());
+    EXPECT_EQ(resolver.error(),
+              "56:78 error: texture_2d<f32> cannot be used as the type of a 'let'");
 }
 
 TEST_F(ResolverVariableValidationTest, OverrideExplicitTypeNotScalar) {

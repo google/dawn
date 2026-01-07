@@ -331,6 +331,7 @@ static constexpr LanguageFeatureCase kValidLanguageFeatureCases[] = {
     {"subgroup_id", LanguageFeature::kSubgroupId},
     {"subgroup_uniformity", LanguageFeature::kSubgroupUniformity},
     {"texel_buffers", LanguageFeature::kTexelBuffers},
+    {"texture_and_sampler_let", LanguageFeature::kTextureAndSamplerLet},
     {"uniform_buffer_standard_layout", LanguageFeature::kUniformBufferStandardLayout},
     {"unrestricted_pointer_parameters", LanguageFeature::kUnrestrictedPointerParameters},
 };
@@ -381,12 +382,15 @@ static constexpr LanguageFeatureCase kInvalidLanguageFeatureCases[] = {
     {"texel_buf11ers", LanguageFeature::kUndefined},
     {"Fie22el_bffers", LanguageFeature::kUndefined},
     {"teel_buffer77", LanguageFeature::kUndefined},
-    {"uniforNN_bffer_standar2_layout", LanguageFeature::kUndefined},
-    {"uniforVV_buffer_standard_layout", LanguageFeature::kUndefined},
-    {"uniform_buffFr_standWWrd11lwyout", LanguageFeature::kUndefined},
-    {"unrestriwwted_pointer_parmeters", LanguageFeature::kUndefined},
-    {"unrestricted_pointer_paramDters", LanguageFeature::kUndefined},
-    {"unrestriced_pointKr_parameters", LanguageFeature::kUndefined},
+    {"texturN_and_sampler_l2t", LanguageFeature::kUndefined},
+    {"textureVVand_sampler_let", LanguageFeature::kUndefined},
+    {"texture_Fnd_sa11WWler_wet", LanguageFeature::kUndefined},
+    {"wwniform_buffer_standad_layout", LanguageFeature::kUndefined},
+    {"uniform_buffer_sDandard_layout", LanguageFeature::kUndefined},
+    {"uniform_uffer_standarK_layout", LanguageFeature::kUndefined},
+    {"uhrestricted_PPoi11ter_parametrrf", LanguageFeature::kUndefined},
+    {"urestricted_pointer_parameters", LanguageFeature::kUndefined},
+    {"unrestricted_pointer_paYYameters", LanguageFeature::kUndefined},
 };
 
 using LanguageFeatureParseTest = testing::TestWithParam<LanguageFeatureCase>;

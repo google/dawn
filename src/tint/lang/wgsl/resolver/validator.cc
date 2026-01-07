@@ -904,7 +904,15 @@ bool Validator::Let(const sem::Variable* v) const {
     auto* decl = v->Declaration();
     auto* storage_ty = v->Type()->UnwrapRef();
 
-    if (!(storage_ty->IsConstructible() || storage_ty->Is<core::type::Pointer>())) {
+    bool assignment_allowed =
+        storage_ty->IsConstructible() || storage_ty->Is<core::type::Pointer>();
+
+    if (allowed_features_.features.contains(wgsl::LanguageFeature::kTextureAndSamplerLet) &&
+        storage_ty->IsAnyOf<core::type::Texture, core::type::Sampler>()) {
+        assignment_allowed = true;
+    }
+
+    if (!assignment_allowed) {
         AddError(decl->source) << sem_.TypeNameOf(storage_ty) << " cannot be used as the type of a "
                                << style::Keyword("let");
         return false;

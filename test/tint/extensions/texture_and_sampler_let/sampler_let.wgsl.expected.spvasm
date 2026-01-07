@@ -1,0 +1,58 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 35
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %tex "tex"
+               OpName %sam "sam"
+               OpName %store "store"
+               OpName %main "main"
+               OpName %res "res"
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+               OpDecorate %sam DescriptorSet 0
+               OpDecorate %sam Binding 1
+               OpDecorate %store DescriptorSet 1
+               OpDecorate %store Binding 0
+               OpDecorate %store Coherent
+      %float = OpTypeFloat 32
+          %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+        %tex = OpVariable %_ptr_UniformConstant_3 UniformConstant
+          %7 = OpTypeSampler
+%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+        %sam = OpVariable %_ptr_UniformConstant_7 UniformConstant
+         %10 = OpTypeImage %float 2D 0 0 0 2 R32f
+%_ptr_UniformConstant_10 = OpTypePointer UniformConstant %10
+      %store = OpVariable %_ptr_UniformConstant_10 UniformConstant
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void
+         %18 = OpTypeSampledImage %3
+    %v4float = OpTypeVector %float 4
+    %v2float = OpTypeVector %float 2
+    %float_1 = OpConstant %float 1
+         %21 = OpConstantComposite %v2float %float_1 %float_1
+    %float_0 = OpConstant %float 0
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+      %int_1 = OpConstant %int 1
+         %25 = OpConstantComposite %v2int %int_1 %int_1
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %34 = OpConstantNull %v2int
+       %main = OpFunction %void None %13
+         %14 = OpLabel
+        %res = OpVariable %_ptr_Function_v4float Function
+         %15 = OpLoad %7 %sam None
+         %16 = OpLoad %3 %tex None
+         %17 = OpSampledImage %18 %16 %15
+         %19 = OpImageSampleExplicitLod %v4float %17 %21 Lod|ConstOffset %float_0 %25
+               OpStore %res %19
+         %31 = OpLoad %10 %store None
+         %32 = OpLoad %v4float %res None
+               OpImageWrite %31 %34 %32 None
+               OpReturn
+               OpFunctionEnd
