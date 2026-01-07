@@ -626,6 +626,8 @@ crbug.com/407076132 [ dawn-no-backend-validation linux no-clang-coverage nvidia 
 crbug.com/407076132 [ dawn-no-backend-validation linux no-clang-coverage nvidia webgpu-adapter-default webgpu-shared-worker ] webgpu:web_platform,copyToTexture,image_file:from_orientation_metadata_file:imageName="*";objectTypeFromFile="ImageBitmap-from-Blob";* [ Failure ]
 crbug.com/407076132 [ dawn-no-backend-validation no-clang-coverage nvidia release-x64 target-cpu-64 webgpu-adapter-default webgpu-dedicated-worker webgpu-dxc-enabled win ] webgpu:web_platform,copyToTexture,image_file:from_orientation_metadata_file:imageName="*";objectTypeFromFile="ImageBitmap-from-Blob";* [ Failure ]
 crbug.com/407076132 [ dawn-no-backend-validation no-clang-coverage nvidia release-x64 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-shared-worker win ] webgpu:web_platform,copyToTexture,image_file:from_orientation_metadata_file:imageName="*";objectTypeFromFile="ImageBitmap-from-Blob";* [ Failure ]
+crbug.com/407076132 [ qualcomm-0x36334330 win webgpu-dedicated-worker ] webgpu:web_platform,copyToTexture,image_file:from_orientation_metadata_file:imageName="*";objectTypeFromFile="ImageBitmap-from-Blob";* [ Failure ]
+crbug.com/407076132 [ qualcomm-0x36334330 win webgpu-shared-worker ] webgpu:web_platform,copyToTexture,image_file:from_orientation_metadata_file:imageName="*";objectTypeFromFile="ImageBitmap-from-Blob";* [ Failure ]
 
 # Widespread texture builtin failures on Intel (Linux/Win/Mac)
 crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
@@ -921,6 +923,21 @@ crbug.com/470115242 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.81
 crbug.com/470127837 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:shader,validation,decl,var:binding_collisions:a_group=1;b_group=1;a_binding=0;b_binding=0;b_use="different" [ Failure ]
 crbug.com/470115243 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:web_platform,copyToTexture,Image* [ RetryOnFailure ]
 
+# Win/Snapdragon X Elite failures
+# TODO(crbug.com/452840618): Remove this disable block once the tests are actually running.
+# finder:disable-unused Unused removal disabled until tests are actually enabled
+crbug.com/473827153 [ dawn-backend-validation qualcomm-0x36334330 win ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;* [ Failure ]
+crbug.com/473827153 [ dawn-backend-validation qualcomm-0x36334330 win ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=15;* [ Failure ]
+crbug.com/473854525 [ qualcomm-0x36334330 win ] webgpu:api,operation,render_pipeline,sample_mask:alpha_to_coverage_mask:*sampleCount=4;* [ Failure ]
+crbug.com/473854526 [ dawn-backend-validation qualcomm-0x36334330 win ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:*;sampleCount=1;rasterizationMask=0 [ Failure ]
+crbug.com/473854526 [ dawn-backend-validation qualcomm-0x36334330 win ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:*;sampleCount=1;rasterizationMask=1 [ Failure ]
+crbug.com/473854526 [ dawn-backend-validation qualcomm-0x36334330 win ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:*;sampleCount=4;* [ Failure ]
+crbug.com/473827154 [ qualcomm-0x36334330 win ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:format="depth*";func="textureSampleCompare*" [ Failure ]
+crbug.com/473827156 [ qualcomm-0x36334330 win ] webgpu:api,validation,capability_checks,* [ RetryOnFailure ]
+crbug.com/442950558 [ qualcomm-0x36334330 win ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:* [ RetryOnFailure ]
+crbug.com/473827158 [ qualcomm-0x36334330 win ] webgpu:api,validation,encoding,encoder_state:pass_end_invalid_order:* [ Failure ]
+crbug.com/473827162 [ arch-arm64 webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,* [ RetryOnFailure ]
+# finder:enable-unused
 
 # Intel linux copyTextureToTexture with compressed textures, dim=2d, dim=3d
 crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-12x10-unorm";dstFormat="astc-12x10-unorm";dimension="3d" [ Failure ]
