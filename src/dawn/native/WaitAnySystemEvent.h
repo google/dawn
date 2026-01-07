@@ -85,32 +85,16 @@ template <typename It>
         handles.push_back((*it).first.mPrimitive.Get());
     }
     DAWN_ASSERT(handles.size() <= MAXIMUM_WAIT_OBJECTS);
-
-    // TODO(crbug.com/344798087): Handle the issue of timeouts in a more general way further up the
-    // stack.
-    // Note that without the looping here, we observed timeouts on arm64 Qualcomm devices. This
-    // looping for the INIFINITY timeout case is also used as a workaround in the Vulkan backend and
-    // should be sufficient for the time being because other cases, i.e. when the timeout is not
-    // INFINITY, the user code would be expected to explicitly handle the timeout case anyways.
-    DWORD status = WAIT_TIMEOUT;
-    DWORD timeoutMS = ToMilliseconds(timeout);
-    while (1) {
-        status = WaitForMultipleObjects(handles.size(), handles.data(), /*bWaitAll=*/false,
-                                        ToMilliseconds(timeout));
-        if (status == WAIT_TIMEOUT) {
-            if (timeoutMS == INFINITE) {
-                continue;
-            } else {
-                return false;
-            }
-        }
-
-        DAWN_CHECK(WAIT_OBJECT_0 <= status && status < WAIT_OBJECT_0 + count);
-        const size_t completedIndex = status - WAIT_OBJECT_0;
-
-        *(*(begin + completedIndex)).second = true;
-        return true;
+    DWORD status = WaitForMultipleObjects(handles.size(), handles.data(), /*bWaitAll=*/false,
+                                          ToMilliseconds(timeout));
+    if (status == WAIT_TIMEOUT) {
+        return false;
     }
+    DAWN_CHECK(WAIT_OBJECT_0 <= status && status < WAIT_OBJECT_0 + count);
+    const size_t completedIndex = status - WAIT_OBJECT_0;
+
+    *(*(begin + completedIndex)).second = true;
+    return true;
 #elif DAWN_PLATFORM_IS(POSIX)
     absl::InlinedVector<pollfd, 4 /* avoid heap allocation for small waits */> pollfds;
     pollfds.reserve(count);
