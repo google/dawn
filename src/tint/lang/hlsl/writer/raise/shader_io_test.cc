@@ -1303,8 +1303,10 @@ $B1: {  # root
     constexpr uint32_t num_workgroups_offset = 0u;
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
-    prepare_immediate_data_layout_config.AddInternalImmediateData(
-        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u());
+    ASSERT_EQ(
+        prepare_immediate_data_layout_config.AddInternalImmediateData(
+            num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u()),
+        Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -1459,8 +1461,10 @@ $B1: {  # root
     constexpr uint32_t num_workgroups_offset = 0u;
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
-    prepare_immediate_data_layout_config.AddInternalImmediateData(
-        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u());
+    ASSERT_EQ(
+        prepare_immediate_data_layout_config.AddInternalImmediateData(
+            num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u()),
+        Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -1721,8 +1725,10 @@ $B1: {  # root
     constexpr uint32_t num_workgroups_offset = 0u;
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
-    prepare_immediate_data_layout_config.AddInternalImmediateData(
-        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u());
+    ASSERT_EQ(
+        prepare_immediate_data_layout_config.AddInternalImmediateData(
+            num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u()),
+        Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -1854,8 +1860,10 @@ $B1: {  # root
     constexpr uint32_t num_workgroups_offset = 0u;
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
-    prepare_immediate_data_layout_config.AddInternalImmediateData(
-        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u());
+    ASSERT_EQ(
+        prepare_immediate_data_layout_config.AddInternalImmediateData(
+            num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u()),
+        Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -2066,8 +2074,10 @@ $B1: {  # root
     constexpr uint32_t num_workgroups_offset = 0u;
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
-    prepare_immediate_data_layout_config.AddInternalImmediateData(
-        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u());
+    ASSERT_EQ(
+        prepare_immediate_data_layout_config.AddInternalImmediateData(
+            num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u()),
+        Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -3635,8 +3645,9 @@ $B1: {  # root
     constexpr uint32_t first_index_offset = 0u;
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
-    prepare_immediate_data_layout_config.AddInternalImmediateData(
-        first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32());
+    ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
+                  first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32()),
+              Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -3782,8 +3793,9 @@ $B1: {  # root
     constexpr uint32_t first_instance_offset = 0u;
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
-    prepare_immediate_data_layout_config.AddInternalImmediateData(
-        first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32());
+    ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
+                  first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32()),
+              Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -3947,10 +3959,12 @@ $B1: {  # root
     constexpr uint32_t first_instance_offset = 4u;
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
-    prepare_immediate_data_layout_config.AddInternalImmediateData(
-        first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32());
-    prepare_immediate_data_layout_config.AddInternalImmediateData(
-        first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32());
+    ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
+                  first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32()),
+              Success);
+    ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
+                  first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32()),
+              Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -4115,10 +4129,12 @@ $B1: {  # root
     constexpr uint32_t first_instance_offset = 4u;
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
-    prepare_immediate_data_layout_config.AddInternalImmediateData(
-        first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32());
-    prepare_immediate_data_layout_config.AddInternalImmediateData(
-        first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32());
+    ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
+                  first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32()),
+              Success);
+    ASSERT_EQ(prepare_immediate_data_layout_config.AddInternalImmediateData(
+                  first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32()),
+              Success);
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 

@@ -106,21 +106,30 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // PrepareImmediateData must come before any transform that needs internal push constants.
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     if (options.first_index_offset) {
-        immediate_data_config.AddInternalImmediateData(
+        auto res = immediate_data_config.AddInternalImmediateData(
             options.first_index_offset.value(), module.symbols.New("tint_first_index_offset"),
             module.Types().u32());
+        if (res != Success) {
+            return res.Failure();
+        }
     }
 
     if (options.first_instance_offset) {
-        immediate_data_config.AddInternalImmediateData(
+        auto res = immediate_data_config.AddInternalImmediateData(
             options.first_instance_offset.value(), module.symbols.New("tint_first_instance_offset"),
             module.Types().u32());
+        if (res != Success) {
+            return res.Failure();
+        }
     }
 
     if (options.num_workgroups_start_offset) {
-        immediate_data_config.AddInternalImmediateData(
+        auto res = immediate_data_config.AddInternalImmediateData(
             options.num_workgroups_start_offset.value(),
             module.symbols.New("tint_num_workgroups_start_offset"), module.Types().vec3u());
+        if (res != Success) {
+            return res.Failure();
+        }
     }
 
     if (array_length_from_uniform_options.buffer_sizes_offset) {
@@ -134,11 +143,14 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         }
         buffer_sizes_array_elements_num = (max_index / 4) + 1;
 
-        immediate_data_config.AddInternalImmediateData(
+        auto res = immediate_data_config.AddInternalImmediateData(
             array_length_from_uniform_options.buffer_sizes_offset.value(),
             module.symbols.New("buffer_sizes"),
             module.Types().array(module.Types().vec4<core::u32>(),
                                  buffer_sizes_array_elements_num));
+        if (res != Success) {
+            return res.Failure();
+        }
     }
 
     if (array_offset_from_uniform_options.buffer_offsets_offset) {
@@ -152,11 +164,14 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         }
         buffer_offsets_array_elements_num = (max_index / 4) + 1;
 
-        immediate_data_config.AddInternalImmediateData(
+        auto res = immediate_data_config.AddInternalImmediateData(
             array_offset_from_uniform_options.buffer_offsets_offset.value(),
             module.symbols.New("buffer_offsets"),
             module.Types().array(module.Types().vec4<core::u32>(),
                                  buffer_offsets_array_elements_num));
+        if (res != Success) {
+            return res.Failure();
+        }
     }
 
     auto immediate_data_layout =

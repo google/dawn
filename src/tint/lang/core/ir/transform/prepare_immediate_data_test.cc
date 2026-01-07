@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 
+#include "gmock/gmock.h"
+
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 
 namespace tint::core::ir::transform {
@@ -136,7 +138,8 @@ $B1: {  # root
 )";
 
     PrepareImmediateDataConfig config;
-    config.AddInternalImmediateData(0u, mod.symbols.New("internal_constant_a"), ty.i32());
+    ASSERT_EQ(config.AddInternalImmediateData(0u, mod.symbols.New("internal_constant_a"), ty.i32()),
+              Success);
     auto result = Run(config);
     if (result == Success) {
         EXPECT_NE(result->var, nullptr);
@@ -173,9 +176,13 @@ $B1: {  # root
 )";
 
     PrepareImmediateDataConfig config;
-    config.AddInternalImmediateData(0u, mod.symbols.New("internal_constant_a"), ty.i32());
-    config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_b"), ty.f32());
-    config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4f());
+    ASSERT_EQ(config.AddInternalImmediateData(0u, mod.symbols.New("internal_constant_a"), ty.i32()),
+              Success);
+    ASSERT_EQ(config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_b"), ty.f32()),
+              Success);
+    ASSERT_EQ(
+        config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4f()),
+        Success);
     auto result = Run(config);
     if (result == Success) {
         EXPECT_NE(result->var, nullptr);
@@ -232,9 +239,13 @@ $B1: {  # root
 )";
 
     PrepareImmediateDataConfig config;
-    config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_a"), ty.i32());
-    config.AddInternalImmediateData(8u, mod.symbols.New("internal_constant_b"), ty.f32());
-    config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4f());
+    ASSERT_EQ(config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_a"), ty.i32()),
+              Success);
+    ASSERT_EQ(config.AddInternalImmediateData(8u, mod.symbols.New("internal_constant_b"), ty.f32()),
+              Success);
+    ASSERT_EQ(
+        config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4f()),
+        Success);
     auto result = Run(config);
     if (result == Success) {
         EXPECT_NE(result->var, nullptr);
@@ -244,6 +255,16 @@ $B1: {  # root
     }
 
     EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_PrepareImmediateDataTests, DuplicateInternalImmediateOffsets) {
+    PrepareImmediateDataConfig config;
+    ASSERT_EQ(config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_a"), ty.i32()),
+              Success);
+    auto res =
+        config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_b"), ty.f32());
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, R"(mutiple internal immediates created at offset 4)");
 }
 
 }  // namespace

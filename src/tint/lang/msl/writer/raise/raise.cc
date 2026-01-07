@@ -120,11 +120,14 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         }
         buffer_sizes_array_elements_num = (max_index / 4) + 1;
 
-        immediate_data_config.AddInternalImmediateData(
+        auto res = immediate_data_config.AddInternalImmediateData(
             array_length_from_constants.buffer_sizes_offset.value(),
             module.symbols.New("tint_storage_buffer_sizes"),
             module.Types().array(module.Types().vec4<core::u32>(),
                                  buffer_sizes_array_elements_num));
+        if (res != Success) {
+            return res.Failure();
+        }
     }
     auto immediate_data_layout =
         core::ir::transform::PrepareImmediateData(module, immediate_data_config);

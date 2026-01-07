@@ -63,8 +63,9 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, Basic) {
     });
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4u(), 6));
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
+                                                             ty.array(ty.vec4u(), 6)),
+              Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     ASSERT_EQ(immediate_data, Success);
 
@@ -151,8 +152,9 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4u(), 1));
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
+                                                             ty.array(ty.vec4u(), 1)),
+              Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -211,8 +213,9 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4u(), 6));
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
+                                                             ty.array(ty.vec4u(), 6)),
+              Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -274,8 +277,9 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4u(), 6));
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
+                                                             ty.array(ty.vec4u(), 6)),
+              Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -403,8 +407,9 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4u(), 15));
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
+                                                             ty.array(ty.vec4u(), 15)),
+              Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -451,8 +456,9 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, AllAtomicOps) {
     });
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4u(), 3));
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
+                                                             ty.array(ty.vec4u(), 3)),
+              Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -543,8 +549,9 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
-                                                   ty.array(ty.vec4u(), 3));
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(0, mod.symbols.New("buffer_offsets"),
+                                                             ty.array(ty.vec4u(), 3)),
+              Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 

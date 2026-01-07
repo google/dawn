@@ -180,7 +180,9 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("first_vertex"), ty.u32());
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("first_vertex"),
+                                                             ty.u32()),
+              Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -253,7 +255,9 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("first_instance"), ty.u32());
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("first_instance"),
+                                                             ty.u32()),
+              Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
@@ -330,8 +334,12 @@ $B1: {  # root
 )";
 
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("first_vertex"), ty.u32());
-    immediate_data_config.AddInternalImmediateData(8, mod.symbols.New("first_instance"), ty.u32());
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("first_vertex"),
+                                                             ty.u32()),
+              Success);
+    ASSERT_EQ(immediate_data_config.AddInternalImmediateData(8, mod.symbols.New("first_instance"),
+                                                             ty.u32()),
+              Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 

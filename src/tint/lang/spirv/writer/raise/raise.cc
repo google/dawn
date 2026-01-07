@@ -111,12 +111,22 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // PrepareImmediateData must come before any transform that needs internal immediate data.
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     if (options.depth_range_offsets) {
-        immediate_data_config.AddInternalImmediateData(options.depth_range_offsets.value().min,
-                                                       module.symbols.New("tint_frag_depth_min"),
-                                                       module.Types().f32());
-        immediate_data_config.AddInternalImmediateData(options.depth_range_offsets.value().max,
-                                                       module.symbols.New("tint_frag_depth_max"),
-                                                       module.Types().f32());
+        {
+            auto res = immediate_data_config.AddInternalImmediateData(
+                options.depth_range_offsets.value().min, module.symbols.New("tint_frag_depth_min"),
+                module.Types().f32());
+            if (res != Success) {
+                return res.Failure();
+            }
+        }
+        {
+            auto res = immediate_data_config.AddInternalImmediateData(
+                options.depth_range_offsets.value().max, module.symbols.New("tint_frag_depth_max"),
+                module.Types().f32());
+            if (res != Success) {
+                return res.Failure();
+            }
+        }
     }
     auto immediate_data_layout =
         core::ir::transform::PrepareImmediateData(module, immediate_data_config);
