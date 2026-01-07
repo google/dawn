@@ -222,6 +222,36 @@ func TestSimplify(t *testing.T) {
 		};
 
 		WithMixin includes MyMixin;
+
+		enum MyEnum {
+			"value1"
+		};
+
+		enum MyEnum {
+			"value2"
+		};
+
+		dictionary MyDict {
+			long member1;
+		};
+
+		partial dictionary MyDict {
+			long member2;
+		};
+
+		typedef long MyTypedef;
+
+		dictionary BaseDict {
+			MyTypedef val;
+		};
+
+		dictionary DerivedDict : BaseDict {
+			long otherVal;
+		};
+
+		interface InterfaceUsingDict {
+			void method(DerivedDict d);
+		};
 	`
 
 	parsed := parser.Parse(idl)
@@ -261,6 +291,36 @@ func TestSimplify(t *testing.T) {
 	require.True(t, memberNames["originalMethod"])
 	require.True(t, memberNames["mixinConst"])
 
+	// Check Partial Enum Merging
+	enumDecl := decls["MyEnum"]
+	require.NotNil(t, enumDecl)
+	enum, ok := enumDecl.(*ast.Enum)
+	require.True(t, ok)
+	require.Equal(t, 2, len(enum.Values))
+
+	enumValues := make(map[string]bool)
+	for _, v := range enum.Values {
+		if val, ok := v.(*ast.BasicLiteral); ok {
+			enumValues[val.Value] = true
+		}
+	}
+	require.True(t, enumValues["\"value1\""])
+	require.True(t, enumValues["\"value2\""])
+
+	// Check Partial Dictionary Merging
+	dictDecl := decls["MyDict"]
+	require.NotNil(t, dictDecl)
+	dict, ok := dictDecl.(*ast.Dictionary)
+	require.True(t, ok)
+	require.Equal(t, 2, len(dict.Members))
+
+	dictMembers := make(map[string]bool)
+	for _, m := range dict.Members {
+		dictMembers[m.Name] = true
+	}
+	require.True(t, dictMembers["member1"])
+	require.True(t, dictMembers["member2"])
+
 	// Check Dependency Ordering
 	// Base must precede Dependent
 	var names []string
@@ -268,19 +328,26 @@ func TestSimplify(t *testing.T) {
 		names = append(names, nameOf(d))
 	}
 
-	baseIdx := -1
-	dependentIdx := -1
-	for i, name := range names {
-		if name == "Base" {
-			baseIdx = i
+	checkOrder := func(first, second string) {
+		firstIdx := -1
+		secondIdx := -1
+		for i, name := range names {
+			if name == first {
+				firstIdx = i
+			}
+			if name == second {
+				secondIdx = i
+			}
 		}
-		if name == "Dependent" {
-			dependentIdx = i
-		}
+		require.NotEqual(t, -1, firstIdx, "%s not found in simplified declarations", first)
+		require.NotEqual(t, -1, secondIdx, "%s not found in simplified declarations", second)
+		require.True(t, firstIdx < secondIdx, "%s should precede %s, but found indices %d and %d", first, second, firstIdx, secondIdx)
 	}
-	require.NotEqual(t, -1, baseIdx, "Base not found in simplified declarations")
-	require.NotEqual(t, -1, dependentIdx, "Dependent not found in simplified declarations")
-	require.True(t, baseIdx < dependentIdx, "Base should precede Dependent")
+
+	checkOrder("Base", "Dependent")
+	checkOrder("MyTypedef", "BaseDict")
+	checkOrder("BaseDict", "DerivedDict")
+	checkOrder("DerivedDict", "InterfaceUsingDict")
 }
 
 func TestEnumEntryName(t *testing.T) {
