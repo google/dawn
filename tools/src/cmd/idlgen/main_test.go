@@ -466,6 +466,37 @@ func TestMemberExtraction(t *testing.T) {
 	})
 }
 
+func TestPatch(t *testing.T) {
+	lostMember := &ast.Member{
+		Name:        "lost",
+		Type:        &ast.TypeName{Name: "Promise"},
+		Annotations: []*ast.Annotation{},
+	}
+	otherMember := &ast.Member{
+		Name:        "other",
+		Type:        &ast.TypeName{Name: "void"},
+		Annotations: []*ast.Annotation{},
+	}
+
+	gpuDevice := &ast.Interface{
+		Name:    "GPUDevice",
+		Members: []ast.InterfaceMember{lostMember, otherMember},
+	}
+
+	decls := declarations{
+		"GPUDevice": gpuDevice,
+	}
+
+	// Execute patch
+	patch(nil, decls)
+
+	// Verify [SameObject] was added to 'lost'
+	require.True(t, hasAnnotation(lostMember, "SameObject"))
+
+	// Verify 'other' was not touched
+	require.False(t, hasAnnotation(otherMember, "SameObject"))
+}
+
 func TestGeneratorEval(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -618,6 +649,18 @@ func TestGeneratorInclude(t *testing.T) {
 	}
 }
 
+func TestMapGet(t *testing.T) {
+	m := newMap()
+	m.Put("key1", "value1")
+	m.Put("key2", 123)
+	m.Put(456, "value3")
+
+	require.Equal(t, "value1", m.Get("key1"))
+	require.Equal(t, 123, m.Get("key2"))
+	require.Equal(t, "value3", m.Get(456))
+	require.Nil(t, m.Get("missing"))
+}
+
 func TestIs(t *testing.T) {
 	isInterface := is(ast.Interface{})
 	isInterfaceOrNamespace := is(ast.Interface{}, ast.Namespace{})
@@ -718,6 +761,25 @@ func TestHasAnnotation(t *testing.T) {
 	})
 }
 
+func TestHasConstructor(t *testing.T) {
+	constructorMember := &ast.Member{
+		Type: &ast.TypeName{Name: "constructor"},
+	}
+	regularMember := &ast.Member{
+		Type: &ast.TypeName{Name: "void"},
+	}
+
+	withConstructor := &ast.Interface{
+		Members: []ast.InterfaceMember{regularMember, constructorMember},
+	}
+	withoutConstructor := &ast.Interface{
+		Members: []ast.InterfaceMember{regularMember},
+	}
+
+	require.True(t, hasConstructor(withConstructor))
+	require.False(t, hasConstructor(withoutConstructor))
+}
+
 func TestPromiseDetection_HappyPath(t *testing.T) {
 	tests := []struct {
 		method    string
@@ -771,6 +833,23 @@ func TestPromiseDetection_InconsistentOverloads(t *testing.T) {
 	require.Panics(t, func() {
 		returnsPromise(method)
 	})
+}
+
+func TestSetlikeOf(t *testing.T) {
+	setlikePattern := &ast.Pattern{Type: ast.Setlike}
+	otherPattern := &ast.Pattern{Type: ast.Iterable}
+
+	withSetlike := &ast.Interface{
+		Patterns: []*ast.Pattern{otherPattern, setlikePattern},
+	}
+	withoutSetlike := &ast.Interface{
+		Patterns: []*ast.Pattern{otherPattern},
+	}
+	notInterface := &ast.Dictionary{}
+
+	require.Equal(t, setlikePattern, setlikeOf(withSetlike))
+	require.Nil(t, setlikeOf(withoutSetlike))
+	require.Nil(t, setlikeOf(notInterface))
 }
 
 func TestPascalCase(t *testing.T) {
