@@ -103,11 +103,13 @@ class ObjectBase : public ErrorMonad {
     Ref<DeviceBase> mDevice;
 };
 
-// The reason why Destroy() and DestroyImpl() are called. Currently only contains a placeholder
-// and will grow to differentiate between DeleteThis and other reasons.
-// TODO(https://issues.chromium.org/issues/451928481): Add the actual reasons.
+// The reason why Destroy() and DestroyImpl() are called.
 enum class DestroyReason {
-    Placeholder,
+    // The object will be delete (in the C++ sense) so no further references to it can be taken.
+    CppDestructor,
+    // Destroy is called before the object is going to be deleted, for example because the
+    // wgpu::Object::Destroy method was called, or because the parent object is being deleted.
+    EarlyDestroy,
 };
 
 // Generic object list with a mutex for tracking for destruction.
@@ -120,7 +122,7 @@ class ApiObjectList {
     bool Untrack(ApiObjectBase* object);
 
     // Destroys and removes all the objects tracked in the list.
-    void Destroy(DestroyReason reason = DestroyReason::Placeholder);
+    void Destroy(DestroyReason reason);
 
     template <typename F>
     void ForEach(F fn) const {
@@ -163,7 +165,7 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
     bool IsAlive() const;
 
     // This needs to be public because it can be called from the device owning the object.
-    void Destroy(DestroyReason reason = DestroyReason::Placeholder);
+    void Destroy(DestroyReason reason = DestroyReason::EarlyDestroy);
 
     // Dawn API
     void APISetLabel(StringView label);

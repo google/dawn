@@ -1076,7 +1076,7 @@ void TextureBase::DestroyImpl(DestroyReason reason) {
     mDefaultView = nullptr;
 
     // Destroy all of the views associated with the texture as well.
-    mTextureViews.Destroy();
+    mTextureViews.Destroy(DestroyReason::EarlyDestroy);
 }
 
 // static

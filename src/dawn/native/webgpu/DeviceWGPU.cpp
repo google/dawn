@@ -146,7 +146,7 @@ Device::Device(AdapterBase* adapter,
 }
 
 Device::~Device() {
-    Destroy();
+    Destroy(DestroyReason::CppDestructor);
 }
 
 WGPUInstance Device::GetInnerInstance() const {

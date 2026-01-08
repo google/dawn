@@ -490,7 +490,7 @@ class DeviceBase : public ErrorSink,
     MaybeError Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor,
                           Ref<QueueBase> defaultQueue);
     void DestroyObjects();
-    void Destroy(DestroyReason reason = DestroyReason::Placeholder);
+    void Destroy(DestroyReason reason);
 
     virtual MaybeError GetAHardwareBufferPropertiesImpl(
         void* handle,

@@ -105,7 +105,7 @@ DeviceBase* ObjectBase::GetDevice() const {
 
 void ApiObjectList::Track(ApiObjectBase* object) {
     if (mMarkedDestroyed.load(std::memory_order_acquire)) {
-        object->DestroyImpl(DestroyReason::Placeholder);
+        object->DestroyImpl(DestroyReason::EarlyDestroy);
         return;
     }
     mObjects.Use([&object](auto lockedObjects) { lockedObjects->Prepend(object); });
@@ -193,7 +193,7 @@ bool ApiObjectBase::IsAlive() const {
 }
 
 void ApiObjectBase::DeleteThis() {
-    Destroy();
+    Destroy(DestroyReason::CppDestructor);
     RefCounted::DeleteThis();
 }
 

@@ -540,7 +540,7 @@ void DeviceBase::WillDropLastExternalRef() {
         // the device - either directly or indirectly. We would need to ensure those tasks don't
         // create new reference cycles, and we would need to continuously try draining the pending
         // tasks to clear out all remaining refs.
-        Destroy(DestroyReason::Placeholder);
+        Destroy(DestroyReason::EarlyDestroy);
     }
 
     // Flush last remaining callback tasks.
@@ -609,7 +609,7 @@ void DeviceBase::DestroyObjects() {
     // clang-format on
 
     for (ObjectType type : kObjectTypeDependencyOrder) {
-        mObjectLists[type].Destroy();
+        mObjectLists[type].Destroy(DestroyReason::EarlyDestroy);
     }
 }
 
@@ -711,7 +711,7 @@ void DeviceBase::Destroy(DestroyReason reason) {
 }
 
 void DeviceBase::APIDestroy() {
-    Destroy();
+    Destroy(DestroyReason::EarlyDestroy);
 }
 
 void DeviceBase::HandleEncoderError(std::unique_ptr<ErrorData> error) {

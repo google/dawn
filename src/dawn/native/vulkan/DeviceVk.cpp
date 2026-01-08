@@ -196,7 +196,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 }
 
 Device::~Device() {
-    Destroy();
+    Destroy(DestroyReason::CppDestructor);
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(

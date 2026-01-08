@@ -497,7 +497,7 @@ void BufferBase::DestroyImpl(DestroyReason reason) {
         }
     }
 
-    mTexelBufferViews.Destroy();
+    mTexelBufferViews.Destroy(DestroyReason::EarlyDestroy);
 }
 
 // static

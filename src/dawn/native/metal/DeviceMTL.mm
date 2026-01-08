@@ -154,7 +154,7 @@ Device::Device(AdapterBase* adapter,
 
 Device::~Device() {
     StopTrace();
-    Destroy();
+    Destroy(DestroyReason::CppDestructor);
 }
 
 MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
