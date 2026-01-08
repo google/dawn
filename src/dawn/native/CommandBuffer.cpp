@@ -33,6 +33,7 @@
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
+#include "dawn/native/Device.h"
 #include "dawn/native/Format.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/Texture.h"
@@ -160,7 +161,11 @@ SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy,
     DAWN_UNREACHABLE();
 }
 
-void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass) {
+void LazyClearRenderPassAttachments(DeviceBase* device, BeginRenderPassCmd* renderPass) {
+    if (!device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
+        return;
+    }
+
     for (auto i : renderPass->attachmentState->GetColorAttachmentsMask()) {
         auto& attachmentInfo = renderPass->colorAttachments[i];
         TextureViewBase* view = attachmentInfo.view.Get();

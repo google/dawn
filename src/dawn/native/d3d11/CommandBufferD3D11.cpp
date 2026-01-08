@@ -647,7 +647,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
         SubresourceRange range = colorAttachment.view->GetSubresourceRange();
         colorAttachment.view->GetTexture()->SetIsSubresourceContentInitialized(true, range);
     }
-    LazyClearRenderPassAttachments(renderPass);
+    LazyClearRenderPassAttachments(GetDevice(), renderPass);
 
     auto* d3d11DeviceContext = commandContext->GetD3D11DeviceContext3();
     // Hold ID3D11RenderTargetView ComPtr to make attachments alive.

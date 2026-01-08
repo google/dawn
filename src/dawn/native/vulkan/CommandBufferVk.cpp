@@ -1050,7 +1050,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                     device, recordingContext,
                     GetResourceUsages().renderPasses[nextRenderPassNumber], currentResourceTable));
 
-                LazyClearRenderPassAttachments(cmd);
+                LazyClearRenderPassAttachments(device, cmd);
                 DAWN_TRY(RecordRenderPass(recordingContext, cmd, currentResourceTable));
 
                 recordingContext->hasRecordedRenderPass = true;

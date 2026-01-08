@@ -785,7 +785,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                 }
                 DAWN_TRY(
                     LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber]));
-                LazyClearRenderPassAttachments(cmd);
+                LazyClearRenderPassAttachments(GetDevice(), cmd);
                 DAWN_TRY(ExecuteRenderPass(cmd, gl));
 
                 nextRenderPassNumber++;

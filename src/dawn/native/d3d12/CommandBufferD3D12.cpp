@@ -946,7 +946,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                     commandContext, GetResourceUsages().renderPasses[nextRenderPassNumber],
                     &passHasUAV));
 
-                LazyClearRenderPassAttachments(beginRenderPassCmd);
+                LazyClearRenderPassAttachments(device, beginRenderPassCmd);
                 DAWN_TRY(RecordRenderPass(commandContext,
                                           descriptorHeapState.GetGraphicsBindingTracker(),
                                           beginRenderPassCmd, passHasUAV));
