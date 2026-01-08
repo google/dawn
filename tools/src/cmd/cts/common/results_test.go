@@ -793,6 +793,54 @@ func TestGetRawResultsV2Filtering(t *testing.T) {
 	require.Equal(t, "test2", compatResults[0].Query.String())
 }
 
+// Tests that new test IDs are transformed to the legacy format correctly.
+func TestGetRawResultsV2TestNameTransformation(t *testing.T) {
+	ctx, cfg, client, builds := generateGoodGetResultsInputs()
+	v2Prefix := "://chrome/test\\:telemetry_gpu_integration_test!webgpucts:"
+	cfg.Tests[0].Prefixes = []string{v2Prefix}
+
+	client.ReturnValues = resultsdb.PrefixGroupedQueryResults{
+		v2Prefix: []resultsdb.QueryResult{
+			{
+				TestId: v2Prefix + `webgpu\:api,operation,render_pass,storeop2:storeOp_controls_whether_1x1_drawn_quad_is_stored#storeOp="discard":`,
+				Status: "PASS",
+				Tags:   []resultsdb.TagPair{},
+			},
+			{
+				TestId: v2Prefix + `webgpu:test,bar#single_case`,
+				Status: "PASS",
+				Tags:   []resultsdb.TagPair{},
+			},
+		},
+	}
+
+	results, err := GetRawResults(ctx, cfg, builds)
+	require.NoError(t, err)
+
+	executionResults := results["execution_mode"]
+	require.Len(t, executionResults, 2)
+
+	expected := result.List{
+		result.Result{
+			Query:  query.Parse(`webgpu:api,operation,render_pass,storeop2:storeOp_controls_whether_1x1_drawn_quad_is_stored:storeOp="discard"`),
+			Status: result.Pass,
+			Tags:   result.NewTags(),
+		},
+		result.Result{
+			Query:  query.Parse(`webgpu:test,bar`),
+			Status: result.Pass,
+			Tags:   result.NewTags(),
+		},
+	}
+	// Durations are zero-initialized
+	expected[0].Duration = 0
+	expected[1].Duration = 0
+	expected[0].MayExonerate = false
+	expected[1].MayExonerate = false
+
+	require.Equal(t, expected, executionResults)
+}
+
 /*******************************************************************************
  * convertRdbStatus tests
  ******************************************************************************/

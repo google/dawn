@@ -381,6 +381,9 @@ func getRawResultsImpl(
 				}
 
 				testName := r.TestId[len(prefix):]
+				if isV2Prefix {
+					testName = convertV2NameToLegacyName(testName)
+				}
 				status := convertRdbStatus(r.Status)
 				tags := result.NewTags()
 				duration := time.Duration(r.Duration * float64(time.Second))
@@ -442,6 +445,23 @@ func convertRdbStatus(rdbStatus string) result.Status {
 	case rdbpb.TestStatus_SKIP.String():
 		return result.Skip
 	}
+}
+
+// convertV2NameToLegacyName transforms a V2 test name to the legacy format.
+func convertV2NameToLegacyName(testName string) string {
+	// V2 test IDs use `\:` and `#` for separators.
+	// Convert to the legacy format that uses `:` for all separators.
+	if strings.HasSuffix(testName, "#single_case") {
+		// Handle #single_case
+		testName = strings.TrimSuffix(testName, "#single_case")
+		testName = strings.ReplaceAll(testName, `\:`, `:`)
+		return testName + ":"
+	}
+	// Handle parameters separated by #, or no #.
+	testName = strings.ReplaceAll(testName, `#`, `:`)
+	testName = strings.ReplaceAll(testName, `\:`, `:`)
+	testName = strings.ReplaceAll(testName, `\;`, `;`)
+	return strings.TrimSuffix(testName, ":")
 }
 
 // LatestCTSRoll returns for the latest merged CTS roll that landed in the past
@@ -687,6 +707,9 @@ func getRecentUniqueSuppressedResults(
 				}
 
 				testName := r.TestId[len(prefix):]
+				if isV2Prefix {
+					testName = convertV2NameToLegacyName(testName)
+				}
 				tags := result.NewTags()
 
 				for _, tagPair := range r.Tags {
