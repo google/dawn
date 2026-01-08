@@ -584,18 +584,23 @@ void DeviceBase::DestroyObjects() {
 
     // clang-format off
     static constexpr std::array<ObjectType, 21> kObjectTypeDependencyOrder = {
+        // Encoders first, nothing refers to them.
         ObjectType::ComputePassEncoder,
         ObjectType::RenderPassEncoder,
         ObjectType::RenderBundleEncoder,
-        ObjectType::RenderBundle,
         ObjectType::CommandEncoder,
+        // Then CommandBuffer [-> RenderBundle] -> lots of things.
         ObjectType::CommandBuffer,
+        ObjectType::RenderBundle,
+        // Then Pipeline -> PipelineLayout -> BindGroupLayout
+        // and                   BindGroup -> BindGroupLayout.
         ObjectType::RenderPipeline,
         ObjectType::ComputePipeline,
         ObjectType::PipelineLayout,
         ObjectType::BindGroup,
         ObjectType::BindGroupLayout,
         ObjectType::BindGroupLayoutInternal,
+        // And finally resource-like things.
         ObjectType::ShaderModule,
         ObjectType::SharedBufferMemory,
         ObjectType::SharedTextureMemory,
