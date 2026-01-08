@@ -199,7 +199,8 @@ class ResourceTableTests : public DawnTest {
                     if !hasResource<texture_2d<u32>>(i) {
                         results[i] = 0xBEEF;
                     } else {
-                        results[i] = textureLoad(getResource<texture_2d<u32>>(i), vec2(0), 0).x;
+                        let tex = getResource<texture_2d<u32>>(i);
+                        results[i] = textureLoad(tex, vec2(0), 0).x;
                     }
                 }
             }
@@ -888,29 +889,41 @@ TEST_P(ResourceTableTests, DefaultBindingsAreZeroAndSizeOne) {
 
         @compute @workgroup_size(1) fn checkDefault() {
             // Default texture_2d<f32>
-            check(!hasResource<texture_2d<f32>>(0));
-            check(all(textureDimensions(getResource<texture_2d<f32>>(0)) == vec2(1)));
-            check(textureNumLevels(getResource<texture_2d<f32>>(0)) == 1);
-            check(all(textureLoad(getResource<texture_2d<f32>>(0), vec2(0), 0) == vec4(0, 0, 0, 1)));
+            {
+                check(!hasResource<texture_2d<f32>>(0));
+                let t = getResource<texture_2d<f32>>(0);
+                check(all(textureDimensions(t) == vec2(1)));
+                check(textureNumLevels(t) == 1);
+                check(all(textureLoad(t, vec2(0), 0) == vec4(0, 0, 0, 1)));
+            }
 
             // Default texture_multisampled_2d
-            check(!hasResource<texture_multisampled_2d<u32>>(0));
-            check(all(textureDimensions(getResource<texture_multisampled_2d<u32>>(0)) == vec2(1)));
-            check(textureNumSamples(getResource<texture_multisampled_2d<u32>>(0)) == 4);
-            check(all(textureLoad(getResource<texture_multisampled_2d<u32>>(0), vec2(0), 0) == vec4(0, 0, 0, 1)));
+            {
+                check(!hasResource<texture_multisampled_2d<u32>>(0));
+                let t = getResource<texture_multisampled_2d<u32>>(0);
+                check(all(textureDimensions(t) == vec2(1)));
+                check(textureNumSamples(t) == 4);
+                check(all(textureLoad(t, vec2(0), 0) == vec4(0, 0, 0, 1)));
+            }
 
-            // Default texture_depth_cube
-            check(!hasResource<texture_depth_cube>(0));
-            check(all(textureDimensions(getResource<texture_depth_cube>(0)) == vec2(1)));
-            check(textureNumLevels(getResource<texture_depth_cube>(0)) == 1);
-            check(textureSampleLevel(getResource<texture_depth_cube>(0), s, vec3(0), 0) == 0);
+                // Default texture_depth_cube
+            {
+                check(!hasResource<texture_depth_cube>(0));
+                let t = getResource<texture_depth_cube>(0);
+                check(all(textureDimensions(t) == vec2(1)));
+                check(textureNumLevels(t) == 1);
+                check(textureSampleLevel(t, s, vec3(0), 0) == 0);
+            }
 
-            // Default texture_2d_array<i32>
-            check(!hasResource<texture_2d_array<i32>>(0));
-            check(all(textureDimensions(getResource<texture_2d_array<i32>>(0)) == vec2(1)));
-            check(textureNumLevels(getResource<texture_2d_array<i32>>(0)) == 1);
-            check(textureNumLayers(getResource<texture_2d_array<i32>>(0)) == 1);
-            check(all(textureLoad(getResource<texture_2d_array<i32>>(0), vec2(0), 0, 0) == vec4(0, 0, 0, 1)));
+                // Default texture_2d_array<i32>
+            {
+                check(!hasResource<texture_2d_array<i32>>(0));
+                let t = getResource<texture_2d_array<i32>>(0);
+                check(all(textureDimensions(t) == vec2(1)));
+                check(textureNumLevels(t) == 1);
+                check(textureNumLayers(t) == 1);
+                check(all(textureLoad(t, vec2(0), 0, 0) == vec4(0, 0, 0, 1)));
+            }
         }
     )");
     wgpu::ComputePipelineDescriptor csDesc = {.compute = {
@@ -957,7 +970,8 @@ TEST_P(ResourceTableTests, PinDoesZeroInit) {
 
         @compute @workgroup_size(1) fn readbackPixel() {
             let errorIfNotPresent = u32(!hasResource<texture_2d<u32>>(0));
-            let texel = textureLoad(getResource<texture_2d<u32>>(0), vec2u(0), 0).r;
+            let tex = getResource<texture_2d<u32>>(0);
+            let texel = textureLoad(tex, vec2u(0), 0).r;
             result = errorIfNotPresent + texel;
         }
     )");
