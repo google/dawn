@@ -178,11 +178,11 @@ dawn_add_library(
     DEPENDS
         webgpu_c
         webgpu_cpp
-    PRIVATE_DEPENDS
         absl::flat_hash_set
         absl::inlined_vector
         absl::no_destructor
         absl::overload
+   PRIVATE_DEPENDS
         dawn::partition_alloc
         dawn_shared_utils
         ${conditional_private_depends}

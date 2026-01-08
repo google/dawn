@@ -172,6 +172,7 @@ option(DAWN_BUILD_NODE_BINDINGS "Enables building Dawn's NodeJS bindings" OFF)
 option(DAWN_ENABLE_SWIFTSHADER "Enables building Swiftshader as part of the build and Vulkan adapter discovery" OFF)
 option(DAWN_BUILD_BENCHMARKS "Build Dawn benchmarks" OFF)
 option(DAWN_BUILD_PROTOBUF "Build the protobuf dependencies" ON)
+option(DAWN_BUILD_FUZZERS "Build Dawn fuzzers" OFF)
 
 option(DAWN_WERROR "Build with -Werror (or equivalent)" OFF)
 option(DAWN_WEVERYTHING "Build with -Weverything if using Clang" OFF)
@@ -484,6 +485,7 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12 OR DAWN_ENABLE_METAL OR DAWN_ENABLE_N
     # headers will be exported upwards.
     add_subdirectory(src/emdawnwebgpu)
     add_subdirectory(src/dawn)
+    add_subdirectory(src/dawn/fuzzers)
 endif()
 
 ################################################################################
