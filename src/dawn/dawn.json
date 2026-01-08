@@ -4105,6 +4105,14 @@
             {
                 "name": "unpin",
                 "tags": ["dawn"]
+            },
+            {
+                "name": "set ownership for memory dump",
+                "tags": ["dawn", "native"],
+                "_comment": "Sets texture's ownership information for memory dump, resets if given owner guid is 0.",
+                "args": [
+                    {"name": "owner guid", "type": "uint64_t", "default": 0}
+                ]
             }
         ]
     },

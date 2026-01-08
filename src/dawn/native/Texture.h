@@ -249,6 +249,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     wgpu::TextureFormat APIGetFormat() const;
     wgpu::TextureUsage APIGetUsage() const;
     wgpu::TextureViewDimension APIGetTextureBindingViewDimension() const;
+    void APISetOwnershipForMemoryDump(uint64_t ownerGuid);
 
   protected:
     TextureBase(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor);
@@ -326,6 +327,10 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     // TODO(crbug.com/dawn/845): Use a more optimized data structure to save space
     std::vector<bool> mIsSubresourceContentInitializedAtIndex;
+
+    // Owner GUID for memory dump tracking, non-zero GUID will be reported via
+    // MemoryDump::AddOwnerGUID, and 0 indicates no external ownership for this texture.
+    uint64_t mOwnerGUIDForMemoryDump = 0u;
 };
 
 template <typename CreateFn>

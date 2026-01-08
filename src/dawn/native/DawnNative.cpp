@@ -275,6 +275,11 @@ const FeatureInfo* GetFeatureInfo(wgpu::FeatureName feature) {
     return &kFeatureNameAndInfoList[FromAPI(feature)];
 }
 
+void MemoryDump::AddOwnerGUID(const char* name, uint64_t ownerGUID) {
+    // Provide a default empty implementation to prevent breaking existing MemoryDump
+    // implementations.
+}
+
 void DumpMemoryStatistics(WGPUDevice device, MemoryDump* dump) {
     auto deviceGuard = FromAPI(device)->GetGuard();
     FromAPI(device)->DumpMemoryStatistics(dump);
