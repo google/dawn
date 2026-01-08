@@ -442,7 +442,12 @@ MaybeError Buffer::Initialize(bool mappedAtCreation,
 
     SetLabelImpl();
 
-    if (!mappedAtCreation) {
+    const bool needsClearResource =
+        GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) ||
+        GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting);
+    // The buffers with mappedAtCreation == true will be initialized in
+    // BufferBase::MapAtCreation().
+    if (!mappedAtCreation && needsClearResource) {
         if (commandContext) {
             DAWN_TRY(ClearInitialResource(commandContext));
         } else {
