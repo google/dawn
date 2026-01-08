@@ -74,26 +74,19 @@
 namespace tint::msl::writer {
 
 Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
-#define RUN_TRANSFORM(name, ...)         \
-    do {                                 \
-        auto result = name(__VA_ARGS__); \
-        if (result != Success) {         \
-            return result.Failure();     \
-        }                                \
-    } while (false)
+    TINT_CHECK_RESULT(core::ir::transform::SingleEntryPoint(module, options.entry_point_name));
 
-    RUN_TRANSFORM(core::ir::transform::SingleEntryPoint, module, options.entry_point_name);
+    TINT_CHECK_RESULT(
+        core::ir::transform::SubstituteOverrides(module, options.substitute_overrides_config));
 
-    RUN_TRANSFORM(core::ir::transform::SubstituteOverrides, module,
-                  options.substitute_overrides_config);
-
-    RUN_TRANSFORM(raise::ValidateSubgroupMatrix, module);
+    TINT_CHECK_RESULT(raise::ValidateSubgroupMatrix(module));
 
     RaiseResult raise_result;
 
     // VertexPulling must come before BindingRemapper and Robustness.
     if (options.vertex_pulling_config) {
-        RUN_TRANSFORM(core::ir::transform::VertexPulling, module, *options.vertex_pulling_config);
+        TINT_CHECK_RESULT(
+            core::ir::transform::VertexPulling(module, *options.vertex_pulling_config));
     }
 
     // Populate binding-related options before prepare immediate data transform
@@ -120,35 +113,32 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         }
         buffer_sizes_array_elements_num = (max_index / 4) + 1;
 
-        auto res = immediate_data_config.AddInternalImmediateData(
+        TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
             array_length_from_constants.buffer_sizes_offset.value(),
             module.symbols.New("tint_storage_buffer_sizes"),
             module.Types().array(module.Types().vec4<core::u32>(),
-                                 buffer_sizes_array_elements_num));
-        if (res != Success) {
-            return res.Failure();
-        }
+                                 buffer_sizes_array_elements_num)));
     }
     auto immediate_data_layout =
         core::ir::transform::PrepareImmediateData(module, immediate_data_config);
     if (immediate_data_layout != Success) {
         return immediate_data_layout.Failure();
     }
-    RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
+    TINT_CHECK_RESULT(core::ir::transform::BindingRemapper(module, remapper_data));
 
     if (!options.disable_robustness) {
         core::ir::transform::RobustnessConfig config{};
         config.use_integer_range_analysis = !options.disable_integer_range_analysis;
-        RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
+        TINT_CHECK_RESULT(core::ir::transform::Robustness(module, config));
 
-        RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
+        TINT_CHECK_RESULT(core::ir::transform::PreventInfiniteLoops(module));
     }
 
     {
         core::ir::transform::BinaryPolyfillConfig binary_polyfills{};
         binary_polyfills.int_div_mod = !options.disable_polyfill_integer_div_mod;
         binary_polyfills.bitshift_modulo = true;  // crbug.com/tint/1543
-        RUN_TRANSFORM(core::ir::transform::BinaryPolyfill, module, binary_polyfills);
+        TINT_CHECK_RESULT(core::ir::transform::BinaryPolyfill(module, binary_polyfills));
     }
 
     {
@@ -168,16 +158,16 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         core_polyfills.abs_signed_int = true;
         core_polyfills.subgroup_broadcast_f16 = options.workarounds.polyfill_subgroup_broadcast_f16;
-        RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
+        TINT_CHECK_RESULT(core::ir::transform::BuiltinPolyfill(module, core_polyfills));
     }
 
     {
         core::ir::transform::ConversionPolyfillConfig conversion_polyfills;
         conversion_polyfills.ftoi = true;
-        RUN_TRANSFORM(core::ir::transform::ConversionPolyfill, module, conversion_polyfills);
+        TINT_CHECK_RESULT(core::ir::transform::ConversionPolyfill(module, conversion_polyfills));
     }
 
-    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module, multiplanar_map);
+    TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));
 
     // TODO(crbug.com/366291600): Replace ArrayLengthFromUniform with ArrayLengthFromImmediates
     if (array_length_from_constants.ubo_binding) {
@@ -205,25 +195,25 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     }
 
     if (!options.disable_workgroup_init) {
-        RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
+        TINT_CHECK_RESULT(core::ir::transform::ZeroInitWorkgroupMemory(module));
     }
 
-    RUN_TRANSFORM(core::ir::transform::PreservePadding, module);
-    RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
-    RUN_TRANSFORM(core::ir::transform::RemoveContinueInSwitch, module);
+    TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module));
+    TINT_CHECK_RESULT(core::ir::transform::VectorizeScalarMatrixConstructors(module));
+    TINT_CHECK_RESULT(core::ir::transform::RemoveContinueInSwitch(module));
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     if (!options.extensions.disable_demote_to_helper) {
-        RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+        TINT_CHECK_RESULT(core::ir::transform::DemoteToHelper(module));
     }
 
     // ConvertPrintToLog must come before ShaderIO as it may introduce entry point builtins.
-    RUN_TRANSFORM(raise::ConvertPrintToLog, module);
+    TINT_CHECK_RESULT(raise::ConvertPrintToLog(module));
 
-    RUN_TRANSFORM(raise::ShaderIO, module,
-                  raise::ShaderIOConfig{options.emit_vertex_point_size, options.fixed_sample_mask});
-    RUN_TRANSFORM(raise::PackedVec3, module);
-    RUN_TRANSFORM(raise::SimdBallot, module);
+    TINT_CHECK_RESULT(raise::ShaderIO(
+        module, raise::ShaderIOConfig{options.emit_vertex_point_size, options.fixed_sample_mask}));
+    TINT_CHECK_RESULT(raise::PackedVec3(module));
+    TINT_CHECK_RESULT(raise::SimdBallot(module));
 
     // ArgumentBuffers must come before ModuleScopeVars
     if (options.use_argument_buffers) {
@@ -251,7 +241,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
                 cfg.skip_bindings.insert(bp);
             }
         }
-        RUN_TRANSFORM(raise::ArgumentBuffers, module, cfg);
+        TINT_CHECK_RESULT(raise::ArgumentBuffers(module, cfg));
     }
 
     // ChangeImmediateToUniform must come before ModuleScopeVars
@@ -259,40 +249,40 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         core::ir::transform::ChangeImmediateToUniformConfig config = {
             .immediate_binding_point = options.immediate_binding_point,
         };
-        RUN_TRANSFORM(core::ir::transform::ChangeImmediateToUniform, module, config);
+        TINT_CHECK_RESULT(core::ir::transform::ChangeImmediateToUniform(module, config));
     }
 
-    RUN_TRANSFORM(raise::ModuleScopeVars, module);
+    TINT_CHECK_RESULT(raise::ModuleScopeVars(module));
 
-    RUN_TRANSFORM(raise::BinaryPolyfill, module);
-    RUN_TRANSFORM(raise::BuiltinPolyfill, module,
-                  {
-                      .polyfill_unpack_2x16_snorm = options.workarounds.polyfill_unpack_2x16_snorm,
-                      .polyfill_unpack_2x16_unorm = options.workarounds.polyfill_unpack_2x16_unorm,
-                  });
+    TINT_CHECK_RESULT(raise::BinaryPolyfill(module));
+    TINT_CHECK_RESULT(raise::BuiltinPolyfill(
+        module, {
+                    .polyfill_unpack_2x16_snorm = options.workarounds.polyfill_unpack_2x16_snorm,
+                    .polyfill_unpack_2x16_unorm = options.workarounds.polyfill_unpack_2x16_unorm,
+                }));
     // After 'BuiltinPolyfill' as that transform can introduce signed dot products.
     core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
         .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
-    RUN_TRANSFORM(core::ir::transform::SignedIntegerPolyfill, module, signed_integer_cfg);
+    TINT_CHECK_RESULT(core::ir::transform::SignedIntegerPolyfill(module, signed_integer_cfg));
 
     core::ir::transform::BuiltinScalarizeConfig scalarize_config{
         .scalarize_clamp = options.workarounds.scalarize_max_min_clamp,
         .scalarize_max = options.workarounds.scalarize_max_min_clamp,
         .scalarize_min = options.workarounds.scalarize_max_min_clamp,
     };
-    RUN_TRANSFORM(core::ir::transform::BuiltinScalarize, module, scalarize_config);
+    TINT_CHECK_RESULT(core::ir::transform::BuiltinScalarize(module, scalarize_config));
 
     raise::ModuleConstantConfig module_const_config{
         options.workarounds.disable_module_constant_f16};
-    RUN_TRANSFORM(raise::ModuleConstant, module, module_const_config);
+    TINT_CHECK_RESULT(raise::ModuleConstant(module, module_const_config));
 
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.
-    RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs, module);
-    RUN_TRANSFORM(core::ir::transform::RenameConflicts, module);
+    TINT_CHECK_RESULT(core::ir::transform::RemoveTerminatorArgs(module));
+    TINT_CHECK_RESULT(core::ir::transform::RenameConflicts(module));
     {
         core::ir::transform::ValueToLetConfig cfg;
-        RUN_TRANSFORM(core::ir::transform::ValueToLet, module, cfg);
+        TINT_CHECK_RESULT(core::ir::transform::ValueToLet(module, cfg));
     }
 
     return raise_result;

@@ -75,18 +75,10 @@
 namespace tint::hlsl::writer {
 
 Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
-#define RUN_TRANSFORM(name, ...)         \
-    do {                                 \
-        auto result = name(__VA_ARGS__); \
-        if (result != Success) {         \
-            return result.Failure();     \
-        }                                \
-    } while (false)
+    TINT_CHECK_RESULT(core::ir::transform::SingleEntryPoint(module, options.entry_point_name));
 
-    RUN_TRANSFORM(core::ir::transform::SingleEntryPoint, module, options.entry_point_name);
-
-    RUN_TRANSFORM(core::ir::transform::SubstituteOverrides, module,
-                  options.substitute_overrides_config);
+    TINT_CHECK_RESULT(
+        core::ir::transform::SubstituteOverrides(module, options.substitute_overrides_config));
 
     // PopulateBindingRelatedOptions must come before PrepareImmediateData so that
     // buffer_sizes_offset is available when configuring immediate data.
@@ -106,30 +98,21 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // PrepareImmediateData must come before any transform that needs internal push constants.
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     if (options.first_index_offset) {
-        auto res = immediate_data_config.AddInternalImmediateData(
+        TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
             options.first_index_offset.value(), module.symbols.New("tint_first_index_offset"),
-            module.Types().u32());
-        if (res != Success) {
-            return res.Failure();
-        }
+            module.Types().u32()));
     }
 
     if (options.first_instance_offset) {
-        auto res = immediate_data_config.AddInternalImmediateData(
+        TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
             options.first_instance_offset.value(), module.symbols.New("tint_first_instance_offset"),
-            module.Types().u32());
-        if (res != Success) {
-            return res.Failure();
-        }
+            module.Types().u32()));
     }
 
     if (options.num_workgroups_start_offset) {
-        auto res = immediate_data_config.AddInternalImmediateData(
+        TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
             options.num_workgroups_start_offset.value(),
-            module.symbols.New("tint_num_workgroups_start_offset"), module.Types().vec3u());
-        if (res != Success) {
-            return res.Failure();
-        }
+            module.symbols.New("tint_num_workgroups_start_offset"), module.Types().vec3u()));
     }
 
     if (array_length_from_uniform_options.buffer_sizes_offset) {
@@ -143,14 +126,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         }
         buffer_sizes_array_elements_num = (max_index / 4) + 1;
 
-        auto res = immediate_data_config.AddInternalImmediateData(
+        TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
             array_length_from_uniform_options.buffer_sizes_offset.value(),
             module.symbols.New("buffer_sizes"),
             module.Types().array(module.Types().vec4<core::u32>(),
-                                 buffer_sizes_array_elements_num));
-        if (res != Success) {
-            return res.Failure();
-        }
+                                 buffer_sizes_array_elements_num)));
     }
 
     if (array_offset_from_uniform_options.buffer_offsets_offset) {
@@ -164,14 +144,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         }
         buffer_offsets_array_elements_num = (max_index / 4) + 1;
 
-        auto res = immediate_data_config.AddInternalImmediateData(
+        TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
             array_offset_from_uniform_options.buffer_offsets_offset.value(),
             module.symbols.New("buffer_offsets"),
             module.Types().array(module.Types().vec4<core::u32>(),
-                                 buffer_offsets_array_elements_num));
-        if (res != Success) {
-            return res.Failure();
-        }
+                                 buffer_offsets_array_elements_num)));
     }
 
     auto immediate_data_layout =
@@ -180,15 +157,15 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         return immediate_data_layout.Failure();
     }
 
-    RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
-    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module, multiplanar_map);
+    TINT_CHECK_RESULT(core::ir::transform::BindingRemapper(module, remapper_data));
+    TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));
 
     // `LocalizeStructArrayAssignment` and `ReplaceNonIndexableMatVecStores` may insert additional
     // expressions before the assignments to arrays or vectors so it is better to add them before
     // `Robustness`.
     if (options.compiler == Options::Compiler::kFXC) {
-        RUN_TRANSFORM(raise::LocalizeStructArrayAssignment, module);
-        RUN_TRANSFORM(raise::ReplaceNonIndexableMatVecStores, module);
+        TINT_CHECK_RESULT(raise::LocalizeStructArrayAssignment(module));
+        TINT_CHECK_RESULT(raise::ReplaceNonIndexableMatVecStores(module));
     }
 
     if (!options.disable_robustness) {
@@ -204,16 +181,16 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
         config.use_integer_range_analysis = !options.disable_integer_range_analysis;
 
-        RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
+        TINT_CHECK_RESULT(core::ir::transform::Robustness(module, config));
 
-        RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
+        TINT_CHECK_RESULT(core::ir::transform::PreventInfiniteLoops(module));
     }
 
     {
         core::ir::transform::BinaryPolyfillConfig binary_polyfills{};
         binary_polyfills.int_div_mod = !options.disable_polyfill_integer_div_mod;
         binary_polyfills.bitshift_modulo = true;
-        RUN_TRANSFORM(core::ir::transform::BinaryPolyfill, module, binary_polyfills);
+        TINT_CHECK_RESULT(core::ir::transform::BinaryPolyfill(module, binary_polyfills));
     }
 
     {
@@ -242,17 +219,17 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         core_polyfills.abs_signed_int = true;
         core_polyfills.subgroup_broadcast_f16 = options.workarounds.polyfill_subgroup_broadcast_f16;
-        RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
+        TINT_CHECK_RESULT(core::ir::transform::BuiltinPolyfill(module, core_polyfills));
     }
 
     {
         core::ir::transform::ConversionPolyfillConfig conversion_polyfills{};
         conversion_polyfills.ftoi = true;
-        RUN_TRANSFORM(core::ir::transform::ConversionPolyfill, module, conversion_polyfills);
+        TINT_CHECK_RESULT(core::ir::transform::ConversionPolyfill(module, conversion_polyfills));
     }
 
     if (options.compiler == Options::Compiler::kFXC) {
-        RUN_TRANSFORM(raise::ReplaceDefaultOnlySwitch, module);
+        TINT_CHECK_RESULT(raise::ReplaceDefaultOnlySwitch(module));
     }
 
     // ArrayLength must run after Robustness, which introduces arrayLength calls.
@@ -262,24 +239,25 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         TINT_ASSERT(!array_length_from_uniform_options.ubo_binding.group &&
                     !array_length_from_uniform_options.ubo_binding.binding);
 
-        RUN_TRANSFORM(core::ir::transform::ArrayLengthFromImmediates, module,
-                      immediate_data_layout.Get(),
-                      array_length_from_uniform_options.buffer_sizes_offset.value(),
-                      buffer_sizes_array_elements_num,
-                      array_length_from_uniform_options.bindpoint_to_size_index);
+        TINT_CHECK_RESULT(core::ir::transform::ArrayLengthFromImmediates(
+            module, immediate_data_layout.Get(),
+            array_length_from_uniform_options.buffer_sizes_offset.value(),
+            buffer_sizes_array_elements_num,
+            array_length_from_uniform_options.bindpoint_to_size_index));
     } else {
         // Always fall back to ArrayLengthFromUniform when buffer_sizes_offset is not provided.
         // This preserves the behavior from before ArrayLengthFromImmediates was introduced,
         // ensuring that arrayLength() calls are properly handled even without explicit options.
-        RUN_TRANSFORM(core::ir::transform::ArrayLengthFromUniform, module,
-                      BindingPoint{array_length_from_uniform_options.ubo_binding.group,
-                                   array_length_from_uniform_options.ubo_binding.binding},
-                      array_length_from_uniform_options.bindpoint_to_size_index);
+        TINT_CHECK_RESULT(core::ir::transform::ArrayLengthFromUniform(
+            module,
+            BindingPoint{array_length_from_uniform_options.ubo_binding.group,
+                         array_length_from_uniform_options.ubo_binding.binding},
+            array_length_from_uniform_options.bindpoint_to_size_index));
     }
 
     if (!options.disable_workgroup_init) {
         // Must run before ShaderIO as it may introduce a builtin parameter (local_invocation_index)
-        RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
+        TINT_CHECK_RESULT(core::ir::transform::ZeroInitWorkgroupMemory(module));
     }
 
     const bool pixel_local_enabled = !options.pixel_local.attachments.empty();
@@ -299,20 +277,20 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             .num_workgroups_start_offset = options.num_workgroups_start_offset,
         };
 
-        RUN_TRANSFORM(raise::ShaderIO, module, config);
+        TINT_CHECK_RESULT(raise::ShaderIO(module, config));
     }
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     // Run after ShaderIO to ensure the discards are added to the entry point it introduces.
     // TODO(crbug.com/42250787): This is only necessary when FXC is being used.
     if (options.compiler == tint::hlsl::writer::Options::Compiler::kFXC) {
-        RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+        TINT_CHECK_RESULT(core::ir::transform::DemoteToHelper(module));
     }
-    RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module,
-                  core::ir::transform::DirectVariableAccessOptions{});
+    TINT_CHECK_RESULT(core::ir::transform::DirectVariableAccess(
+        module, core::ir::transform::DirectVariableAccessOptions{}));
 
     // DecomposeStorageAccess must come after Robustness and DirectVariableAccess
-    RUN_TRANSFORM(raise::DecomposeStorageAccess, module);
+    TINT_CHECK_RESULT(raise::DecomposeStorageAccess(module));
 
     // ArrayOffsetFrom* transforms must come after both DirectVariableAccess and
     // DecomposeStorageAccess, and BEFORE ChangeImmediateToUniform.
@@ -322,10 +300,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         TINT_ASSERT(!array_offset_from_uniform_options.ubo_binding.group &&
                     !array_offset_from_uniform_options.ubo_binding.binding);
 
-        RUN_TRANSFORM(raise::ArrayOffsetFromImmediates, module, immediate_data_layout.Get(),
-                      array_offset_from_uniform_options.buffer_offsets_offset.value(),
-                      buffer_offsets_array_elements_num,
-                      array_offset_from_uniform_options.bindpoint_to_offset_index);
+        TINT_CHECK_RESULT(raise::ArrayOffsetFromImmediates(
+            module, immediate_data_layout.Get(),
+            array_offset_from_uniform_options.buffer_offsets_offset.value(),
+            buffer_offsets_array_elements_num,
+            array_offset_from_uniform_options.bindpoint_to_offset_index));
     } else if (array_offset_from_uniform_options.ubo_binding.group ||
                array_offset_from_uniform_options.ubo_binding.binding) {
         // Fall back to ArrayOffsetFromUniform when UBO binding is provided.
@@ -339,61 +318,62 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core::ir::transform::ChangeImmediateToUniformConfig config = {
             .immediate_binding_point = options.immediate_binding_point,
         };
-        RUN_TRANSFORM(core::ir::transform::ChangeImmediateToUniform, module, config);
+        TINT_CHECK_RESULT(core::ir::transform::ChangeImmediateToUniform(module, config));
     }
 
     // ArrayOffsetFromUniform must come after ChangeImmediateToUniform, DirectVariableAccess, and
     // DecomposeStorageAccess.
     if (array_offset_from_uniform_options.ubo_binding.group ||
         array_offset_from_uniform_options.ubo_binding.binding) {
-        RUN_TRANSFORM(raise::ArrayOffsetFromUniform, module,
-                      BindingPoint{array_offset_from_uniform_options.ubo_binding.group,
-                                   array_offset_from_uniform_options.ubo_binding.binding},
-                      array_offset_from_uniform_options.bindpoint_to_offset_index);
+        TINT_CHECK_RESULT(raise::ArrayOffsetFromUniform(
+            module,
+            BindingPoint{array_offset_from_uniform_options.ubo_binding.group,
+                         array_offset_from_uniform_options.ubo_binding.binding},
+            array_offset_from_uniform_options.bindpoint_to_offset_index));
     }
 
     // DecomposeUniformAccess must come after DecomposeStorageAccess, ChangeImmediateToUniform, and
     // ArrayOffsetFrom* transforms
-    RUN_TRANSFORM(core::ir::transform::DecomposeUniformAccess, module);
+    TINT_CHECK_RESULT(core::ir::transform::DecomposeUniformAccess(module));
 
     // PixelLocal must run after DirectVariableAccess to avoid chasing pointer parameters.
     if (pixel_local_enabled) {
         raise::PixelLocalConfig config;
         config.options = options.pixel_local;
-        RUN_TRANSFORM(raise::PixelLocal, module, config);
+        TINT_CHECK_RESULT(raise::PixelLocal(module, config));
     }
 
-    RUN_TRANSFORM(raise::BinaryPolyfill, module);
+    TINT_CHECK_RESULT(raise::BinaryPolyfill(module));
 
     // Avoid potential UB (aka signed overflow) by performing unsigned integer arithmetic.
     core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
         .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
-    RUN_TRANSFORM(core::ir::transform::SignedIntegerPolyfill, module, signed_integer_cfg);
+    TINT_CHECK_RESULT(core::ir::transform::SignedIntegerPolyfill(module, signed_integer_cfg));
 
     // BuiltinPolyfill must come after BinaryPolyfill and DecomposeStorageAccess as they add
     // builtins
-    RUN_TRANSFORM(raise::BuiltinPolyfill, module);
-    RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
-    RUN_TRANSFORM(core::ir::transform::RemoveContinueInSwitch, module);
+    TINT_CHECK_RESULT(raise::BuiltinPolyfill(module));
+    TINT_CHECK_RESULT(core::ir::transform::VectorizeScalarMatrixConstructors(module));
+    TINT_CHECK_RESULT(core::ir::transform::RemoveContinueInSwitch(module));
 
     core::ir::transform::BuiltinScalarizeConfig scalarize_config{
         .scalarize_clamp = options.workarounds.scalarize_max_min_clamp,
         .scalarize_max = options.workarounds.scalarize_max_min_clamp,
         .scalarize_min = options.workarounds.scalarize_max_min_clamp};
-    RUN_TRANSFORM(core::ir::transform::BuiltinScalarize, module, scalarize_config);
+    TINT_CHECK_RESULT(core::ir::transform::BuiltinScalarize(module, scalarize_config));
 
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.
-    RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs, module);
-    RUN_TRANSFORM(core::ir::transform::RenameConflicts, module);
+    TINT_CHECK_RESULT(core::ir::transform::RemoveTerminatorArgs(module));
+    TINT_CHECK_RESULT(core::ir::transform::RenameConflicts(module));
     {
         core::ir::transform::ValueToLetConfig cfg;
         cfg.replace_pointer_lets = true;
-        RUN_TRANSFORM(core::ir::transform::ValueToLet, module, cfg);
+        TINT_CHECK_RESULT(core::ir::transform::ValueToLet(module, cfg));
     }
 
     // Anything which runs after this needs to handle `Capabilities::kAllowModuleScopedLets`
-    RUN_TRANSFORM(raise::PromoteInitializers, module);
+    TINT_CHECK_RESULT(raise::PromoteInitializers(module));
 
     return Success;
 }
