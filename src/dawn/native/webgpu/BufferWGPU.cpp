@@ -213,24 +213,39 @@ MaybeError Buffer::CaptureContentIfNeeded(CaptureContext& captureContext,
     if (usage & wgpu::BufferUsage::MapRead) {
         return {};
     }
-    schema::RootCommandWriteBufferCmd cmd{{
-        .data = {{
-            .bufferId = id,
-            .bufferOffset = 0,
-            .size = GetSize(),
-        }},
-    }};
-    Serialize(captureContext, cmd);
+
     return AddContentToCapture(captureContext);
 }
 
 // TODO(451650604): We currently get at most 1mb at a time to keep memory usage down.
 // Revisit for speed later.
 MaybeError Buffer::AddContentToCapture(CaptureContext& captureContext) {
+    // TODO(473593119): Handle the unaligned trailing bytes.
+    // TODO(473568230): Support copies with unaligned size.
+    // copyBufferToBuffer requires 4 byte alignment for both size and offset which prevents
+    // us from copying the trailing bytes. writeBuffer has the same alignment requirements.
+    // so the user can't put bytes in via writeBuffer. mapAsync requires offset to be 8 byte
+    // aligned and size to be 4 bytes so the user can not set those last bytes with mapAsync.
+    // We can still access those bytes with copyBufferToTexture and copyTextureToBuffer though.
+    // For now, we just ignore the last 3 bytes.
+    uint64_t copyableSize = AlignDown(GetSize(), 4);
+    if (copyableSize == 0) {
+        return {};
+    }
+
     struct MapAsyncResult {
         WGPUMapAsyncStatus status;
         std::string message;
     } mapAsyncResult = {};
+
+    schema::RootCommandWriteBufferCmd cmd{{
+        .data = {{
+            .bufferId = captureContext.GetId(this),
+            .bufferOffset = 0,
+            .size = copyableSize,
+        }},
+    }};
+    Serialize(captureContext, cmd);
 
     WGPUBuffer srcBuffer = GetInnerHandle();
     WGPUBuffer copyBuffer = captureContext.GetCopyBuffer();
@@ -241,9 +256,8 @@ MaybeError Buffer::AddContentToCapture(CaptureContext& captureContext) {
     auto& wgpu = device->wgpu;
 
     CaptureContext::ScopedContentWriter writer(captureContext);
-    uint64_t bufferSize = GetSize();
-    for (uint64_t offset = 0; offset < bufferSize; offset += CaptureContext::kCopyBufferSize) {
-        uint64_t copySize = std::min(CaptureContext::kCopyBufferSize, bufferSize - offset);
+    for (uint64_t offset = 0; offset < copyableSize; offset += CaptureContext::kCopyBufferSize) {
+        uint64_t copySize = std::min(CaptureContext::kCopyBufferSize, copyableSize - offset);
 
         WGPUCommandEncoder encoder = wgpu.deviceCreateCommandEncoder(innerDevice, nullptr);
         wgpu.commandEncoderCopyBufferToBuffer(encoder, srcBuffer, offset, copyBuffer, 0, copySize);
