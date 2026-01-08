@@ -41,6 +41,8 @@ namespace tint::core::ir::transform {
 
 namespace {
 
+constexpr uint32_t kMaxImmediateBlockSize = 0x1000;
+
 /// PIMPL state for the transform.
 struct State {
     /// The transform config.
@@ -92,24 +94,36 @@ struct State {
 
         // Create the structure and immediate data variable.
         for (auto& internal : config.internal_immediate_data) {
+            auto offset = internal.first;
+
             if (!members.IsEmpty()) {
-                if (members.Back()->Offset() + members.Back()->Size() > internal.first) {
+                if (members.Back()->Offset() + members.Back()->Size() > offset) {
                     return Failure("immediate offset for '" + internal.second.name.Name() +
                                    "' overlaps with previous member '" +
                                    members.Back()->Name().Name() + "'");
                 }
             }
+            if (offset & (internal.second.type->Align() - 1)) {
+                return Failure("immediate offset for '" + internal.second.name.Name() +
+                               "' must be aligned to " +
+                               std::to_string(internal.second.type->Align()) + " bytes");
+            }
+            if (offset + internal.second.type->Size() > kMaxImmediateBlockSize) {
+                return Failure("immediate '" + internal.second.name.Name() +
+                               "' exceeds maximum immediate block size");
+            }
 
             auto index = static_cast<uint32_t>(members.Length());
-            layout.offset_to_index.Add(internal.first, index);
+            layout.offset_to_index.Add(offset, index);
             members.Push(ty.Get<core::type::StructMember>(internal.second.name,
                                                           internal.second.type,
                                                           /* index */ index,
-                                                          /* offset */ internal.first,
+                                                          /* offset */ offset,
                                                           /* align */ internal.second.type->Align(),
                                                           /* size */ internal.second.type->Size(),
                                                           /* attributes */ IOAttributes{}));
         }
+
         auto* immediate_constant_struct =
             ty.Struct(ir.symbols.New("tint_immediate_data_struct"), std::move(members));
         immediate_constant_struct->SetStructFlag(type::kBlock);

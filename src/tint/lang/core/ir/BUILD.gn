@@ -241,7 +241,6 @@ if (tint_build_unittests) {
       "validator_call_test.cc",
       "validator_flow_control_test.cc",
       "validator_function_test.cc",
-      "validator_immediate_test.cc",
       "validator_test.cc",
       "validator_test.h",
       "validator_type_test.cc",

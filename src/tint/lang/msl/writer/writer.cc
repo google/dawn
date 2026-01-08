@@ -27,14 +27,11 @@
 
 #include "src/tint/lang/msl/writer/writer.h"
 
-#include <vector>
-
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/input_attachment.h"
@@ -142,36 +139,11 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     core::ir::ReferencedModuleVars<const core::ir::Module> referenced_module_vars{ir};
     auto& refs = referenced_module_vars.TransitiveReferences(ep_func);
 
-    // Check for unsupported module-scope variable address spaces and types and ensure at most one
-    // user-declared immediate data.
+    // Check for unsupported module-scope variable address spaces and types.
     for (auto* var : refs) {
         auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
         if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
             return Failure("pixel_local address space is not supported by the MSL backend");
-        }
-    }
-
-    auto user_immediate_res = core::ir::ValidateSingleUserImmediate(ir, ep_func);
-    if (user_immediate_res != Success) {
-        return user_immediate_res.Failure();
-    }
-
-    uint32_t user_immediate_size = user_immediate_res.Get();
-
-    // Buffer sizes uses vec4 array which requires 16 bytes alignment. Validate general
-    // constraints with shared helper first (size 16 here to reflect vec4 requirement for
-    // alignment checking later) then enforce 16-byte requirement.
-    if (options.array_length_from_constants.buffer_sizes_offset) {
-        std::vector<core::ir::ImmediateInfo> immediates = {
-            {*options.array_length_from_constants.buffer_sizes_offset, 16u},
-        };
-        if (auto res =
-                core::ir::ValidateInternalImmediateOffset(0x1000, user_immediate_size, immediates);
-            res != Success) {
-            return res.Failure();
-        }
-        if ((*options.array_length_from_constants.buffer_sizes_offset) & 0xF) {
-            return Failure("invalid offsets for buffer sizes offset in immediate block");
         }
     }
 

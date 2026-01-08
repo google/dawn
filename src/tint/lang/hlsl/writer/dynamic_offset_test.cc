@@ -52,7 +52,7 @@ TEST_F(HlslWriterTest, DynamicOffset_RobustnessAndDynamicOffsetFromImmediates) {
     Options options{};
     options.disable_robustness = false;
     options.immediate_binding_point = BindingPoint{0, 30};
-    options.array_offset_from_uniform.buffer_offsets_offset = 4;
+    options.array_offset_from_uniform.buffer_offsets_offset = 16;
     options.array_offset_from_uniform.bindpoint_to_offset_index[{0, 0}] = 0;
 
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
@@ -63,7 +63,7 @@ cbuffer cbuffer_tint_immediate_data : register(b30) {
 };
 [numthreads(1, 1, 1)]
 void main() {
-  int result = asint(sb.Load((0u + tint_immediate_data[0u].y)));
+  int result = asint(sb.Load((0u + tint_immediate_data[1u].x)));
 }
 
 )");

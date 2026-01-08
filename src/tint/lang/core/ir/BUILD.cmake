@@ -246,7 +246,6 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/validator_call_test.cc
   lang/core/ir/validator_flow_control_test.cc
   lang/core/ir/validator_function_test.cc
-  lang/core/ir/validator_immediate_test.cc
   lang/core/ir/validator_test.cc
   lang/core/ir/validator_test.h
   lang/core/ir/validator_type_test.cc

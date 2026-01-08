@@ -522,6 +522,52 @@ TEST_F(IR_ValidatorTest, Var_Immediate_NotHostShareable) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Var_Immediate_Multiple_SameEntryPoint) {
+    auto* v1 = b.Var<immediate, u32>();
+    auto* v2 = b.Var<immediate, u32>();
+    mod.root_block->Append(v1);
+    mod.root_block->Append(v2);
+
+    auto* f = FragmentEntryPoint();
+    b.Append(f->Block(), [&] {
+        b.Let(v1->Result());
+        b.Let(v2->Result());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:3:34 error: var: multiple user-declared immediate data variables referenced by entry point %f
+  %2:ptr<immediate, u32, read> = var undef
+                                 ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Var_Immediate_Multiple_DifferentEntryPoints) {
+    auto* v1 = b.Var<immediate, u32>();
+    auto* v2 = b.Var<immediate, u32>();
+    mod.root_block->Append(v1);
+    mod.root_block->Append(v2);
+
+    auto* f1 = FragmentEntryPoint("f1");
+    b.Append(f1->Block(), [&] {
+        b.Let(v1->Result());
+        b.Return(f1);
+    });
+
+    auto* f2 = FragmentEntryPoint("f2");
+    b.Append(f2->Block(), [&] {
+        b.Let(v1->Result());
+        b.Return(f2);
+    });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowMultipleEntryPoints});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Var_Storage_NotHostShareable) {
     auto* v = b.Var<storage, bool, read>();
     v->SetBindingPoint(0, 0);

@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/glsl/writer/writer.h"
 
-#include <vector>
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
@@ -149,16 +148,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                 }
             }
         }
-
-        // user-declared immediate validation handled later by helper.
     }
-
-    auto user_immediate_res = core::ir::ValidateSingleUserImmediate(ir, ep_func);
-    if (user_immediate_res != Success) {
-        return user_immediate_res.Failure();
-    }
-
-    uint32_t user_immediate_size = user_immediate_res.Get();
 
     // Check for calls to unsupported builtin functions.
     for (auto* inst : ir.Instructions()) {
@@ -229,25 +219,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         auto res = check_io_attributes(ep_func->ReturnAttributes());
         if (res != Success) {
             return res;
-        }
-    }
-
-    {
-        std::vector<core::ir::ImmediateInfo> immediates;
-        if (options.first_instance_offset) {
-            immediates.push_back({*options.first_instance_offset, 4u});
-        }
-        if (options.first_vertex_offset) {
-            immediates.push_back({*options.first_vertex_offset, 4u});
-        }
-        if (options.depth_range_offsets) {
-            immediates.push_back({options.depth_range_offsets->max, 4u});
-            immediates.push_back({options.depth_range_offsets->min, 4u});
-        }
-        if (auto res =
-                core::ir::ValidateInternalImmediateOffset(0x1000, user_immediate_size, immediates);
-            res != Success) {
-            return res.Failure();
         }
     }
 

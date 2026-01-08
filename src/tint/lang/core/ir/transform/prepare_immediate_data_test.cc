@@ -42,7 +42,6 @@ class IR_PrepareImmediateDataTests : public TransformTest {
     Result<ImmediateDataLayout> Run(PrepareImmediateDataConfig config) {
         // Run the transform.
         auto result = PrepareImmediateData(mod, config);
-        EXPECT_EQ(result, Success);
         if (result != Success) {
             return result.Failure();
         }
@@ -70,11 +69,9 @@ $B1: {  # root
 
     PrepareImmediateDataConfig config;
     auto result = Run(config);
-    if (result == Success) {
-        EXPECT_EQ(result->var, nullptr);
-        EXPECT_TRUE(result->offset_to_index.IsEmpty());
-    }
-
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_EQ(result->var, nullptr);
+    EXPECT_TRUE(result->offset_to_index.IsEmpty());
     EXPECT_EQ(expect, str());
 }
 
@@ -105,11 +102,9 @@ $B1: {  # root
 
     PrepareImmediateDataConfig config;
     auto result = Run(config);
-    if (result == Success) {
-        EXPECT_EQ(result->var, nullptr);
-        EXPECT_TRUE(result->offset_to_index.IsEmpty());
-    }
-
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_EQ(result->var, nullptr);
+    EXPECT_TRUE(result->offset_to_index.IsEmpty());
     EXPECT_EQ(expect, str());
 }
 
@@ -141,11 +136,9 @@ $B1: {  # root
     ASSERT_EQ(config.AddInternalImmediateData(0u, mod.symbols.New("internal_constant_a"), ty.i32()),
               Success);
     auto result = Run(config);
-    if (result == Success) {
-        EXPECT_NE(result->var, nullptr);
-        EXPECT_EQ(result->offset_to_index.GetOr(0u, UINT32_MAX), 0u);
-    }
-
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_NE(result->var, nullptr);
+    EXPECT_EQ(result->offset_to_index.GetOr(0u, UINT32_MAX), 0u);
     EXPECT_EQ(expect, str());
 }
 
@@ -184,13 +177,11 @@ $B1: {  # root
         config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4f()),
         Success);
     auto result = Run(config);
-    if (result == Success) {
-        EXPECT_NE(result->var, nullptr);
-        EXPECT_EQ(result->offset_to_index.GetOr(0u, UINT32_MAX), 0u);
-        EXPECT_EQ(result->offset_to_index.GetOr(4u, UINT32_MAX), 1u);
-        EXPECT_EQ(result->offset_to_index.GetOr(16u, UINT32_MAX), 2u);
-    }
-
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_NE(result->var, nullptr);
+    EXPECT_EQ(result->offset_to_index.GetOr(0u, UINT32_MAX), 0u);
+    EXPECT_EQ(result->offset_to_index.GetOr(4u, UINT32_MAX), 1u);
+    EXPECT_EQ(result->offset_to_index.GetOr(16u, UINT32_MAX), 2u);
     EXPECT_EQ(expect, str());
 }
 
@@ -247,13 +238,12 @@ $B1: {  # root
         config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4f()),
         Success);
     auto result = Run(config);
-    if (result == Success) {
-        EXPECT_NE(result->var, nullptr);
-        EXPECT_EQ(result->offset_to_index.GetOr(4u, UINT32_MAX), 1u);
-        EXPECT_EQ(result->offset_to_index.GetOr(8u, UINT32_MAX), 2u);
-        EXPECT_EQ(result->offset_to_index.GetOr(16u, UINT32_MAX), 3u);
-    }
-
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_NE(result->var, nullptr);
+    EXPECT_EQ(result->offset_to_index.GetOr(4u, UINT32_MAX), 1u);
+    EXPECT_EQ(result->offset_to_index.GetOr(8u, UINT32_MAX), 2u);
+    EXPECT_EQ(result->offset_to_index.GetOr(16u, UINT32_MAX), 3u);
+    ASSERT_EQ(result, Success) << result.Failure();
     EXPECT_EQ(expect, str());
 }
 
@@ -265,6 +255,86 @@ TEST_F(IR_PrepareImmediateDataTests, DuplicateInternalImmediateOffsets) {
         config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_b"), ty.f32());
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason, R"(mutiple internal immediates created at offset 4)");
+}
+
+TEST_F(IR_PrepareImmediateDataTests, ValidateInternalImmediate_OverlapUser) {
+    // User immediate occupies the first 16 bytes.
+    auto* v = b.Var("user_immediate", core::AddressSpace::kImmediate, ty.vec4u());
+    mod.root_block->Append(v);
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Load(v));
+        b.Return(eb);
+    });
+
+    // Internal immediate with offset 8 overlaps with the user immediate.
+    PrepareImmediateDataConfig config;
+    ASSERT_EQ(config.AddInternalImmediateData(8u, mod.symbols.New("internal_constant"), ty.u32()),
+              Success);
+    auto result = Run(config);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(
+        result.Failure().reason,
+        R"(immediate offset for 'internal_constant' overlaps with previous member 'user_immediate_data')");
+}
+
+TEST_F(IR_PrepareImmediateDataTests, ValidateInternalImmediate_OverlapInternal) {
+    PrepareImmediateDataConfig config;
+    ASSERT_EQ(
+        config.AddInternalImmediateData(0u, mod.symbols.New("internal_constant_1"), ty.vec4u()),
+        Success);
+    ASSERT_EQ(
+        config.AddInternalImmediateData(8u, mod.symbols.New("internal_constant_2"), ty.vec4u()),
+        Success);
+    auto result = Run(config);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(
+        result.Failure().reason,
+        R"(immediate offset for 'internal_constant_2' overlaps with previous member 'internal_constant_1')");
+}
+
+TEST_F(IR_PrepareImmediateDataTests, ValidateInternalImmediate_MisalignedScalar) {
+    PrepareImmediateDataConfig config;
+    ASSERT_EQ(config.AddInternalImmediateData(2u, mod.symbols.New("internal_constant"), ty.u32()),
+              Success);
+    auto result = Run(config);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              R"(immediate offset for 'internal_constant' must be aligned to 4 bytes)");
+}
+
+TEST_F(IR_PrepareImmediateDataTests, ValidateInternalImmediate_MisalignedArray) {
+    PrepareImmediateDataConfig config;
+    ASSERT_EQ(config.AddInternalImmediateData(8u, mod.symbols.New("internal_constant"),
+                                              ty.array<vec4u, 4>()),
+              Success);
+    auto result = Run(config);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              R"(immediate offset for 'internal_constant' must be aligned to 16 bytes)");
+}
+
+TEST_F(IR_PrepareImmediateDataTests, ValidateInternalImmediate_OffsetExceedsMax) {
+    PrepareImmediateDataConfig config;
+    ASSERT_EQ(
+        config.AddInternalImmediateData(0x2000u, mod.symbols.New("internal_constant"), ty.u32()),
+        Success);
+    auto result = Run(config);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              R"(immediate 'internal_constant' exceeds maximum immediate block size)");
+}
+
+TEST_F(IR_PrepareImmediateDataTests, ValidateInternalImmediate_OffsetPlusSizeExceedsMax) {
+    PrepareImmediateDataConfig config;
+    ASSERT_EQ(config.AddInternalImmediateData(0x0FFCu, mod.symbols.New("internal_constant"),
+                                              ty.array<u32, 4>()),
+              Success);
+    auto result = Run(config);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              R"(immediate 'internal_constant' exceeds maximum immediate block size)");
 }
 
 }  // namespace

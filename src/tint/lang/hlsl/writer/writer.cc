@@ -27,10 +27,6 @@
 
 #include "src/tint/lang/hlsl/writer/writer.h"
 
-#include <memory>
-#include <utility>
-#include <vector>
-
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -116,33 +112,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
         if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
             return Failure("input attachments are not supported by the HLSL backend");
-        }
-    }
-
-    auto user_immediate_res = core::ir::ValidateSingleUserImmediate(ir, ep_func);
-    if (user_immediate_res != Success) {
-        return user_immediate_res.Failure();
-    }
-
-    uint32_t user_immediate_size = user_immediate_res.Get();
-
-    // Validate internal immediate offsets using shared helper.
-    {
-        std::vector<core::ir::ImmediateInfo> immediates;
-        if (options.first_index_offset) {
-            immediates.push_back({*options.first_index_offset, 4u});
-        }
-        if (options.first_instance_offset) {
-            immediates.push_back({*options.first_instance_offset, 4u});
-        }
-        if (options.num_workgroups_start_offset) {
-            immediates.push_back({*options.num_workgroups_start_offset, 4u});
-        }
-        // Pass user immediate size so internal offsets don't overlap user region.
-        if (auto res =
-                core::ir::ValidateInternalImmediateOffset(0x1000, user_immediate_size, immediates);
-            res != Success) {
-            return res.Failure();
         }
     }
 

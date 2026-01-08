@@ -29,7 +29,6 @@
 
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "src/tint/lang/core/ir/analysis/subgroup_matrix.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
@@ -105,8 +104,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     core::ir::ReferencedModuleVars<const core::ir::Module> referenced_module_vars{ir};
     auto& refs = referenced_module_vars.TransitiveReferences(ep_func);
 
-    // Check for unsupported module-scope variable address spaces and ensure at most one user
-    // immediate.
+    // Check for unsupported module-scope variable address spaces.
     for (auto* var : refs) {
         auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
         if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
@@ -129,25 +127,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             if (!options.resource_table) {
                 return Failure("hasResource and getResource require a resource table");
             }
-        }
-    }
-
-    auto user_immediate_res = core::ir::ValidateSingleUserImmediate(ir, ep_func);
-    if (user_immediate_res != Success) {
-        return user_immediate_res.Failure();
-    }
-
-    uint32_t user_immediate_size = user_immediate_res.Get();
-
-    if (options.depth_range_offsets) {
-        std::vector<core::ir::ImmediateInfo> immediates = {
-            {options.depth_range_offsets->max, 4u},
-            {options.depth_range_offsets->min, 4u},
-        };
-        if (auto res =
-                core::ir::ValidateInternalImmediateOffset(0x1000, user_immediate_size, immediates);
-            res != Success) {
-            return res.Failure();
         }
     }
 

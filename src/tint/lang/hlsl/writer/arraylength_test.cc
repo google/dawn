@@ -303,7 +303,7 @@ TEST_F(HlslWriterTest, ArrayLength_RobustnessAndArrayLengthFromImmediates) {
     options.entry_point_name = "main";
     options.disable_robustness = false;
     options.immediate_binding_point = BindingPoint{0, 30};
-    options.array_length_from_uniform.buffer_sizes_offset = 4;  // Non-zero offset
+    options.array_length_from_uniform.buffer_sizes_offset = 16;  // Non-zero offset
     options.array_length_from_uniform.bindpoint_to_size_index[{0, 1}] = 0;
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(struct tint_array_lengths_struct {
@@ -316,7 +316,7 @@ cbuffer cbuffer_tint_immediate_data : register(b30) {
   uint4 tint_immediate_data[2];
 };
 void main() {
-  tint_array_lengths_struct v = {(tint_immediate_data[0u].y / 4u)};
+  tint_array_lengths_struct v = {(tint_immediate_data[1u].x / 4u)};
   dest.Store((0u + (min(0u, (v.tint_array_length_0_1 - 1u)) * 4u)), 123u);
 }
 
