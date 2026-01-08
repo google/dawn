@@ -57,7 +57,8 @@ TEST_F(MslWriter_ShaderIOTest, NoInputsOrOutputs) {
 
     auto* expect = src;
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -133,7 +134,8 @@ foo_inputs = struct @align(4) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -262,7 +264,8 @@ foo_inputs = struct @align(4) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -370,7 +373,8 @@ foo_inputs = struct @align(4) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -419,7 +423,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -467,7 +472,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -568,7 +574,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -649,7 +656,8 @@ foo_outputs = struct @align(4) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -742,7 +750,8 @@ $B1: {  # root
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -821,7 +830,8 @@ $B1: {  # root
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -872,7 +882,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.emit_vertex_point_size = true;
 
     capabilities.Set(core::ir::Capability::kAllowPointSizeBuiltin, true);
@@ -928,7 +939,8 @@ foo_inputs = struct @align(4) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1000,7 +1012,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1049,7 +1062,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.fixed_sample_mask = 12345678u;
     Run(ShaderIO, config);
 
@@ -1123,7 +1137,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.fixed_sample_mask = 12345678u;
     Run(ShaderIO, config);
 
@@ -1207,7 +1222,8 @@ foo_inputs = struct @align(4) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1258,7 +1274,113 @@ TEST_F(MslWriter_ShaderIOTest, UnnamedParameter) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ShaderIOTest, ClampFragDepth) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"), {
+                                                  {
+                                                      mod.symbols.New("color"),
+                                                      ty.f32(),
+                                                      core::IOAttributes{
+                                                          .location = 0u,
+                                                      },
+                                                  },
+                                                  {
+                                                      mod.symbols.New("depth"),
+                                                      ty.f32(),
+                                                      core::IOAttributes{
+                                                          .builtin = core::BuiltinValue::kFragDepth,
+                                                      },
+                                                  },
+                                              });
+
+    auto* ep = b.Function("foo", str_ty);
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep, b.Construct(str_ty, 0.5_f, 2_f));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(4) {
+  color:f32 @offset(0), @location(0)
+  depth:f32 @offset(4), @builtin(frag_depth)
+}
+
+%foo = @fragment func():Outputs {
+  $B1: {
+    %2:Outputs = construct 0.5f, 2.0f
+    ret %2
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(4) {
+  color:f32 @offset(0)
+  depth:f32 @offset(4)
+}
+
+tint_immediate_data_struct = struct @align(4), @block {
+  depth_min:f32 @offset(4)
+  depth_max:f32 @offset(8)
+}
+
+foo_outputs = struct @align(4) {
+  Outputs_color:f32 @offset(0), @location(0)
+  Outputs_depth:f32 @offset(4), @builtin(frag_depth)
+}
+
+$B1: {  # root
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo_inner = func():Outputs {
+  $B2: {
+    %3:Outputs = construct 0.5f, 2.0f
+    ret %3
+  }
+}
+%foo = @fragment func():foo_outputs {
+  $B3: {
+    %5:Outputs = call %foo_inner
+    %6:f32 = access %5, 0u
+    %7:f32 = access %5, 1u
+    %8:ptr<immediate, f32, read> = access %tint_immediate_data, 0u
+    %9:f32 = load %8
+    %10:ptr<immediate, f32, read> = access %tint_immediate_data, 1u
+    %11:f32 = load %10
+    %12:f32 = clamp %7, %9, %11
+    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var undef
+    %14:ptr<function, f32, read_write> = access %tint_wrapper_result, 0u
+    store %14, %6
+    %15:ptr<function, f32, read_write> = access %tint_wrapper_result, 1u
+    store %15, %12
+    %16:foo_outputs = load %tint_wrapper_result
+    ret %16
+  }
+}
+)";
+
+    core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
+    ASSERT_EQ(
+        immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("depth_min"), ty.f32()),
+        Success);
+    ASSERT_EQ(
+        immediate_data_config.AddInternalImmediateData(8, mod.symbols.New("depth_max"), ty.f32()),
+        Success);
+    auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
+    EXPECT_EQ(immediate_data, Success);
+
+    ShaderIOConfig config{immediate_data.Get()};
+    config.depth_range_offsets = {4, 8};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());

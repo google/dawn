@@ -425,10 +425,6 @@ crbug.com/409512700 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyT
 # ETC2 failures on Apple GPUS
 crbug.com/42240782 [ apple-angle-metal-renderer:-apple-m2 dawn-backend-validation ] webgpu:api,validation,createView:format:textureFormatFeature="texture-compression-etc2";viewFormatFeature="texture-compression-etc2" [ Failure ]
 
-# Metal need a workaround to clamp frag_depth
-crbug.com/42240779 [ mac ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="*";unclippedDepth="_undef_";* [ Failure ]
-crbug.com/42240779 [ mac ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="*";unclippedDepth=false;* [ Failure ]
-
 # Copies using combined depth-stencil formats failing on Android Qualcomm (Pixel 4)
 crbug.com/42240838 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth24plus-stencil8";unclippedDepth=false;multisampled=false [ Failure ]
 crbug.com/42240838 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth24plus-stencil8";unclippedDepth=false;multisampled=true [ Failure ]

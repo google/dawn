@@ -162,11 +162,19 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
     /// @copydoc ShaderIO::BackendState::SetOutput
     void SetOutput(core::ir::Builder& builder, uint32_t idx, core::ir::Value* value) override {
+        auto& output = outputs[idx];
+
         // If this a sample mask builtin, combine with the fixed sample mask if provided.
         if (config.fixed_sample_mask != UINT32_MAX &&
-            outputs[idx].attributes.builtin == core::BuiltinValue::kSampleMask) {
+            output.attributes.builtin == core::BuiltinValue::kSampleMask) {
             value = builder.And(value, u32(config.fixed_sample_mask))->Result();
         }
+
+        // Clamp frag_depth values if necessary.
+        if (output.attributes.builtin == core::BuiltinValue::kFragDepth) {
+            value = ClampFragDepth(builder, value);
+        }
+
         output_values[idx] = value;
     }
 
@@ -224,7 +232,25 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                                                 .builtin = core::BuiltinValue::kSampleMask,
                                             });
     }
+
+    /// Clamp a frag_depth builtin value if necessary.
+    /// @param builder the builder to use for new instructions
+    /// @param frag_depth the incoming frag_depth value
+    /// @returns the clamped value
+    core::ir::Value* ClampFragDepth(core::ir::Builder& builder, core::ir::Value* frag_depth) {
+        if (!config.depth_range_offsets) {
+            return frag_depth;
+        }
+
+        auto* immediate_data = config.immediate_data_layout.var;
+        auto min_idx = u32(config.immediate_data_layout.IndexOf(config.depth_range_offsets->min));
+        auto max_idx = u32(config.immediate_data_layout.IndexOf(config.depth_range_offsets->max));
+        auto* min = builder.Load(builder.Access<ptr<immediate, f32>>(immediate_data, min_idx));
+        auto* max = builder.Load(builder.Access<ptr<immediate, f32>>(immediate_data, max_idx));
+        return builder.Clamp(frag_depth, min, max)->Result();
+    }
 };
+
 }  // namespace
 
 Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {

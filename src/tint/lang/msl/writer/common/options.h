@@ -78,6 +78,18 @@ struct ArgumentBufferInfo {
 
 /// Configuration options used for generating MSL.
 struct Options {
+    struct RangeOffsets {
+        /// The offset of the min_depth immediate data
+        uint32_t min = 0;
+        /// The offset of the max_depth immediate data
+        uint32_t max = 0;
+
+        /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+        TINT_REFLECT(RangeOffsets, min, max);
+        TINT_REFLECT_EQUALS(RangeOffsets);
+        TINT_REFLECT_HASH_CODE(RangeOffsets);
+    };
+
     /// The set of options which control workarounds for driver issues.
     struct Workarounds {
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -198,6 +210,9 @@ struct Options {
     /// Map of group id to argument buffer information
     std::unordered_map<uint32_t, ArgumentBufferInfo> group_to_argument_buffer_info;
 
+    /// Offsets of the minDepth and maxDepth push constants.
+    std::optional<RangeOffsets> depth_range_offsets = std::nullopt;
+
     /// The bindings.
     Bindings bindings;
 
@@ -223,6 +238,7 @@ struct Options {
                  vertex_pulling_config,
                  immediate_binding_point,
                  group_to_argument_buffer_info,
+                 depth_range_offsets,
                  bindings,
                  substitute_overrides_config);
     TINT_REFLECT_EQUALS(Options);

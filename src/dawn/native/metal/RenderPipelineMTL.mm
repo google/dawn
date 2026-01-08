@@ -378,6 +378,11 @@ MaybeError RenderPipeline::InitializeImpl() {
     }
     descriptorMTL.vertexDescriptor = vertexDesc.Get();
 
+    if (UsesFragDepth() && !HasUnclippedDepth()) {
+        mImmediateMask |= GetImmediateConstantBlockBits(
+            offsetof(RenderImmediateConstants, clampFragDepth), sizeof(ClampFragDepthArgs));
+    }
+
     const PerStage<ProgrammableStage>& allStages = GetAllStages();
     const ProgrammableStage& vertexStage = allStages[wgpu::ShaderStage::Vertex];
     ShaderModule::MetalFunctionData vertexData;

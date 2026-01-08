@@ -57,6 +57,7 @@
 #include "src/tint/lang/core/ir/transform/vertex_pulling.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/msl/writer/common/option_helpers.h"
@@ -119,6 +120,15 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
             module.Types().array(module.Types().vec4<core::u32>(),
                                  buffer_sizes_array_elements_num)));
     }
+    if (options.depth_range_offsets) {
+        TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
+            options.depth_range_offsets.value().min, module.symbols.New("tint_frag_depth_min"),
+            module.Types().f32()));
+        TINT_CHECK_RESULT(immediate_data_config.AddInternalImmediateData(
+            options.depth_range_offsets.value().max, module.symbols.New("tint_frag_depth_max"),
+            module.Types().f32()));
+    }
+
     auto immediate_data_layout =
         core::ir::transform::PrepareImmediateData(module, immediate_data_config);
     if (immediate_data_layout != Success) {
@@ -211,7 +221,8 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(raise::ConvertPrintToLog(module));
 
     TINT_CHECK_RESULT(raise::ShaderIO(
-        module, raise::ShaderIOConfig{options.emit_vertex_point_size, options.fixed_sample_mask}));
+        module, raise::ShaderIOConfig{immediate_data_layout.Get(), options.emit_vertex_point_size,
+                                      options.fixed_sample_mask, options.depth_range_offsets}));
     TINT_CHECK_RESULT(raise::PackedVec3(module));
     TINT_CHECK_RESULT(raise::SimdBallot(module));
 

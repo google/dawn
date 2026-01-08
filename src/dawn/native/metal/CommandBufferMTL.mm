@@ -1778,6 +1778,10 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
     ImmediateConstantTracker<RenderImmediateConstantsTrackerBase, id<MTLRenderCommandEncoder>>
         immediates = {};
+
+    // Apply default frag depth
+    immediates.SetClampFragDepth(0.0, 1.0);
+
     auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) {
         switch (type) {
             case Command::Draw: {
@@ -1956,13 +1960,11 @@ MaybeError CommandBuffer::EncodeRenderPass(
                            slopeScale:newPipeline->GetDepthBiasSlopeScale()
                                 clamp:newPipeline->GetDepthBiasClamp()];
 
-                // When using @builtin(frag_depth) we need to clamp to the viewport, otherwise
+                // When using and unclipped depth we need to clamp to the viewport, otherwise
                 // Metal writes the raw value to the depth buffer, which doesn't match other
                 // APIs.
                 MTLDepthClipMode clipMode =
-                    (newPipeline->UsesFragDepth() || newPipeline->HasUnclippedDepth())
-                        ? MTLDepthClipModeClamp
-                        : MTLDepthClipModeClip;
+                    newPipeline->HasUnclippedDepth() ? MTLDepthClipModeClamp : MTLDepthClipModeClip;
                 [encoder setDepthClipMode:clipMode];
 
                 newPipeline->Encode(encoder);
@@ -2055,6 +2057,10 @@ MaybeError CommandBuffer::EncodeRenderPass(
                 viewport.height = cmd->height;
                 viewport.znear = cmd->minDepth;
                 viewport.zfar = cmd->maxDepth;
+
+                // Try applying the immediate data that contain min/maxDepth immediately. This can
+                // be deferred if no pipeline is currently bound.
+                immediates.SetClampFragDepth(cmd->minDepth, cmd->maxDepth);
 
                 [encoder setViewport:viewport];
                 break;
