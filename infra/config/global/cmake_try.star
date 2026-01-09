@@ -30,6 +30,8 @@
 load("@chromium-luci//builders.star", "cpu", "os")
 load("@chromium-luci//try.star", "try_")
 load("//constants.star", "siso")
+load("//location_filters.star", "exclusion_filters")
+load("//project.star", "ACTIVE_MILESTONES")
 
 try_.defaults.set(
     executable = "recipe:dawn/cmake",
@@ -55,12 +57,9 @@ def apply_cq_builder_defaults(kwargs):
     # There are fewer optimizations such as the use of `gn analyze` for CMake
     # builders, so allow more concurrent builds than GN equivalents.
     kwargs.setdefault("max_concurrent_builds", 5)
-
-    # TODO(crbug.com/459517292): Add this once we confirm that CMake builders
-    # defined this way are equivalent to the old approach.
-    # kwargs.setdefault("tryjob", try_.job(
-    #     location_filters = exclusion_filters.cmake_cq_file_exclusions,
-    # ))
+    kwargs.setdefault("tryjob", try_.job(
+        location_filters = exclusion_filters.cmake_cq_file_exclusions,
+    ))
     return kwargs
 
 def apply_linux_cq_builder_defaults(kwargs):
@@ -81,13 +80,14 @@ def apply_linux_cq_builder_defaults(kwargs):
 def add_builder_to_main_and_milestone_cq_groups(kwargs):
     # Dawn standalone builders run fine unbranched on branched CLs.
     try_.builder(**kwargs)
-    # TODO(crbug.com/459517292): Add this once we confirm that CMake builders
-    # defined this way are equivalent to the old approach.
-    # for milestone in ACTIVE_MILESTONES.keys():
-    #     luci.cq_tryjob_verifier(
-    #         cq_group = "Dawn-CQ-" + milestone,
-    #         builder = "dawn:try/" + kwargs["name"],
-    #     )
+    for milestone in ACTIVE_MILESTONES.keys():
+        # TODO(crbug.com/459517292): Figure out why the legacy builders were
+        # marked as experimental and remove the need for that.
+        luci.cq_tryjob_verifier(
+            cq_group = "Dawn-CQ-" + milestone,
+            builder = "dawn:try/" + kwargs["name"],
+            experiment_percentage = 100,
+        )
 
 def dawn_linux_cmake_cq_tester(**kwargs):
     kwargs = apply_linux_cq_builder_defaults(kwargs)

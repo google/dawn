@@ -436,10 +436,15 @@ luci.console_view_entry(
 # * win-msvc-rel-x64
 #   * dawn-cq-win-x64-msvc-rel
 
+# The following CMake builders have been replaced with functionally equivalent
+# ones defined using chromium-luci code. See crbug.com/459517292.
+# * cmake-linux-clang-rel-x64
+#   * dawn-linux-x64-sws-cmake-rel
+#   * dawn-cq-linux-x64-sws-cmake-rel
+
 dawn_cmake_standalone_builder("cmake-linux-clang-dbg-x64", clang = True, debug = True, cpu = "x64", asan = False, ubsan = False)
 dawn_cmake_standalone_builder("cmake-linux-clang-dbg-x64-asan", clang = True, debug = True, cpu = "x64", asan = True, ubsan = False)
 dawn_cmake_standalone_builder("cmake-linux-clang-dbg-x64-ubsan", clang = True, debug = True, cpu = "x64", asan = False, ubsan = True)
-dawn_cmake_standalone_builder("cmake-linux-clang-rel-x64", clang = True, debug = False, cpu = "x64", asan = False, ubsan = False)
 dawn_cmake_standalone_builder("cmake-linux-clang-rel-x64-asan", clang = True, debug = False, cpu = "x64", asan = True, ubsan = False)
 dawn_cmake_standalone_builder("cmake-linux-clang-rel-x64-ubsan", clang = True, debug = False, cpu = "x64", asan = False, ubsan = True)
 dawn_cmake_standalone_builder("cmake-mac-dbg", clang = True, debug = True, cpu = "x64", asan = False, ubsan = False, experimental = False)
