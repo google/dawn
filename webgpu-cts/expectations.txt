@@ -813,6 +813,10 @@ crbug.com/461850861 [ android-14 android-pixel-6 arm dawn-no-backend-validation 
 # capability_checks,limits,maxInterStageShaderVariables failure on Android Qualcomm
 crbug.com/407159803 [ android-r qualcomm ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:* [ Failure ]
 
+# maxInterStageShaderVariables validation needs updating - in progress
+crbug.com/474097248 webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:* [ Failure ]
+crbug.com/474097248 webgpu:api,validation,render_pipeline,inter_stage:max_variables_count,input:* [ Failure ]
+
 crbug.com/407801079 [ dawn-no-backend-validation no-asan nvidia target-cpu-32 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ Failure ]
 
 # image_copy:mip_levels, BC formats dimension="3d", on AMD mac and Intel linux

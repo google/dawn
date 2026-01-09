@@ -674,25 +674,29 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderVariables) {
     // @builtin(front_facing), @builtin(sample_index) and @builtin(sample_mask) should all be
     // counted into the maximum inter-stage variables count. Then the maximum user-defined
     // inter-stage shader variables can only be (kMaxInterStageShaderVariables - 1) because these
-    // user-defined inter-stage shader variables always consume 1 shader variable.
+    // user-defined inter-stage shader variables always consume 1 shader variable each.
     {
         constexpr uint8_t kMaskFrontFacing = 1;
         constexpr uint8_t kMaskSampleIndex = 1 << 1;
         constexpr uint8_t kMaskSampleMask = 1 << 2;
+        int useCount = 0;
         for (uint8_t mask = 1; mask <= 7; ++mask) {
             std::string builtInDeclarations = "";
             if (mask & kMaskFrontFacing) {
                 builtInDeclarations += "@builtin(front_facing) frontFacing : bool,";
+                ++useCount;
             }
             if (mask & kMaskSampleIndex) {
                 builtInDeclarations += "@builtin(sample_index) sampleIndex : u32,";
+                ++useCount;
             }
             if (mask & kMaskSampleMask) {
                 builtInDeclarations += "@builtin(sample_mask) sampleMask : u32,";
+                ++useCount;
             }
 
             {
-                uint32_t variablesCount = kMaxInterStageShaderVariables - 1;
+                uint32_t variablesCount = kMaxInterStageShaderVariables - useCount;
                 CheckTestPipeline(true, variablesCount, wgpu::ShaderStage::Fragment,
                                   builtInDeclarations.c_str());
             }

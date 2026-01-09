@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
+#include <functional>
 #include <limits>
 #include <string>
 #include <vector>
@@ -920,11 +921,16 @@ class MaxInterStageShaderVariablesLimitTests : public MaxLimitTests {
         const auto& baseLimits = GetAdapterLimits();
 
         uint32_t builtinVariableCount = 0;
-        if (spec.renderPointLists) {
-            ++builtinVariableCount;
-        }
-        if (spec.hasFrontFacing || spec.hasSampleIndex || spec.hasSampleMask) {
-            ++builtinVariableCount;
+        std::reference_wrapper<const bool> usages[] = {
+            spec.renderPointLists,
+            spec.hasSampleMask,
+            spec.hasSampleIndex,
+            spec.hasFrontFacing,
+        };
+        for (const auto& usage : usages) {
+            if (usage) {
+                ++builtinVariableCount;
+            }
         }
         if (spec.clipDistancesSize.has_value()) {
             builtinVariableCount += RoundUp(*spec.clipDistancesSize, 4) / 4;
