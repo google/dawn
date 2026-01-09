@@ -102,9 +102,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             options.depth_range_offsets.value().max, module.symbols.New("tint_frag_depth_max"),
             module.Types().f32()));
     }
-    auto immediate_data_layout =
-        core::ir::transform::PrepareImmediateData(module, immediate_data_config);
-    TINT_CHECK_RESULT(immediate_data_layout);
+    TINT_CHECK_RESULT_UNWRAP(immediate_data_layout, core::ir::transform::PrepareImmediateData(
+                                                        module, immediate_data_config));
 
     // Note, this must come after Robustness as it may add `arrayLength`.
     // This also needs to come before binding remapper as Dawn inserts _pre-remapping_ binding
@@ -218,14 +217,13 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(core::ir::transform::RemoveContinueInSwitch(module));
 
     TINT_CHECK_RESULT(raise::ShaderIO(
-        module, raise::ShaderIOConfig{immediate_data_layout.Get(), options.depth_range_offsets,
+        module, raise::ShaderIOConfig{immediate_data_layout, options.depth_range_offsets,
                                       options.bgra_swizzle_locations}));
 
     // Must come after ShaderIO as it operates on module-scope `in` variables.
     TINT_CHECK_RESULT(raise::OffsetFirstIndex(
-        module,
-        raise::OffsetFirstIndexConfig{immediate_data_layout.Get(), options.first_vertex_offset,
-                                      options.first_instance_offset}));
+        module, raise::OffsetFirstIndexConfig{immediate_data_layout, options.first_vertex_offset,
+                                              options.first_instance_offset}));
 
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.

@@ -103,14 +103,13 @@ Result<std::string> SpirvToWgsl([[maybe_unused]] const std::vector<uint32_t>& sp
     return Failure{"Tint WGSL writer is not enabled"};
 #else
     // Convert the SPIR-V program to an IR module.
-    auto ir_from_spirv = tint::spirv::reader::ReadIR(spirv);
-    TINT_CHECK_RESULT(ir_from_spirv);
+    TINT_CHECK_RESULT_UNWRAP(ir_from_spirv, tint::spirv::reader::ReadIR(spirv));
 
     // Convert the IR module to WGSL.
-    auto wgsl_from_ir = tint::wgsl::writer::WgslFromIR(ir_from_spirv.Get(), wgsl_options);
-    TINT_CHECK_RESULT(wgsl_from_ir);
+    TINT_CHECK_RESULT_UNWRAP(wgsl_from_ir,
+                             tint::wgsl::writer::WgslFromIR(ir_from_spirv, wgsl_options));
 
-    return wgsl_from_ir->wgsl;
+    return wgsl_from_ir.wgsl;
 #endif  // TINT_BUILD_SPV_READER && TINT_BUILD_WGSL_WRITER
 }
 

@@ -36,19 +36,17 @@ namespace tint::spirv::reader {
 
 Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input, const Options& options) {
     // Parse the input SPIR-V to the SPIR-V dialect of the IR.
-    auto mod = Parse(Slice(input.data(), input.size()), options);
-    TINT_CHECK_RESULT(mod);
+    TINT_CHECK_RESULT_UNWRAP(mod, Parse(Slice(input.data(), input.size()), options));
 
     // Lower the module to the core dialect of the IR.
-    TINT_CHECK_RESULT(Lower(mod.Get()));
+    TINT_CHECK_RESULT(Lower(mod));
 
     // Always validate the core IR, so that we fail somewhat gracefully on invalid inputs instead of
     // just ICEing later on.
-    TINT_CHECK_RESULT(
-        core::ir::Validate(mod.Get(), core::ir::Capabilities{
-                                          core::ir::Capability::kAllowMultipleEntryPoints,
-                                          core::ir::Capability::kAllowOverrides,
-                                      }));
+    TINT_CHECK_RESULT(core::ir::Validate(mod, core::ir::Capabilities{
+                                                  core::ir::Capability::kAllowMultipleEntryPoints,
+                                                  core::ir::Capability::kAllowOverrides,
+                                              }));
 
     return mod;
 }

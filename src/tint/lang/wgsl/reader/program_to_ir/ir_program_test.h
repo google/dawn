@@ -57,14 +57,13 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
             return Failure{program.Diagnostics().Str()};
         }
 
-        auto result = wgsl::reader::ProgramToIR(program);
-        TINT_CHECK_RESULT(result);
+        TINT_CHECK_RESULT_UNWRAP(result, wgsl::reader::ProgramToIR(program));
 
         // WGSL-dialect -> core-dialect
-        TINT_CHECK_RESULT(wgsl::reader::Lower(result.Get()));
+        TINT_CHECK_RESULT(wgsl::reader::Lower(result));
 
-        TINT_CHECK_RESULT(core::ir::Validate(result.Get(), kCapabilities));
-        return result.Move();
+        TINT_CHECK_RESULT(core::ir::Validate(result, kCapabilities));
+        return result;
     }
 
     /// Build the module from the given WGSL.
@@ -75,11 +74,10 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
         wgsl::reader::Options options{
             .allowed_features = wgsl::AllowedFeatures::Everything(),
         };
-        auto result = wgsl::reader::WgslToIR(&file, options);
-        TINT_CHECK_RESULT(result);
-        TINT_CHECK_RESULT(core::ir::Validate(result.Get(), kCapabilities));
+        TINT_CHECK_RESULT_UNWRAP(result, wgsl::reader::WgslToIR(&file, options));
+        TINT_CHECK_RESULT(core::ir::Validate(result, kCapabilities));
 
-        return result.Move();
+        return result;
     }
 
     /// Helper to disassemble a module into a string representation

@@ -38,17 +38,14 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     Output output;
 
     // Raise from core-dialect
-    auto raise_result = Raise(ir, options);
-    TINT_CHECK_RESULT(raise_result);
+    TINT_CHECK_RESULT(Raise(ir, options));
 
-    auto wg_info = GetWorkgroupInfo(ir);
-    TINT_CHECK_RESULT(wg_info);
-
+    TINT_CHECK_RESULT_UNWRAP(wg_info, GetWorkgroupInfo(ir));
     output.workgroup_info = {
-        .x = wg_info.Get().x,
-        .y = wg_info.Get().y,
-        .z = wg_info.Get().z,
-        .storage_size = wg_info.Get().storage_size,
+        .x = wg_info.x,
+        .y = wg_info.y,
+        .z = wg_info.z,
+        .storage_size = wg_info.storage_size,
     };
 
     return output;

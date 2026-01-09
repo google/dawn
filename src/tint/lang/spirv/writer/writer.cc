@@ -170,10 +170,8 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     // Raise from core-dialect to SPIR-V-dialect.
     TINT_CHECK_RESULT(Raise(ir, options));
 
-    auto res = Print(ir, options);
-    TINT_CHECK_RESULT(res);
-
-    res->subgroup_matrix_info = sm_info;
+    TINT_CHECK_RESULT_UNWRAP(res, Print(ir, options));
+    res.subgroup_matrix_info = sm_info;
 
     return res;
 }

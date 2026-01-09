@@ -103,41 +103,34 @@ Evaluator::EvalResult Evaluator::EvalValue(core::ir::Value* val) {
 }
 
 Evaluator::EvalResult Evaluator::EvalBitcast(core::ir::Bitcast* bc) {
-    auto val = EvalValue(bc->Val());
-    TINT_CHECK_RESULT(val);
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(bc->Val()));
     // Check if the value could be evaluated
-    if (!val.Get()) {
+    if (!val) {
         return nullptr;
     }
 
-    auto r = const_eval_.bitcast(bc->Result()->Type(), Vector{val.Get()}, SourceOf(bc));
-    if (r != Success) {
-        return Failure();
-    }
-    return r.Get();
+    TINT_CHECK_RESULT_UNWRAP(r,
+                             const_eval_.bitcast(bc->Result()->Type(), Vector{val}, SourceOf(bc)));
+    return r;
 }
 
 Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a) {
-    auto obj_res = EvalValue(a->Object());
-    TINT_CHECK_RESULT(obj_res);
+    TINT_CHECK_RESULT_UNWRAP(obj, EvalValue(a->Object()));
 
-    auto* obj = obj_res.Get();
     auto* access_obj_type = a->Object()->Type()->UnwrapPtrOrRef();
     for (auto* idx : a->Indices()) {
-        auto val = EvalValue(idx);
-        TINT_CHECK_RESULT(val);
+        TINT_CHECK_RESULT_UNWRAP(val, EvalValue(idx));
+
         // Check if the value could be evaluated
         constexpr uint32_t kDefaultConstIndex = 0;
         uint32_t index_const = kDefaultConstIndex;
-        if (val.Get()) {
-            TINT_ASSERT(val.Get()->Is<core::constant::Value>());
+        if (val) {
+            TINT_ASSERT(val->Is<core::constant::Value>());
 
-            auto res = const_eval_.Index(obj, access_obj_type, val.Get(), SourceOf(a));
-            if (res != Success) {
-                return Failure();
-            }
-            index_const = val.Get()->ValueAs<u32>();
-            obj = res.Get();
+            TINT_CHECK_RESULT_UNWRAP(res,
+                                     const_eval_.Index(obj, access_obj_type, val, SourceOf(a)));
+            index_const = val->ValueAs<u32>();
+            obj = res;
         } else {
             // No constant array evaluation possible for non-const (dynamic) indices. Only
             // validation of bounds is possible at this stage.
@@ -164,13 +157,12 @@ Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
     for (auto* arg : c->Args()) {
         arg_types.Push(arg->Type());
 
-        auto val = EvalValue(arg);
-        TINT_CHECK_RESULT(val);
+        TINT_CHECK_RESULT_UNWRAP(val, EvalValue(arg));
         // Check if the value could be evaluated
-        if (!val.Get()) {
+        if (!val) {
             return nullptr;
         }
-        arg_values.Push(val.Get());
+        arg_values.Push(val);
     }
 
     auto mat_vec = [&](const core::type::Type* type,
@@ -179,17 +171,15 @@ Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
             table.Lookup(intrinsic, Vector{type}, arg_types, core::EvaluationStage::kOverride);
         if (op != Success) {
             AddError(SourceOf(c)) << "unable to find intrinsic for construct: " << op.Failure();
-            return constant::Eval::Error();
+            return Failure();
         }
         if (!op->const_eval_fn) {
             AddError(SourceOf(c)) << "unhandled type constructor";
-            return constant::Eval::Error();
+            return Failure();
         }
-        auto r = (const_eval_.*op->const_eval_fn)(result_ty, arg_values, SourceOf(c));
-        if (r != Success) {
-            return constant::Eval::Error();
-        }
-        return r.Get();
+        TINT_CHECK_RESULT_UNWRAP(
+            r, (const_eval_.*op->const_eval_fn)(result_ty, arg_values, SourceOf(c)));
+        return r;
     };
 
     // Dispatch to the appropriate const eval function.
@@ -228,65 +218,54 @@ Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
 }
 
 Evaluator::EvalResult Evaluator::EvalConvert(core::ir::Convert* c) {
-    auto val = EvalValue(c->Args()[0]);
-    TINT_CHECK_RESULT(val);
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(c->Args()[0]));
     // Check if the value could be evaluated
-    if (!val.Get()) {
+    if (!val) {
         return nullptr;
     }
-    auto r = const_eval_.Convert(c->Result()->Type(), val.Get(), SourceOf(c));
-    if (r != Success) {
-        return Failure();
-    }
-    return r.Get();
+    TINT_CHECK_RESULT_UNWRAP(r, const_eval_.Convert(c->Result()->Type(), val, SourceOf(c)));
+    return r;
 }
 
 Evaluator::EvalResult Evaluator::EvalOverride(core::ir::Override* o) {
-    auto val = EvalValue(o->Initializer());
-    TINT_CHECK_RESULT(val);
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(o->Initializer()));
     // Check if the value could be evaluated
-    if (!val.Get()) {
+    if (!val) {
         return nullptr;
     }
-    return val.Get();
+    return val;
 }
 
 Evaluator::EvalResult Evaluator::EvalConstExprIf(core::ir::ConstExprIf* c) {
-    auto val = EvalValue(c->Condition());
-    TINT_CHECK_RESULT(val);
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(c->Condition()));
     // Check if the value could be evaluated
-    if (!val.Get()) {
+    if (!val) {
         return nullptr;
     }
-    bool branch_val = val.Get()->ValueAs<bool>();
+    bool branch_val = val->ValueAs<bool>();
     auto* inline_block = branch_val ? c->True() : c->False();
 
     // Note: ConstExprIf must be limited to side effect boolean values for this evaluation to be
     // correct. This is currently the case as ConstExprIf was created for the singular purpose of
     // correctly semantically representing short circuiting operations (and/or).
-    auto ret = EvalValue(inline_block->Terminator()->Args()[0]);
-    TINT_CHECK_RESULT(ret);
+    TINT_CHECK_RESULT_UNWRAP(ret, EvalValue(inline_block->Terminator()->Args()[0]));
     // Check if the value could be evaluated
-    if (!val.Get()) {
+    if (!ret) {
         return nullptr;
     }
 
-    return val.Get();
+    return ret;
 }
 
 Evaluator::EvalResult Evaluator::EvalSwizzle(core::ir::Swizzle* s) {
-    auto val = EvalValue(s->Object());
-    TINT_CHECK_RESULT(val);
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(s->Object()));
     // Check if the value could be evaluated
-    if (!val.Get()) {
+    if (!val) {
         return nullptr;
     }
 
-    auto r = const_eval_.Swizzle(s->Result()->Type(), val.Get(), s->Indices());
-    if (r != Success) {
-        return Failure();
-    }
-    return r.Get();
+    TINT_CHECK_RESULT_UNWRAP(r, const_eval_.Swizzle(s->Result()->Type(), val, s->Indices()));
+    return r;
 }
 
 Evaluator::EvalResult Evaluator::EvalUnary(core::ir::CoreUnary* u) {
@@ -338,10 +317,9 @@ Evaluator::EvalResult Evaluator::EvalBinary(core::ir::CoreBinary* cb) {
         return Failure();
     }
 
-    auto lhs = EvalValue(cb->LHS());
-    TINT_CHECK_RESULT(lhs);
+    TINT_CHECK_RESULT_UNWRAP(lhs, EvalValue(cb->LHS()));
     // Check LHS could be evaluated
-    if (!lhs.Get()) {
+    if (!lhs) {
         return nullptr;
     }
 
@@ -350,19 +328,15 @@ Evaluator::EvalResult Evaluator::EvalBinary(core::ir::CoreBinary* cb) {
     TINT_ASSERT(cb->Op() != tint::core::BinaryOp::kLogicalAnd &&
                 cb->Op() != tint::core::BinaryOp::kLogicalOr);
 
-    auto rhs = EvalValue(cb->RHS());
-    TINT_CHECK_RESULT(rhs);
+    TINT_CHECK_RESULT_UNWRAP(rhs, EvalValue(cb->RHS()));
     // Check RHS could be evaluated
-    if (!rhs.Get()) {
+    if (!rhs) {
         return nullptr;
     }
 
-    auto r = (const_eval_.*const_eval_fn)(cb->Result()->Type(), Vector{lhs.Get(), rhs.Get()},
-                                          SourceOf(cb));
-    if (r != Success) {
-        return Failure();
-    }
-    return r.Get();
+    TINT_CHECK_RESULT_UNWRAP(
+        r, (const_eval_.*const_eval_fn)(cb->Result()->Type(), Vector{lhs, rhs}, SourceOf(cb)));
+    return r;
 }
 
 Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* c) {
@@ -375,13 +349,12 @@ Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* 
     for (auto* arg : c->Args()) {
         arg_types.Push(arg->Type());
 
-        auto val = EvalValue(arg);
-        TINT_CHECK_RESULT(val);
+        TINT_CHECK_RESULT_UNWRAP(val, EvalValue(arg));
         // Check if the value could be evaluated
-        if (!val.Get()) {
+        if (!val) {
             return nullptr;
         }
-        args.Push(val.Get());
+        args.Push(val);
     }
 
     auto overload = core::intrinsic::LookupFn(context, c->FriendlyName().c_str(), c->FuncId(),

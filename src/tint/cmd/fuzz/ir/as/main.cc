@@ -181,15 +181,14 @@ tint::Result<tint::core::ir::Module> GenerateIrModule(const tint::Program& progr
         return tint::Failure{"Unsupported enable used in shader"};
     }
 
-    auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
-    TINT_CHECK_RESULT(ir);
+    TINT_CHECK_RESULT_UNWRAP(ir, tint::wgsl::reader::ProgramToLoweredIR(program));
 
-    auto cfg = tint::fuzz::ir::SubstituteOverridesConfig(ir.Get());
-    TINT_CHECK_RESULT(tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg));
+    auto cfg = tint::fuzz::ir::SubstituteOverridesConfig(ir);
+    TINT_CHECK_RESULT(tint::core::ir::transform::SubstituteOverrides(ir, cfg));
 
-    TINT_CHECK_RESULT(tint::core::ir::Validate(ir.Get()));
+    TINT_CHECK_RESULT(tint::core::ir::Validate(ir));
 
-    return ir.Move();
+    return ir;
 }
 
 /// @returns a fuzzer test case protobuf for the given program.

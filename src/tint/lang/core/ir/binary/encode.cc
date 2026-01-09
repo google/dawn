@@ -1427,14 +1427,13 @@ Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& mod_in) {
 }
 
 Result<Vector<std::byte, 0>> EncodeToBinary(const Module& mod_in) {
-    auto mod_out = EncodeToProto(mod_in);
-    TINT_CHECK_RESULT(mod_out);
+    TINT_CHECK_RESULT_UNWRAP(mod_out, EncodeToProto(mod_in));
 
     Vector<std::byte, 0> buffer;
-    size_t len = mod_out.Get()->ByteSizeLong();
+    size_t len = mod_out->ByteSizeLong();
     buffer.Resize(len);
     if (len > 0) {
-        if (!mod_out.Get()->SerializeToArray(&buffer[0], static_cast<int>(len))) {
+        if (!mod_out->SerializeToArray(&buffer[0], static_cast<int>(len))) {
             return Failure{"failed to serialize protobuf"};
         }
     }

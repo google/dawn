@@ -110,9 +110,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             options.depth_range_offsets.value().max, module.symbols.New("tint_frag_depth_max"),
             module.Types().f32()));
     }
-    auto immediate_data_layout =
-        core::ir::transform::PrepareImmediateData(module, immediate_data_config);
-    TINT_CHECK_RESULT(immediate_data_layout);
+    TINT_CHECK_RESULT_UNWRAP(immediate_data_layout, core::ir::transform::PrepareImmediateData(
+                                                        module, immediate_data_config));
 
     core::ir::transform::BinaryPolyfillConfig binary_polyfills;
     binary_polyfills.bitshift_modulo = true;
@@ -231,7 +230,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
     TINT_CHECK_RESULT(raise::RemoveUnreachableInLoopContinuing(module));
     TINT_CHECK_RESULT(raise::ShaderIO(
-        module, raise::ShaderIOConfig{immediate_data_layout.Get(), options.emit_vertex_point_size,
+        module, raise::ShaderIOConfig{immediate_data_layout, options.emit_vertex_point_size,
                                       !options.extensions.use_storage_input_output_16,
                                       options.polyfill_pixel_center, options.depth_range_offsets}));
 

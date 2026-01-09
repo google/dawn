@@ -151,9 +151,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                                  buffer_offsets_array_elements_num)));
     }
 
-    auto immediate_data_layout =
-        core::ir::transform::PrepareImmediateData(module, immediate_data_config);
-    TINT_CHECK_RESULT(immediate_data_layout);
+    TINT_CHECK_RESULT_UNWRAP(immediate_data_layout, core::ir::transform::PrepareImmediateData(
+                                                        module, immediate_data_config));
 
     TINT_CHECK_RESULT(core::ir::transform::BindingRemapper(module, remapper_data));
     TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));
@@ -238,7 +237,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                     !array_length_from_uniform_options.ubo_binding.binding);
 
         TINT_CHECK_RESULT(core::ir::transform::ArrayLengthFromImmediates(
-            module, immediate_data_layout.Get(),
+            module, immediate_data_layout,
             array_length_from_uniform_options.buffer_sizes_offset.value(),
             buffer_sizes_array_elements_num,
             array_length_from_uniform_options.bindpoint_to_size_index));
@@ -264,7 +263,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // introduce a uniform buffer for kNumWorkgroups.
     {
         raise::ShaderIOConfig config = {
-            .immediate_data_layout = immediate_data_layout.Get(),
+            .immediate_data_layout = immediate_data_layout,
             .num_workgroups_binding = options.root_constant_binding_point,
             .first_index_offset_binding = options.root_constant_binding_point,
             .add_input_position_member = pixel_local_enabled,
@@ -299,7 +298,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                     !array_offset_from_uniform_options.ubo_binding.binding);
 
         TINT_CHECK_RESULT(raise::ArrayOffsetFromImmediates(
-            module, immediate_data_layout.Get(),
+            module, immediate_data_layout,
             array_offset_from_uniform_options.buffer_offsets_offset.value(),
             buffer_offsets_array_elements_num,
             array_offset_from_uniform_options.bindpoint_to_offset_index));

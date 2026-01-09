@@ -153,10 +153,9 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
 
     TINT_CHECK_RESULT(CanGenerate(module, options));
 
-    auto output = Generate(module, options);
-    TINT_CHECK_RESULT(output);
+    TINT_CHECK_RESULT_UNWRAP(output, Generate(module, options));
     if (context.options.dump) {
-        std::cout << "Dumping generated HLSL:\n" << output->hlsl << "\n";
+        std::cout << "Dumping generated HLSL:\n" << output.hlsl << "\n";
     }
 
     // Run DXC against generated HLSL in order to fuzz it. Note that we ignore whether it succeeds
@@ -171,7 +170,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         uint32_t hlsl_shader_model = 66;
         bool require_16bit_types = true;
         [[maybe_unused]] auto validate_res = validate::ValidateUsingDXC(
-            dxc.Path(), output->hlsl, output->entry_point_name, output->pipeline_stage,
+            dxc.Path(), output.hlsl, output.entry_point_name, output.pipeline_stage,
             require_16bit_types, hlsl_shader_model);
     }
 

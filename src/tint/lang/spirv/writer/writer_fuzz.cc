@@ -167,8 +167,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
 
     TINT_CHECK_RESULT(CanGenerate(module, options));
 
-    auto output = Generate(module, options);
-    TINT_CHECK_RESULT(output);
+    TINT_CHECK_RESULT_UNWRAP(output, Generate(module, options));
 
     spv_target_env target_env = SPV_ENV_VULKAN_1_1;
     switch (options.spirv_version) {
@@ -185,7 +184,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
             TINT_ICE() << "unsupported SPIR-V version";
     }
 
-    auto& spirv = output->spirv;
+    auto& spirv = output.spirv;
     auto res = validate::Validate(Slice(spirv.data(), spirv.size()), target_env);
     TINT_ASSERT(res == Success) << "output of SPIR-V writer failed to validate with SPIR-V Tools\n"
                                 << res.Failure() << "\n\n"

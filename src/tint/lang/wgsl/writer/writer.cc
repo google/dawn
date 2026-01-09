@@ -50,9 +50,8 @@ Result<Output> Generate(const Program& program, const Options& options) {
 }
 
 Result<Output> WgslFromIR(core::ir::Module& module, const Options& options) {
-    auto res = ProgramFromIR(module, options);
-    TINT_CHECK_RESULT(res);
-    return Generate(res.Move(), options);
+    TINT_CHECK_RESULT_UNWRAP(res, ProgramFromIR(module, options));
+    return Generate(res, options);
 }
 
 Result<Program> ProgramFromIR(core::ir::Module& module, const Options& options) {

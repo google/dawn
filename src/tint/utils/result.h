@@ -245,6 +245,17 @@ auto& operator<<(STREAM& out, const Result<SUCCESS, FAILURE>& res) {
     }                                                              \
     TINT_REQUIRE_SEMICOLON
 
+#define TINT_CHECK_RESULT_UNWRAP_IMPL(to, from, result) \
+    auto from = (result);                               \
+    if (DAWN_UNLIKELY(from != tint::Success)) {         \
+        return from.Failure();                          \
+    }                                                   \
+    auto to = from.Move();                              \
+    TINT_REQUIRE_SEMICOLON
+/// Check that @p result is Success and propagate the failure if not.
+#define TINT_CHECK_RESULT_UNWRAP(to, result) \
+    TINT_CHECK_RESULT_UNWRAP_IMPL(to, TINT_CONCAT(tint_check_result_value, __LINE__), result)
+
 }  // namespace tint
 
 #endif  // SRC_TINT_UTILS_RESULT_H_

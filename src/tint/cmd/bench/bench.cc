@@ -45,10 +45,9 @@ Result<Source::File> GetWgslFile(std::string name) {
 }
 
 Result<ProgramAndFile> GetWgslProgram(std::string name) {
-    auto res = GetWgslFile(name);
-    TINT_CHECK_RESULT(res);
+    TINT_CHECK_RESULT_UNWRAP(res, GetWgslFile(name));
 
-    auto file = std::make_unique<Source::File>(res.Get());
+    auto file = std::make_unique<Source::File>(res);
     auto program = wgsl::reader::Parse(file.get());
     if (!program.IsValid()) {
         return Failure{program.Diagnostics().Str()};

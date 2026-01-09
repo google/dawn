@@ -375,7 +375,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, ExtractBits_I32_TooManyBits) {
     auto* offset = constants.Get(u32(24));
     auto* count = constants.Get(u32(16));
     auto result = eval.extractBits(a->Type(), Vector{a, offset, count}, {});
-    ASSERT_EQ(result, Success);
+    ASSERT_EQ(result, Success) << error();
     EXPECT_EQ(result.Get()->ValueAs<i32>(), 0x12);
     EXPECT_EQ(error(),
               R"(warning: 'offset' + 'count' must be less than or equal to the bit width of 'e')");

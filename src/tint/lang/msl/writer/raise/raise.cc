@@ -129,9 +129,8 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
             module.Types().f32()));
     }
 
-    auto immediate_data_layout =
-        core::ir::transform::PrepareImmediateData(module, immediate_data_config);
-    TINT_CHECK_RESULT(immediate_data_layout);
+    TINT_CHECK_RESULT_UNWRAP(immediate_data_layout, core::ir::transform::PrepareImmediateData(
+                                                        module, immediate_data_config));
     TINT_CHECK_RESULT(core::ir::transform::BindingRemapper(module, remapper_data));
 
     if (!options.disable_robustness) {
@@ -179,23 +178,25 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     // TODO(crbug.com/366291600): Replace ArrayLengthFromUniform with ArrayLengthFromImmediates
     if (array_length_from_constants.ubo_binding) {
-        auto array_length_from_uniform_result = core::ir::transform::ArrayLengthFromUniform(
-            module, BindingPoint{0u, array_length_from_constants.ubo_binding.value()},
-            array_length_from_constants.bindpoint_to_size_index);
-        TINT_CHECK_RESULT(array_length_from_uniform_result);
+        TINT_CHECK_RESULT_UNWRAP(
+            array_length_from_uniform_result,
+            core::ir::transform::ArrayLengthFromUniform(
+                module, BindingPoint{0u, array_length_from_constants.ubo_binding.value()},
+                array_length_from_constants.bindpoint_to_size_index));
         raise_result.needs_storage_buffer_sizes =
-            array_length_from_uniform_result->needs_storage_buffer_sizes;
+            array_length_from_uniform_result.needs_storage_buffer_sizes;
     }
 
     if (array_length_from_constants.buffer_sizes_offset) {
         TINT_IR_ASSERT(module, !array_length_from_constants.ubo_binding);
-        auto array_length_from_immediate_result = core::ir::transform::ArrayLengthFromImmediates(
-            module, immediate_data_layout.Get(),
-            array_length_from_constants.buffer_sizes_offset.value(),
-            buffer_sizes_array_elements_num, array_length_from_constants.bindpoint_to_size_index);
-        TINT_CHECK_RESULT(array_length_from_immediate_result);
+        TINT_CHECK_RESULT_UNWRAP(array_length_from_immediate_result,
+                                 core::ir::transform::ArrayLengthFromImmediates(
+                                     module, immediate_data_layout,
+                                     array_length_from_constants.buffer_sizes_offset.value(),
+                                     buffer_sizes_array_elements_num,
+                                     array_length_from_constants.bindpoint_to_size_index));
         raise_result.needs_storage_buffer_sizes =
-            array_length_from_immediate_result->needs_storage_buffer_sizes;
+            array_length_from_immediate_result.needs_storage_buffer_sizes;
     }
 
     if (!options.disable_workgroup_init) {
@@ -215,7 +216,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(raise::ConvertPrintToLog(module));
 
     TINT_CHECK_RESULT(raise::ShaderIO(
-        module, raise::ShaderIOConfig{immediate_data_layout.Get(), options.emit_vertex_point_size,
+        module, raise::ShaderIOConfig{immediate_data_layout, options.emit_vertex_point_size,
                                       options.fixed_sample_mask, options.depth_range_offsets}));
     TINT_CHECK_RESULT(raise::PackedVec3(module));
     TINT_CHECK_RESULT(raise::SimdBallot(module));

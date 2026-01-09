@@ -65,16 +65,14 @@ class SpirvParserTestHelperBase : public BASE {
     Result<std::string> Run(std::string spirv_asm,
                             spv_target_env spv_version = SPV_ENV_UNIVERSAL_1_0) {
         // Assemble the SPIR-V input.
-        auto binary = Assemble(spirv_asm, spv_version);
-        TINT_CHECK_RESULT(binary);
+        TINT_CHECK_RESULT_UNWRAP(binary, Assemble(spirv_asm, spv_version));
 
         // Parse the SPIR-V to produce an IR module.
-        auto parsed = Parse(Slice(binary.Get().data(), binary.Get().size()), options);
-        TINT_CHECK_RESULT(parsed);
+        TINT_CHECK_RESULT_UNWRAP(parsed, Parse(Slice(binary.data(), binary.size()), options));
 
         // Validate the IR module against the capabilities supported by the SPIR-V dialect.
         TINT_CHECK_RESULT(
-            ValidateAndDumpIfNeeded(parsed.Get(), "spirv.test",
+            ValidateAndDumpIfNeeded(parsed, "spirv.test",
                                     core::ir::Capabilities{
                                         core::ir::Capability::kAllowMultipleEntryPoints,
                                         core::ir::Capability::kAllowOverrides,
@@ -85,7 +83,7 @@ class SpirvParserTestHelperBase : public BASE {
                                     }));
 
         // Return the disassembled IR module.
-        return core::ir::Disassembler(parsed.Get()).Plain();
+        return core::ir::Disassembler(parsed).Plain();
     }
 
     /// Parser options
