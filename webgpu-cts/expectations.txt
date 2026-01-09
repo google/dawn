@@ -411,7 +411,22 @@ crbug.com/42251290 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:shader,execution,m
 crbug.com/42251180 [ asan dawn-no-backend-validation intel-0x9bc5 release-x64 target-cpu-64 webgpu-dxc-enabled win10 ] webgpu:shader,execution,robust_access:linear_memory:* [ Failure ]
 crbug.com/42251180 [ dawn-no-backend-validation intel-0x9bc5 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win10 ] webgpu:shader,execution,robust_access:linear_memory:* [ Failure ]
 
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:* [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x3h_align8";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x4h_align8";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x4h_align8";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x2f_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x2f_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat2x3f_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x3f_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x3f_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat2x4f_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x4f_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x4f_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x3h_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x3h_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x4h_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x4h_size";aspace="workgroup" [ Failure ]
+
 crbug.com/341991440 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="array";* [ Failure ]
 
 # Video tests fail on Mac SwiftShader
@@ -647,8 +662,8 @@ crbug.com/407088850 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call
 crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_3d_coords:* [ Failure ]
 crbug.com/407088850 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_3d_coords:* [ Failure ]
 crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:* [ Failure ]
+crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:* [ Failure ]
 crbug.com/407088850 [ intel webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ]
-crbug.com/407088850 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:* [ Failure ]
 crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:* [ Failure ]
 crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_3d_coords:* [ Failure ]
 crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_3d_coords:* [ Failure ]
