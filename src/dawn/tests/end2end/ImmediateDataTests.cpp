@@ -173,47 +173,6 @@ TEST_P(ImmediateDataTests, BasicComputePipeline) {
     EXPECT_BUFFER_U32_RANGE_EQ(immediateData.data(), mStorageBuffer, 0, immediateData.size());
 }
 
-// ImmediateData range should be initialized to 0.
-TEST_P(ImmediateDataTests, ImmediateDataInitialization) {
-    // Render pipeline
-    {
-        wgpu::RenderPipeline pipeline = CreateRenderPipeline();
-        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
-
-        // rgba8unorm: {0.0, 0.4, 0.6} + {0.0 diff} => {0.0, 0.4, 0.6} => {0, 102, 153, 255}
-        std::array<float, 2> immediateData = {0.4, 0.6};
-        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder renderPassEncoder =
-            commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
-        renderPassEncoder.SetImmediates(4, immediateData.data(), 8);
-        renderPassEncoder.SetPipeline(CreateRenderPipeline());
-        renderPassEncoder.SetBindGroup(0, CreateBindGroup());
-        renderPassEncoder.Draw(3);
-        renderPassEncoder.End();
-        wgpu::CommandBuffer commands = commandEncoder.Finish();
-        queue.Submit(1, &commands);
-
-        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 102, 153, 255), renderPass.color, 0, 0);
-    }
-
-    // Compute Pipeline
-    {
-        std::array<uint32_t, 2> immediateData = {128, 240};
-        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
-        computePassEncoder.SetPipeline(CreateComputePipeline());
-        computePassEncoder.SetImmediates(4, immediateData.data(), 8);
-        computePassEncoder.SetBindGroup(0, CreateBindGroup());
-        computePassEncoder.DispatchWorkgroups(1);
-        computePassEncoder.End();
-        wgpu::CommandBuffer commands = commandEncoder.Finish();
-        queue.Submit(1, &commands);
-
-        std::array<uint32_t, 4> expected = {0, 128, 240, 0};
-        EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), mStorageBuffer, 0, immediateData.size());
-    }
-}
-
 // SetImmediates with offset on immediate data range.
 TEST_P(ImmediateDataTests, SetImmediatesWithRangeOffset) {
     constexpr uint32_t kHalfImmediateDataSize = 8;

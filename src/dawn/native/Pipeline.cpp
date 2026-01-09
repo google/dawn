@@ -33,6 +33,7 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/string_view.h"
+#include "dawn/common/Constants.h"
 #include "dawn/common/Enumerator.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Device.h"
@@ -274,6 +275,7 @@ PipelineBase::PipelineBase(DeviceBase* device,
         bool isFirstStage = mStageMask == wgpu::ShaderStage::None;
         mStageMask |= StageBit(shaderStage);
         mStages[shaderStage] = {module, entryPointName, &metadata, {}};
+
         auto& constants = mStages[shaderStage].constants;
         for (uint32_t i = 0; i < stage.constantCount; i++) {
             constants.emplace(stage.constants[i].key, stage.constants[i].value);
@@ -294,6 +296,8 @@ PipelineBase::PipelineBase(DeviceBase* device,
                 }
             }
         }
+
+        mUserImmdiateSlots |= metadata.immediateDataUsedSlots;
     }
 }
 
@@ -448,6 +452,10 @@ void PipelineBase::SetImmediateMaskForTesting(ImmediateConstantMask immediateCon
 
 uint32_t PipelineBase::GetImmediateConstantSize() const {
     return static_cast<uint32_t>(mImmediateMask.count());
+}
+
+ImmediateConstantMask PipelineBase::GetUserImmediateSlots() const {
+    return mUserImmdiateSlots;
 }
 
 }  // namespace dawn::native

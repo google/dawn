@@ -727,4 +727,30 @@ void RenderEncoderBase::APISetBindGroup(uint32_t groupIndexIn,
         dynamicOffsetCount);
 }
 
+void RenderEncoderBase::APISetImmediates(uint32_t offset, const void* data, size_t size) {
+    mEncodingContext->TryEncode(
+        this,
+        [&](CommandAllocator* allocator) -> MaybeError {
+            if (IsValidationEnabled()) {
+                DAWN_TRY(ValidateSetImmediates(offset, size));
+            }
+
+            // Skip SetImmediates when uploading constants are empty.
+            if (size == 0) {
+                return {};
+            }
+
+            SetImmediatesCmd* cmd = allocator->Allocate<SetImmediatesCmd>(Command::SetImmediates);
+            cmd->offset = offset;
+            cmd->size = size;
+            uint8_t* immediateDatas = allocator->AllocateData<uint8_t>(cmd->size);
+            memcpy(immediateDatas, data, size);
+
+            mCommandBufferState.SetImmediateData(offset, size);
+
+            return {};
+        },
+        "encoding %s.SetImmediates(%u, %u, ...).", this, offset, size);
+}
+
 }  // namespace dawn::native

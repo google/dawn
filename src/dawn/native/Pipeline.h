@@ -87,6 +87,7 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     bool HasStage(SingleShaderStage stage) const;
     wgpu::ShaderStage GetStageMask() const;
     const ImmediateConstantMask& GetImmediateMask() const;
+    virtual ImmediateConstantMask GetUserImmediateSlots() const;
 
     ResultOrError<Ref<BindGroupLayoutBase>> GetBindGroupLayout(uint32_t groupIndex);
 
@@ -115,6 +116,7 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
     ImmediateConstantMask mImmediateMask = ImmediateConstantMask(0);
+    ImmediateConstantMask mUserImmdiateSlots = ImmediateConstantMask(0);
 
   private:
     MaybeError ValidateGetBindGroupLayout(BindGroupIndex group);

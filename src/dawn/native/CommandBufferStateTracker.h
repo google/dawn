@@ -75,9 +75,10 @@ class CommandBufferStateTracker {
                         uint64_t size);
     void UnsetVertexBuffer(VertexBufferSlot slot);
     void SetVertexBuffer(VertexBufferSlot slot, uint64_t size);
+    void SetImmediateData(uint32_t offset, uint32_t size);
     void End();
 
-    static constexpr size_t kNumAspects = 5;
+    static constexpr size_t kNumAspects = 6;
     using ValidationAspects = std::bitset<kNumAspects>;
 
     BindGroupBase* GetBindGroup(BindGroupIndex index) const;
@@ -119,6 +120,8 @@ class CommandBufferStateTracker {
     RAW_PTR_EXCLUSION PipelineLayoutBase* mLastPipelineLayout = nullptr;
     RAW_PTR_EXCLUSION PipelineBase* mLastPipeline = nullptr;
     RAW_PTR_EXCLUSION const RequiredBufferSizes* mMinBufferSizes = nullptr;
+
+    ImmediateConstantMask mImmediateDataMask;
 };
 
 }  // namespace dawn::native

@@ -51,12 +51,13 @@ class ProgrammableEncoder : public ApiObjectBase {
     void APIInsertDebugMarker(StringView groupLabel);
     void APIPopDebugGroup();
     void APIPushDebugGroup(StringView groupLabel);
-    void APISetImmediates(uint32_t offset, const void* data, size_t size);
 
   protected:
     bool IsValidationEnabled() const;
     bool NeedsIndirectGPUValidation() const;
     MaybeError ValidateProgrammableEncoderEnd() const;
+
+    MaybeError ValidateSetImmediates(uint32_t offset, size_t size) const;
 
     // Compute and render passes do different things on SetBindGroup. These are helper functions
     // for the logic they have in common.
