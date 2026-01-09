@@ -564,7 +564,7 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
     std::vector<TextureDescForTypeIDCase> cases;
 
     // TODO(https://issues.chromium.org/473354065): Add tests of filterable vs. unfilterable floats
-    // when get/hasBinding is able to make the difference.
+    // when get/hasResource is able to make the difference.
 
     // Regular 1D textures.
     cases.push_back({
@@ -783,7 +783,7 @@ TEST_P(ResourceTableTests, HasResourceTextureCompatibilityAllTypes) {
         table.Update(i, &resource);
     }
 
-    // Test hasBinding returning for each of the supported WGSL types, against each texture.
+    // Test hasResource returning for each of the supported WGSL types, against each texture.
     for (auto wgslType : kWgslSampledTextureTypes) {
         std::vector<bool> expected;
         for (auto textureCase : textureCases) {
@@ -795,7 +795,7 @@ TEST_P(ResourceTableTests, HasResourceTextureCompatibilityAllTypes) {
 }
 
 // Test that calling hasResource() with values outside of the resource table size returns false.
-TEST_P(ResourceTableTests, HasBindingOOBIsFalse) {
+TEST_P(ResourceTableTests, HasResourceOOBIsFalse) {
     // Create the test pipeline
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_resource_table;

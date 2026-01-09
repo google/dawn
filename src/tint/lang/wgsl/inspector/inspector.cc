@@ -714,8 +714,8 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
                         return;
                     }
 
-                    // A texture of `sem::Call` means we're dealing with a `getBinding` or
-                    // `hasBinding` call. Skip it.
+                    // A texture of `sem::Call` means we're dealing with a `getResource` or
+                    // `hasResource` call. Skip it.
                     if (call->Arguments()[size_t(texture_index)]->Is<sem::Call>()) {
                         return;
                     }

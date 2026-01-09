@@ -99,8 +99,6 @@ enum extension {
   chromium_experimental_subgroup_matrix
   // A Chromium-specific extension for barycentric_coord support
   chromium_experimental_barycentric_coord
-  // A Chromium-specific extension for dynamic binding
-  chromium_experimental_dynamic_binding
   // A Chromium-specific extension for resource table
   chromium_experimental_resource_table
   // A Chromium-specific extension for the attribute `subgroup_size`

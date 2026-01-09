@@ -116,7 +116,6 @@ enum class Extension : uint8_t {
     kUndefined,
     kChromiumDisableUniformityAnalysis,
     kChromiumExperimentalBarycentricCoord,
-    kChromiumExperimentalDynamicBinding,
     kChromiumExperimentalFramebufferFetch,
     kChromiumExperimentalPixelLocal,
     kChromiumExperimentalResourceTable,
@@ -152,7 +151,6 @@ Extension ParseExtension(std::string_view str);
 constexpr std::string_view kExtensionStrings[] = {
     "chromium_disable_uniformity_analysis",
     "chromium_experimental_barycentric_coord",
-    "chromium_experimental_dynamic_binding",
     "chromium_experimental_framebuffer_fetch",
     "chromium_experimental_pixel_local",
     "chromium_experimental_resource_table",
@@ -171,7 +169,6 @@ constexpr std::string_view kExtensionStrings[] = {
 static constexpr Extension kAllExtensions[] = {
     Extension::kChromiumDisableUniformityAnalysis,
     Extension::kChromiumExperimentalBarycentricCoord,
-    Extension::kChromiumExperimentalDynamicBinding,
     Extension::kChromiumExperimentalFramebufferFetch,
     Extension::kChromiumExperimentalPixelLocal,
     Extension::kChromiumExperimentalResourceTable,

@@ -465,15 +465,6 @@ bool Validator::BindingArray(const core::type::BindingArray* t, const Source& so
         return false;
     }
 
-    if (t->Count()->Is<core::type::RuntimeArrayCount>()) {
-        if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalDynamicBinding)) {
-            AddError(source) << "use of a runtime " << style::Attribute("binding_array")
-                             << " requires enabling extension "
-                             << style::Code("chromium_experimental_dynamic_binding");
-            return false;
-        }
-    }
-
     if (!t->Count()->Is<core::type::ConstantArrayCount>()) {
         AddError(source) << "binding_array count must be a constant expression";
         return false;
