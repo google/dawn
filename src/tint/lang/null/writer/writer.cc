@@ -39,14 +39,10 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
 
     // Raise from core-dialect
     auto raise_result = Raise(ir, options);
-    if (raise_result != Success) {
-        return raise_result.Failure();
-    }
+    TINT_CHECK_RESULT(raise_result);
 
     auto wg_info = GetWorkgroupInfo(ir);
-    if (wg_info != Success) {
-        return wg_info.Failure();
-    }
+    TINT_CHECK_RESULT(wg_info);
 
     output.workgroup_info = {
         .x = wg_info.Get().x,

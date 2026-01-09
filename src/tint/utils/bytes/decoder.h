@@ -85,9 +85,7 @@ struct Decoder<std::string, void> {
     /// @returns the decoded string, or an error if the stream is too short.
     static Result<std::string> Decode(Reader& reader) {
         auto len = reader.Int<uint16_t>();
-        if (len != Success) {
-            return len.Failure();
-        }
+        TINT_CHECK_RESULT(len);
         return reader.String(len.Get());
     }
 };
@@ -138,20 +136,14 @@ struct Decoder<std::unordered_map<K, V>, void> {
 
         while (!reader.IsEOF()) {
             auto stop = bytes::Decode<bool>(reader);
-            if (stop != Success) {
-                return stop.Failure();
-            }
+            TINT_CHECK_RESULT(stop);
             if (stop.Get()) {
                 break;
             }
             auto key = bytes::Decode<K>(reader);
-            if (key != Success) {
-                return key.Failure();
-            }
+            TINT_CHECK_RESULT(key);
             auto val = bytes::Decode<V>(reader);
-            if (val != Success) {
-                return val.Failure();
-            }
+            TINT_CHECK_RESULT(val);
             out.emplace(std::move(key.Get()), std::move(val.Get()));
         }
 
@@ -170,16 +162,12 @@ struct Decoder<std::unordered_set<V>, void> {
 
         while (!reader.IsEOF()) {
             auto stop = bytes::Decode<bool>(reader);
-            if (stop != Success) {
-                return stop.Failure();
-            }
+            TINT_CHECK_RESULT(stop);
             if (stop.Get()) {
                 break;
             }
             auto val = bytes::Decode<V>(reader);
-            if (val != Success) {
-                return val.Failure();
-            }
+            TINT_CHECK_RESULT(val);
             out.emplace(std::move(val.Get()));
         }
 
@@ -198,16 +186,12 @@ struct Decoder<std::vector<V>, void> {
 
         while (!reader.IsEOF()) {
             auto stop = bytes::Decode<bool>(reader);
-            if (stop != Success) {
-                return stop.Failure();
-            }
+            TINT_CHECK_RESULT(stop);
             if (stop.Get()) {
                 break;
             }
             auto val = bytes::Decode<V>(reader);
-            if (val != Success) {
-                return val.Failure();
-            }
+            TINT_CHECK_RESULT(val);
             out.emplace_back(std::move(val.Get()));
         }
 
@@ -223,16 +207,12 @@ struct Decoder<std::optional<T>, void> {
     /// @returns the decoded optional, or an error if the stream is too short.
     static Result<std::optional<T>> Decode(Reader& reader) {
         auto has_value = bytes::Decode<bool>(reader);
-        if (has_value != Success) {
-            return has_value.Failure();
-        }
+        TINT_CHECK_RESULT(has_value);
         if (!has_value.Get()) {
             return std::optional<T>{std::nullopt};
         }
         auto value = bytes::Decode<T>(reader);
-        if (value != Success) {
-            return value.Failure();
-        }
+        TINT_CHECK_RESULT(value);
         return std::optional<T>{value.Get()};
     }
 };
@@ -269,14 +249,10 @@ struct Decoder<std::tuple<FIRST, OTHERS...>, void> {
     /// @returns the decoded tuple, or an error if the stream is too short.
     static Result<std::tuple<FIRST, OTHERS...>> Decode(Reader& reader) {
         auto first = bytes::Decode<FIRST>(reader);
-        if (first != Success) {
-            return first.Failure();
-        }
+        TINT_CHECK_RESULT(first);
         if constexpr (sizeof...(OTHERS) > 0) {
             auto others = bytes::Decode<std::tuple<OTHERS...>>(reader);
-            if (others != Success) {
-                return others.Failure();
-            }
+            TINT_CHECK_RESULT(others);
             return std::tuple_cat(std::tuple<FIRST>(first.Get()), others.Get());
         } else {
             return std::tuple<FIRST>(first.Get());
@@ -295,9 +271,7 @@ struct Decoder<T, std::void_t<decltype(tint::EnumRange<T>::kMax)>> {
         using Range = tint::EnumRange<T>;
         using U = std::underlying_type_t<T>;
         auto value = reader.Int<U>(endianness);
-        if (value != Success) {
-            return value.Failure();
-        }
+        TINT_CHECK_RESULT(value);
         static constexpr U kMin = static_cast<U>(Range::kMin);
         static constexpr U kMax = static_cast<U>(Range::kMax);
         if (value.Get() < kMin || value.Get() > kMax) {

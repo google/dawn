@@ -58,19 +58,12 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
         }
 
         auto result = wgsl::reader::ProgramToIR(program);
-        if (result != Success) {
-            return result.Failure();
-        }
+        TINT_CHECK_RESULT(result);
 
         // WGSL-dialect -> core-dialect
-        if (auto lower = wgsl::reader::Lower(result.Get()); lower != Success) {
-            return lower.Failure();
-        }
+        TINT_CHECK_RESULT(wgsl::reader::Lower(result.Get()));
 
-        auto validate = core::ir::Validate(result.Get(), kCapabilities);
-        if (validate != Success) {
-            return validate.Failure();
-        }
+        TINT_CHECK_RESULT(core::ir::Validate(result.Get(), kCapabilities));
         return result.Move();
     }
 
@@ -83,13 +76,8 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
             .allowed_features = wgsl::AllowedFeatures::Everything(),
         };
         auto result = wgsl::reader::WgslToIR(&file, options);
-        if (result != Success) {
-            return result.Failure();
-        }
-        auto validated = core::ir::Validate(result.Get(), kCapabilities);
-        if (validated != Success) {
-            return validated.Failure();
-        }
+        TINT_CHECK_RESULT(result);
+        TINT_CHECK_RESULT(core::ir::Validate(result.Get(), kCapabilities));
 
         return result.Move();
     }

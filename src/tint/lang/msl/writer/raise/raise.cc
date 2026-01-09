@@ -131,9 +131,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     auto immediate_data_layout =
         core::ir::transform::PrepareImmediateData(module, immediate_data_config);
-    if (immediate_data_layout != Success) {
-        return immediate_data_layout.Failure();
-    }
+    TINT_CHECK_RESULT(immediate_data_layout);
     TINT_CHECK_RESULT(core::ir::transform::BindingRemapper(module, remapper_data));
 
     if (!options.disable_robustness) {
@@ -184,9 +182,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         auto array_length_from_uniform_result = core::ir::transform::ArrayLengthFromUniform(
             module, BindingPoint{0u, array_length_from_constants.ubo_binding.value()},
             array_length_from_constants.bindpoint_to_size_index);
-        if (array_length_from_uniform_result != Success) {
-            return array_length_from_uniform_result.Failure();
-        }
+        TINT_CHECK_RESULT(array_length_from_uniform_result);
         raise_result.needs_storage_buffer_sizes =
             array_length_from_uniform_result->needs_storage_buffer_sizes;
     }
@@ -197,9 +193,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
             module, immediate_data_layout.Get(),
             array_length_from_constants.buffer_sizes_offset.value(),
             buffer_sizes_array_elements_num, array_length_from_constants.bindpoint_to_size_index);
-        if (array_length_from_immediate_result != Success) {
-            return array_length_from_immediate_result.Failure();
-        }
+        TINT_CHECK_RESULT(array_length_from_immediate_result);
         raise_result.needs_storage_buffer_sizes =
             array_length_from_immediate_result->needs_storage_buffer_sizes;
     }

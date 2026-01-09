@@ -160,15 +160,10 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         }
     }
 
-    auto check = CanGenerate(module, options);
-    if (check != Success) {
-        return Failure{check.Failure().reason};
-    }
+    TINT_CHECK_RESULT(CanGenerate(module, options));
 
     auto output = Generate(module, options);
-    if (output != Success) {
-        return output.Failure();
-    }
+    TINT_CHECK_RESULT(output);
     if (context.options.dump) {
         std::cout << "Dumping generated GLSL:\n" << output->glsl << "\n";
     }

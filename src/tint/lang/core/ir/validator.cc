@@ -5200,10 +5200,7 @@ const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* in
 
 Result<SuccessType> Validate(const Module& mod, Capabilities capabilities) {
     Validator v(mod, capabilities);
-    auto res = v.Run();
-    if (res != Success) {
-        return res;
-    }
+    TINT_CHECK_RESULT(v.Run());
     return Success;
 }
 
@@ -5220,10 +5217,7 @@ Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
 #endif
 
 #if TINT_ENABLE_IR_VALIDATION
-    auto result = Validate(ir, capabilities);
-    if (result != Success) {
-        return result.Failure();
-    }
+    TINT_CHECK_RESULT(Validate(ir, capabilities));
 #endif
 
     return Success;

@@ -195,9 +195,7 @@ class Printer {
 
     /// @returns the generated SPIR-V code on success, or failure
     Result<Output> Code() {
-        if (auto res = Generate(); res != Success) {
-            return res.Failure();
-        }
+        TINT_CHECK_RESULT(Generate());
 
         uint32_t version = 0u;
         switch (options_.spirv_version) {
@@ -296,10 +294,8 @@ class Printer {
 
     /// Builds the SPIR-V from the IR
     Result<SuccessType> Generate() {
-        auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "spirv.Printer", kPrinterCapabilities);
-        if (valid != Success) {
-            return valid.Failure();
-        }
+        TINT_CHECK_RESULT(
+            core::ir::ValidateAndDumpIfNeeded(ir_, "spirv.Printer", kPrinterCapabilities));
 
         module_.PushCapability(SpvCapabilityShader);
 
@@ -320,10 +316,7 @@ class Printer {
 
         // Emit functions.
         for (core::ir::Function* func : ir_.functions) {
-            auto res = EmitFunction(func);
-            if (res != Success) {
-                return res;
-            }
+            TINT_CHECK_RESULT(EmitFunction(func));
         }
 
         return Success;

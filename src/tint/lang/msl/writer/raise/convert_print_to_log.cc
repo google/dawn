@@ -250,13 +250,10 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ConvertPrintToLog(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "msl.ConvertPrintToLog",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllowDuplicateBindings,
-                                          });
-    if (result != Success) {
-        return result.Failure();
-    }
+    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "msl.ConvertPrintToLog",
+                                              core::ir::Capabilities{
+                                                  core::ir::Capability::kAllowDuplicateBindings,
+                                              }));
 
     State{ir}.Process();
 

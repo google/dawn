@@ -1030,16 +1030,13 @@ struct State {
 }  // namespace
 
 Result<SuccessType> Texture(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "spirv.Texture",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllowMultipleEntryPoints,
-                                              core::ir::Capability::kAllowOverrides,
-                                              core::ir::Capability::kAllowNonCoreTypes,
-                                              core::ir::Capability::kAllowPointerToHandle,
-                                          });
-    if (result != Success) {
-        return result.Failure();
-    }
+    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "spirv.Texture",
+                                              core::ir::Capabilities{
+                                                  core::ir::Capability::kAllowMultipleEntryPoints,
+                                                  core::ir::Capability::kAllowOverrides,
+                                                  core::ir::Capability::kAllowNonCoreTypes,
+                                                  core::ir::Capability::kAllowPointerToHandle,
+                                              }));
 
     State{ir}.Process();
 

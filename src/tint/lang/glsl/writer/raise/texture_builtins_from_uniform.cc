@@ -205,11 +205,8 @@ struct State {
 
 Result<SuccessType> TextureBuiltinsFromUniform(core::ir::Module& ir,
                                                const TextureBuiltinsFromUniformOptions& cfg) {
-    auto result = ValidateAndDumpIfNeeded(ir, "glsl.TextureBuiltinsFromUniform",
-                                          kTextureBuiltinFromUniformCapabilities);
-    if (result != Success) {
-        return result.Failure();
-    }
+    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "glsl.TextureBuiltinsFromUniform",
+                                              kTextureBuiltinFromUniformCapabilities));
 
     State{ir, cfg}.Process();
 

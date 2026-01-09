@@ -1915,16 +1915,13 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
-    auto result =
+    TINT_CHECK_RESULT(
         ValidateAndDumpIfNeeded(ir, "hlsl.BuiltinPolyfill",
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
                                     core::ir::Capability::kAllowDuplicateBindings,
                                     core::ir::Capability::kAllowNonCoreTypes,
-                                });
-    if (result != Success) {
-        return result.Failure();
-    }
+                                }));
 
     State{ir}.Process();
     return Success;

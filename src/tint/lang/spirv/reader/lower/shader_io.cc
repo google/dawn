@@ -77,9 +77,7 @@ struct State {
     Result<SuccessType> Process() {
         // Process outputs first, as that may introduce new functions that input variables need to
         // be propagated through.
-        if (auto result = ProcessOutputs(); result != Success) {
-            return result;
-        }
+        TINT_CHECK_RESULT(ProcessOutputs());
         ProcessInputs();
 
         auto clean_members = [](const core::type::Struct* strct) {
@@ -121,9 +119,7 @@ struct State {
             }
         }
         for (auto& ep : entry_points) {
-            if (auto result = ProcessEntryPointOutputs(ep); result != Success) {
-                return result;
-            }
+            TINT_CHECK_RESULT(ProcessEntryPointOutputs(ep));
         }
         return Success;
     }
@@ -357,9 +353,7 @@ struct State {
                               var_attributes);
                 }
             });
-            if (result != Success) {
-                return result;
-            }
+            TINT_CHECK_RESULT(result);
         }
 
         if (output_descriptors.Length() == 1) {
@@ -746,7 +740,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ShaderIO(core::ir::Module& ir) {
-    auto result =
+    TINT_CHECK_RESULT(
         ValidateAndDumpIfNeeded(ir, "spirv.ShaderIO",
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllowMultipleEntryPoints,
@@ -757,10 +751,7 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir) {
                                     core::ir::Capability::kAllowLocationForNumericElements,
                                     core::ir::Capability::kAllowPointerToHandle,
                                     core::ir::Capability::kLoosenValidationForShaderIO,
-                                });
-    if (result != Success) {
-        return result.Failure();
-    }
+                                }));
 
     return State{ir}.Process();
 }

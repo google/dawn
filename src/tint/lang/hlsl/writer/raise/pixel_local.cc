@@ -242,15 +242,12 @@ struct State {
 }  // namespace
 
 Result<SuccessType> PixelLocal(core::ir::Module& ir, const PixelLocalConfig& config) {
-    auto result =
+    TINT_CHECK_RESULT(
         ValidateAndDumpIfNeeded(ir, "hlsl.PixelLocal",
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
                                     core::ir::Capability::kAllowDuplicateBindings,
-                                });
-    if (result != Success) {
-        return result.Failure();
-    }
+                                }));
 
     State{config.options, ir}.Process();
 

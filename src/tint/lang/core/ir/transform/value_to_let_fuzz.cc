@@ -51,10 +51,7 @@ Result<SuccessType> ValueToLetFuzzer(Module& module,
         return Failure{"Cannot run module"};
     }
 
-    auto res = ValueToLet(module, config);
-    if (res != Success) {
-        return Failure{res.Failure().reason};
-    }
+    TINT_CHECK_RESULT(ValueToLet(module, config));
     return Success;
 }
 

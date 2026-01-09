@@ -153,11 +153,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> CaseSwitchToIfElse(core::ir::Module& ir) {
-    auto result =
-        ValidateAndDumpIfNeeded(ir, "spirv.CaseSwitchToIfElse", kCaseSwitchToIfElseCapabilities);
-    if (result != Success) {
-        return result;
-    }
+    TINT_CHECK_RESULT(
+        ValidateAndDumpIfNeeded(ir, "spirv.CaseSwitchToIfElse", kCaseSwitchToIfElseCapabilities));
 
     State{ir}.Process();
 

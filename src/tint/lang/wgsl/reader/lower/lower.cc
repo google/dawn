@@ -213,16 +213,13 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
 }  // namespace
 
 Result<SuccessType> Lower(core::ir::Module& mod) {
-    auto res =
+    TINT_CHECK_RESULT(
         core::ir::ValidateAndDumpIfNeeded(mod, "wgsl.Lower",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowMultipleEntryPoints,
                                               core::ir::Capability::kAllowOverrides,
                                               core::ir::Capability::kAllow8BitIntegers,
-                                          });
-    if (res != Success) {
-        return res.Failure();
-    }
+                                          }));
 
     core::ir::Builder b{mod};
     core::type::Manager& ty{mod.Types()};

@@ -123,10 +123,8 @@ class Printer : public tint::TextGenerator {
 
     /// @returns the generated GLSL shader
     tint::Result<Output> Generate() {
-        auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "glsl.Printer", kPrinterCapabilities);
-        if (valid != Success) {
-            return std::move(valid.Failure());
-        }
+        TINT_CHECK_RESULT(
+            core::ir::ValidateAndDumpIfNeeded(ir_, "glsl.Printer", kPrinterCapabilities));
 
         {
             TINT_SCOPED_ASSIGNMENT(current_buffer_, &header_buffer_);

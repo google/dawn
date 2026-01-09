@@ -489,12 +489,9 @@ TransformElements(Manager& mgr,
     Vector<const Value*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        if (auto el = TransformElements(mgr, composite_el_ty, f, index + i, cs->Index(i)...);
-            el == Success) {
-            els.Push(el.Get());
-        } else {
-            return el.Failure();
-        }
+        auto el = TransformElements(mgr, composite_el_ty, f, index + i, cs->Index(i)...);
+        TINT_CHECK_RESULT(el);
+        els.Push(el.Get());
     }
     return mgr.Composite(composite_ty, std::move(els));
 }
@@ -518,12 +515,9 @@ Eval::Result TransformUnaryElements(Manager& mgr,
     Vector<const Value*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        if (auto el = TransformUnaryElements(mgr, composite_el_ty, f, c0->Index(i));
-            el == Success) {
-            els.Push(el.Get());
-        } else {
-            return el.Failure();
-        }
+        auto el = TransformUnaryElements(mgr, composite_el_ty, f, c0->Index(i));
+        TINT_CHECK_RESULT(el);
+        els.Push(el.Get());
     }
     return mgr.Composite(composite_ty, std::move(els));
 }
@@ -550,12 +544,9 @@ Eval::Result TransformBinaryElements(Manager& mgr,
     Vector<const Value*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        if (auto el = TransformBinaryElements(mgr, composite_el_ty, f, c0->Index(i), c1->Index(i));
-            el == Success) {
-            els.Push(el.Get());
-        } else {
-            return el.Failure();
-        }
+        auto el = TransformBinaryElements(mgr, composite_el_ty, f, c0->Index(i), c1->Index(i));
+        TINT_CHECK_RESULT(el);
+        els.Push(el.Get());
     }
     return mgr.Composite(composite_ty, std::move(els));
 }
@@ -585,13 +576,10 @@ Eval::Result TransformBinaryDifferingArityElements(Manager& mgr,
         auto nested_or_self = [&](auto* c, uint32_t num_elems) {
             return (num_elems == 1) ? c : c->Index(i);
         };
-        if (auto el = TransformBinaryDifferingArityElements(
-                mgr, element_ty, f, nested_or_self(c0, n0), nested_or_self(c1, n1));
-            el == Success) {
-            els.Push(el.Get());
-        } else {
-            return el.Failure();
-        }
+        auto el = TransformBinaryDifferingArityElements(mgr, element_ty, f, nested_or_self(c0, n0),
+                                                        nested_or_self(c1, n1));
+        TINT_CHECK_RESULT(el);
+        els.Push(el.Get());
     }
     return mgr.Composite(composite_ty, std::move(els));
 }
@@ -618,13 +606,10 @@ Eval::Result TransformTernaryElements(Manager& mgr,
     Vector<const Value*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        if (auto el = TransformTernaryElements(mgr, composite_el_ty, f, c0->Index(i), c1->Index(i),
-                                               c2->Index(i));
-            el == Success) {
-            els.Push(el.Get());
-        } else {
-            return el.Failure();
-        }
+        auto el = TransformTernaryElements(mgr, composite_el_ty, f, c0->Index(i), c1->Index(i),
+                                           c2->Index(i));
+        TINT_CHECK_RESULT(el);
+        els.Push(el.Get());
     }
     return mgr.Composite(composite_ty, std::move(els));
 }
@@ -846,17 +831,11 @@ tint::Result<NumberT, Eval::Error> Eval::Dot2(const Source& source,
                                               NumberT b1,
                                               NumberT b2) {
     auto r1 = Mul(source, a1, b1);
-    if (r1 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r1);
     auto r2 = Mul(source, a2, b2);
-    if (r2 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r2);
     auto r = Add(source, r1.Get(), r2.Get());
-    if (r != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r);
     return r;
 }
 
@@ -869,25 +848,15 @@ tint::Result<NumberT, Eval::Error> Eval::Dot3(const Source& source,
                                               NumberT b2,
                                               NumberT b3) {
     auto r1 = Mul(source, a1, b1);
-    if (r1 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r1);
     auto r2 = Mul(source, a2, b2);
-    if (r2 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r2);
     auto r3 = Mul(source, a3, b3);
-    if (r3 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r3);
     auto r = Add(source, r1.Get(), r2.Get());
-    if (r != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r);
     r = Add(source, r.Get(), r3.Get());
-    if (r != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r);
     return r;
 }
 
@@ -902,33 +871,19 @@ tint::Result<NumberT, Eval::Error> Eval::Dot4(const Source& source,
                                               NumberT b3,
                                               NumberT b4) {
     auto r1 = Mul(source, a1, b1);
-    if (r1 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r1);
     auto r2 = Mul(source, a2, b2);
-    if (r2 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r2);
     auto r3 = Mul(source, a3, b3);
-    if (r3 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r3);
     auto r4 = Mul(source, a4, b4);
-    if (r4 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r4);
     auto r = Add(source, r1.Get(), r2.Get());
-    if (r != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r);
     r = Add(source, r.Get(), r3.Get());
-    if (r != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r);
     r = Add(source, r.Get(), r4.Get());
-    if (r != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r);
     return r;
 }
 
@@ -946,17 +901,11 @@ tint::Result<NumberT, Eval::Error> Eval::Det2(const Source& source,
     // a * d - c * b
 
     auto r1 = Mul(source, a, d);
-    if (r1 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r1);
     auto r2 = Mul(source, c, b);
-    if (r2 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r2);
     auto r = Sub(source, r1.Get(), r2.Get());
-    if (r != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r);
     return r;
 }
 
@@ -981,33 +930,19 @@ tint::Result<NumberT, Eval::Error> Eval::Det3(const Source& source,
     //   | f i |     | c i |     | c f |
 
     auto det1 = Det2(source, e, f, h, i);
-    if (det1 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(det1);
     auto a_det1 = Mul(source, a, det1.Get());
-    if (a_det1 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(a_det1);
     auto det2 = Det2(source, b, c, h, i);
-    if (det2 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(det2);
     auto d_det2 = Mul(source, d, det2.Get());
-    if (d_det2 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(d_det2);
     auto det3 = Det2(source, b, c, e, f);
-    if (det3 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(det3);
     auto g_det3 = Mul(source, g, det3.Get());
-    if (g_det3 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(g_det3);
     auto r = Sub(source, a_det1.Get(), d_det2.Get());
-    if (r != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r);
     return Add(source, r.Get(), g_det3.Get());
 }
 
@@ -1041,45 +976,25 @@ tint::Result<NumberT, Eval::Error> Eval::Det4(const Source& source,
     //   | h l p |     | d l p |     | d h p |     | d h l |
 
     auto det1 = Det3(source, f, g, h, j, k, l, n, o, p);
-    if (det1 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(det1);
     auto a_det1 = Mul(source, a, det1.Get());
-    if (a_det1 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(a_det1);
     auto det2 = Det3(source, b, c, d, j, k, l, n, o, p);
-    if (det2 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(det2);
     auto e_det2 = Mul(source, e, det2.Get());
-    if (e_det2 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(e_det2);
     auto det3 = Det3(source, b, c, d, f, g, h, n, o, p);
-    if (det3 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(det3);
     auto i_det3 = Mul(source, i, det3.Get());
-    if (i_det3 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(i_det3);
     auto det4 = Det3(source, b, c, d, f, g, h, j, k, l);
-    if (det4 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(det4);
     auto m_det4 = Mul(source, m, det4.Get());
-    if (m_det4 != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(m_det4);
     auto r = Sub(source, a_det1.Get(), e_det2.Get());
-    if (r != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r);
     r = Add(source, r.Get(), i_det3.Get());
-    if (r != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(r);
     return Sub(source, r.Get(), m_det4.Get());
 }
 
@@ -1098,10 +1013,9 @@ tint::Result<NumberT, Eval::Error> Eval::Sqrt(const Source& source, NumberT v) {
 
 auto Eval::SqrtFunc(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto v) -> Eval::Result {
-        if (auto r = Sqrt(source, v); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Sqrt(source, v);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
@@ -1122,84 +1036,75 @@ tint::Result<NumberT, Eval::Error> Eval::Clamp(const Source& source,
 
 auto Eval::ClampFunc(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto e, auto low, auto high) -> Eval::Result {
-        if (auto r = Clamp(source, e, low, high); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Clamp(source, e, low, high);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
 auto Eval::AddFunc(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto a1, auto a2) -> Eval::Result {
-        if (auto r = Add(source, a1, a2); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Add(source, a1, a2);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
 auto Eval::SubFunc(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto a1, auto a2) -> Eval::Result {
-        if (auto r = Sub(source, a1, a2); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Sub(source, a1, a2);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
 auto Eval::MulFunc(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto a1, auto a2) -> Eval::Result {
-        if (auto r = Mul(source, a1, a2); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Mul(source, a1, a2);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
 auto Eval::DivFunc(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto a1, auto a2) -> Eval::Result {
-        if (auto r = Div(source, a1, a2); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Div(source, a1, a2);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
 auto Eval::ModFunc(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto a1, auto a2) -> Eval::Result {
-        if (auto r = Mod(source, a1, a2); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Mod(source, a1, a2);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
 auto Eval::Dot2Func(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto a1, auto a2, auto b1, auto b2) -> Eval::Result {
-        if (auto r = Dot2(source, a1, a2, b1, b2); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Dot2(source, a1, a2, b1, b2);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
 auto Eval::Dot3Func(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto a1, auto a2, auto a3, auto b1, auto b2,
                                    auto b3) -> Eval::Result {
-        if (auto r = Dot3(source, a1, a2, a3, b1, b2, b3); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Dot3(source, a1, a2, a3, b1, b2, b3);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
 auto Eval::Dot4Func(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto a1, auto a2, auto a3, auto a4, auto b1, auto b2, auto b3,
                                    auto b4) -> Eval::Result {
-        if (auto r = Dot4(source, a1, a2, a3, a4, b1, b2, b3, b4); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Dot4(source, a1, a2, a3, a4, b1, b2, b3, b4);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
@@ -1240,9 +1145,7 @@ Eval::Result Eval::Length(const Source& source, const core::type::Type* ty, cons
 
     // Evaluates to sqrt(e[0]^2 + e[1]^2 + ...) if T is a vector type.
     auto d = Dot(source, c0, c0);
-    if (d != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(d);
     return Dispatch_fa_f32_f16(SqrtFunc(source, ty), d.Get());
 }
 
@@ -1268,20 +1171,18 @@ Eval::Result Eval::Sub(const Source& source,
 
 auto Eval::Det2Func(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto a, auto b, auto c, auto d) -> Eval::Result {
-        if (auto r = Det2(source, a, b, c, d); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Det2(source, a, b, c, d);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
 auto Eval::Det3Func(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto a, auto b, auto c, auto d, auto e, auto f, auto g, auto h,
                                    auto i) -> Eval::Result {
-        if (auto r = Det3(source, a, b, c, d, e, f, g, h, i); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Det3(source, a, b, c, d, e, f, g, h, i);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
@@ -1289,10 +1190,9 @@ auto Eval::Det4Func(const Source& source, const core::type::Type* elem_ty) {
     return [this, source, elem_ty](auto a, auto b, auto c, auto d, auto e, auto f, auto g, auto h,
                                    auto i, auto j, auto k, auto l, auto m, auto n, auto o,
                                    auto p) -> Eval::Result {
-        if (auto r = Det4(source, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p); r == Success) {
-            return CreateScalar(source, elem_ty, r.Get());
-        }
-        return error;
+        auto r = Det4(source, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p);
+        TINT_CHECK_RESULT(r);
+        return CreateScalar(source, elem_ty, r.Get());
     };
 }
 
@@ -1473,15 +1373,11 @@ Eval::Result Eval::bitcast(const core::type::Type* ty,
             [&](const core::type::AbstractInt*) -> tint::Result<SuccessType, Error> {
                 if (element->ValueAs<AInt>() < 0) {
                     auto res = Conv(mgr.types.i32(), Vector{element}, source);
-                    if (res != Success) {
-                        return res.Failure();
-                    }
+                    TINT_CHECK_RESULT(res);
                     return push_32_bits(tint::Bitcast<u32>(res.Get()->ValueAs<i32>()));
                 } else {
                     auto res = Conv(mgr.types.u32(), Vector{element}, source);
-                    if (res != Success) {
-                        return res.Failure();
-                    }
+                    TINT_CHECK_RESULT(res);
                     return push_32_bits(res.Get()->ValueAs<u32>());
                 }
             },
@@ -1500,14 +1396,10 @@ Eval::Result Eval::bitcast(const core::type::Type* ty,
             TINT_ICE_ON_NO_MATCH);
     };
     if (src_count == 1) {
-        if (auto res = push_src_element_bits(value); res != Success) {
-            return res.Failure();
-        }
+        TINT_CHECK_RESULT(push_src_element_bits(value));
     } else {
         for (size_t i = 0; i < src_count; i++) {
-            if (auto res = push_src_element_bits(value->Index(i)); res != Success) {
-                return res.Failure();
-            }
+            TINT_CHECK_RESULT(push_src_element_bits(value->Index(i)));
         }
     }
 
@@ -1690,9 +1582,7 @@ Eval::Result Eval::MultiplyMatVec(const core::type::Type* ty,
     Vector<const Value*, 4> result;
     for (size_t i = 0; i < mat_ty->Rows(); ++i) {
         auto r = dot(args[0], i, args[1]);  // matrix row i * vector
-        if (r != Success) {
-            return error;
-        }
+        TINT_CHECK_RESULT(r);
         result.Push(r.Get());
     }
     return mgr.Composite(ty, result);
@@ -1740,9 +1630,7 @@ Eval::Result Eval::MultiplyVecMat(const core::type::Type* ty,
     Vector<const Value*, 4> result;
     for (size_t i = 0; i < mat_ty->Columns(); ++i) {
         auto r = dot(args[0], args[1], i);  // vector * matrix col i
-        if (r != Success) {
-            return error;
-        }
+        TINT_CHECK_RESULT(r);
         result.Push(r.Get());
     }
     return mgr.Composite(ty, result);
@@ -1799,9 +1687,7 @@ Eval::Result Eval::MultiplyMatMat(const core::type::Type* ty,
         Vector<const Value*, 4> col_vec;
         for (size_t r = 0; r < mat1_ty->Rows(); ++r) {
             auto v = dot(mat1, r, mat2, c);  // mat1 row r * mat2 col c
-            if (v != Success) {
-                return error;
-            }
+            TINT_CHECK_RESULT(v);
             col_vec.Push(v.Get());  // mat1 row r * mat2 col c
         }
 
@@ -2429,17 +2315,11 @@ Eval::Result Eval::cross(const core::type::Type* ty,
     auto* v2 = v->Index(2);
 
     auto x = Dispatch_fa_f32_f16(Det2Func(source, elem_ty), u1, u2, v1, v2);
-    if (x != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(x);
     auto y = Dispatch_fa_f32_f16(Det2Func(source, elem_ty), v0, v2, u0, u2);
-    if (y != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(y);
     auto z = Dispatch_fa_f32_f16(Det2Func(source, elem_ty), u0, u1, v0, v1);
-    if (z != Success) {
-        return error;
-    }
+    TINT_CHECK_RESULT(z);
 
     return mgr.Composite(ty, Vector<const Value*, 3>{x.Get(), y.Get(), z.Get()});
 }
@@ -2851,9 +2731,8 @@ Eval::Result Eval::frexp(const core::type::Type* ty,
         Vector<const Value*, 4> exp_els;
         for (uint32_t i = 0; i < vec->Width(); i++) {
             auto fe = scalar(arg->Index(i));
-            if (fe.fract != Success || fe.exp != Success) {
-                return error;
-            }
+            TINT_CHECK_RESULT(fe.fract);
+            TINT_CHECK_RESULT(fe.exp);
             fract_els.Push(fe.fract.Get());
             exp_els.Push(fe.exp.Get());
         }
@@ -2865,9 +2744,8 @@ Eval::Result Eval::frexp(const core::type::Type* ty,
                                  });
     } else {
         auto fe = scalar(arg);
-        if (fe.fract != Success || fe.exp != Success) {
-            return error;
-        }
+        TINT_CHECK_RESULT(fe.fract);
+        TINT_CHECK_RESULT(fe.exp);
         return mgr.Composite(ty, Vector<const Value*, 2>{
                                      fe.fract.Get(),
                                      fe.exp.Get(),
@@ -3110,21 +2988,13 @@ Eval::Result Eval::mix(const core::type::Type* ty,
             // Implement as `e1 * (1 - e3) + e2 * e3)` instead of as `e1 + e3 * (e2 - e1)` to avoid
             // float precision loss when e1 and e2 significantly differ in magnitude.
             auto one_sub_e3 = Sub(source, NumberT{1}, e3);
-            if (one_sub_e3 != Success) {
-                return error;
-            }
+            TINT_CHECK_RESULT(one_sub_e3);
             auto e1_mul_one_sub_e3 = Mul(source, e1, one_sub_e3.Get());
-            if (e1_mul_one_sub_e3 != Success) {
-                return error;
-            }
+            TINT_CHECK_RESULT(e1_mul_one_sub_e3);
             auto e2_mul_e3 = Mul(source, e2, e3);
-            if (e2_mul_e3 != Success) {
-                return error;
-            }
+            TINT_CHECK_RESULT(e2_mul_e3);
             auto r = Add(source, e1_mul_one_sub_e3.Get(), e2_mul_e3.Get());
-            if (r != Success) {
-                return error;
-            }
+            TINT_CHECK_RESULT(r);
             return CreateScalar(source, c0->Type(), r.Get());
         };
         return Dispatch_fa_f32_f16(create, c0, c1);
@@ -3154,19 +3024,13 @@ Eval::Result Eval::modf(const core::type::Type* ty,
 
     Vector<const Value*, 2> fields;
 
-    if (auto fract = TransformUnaryElements(mgr, args[0]->Type(), transform_fract, args[0]);
-        fract == Success) {
-        fields.Push(fract.Get());
-    } else {
-        return error;
-    }
+    auto fract = TransformUnaryElements(mgr, args[0]->Type(), transform_fract, args[0]);
+    TINT_CHECK_RESULT(fract);
+    fields.Push(fract.Get());
 
-    if (auto whole = TransformUnaryElements(mgr, args[0]->Type(), transform_whole, args[0]);
-        whole == Success) {
-        fields.Push(whole.Get());
-    } else {
-        return error;
-    }
+    auto whole = TransformUnaryElements(mgr, args[0]->Type(), transform_whole, args[0]);
+    TINT_CHECK_RESULT(whole);
+    fields.Push(whole.Get());
 
     return mgr.Composite(ty, std::move(fields));
 }

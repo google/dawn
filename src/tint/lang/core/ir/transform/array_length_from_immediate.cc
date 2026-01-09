@@ -350,11 +350,8 @@ Result<ArrayLengthFromImmediateResult> ArrayLengthFromImmediates(
     const uint32_t buffer_sizes_offset,
     const uint32_t buffer_sizes_array_elements_num,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
-    auto validated = ValidateAndDumpIfNeeded(ir, "core.ArrayLengthFromImmediates",
-                                             kArrayLengthFromImmediateCapabilities);
-    if (validated != Success) {
-        return validated.Failure();
-    }
+    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "core.ArrayLengthFromImmediates",
+                                              kArrayLengthFromImmediateCapabilities));
 
     State state{ir, immediate_data_layout, buffer_sizes_offset, buffer_sizes_array_elements_num,
                 bindpoint_to_size_index};

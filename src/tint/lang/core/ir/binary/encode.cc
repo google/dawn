@@ -1421,19 +1421,14 @@ Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& mod_in) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     pb::Module mod_out;
-    auto res = Encoder{mod_in, mod_out}.Encode();
-    if (res != Success) {
-        return res.Failure();
-    }
+    TINT_CHECK_RESULT((Encoder{mod_in, mod_out}.Encode()));
 
     return std::make_unique<pb::Module>(mod_out);
 }
 
 Result<Vector<std::byte, 0>> EncodeToBinary(const Module& mod_in) {
     auto mod_out = EncodeToProto(mod_in);
-    if (mod_out != Success) {
-        return mod_out.Failure();
-    }
+    TINT_CHECK_RESULT(mod_out);
 
     Vector<std::byte, 0> buffer;
     size_t len = mod_out.Get()->ByteSizeLong();

@@ -195,48 +195,29 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     for (auto* param : ep_func->Params()) {
         if (auto* str = param->Type()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
-                auto res = check_io_attributes(member->Attributes());
-                if (res != Success) {
-                    return res;
-                }
+                TINT_CHECK_RESULT(check_io_attributes(member->Attributes()));
             }
         } else {
-            auto res = check_io_attributes(param->Attributes());
-            if (res != Success) {
-                return res;
-            }
+            TINT_CHECK_RESULT(check_io_attributes(param->Attributes()));
         }
     }
     // Check output attributes.
     if (auto* str = ep_func->ReturnType()->As<core::type::Struct>()) {
         for (auto* member : str->Members()) {
-            auto res = check_io_attributes(member->Attributes());
-            if (res != Success) {
-                return res;
-            }
+            TINT_CHECK_RESULT(check_io_attributes(member->Attributes()));
         }
     } else {
-        auto res = check_io_attributes(ep_func->ReturnAttributes());
-        if (res != Success) {
-            return res;
-        }
+        TINT_CHECK_RESULT(check_io_attributes(ep_func->ReturnAttributes()));
     }
 
-    {
-        auto res = ValidateBindingOptions(options);
-        if (res != Success) {
-            return res.Failure();
-        }
-    }
+    TINT_CHECK_RESULT(ValidateBindingOptions(options));
 
     return Success;
 }
 
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     // Raise from core-dialect to GLSL-dialect.
-    if (auto res = Raise(ir, options); res != Success) {
-        return res.Failure();
-    }
+    TINT_CHECK_RESULT(Raise(ir, options));
 
     return Print(ir, options);
 }

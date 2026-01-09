@@ -42,9 +42,7 @@ class IR_PrepareImmediateDataTests : public TransformTest {
     Result<ImmediateDataLayout> Run(PrepareImmediateDataConfig config) {
         // Run the transform.
         auto result = PrepareImmediateData(mod, config);
-        if (result != Success) {
-            return result.Failure();
-        }
+        TINT_CHECK_RESULT(result);
 
         // Validate the output IR.
         EXPECT_EQ(ir::Validate(mod, capabilities), Success);

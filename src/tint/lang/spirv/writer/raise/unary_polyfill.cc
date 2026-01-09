@@ -110,11 +110,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> UnaryPolyfill(core::ir::Module& module, const UnaryPolyfillConfig& config) {
-    auto result =
-        ValidateAndDumpIfNeeded(module, "spirv.UnaryPolyfill", kPolyfillUnaryCapabilities);
-    if (result != Success) {
-        return result.Failure();
-    }
+    TINT_CHECK_RESULT(
+        ValidateAndDumpIfNeeded(module, "spirv.UnaryPolyfill", kPolyfillUnaryCapabilities));
 
     State{module, config}.Process();
 

@@ -105,11 +105,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> DeadCodeElimination(Module& ir) {
-    auto result =
-        ValidateAndDumpIfNeeded(ir, "core.DeadCodeElimination", kDeadCodeEliminationCapabilities);
-    if (result != Success) {
-        return result;
-    }
+    TINT_CHECK_RESULT(
+        ValidateAndDumpIfNeeded(ir, "core.DeadCodeElimination", kDeadCodeEliminationCapabilities));
 
     State{ir}.Process();
 

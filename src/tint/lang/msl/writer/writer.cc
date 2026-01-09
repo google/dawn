@@ -97,32 +97,20 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         for (auto* param : f->Params()) {
             if (auto* str = param->Type()->As<core::type::Struct>()) {
                 for (auto* member : str->Members()) {
-                    auto res = check_io_attributes(member->Attributes());
-                    if (res != Success) {
-                        return res;
-                    }
+                    TINT_CHECK_RESULT(check_io_attributes(member->Attributes()));
                 }
             } else {
-                auto res = check_io_attributes(param->Attributes());
-                if (res != Success) {
-                    return res;
-                }
+                TINT_CHECK_RESULT(check_io_attributes(param->Attributes()));
             }
         }
 
         // Check output attributes.
         if (auto* str = f->ReturnType()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
-                auto res = check_io_attributes(member->Attributes());
-                if (res != Success) {
-                    return res;
-                }
+                TINT_CHECK_RESULT(check_io_attributes(member->Attributes()));
             }
         } else {
-            auto res = check_io_attributes(f->ReturnAttributes());
-            if (res != Success) {
-                return res;
-            }
+            TINT_CHECK_RESULT(check_io_attributes(f->ReturnAttributes()));
         }
 
         if (ir.NameOf(f).NameView() == options.entry_point_name) {
@@ -197,12 +185,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
     }
 
-    {
-        auto res = ValidateBindingOptions(options);
-        if (res != Success) {
-            return res.Failure();
-        }
-    }
+    TINT_CHECK_RESULT(ValidateBindingOptions(options));
 
     return Success;
 }
@@ -210,14 +193,10 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     // Raise from core-dialect to MSL-dialect.
     auto raise_result = Raise(ir, options);
-    if (raise_result != Success) {
-        return raise_result.Failure();
-    }
+    TINT_CHECK_RESULT(raise_result);
 
     auto result = Print(ir, options);
-    if (result != Success) {
-        return result.Failure();
-    }
+    TINT_CHECK_RESULT(result);
 
     result->needs_storage_buffer_sizes = raise_result->needs_storage_buffer_sizes;
     return result;

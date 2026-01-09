@@ -112,15 +112,13 @@ struct State {
 }  // namespace
 
 Result<SuccessType> OffsetFirstIndex(core::ir::Module& ir, const OffsetFirstIndexConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "glsl.OffsetFirstIndex",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllowHandleVarsWithoutBindings,
-                                              core::ir::Capability::kAllowDuplicateBindings,
-                                              core::ir::Capability::kLoosenValidationForShaderIO,
-                                          });
-    if (result != Success) {
-        return result.Failure();
-    }
+    TINT_CHECK_RESULT(
+        ValidateAndDumpIfNeeded(ir, "glsl.OffsetFirstIndex",
+                                core::ir::Capabilities{
+                                    core::ir::Capability::kAllowHandleVarsWithoutBindings,
+                                    core::ir::Capability::kAllowDuplicateBindings,
+                                    core::ir::Capability::kLoosenValidationForShaderIO,
+                                }));
 
     State{config, ir}.Process();
 

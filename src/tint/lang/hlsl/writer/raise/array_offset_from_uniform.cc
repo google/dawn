@@ -220,11 +220,8 @@ Result<SuccessType> ArrayOffsetFromUniform(
     core::ir::Module& ir,
     BindingPoint ubo_binding,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_offset_index) {
-    auto validated = ValidateAndDumpIfNeeded(ir, "hlsl.ArrayOffsetFromUniform",
-                                             kArrayOffsetFromUniformCapabilities);
-    if (validated != Success) {
-        return validated.Failure();
-    }
+    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "hlsl.ArrayOffsetFromUniform",
+                                              kArrayOffsetFromUniformCapabilities));
 
     State state{ir, ubo_binding, bindpoint_to_offset_index};
     state.Process();

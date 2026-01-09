@@ -223,11 +223,8 @@ Result<SuccessType> ArrayOffsetFromImmediates(
     const uint32_t buffer_offsets_offset,
     const uint32_t buffer_offsets_array_elements_num,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_offset_index) {
-    auto validated = ValidateAndDumpIfNeeded(ir, "core.ArrayOffsetFromImmediates",
-                                             kArrayOffsetFromImmediateCapabilities);
-    if (validated != Success) {
-        return validated.Failure();
-    }
+    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "core.ArrayOffsetFromImmediates",
+                                              kArrayOffsetFromImmediateCapabilities));
 
     State state{ir, immediate_data_layout, buffer_offsets_offset, buffer_offsets_array_elements_num,
                 bindpoint_to_offset_index};

@@ -66,18 +66,14 @@ class SpirvParserTestHelperBase : public BASE {
                             spv_target_env spv_version = SPV_ENV_UNIVERSAL_1_0) {
         // Assemble the SPIR-V input.
         auto binary = Assemble(spirv_asm, spv_version);
-        if (binary != Success) {
-            return binary.Failure();
-        }
+        TINT_CHECK_RESULT(binary);
 
         // Parse the SPIR-V to produce an IR module.
         auto parsed = Parse(Slice(binary.Get().data(), binary.Get().size()), options);
-        if (parsed != Success) {
-            return parsed.Failure();
-        }
+        TINT_CHECK_RESULT(parsed);
 
         // Validate the IR module against the capabilities supported by the SPIR-V dialect.
-        auto validated =
+        TINT_CHECK_RESULT(
             ValidateAndDumpIfNeeded(parsed.Get(), "spirv.test",
                                     core::ir::Capabilities{
                                         core::ir::Capability::kAllowMultipleEntryPoints,
@@ -86,10 +82,7 @@ class SpirvParserTestHelperBase : public BASE {
                                         core::ir::Capability::kAllowVectorElementPointer,
                                         core::ir::Capability::kAllowNonCoreTypes,
                                         core::ir::Capability::kAllowStructMatrixDecorations,
-                                    });
-        if (validated != Success) {
-            return validated.Failure();
-        }
+                                    }));
 
         // Return the disassembled IR module.
         return core::ir::Disassembler(parsed.Get()).Plain();

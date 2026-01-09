@@ -34,19 +34,9 @@
 namespace tint::null::writer {
 
 Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
-#define RUN_TRANSFORM(name, ...)         \
-    do {                                 \
-        auto result = name(__VA_ARGS__); \
-        if (result != Success) {         \
-            return result.Failure();     \
-        }                                \
-    } while (false)
-
-    RUN_TRANSFORM(core::ir::transform::SingleEntryPoint, module, options.entry_point_name);
-
-    RUN_TRANSFORM(core::ir::transform::SubstituteOverrides, module,
-                  options.substitute_overrides_config);
-
+    TINT_CHECK_RESULT(core::ir::transform::SingleEntryPoint(module, options.entry_point_name));
+    TINT_CHECK_RESULT(
+        core::ir::transform::SubstituteOverrides(module, options.substitute_overrides_config));
     return Success;
 }
 

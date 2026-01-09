@@ -216,12 +216,9 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(
+    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(
         ir, "glsl.BinaryPolyfill",
-        core::ir::Capabilities{core::ir::Capability::kAllowDuplicateBindings});
-    if (result != Success) {
-        return result.Failure();
-    }
+        core::ir::Capabilities{core::ir::Capability::kAllowDuplicateBindings}));
 
     State{ir}.Process();
 

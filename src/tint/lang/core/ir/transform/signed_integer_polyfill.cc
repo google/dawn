@@ -145,7 +145,7 @@ struct State {
 
 Result<SuccessType> SignedIntegerPolyfill(core::ir::Module& ir,
                                           const SignedIntegerPolyfillConfig& cfg) {
-    auto result =
+    TINT_CHECK_RESULT(
         ValidateAndDumpIfNeeded(ir, "ir.SignedIntegerPolyfill",
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllowDuplicateBindings,
@@ -160,10 +160,7 @@ Result<SuccessType> SignedIntegerPolyfill(core::ir::Module& ir,
                                     core::ir::Capability::kAllowModuleScopeLets,
                                     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
                                     core::ir::Capability::kAllowNonCoreTypes,
-                                });
-    if (result != Success) {
-        return result;
-    }
+                                }));
 
     State{ir, cfg}.Process();
 

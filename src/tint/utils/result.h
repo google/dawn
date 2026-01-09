@@ -35,6 +35,7 @@
 
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/rtti/traits.h"
+#include "src/utils/compiler.h"
 
 namespace tint {
 
@@ -237,10 +238,11 @@ auto& operator<<(STREAM& out, const Result<SUCCESS, FAILURE>& res) {
 }
 
 /// Check that @p result is Success and propagate the failure if not.
-#define TINT_CHECK_RESULT(result)                                                        \
-    if (auto&& tint_check_result_value = (result); tint_check_result_value != Success) { \
-        return tint_check_result_value.Failure();                                        \
-    }                                                                                    \
+#define TINT_CHECK_RESULT(result)                                  \
+    if (auto&& tint_check_result_value = (result);                 \
+        DAWN_UNLIKELY(tint_check_result_value != tint::Success)) { \
+        return tint_check_result_value.Failure();                  \
+    }                                                              \
     TINT_REQUIRE_SEMICOLON
 
 }  // namespace tint

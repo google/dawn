@@ -28,7 +28,6 @@
 #include "src/tint/lang/spirv/writer/writer.h"
 
 #include <string>
-#include <utility>
 
 #include "src/tint/lang/core/ir/analysis/subgroup_matrix.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
@@ -141,39 +140,22 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     for (auto* param : ep_func->Params()) {
         if (auto* str = param->Type()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
-                auto res = check_io_attributes(member->Attributes());
-                if (res != Success) {
-                    return res;
-                }
+                TINT_CHECK_RESULT(check_io_attributes(member->Attributes()));
             }
         } else {
-            auto res = check_io_attributes(param->Attributes());
-            if (res != Success) {
-                return res;
-            }
+            TINT_CHECK_RESULT(check_io_attributes(param->Attributes()));
         }
     }
     // Check output attributes.
     if (auto* str = ep_func->ReturnType()->As<core::type::Struct>()) {
         for (auto* member : str->Members()) {
-            auto res = check_io_attributes(member->Attributes());
-            if (res != Success) {
-                return res;
-            }
+            TINT_CHECK_RESULT(check_io_attributes(member->Attributes()));
         }
     } else {
-        auto res = check_io_attributes(ep_func->ReturnAttributes());
-        if (res != Success) {
-            return res;
-        }
+        TINT_CHECK_RESULT(check_io_attributes(ep_func->ReturnAttributes()));
     }
 
-    {
-        auto res = ValidateBindingOptions(options);
-        if (res != Success) {
-            return res.Failure();
-        }
-    }
+    TINT_CHECK_RESULT(ValidateBindingOptions(options));
 
     return Success;
 }
@@ -186,14 +168,10 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     auto sm_info = core::ir::analysis::GatherSubgroupMatrixInfo(ir);
 
     // Raise from core-dialect to SPIR-V-dialect.
-    if (auto res = Raise(ir, options); res != Success) {
-        return std::move(res.Failure());
-    }
+    TINT_CHECK_RESULT(Raise(ir, options));
 
     auto res = Print(ir, options);
-    if (res != Success) {
-        return res;
-    }
+    TINT_CHECK_RESULT(res);
 
     res->subgroup_matrix_info = sm_info;
 

@@ -104,9 +104,7 @@ Evaluator::EvalResult Evaluator::EvalValue(core::ir::Value* val) {
 
 Evaluator::EvalResult Evaluator::EvalBitcast(core::ir::Bitcast* bc) {
     auto val = EvalValue(bc->Val());
-    if (val != Success) {
-        return val;
-    }
+    TINT_CHECK_RESULT(val);
     // Check if the value could be evaluated
     if (!val.Get()) {
         return nullptr;
@@ -121,17 +119,13 @@ Evaluator::EvalResult Evaluator::EvalBitcast(core::ir::Bitcast* bc) {
 
 Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a) {
     auto obj_res = EvalValue(a->Object());
-    if (obj_res != Success) {
-        return obj_res;
-    }
+    TINT_CHECK_RESULT(obj_res);
 
     auto* obj = obj_res.Get();
     auto* access_obj_type = a->Object()->Type()->UnwrapPtrOrRef();
     for (auto* idx : a->Indices()) {
         auto val = EvalValue(idx);
-        if (val != Success) {
-            return val;
-        }
+        TINT_CHECK_RESULT(val);
         // Check if the value could be evaluated
         constexpr uint32_t kDefaultConstIndex = 0;
         uint32_t index_const = kDefaultConstIndex;
@@ -171,9 +165,7 @@ Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
         arg_types.Push(arg->Type());
 
         auto val = EvalValue(arg);
-        if (val != Success) {
-            return val;
-        }
+        TINT_CHECK_RESULT(val);
         // Check if the value could be evaluated
         if (!val.Get()) {
             return nullptr;
@@ -237,9 +229,7 @@ Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
 
 Evaluator::EvalResult Evaluator::EvalConvert(core::ir::Convert* c) {
     auto val = EvalValue(c->Args()[0]);
-    if (val != Success) {
-        return val;
-    }
+    TINT_CHECK_RESULT(val);
     // Check if the value could be evaluated
     if (!val.Get()) {
         return nullptr;
@@ -253,9 +243,7 @@ Evaluator::EvalResult Evaluator::EvalConvert(core::ir::Convert* c) {
 
 Evaluator::EvalResult Evaluator::EvalOverride(core::ir::Override* o) {
     auto val = EvalValue(o->Initializer());
-    if (val != Success) {
-        return val;
-    }
+    TINT_CHECK_RESULT(val);
     // Check if the value could be evaluated
     if (!val.Get()) {
         return nullptr;
@@ -265,9 +253,7 @@ Evaluator::EvalResult Evaluator::EvalOverride(core::ir::Override* o) {
 
 Evaluator::EvalResult Evaluator::EvalConstExprIf(core::ir::ConstExprIf* c) {
     auto val = EvalValue(c->Condition());
-    if (val != Success) {
-        return val;
-    }
+    TINT_CHECK_RESULT(val);
     // Check if the value could be evaluated
     if (!val.Get()) {
         return nullptr;
@@ -279,9 +265,7 @@ Evaluator::EvalResult Evaluator::EvalConstExprIf(core::ir::ConstExprIf* c) {
     // correct. This is currently the case as ConstExprIf was created for the singular purpose of
     // correctly semantically representing short circuiting operations (and/or).
     auto ret = EvalValue(inline_block->Terminator()->Args()[0]);
-    if (ret != Success) {
-        return ret;
-    }
+    TINT_CHECK_RESULT(ret);
     // Check if the value could be evaluated
     if (!val.Get()) {
         return nullptr;
@@ -292,9 +276,7 @@ Evaluator::EvalResult Evaluator::EvalConstExprIf(core::ir::ConstExprIf* c) {
 
 Evaluator::EvalResult Evaluator::EvalSwizzle(core::ir::Swizzle* s) {
     auto val = EvalValue(s->Object());
-    if (val != Success) {
-        return val;
-    }
+    TINT_CHECK_RESULT(val);
     // Check if the value could be evaluated
     if (!val.Get()) {
         return nullptr;
@@ -357,9 +339,7 @@ Evaluator::EvalResult Evaluator::EvalBinary(core::ir::CoreBinary* cb) {
     }
 
     auto lhs = EvalValue(cb->LHS());
-    if (lhs != Success) {
-        return lhs;
-    }
+    TINT_CHECK_RESULT(lhs);
     // Check LHS could be evaluated
     if (!lhs.Get()) {
         return nullptr;
@@ -371,9 +351,7 @@ Evaluator::EvalResult Evaluator::EvalBinary(core::ir::CoreBinary* cb) {
                 cb->Op() != tint::core::BinaryOp::kLogicalOr);
 
     auto rhs = EvalValue(cb->RHS());
-    if (rhs != Success) {
-        return rhs;
-    }
+    TINT_CHECK_RESULT(rhs);
     // Check RHS could be evaluated
     if (!rhs.Get()) {
         return nullptr;
@@ -398,9 +376,7 @@ Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* 
         arg_types.Push(arg->Type());
 
         auto val = EvalValue(arg);
-        if (val != Success) {
-            return val;
-        }
+        TINT_CHECK_RESULT(val);
         // Check if the value could be evaluated
         if (!val.Get()) {
             return nullptr;

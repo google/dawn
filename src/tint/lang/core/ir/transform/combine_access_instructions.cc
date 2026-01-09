@@ -80,15 +80,12 @@ struct State {
 }  // namespace
 
 Result<SuccessType> CombineAccessInstructions(Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.CombineAccessInstructions",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllowDuplicateBindings,
-                                              core::ir::Capability::kAllowNonCoreTypes,
-                                              core::ir::Capability::kAllow8BitIntegers,
-                                          });
-    if (result != Success) {
-        return result;
-    }
+    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "core.CombineAccessInstructions",
+                                              core::ir::Capabilities{
+                                                  core::ir::Capability::kAllowDuplicateBindings,
+                                                  core::ir::Capability::kAllowNonCoreTypes,
+                                                  core::ir::Capability::kAllow8BitIntegers,
+                                              }));
 
     State{ir}.Process();
 

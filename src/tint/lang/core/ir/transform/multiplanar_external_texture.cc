@@ -86,9 +86,7 @@ struct State {
                 }
                 auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
                 if (ptr->StoreType()->Is<core::type::ExternalTexture>()) {
-                    if (auto res = ReplaceVar(var); DAWN_UNLIKELY(res != Success)) {
-                        return res.Failure();
-                    }
+                    TINT_CHECK_RESULT(ReplaceVar(var));
                     to_remove.Push(var);
                 }
             }
@@ -605,11 +603,8 @@ struct State {
 Result<SuccessType> MultiplanarExternalTexture(
     Module& ir,
     const tint::transform::multiplanar::BindingsMap& multiplanar_map) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.MultiplanarExternalTexture",
-                                          kMultiplanarExternalTextureCapabilities);
-    if (result != Success) {
-        return result;
-    }
+    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "core.MultiplanarExternalTexture",
+                                              kMultiplanarExternalTextureCapabilities));
 
     return State{multiplanar_map, ir}.Process();
 }

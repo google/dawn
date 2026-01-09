@@ -249,11 +249,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> VarForDynamicIndex(core::ir::Module& ir) {
-    auto result =
-        ValidateAndDumpIfNeeded(ir, "spirv.VarForDynamicIndex", kVarForDynamicIndexCapabilities);
-    if (result != Success) {
-        return result;
-    }
+    TINT_CHECK_RESULT(
+        ValidateAndDumpIfNeeded(ir, "spirv.VarForDynamicIndex", kVarForDynamicIndexCapabilities));
 
     State{ir}.Process();
 

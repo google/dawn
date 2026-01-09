@@ -120,7 +120,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> RemoveContinueInSwitch(Module& ir) {
-    auto result =
+    TINT_CHECK_RESULT(
         ValidateAndDumpIfNeeded(ir, "core.RemoveContinueInSwitch",
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllowVectorElementPointer,
@@ -128,10 +128,7 @@ Result<SuccessType> RemoveContinueInSwitch(Module& ir) {
                                     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
                                     core::ir::Capability::kAllowDuplicateBindings,
                                     core::ir::Capability::kAllowNonCoreTypes,
-                                });
-    if (result != Success) {
-        return result;
-    }
+                                }));
 
     State{ir}.Process();
 

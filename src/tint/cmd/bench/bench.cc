@@ -46,9 +46,8 @@ Result<Source::File> GetWgslFile(std::string name) {
 
 Result<ProgramAndFile> GetWgslProgram(std::string name) {
     auto res = GetWgslFile(name);
-    if (res != Success) {
-        return res.Failure();
-    }
+    TINT_CHECK_RESULT(res);
+
     auto file = std::make_unique<Source::File>(res.Get());
     auto program = wgsl::reader::Parse(file.get());
     if (!program.IsValid()) {

@@ -165,15 +165,10 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.workarounds.texture_sample_compare_depth_cube_array =
         fuzzed_options.texture_sample_compare_depth_cube_array;
 
-    auto check = CanGenerate(module, options);
-    if (check != Success) {
-        return Failure{check.Failure().reason};
-    }
+    TINT_CHECK_RESULT(CanGenerate(module, options));
 
     auto output = Generate(module, options);
-    if (output != Success) {
-        return output.Failure();
-    }
+    TINT_CHECK_RESULT(output);
 
     spv_target_env target_env = SPV_ENV_VULKAN_1_1;
     switch (options.spirv_version) {

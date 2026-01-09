@@ -1306,17 +1306,15 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, const BuiltinPolyfillConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "msl.BuiltinPolyfill",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllow8BitIntegers,
-                                              core::ir::Capability::kAllowPointSizeBuiltin,
-                                              core::ir::Capability::kAllowAnyLetType,
-                                              core::ir::Capability::kAllowNonCoreTypes,
-                                              core::ir::Capability::kMslAllowEntryPointInterface,
-                                          });
-    if (result != Success) {
-        return result.Failure();
-    }
+    TINT_CHECK_RESULT(
+        ValidateAndDumpIfNeeded(ir, "msl.BuiltinPolyfill",
+                                core::ir::Capabilities{
+                                    core::ir::Capability::kAllow8BitIntegers,
+                                    core::ir::Capability::kAllowPointSizeBuiltin,
+                                    core::ir::Capability::kAllowAnyLetType,
+                                    core::ir::Capability::kAllowNonCoreTypes,
+                                    core::ir::Capability::kMslAllowEntryPointInterface,
+                                }));
 
     State{ir, config}.Process();
 

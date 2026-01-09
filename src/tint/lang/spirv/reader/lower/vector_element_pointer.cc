@@ -154,7 +154,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
-    auto result =
+    TINT_CHECK_RESULT(
         ValidateAndDumpIfNeeded(ir, "spirv.VectorElementPointer",
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllowMultipleEntryPoints,
@@ -166,10 +166,7 @@ Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
                                     core::ir::Capability::kAllowLocationForNumericElements,
                                     core::ir::Capability::kAllowPointerToHandle,
                                     core::ir::Capability::kLoosenValidationForShaderIO,
-                                });
-    if (result != Success) {
-        return result.Failure();
-    }
+                                }));
 
     State{ir}.Process();
 

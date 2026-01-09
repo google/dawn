@@ -245,9 +245,7 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
     } else {
         auto result =
             ResolveCandidate(context, std::move(candidates), intrinsic_name, template_args, args);
-        if (DAWN_UNLIKELY(result != Success)) {
-            return result.Failure();
-        }
+        TINT_CHECK_RESULT(result);
         match = result.Get();
     }
 

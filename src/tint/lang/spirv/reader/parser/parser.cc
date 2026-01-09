@@ -99,10 +99,7 @@ class Parser {
     /// @returns the generated SPIR-V IR module on success, or failure
     Result<core::ir::Module> Run(Slice<const uint32_t> spirv) {
         // Validate the incoming SPIR-V binary.
-        auto result = validate::Validate(spirv, kTargetEnv);
-        if (result != Success) {
-            return result.Failure();
-        }
+        TINT_CHECK_RESULT(validate::Validate(spirv, kTargetEnv));
 
         // Build the SPIR-V tools internal representation of the SPIR-V module.
         spvtools::Context context(kTargetEnv);

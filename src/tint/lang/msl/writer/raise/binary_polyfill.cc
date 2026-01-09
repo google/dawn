@@ -103,17 +103,15 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "msl.BinaryPolyfill",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllow8BitIntegers,
-                                              core::ir::Capability::kAllowPointSizeBuiltin,
-                                              core::ir::Capability::kAllowAnyLetType,
-                                              core::ir::Capability::kAllowNonCoreTypes,
-                                              core::ir::Capability::kMslAllowEntryPointInterface,
-                                          });
-    if (result != Success) {
-        return result.Failure();
-    }
+    TINT_CHECK_RESULT(
+        ValidateAndDumpIfNeeded(ir, "msl.BinaryPolyfill",
+                                core::ir::Capabilities{
+                                    core::ir::Capability::kAllow8BitIntegers,
+                                    core::ir::Capability::kAllowPointSizeBuiltin,
+                                    core::ir::Capability::kAllowAnyLetType,
+                                    core::ir::Capability::kAllowNonCoreTypes,
+                                    core::ir::Capability::kMslAllowEntryPointInterface,
+                                }));
 
     State{ir}.Process();
 

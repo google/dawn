@@ -153,9 +153,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     auto immediate_data_layout =
         core::ir::transform::PrepareImmediateData(module, immediate_data_config);
-    if (immediate_data_layout != Success) {
-        return immediate_data_layout.Failure();
-    }
+    TINT_CHECK_RESULT(immediate_data_layout);
 
     TINT_CHECK_RESULT(core::ir::transform::BindingRemapper(module, remapper_data));
     TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));

@@ -57,17 +57,13 @@ Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& optio
 Result<core::ir::Module> ProgramToLoweredIR(const Program& program,
                                             InternalCompilerErrorCallback ice_callback) {
     auto ir = ProgramToIR(program);
-    if (ir != Success) {
-        return ir.Failure();
-    }
+    TINT_CHECK_RESULT(ir);
 
     ir->ice_callback = ice_callback;
 
     // Lower from WGSL-dialect to core-dialect
-    auto res = Lower(ir.Get());
-    if (res != Success) {
-        return res.Failure();
-    }
+    TINT_CHECK_RESULT(Lower(ir.Get()));
+
     return ir;
 }
 

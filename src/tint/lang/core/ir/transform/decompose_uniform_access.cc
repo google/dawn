@@ -607,17 +607,14 @@ struct State {
 }  // namespace
 
 Result<SuccessType> DecomposeUniformAccess(core::ir::Module& ir) {
-    auto result =
+    TINT_CHECK_RESULT(
         ValidateAndDumpIfNeeded(ir, "core.DecomposeUniformAccess",
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllow8BitIntegers,
                                     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
                                     core::ir::Capability::kAllowDuplicateBindings,
                                     core::ir::Capability::kAllowNonCoreTypes,
-                                });
-    if (result != Success) {
-        return result.Failure();
-    }
+                                }));
 
     State{ir}.Process();
 

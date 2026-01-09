@@ -202,10 +202,7 @@ ResourceTableHelper::~ResourceTableHelper() = default;
 Result<SuccessType> ResourceTable(core::ir::Module& ir,
                                   const ResourceTableConfig& config,
                                   ResourceTableHelper* helper) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.ResourceTable");
-    if (result != Success) {
-        return result.Failure();
-    }
+    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "core.ResourceTable"));
 
     State{config, ir, helper}.Process();
 

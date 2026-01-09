@@ -107,10 +107,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ModuleConstant(core::ir::Module& ir, const ModuleConstantConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "msl.ModuleConstant", kModuleConstantCapabilities);
-    if (result != Success) {
-        return result;
-    }
+    TINT_CHECK_RESULT(
+        ValidateAndDumpIfNeeded(ir, "msl.ModuleConstant", kModuleConstantCapabilities));
 
     State{ir, config}.Process();
 

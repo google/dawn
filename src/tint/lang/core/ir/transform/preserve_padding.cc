@@ -169,10 +169,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> PreservePadding(Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.PreservePadding", kPreservePaddingCapabilities);
-    if (result != Success) {
-        return result;
-    }
+    TINT_CHECK_RESULT(
+        ValidateAndDumpIfNeeded(ir, "core.PreservePadding", kPreservePaddingCapabilities));
 
     State{ir}.Process();
 

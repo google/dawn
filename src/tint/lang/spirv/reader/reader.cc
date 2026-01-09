@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/spirv/reader/reader.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/spirv/reader/lower/lower.h"
@@ -39,25 +37,18 @@ namespace tint::spirv::reader {
 Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input, const Options& options) {
     // Parse the input SPIR-V to the SPIR-V dialect of the IR.
     auto mod = Parse(Slice(input.data(), input.size()), options);
-    if (mod != Success) {
-        return mod.Failure();
-    }
+    TINT_CHECK_RESULT(mod);
 
     // Lower the module to the core dialect of the IR.
-    if (auto res = Lower(mod.Get()); res != Success) {
-        return std::move(res.Failure());
-    }
+    TINT_CHECK_RESULT(Lower(mod.Get()));
 
     // Always validate the core IR, so that we fail somewhat gracefully on invalid inputs instead of
     // just ICEing later on.
-    auto validation_result =
+    TINT_CHECK_RESULT(
         core::ir::Validate(mod.Get(), core::ir::Capabilities{
                                           core::ir::Capability::kAllowMultipleEntryPoints,
                                           core::ir::Capability::kAllowOverrides,
-                                      });
-    if (validation_result != tint::Success) {
-        return validation_result.Failure();
-    }
+                                      }));
 
     return mod;
 }

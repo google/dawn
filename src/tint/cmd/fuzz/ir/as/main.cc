@@ -182,19 +182,12 @@ tint::Result<tint::core::ir::Module> GenerateIrModule(const tint::Program& progr
     }
 
     auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
-    if (ir != tint::Success) {
-        return ir.Failure();
-    }
+    TINT_CHECK_RESULT(ir);
 
     auto cfg = tint::fuzz::ir::SubstituteOverridesConfig(ir.Get());
-    auto substituteOverridesResult = tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
-    if (substituteOverridesResult != tint::Success) {
-        return substituteOverridesResult.Failure();
-    }
+    TINT_CHECK_RESULT(tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg));
 
-    if (auto val = tint::core::ir::Validate(ir.Get()); val != tint::Success) {
-        return val.Failure();
-    }
+    TINT_CHECK_RESULT(tint::core::ir::Validate(ir.Get()));
 
     return ir.Move();
 }

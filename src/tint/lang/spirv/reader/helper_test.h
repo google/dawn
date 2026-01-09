@@ -60,24 +60,17 @@ class SpirvReaderTestHelperBase : public BASE {
     Result<std::string> Run(std::string spirv_asm) {
         // Assemble the SPIR-V input.
         auto binary = Assemble(spirv_asm);
-        if (binary != Success) {
-            return binary.Failure();
-        }
+        TINT_CHECK_RESULT(binary);
 
         // Parse the SPIR-V to produce a core IR module.
         auto parsed = ReadIR(binary.Get());
-        if (parsed != Success) {
-            return parsed.Failure();
-        }
+        TINT_CHECK_RESULT(parsed);
 
         // Validate the IR module against the capabilities supported by the core dialect.
-        auto validated =
+        TINT_CHECK_RESULT(
             core::ir::Validate(parsed.Get(), core::ir::Capabilities{
                                                  core::ir::Capability::kAllowMultipleEntryPoints,
-                                             });
-        if (validated != Success) {
-            return validated.Failure();
-        }
+                                             }));
 
         // Return the disassembled IR module.
         return "\n" + core::ir::Disassembler(parsed.Get()).Plain();

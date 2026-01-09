@@ -306,11 +306,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ZeroInitWorkgroupMemory(Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.ZeroInitWorkgroupMemory",
-                                          kZeroInitWorkgroupMemoryCapabilities);
-    if (result != Success) {
-        return result;
-    }
+    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "core.ZeroInitWorkgroupMemory",
+                                              kZeroInitWorkgroupMemoryCapabilities));
 
     State{ir}.Process();
 

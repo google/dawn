@@ -147,7 +147,7 @@ struct State {
 
 Result<SuccessType> ChangeImmediateToUniform(core::ir::Module& ir,
                                              const ChangeImmediateToUniformConfig& config) {
-    auto result =
+    TINT_CHECK_RESULT(
         ValidateAndDumpIfNeeded(ir, "core.ChangeImmediateToUniform",
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllow8BitIntegers,
@@ -156,10 +156,7 @@ Result<SuccessType> ChangeImmediateToUniform(core::ir::Module& ir,
                                     core::ir::Capability::kAllowDuplicateBindings,
                                     core::ir::Capability::kAllowNonCoreTypes,
                                     core::ir::Capability::kMslAllowEntryPointInterface,
-                                });
-    if (result != Success) {
-        return result.Failure();
-    }
+                                }));
 
     State{config, ir}.Process();
 
