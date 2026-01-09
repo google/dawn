@@ -690,6 +690,9 @@ crbug.com/407076123 [ android-14 android-pixel-6 ] webgpu:api,validation,createB
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 
+# Disallow cube-array in compat. Remove once CTS rolls
+crbug.com/474097241 webgpu:compat,api,validation,texture,createTexture:invalidTextureBindingViewDimension:dimension="2d";textureBindingViewDimension="cube-array" [ Failure ]
+
 # Not implemented yet
 crbug.com/342840940 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 release ubuntu ] webgpu:api,validation,capability_checks,features,texture_formats:check_capability_guarantees: [ Failure ]
 

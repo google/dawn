@@ -121,14 +121,18 @@ MaybeError ValidateCanViewTextureAs(const DeviceBase* device,
 }
 
 bool IsTextureViewDimensionCompatibleWithTextureDimension(
+    const DeviceBase* device,
     wgpu::TextureViewDimension textureViewDimension,
     wgpu::TextureDimension textureDimension) {
     switch (textureViewDimension) {
         case wgpu::TextureViewDimension::e2D:
         case wgpu::TextureViewDimension::e2DArray:
         case wgpu::TextureViewDimension::Cube:
-        case wgpu::TextureViewDimension::CubeArray:
             return textureDimension == wgpu::TextureDimension::e2D;
+
+        case wgpu::TextureViewDimension::CubeArray:
+            return device->IsCompatibilityMode() ? false
+                                                 : textureDimension == wgpu::TextureDimension::e2D;
 
         case wgpu::TextureViewDimension::e3D:
             return textureDimension == wgpu::TextureDimension::e3D;
@@ -242,7 +246,7 @@ MaybeError ValidateTextureViewDimensionCompatibility(
                     descriptor->dimension, descriptor->arrayLayerCount, texture);
 
     DAWN_INVALID_IF(
-        !IsTextureViewDimensionCompatibleWithTextureDimension(descriptor->dimension,
+        !IsTextureViewDimensionCompatibleWithTextureDimension(device, descriptor->dimension,
                                                               texture->GetDimension()),
         "The dimension (%s) of the texture view is not compatible with the dimension (%s) "
         "of %s.",
@@ -775,8 +779,8 @@ MaybeError ValidateTextureDescriptor(
                          "validating resolved compatibility textureBindingViewDimension");
 
         DAWN_INVALID_IF(
-            !IsTextureViewDimensionCompatibleWithTextureDimension(textureBindingViewDimension,
-                                                                  descriptor->dimension),
+            !IsTextureViewDimensionCompatibleWithTextureDimension(
+                device, textureBindingViewDimension, descriptor->dimension),
             "The textureBindingViewDimension (%s) is not compatible with the dimension (%s)",
             textureBindingViewDimension, descriptor->dimension);
 
