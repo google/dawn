@@ -452,6 +452,9 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 // for certain backends.
 // This test passes by not asserting or crashing.
 TEST_P(BindGroupTests, MultipleEntryPointsWithMultipleNonZeroGroups) {
+    // TODO(crbug.com/473886640): [Capture] validation error: sparse bind group layout.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Contents {
             f : f32

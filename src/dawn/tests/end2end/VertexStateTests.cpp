@@ -553,6 +553,9 @@ TEST_P(VertexStateTest, MultiplePipelinesMixedVertexState) {
 
 // Checks that using the last vertex buffer doesn't overflow the vertex buffer table in Metal.
 TEST_P(VertexStateTest, LastAllowedVertexBuffer) {
+    // TODO(crbug.com/474158751): [Capture] vertex slot 0 not set.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr uint32_t kBufferIndex = kMaxVertexBuffers - 1;
 
     utils::ComboVertexState vertexState;

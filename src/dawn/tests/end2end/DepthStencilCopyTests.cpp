@@ -111,6 +111,9 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
 
         DAWN_TEST_UNSUPPORTED_IF(!mIsFormatSupported);
 
+        // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
         // Draw a square in the bottom left quarter of the screen.
         mVertexModule = utils::CreateShaderModule(device, R"(
             @vertex

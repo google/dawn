@@ -135,6 +135,9 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
     // TODO(crbug.com/dawn/2426): Fails on Pixel 6 devices with Android U.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsVulkan() && IsARM());
 
+    // TODO(crbug.com/474399207): [Capture] Investigate crash.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled() && IsMetal());
+
     for (wgpu::BufferUsage usage : {wgpu::BufferUsage::Storage, wgpu::BufferUsage::Uniform}) {
         uint64_t maxBufferBindingSize;
         std::string shader;

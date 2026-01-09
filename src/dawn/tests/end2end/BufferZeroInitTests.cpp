@@ -776,6 +776,9 @@ TEST_P(BufferZeroInitTest, MapAsync_Write) {
 // Test that the code path of creating a buffer with BufferDescriptor.mappedAtCreation == true
 // clears the buffer correctly at the creation of the buffer.
 TEST_P(BufferZeroInitTest, MappedAtCreation) {
+    // TODO(crbug.com/473894293): [Capture] buffer mapping: investigate.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr uint32_t kBufferSize = 16u;
 
     constexpr std::array<uint32_t, kBufferSize / sizeof(uint32_t)> kExpectedData = {{0, 0, 0, 0}};
@@ -1136,6 +1139,9 @@ TEST_P(BufferZeroInitTest, PaddingInitialized) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
+    // TODO(crbug.com/473593119): [Capture] size not multiple of 4.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
     // A small sub-4-byte format means a single vertex can fit entirely within the padded buffer,
     // touching some of the padding. Test a small format, as well as larger formats.
@@ -1307,14 +1313,14 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     // without any copy commands on Metal on AMD GPU.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsAMD());
 
-    // TODO(crbug.com/463893789): Get rid of explicit WebGPUOnXXX suppressions.
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Metal));
-
     // Skip if timestamp feature is not supported on device
     DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::TimestampQuery}));
 
     // crbug.com/dawn/940: Does not work on Mac 11.0+. Backend validation changed.
     DAWN_TEST_UNSUPPORTED_IF(IsMacOS() && !IsMacOS(10));
+
+    // TODO(crbug.com/451389800): [Capture] implement query set.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     constexpr uint64_t kBufferSize = 16u;
     constexpr wgpu::BufferUsage kBufferUsage =

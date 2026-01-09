@@ -101,6 +101,9 @@ class OcclusionQueryTests : public QueryTests {
     void SetUp() override {
         QueryTests::SetUp();
 
+        // TODO(crbug.com/451389800): [Capture] implement query set.
+        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
         // Create basic render pipeline
         vsModule = utils::CreateShaderModule(device, R"(
             @vertex
@@ -628,6 +631,9 @@ class TimestampQueryTestsBase : public QueryTests {
 
         // TODO(crbug.com/458607667): Timestamp tests are flaky on WARP.
         DAWN_SUPPRESS_TEST_IF(IsWARP());
+
+        // TODO(crbug.com/451389800): [Capture] implement query set.
+        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
     }
 
     wgpu::QuerySet CreateQuerySetForTimestamp(uint32_t queryCount) {

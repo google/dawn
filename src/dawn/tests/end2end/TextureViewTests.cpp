@@ -899,6 +899,10 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretationRenderAttachment) {
     // View format reinterpretation is unsupported in Compatibility mode.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
+    // TODO(crbug.com/473890413): [Capture] validation error: attachment state of pipeline not
+    // compatible with pass.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     // Test will render into an SRGB view
     wgpu::TextureViewDescriptor viewDesc = {};
     viewDesc.format = wgpu::TextureFormat::RGBA8UnormSrgb;
@@ -1007,6 +1011,10 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretionResolveAttachment) {
 
     // TODO(crbug.com/468047552): Fails on Win11/NVIDIA GTX 1660.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsNvidia() && IsD3D12() && IsBackendValidationEnabled());
+
+    // TODO(crbug.com/473890413): [Capture] validation error: attachment state of pipeline not
+    // compatible with pass.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     // Test will resolve into an SRGB view
     wgpu::TextureViewDescriptor viewDesc = {};

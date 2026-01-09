@@ -411,7 +411,15 @@ TEST_P(ReadOnlyStencilAttachmentTests, NotSampleFromAttachment) {
     }
 }
 
-class ReadOnlyDepthAndStencilAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {};
+class ReadOnlyDepthAndStencilAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {
+  protected:
+    void SetUp() override {
+        ReadOnlyDepthStencilAttachmentTests::SetUp();
+
+        // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+    }
+};
 
 // Test that using stencilReadOnly while modifying the depth aspect works.
 TEST_P(ReadOnlyDepthAndStencilAttachmentTests, ModifyDepthSampleStencil) {

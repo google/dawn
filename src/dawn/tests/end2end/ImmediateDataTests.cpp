@@ -281,6 +281,9 @@ TEST_P(ImmediateDataTests, SetImmediatesMultipleTimes) {
 // Test that clamp frag depth(supported by internal immediate constants)
 // works fine when shaders have user immediate data
 TEST_P(ImmediateDataTests, UsingImmediateDataDontAffectClampFragDepth) {
+    // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         var<immediate> constants: vec4f;
         @vertex fn vs() -> @builtin(position) vec4f {

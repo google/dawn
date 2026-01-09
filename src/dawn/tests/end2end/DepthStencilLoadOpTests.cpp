@@ -80,6 +80,9 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
 
         DAWN_TEST_UNSUPPORTED_IF(!mIsFormatSupported);
 
+        // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
         wgpu::TextureDescriptor descriptor;
         descriptor.size = {kRTSize, kRTSize};
         descriptor.format = GetParam().mFormat;
@@ -292,6 +295,9 @@ class StencilClearValueOverflowTest : public DepthStencilLoadOpTests {};
 // stencil clear value in encoder.BeginRenderPass() (currently Dawn only supports 8-bit stencil
 // format).
 TEST_P(StencilClearValueOverflowTest, StencilClearValueOverFlowUint8) {
+    // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr uint32_t kOverflowedStencilValue = kStencilValues[0] + 0x100;
     renderPassDescriptors[0].cDepthStencilAttachmentInfo.stencilClearValue =
         kOverflowedStencilValue;
@@ -308,6 +314,9 @@ TEST_P(StencilClearValueOverflowTest, StencilClearValueOverFlowUint8) {
 // the stencil clear value in encoder.BeginRenderPass() (currently Dawn only supports 8-bit stencil
 // format).
 TEST_P(StencilClearValueOverflowTest, StencilClearValueOverFlowUint16) {
+    // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr uint32_t kOverflowedStencilValue = kStencilValues[0] + 0x10000;
     renderPassDescriptors[0].cDepthStencilAttachmentInfo.stencilClearValue =
         kOverflowedStencilValue;
@@ -384,7 +393,10 @@ class DepthTextureClearTwiceTest : public DawnTestWithParams<DepthTextureClearTw
 };
 
 TEST_P(DepthTextureClearTwiceTest, ClearDepthAspectTwice) {
-    DAWN_SUPPRESS_TEST_IF(!mIsFormatSupported);
+    DAWN_TEST_UNSUPPORTED_IF(!mIsFormatSupported);
+
+    // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     constexpr uint32_t kSize = 64;
     constexpr uint32_t kLevelCount = 5;

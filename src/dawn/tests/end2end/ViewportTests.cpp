@@ -188,11 +188,17 @@ TEST_P(ViewportTest, SubBoxes) {
 
 // Test that by default the [0, 1] depth range is used.
 TEST_P(ViewportTest, DefaultViewportDepth) {
+    // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     TestViewportDepth(0.0, 1.0, false);
 }
 
 // Test various viewport depth ranges
 TEST_P(ViewportTest, ViewportDepth) {
+    // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     TestViewportDepth(0.0, 0.5);
     TestViewportDepth(0.5, 1.0);
 }

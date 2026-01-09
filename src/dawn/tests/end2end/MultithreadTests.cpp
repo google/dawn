@@ -930,6 +930,9 @@ TEST_P(MultithreadEncodingTests, RenderPassEncodersInParallel) {
     // TODO(crbug.com/468047550): Fails on Win11/NVIDIA GTX 1660.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsNvidia() && IsD3D12() && IsBackendValidationEnabled());
 
+    // TODO(crbug.com/473899151): [Capture] multisampled.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr uint32_t kRTSize = 16;
     constexpr uint32_t kNumThreads = 10;
 
@@ -977,6 +980,9 @@ TEST_P(MultithreadEncodingTests, RenderPassEncoders_ResolveToMipLevelOne_InParal
 
     // TODO(crbug.com/468047550): Fails on Win11/NVIDIA GTX 1660.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsNvidia() && IsD3D12() && IsBackendValidationEnabled());
+
+    // TODO(crbug.com/473899151): [Capture] multisampled.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     constexpr uint32_t kRTSize = 16;
     constexpr uint32_t kNumThreads = 10;
@@ -1747,6 +1753,9 @@ TEST_P(MultithreadTimestampQueryTests, ResolveQuerySets_InParallel) {
     // TODO(451928481): multithread support in GL is incomplete
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
     DAWN_SUPPRESS_TEST_IF(IsWARP());  // Flaky on WARP
+
+    // TODO(crbug.com/451389800): [Capture] implement query set.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     constexpr uint32_t kQueryCount = 2;
     constexpr uint32_t kNumThreads = 10;

@@ -76,6 +76,9 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithMappedAtCreation) {
     // BufferZeroInitTests.
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
+    // TODO(crbug.com/473894293): [Capture] validation error: no CopyDst usage.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr uint32_t kSize = 32u;
 
     wgpu::BufferDescriptor defaultDescriptor;

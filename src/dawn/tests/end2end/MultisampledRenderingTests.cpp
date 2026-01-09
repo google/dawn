@@ -387,6 +387,9 @@ class MultisampledRenderingTest : public DawnTest {
 TEST_P(MultisampledRenderingTest, ResolveInto2DTexture) {
     DAWN_SUPPRESS_TEST_IF(IsWARP());
 
+    // TODO(crbug.com/473899151): [Capture] multisampled.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr bool kTestDepth = false;
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(kTestDepth);
 
@@ -533,6 +536,9 @@ TEST_P(MultisampledRenderingTest, ResolveOneOfMultipleTargets) {
     DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
                              HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
     DAWN_SUPPRESS_TEST_IF(IsWARP());
+
+    // TODO(crbug.com/473899151): [Capture] multisampled.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -1059,6 +1065,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverage) {
     // TODO(crbug.com/458113207): Flaky w/ WARP.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
+    // TODO(crbug.com/473899151): [Capture] multisampled.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr bool kTestDepth = false;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
     constexpr bool kAlphaToCoverageEnabled = true;
@@ -1108,6 +1117,9 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCo
     // TODO(dawn:1550) Workaround introduces a bug on Qualcomm GPUs, but is necessary for ARM GPUs.
     DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
                              HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
+
+    // TODO(crbug.com/473899151): [Capture] multisampled.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     // TODO(crbug.com/458113207): Flaky w/ WARP.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
@@ -1241,6 +1253,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSamp
     // TODO(crbug.com/458113207): Flaky w/ WARP.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
 
+    // TODO(crbug.com/473899151): [Capture] multisampled.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr bool kTestDepth = false;
     constexpr float kMSAACoverage = 0.50f;
     constexpr uint32_t kSampleMask = kFirstSampleMaskBit | kThirdSampleMaskBit;
@@ -1284,6 +1299,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndRast
 
     // TODO(crbug.com/458113207): Flaky w/ WARP.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
+
+    // TODO(crbug.com/473899151): [Capture] multisampled.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     constexpr bool kTestDepth = false;
     constexpr float kMSAACoverage = 0.50f;
@@ -1378,6 +1396,9 @@ class MultisampledRenderingWithTransientAttachmentTest : public MultisampledRend
 
 // Test using one multisampled color transient attachment with resolve target can render correctly.
 TEST_P(MultisampledRenderingWithTransientAttachmentTest, ResolveTransientAttachmentInto2DTexture) {
+    // TODO(crbug.com/473899151): [Capture] texture usage conflict.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr bool kTestDepth = false;
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(kTestDepth);
 
@@ -1861,6 +1882,9 @@ class DawnLoadResolveTextureTest : public MultisampledRenderingTest {
 // LoadOp::ExpandResolveTexture. The resolve texture will have its content preserved between
 // passes.
 TEST_P(DawnLoadResolveTextureTest, DrawThenLoad) {
+    // TODO(crbug.com/474147745): [Capture] validation error: TransientAttachment usage.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     auto multiSampledTexture = CreateTextureForRenderAttachment(
         kColorFormat, 4, 1, 1,
         /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
@@ -1909,6 +1933,9 @@ TEST_P(DawnLoadResolveTextureTest, DrawThenLoad) {
 
 // Test using ExpandResolveTexture load op for non-zero indexed attachment.
 TEST_P(DawnLoadResolveTextureTest, DrawThenLoadNonZeroIndexedAttachment) {
+    // TODO(crbug.com/474147745): [Capture] validation error: TransientAttachment usage.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     auto multiSampledTexture = CreateTextureForRenderAttachment(
         kColorFormat, 4, 1, 1,
         /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
@@ -2195,6 +2222,9 @@ TEST_P(DawnLoadResolveTextureTest, TwoOutputsDrawThenLoadColor0AndColor1) {
 
 // Test ExpandResolveTexture load op rendering with depth test works correctly.
 TEST_P(DawnLoadResolveTextureTest, DrawWithDepthTest) {
+    // TODO(crbug.com/474147745): [Capture] validation error: TransientAttachment usage.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     auto multiSampledTexture = CreateTextureForRenderAttachment(
         kColorFormat, 4, 1, 1,
         /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
@@ -2269,6 +2299,10 @@ TEST_P(DawnLoadResolveTextureTest, TwoOutputsDrawWithDepthTestColor0AndColor1) {
     // TODO(42240662): "resolve_multiple_attachments_in_separate_passes" is currently not working
     // with DawnLoadResolveTexture feature if there are more than one attachment.
     DAWN_TEST_UNSUPPORTED_IF(HasResolveMultipleAttachmentInSeparatePassesToggle());
+
+    // TODO(crbug.com/473890413): [Capture] validation error: attachment state of pipeline not
+    // compatible with pass.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     auto multiSampledTexture1 = CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1,
                                                                  /*transientAttachment=*/false,

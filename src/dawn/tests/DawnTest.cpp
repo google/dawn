@@ -1645,12 +1645,6 @@ void DawnTestBase::SetUp() {
 
     mCheckCaptureReplay = gTestEnv->IsCaptureReplayCheckingEnabled();
 
-    // TODO(crbug.com/462149555): Remove the toggle and related logic once capture and replay
-    // implementation is complete.
-    if (mCheckCaptureReplay) {
-        mCheckCaptureReplay = HasToggleEnabled("enable_for_check_capture_replay");
-    }
-
     if (IsCaptureReplayCheckingEnabled()) {
         mRecorder = Recorder::CreateAndStart(device);
     }

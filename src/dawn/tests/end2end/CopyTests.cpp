@@ -3091,6 +3091,9 @@ TEST_P(CopyTests_T2T, CopyWithinSameTextureNonOverlappedSlices) {
 // A regression test (from WebGPU CTS) for an Intel D3D12 driver bug about T2T copy with specific
 // texture formats. See http://crbug.com/1161355 for more details.
 TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
+    // TODO(crbug.com/473582006): [Capture] issue calling ResolveDeferredExpectationsNow.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     constexpr std::array<wgpu::TextureFormat, 11> kFormats = {
         {wgpu::TextureFormat::RG8Sint, wgpu::TextureFormat::RG8Uint, wgpu::TextureFormat::RG8Snorm,
          wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::R16Float, wgpu::TextureFormat::R16Sint,

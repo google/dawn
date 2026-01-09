@@ -2383,6 +2383,9 @@ TEST_P(VideoViewsExtendedUsagesTests, SamplingMultiPlanarYUVTexture) {
     // TODO(crbug.com/dawn/1998): Failure on Intel's Vulkan device.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
 
+    // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     auto texture = CreateMultiPlanarTexture(GetFormat(), wgpu::TextureUsage::TextureBinding,
                                             /*isCheckerboard*/ true,
                                             /*initialized*/ true);
@@ -2456,6 +2459,9 @@ TEST_P(VideoViewsExtendedUsagesTests, SamplingMultiPlanarYUVTexture) {
 
 // Tests sampling a YUVA multi-planar texture.
 TEST_P(VideoViewsExtendedUsagesTests, SamplingMultiPlanarYUVATexture) {
+    // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     auto texture = CreateMultiPlanarTexture(GetFormat(), wgpu::TextureUsage::TextureBinding,
                                             /*isCheckerboard*/ true,
                                             /*initialized*/ true);
@@ -2539,6 +2545,9 @@ TEST_P(VideoViewsExtendedUsagesTests, SamplingMultiPlanarYUVATexture) {
 
 // Test copying from multi-planar format per plane to a buffer succeeds.
 TEST_P(VideoViewsExtendedUsagesTests, T2BCopyPlaneAspectsSucceeds) {
+    // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     switch (utils::GetMultiPlaneTextureBitDepth(GetFormat())) {
         case 8:
             RunT2BCopyPlaneAspectsTest<uint8_t>();

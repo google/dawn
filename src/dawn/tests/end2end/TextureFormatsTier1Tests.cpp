@@ -559,6 +559,14 @@ class MultisampleFormatsTest : public TextureFormatsTier1Test {
     static constexpr uint32_t kSize = 16;
     static constexpr uint32_t kMultisampleCount = 4;
 
+    void SetUp() override {
+        TextureFormatsTier1Test::SetUp();
+        DAWN_SUPPRESS_TEST_IF(!IsCompatibilityMode());
+
+        // TODO(crbug.com/473899151): [Capture] multisampled.
+        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+    }
+
     // Fragment shader for the second pass: reading multisample texture and writing verification
     // color. This shader outputs red if all samples match the expected color, else green.
     std::string GetMultisampleValidationFS(wgpu::TextureFormat format) {

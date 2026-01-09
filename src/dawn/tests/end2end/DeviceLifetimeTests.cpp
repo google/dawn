@@ -42,7 +42,15 @@ using testing::Return;
 
 using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>;
 
-class DeviceLifetimeTests : public DawnTest {};
+class DeviceLifetimeTests : public DawnTest {
+  protected:
+    void SetUp() override {
+        DawnTest::SetUp();
+
+        // TODO(crbug.com/474139502): [Capture] hit device guard on replay.
+        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+    }
+};
 
 // Test that the device can be dropped before its queue.
 TEST_P(DeviceLifetimeTests, DroppedBeforeQueue) {

@@ -44,6 +44,12 @@ enum class QuadAngle { Flat, TiltedX };
 
 class DepthBiasTests : public DawnTest {
   protected:
+    void SetUp() override {
+        DawnTest::SetUp();
+        // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+    }
+
     void RunDepthBiasTest(wgpu::TextureFormat depthFormat,
                           float depthClear,
                           QuadAngle quadAngle,

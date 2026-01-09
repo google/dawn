@@ -34,7 +34,15 @@ namespace {
 
 constexpr wgpu::TextureFormat kDepthFormat = wgpu::TextureFormat::Depth32Float;
 
-class FragDepthTests : public DawnTest {};
+class FragDepthTests : public DawnTest {
+  protected:
+    void SetUp() override {
+        DawnTest::SetUp();
+
+        // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
+        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+    }
+};
 
 // Test that when writing to FragDepth the result is clamped to the viewport.
 TEST_P(FragDepthTests, FragDepthIsClampedToViewport) {

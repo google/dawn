@@ -801,6 +801,10 @@ TEST_P(TextureFormatTest, RGBA16Float) {
 
 // Test the RGBA8Unorm format
 TEST_P(TextureFormatTest, RGBA8UnormSrgb) {
+    // TODO(crbug.com/473890413): [Capture] validation error: attachment state of pipeline not
+    // compatible with pass.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     uint8_t maxValue = std::numeric_limits<uint8_t>::max();
     std::vector<uint8_t> textureData = {0, 1, maxValue, 64, 35, 68, 152, 168};
 
@@ -824,6 +828,10 @@ TEST_P(TextureFormatTest, RGBA8UnormSrgb) {
 TEST_P(TextureFormatTest, BGRA8UnormSrgb) {
     // BGRA8UnormSrgb is unsupported in Compatibility mode
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
+    // TODO(crbug.com/473890413): [Capture] validation error: attachment state of pipeline not
+    // compatible with pass.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     uint8_t maxValue = std::numeric_limits<uint8_t>::max();
     std::vector<uint8_t> textureData = {0, 1, maxValue, 64, 35, 68, 152, 168};
