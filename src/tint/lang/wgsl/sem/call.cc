@@ -38,8 +38,9 @@ Call::Call(const ast::CallExpression* declaration,
            core::EvaluationStage stage,
            VectorRef<const sem::ValueExpression*> arguments,
            const Statement* statement,
-           const core::constant::Value* constant)
-    : Base(declaration, target->ReturnType(), stage, statement, constant),
+           const core::constant::Value* constant,
+           const Variable* root_ident)
+    : Base(declaration, target->ReturnType(), stage, statement, constant, root_ident),
       target_(target),
       arguments_(std::move(arguments)) {
     // Check that the stage is no earlier than the target supports

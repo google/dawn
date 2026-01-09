@@ -155,6 +155,8 @@ void Run(std::string_view wgsl, const Options& options, std::span<const std::byt
     // Parse the WGSL program.
     tint::wgsl::reader::Options parse_options;
     parse_options.allowed_features = tint::wgsl::AllowedFeatures::Everything();
+    // buffer_view is not ready for fuzzing yet.
+    parse_options.allowed_features.features.erase(tint::wgsl::LanguageFeature::kBufferView);
     auto program = tint::wgsl::reader::Parse(&file, parse_options);
     if (!program.IsValid()) {
         if (options.verbose) {

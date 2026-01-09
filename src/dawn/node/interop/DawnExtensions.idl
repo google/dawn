@@ -45,6 +45,7 @@ enum WGSLLanguageFeatureName {
     "subgroup_id",
     "subgroup_uniformity",
     "texture_and_sampler_let",
+    "buffer_view",
 };
 
 // ============================================================================

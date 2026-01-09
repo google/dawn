@@ -121,6 +121,7 @@ enum language_feature {
   fragment_depth
   immediate_address_space
   texture_and_sampler_let
+  buffer_view
 
   // Non-standard language features for Chromium developers.
   chromium_print
@@ -197,6 +198,9 @@ type input_attachment<T>
 type __atomic_compare_exchange_result<T>
 
 type subgroup_matrix<S: subgroup_matrix_kind, T, C: num, R: num>
+
+@display("buffer") type unsized_buffer
+type buffer<N: num>
 
 @display("any concrete constructible type") type __constructible
 
@@ -306,6 +310,9 @@ match storage
   : address_space.storage
 match workgroup
   : address_space.workgroup
+match uniform_or_storage
+  : address_space.uniform
+  | address_space.storage
 
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
@@ -825,6 +832,38 @@ match workgroup
   fn subgroupMatrixScalarMultiply(m: subgroup_matrix<K, i8, C, R>, @test_value(8) s: i32) -> subgroup_matrix<K, i8, C, R>
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
   fn subgroupMatrixScalarMultiply(m: subgroup_matrix<K, u8, C, R>, @test_value(8) s: u32) -> subgroup_matrix<K, u8, C, R>
+
+
+//////////////////////////////////////////
+// buffer view
+//////////////////////////////////////////
+@must_use implicit(R: read, AS: uniform_or_storage, N: num)
+  fn bufferView<T>(ptr<AS, buffer<N>, R>, offset: u32) -> ptr<AS, T, R>
+@must_use implicit(R: read, AS: uniform_or_storage, N: num)
+  fn bufferView<T>(ptr<AS, buffer<N>, R>, offset: i32) -> ptr<AS, T, R>
+@must_use implicit(W: read_write, AS: workgroup_or_storage, N: num)
+  fn bufferView<T>(ptr<AS, buffer<N>, W>, offset: u32) -> ptr<AS, T, W>
+@must_use implicit(W: read_write, AS: workgroup_or_storage, N: num)
+  fn bufferView<T>(ptr<AS, buffer<N>, W>, offset: i32) -> ptr<AS, T, W>
+
+@must_use implicit(R: read, AS: uniform_or_storage)
+  fn bufferView<T>(ptr<AS, unsized_buffer, R>, offset: u32) -> ptr<AS, T, R>
+@must_use implicit(R: read, AS: uniform_or_storage)
+  fn bufferView<T>(ptr<AS, unsized_buffer, R>, offset: i32) -> ptr<AS, T, R>
+@must_use implicit(W: read_write, AS: workgroup_or_storage)
+  fn bufferView<T>(ptr<AS, unsized_buffer, W>, offset: u32) -> ptr<AS, T, W>
+@must_use implicit(W: read_write, AS: workgroup_or_storage)
+  fn bufferView<T>(ptr<AS, unsized_buffer, W>, offset: i32) -> ptr<AS, T, W>
+
+@must_use implicit(R: read, AS: uniform_or_storage, N: num)
+  fn bufferLength(ptr<AS, buffer<N>, R>) -> u32
+@must_use implicit(W: read_write, AS: workgroup_or_storage, N: num)
+  fn bufferLength(ptr<AS, buffer<N>, W>) -> u32
+
+@must_use implicit(R: read, AS: uniform_or_storage)
+  fn bufferLength(ptr<AS, unsized_buffer, R>) -> u32
+@must_use implicit(W: read_write, AS: workgroup_or_storage)
+  fn bufferLength(ptr<AS, unsized_buffer, W>) -> u32
 
 // chromium_experimental_print
 implicit(T: concrete_scalar) fn print(T)

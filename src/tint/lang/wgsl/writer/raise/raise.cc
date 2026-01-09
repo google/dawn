@@ -204,6 +204,8 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kPrint)
         CASE(kHasResource)
         CASE(kGetResource)
+        CASE(kBufferView)
+        CASE(kBufferLength)
         case core::BuiltinFn::kNone:
             break;
     }

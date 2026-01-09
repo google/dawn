@@ -310,6 +310,40 @@ inline const type::SubgroupMatrix* BuildSubgroupMatrix(intrinsic::MatchState& st
                                        A.Value(), B.Value());
 }
 
+inline bool MatchUnsizedBuffer(intrinsic::MatchState&, const type::Type* ty) {
+    if (ty->Is<intrinsic::Any>()) {
+        return true;
+    }
+    if (auto* b = ty->As<type::Buffer>()) {
+        return b->Size() == 0;
+    }
+    return false;
+}
+
+inline const type::Buffer* BuildUnsizedBuffer(intrinsic::MatchState& state, const type::Type*) {
+    return state.types.unsized_buffer();
+}
+
+inline bool MatchBuffer(intrinsic::MatchState&, const type::Type* ty, intrinsic::Number& N) {
+    if (ty->Is<intrinsic::Any>()) {
+        N = intrinsic::Number::any;
+        return true;
+    }
+    if (auto* b = ty->As<type::Buffer>()) {
+        if (b->Size() != 0) {
+            N = b->Size();
+            return true;
+        }
+    }
+    return false;
+}
+
+inline const type::Buffer* BuildBuffer(intrinsic::MatchState& state,
+                                       const type::Type*,
+                                       intrinsic::Number N) {
+    return state.types.buffer(N.Value());
+}
+
 inline bool MatchArray(intrinsic::MatchState&,
                        const type::Type* ty,
                        const type::Type*& T,

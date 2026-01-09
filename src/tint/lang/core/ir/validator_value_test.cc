@@ -485,7 +485,7 @@ TEST_F(IR_ValidatorTest, Var_Uniform_NotConstructible) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:2:40 error: var: vars in the 'uniform' address space must be host-shareable and constructible
+            R"(:2:40 error: var: vars in the 'uniform' address space must be host-shareable and constructible or a buffer
   %1:ptr<uniform, atomic<u32>, read> = var undef @binding_point(0, 0)
                                        ^^^
 )")) << res.Failure();
@@ -501,7 +501,7 @@ TEST_F(IR_ValidatorTest, Var_Uniform_NotHostShareable) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:2:33 error: var: vars in the 'uniform' address space must be host-shareable and constructible
+            R"(:2:33 error: var: vars in the 'uniform' address space must be host-shareable and constructible or a buffer
   %1:ptr<uniform, bool, read> = var undef @binding_point(0, 0)
                                 ^^^
 )")) << res.Failure();

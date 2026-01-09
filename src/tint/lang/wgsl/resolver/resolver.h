@@ -237,6 +237,9 @@ class Resolver {
     const core::type::SubgroupMatrix* SubgroupMatrix(const ast::Identifier* ident,
                                                      core::SubgroupMatrixKind kind);
 
+    /// @returns a buffer resolved from the templated identifier @p ident
+    const core::type::Buffer* Buffer(const ast::Identifier* ident);
+
     /// @returns @p ident cast to an ast::TemplatedIdentifier, if the identifier is templated and
     /// the number of templated arguments are between @p min_args and @p max_args.
     const ast::TemplatedIdentifier* TemplatedIdentifier(const ast::Identifier* ident,
@@ -474,8 +477,9 @@ class Resolver {
 
     /// Resolves and validates the expression used as the count parameter of an array.
     /// @param count_expr the expression used as the second template parameter to an array<>.
+    /// @param array indicates whether the count is for an array or buffer
     /// @returns the number of elements in the array.
-    const core::type::ArrayCount* ArrayCount(const ast::Expression* count_expr);
+    const core::type::ArrayCount* ArrayCount(const ast::Expression* count_expr, bool array = true);
 
     /// Builds and returns the semantic information for an array.
     /// @returns the semantic Array information, or nullptr if an error is raised.

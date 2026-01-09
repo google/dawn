@@ -529,6 +529,9 @@ BuiltinType ParseBuiltinType(std::string_view str) {
     if (str == "bool") {
         return BuiltinType::kBool;
     }
+    if (str == "buffer") {
+        return BuiltinType::kBuffer;
+    }
     if (str == "f16") {
         return BuiltinType::kF16;
     }
@@ -814,6 +817,8 @@ std::string_view ToString(BuiltinType value) {
             return "binding_array";
         case BuiltinType::kBool:
             return "bool";
+        case BuiltinType::kBuffer:
+            return "buffer";
         case BuiltinType::kF16:
             return "f16";
         case BuiltinType::kF32:
@@ -1796,6 +1801,12 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupMatrixScalarMultiply") {
         return BuiltinFn::kSubgroupMatrixScalarMultiply;
     }
+    if (name == "bufferView") {
+        return BuiltinFn::kBufferView;
+    }
+    if (name == "bufferLength") {
+        return BuiltinFn::kBufferLength;
+    }
     if (name == "print") {
         return BuiltinFn::kPrint;
     }
@@ -2116,6 +2127,10 @@ const char* str(BuiltinFn i) {
             return "subgroupMatrixScalarSubtract";
         case BuiltinFn::kSubgroupMatrixScalarMultiply:
             return "subgroupMatrixScalarMultiply";
+        case BuiltinFn::kBufferView:
+            return "bufferView";
+        case BuiltinFn::kBufferLength:
+            return "bufferLength";
         case BuiltinFn::kPrint:
             return "print";
         case BuiltinFn::kHasResource:

@@ -13,7 +13,7 @@ See:
 
 {{- /* For each permutation of each overload of each function... */ -}}
 {{- range $I.Sem.Builtins -}}
-{{    if and (and (not (HasPrefix .Name "_")) (not (HasPrefix .Name "getBinding"))) (not (HasPrefix .Name "getResource")) }}
+{{    if and (and (and (and (not (HasPrefix .Name "_")) (not (HasPrefix .Name "getBinding"))) (not (HasPrefix .Name "getResource"))) (not (HasPrefix .Name "bufferView"))) (not (HasPrefix .Name "bufferLength")) }}
 {{-     range .Overloads  -}}
 {{-       range $I.Permute . -}}
 {{- /*      Generate a ./literal/<function>/<permuataion-hash>.wgsl file using
@@ -393,6 +393,7 @@ requires texel_buffers;
 {{-   $name := .Target.Name -}}
 {{-   if             eq $name "array"   -}}storage
 {{-   else if        eq $name "runtime_array"   -}}storage
+{{-   else if        eq $name "unsized_buffer"    -}}storage
 {{-   else if HasPrefix $name "texture" -}}handle
 {{-   else if HasPrefix $name "sampler" -}}handle
 {{-   else if HasPrefix $name "input_attachment" -}}handle
@@ -477,6 +478,7 @@ requires texel_buffers;
 {{-     else if eq .Target.Name "mat"        -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}<{{template "Type" (ElementType .)}}>
 {{-     else if eq .Target.Name "runtime_array" -}}array<{{template "Type" (ElementType .)}}>
 {{-     else if eq .Target.Name "subgroup_matrix" -}}subgroup_matrix_{{index .TemplateArguments 0}}<{{template "Type" (ElementType .)}}, {{index .TemplateArguments 2}}, {{index .TemplateArguments 3}}>
+{{-     else if eq .Target.Name "unsized_buffer" -}}buffer
 {{-     else if HasPrefix .Target.Name "vec" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
 {{-     else if HasPrefix .Target.Name "mat" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
 {{-     else                                 -}}{{.Target.Name}}{{template "TemplateArguments" .TemplateArguments}}

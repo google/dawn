@@ -100,6 +100,7 @@ if (tint_build_unittests) {
       "barycentric_coord_extension_test.cc",
       "binding_array_test.cc",
       "bitcast_validation_test.cc",
+      "buffer_test.cc",
       "builtin_enum_test.cc",
       "builtin_structs_test.cc",
       "builtin_test.cc",

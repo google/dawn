@@ -3531,11 +3531,96 @@ TEST_F(IRToProgramRoundtripTest, SubgroupMatrixLoad) {
     RUN_TEST(R"(
 enable chromium_experimental_subgroup_matrix;
 
-@group(0u) @binding(0u) var<storage, read_write> buffer : array<f32, 64u>;
+@group(0u) @binding(0u) var<storage, read_write> v : array<f32, 64u>;
 
 fn f() {
-  let l = subgroupMatrixLoad<subgroup_matrix_left<f32, 4, 2>>(&(buffer), 0u, false, 4u);
-  let r = subgroupMatrixLoad<subgroup_matrix_right<f32, 2, 4>>(&(buffer), 32u, true, 8u);
+  let l = subgroupMatrixLoad<subgroup_matrix_left<f32, 4, 2>>(&(v), 0u, false, 4u);
+  let r = subgroupMatrixLoad<subgroup_matrix_right<f32, 2, 4>>(&(v), 32u, true, 8u);
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// buffer_view
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, BufferView_Storage) {
+    RUN_TEST(R"(
+@group(0u) @binding(0u) var<storage, read> v1 : buffer;
+
+@group(0u) @binding(1u) var<storage, read_write> v2 : buffer<32>;
+
+fn f() {
+  let a = bufferView<array<u32, 4u>>(&(v1), 0u);
+  let b = bufferView<f32>(&(v2), 4u);
+  let c = bufferView<vec4<f32>>(&(v1), 16u);
+  let d = bufferView<array<u32>>(&(v2), 0u);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BufferView_Uniform) {
+    RUN_TEST(R"(
+@group(0u) @binding(0u) var<uniform> v : buffer<128>;
+
+fn foo(p : ptr<uniform, buffer>) {
+  let a = bufferView<array<u32, 4u>>(&(v), 0u);
+  let b = bufferView<f32>(p, 4u);
+  let c = bufferView<vec4<f32>>(&(v), 16u);
+  let d = bufferView<array<u32, 1u>>(p, 0u);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BufferView_Workgroup) {
+    RUN_TEST(R"(
+var<workgroup> v : buffer<128>;
+
+fn foo(p : ptr<workgroup, buffer>) {
+  let a = bufferView<array<u32, 4u>>(&(v), 0u);
+  let b = bufferView<f32>(p, 4u);
+  let c = bufferView<vec4<f32>>(&(v), 16u);
+  let d = bufferView<array<u32, 1u>>(p, 0u);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BufferLength_Storage) {
+    RUN_TEST(R"(
+@group(0u) @binding(0u) var<storage, read> v1 : buffer;
+
+@group(0u) @binding(1u) var<storage, read_write> v2 : buffer<32>;
+
+fn f() {
+  let a = bufferLength(&(v1));
+  let b = bufferLength(&(v2));
+  let c = bufferLength(&(v1));
+  let d = bufferLength(&(v2));
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BufferLength_Uniform) {
+    RUN_TEST(R"(
+@group(0u) @binding(0u) var<uniform> v : buffer<32>;
+
+fn foo(p : ptr<uniform, buffer>) {
+  let a = bufferLength(&(v));
+  let b = bufferLength(p);
+  let c = bufferLength(&(v));
+  let d = bufferLength(p);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BufferLength_Workgroup) {
+    RUN_TEST(R"(
+var<workgroup> v : buffer<32>;
+
+fn foo(p : ptr<workgroup, buffer>) {
+  let a = bufferLength(&(v));
+  let b = bufferLength(p);
+  let c = bufferLength(&(v));
+  let d = bufferLength(p);
 }
 )");
 }

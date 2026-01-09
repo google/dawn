@@ -4488,6 +4488,7 @@
             {"value": 11, "name": "immediate address space", "jsrepr": "'immediate_address_space'", "tags": ["dawn"]},
             {"value": 12, "name": "subgroup uniformity", "jsrepr": "'subgroup_uniformity'", "tags": ["dawn"]},
             {"value": 13, "name": "texture and sampler let", "jsrepr": "'texture_and_sampler_let'", "tags": ["dawn"]},
+            {"value": 14, "name": "buffer view", "jsrepr": "'buffer_view'", "tags": ["dawn"]},
             {"value": 0, "name": "chromium testing unimplemented", "jsrepr": "'chromium_testing_unimplemented'", "tags": ["dawn"]},
             {"value": 1, "name": "chromium testing unsafe experimental", "jsrepr": "'chromium_testing_unsafe_experimental'", "tags": ["dawn"]},
             {"value": 2, "name": "chromium testing experimental", "jsrepr": "'chromium_testing_experimental'", "tags": ["dawn"]},

@@ -3463,9 +3463,10 @@ void Validator::CheckVar(const Var* var) {
     }
 
     if (mv->AddressSpace() == AddressSpace::kUniform) {
-        if (!mv->StoreType()->IsConstructible() || !mv->StoreType()->IsHostShareable()) {
-            AddError(var)
-                << "vars in the 'uniform' address space must be host-shareable and constructible";
+        if (!(mv->StoreType()->IsConstructible() || mv->StoreType()->Is<core::type::Buffer>()) ||
+            !mv->StoreType()->IsHostShareable()) {
+            AddError(var) << "vars in the 'uniform' address space must be host-shareable and "
+                             "constructible or a buffer";
             return;
         }
     }

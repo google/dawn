@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/buffer.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
@@ -572,6 +573,13 @@ class Manager final {
     const core::type::SubgroupMatrix* subgroup_matrix() {
         return subgroup_matrix(K, Get<T>(), C, R);
     }
+
+    /// @param n the size of the buffer
+    /// @returns the buffer
+    const core::type::Buffer* buffer(uint32_t n);
+
+    /// @returns the unsized buffer
+    const core::type::Buffer* unsized_buffer();
 
     /// @param elem_ty the array element type
     /// @param count the array element count

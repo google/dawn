@@ -466,6 +466,12 @@ class Validator {
     /// @returns true on success, false otherwise
     bool SubgroupMatrix(const core::type::SubgroupMatrix* t, const Source& source) const;
 
+    /// Validates buffer type
+    /// @param t the buffer type to validate
+    /// @param source the source of the buffer type
+    /// @returns true on success, false otherwise
+    bool Buffer(const core::type::Buffer* t, const Source& source) const;
+
     /// Validates a structure
     /// @param str the structure to validate
     /// @param stage the current pipeline stage
@@ -556,6 +562,11 @@ class Validator {
     /// @param call the builtin call to validate
     /// @returns true on success, false otherwise
     bool QuadBroadcast(const sem::Call* call) const;
+
+    /// Validates a bufferView builtin function
+    /// @param call the builtin call to validate
+    /// @returns true on success, false otherwise
+    bool BufferView(const sem::Call* call) const;
 
     /// Validates an optional builtin function and its required extensions and language features.
     /// @param call the builtin call to validate

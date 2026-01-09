@@ -46,12 +46,14 @@ class Call final : public Castable<Call, ValueExpression> {
     /// @param arguments the call arguments
     /// @param statement the statement that owns this expression
     /// @param constant the constant value of this expression
+    /// @param root_ident the root identifier of the call (rarely used)
     Call(const ast::CallExpression* declaration,
          const CallTarget* target,
          core::EvaluationStage stage,
          VectorRef<const sem::ValueExpression*> arguments,
          const Statement* statement,
-         const core::constant::Value* constant);
+         const core::constant::Value* constant,
+         const Variable* root_ident = nullptr);
 
     /// Destructor
     ~Call() override;

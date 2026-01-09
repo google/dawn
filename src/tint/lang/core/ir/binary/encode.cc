@@ -438,6 +438,7 @@ struct Encoder {
                             TINT_ICE() << "invalid subgroup matrix kind: " << ToString(s->Kind());
                     }
                 },
+                [&](const core::type::Buffer* b) { TypeBuffer(*type_out.mutable_buffer(), b); },
                 TINT_ICE_ON_NO_MATCH);
 
             mod_out_.mutable_types()->Add(std::move(type_out));
@@ -579,6 +580,20 @@ struct Encoder {
         subgroup_matrix_out.set_sub_type(Type(subgroup_matrix_in->Type()));
         subgroup_matrix_out.set_columns(subgroup_matrix_in->Columns());
         subgroup_matrix_out.set_rows(subgroup_matrix_in->Rows());
+    }
+
+    void TypeBuffer(pb::TypeBuffer& buffer_out, const core::type::Buffer* buffer_in) {
+        tint::Switch(
+            buffer_in->Count(),  //
+            [&](const core::type::ConstantArrayCount* c) {
+                buffer_out.set_count(c->value);
+                if (c->value >= internal_limits::kMaxArrayElementCount) {
+                    err_ << "array count (" << c->value << ") must be less than "
+                         << internal_limits::kMaxArrayElementCount << "\n";
+                }
+            },
+            [&](const core::type::RuntimeArrayCount*) { buffer_out.set_count(0); },
+            TINT_ICE_ON_NO_MATCH);
     }
 
     [[maybe_unused]] void TypeBuitinStruct(pb::Type& builtin_struct_out,
@@ -1408,6 +1423,10 @@ struct Encoder {
                 return pb::BuiltinFn::has_resource;
             case core::BuiltinFn::kGetResource:
                 return pb::BuiltinFn::get_resource;
+            case core::BuiltinFn::kBufferView:
+                return pb::BuiltinFn::buffer_view;
+            case core::BuiltinFn::kBufferLength:
+                return pb::BuiltinFn::buffer_length;
             case core::BuiltinFn::kNone:
                 break;
         }

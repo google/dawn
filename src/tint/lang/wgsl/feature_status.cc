@@ -41,6 +41,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kFragmentDepth:
         case LanguageFeature::kImmediateAddressSpace:
         case LanguageFeature::kTextureAndSamplerLet:
+        case LanguageFeature::kBufferView:
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////

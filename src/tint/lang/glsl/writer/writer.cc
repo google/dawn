@@ -65,6 +65,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                     "1D textures inside binding arrays are not yet supported by the GLSL backend");
             }
         }
+        if (ty->Is<core::type::Buffer>()) {
+            return Failure("buffers are not supported by the GLSL backend");
+        }
     }
 
     core::ir::Function* ep_func = nullptr;

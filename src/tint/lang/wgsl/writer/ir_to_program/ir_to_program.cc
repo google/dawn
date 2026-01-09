@@ -1100,6 +1100,12 @@ class State {
                 }
                 TINT_IR_ICE(mod) << core::type::Array::kErrExpectedConstantCount;
             },  //
+            [&](const core::type::Buffer* buf) {
+                if (buf->Size() == 0) {
+                    return b.ty.buffer();
+                }
+                return b.ty.buffer(buf->Size());
+            },  //
             TINT_ICE_ON_NO_MATCH);
     }
 

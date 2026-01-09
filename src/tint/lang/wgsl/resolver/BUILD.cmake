@@ -100,6 +100,7 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/barycentric_coord_extension_test.cc
   lang/wgsl/resolver/binding_array_test.cc
   lang/wgsl/resolver/bitcast_validation_test.cc
+  lang/wgsl/resolver/buffer_test.cc
   lang/wgsl/resolver/builtin_enum_test.cc
   lang/wgsl/resolver/builtin_structs_test.cc
   lang/wgsl/resolver/builtin_test.cc

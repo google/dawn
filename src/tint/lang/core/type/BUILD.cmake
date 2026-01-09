@@ -55,6 +55,8 @@ tint_add_target(tint_lang_core_type lib
   lang/core/type/binding_array.h
   lang/core/type/bool.cc
   lang/core/type/bool.h
+  lang/core/type/buffer.cc
+  lang/core/type/buffer.h
   lang/core/type/builtin_structs.cc
   lang/core/type/builtin_structs.h
   lang/core/type/clone_context.h
@@ -162,6 +164,7 @@ tint_add_target(tint_lang_core_type_test test
   lang/core/type/atomic_test.cc
   lang/core/type/binding_array_test.cc
   lang/core/type/bool_test.cc
+  lang/core/type/buffer_test.cc
   lang/core/type/builtin_structs_test.cc
   lang/core/type/depth_multisampled_texture_test.cc
   lang/core/type/depth_texture_test.cc

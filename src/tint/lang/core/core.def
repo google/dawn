@@ -185,6 +185,8 @@ enum builtin_type {
   subgroup_matrix_left
   subgroup_matrix_right
   subgroup_matrix_result
+  // buffer
+  buffer
   // sized_binding_array
   binding_array
   // type-less binding array
@@ -349,6 +351,9 @@ type __atomic_compare_exchange_result<T>
 
 type subgroup_matrix<S: subgroup_matrix_kind, T, C: num, R: num>
 
+@display("buffer") type unsized_buffer
+type buffer<N: num>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
 //                                                                            //
@@ -428,6 +433,7 @@ match u32_texel_format
   | texel_format.rgba32uint
   | texel_format.rgb10a2uint
 
+match read: access.read
 match write: access.write
 match read_write: access.read_write
 match readable
@@ -443,6 +449,9 @@ match function_private_workgroup
   | address_space.workgroup
 match workgroup_or_storage
   : address_space.workgroup
+  | address_space.storage
+match uniform_or_storage
+  : address_space.uniform
   | address_space.storage
 match storage
   : address_space.storage
@@ -928,6 +937,27 @@ implicit(C: iu32) fn textureStore(texture: texel_buffer<u32_texel_format, read_w
   fn subgroupMatrixScalarMultiply(m: subgroup_matrix<K, i8, C, R>, s: i32) -> subgroup_matrix<K, i8, C, R>
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
   fn subgroupMatrixScalarMultiply(m: subgroup_matrix<K, u8, C, R>, s: u32) -> subgroup_matrix<K, u8, C, R>
+
+////////////////////////////////////////
+// Buffer view
+////////////////////////////////////////
+@must_use implicit(R: read, AS: uniform_or_storage, O: iu32)
+  fn bufferView<T>(ptr<AS, unsized_buffer, R>, O) -> ptr<AS, T, R>
+@must_use implicit(R: read, AS: uniform_or_storage, O: iu32, N: num)
+  fn bufferView<T>(ptr<AS, buffer<N>, R>, O) -> ptr<AS, T, R>
+@must_use implicit(W: read_write, AS: workgroup_or_storage, O: iu32)
+  fn bufferView<T>(ptr<AS, unsized_buffer, W>, O) -> ptr<AS, T, W>
+@must_use implicit(W: read_write, AS: workgroup_or_storage, O: iu32, N: num)
+  fn bufferView<T>(ptr<AS, buffer<N>, W>, O) -> ptr<AS, T, W>
+
+@must_use implicit(R: read, AS: uniform_or_storage)
+  fn bufferLength(ptr<AS, unsized_buffer, R>) -> u32
+@must_use implicit(R: read, AS: uniform_or_storage, N: num)
+  fn bufferLength(ptr<AS, buffer<N>, R>) -> u32
+@must_use implicit(W: read_write, AS: workgroup_or_storage)
+  fn bufferLength(ptr<AS, unsized_buffer, W>) -> u32
+@must_use implicit(W: read_write, AS: workgroup_or_storage, N: num)
+  fn bufferLength(ptr<AS, buffer<N>, W>) -> u32
 
 // chromium_experimental_print
 implicit(T: scalar) fn print(T)

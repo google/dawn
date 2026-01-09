@@ -231,8 +231,8 @@ bool Validator::IsPlain(const core::type::Type* type) const {
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
 bool Validator::IsStorable(const core::type::Type* type) const {
-    return IsPlain(type) ||
-           type->IsAnyOf<core::type::BindingArray, core::type::Texture, core::type::Sampler>();
+    return IsPlain(type) || type->IsAnyOf<core::type::BindingArray, core::type::Texture,
+                                          core::type::Sampler, core::type::Buffer>();
 }
 
 const ast::Statement* Validator::ClosestContinuing(bool stop_at_loop,
@@ -498,6 +498,17 @@ bool Validator::SubgroupMatrix(const core::type::SubgroupMatrix* t, const Source
              ->IsAnyOf<core::type::F32, core::type::F16, core::type::I32, core::type::U32,
                        core::type::I8, core::type::U8>()) {
         AddError(source) << "subgroup_matrix element type must be f32, f16, i32, u32, i8 or u8";
+        return false;
+    }
+
+    return true;
+}
+
+bool Validator::Buffer(const core::type::Buffer*, const Source& source) const {
+    if (!allowed_features_.features.count(wgsl::LanguageFeature::kBufferView)) {
+        AddError(source) << "use of " << style::Type("buffer")
+                         << " requires the buffer_view language feature, which is not allowed in "
+                            "the current environment";
         return false;
     }
 
@@ -865,6 +876,23 @@ bool Validator::Var(const sem::Variable* v) const {
         if (v->AddressSpace() != core::AddressSpace::kStorage) {
             AddError(var->source)
                 << "only variables in <storage> address space may specify an access mode";
+            return false;
+        }
+    }
+
+    if (auto* buffer = store_ty->As<core::type::Buffer>()) {
+        if (buffer->Count()->Is<core::type::RuntimeArrayCount>() &&
+            (v->AddressSpace() == core::AddressSpace::kUniform ||
+             v->AddressSpace() == core::AddressSpace::kWorkgroup)) {
+            AddError(var->source) << "buffer type must be sized in "
+                                  << style::Enum(v->AddressSpace()) << " address space";
+            return false;
+        }
+        if (!(buffer->Count()->Is<core::type::RuntimeArrayCount>() ||
+              buffer->Count()->Is<core::type::ConstantArrayCount>()) &&
+            v->AddressSpace() != core::AddressSpace::kWorkgroup) {
+            AddError(var->source) << "buffer type must not be sized with an override-expression in "
+                                  << style::Enum(v->AddressSpace()) << " address space";
             return false;
         }
     }
@@ -2068,6 +2096,83 @@ bool Validator::SubgroupShuffleFunction(wgsl::BuiltinFn fn, const sem::Call* cal
     return true;
 }
 
+bool Validator::BufferView(const sem::Call* call) const {
+    auto* builtin = call->Target()->As<sem::BuiltinFn>();
+    if (!builtin) {
+        return false;
+    }
+
+    auto ContainsAtomic = [&](const core::type::Type* type) {
+        if (type->Is<core::type::Atomic>()) {
+            return true;
+        }
+        return atomic_composite_info_.Contains(type);
+    };
+    auto* ret_type = call->Target()->ReturnType();
+    auto* ret_ptr_type = ret_type->As<core::type::Pointer>();
+    auto* ret_store_type = ret_ptr_type->StoreType();
+    if (!ret_store_type->IsHostShareable()) {
+        AddError(call->Declaration()->source)
+            << "return type of " << builtin->str() << " must be host-shareable";
+        return false;
+    }
+    if (ret_store_type->Is<core::type::Buffer>()) {
+        AddError(call->Declaration()->source)
+            << "return type of " << builtin->str() << " cannot be a buffer";
+        return false;
+    }
+    if (ContainsAtomic(ret_store_type)) {
+        AddError(call->Declaration()->source)
+            << "return type of " << builtin->str() << " cannot contain an atomic type";
+        return false;
+    }
+
+    if (!CheckTypeAccessAddressSpace(ret_store_type, ret_ptr_type->Access(),
+                                     ret_ptr_type->AddressSpace(), call->Declaration()->source)) {
+        return false;
+    }
+
+    TINT_ASSERT(call->Arguments().Length() == 2);
+
+    auto* buffer_ptr = call->Arguments()[0];
+    auto* buffer_type =
+        buffer_ptr->Type()->As<core::type::Pointer>()->StoreType()->As<core::type::Buffer>();
+    auto* offset = call->Arguments()[1];
+    auto* constant_value = offset->ConstantValue();
+    if (!constant_value || !offset->Type()->IsIntegerScalar()) {
+        return true;
+    }
+
+    uint32_t value;
+    if (offset->Type()->IsUnsignedIntegerScalar()) {
+        value = constant_value->ValueAs<u32>();
+    } else {
+        int32_t ivalue = constant_value->ValueAs<i32>();
+        if (ivalue < 0) {
+            AddError(offset->Declaration()->source)
+                << "the offset argument of " << builtin->str() << " must be non-negative";
+            return false;
+        }
+        value = static_cast<uint32_t>(ivalue);
+    }
+    if (value % ret_store_type->Align() != 0) {
+        AddError(offset->Declaration()->source)
+            << "the offset argument of " << builtin->str()
+            << " must evenly divide the alignment of the return type (" << ret_store_type->Align()
+            << ")";
+        return false;
+    }
+    auto count = buffer_type->ConstantCount();
+    if (count != std::nullopt && value + ret_store_type->Size() >= count.value()) {
+        AddError(offset->Declaration()->source)
+            << "the offset argument of " << builtin->str()
+            << " plus the size of the return type must be smaller than the buffer size";
+        return false;
+    }
+
+    return true;
+}
+
 bool Validator::TextureBuiltinFn(const sem::Call* call) const {
     auto* builtin = call->Target()->As<sem::BuiltinFn>();
     if (!builtin) {
@@ -2306,7 +2411,30 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
         auto* param_type = param->Type();
         auto* arg_type = sem_.TypeOf(arg_expr)->UnwrapRef();
 
-        if (param_type != arg_type) {
+        bool allow_mismatch = false;
+        if (param_type->Is<core::type::Pointer>() && arg_type->Is<core::type::Pointer>()) {
+            auto* arg_ptr_type = arg_type->As<core::type::Pointer>();
+            auto* arg_store_type = arg_ptr_type->StoreType();
+            auto* param_ptr_type = param_type->As<core::type::Pointer>();
+            auto* param_store_type = param_ptr_type->StoreType();
+            if (arg_store_type->Is<core::type::Buffer>() &&
+                param_store_type->Is<core::type::Buffer>()) {
+                const bool param_unsized = param_store_type->As<core::type::Buffer>()
+                                               ->Count()
+                                               ->Is<core::type::RuntimeArrayCount>();
+                auto arg_count = arg_store_type->As<core::type::Buffer>()->ConstantCount();
+                auto param_count = param_store_type->As<core::type::Buffer>()->ConstantCount();
+                if (arg_ptr_type->AddressSpace() == param_ptr_type->AddressSpace() &&
+                    arg_ptr_type->Access() == param_ptr_type->Access() &&
+                    (param_unsized || arg_count.value_or(0) > param_count.value_or(0))) {
+                    // Any buffer argument can match an unsized buffer parameter.
+                    // A larger buffer argument can match a smaller buffer parameter.
+                    allow_mismatch = true;
+                }
+            }
+        }
+
+        if (!allow_mismatch && param_type != arg_type) {
             AddError(arg_expr->source) << "type mismatch for argument " << (i + 1) << " in call to "
                                        << style::Function(name) << ", expected "
                                        << style::Type(sem_.TypeNameOf(param_type)) << ", got "
@@ -3293,6 +3421,15 @@ bool Validator::CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
         }
         return false;
     };
+
+    if (store_ty->Is<core::type::Buffer>() && !(address_space == core::AddressSpace::kStorage ||
+                                                address_space == core::AddressSpace::kUniform ||
+                                                address_space == core::AddressSpace::kWorkgroup)) {
+        AddError(source) << style::Type("buffer") << " variables must have "
+                         << style::Enum("storage") << ", " << style::Enum("uniform") << ", or "
+                         << style::Enum("workgroup") << " address space";
+        return false;
+    }
 
     auto check_sub_atomics = [&] {
         if (auto atomic_use = atomic_composite_info_.Get(store_ty)) {

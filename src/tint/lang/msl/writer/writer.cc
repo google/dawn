@@ -60,6 +60,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         if (ty->Is<core::type::InputAttachment>()) {
             return Failure("input_attachment not supported by the MSL backend");
         }
+        if (ty->Is<core::type::Buffer>()) {
+            return Failure("buffers are not supported by the MSL backend");
+        }
     }
 
     for (auto* i : ir.Instructions()) {
