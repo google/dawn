@@ -336,6 +336,22 @@ TEST_F(IR_EvaluatorTest, ConstExprIfSimple) {
     EXPECT_EQ(true, c->Value()->ValueAs<bool>());
 }
 
+TEST_F(IR_EvaluatorTest, ConstExprIfalse) {
+    auto* constexpr_if = b.ConstExprIf(true);
+    constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
+    b.Append(constexpr_if->True(), [&] { b.ExitIf(constexpr_if, false); });
+    b.Append(constexpr_if->False(), [&] { b.ExitIf(constexpr_if, true); });
+    auto res = Eval(b, constexpr_if);
+    ASSERT_EQ(res, Success) << res.Failure();
+
+    auto* val = res.Get();
+    ASSERT_NE(val, nullptr);
+    auto* c = val->As<core::ir::Constant>();
+    ASSERT_NE(c, nullptr);
+    ASSERT_EQ(ty.bool_(), c->Type());
+    EXPECT_EQ(false, c->Value()->ValueAs<bool>());
+}
+
 TEST_F(IR_EvaluatorTest, BuiltinCall) {
     auto* inst = b.Call(ty.i32(), core::BuiltinFn::kAbs, -1_i);
     auto res = Eval(b, inst);
