@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '9361229d709b65abed78f7a63dd9d17165154f12',
+  'chromium_revision': '1a72e6d92a5164e77f2dadb89407463d18b796cb',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -107,7 +107,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@72926f8e78b4f731aabb29e9e6ec5847e45496f4',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@7c837b993aba7a5efbd5ca6f00271f2df7d1e495',
     'condition': 'dawn_standalone',
   },
 
@@ -138,15 +138,15 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@5f91e762c6ce9466649ed101efc0562b75b12b45',
+  'url': '{chromium_git}/chromium/src/build@fdd2f031668c57ae894fe311da47b7f97e1b5c16',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@be193c7ef74114b59488e2d67a518cc1bc584aae',
+  'url': '{chromium_git}/chromium/src/tools/clang@3240f2283a294839cf928f7329fe1a89230fa74e',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
-    'url': '{chromium_git}/chromium/src/tools/memory@d500250668368512cf2b0873c7727f034c00ce7a',
+    'url': '{chromium_git}/chromium/src/tools/memory@60d6f6fb67336f5b5060c6e1d0a72a32432423b5',
     'condition': 'dawn_standalone',
   },
   'tools/valgrind': {
@@ -248,7 +248,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@da902d0e5961061697de0fcb4d4cbf2d69cdd099',
+    'url': '{chromium_git}/chromium/src/testing@771d29aa974b8b2d2b7b9b0ced9bffa170597070',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
