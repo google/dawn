@@ -152,7 +152,6 @@ def get_common_properties(os, clang, rbe_project, remote_jobs):
             "enable_cloud_monitoring": True,
             "enable_cloud_profiler": True,
             "enable_cloud_trace": True,
-            "metrics_project": "chromium-reclient-metrics",
             "project": rbe_project,
         },
     }
@@ -160,7 +159,6 @@ def get_common_properties(os, clang, rbe_project, remote_jobs):
         reclient_props = {
             "instance": rbe_project,
             "jobs": remote_jobs,
-            "metrics_project": "chromium-reclient-metrics",
             "scandeps_server": True,
         }
         properties["$build/reclient"] = reclient_props
