@@ -58,6 +58,8 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
 
     bool IsAlive() const;
+    Queue* GetQueue();
+    const LimitsAndFeatures& GetLimitsAndFeatures() const;
 
     void HandleError(WGPUErrorType errorType, WGPUStringView message);
     void HandleLogging(WGPULoggingType loggingType, WGPUStringView message);
@@ -77,6 +79,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     WGPUFuture APICreateRenderPipelineAsync(
         WGPURenderPipelineDescriptor const* descriptor,
         const WGPUCreateRenderPipelineAsyncCallbackInfo& callbackInfo);
+    WGPUResourceTable APICreateResourceTable(const WGPUResourceTableDescriptor* descriptor);
     WGPUTexture APICreateTexture(const WGPUTextureDescriptor* descriptor);
     WGPUTexture APICreateErrorTexture(const WGPUTextureDescriptor* descriptor);
 

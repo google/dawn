@@ -128,6 +128,8 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     WGPUDawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits =
         WGPU_DAWN_TEXEL_COPY_BUFFER_ROW_ALIGNMENT_LIMITS_INIT;
     compatLimits.chain.next = &texelCopyBufferRowAlignmentLimits.chain;
+    WGPUResourceTableLimits resourceTableLimits = WGPU_RESOURCE_TABLE_LIMITS_INIT;
+    texelCopyBufferRowAlignmentLimits.chain.next = &resourceTableLimits.chain;
 
     mProcs.deviceGetLimits(device, &limits);
     cmd.limits = &limits;

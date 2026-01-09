@@ -131,7 +131,7 @@
         ],
         "render pass encoder set immediates": [
             { "name": "render pass encoder id", "type": "ObjectId", "id_type": "render pass encoder"},
-            {"name": "offset", "type": "uint32_t"},
+            { "name": "offset", "type": "uint32_t"},
             { "name": "data", "type": "uint8_t", "annotation": "const*", "length": "size", "wire_is_data_only": true},
             { "name": "size", "type": "size_t"}
         ],
@@ -143,7 +143,7 @@
         ],
         "compute pass encoder set immediates": [
             { "name": "compute pass encoder id", "type": "ObjectId", "id_type": "compute pass encoder"},
-            {"name": "offset", "type": "uint32_t"},
+            { "name": "offset", "type": "uint32_t"},
             { "name": "data", "type": "uint8_t", "annotation": "const*", "length": "size", "wire_is_data_only": true},
             { "name": "size", "type": "size_t"}
         ]
@@ -285,11 +285,8 @@
             "QueueWriteTexture",
             "RenderBundleEncoderSetImmediates",
             "RenderPassEncoderSetImmediates",
-            "ResourceTableDestroy",
             "ResourceTableGetSize",
             "ResourceTableInsertBinding",
-            "ResourceTableRemoveBinding",
-            "ResourceTableUpdate",
             "ShaderModuleGetCompilationInfo",
             "SurfaceGetCapabilities",
             "SurfaceGetCurrentTexture",
@@ -310,6 +307,7 @@
             "BufferUnmap",
             "DeviceCreateErrorBuffer",
             "DeviceCreateErrorTexture",
+            "DeviceCreateResourceTable",
             "DeviceCreateTexture",
             "DeviceDestroy",
             "DeviceGetQueue",
@@ -318,6 +316,9 @@
             "InstanceProcessEvents",
             "InstanceWaitAny",
             "QueueSubmit",
+            "ResourceTableDestroy",
+            "ResourceTableRemoveBinding",
+            "ResourceTableUpdate",
             "SurfaceConfigure",
             "SurfacePresent",
             "SurfaceUnconfigure"

@@ -43,9 +43,6 @@ class ResourceTableTests : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-        // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-
         DAWN_TEST_UNSUPPORTED_IF(
             !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
 

@@ -60,6 +60,10 @@ WGPUStatus LimitsAndFeatures::GetLimits(WGPULimits* limits) const {
                     mTexelCopyBufferRowAlignmentLimits;
                 break;
             }
+            case WGPUSType_ResourceTableLimits: {
+                *reinterpret_cast<WGPUResourceTableLimits*>(chain) = mResourceTableLimits;
+                break;
+            }
             default:
                 // Fail if unknown sType found.
                 return WGPUStatus_Error;
@@ -97,6 +101,10 @@ void LimitsAndFeatures::ToSupportedFeatures(WGPUSupportedFeatures* supportedFeat
     supportedFeatures->features = features;
 }
 
+const WGPUResourceTableLimits& LimitsAndFeatures::GetResourceTableLimits() const {
+    return mResourceTableLimits;
+}
+
 void LimitsAndFeatures::SetLimits(const WGPULimits* limits) {
     DAWN_ASSERT(limits != nullptr);
     mLimits = *limits;
@@ -116,6 +124,12 @@ void LimitsAndFeatures::SetLimits(const WGPULimits* limits) {
                 DAWN_ASSERT(mTexelCopyBufferRowAlignmentLimits.chain.sType ==
                             WGPUSType_DawnTexelCopyBufferRowAlignmentLimits);
                 mTexelCopyBufferRowAlignmentLimits.chain.next = nullptr;
+                break;
+            }
+            case WGPUSType_ResourceTableLimits: {
+                mResourceTableLimits = *reinterpret_cast<WGPUResourceTableLimits*>(chain);
+                DAWN_ASSERT(mResourceTableLimits.chain.sType == WGPUSType_ResourceTableLimits);
+                mResourceTableLimits.chain.next = nullptr;
                 break;
             }
             default:

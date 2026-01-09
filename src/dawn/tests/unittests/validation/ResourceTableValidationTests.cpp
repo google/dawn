@@ -159,11 +159,6 @@ TEST_F(ResourceTableValidationTest, NextInChain) {
 
 // Test the Destroy call on a ResourceTable
 TEST_F(ResourceTableValidationTest, Destroy) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     wgpu::ResourceTableDescriptor descriptor;
     descriptor.size = 1u;
     wgpu::ResourceTable resourceTable = device.CreateResourceTable(&descriptor);
@@ -525,11 +520,6 @@ TEST_F(ResourceTableValidationTestDisabled, CommandEncoder_SetResourceTable) {
 
 // Tests that the resource table can be used in submit
 TEST_F(ResourceTableValidationTest, Submit_CanUseInSubmit) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     // Success case: resource table can be used in submit
     {
         wgpu::ResourceTableDescriptor descriptor;
@@ -1034,11 +1024,6 @@ TEST_F(ResourceTableValidationTest, PinValidationUsageRenderPass) {
 // Checks that only texture views are allowed as resources in mutators for SamplingResourceTable.
 // TODO(https://issues.chromium.org/473354063): Support samplers in SamplingResourceTable.
 TEST_F(ResourceTableValidationTest, MutatorBindingKindValidation) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     // Create the texture to put in the table.
     wgpu::TextureDescriptor tDesc = {
         .usage = wgpu::TextureUsage::TextureBinding,
@@ -1090,11 +1075,6 @@ TEST_F(ResourceTableValidationTest, MutatorBindingKindValidation) {
 // TODO(https://issues.chromium.org/473444515): Support storage textures in FullResourceTable
 // TODO(https://issues.chromium.org/382544164): Support texel buffers in FullResourceTable
 TEST_F(ResourceTableValidationTest, MutatorTextureViewMustBeOnlyTextureBinding) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     // Create the texture to put in the table.
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding |
@@ -1145,11 +1125,6 @@ TEST_F(ResourceTableValidationTest, MutatorTextureViewMustBeOnlyTextureBinding) 
 
 // Check that the texture view must have a single aspect for mutators.
 TEST_F(ResourceTableValidationTest, MutatorTextureViewMustBeSingleAspect) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     // Create the texture to put in the table.
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
@@ -1188,11 +1163,6 @@ TEST_F(ResourceTableValidationTest, MutatorTextureViewMustBeSingleAspect) {
 // Test that it is not allowed to call Update, RemoveBinding or InsertBinding after the table is
 // destroyed.
 TEST_F(ResourceTableValidationTest, MutatorsAfterDestroy) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     // Create the texture to put in the table.
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
@@ -1225,11 +1195,6 @@ TEST_F(ResourceTableValidationTest, MutatorsAfterDestroy) {
 
 // Test that it is not allowed to call Update, RemoveBinding with slots past the end.
 TEST_F(ResourceTableValidationTest, MutatorsAfterTableEnd) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     // Create the texture to put in the table.
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
@@ -1258,11 +1223,6 @@ TEST_F(ResourceTableValidationTest, MutatorsAfterTableEnd) {
 // Test that Update/RemoveBinding return success but generates a validation error when used on an
 // invalid table.
 TEST_F(ResourceTableValidationTest, MutatorsOnInvalidTable) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     // Create the texture to put in the table.
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
@@ -1302,11 +1262,6 @@ TEST_F(ResourceTableValidationTest, MutatorsOnInvalidTable) {
 
 // Test that Update() can be called on a table slot if it has never been used before.
 TEST_F(ResourceTableValidationTest, UpdateBindingWhenNeverUsed) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -1331,11 +1286,6 @@ TEST_F(ResourceTableValidationTest, UpdateBindingWhenNeverUsed) {
 
 // Test that Remove() can be called on a table slot even when it was never used.
 TEST_F(ResourceTableValidationTest, RemoveBindingWhenNeverUsed) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     // This is "content timeline" validation so it works the same on error tables and valid tables,
     // and we ignore device-timeline validation errors, they are not what we are testing here.
     for (auto table : {MakeResourceTable(3), MakeErrorResourceTable(3)}) {
@@ -1347,11 +1297,6 @@ TEST_F(ResourceTableValidationTest, RemoveBindingWhenNeverUsed) {
 // Check that a table slot can be updated only after all commands submitted prior to RemoveBinding
 // are completed.
 TEST_F(ResourceTableValidationTest, UpdateAfterRemoveRequiresGPUIsFinished) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -1397,11 +1342,6 @@ TEST_F(ResourceTableValidationTest, UpdateAfterRemoveRequiresGPUIsFinished) {
 
 // Check that trying to insert bindings fail when no more are available.
 TEST_F(ResourceTableValidationTest, InsertBindingFailWhenNoMoreSpace) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -1433,11 +1373,6 @@ TEST_F(ResourceTableValidationTest, InsertBindingFailWhenNoMoreSpace) {
 
 // Check that bindings that are inserted are unavailable for Update() until RemoveBinding.
 TEST_F(ResourceTableValidationTest, InsertBindingPreventsUpdate) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -1464,11 +1399,6 @@ TEST_F(ResourceTableValidationTest, InsertBindingPreventsUpdate) {
 
 // Check that InsertBinding skips over used slots.
 TEST_F(ResourceTableValidationTest, InsertBindingSkipsOverUsedSlots) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
@@ -1504,11 +1434,6 @@ TEST_F(ResourceTableValidationTest, InsertBindingSkipsOverUsedSlots) {
 
 // Test the value returned by GetSize right after creating the table.
 TEST_F(ResourceTableValidationTest, GetSizeAfterCreation) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     // Valid resource tables of varying size.
     {
         EXPECT_EQ(0u, MakeResourceTable(0).GetSize());
@@ -1534,11 +1459,6 @@ TEST_F(ResourceTableValidationTest, GetSizeAfterCreation) {
 
 // Test the value returned by GetSize after calling Destroy() should return the same value.
 TEST_F(ResourceTableValidationTest, GetSizeAfterDestroy) {
-    // TODO(https://issues.chromium.org/473444513): Implemented bindless in the wire.
-    if (UsesWire()) {
-        GTEST_SKIP();
-    }
-
     // Valid resource table.
     {
         wgpu::ResourceTable table = MakeResourceTable(42);

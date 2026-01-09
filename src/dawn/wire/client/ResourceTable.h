@@ -30,22 +30,37 @@
 
 #include <webgpu/webgpu.h>
 
+#include <vector>
+
 #include "dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
 
+class Device;
+
 class ResourceTable final : public ObjectBase {
   public:
-    explicit ResourceTable(const ObjectBaseParams& params);
+    static WGPUResourceTable Create(Device* device, const WGPUResourceTableDescriptor* descriptor);
+
+    ResourceTable(const ObjectBaseParams& params,
+                  Device* device,
+                  const WGPUResourceTableDescriptor* descriptor);
     ~ResourceTable() override;
 
     ObjectType GetObjectType() const override;
 
+    // WebGPU API
     void APIDestroy();
     WGPUStatus APIUpdate(uint32_t slot, const WGPUBindingResource* resource);
     uint32_t APIInsertBinding(const WGPUBindingResource* resource);
     WGPUStatus APIRemoveBinding(uint32_t slot);
     uint32_t APIGetSize() const;
+
+  private:
+    Ref<Device> mDevice;
+    bool mDestroyed = false;
+    uint32_t mSize = 0;
+    std::vector<uint64_t> mSlotAvailableAfterSubmit;
 };
 
 }  // namespace dawn::wire::client

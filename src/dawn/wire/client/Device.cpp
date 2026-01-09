@@ -277,6 +277,27 @@ bool Device::IsAlive() const {
     return mIsAlive;
 }
 
+Queue* Device::GetQueue() {
+    // The queue is lazily created because if a Device is created by Reserve/Inject, we cannot send
+    // the GetQueue message until it has been injected on the Server. It cannot happen immediately
+    // on construction.
+    if (mQueue == nullptr) {
+        // Get the primary queue for this device.
+        Client* client = GetClient();
+        mQueue = client->Make<Queue>(GetEventManagerHandle());
+
+        DeviceGetQueueCmd cmd;
+        cmd.self = ToAPI(this);
+        cmd.result = mQueue->GetWireHandle(client);
+        client->SerializeCommand(cmd);
+    }
+    return mQueue.Get();
+}
+
+const LimitsAndFeatures& Device::GetLimitsAndFeatures() const {
+    return mLimitsAndFeatures;
+}
+
 void Device::WillDropLastExternalRef() {
     if (IsRegistered()) {
         HandleDeviceLost(WGPUDeviceLostReason_Destroyed,
@@ -395,6 +416,10 @@ WGPUBuffer Device::APICreateErrorBuffer(const WGPUBufferDescriptor* descriptor) 
     return Buffer::CreateError(this, descriptor);
 }
 
+WGPUResourceTable Device::APICreateResourceTable(const WGPUResourceTableDescriptor* descriptor) {
+    return ResourceTable::Create(this, descriptor);
+}
+
 WGPUTexture Device::APICreateTexture(const WGPUTextureDescriptor* descriptor) {
     return Texture::Create(this, descriptor);
 }
@@ -409,23 +434,7 @@ WGPUAdapter Device::APIGetAdapter() const {
 }
 
 WGPUQueue Device::APIGetQueue() {
-    // The queue is lazily created because if a Device is created by
-    // Reserve/Inject, we cannot send the GetQueue message until
-    // it has been injected on the Server. It cannot happen immediately
-    // on construction.
-    if (mQueue == nullptr) {
-        // Get the primary queue for this device.
-        Client* client = GetClient();
-        mQueue = client->Make<Queue>(GetEventManagerHandle());
-
-        DeviceGetQueueCmd cmd;
-        cmd.self = ToAPI(this);
-        cmd.result = mQueue->GetWireHandle(client);
-
-        client->SerializeCommand(cmd);
-    }
-
-    Ref<Queue> queue = mQueue;
+    Ref<Queue> queue = GetQueue();
     return ReturnToAPI(std::move(queue));
 }
 
