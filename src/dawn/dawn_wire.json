@@ -114,9 +114,6 @@
             { "name": "configured device id", "type": "ObjectId", "id_type": "device" },
             { "name": "texture handle", "type": "ObjectHandle", "handle_type": "texture" }
         ],
-        "surface present": [
-            { "name": "self", "type": "surface" }
-        ],
         "instance request adapter": [
             { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "event manager handle", "type": "ObjectHandle" },

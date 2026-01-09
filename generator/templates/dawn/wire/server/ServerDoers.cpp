@@ -56,9 +56,12 @@ namespace dawn::wire::server {
                     //* If there is a return value, assign it.
                     {% if ret|length == 1 %}
                         *{{as_varName(ret[0].name)}} =
+                    {% elif method.returns and method.returns.type.name.canonical_case() == "status" %}
+                        WGPUStatus status =
                     {% else %}
                         //* Only one member should be a return value.
                         {{ assert(ret|length == 0) }}
+                        {{ assert(not method.returns) }}
                     {% endif %}
                     mProcs.{{as_varName(type.name, method.name)}}(
                         {%- for member in command.members if not member.is_return_value -%}
@@ -71,6 +74,15 @@ namespace dawn::wire::server {
                         //* object creation functions.
                         DAWN_ASSERT(*{{as_varName(ret[0].name)}} != nullptr);
                     {% endif %}
+
+                    //* The client is responsible for making sure what it does isn't an invalid API
+                    //* usage that will cause a WGPUStatus_Error.
+                    {% if method.returns and method.returns.type.name.canonical_case() == "status" %}
+                        if (status != WGPUStatus_Success) {
+                            return WireResult::FatalError;
+                        }
+                    {% endif %}
+
                     return WireResult::Success;
                 }
             {% endif %}

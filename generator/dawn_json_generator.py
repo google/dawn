@@ -759,11 +759,20 @@ def compute_wire_params(api_params, wire_json):
             command_name = concat_names(api_object.name, method.name)
             command_suffix = Name(command_name).CamelCase()
 
-            # Only object return values or void are supported.
+            # Only object return values, status or void are supported:
+            #
+            #- "void" is not a return value so commands can just be pushed to the server.
+            # - objects use the wire's "promise pipelining" and will be sent associated with the
+            #   WireHandle provided by the client.
+            # - "status" is used to synchronously return validation errors so the server checks that
+            #   they are always a success.
+            #
             # Other methods must be handwritten.
             is_object = method.returns and method.returns.type.category == 'object'
+            is_status = method.returns and method.returns.type.name.canonical_case(
+            ) == 'status'
             is_void = method.returns == None
-            if not (is_object or is_void):
+            if not (is_object or is_status or is_void):
                 assert command_suffix in (
                     wire_json['special items']['client_handwritten_commands']
                 ), command_suffix
