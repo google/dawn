@@ -1653,6 +1653,8 @@ void DawnTestBase::SetUp() {
 void DawnTestBase::TearDown() {
     ResolveDeferredExpectationsNow();
 
+    mRecorder.reset();
+
     if (mRequireUseTieredLimits) {
         mBackendAdapter.SetUseTieredLimits(false);
     }
@@ -2313,6 +2315,11 @@ void DawnTestBase::CheckReplayedReadbackBuffers(std::span<ReadbackSlot> existing
 
         replayedBuffer.Unmap();
     }
+
+    // Start a new recorder if we still have device
+    if (device != nullptr) {
+        mRecorder = Recorder::CreateAndStart(device);
+    }
 }
 
 std::unique_ptr<platform::Platform> DawnTestBase::CreateTestPlatform() {
@@ -2339,6 +2346,8 @@ void DawnTestBase::ResolveDeferredExpectationsNow() {
     for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
         mReadbackSlots[i].buffer.Unmap();
     }
+
+    mReadbackSlots.clear();
 }
 
 bool utils::RGBA8::operator<=(const utils::RGBA8& other) const {
