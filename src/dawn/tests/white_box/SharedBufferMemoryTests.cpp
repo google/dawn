@@ -472,6 +472,9 @@ TEST_P(SharedBufferMemoryTests, ReadWriteSharedMapWriteBuffer) {
 
 // Read and write a buffer with MapRead and CopyDst usages.
 TEST_P(SharedBufferMemoryTests, ReadWriteSharedMapReadBuffer) {
+    // TODO(crbug.com/468353728): Flaky on Snapdragon X Elite w/ D3D12.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
+
     // Create buffer buffer with initialized data.
     wgpu::SharedBufferMemory memory = GetParam().mBackend->CreateSharedBufferMemory(
         device, kMapReadUsages, kBufferSize, kBufferData);

@@ -556,6 +556,9 @@ TEST_P(WaitAnyTests, UnsupportedTimeout) {
 }
 
 TEST_P(WaitAnyTests, UnsupportedCount) {
+    // TODO(crbug.com/474391710): Flaky on Snapdragon X Elite w/ D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
+
     for (uint64_t timeout : {uint64_t(0), uint64_t(1)}) {
         // We don't support values higher than the default (64), and if you ask for lower than 64
         // you still get 64. DawnTest doesn't request anything (so requests 0) so gets 64.
