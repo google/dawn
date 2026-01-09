@@ -1133,6 +1133,9 @@ fn ep_func() {}
     EXPECT_FALSE(result[0].num_workgroups_used);
     EXPECT_FALSE(result[0].frag_depth_used);
     EXPECT_FALSE(result[0].fine_derivative_builtin_used);
+    EXPECT_FALSE(result[0].primitive_index_used);
+    EXPECT_FALSE(result[0].subgroup_invocation_id_used);
+    EXPECT_FALSE(result[0].subgroup_size_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
@@ -1227,6 +1230,99 @@ fn ep_func(in_var: in_struct) {}
 
     ASSERT_EQ(1u, result.size());
     EXPECT_TRUE(result[0].front_facing_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, PrimitiveIndexSimpleReferenced) {
+    auto* src = R"(
+enable primitive_index;
+@fragment
+fn ep_func(@builtin(primitive_index) in_var: u32) {}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].primitive_index_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, PrimitiveIndexStructReferenced) {
+    auto* src = R"(
+enable primitive_index;
+struct in_struct {
+  @builtin(primitive_index) inner_position: u32,
+}
+@fragment
+fn ep_func(in_var: in_struct) {}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].primitive_index_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, SubgroupInvocationIdSimpleReferenced) {
+    auto* src = R"(
+enable subgroups;
+@fragment
+fn ep_func(@builtin(subgroup_invocation_id) in_var: u32) {}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].subgroup_invocation_id_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, SubgroupInvocationIdStructReferenced) {
+    auto* src = R"(
+enable subgroups;
+struct in_struct {
+  @builtin(subgroup_invocation_id) inner_position: u32,
+}
+@fragment
+fn ep_func(in_var: in_struct) {}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].subgroup_invocation_id_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, SubgroupSizeSimpleReferenced) {
+    auto* src = R"(
+enable subgroups;
+@fragment
+fn ep_func(@builtin(subgroup_size) in_var: u32) {}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].subgroup_size_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, SubgroupSizeStructReferenced) {
+    auto* src = R"(
+enable subgroups;
+struct in_struct {
+  @builtin(subgroup_size) inner_position: u32,
+}
+@fragment
+fn ep_func(in_var: in_struct) {}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].subgroup_size_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, SampleIndexSimpleReferenced) {

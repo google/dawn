@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <bit>
 #include <limits>
 #include <memory>
 #include <sstream>
@@ -535,180 +536,6 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
     CheckTestPipeline(false, kMaxInterStageShaderVariables, wgpu::ShaderStage::Fragment);
 }
 
-// Validate the number of total inter-stage user-defined variables count and built-in variables
-// cannot exceed kMaxInterStageShaderVariables.
-TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderVariables) {
-    auto CheckTestPipeline = [&](bool success,
-                                 uint32_t totalUserDefinedInterStageShaderVariablesCount,
-                                 wgpu::ShaderStage failingShaderStage,
-                                 const char* extraBuiltInDeclarations = "",
-                                 bool usePointListAsPrimitiveType = false) {
-        // Build the ShaderIO struct containing totalUserDefinedInterStageShaderVariablesCount
-        // variables.
-        std::ostringstream stream;
-        stream << "struct ShaderIO {\n" << extraBuiltInDeclarations << "\n";
-        uint32_t vec4InputLocations = totalUserDefinedInterStageShaderVariablesCount;
-
-        for (uint32_t location = 0; location < vec4InputLocations; ++location) {
-            stream << "@location(" << location << ") var" << location << ": vec4f,\n";
-        }
-
-        if (failingShaderStage == wgpu::ShaderStage::Vertex) {
-            stream << " @builtin(position) pos: vec4f,\n";
-        }
-        stream << "}\n";
-
-        std::string ioStruct = stream.str();
-
-        // Build the test pipeline. Note that it's not possible with just ASSERT_DEVICE_ERROR
-        // whether it is the vertex or fragment shader that fails. So instead we will look for the
-        // string "failingVertex" or "failingFragment" in the error message.
-        utils::ComboRenderPipelineDescriptor pDesc;
-        pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
-        if (usePointListAsPrimitiveType) {
-            pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
-        } else {
-            pDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
-        }
-
-        const char* errorMatcher = nullptr;
-        switch (failingShaderStage) {
-            case wgpu::ShaderStage::Vertex: {
-                if (usePointListAsPrimitiveType) {
-                    errorMatcher = "PointList";
-                } else {
-                    errorMatcher = "failingVertex";
-                }
-
-                std::string shader = ioStruct + R"(
-                    @vertex fn failingVertex() -> ShaderIO {
-                        var shaderIO : ShaderIO;
-                        shaderIO.pos = vec4f(0.0, 0.0, 0.0, 1.0);
-                        return shaderIO;
-                     }
-                    @fragment fn main() -> @location(0) vec4f {
-                        return vec4f(0.0);
-                    })";
-                wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader);
-
-                pDesc.vertex.entryPoint = "failingVertex";
-                pDesc.vertex.module = shaderModule;
-                pDesc.cFragment.module = shaderModule;
-                break;
-            }
-
-            case wgpu::ShaderStage::Fragment: {
-                std::string shader = ioStruct + R"(
-                     @vertex fn main() -> @builtin(position) vec4f {
-                        return vec4f(0.0);
-                     }
-                     @fragment fn failingFragment(io : ShaderIO) -> @location(0) vec4f {
-                        return vec4f(0.0);
-                     })";
-                wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader);
-
-                errorMatcher = "failingFragment";
-                pDesc.cFragment.entryPoint = "failingFragment";
-                pDesc.cFragment.module = shaderModule;
-                pDesc.vertex.module = shaderModule;
-                break;
-            }
-
-            default:
-                DAWN_UNREACHABLE();
-        }
-
-        if (success) {
-            if (failingShaderStage == wgpu::ShaderStage::Vertex) {
-                // It is allowed that fragment inputs are a subset of the vertex output variables.
-                device.CreateRenderPipeline(&pDesc);
-            } else {
-                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
-                                    testing::HasSubstr("The fragment input at location"));
-            }
-        } else {
-            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
-                                testing::HasSubstr(errorMatcher));
-        }
-    };
-
-    // Verify when there is no input builtin variable in a fragment shader, the total user-defined
-    // input variables count must be less than kMaxInterStageShaderVariables.
-    {
-        CheckTestPipeline(true, kMaxInterStageShaderVariables, wgpu::ShaderStage::Fragment);
-        CheckTestPipeline(false, kMaxInterStageShaderVariables + 1, wgpu::ShaderStage::Fragment);
-    }
-
-    // Verify the total user-defined vertex output variables count must be less than
-    // kMaxInterStageShaderVariables.
-    {
-        CheckTestPipeline(true, kMaxInterStageShaderVariables, wgpu::ShaderStage::Vertex);
-        CheckTestPipeline(false, kMaxInterStageShaderVariables + 1, wgpu::ShaderStage::Vertex);
-    }
-
-    // Verify the total user-defined vertex output variables count must be less than or equal to
-    // (kMaxInterStageShaderVariables - 1) when the primitive topology is PointList.
-    {
-        constexpr bool kUsePointListAsPrimitiveTopology = true;
-        const char* kExtraBuiltins = "";
-
-        {
-            uint32_t variablesCount = kMaxInterStageShaderVariables - 1;
-            CheckTestPipeline(true, variablesCount, wgpu::ShaderStage::Vertex, kExtraBuiltins,
-                              kUsePointListAsPrimitiveTopology);
-        }
-        {
-            uint32_t variablesCount = kMaxInterStageShaderVariables;
-            CheckTestPipeline(false, variablesCount, wgpu::ShaderStage::Vertex, kExtraBuiltins,
-                              kUsePointListAsPrimitiveTopology);
-        }
-    }
-
-    // @builtin(position) in fragment shaders shouldn't be counted into the maximum inter-stage
-    // variables count.
-    {
-        CheckTestPipeline(true, kMaxInterStageShaderVariables, wgpu::ShaderStage::Fragment,
-                          "@builtin(position) fragCoord : vec4f,");
-    }
-
-    // @builtin(front_facing), @builtin(sample_index) and @builtin(sample_mask) should all be
-    // counted into the maximum inter-stage variables count. Then the maximum user-defined
-    // inter-stage shader variables can only be (kMaxInterStageShaderVariables - 1) because these
-    // user-defined inter-stage shader variables always consume 1 shader variable each.
-    {
-        constexpr uint8_t kMaskFrontFacing = 1;
-        constexpr uint8_t kMaskSampleIndex = 1 << 1;
-        constexpr uint8_t kMaskSampleMask = 1 << 2;
-        int useCount = 0;
-        for (uint8_t mask = 1; mask <= 7; ++mask) {
-            std::string builtInDeclarations = "";
-            if (mask & kMaskFrontFacing) {
-                builtInDeclarations += "@builtin(front_facing) frontFacing : bool,";
-                ++useCount;
-            }
-            if (mask & kMaskSampleIndex) {
-                builtInDeclarations += "@builtin(sample_index) sampleIndex : u32,";
-                ++useCount;
-            }
-            if (mask & kMaskSampleMask) {
-                builtInDeclarations += "@builtin(sample_mask) sampleMask : u32,";
-                ++useCount;
-            }
-
-            {
-                uint32_t variablesCount = kMaxInterStageShaderVariables - useCount;
-                CheckTestPipeline(true, variablesCount, wgpu::ShaderStage::Fragment,
-                                  builtInDeclarations.c_str());
-            }
-            {
-                uint32_t variablesCount = kMaxInterStageShaderVariables;
-                CheckTestPipeline(false, variablesCount, wgpu::ShaderStage::Fragment,
-                                  builtInDeclarations.c_str());
-            }
-        }
-    }
-}
-
 // Test that numeric ID must be unique
 TEST_F(ShaderModuleValidationTest, OverridableConstantsNumericIDConflicts) {
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
@@ -906,6 +733,216 @@ TEST_F(ShaderModuleValidationTest, UnicodeValidity) {
     }
     for (const char* testCase : kErrorTestCases) {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, kPrefix + testCase));
+    }
+}
+
+// Validate the number of total inter-stage user-defined variables count and built-in variables
+// cannot exceed kMaxInterStageShaderVariables.
+class ShaderModuleMaxInterStageShaderVariablesValidationTest : public ValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        wgpu::SupportedFeatures supportedFeatures;
+        adapter.GetFeatures(&supportedFeatures);
+        std::vector<wgpu::FeatureName> requiredFeatures(
+            supportedFeatures.features,
+            supportedFeatures.features + supportedFeatures.featureCount);
+        return requiredFeatures;
+    }
+};
+
+TEST_F(ShaderModuleMaxInterStageShaderVariablesValidationTest, Test) {
+    auto CheckTestPipeline =
+        [&](bool success, uint32_t totalUserDefinedInterStageShaderVariablesCount,
+            wgpu::ShaderStage failingShaderStage, const char* extraBuiltInDeclarations = "",
+            bool usePointListAsPrimitiveType = false) {
+            std::ostringstream stream;
+
+            // add enables
+            if (device.HasFeature(wgpu::FeatureName::PrimitiveIndex)) {
+                stream << "enable primitive_index;";
+            }
+
+            if (device.HasFeature(wgpu::FeatureName::Subgroups)) {
+                stream << "enable subgroups;";
+            }
+
+            // Build the ShaderIO struct containing totalUserDefinedInterStageShaderVariablesCount
+            // variables.
+            stream << "struct ShaderIO {\n" << extraBuiltInDeclarations << "\n";
+            uint32_t vec4InputLocations = totalUserDefinedInterStageShaderVariablesCount;
+
+            for (uint32_t location = 0; location < vec4InputLocations; ++location) {
+                stream << "@location(" << location << ") var" << location << ": vec4f,\n";
+            }
+
+            if (failingShaderStage == wgpu::ShaderStage::Vertex) {
+                stream << " @builtin(position) pos: vec4f,\n";
+            }
+            stream << "}\n";
+
+            std::string ioStruct = stream.str();
+
+            // Build the test pipeline. Note that it's not possible with just ASSERT_DEVICE_ERROR
+            // whether it is the vertex or fragment shader that fails. So instead we will look for
+            // the string "failingVertex" or "failingFragment" in the error message.
+            utils::ComboRenderPipelineDescriptor pDesc;
+            pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+            if (usePointListAsPrimitiveType) {
+                pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+            } else {
+                pDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+            }
+
+            const char* errorMatcher = nullptr;
+            switch (failingShaderStage) {
+                case wgpu::ShaderStage::Vertex: {
+                    if (usePointListAsPrimitiveType) {
+                        errorMatcher = "PointList";
+                    } else {
+                        errorMatcher = "failingVertex";
+                    }
+
+                    std::string shader = ioStruct + R"(
+                    @vertex fn failingVertex() -> ShaderIO {
+                        var shaderIO : ShaderIO;
+                        shaderIO.pos = vec4f(0.0, 0.0, 0.0, 1.0);
+                        return shaderIO;
+                     }
+                    @fragment fn main() -> @location(0) vec4f {
+                        return vec4f(0.0);
+                    })";
+                    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader);
+
+                    pDesc.vertex.entryPoint = "failingVertex";
+                    pDesc.vertex.module = shaderModule;
+                    pDesc.cFragment.module = shaderModule;
+                    break;
+                }
+
+                case wgpu::ShaderStage::Fragment: {
+                    std::string shader = ioStruct + R"(
+                     @vertex fn main() -> @builtin(position) vec4f {
+                        return vec4f(0.0);
+                     }
+                     @fragment fn failingFragment(io : ShaderIO) -> @location(0) vec4f {
+                        return vec4f(0.0);
+                     })";
+                    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader);
+
+                    errorMatcher = "failingFragment";
+                    pDesc.cFragment.entryPoint = "failingFragment";
+                    pDesc.cFragment.module = shaderModule;
+                    pDesc.vertex.module = shaderModule;
+                    break;
+                }
+
+                default:
+                    DAWN_UNREACHABLE();
+            }
+
+            if (success) {
+                if (failingShaderStage == wgpu::ShaderStage::Vertex) {
+                    // It is allowed that fragment inputs are a subset of the vertex output
+                    // variables.
+                    device.CreateRenderPipeline(&pDesc);
+                } else {
+                    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
+                                        testing::HasSubstr("The fragment input at location"));
+                }
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
+                                    testing::HasSubstr(errorMatcher));
+            }
+        };
+
+    // Verify when there is no input builtin variable in a fragment shader, the total user-defined
+    // input variables count must be less than kMaxInterStageShaderVariables.
+    {
+        CheckTestPipeline(true, kMaxInterStageShaderVariables, wgpu::ShaderStage::Fragment);
+        CheckTestPipeline(false, kMaxInterStageShaderVariables + 1, wgpu::ShaderStage::Fragment);
+    }
+
+    // Verify the total user-defined vertex output variables count must be less than
+    // kMaxInterStageShaderVariables.
+    {
+        CheckTestPipeline(true, kMaxInterStageShaderVariables, wgpu::ShaderStage::Vertex);
+        CheckTestPipeline(false, kMaxInterStageShaderVariables + 1, wgpu::ShaderStage::Vertex);
+    }
+
+    // Verify the total user-defined vertex output variables count must be less than or equal to
+    // (kMaxInterStageShaderVariables - 1) when the primitive topology is PointList.
+    {
+        constexpr bool kUsePointListAsPrimitiveTopology = true;
+        const char* kExtraBuiltins = "";
+
+        {
+            uint32_t variablesCount = kMaxInterStageShaderVariables - 1;
+            CheckTestPipeline(true, variablesCount, wgpu::ShaderStage::Vertex, kExtraBuiltins,
+                              kUsePointListAsPrimitiveTopology);
+        }
+        {
+            uint32_t variablesCount = kMaxInterStageShaderVariables;
+            CheckTestPipeline(false, variablesCount, wgpu::ShaderStage::Vertex, kExtraBuiltins,
+                              kUsePointListAsPrimitiveTopology);
+        }
+    }
+
+    // @builtin(position) in fragment shaders shouldn't be counted into the maximum inter-stage
+    // variables count.
+    {
+        CheckTestPipeline(true, kMaxInterStageShaderVariables, wgpu::ShaderStage::Fragment,
+                          "@builtin(position) fragCoord : vec4f,");
+    }
+
+    // @builtin(front_facing), @builtin(sample_index), @builtin(sample_mask),
+    // @builtin(primitive_index), @builtin(subgroup_invocation_id) and
+    // @builtin(subgroup_size) should all be counted into the maximum
+    // inter-stage variables count. Then the maximum user-defined inter-stage
+    // shader variables can only be (kMaxInterStageShaderVariables - 1) because
+    // these user-defined inter-stage shader variables always consume 1 shader
+    // variable each.
+    {
+        struct Builtin {
+            const char* name;
+            const char* type;
+            const char* extension;
+            std::optional<wgpu::FeatureName> requiredFeature;
+        };
+        Builtin builtins[] = {
+            {"front_facing", "bool", nullptr, {}},
+            {"sample_index", "u32", nullptr, {}},
+            {"sample_mask", "u32", nullptr, {}},
+            {"primitive_index", "u32", "primitive_index", wgpu::FeatureName::PrimitiveIndex},
+            {"subgroup_invocation_id", "u32", "subgroups", wgpu::FeatureName::Subgroups},
+            {"subgroup_size", "u32", "subgroups", wgpu::FeatureName::Subgroups},
+        };
+        for (uint8_t mask = 1; mask < 1 << std::size(builtins); ++mask) {
+            std::string builtInDeclarations = "";
+            bool canTest = true;
+            for (uint8_t b = 0; b < std::size(builtins); ++b) {
+                if (mask & (1 << b)) {
+                    const Builtin& builtin = builtins[b];
+                    builtInDeclarations += "@builtin(" + std::string(builtin.name) + ") b_" +
+                                           std::string(builtin.name) + ": " +
+                                           std::string(builtin.type) + ",";
+                    if (builtin.requiredFeature.has_value()) {
+                        if (!device.HasFeature(builtin.requiredFeature.value())) {
+                            canTest = false;
+                        }
+                    }
+                }
+            }
+            if (canTest) {
+                uint32_t variablesCount = kMaxInterStageShaderVariables - std::popcount(mask);
+                CheckTestPipeline(true, variablesCount, wgpu::ShaderStage::Fragment,
+                                  builtInDeclarations.c_str());
+            }
+            if (canTest) {
+                uint32_t variablesCount = kMaxInterStageShaderVariables - std::popcount(mask) + 1;
+                CheckTestPipeline(false, variablesCount, wgpu::ShaderStage::Fragment,
+                                  builtInDeclarations.c_str());
+            }
+        }
     }
 }
 

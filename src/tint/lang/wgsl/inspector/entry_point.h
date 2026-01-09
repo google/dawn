@@ -208,6 +208,12 @@ struct EntryPoint {
     bool uses_subgroup_matrix = false;
     /// Does the entry point use dpdxFine, dpdyFine, or fwidthFine
     bool fine_derivative_builtin_used = false;
+    /// Does the entry point use primitive_index
+    bool primitive_index_used = false;
+    /// Does the entry point use subgroup_invocation_id
+    bool subgroup_invocation_id_used = false;
+    /// Does the entry point use subgroup_size
+    bool subgroup_size_used = false;
     /// The array length of the clip_distances builtin. Holding no value means the clip_distances
     /// is not used.
     std::optional<uint32_t> clip_distances_size;

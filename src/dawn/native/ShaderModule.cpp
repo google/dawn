@@ -963,15 +963,25 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         // Other fragment metadata
         metadata->usesSampleMaskOutput = entryPoint.output_sample_mask_used;
         metadata->usesSampleIndex = entryPoint.sample_index_used;
-        if (entryPoint.front_facing_used) {
-            ++totalInterStageShaderVariables;
+
+        struct BoolName {
+            const bool& value;
+            const char* name;
+        };
+        BoolName boolNames[] = {
+            {entryPoint.front_facing_used, "front_facing"},
+            {entryPoint.input_sample_mask_used, "sample_mask"},
+            {entryPoint.sample_index_used, "sample_index_used"},
+            {entryPoint.primitive_index_used, "primitive_index_used"},
+            {entryPoint.subgroup_invocation_id_used, "subgroup_invocation_id"},
+            {entryPoint.subgroup_size_used, "subgroup_size"},
+        };
+        for (const auto& boolName : boolNames) {
+            if (boolName.value) {
+                ++totalInterStageShaderVariables;
+            }
         }
-        if (entryPoint.input_sample_mask_used) {
-            ++totalInterStageShaderVariables;
-        }
-        if (entryPoint.sample_index_used) {
-            ++totalInterStageShaderVariables;
-        }
+
         metadata->usesFragDepth = entryPoint.frag_depth_used;
         metadata->usesFragPosition = entryPoint.frag_position_used;
         metadata->usesFineDerivativeBuiltin = entryPoint.fine_derivative_builtin_used;
@@ -983,24 +993,13 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             std::ostringstream builtinInfo;
             if (metadata->totalInterStageShaderVariables > userDefinedInputVariables) {
                 builtinInfo << " + 1 (";
-                bool isFirst = true;
-                if (entryPoint.front_facing_used) {
-                    builtinInfo << "front_facing";
-                    isFirst = false;
-                }
-                if (entryPoint.input_sample_mask_used) {
-                    if (!isFirst) {
-                        builtinInfo << "|";
+
+                const char* separator = "";
+                for (const auto& boolName : boolNames) {
+                    if (boolName.value) {
+                        builtinInfo << separator << boolName.name;
+                        separator = "|";
                     }
-                    builtinInfo << "sample_mask";
-                    isFirst = false;
-                }
-                if (entryPoint.sample_index_used) {
-                    if (!isFirst) {
-                        builtinInfo << "|";
-                    }
-                    builtinInfo << "sample_index";
-                    isFirst = false;
                 }
             }
 
