@@ -143,9 +143,22 @@ interop::GPUFlagsConstant GPUTexture::getUsage(Napi::Env env) {
 }
 
 std::variant<interop::GPUTextureViewDimension, interop::UndefinedType>
-GPUTexture::getTextureBindingViewDimension(Napi::Env) {
-    // TODO(https://issues.chromium.org/458616688): Implement once the getter is added to dawn.json
-    return interop::UndefinedType{};
+GPUTexture::getTextureBindingViewDimension(Napi::Env env) {
+    wgpu::TextureViewDimension viewDimension = texture_.GetTextureBindingViewDimension();
+
+    if (viewDimension == wgpu::TextureViewDimension::Undefined) {
+        return interop::UndefinedType{};
+    }
+
+    interop::GPUTextureViewDimension result;
+    Converter conv(env);
+    if (!conv(result, texture_.GetTextureBindingViewDimension())) {
+        Napi::Error::New(env, "Couldn't convert usage to a JavaScript value.")
+            .ThrowAsJavaScriptException();
+        return interop::UndefinedType{};
+    }
+
+    return result;
 }
 
 std::string GPUTexture::getLabel(Napi::Env) {

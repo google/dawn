@@ -840,6 +840,33 @@ bool Converter::Convert(wgpu::TextureViewDimension& out,
     return Throw("invalid value for GPUTextureViewDimension");
 }
 
+bool Converter::Convert(interop::GPUTextureViewDimension& out,
+                        const wgpu::TextureViewDimension in) {
+    switch (in) {
+        case wgpu::TextureViewDimension::e1D:
+            out = interop::GPUTextureViewDimension::k1D;
+            return true;
+        case wgpu::TextureViewDimension::e2D:
+            out = interop::GPUTextureViewDimension::k2D;
+            return true;
+        case wgpu::TextureViewDimension::e2DArray:
+            out = interop::GPUTextureViewDimension::k2DArray;
+            return true;
+        case wgpu::TextureViewDimension::Cube:
+            out = interop::GPUTextureViewDimension::kCube;
+            return true;
+        case wgpu::TextureViewDimension::CubeArray:
+            out = interop::GPUTextureViewDimension::kCubeArray;
+            return true;
+        case wgpu::TextureViewDimension::e3D:
+            out = interop::GPUTextureViewDimension::k3D;
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
 bool Converter::Convert(wgpu::ComputeState& out, const interop::GPUProgrammableStage& in) {
     out = {};
     out.module = *in.module.As<GPUShaderModule>();

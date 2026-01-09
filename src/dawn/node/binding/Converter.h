@@ -287,6 +287,9 @@ class Converter {
     // Below are the various overloads of Convert() used to convert the Dawn types -> interop.
     [[nodiscard]] bool Convert(interop::GPUTextureDimension& out, wgpu::TextureDimension in);
 
+    [[nodiscard]] bool Convert(interop::GPUTextureViewDimension& out,
+                               wgpu::TextureViewDimension in);
+
     [[nodiscard]] bool Convert(interop::GPUTextureFormat& out, wgpu::TextureFormat in);
 
     [[nodiscard]] bool Convert(interop::GPUTextureUsageFlags& out, wgpu::TextureUsage in);
