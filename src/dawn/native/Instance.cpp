@@ -224,6 +224,10 @@ InstanceBase::InstanceBase(const TogglesState& instanceToggles)
 InstanceBase::~InstanceBase() = default;
 
 void InstanceBase::DeleteThis() {
+    // Stop tracking events. See comment on ShutDown.
+    mEventManager.ShutDown();
+    mLoggingCallbackInfo = kEmptyLoggingCallbackInfo;
+
     // Flush all remaining callback tasks on all devices and on the instance.
     absl::flat_hash_set<DeviceBase*> devices;
     do {
@@ -242,17 +246,11 @@ void InstanceBase::DeleteThis() {
         mCallbackTaskManager->Flush();
     } while (!mCallbackTaskManager->IsEmpty());
 
-    RefCountedWithExternalCount::DeleteThis();
+    RefCounted::DeleteThis();
 }
 
 void InstanceBase::DisconnectDawnPlatform() {
     SetPlatform(nullptr);
-}
-
-void InstanceBase::WillDropLastExternalRef() {
-    // Stop tracking events. See comment on ShutDown.
-    mEventManager.ShutDown();
-    mLoggingCallbackInfo = kEmptyLoggingCallbackInfo;
 }
 
 // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
