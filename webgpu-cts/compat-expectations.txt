@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-01-09 11:12:45AM
+# Last rolled: 2026-01-12 09:38:41AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -2261,6 +2261,21 @@ crbug.com/0000 [ linux nvidia ] webgpu:api,validation,encoding,encoder_open_stat
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,encoding,encoder_open_state:render_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,validation,encoding,encoder_open_state:render_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,encoding,encoder_open_state:render_pass_commands:command="setImmediates" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,let:type:case="sampler" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,let:type:case="sampler" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,let:type:case="sampler" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,let:type:case="sampler_comparison" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,let:type:case="sampler_comparison" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,let:type:case="sampler_comparison" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,let:type:case="texture_2d" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,let:type:case="texture_2d" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,let:type:case="texture_2d" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,let:type:case="texture_storage_1d" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,let:type:case="texture_storage_1d" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,let:type:case="texture_storage_1d" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="texture_and_sampler_let" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="texture_and_sampler_let" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="texture_and_sampler_let" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="offscreen";format="bgra8unorm";usage=0 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="offscreen";format="bgra8unorm";usage=0 [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="offscreen";format="bgra8unorm";usage=0 [ Failure ]
