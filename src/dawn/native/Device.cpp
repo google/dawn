@@ -1452,7 +1452,7 @@ QuerySetBase* DeviceBase::APICreateQuerySet(const QuerySetDescriptor* descriptor
 }
 ResourceTableBase* DeviceBase::APICreateResourceTable(const ResourceTableDescriptor* descriptor) {
     Ref<ResourceTableBase> result;
-    if (ConsumedError(CreateResourceTable(descriptor), &result,
+    if (ConsumedError(CreateResourceTable(descriptor), &result, InternalErrorType::OutOfMemory,
                       "calling %s.CreateResourceTable(%s).", this, descriptor)) {
         result = ResourceTableBase::MakeError(this, descriptor);
     }
