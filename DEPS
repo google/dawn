@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '1a72e6d92a5164e77f2dadb89407463d18b796cb',
+  'chromium_revision': '073d9b927e6ccc24137351fa6429c430b0a1bbc7',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -107,7 +107,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@7c837b993aba7a5efbd5ca6f00271f2df7d1e495',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@fb0b652edba70f5c4ac867f3beca9e535f905b4c',
     'condition': 'dawn_standalone',
   },
 
@@ -123,7 +123,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@4d1d71696f4c33f218b9969ef698a1d57833bdf9',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@e9f0fd9932428fc109b848892050daadc2d91cc9',
     'condition': 'dawn_standalone',
   },
 
@@ -138,7 +138,7 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@fdd2f031668c57ae894fe311da47b7f97e1b5c16',
+  'url': '{chromium_git}/chromium/src/build@d747365c051153cc89f25e6adc95538aabcdd319',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
@@ -248,7 +248,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@771d29aa974b8b2d2b7b9b0ced9bffa170597070',
+    'url': '{chromium_git}/chromium/src/testing@3052f51ada5e06b1ce10dbe07b77f5a7cc282401',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -345,7 +345,7 @@ deps = {
   },
 
   'third_party/zlib': {
-    'url': '{chromium_git}/chromium/src/third_party/zlib@e00f7038713ff2e751c28a1ac08f0b68bca8567c',
+    'url': '{chromium_git}/chromium/src/third_party/zlib@2182f37a0861358faa9f6b8e0dacce32142c3a33',
     'condition': 'dawn_standalone',
   },
 
@@ -593,7 +593,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@9cce6259aef60f8dbea52f421bb0234eb7cdadd5',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@b2155fca494c5b6266d42f9129ae3a7b85482c95',
     'condition': 'dawn_standalone',
   },
 
