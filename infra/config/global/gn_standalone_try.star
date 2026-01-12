@@ -225,6 +225,16 @@ dawn_win_functional_cq_tester(
 )
 
 dawn_win_functional_cq_tester(
+    name = "dawn-cq-win-arm64-rel",
+    description_html = "Tests release Dawn on Win/ARM64 configs. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-win-arm64-builder-rel",
+        "ci/dawn-win-arm64-qualcomm-snapdragonxelite-rel",
+    ],
+    gn_args = "ci/dawn-win-arm64-builder-rel",
+)
+
+dawn_win_functional_cq_tester(
     name = "dawn-cq-win-x64-msvc-dbg",
     description_html = "Tests debug Dawn built with MSVC on Win/x64 on multiple hardware configs. Blocks CL submission",
     mirrors = [

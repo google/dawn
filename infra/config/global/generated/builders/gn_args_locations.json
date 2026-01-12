@@ -34,6 +34,7 @@
     "dawn-cq-mac-arm64-rel": "try/dawn-cq-mac-arm64-rel/gn-args.json",
     "dawn-cq-mac-x64-dbg": "try/dawn-cq-mac-x64-dbg/gn-args.json",
     "dawn-cq-mac-x64-rel": "try/dawn-cq-mac-x64-rel/gn-args.json",
+    "dawn-cq-win-arm64-rel": "try/dawn-cq-win-arm64-rel/gn-args.json",
     "dawn-cq-win-x64-dbg": "try/dawn-cq-win-x64-dbg/gn-args.json",
     "dawn-cq-win-x64-msvc-dbg": "try/dawn-cq-win-x64-msvc-dbg/gn-args.json",
     "dawn-cq-win-x64-msvc-rel": "try/dawn-cq-win-x64-msvc-rel/gn-args.json",
