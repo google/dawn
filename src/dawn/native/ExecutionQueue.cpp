@@ -69,8 +69,9 @@ MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Na
     // explicitly enables thread safe wait, the main blocking backend is D3D11 which is using the
     // value of |mCompletedSerial| within it's implementation of |CheckAndUpdateCompletedSerials|.
     if (GetDevice()->IsToggleEnabled(Toggle::WaitIsThreadSafe)) {
-        {
+        if (waitSerial > GetLastSubmittedCommandSerial()) {
             auto deviceGuard = GetDevice()->GetGuard();
+            // Check submitted command serial again since it could have been incremented already.
             if (waitSerial > GetLastSubmittedCommandSerial()) {
                 // Serial has not been submitted yet. Submit it now.
                 DAWN_TRY(EnsureCommandsFlushed(waitSerial));
