@@ -153,6 +153,13 @@ crbug.com/409266267 [ amd mac ] webgpu:shader,execution,expression,call,builtin,
 crbug.com/408250014 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_3d_coords:* [ Skip ]
 crbug.com/408250014 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_3d_coords:* [ Skip ]
 
+# textureGather with offset broken on android-t and android-14
+crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_2d_coords:*;offset=true [ Skip ]
+crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:*;offset=true [ Skip ]
+crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:*;offset=true [ Skip ]
+crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Skip ]
+crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:*;offset=true [ Skip ]
+
 ################################################################################
 # Temporary Skip Expectations
 #
@@ -189,13 +196,6 @@ crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,
 crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:* [ Skip ]
 crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Skip ]
 crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Skip ]
-
-# textureGather with offset broken on android-t and android-14
-crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_2d_coords:*;offset=true [ Skip ]
-crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:*;offset=true [ Skip ]
-crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:*;offset=true [ Skip ]
-crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Skip ]
-crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:*;offset=true [ Skip ]
 
 # Wrapping is incorrect for texture gather (skip or fail? - they'll never pass, but skip means no testing)
 crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc1-rgba-unorm";* [ Skip ]
