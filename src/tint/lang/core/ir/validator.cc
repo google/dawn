@@ -3664,6 +3664,13 @@ void Validator::CheckInterpolation(const CastableBase* anchor,
                 has_location |= (capabilities_.Contains(Capability::kLoosenValidationForShaderIO) &&
                                  a.builtin.has_value());
 
+                if (t->IsIntegerScalar()) {
+                    if (a.interpolation.value().type != InterpolationType::kFlat) {
+                        AddError(anchor)
+                            << "interpolation attribute type must be flat for integral types";
+                    }
+                }
+
                 if (!has_location) {
                     if (!capabilities_.Contains(Capability::kLoosenValidationForShaderIO)) {
                         AddError(anchor) << "interpolation attribute requires a location attribute";

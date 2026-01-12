@@ -1559,6 +1559,26 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_WithBuiltin_WithoutCapability) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_Interpolate_Integral_NotFlat) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("p", ty.i32());
+    p->SetLocation(0);
+    p->SetInterpolation(Interpolation{InterpolationType::kLinear, InterpolationSampling::kCenter});
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:1:27 error: interpolation attribute type must be flat for integral types
+%my_func = @fragment func(%p:i32 [@location(0), @interpolate(linear, center)]):void {
+                          ^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_ParameterWithConstructibleType) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("my_param", ty.u32());
