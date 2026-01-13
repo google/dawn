@@ -37,6 +37,7 @@
 #include "dawn/tests/DawnNativeTest.h"
 #include "dawn/tests/MockCallback.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "mocks/BindGroupLayoutMock.h"
 #include "mocks/BindGroupMock.h"
@@ -1070,6 +1071,31 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     EXPECT_FALSE(FromAPI(csModule.Get())->IsAlive());
     EXPECT_FALSE(FromAPI(texture.Get())->IsAlive());
     EXPECT_FALSE(FromAPI(textureView.Get())->IsAlive());
+}
+
+// Verify that the object's destruction (which modifies the internal object list) shouldn't race
+// with other objects' IsAlive() checks. Each thread creates a buffer, checks IsAlive(), and drops
+// the ref, causing the buffer to be removed from the tracking list.
+TEST_F(DestroyObjectTests, IsAliveRace) {
+    constexpr uint32_t kNumThreads = 10;
+    constexpr uint32_t kBuffersPerThread = 100;
+
+    dawn::utils::RunInParallel(kNumThreads, [&](uint32_t threadIndex) {
+        for (uint32_t i = 0; i < kBuffersPerThread; i++) {
+            // Create a buffer
+            BufferDescriptor desc = {};
+            desc.size = 16;
+            desc.usage = wgpu::BufferUsage::Uniform;
+            Ref<BufferMock> bufferMock = AcquireRef(new BufferMock(mDeviceMock, &desc));
+            EXPECT_CALL(*bufferMock.Get(), DestroyImpl).Times(1);
+
+            // Check that it's alive
+            EXPECT_TRUE(bufferMock->IsAlive());
+
+            // Drop the ref, causing destruction which removes it from the tracking list
+            bufferMock = nullptr;
+        }
+    });
 }
 
 class DestroyObjectRegressionTests : public DawnNativeTest {};
