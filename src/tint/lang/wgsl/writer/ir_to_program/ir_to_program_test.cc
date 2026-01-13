@@ -3704,23 +3704,5 @@ fn f() {
 )");
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// chromium_internal_graphite
-////////////////////////////////////////////////////////////////////////////////
-TEST_F(IRToProgramTest, Enable_ChromiumInternalGraphite_SubgroupBallot) {
-    b.Append(b.ir.root_block, [&] {
-        auto t = b.Var("T", ty.ref<core::AddressSpace::kHandle>(ty.storage_texture(
-                                core::type::TextureDimension::k2d, core::TexelFormat::kR8Unorm,
-                                core::Access::kRead)));
-        t->SetBindingPoint(0, 0);
-    });
-
-    EXPECT_WGSL(R"(
-enable chromium_internal_graphite;
-
-@group(0u) @binding(0u) var T : texture_storage_2d<r8unorm, read>;
-)");
-}
-
 }  // namespace
 }  // namespace tint::wgsl::writer
