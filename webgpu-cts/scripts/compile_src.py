@@ -105,6 +105,10 @@ if __name__ == "__main__":
 
     # Run gen_listings.js to overwrite the placeholder src/webgpu/listings.js created
     # from transpiling src/
+    # Note: Need to place a package.json file so that the NodeJS invocation
+    # below correctly parses gen_listings_and_webworkers.js as CommonJS.
+    with open(os.path.join(gen_dir, 'src-node', 'package.json'), 'w') as f:
+        f.write('{"type": "commonjs"}')
     RunNode([
         os.path.join(gen_dir, "src-node", "common", "tools",
                      "gen_listings_and_webworkers.js"),
