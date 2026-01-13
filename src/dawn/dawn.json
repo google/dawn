@@ -2431,7 +2431,8 @@
             {"value": 55, "name": "adapter properties WGPU", "tags": ["dawn"]},
             {"value": 56, "name": "shared buffer memory D3D12 shared memory file mapping handle", "tags": ["dawn"]},
             {"value": 57, "name": "shared texture memory D3D12 resource", "tags": ["dawn", "native"]},
-            {"value": 58, "name": "chromium experimental sampling resource table", "tags": ["dawn"]}
+            {"value": 58, "name": "chromium experimental sampling resource table", "tags": ["dawn"]},
+            {"value": 59, "name": "chromium experimental subgroup size control", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

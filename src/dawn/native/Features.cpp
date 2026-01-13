@@ -432,6 +432,11 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::ChromiumExperimentalSamplingResourceTable,
      {"Experimental support for the bindless sampling resource table",
       "https://github.com/Kangz/gpuweb/blob/bindless/proposals/bindless.md",
+      FeatureInfo::FeatureState::Experimental}},
+    {Feature::ChromiumExperimentalSubgroupSizeControl,
+     {"Support the \"enable chromium_experimental_subgroup_size_control;\" directive in WGSL.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/tint/extensions/"
+      "chromium_experimental_subgroup_size_control.md",
       FeatureInfo::FeatureState::Experimental}}};
 
 }  // anonymous namespace

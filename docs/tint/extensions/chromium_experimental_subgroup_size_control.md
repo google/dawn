@@ -29,7 +29,7 @@ experimental extension it would be `enable chromium_experimental_subgroup_size_c
 
 This extension adds a new `subgroup_size` attribute for `compute` shaders.
 
-This extension must be used together with the extension `subgroups`.
+Enabling this extension on the API side will implicitly enable the `subgroups` extension.
 
 ```
 subgroup_size_attr :

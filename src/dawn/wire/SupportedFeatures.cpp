@@ -123,6 +123,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_PrimitiveIndex:
         case WGPUFeatureName_AdapterPropertiesWGPU:
         case WGPUFeatureName_ChromiumExperimentalSamplingResourceTable:
+        case WGPUFeatureName_ChromiumExperimentalSubgroupSizeControl:
             return true;
     }
 

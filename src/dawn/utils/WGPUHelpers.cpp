@@ -475,6 +475,13 @@ const absl::flat_hash_map<wgpu::FeatureName, absl::flat_hash_set<wgpu::FeatureNa
     kImplicitlyEnabledFeaturesMap = {
         {wgpu::FeatureName::TextureFormatsTier1, {wgpu::FeatureName::RG11B10UfloatRenderable}},
         {wgpu::FeatureName::TextureFormatsTier2, {wgpu::FeatureName::TextureFormatsTier1}},
+
+// Below are experimental features that are not supported by Emscripten.
+#ifndef __EMSCRIPTEN__
+        {wgpu::FeatureName::ChromiumExperimentalSubgroupSizeControl,
+         {wgpu::FeatureName::Subgroups}},
+#endif
+
         // Add other implicit enabling rules here
 };
 

@@ -1791,6 +1791,9 @@ void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescri
     if (mEnabledFeatures.IsEnabled(Feature::TextureFormatsTier1)) {
         mEnabledFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
     }
+    if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalSubgroupSizeControl)) {
+        mEnabledFeatures.EnableFeature(Feature::Subgroups);
+    }
 
     if (level == wgpu::FeatureLevel::Core) {
         // Core-defaulting adapters always support the "core-features-and-limits" feature.
@@ -1844,6 +1847,10 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalSamplingResourceTable)) {
         mWGSLAllowedFeatures.extensions.insert(
             tint::wgsl::Extension::kChromiumExperimentalResourceTable);
+    }
+    if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalSubgroupSizeControl)) {
+        mWGSLAllowedFeatures.extensions.insert(
+            tint::wgsl::Extension::kChromiumExperimentalSubgroupSizeControl);
     }
 
     // Language features are enabled instance-wide.
