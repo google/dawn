@@ -2636,6 +2636,30 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonRootBlockOverride) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ModuleScopeRuntimeExpression) {
+    auto* f = ComputeEntryPoint();
+
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.atomic(ty.u32())));
+    mod.root_block->Append(v);
+
+    auto* load = b.Call(ty.u32(), core::BuiltinFn::kAtomicLoad, v->Result(0));
+    mod.root_block->Append(load);
+
+    f->SetWorkgroupSize({load->Result(0), b.Constant(1_u), b.Constant(1_u)});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:3:12 error: atomicLoad: instruction is not evaluatable at pipeline creation time
+  %2:u32 = atomicLoad %v
+           ^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_SubgroupSize_NonCompute) {
     auto* f = FragmentEntryPoint();
     f->SetSubgroupSize(b.Constant(16_i));

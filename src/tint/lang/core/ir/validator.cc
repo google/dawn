@@ -2482,10 +2482,37 @@ void Validator::CheckRootBlock(const Block* blk) {
     block_stack_.Push(blk);
     TINT_DEFER(block_stack_.Pop());
 
+    Hashset<const core::ir::Value*, 8> pipeline_evaluatable{};
+
+    auto add_evaluatable = [&](const Instruction* inst, const bool is_creatable) {
+        if (auto* res = inst->Result(0); res != nullptr && is_creatable) {
+            pipeline_evaluatable.Add(res);
+        }
+    };
+
     for (auto* inst : *blk) {
         if (inst->Block() != blk) {
             AddError(inst) << "instruction in root block does not have root block as parent";
             continue;
+        }
+
+        auto is_pipeline_creatable = true;
+        for (auto* op : inst->Operands()) {
+            if (!op) {
+                continue;
+            }
+            if (op->Is<core::ir::Constant>()) {
+                continue;
+            }
+            if (pipeline_evaluatable.Contains(op)) {
+                continue;
+            }
+            is_pipeline_creatable = false;
+            break;
+        }
+
+        if (!is_pipeline_creatable) {
+            AddError(inst) << "instruction is not evaluatable at pipeline creation time";
         }
 
         tint::Switch(
@@ -2493,6 +2520,7 @@ void Validator::CheckRootBlock(const Block* blk) {
             [&](const core::ir::Override* o) {
                 if (capabilities_.Contains(Capability::kAllowOverrides)) {
                     CheckInstruction(o);
+                    add_evaluatable(o, is_pipeline_creatable);
                 } else {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
                 }
@@ -2501,6 +2529,7 @@ void Validator::CheckRootBlock(const Block* blk) {
             [&](const core::ir::Let* let) {
                 if (capabilities_.Contains(Capability::kAllowModuleScopeLets)) {
                     CheckInstruction(let);
+                    add_evaluatable(let, is_pipeline_creatable);
                 } else {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
                 }
@@ -2510,16 +2539,15 @@ void Validator::CheckRootBlock(const Block* blk) {
                     capabilities_.Contains(Capability::kAllowOverrides)) {
                     CheckInstruction(c);
                     CheckOnlyUsedInRootBlock(inst);
+                    add_evaluatable(c, is_pipeline_creatable);
                 } else {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
                 }
             },
             [&](Default) {
                 // Note, this validation around kAllowOverrides is looser than it could be. There
-                // are only certain expressions and builtins which can be used in an override, but
-                // the current checks are only doing type level checking. To tighten this up will
-                // require walking up the tree to make sure that operands are const/override and
-                // builtins are allowed.
+                // are only certain expressions and builtins which can be used in an override, which
+                // currently isn't checked.
                 if (capabilities_.Contains(Capability::kAllowOverrides) &&
                     inst->IsAnyOf<core::ir::Unary, core::ir::Binary, core::ir::BuiltinCall,
                                   core::ir::Convert, core::ir::Swizzle, core::ir::Access,
@@ -2529,6 +2557,7 @@ void Validator::CheckRootBlock(const Block* blk) {
                     // block, with the caveat that those instructions can _only_ be used in the root
                     // block.
                     CheckOnlyUsedInRootBlock(inst);
+                    add_evaluatable(inst, is_pipeline_creatable);
                 } else {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
                 }
@@ -3116,18 +3145,10 @@ void Validator::CheckWorkgroupSize(const Function* func) {
                 return;
             }
 
-            if (r->Instruction()->Is<core::ir::Override>()) {
-                continue;
-            }
-
-            // TODO(376624999): Finish implementing checking that this is a override/constant
-            //  expression, i.e. calculated from only appropriate values/operations, once override
-            //  implementation is complete
-            // for each value/operation used to calculate param:
-            //        if  not constant expression && not override expression:
-            //            fail
-            //    pass
-
+            // Since above, it is already checked if the value is in the root block, it is assumed
+            // to be pipeline creatable here, i.e. const/override or derived from consts and
+            // overrides.
+            // If that is not true, that indicates an issue in CheckRootBlock().
             continue;
         }
 
