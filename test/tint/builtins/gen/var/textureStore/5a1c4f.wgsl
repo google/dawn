@@ -35,8 +35,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-enable chromium_internal_graphite;
-
 requires texel_buffers;
 @group(1) @binding(0) var arg_0: texel_buffer<r8unorm, read_write>;
 

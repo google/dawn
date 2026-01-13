@@ -508,13 +508,6 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
         return "";
     }
 
-    const char* GetEnable(wgpu::TextureFormat format) {
-        if (format == wgpu::TextureFormat::R8Unorm) {
-            return "enable chromium_internal_graphite;";
-        }
-        return "";
-    }
-
     std::string CommonWriteOnlyTestCode(
         const char* stage,
         wgpu::TextureFormat format,
@@ -550,7 +543,6 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
         const bool isFragment = strcmp(stage, "fragment") == 0;
 
         std::ostringstream ostream;
-        ostream << GetEnable(format) << "\n";
         ostream << GetImageDeclaration(format, "write", dimension, 0) << "\n";
         ostream << "@" << stage << workgroupSize << "\n";
         ostream << "fn main() ";
@@ -591,7 +583,6 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
                                          : "any(abs(pixel - expected) > vec4<f32>(0.001))";
 
         std::ostringstream ostream;
-        ostream << GetEnable(format) << "\n";
         ostream << GetImageDeclaration(format, "read", dimension, 0) << "\n";
         ostream << "@" << stage << " fn main() ";
         if (isFragment) {

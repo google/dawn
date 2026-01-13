@@ -84,8 +84,6 @@ enum extension {
 
   // A Chromium-specific extension for disabling uniformity analysis.
   chromium_disable_uniformity_analysis
-  // A Chromium-specific extension that enables features for graphite
-  chromium_internal_graphite
   // A Chromium-specific extension that enables features for input
   // attachments
   chromium_internal_input_attachments

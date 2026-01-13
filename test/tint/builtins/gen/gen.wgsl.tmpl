@@ -341,11 +341,6 @@ enable chromium_internal_input_attachments;
 enable f16;
 {{    end -}}
 
-{{- /* Emit 'enable chromium_internal_graphite' if required */ -}}
-{{-   if OverloadUsesType $overload "r8unorm"}}
-enable chromium_internal_graphite;
-{{    end -}}
-
 {{- /* Emit 'requires texel_buffers' if required */ -}}
 {{-   if OverloadUsesType $overload "texel_buffer"}}
 requires texel_buffers;

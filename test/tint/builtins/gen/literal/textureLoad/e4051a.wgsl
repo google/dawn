@@ -37,8 +37,6 @@
 
 // flags: --glsl-desktop
 
-enable chromium_internal_graphite;
-
 @group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @group(1) @binding(0) var arg_0: texture_storage_2d<r8unorm, read_write>;

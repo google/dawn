@@ -1,5 +1,3 @@
-enable chromium_internal_graphite;
-
 @group(1) @binding(0) var arg_0 : texture_storage_3d<r8unorm, write>;
 
 fn textureStore_1a264d() {
