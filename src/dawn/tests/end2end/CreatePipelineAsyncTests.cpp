@@ -892,6 +892,9 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithVertexBufferLayouts
 
 // Verify calling CreateRenderPipelineAsync() with valid depthStencilState works on all backends.
 TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithDepthStencilState) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.size = {1, 1, 1};
     textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;

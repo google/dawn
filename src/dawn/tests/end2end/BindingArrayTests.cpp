@@ -448,6 +448,8 @@ TEST_P(SizedBindingArrayTests, BindingArraySampledTextureAsFunctionArgument) {
 
 // Test accessing a binding_array of sampled textures passed as function argument.
 TEST_P(SizedBindingArrayTests, BindingArrayOfSampledTexturesPassedAsArgument) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsVulkan());
     // Crashes on the Intel Windows Vulkan shader compiler.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsWindows() && IsIntel());
 

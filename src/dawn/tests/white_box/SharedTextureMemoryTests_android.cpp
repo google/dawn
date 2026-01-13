@@ -381,6 +381,8 @@ TEST_P(SharedTextureMemoryTests, CPUWriteThenGPURead) {
 TEST_P(SharedTextureMemoryTests, InvalidSharedTextureMemoryAHardwareBufferProperties) {
     DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::YCbCrVulkanSamplers}));
 
+    // TODO(crbug.com/40238674): Fails on Pixel 10 vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsVulkan());
     // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsIntel() && IsAndroid());
 
@@ -415,6 +417,9 @@ TEST_P(SharedTextureMemoryTests, InvalidSharedTextureMemoryAHardwareBufferProper
 
 // Test querying YCbCr info from the Device.
 TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoFromDevice) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsVulkan());
+
     DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::YCbCrVulkanSamplers}));
 
     // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
@@ -481,6 +486,9 @@ TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoFromDevice) {
 
 // Test querying YCbCr info from the SharedTextureMemory without external format.
 TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoWithoutExternalFormat) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsVulkan());
+
     DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::YCbCrVulkanSamplers}));
 
     // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.

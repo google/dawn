@@ -634,6 +634,8 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRow) {
 // Test with bytesPerRow greater than needed for cube textures.
 // Made for testing compat behavior.
 TEST_P(QueueWriteTextureTests, VaryingBytesPerRowCube) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     auto format = GetParam().mTextureFormat;
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());

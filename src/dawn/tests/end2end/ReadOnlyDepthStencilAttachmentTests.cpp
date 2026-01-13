@@ -358,6 +358,8 @@ TEST_P(ReadOnlyDepthAttachmentTests, UnusedAspectWithReadOnly) {
 class ReadOnlyStencilAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {};
 
 TEST_P(ReadOnlyStencilAttachmentTests, SampleFromAttachment) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // stencilRefValue < stencilValue (stencilInitValue), so stencil test passes. The pipeline
     // samples from stencil buffer and writes into color buffer.
     {
@@ -386,6 +388,8 @@ TEST_P(ReadOnlyStencilAttachmentTests, SampleFromAttachment) {
 }
 
 TEST_P(ReadOnlyStencilAttachmentTests, NotSampleFromAttachment) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // stencilRefValue < stencilValue (stencilInitValue), so stencil test passes. The pipeline
     // draw solid blue into color buffer.
     {
@@ -423,6 +427,8 @@ class ReadOnlyDepthAndStencilAttachmentTests : public ReadOnlyDepthStencilAttach
 
 // Test that using stencilReadOnly while modifying the depth aspect works.
 TEST_P(ReadOnlyDepthAndStencilAttachmentTests, ModifyDepthSampleStencil) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // Stencil test is always true but the depth test passes only for the
     TestSpec spec1;
     spec1.readonlyAspects = wgpu::TextureAspect::StencilOnly;
@@ -474,6 +480,8 @@ TEST_P(ReadOnlyDepthAndStencilAttachmentTests, SampleDepthModifyStencil) {
 
 // Test sampling depth with both the depth and stencil readonly.
 TEST_P(ReadOnlyDepthAndStencilAttachmentTests, BothReadOnlySampleDepth) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // Sample the depth while using both depth an stencil testing.
 
     // First render: depth test passes only for the bottom half, stencil passes.
@@ -496,6 +504,8 @@ TEST_P(ReadOnlyDepthAndStencilAttachmentTests, BothReadOnlySampleDepth) {
 
 // Test sampling stencil with both the depth and stencil readonly.
 TEST_P(ReadOnlyDepthAndStencilAttachmentTests, BothReadOnlySampleStencil) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // Sample the stencil while using both depth an stencil testing.
 
     // First render: depth test passes only for the bottom half, stencil passes.

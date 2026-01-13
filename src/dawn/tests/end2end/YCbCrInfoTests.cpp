@@ -295,6 +295,9 @@ TEST_P(YCbCrInfoTest, CreateBindGroupWithYCbCrSamplerSupported) {
     // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsIntel() && IsAndroid());
 
+    // TODO(crbug.com/40238674): Fails on Pixel 10 vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsVulkan());
+
     std::vector<wgpu::BindGroupLayoutEntry> entries;
 
     wgpu::YCbCrVkDescriptor yCbCrDesc = {};
@@ -432,6 +435,9 @@ TEST_P(YCbCrInfoTest, CreateBindGroupLayoutWithYCbCrSamplerDuplicateSampledTextu
 TEST_P(YCbCrInfoTest, CreateBindGroupWithSamplerAndStaticSamplerSupported) {
     // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsIntel() && IsAndroid());
+
+    // TODO(crbug.com/40238674): Fails on Pixel 10 vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsVulkan());
 
     std::vector<wgpu::BindGroupLayoutEntry> entries;
 

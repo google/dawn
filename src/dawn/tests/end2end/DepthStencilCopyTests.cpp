@@ -1150,6 +1150,8 @@ class StencilCopyTests : public DepthStencilCopyTests {
 
 // Test copying the stencil-only aspect into a buffer.
 TEST_P(StencilCopyTests, FromStencilAspect) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // TODO(42242119): hang/crash on Qualcomm Adreno X1.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 
@@ -1177,6 +1179,8 @@ TEST_P(StencilCopyTests, FromStencilAspect) {
 
 // Test copying the stencil-only aspect into a buffer at a non-zero offset
 TEST_P(StencilCopyTests, FromStencilAspectAtNonZeroOffset) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // TODO(42242119): hang/crash on Qualcomm Adreno X1.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 
@@ -1206,6 +1210,8 @@ TEST_P(StencilCopyTests, FromStencilAspectAtNonZeroOffset) {
 
 // Test copying the non-zero mip, stencil-only aspect into a buffer.
 TEST_P(StencilCopyTests, FromNonZeroMipStencilAspect) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // TODO(42242119): hang/crash on Qualcomm Adreno X1.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 
@@ -1335,12 +1341,16 @@ TEST_P(StencilCopyTests, BufferCopySizeEdgeCase) {
 
 // Test copying to the stencil-aspect of a texture
 TEST_P(StencilCopyTests, ToStencilAspect) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     constexpr uint32_t kBufferCopyOffset = 0;
     DoCopyToStencilTest(kBufferCopyOffset);
 }
 
 // Test copying to the stencil-aspect of a texture at non-zero offset
 TEST_P(StencilCopyTests, ToStencilAspectAtNonZeroOffset) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     constexpr std::array<uint32_t, 2> kBufferCopyOffsets = {8, 512};
     for (uint32_t offset : kBufferCopyOffsets) {
         DoCopyToStencilTest(offset);
@@ -1398,6 +1408,8 @@ class StencilCopyTests_Compat : public StencilCopyTests {
 };
 
 TEST_P(StencilCopyTests_Compat, FromStencilAspect) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     constexpr uint32_t kTestLevel = 0;
     constexpr uint32_t kBufferCopyOffset = 0;
     constexpr uint32_t kTestTextureSizes[][2] = {
@@ -1417,6 +1429,8 @@ TEST_P(StencilCopyTests_Compat, FromStencilAspect) {
 
 // Test copying the stencil-only aspect into a buffer at a non-zero offset
 TEST_P(StencilCopyTests_Compat, FromStencilAspectAtNonZeroOffset) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     constexpr uint32_t kTestLevel = 0;
     constexpr std::array<uint32_t, 2> kBufferCopyOffsets = {4u, 512u};
     constexpr uint32_t kTestTextureSizes[][2] = {
@@ -1437,6 +1451,8 @@ TEST_P(StencilCopyTests_Compat, FromStencilAspectAtNonZeroOffset) {
 
 // Test copying the non-zero mip, stencil-only aspect into a buffer.
 TEST_P(StencilCopyTests_Compat, FromNonZeroMipStencilAspect) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     constexpr uint32_t kWidth = 9;
     constexpr uint32_t kHeight = 9;
     constexpr uint32_t kBufferCopyOffset = 0;

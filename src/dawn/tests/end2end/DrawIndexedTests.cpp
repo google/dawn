@@ -172,6 +172,9 @@ TEST_P(DrawIndexedTest, BaseVertex) {
 TEST_P(DrawIndexedTest, NegativeBaseVertex) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_base_vertex"));
 
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+
     // TODO(crbug.com/343178421): ANGLE/SwiftShader and ANGLE/D3D11 fail with negative baseVertex.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
 

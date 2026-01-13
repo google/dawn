@@ -46,6 +46,7 @@ class DepthBiasTests : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
+
         // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
         DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
     }
@@ -165,6 +166,8 @@ class DepthBiasTests : public DawnTest {
 
 // Test adding positive bias to output
 TEST_P(DepthBiasTests, PositiveBiasOnFloat) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // NVIDIA GPUs under Vulkan seem to be using a different scale than everyone else.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
 
@@ -207,6 +210,8 @@ TEST_P(DepthBiasTests, PositiveBiasOnFloatWithClamp) {
 
 // Test adding negative bias to output
 TEST_P(DepthBiasTests, NegativeBiasOnFloat) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // NVIDIA GPUs seems to be using a different scale than everyone else
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
     // Draw quad flat on z = 0.25 with -0.25 bias, depth clear of 0.125
@@ -245,6 +250,8 @@ TEST_P(DepthBiasTests, NegativeBiasOnFloatWithClamp) {
 
 // Test tiledX quad with no bias
 TEST_P(DepthBiasTests, NoBiasTiltedXOnFloat) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // Draw quad with z from 0 to 0.5 with no bias
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0, QuadAngle::TiltedX, 0, 0, 0);
 
@@ -260,6 +267,8 @@ TEST_P(DepthBiasTests, NoBiasTiltedXOnFloat) {
 
 // Test adding positive slope bias to output
 TEST_P(DepthBiasTests, PositiveSlopeBiasOnFloat) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // Draw quad with z from 0 to 0.5 with a slope bias of 1
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0, QuadAngle::TiltedX, 0, 1, 0);
 
@@ -275,6 +284,8 @@ TEST_P(DepthBiasTests, PositiveSlopeBiasOnFloat) {
 
 // Test adding negative half slope bias to output
 TEST_P(DepthBiasTests, NegativeHalfSlopeBiasOnFloat) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
     // Draw quad with z from 0 to 0.5 with a slope bias of -0.5
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0, QuadAngle::TiltedX, 0, -0.5, 0);
 
