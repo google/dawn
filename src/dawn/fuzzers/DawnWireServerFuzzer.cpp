@@ -147,6 +147,7 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
     dawn::wire::WireServerDescriptor serverDesc = {};
     serverDesc.procs = &procs;
     serverDesc.serializer = &devNull;
+    serverDesc.useSpontaneousCallbacks = true;
 
     std::unique_ptr<dawn::wire::WireServer> wireServer(new dawn::wire::WireServer(serverDesc));
     wireServer->InjectInstance(instance->Get(), {1, 0});
