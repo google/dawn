@@ -54,6 +54,10 @@ class DAWN_MUTEX_CAPABILITY MutexBase : public RefCounted, NonCopyable {
             }
         }
 
+        AutoLockBase(AutoLockBase&& other) : mMutex(std::move(other.mMutex)) {
+            other.mMutex = nullptr;
+        }
+
         ~AutoLockBase() {
             if (mMutex != nullptr) {
                 mMutex->Unlock();
