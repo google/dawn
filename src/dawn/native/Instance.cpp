@@ -224,8 +224,6 @@ InstanceBase::InstanceBase(const TogglesState& instanceToggles)
 InstanceBase::~InstanceBase() = default;
 
 void InstanceBase::DeleteThis() {
-    // Stop tracking events. See comment on ShutDown.
-    mEventManager.ShutDown();
     mLoggingCallbackInfo = kEmptyLoggingCallbackInfo;
 
     // Flush all remaining callback tasks on all devices and on the instance.

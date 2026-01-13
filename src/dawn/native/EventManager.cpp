@@ -258,13 +258,17 @@ auto PrepareReadyCallbacks(std::vector<TrackedFutureWaitInfo>& futures) {
 
 // EventManager
 
-EventManager::EventManager(InstanceBase* instance) : mInstance(instance) {
-    // Construct the non-movable inner struct.
-    mEvents.Use([&](auto events) { (*events).emplace(); });
-}
+EventManager::EventManager(InstanceBase* instance) : mInstance(instance) {}
 
 EventManager::~EventManager() {
-    DAWN_ASSERT(IsShutDown());
+    mEvents.Use([&](auto events) {
+        // For all non-spontaneous events, call their callbacks now.
+        for (auto& [futureID, event] : *events) {
+            if (event->mCallbackMode != wgpu::CallbackMode::AllowSpontaneous) {
+                event->EnsureComplete(EventCompletionType::Shutdown);
+            }
+        }
+    });
 }
 
 MaybeError EventManager::Initialize(const UnpackedPtr<InstanceDescriptor>& descriptor) {
@@ -288,22 +292,6 @@ MaybeError EventManager::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
     }
 
     return {};
-}
-
-void EventManager::ShutDown() {
-    mEvents.Use([&](auto events) {
-        // For all non-spontaneous events, call their callbacks now.
-        for (auto& [futureID, event] : **events) {
-            if (event->mCallbackMode != wgpu::CallbackMode::AllowSpontaneous) {
-                event->EnsureComplete(EventCompletionType::Shutdown);
-            }
-        }
-        (*events).reset();
-    });
-}
-
-bool EventManager::IsShutDown() const {
-    return mEvents.Use([](auto events) { return !events->has_value(); });
 }
 
 FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
@@ -341,19 +329,10 @@ FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
     }
 
     mEvents.Use([&](auto events) {
-        if (!events->has_value()) {
-            // We are shutting down, so if the event isn't spontaneous, call the callback now.
-            if (event->mCallbackMode != wgpu::CallbackMode::AllowSpontaneous) {
-                event->EnsureComplete(EventCompletionType::Shutdown);
-            }
-            // Otherwise, in native, the event manager is not in charge of tracking the event, so
-            // just return early now.
-            return;
-        }
         if (event->mCallbackMode != wgpu::CallbackMode::WaitAnyOnly) {
             FetchMax(mLastProcessEventID, futureID);
         }
-        (*events)->emplace(futureID, std::move(event));
+        events->emplace(futureID, std::move(event));
     });
     return futureID;
 }
@@ -376,18 +355,11 @@ void EventManager::SetFutureReady(TrackedEvent* event) {
         // the same future. Note that only one thread will actually call the callback since
         // EnsureComplete is thread safe.
         event->EnsureComplete(EventCompletionType::Ready);
-        mEvents.Use([&](auto events) {
-            if (!events->has_value()) {
-                return;
-            }
-            (*events)->erase(event->mFutureID);
-        });
+        mEvents.Use([&](auto events) { events->erase(event->mFutureID); });
     }
 }
 
 bool EventManager::ProcessPollEvents() {
-    DAWN_ASSERT(!IsShutDown());
-
     std::vector<TrackedFutureWaitInfo> futures;
     wgpu::WaitStatus waitStatus;
     bool hasProgressingEvents = false;
@@ -397,8 +369,8 @@ bool EventManager::ProcessPollEvents() {
         // allowed to be completed in the ProcessPoll call. Note that spontaneous events are allowed
         // to trigger anywhere which is why we include them in the call.
         lastProcessEventID = mLastProcessEventID.load(std::memory_order_acquire);
-        futures.reserve((*events)->size());
-        for (auto& [futureID, event] : **events) {
+        futures.reserve(events->size());
+        for (auto& [futureID, event] : *events) {
             if (event->mCallbackMode != wgpu::CallbackMode::WaitAnyOnly) {
                 // Figure out if there are any progressing events. If we only have non-progressing
                 // events, we need to return false to indicate that there isn't any polling work to
@@ -440,7 +412,7 @@ bool EventManager::ProcessPollEvents() {
     // thread safe.
     mEvents.Use([&](auto events) {
         for (auto it = futures.begin(); it != readyEnd; ++it) {
-            (*events)->erase(it->futureID);
+            events->erase(it->futureID);
         }
     });
 
@@ -451,8 +423,6 @@ bool EventManager::ProcessPollEvents() {
 }
 
 wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nanoseconds timeout) {
-    DAWN_ASSERT(!IsShutDown());
-
     // Validate for feature support.
     if (timeout > Nanoseconds(0)) {
         if (!mTimedWaitAnyEnable) {
@@ -489,8 +459,8 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
 
             // Try to find the event, if we don't find it, we can assume that it has already been
             // completed.
-            auto it = (*events)->find(futureID);
-            if (it == (*events)->end()) {
+            auto it = events->find(futureID);
+            if (it == events->end()) {
                 infos[i].completed = true;
                 anyCompleted = true;
             } else {
@@ -529,7 +499,7 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
     // thread safe.
     mEvents.Use([&](auto events) {
         for (auto it = futures.begin(); it != readyEnd; ++it) {
-            (*events)->erase(it->futureID);
+            events->erase(it->futureID);
         }
     });
 

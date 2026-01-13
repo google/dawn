@@ -68,10 +68,6 @@ class EventManager final : NonMovable {
     ~EventManager();
 
     MaybeError Initialize(const UnpackedPtr<InstanceDescriptor>& descriptor);
-    // Called by WillDropLastExternalRef. Once shut down, the EventManager stops tracking anything.
-    // It drops any refs to TrackedEvents, to break reference cycles. If doing so frees the last ref
-    // of any uncompleted TrackedEvents, they'll get completed with EventCompletionType::Shutdown.
-    void ShutDown();
 
     class TrackedEvent;
     // Track a TrackedEvent and give it a FutureID.
@@ -85,8 +81,6 @@ class EventManager final : NonMovable {
                                            Nanoseconds timeout);
 
   private:
-    bool IsShutDown() const;
-
     // Raw pointer to the Instance to allow for logging. The Instance owns the EventManager, so a
     // raw pointer here is always safe.
     raw_ptr<const InstanceBase> mInstance;
@@ -98,7 +92,7 @@ class EventManager final : NonMovable {
     // Freed once the user has dropped their last ref to the Instance, so can't call WaitAny or
     // ProcessEvents anymore. This breaks reference cycles.
     using EventMap = absl::flat_hash_map<FutureID, Ref<TrackedEvent>>;
-    MutexProtected<std::optional<EventMap>> mEvents;
+    MutexProtected<EventMap> mEvents;
 
     // Records last process event id in order to properly return whether or not there are still
     // events to process when we have re-entrant callbacks.
