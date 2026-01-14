@@ -960,6 +960,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 #endif
     }
 
+    if (IsIntelMesa()) {
+        // chromium:448873316: Non-scalar (vector) saturate from uniform fails.
+        deviceToggles->Default(Toggle::SaturateAsMinMaxF16, true);
+    }
+
     if (IsPixel10()) {
         // Pixel 10 has a bug in vkGetPipelineCacheData(), see https://crbug.com/437807243.
         // TODO(crbug.com/437807243): If newer driver version without bug is released then we can

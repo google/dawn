@@ -250,6 +250,10 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::VulkanPolyfillSwitchWithIf);
     req.tintOptions.workarounds.scalarize_max_min_clamp =
         GetDevice()->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
+
+    req.tintOptions.workarounds.polyfill_saturate_as_min_max_f16 =
+        GetDevice()->IsToggleEnabled(Toggle::SaturateAsMinMaxF16);
+
     req.tintOptions.workarounds.dva_transform_handle =
         GetDevice()->IsToggleEnabled(Toggle::VulkanDirectVariableAccessTransformHandle);
     req.tintOptions.workarounds.polyfill_subgroup_broadcast_f16 =

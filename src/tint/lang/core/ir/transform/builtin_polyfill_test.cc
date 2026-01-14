@@ -188,6 +188,120 @@ TEST_F(IR_BuiltinPolyfillTest, Saturate_Vec4F16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillTest, Saturate_AsMinMax_Vec4F16_Saturate_False) {
+    Build(core::BuiltinFn::kSaturate, ty.vec4h(), Vector{ty.vec4h()});
+    auto* src = R"(
+%foo = func(%arg:vec4<f16>):vec4<f16> {
+  $B1: {
+    %result:vec4<f16> = saturate %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec4<f16>):vec4<f16> {
+  $B1: {
+    %3:vec4<f16> = min %arg, vec4<f16>(1.0h)
+    %result:vec4<f16> = max %3, vec4<f16>(0.0h)
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.saturate = false;
+    config.saturate_as_min_max = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Saturate_AsMinMax_F16_Scalar_Saturate_False) {
+    Build(core::BuiltinFn::kSaturate, ty.f16(), Vector{ty.f16()});
+    auto* src = R"(
+%foo = func(%arg:f16):f16 {
+  $B1: {
+    %result:f16 = saturate %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:f16):f16 {
+  $B1: {
+    %result:f16 = saturate %arg
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.saturate = false;
+    config.saturate_as_min_max = false;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Saturate_AsMinMax_Vec4F16_Saturate_True) {
+    Build(core::BuiltinFn::kSaturate, ty.vec4h(), Vector{ty.vec4h()});
+    auto* src = R"(
+%foo = func(%arg:vec4<f16>):vec4<f16> {
+  $B1: {
+    %result:vec4<f16> = saturate %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec4<f16>):vec4<f16> {
+  $B1: {
+    %3:vec4<f16> = min %arg, vec4<f16>(1.0h)
+    %result:vec4<f16> = max %3, vec4<f16>(0.0h)
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.saturate = true;
+    config.saturate_as_min_max = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Saturate_AsMinMax_F16_Scalar_Saturate_True) {
+    Build(core::BuiltinFn::kSaturate, ty.f16(), Vector{ty.f16()});
+    auto* src = R"(
+%foo = func(%arg:f16):f16 {
+  $B1: {
+    %result:f16 = saturate %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:f16):f16 {
+  $B1: {
+    %result:f16 = clamp %arg, 0.0h, 1.0h
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.saturate = true;
+    config.saturate_as_min_max = false;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_BuiltinPolyfillTest, Clamp_NoPolyfill_Float) {
     Build(core::BuiltinFn::kClamp, ty.f32(), Vector{ty.f32(), ty.f32(), ty.f32()});
     auto* src = R"(
