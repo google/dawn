@@ -1184,6 +1184,41 @@ crbug.com/469120957 [ clang-coverage win ] webgpu:shader,execution,expression,ca
 crbug.com/469120957 [ clang-coverage win ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="function";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 crbug.com/469120957 [ clang-coverage win ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 
+# Untriaged failures of Pixel 10
+# See crbug.com/40238674 and crbug.com/475503907
+crbug.com/0000 [ imagination ] webgpu:api,operation,command_buffer,queries,timestampQuery:many_query_sets:numQuerySets=65536;stage="render" [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,compute,basic:large_dispatch:dispatchSize="maximum" [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="compute";dimension="1d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="compute";dimension="2d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="compute";dimension="2d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="compute";dimension="3d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="compute";dimension="3d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="fragment";dimension="1d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="fragment";dimension="2d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="fragment";dimension="2d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="fragment";dimension="3d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="fragment";dimension="3d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="vertex";dimension="1d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="vertex";dimension="2d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="vertex";dimension="2d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="vertex";dimension="3d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";shaderStage="vertex";dimension="3d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;wgslType="f16" [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=true;wgslType="f16" [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";async=true;wgslType="f16" [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,validation,encoding,encoder_state:pass_end_invalid_order:pass0Type="compute";pass1Type="compute" [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,validation,encoding,encoder_state:pass_end_invalid_order:pass0Type="compute";pass1Type="render" [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,validation,encoding,encoder_state:pass_end_invalid_order:pass0Type="render";pass1Type="compute" [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,validation,encoding,encoder_state:pass_end_invalid_order:pass0Type="render";pass1Type="render" [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:shader,execution,expression,binary,f16_addition:vector_scalar_compound:inputSource="const";dim=4 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:shader,execution,expression,binary,f16_division:vector_scalar_compound:inputSource="const";dim=3 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:shader,execution,expression,binary,f16_division:vector_scalar_compound:inputSource="const";dim=4 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:shader,execution,expression,binary,f16_matrix_addition:matrix:inputSource="const";cols=2;rows=3 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:shader,execution,expression,binary,f16_matrix_addition:matrix:inputSource="const";cols=2;rows=4 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:shader,execution,expression,binary,f16_matrix_addition:matrix:inputSource="const";cols=3;rows=2 [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,command_buffer,copyTextureToTexture:* [ Failure ]
+crbug.com/0000 [ imagination ] webgpu:api,operation,command_buffer,image_copy:* [ Failure ]
+
 ################################################################################
 # Autogenerated Failure expectations. Please triage.
 # ##ROLLER_AUTOGENERATED_FAILURES##
