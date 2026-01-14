@@ -261,15 +261,7 @@ MaybeError ExecutionQueueBase::EnsureCommandsFlushed(ExecutionSerial serial) {
 }
 
 MaybeError ExecutionQueueBase::SubmitPendingCommands() {
-    if (mInSubmit) {
-        return {};
-    }
-
-    mInSubmit = true;
-    auto result = SubmitPendingCommandsImpl();
-    mInSubmit = false;
-
-    return result;
+    return SubmitPendingCommandsImpl();
 }
 
 void ExecutionQueueBase::AssumeCommandsComplete() {

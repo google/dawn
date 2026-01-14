@@ -104,14 +104,6 @@ class ExecutionQueueBase : public ApiObjectBase {
     // example, until the client has explictly issued a submission.
     enum class SubmitMode { Normal, Passive };
 
-    // Tracks whether we are in a submit to avoid submit reentrancy. Reentrancy could otherwise
-    // happen when allocating resources or staging memory during submission (for workarounds, or
-    // emulation) and the heuristics ask for an early submit to happen (which would cause a
-    // submit-in-submit and many issues).
-    // TODO(crbug.com/42240396): Move all handling of Submit(command buffers) in this class as well,
-    // at which point this member can be private.
-    bool mInSubmit = false;
-
   protected:
     using ApiObjectBase::ApiObjectBase;
 

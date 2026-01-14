@@ -643,9 +643,7 @@ MaybeError QueueBase::SubmitInternal(uint32_t commandCount, CommandBufferBase* c
     }
     DAWN_ASSERT(!IsError());
 
-    mInSubmit = true;
     DAWN_TRY(SubmitImpl(commandCount, commands));
-    mInSubmit = false;
 
     // Call Tick() to flush pending work.
     DAWN_TRY(device->Tick());
