@@ -301,15 +301,24 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
             for (auto i : cmd->attachmentState->GetColorAttachmentsMask()) {
                 auto& attachmentInfo = cmd->colorAttachments[i];
                 TextureViewBase* resolveTarget = attachmentInfo.resolveTarget.Get();
-                if (resolveTarget != nullptr) {
-                    // Save the color and resolve targets together for an explicit resolve pass
-                    // after this one ends, then remove the resolve target from this pass and
-                    // force the storeOp to Store.
-                    temporaryResolveAttachments.emplace_back(attachmentInfo.view.Get(),
-                                                             resolveTarget, attachmentInfo.storeOp);
-                    attachmentInfo.storeOp = wgpu::StoreOp::Store;
-                    attachmentInfo.resolveTarget = nullptr;
+                if (!resolveTarget) {
+                    continue;
                 }
+
+                // Check if the MSAA attachment is transient.
+                // If it is, we cannot store it to resolve later. It must resolve in this pass.
+                if (attachmentInfo.view->GetTexture()->GetUsage() &
+                    wgpu::TextureUsage::TransientAttachment) {
+                    continue;
+                }
+
+                // Save the color and resolve targets together for an explicit resolve pass
+                // after this one ends, then remove the resolve target from this pass and
+                // force the storeOp to Store.
+                temporaryResolveAttachments.emplace_back(attachmentInfo.view.Get(), resolveTarget,
+                                                         attachmentInfo.storeOp);
+                attachmentInfo.storeOp = wgpu::StoreOp::Store;
+                attachmentInfo.resolveTarget = nullptr;
             }
 
             passEndOperations.emplace_back(
