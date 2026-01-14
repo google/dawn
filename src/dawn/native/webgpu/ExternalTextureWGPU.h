@@ -1,4 +1,4 @@
-// Copyright 2025 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,61 +25,36 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_FORWARD_H_
-#define SRC_DAWN_NATIVE_WEBGPU_FORWARD_H_
+#ifndef SRC_DAWN_NATIVE_WEBGPU_EXTERNALTTEXTUREWGPU_H_
+#define SRC_DAWN_NATIVE_WEBGPU_EXTERNALTTEXTUREWGPU_H_
 
-#include "dawn/native/ToBackend.h"
+#include "dawn/native/ExternalTexture.h"
+#include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/native/webgpu/RecordableObject.h"
 
 namespace dawn::native::webgpu {
 
-class Backend;
-class BindGroup;
-class BindGroupLayout;
-class Buffer;
-class CommandBuffer;
-class ComputePipeline;
 class Device;
-class ExternalTexture;
-class PhysicalDevice;
-class PipelineLayout;
-class QuerySet;
-class Queue;
-class RenderBundle;
-class RenderPipeline;
-class ResourceTable;
-class Sampler;
-class ShaderModule;
-class SwapChain;
-class Texture;
-class TextureView;
 
-struct WebGPUBackendTraits {
-    using BindGroupType = BindGroup;
-    using BindGroupLayoutType = BindGroupLayout;
-    using BufferType = Buffer;
-    using CommandBufferType = CommandBuffer;
-    using ComputePipelineType = ComputePipeline;
-    using DeviceType = Device;
-    using ExternalTextureType = ExternalTexture;
-    using PhysicalDeviceType = PhysicalDevice;
-    using PipelineLayoutType = PipelineLayout;
-    using QuerySetType = QuerySet;
-    using QueueType = Queue;
-    using RenderBundleType = RenderBundle;
-    using RenderPipelineType = RenderPipeline;
-    using ResourceTableType = ResourceTable;
-    using SamplerType = Sampler;
-    using ShaderModuleType = ShaderModule;
-    using SwapChainType = SwapChain;
-    using TextureType = Texture;
-    using TextureViewType = TextureView;
+class ExternalTexture final : public ExternalTextureBase,
+                              public RecordableObject,
+                              public ObjectWGPU<WGPUExternalTexture> {
+  public:
+    static ResultOrError<Ref<ExternalTextureBase>> Create(
+        Device* device,
+        const ExternalTextureDescriptor* descriptor);
+
+    MaybeError AddReferenced(CaptureContext& captureContext) override;
+    MaybeError CaptureCreationParameters(CaptureContext& context) override;
+
+  private:
+    ExternalTexture(Device* device, const ExternalTextureDescriptor* descriptor);
+    ~ExternalTexture() override;
+
+    void DestroyImpl(DestroyReason reason) override;
+    void SetLabelImpl() override;
 };
-
-template <typename T>
-auto ToBackend(T&& common) -> decltype(ToBackendBase<WebGPUBackendTraits>(common)) {
-    return ToBackendBase<WebGPUBackendTraits>(common);
-}
 
 }  // namespace dawn::native::webgpu
 
-#endif  // SRC_DAWN_NATIVE_WEBGPU_FORWARD_H_
+#endif  // SRC_DAWN_NATIVE_WEBGPU_EXTERNALTTEXTUREWGPU_H_

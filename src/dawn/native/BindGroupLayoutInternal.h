@@ -139,6 +139,8 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     uint32_t GetStaticSamplerCount() const;
     bool IsStorageBufferBinding(BindingIndex bindingIndex) const;
 
+    uint32_t GetExternalTextureCount() const;
+
     // Returns the exact ranges of indices that contains specific binding types.
     BeginEndRange<BindingIndex> GetDynamicBufferIndices() const;
     BeginEndRange<BindingIndex> GetBufferIndices() const;

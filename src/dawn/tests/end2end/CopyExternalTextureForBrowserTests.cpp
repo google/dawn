@@ -303,6 +303,9 @@ class CopyExternalTextureForBrowserTests_Basic
 TEST_P(CopyExternalTextureForBrowserTests_Basic, Copy) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
 
+    // TODO(crbug.com/465184041): [Capture] external texture.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
     wgpu::CopyTextureForBrowserOptions options = {};
     options.flipY = GetParam().mFlipY;
 
@@ -402,11 +405,10 @@ TEST_P(CopyExternalTextureForBrowserTests_Basic, Copy) {
     DoBasicCopyTest(srcOrigin, dstOrigin, copySize, naturalSize, dstTextureSize, options);
 }
 
-// TODO(crbug.com/465184041): Implement external texture for WebGPUBackend.
 DAWN_INSTANTIATE_TEST_P(
     CopyExternalTextureForBrowserTests_Basic,
     {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-     VulkanBackend()},
+     VulkanBackend(), WebGPUBackend()},
     std::vector<CopyRect>({CopyRect::TopLeft, CopyRect::TopRight, CopyRect::BottomLeft,
                            CopyRect::BottomRight, CopyRect::FullSize}),
     std::vector<CopyRect>({CopyRect::TopLeft, CopyRect::TopRight, CopyRect::BottomLeft,
@@ -420,6 +422,9 @@ class CopyExternalTextureForBrowserTests_Aspect : public CopyExternalTextureForB
 
 TEST_P(CopyExternalTextureForBrowserTests_Aspect, Copy) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+
+    // TODO(crbug.com/465184041): [Capture] external texture.
+    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     wgpu::Origin3D srcOrigin = {};
     wgpu::Origin3D dstOrigin = {};
@@ -438,7 +443,8 @@ DAWN_INSTANTIATE_TEST(CopyExternalTextureForBrowserTests_Aspect,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

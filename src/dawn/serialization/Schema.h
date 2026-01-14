@@ -61,6 +61,7 @@ enum class ObjectType : uint32_t {
     ShaderModule,
     Texture,
     TextureView,
+    ExternalTexture,
 };
 
 enum class BindGroupLayoutEntryType : uint32_t {

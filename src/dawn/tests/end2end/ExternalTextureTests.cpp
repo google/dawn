@@ -218,6 +218,13 @@ class ExternalTextureTestsBase : public Parent {
 
 class ExternalTextureTests : public ExternalTextureTestsBase<DawnTest> {
   protected:
+    void SetUp() override {
+        ExternalTextureTestsBase<DawnTest>::SetUp();
+
+        // TODO(crbug.com/465184041): [Capture] external texture.
+        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+    }
+
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> requiredFeatures = {};
         if (SupportsFeatures({wgpu::FeatureName::Unorm16TextureFormats})) {
@@ -1593,7 +1600,6 @@ TEST_P(ExternalTextureTests, MultipleBindings) {
     ASSERT_NE(pipeline.Get(), nullptr);
 }
 
-// TODO(crbug.com/465184041): Implement external texture for WebGPUBackend.
 DAWN_INSTANTIATE_TEST(ExternalTextureTests,
                       D3D11Backend(),
                       D3D12Backend(),
@@ -1601,7 +1607,8 @@ DAWN_INSTANTIATE_TEST(ExternalTextureTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 enum class AccessMode { Sample, Load };
 enum class OOBAccess { BelowBottomLeft, OverTopRight };
@@ -1663,6 +1670,10 @@ class ExternalTextureOOBTests : public ExternalTextureTestsBase<DawnTestWithPara
   protected:
     void SetUp() override {
         ExternalTextureTestsBase<DawnTestWithParams<OOBTestParams>>::SetUp();
+
+        // TODO(crbug.com/465184041): [Capture] external texture.
+        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+
         sourceTexturePlane0 = Create2DTexture(
             device, kPlaneWidth, kPlaneHeight, wgpu::TextureFormat::R8Unorm,
             wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
@@ -1814,7 +1825,7 @@ TEST_P(ExternalTextureOOBTests, ExternalTextureOOB) {
 DAWN_INSTANTIATE_TEST_P(
     ExternalTextureOOBTests,
     {D3D11Backend(), D3D12Backend(), D3D12Backend({}, {"d3d12_use_root_signature_version_1_1"}),
-     MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+     MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
     std::vector<wgpu::ExternalTextureRotation>({wgpu::ExternalTextureRotation::Rotate0Degrees,
                                                 wgpu::ExternalTextureRotation::Rotate90Degrees,
                                                 wgpu::ExternalTextureRotation::Rotate180Degrees,

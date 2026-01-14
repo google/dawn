@@ -55,6 +55,20 @@ WGPUOrigin3D ToWGPU(const TexelOrigin3D& origin) {
     };
 }
 
+WGPUOrigin2D ToWGPU(const Origin2D& origin) {
+    return {
+        .x = static_cast<uint32_t>(origin.x),
+        .y = static_cast<uint32_t>(origin.y),
+    };
+}
+
+WGPUExtent2D ToWGPU(const Extent2D& extent) {
+    return {
+        .width = static_cast<uint32_t>(extent.width),
+        .height = static_cast<uint32_t>(extent.height),
+    };
+}
+
 WGPUColor ToWGPU(const dawn::native::Color& color) {
     return {
         .r = color.r,

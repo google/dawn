@@ -29,6 +29,7 @@
 
 #include <vector>
 
+#include "absl/container/inlined_vector.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/webgpu/CaptureContext.h"
@@ -38,6 +39,18 @@
 #include "dawn/native/webgpu/RenderPipelineWGPU.h"
 
 namespace dawn::native::webgpu {
+
+namespace {
+WGPUExternalTextureBindingLayout ToWGPU(const ExternalTextureBindingLayout* entry) {
+    return {
+        .chain =
+            {
+                .next = nullptr,
+                .sType = WGPUSType_ExternalTextureBindingLayout,
+            },
+    };
+}
+}  // namespace
 
 // static
 ResultOrError<Ref<BindGroupLayout>> BindGroupLayout::Create(
@@ -53,11 +66,20 @@ BindGroupLayout::BindGroupLayout(Device* device,
       ObjectWGPU(device->wgpu.bindGroupLayoutRelease),
       mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
     // Rebuild the descriptor and resolve internal bindings to regular ones.
-    std::vector<WGPUBindGroupLayoutEntry> entries(descriptor->entryCount);
-    for (size_t i = 0; i < entries.size(); i++) {
-        entries[i] = *ToAPI(&descriptor->entries[i]);
+    absl::InlinedVector<WGPUBindGroupLayoutEntry, 8> entries(descriptor->entryCount);
 
-        switch (descriptor->entries[i].buffer.type) {
+    // Pre-calculate the number of external textures to prevent InlinedVector reallocation.
+    size_t externalTextureCount = GetExternalTextureCount();
+    // Use an inline size of 1 since external textures are rare, and reserve the required capacity
+    // immediately.
+    absl::InlinedVector<WGPUExternalTextureBindingLayout, 1> externalTextureEntries;
+    externalTextureEntries.reserve(externalTextureCount);
+
+    for (size_t i = 0; i < entries.size(); i++) {
+        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&descriptor->entries[i]);
+        entries[i] = *ToAPI(*entry);
+
+        switch (entry->buffer.type) {
             case kInternalStorageBufferBinding:
                 entries[i].buffer.type = WGPUBufferBindingType_Storage;
                 break;
@@ -66,6 +88,11 @@ BindGroupLayout::BindGroupLayout(Device* device,
                 break;
             default:
                 break;
+        }
+
+        if (auto* externalTextureLayout = entry.Get<ExternalTextureBindingLayout>()) {
+            externalTextureEntries.push_back(ToWGPU(externalTextureLayout));
+            entries[i].nextInChain = &externalTextureEntries.back().chain;
         }
     }
 

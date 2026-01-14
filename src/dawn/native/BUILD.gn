@@ -725,6 +725,8 @@ source_set("sources") {
       "webgpu/ComputePipelineWGPU.h",
       "webgpu/DeviceWGPU.cpp",
       "webgpu/DeviceWGPU.h",
+      "webgpu/ExternalTextureWGPU.cpp",
+      "webgpu/ExternalTextureWGPU.h",
       "webgpu/Forward.h",
       "webgpu/ObjectWGPU.h",
       "webgpu/PhysicalDeviceWGPU.cpp",

@@ -877,6 +877,12 @@ uint32_t BindGroupLayoutInternalBase::GetStaticSamplerCount() const {
                     GetBindingTypeStart(BindingTypeOrder_StaticSampler));
 }
 
+uint32_t BindGroupLayoutInternalBase::GetExternalTextureCount() const {
+    DAWN_ASSERT(!IsError());
+    return uint32_t(GetBindingTypeEnd(BindingTypeOrder_ExternalTexture) -
+                    GetBindingTypeStart(BindingTypeOrder_ExternalTexture));
+}
+
 const BindingCounts& BindGroupLayoutInternalBase::GetValidationBindingCounts() const {
     DAWN_ASSERT(!IsError());
     return mValidationBindingCounts;

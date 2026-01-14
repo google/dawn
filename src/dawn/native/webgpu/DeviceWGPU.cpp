@@ -54,6 +54,7 @@
 #include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/CommandBufferWGPU.h"
 #include "dawn/native/webgpu/ComputePipelineWGPU.h"
+#include "dawn/native/webgpu/ExternalTextureWGPU.h"
 #include "dawn/native/webgpu/PhysicalDeviceWGPU.h"
 #include "dawn/native/webgpu/PipelineLayoutWGPU.h"
 #include "dawn/native/webgpu/QuerySetWGPU.h"
@@ -171,6 +172,12 @@ ResultOrError<Ref<BufferBase>> Device::CreateBufferImpl(
     const UnpackedPtr<BufferDescriptor>& descriptor) {
     return Buffer::Create(this, descriptor);
 }
+
+ResultOrError<Ref<ExternalTextureBase>> Device::CreateExternalTextureImpl(
+    const ExternalTextureDescriptor* descriptor) {
+    return ExternalTexture::Create(this, descriptor);
+}
+
 ResultOrError<Ref<CommandBufferBase>> Device::CreateCommandBuffer(
     CommandEncoder* encoder,
     const CommandBufferDescriptor* descriptor) {

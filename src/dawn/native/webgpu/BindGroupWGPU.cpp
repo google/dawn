@@ -37,9 +37,11 @@
 #include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
+#include "dawn/native/webgpu/ExternalTextureWGPU.h"
 #include "dawn/native/webgpu/RenderPipelineWGPU.h"
 #include "dawn/native/webgpu/SamplerWGPU.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
+#include "dawn/native/webgpu/ToWGPU.h"
 
 namespace dawn::native::webgpu {
 
@@ -60,15 +62,37 @@ WGPUBindGroupEntry ToWGPU(const BindGroupEntry* entry) {
     };
 }
 
+WGPUExternalTextureBindingEntry ToWGPU(const ExternalTextureBindingEntry* entry) {
+    return {
+        .chain =
+            {
+                .next = nullptr,
+                .sType = WGPUSType_ExternalTextureBindingEntry,
+            },
+        .externalTexture = ToBackend(entry->externalTexture)->GetInnerHandle(),
+    };
+}
+
 class ComboBindGroupDescriptor {
   public:
-    explicit ComboBindGroupDescriptor(const BindGroupDescriptor* desc) {
+    explicit ComboBindGroupDescriptor(const UnpackedPtr<BindGroupDescriptor>& desc,
+                                      uint32_t externalTextureCount) {
+        // Use the pre-calculate the number of external textures to reserve upfront to prevent
+        // InlinedVector reallocation.
+        mExternalTextureEntries.reserve(externalTextureCount);
+
         mDesc.nextInChain = nullptr;
         mDesc.label = ToOutputStringView(desc->label);
         mDesc.layout = ToBackend(desc->layout->GetInternalBindGroupLayout())->GetInnerHandle();
         mDesc.entryCount = desc->entryCount;
         for (uint32_t i = 0; i < desc->entryCount; ++i) {
-            mEntries.push_back(ToWGPU(&desc->entries[i]));
+            UnpackedPtr<BindGroupEntry> entry = Unpack(&desc->entries[i]);
+            mEntries.push_back(ToWGPU(*entry));
+
+            if (auto* externalTextureEntry = entry.Get<ExternalTextureBindingEntry>()) {
+                mExternalTextureEntries.push_back(ToWGPU(externalTextureEntry));
+                mEntries.back().nextInChain = &mExternalTextureEntries.back().chain;
+            }
         }
         mDesc.entries = mEntries.data();
     }
@@ -78,6 +102,9 @@ class ComboBindGroupDescriptor {
   private:
     WGPUBindGroupDescriptor mDesc;
     absl::InlinedVector<WGPUBindGroupEntry, 8> mEntries;
+    // Use an inline size of 1 since external textures are rare, and reserve the required capacity
+    // in constructor to preserve reallocations.
+    absl::InlinedVector<WGPUExternalTextureBindingEntry, 1> mExternalTextureEntries;
 };
 
 }  // namespace
@@ -96,7 +123,7 @@ BindGroup::BindGroup(Device* device, const UnpackedPtr<BindGroupDescriptor>& des
     : BindGroupBase(this, device, descriptor),
       RecordableObject(schema::ObjectType::BindGroup),
       ObjectWGPU(device->wgpu.bindGroupRelease) {
-    ComboBindGroupDescriptor desc(*descriptor);
+    ComboBindGroupDescriptor desc(descriptor, GetLayout()->GetExternalTextureCount());
     mInnerHandle =
         ToBackend(GetDevice())
             ->wgpu.deviceCreateBindGroup(ToBackend(GetDevice())->GetInnerHandle(), desc.Get());
