@@ -1459,6 +1459,7 @@ ResourceTableBase* DeviceBase::APICreateResourceTable(const ResourceTableDescrip
     return ReturnToAPI(std::move(result));
 }
 SamplerBase* DeviceBase::APICreateSampler(const SamplerDescriptor* descriptor) {
+    auto deviceGuard = UseGuardForCreateSampler();
     Ref<SamplerBase> result;
     if (ConsumedError(CreateSampler(descriptor), &result, "calling %s.CreateSampler(%s).", this,
                       descriptor)) {
@@ -1592,6 +1593,7 @@ ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescr
     return ReturnToAPI(std::move(result));
 }
 TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
+    auto deviceGuard = UseGuardForCreateTexture();
     Ref<TextureBase> result;
     if (ConsumedError(CreateTexture(descriptor), &result, InternalErrorType::OutOfMemory,
                       "calling %s.CreateTexture(%s).", this, descriptor)) {
@@ -2542,6 +2544,18 @@ bool DeviceBase::ReduceMemoryUsageImpl() {
 }
 
 void DeviceBase::PerformIdleTasksImpl() {}
+
+std::optional<DeviceGuard> DeviceBase::UseGuardForCreateTexture() {
+    // Backends with thread-safe CreateTextureImpl() can override this to return nullopt.
+    // TODO(crbug.com/475530346): Even with a thread-safe CreateTextureImpl(), there's still a
+    // potential race between Device::Destroy() and APICreateTexture() without the device lock. We
+    // assume callers are responsible for synchronizing Destroy() calls with texture creation.
+    return GetGuard();
+}
+
+std::optional<DeviceGuard> DeviceBase::UseGuardForCreateSampler() {
+    return GetGuard();
+}
 
 bool DeviceBase::ShouldDuplicateNumWorkgroupsForDispatchIndirect(
     ComputePipelineBase* computePipeline) const {

@@ -97,6 +97,9 @@ class Device final : public d3d::Device {
 
     bool ReduceMemoryUsageImpl() override;
 
+    std::optional<DeviceGuard> UseGuardForCreateTexture() override;
+    std::optional<DeviceGuard> UseGuardForCreateSampler() override;
+
     uint32_t GetUAVSlotCount() const;
 
     ResultOrError<TextureViewBase*> GetOrCreateCachedImplicitPixelLocalStorageAttachment(
