@@ -1172,6 +1172,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // when dynamic rendering is enabled.
         deviceToggles->Default(Toggle::VulkanUseDynamicRendering, false);
     }
+
+    // Enable validation of generated SPIR-V by default.
+    // Graphite and other native clients may turn this off.
+    deviceToggles->Default(Toggle::EnableSpirvValidation, true);
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(

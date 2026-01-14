@@ -328,7 +328,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         "Vulkan.CompileShaderToSPIRV");
 
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
-    {
+    if (GetDevice()->IsToggleEnabled(Toggle::EnableSpirvValidation)) {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "Vulkan.ValidateSpirv");
 
         // Validate and if required dump the compiled SPIR-V code.
