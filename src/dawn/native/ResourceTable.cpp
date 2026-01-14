@@ -391,20 +391,7 @@ wgpu::Status ResourceTableBase::APIUpdate(uint32_t slotIn, const BindingResource
         return wgpu::Status::Error;
     }
 
-    // Perform validation that produces a validation error, but unconditionally mark the slot as
-    // used since we need to match client-side validation that doesn't perform these checks.
-    if (GetDevice()->ConsumedError(  //
-            ([&]() -> MaybeError {
-                DAWN_TRY(GetDevice()->ValidateObject(this));
-                return ValidateBindingResource(GetDevice(), resource);
-            })(),
-            "validating %s.Update()", this)) {
-        BindingResource nothing = {};
-        Update(slot, &nothing);
-    } else {
-        Update(slot, resource);
-    }
-
+    UpdateWithDeviceValidation(slot, resource, "Update");
     return wgpu::Status::Success;
 }
 
@@ -421,8 +408,7 @@ uint32_t ResourceTableBase::APIInsertBinding(const BindingResource* resource) {
             continue;
         }
 
-        wgpu::Status updateStatus = APIUpdate(uint32_t(slot), resource);
-        DAWN_ASSERT(updateStatus == wgpu::Status::Success);
+        UpdateWithDeviceValidation(slot, resource, "InsertBinding");
         return uint32_t(slot);
     }
 
@@ -492,6 +478,24 @@ void ResourceTableBase::Remove(ResourceTableSlot slot) {
     SetEntry(slot, &nothing);
 }
 
+void ResourceTableBase::UpdateWithDeviceValidation(ResourceTableSlot slot,
+                                                   const BindingResource* resource,
+                                                   std::string_view methodName) {
+    // Perform validation that produces a validation error, but unconditionally mark the slot as
+    // used since we need to match client-side validation that doesn't perform these checks.
+    if (GetDevice()->ConsumedError(  //
+            ([&]() -> MaybeError {
+                DAWN_TRY(GetDevice()->ValidateObject(this));
+                return ValidateBindingResource(GetDevice(), resource);
+            })(),
+            "validating %s.%s()", this, methodName)) {
+        BindingResource nothing = {};
+        Update(slot, &nothing);
+    } else {
+        Update(slot, resource);
+    }
+}
+
 void ResourceTableBase::SetEntry(ResourceTableSlot slot, const BindingResource* contents) {
     // TODO(https://issues.chromium.org/473354063): Support resources that aren't TextureViews
     DAWN_ASSERT(contents->buffer == nullptr && contents->sampler == nullptr);
@@ -545,13 +549,13 @@ ResourceTableBase::Updates ResourceTableBase::AcquireDirtySlotUpdates() {
 
         // Don't add updates for removing resources because the shader-side validation will prevent
         // accesses anyway.
-        if (mSlots[dirtyIndex].resource == nullptr) {
+        if (state.resource == nullptr) {
             continue;
         }
 
         updates.resourceUpdates.push_back({
             .slot = dirtyIndex,
-            .textureView = mSlots[dirtyIndex].resource.Get(),
+            .textureView = state.resource.Get(),
         });
     }
     mDirtySlots.clear();

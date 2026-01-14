@@ -116,6 +116,13 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     void Update(ResourceTableSlot slot, const BindingResource* contents);
     void Remove(ResourceTableSlot slot);
 
+    // Performs the steps for wgpu::ResourceTable::Update that are after the validation returning a
+    // synchronous error. This is to allow factoring the code between APIUpdate and
+    // APIInsertBinding.
+    void UpdateWithDeviceValidation(ResourceTableSlot slot,
+                                    const BindingResource* resource,
+                                    std::string_view methodName);
+
     // AcquireDirtySlotUpdates returns all the batched updates that need to be applied before uses
     // of the ResourceTable (since the last call to AcquireDirtySlotUpdates or creation of the
     // ResourceTable).
