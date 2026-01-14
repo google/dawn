@@ -50,10 +50,24 @@ import requests
 DAWN_ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEPS_FILE = DAWN_ROOT / 'DEPS'
 
-CHROMIUM_SRC_URL = 'https://chromium.googlesource.com/chromium/src'
+CHROMIUM_GOB_URL = 'https://chromium.googlesource.com'
+CHROMIUM_SRC_URL = posixpath.join(CHROMIUM_GOB_URL, 'chromium', 'src')
 CHROMIUM_REVISION_VAR = 'chromium_revision'
 
 DEFAULT_REVISION_CHARACTERS = 10
+
+# Used to extract/replace the git revision for the chromium-luci entry in a
+# PACKAGE.star file.
+CHROMIUM_LUCI_REVISION_PATTERN = re.compile(
+    #   Group 1: Context prefix to ensure that we're matching the chromium-luci
+    #   entry.
+    r'(name\s*=\s*"@chromium-luci".*?revision\s*=\s*")'
+    #   Group 2: The hexadecimal revision to extract/replace.
+    r'([a-fA-F0-9]+)'
+    #   Positive lookahead: Asserts that a " follows, but does not match/consume
+    #   it.
+    r'(?=")',
+    re.DOTALL)
 
 # GN variables that need to be synced. A map from Dawn variable name to
 # Chromium variable name.
@@ -961,43 +975,38 @@ def _apply_changed_deps(changed_entries: list[ChangedDepsEntry]) -> None:
     subprocess.run(cmd, check=True)
 
 
-def _sync_chromium_luci_revision(revision: str) -> None:
+def _sync_chromium_luci_revision(chromium_revision: str) -> ChangedRepo:
     """Syncs the chromium-luci revision used by //infra/config.
 
     Args:
-        revision: The Chromium revision to read the chromium-luci revision at.
-    """
-    chromium_package_contents = _read_remote_chromium_file(
-        'infra/config/PACKAGE.star', revision)
-    # Regex breakdown:
-    # 1. (name\s*=\s*"@chromium-luci".*?revision\s*=\s*")
-    #   Group 1: Context prefix to ensure that we're matching the chromium-luci
-    #   entry.
-    # 2. ([a-fA-F0-9]+)
-    #   Group 2: The hexadecimal revision to extract/replace.
-    # 3. (?=")
-    #   Positive lookahead: Asserts that a " follows, but does not match/consume
-    #   it.
-    revision_pattern = re.compile(
-        r'(name\s*=\s*"@chromium-luci".*?revision\s*=\s*")'
-        r'([a-fA-F0-9]+)'
-        r'(?=")', re.DOTALL)
-    match = revision_pattern.search(chromium_package_contents)
-    if not match:
-        raise RuntimeError(
-            "Unable to extract chromium-luci revision from Chromium's "
-            '//infra/config/PACKAGE.star')
-    chromium_luci_revision = match.group(2)
+        chromium_revision: The Chromium revision to read the chromium-luci revision at.
 
+    Returns:
+        A ChangedRepo specifying the old and new chromium-luci revisions.
+    """
     infra_path = DAWN_ROOT / 'infra' / 'config' / 'global'
     dawn_package = infra_path / 'PACKAGE.star'
     with open(dawn_package, encoding='utf-8') as infile:
         dawn_package_contents = infile.read()
 
+    old_revision = _extract_chromium_luci_revision(dawn_package_contents)
+    if not old_revision:
+        raise RuntimeError(
+            "Unable to extract chromium-luci revision from Dawn's "
+            '//infra/config/global/PACKAGE.star')
+
+    chromium_package_contents = _read_remote_chromium_file(
+        'infra/config/PACKAGE.star', chromium_revision)
+    new_revision = _extract_chromium_luci_revision(chromium_package_contents)
+    if not new_revision:
+        raise RuntimeError(
+            "Unable to extract chromium-luci revision from Chromium's "
+            '//infra/config/PACKAGE.star')
+
     # Replace the match with Group 1 (matched content before the revision) and
     # the new revision itself.
-    dawn_package_contents = revision_pattern.sub(
-        rf'\g<1>{chromium_luci_revision}', dawn_package_contents)
+    dawn_package_contents = CHROMIUM_LUCI_REVISION_PATTERN.sub(
+        rf'\g<1>{new_revision}', dawn_package_contents)
     with open(dawn_package, 'w', encoding='utf-8') as outfile:
         outfile.write(dawn_package_contents)
 
@@ -1015,6 +1024,31 @@ def _sync_chromium_luci_revision(revision: str) -> None:
     subprocess.check_call(['git', 'add', str(infra_path)],
                           stdout=subprocess.DEVNULL,
                           stderr=subprocess.DEVNULL)
+
+    # This is technically not a DEPS entry (ChangedRepo inherits from
+    # ChangedDepsEntry), but it's similar enough that it can treated as such.
+    return ChangedRepo(name='chromium-luci (Starlark)',
+                       url=posixpath.join(CHROMIUM_GOB_URL, 'infra',
+                                          'chromium'),
+                       old_revision=old_revision,
+                       new_revision=new_revision)
+
+
+def _extract_chromium_luci_revision(package_star_contents: str) -> str | None:
+    """Extracts the revision for chromium-luci from a PACKAGE.star file.
+
+    Args:
+        package_star_contents: A string containing the contents of a
+            PACKAGE.star file.
+
+    Returns:
+        The git revision for the chromium-luci entry, or None if it could not
+        be extracted.
+    """
+    match = CHROMIUM_LUCI_REVISION_PATTERN.search(package_star_contents)
+    if not match:
+        return None
+    return match.group(2)
 
 
 def _parse_args() -> argparse.Namespace:
@@ -1063,10 +1097,17 @@ def main() -> None:
     chromium_deps = _parse_deps_file(
         _read_remote_chromium_file('DEPS', revision_range.new_revision))
     changed_entries = _get_changed_deps_entries(dawn_deps, chromium_deps)
+
+    # We want this entry to be in the commit message, but we do not want it to
+    # be present for _apply_changed_deps() since it is not actually a DEPS
+    # entry.
+    chromium_luci_entry = _sync_chromium_luci_revision(
+        revision_range.new_revision)
+    entries_for_commit_message = changed_entries + [chromium_luci_entry]
     # Create the commit message before adding the entry for the Chromium
     # revision since Chromium information is explicitly added to the message.
-    commit_message = _generate_commit_message(changed_entries, revision_range,
-                                              args.autoroll)
+    commit_message = _generate_commit_message(entries_for_commit_message,
+                                              revision_range, args.autoroll)
     # We change the variable directly instead of using ChangedRepo since
     # 'gclient setdep --revision' does not work for repos if there is no entry
     # in .gitmodules.
@@ -1083,7 +1124,6 @@ def main() -> None:
         _create_roll_branch()
 
     _apply_changed_deps(changed_entries)
-    _sync_chromium_luci_revision(revision_range.new_revision)
 
     if args.autoroll:
         _amend_commit(commit_message)
