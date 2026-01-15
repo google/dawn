@@ -991,9 +991,7 @@ MaybeError DeviceBase::ValidateObject(const ApiObjectBase* object) const {
     DAWN_INVALID_IF(object->GetDevice() != this,
                     "%s is associated with %s, and cannot be used with %s.", object,
                     object->GetDevice(), this);
-
-    // TODO(dawn:563): Preserve labels for error objects.
-    DAWN_INVALID_IF(object->IsError(), "%s is invalid.", object);
+    DAWN_INVALID_IF(object->IsError(), "%s is invalid due to a previous error.", object);
 
     return {};
 }
@@ -1001,7 +999,7 @@ MaybeError DeviceBase::ValidateObject(const ApiObjectBase* object) const {
 MaybeError DeviceBase::IsNotErrorObject(const ApiObjectBase* object) const {
     DAWN_ASSERT(!IsValidationEnabled());
     DAWN_ASSERT(object != nullptr);
-    DAWN_INVALID_IF(object->IsError(), "%s is invalid.", object);
+    DAWN_INVALID_IF(object->IsError(), "%s is invalid due to a previous error.", object);
 
     return {};
 }
