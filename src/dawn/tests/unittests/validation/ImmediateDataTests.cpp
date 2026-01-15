@@ -79,8 +79,7 @@ struct ImmediateDataDisableTest : ValidationTestWithParam<FeatureMode> {
 // Check that creating a PipelineLayout with non-zero immediateSize is disallowed
 // without the feature enabled.
 TEST_P(ImmediateDataDisableTest, ImmediateSizeNotAllowed) {
-    wgpu::PipelineLayoutDescriptor desc;
-    desc.bindGroupLayoutCount = 0;
+    wgpu::PipelineLayoutDescriptor desc{};
     desc.immediateSize = 1;
 
     if (GetParam() == FeatureMode::Enabled) {
@@ -165,8 +164,7 @@ class ImmediateDataTest : public ValidationTest {
 // Check that non-zero immediateSize is possible with feature enabled and size must
 // below max size limits.
 TEST_F(ImmediateDataTest, ValidateImmediateSize) {
-    wgpu::PipelineLayoutDescriptor desc;
-    desc.bindGroupLayoutCount = 0;
+    wgpu::PipelineLayoutDescriptor desc{};
 
     // Success case with valid immediateSize.
     {
@@ -327,7 +325,6 @@ TEST_F(ImmediateDataTest, ValidatePipelineLayoutImmediateDataBytesAndShaders) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = shaderModule;
         pipelineDescriptor.cFragment.module = shaderModule;
-        pipelineDescriptor.cFragment.targetCount = 1;
         pipelineDescriptor.layout = CreatePipelineLayout(kShaderImmediateDataBytes);
         device.CreateRenderPipeline(&pipelineDescriptor);
     }
@@ -345,7 +342,6 @@ TEST_F(ImmediateDataTest, ValidatePipelineLayoutImmediateDataBytesAndShaders) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = shaderModule;
         pipelineDescriptor.cFragment.module = shaderModule;
-        pipelineDescriptor.cFragment.targetCount = 1;
         device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
@@ -361,7 +357,6 @@ TEST_F(ImmediateDataTest, ValidatePipelineLayoutImmediateDataBytesAndShaders) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = shaderModule;
         pipelineDescriptor.cFragment.module = shaderModule;
-        pipelineDescriptor.cFragment.targetCount = 1;
         pipelineDescriptor.layout = CreatePipelineLayout(kShaderImmediateDataBytes - 4);
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pipelineDescriptor));
     }
@@ -451,7 +446,6 @@ TEST_F(ImmediateDataTest, ValidateDefaultPipelineLayout) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = shaderModule;
         pipelineDescriptor.cFragment.module = shaderModule;
-        pipelineDescriptor.cFragment.targetCount = 1;
         device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
@@ -463,17 +457,163 @@ TEST_F(ImmediateDataTest, ValidateDefaultPipelineLayout) {
     }
 }
 
+// Check that executing multiple bundles with different immediate data requirements works.
+TEST_F(ImmediateDataTest, ExecuteBundlesWithDifferentImmediateData) {
+    // Pipeline 4: requires 4 bytes
+    wgpu::ShaderModule module4 = utils::CreateShaderModule(device, R"(
+        var<immediate> constants: u32;
+        @vertex fn vs() -> @builtin(position) vec4f {
+            _ = constants;
+            return vec4f(0.0, 0.0, 0.0, 1.0);
+        }
+        @fragment fn fs() -> @location(0) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 1.0);
+        }
+    )");
+    utils::ComboRenderPipelineDescriptor desc4;
+    desc4.vertex.module = module4;
+    desc4.cFragment.module = module4;
+    wgpu::RenderPipeline pipeline4 = device.CreateRenderPipeline(&desc4);
+
+    // Pipeline 8: requires 8 bytes
+    wgpu::ShaderModule module8 = utils::CreateShaderModule(device, R"(
+        struct Constants {
+            a: u32,
+            b: u32,
+        }
+        var<immediate> constants: Constants;
+        @vertex fn vs() -> @builtin(position) vec4f {
+            _ = constants.b;
+            return vec4f(0.0, 0.0, 0.0, 1.0);
+        }
+        @fragment fn fs() -> @location(0) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 1.0);
+        }
+    )");
+    utils::ComboRenderPipelineDescriptor desc8;
+    desc8.vertex.module = module8;
+    desc8.cFragment.module = module8;
+    wgpu::RenderPipeline pipeline8 = device.CreateRenderPipeline(&desc8);
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    // Bundle 4
+    wgpu::RenderBundle bundle4;
+    {
+        wgpu::RenderBundleEncoderDescriptor bundleDesc;
+        bundleDesc.colorFormatCount = 1;
+        bundleDesc.colorFormats = &renderPass.colorFormat;
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&bundleDesc);
+        encoder.SetPipeline(pipeline4);
+        uint32_t data = 0;
+        encoder.SetImmediates(0, &data, 4);
+        encoder.Draw(3);
+        bundle4 = encoder.Finish();
+    }
+
+    // Bundle 8
+    wgpu::RenderBundle bundle8;
+    {
+        wgpu::RenderBundleEncoderDescriptor bundleDesc;
+        bundleDesc.colorFormatCount = 1;
+        bundleDesc.colorFormats = &renderPass.colorFormat;
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&bundleDesc);
+        encoder.SetPipeline(pipeline8);
+        uint32_t data[] = {0, 0};
+        encoder.SetImmediates(0, data, 8);
+        encoder.Draw(3);
+        bundle8 = encoder.Finish();
+    }
+
+    // Execute both
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    wgpu::RenderBundle bundles[] = {bundle4, bundle8};
+    pass.ExecuteBundles(2, bundles);
+    pass.End();
+    encoder.Finish();
+}
+
+// Check that ExecuteBundles resets the immediate data state in the RenderPass.
+TEST_F(ImmediateDataTest, ExecuteBundlesResetsImmediateDataState) {
+    // Pipeline 4: requires 4 bytes
+    wgpu::ShaderModule module4 = utils::CreateShaderModule(device, R"(
+        var<immediate> constants: u32;
+        @vertex fn vs() -> @builtin(position) vec4f {
+            _ = constants;
+            return vec4f(0.0, 0.0, 0.0, 1.0);
+        }
+        @fragment fn fs() -> @location(0) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 1.0);
+        }
+    )");
+    utils::ComboRenderPipelineDescriptor desc4;
+    desc4.vertex.module = module4;
+    desc4.cFragment.module = module4;
+    wgpu::RenderPipeline pipeline4 = device.CreateRenderPipeline(&desc4);
+
+    // Bundle (placeholder, just to execute)
+    wgpu::RenderBundle bundle;
+    {
+        wgpu::RenderBundleEncoderDescriptor bundleDesc;
+        bundleDesc.colorFormatCount = 1;
+        wgpu::TextureFormat format = wgpu::TextureFormat::RGBA8Unorm;
+        bundleDesc.colorFormats = &format;
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&bundleDesc);
+        bundle = encoder.Finish();
+    }
+
+    // Case 1: Immediate -> ExecuteBundles -> SetPipeline -> Draw (Fail: No immediate data)
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+        pass.SetPipeline(pipeline4);
+        uint32_t data = 0;
+        pass.SetImmediates(0, &data, 4);
+
+        pass.ExecuteBundles(1, &bundle);
+
+        pass.SetPipeline(pipeline4);  // Restore pipeline
+        pass.Draw(3);                 // Should fail (Immediate data lost)
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Case 2: ExecuteBundles -> SetImmediates -> SetPipeline -> Draw (Success)
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.ExecuteBundles(1, &bundle);
+        uint32_t data = 0;
+        pass.SetImmediates(0, &data, 4);
+        pass.SetPipeline(pipeline4);
+        pass.Draw(3);
+        pass.End();
+        encoder.Finish();
+    }
+}
+
+enum class EncoderType {
+    Compute,
+    RenderPass,
+    RenderBundle,
+};
+
 struct ImmediateDataRange {
     uint32_t offset;
     uint32_t size;
 };
 
-class ImmediateDataRequiredTest : public ImmediateDataTest {
+class ImmediateDataRequiredTest : public ImmediateDataTest,
+                                  public testing::WithParamInterface<EncoderType> {
   protected:
     void TestImmediateDataValidation(std::string entryPoint,
                                      std::vector<ImmediateDataRange> ranges,
                                      bool success,
-                                     bool isCompute) {
+                                     EncoderType encoderType) {
         // Structs with padding:
         // PadMiddle:
         //   a: u32 (0..4)
@@ -532,7 +672,7 @@ class ImmediateDataRequiredTest : public ImmediateDataTest {
         wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, kShader);
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-        auto setImmediates = [&](auto& pass) {
+        auto SetImmediates = [&](auto& pass) {
             for (const auto& range : ranges) {
                 if (range.size > 0) {
                     std::vector<uint32_t> data((range.size + 3) / 4, 0);
@@ -541,18 +681,7 @@ class ImmediateDataRequiredTest : public ImmediateDataTest {
             }
         };
 
-        if (isCompute) {
-            wgpu::ComputePipelineDescriptor descriptor;
-            descriptor.compute.module = shaderModule;
-            descriptor.compute.entryPoint = entryPoint.c_str();
-            wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
-
-            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-            pass.SetPipeline(pipeline);
-            setImmediates(pass);
-            pass.DispatchWorkgroups(1);
-            pass.End();
-        } else {
+        auto CreateRenderPipeline = [&]() {
             utils::ComboRenderPipelineDescriptor descriptor;
             descriptor.vertex.module = shaderModule;
             descriptor.cFragment.module = shaderModule;
@@ -564,16 +693,54 @@ class ImmediateDataRequiredTest : public ImmediateDataTest {
                 descriptor.vertex.entryPoint = "vsTail";
                 descriptor.cFragment.entryPoint = "fsTail";
             }
-            descriptor.cFragment.targetCount = 1;
 
-            wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+            return device.CreateRenderPipeline(&descriptor);
+        };
 
-            utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
-            pass.SetPipeline(pipeline);
-            setImmediates(pass);
-            pass.Draw(3);
-            pass.End();
+        switch (encoderType) {
+            case EncoderType::Compute: {
+                wgpu::ComputePipelineDescriptor descriptor;
+                descriptor.compute.module = shaderModule;
+                descriptor.compute.entryPoint = entryPoint.c_str();
+                wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
+
+                wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+                pass.SetPipeline(pipeline);
+                SetImmediates(pass);
+                pass.DispatchWorkgroups(1);
+                pass.End();
+                break;
+            }
+            case EncoderType::RenderPass: {
+                wgpu::RenderPipeline pipeline = CreateRenderPipeline();
+                utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+                pass.SetPipeline(pipeline);
+                SetImmediates(pass);
+                pass.Draw(3);
+                pass.End();
+                break;
+            }
+            case EncoderType::RenderBundle: {
+                wgpu::RenderPipeline pipeline = CreateRenderPipeline();
+                wgpu::RenderBundleEncoderDescriptor bundleDesc;
+                bundleDesc.colorFormatCount = 1;
+                wgpu::TextureFormat format = wgpu::TextureFormat::RGBA8Unorm;
+                bundleDesc.colorFormats = &format;
+
+                wgpu::RenderBundleEncoder bundleEncoder =
+                    device.CreateRenderBundleEncoder(&bundleDesc);
+                bundleEncoder.SetPipeline(pipeline);
+                SetImmediates(bundleEncoder);
+                bundleEncoder.Draw(3);
+
+                if (success) {
+                    bundleEncoder.Finish();
+                } else {
+                    ASSERT_DEVICE_ERROR(bundleEncoder.Finish());
+                }
+                return;
+            }
         }
 
         if (success) {
@@ -584,36 +751,57 @@ class ImmediateDataRequiredTest : public ImmediateDataTest {
     }
 
     void RunTests(std::string entryPoint, std::vector<ImmediateDataRange> ranges, bool success) {
-        TestImmediateDataValidation(entryPoint, ranges, success, true);
-        TestImmediateDataValidation(entryPoint, ranges, success, false);
+        TestImmediateDataValidation(entryPoint, ranges, success, GetParam());
     }
 };
 
-TEST_F(ImmediateDataRequiredTest, PadMiddleMissesA) {
+TEST_P(ImmediateDataRequiredTest, PadMiddleMissesA) {
     RunTests("mainMiddle", {{16, 16}}, false);
 }
-TEST_F(ImmediateDataRequiredTest, PadMiddleCoversAll) {
+
+TEST_P(ImmediateDataRequiredTest, PadMiddleCoversAll) {
     RunTests("mainMiddle", {{0, 32}}, true);
 }
-TEST_F(ImmediateDataRequiredTest, PadMiddleMissesB) {
+
+TEST_P(ImmediateDataRequiredTest, PadMiddleMissesB) {
     RunTests("mainMiddle", {{0, 16}}, false);
 }
-TEST_F(ImmediateDataRequiredTest, PadMiddlePartialB) {
+
+TEST_P(ImmediateDataRequiredTest, PadMiddlePartialB) {
     RunTests("mainMiddle", {{16, 12}}, false);
 }
-TEST_F(ImmediateDataRequiredTest, PadMiddleSplitCoverage) {
+
+TEST_P(ImmediateDataRequiredTest, PadMiddleSplitCoverage) {
     RunTests("mainMiddle", {{0, 4}, {16, 16}}, true);
 }
 
-TEST_F(ImmediateDataRequiredTest, PadTailCoversA) {
+TEST_P(ImmediateDataRequiredTest, PadTailCoversA) {
     RunTests("mainTail", {{0, 12}}, true);
 }
-TEST_F(ImmediateDataRequiredTest, PadTailCoversAll) {
+
+TEST_P(ImmediateDataRequiredTest, PadTailCoversAll) {
     RunTests("mainTail", {{0, 16}}, true);
 }
-TEST_F(ImmediateDataRequiredTest, PadTailPartialA) {
+
+TEST_P(ImmediateDataRequiredTest, PadTailPartialA) {
     RunTests("mainTail", {{0, 8}}, false);
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    ,
+    ImmediateDataRequiredTest,
+    ::testing::Values(EncoderType::Compute, EncoderType::RenderPass, EncoderType::RenderBundle),
+    [](const testing::TestParamInfo<ImmediateDataRequiredTest::ParamType>& info) {
+        switch (info.param) {
+            case EncoderType::Compute:
+                return "Compute";
+            case EncoderType::RenderPass:
+                return "RenderPass";
+            case EncoderType::RenderBundle:
+                return "RenderBundle";
+        }
+        return "Unknown";
+    });
 
 }  // anonymous namespace
 }  // namespace dawn
