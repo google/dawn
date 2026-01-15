@@ -1315,9 +1315,13 @@ class Validator {
     /// @param anchor where to attach error messages to.
     /// @param ty the type of the IO object
     /// @param attr the IO attributes of the object.
+    /// @param stage the shader stage
+    /// @param dir the direction of the IO usage
     void CheckInterpolation(const CastableBase* anchor,
                             const core::type::Type* ty,
-                            const IOAttributes& attr);
+                            const IOAttributes& attr,
+                            const Function::PipelineStage stage,
+                            const IODirection dir);
 
     /// Validates binding_point attributes on entry point IO.
     /// @param anchor where to attach error messages to.
@@ -2914,7 +2918,7 @@ void Validator::ValidateIOAttributes(const Function* func) {
 
     // Validate all the interpolation usages.
     for (const auto& task : tasks) {
-        CheckInterpolation(task.anchor, task.type, task.attr);
+        CheckInterpolation(task.anchor, task.type, task.attr, stage, task.dir);
     }
 
     if (stage != Function::PipelineStage::kUndefined) {
@@ -3661,29 +3665,32 @@ void Validator::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locatio
 
 void Validator::CheckInterpolation(const CastableBase* anchor,
                                    const core::type::Type* ty,
-                                   const IOAttributes& attr) {
+                                   const IOAttributes& attr,
+                                   const Function::PipelineStage stage,
+                                   const IODirection dir) {
     bool ctx = false;
 
     WalkTypeAndMembers(
         ctx, ty, attr,
-        [this, anchor](bool& in_location_composite, const core::type::Type* t,
-                       const IOAttributes& a) {
+        [this, anchor, stage, dir](bool& in_location_composite, const core::type::Type* t,
+                                   const IOAttributes& a) {
+            bool has_location = a.location.has_value() || in_location_composite;
+            if (!has_location) {
+                if (auto* str = t->As<core::type::Struct>()) {
+                    has_location |= str->Members().All(
+                        [](const auto* mem) { return mem->Attributes().location.has_value(); });
+                }
+            }
+
             if (a.interpolation.has_value()) {
+                has_location |= (capabilities_.Contains(Capability::kLoosenValidationForShaderIO) &&
+                                 a.builtin.has_value());
+
                 if (!capabilities_.Contains(Capability::kAllowLocationForNumericElements) &&
                     t->As<core::type::Struct>()) {
                     AddError(anchor) << "interpolation cannot be applied to a struct without "
                                         "'kAllowLocationForNumericElements' capability";
                 }
-
-                bool has_location = a.location.has_value() || in_location_composite;
-                if (!has_location) {
-                    if (auto* str = t->As<core::type::Struct>()) {
-                        has_location |= str->Members().All(
-                            [](const auto* mem) { return mem->Attributes().location.has_value(); });
-                    }
-                }
-                has_location |= (capabilities_.Contains(Capability::kLoosenValidationForShaderIO) &&
-                                 a.builtin.has_value());
 
                 if (t->IsIntegerScalar()) {
                     if (a.interpolation.value().type != InterpolationType::kFlat) {
@@ -3700,9 +3707,20 @@ void Validator::CheckInterpolation(const CastableBase* anchor,
                                             "(or location-like shader I/O annotation)";
                     }
                 }
+            } else if (has_location && t->IsIntegerScalarOrVector()) {
+                // Integral vertex outputs and fragment inputs require flat interpolation.
+                const bool needs_flat =
+                    (stage == Function::PipelineStage::kVertex && dir == IODirection::kOutput) ||
+                    (stage == Function::PipelineStage::kFragment && dir == IODirection::kInput);
+                if (needs_flat) {
+                    AddError(anchor) << "integral user-defined inputs and outputs must have an "
+                                        "@interpolate(flat) attribute";
+                }
             }
 
-            in_location_composite |= a.location.has_value();
+            if (t->IsAnyOf<core::type::Array, core::type::Struct>()) {
+                in_location_composite |= a.location.has_value();
+            }
         });
 }
 

@@ -1452,6 +1452,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicStoreDynamicAccessChai
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto index = b.FunctionParam(ty.u32());
     index->SetLocation(0);
+    index->SetInterpolation(core::Interpolation{core::InterpolationType::kFlat});
     func->SetParams({index});
     b.Append(func->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage>(ty.atomic<i32>()), var, 0_u, index, 1_u, index);
@@ -1473,7 +1474,7 @@ $B1: {  # root
   %v:ptr<storage, S2, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func(%3:u32 [@location(0)]):void {
+%foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
   $B2: {
     %4:ptr<storage, atomic<i32>, read_write> = access %v, 0u, %3, 1u, %3
     %5:void = atomicStore %4, 123i
@@ -1497,7 +1498,7 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func(%3:u32 [@location(0)]):void {
+%foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
   $B2: {
     %4:u32 = mul %3, 32u
     %5:u32 = mul %3, 4u
@@ -1655,6 +1656,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicLoadDynamicAccessChain
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto index = b.FunctionParam(ty.u32());
     index->SetLocation(0);
+    index->SetInterpolation(core::Interpolation{core::InterpolationType::kFlat});
     func->SetParams({index});
     b.Append(func->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage>(ty.atomic<i32>()), var, 0_u, index, 1_u, index);
@@ -1676,7 +1678,7 @@ $B1: {  # root
   %v:ptr<storage, S2, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func(%3:u32 [@location(0)]):void {
+%foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
   $B2: {
     %4:ptr<storage, atomic<i32>, read_write> = access %v, 0u, %3, 1u, %3
     %5:i32 = atomicLoad %4
@@ -1701,7 +1703,7 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func(%3:u32 [@location(0)]):void {
+%foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
   $B2: {
     %4:u32 = mul %3, 32u
     %5:u32 = mul %3, 4u
@@ -1865,6 +1867,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicSubDynamicAccessChain)
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto index = b.FunctionParam(ty.u32());
     index->SetLocation(0);
+    index->SetInterpolation(core::Interpolation{core::InterpolationType::kFlat});
     func->SetParams({index});
     b.Append(func->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage>(ty.atomic<i32>()), var, 0_u, index, 1_u, index);
@@ -1886,7 +1889,7 @@ $B1: {  # root
   %v:ptr<storage, S2, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func(%3:u32 [@location(0)]):void {
+%foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
   $B2: {
     %4:ptr<storage, atomic<i32>, read_write> = access %v, 0u, %3, 1u, %3
     %5:i32 = atomicSub %4, 123i
@@ -1911,7 +1914,7 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func(%3:u32 [@location(0)]):void {
+%foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
   $B2: {
     %4:u32 = mul %3, 32u
     %5:u32 = mul %3, 4u
@@ -2090,6 +2093,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicCompareExchangeWeakDyn
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto index = b.FunctionParam(ty.u32());
     index->SetLocation(0);
+    index->SetInterpolation(core::Interpolation{core::InterpolationType::kFlat});
     func->SetParams({index});
     b.Append(func->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage>(ty.atomic<i32>()), var, 0_u, index, 1_u, index);
@@ -2117,7 +2121,7 @@ $B1: {  # root
   %v:ptr<storage, S2, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func(%3:u32 [@location(0)]):void {
+%foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
   $B2: {
     %4:ptr<storage, atomic<i32>, read_write> = access %v, 0u, %3, 1u, %3
     %5:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %4, 123i, 345i
@@ -2147,7 +2151,7 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func(%3:u32 [@location(0)]):void {
+%foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
   $B2: {
     %4:u32 = mul %3, 32u
     %5:u32 = mul %3, 4u
@@ -2394,6 +2398,7 @@ TEST_P(DecomposeBuiltinAtomic, DynamicAccessChain) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto index = b.FunctionParam(ty.u32());
     index->SetLocation(0);
+    index->SetInterpolation(core::Interpolation{core::InterpolationType::kFlat});
     func->SetParams({index});
     b.Append(func->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage>(ty.atomic<u32>()), var, 0_u, index, 0_u, index);
@@ -2414,7 +2419,7 @@ $B1: {  # root
   %v:ptr<storage, S2, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func(%3:u32 [@location(0)]):void {
+%foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
   $B2: {
     %4:ptr<storage, atomic<u32>, read_write> = access %v, 0u, %3, 0u, %3
     %5:u32 = )" +
@@ -2439,7 +2444,7 @@ $B1: {  # root
   %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = @fragment func(%3:u32 [@location(0)]):void {
+%foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
   $B2: {
     %4:u32 = mul %3, 12u
     %5:u32 = mul %3, 4u

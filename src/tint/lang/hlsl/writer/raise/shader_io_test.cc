@@ -2807,13 +2807,17 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_Disabled) 
     core::IOAttributes pos_attr;
     pos_attr.builtin = core::BuiltinValue::kPosition;
 
-    core::IOAttributes loc0_attr;
-    loc0_attr.location = 0;
-    core::IOAttributes loc1_attr;
-    loc1_attr.location = 1;
-    core::IOAttributes loc2_attr;
-    loc2_attr.location = 2;
-
+    core::IOAttributes loc0_attr{
+        .location = 0,
+    };
+    core::IOAttributes loc1_attr{
+        .location = 1,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
+    core::IOAttributes loc2_attr{
+        .location = 2,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {mod.symbols.New("position"), ty.vec4f(), pos_attr},
@@ -2832,8 +2836,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_Disabled) 
 Outputs = struct @align(16) {
   position:vec4<f32> @offset(0), @builtin(position)
   loc0:f32 @offset(16), @location(0)
-  loc1:i32 @offset(20), @location(1)
-  loc2:vec3<i32> @offset(32), @location(2)
+  loc1:i32 @offset(20), @location(1), @interpolate(flat)
+  loc2:vec3<i32> @offset(32), @location(2), @interpolate(flat)
 }
 
 %foo = @vertex func():Outputs {
@@ -2857,8 +2861,8 @@ Outputs = struct @align(16) {
 
 foo_outputs = struct @align(16) {
   Outputs_loc0:f32 @offset(0), @location(0)
-  Outputs_loc1:i32 @offset(4), @location(1)
-  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_loc1:i32 @offset(4), @location(1), @interpolate(flat)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2), @interpolate(flat)
   Outputs_position:vec4<f32> @offset(32), @builtin(position)
 }
 
@@ -2895,13 +2899,17 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_None) {
     core::IOAttributes pos_attr;
     pos_attr.builtin = core::BuiltinValue::kPosition;
 
-    core::IOAttributes loc0_attr;
-    loc0_attr.location = 0;
-    core::IOAttributes loc1_attr;
-    loc1_attr.location = 1;
-    core::IOAttributes loc2_attr;
-    loc2_attr.location = 2;
-
+    core::IOAttributes loc0_attr{
+        .location = 0,
+    };
+    core::IOAttributes loc1_attr{
+        .location = 1,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
+    core::IOAttributes loc2_attr{
+        .location = 2,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {mod.symbols.New("position"), ty.vec4f(), pos_attr},
@@ -2920,8 +2928,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_None) {
 Outputs = struct @align(16) {
   position:vec4<f32> @offset(0), @builtin(position)
   loc0:f32 @offset(16), @location(0)
-  loc1:i32 @offset(20), @location(1)
-  loc2:vec3<i32> @offset(32), @location(2)
+  loc1:i32 @offset(20), @location(1), @interpolate(flat)
+  loc2:vec3<i32> @offset(32), @location(2), @interpolate(flat)
 }
 
 %foo = @vertex func():Outputs {
@@ -2945,8 +2953,8 @@ Outputs = struct @align(16) {
 
 foo_outputs = struct @align(16) {
   Outputs_loc0:f32 @offset(0), @location(0)
-  Outputs_loc1:i32 @offset(4), @location(1)
-  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_loc1:i32 @offset(4), @location(1), @interpolate(flat)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2), @interpolate(flat)
   Outputs_position:vec4<f32> @offset(32), @builtin(position)
 }
 
@@ -2986,13 +2994,17 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_First) {
     core::IOAttributes pos_attr;
     pos_attr.builtin = core::BuiltinValue::kPosition;
 
-    core::IOAttributes loc0_attr;
-    loc0_attr.location = 0;
-    core::IOAttributes loc1_attr;
-    loc1_attr.location = 1;
-    core::IOAttributes loc2_attr;
-    loc2_attr.location = 2;
-
+    core::IOAttributes loc0_attr{
+        .location = 0,
+    };
+    core::IOAttributes loc1_attr{
+        .location = 1,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
+    core::IOAttributes loc2_attr{
+        .location = 2,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {mod.symbols.New("position"), ty.vec4f(), pos_attr},
@@ -3011,8 +3023,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_First) {
 Outputs = struct @align(16) {
   position:vec4<f32> @offset(0), @builtin(position)
   loc0:f32 @offset(16), @location(0)
-  loc1:i32 @offset(20), @location(1)
-  loc2:vec3<i32> @offset(32), @location(2)
+  loc1:i32 @offset(20), @location(1), @interpolate(flat)
+  loc2:vec3<i32> @offset(32), @location(2), @interpolate(flat)
 }
 
 %foo = @vertex func():Outputs {
@@ -3035,8 +3047,8 @@ Outputs = struct @align(16) {
 }
 
 foo_outputs = struct @align(16) {
-  Outputs_loc1:i32 @offset(0), @location(1)
-  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_loc1:i32 @offset(0), @location(1), @interpolate(flat)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2), @interpolate(flat)
   Outputs_position:vec4<f32> @offset(32), @builtin(position)
 }
 
@@ -3075,13 +3087,17 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_Middle) {
     core::IOAttributes pos_attr;
     pos_attr.builtin = core::BuiltinValue::kPosition;
 
-    core::IOAttributes loc0_attr;
-    loc0_attr.location = 0;
-    core::IOAttributes loc1_attr;
-    loc1_attr.location = 1;
-    core::IOAttributes loc2_attr;
-    loc2_attr.location = 2;
-
+    core::IOAttributes loc0_attr{
+        .location = 0,
+    };
+    core::IOAttributes loc1_attr{
+        .location = 1,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
+    core::IOAttributes loc2_attr{
+        .location = 2,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {mod.symbols.New("position"), ty.vec4f(), pos_attr},
@@ -3100,8 +3116,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_Middle) {
 Outputs = struct @align(16) {
   position:vec4<f32> @offset(0), @builtin(position)
   loc0:f32 @offset(16), @location(0)
-  loc1:i32 @offset(20), @location(1)
-  loc2:vec3<i32> @offset(32), @location(2)
+  loc1:i32 @offset(20), @location(1), @interpolate(flat)
+  loc2:vec3<i32> @offset(32), @location(2), @interpolate(flat)
 }
 
 %foo = @vertex func():Outputs {
@@ -3125,7 +3141,7 @@ Outputs = struct @align(16) {
 
 foo_outputs = struct @align(16) {
   Outputs_loc0:f32 @offset(0), @location(0)
-  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2), @interpolate(flat)
   Outputs_position:vec4<f32> @offset(32), @builtin(position)
 }
 
@@ -3164,13 +3180,17 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_Last) {
     core::IOAttributes pos_attr;
     pos_attr.builtin = core::BuiltinValue::kPosition;
 
-    core::IOAttributes loc0_attr;
-    loc0_attr.location = 0;
-    core::IOAttributes loc1_attr;
-    loc1_attr.location = 1;
-    core::IOAttributes loc2_attr;
-    loc2_attr.location = 2;
-
+    core::IOAttributes loc0_attr{
+        .location = 0,
+    };
+    core::IOAttributes loc1_attr{
+        .location = 1,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
+    core::IOAttributes loc2_attr{
+        .location = 2,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {mod.symbols.New("position"), ty.vec4f(), pos_attr},
@@ -3189,8 +3209,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_Last) {
 Outputs = struct @align(16) {
   position:vec4<f32> @offset(0), @builtin(position)
   loc0:f32 @offset(16), @location(0)
-  loc1:i32 @offset(20), @location(1)
-  loc2:vec3<i32> @offset(32), @location(2)
+  loc1:i32 @offset(20), @location(1), @interpolate(flat)
+  loc2:vec3<i32> @offset(32), @location(2), @interpolate(flat)
 }
 
 %foo = @vertex func():Outputs {
@@ -3214,7 +3234,7 @@ Outputs = struct @align(16) {
 
 foo_outputs = struct @align(16) {
   Outputs_loc0:f32 @offset(0), @location(0)
-  Outputs_loc1:i32 @offset(4), @location(1)
+  Outputs_loc1:i32 @offset(4), @location(1), @interpolate(flat)
   Outputs_position:vec4<f32> @offset(16), @builtin(position)
 }
 
@@ -3253,13 +3273,17 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_FirstAndLa
     core::IOAttributes pos_attr;
     pos_attr.builtin = core::BuiltinValue::kPosition;
 
-    core::IOAttributes loc0_attr;
-    loc0_attr.location = 0;
-    core::IOAttributes loc1_attr;
-    loc1_attr.location = 1;
-    core::IOAttributes loc2_attr;
-    loc2_attr.location = 2;
-
+    core::IOAttributes loc0_attr{
+        .location = 0,
+    };
+    core::IOAttributes loc1_attr{
+        .location = 1,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
+    core::IOAttributes loc2_attr{
+        .location = 2,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {mod.symbols.New("position"), ty.vec4f(), pos_attr},
@@ -3278,8 +3302,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_FirstAndLa
 Outputs = struct @align(16) {
   position:vec4<f32> @offset(0), @builtin(position)
   loc0:f32 @offset(16), @location(0)
-  loc1:i32 @offset(20), @location(1)
-  loc2:vec3<i32> @offset(32), @location(2)
+  loc1:i32 @offset(20), @location(1), @interpolate(flat)
+  loc2:vec3<i32> @offset(32), @location(2), @interpolate(flat)
 }
 
 %foo = @vertex func():Outputs {
@@ -3302,7 +3326,7 @@ Outputs = struct @align(16) {
 }
 
 foo_outputs = struct @align(16) {
-  Outputs_loc1:i32 @offset(0), @location(1)
+  Outputs_loc1:i32 @offset(0), @location(1), @interpolate(flat)
   Outputs_position:vec4<f32> @offset(16), @builtin(position)
 }
 
@@ -3340,13 +3364,17 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_All) {
     core::IOAttributes pos_attr;
     pos_attr.builtin = core::BuiltinValue::kPosition;
 
-    core::IOAttributes loc0_attr;
-    loc0_attr.location = 0;
-    core::IOAttributes loc1_attr;
-    loc1_attr.location = 1;
-    core::IOAttributes loc2_attr;
-    loc2_attr.location = 2;
-
+    core::IOAttributes loc0_attr{
+        .location = 0,
+    };
+    core::IOAttributes loc1_attr{
+        .location = 1,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
+    core::IOAttributes loc2_attr{
+        .location = 2,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {mod.symbols.New("position"), ty.vec4f(), pos_attr},
@@ -3365,8 +3393,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_All) {
 Outputs = struct @align(16) {
   position:vec4<f32> @offset(0), @builtin(position)
   loc0:f32 @offset(16), @location(0)
-  loc1:i32 @offset(20), @location(1)
-  loc2:vec3<i32> @offset(32), @location(2)
+  loc1:i32 @offset(20), @location(1), @interpolate(flat)
+  loc2:vec3<i32> @offset(32), @location(2), @interpolate(flat)
 }
 
 %foo = @vertex func():Outputs {
@@ -3425,13 +3453,17 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_NonLocatio
     core::IOAttributes pos_attr;
     pos_attr.builtin = core::BuiltinValue::kPosition;
 
-    core::IOAttributes loc0_attr;
-    loc0_attr.location = 0;
-    core::IOAttributes loc1_attr;
-    loc1_attr.location = 1;
-    core::IOAttributes loc2_attr;
-    loc2_attr.location = 2;
-
+    core::IOAttributes loc0_attr{
+        .location = 0,
+    };
+    core::IOAttributes loc1_attr{
+        .location = 1,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
+    core::IOAttributes loc2_attr{
+        .location = 2,
+        .interpolation = core::Interpolation{core::InterpolationType::kFlat},
+    };
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {mod.symbols.New("loc0"), ty.f32(), loc0_attr},
@@ -3450,8 +3482,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_NonLocatio
 Outputs = struct @align(16) {
   loc0:f32 @offset(0), @location(0)
   position:vec4<f32> @offset(16), @builtin(position)
-  loc1:i32 @offset(32), @location(1)
-  loc2:vec3<i32> @offset(48), @location(2)
+  loc1:i32 @offset(32), @location(1), @interpolate(flat)
+  loc2:vec3<i32> @offset(48), @location(2), @interpolate(flat)
 }
 
 %foo = @vertex func():Outputs {
@@ -3475,7 +3507,7 @@ Outputs = struct @align(16) {
 
 foo_outputs = struct @align(16) {
   Outputs_loc0:f32 @offset(0), @location(0)
-  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2), @interpolate(flat)
   Outputs_position:vec4<f32> @offset(32), @builtin(position)
 }
 

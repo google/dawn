@@ -1579,6 +1579,94 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Integral_NotFlat) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_Location_Integral_WithoutInterpolation_VertexInput) {
+    auto* f = VertexEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("p", ty.i32());
+    p->SetLocation(0);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero<vec4f>()); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Location_Integral_WithoutInterpolation_VertexOutput) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"),
+                  {
+                      {mod.symbols.New("pos"), ty.vec4f(), {.builtin = BuiltinValue::kPosition}},
+                      {mod.symbols.New("loc"), ty.vec4u(), {.location = 0u}},
+                  });
+
+    auto* f = b.Function("my_func", str_ty, Function::PipelineStage::kVertex);
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:6:1 error: integral user-defined inputs and outputs must have an @interpolate(flat) attribute
+%my_func = @vertex func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Location_Integral_WithoutInterpolation_FragmentInput) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("p", ty.i32());
+    p->SetLocation(0);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:1:27 error: integral user-defined inputs and outputs must have an @interpolate(flat) attribute
+%my_func = @fragment func(%p:i32 [@location(0)]):void {
+                          ^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Location_Integral_WithoutInterpolation_FragmentOutput) {
+    auto* f = FragmentEntryPoint("my_func");
+    f->SetReturnType(ty.u32());
+    f->SetReturnLocation(0);
+
+    b.Append(f->Block(), [&] { b.Return(f, 0_u); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+// Test that an integral builtin inside a struct with another member with a location attribute does
+// not falsely trigger validation for required flat interpolation attributes.
+TEST_F(IR_ValidatorTest, Function_IntegralBuiltin_InStructWithLocationMember) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"),
+                  {
+                      {mod.symbols.New("loc"), ty.vec4f(), {.location = 0u}},
+                      {mod.symbols.New("mask"), ty.u32(), {.builtin = BuiltinValue::kSampleMask}},
+                  });
+
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("p", str_ty);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_ParameterWithConstructibleType) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("my_param", ty.u32());
