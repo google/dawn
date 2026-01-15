@@ -268,6 +268,44 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
     });
 }
 
+// Test that creating buffers with mappedAtCreation in parallel works.
+// Tests both buffers with MapWrite usage and without.
+TEST_P(MultithreadTests, MapAtCreationInParallel) {
+    // TODO(451928481): multithread support in GL is incomplete
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+    constexpr uint32_t kDataSize = 1000;
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    constexpr uint32_t kSize = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
+
+    utils::RunInParallel(10, [this, &myData = std::as_const(myData)](uint32_t index) {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = kSize;
+        descriptor.mappedAtCreation = true;
+
+        // Alternate between buffers with MapWrite and without
+        if (index % 2 == 0) {
+            // Buffer with MapWrite usage
+            descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+        } else {
+            // Buffer without MapWrite usage
+            descriptor.usage = wgpu::BufferUsage::CopySrc;
+        }
+
+        wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+        // Buffer is mapped at creation, write into it and unmap
+        memcpy(buffer.GetMappedRange(0, kSize), myData.data(), kSize);
+        buffer.Unmap();
+
+        // Check the content of the buffer
+        EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 0, kDataSize);
+    });
+}
+
 // Test that copy a texture to a buffer then map that buffer in parallel works.
 TEST_P(MultithreadTests, T2BThenMapInParallel) {
     // TODO(451928481): multithread support in GL is incomplete
