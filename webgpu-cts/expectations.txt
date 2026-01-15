@@ -946,6 +946,13 @@ crbug.com/473827156 [ qualcomm-0x36334330 win ] webgpu:api,validation,capability
 crbug.com/442950558 [ qualcomm-0x36334330 win ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:* [ RetryOnFailure ]
 crbug.com/473827158 [ qualcomm-0x36334330 win ] webgpu:api,validation,encoding,encoder_state:pass_end_invalid_order:* [ Failure ]
 crbug.com/473827162 [ arch-arm64 webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,* [ RetryOnFailure ]
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,*i32* [ Failure ]
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,insertBits:integer:inputSource="const";signed=true;* [ Failure ]
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_decrement_underflow: [ Failure ]
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_increment: [ Failure ]
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:vec3_element_increment: [ Failure ]
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:vec4_element_increment: [ Failure ]
+crbug.com/475877305 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ]
 
 # finder:enable-unused
 
