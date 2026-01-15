@@ -451,17 +451,18 @@ TEST_P(DepthTextureClearTwiceTest, ClearDepthAspectTwice) {
     }
 }
 
-DAWN_INSTANTIATE_TEST_P(DepthTextureClearTwiceTest,
-                        {D3D11Backend(), D3D11Backend({"use_packed_depth24_unorm_stencil8_format"}),
-                         D3D12Backend(), D3D12Backend({"use_packed_depth24_unorm_stencil8_format"}),
-                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
-                         VulkanBackend({}, {"vulkan_use_dynamic_rendering"}), WebGPUBackend()},
-                        {wgpu::TextureFormat::Depth16Unorm, wgpu::TextureFormat::Depth24Plus,
-                         wgpu::TextureFormat::Depth32Float,
-                         wgpu::TextureFormat::Depth32FloatStencil8,
-                         wgpu::TextureFormat::Depth24PlusStencil8},
-                        {true, false});
+DAWN_INSTANTIATE_TEST_P(
+    DepthTextureClearTwiceTest,
+    {D3D11Backend(), D3D11Backend({"use_packed_depth24_unorm_stencil8_format"}), D3D12Backend(),
+     D3D12Backend({"use_packed_depth24_unorm_stencil8_format"}), MetalBackend(), OpenGLBackend(),
+     OpenGLESBackend(), VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
+     VulkanBackend({"vulkan_use_create_render_pass_2"}, {"vulkan_use_dynamic_rendering"}),
+     VulkanBackend({}, {"vulkan_use_create_render_pass_2", "vulkan_use_dynamic_rendering"}),
+     WebGPUBackend()},
+    {wgpu::TextureFormat::Depth16Unorm, wgpu::TextureFormat::Depth24Plus,
+     wgpu::TextureFormat::Depth32Float, wgpu::TextureFormat::Depth32FloatStencil8,
+     wgpu::TextureFormat::Depth24PlusStencil8},
+    {true, false});
 
 }  // anonymous namespace
 }  // namespace dawn

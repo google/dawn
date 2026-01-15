@@ -356,6 +356,9 @@ struct VulkanFunctions {
     VkFn<PFN_vkCmdDrawIndirectCountKHR> CmdDrawIndirectCountKHR = nullptr;
     VkFn<PFN_vkCmdDrawIndexedIndirectCountKHR> CmdDrawIndexedIndirectCountKHR = nullptr;
 
+    // VK_KHR_create_renderpass2
+    VkFn<PFN_vkCreateRenderPass2KHR> CreateRenderPass2KHR = nullptr;
+
     // Promoted in 1.3
 
     // VK_KHR_dynamic_rendering

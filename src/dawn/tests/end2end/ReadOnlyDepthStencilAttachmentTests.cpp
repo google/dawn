@@ -530,22 +530,27 @@ DAWN_INSTANTIATE_TEST_P(
     ReadOnlyDepthAttachmentTests,
     {D3D11Backend(), D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
      OpenGLBackend(), OpenGLESBackend(), VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
-     VulkanBackend({}, {"vulkan_use_dynamic_rendering"}), WebGPUBackend()},
+     VulkanBackend({"vulkan_use_create_render_pass_2"}, {"vulkan_use_dynamic_rendering"}),
+     VulkanBackend({}, {"vulkan_use_create_render_pass_2", "vulkan_use_dynamic_rendering"}),
+     WebGPUBackend()},
     std::vector<wgpu::TextureFormat>(utils::kDepthFormats.begin(), utils::kDepthFormats.end()));
 DAWN_INSTANTIATE_TEST_P(
     ReadOnlyStencilAttachmentTests,
     {D3D11Backend(), D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
      OpenGLBackend(), OpenGLESBackend(), VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
-     VulkanBackend({}, {"vulkan_use_dynamic_rendering"}), WebGPUBackend()},
+     VulkanBackend({"vulkan_use_create_render_pass_2"}, {"vulkan_use_dynamic_rendering"}),
+     VulkanBackend({}, {"vulkan_use_create_render_pass_2", "vulkan_use_dynamic_rendering"}),
+     WebGPUBackend()},
     std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(), utils::kStencilFormats.end()));
-DAWN_INSTANTIATE_TEST_P(ReadOnlyDepthAndStencilAttachmentTests,
-                        {D3D11Backend(), D3D12Backend(),
-                         D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
-                         OpenGLBackend(), OpenGLESBackend(),
-                         VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
-                         VulkanBackend({}, {"vulkan_use_dynamic_rendering"}), WebGPUBackend()},
-                        std::vector<wgpu::TextureFormat>(utils::kDepthAndStencilFormats.begin(),
-                                                         utils::kDepthAndStencilFormats.end()));
+DAWN_INSTANTIATE_TEST_P(
+    ReadOnlyDepthAndStencilAttachmentTests,
+    {D3D11Backend(), D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
+     OpenGLBackend(), OpenGLESBackend(), VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
+     VulkanBackend({"vulkan_use_create_render_pass_2"}, {"vulkan_use_dynamic_rendering"}),
+     VulkanBackend({}, {"vulkan_use_create_render_pass_2", "vulkan_use_dynamic_rendering"}),
+     WebGPUBackend()},
+    std::vector<wgpu::TextureFormat>(utils::kDepthAndStencilFormats.begin(),
+                                     utils::kDepthAndStencilFormats.end()));
 
 }  // anonymous namespace
 }  // namespace dawn

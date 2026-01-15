@@ -386,6 +386,10 @@ MaybeError VulkanFunctions::LoadDeviceProcs(VkInstance instance,
         GET_DEVICE_PROC(CmdDrawIndexedIndirectCountKHR);
     }
 
+    if (deviceInfo.HasExt(DeviceExt::CreateRenderPass2)) {
+        GET_DEVICE_PROC(CreateRenderPass2KHR);
+    }
+
     // Promoted in 1.3
     if (deviceInfo.HasExt(DeviceExt::DynamicRendering)) {
         GET_DEVICE_PROC(CmdBeginRenderingKHR);

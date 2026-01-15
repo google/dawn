@@ -364,23 +364,25 @@ TEST_P(RenderPassTest, ClearMultisubresourceAfterWriteDepth16Unorm) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(RenderPassTest,
-                      D3D11Backend(),
-                      D3D12Backend(),
-                      D3D12Backend({}, {"use_d3d12_render_pass"}),
-                      MetalBackend(),
+DAWN_INSTANTIATE_TEST(
+    RenderPassTest,
+    D3D11Backend(),
+    D3D12Backend(),
+    D3D12Backend({}, {"use_d3d12_render_pass"}),
+    MetalBackend(),
 
-                      // for dawn:1071 regression
-                      MetalBackend({"metal_render_r8_rg8_unorm_small_mip_to_temp_texture"}),
+    // for dawn:1071 regression
+    MetalBackend({"metal_render_r8_rg8_unorm_small_mip_to_temp_texture"}),
 
-                      // for dawn:1389 regression
-                      MetalBackend({"use_blit_for_buffer_to_depth_texture_copy"}),
+    // for dawn:1389 regression
+    MetalBackend({"use_blit_for_buffer_to_depth_texture_copy"}),
 
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
-                      VulkanBackend({}, {"vulkan_use_dynamic_rendering"}),
-                      WebGPUBackend());
+    OpenGLBackend(),
+    OpenGLESBackend(),
+    VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
+    VulkanBackend({"vulkan_use_create_render_pass_2"}, {"vulkan_use_dynamic_rendering"}),
+    VulkanBackend({}, {"vulkan_use_create_render_pass_2", "vulkan_use_dynamic_rendering"}),
+    WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

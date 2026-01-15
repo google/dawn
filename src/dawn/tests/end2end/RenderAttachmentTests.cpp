@@ -156,16 +156,18 @@ TEST_P(RenderAttachmentTest, DepthSlice) {
     EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8::kBlue, renderTarget2, 0, 0, 2);
 }
 
-DAWN_INSTANTIATE_TEST(RenderAttachmentTest,
-                      D3D11Backend(),
-                      D3D12Backend(),
-                      D3D12Backend({}, {"use_d3d12_render_pass"}),
-                      MetalBackend(),
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
-                      VulkanBackend({}, {"vulkan_use_dynamic_rendering"}),
-                      WebGPUBackend());
+DAWN_INSTANTIATE_TEST(
+    RenderAttachmentTest,
+    D3D11Backend(),
+    D3D12Backend(),
+    D3D12Backend({}, {"use_d3d12_render_pass"}),
+    MetalBackend(),
+    OpenGLBackend(),
+    OpenGLESBackend(),
+    VulkanBackend({"vulkan_use_dynamic_rendering"}, {}),
+    VulkanBackend({"vulkan_use_create_render_pass_2"}, {"vulkan_use_dynamic_rendering"}),
+    VulkanBackend({}, {"vulkan_use_create_render_pass_2", "vulkan_use_dynamic_rendering"}),
+    WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn
