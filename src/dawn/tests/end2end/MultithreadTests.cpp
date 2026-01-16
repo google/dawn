@@ -238,6 +238,7 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
     constexpr uint32_t kDataSize = 1000;
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -274,7 +275,8 @@ TEST_P(MultithreadTests, MapAtCreationInParallel) {
     // TODO(451928481): multithread support in GL is incomplete
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
     constexpr uint32_t kDataSize = 1000;
-    std::vector<uint32_t> myData(kDataSize);
+    std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
