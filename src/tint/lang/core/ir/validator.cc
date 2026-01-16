@@ -1320,8 +1320,8 @@ class Validator {
     void CheckInterpolation(const CastableBase* anchor,
                             const core::type::Type* ty,
                             const IOAttributes& attr,
-                            const Function::PipelineStage stage,
-                            const IODirection dir);
+                            Function::PipelineStage stage,
+                            IODirection dir);
 
     /// Validates binding_point attributes on entry point IO.
     /// @param anchor where to attach error messages to.

@@ -180,7 +180,6 @@ Checks: "-*,\
           portability-*,\
           -portability-template-virtual-member-function,\
           readability-*,\
-          -readability-avoid-const-params-in-decls,\
           -readability-avoid-nested-conditional-operator,\
           -readability-avoid-return-with-void-value,\
           -readability-braces-around-statements,\
