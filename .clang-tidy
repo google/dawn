@@ -170,7 +170,6 @@ Checks: "-*,\
           -performance-for-range-copy,\
           -performance-inefficient-algorithm,\
           -performance-inefficient-string-concatenation,\
-          -performance-inefficient-vector-operation,\
           -performance-move-const-arg,\
           -performance-no-automatic-move,\
           -performance-noexcept-move-constructor,\
