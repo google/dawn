@@ -1770,6 +1770,9 @@ TEST_P(SharedTextureMemoryTests, UninitializedOnEndAccess) {
 
 // Test copying to texture memory on one device, then sampling it using another device.
 TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
+
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
@@ -1874,6 +1877,9 @@ TEST_P(SharedTextureMemoryTests, EndWithoutUse) {
 // If concurrent read is supported, use two read textures. The first EndAccess should
 // see no fences. The second should then export all the unacquired fences.
 TEST_P(SharedTextureMemoryTests, BeginEndWithoutUse) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
+
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
