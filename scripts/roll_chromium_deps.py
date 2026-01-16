@@ -1034,6 +1034,27 @@ def _sync_chromium_luci_revision(chromium_revision: str) -> ChangedRepo:
                        new_revision=new_revision)
 
 
+def _run_lucicfg_nonfatal() -> None:
+    """Debug code for crbug.com/452840620."""
+    try:
+        p = subprocess.run([
+            'lucicfg',
+            'generate',
+            str(DAWN_ROOT / 'infra' / 'config' / 'global' / 'main.star'),
+        ],
+                           capture_output=True,
+                           text=True,
+                           check=False)
+        logging.error('crbug.com/452840620: stdout from lucicfg generate: %s',
+                      p.stdout)
+        logging.error('crbug.com/452840620: stderr from lucicfg generate: %s',
+                      p.stderr)
+    except Exception as e:
+        logging.error(
+            'crbug.com/452840620: Got error running lucicfg generate despite '
+            'not checking return code: %s', e)
+
+
 def _extract_chromium_luci_revision(package_star_contents: str) -> str | None:
     """Extracts the revision for chromium-luci from a PACKAGE.star file.
 
@@ -1101,9 +1122,14 @@ def main() -> None:
     # We want this entry to be in the commit message, but we do not want it to
     # be present for _apply_changed_deps() since it is not actually a DEPS
     # entry.
-    chromium_luci_entry = _sync_chromium_luci_revision(
-        revision_range.new_revision)
-    entries_for_commit_message = changed_entries + [chromium_luci_entry]
+    # TODO(crbug.com/452840620): Re-enable chromium-luci syncing once we figure
+    # out why `lucicfg generate` is failing on the autoroller.
+    # chromium_luci_entry = _sync_chromium_luci_revision(
+    #     revision_range.new_revision)
+    # entries_for_commit_message = changed_entries + [chromium_luci_entry]
+    _run_lucicfg_nonfatal()
+    entries_for_commit_message = changed_entries
+
     # Create the commit message before adding the entry for the Chromium
     # revision since Chromium information is explicitly added to the message.
     commit_message = _generate_commit_message(entries_for_commit_message,
