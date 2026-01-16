@@ -712,6 +712,23 @@ TEST_F(TextureValidationTest, UseASTCFormatWithoutEnablingFeature) {
     }
 }
 
+class TransientAttachmentValidationTest : public TextureValidationTest {
+  protected:
+    std::vector<const char*> GetEnabledToggles() override {
+        return {"disable_transient_attachment"};
+    }
+};
+
+// Check that using a transient attachment is disabled.
+TEST_F(TransientAttachmentValidationTest, TransientAttachmentDisabled) {
+    wgpu::TextureDescriptor desc;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.size = {1, 1, 1};
+    desc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment;
+
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+}
+
 class TextureCompatValidationTest : public ValidationTest {
   protected:
     bool UseCompatibilityMode() const override { return true; }

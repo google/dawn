@@ -196,6 +196,7 @@ enum class Toggle {
     IgnoreImportedAHardwareBufferVulkanImageSize,
     GLAllowContextOnMultiThreads,
     GLDefer,
+    DisableTransientAttachment,
 
     EnumCount,
     InvalidEnum = EnumCount,

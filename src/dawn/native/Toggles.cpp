@@ -801,6 +801,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Allows the GL backend to defer GL commands until Queue::Submit is called. This includes "
       "backend resource creations which will also be deferred.",
       "https://crbug.com/dawn/451928481", ToggleStage::Device}},
+    {Toggle::DisableTransientAttachment,
+     {"disable_transient_attachment", "Disable TextureUsage TransientAttachment usage.",
+      "https://crbug.com/dawn/462620664", ToggleStage::Device}},
+
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 
