@@ -128,6 +128,11 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     if (auto* d3dProperties = info.Get<AdapterPropertiesD3D>()) {
         d3dProperties->shaderModel = 0;
     }
+    if (auto* explicitComputeSubgroupSizeConfigs =
+            info.Get<AdapterPropertiesExplicitComputeSubgroupSizeConfigs>()) {
+        explicitComputeSubgroupSizeConfigs->minExplicitComputeSubgroupSize = 4;
+        explicitComputeSubgroupSizeConfigs->maxExplicitComputeSubgroupSize = 128;
+    }
 }
 
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(

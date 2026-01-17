@@ -930,5 +930,97 @@ DAWN_INSTANTIATE_TEST_P(SubgroupsShaderInclusiveTest,
                             SubgroupOpDataType::I32,
                         });
 
+class SubgroupSizeControlTests : public DawnTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        // Always require related features if available.
+        std::vector<wgpu::FeatureName> requiredFeatures;
+        if (SupportsFeatures({wgpu::FeatureName::Subgroups,
+                              wgpu::FeatureName::ChromiumExperimentalSubgroupSizeControl})) {
+            mSupportsSubgroupSizeControl = true;
+            requiredFeatures.push_back(wgpu::FeatureName::Subgroups);
+            requiredFeatures.push_back(wgpu::FeatureName::ChromiumExperimentalSubgroupSizeControl);
+        }
+        return requiredFeatures;
+    }
+
+    bool SupportSubgroupSizeControl() const { return mSupportsSubgroupSizeControl; }
+
+    void DoTest(uint32_t subgroupSize) {
+        DAWN_ASSERT(IsPowerOfTwo(subgroupSize));
+
+        std::stringstream code;
+        code << R"(
+enable subgroups;
+enable chromium_experimental_subgroup_size_control;
+
+override kSubgroupSize : u32;
+
+@group(0) @binding(0)
+var<storage, read_write> output: u32;
+
+@compute @workgroup_size(kSubgroupSize) @subgroup_size(kSubgroupSize)
+fn main(@builtin(subgroup_size) sg_size : u32) {
+    if (subgroupElect()) {
+        output = sg_size;
+    }
+})";
+        wgpu::ShaderModule csModule = utils::CreateShaderModule(device, code.str().c_str());
+
+        wgpu::ConstantEntry entry = {nullptr, "kSubgroupSize", static_cast<double>(subgroupSize)};
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = csModule;
+        csDesc.compute.constantCount = 1;
+        csDesc.compute.constants = &entry;
+        auto pipeline = device.CreateComputePipeline(&csDesc);
+
+        uint32_t outputBufferSizeInBytes = sizeof(uint32_t);
+        wgpu::BufferDescriptor outputBufferDesc;
+        outputBufferDesc.size = outputBufferSizeInBytes;
+        outputBufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+        wgpu::Buffer outputBuffer = device.CreateBuffer(&outputBufferDesc);
+
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {
+                                                             {0, outputBuffer},
+                                                         });
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER_U32_EQ(subgroupSize, outputBuffer, 0);
+    }
+
+  private:
+    bool mSupportsSubgroupSizeControl = false;
+};
+
+// Test all the values that are between `minExplicitComputeSubgroupSize` and
+// `maxExplicitComputeSubgroupSize` and are a power of 2 can be used as WGSL attribute
+// `@subgroup_size` and the value of the WGSL builtin `subgroup_size` exactly matches the value of
+// the WGSL attribute `@subgroup_size`.
+TEST_P(SubgroupSizeControlTests, TestAllSubgroupSizes) {
+    DAWN_TEST_UNSUPPORTED_IF(!SupportSubgroupSizeControl());
+
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesExplicitComputeSubgroupSizeConfigs subgroupSizeConfigs;
+    info.nextInChain = &subgroupSizeConfigs;
+    adapter.GetInfo(&info);
+
+    ASSERT_TRUE(IsPowerOfTwo(subgroupSizeConfigs.minExplicitComputeSubgroupSize));
+    for (uint32_t subgroupSize = subgroupSizeConfigs.minExplicitComputeSubgroupSize;
+         subgroupSize <= subgroupSizeConfigs.maxExplicitComputeSubgroupSize; subgroupSize *= 2) {
+        DoTest(subgroupSize);
+    }
+}
+
+DAWN_INSTANTIATE_TEST(SubgroupSizeControlTests, D3D12Backend(), MetalBackend(), VulkanBackend());
+
 }  // anonymous namespace
 }  // namespace dawn

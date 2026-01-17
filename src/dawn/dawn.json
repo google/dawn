@@ -4022,7 +4022,8 @@
             {"value": 78, "name": "shared texture memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
             {"value": 79, "name": "request adapter options angle virtualization group", "tags": ["dawn", "native"]},
             {"value": 80, "name": "resource table limits", "tags": ["dawn"]},
-            {"value": 81, "name": "pipeline layout resource table", "tags": ["dawn"]}
+            {"value": 81, "name": "pipeline layout resource table", "tags": ["dawn"]},
+            {"value": 82, "name": "adapter properties explicit compute subgroup size configs", "tags": ["dawn"]}
         ]
     },
     "texture": {
@@ -4738,6 +4739,16 @@
         "members": [
             {"name": "config count", "type": "size_t"},
             {"name": "configs", "type": "subgroup matrix config", "annotation": "const*", "length": "config count"}
+        ]
+    },
+    "adapter properties explicit compute subgroup size configs": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["adapter info"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "min explicit compute subgroup size", "type": "uint32_t"},
+            {"name": "max explicit compute subgroup size", "type": "uint32_t"}
         ]
     }
 }

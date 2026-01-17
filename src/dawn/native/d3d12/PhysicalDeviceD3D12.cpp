@@ -196,6 +196,11 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mDeviceInfo.supportsWaveOps) {
         EnableFeature(Feature::Subgroups);
     }
+
+    // SubgroupSizeControl feature requires SM >= 6.6 for HLSL attribute `[WaveSize]`.
+    if (mDeviceInfo.highestSupportedShaderModel >= 66) {
+        EnableFeature(Feature::ChromiumExperimentalSubgroupSizeControl);
+    }
 #endif
 
     D3D12_FEATURE_DATA_FORMAT_SUPPORT bgra8unormFormatInfo = {};
@@ -950,6 +955,13 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     if (auto* d3dProperties = info.Get<AdapterPropertiesD3D>()) {
         // Report highest supported shader model version, instead of actual applied version.
         d3dProperties->shaderModel = GetDeviceInfo().highestSupportedShaderModel;
+    }
+    if (auto* explicitComputeSubgroupSizeConfigs =
+            info.Get<AdapterPropertiesExplicitComputeSubgroupSizeConfigs>()) {
+        explicitComputeSubgroupSizeConfigs->minExplicitComputeSubgroupSize =
+            mDeviceInfo.waveLaneCountMin;
+        explicitComputeSubgroupSizeConfigs->maxExplicitComputeSubgroupSize =
+            mDeviceInfo.waveLaneCountMax;
     }
 }
 

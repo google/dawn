@@ -251,11 +251,19 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     fakePowerProperties.chain.sType = WGPUSType_DawnAdapterPropertiesPowerPreference;
     fakePowerProperties.powerPreference = WGPUPowerPreference::WGPUPowerPreference_LowPower;
 
+    WGPUAdapterPropertiesExplicitComputeSubgroupSizeConfigs fakeExplicitComputeSubgroupSizeConfigs =
+        {};
+    fakeExplicitComputeSubgroupSizeConfigs.chain.sType =
+        WGPUSType_AdapterPropertiesExplicitComputeSubgroupSizeConfigs;
+    fakeExplicitComputeSubgroupSizeConfigs.minExplicitComputeSubgroupSize = 8;
+    fakeExplicitComputeSubgroupSizeConfigs.maxExplicitComputeSubgroupSize = 32;
+
     std::initializer_list<WGPUFeatureName> fakeFeaturesList = {
         WGPUFeatureName_AdapterPropertiesMemoryHeaps,
         WGPUFeatureName_AdapterPropertiesD3D,
         WGPUFeatureName_AdapterPropertiesVk,
         WGPUFeatureName_ChromiumExperimentalSubgroupMatrix,
+        WGPUFeatureName_ChromiumExperimentalSubgroupSizeControl,
     };
     WGPUSupportedFeatures fakeFeatures = {fakeFeaturesList.size(), std::data(fakeFeaturesList)};
 
@@ -296,6 +304,11 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                             case WGPUSType_DawnAdapterPropertiesPowerPreference:
                                 *reinterpret_cast<WGPUDawnAdapterPropertiesPowerPreference*>(
                                     chain) = fakePowerProperties;
+                                break;
+                            case WGPUSType_AdapterPropertiesExplicitComputeSubgroupSizeConfigs:
+                                *reinterpret_cast<
+                                    WGPUAdapterPropertiesExplicitComputeSubgroupSizeConfigs*>(
+                                    chain) = fakeExplicitComputeSubgroupSizeConfigs;
                                 break;
                             default:
                                 ADD_FAILURE() << "Unexpected chain";
@@ -387,6 +400,18 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                 adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
                 // Expect them to match.
                 EXPECT_EQ(powerProperties.powerPreference, fakePowerProperties.powerPreference);
+
+                // Get the explicit compute subgroup size properties
+                WGPUAdapterPropertiesExplicitComputeSubgroupSizeConfigs subgroupSizeConfigs = {};
+                subgroupSizeConfigs.chain.sType =
+                    WGPUSType_AdapterPropertiesExplicitComputeSubgroupSizeConfigs;
+                info.nextInChain = &subgroupSizeConfigs.chain;
+                adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
+                // Expect them to match
+                EXPECT_EQ(subgroupSizeConfigs.minExplicitComputeSubgroupSize,
+                          fakeExplicitComputeSubgroupSizeConfigs.minExplicitComputeSubgroupSize);
+                EXPECT_EQ(subgroupSizeConfigs.maxExplicitComputeSubgroupSize,
+                          fakeExplicitComputeSubgroupSizeConfigs.maxExplicitComputeSubgroupSize);
             }));
 
         FlushCallbacks();

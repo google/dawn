@@ -127,6 +127,16 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     *propertiesChain = &powerProperties.chain;
     propertiesChain = &(*propertiesChain)->next;
 
+    // Query AdapterPropertiesExplicitComputeSubgroupSizeConfigs if the feature is supported.
+    WGPUAdapterPropertiesExplicitComputeSubgroupSizeConfigs explicitComputeSubgroupSizeConfigs = {};
+    explicitComputeSubgroupSizeConfigs.chain.sType =
+        WGPUSType_AdapterPropertiesExplicitComputeSubgroupSizeConfigs;
+    if (mProcs.adapterHasFeature(adapter,
+                                 WGPUFeatureName_ChromiumExperimentalSubgroupSizeControl)) {
+        *propertiesChain = &explicitComputeSubgroupSizeConfigs.chain;
+        propertiesChain = &(*propertiesChain)->next;
+    }
+
     mProcs.adapterGetInfo(adapter, &info);
     cmd.info = &info;
 
