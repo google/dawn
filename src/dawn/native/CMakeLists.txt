@@ -1027,7 +1027,8 @@ if (DAWN_BUILD_MONOLITHIC_LIBRARY)
 
     # Do the bundling of all the objects and dependencies together.
     include(BundleLibraries)
-    bundle_libraries(webgpu_dawn ${DAWN_BUILD_MONOLITHIC_LIBRARY} webgpu_dawn_objects)
+    string(TOUPPER "${DAWN_BUILD_MONOLITHIC_LIBRARY}" BUNDLE_LINK_TYPE)
+    bundle_libraries(webgpu_dawn ${BUNDLE_LINK_TYPE} webgpu_dawn_objects)
     add_library(dawn::webgpu_dawn ALIAS webgpu_dawn)
 
     # Since this is a bundled library, the only dependency is the config needed to use it.
