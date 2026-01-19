@@ -88,6 +88,12 @@ public class {{ kotlin_name(obj) }} private constructor(public val handle: Long)
         {%- endfor -%}
 
     {% endfor %}
+    /**
+     * Decrements the reference count of the object and frees resources when the count reaches zero.
+     *
+     * This is the standard way to manage object lifetimes and should be used in `use` blocks.
+     * After calling this, the object is no longer usable.
+     */
     external override fun close()
 
     //* By default, the equals() function implements referential equality.
