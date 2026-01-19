@@ -112,9 +112,7 @@ elseif(APPLE)
 elseif(ANDROID)
   set(ENABLE_VULKAN ON)
   set(ENABLE_OPENGLES ON)
-  # Disable SPIR-V validation on Android because it adds a significant amount
-  # to the binary size, and Tint's output should be well-formed.
-  set(ENABLE_SPIRV_VALIDATION OFF)
+  set(ENABLE_SPIRV_VALIDATION ON)
 elseif(UNIX)
   set(ENABLE_OPENGLES ON)
   set(ENABLE_DESKTOP_GL ON)
