@@ -1227,7 +1227,7 @@ INSTANTIATE_TEST_SUITE_P(NonRefTypes,
                                           /* type_builder */
                                           testing::Values(TypeBuilder<i32>,
                                                           TypeBuilder<bool>,
-                                                          TypeBuilder<vec4<f32>>,
+                                                          TypeBuilder<vec4f>,
                                                           TypeBuilder<array<f32, 3>>)));
 
 INSTANTIATE_TEST_SUITE_P(RefTypes,
@@ -1237,7 +1237,7 @@ INSTANTIATE_TEST_SUITE_P(RefTypes,
                                           /* type_builder */
                                           testing::Values(RefTypeBuilder<i32>,
                                                           RefTypeBuilder<bool>,
-                                                          RefTypeBuilder<vec4<f32>>)));
+                                                          RefTypeBuilder<vec4f>)));
 
 TEST_F(IR_ValidatorTest, PointerToPointer) {
     auto* type = ty.ptr<function, ptr<function, i32>>();

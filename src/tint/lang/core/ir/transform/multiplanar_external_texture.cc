@@ -227,8 +227,8 @@ struct State {
                     if (call->Func() == core::BuiltinFn::kTextureDimensions) {
                         // Use params.apparentSize + vec2u(1, 1) instead of the textureDimensions.
                         b.InsertBefore(call, [&] {
-                            auto* apparent_size = b.Access<vec2<u32>>(params, 12_u);
-                            auto* vec2u_1_1 = b.Splat<vec2<u32>>(1_u);
+                            auto* apparent_size = b.Access<vec2u>(params, 12_u);
+                            auto* vec2u_1_1 = b.Splat<vec2u>(1_u);
                             auto* dimensions = b.Add(apparent_size, vec2u_1_1);
                             dimensions->SetResult(call->DetachResult());
                         });

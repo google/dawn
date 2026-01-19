@@ -339,7 +339,7 @@ TEST_F(IR_ValidatorTest, Construct_Array_WrongArgCount) {
 TEST_F(IR_ValidatorTest, Construct_Vector_1arg_WrongType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        b.Construct<vec2<u32>>(b.Zero<vec2<f32>>());
+        b.Construct<vec2u>(b.Zero<vec2f>());
         b.Return(f);
     });
 
@@ -356,7 +356,7 @@ TEST_F(IR_ValidatorTest, Construct_Vector_1arg_WrongType) {
 TEST_F(IR_ValidatorTest, Construct_Vector_2arg_WrongType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        b.Construct<vec2<u32>>(b.Zero<f32>(), b.Zero<f32>());
+        b.Construct<vec2u>(b.Zero<f32>(), b.Zero<f32>());
         b.Return(f);
     });
 

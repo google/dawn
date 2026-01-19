@@ -361,7 +361,7 @@ struct State {
             element_index = b.Call(ty.u32(), core::BuiltinFn::kSelect, args)->Result();
         }
 
-        auto* bitcast = b.Bitcast<vec2<f16>>(load);
+        auto* bitcast = b.Bitcast<vec2h>(load);
         return b.Access<f16>(bitcast, element_index);
     }
 

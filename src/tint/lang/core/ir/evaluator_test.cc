@@ -247,7 +247,7 @@ TEST_F(IR_EvaluatorTest, ArrayBounds_NestedDynamicAndConstantOutOfBoundsAccess) 
 }
 
 TEST_F(IR_EvaluatorTest, ArrayBounds_NestedVecOverflowBoundsAccess) {
-    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<vec3<u32>, 7>()));
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<vec3u, 7>()));
     auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 3_i, 3_i);
     auto res = Eval(b, inst);
 
@@ -257,7 +257,7 @@ TEST_F(IR_EvaluatorTest, ArrayBounds_NestedVecOverflowBoundsAccess) {
 }
 
 TEST_F(IR_EvaluatorTest, ArrayBounds_NestedVecBoundsAccessSuccess) {
-    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<vec3<u32>, 7>()));
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<vec3u, 7>()));
     auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 3_i, 2_i);
     auto res = Eval(b, inst);
 

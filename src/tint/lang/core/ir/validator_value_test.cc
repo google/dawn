@@ -704,7 +704,7 @@ TEST_F(IR_ValidatorTest, Var_DuplicateBindingPoints_CapabilityOverride) {
 }
 
 TEST_F(IR_ValidatorTest, Var_MultipleIOAnnotations) {
-    auto* v = b.Var<AddressSpace::kIn, vec4<f32>>();
+    auto* v = b.Var<AddressSpace::kIn, vec4f>();
     v->SetBuiltin(BuiltinValue::kPosition);
     v->SetLocation(0);
     mod.root_block->Append(v);
@@ -744,7 +744,7 @@ TEST_F(IR_ValidatorTest, Var_Struct_MultipleIOAnnotations) {
 }
 
 TEST_F(IR_ValidatorTest, Var_MissingIOAnnotations) {
-    auto* v = b.Var<AddressSpace::kIn, vec4<f32>>();
+    auto* v = b.Var<AddressSpace::kIn, vec4f>();
     mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);

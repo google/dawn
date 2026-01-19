@@ -459,8 +459,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_Modf_UserDeclaredResultStruct) {
 
     auto* f = b.Function("f", ty.vec4f());
     b.Append(f->Block(), [&] {
-        auto* c = b.Call(str_ty, BuiltinFn::kModf, b.Splat<vec4<f32>>(1_f));
-        b.Return(f, b.Access<vec4<f32>>(c, 0_u));
+        auto* c = b.Call(str_ty, BuiltinFn::kModf, b.Splat<vec4f>(1_f));
+        b.Return(f, b.Access<vec4f>(c, 0_u));
     });
 
     auto res = ir::Validate(mod);
@@ -519,11 +519,11 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Component_TooSmall) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
-        auto* offset = b.Composite<vec2<i32>>(1_i, 3_i);
+        auto* offset = b.Composite<vec2i>(1_i, 3_i);
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, -2_i, t, s, coords, offset));
+        b.Let("x", b.Call<vec4i>(core::BuiltinFn::kTextureGather, -2_i, t, s, coords, offset));
         b.Return(func);
     });
 
@@ -551,11 +551,11 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Component_TooBig) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
-        auto* offset = b.Composite<vec2<i32>>(1_i, 3_i);
+        auto* offset = b.Composite<vec2i>(1_i, 3_i);
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, 6_u, t, s, coords, offset));
+        b.Let("x", b.Call<vec4i>(core::BuiltinFn::kTextureGather, 6_u, t, s, coords, offset));
         b.Return(func);
     });
 
@@ -584,12 +584,12 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Offset_TooSmall) {
     b.Append(func->Block(), [&] {
         auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(1_i);
-        auto* offset = b.Composite<vec2<i32>>(1_i, -9_i);
+        auto* offset = b.Composite<vec2i>(1_i, -9_i);
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, 2_u, t, s, coords, array_idx,
-                                     offset));
+        b.Let("x",
+              b.Call<vec4i>(core::BuiltinFn::kTextureGather, 2_u, t, s, coords, array_idx, offset));
         b.Return(func);
     });
 
@@ -619,12 +619,12 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Offset_TooBig) {
     b.Append(func->Block(), [&] {
         auto* coords = b.Construct(ty.vec2f(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(1_i);
-        auto* offset = b.Composite<vec2<i32>>(8_i, -2_i);
+        auto* offset = b.Composite<vec2i>(8_i, -2_i);
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
-        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, 2_u, t, s, coords, array_idx,
-                                     offset));
+        b.Let("x",
+              b.Call<vec4i>(core::BuiltinFn::kTextureGather, 2_u, t, s, coords, array_idx, offset));
         b.Return(func);
     });
 

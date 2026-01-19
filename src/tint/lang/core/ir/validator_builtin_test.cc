@@ -1278,7 +1278,7 @@ TEST_F(IR_ValidatorTest, Builtin_PointSize_WithoutCapability) {
     const auto point_size_attr = IOAttributes{.builtin = core::BuiltinValue::kPointSize};
     auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"),
                              {
-                                 {mod.symbols.New("pos"), ty.vec4<f32>(), position_attr},
+                                 {mod.symbols.New("pos"), ty.vec4f(), position_attr},
                                  {mod.symbols.New("size"), ty.f32(), point_size_attr},
                              });
 
@@ -1305,7 +1305,7 @@ TEST_F(IR_ValidatorTest, Builtin_PointSize_WithCapability) {
     const auto point_size_attr = IOAttributes{.builtin = core::BuiltinValue::kPointSize};
     auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"),
                              {
-                                 {mod.symbols.New("pos"), ty.vec4<f32>(), position_attr},
+                                 {mod.symbols.New("pos"), ty.vec4f(), position_attr},
                                  {mod.symbols.New("size"), ty.f32(), point_size_attr},
                              });
 
@@ -1449,50 +1449,50 @@ INSTANTIATE_TEST_SUITE_P(
         // Scalar reinterpretation
         std::make_tuple(true, TypeBuilder<u32>, TypeBuilder<i32>),
         std::make_tuple(true, TypeBuilder<u32>, TypeBuilder<f32>),
-        std::make_tuple(true, TypeBuilder<u32>, TypeBuilder<vec2<f16>>),
+        std::make_tuple(true, TypeBuilder<u32>, TypeBuilder<vec2h>),
         std::make_tuple(true, TypeBuilder<i32>, TypeBuilder<u32>),
         std::make_tuple(true, TypeBuilder<i32>, TypeBuilder<f32>),
-        std::make_tuple(true, TypeBuilder<i32>, TypeBuilder<vec2<f16>>),
+        std::make_tuple(true, TypeBuilder<i32>, TypeBuilder<vec2h>),
         std::make_tuple(true, TypeBuilder<f32>, TypeBuilder<u32>),
         std::make_tuple(true, TypeBuilder<f32>, TypeBuilder<i32>),
-        std::make_tuple(true, TypeBuilder<f32>, TypeBuilder<vec2<f16>>),
+        std::make_tuple(true, TypeBuilder<f32>, TypeBuilder<vec2h>),
         std::make_tuple(false, TypeBuilder<u32>, TypeBuilder<f16>),
         std::make_tuple(false, TypeBuilder<i32>, TypeBuilder<f16>),
         std::make_tuple(false, TypeBuilder<f32>, TypeBuilder<f16>),
         std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<u32>),
         std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<i32>),
         std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<f32>),
-        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<vec2<f16>>),
+        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<vec2h>),
 
         // Component-wise identity, sparsely (non-exhaustively) covering types and vector sizes
-        std::make_tuple(true, TypeBuilder<vec2<u32>>, TypeBuilder<vec2<u32>>),
-        std::make_tuple(true, TypeBuilder<vec3<i32>>, TypeBuilder<vec3<i32>>),
-        std::make_tuple(true, TypeBuilder<vec4<f32>>, TypeBuilder<vec4<f32>>),
-        std::make_tuple(true, TypeBuilder<vec3<f16>>, TypeBuilder<vec3<f16>>),
-        std::make_tuple(false, TypeBuilder<vec2<u32>>, TypeBuilder<vec3<u32>>),
-        std::make_tuple(false, TypeBuilder<vec2<u32>>, TypeBuilder<vec4<u32>>),
-        std::make_tuple(false, TypeBuilder<vec3<i32>>, TypeBuilder<vec2<i32>>),
-        std::make_tuple(false, TypeBuilder<vec3<i32>>, TypeBuilder<vec4<i32>>),
-        std::make_tuple(false, TypeBuilder<vec4<f32>>, TypeBuilder<vec2<f32>>),
-        std::make_tuple(false, TypeBuilder<vec4<f32>>, TypeBuilder<vec3<f32>>),
+        std::make_tuple(true, TypeBuilder<vec2u>, TypeBuilder<vec2u>),
+        std::make_tuple(true, TypeBuilder<vec3i>, TypeBuilder<vec3i>),
+        std::make_tuple(true, TypeBuilder<vec4f>, TypeBuilder<vec4f>),
+        std::make_tuple(true, TypeBuilder<vec3h>, TypeBuilder<vec3h>),
+        std::make_tuple(false, TypeBuilder<vec2u>, TypeBuilder<vec3u>),
+        std::make_tuple(false, TypeBuilder<vec2u>, TypeBuilder<vec4u>),
+        std::make_tuple(false, TypeBuilder<vec3i>, TypeBuilder<vec2i>),
+        std::make_tuple(false, TypeBuilder<vec3i>, TypeBuilder<vec4i>),
+        std::make_tuple(false, TypeBuilder<vec4f>, TypeBuilder<vec2f>),
+        std::make_tuple(false, TypeBuilder<vec4f>, TypeBuilder<vec3f>),
 
         // Component-wise reinterpretation, sparsely (non-exhaustively) covering types and
         // vector sizes
-        std::make_tuple(true, TypeBuilder<vec2<u32>>, TypeBuilder<vec2<i32>>),
-        std::make_tuple(true, TypeBuilder<vec3<u32>>, TypeBuilder<vec3<f32>>),
-        std::make_tuple(true, TypeBuilder<vec4<i32>>, TypeBuilder<vec4<u32>>),
-        std::make_tuple(true, TypeBuilder<vec3<i32>>, TypeBuilder<vec3<f32>>),
-        std::make_tuple(true, TypeBuilder<vec3<f32>>, TypeBuilder<vec3<u32>>),
-        std::make_tuple(true, TypeBuilder<vec2<f32>>, TypeBuilder<vec2<i32>>),
-        std::make_tuple(true, TypeBuilder<vec2<u32>>, TypeBuilder<vec4<f16>>),
-        std::make_tuple(true, TypeBuilder<vec2<i32>>, TypeBuilder<vec4<f16>>),
-        std::make_tuple(true, TypeBuilder<vec2<f32>>, TypeBuilder<vec4<f16>>),
-        std::make_tuple(false, TypeBuilder<vec4<u32>>, TypeBuilder<vec4<f16>>),
-        std::make_tuple(false, TypeBuilder<vec2<i32>>, TypeBuilder<vec2<f16>>),
-        std::make_tuple(false, TypeBuilder<vec4<f32>>, TypeBuilder<vec4<f16>>),
+        std::make_tuple(true, TypeBuilder<vec2u>, TypeBuilder<vec2i>),
+        std::make_tuple(true, TypeBuilder<vec3u>, TypeBuilder<vec3f>),
+        std::make_tuple(true, TypeBuilder<vec4i>, TypeBuilder<vec4u>),
+        std::make_tuple(true, TypeBuilder<vec3i>, TypeBuilder<vec3f>),
+        std::make_tuple(true, TypeBuilder<vec3f>, TypeBuilder<vec3u>),
+        std::make_tuple(true, TypeBuilder<vec2f>, TypeBuilder<vec2i>),
+        std::make_tuple(true, TypeBuilder<vec2u>, TypeBuilder<vec4h>),
+        std::make_tuple(true, TypeBuilder<vec2i>, TypeBuilder<vec4h>),
+        std::make_tuple(true, TypeBuilder<vec2f>, TypeBuilder<vec4h>),
+        std::make_tuple(false, TypeBuilder<vec4u>, TypeBuilder<vec4h>),
+        std::make_tuple(false, TypeBuilder<vec2i>, TypeBuilder<vec2h>),
+        std::make_tuple(false, TypeBuilder<vec4f>, TypeBuilder<vec4h>),
         std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<u32>),
         std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<i32>),
         std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<f32>),
-        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<vec2<f16>>)));
+        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<vec2h>)));
 
 }  // namespace tint::core::ir

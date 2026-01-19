@@ -63,7 +63,7 @@ TEST_F(MslWriter_VertexPullingTest, NoModify_NoInputs) {
     auto* ep = b.Function("foo", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -90,7 +90,7 @@ TEST_F(MslWriter_VertexPullingTest, OneAttribute_Param) {
     ep->AppendParam(param);
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct<vec4<f32>>(param, 0_f, 0_f, 1_f));
+        b.Return(ep, b.Construct<vec4f>(param, 0_f, 0_f, 1_f));
     });
 
     auto* src = R"(
@@ -138,7 +138,7 @@ TEST_F(MslWriter_VertexPullingTest, OneAttribute_Struct) {
     ep->AppendParam(param);
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct<vec4<f32>>(b.Access<f32>(param, 0_u), 0_f, 0_f, 1_f));
+        b.Return(ep, b.Construct<vec4f>(b.Access<f32>(param, 0_u), 0_f, 0_f, 1_f));
     });
 
     auto* src = R"(
@@ -193,7 +193,7 @@ TEST_F(MslWriter_VertexPullingTest, OneAttribute_NonDefaultArrayStride) {
     ep->AppendParam(param);
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct<vec4<f32>>(param, 0_f, 0_f, 1_f));
+        b.Return(ep, b.Construct<vec4f>(param, 0_f, 0_f, 1_f));
     });
 
     auto* src = R"(
@@ -238,7 +238,7 @@ TEST_F(MslWriter_VertexPullingTest, OneAttribute_NonDefaultArrayStrideAndOffset)
     ep->AppendParam(param);
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct<vec4<f32>>(param, 0_f, 0_f, 1_f));
+        b.Return(ep, b.Construct<vec4f>(param, 0_f, 0_f, 1_f));
     });
 
     auto* src = R"(
@@ -284,7 +284,7 @@ TEST_F(MslWriter_VertexPullingTest, InstanceStepMode) {
     ep->AppendParam(param);
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct<vec4<f32>>(param, 0_f, 0_f, 1_f));
+        b.Return(ep, b.Construct<vec4f>(param, 0_f, 0_f, 1_f));
     });
 
     auto* src = R"(
@@ -328,7 +328,7 @@ TEST_F(MslWriter_VertexPullingTest, InstanceStepMode_WithArrayStride) {
     ep->AppendParam(param);
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct<vec4<f32>>(param, 0_f, 0_f, 1_f));
+        b.Return(ep, b.Construct<vec4f>(param, 0_f, 0_f, 1_f));
     });
 
     auto* src = R"(
@@ -379,7 +379,7 @@ TEST_F(MslWriter_VertexPullingTest, MultipleAttributes_SameBuffer_Params) {
     b.Append(ep->Block(), [&] {  //
         auto* f1 = b.Convert<f32>(input_1);
         auto* f2 = b.Convert<f32>(input_2);
-        b.Return(ep, b.Construct<vec4<f32>>(input_0, f1, f2, 1_f));
+        b.Return(ep, b.Construct<vec4f>(input_0, f1, f2, 1_f));
     });
 
     auto* src = R"(
@@ -449,7 +449,7 @@ TEST_F(MslWriter_VertexPullingTest, MultipleAttributes_SameBuffer_Struct) {
     b.Append(ep->Block(), [&] {  //
         auto* f1 = b.Convert<f32>(b.Access<u32>(param, 1_u));
         auto* f2 = b.Convert<f32>(b.Access<i32>(param, 2_u));
-        b.Return(ep, b.Construct<vec4<f32>>(b.Access<f32>(param, 0_u), f1, f2, 1_f));
+        b.Return(ep, b.Construct<vec4f>(b.Access<f32>(param, 0_u), f1, f2, 1_f));
     });
 
     auto* src = R"(
@@ -536,7 +536,7 @@ TEST_F(MslWriter_VertexPullingTest, MultipleAttributes_DifferentBuffers) {
     b.Append(ep->Block(), [&] {  //
         auto* f1 = b.Convert<f32>(input_1);
         auto* f2 = b.Convert<f32>(input_2);
-        b.Return(ep, b.Construct<vec4<f32>>(input_0, f1, f2, 1_f));
+        b.Return(ep, b.Construct<vec4f>(input_0, f1, f2, 1_f));
     });
 
     auto* src = R"(
@@ -623,7 +623,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingVertexAndIndexAttribute_Params) {
         auto* f1 = b.Convert<f32>(b.Access<u32>(param, 1_u));
         auto* f2 = b.Convert<f32>(b.Access<i32>(param, 2_u));
         b.Let("idx_add", b.Add(vertex_index, instance_index));
-        b.Return(ep, b.Construct<vec4<f32>>(b.Access<f32>(param, 0_u), f1, f2, 1_f));
+        b.Return(ep, b.Construct<vec4f>(b.Access<f32>(param, 0_u), f1, f2, 1_f));
     });
 
     auto* src = R"(
@@ -733,7 +733,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingVertexAndIndexAttribute_Params_Multi
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
         b.Let("idx_add", b.Add(vertex_index, instance_index));
-        b.Return(ep, b.Construct<vec4<f32>>(loc0, loc1, loc2, loc3));
+        b.Return(ep, b.Construct<vec4f>(loc0, loc1, loc2, loc3));
     });
 
     auto* src = R"(
@@ -819,7 +819,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingVertexIndex_NotUsedByBuffer) {
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
         b.Let("idx_add", b.Add(vertex_index, instance_index));
-        b.Return(ep, b.Construct<vec4<f32>>(loc0));
+        b.Return(ep, b.Construct<vec4f>(loc0));
     });
 
     auto* src = R"(
@@ -878,7 +878,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingInstanceIndex_NotUsedByBuffer) {
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
         b.Let("idx_add", b.Add(vertex_index, instance_index));
-        b.Return(ep, b.Construct<vec4<f32>>(loc0));
+        b.Return(ep, b.Construct<vec4f>(loc0));
     });
 
     auto* src = R"(
@@ -945,7 +945,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingVertexAndIndexAttribute_SameStruct) 
         auto* vertex_index = b.Access<u32>(param, 3_u);
         auto* instance_index = b.Access<u32>(param, 4_u);
         b.Let("idx_add", b.Add(vertex_index, instance_index));
-        b.Return(ep, b.Construct<vec4<f32>>(b.Access<f32>(param, 0_u), f1, f2, 1_f));
+        b.Return(ep, b.Construct<vec4f>(b.Access<f32>(param, 0_u), f1, f2, 1_f));
     });
 
     auto* src = R"(
@@ -1067,7 +1067,7 @@ TEST_F(MslWriter_VertexPullingTest, ExistingVertexAndIndexAttribute_DifferentStr
         auto* vertex_index = b.Access<u32>(indices, 0_u);
         auto* instance_index = b.Access<u32>(indices, 1_u);
         b.Let("idx_add", b.Add(vertex_index, instance_index));
-        b.Return(ep, b.Construct<vec4<f32>>(b.Access<f32>(param, 0_u), f1, f2, 1_f));
+        b.Return(ep, b.Construct<vec4f>(b.Access<f32>(param, 0_u), f1, f2, 1_f));
     });
 
     auto* src = R"(
@@ -1224,7 +1224,7 @@ TEST_F(MslWriter_VertexPullingTest, Formats_F32) {
         mod.SetName(b.Access(ty.vec4f(), param, 18_u), "float32x4");
         mod.SetName(b.Access(ty.vec4f(), param, 19_u), "unorm10_10_10_2");
         mod.SetName(b.Access(ty.vec4f(), param, 20_u), "unorm8x4_bgra");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -1561,7 +1561,7 @@ TEST_F(MslWriter_VertexPullingTest, Formats_F16) {
         mod.SetName(b.Access(ty.vec4h(), param, 18_u), "float32x4");
         mod.SetName(b.Access(ty.vec4h(), param, 19_u), "unorm10_10_10_2");
         mod.SetName(b.Access(ty.vec4h(), param, 20_u), "unorm8x4_bgra");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -1894,7 +1894,7 @@ TEST_F(MslWriter_VertexPullingTest, Formats_SInt) {
         mod.SetName(b.Access(ty.vec2i(), param, 7_u), "sint32x2");
         mod.SetName(b.Access(ty.vec3i(), param, 8_u), "sint32x3");
         mod.SetName(b.Access(ty.vec4i(), param, 9_u), "sint32x4");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -2107,7 +2107,7 @@ TEST_F(MslWriter_VertexPullingTest, Formats_UInt) {
         mod.SetName(b.Access(ty.vec2u(), param, 7_u), "uint32x2");
         mod.SetName(b.Access(ty.vec3u(), param, 8_u), "uint32x3");
         mod.SetName(b.Access(ty.vec4u(), param, 9_u), "uint32x4");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -2287,7 +2287,7 @@ TEST_F(MslWriter_VertexPullingTest, ShaderTypeTooFewComponents) {
         mod.SetName(b.Access(ty.u32(), param, 0_u), "uint32x2");
         mod.SetName(b.Access(ty.vec2u(), param, 1_u), "uint32x4");
         mod.SetName(b.Access(ty.vec3u(), param, 2_u), "uint32x4");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -2402,7 +2402,7 @@ TEST_F(MslWriter_VertexPullingTest, ShaderTypeTooManyComponents_U32) {
         mod.SetName(b.Access(ty.vec3u(), param, 3_u), "vec3u_from_vec2");
         mod.SetName(b.Access(ty.vec4u(), param, 4_u), "vec4u_from_vec2");
         mod.SetName(b.Access(ty.vec4u(), param, 5_u), "vec4u_from_vec3");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -2535,7 +2535,7 @@ TEST_F(MslWriter_VertexPullingTest, ShaderTypeTooManyComponents_I32) {
         mod.SetName(b.Access(ty.vec3i(), param, 3_u), "vec3i_from_vec2");
         mod.SetName(b.Access(ty.vec4i(), param, 4_u), "vec4i_from_vec2");
         mod.SetName(b.Access(ty.vec4i(), param, 5_u), "vec4i_from_vec3");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -2679,7 +2679,7 @@ TEST_F(MslWriter_VertexPullingTest, ShaderTypeTooManyComponents_F32) {
         mod.SetName(b.Access(ty.vec3f(), param, 3_u), "vec3f_from_snormx2");
         mod.SetName(b.Access(ty.vec4f(), param, 4_u), "vec4f_from_f32x2");
         mod.SetName(b.Access(ty.vec4f(), param, 5_u), "vec4f_from_unorm_packed");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -2816,7 +2816,7 @@ TEST_F(MslWriter_VertexPullingTest, ShaderTypeTooManyComponents_F16) {
         mod.SetName(b.Access(ty.vec4h(), param, 4_u), "vec4h_from_f16x2");
         mod.SetName(b.Access(ty.vec4h(), param, 5_u), "vec4h_from_f32x2");
         mod.SetName(b.Access(ty.vec4h(), param, 6_u), "vec4h_from_unorm_packed");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -2959,7 +2959,7 @@ TEST_F(MslWriter_VertexPullingTest, Unaligned_Uint8) {
         mod.SetName(b.Access(ty.u32(), param, 0_u), "uint8_offset1");
         mod.SetName(b.Access(ty.u32(), param, 1_u), "uint8_offset2");
         mod.SetName(b.Access(ty.u32(), param, 2_u), "uint8_offset3");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -3041,7 +3041,7 @@ TEST_F(MslWriter_VertexPullingTest, Unaligned_Uint8x2) {
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
         mod.SetName(b.Access(ty.vec2u(), param, 0_u), "uint8x2_offset2");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
@@ -3107,7 +3107,7 @@ TEST_F(MslWriter_VertexPullingTest, Unaligned_Uint16) {
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(ep->Block(), [&] {  //
         mod.SetName(b.Access(ty.u32(), param, 0_u), "uint16_offset2");
-        b.Return(ep, b.Zero<vec4<f32>>());
+        b.Return(ep, b.Zero<vec4f>());
     });
 
     auto* src = R"(
