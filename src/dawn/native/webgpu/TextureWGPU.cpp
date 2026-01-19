@@ -158,7 +158,7 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
                                            schema::ObjectId id,
                                            bool newResource) {
     // If it's all zeros we don't need to capture it.
-    if (!IsInitialized()) {
+    if (!IsInitialized() || !newResource) {
         return {};
     }
     struct MapAsyncResult {
