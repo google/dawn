@@ -209,8 +209,9 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
                                         Aspect aspect,
                                         const Origin3D& origin,
                                         const Extent3D& extent) const;
-    // For 2d-array textures, this keeps the array layers in contrast to
-    // GetMipLevelSingleSubresourceVirtualSize.
+    // For 2d-array textures, these 2 functions keeps the array layers in contrast to
+    // GetMipLevelSingleSubresource(Physical/Virtual)Size.
+    Extent3D GetMipLevelSubresourcePhysicalSize(uint32_t level, Aspect aspect) const;
     Extent3D GetMipLevelSubresourceVirtualSize(uint32_t level, Aspect aspect) const;
 
     MaybeError Pin(wgpu::TextureUsage usage);

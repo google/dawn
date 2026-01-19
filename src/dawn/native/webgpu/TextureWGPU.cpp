@@ -179,8 +179,7 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
     // For each mip level, emit a WriteTexture command, for the entire level.
     // Then, copy the texture to a buffer, map it, and write the buffer data for that level.
     for (uint32_t mipLevel = 0; mipLevel < GetNumMipLevels(); ++mipLevel) {
-        auto size =
-            TexelExtent3D(GetMipLevelSingleSubresourcePhysicalSize(mipLevel, Aspect::Color));
+        auto size = TexelExtent3D(GetMipLevelSubresourcePhysicalSize(mipLevel, Aspect::Color));
         auto blockSize = blockInfo.ToBlock(size);
         uint32_t usedBytesPerRow = uint32_t(blockInfo.ToBytes(blockSize.width));
         uint32_t mappableBytesPerRow = RoundUp(usedBytesPerRow, 4);
