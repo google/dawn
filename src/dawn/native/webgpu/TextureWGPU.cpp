@@ -184,7 +184,7 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
         uint32_t usedBytesPerRow = uint32_t(blockInfo.ToBytes(blockSize.width));
         uint32_t mappableBytesPerRow = RoundUp(usedBytesPerRow, 4);
 
-        schema::RootCommandWriteTextureCmd cmd{{
+        schema::RootCommandInitTextureCmd cmd{{
             .data = {{
                 .destination = {{
                     .textureId = id,

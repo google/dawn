@@ -254,6 +254,22 @@ MaybeError ReadContentIntoTexture(const ReplayImpl& replay,
     return {};
 }
 
+MaybeError InitializeTexture(const ReplayImpl& replay,
+                             ReadHead& readHead,
+                             wgpu::Device device,
+                             const schema::RootCommandInitTextureCmdData& cmdData) {
+    const uint64_t dataSize = (cmdData.dataSize + 3) & ~3;
+
+    const uint32_t* data;
+    DAWN_TRY_ASSIGN(data, readHead.GetData(dataSize));
+
+    wgpu::TexelCopyTextureInfo dst = ToWGPU(replay, cmdData.destination);
+    wgpu::TexelCopyBufferLayout layout = ToWGPU(cmdData.layout);
+    wgpu::Extent3D size = ToWGPU(cmdData.size);
+    device.GetQueue().WriteTexture(&dst, data, cmdData.dataSize, &layout, &size);
+    return {};
+}
+
 ResultOrError<wgpu::BindGroup> CreateBindGroup(const ReplayImpl& replay,
                                                wgpu::Device device,
                                                ReadHead& readHead,
@@ -1355,6 +1371,12 @@ MaybeError ReplayImpl::Play() {
                 schema::RootCommandSetLabelCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 DAWN_TRY(SetLabel(data.id, data.type, data.label));
+                break;
+            }
+            case schema::RootCommand::InitTexture: {
+                schema::RootCommandInitTextureCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                DAWN_TRY(InitializeTexture(*this, contentReadHead, mDevice, data));
                 break;
             }
             default: {

@@ -122,6 +122,7 @@ enum class RootCommand : uint32_t {
     WriteTexture,
     UnmapBuffer,
     SetLabel,
+    InitTexture,
 
     End,
 };
@@ -491,6 +492,14 @@ DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(UnmapBuffer, UNMAP_BUFFER_CMD_DATA_MEMBER
     X(uint64_t, dataSize)
 
 DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(WriteTexture, WRITE_TEXTURE_CMD_DATA_MEMBER){};
+
+#define INIT_TEXTURE_CMD_DATA_MEMBER(X)  \
+    X(TexelCopyTextureInfo, destination) \
+    X(TexelCopyBufferLayout, layout)     \
+    X(Extent3D, size)                    \
+    X(uint64_t, dataSize)
+
+DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(InitTexture, INIT_TEXTURE_CMD_DATA_MEMBER){};
 
 #define QUEUE_SUBMIT_CMD_DATA_MEMBER(X) X(std::vector<ObjectId>, commandBuffers)
 
