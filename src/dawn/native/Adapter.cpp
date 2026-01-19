@@ -202,8 +202,8 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
         info->subgroupMinSize = std::min(info->subgroupMinSize, 8u);
     }
 
-    DAWN_ASSERT(IsPowerOfTwo(info->subgroupMaxSize));
-    DAWN_ASSERT(IsPowerOfTwo(info->subgroupMinSize));
+    DAWN_ASSERT(info->subgroupMaxSize == 0 || IsPowerOfTwo(info->subgroupMaxSize));
+    DAWN_ASSERT(info->subgroupMinSize == 0 || IsPowerOfTwo(info->subgroupMinSize));
 
     return wgpu::Status::Success;
 }
