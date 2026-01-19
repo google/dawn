@@ -310,6 +310,12 @@ MaybeError TextureView::CaptureCreationParameters(CaptureContext& captureContext
         .arrayLayerCount = GetLayerCount(),
         .aspect = ToDawn(GetAspects()),
         .usage = GetUsage(),
+        .swizzle = {{
+            .r = GetSwizzle().r,
+            .g = GetSwizzle().g,
+            .b = GetSwizzle().b,
+            .a = GetSwizzle().a,
+        }},
     }};
     Serialize(captureContext, tex);
     return {};

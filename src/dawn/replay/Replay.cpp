@@ -92,6 +92,17 @@ template wgpu::TextureView Replay::GetObjectByLabel<wgpu::TextureView>(
 
 namespace {
 
+bool IsSwizzleIdentity(const wgpu::TextureComponentSwizzle& swizzle) {
+    return (swizzle.r == wgpu::ComponentSwizzle::R ||
+            swizzle.r == wgpu::ComponentSwizzle::Undefined) &&
+           (swizzle.g == wgpu::ComponentSwizzle::G ||
+            swizzle.g == wgpu::ComponentSwizzle::Undefined) &&
+           (swizzle.b == wgpu::ComponentSwizzle::B ||
+            swizzle.b == wgpu::ComponentSwizzle::Undefined) &&
+           (swizzle.a == wgpu::ComponentSwizzle::A ||
+            swizzle.a == wgpu::ComponentSwizzle::Undefined);
+}
+
 wgpu::Origin3D ToWGPU(const schema::Origin3D& origin) {
     return wgpu::Origin3D{
         .x = origin.x,
@@ -842,6 +853,16 @@ ResultOrError<wgpu::TextureView> CreateTextureView(const ReplayImpl& replay,
         .aspect = view.aspect,
         .usage = view.usage,
     };
+
+    wgpu::TextureComponentSwizzleDescriptor swizzleDesc = {};
+    swizzleDesc.swizzle.r = view.swizzle.r;
+    swizzleDesc.swizzle.g = view.swizzle.g;
+    swizzleDesc.swizzle.b = view.swizzle.b;
+    swizzleDesc.swizzle.a = view.swizzle.a;
+    if (!IsSwizzleIdentity(swizzleDesc.swizzle)) {
+        desc.nextInChain = &swizzleDesc;
+    }
+
     wgpu::Texture texture = replay.GetObjectById<wgpu::Texture>(view.textureId);
     wgpu::TextureView textureView = texture.CreateView(&desc);
     return {textureView};

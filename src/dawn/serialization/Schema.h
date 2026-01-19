@@ -148,6 +148,14 @@ DAWN_REPLAY_SERIALIZABLE(struct, Extent3D, EXTENT3D_MEMBER){};
 
 DAWN_REPLAY_SERIALIZABLE(struct, Color, COLOR_MEMBER){};
 
+#define TEXTURE_COMPONENT_SWIZZLE_MEMBER(X) \
+    X(wgpu::ComponentSwizzle, r)            \
+    X(wgpu::ComponentSwizzle, g)            \
+    X(wgpu::ComponentSwizzle, b)            \
+    X(wgpu::ComponentSwizzle, a)
+
+DAWN_REPLAY_SERIALIZABLE(struct, TextureComponentSwizzle, TEXTURE_COMPONENT_SWIZZLE_MEMBER){};
+
 #define PIPELINE_CONSTANT_MEMBER(X) \
     X(std::string, name)            \
     X(double, value)
@@ -337,7 +345,8 @@ DAWN_REPLAY_SERIALIZABLE(struct, Texture, TEXTURE_CREATION_MEMBER){};
     X(uint32_t, baseArrayLayer)              \
     X(uint32_t, arrayLayerCount)             \
     X(wgpu::TextureAspect, aspect)           \
-    X(wgpu::TextureUsage, usage)
+    X(wgpu::TextureUsage, usage)             \
+    X(TextureComponentSwizzle, swizzle)
 
 DAWN_REPLAY_SERIALIZABLE(struct, TextureView, TEXTURE_VIEW_CREATION_MEMBER){};
 
