@@ -22,7 +22,7 @@ vars = {
   'dawn_tintd': False, # Also fetches dependencies required for building tintd.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:5550ba0f4053c3cbb0bff3d60ded9d867b6fa371',
+  'dawn_gn_version': 'git_revision:103f8b437f5e791e0aef9d5c372521a5d675fabb',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -47,7 +47,7 @@ vars = {
   # reclient CIPD package version
   'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
   # siso CIPD package version.
-  'siso_version': 'git_revision:1624786919608fb2140226f6468cd8d0b52fe3b5',
+  'siso_version': 'git_revision:e5e464d368b40b19a9f6315b8fd2d8bd2d8ab668',
 
   # 'magic' text to tell depot_tools that git submodules should be accepted
   # but parity with DEPS file is expected.
@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '073d9b927e6ccc24137351fa6429c430b0a1bbc7',
+  'chromium_revision': '612203b61a4314a1e82bc828591ca9c61702caf8',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -107,7 +107,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@fb0b652edba70f5c4ac867f3beca9e535f905b4c',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@1f27506fad60f037320654f1d913250e6bbf3661',
     'condition': 'dawn_standalone',
   },
 
@@ -123,7 +123,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@e9f0fd9932428fc109b848892050daadc2d91cc9',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@869153a967d9e3a28b658b4aa6265b78a95b3540',
     'condition': 'dawn_standalone',
   },
 
@@ -138,15 +138,15 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@d747365c051153cc89f25e6adc95538aabcdd319',
+  'url': '{chromium_git}/chromium/src/build@2bd1bf44a4218a0dfaf3086a7ed86e693261acdc',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@3240f2283a294839cf928f7329fe1a89230fa74e',
+  'url': '{chromium_git}/chromium/src/tools/clang@97e19de6f6025d721d3a05ff02dce43ca45fb13f',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
-    'url': '{chromium_git}/chromium/src/tools/memory@60d6f6fb67336f5b5060c6e1d0a72a32432423b5',
+    'url': '{chromium_git}/chromium/src/tools/memory@16429092be4bb5160bed0ad763bd4c13f1f52990',
     'condition': 'dawn_standalone',
   },
   'tools/valgrind': {
@@ -154,7 +154,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'tools/win': {
-    'url': Var('chromium_git') + '/chromium/src/tools/win@24494b071e019a2baea4355d9870ffc5fc0bbafe',
+    'url': Var('chromium_git') + '/chromium/src/tools/win@2a9823716f1dd1491fdbc5dc0d2c2f6ab0c8e848',
     'condition': 'checkout_win and not build_with_chromium',
   },
 
@@ -248,7 +248,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@3052f51ada5e06b1ce10dbe07b77f5a7cc282401',
+    'url': '{chromium_git}/chromium/src/testing@2ce3007b7a11c8a4102954a142b87e4e30395589',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -261,7 +261,7 @@ deps = {
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@c9916a593bec75bdaa231475af0e8740f857bf10',
+    'url': '{chromium_git}/catapult.git@00664c71d8959273376a1f74efa2afe65c118cbe',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
@@ -345,7 +345,7 @@ deps = {
   },
 
   'third_party/zlib': {
-    'url': '{chromium_git}/chromium/src/third_party/zlib@2182f37a0861358faa9f6b8e0dacce32142c3a33',
+    'url': '{chromium_git}/chromium/src/third_party/zlib@980253c1cc835c893c57b5cfc10c5b942e10bc46',
     'condition': 'dawn_standalone',
   },
 
@@ -593,7 +593,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@b2155fca494c5b6266d42f9129ae3a7b85482c95',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@5b70baa1fd02c684fb68f7dc6fad54decabbcaee',
     'condition': 'dawn_standalone',
   },
 
