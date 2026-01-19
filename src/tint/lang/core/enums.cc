@@ -1232,6 +1232,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "bias";
         case ParameterUsage::kBits:
             return "bits";
+        case ParameterUsage::kColMajor:
+            return "col_major";
         case ParameterUsage::kCompareValue:
             return "compare_value";
         case ParameterUsage::kComponent:
@@ -1314,6 +1316,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "scope";
         case ParameterUsage::kSourceLaneIndex:
             return "sourceLaneIndex";
+        case ParameterUsage::kStride:
+            return "stride";
         case ParameterUsage::kTexel:
             return "texel";
         case ParameterUsage::kTexture:

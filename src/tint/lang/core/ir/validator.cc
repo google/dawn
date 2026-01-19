@@ -4176,8 +4176,10 @@ void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
         }
     };
 
-    check_arg_in_range(core::ParameterUsage::kComponent, 0, 3);
-    check_arg_in_range(core::ParameterUsage::kOffset, -8, 7);
+    if (core::IsTexture(call->Func())) {
+        check_arg_in_range(core::ParameterUsage::kComponent, 0, 3);
+        check_arg_in_range(core::ParameterUsage::kOffset, -8, 7);
+    }
 }
 
 void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {

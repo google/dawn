@@ -3266,13 +3266,13 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [152] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [153] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -3296,13 +3296,13 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [157] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [158] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -3326,13 +3326,13 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [162] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [163] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -3356,13 +3356,13 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [167] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [168] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -3386,13 +3386,13 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [172] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [173] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -3416,13 +3416,13 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [177] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [178] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -3794,19 +3794,19 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [240] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kOffset,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
   {
     /* [241] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [242] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -3818,19 +3818,19 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [244] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kOffset,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
   {
     /* [245] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [246] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -3842,19 +3842,19 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [248] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kOffset,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
   {
     /* [249] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [250] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -3866,19 +3866,19 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [252] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kOffset,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
   {
     /* [253] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [254] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -3890,19 +3890,19 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [256] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kOffset,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
   {
     /* [257] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [258] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -3914,19 +3914,19 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [260] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kOffset,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
   {
     /* [261] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kColMajor,
     /* is_const */ true,
     /* matcher_indices */ MatcherIndicesIndex(101),
   },
   {
     /* [262] */
-    /* usage */ core::ParameterUsage::kNone,
+    /* usage */ core::ParameterUsage::kStride,
     /* is_const */ false,
     /* matcher_indices */ MatcherIndicesIndex(17),
   },
@@ -13849,23 +13849,23 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [145] */
-    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : fiu32_f16, C : num, R : num](ptr<storage, runtime_array<S>, readable>, u32, @const bool, u32) -> T */
-    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : fiu32_f16, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<S, AC>, readable>, u32, @const bool, u32) -> T */
-    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : i8, C : num, R : num](ptr<storage, runtime_array<i32>, readable>, u32, @const bool, u32) -> T */
-    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : u8, C : num, R : num](ptr<storage, runtime_array<u32>, readable>, u32, @const bool, u32) -> T */
-    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : i8, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<i32, AC>, readable>, u32, @const bool, u32) -> T */
-    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : u8, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<u32, AC>, readable>, u32, @const bool, u32) -> T */
+    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : fiu32_f16, C : num, R : num](ptr<storage, runtime_array<S>, readable>, offset: u32, @const col_major: bool, stride: u32) -> T */
+    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : fiu32_f16, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<S, AC>, readable>, offset: u32, @const col_major: bool, stride: u32) -> T */
+    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : i8, C : num, R : num](ptr<storage, runtime_array<i32>, readable>, offset: u32, @const col_major: bool, stride: u32) -> T */
+    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : u8, C : num, R : num](ptr<storage, runtime_array<u32>, readable>, offset: u32, @const col_major: bool, stride: u32) -> T */
+    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : i8, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<i32, AC>, readable>, offset: u32, @const col_major: bool, stride: u32) -> T */
+    /* fn subgroupMatrixLoad<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : u8, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<u32, AC>, readable>, offset: u32, @const col_major: bool, stride: u32) -> T */
     /* num overloads */ 6,
     /* overloads */ OverloadIndex(221),
   },
   {
     /* [146] */
-    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : fiu32_f16, C : num, R : num](ptr<storage, runtime_array<S>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, u32) */
-    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : fiu32_f16, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<S, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, u32) */
-    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : i8, C : num, R : num](ptr<storage, runtime_array<i32>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, u32) */
-    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : u8, C : num, R : num](ptr<storage, runtime_array<u32>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, u32) */
-    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : i8, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<i32, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, u32) */
-    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : u8, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<u32, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, u32) */
+    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : fiu32_f16, C : num, R : num](ptr<storage, runtime_array<S>, writable>, u32, subgroup_matrix<K, S, C, R>, @const col_major: bool, stride: u32) */
+    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : fiu32_f16, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<S, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const col_major: bool, stride: u32) */
+    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : i8, C : num, R : num](ptr<storage, runtime_array<i32>, writable>, u32, subgroup_matrix<K, S, C, R>, @const col_major: bool, stride: u32) */
+    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : u8, C : num, R : num](ptr<storage, runtime_array<u32>, writable>, u32, subgroup_matrix<K, S, C, R>, @const col_major: bool, stride: u32) */
+    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : i8, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<i32, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const col_major: bool, stride: u32) */
+    /* fn subgroupMatrixStore[K : subgroup_matrix_kind, S : u8, C : num, R : num, AC : num](ptr<workgroup_or_storage, array<u32, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const col_major: bool, stride: u32) */
     /* num overloads */ 6,
     /* overloads */ OverloadIndex(227),
   },
