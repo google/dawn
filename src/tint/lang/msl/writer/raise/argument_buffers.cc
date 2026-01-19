@@ -84,7 +84,7 @@ struct State {
     static constexpr const char* kDynamicOffsetParamName = "tint_dynamic_offset_buffer";
 
     /// Process the module.
-    void Process() {
+    Result<SuccessType> Process() {
         // Seed the block-to-function map with the function entry blocks.
         // This is used to determine the owning function for any given instruction.
         for (auto& func : ir.functions) {
@@ -112,8 +112,19 @@ struct State {
                 continue;
             }
 
-            Vector<core::ir::Instruction*, 16> to_destroy;
             auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+
+            // Only uniform and storage buffers support dynamic offsets.
+            if (!(ptr->AddressSpace() == core::AddressSpace::kStorage ||
+                  ptr->AddressSpace() == core::AddressSpace::kUniform)) {
+                auto binding_iter =
+                    iter->second.binding_info_to_offset_index.find(var->BindingPoint()->binding);
+                if (binding_iter != iter->second.binding_info_to_offset_index.end()) {
+                    return Failure("dynamic offset supplied for non-buffer type");
+                }
+            }
+
+            Vector<core::ir::Instruction*, 16> to_destroy;
             var->Result()->ForEachUseUnsorted([&](core::ir::Usage use) {  //
                 auto* extracted_variable = GetVariableFromStruct(var, use.instruction);
 
@@ -158,6 +169,8 @@ struct State {
                 inst->Destroy();
             }
         }
+
+        return Success;
     }
 
     /// Create the argument buffers. Each bind group will have a separate structure.
@@ -386,9 +399,7 @@ Result<SuccessType> ArgumentBuffers(core::ir::Module& ir, const ArgumentBuffersC
                                     tint::core::ir::Capability::kAllowDuplicateBindings,
                                 }));
 
-    State{config, ir}.Process();
-
-    return Success;
+    return State{config, ir}.Process();
 }
 
 }  // namespace tint::msl::writer::raise
