@@ -577,6 +577,11 @@ type f32
 implicit(T) fn f<T>()`,
 			`file.txt:1:18 'T' already declared
 First declared here: file.txt:1:10`,
+		}, {
+			`
+type bool
+fn f(@const bool)`,
+			`file.txt:2:13 @const parameters must be named`,
 		},
 	} {
 
