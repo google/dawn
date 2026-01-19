@@ -127,6 +127,9 @@ class Device final : public DeviceBase {
     bool ReduceMemoryUsageImpl() override;
     void PerformIdleTasksImpl() override;
 
+    std::optional<DeviceGuard> UseGuardForCreateBindGroup() override;
+    std::optional<DeviceGuard> UseGuardForCreateBindGroupLayout() override;
+
     void OnDebugMessage(std::string message);
 
     // Used to associate this device with validation layer messages.

@@ -1255,6 +1255,7 @@
         "methods": [
             {
                 "name": "create bind group",
+                "no autolock": true,
                 "returns": "bind group",
                 "args": [
                     {"name": "descriptor", "type": "bind group descriptor", "annotation": "const*"}
@@ -1262,6 +1263,7 @@
             },
             {
                 "name": "create bind group layout",
+                "no autolock": true,
                 "returns": "bind group layout",
                 "args": [
                     {"name": "descriptor", "type": "bind group layout descriptor", "annotation": "const*"}

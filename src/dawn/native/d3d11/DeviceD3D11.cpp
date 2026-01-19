@@ -525,7 +525,15 @@ bool Device::ReduceMemoryUsageImpl() {
     return false;
 }
 
-std::optional<DeviceGuard> Device::UseGuardForCreateTexture() {
+std::optional<DeviceGuard> Device::UseGuardForCreateBindGroup() {
+    return std::nullopt;
+}
+
+std::optional<DeviceGuard> Device::UseGuardForCreateBindGroupLayout() {
+    return std::nullopt;
+}
+
+std::optional<DeviceGuard> Device::UseGuardForCreateBuffer() {
     return std::nullopt;
 }
 
@@ -533,7 +541,7 @@ std::optional<DeviceGuard> Device::UseGuardForCreateSampler() {
     return std::nullopt;
 }
 
-std::optional<DeviceGuard> Device::UseGuardForCreateBuffer() {
+std::optional<DeviceGuard> Device::UseGuardForCreateTexture() {
     return std::nullopt;
 }
 
