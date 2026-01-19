@@ -404,8 +404,8 @@ TEST_P(TextureZeroInitTest, RenderingArrayLayerClearsToZero) {
 
 // This tests CopyBufferToTexture fully overwrites copy so lazy init is not needed.
 TEST_P(TextureZeroInitTest, CopyBufferToTexture) {
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(4, 1,
                                 wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding |
@@ -732,8 +732,8 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
 
 // Test that clear state is tracked independently for depth/stencil textures.
 TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 

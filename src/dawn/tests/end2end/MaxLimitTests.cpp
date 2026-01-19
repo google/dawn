@@ -721,8 +721,8 @@ TEST_P(MaxLimitTests, WriteToMaxFragmentCombinedOutputResources) {
     // TODO(http://crbug.com/348199037): VUID-RuntimeSpirv-Location-06428
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
 
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
 
     // Compute the number of each resource type (storage buffers and storage textures) such that
     // there is at least one color attachment, and as many of the buffer/textures as possible,

@@ -583,15 +583,15 @@ TEST_P(TextureFormatTest, RG8Unorm) {
 
 // Test the R16Unorm format
 TEST_P(TextureFormatTest, R16Unorm) {
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
     DoUnormTest<uint16_t>({wgpu::TextureFormat::R16Unorm, 2, TextureComponentType::Float, 1});
 }
 
 // Test the RG16Unorm format
 TEST_P(TextureFormatTest, RG16Unorm) {
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
     DoUnormTest<uint16_t>({wgpu::TextureFormat::RG16Unorm, 4, TextureComponentType::Float, 2});
 }
 

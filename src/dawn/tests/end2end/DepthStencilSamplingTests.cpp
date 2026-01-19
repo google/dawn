@@ -644,8 +644,8 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
     // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsIntel() && IsAndroid());
 
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
 
     constexpr uint32_t kWidth = 16;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(

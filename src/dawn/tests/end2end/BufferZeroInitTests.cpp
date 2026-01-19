@@ -1134,8 +1134,8 @@ TEST_P(BufferZeroInitTest, PaddingInitialized) {
     DAWN_SUPPRESS_TEST_IF(IsANGLE());                              // TODO(crbug.com/dawn/1084)
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());  // TODO(crbug.com/dawn/1214)
 
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
 
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());

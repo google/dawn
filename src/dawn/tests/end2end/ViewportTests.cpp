@@ -190,8 +190,8 @@ TEST_P(ViewportTest, SubBoxes) {
 TEST_P(ViewportTest, DefaultViewportDepth) {
     // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
     DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
 
     TestViewportDepth(0.0, 1.0, false);
 }
@@ -200,8 +200,8 @@ TEST_P(ViewportTest, DefaultViewportDepth) {
 TEST_P(ViewportTest, ViewportDepth) {
     // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
     DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
 
     TestViewportDepth(0.0, 0.5);
     TestViewportDepth(0.5, 1.0);

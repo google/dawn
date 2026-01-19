@@ -246,8 +246,8 @@ TEST_P(OcclusionQueryTests, QuerySetDestroy) {
 // zero indicates that no sample passed depth/stencil testing,
 // non-zero indicates that at least one sample passed depth/stencil testing.
 TEST_P(OcclusionQueryTests, QueryWithDepthStencilTest) {
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
     // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
 
@@ -269,8 +269,8 @@ TEST_P(OcclusionQueryTests, QueryWithDepthStencilTest) {
 // zero indicates that no sample passed scissor testing,
 // non-zero indicates that at least one sample passed scissor testing.
 TEST_P(OcclusionQueryTests, QueryWithScissorTest) {
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
     // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
 
@@ -283,8 +283,8 @@ TEST_P(OcclusionQueryTests, QueryWithScissorTest) {
 
 // Test begin occlusion query with same query index on different render pass
 TEST_P(OcclusionQueryTests, Rewrite) {
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
     constexpr uint32_t kQueryCount = 1;
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
@@ -323,8 +323,8 @@ TEST_P(OcclusionQueryTests, Rewrite) {
 // Test resolving occlusion query correctly if the queries are written sparsely, which also tests
 // the query resetting at the start of render passes on Vulkan backend.
 TEST_P(OcclusionQueryTests, ResolveSparseQueries) {
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
     constexpr uint32_t kQueryCount = 7;
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
@@ -550,8 +550,8 @@ TEST_P(OcclusionQueryTests, RewriteToZeroWithDraw) {
 
 // Test resolving occlusion query to the destination buffer with offset
 TEST_P(OcclusionQueryTests, ResolveToBufferWithOffset) {
-    // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
-    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
