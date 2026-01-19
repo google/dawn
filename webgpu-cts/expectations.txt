@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-01-14 07:10:27AM
+# Last rolled: 2026-01-19 05:12:11AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -468,7 +468,6 @@ crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin
 crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=16;mapId="remap";scalarType="u32" [ Failure ]
 crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=4;mapId="remap";scalarType="u32" [ Failure ]
 crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ]
-
 
 # Win10 workgroup_barrier tests fail
 crbug.com/42251260 [ webgpu-dxc-disabled win ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_load_store:accessValueType="u32";memType="non_atomic_texture";accessPair="rw";normalBarrier=true [ Failure ]
