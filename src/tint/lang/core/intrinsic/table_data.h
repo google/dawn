@@ -161,6 +161,9 @@ struct ParameterInfo {
     /// The parameter usage (parameter name in definition file)
     const ParameterUsage usage;
 
+    /// True if the parameter is required to be constant.
+    const bool is_const;
+
     /// Index of the matcher indices that are used to match the parameter types.
     /// These indices are consumed by the matchers themselves.
     const MatcherIndicesIndex matcher_indices;

@@ -405,7 +405,7 @@ Candidate ScoreOverload(Context& context,
         auto* matcher_indices = context.data[parameter.matcher_indices];
         auto* ty =
             context.Match(templates, overload, matcher_indices, earliest_eval_stage).Type(args[p]);
-        parameters.Emplace(ty, parameter.usage);
+        parameters.Emplace(ty, parameter.usage, parameter.is_const);
     }
 
     return Candidate{score, &overload, templates, parameters};

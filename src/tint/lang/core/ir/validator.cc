@@ -4103,6 +4103,17 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
         return;
     }
 
+    // Check evaluation stage of parameters that are required to be const-expressions.
+    for (uint32_t i = 0; i < builtin->parameters.Length(); i++) {
+        const auto& p = builtin->parameters[i];
+        const auto* arg = call->Args()[i];
+        if (p.is_const && !arg->Is<Constant>()) {
+            AddError(call, BuiltinCall::kArgsOperandOffset + i)
+                << "the " << style::Variable(p.usage) << " argument must be a constant";
+            return;
+        }
+    }
+
     if (auto* bc = call->As<CoreBuiltinCall>()) {
         CheckCoreBuiltinCall(bc, builtin.Get());
     }
@@ -4124,17 +4135,6 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 
 void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                                      const core::intrinsic::Overload& overload) {
-    if (call->Func() == core::BuiltinFn::kQuadBroadcast ||
-        call->Func() == core::BuiltinFn::kSubgroupBroadcast) {
-        TINT_ASSERT(call->Args().Length() == 2);
-        constexpr uint32_t kIdArg = 1;
-        auto* id = call->Args()[kIdArg];
-        if (!id->Is<core::ir::Constant>()) {
-            AddError(call, kIdArg) << "non-constant ID provided";
-        }
-        return;
-    }
-
     auto idx_for_usage = [&](core::ParameterUsage usage) -> std::optional<uint32_t> {
         for (uint32_t i = 0; i < overload.parameters.Length(); ++i) {
             auto& p = overload.parameters[i];
@@ -4154,20 +4154,13 @@ void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
         TINT_ASSERT(idx < call->Args().Length());
 
         auto* val = call->Args()[idx];
-        if (auto* const_val = val->As<ir::Constant>()) {
-            auto* cnst = const_val->Value();
+        auto* const_val = val->As<ir::Constant>();
+        TINT_ASSERT(const_val);
+        auto* cnst = const_val->Value();
 
-            if (val->Type()->Is<core::type::Vector>()) {
-                for (size_t i = 0; i < cnst->NumElements(); i++) {
-                    auto value = cnst->Index(i)->ValueAs<int32_t>();
-                    if (value < min || value > max) {
-                        AddError(call, idx)
-                            << value << " outside range of [" << min << ", " << max << "]";
-                        return;
-                    }
-                }
-            } else {
-                auto value = cnst->ValueAs<int32_t>();
+        if (val->Type()->Is<core::type::Vector>()) {
+            for (size_t i = 0; i < cnst->NumElements(); i++) {
+                auto value = cnst->Index(i)->ValueAs<int32_t>();
                 if (value < min || value > max) {
                     AddError(call, idx)
                         << value << " outside range of [" << min << ", " << max << "]";
@@ -4175,8 +4168,11 @@ void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                 }
             }
         } else {
-            AddError(call, idx) << "expected a constant value";
-            return;
+            auto value = cnst->ValueAs<int32_t>();
+            if (value < min || value > max) {
+                AddError(call, idx) << value << " outside range of [" << min << ", " << max << "]";
+                return;
+            }
         }
     };
 

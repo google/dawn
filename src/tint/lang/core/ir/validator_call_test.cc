@@ -647,8 +647,9 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_QuadBroadcast_NonConstId) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
-                                          R"(:4:32 error: quadBroadcast: non-constant ID provided
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:4:32 error: quadBroadcast: the 'id' argument must be a constant
     %3:i32 = quadBroadcast 2i, %a
                                ^^
 
@@ -665,9 +666,10 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_SubgroupBroadcast_NonConstId) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(
-                    R"(:4:36 error: subgroupBroadcast: non-constant ID provided
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:4:36 error: subgroupBroadcast: the 'sourceLaneIndex' argument must be a constant
     %3:i32 = subgroupBroadcast 2i, %a
                                    ^^
 

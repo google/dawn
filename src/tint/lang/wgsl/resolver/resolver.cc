@@ -2304,6 +2304,17 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         AddWarning(expr->source) << "use of deprecated builtin";
     }
 
+    // Check evaluation stage of parameters that are required to be const-expressions.
+    for (uint32_t i = 0; i < overload->parameters.Length(); i++) {
+        const auto& p = overload->parameters[i];
+        if (p.is_const && args[i]->Stage() != core::EvaluationStage::kConstant) {
+            AddError(args[i]->Declaration()->source)
+                << "the " << style::Variable(p.usage) << " argument of "
+                << style::Function(target->str()) << " must be a const-expression";
+            return nullptr;
+        }
+    }
+
     // If the builtin is @const, and all arguments have constant values, evaluate the builtin
     // now.
     const core::constant::Value* value = nullptr;

@@ -2173,43 +2173,40 @@ bool Validator::TextureBuiltinFn(const sem::Call* call) const {
     std::string func_name = builtin->str();
     auto& signature = builtin->Signature();
 
-    auto check_arg_is_constexpr = [&](core::ParameterUsage usage, int min, int max) {
+    auto check_const_arg_range = [&](core::ParameterUsage usage, int min, int max) {
         auto signed_index = signature.IndexOf(usage);
         if (signed_index < 0) {
             return true;
         }
         auto index = static_cast<size_t>(signed_index);
         auto* arg = call->Arguments()[index];
-        if (auto values = arg->ConstantValue()) {
-            if (auto* vector = values->Type()->As<core::type::Vector>()) {
-                for (size_t i = 0; i < vector->Width(); i++) {
-                    auto value = values->Index(i)->ValueAs<AInt>();
-                    if (value < min || value > max) {
-                        AddError(arg->Declaration()->source)
-                            << "each component of the " << usage << " argument must be at least "
-                            << min << " and at most " << max << ". " << usage << " component " << i
-                            << " is " << value;
-                        return false;
-                    }
-                }
-            } else {
-                auto value = values->ValueAs<AInt>();
+        auto values = arg->ConstantValue();
+        TINT_ASSERT(values);
+        if (auto* vector = values->Type()->As<core::type::Vector>()) {
+            for (size_t i = 0; i < vector->Width(); i++) {
+                auto value = values->Index(i)->ValueAs<AInt>();
                 if (value < min || value > max) {
                     AddError(arg->Declaration()->source)
-                        << "the " << usage << " argument must be at least " << min
-                        << " and at most " << max << ". " << usage << " is " << value;
+                        << "each component of the " << usage << " argument must be at least " << min
+                        << " and at most " << max << ". " << usage << " component " << i << " is "
+                        << value;
                     return false;
                 }
             }
-            return true;
+        } else {
+            auto value = values->ValueAs<AInt>();
+            if (value < min || value > max) {
+                AddError(arg->Declaration()->source)
+                    << "the " << usage << " argument must be at least " << min << " and at most "
+                    << max << ". " << usage << " is " << value;
+                return false;
+            }
         }
-        AddError(arg->Declaration()->source)
-            << "the " << usage << " argument must be a const-expression";
-        return false;
+        return true;
     };
 
-    return check_arg_is_constexpr(core::ParameterUsage::kOffset, -8, 7) &&
-           check_arg_is_constexpr(core::ParameterUsage::kComponent, 0, 3);
+    return check_const_arg_range(core::ParameterUsage::kOffset, -8, 7) &&
+           check_const_arg_range(core::ParameterUsage::kComponent, 0, 3);
 }
 
 bool Validator::SubgroupBroadcast(const sem::Call* call) const {
@@ -2221,12 +2218,7 @@ bool Validator::SubgroupBroadcast(const sem::Call* call) const {
     TINT_ASSERT(call->Arguments().Length() == 2);
     auto* id = call->Arguments()[1];
     auto* constant_value = id->ConstantValue();
-
-    if (!constant_value) {
-        AddError(id->Declaration()->source)
-            << "the sourceLaneIndex argument of subgroupBroadcast must be a const-expression";
-        return false;
-    }
+    TINT_ASSERT(constant_value);
 
     if (id->Type()->IsSignedIntegerScalar()) {
         if (constant_value->ValueAs<i32>() < 0) {
@@ -2264,12 +2256,7 @@ bool Validator::QuadBroadcast(const sem::Call* call) const {
     TINT_ASSERT(call->Arguments().Length() == 2);
     auto* id = call->Arguments()[1];
     auto* constant_value = id->ConstantValue();
-
-    if (!constant_value) {
-        AddError(id->Declaration()->source)
-            << "the id argument of quadBroadcast must be a const-expression";
-        return false;
-    }
+    TINT_ASSERT(constant_value);
 
     if (id->Type()->IsSignedIntegerScalar()) {
         if (constant_value->ValueAs<i32>() < 0) {
