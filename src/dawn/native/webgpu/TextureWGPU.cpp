@@ -137,13 +137,13 @@ MaybeError Texture::CaptureCreationParameters(CaptureContext& captureContext) {
     std::vector<wgpu::TextureFormat> viewFormats;
     for (FormatIndex i : GetViewFormats()) {
         const Format& viewFormat = device->GetValidInternalFormat(i);
-        viewFormats.emplace_back(viewFormat.baseFormat);
+        viewFormats.emplace_back(viewFormat.format);
     }
     schema::Texture tex{{
         .usage = GetUsage(),
         .dimension = GetDimension(),
         .size = ToSchema(GetBaseSize()),
-        .format = GetFormat().baseFormat,
+        .format = GetFormat().format,
         .mipLevelCount = GetNumMipLevels(),
         .sampleCount = GetSampleCount(),
         .viewFormats = viewFormats,
@@ -302,7 +302,7 @@ MaybeError TextureView::AddReferenced(CaptureContext& captureContext) {
 MaybeError TextureView::CaptureCreationParameters(CaptureContext& captureContext) {
     schema::TextureView tex{{
         .textureId = captureContext.GetId(GetTexture()),
-        .format = GetFormat().baseFormat,
+        .format = GetFormat().format,
         .dimension = GetDimension(),
         .baseMipLevel = GetBaseMipLevel(),
         .mipLevelCount = GetLevelCount(),
