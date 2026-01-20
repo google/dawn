@@ -1151,5 +1151,67 @@ INSTANTIATE_TEST_SUITE_P(,
                          ::testing::Combine(::testing::ValuesIn(kExtensions),
                                             ::testing::Values(true, false)));
 
+class SubgroupSizeControlValidationTest : public ValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::ChromiumExperimentalSubgroupSizeControl,
+                wgpu::FeatureName::Subgroups};
+    }
+    void TestTotalInvocationsPerWorkgroupAndSubgroupSize(const std::vector<uint32_t>& workgroupSize,
+                                                         uint32_t subgroupSize,
+                                                         bool success) {
+        for (bool setSubgroupSizeAsOverride : {true, false}) {
+            std::ostringstream stream;
+            stream << R"(
+enable subgroups;
+enable chromium_experimental_subgroup_size_control;)";
+
+            if (setSubgroupSizeAsOverride) {
+                stream << "override kSubgroupSize : u32;\n";
+            } else {
+                stream << "const kSubgroupSize = " << subgroupSize << ";\n";
+            }
+
+            stream << "@compute @subgroup_size(kSubgroupSize) @workgroup_size(" << workgroupSize[0];
+            for (uint32_t i = 1; i < workgroupSize.size(); ++i) {
+                stream << ", " << workgroupSize[i];
+            }
+            stream << ")\n";
+            stream << R"(
+fn main(@builtin(subgroup_invocation_id) sg_id : u32,
+        @builtin(subgroup_size) sg_size : u32) {
+    _ = sg_id + sg_size;
+})";
+
+            wgpu::ComputePipelineDescriptor pipelineDesc = {};
+            pipelineDesc.compute.module = utils::CreateShaderModule(device, stream.str().c_str());
+
+            wgpu::ConstantEntry entry = {};
+            if (setSubgroupSizeAsOverride) {
+                entry.key = "kSubgroupSize";
+                entry.value = static_cast<double>(subgroupSize);
+                pipelineDesc.compute.constantCount = 1;
+                pipelineDesc.compute.constants = &entry;
+            }
+
+            if (success) {
+                device.CreateComputePipeline(&pipelineDesc);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&pipelineDesc));
+            }
+        }
+    }
+};
+
+// Test total invocations per workgroup should be a multiple of subgroup size when the
+// `@subgroup_size` attribute is used.
+TEST_F(SubgroupSizeControlValidationTest, ValidateTotalInvocationsPerWorkgroupAndSubgroupSize) {
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({32}, 16, true);
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({8, 4}, 16, true);
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({8, 4, 2}, 32, true);
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({24}, 16, false);
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({8, 3, 2}, 32, false);
+}
+
 }  // anonymous namespace
 }  // namespace dawn

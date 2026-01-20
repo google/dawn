@@ -1381,6 +1381,15 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
                         workgroupInfo.x, maxSubgroupSize);
     }
 
+    if (workgroupInfo.subgroup_size.has_value()) {
+        const uint32_t explicitSubgroupSize = workgroupInfo.subgroup_size.value();
+        DAWN_ASSERT(explicitSubgroupSize > 0);
+        DAWN_INVALID_IF((numInvocations % explicitSubgroupSize != 0),
+                        "The total number of workgroup invocations (%u) is not a multiple of the "
+                        "subgroup_size attribute (%u)",
+                        numInvocations, explicitSubgroupSize);
+    }
+
     return Extent3D{workgroupInfo.x, workgroupInfo.y, workgroupInfo.z};
 }
 
