@@ -244,6 +244,19 @@ void WalkTypeAndMembers(CTX& ctx,
         [&](const core::type::Array* a) { WalkArrayElements(ctx, a, impl); });
 }
 
+/// @returns true if the type or any contained types are atomic
+/// @param ty root of the types to walks
+bool ContainsAtomic(const core::type::Type* ty) {
+    bool found = false;
+    WalkTypeAndMembers(found, ty, IOAttributes{},
+                       [&](bool& ctx, const core::type::Type* t, const IOAttributes&) {
+                           if (t != nullptr && t->Is<core::type::Atomic>()) {
+                               ctx = true;
+                           }
+                       });
+    return found;
+}
+
 /// The IO direction of an operation.
 enum class IODirection : uint8_t { kInput, kOutput, kResource };
 
@@ -3441,6 +3454,21 @@ void Validator::CheckVar(const Var* var) {
         if (!capabilities_.Contains(Capability::kMslAllowEntryPointInterface) ||
             mv->AddressSpace() != AddressSpace::kPrivate) {
             AddError(var) << "vars in a function scope must be in the 'function' address space";
+            return;
+        }
+    }
+
+    if (ContainsAtomic(mv->StoreType())) {
+        if (mv->AddressSpace() == AddressSpace::kStorage) {
+            if (mv->Access() != core::Access::kReadWrite) {
+                AddError(var)
+                    << "atomic variables in 'storage' address space must have 'read_write' "
+                       "access mode";
+                return;
+            }
+        } else if (mv->AddressSpace() != AddressSpace::kWorkgroup) {
+            AddError(var)
+                << "atomic variables must be in the 'workgroup' or 'storage' address space";
             return;
         }
     }

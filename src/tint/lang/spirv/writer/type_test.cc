@@ -494,7 +494,7 @@ TEST_F(SpirvWriterTest, Type_Struct_MatrixLayout) {
 TEST_F(SpirvWriterTest, Type_Atomic) {
     core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        v = b.Var<private_, atomic<i32>, read_write>("v");
+        v = b.Var<workgroup, atomic<i32>, read_write>("v");
     });
 
     auto* eb = b.ComputeFunction("main");
