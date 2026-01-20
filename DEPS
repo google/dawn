@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '612203b61a4314a1e82bc828591ca9c61702caf8',
+  'chromium_revision': '294ebb2115d0ef46fa25a919e5a2e9cf5336cc4f',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -123,7 +123,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@869153a967d9e3a28b658b4aa6265b78a95b3540',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@2862259f0f6eec72be0ae943bf5bd24003eb89db',
     'condition': 'dawn_standalone',
   },
 
@@ -138,7 +138,7 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@2bd1bf44a4218a0dfaf3086a7ed86e693261acdc',
+  'url': '{chromium_git}/chromium/src/build@4927700117c86cdc3ed54adab1e741ae26a43a5f',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
@@ -248,7 +248,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@2ce3007b7a11c8a4102954a142b87e4e30395589',
+    'url': '{chromium_git}/chromium/src/testing@a1fbe91aec15a21683e200a03233d4d4858eaa36',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -593,7 +593,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@5b70baa1fd02c684fb68f7dc6fad54decabbcaee',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@cb11b9bc34c2183fa5049a69cd1ea09511289235',
     'condition': 'dawn_standalone',
   },
 
