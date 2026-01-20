@@ -100,6 +100,7 @@ enum builtin_type {
   bool
   i8
   u8
+  u16
   f16
   f32
   i32
@@ -297,6 +298,7 @@ enum usages {
 type bool
 type i8
 type u8
+type u16
 @precedence(3) type i32
 @precedence(2) type u32
 @precedence(1) type f32
@@ -360,7 +362,7 @@ type buffer<N: num>
 // A type matcher that can match one or more types.                           //
 ////////////////////////////////////////////////////////////////////////////////
 
-match scalar: f32 | f16 | i32 | u32 | bool
+match scalar: f32 | f16 | i32 | u32 | u16 | bool
 match scalar_no_f32: i32 | f16 | u32 | bool
 match scalar_no_f16: f32 | i32 | u32 | bool
 match scalar_no_i32: f32 | f16 | u32 | bool

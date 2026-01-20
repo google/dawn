@@ -700,6 +700,9 @@ BuiltinType ParseBuiltinType(std::string_view str) {
     if (str == "texture_storage_3d") {
         return BuiltinType::kTextureStorage3D;
     }
+    if (str == "u16") {
+        return BuiltinType::kU16;
+    }
     if (str == "u32") {
         return BuiltinType::kU32;
     }
@@ -931,6 +934,8 @@ std::string_view ToString(BuiltinType value) {
             return "texture_storage_2d_array";
         case BuiltinType::kTextureStorage3D:
             return "texture_storage_3d";
+        case BuiltinType::kU16:
+            return "u16";
         case BuiltinType::kU32:
             return "u32";
         case BuiltinType::kU8:

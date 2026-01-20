@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,23 +25,39 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/type/u16.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::ScalarBase);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::AInt>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::AFloat>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::i32>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::i8>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u32>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u64>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u8>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u16>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::f16>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::f32>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<bool>);
+#include "src/tint/lang/core/type/manager.h"
 
-namespace tint::core::constant {
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::U16);
 
-ScalarBase::~ScalarBase() = default;
+namespace tint::core::type {
 
+U16::U16()
+    : Base(static_cast<size_t>(tint::TypeCode::Of<U16>().bits),
+           core::type::Flags{
+               Flag::kConstructable,
+               Flag::kCreationFixedFootprint,
+               Flag::kFixedFootprint,
+               Flag::kHostShareable,
+           }) {}
+
+U16::~U16() = default;
+
+std::string U16::FriendlyName() const {
+    return "u16";
 }
+
+uint32_t U16::Size() const {
+    return 2;
+}
+
+uint32_t U16::Align() const {
+    return 2;
+}
+
+U16* U16::Clone(CloneContext& ctx) const {
+    return ctx.dst.mgr->Get<U16>();
+}
+
+}  // namespace tint::core::type

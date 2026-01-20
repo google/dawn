@@ -794,19 +794,19 @@ TEST_F(CoreIntrinsicTableTest, MismatchTypeInitializer) {
 
 6 candidate constructors:
  • 'vec3<T  ✓ >(x: T  ✓ , y: T  ✗ , z: T  ✓ ) -> vec3<T>' where:
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
  • 'vec3<T  ✓ >(x: T  ✓ , yz: vec2<T>  ✗ ) -> vec3<T>' where:
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
  • 'vec3<T  ✓ >(T  ✓ ) -> vec3<T>' where:
       ✗  overload expects 1 argument, call passed 3 arguments
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
  • 'vec3<T  ✓ >(xy: vec2<T>  ✗ , z: T  ✗ ) -> vec3<T>' where:
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
  • 'vec3<T  ✓ >(vec3<T>  ✗ ) -> vec3<T>' where:
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
  • 'vec3<T  ✓ >() -> vec3<T>' where:
       ✗  overload expects 0 arguments, call passed 3 arguments
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
 
 5 candidate conversions:
  • 'vec3<T  ✓ >(vec3<U>  ✗ ) -> vec3<T>' where:
@@ -883,18 +883,18 @@ TEST_F(CoreIntrinsicTableTest, MismatchTypeConversion) {
 
 6 candidate constructors:
  • 'vec3<T  ✓ >(vec3<T>  ✗ ) -> vec3<T>' where:
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
  • 'vec3<T  ✓ >(T  ✗ ) -> vec3<T>' where:
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
  • 'vec3<T  ✓ >() -> vec3<T>' where:
       ✗  overload expects 0 arguments, call passed 1 argument
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
  • 'vec3<T  ✓ >(xy: vec2<T>  ✗ , z: T  ✗ ) -> vec3<T>' where:
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
  • 'vec3<T  ✓ >(x: T  ✗ , yz: vec2<T>  ✗ ) -> vec3<T>' where:
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
  • 'vec3<T  ✓ >(x: T  ✗ , y: T  ✗ , z: T  ✗ ) -> vec3<T>' where:
-      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32', 'u16' or 'bool'
 
 5 candidate conversions:
  • 'vec3<T  ✓ >(vec3<U>  ✗ ) -> vec3<T>' where:

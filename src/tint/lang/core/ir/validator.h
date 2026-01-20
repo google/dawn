@@ -44,6 +44,8 @@ namespace tint::core::ir {
 enum class Capability : uint8_t {
     /// Allows 8-bit integer types.
     kAllow8BitIntegers,
+    /// Allows 16-bit integer types.
+    kAllow16BitIntegers,
     /// Allows 64-bit integer types.
     kAllow64BitIntegers,
     /// Allows ClipDistances on f32 and vecN<f32> parameters

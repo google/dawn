@@ -46,6 +46,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/type.h"
+#include "src/tint/lang/core/type/u16.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
@@ -147,6 +148,10 @@ const core::type::I32* Manager::i32() {
 
 const core::type::U8* Manager::u8() {
     return Get<core::type::U8>();
+}
+
+const core::type::U16* Manager::u16() {
+    return Get<core::type::U16>();
 }
 
 const core::type::U32* Manager::u32() {

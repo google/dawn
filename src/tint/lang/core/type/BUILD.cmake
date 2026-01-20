@@ -122,6 +122,8 @@ tint_add_target(tint_lang_core_type lib
   lang/core/type/texture_dimension.h
   lang/core/type/type.cc
   lang/core/type/type.h
+  lang/core/type/u16.cc
+  lang/core/type/u16.h
   lang/core/type/u32.cc
   lang/core/type/u32.h
   lang/core/type/u64.cc
@@ -190,6 +192,7 @@ tint_add_target(tint_lang_core_type_test test
   lang/core/type/texel_buffer_test.cc
   lang/core/type/texture_test.cc
   lang/core/type/type_test.cc
+  lang/core/type/u16_test.cc
   lang/core/type/u32_test.cc
   lang/core/type/u64_test.cc
   lang/core/type/u8_test.cc

@@ -83,6 +83,7 @@
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"  // IWYU pragma: export
 #include "src/tint/lang/core/type/type.h"     // IWYU pragma: export
+#include "src/tint/lang/core/type/u16.h"      // IWYU pragma: export
 #include "src/tint/lang/core/type/u32.h"      // IWYU pragma: export
 #include "src/tint/lang/core/type/u64.h"      // IWYU pragma: export
 #include "src/tint/lang/core/type/u8.h"       // IWYU pragma: export
@@ -380,6 +381,11 @@ class Builder {
     /// @returns the new constant
     ir::Constant* Constant(core::u8 v) { return Constant(ConstantValue(v)); }
 
+    /// Creates a ir::Constant for a u16 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    ir::Constant* Constant(core::u16 v) { return Constant(ConstantValue(v)); }
+
     /// Creates a ir::Constant for a f32 Scalar
     /// @param v the value
     /// @returns the new constant
@@ -432,6 +438,11 @@ class Builder {
     /// @param v the value
     /// @returns the new constant
     const core::constant::Value* ConstantValue(core::u8 v) { return ir.constant_values.Get(v); }
+
+    /// Creates a core::constant::Value for a u16 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    const core::constant::Value* ConstantValue(core::u16 v) { return ir.constant_values.Get(v); }
 
     /// Creates a core::constant::Value for a f32 Scalar
     /// @param v the value

@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texel_buffer.h"
+#include "src/tint/lang/core/type/u16.h"
 #include "src/tint/lang/glsl/writer/common/option_helpers.h"
 #include "src/tint/lang/glsl/writer/printer/printer.h"
 #include "src/tint/lang/glsl/writer/raise/raise.h"
@@ -67,6 +68,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
         if (ty->Is<core::type::Buffer>()) {
             return Failure("buffers are not supported by the GLSL backend");
+        }
+        if (ty->Is<core::type::U16>()) {
+            return Failure("16-bit unsigned integers are not supported by the GLSL backend");
         }
     }
 

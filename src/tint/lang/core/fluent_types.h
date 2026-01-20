@@ -39,6 +39,7 @@ using f16 = tint::core::f16;
 using f32 = tint::core::f32;
 using i32 = tint::core::i32;
 using i8 = tint::core::i8;
+using u16 = tint::core::u16;
 using u32 = tint::core::u32;
 using u64 = tint::core::u64;
 using u8 = tint::core::u8;

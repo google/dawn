@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,23 +25,53 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/type/u16.h"
+#include "src/tint/lang/core/type/helper_test.h"
+#include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/core/type/void.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::ScalarBase);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::AInt>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::AFloat>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::i32>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::i8>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u32>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u64>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u8>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u16>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::f16>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::f32>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<bool>);
+namespace tint::core::type {
+namespace {
 
-namespace tint::core::constant {
+using U16Test = TestHelper;
 
-ScalarBase::~ScalarBase() = default;
-
+TEST_F(U16Test, Creation) {
+    Manager ty;
+    auto* a = ty.u16();
+    auto* b = ty.u16();
+    EXPECT_EQ(a, b);
 }
+
+TEST_F(U16Test, Hash) {
+    Manager ty;
+    auto* a = ty.u16();
+    auto* b = ty.u16();
+    EXPECT_EQ(a->unique_hash, b->unique_hash);
+}
+
+TEST_F(U16Test, Equals) {
+    Manager ty;
+    auto* a = ty.u16();
+    auto* b = ty.u16();
+    EXPECT_TRUE(a->Equals(*b));
+    EXPECT_FALSE(a->Equals(Void{}));
+}
+
+TEST_F(U16Test, FriendlyName) {
+    U16 u;
+    EXPECT_EQ(u.FriendlyName(), "u16");
+}
+
+TEST_F(U16Test, Clone) {
+    Manager ty;
+    auto* a = ty.u16();
+
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+
+    auto* b = a->Clone(ctx);
+    ASSERT_TRUE(b->Is<U16>());
+}
+
+}  // namespace
+}  // namespace tint::core::type

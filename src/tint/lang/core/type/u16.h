@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,23 +25,39 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/constant/scalar.h"
+#ifndef SRC_TINT_LANG_CORE_TYPE_U16_H_
+#define SRC_TINT_LANG_CORE_TYPE_U16_H_
 
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::ScalarBase);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::AInt>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::AFloat>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::i32>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::i8>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u32>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u64>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u8>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u16>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::f16>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::f32>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<bool>);
+#include <string>
 
-namespace tint::core::constant {
+#include "src/tint/lang/core/type/numeric_scalar.h"
 
-ScalarBase::~ScalarBase() = default;
+namespace tint::core::type {
 
-}
+/// A unsigned int 16 type.
+class U16 final : public Castable<U16, NumericScalar> {
+  public:
+    /// Constructor
+    U16();
+
+    /// Destructor
+    ~U16() override;
+
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName() const override;
+
+    /// @returns the size in bytes of the type.
+    uint32_t Size() const override;
+
+    /// @returns the alignment in bytes of the type.
+    uint32_t Align() const override;
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    U16* Clone(CloneContext& ctx) const override;
+};
+
+}  // namespace tint::core::type
+
+#endif  // SRC_TINT_LANG_CORE_TYPE_U16_H_

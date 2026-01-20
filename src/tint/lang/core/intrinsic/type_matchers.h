@@ -55,6 +55,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/core/type/u16.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
@@ -126,6 +127,14 @@ inline const type::U8* BuildU8(intrinsic::MatchState& state, const type::Type*) 
 
 inline bool MatchU8(intrinsic::MatchState&, const type::Type* ty) {
     return ty->IsAnyOf<intrinsic::Any, type::U8, type::AbstractInt>();
+}
+
+inline const type::U16* BuildU16(intrinsic::MatchState& state, const type::Type*) {
+    return state.types.u16();
+}
+
+inline bool MatchU16(intrinsic::MatchState&, const type::Type* ty) {
+    return ty->IsAnyOf<intrinsic::Any, type::U16, type::AbstractInt>();
 }
 
 inline bool MatchVec(intrinsic::MatchState&,

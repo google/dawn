@@ -47,6 +47,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/subgroup_matrix.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/core/type/u16.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -226,7 +227,7 @@ bool Validator::IsPlain(const core::type::Type* type) const {
     return type->IsAnyOf<core::type::Scalar, core::type::Atomic, core::type::Vector,
                          core::type::Matrix, sem::Array, core::type::Struct,
                          core::type::SubgroupMatrix>() &&
-           !type->IsAnyOf<core::type::I8, core::type::U8>();
+           !type->IsAnyOf<core::type::I8, core::type::U8, core::type::U16>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types

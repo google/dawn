@@ -172,6 +172,9 @@ class Resolver {
     /// @returns a new u8, if the subgroup matrix extension is enabled, otherwise nullptr
     const core::type::U8* U8(const ast::Identifier* ident);
 
+    /// @returns nullptr since u16 is not enabled in WGSL.
+    const core::type::U16* U16(const ast::Identifier* ident);
+
     /// @returns a vector with the element type @p el of width @p n resolved from the identifier @p
     /// ident.
     const core::type::Vector* Vec(const ast::Identifier* ident,
