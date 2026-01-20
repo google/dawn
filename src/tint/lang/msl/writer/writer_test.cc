@@ -54,7 +54,7 @@ kernel void entry() {
 }
 )");
 
-    EXPECT_THAT(output_.workgroup_info.allocations, testing::ElementsAre());
+    EXPECT_THAT(output_.workgroup_allocations, testing::ElementsAre());
 }
 
 TEST_F(MslWriterTest, WorkgroupAllocations) {
@@ -101,7 +101,7 @@ kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadg
 }
 )");
 
-    EXPECT_THAT(output_.workgroup_info.allocations, testing::ElementsAre(8u));
+    EXPECT_THAT(output_.workgroup_allocations, testing::ElementsAre(8u));
 }
 
 TEST_F(MslWriterTest, NeedsStorageBufferSizes_False) {

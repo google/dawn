@@ -50,6 +50,7 @@ cc_library(
     "subgroup_matrix.h",
     "substitute_overrides_config.h",
     "vertex_pulling_config.h",
+    "workgroup_info.h",
   ],
   deps = [
     "//src/tint/utils",

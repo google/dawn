@@ -424,7 +424,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 r.tintOptions.remapped_entry_point_name,
                 result->needs_storage_buffer_sizes,
                 result->has_invariant_attribute,
-                std::move(result->workgroup_info.allocations),
+                std::move(result->workgroup_allocations),
                 localSize,
             }};
         },

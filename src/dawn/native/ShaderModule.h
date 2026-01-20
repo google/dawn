@@ -60,6 +60,7 @@
 #include "dawn/native/PerStage.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/dawn_platform.h"
+#include "tint/api/common/workgroup_info.h"
 #include "tint/tint.h"
 
 namespace tint {

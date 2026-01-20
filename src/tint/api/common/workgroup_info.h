@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,45 +25,31 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_OUTPUT_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_COMMON_OUTPUT_H_
+#ifndef SRC_TINT_API_COMMON_WORKGROUP_INFO_H_
+#define SRC_TINT_API_COMMON_WORKGROUP_INFO_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <cstdint>
 #include <optional>
-#include <vector>
 
-#include "src/tint/api/common/subgroup_matrix.h"
-#include "src/tint/api/common/workgroup_info.h"
+namespace tint {
 
-namespace tint::spirv::writer {
+/// Workgroup size information, which is part of the output of shader generation.
+struct WorkgroupInfo {
+    /// The x-component
+    uint32_t x = 0;
+    /// The y-component
+    uint32_t y = 0;
+    /// The z-component
+    uint32_t z = 0;
 
-/// The output produced when generating SPIR-V.
-struct Output {
-    /// Constructor
-    Output();
+    /// The needed workgroup storage size
+    size_t storage_size = 0;
 
-    /// Destructor
-    ~Output();
-
-    /// Copy constructor
-    Output(const Output&);
-
-    /// Copy assignment
-    /// @returns this
-    Output& operator=(const Output&);
-
-    /// The generated SPIR-V.
-    std::vector<uint32_t> spirv;
-
-    /// The workgroup size information, if the entry point was a compute shader
-    WorkgroupInfo workgroup_info{};
-
-    /// The subgroup matrix information
-    SubgroupMatrixInfo subgroup_matrix_info{};
+    /// The `@subgroup_size` attribute
+    std::optional<uint32_t> subgroup_size;
 };
 
-}  // namespace tint::spirv::writer
+}  // namespace tint
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_OUTPUT_H_
+#endif  // SRC_TINT_API_COMMON_WORKGROUP_INFO_H_

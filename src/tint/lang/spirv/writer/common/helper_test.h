@@ -100,7 +100,7 @@ class SpirvWriterTestHelperBase : public BASE {
     std::string output_;
 
     /// Workgroup info
-    Output::WorkgroupInfo workgroup_info;
+    WorkgroupInfo workgroup_info;
 
     /// Subgroup Matrix Info
     SubgroupMatrixInfo subgroup_matrix_info;

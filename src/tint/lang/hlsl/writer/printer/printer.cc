@@ -240,7 +240,7 @@ class Printer : public tint::TextGenerator {
                     Line() << "[WaveSize(" << sg_opt.value() << ")]";
 
                     // Store the subgroup size information away to return from the generator.
-                    result_.subgroup_size = sg_opt;
+                    result_.workgroup_info.subgroup_size = sg_opt;
                 }
             }
 
