@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-01-19 05:12:11AM
+# Last rolled: 2026-01-19 08:13:12PM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -2540,6 +2540,7 @@ crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limit
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createBindGroupLayout,at_over:limitTest="atMaximum";testValueName="atLimit";access="write-only";order="backward" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createBindGroupLayout,at_over:limitTest="overMaximum";testValueName="atLimit";access="write-only";order="backward" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipeline,at_over:limitTest="atMaximum";testValueName="overLimit";async=false [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipeline,at_over:limitTest="underDefault";testValueName="overLimit";async=true [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipelineLayout,at_over:limitTest="atMaximum";testValueName="atLimit";access="read-write";order="forward" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipelineLayout,at_over:limitTest="overMaximum";testValueName="atLimit";access="read-write";order="forward" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInVertexStage:createBindGroupLayout,at_over:limitTest="atDefault";testValueName="atLimit";order="shiftByHalf" [ Failure ]
