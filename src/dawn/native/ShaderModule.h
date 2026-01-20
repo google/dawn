@@ -172,10 +172,7 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
 // Return extent3D with workgroup size dimension info if it is valid.
 // width = x, height = y, depthOrArrayLength = z.
 ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
-    uint32_t x,
-    uint32_t y,
-    uint32_t z,
-    size_t workgroupStorageSize,
+    const tint::WorkgroupInfo& workgroupInfo,
     bool usesSubgroupMatrix,
     uint32_t maxSubgroupSize,
     const LimitsForCompilationRequest& limits,

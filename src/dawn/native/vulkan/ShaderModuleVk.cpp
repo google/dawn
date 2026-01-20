@@ -316,10 +316,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 Extent3D _;
                 DAWN_TRY_ASSIGN(
                     _, ValidateComputeStageWorkgroupSize(
-                           tintResult->workgroup_info.x, tintResult->workgroup_info.y,
-                           tintResult->workgroup_info.z, tintResult->workgroup_info.storage_size,
-                           r.usesSubgroupMatrix, r.maxSubgroupSize, r.limits,
-                           r.adapterSupportedLimits.UnsafeGetValue()));
+                           tintResult->workgroup_info, r.usesSubgroupMatrix, r.maxSubgroupSize,
+                           r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
             }
 
             DAWN_TRY(ValidateSubgroupMatrixConfiguration(tintResult->subgroup_matrix_info,

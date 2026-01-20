@@ -1313,21 +1313,19 @@ void ReflectShaderUsingTint(const ShaderModuleParseDeviceInfo& deviceInfo,
 }  // anonymous namespace
 
 ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
-    uint32_t x,
-    uint32_t y,
-    uint32_t z,
-    size_t workgroupStorageSize,
+    const tint::WorkgroupInfo& workgroupInfo,
     bool usesSubgroupMatrix,
     uint32_t maxSubgroupSize,
     const LimitsForCompilationRequest& limits,
     const LimitsForCompilationRequest& adaterSupportedlimits) {
-    DAWN_INVALID_IF(x < 1 || y < 1 || z < 1,
+    DAWN_INVALID_IF(workgroupInfo.x < 1 || workgroupInfo.y < 1 || workgroupInfo.z < 1,
                     "Entry-point uses workgroup_size(%u, %u, %u) that are below the "
                     "minimum allowed (1, 1, 1).",
-                    x, y, z);
+                    workgroupInfo.x, workgroupInfo.y, workgroupInfo.z);
 
-    if (x > limits.maxComputeWorkgroupSizeX || y > limits.maxComputeWorkgroupSizeY ||
-        z > limits.maxComputeWorkgroupSizeZ) [[unlikely]] {
+    if (workgroupInfo.x > limits.maxComputeWorkgroupSizeX ||
+        workgroupInfo.y > limits.maxComputeWorkgroupSizeY ||
+        workgroupInfo.z > limits.maxComputeWorkgroupSizeZ) [[unlikely]] {
         uint32_t maxComputeWorkgroupSizeXAdapterLimit =
             adaterSupportedlimits.maxComputeWorkgroupSizeX;
         uint32_t maxComputeWorkgroupSizeYAdapterLimit =
@@ -1335,8 +1333,9 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
         uint32_t maxComputeWorkgroupSizeZAdapterLimit =
             adaterSupportedlimits.maxComputeWorkgroupSizeZ;
         std::string increaseLimitAdvice =
-            (x <= maxComputeWorkgroupSizeXAdapterLimit &&
-             y <= maxComputeWorkgroupSizeYAdapterLimit && z <= maxComputeWorkgroupSizeZAdapterLimit)
+            (workgroupInfo.x <= maxComputeWorkgroupSizeXAdapterLimit &&
+             workgroupInfo.y <= maxComputeWorkgroupSizeYAdapterLimit &&
+             workgroupInfo.z <= maxComputeWorkgroupSizeZAdapterLimit)
                 ? absl::StrFormat(
                       " This adapter supports higher maxComputeWorkgroupSizeX of %u, "
                       "maxComputeWorkgroupSizeY of %u, and maxComputeWorkgroupSizeZ of %u, which "
@@ -1349,11 +1348,12 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
         return DAWN_VALIDATION_ERROR(
             "Entry-point uses workgroup_size(%u, %u, %u) that exceeds the "
             "maximum allowed (%u, %u, %u).%s",
-            x, y, z, limits.maxComputeWorkgroupSizeX, limits.maxComputeWorkgroupSizeY,
-            limits.maxComputeWorkgroupSizeZ, increaseLimitAdvice);
+            workgroupInfo.x, workgroupInfo.y, workgroupInfo.z, limits.maxComputeWorkgroupSizeX,
+            limits.maxComputeWorkgroupSizeY, limits.maxComputeWorkgroupSizeZ, increaseLimitAdvice);
     }
 
-    uint64_t numInvocations = static_cast<uint64_t>(x) * y * z;
+    uint64_t numInvocations =
+        static_cast<uint64_t>(workgroupInfo.x) * workgroupInfo.y * workgroupInfo.z;
     uint32_t maxComputeInvocationsPerWorkgroup = limits.maxComputeInvocationsPerWorkgroup;
     DAWN_INVALID_IF(numInvocations > maxComputeInvocationsPerWorkgroup,
                     "The total number of workgroup invocations (%u) exceeds the "
@@ -1364,24 +1364,24 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
 
     uint32_t maxComputeWorkgroupStorageSize = limits.maxComputeWorkgroupStorageSize;
     DAWN_INVALID_IF(
-        workgroupStorageSize > maxComputeWorkgroupStorageSize,
+        workgroupInfo.storage_size > maxComputeWorkgroupStorageSize,
         "The total use of workgroup storage (%u bytes) is larger than "
         "the maximum allowed (%u bytes).%s",
-        workgroupStorageSize, maxComputeWorkgroupStorageSize,
+        workgroupInfo.storage_size, maxComputeWorkgroupStorageSize,
         DAWN_INCREASE_LIMIT_MESSAGE(adaterSupportedlimits, maxComputeWorkgroupStorageSize,
-                                    workgroupStorageSize));
+                                    workgroupInfo.storage_size));
 
     if (usesSubgroupMatrix) {
         // maxSubgroupSize must have a valid value if usesSubgroupMatrix is true and subgroups
         // feature is supported.
         DAWN_ASSERT(maxSubgroupSize > 0);
-        DAWN_INVALID_IF((x % maxSubgroupSize) != 0,
+        DAWN_INVALID_IF((workgroupInfo.x % maxSubgroupSize) != 0,
                         "The x-dimension of workgroup_size (%u) must be a multiple of the device "
                         "maxSubgroupSize (%u) when the shader uses a subgroup matrix",
-                        x, maxSubgroupSize);
+                        workgroupInfo.x, maxSubgroupSize);
     }
 
-    return Extent3D{x, y, z};
+    return Extent3D{workgroupInfo.x, workgroupInfo.y, workgroupInfo.z};
 }
 
 CachedValidationError::CachedValidationError(std::unique_ptr<ErrorData>&& errorData) {

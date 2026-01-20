@@ -520,10 +520,8 @@ MaybeError ComputePipeline::InitializeImpl() {
 
     Extent3D _;
     DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                           tintResult->workgroup_info.x, tintResult->workgroup_info.y,
-                           tintResult->workgroup_info.z, tintResult->workgroup_info.storage_size,
-                           computeStage.metadata->usesSubgroupMatrix, maxSubgroupSize, limits,
-                           adapterSupportedLimits));
+                           tintResult->workgroup_info, computeStage.metadata->usesSubgroupMatrix,
+                           maxSubgroupSize, limits, adapterSupportedLimits));
 
     return {};
 }
