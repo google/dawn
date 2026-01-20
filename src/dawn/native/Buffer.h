@@ -178,8 +178,6 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
 
     uint64_t mAllocatedSize = 0;
 
-    ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
-
   private:
     class MapAsyncEvent;
 
@@ -213,6 +211,8 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     const wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
     const wgpu::BufferUsage mInternalUsage = wgpu::BufferUsage::None;
     bool mIsDataInitialized = false;
+
+    ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
 
     // Once MapAsync() returns a future there is a possible race between MapAsyncEvent completing
     // and the buffer being unmapped as they can happen on different threads. `mPendingMapMutex`

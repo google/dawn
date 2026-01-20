@@ -509,10 +509,10 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     DAWN_ASSERT((mode == wgpu::MapMode::Write && IsCPUWritable()) ||
                 (mode == wgpu::MapMode::Read && IsCPUReadable()));
 
-    mMapReadySerial = mLastUsageSerial;
+    mMapReadySerial = GetLastUsageSerial();
     const ExecutionSerial completedSerial = GetDevice()->GetQueue()->GetCompletedCommandSerial();
     // We may run into map stall in case that the buffer is still being used by previous submitted
-    // commands. To avoid that, instead we ask Queue to do the map later when mLastUsageSerial has
+    // commands. To avoid that, instead we ask Queue to do the map later when last usage serial has
     // passed.
     if (mMapReadySerial > completedSerial) {
         ToBackend(GetDevice()->GetQueue())->TrackPendingMapBuffer({this}, mode, mMapReadySerial);
@@ -1446,7 +1446,7 @@ MaybeError GPUUsableBuffer::WriteInternal(const ScopedCommandRecordingContext* c
     // Map the buffer if it is possible, so WriteInternal() can write the mapped memory
     // directly.
     if (IsCPUWritable() &&
-        mLastUsageSerial <= GetDevice()->GetQueue()->GetCompletedCommandSerial()) {
+        GetLastUsageSerial() <= GetDevice()->GetQueue()->GetCompletedCommandSerial()) {
         ScopedMap scopedMap;
         DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(commandContext, this, wgpu::MapMode::Write));
 

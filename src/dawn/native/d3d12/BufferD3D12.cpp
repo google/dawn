@@ -681,7 +681,7 @@ MaybeError Buffer::SynchronizeBufferBeforeUseOnGPU() {
             device->ReferenceUntilUnused(d3dFence->GetD3DFence());
         }
 
-        mLastUsageSerial = queue->GetPendingCommandSerial();
+        MarkUsedInPendingCommands();
     }
 
     return {};
