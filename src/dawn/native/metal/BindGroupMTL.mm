@@ -76,18 +76,21 @@ MaybeError BindGroup::InitializeImpl() {
 
         auto HandleTextureBinding = [&]() {
             auto textureView = ToBackend(GetBindingAsTextureView(bindingIndex));
-            id<MTLTexture> texture = textureView->GetMTLTexture();
+            id<MTLTexture> texture =
+                textureView->GetTexture()->IsDestroyed() ? nil : textureView->GetMTLTexture();
             [*encoder setTexture:texture atIndex:dstBinding];
         };
 
+        // Note, if a resource is destroyed, we will write nil to that slot.
+        // Validation should ensure we never actually try to use it.
         // TODO(crbug.com/363031535): The buffers, samplers and textures in the MatchVariant need to
         // have resource usage tracking added.
         MatchVariant(
             bindingInfo.bindingLayout,
             [&](const BufferBindingInfo& layout) {
                 const BufferBinding& binding = GetBindingAsBufferBinding(bindingIndex);
-
-                const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
+                const id<MTLBuffer> buffer =
+                    binding.buffer->IsDestroyed() ? nil : ToBackend(binding.buffer)->GetMTLBuffer();
                 [*encoder setBuffer:buffer offset:binding.offset atIndex:dstBinding];
             },
             [&](const SamplerBindingInfo&) {

@@ -475,20 +475,27 @@ MTLTextureUsage Texture::GetMTLTextureUsage() const {
 }
 
 id<MTLTexture> Texture::GetMTLTexture(Aspect aspect) const {
+    id<MTLTexture> tex;
     switch (aspect) {
         case Aspect::Plane0:
             DAWN_ASSERT(mMtlPlaneTextures.size() > 1);
-            return mMtlPlaneTextures[0].Get();
+            tex = mMtlPlaneTextures[0].Get();
+            break;
         case Aspect::Plane1:
             DAWN_ASSERT(mMtlPlaneTextures.size() > 1);
-            return mMtlPlaneTextures[1].Get();
+            tex = mMtlPlaneTextures[1].Get();
+            break;
         case Aspect::Plane2:
             DAWN_ASSERT(mMtlPlaneTextures.size() > 2);
-            return mMtlPlaneTextures[2].Get();
+            tex = mMtlPlaneTextures[2].Get();
+            break;
         default:
             DAWN_ASSERT(mMtlPlaneTextures.size() == 1);
-            return mMtlPlaneTextures[0].Get();
+            tex = mMtlPlaneTextures[0].Get();
+            break;
     }
+    DAWN_ASSERT(tex != nullptr);
+    return tex;
 }
 
 IOSurfaceRef Texture::GetIOSurface() {

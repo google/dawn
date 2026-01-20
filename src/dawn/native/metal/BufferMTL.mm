@@ -180,6 +180,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
 Buffer::~Buffer() = default;
 
 id<MTLBuffer> Buffer::GetMTLBuffer() const {
+    DAWN_ASSERT(mMtlBuffer != nullptr);
     return mMtlBuffer.Get();
 }
 
