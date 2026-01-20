@@ -46,8 +46,7 @@
 #include "dawn/wire/client/EventManager.h"
 #include "dawn/wire/client/webgpu.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "tint/lang/wgsl/enums.h"
-#include "tint/lang/wgsl/feature_status.h"
+#include "tint/tint.h"
 
 namespace dawn::wire::client {
 namespace {

@@ -34,7 +34,7 @@
 #include "dawn/native/Buffer.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Queue.h"
-#include "tint/api/common/resource_type.h"
+#include "tint/tint.h"
 
 namespace dawn::native {
 

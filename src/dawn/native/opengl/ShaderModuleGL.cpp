@@ -46,7 +46,7 @@
 #include "dawn/native/opengl/UtilsGL.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-#include "tint/api/common/binding_point.h"
+#include "tint/tint.h"
 
 namespace dawn::native::opengl {
 namespace {
