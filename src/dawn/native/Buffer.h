@@ -91,7 +91,6 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
         PendingMap,
         Mapped,
         MappedAtCreation,
-        HostMappedPersistent,
         SharedMemoryNoAccess,
         Destroyed,
     };
@@ -210,6 +209,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     const uint64_t mSize = 0;
     const wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
     const wgpu::BufferUsage mInternalUsage = wgpu::BufferUsage::None;
+    const bool mIsHostMapped = false;
     bool mIsDataInitialized = false;
 
     ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
