@@ -603,6 +603,8 @@ source_set("sources") {
       "d3d12/ResourceAllocatorManagerD3D12.h",
       "d3d12/ResourceHeapAllocationD3D12.cpp",
       "d3d12/ResourceHeapAllocationD3D12.h",
+      "d3d12/ResourceTableD3D12.cpp",
+      "d3d12/ResourceTableD3D12.h",
       "d3d12/SamplerD3D12.cpp",
       "d3d12/SamplerD3D12.h",
       "d3d12/SamplerHeapCacheD3D12.cpp",

@@ -243,6 +243,12 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         (r8unormFormatSupport.Support2 & D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE)) {
         EnableFeature(Feature::TextureFormatsTier2);
     }
+
+    // Tier 2 hardware supports at least 1 million descriptors in a heap.
+    // Tier 3 hardware supports essentially the full 32-bit range.
+    if (GetDeviceInfo().resourceBindingTier >= D3D12_RESOURCE_BINDING_TIER_2) {
+        EnableFeature(Feature::ChromiumExperimentalSamplingResourceTable);
+    }
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
@@ -420,6 +426,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
                 kShaderBuiltinSlots + kUnusedSlots ==
             kMaxRootSignatureSize);
     }
+
+    limits->resourceTableLimits.maxResourceTableSize = kMaxResourceTableSize;
 
     return {};
 }
