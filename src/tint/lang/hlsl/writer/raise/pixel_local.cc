@@ -247,6 +247,7 @@ Result<SuccessType> PixelLocal(core::ir::Module& ir, const PixelLocalConfig& con
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
                                     core::ir::Capability::kAllowDuplicateBindings,
+                                    core::ir::Capability::kAllowNonCoreTypes,
                                 }));
 
     State{config.options, ir}.Process();
