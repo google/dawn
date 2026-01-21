@@ -692,10 +692,6 @@ crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffe
 # Disallow cube-array in compat. Remove once CTS rolls
 crbug.com/474097241 webgpu:compat,api,validation,texture,createTexture:invalidTextureBindingViewDimension:dimension="2d";textureBindingViewDimension="cube-array" [ Failure ]
 
-# maxInterStageShaderVariables validation needs updating - in progress
-crbug.com/474097248 webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:* [ Failure ]
-crbug.com/474097248 webgpu:api,validation,render_pipeline,inter_stage:max_variables_count,input:* [ Failure ]
-
 # Not implemented yet
 crbug.com/342840940 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 release ubuntu ] webgpu:api,validation,capability_checks,features,texture_formats:check_capability_guarantees: [ Failure ]
 
