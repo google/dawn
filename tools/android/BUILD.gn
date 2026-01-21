@@ -175,7 +175,6 @@ dawn_json_generator("kotlin_gen") {
     "java/androidx/webgpu/PredefinedColorSpace.kt",
     "java/androidx/webgpu/PresentMode.kt",
     "java/androidx/webgpu/PrimitiveTopology.kt",
-    "java/androidx/webgpu/Proc.kt",
     "java/androidx/webgpu/QueryType.kt",
     "java/androidx/webgpu/QueueWorkDoneStatus.kt",
     "java/androidx/webgpu/RequestAdapterStatus.kt",

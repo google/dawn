@@ -919,6 +919,7 @@ def compute_kotlin_params(loaded_json,
     customize_objects = customize_api["objects"]
     customize_structures = customize_api["structures"]
     customize_enums = customize_api["enums"]
+    customize_callback = customize_api["function pointer"]
 
     def kotlin_record_members(members):
         # Members are sorted in the following order.
@@ -1107,6 +1108,11 @@ def compute_kotlin_params(loaded_json,
                                    {}).get('omitted') is not True
 
     def include_callback(function):
+        is_omitted = bool(
+            customize_callback.get(function.name.get(), {}).get('omitted'))
+        if is_omitted:
+            return False
+
         structures = params_kotlin['by_category']['structure']
         function_pointers = params_kotlin['by_category']['function pointer']
         if any(member.name.get() == function.name.get()
