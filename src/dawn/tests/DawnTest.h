@@ -200,6 +200,7 @@ class DawnTestEnvironment : public testing::Environment {
     ~DawnTestEnvironment() override;
 
     static void SetEnvironment(DawnTestEnvironment* env);
+    static DawnTestEnvironment* GetEnvironment();
 
     std::vector<AdapterTestParam> GetAvailableAdapterTestParamsForBackends(
         const BackendTestConfig* params,
@@ -841,8 +842,10 @@ class DawnTestBase {
 
 // Skip a test when the test failing on a specific HW / backend / OS combination. We can disable
 // this macro with the command line parameter "--run-suppressed-tests".
-#define DAWN_SUPPRESS_TEST_IF(condition) \
-    DAWN_SKIP_TEST_IF_BASE(!RunSuppressedTests() && condition, "suppressed", condition)
+#define DAWN_SUPPRESS_TEST_IF(condition)                                                         \
+    DAWN_SKIP_TEST_IF_BASE(                                                                      \
+        !DawnTestEnvironment::GetEnvironment()->RunSuppressedTests() && condition, "suppressed", \
+        condition)
 
 #define EXPECT_DEPRECATION_WARNINGS(statement, n)                             \
     do {                                                                      \

@@ -288,6 +288,11 @@ void DawnTestEnvironment::SetEnvironment(DawnTestEnvironment* env) {
     gTestEnv = env;
 }
 
+// static
+DawnTestEnvironment* DawnTestEnvironment::GetEnvironment() {
+    return gTestEnv;
+}
+
 DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
     InitializePartitionAllocForTesting();
     InitializeDanglingPointerDetectorForTesting();
