@@ -70,6 +70,11 @@ vars = {
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
+
+  # Checkout mesa 3D graphics library and related dependencies
+  # Not used by Dawn/Tint directly, but is used as part of an
+  #  experiment in the fuzzing stack.
+  'checkout_mesa': False,
 }
 
 deps = {
@@ -129,7 +134,7 @@ deps = {
 
   # Required by //build on Linux
   'third_party/libdrm/src': {
-    'url': '{chromium_git}/chromiumos/third_party/libdrm.git@ad78bb591d02162d3b90890aa4d0a238b2a37cde',
+    'url': '{chromium_git}/chromiumos/third_party/libdrm.git@369990d9660a387f618d0eedc341eb285016243b',
     'condition': 'dawn_standalone and host_os == "linux"',
   },
 
@@ -267,6 +272,16 @@ deps = {
   'third_party/google_benchmark/src': {
     'url': '{chromium_git}/external/github.com/google/benchmark.git' + '@' + '188e8278990a9069ffc84441cb5a024fd0bede37',
     'condition': 'dawn_standalone',
+  },
+
+  # Required for fuzzer + mesa experiment
+  'third_party/mesa/src': {
+    'url': '{chromium_git}/external/gitlab.freedesktop.org/mesa/mesa/@2e683eb7385c54f872acc47b371210d2282bc103',
+    'condition': 'dawn_standalone and checkout_mesa',
+  },
+  'third_party/meson': {
+    'url': '{chromium_git}/external/github.com/mesonbuild/meson@d389906a136c2aac9820ded0f38d1e25ef25fb9a',
+    'condition': 'dawn_standalone and checkout_mesa',
   },
 
   # Jinja2 and MarkupSafe for the code generator
