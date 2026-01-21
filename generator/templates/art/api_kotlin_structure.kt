@@ -54,7 +54,7 @@ public class {{ kotlin_name(structure) }}
         {% if member_doc %}
             {{ generate_simple_kdoc(member_doc, indent_prefix = "    ", line_wrap_prefix = '\n     * ') }}
         {% endif %}
-        {{ kotlin_annotation(member) }} public var {{ member.name.camelCase() }}: {{ kotlin_definition(member) }},
+        {% if member.type.name.get() == "bool" %}@get:JvmName("is{{ member.name.CamelCase() }}") {% endif %}{{ kotlin_annotation(member) }} public var {{ member.name.camelCase() }}: {{ kotlin_definition(member) }},
     {% endfor %}
     {% for structure in chain_children_list %}
         //* Generating KDocs

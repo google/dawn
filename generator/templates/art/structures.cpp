@@ -174,7 +174,8 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
             {{KotlinRecord}} kotlinRecord;
             {% for member in kotlin_record_members(structure.members) %}
                 {
-                    jmethodID getter = env->GetMethodID(clz, "get{{member.name.CamelCase()}}", "(){{jni_signature(member)}}");
+                    {% set prefix = "is" if member.type.name.get() == "bool" else "get" %}
+                    jmethodID getter = env->GetMethodID(clz, "{{prefix}}{{member.name.CamelCase()}}", "(){{jni_signature(member)}}");
                     CallGetter(env, getter, obj, &kotlinRecord.{{as_varName(member.name)}});
                 }
             {% endfor %}
