@@ -393,7 +393,9 @@ bool Queue::HasPendingCommands() const {
     return mPendingCommandsNeedSubmit.load(std::memory_order_acquire);
 }
 
-void Queue::ForceEventualFlushOfCommands() {}
+void Queue::ForceEventualFlushOfCommands() {
+    mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
+}
 
 MaybeError Queue::WaitForIdleForDestructionImpl() {
     if (!mPendingCommands->IsValid()) {

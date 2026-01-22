@@ -812,7 +812,9 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
 
     // With Vulkan Queue::WriteBuffers() doesn't encode any commands which need to be waited on so
     // MapAsync() can happen immediately. On other platforms that isn't the case.
-    bool mapCompletesFirst = IsVulkan() && !IsWebGPUOnWebGPU();
+    // Similarly, for MapRead buffers, D3D11's Queue::WriteBuffers() also doesn't encode any
+    // commands.
+    bool mapCompletesFirst = (IsVulkan() || IsD3D11()) && !IsWebGPUOnWebGPU();
 
     // 1. submission without using buffer.
     SubmitCommandBuffer({});
@@ -1605,6 +1607,21 @@ TEST_P(BufferMapExtendedUsagesTests, MapWriteWithAnyUsage) {
 
         EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
     }
+}
+
+// Test that Queue.WriteBuffer works to update a mappable buffer.
+TEST_P(BufferMapExtendedUsagesTests, QueueWriteMappableBuffer) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopyDst |
+                       wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Uniform;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    uint32_t myData = 0x12345678;
+    constexpr size_t kSize = sizeof(myData);
+    queue.WriteBuffer(buffer, 0, &myData, kSize);
+
+    EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
 }
 
 // Test that mapping a vertex buffer, modifying the data then draw with the buffer works.

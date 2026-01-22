@@ -650,13 +650,9 @@ MaybeError Buffer::Clear(const ScopedCommandRecordingContext* commandContext,
         return {};
     }
 
-    // Map the buffer if it is possible, so EnsureDataInitializedAsDestination() and ClearInternal()
-    // can write the mapped memory directly.
-    ScopedMap scopedMap;
-    DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(commandContext, this, wgpu::MapMode::Write));
-
     // For non-staging buffers, we can use UpdateSubresource to write the data.
     DAWN_TRY(EnsureDataInitializedAsDestination(commandContext, offset, size));
+
     return ClearInternal(commandContext, clearValue, offset, size);
 }
 
@@ -695,14 +691,9 @@ MaybeError Buffer::Write(const ScopedCommandRecordingContext* commandContext,
                          size_t size) {
     DAWN_ASSERT(size != 0);
 
-    MarkUsedInPendingCommands();
-    // Map the buffer if it is possible, so EnsureDataInitializedAsDestination() and WriteInternal()
-    // can write the mapped memory directly.
-    ScopedMap scopedMap;
-    DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(commandContext, this, wgpu::MapMode::Write));
-
     // For non-staging buffers, we can use UpdateSubresource to write the data.
     DAWN_TRY(EnsureDataInitializedAsDestination(commandContext, offset, size));
+
     return WriteInternal(commandContext, offset, data, size);
 }
 
@@ -1424,12 +1415,16 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
     // transfer the data to constant buffer.
     Ref<BufferBase> stagingBuffer;
     DAWN_TRY_ASSIGN(stagingBuffer, ToBackend(GetDevice())->GetStagingBuffer(commandContext, size));
-    stagingBuffer->MarkUsedInPendingCommands();
     DAWN_TRY(ToBackend(stagingBuffer)->WriteInternal(commandContext, 0, data, size));
     DAWN_TRY(ToBackend(stagingBuffer.Get())
                  ->CopyToInternal(commandContext,
                                   /*sourceOffset=*/0,
                                   /*size=*/size, this, offset));
+    // WriteInternal() might not call MarkUsedInPendingCommands() if the staging buffer is mappable.
+    // But we need to mark buffer as being used for CopyToInternal().
+    // TODO(crbug.com/345471009): Consider whether it's OK to change CopyToInternal() to
+    // automatically trigger MarkUsedInPendingCommands().
+    stagingBuffer->MarkUsedInPendingCommands();
     ToBackend(GetDevice())->ReturnStagingBuffer(std::move(stagingBuffer));
 
     return {};
@@ -1455,6 +1450,10 @@ MaybeError GPUUsableBuffer::WriteInternal(const ScopedCommandRecordingContext* c
         return {};
     }
 
+    // Mark the buffer as used in pending commands if the mapping path above wasn't taken.
+    // Mapped writes complete synchronously and don't require tracking.
+    MarkUsedInPendingCommands();
+
     // WriteInternal() can be called with GetAllocatedSize(). We treat it as a full buffer write
     // as well.
     bool fullSizeWrite = size >= GetSize() && offset == 0;
@@ -1468,7 +1467,12 @@ MaybeError GPUUsableBuffer::WriteInternal(const ScopedCommandRecordingContext* c
         DAWN_TRY_ASSIGN(gpuCopyableStorage, GetOrCreateDstCopyableStorage());
     }
 
-    if (!fullSizeWrite) {
+    if (fullSizeWrite) {
+        // If this is a full overwrite, no need to copy the old content.
+        // Just need to copy the revision number.
+        DAWN_ASSERT(mLastUpdatedStorage);
+        gpuCopyableStorage->SetRevision(mLastUpdatedStorage->GetRevision());
+    } else {
         DAWN_TRY(SyncStorage(commandContext, gpuCopyableStorage));
     }
 
