@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': 'e5101f14da080ceeeca4176834a01af63559dab1',
+  'chromium_revision': 'bfdaa543b75542a0953ba0f045b8f5aba7df2267',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -112,7 +112,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@74ac621e4dc50aef30d8d872e17f72d8cd0abc8d',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@f09d6283fcff04e5a7277e461465a990b957abaa',
     'condition': 'dawn_standalone',
   },
 
@@ -128,13 +128,13 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@3f8b546bced16730c315497cfba0eab78edb71b3',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@5015187a42d68b9851b713c3a7857187ff9311c5',
     'condition': 'dawn_standalone',
   },
 
   # Required by //build on Linux
   'third_party/libdrm/src': {
-    'url': '{chromium_git}/chromiumos/third_party/libdrm.git@369990d9660a387f618d0eedc341eb285016243b',
+    'url': '{chromium_git}/chromiumos/third_party/libdrm.git@ad78bb591d02162d3b90890aa4d0a238b2a37cde',
     'condition': 'dawn_standalone and host_os == "linux"',
   },
 
@@ -143,7 +143,7 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@4af5deaaac82b453c0031f857b1f64e8bd1f2a96',
+  'url': '{chromium_git}/chromium/src/build@c005383938280d7b7bde5d017a89ab452e3fcd72',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
@@ -253,7 +253,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@131a8f5f18bdf1a26c41a8d183b6a56457bb9a36',
+    'url': '{chromium_git}/chromium/src/testing@c636857855e3b29e0142b0dbfdf63646bca69388',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -266,7 +266,7 @@ deps = {
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@fecea936ae27079c61641a33a4b1ccb3dbe85500',
+    'url': '{chromium_git}/catapult.git@f5cc226ca90c4a5c634725036c5ecd90c6345f52',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
@@ -580,7 +580,7 @@ deps = {
 
   # Misc dependencies inherited from Tint
   'third_party/protobuf': {
-    'url': '{chromium_git}/chromium/src/third_party/protobuf@4f216a5f6e8766aa627c01d6f5d9f609c17fda2a',
+    'url': '{chromium_git}/chromium/src/third_party/protobuf@19c4f7c825cd2764f1dcd29703ac5befac934406',
     'condition': 'dawn_standalone',
   },
 
