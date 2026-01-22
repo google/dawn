@@ -461,6 +461,10 @@ class CopyTests_T2B : public CopyTests_WithFormatParam {
     void SetUp() override {
         CopyTests_WithFormatParam::SetUp();
 
+        // TODO(crbug.com/40238674): Fails on Pixel 10 gles on compilation so it must be skipped at
+        // this level.
+        DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsOpenGLES());
+
         auto format = GetParam().mTextureFormat;
 
         // TODO(crbug.com/dawn/2294): diagnose BGRA T2B failures on Pixel 4 OpenGLES

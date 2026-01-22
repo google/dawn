@@ -237,6 +237,10 @@ class CopyTextureForBrowserTests : public Parent {
     void SetUp() override {
         Parent::SetUp();
 
+        // TODO(crbug.com/40238674): Fails on Pixel 10 gles on compilation so it must be skipped at
+        // this level.
+        DAWN_SUPPRESS_TEST_IF(this->IsImgTec() && this->IsOpenGLES());
+
         pipeline = MakeTestPipeline();
 
         uint32_t uniformBufferData[] = {
