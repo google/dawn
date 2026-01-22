@@ -32,6 +32,7 @@
 #include <iostream>
 #include <memory>
 #include <ranges>
+#include <span>
 #include <string>
 #include <utility>
 #include <variant>
@@ -45,6 +46,33 @@
 #include "src/dawn/replay/ReplayImpl.h"
 
 namespace dawn::replay {
+
+namespace schema {
+#define DAWN_REPLAY_ENUM_TO_STRING_MEMBER(NAME, ...) \
+    case EnumType::NAME:                             \
+        return #NAME;
+
+#define DAWN_REPLAY_ENUM_TO_STRING(NAME, MEMBERS)                    \
+    const char* EnumToString(schema::NAME value) {                   \
+        using EnumType = NAME;                                       \
+        switch (value) {                                             \
+            MEMBERS(DAWN_REPLAY_ENUM_TO_STRING_MEMBER)               \
+            default:                                                 \
+                return "UNKNOWN";                                    \
+        }                                                            \
+    }                                                                \
+    std::ostream& operator<<(std::ostream& os, schema::NAME value) { \
+        return os << EnumToString(value);                            \
+    }
+
+DAWN_REPLAY_OBJECT_TYPES_ENUM(DAWN_REPLAY_ENUM_TO_STRING)
+DAWN_REPLAY_COMMAND_BUFFER_COMMANDS_ENUM(DAWN_REPLAY_ENUM_TO_STRING)
+DAWN_REPLAY_ROOT_COMMANDS_ENUM(DAWN_REPLAY_ENUM_TO_STRING)
+
+#undef DAWN_REPLAY_ENUM_TO_STRING_MEMBER
+#undef DAWN_REPLAY_ENUM_TO_STRING
+
+}  // namespace schema
 
 class ReplayImpl;
 
