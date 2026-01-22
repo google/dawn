@@ -263,6 +263,13 @@ int SampleBase::Run(unsigned int delay) {
                     dawn::ErrorLog() << "Failed to get an device: " << message;
                     return;
                 }
+
+#ifndef __EMSCRIPTEN__
+                device.SetLoggingCallback([](wgpu::LoggingType type, wgpu::StringView message) {
+                    std::cerr << "Device log (" << type << "): " << message << std::endl;
+                });
+#endif  // __EMSCRIPTEN__
+
                 sample->device = std::move(device);
                 sample->queue = sample->device.GetQueue();
             }),
