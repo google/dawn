@@ -2124,12 +2124,19 @@ ResultOrError<Ref<ComputePipelineBase>> DeviceBase::CreateComputePipeline(
     }
 
     MaybeError maybeError;
+    bool errorIsValidation = false;
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateComputePipelineUS");
         maybeError = uninitializedComputePipeline->Initialize();
+        auto error = maybeError.AcquireError();
+        if (error != nullptr) {
+            errorIsValidation = error->GetType() == dawn::native::InternalErrorType::Validation;
+        }
+        maybeError = MaybeError(std::move(error));
     }
-    DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateComputePipelineSuccess", maybeError.IsSuccess());
 
+    DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateComputePipelineSuccess",
+                           maybeError.IsSuccess() || errorIsValidation);
     DAWN_TRY(std::move(maybeError));
     return useCache ? AddOrGetCachedComputePipeline(std::move(uninitializedComputePipeline))
                     : std::move(uninitializedComputePipeline);
@@ -2266,11 +2273,19 @@ ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateRenderPipeline(
     }
 
     MaybeError maybeError;
+    bool errorIsValidation = false;
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateRenderPipelineUS");
         maybeError = uninitializedRenderPipeline->Initialize();
+        auto error = maybeError.AcquireError();
+        if (error != nullptr) {
+            errorIsValidation = error->GetType() == dawn::native::InternalErrorType::Validation;
+        }
+        maybeError = MaybeError(std::move(error));
     }
-    DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateRenderPipelineSuccess", maybeError.IsSuccess());
+
+    DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateRenderPipelineSuccess",
+                           maybeError.IsSuccess() || errorIsValidation);
 
     DAWN_TRY(std::move(maybeError));
     return useCache ? AddOrGetCachedRenderPipeline(std::move(uninitializedRenderPipeline))
