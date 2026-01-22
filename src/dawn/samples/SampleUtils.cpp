@@ -59,6 +59,9 @@ static wgpu::BackendType backendType = wgpu::BackendType::Undefined;
 static wgpu::AdapterType adapterType = wgpu::AdapterType::Unknown;
 static std::vector<std::string> enableToggles;
 static std::vector<std::string> disableToggles;
+#ifndef __EMSCRIPTEN__
+static dawn::native::BackendValidationLevel backendValidationLevel;
+#endif  // __EMSCRIPTEN__
 
 // Small helper to insert an extension struct into the extension chain.
 template <typename T>
@@ -96,6 +99,17 @@ bool InitSample(int argc, const char** argv) {
                                    "adapter-type", "The type of adapter to request")
                                .ShortName('a')
                                .Default(wgpu::AdapterType::Unknown);
+#ifndef __EMSCRIPTEN__
+    auto& backendValidationLevelOpt =
+        opts.AddEnum<dawn::native::BackendValidationLevel>(
+                {
+                    {"full", dawn::native::BackendValidationLevel::Full},
+                    {"partial", dawn::native::BackendValidationLevel::Partial},
+                    {"disabled", dawn::native::BackendValidationLevel::Disabled},
+                },
+                "enable-backend-validation", "Backend validation layer level")
+            .Default(dawn::native::BackendValidationLevel::Disabled);
+#endif  // __EMSCRIPTEN__
 
     auto result = opts.Parse(argc, argv);
     if (!result.success) {
@@ -113,6 +127,9 @@ bool InitSample(int argc, const char** argv) {
     adapterType = adapterTypeOpt.GetValue();
     enableToggles = enableTogglesOpt.GetOwnedValue();
     disableToggles = disableTogglesOpt.GetOwnedValue();
+#ifndef __EMSCRIPTEN__
+    backendValidationLevel = backendValidationLevelOpt.GetValue();
+#endif  // __EMSCRIPTEN__
     return true;
 }
 
@@ -170,6 +187,12 @@ int SampleBase::Run(unsigned int delay) {
 #ifndef __EMSCRIPTEN__
         // Add Dawn Toggles
         InsertExtensionStruct(&instanceDescriptor, &dawnTogglesDesc);
+
+        // Add other Dawn instance options
+        dawn::native::DawnInstanceDescriptor dawnInstanceDesc;
+        InsertExtensionStruct(&instanceDescriptor, &dawnInstanceDesc);
+        dawnInstanceDesc.backendValidationLevel = backendValidationLevel;
+        // (Note Dawn has a default instance logging callback so we don't need to set one here.)
 #endif  // __EMSCRIPTEN__
 
         sample->instance = wgpu::CreateInstance(&instanceDescriptor);
