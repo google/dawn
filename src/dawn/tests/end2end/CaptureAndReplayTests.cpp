@@ -368,25 +368,47 @@ TEST_P(CaptureAndReplayTests, TwoCaptures) {
     }
 }
 
-// We make a buffer before capture. During capture write map it, put data in it.
-// Then check the data is correct on replay.
+// We make a buffer before capture. During capture
+// write map it, put data in it, copyB2B from it,
+// write map it again, put different data in it, copyB2B from it,
+// then check the data is correct on replay.
 TEST_P(CaptureAndReplayTests, MapWrite) {
-    const char* label = "myBuffer";
-    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+    const uint8_t myData1[] = {0x11, 0x22, 0x33, 0x44};
+    const uint8_t myData2[] = {0x55, 0x66, 0x77, 0x88};
 
-    wgpu::Buffer buffer =
-        CreateBuffer(label, 4, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
+    wgpu::Buffer srcBuffer =
+        CreateBuffer("srcBuffer", 4, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
+    wgpu::Buffer dstBuffer = CreateBuffer("dstBuffer", 4, wgpu::BufferUsage::CopyDst);
 
     auto recorder = Recorder::CreateAndStart(device);
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 4);
-    buffer.WriteMappedRange(0, &myData, sizeof(myData));
-    buffer.Unmap();
+    MapAsyncAndWait(srcBuffer, wgpu::MapMode::Write, 0, 4);
+    srcBuffer.WriteMappedRange(0, &myData1, sizeof(myData1));
+    srcBuffer.Unmap();
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(srcBuffer, 0, dstBuffer, 0, 4);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    MapAsyncAndWait(srcBuffer, wgpu::MapMode::Write, 0, 4);
+    srcBuffer.WriteMappedRange(0, &myData2, sizeof(myData2));
+    srcBuffer.Unmap();
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(srcBuffer, 0, dstBuffer, 0, 4);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
 
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    ExpectBufferEQ(replay.get(), label, myData);
+    ExpectBufferEQ(replay.get(), "srcBuffer", myData2);
+    ExpectBufferEQ(replay.get(), "dstBuffer", myData2);
 }
 
 // We make 2 buffers before capture. During capture we map one buffer

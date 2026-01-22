@@ -63,6 +63,7 @@ class Buffer final : public BufferBase, public RecordableObject, public ObjectWG
     MaybeError AddContentToCapture(CaptureContext& captureContext);
 
     raw_ptr<void> mMappedData = nullptr;
+    bool mNeedsCapture = true;
 };
 
 }  // namespace dawn::native::webgpu

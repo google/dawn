@@ -161,11 +161,10 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
 
     if (IsMappedState(oldState) && MapMode() == wgpu::MapMode::Write &&
         newState != BufferState::Destroyed) {
-        CaptureContext* captureContext = ToBackend(GetDevice()->GetQueue())->GetCaptureContext();
-        if (captureContext != nullptr) {
-            [[maybe_unused]] auto result =
-                captureContext->CaptureUnmapBuffer(this, MapOffset(), mMappedData, MapSize());
-        }
+        // TODO(477349135): Optimize this by tracking the ranges. As it is we'll
+        // capture the entire buffer even if only a few bytes were updated. Instead
+        // of mNeedsCapture we could have mDirtySpans. When size is 0 there's nothing to do.
+        mNeedsCapture = true;
     }
 
     if (mInnerHandle) {
@@ -204,15 +203,17 @@ MaybeError Buffer::CaptureContentIfNeeded(CaptureContext& captureContext,
     // TODO(451338754): If it's a new resource and we know the buffer is all zero then don't
     // capture.
     wgpu::BufferUsage usage = GetUsage();
-    bool unwritableOnPlayback = usage & wgpu::BufferUsage::MapWrite;
-    if (!newResource || unwritableOnPlayback) {
+    if (!mNeedsCapture && !newResource) {
         return {};
     }
+
     // A MapRead buffer is never used as input since it's only allowed CopyDst
     // so we don't need its contents.
     if (usage & wgpu::BufferUsage::MapRead) {
         return {};
     }
+
+    mNeedsCapture = false;
 
     return AddContentToCapture(captureContext);
 }

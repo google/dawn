@@ -222,22 +222,6 @@ MaybeError ReadContentIntoBuffer(ReadHead& readHead,
     return {};
 }
 
-MaybeError MapContentIntoBuffer(ReadHead& readHead,
-                                wgpu::Device device,
-                                wgpu::Buffer buffer,
-                                uint64_t bufferOffset,
-                                uint64_t size) {
-    const uint32_t* data;
-    DAWN_TRY_ASSIGN(data, readHead.GetData(size));
-
-    // Note: We could call MapAsync here, wait for it to map, put in the data, then unmap.
-    // To do so we'd have to change the code in ReplayImpl::CreateBuffer to leave the buffer
-    // as MapWrite|CopySrc. That would be more inline with what the user actually did
-    // though it might be slower as it would be synchronous.
-    device.GetQueue().WriteBuffer(buffer, bufferOffset, data, size);
-    return {};
-}
-
 MaybeError ReadContentIntoTexture(const ReplayImpl& replay,
                                   ReadHead& readHead,
                                   wgpu::Device device,
@@ -1357,14 +1341,6 @@ MaybeError ReplayImpl::Play() {
                                });
 
                 mDevice.GetQueue().Submit(commandBuffers.size(), commandBuffers.data());
-                break;
-            }
-            case schema::RootCommand::UnmapBuffer: {
-                schema::RootCommandUnmapBufferCmdData data;
-                DAWN_TRY(Deserialize(readHead, &data));
-                wgpu::Buffer buffer = GetObjectById<wgpu::Buffer>(data.bufferId);
-                DAWN_TRY(MapContentIntoBuffer(contentReadHead, mDevice, buffer, data.bufferOffset,
-                                              data.size));
                 break;
             }
             case schema::RootCommand::SetLabel: {

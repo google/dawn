@@ -177,10 +177,6 @@ class CaptureContext {
                                        uint64_t bufferOffset,
                                        const void* data,
                                        size_t size);
-    MaybeError CaptureUnmapBuffer(Buffer* buffer,
-                                  uint64_t bufferOffset,
-                                  const void* data,
-                                  size_t size);
     MaybeError CaptureQueueWriteTexture(const TexelCopyTextureInfo& destination,
                                         const void* data,
                                         size_t dataSize,
