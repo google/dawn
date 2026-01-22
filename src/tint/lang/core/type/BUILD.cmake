@@ -114,6 +114,8 @@ tint_add_target(tint_lang_core_type lib
   lang/core/type/struct.h
   lang/core/type/subgroup_matrix.cc
   lang/core/type/subgroup_matrix.h
+  lang/core/type/swizzle_view.cc
+  lang/core/type/swizzle_view.h
   lang/core/type/texel_buffer.cc
   lang/core/type/texel_buffer.h
   lang/core/type/texture.cc

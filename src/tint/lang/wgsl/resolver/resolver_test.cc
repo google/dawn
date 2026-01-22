@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/builtin_texture_helper_test.h"
@@ -1289,7 +1290,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
     ASSERT_TRUE(TypeOf(mem)->Is<core::type::Vector>());
     EXPECT_TRUE(TypeOf(mem)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(mem)->As<core::type::Vector>()->Width(), 4u);
-    auto* sma = Sem().Get(mem)->As<sem::Swizzle>();
+    auto* sma = Sem().Get(mem)->UnwrapLoad()->As<sem::Swizzle>();
     ASSERT_NE(sma, nullptr);
     EXPECT_EQ(sma->Object()->Declaration(), mem->object);
     EXPECT_THAT(sma->Indices(), ElementsAre(0, 2, 1, 3));
@@ -1341,7 +1342,21 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
     ASSERT_TRUE(TypeOf(mem)->Is<core::type::Vector>());
     EXPECT_TRUE(TypeOf(mem)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(mem)->As<core::type::Vector>()->Width(), 2u);
-    ASSERT_TRUE(Sem().Get(mem)->Is<sem::Swizzle>());
+    ASSERT_TRUE(Sem().Get(mem)->UnwrapLoad()->Is<sem::Swizzle>());
+}
+
+TEST_F(ResolverTest, Expr_VectorSwizzle_InBinaryOp) {
+    GlobalVar("my_vec", ty.vec4<f32>(), core::AddressSpace::kPrivate);
+
+    auto* expr = Add(MemberAccessor("my_vec", "xyz"), MemberAccessor("my_vec", "zyx"));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(expr), nullptr);
+    EXPECT_TRUE(TypeOf(expr)->Is<core::type::Vector>());
+    EXPECT_TRUE(TypeOf(expr)->DeepestElement()->Is<core::type::F32>());
+    EXPECT_EQ(TypeOf(expr)->As<core::type::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {

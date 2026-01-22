@@ -120,6 +120,8 @@ libtint_source_set("type") {
     "struct.h",
     "subgroup_matrix.cc",
     "subgroup_matrix.h",
+    "swizzle_view.cc",
+    "swizzle_view.h",
     "texel_buffer.cc",
     "texel_buffer.h",
     "texture.cc",

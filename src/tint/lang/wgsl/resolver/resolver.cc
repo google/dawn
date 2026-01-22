@@ -52,8 +52,10 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/swizzle_view.h"
 #include "src/tint/lang/core/type/u16.h"
 #include "src/tint/lang/core/type/u8.h"
+#include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
@@ -1707,6 +1709,17 @@ const sem::ValueExpression* Resolver::Load(const sem::ValueExpression* expr) {
         return nullptr;
     }
 
+    // When requested, wrap a swizzle view in an ephemeral Load in order to correctly resolve types
+    // for validation. Because this sem::Load will not become a true load during lowering to IR,
+    // they are not registered.
+    if (auto* swizzle_view = expr->Type()->As<core::type::SwizzleView>()) {
+        auto* load =
+            b.create<sem::Load>(expr, swizzle_view->StoreType(), current_statement_, expr->Stage());
+        b.Sem().Replace(expr->Declaration(), load);
+
+        return load;
+    }
+
     if (!expr->Type()->Is<core::type::Reference>()) {
         // Expression is not a reference type, so cannot be loaded. Just return expr.
         return expr;
@@ -1890,7 +1903,9 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     }
 
     // If we're extracting from a memory view, we return a reference.
-    if (memory_view) {
+    // TODO(crbug.com/477280751): The swizzle view exception preserves some existing buggy behavior
+    // in single element swizzle of a swizzle assignment, but this should be fixed in a follow up.
+    if (memory_view && !memory_view->Is<core::type::SwizzleView>()) {
         ty =
             b.create<core::type::Reference>(memory_view->AddressSpace(), ty, memory_view->Access());
     }
@@ -1901,7 +1916,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
         stage = core::EvaluationStage::kNotEvaluated;
     } else {
         if (auto* idx_val = idx->ConstantValue()) {
-            auto res = const_eval_.Index(obj->ConstantValue(), obj->Type(), idx_val,
+            auto res = const_eval_.Index(obj->ConstantValue(), storage_ty, idx_val,
                                          idx->Declaration()->source);
             if (res != Success) {
                 return nullptr;
@@ -1942,7 +1957,14 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     // sem::ValueConversion call for a CtorConvIntrinsic with an optional template argument type.
     auto ctor_or_conv = [&](CtorConvIntrinsic ty,
                             VectorRef<const core::type::Type*> template_args) -> sem::Call* {
-        auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
+        auto arg_tys = tint::Transform(args, [&](auto* arg) -> const core::type::Type* {
+            // Use the swizzle result type as the arg type for intrinsic lookup.
+            if (auto* swizzle_view = arg->Type()->template As<core::type::SwizzleView>()) {
+                return swizzle_view->StoreType();
+            }
+            return arg->Type()->UnwrapRef();
+        });
+
         auto match = intrinsic_table_.Lookup(ty, template_args, arg_tys, args_stage);
         if (match != Success) {
             AddError(expr->source) << match.Failure();
@@ -2260,7 +2282,14 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         }
     }
 
-    auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
+    auto arg_tys = tint::Transform(args, [&](auto* arg) -> const core::type::Type* {
+        // Use the swizzle result type as the arg type for intrinsic lookup.
+        if (auto* swizzle_view = arg->Type()->template As<core::type::SwizzleView>()) {
+            return swizzle_view->StoreType();
+        }
+        return arg->Type()->UnwrapRef();
+    });
+
     auto overload = intrinsic_table_.Lookup(fn, tmpl_args, arg_tys, arg_stage);
     if (overload != Success) {
         AddError(expr->source) << overload.Failure();
@@ -3563,37 +3592,31 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 return nullptr;
             }
 
-            const sem::ValueExpression* obj_expr = object;
             if (size == 1) {
                 // A single element swizzle is just the type of the vector.
                 ty = vec->Type();
                 // If we're extracting from a memory view, we return a reference.
-                if (memory_view) {
+                // TODO(crbug.com/477280751): The swizzle view exception preserves some existing
+                // buggy behavior in single element swizzle of a swizzle assignment, but this should
+                // be fixed in a follow up.
+                if (memory_view && !memory_view->Is<core::type::SwizzleView>()) {
                     ty = b.create<core::type::Reference>(memory_view->AddressSpace(), ty,
                                                          memory_view->Access());
                 }
             } else {
-                // The vector will have a number of components equal to the length of
-                // the swizzle.
-                ty = b.create<core::type::Vector>(vec->Type(), static_cast<uint32_t>(size));
-
-                if (obj_expr->Type()->Is<core::type::Pointer>()) {
-                    // If the LHS is a pointer, the load rule is invoked. We special case this
-                    // because our usual handling of implicit loads assumes the expression has
-                    // reference type. This expression also has an implicit dereference before the
-                    // load, but we have no way of representing that, so we create the load directly
-                    // from the pointer expression.
-                    auto* load =
-                        b.create<sem::Load>(obj_expr, current_statement_, obj_expr->Stage());
-                    b.Sem().Replace(obj_expr->Declaration(), load);
-
-                    // Register the load for the alias analysis.
-                    RegisterLoad(obj_expr);
-
-                    obj_expr = load;
+                if (memory_view) {
+                    auto* vec_ty =
+                        b.create<core::type::Vector>(vec->Type(), static_cast<uint32_t>(size));
+                    ty = b.create<core::type::SwizzleView>(memory_view->AddressSpace(), vec_ty,
+                                                           memory_view->Access(), vec->Width(),
+                                                           static_cast<uint32_t>(size));
+                    // The object being swizzled will be loaded during IR generation, so we register
+                    // the load ahead of time here for the purpose of alias analysis.
+                    RegisterLoad(object);
                 } else {
-                    // The load rule is invoked before the swizzle, if necessary.
-                    obj_expr = Load(obj_expr);
+                    // The vector will have a number of components equal to the length of
+                    // the swizzle.
+                    ty = b.create<core::type::Vector>(vec->Type(), static_cast<uint32_t>(size));
                 }
             }
             const core::constant::Value* val = nullptr;
@@ -3604,7 +3627,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 }
                 val = res.Get();
             }
-            return b.create<sem::Swizzle>(expr, ty, current_statement_, val, obj_expr,
+            return b.create<sem::Swizzle>(expr, ty, current_statement_, val, object,
                                           std::move(swizzle), root_ident);
         },
 
@@ -3760,7 +3783,12 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
         default: {
             stage = expr->Stage();
-            auto overload = intrinsic_table_.Lookup(unary->op, expr_ty->UnwrapRef(), stage);
+            auto* arg_ty = expr_ty->UnwrapRef();
+            // Use the swizzle result type as the arg type for intrinsic lookup.
+            if (auto* swizzle_view = expr_ty->As<core::type::SwizzleView>()) {
+                arg_ty = swizzle_view->StoreType();
+            }
+            auto overload = intrinsic_table_.Lookup(unary->op, arg_ty, stage);
             if (overload != Success) {
                 AddError(unary->source) << overload.Failure();
                 return nullptr;

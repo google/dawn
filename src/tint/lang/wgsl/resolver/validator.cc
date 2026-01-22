@@ -46,6 +46,7 @@
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/subgroup_matrix.h"
+#include "src/tint/lang/core/type/swizzle_view.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/core/type/u16.h"
 #include "src/tint/lang/core/type/u8.h"
