@@ -947,6 +947,8 @@ crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shade
 crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:vec4_element_increment: [ Failure ]
 crbug.com/475877305 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ]
 crbug.com/477654108 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:*atLimit* [ Failure ]
+crbug.com/477643914 [ dawn-backend-validation qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:api,validation,state,device_lost,destroy:createTexture,2d,* [ Failure ]
+crbug.com/477643914 [ dawn-backend-validation qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:api,validation,state,device_lost,destroy:createView,2d,* [ Failure ]
 
 # finder:enable-unused
 
