@@ -45,86 +45,118 @@ using ObjectId = uint64_t;
 // device is always 1
 const ObjectId kDeviceId = 1;
 
-enum class ObjectType : uint32_t {
-    Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
-    BindGroup,
-    BindGroupLayout,
-    Buffer,
-    CommandBuffer,
-    ComputePipeline,
-    Device,
-    PipelineLayout,
-    QuerySet,
-    RenderBundle,
-    RenderPipeline,
-    Sampler,
-    ShaderModule,
-    Texture,
-    TextureView,
-    ExternalTexture,
-};
+// Helper to select the 1st or 2nd implementation
+#define DAWN_REPLAY_GET_X_MACRO(_1, _2, NAME, ...) NAME
 
-enum class BindGroupLayoutEntryType : uint32_t {
-    Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
-    BufferBinding,
-    SamplerBinding,
-    TextureBinding,
-    TexelBufferBinding,
-    StorageTextureBinding,
-    ExternalTextureBinding,
-    StaticSamplerBindingInfo,
-    InputAttachmentBindingInfo,
-};
+#define DAWN_REPLAY_ENUM_DEfAULT_MEMBER(NAME) NAME,
+#define DAWN_REPLAY_ENUM_VALUE_MEMBER(NAME, VALUE) NAME = VALUE,
+#define DAWN_REPLAY_ENUM_MEMBER(...)                                    \
+    DAWN_REPLAY_GET_X_MACRO(__VA_ARGS__, DAWN_REPLAY_ENUM_VALUE_MEMBER, \
+                            DAWN_REPLAY_ENUM_DEfAULT_MEMBER)(__VA_ARGS__)
 
-enum class CommandBufferCommand : uint32_t {
-    Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
-    BeginComputePass,
-    BeginOcclusionQuery,
-    BeginRenderPass,
-    ClearBuffer,
-    CopyBufferToBuffer,
-    CopyBufferToTexture,
-    CopyTextureToBuffer,
-    CopyTextureToTexture,
-    Dispatch,
-    DispatchIndirect,
-    Draw,
-    DrawIndexed,
-    DrawIndexedIndirect,
-    DrawIndirect,
-    End,
-    EndOcclusionQuery,
-    EndRenderPass,
-    ExecuteBundles,
-    InsertDebugMarker,
-    PopDebugGroup,
-    PushDebugGroup,
-    ResolveQuerySet,
-    SetBindGroup,
-    SetBlendConstant,
-    SetComputePipeline,
-    SetImmediates,
-    SetIndexBuffer,
-    SetRenderPipeline,
-    SetScissorRect,
-    SetStencilReference,
-    SetVertexBuffer,
-    SetViewport,
-    WriteBuffer,
-    WriteTimestamp,
-};
+#define DAWN_REPLAY_ENUM(NAME, MEMBERS) \
+    enum class NAME : uint32_t { MEMBERS(DAWN_REPLAY_ENUM_MEMBER) };
 
-enum class RootCommand : uint32_t {
-    Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
-    CreateResource,
-    QueueSubmit,
-    WriteBuffer,
-    WriteTexture,
-    SetLabel,
-    InitTexture,
+#define DAWN_REPLAY_OBJECT_TYPES(X) \
+    X(Invalid, 0)                   \
+    X(BindGroup)                    \
+    X(BindGroupLayout)              \
+    X(Buffer)                       \
+    X(CommandBuffer)                \
+    X(ComputePipeline)              \
+    X(Device)                       \
+    X(ExternalTexture)              \
+    X(PipelineLayout)               \
+    X(QuerySet)                     \
+    X(RenderBundle)                 \
+    X(RenderPipeline)               \
+    X(Sampler)                      \
+    X(ShaderModule)                 \
+    X(Texture)                      \
+    X(TextureView)
 
-    End,
-};
+#define DAWN_REPLAY_OBJECT_TYPES_ENUM(X) X(ObjectType, DAWN_REPLAY_OBJECT_TYPES)
+
+DAWN_REPLAY_OBJECT_TYPES_ENUM(DAWN_REPLAY_ENUM)
+
+#define DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES(X) \
+    X(Invalid, 0)                                       \
+    X(BufferBinding)                                    \
+    X(SamplerBinding)                                   \
+    X(TextureBinding)                                   \
+    X(TexelBufferBinding)                               \
+    X(StorageTextureBinding)                            \
+    X(ExternalTextureBinding)                           \
+    X(StaticSamplerBindingInfo)                         \
+    X(InputAttachmentBindingInfo)
+
+#define DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES_ENUM(X) \
+    X(BindGroupLayoutEntryType, DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES)
+
+DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES_ENUM(DAWN_REPLAY_ENUM)
+
+#define DAWN_REPLAY_COMMAND_BUFFER_COMMANDS(X) \
+    X(Invalid, 0)                              \
+    X(BeginComputePass)                        \
+    X(BeginOcclusionQuery)                     \
+    X(BeginRenderPass)                         \
+    X(ClearBuffer)                             \
+    X(CopyBufferToBuffer)                      \
+    X(CopyBufferToTexture)                     \
+    X(CopyTextureToBuffer)                     \
+    X(CopyTextureToTexture)                    \
+    X(Dispatch)                                \
+    X(DispatchIndirect)                        \
+    X(Draw)                                    \
+    X(DrawIndexed)                             \
+    X(DrawIndexedIndirect)                     \
+    X(DrawIndirect)                            \
+    X(End)                                     \
+    X(EndOcclusionQuery)                       \
+    X(EndRenderPass)                           \
+    X(ExecuteBundles)                          \
+    X(InsertDebugMarker)                       \
+    X(PopDebugGroup)                           \
+    X(PushDebugGroup)                          \
+    X(ResolveQuerySet)                         \
+    X(SetBindGroup)                            \
+    X(SetBlendConstant)                        \
+    X(SetComputePipeline)                      \
+    X(SetImmediates)                           \
+    X(SetIndexBuffer)                          \
+    X(SetRenderPipeline)                       \
+    X(SetScissorRect)                          \
+    X(SetStencilReference)                     \
+    X(SetVertexBuffer)                         \
+    X(SetViewport)                             \
+    X(WriteBuffer)                             \
+    X(WriteTimestamp)
+
+#define DAWN_REPLAY_COMMAND_BUFFER_COMMANDS_ENUM(X) \
+    X(CommandBufferCommand, DAWN_REPLAY_COMMAND_BUFFER_COMMANDS)
+
+DAWN_REPLAY_COMMAND_BUFFER_COMMANDS_ENUM(DAWN_REPLAY_ENUM)
+
+#define DAWN_REPLAY_ROOT_COMMANDS(X) \
+    X(Invalid, 0)                    \
+    X(CreateResource)                \
+    X(QueueSubmit)                   \
+    X(WriteBuffer)                   \
+    X(WriteTexture)                  \
+    X(UnmapBuffer)                   \
+    X(SetLabel)                      \
+    X(InitTexture)                   \
+    X(End)
+
+#define DAWN_REPLAY_ROOT_COMMANDS_ENUM(X) X(RootCommand, DAWN_REPLAY_ROOT_COMMANDS)
+
+DAWN_REPLAY_ROOT_COMMANDS_ENUM(DAWN_REPLAY_ENUM)
+
+#undef DAWN_REPLAY_ENUM
+#undef DAWN_REPLAY_GET_X_MACRO
+#undef DAWN_REPLAY_ENUM_DEfAULT_MEMBER
+#undef DAWN_REPLAY_ENUM_VALUE_MEMBER
+#undef DAWN_REPLAY_ENUM_MEMBER
 
 #define ORIGIN3D_MEMBER(X) \
     X(uint32_t, x)         \
