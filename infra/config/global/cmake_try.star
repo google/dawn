@@ -96,6 +96,21 @@ def dawn_linux_cmake_cq_tester(**kwargs):
 ## CQ Builders
 
 dawn_linux_cmake_cq_tester(
+    name = "dawn-cq-linux-x64-sws-cmake-dbg",
+    description_html = "Compiles and tests debug Dawn test binaries for Linux/x64 using CMake and Clang. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-linux-x64-sws-cmake-dbg",
+    ],
+    properties = {
+        "asan": False,
+        "clang": True,
+        "debug": True,
+        "target_cpu": "x64",
+        "ubsan": False,
+    },
+)
+
+dawn_linux_cmake_cq_tester(
     name = "dawn-cq-linux-x64-sws-cmake-rel",
     description_html = "Compiles and tests release Dawn test binaries for Linux/x64 using CMake and Clang. Blocks CL submission",
     mirrors = [
