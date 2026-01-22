@@ -172,6 +172,20 @@ class UploadBuffer final : public Buffer {
     ~UploadBuffer() override = default;
 
   private:
+    // BufferBase implementations
+    MaybeError MapAtCreationImpl() override {
+        mMappedData = mUploadData.get();
+        // MapAtCreation does the zeroization on the front-end side.
+        return {};
+    }
+
+    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override {
+        mMappedData = mUploadData.get();
+        return EnsureDataInitialized(nullptr);
+    }
+    void UnmapImpl(BufferState oldState, BufferState newState) override { mMappedData = nullptr; }
+
+    // d3d11::Buffer implementations
     MaybeError InitializeInternal() override {
         mUploadData = std::unique_ptr<uint8_t[]>(AllocNoThrow<uint8_t>(GetAllocatedSize()));
         if (mUploadData == nullptr) {
@@ -180,15 +194,12 @@ class UploadBuffer final : public Buffer {
         return {};
     }
 
-    MaybeError MapInternal(const ScopedCommandRecordingContext* commandContext,
-                           wgpu::MapMode) override {
+    MaybeError MapInternal(const ScopedCommandRecordingContext*, wgpu::MapMode) override {
         mMappedData = mUploadData.get();
         return {};
     }
 
-    void UnmapInternal(const ScopedCommandRecordingContext* commandContext) override {
-        mMappedData = nullptr;
-    }
+    void UnmapInternal(const ScopedCommandRecordingContext*) override { mMappedData = nullptr; }
 
     MaybeError ClearInternal(const ScopedCommandRecordingContext* commandContext,
                              uint8_t clearValue,
