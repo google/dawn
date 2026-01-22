@@ -100,11 +100,34 @@ class ReplayImpl : public Replay {
         return *p;
     }
 
+    template <typename T>
+    const std::string& GetLabel(const T& object) const {
+        if (object == nullptr) {
+            return kNotFound;
+        }
+
+        return GetLabel(GetObjectId(object));
+    }
+
+    const std::string& GetLabel(schema::ObjectId id) const;
+
   private:
     ReplayImpl(wgpu::Device device, std::unique_ptr<CaptureImpl> capture);
 
     MaybeError CreateResource(wgpu::Device device, ReadHead& readHead);
     MaybeError SetLabel(schema::ObjectId id, schema::ObjectType type, const std::string& label);
+
+    template <typename T>
+    void AddResource(schema::ObjectId id, const std::string& label, T& resource) {
+        mResources.emplace(id, LabeledResource{label, resource});
+        mResourceToIdMap.emplace(resource.Get(), id);
+    }
+
+    template <typename T>
+    schema::ObjectId GetObjectId(const T& object) const {
+        auto iter = mResourceToIdMap.find(object.Get());
+        return iter ? iter->second : 0;
+    }
 
     wgpu::Device mDevice;
     std::unique_ptr<const CaptureImpl> mCapture;
@@ -112,7 +135,12 @@ class ReplayImpl : public Replay {
     using IdToResourceMap = absl::flat_hash_map<schema::ObjectId, LabeledResource>;
     IdToResourceMap mResources;
 
+    using ResourcePtrToIdMap = absl::flat_hash_map<const void*, schema::ObjectId>;
+    ResourcePtrToIdMap mResourceToIdMap;
+
     BlitBufferToDepthTexture mBlitBufferToDepthTexture;
+
+    std::string kNotFound;
 };
 
 }  // namespace dawn::replay

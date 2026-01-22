@@ -1178,7 +1178,7 @@ std::unique_ptr<ReplayImpl> ReplayImpl::Create(wgpu::Device device,
 
 ReplayImpl::ReplayImpl(wgpu::Device device, std::unique_ptr<CaptureImpl> capture)
     : mDevice(device), mCapture(std::move(capture)) {
-    mResources.insert({schema::kDeviceId, {"", device}});
+    AddResource(schema::kDeviceId, "", device);
 }
 
 MaybeError ReplayImpl::CreateResource(wgpu::Device device, ReadHead& readHead) {
@@ -1189,7 +1189,7 @@ MaybeError ReplayImpl::CreateResource(wgpu::Device device, ReadHead& readHead) {
         case schema::ObjectType::BindGroup: {
             wgpu::BindGroup bindGroup;
             DAWN_TRY_ASSIGN(bindGroup, CreateBindGroup(*this, device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, bindGroup}});
+            AddResource(resource.id, resource.label, bindGroup);
             return {};
         }
 
@@ -1197,14 +1197,14 @@ MaybeError ReplayImpl::CreateResource(wgpu::Device device, ReadHead& readHead) {
             wgpu::BindGroupLayout bindGroupLayout;
             DAWN_TRY_ASSIGN(bindGroupLayout,
                             CreateBindGroupLayout(*this, device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, bindGroupLayout}});
+            AddResource(resource.id, resource.label, bindGroupLayout);
             return {};
         }
 
         case schema::ObjectType::Buffer: {
             wgpu::Buffer buffer;
             DAWN_TRY_ASSIGN(buffer, CreateBuffer(device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, buffer}});
+            AddResource(resource.id, resource.label, buffer);
             return {};
         }
 
@@ -1214,7 +1214,7 @@ MaybeError ReplayImpl::CreateResource(wgpu::Device device, ReadHead& readHead) {
             wgpu::CommandBuffer commandBuffer;
             DAWN_TRY_ASSIGN(commandBuffer,
                             CreateCommandBuffer(*this, device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, commandBuffer}});
+            AddResource(resource.id, resource.label, commandBuffer);
             return {};
         }
 
@@ -1222,7 +1222,7 @@ MaybeError ReplayImpl::CreateResource(wgpu::Device device, ReadHead& readHead) {
             wgpu::ComputePipeline computePipeline;
             DAWN_TRY_ASSIGN(computePipeline,
                             CreateComputePipeline(*this, device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, computePipeline}});
+            AddResource(resource.id, resource.label, computePipeline);
             return {};
         }
 
@@ -1230,14 +1230,14 @@ MaybeError ReplayImpl::CreateResource(wgpu::Device device, ReadHead& readHead) {
             wgpu::PipelineLayout pipelineLayout;
             DAWN_TRY_ASSIGN(pipelineLayout,
                             CreatePipelineLayout(*this, device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, pipelineLayout}});
+            AddResource(resource.id, resource.label, pipelineLayout);
             return {};
         }
 
         case schema::ObjectType::QuerySet: {
             wgpu::QuerySet querySet;
             DAWN_TRY_ASSIGN(querySet, CreateQuerySet(*this, device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, querySet}});
+            AddResource(resource.id, resource.label, querySet);
             return {};
         }
 
@@ -1247,7 +1247,7 @@ MaybeError ReplayImpl::CreateResource(wgpu::Device device, ReadHead& readHead) {
             wgpu::RenderBundle renderBundle;
             DAWN_TRY_ASSIGN(renderBundle,
                             CreateRenderBundle(*this, device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, renderBundle}});
+            AddResource(resource.id, resource.label, renderBundle);
             return {};
         }
 
@@ -1255,35 +1255,35 @@ MaybeError ReplayImpl::CreateResource(wgpu::Device device, ReadHead& readHead) {
             wgpu::RenderPipeline renderPipeline;
             DAWN_TRY_ASSIGN(renderPipeline,
                             CreateRenderPipeline(*this, device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, renderPipeline}});
+            AddResource(resource.id, resource.label, renderPipeline);
             return {};
         }
 
         case schema::ObjectType::Sampler: {
             wgpu::Sampler sampler;
             DAWN_TRY_ASSIGN(sampler, CreateSampler(device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, sampler}});
+            AddResource(resource.id, resource.label, sampler);
             return {};
         }
 
         case schema::ObjectType::ShaderModule: {
             wgpu::ShaderModule shaderModule;
             DAWN_TRY_ASSIGN(shaderModule, CreateShaderModule(device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, shaderModule}});
+            AddResource(resource.id, resource.label, shaderModule);
             return {};
         }
 
         case schema::ObjectType::Texture: {
             wgpu::Texture texture;
             DAWN_TRY_ASSIGN(texture, CreateTexture(device, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, texture}});
+            AddResource(resource.id, resource.label, texture);
             return {};
         }
 
         case schema::ObjectType::TextureView: {
             wgpu::TextureView textureView;
             DAWN_TRY_ASSIGN(textureView, CreateTextureView(*this, readHead, resource.label));
-            mResources.insert({resource.id, {resource.label, textureView}});
+            AddResource(resource.id, resource.label, textureView);
             return {};
         }
 
@@ -1324,6 +1324,14 @@ MaybeError ReplayImpl::SetLabel(schema::ObjectId id,
             return DAWN_INTERNAL_ERROR("unhandled resource type");
     }
     return {};
+}
+
+const std::string& ReplayImpl::GetLabel(schema::ObjectId id) const {
+    auto iter = mResources.find(id);
+    if (iter == mResources.end()) {
+        return kNotFound;
+    }
+    return iter->second.label;
 }
 
 MaybeError ReplayImpl::Play() {
