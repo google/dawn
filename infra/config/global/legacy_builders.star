@@ -445,8 +445,11 @@ luci.console_view_entry(
 #   * dawn-linux-x64-sws-cmake-rel
 #   * dawn-cq-linux-x64-sws-cmake-rel
 
-dawn_cmake_standalone_builder("cmake-linux-clang-dbg-x64-asan", clang = True, debug = True, cpu = "x64", asan = True, ubsan = False)
-dawn_cmake_standalone_builder("cmake-linux-clang-dbg-x64-ubsan", clang = True, debug = True, cpu = "x64", asan = False, ubsan = True)
+# The following CMake builders have been removed due to deciding that they were
+# not providing value in go/dawn-standalone-builders-dd.
+# * cmake-linux-clang-dbg-x64-asan
+# * cmake-linux-clang-dbg-x64-ubsan
+
 dawn_cmake_standalone_builder("cmake-linux-clang-rel-x64-asan", clang = True, debug = False, cpu = "x64", asan = True, ubsan = False)
 dawn_cmake_standalone_builder("cmake-linux-clang-rel-x64-ubsan", clang = True, debug = False, cpu = "x64", asan = False, ubsan = True)
 dawn_cmake_standalone_builder("cmake-mac-dbg", clang = True, debug = True, cpu = "x64", asan = False, ubsan = False, experimental = False)
