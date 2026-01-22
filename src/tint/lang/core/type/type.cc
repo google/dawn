@@ -64,7 +64,7 @@ Type::~Type() = default;
 
 const Type* Type::UnwrapPtr() const {
     auto* type = this;
-    while (auto* ptr = type->As<Pointer>()) {
+    if (auto* ptr = type->As<Pointer>()) {
         type = ptr->StoreType();
     }
     return type;
