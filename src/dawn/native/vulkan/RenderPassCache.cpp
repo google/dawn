@@ -27,6 +27,7 @@
 
 #include "dawn/native/vulkan/RenderPassCache.h"
 
+#include <concepts>
 #include <vector>
 
 #include "absl/container/inlined_vector.h"
@@ -210,6 +211,9 @@ void InitializePassInfo(Device* device, const RenderPassCacheQuery& query, InfoT
 
             passInfo.inputAttachmentRefs[i].attachment = resolveAttachmentRef.attachment;
             passInfo.inputAttachmentRefs[i].layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            if constexpr (std::same_as<InfoType, RenderPassCreateInfo2>) {
+                passInfo.inputAttachmentRefs[i].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            }
 
             highestInputAttachmentIndex = i;
         } else {
@@ -240,26 +244,26 @@ void InitializePassInfo(Device* device, const RenderPassCacheQuery& query, InfoT
         subpassCount++;
 
         // Dependency for resolve texture's read -> resolve texture's write.
-        auto& dependency = passInfo.subpassDependencies[dependencyCount];
-        dependency.srcSubpass = 0;
-        dependency.dstSubpass = 1;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+        auto* dependency = &passInfo.subpassDependencies[dependencyCount];
+        dependency->srcSubpass = 0;
+        dependency->dstSubpass = 1;
+        dependency->srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        dependency->dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency->srcAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
+        dependency->dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dependency->dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
         dependencyCount++;
 
         // Dependency for color write in subpass 0 -> color write in subpass 1
-        dependency = passInfo.subpassDependencies[dependencyCount];
-        dependency.srcSubpass = 0;
-        dependency.dstSubpass = 1;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        dependency.dstAccessMask =
+        dependency = &passInfo.subpassDependencies[dependencyCount];
+        dependency->srcSubpass = 0;
+        dependency->dstSubpass = 1;
+        dependency->srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency->dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency->srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dependency->dstAccessMask =
             VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+        dependency->dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
         dependencyCount++;
     }
 
