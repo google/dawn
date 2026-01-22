@@ -872,6 +872,9 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
             break;
+        // Note: Depth24Plus is not copyable in WebGPU directly.
+        // We enabled it for capture and copy as f32
+        case wgpu::TextureFormat::Depth24Plus:
         case wgpu::TextureFormat::Depth32Float:
         case wgpu::TextureFormat::R32Float:
             AppendFloatTextureHead();
@@ -898,8 +901,6 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
             break;
         case wgpu::TextureFormat::Stencil8:
-        case wgpu::TextureFormat::Depth24PlusStencil8:
-            // Depth24PlusStencil8 can only copy with stencil aspect and is gated by validation.
             AppendStencilTextureHead();
             shader += kDstBufferU32;
             shader += kCommonHead;
@@ -908,10 +909,13 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::Uint;
             break;
+        case wgpu::TextureFormat::Depth24PlusStencil8:
         case wgpu::TextureFormat::Depth32FloatStencil8: {
             // Depth32FloatStencil8 is not supported on OpenGL/OpenGLES where the blit path is
             // enabled by default. But could be hit if the blit path toggle is manually set on other
             // backends.
+            // Note: Depth24PlusStencil's depth aspect is not copyable in WebGPU directly.
+            // We enabled it for capture and copy as f32
             switch (src.aspect) {
                 case Aspect::Depth:
                     AppendFloatTextureHead();
@@ -1026,6 +1030,7 @@ bool IsFormatSupportedByTextureToBufferBlit(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::RG32Float:
         case wgpu::TextureFormat::RGBA32Float:
         case wgpu::TextureFormat::Depth16Unorm:
+        case wgpu::TextureFormat::Depth24Plus:
         case wgpu::TextureFormat::Depth32Float:
         case wgpu::TextureFormat::Stencil8:
         case wgpu::TextureFormat::Depth24PlusStencil8:

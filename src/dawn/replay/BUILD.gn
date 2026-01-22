@@ -33,6 +33,8 @@ static_library("replay") {
   sources = [
     "${dawn_root}/include/dawn/replay/Replay.h",
     "${dawn_root}/include/dawn/replay/dawn_replay_export.h",
+    "BlitBufferToDepthTexture.cpp",
+    "BlitBufferToDepthTexture.h",
     "Capture.cpp",
     "Capture.h",
     "Deserialization.cpp",

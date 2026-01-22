@@ -182,6 +182,7 @@ wgpu::BufferUsage ComputeInternalBufferUsages(const DeviceBase* device,
     if (usage & wgpu::BufferUsage::CopyDst) {
         const bool useComputeForT2B =
             device->IsToggleEnabled(Toggle::UseBlitForDepth16UnormTextureToBufferCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForDepth24PlusTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForDepth32FloatTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy) ||

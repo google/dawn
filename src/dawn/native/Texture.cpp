@@ -587,6 +587,10 @@ bool CopySrcNeedsInternalTextureBindingUsage(const DeviceBase* device, const For
         (device->IsToggleEnabled(Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource) ||
          (format.format == wgpu::TextureFormat::Depth16Unorm &&
           device->IsToggleEnabled(Toggle::UseBlitForDepth16UnormTextureToBufferCopy)) ||
+         (format.format == wgpu::TextureFormat::Depth24Plus &&
+          device->IsToggleEnabled(Toggle::UseBlitForDepth24PlusTextureToBufferCopy)) ||
+         (format.format == wgpu::TextureFormat::Depth24PlusStencil8 &&
+          device->IsToggleEnabled(Toggle::UseBlitForDepth24PlusTextureToBufferCopy)) ||
          (format.format == wgpu::TextureFormat::Depth32Float &&
           device->IsToggleEnabled(Toggle::UseBlitForDepth32FloatTextureToBufferCopy)))) {
         return true;

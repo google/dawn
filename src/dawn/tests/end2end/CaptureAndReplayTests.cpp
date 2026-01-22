@@ -2260,6 +2260,183 @@ TEST_P(CaptureAndReplayTests, MappedBufferDestroyed) {
     // just expect no errors
 }
 
+// Depth24Plus is not directly copyable as either src or dst so, we make a depth24plus.
+// put values in it via render pass. Then capture it in an empty render pass.
+// On replay we read the values via a compute shader.
+TEST_P(CaptureAndReplayTests, CaptureDepth24Plus) {
+    // TODO(477645283): This fails only on WARP and after it fails, all following tests
+    // fail to create a device.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
+    constexpr uint32_t kNumLayers = 6;
+    auto [cPipeline, commands] = [&]() {
+        wgpu::Texture texture = CreateTexture(
+            "myTexture", {1, 1, kNumLayers}, wgpu::TextureFormat::Depth24Plus,
+            wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+
+        const char* shader = R"(
+            struct VOut {
+              @builtin(position) pos: vec4f,
+              @location(0) @interpolate(flat, either) instance_index: u32,
+            };
+
+            @vertex fn vs(@builtin(vertex_index) vNdx: u32,
+                          @builtin(instance_index) iNdx: u32)
+                 -> VOut {
+                let pos = array(
+                  vec2f(-1, -1),
+                  vec2f(-1,  3),
+                  vec2f( 3, -1),
+                );
+                return VOut(vec4f(pos[vNdx], 0, 1), iNdx);
+            }
+
+            @fragment fn fs(v: VOut) -> @builtin(frag_depth) f32 {
+                return (f32(v.instance_index) + 0.5) / 6.0;
+            }
+
+            @group(0) @binding(0) var tex: texture_2d_array<f32>;
+            @group(0) @binding(1) var<storage, read_write> result: array<f32>;
+
+            @compute @workgroup_size(1) fn main(@builtin(global_invocation_id) gid: vec3u) {
+                result[gid.x] = textureLoad(tex, vec2u(0), gid.x, 0).x;
+            }
+        )";
+        auto module = utils::CreateShaderModule(device, shader);
+
+        // Put values in depth texture. This step is not captured.
+        {
+            utils::ComboRenderPipelineDescriptor desc;
+            desc.vertex.module = module;
+            desc.cFragment.module = module;
+            desc.cFragment.targetCount = 0;
+            desc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+
+            wgpu::DepthStencilState* depthStencil =
+                desc.EnableDepthStencil(wgpu::TextureFormat::Depth24Plus);
+            depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
+            depthStencil->depthCompare = wgpu::CompareFunction::Always;
+
+            wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+            wgpu::CommandBuffer commands;
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            for (uint32_t layer = 0; layer < kNumLayers; ++layer) {
+                wgpu::TextureViewDescriptor viewDesc;
+                viewDesc.baseArrayLayer = layer;
+                viewDesc.arrayLayerCount = 1;
+
+                utils::ComboRenderPassDescriptor passDescriptor({}, texture.CreateView(&viewDesc));
+                passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+                passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+                passDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp =
+                    wgpu::StoreOp::Undefined;
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+                pass.SetPipeline(pipeline);
+                pass.Draw(3, 1, 0, layer);
+                pass.End();
+            }
+            commands = encoder.Finish();
+            queue.Submit(1, &commands);
+        }
+
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = module;
+        wgpu::ComputePipeline cPipeline = device.CreateComputePipeline(&csDesc);
+
+        // Copy texture to temp buffer via compute shader during capture.
+        // We don't care about the temp buffer. We just care that texture is
+        // referenced so it will appear during replay.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        {
+            wgpu::Buffer tempBuffer =
+                CreateBuffer("temp", sizeof(float) * kNumLayers,
+                             wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
+            wgpu::BindGroup bindGroup =
+                utils::MakeBindGroup(device, cPipeline.GetBindGroupLayout(0),
+                                     {
+                                         {0, texture.CreateView()},
+                                         {1, tempBuffer},
+                                     });
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetPipeline(cPipeline);
+            pass.SetBindGroup(0, bindGroup);
+            pass.DispatchWorkgroups(kNumLayers);
+            pass.End();
+        }
+        return std::make_pair(cPipeline, encoder.Finish());
+    }();
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    // Read the replay version of myTexture in result via compute shader.
+    wgpu::Buffer result = CreateBuffer("result", sizeof(float) * kNumLayers,
+                                       wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("myTexture");
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, cPipeline.GetBindGroupLayout(0),
+                                                         {
+                                                             {0, texture.CreateView()},
+                                                             {1, result},
+                                                         });
+
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(cPipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(kNumLayers);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    float expected[kNumLayers];
+    for (uint32_t i = 0; i < kNumLayers; ++i) {
+        expected[i] = (i + 0.5f) / 6.f;
+    }
+    EXPECT_BUFFER_FLOAT_RANGE_TOLERANCE_EQ(expected, result, 0, 6, 0.05);
+}
+
+// Test that you can not copy Depth24plus/Depth24PlusStencil8 depth aspect
+// The spec requires this to be validated out but the WGPU backend enables copying
+// on the inner device by the use_blit_for_depth24plus_texture_to_buffer_copy
+// toggle. Make sure that even when that toggle is enabled copying these formats
+// is validated out.
+TEST_P(CaptureAndReplayTests, Depth24PlusNotCopyable) {
+    // No validation errors if validation is off.
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    wgpu::Buffer buffer = CreateBuffer("buf", 4, wgpu::BufferUsage::CopyDst);
+    for (wgpu::TextureFormat format :
+         {wgpu::TextureFormat::Depth24Plus, wgpu::TextureFormat::Depth24PlusStencil8}) {
+        wgpu::Texture texture = CreateTexture("tex", {1}, format, wgpu::TextureUsage::CopySrc);
+
+        wgpu::CommandBuffer commands;
+        {
+            // Copy srcTexture to dstBuffer
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
+                texture, 0, {0, 0, 0}, wgpu::TextureAspect::DepthOnly);
+            wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+                utils::CreateTexelCopyBufferInfo(buffer, 0, 256, 1);
+            wgpu::Extent3D extent = {1, 1, 1};
+
+            encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &extent);
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 class CaptureAndReplayDrawTests : public CaptureAndReplayTests {

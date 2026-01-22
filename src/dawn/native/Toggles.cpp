@@ -428,6 +428,14 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a blit instead of a copy command to copy depth aspect of a texture to a buffer."
       "Workaround for OpenGL and OpenGLES.",
       "https://crbug.com/dawn/1782", ToggleStage::Device}},
+    {Toggle::UseBlitForDepth24PlusTextureToBufferCopy,
+     {"use_blit_for_depth24plus_texture_to_buffer_copy",
+      "Use a blit instead of a copy command to copy depth aspect of a texture to a buffer. "
+      "Note that it copies depth24 as float. "
+      "This is a workaround for Capture and Replay to be able to capture depth24plus textures. "
+      "It should only be enabled in the inner device of the WebGPU backed as it allows depth24 T2B "
+      "to pass validation.",
+      "https://crbug.com/dawn/1782", ToggleStage::Device}},
     {Toggle::UseBlitForDepth32FloatTextureToBufferCopy,
      {"use_blit_for_depth32float_texture_to_buffer_copy",
       "Use a blit instead of a copy command to copy depth aspect of a texture to a buffer."

@@ -36,6 +36,7 @@
 #include <variant>
 
 #include "absl/container/flat_hash_map.h"
+#include "dawn/replay/BlitBufferToDepthTexture.h"
 #include "dawn/replay/Capture.h"
 #include "dawn/replay/Replay.h"
 #include "dawn/webgpu_cpp.h"
@@ -110,6 +111,8 @@ class ReplayImpl : public Replay {
 
     using IdToResourceMap = absl::flat_hash_map<schema::ObjectId, LabeledResource>;
     IdToResourceMap mResources;
+
+    BlitBufferToDepthTexture mBlitBufferToDepthTexture;
 };
 
 }  // namespace dawn::replay

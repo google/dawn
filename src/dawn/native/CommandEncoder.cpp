@@ -411,17 +411,21 @@ MaybeError ValidateSourceTextureFormatForTextureToTextureCopyInCompatibilityMode
     return {};
 }
 
-MaybeError ValidateTextureDepthStencilToBufferCopyRestrictions(const TexelCopyTextureInfo& src) {
+MaybeError ValidateTextureDepthStencilToBufferCopyRestrictions(const DeviceBase* device,
+                                                               const TexelCopyTextureInfo& src) {
     Aspect aspectUsed;
     DAWN_TRY_ASSIGN(aspectUsed, SingleAspectUsedByTexelCopyTextureInfo(src));
     if (aspectUsed == Aspect::Depth) {
         switch (src.texture->GetFormat().format) {
             case wgpu::TextureFormat::Depth24Plus:
             case wgpu::TextureFormat::Depth24PlusStencil8:
-                return DAWN_VALIDATION_ERROR(
-                    "The depth aspect of %s format %s cannot be selected in a texture to "
-                    "buffer copy.",
-                    src.texture, src.texture->GetFormat().format);
+                if (!device->IsToggleEnabled(Toggle::UseBlitForDepth24PlusTextureToBufferCopy)) {
+                    return DAWN_VALIDATION_ERROR(
+                        "The depth aspect of %s format %s cannot be selected in a texture to "
+                        "buffer copy.",
+                        src.texture, src.texture->GetFormat().format);
+                }
+                break;
             case wgpu::TextureFormat::Depth32Float:
             case wgpu::TextureFormat::Depth16Unorm:
             case wgpu::TextureFormat::Depth32FloatStencil8:
@@ -1119,6 +1123,10 @@ bool ShouldUseTextureToBufferBlit(const DeviceBase* device,
     if (aspect == Aspect::Depth &&
         ((format.format == wgpu::TextureFormat::Depth16Unorm &&
           device->IsToggleEnabled(Toggle::UseBlitForDepth16UnormTextureToBufferCopy)) ||
+         (format.format == wgpu::TextureFormat::Depth24Plus &&
+          device->IsToggleEnabled(Toggle::UseBlitForDepth24PlusTextureToBufferCopy)) ||
+         (format.format == wgpu::TextureFormat::Depth24PlusStencil8 &&
+          device->IsToggleEnabled(Toggle::UseBlitForDepth24PlusTextureToBufferCopy)) ||
          (format.format == wgpu::TextureFormat::Depth32Float &&
           device->IsToggleEnabled(Toggle::UseBlitForDepth32FloatTextureToBufferCopy)))) {
         return true;
@@ -1813,7 +1821,7 @@ void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOr
                                                   mUsageValidationMode),
                                  "validating source %s usage.", source.texture);
                 DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(source.texture));
-                DAWN_TRY(ValidateTextureDepthStencilToBufferCopyRestrictions(source));
+                DAWN_TRY(ValidateTextureDepthStencilToBufferCopyRestrictions(GetDevice(), source));
 
                 DAWN_TRY(ValidateTexelCopyBufferInfo(GetDevice(), *destination));
                 DAWN_TRY_CONTEXT(ValidateCanUseAs(destination->buffer, wgpu::BufferUsage::CopyDst),

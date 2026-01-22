@@ -100,8 +100,14 @@ Device::Device(AdapterBase* adapter,
 
     apiDesc.nextInChain = nullptr;
     auto enabledTogglesName = deviceToggles.GetEnabledToggleNames();
-    apiToggleDescriptor.enabledToggleCount = enabledTogglesName.size();
-    apiToggleDescriptor.enabledToggles = enabledTogglesName.data();
+
+    std::vector<const char*> enabledToggles(enabledTogglesName.data(),
+                                            enabledTogglesName.data() + enabledTogglesName.size());
+    // enable so we can capture the depth aspect of depth24plus and depth24plusStencil8
+    enabledToggles.push_back("use_blit_for_depth24plus_texture_to_buffer_copy");
+
+    apiToggleDescriptor.enabledToggleCount = enabledToggles.size();
+    apiToggleDescriptor.enabledToggles = enabledToggles.data();
 
     auto disabledTogglesName = deviceToggles.GetDisabledToggleNames();
     apiToggleDescriptor.disabledToggleCount = disabledTogglesName.size();

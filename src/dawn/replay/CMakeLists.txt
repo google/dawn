@@ -31,6 +31,7 @@ set(headers
 )
 
 set(private_headers
+    "BlitBufferToDepthTexture.h"
     "Capture.h"
     "Deserialization.h"
     "Error.h"
@@ -39,6 +40,7 @@ set(private_headers
 )
 
 set(sources
+    "BlitBufferToDepthTexture.cpp"
     "Capture.cpp"
     "Deserialization.cpp"
     "Error.cpp"

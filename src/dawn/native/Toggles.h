@@ -112,6 +112,7 @@ enum class Toggle {
     UseBlitForStencilTextureWrite,
     UseBlitForDepthTextureToTextureCopyToNonzeroSubresource,
     UseBlitForDepth16UnormTextureToBufferCopy,
+    UseBlitForDepth24PlusTextureToBufferCopy,
     UseBlitForDepth32FloatTextureToBufferCopy,
     UseBlitForStencilTextureToBufferCopy,
     UseBlitForSnormTextureToBufferCopy,
