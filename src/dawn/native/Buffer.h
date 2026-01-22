@@ -85,8 +85,8 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     enum class BufferState {
         // MapAsync() or Unmap() is in progress.
         // TODO(crbug.com/467247254): See if ConcurrentAccessGuard<T> can be used be implemented and
-        // used instead of having an InsideOperation state.
-        InsideOperation,
+        // used instead of having an InUse state.
+        InUse,
         Unmapped,
         PendingMap,
         Mapped,
@@ -234,17 +234,17 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // guard against concurrent access to the buffer.
     //
     // The follow semantics are used:
-    // 1. On MapAsync() set state to InsideOperation before modifying any other members. If there is
-    //    a race modifying the state compare_exchange() will fail and a validation error is thrown.
-    //    After modifying all member variables set state to PendingMap.
+    // 1. On MapAsync() set state to InUse before modifying any other members. If there is a race
+    //    modifying the state compare_exchange() will fail and a validation error is thrown. After
+    //    modifying all member variables set state to PendingMap.
     // 2. When MapAsyncEvent completes set state to Mapped after all other work is finished.
     // 3. For *MappedRange() functions check that state is Mapped before checking other members for
     //    validation.
-    // 4. For Unmap() set state to InsideOperation before modifying any other member variables. If
-    //    there is a race modifying state compare_exchange() will fail and a validation error is
-    //    thrown. After the buffer is unmapped set state to Unmapped.
-    // 5. For Destroy() check if the state is InsideOperation and if so spin loop until the
-    //    concurrent operation is finished. This prevents destruction in the middle of an operation.
+    // 4. For Unmap() set state to InUse before modifying any other member variables. If there is a
+    //    race modifying state compare_exchange() will fail and a validation error is thrown. After
+    //    the buffer is unmapped set state to Unmapped.
+    // 5. For Destroy() check if the state is InUse and if so spin loop until the concurrent
+    //    operation is finished. This prevents destruction in the middle of an operation.
     //
     // With those `mState` changes in place, we can guarantee that if GetMappedRange() is
     // successful, that MapAsync() must have succeeded. We cannot guarantee, however, that Unmap()
