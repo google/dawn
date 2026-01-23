@@ -617,6 +617,7 @@
         "methods": [
             {
                 "name": "map async",
+                "no autolock": true,
                 "returns": "future",
                 "args": [
                     {"name": "mode", "type": "map mode"},

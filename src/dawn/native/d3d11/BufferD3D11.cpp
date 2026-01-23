@@ -459,6 +459,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation,
     // The buffers with mappedAtCreation == true will be initialized in
     // BufferBase::MapAtCreation().
     if (!mappedAtCreation && needsClearResource) {
+        auto scopedUseDuringCreation = UseInternal();
         if (commandContext) {
             DAWN_TRY(ClearInitialResource(commandContext));
         } else {
@@ -519,6 +520,7 @@ void Buffer::UnmapInternal(const ScopedCommandRecordingContext* commandContext) 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
     DAWN_ASSERT((mode == wgpu::MapMode::Write && IsCPUWritable()) ||
                 (mode == wgpu::MapMode::Read && IsCPUReadable()));
+    auto deviceGuard = GetDevice()->GetGuard();
 
     mMapReadySerial = GetLastUsageSerial();
     const ExecutionSerial completedSerial = GetDevice()->GetQueue()->GetCompletedCommandSerial();
@@ -1426,16 +1428,19 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
     // transfer the data to constant buffer.
     Ref<BufferBase> stagingBuffer;
     DAWN_TRY_ASSIGN(stagingBuffer, ToBackend(GetDevice())->GetStagingBuffer(commandContext, size));
-    DAWN_TRY(ToBackend(stagingBuffer)->WriteInternal(commandContext, 0, data, size));
-    DAWN_TRY(ToBackend(stagingBuffer.Get())
-                 ->CopyToInternal(commandContext,
-                                  /*sourceOffset=*/0,
-                                  /*size=*/size, this, offset));
-    // WriteInternal() might not call MarkUsedInPendingCommands() if the staging buffer is mappable.
-    // But we need to mark buffer as being used for CopyToInternal().
-    // TODO(crbug.com/345471009): Consider whether it's OK to change CopyToInternal() to
-    // automatically trigger MarkUsedInPendingCommands().
-    stagingBuffer->MarkUsedInPendingCommands();
+    {
+        auto scopedUseStaging = stagingBuffer->UseInternal();
+        DAWN_TRY(ToBackend(stagingBuffer)->WriteInternal(commandContext, 0, data, size));
+        DAWN_TRY(ToBackend(stagingBuffer.Get())
+                     ->CopyToInternal(commandContext,
+                                      /*sourceOffset=*/0,
+                                      /*size=*/size, this, offset));
+        // WriteInternal() might not call MarkUsedInPendingCommands() if the staging buffer is
+        // mappable. But we need to mark buffer as being used for CopyToInternal().
+        // TODO(crbug.com/345471009): Consider whether it's OK to change CopyToInternal() to
+        // automatically trigger MarkUsedInPendingCommands().
+        stagingBuffer->MarkUsedInPendingCommands();
+    }
     ToBackend(GetDevice())->ReturnStagingBuffer(std::move(stagingBuffer));
 
     return {};

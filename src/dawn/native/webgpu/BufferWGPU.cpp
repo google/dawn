@@ -103,6 +103,8 @@ MaybeError Buffer::MapAtCreationImpl() {
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
+    auto deviceGuard = GetDevice()->GetGuard();
+
     struct MapAsyncResult {
         WGPUMapAsyncStatus status;
         std::string message;

@@ -30,6 +30,7 @@
 
 #include <memory>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/SerialMap.h"
 #include "dawn/common/WeakRefSupport.h"
@@ -64,6 +65,8 @@ struct TrackTaskCallback : CallbackTask {
 
 class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
   public:
+    using BufferSet = absl::flat_hash_set<BufferBase*>;
+
     ~QueueBase() override;
 
     static Ref<QueueBase> MakeError(DeviceBase* device, StringView label);
@@ -140,8 +143,9 @@ class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
                                                      const TexelCopyTextureInfo* destination,
                                                      const Extent3D* copySize,
                                                      const CopyTextureForBrowserOptions* options);
-
-    MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands) const;
+    MaybeError ValidateSubmit(uint32_t commandCount,
+                              CommandBufferBase* const* commands,
+                              BufferSet& buffersFromCommands) const;
     MaybeError ValidateOnSubmittedWorkDone() const;
     MaybeError ValidateWriteTexture(const TexelCopyTextureInfo* destination,
                                     size_t dataSize,

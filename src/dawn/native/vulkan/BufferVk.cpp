@@ -331,11 +331,13 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
             }
         } else {
             if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+                auto scopedUseDuringCreation = UseInternal();
                 ClearBuffer(ToBackend(device->GetQueue())->GetPendingRecordingContext(),
                             0x01010101);
             }
             if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
                 paddingClearSize > 0) {
+                auto scopedUseDuringCreation = UseInternal();
                 CommandRecordingContext* recordingContext =
                     ToBackend(device->GetQueue())->GetPendingRecordingContext();
                 ClearBuffer(recordingContext, 0, paddingClearOffset, paddingClearSize);
