@@ -907,7 +907,7 @@ Ref<TextureBase> Device::CreateTextureWrappingVulkanImage(
     return result;
 }
 
-uint32_t Device::GetComputeSubgroupSize() const {
+std::optional<uint32_t> Device::GetComputeSubgroupSize() const {
     return ToBackend(GetPhysicalDevice())->GetDefaultComputeSubgroupSize();
 }
 

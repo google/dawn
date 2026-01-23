@@ -71,7 +71,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsAndroidHuawei() const;
     bool IsSwiftshader() const;
 
-    uint32_t GetDefaultComputeSubgroupSize() const;
+    std::optional<uint32_t> GetDefaultComputeSubgroupSize() const;
     std::vector<SubgroupMatrixConfig> EnumerateSubgroupMatrixConfigs(
         const TogglesState& toggles) const;
 
@@ -102,7 +102,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         const TogglesState& deviceToggles,
         Ref<DeviceBase::DeviceLostEvent>&& lostEvent) override;
 
-    uint32_t FindDefaultComputeSubgroupSize() const;
+    std::optional<uint32_t> FindDefaultComputeSubgroupSize() const;
     bool CheckSemaphoreSupport(DeviceExt deviceExt,
                                VkExternalSemaphoreHandleTypeFlagBits handleType) const;
 
@@ -120,7 +120,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     Ref<VulkanInstance> mVulkanInstance;
     VulkanDeviceInfo mDeviceInfo = {};
 
-    uint32_t mDefaultComputeSubgroupSize = 0;
+    std::optional<uint32_t> mDefaultComputeSubgroupSize;
     bool mSupportsCoreFeatureLevel = true;
     mutable std::unique_ptr<ErrorData> mCoreError;
 

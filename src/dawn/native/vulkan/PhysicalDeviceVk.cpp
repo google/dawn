@@ -472,6 +472,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         mSubgroupMinSize >= kDefaultSubgroupMinSize && mSubgroupMaxSize <= kDefaultSubgroupMaxSize;
     if (hasBaseSubgroupSupport && hasRequiredF16Support && allowSubgroupSizeRanges) {
         EnableFeature(Feature::Subgroups);
+
+        // We have already required `VK_EXT_subgroup_size_control` for `Subgroups` (see condition 4)
+        EnableFeature(Feature::ChromiumExperimentalSubgroupSizeControl);
     }
 
     // Enable subgroup matrix if all of the following are true:
@@ -839,13 +842,13 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
 
     if (mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) {
         mDefaultComputeSubgroupSize = FindDefaultComputeSubgroupSize();
-        if (mDefaultComputeSubgroupSize > 0) {
+        if (mDefaultComputeSubgroupSize.has_value()) {
             // According to VK_EXT_subgroup_size_control, for compute shaders we must ensure
             // computeInvocationsPerWorkgroup <= maxComputeWorkgroupSubgroups x computeSubgroupSize
             limits->v1.maxComputeInvocationsPerWorkgroup =
                 std::min(limits->v1.maxComputeInvocationsPerWorkgroup,
                          mDeviceInfo.subgroupSizeControlProperties.maxComputeWorkgroupSubgroups *
-                             mDefaultComputeSubgroupSize);
+                             mDefaultComputeSubgroupSize.value());
         }
     }
 
@@ -1313,16 +1316,16 @@ bool PhysicalDevice::IsSwiftshader() const {
     return gpu_info::IsGoogleSwiftshader(GetVendorId(), GetDeviceId());
 }
 
-uint32_t PhysicalDevice::FindDefaultComputeSubgroupSize() const {
+std::optional<uint32_t> PhysicalDevice::FindDefaultComputeSubgroupSize() const {
     if (!mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) {
-        return 0;
+        return std::nullopt;
     }
 
     const VkPhysicalDeviceSubgroupSizeControlPropertiesEXT& ext =
         mDeviceInfo.subgroupSizeControlProperties;
 
     if (ext.minSubgroupSize == ext.maxSubgroupSize) {
-        return 0;
+        return std::nullopt;
     }
 
     // At the moment, only Intel devices support varying subgroup sizes and 16, which is the
@@ -1363,7 +1366,7 @@ bool PhysicalDevice::CheckSemaphoreSupport(DeviceExt deviceExt,
     return IsSubset(kRequiredSemaphoreFlags, semaphoreProperties.externalSemaphoreFeatures);
 }
 
-uint32_t PhysicalDevice::GetDefaultComputeSubgroupSize() const {
+std::optional<uint32_t> PhysicalDevice::GetDefaultComputeSubgroupSize() const {
     return mDefaultComputeSubgroupSize;
 }
 
@@ -1524,6 +1527,13 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
         subgroupMatrixConfigs->configs = configs;
         subgroupMatrixConfigs->configCount = supportedConfigs.size();
         memcpy(configs, supportedConfigs.data(), count * sizeof(SubgroupMatrixConfig));
+    }
+    if (auto* explicitComputeSubgroupSizeConfigs =
+            info.Get<AdapterPropertiesExplicitComputeSubgroupSizeConfigs>()) {
+        explicitComputeSubgroupSizeConfigs->minExplicitComputeSubgroupSize =
+            mDeviceInfo.subgroupSizeControlProperties.minSubgroupSize;
+        explicitComputeSubgroupSizeConfigs->maxExplicitComputeSubgroupSize =
+            mDeviceInfo.subgroupSizeControlProperties.maxSubgroupSize;
     }
 }
 

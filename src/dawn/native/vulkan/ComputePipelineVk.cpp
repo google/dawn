@@ -104,10 +104,16 @@ MaybeError ComputePipeline::InitializeImpl() {
     VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroupSizeInfo = {};
     PNextChainBuilder stageExtChain(&createInfo.stage);
 
-    uint32_t computeSubgroupSize = device->GetComputeSubgroupSize();
-    if (computeSubgroupSize != 0u) {
+    std::optional<uint32_t> explicitSubgroupSize;
+    if (moduleAndSpirv.explicitSubgroupSize.has_value()) {
+        explicitSubgroupSize = moduleAndSpirv.explicitSubgroupSize;
+    } else {
+        explicitSubgroupSize = device->GetComputeSubgroupSize();
+    }
+
+    if (explicitSubgroupSize.has_value()) {
         DAWN_ASSERT(device->GetDeviceInfo().HasExt(DeviceExt::SubgroupSizeControl));
-        subgroupSizeInfo.requiredSubgroupSize = computeSubgroupSize;
+        subgroupSizeInfo.requiredSubgroupSize = explicitSubgroupSize.value();
         stageExtChain.Add(
             &subgroupSizeInfo,
             VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT);

@@ -112,9 +112,9 @@ class Device final : public DeviceBase {
                                             const TextureCopy& dst,
                                             const Extent3D& copySizePixels) override;
 
-    // Return the fixed subgroup size to use for compute shaders on this device or 0 if none
-    // needs to be set.
-    uint32_t GetComputeSubgroupSize() const;
+    // Return the fixed subgroup size to use for compute shaders on this device or std::nullopt
+    // if none needs to be set.
+    std::optional<uint32_t> GetComputeSubgroupSize() const;
 
     uint32_t GetOptimalBytesPerRowAlignment() const override;
     uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;

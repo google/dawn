@@ -20,6 +20,7 @@ The usage is restricted to `compute` shaders.
 |Vulkan|`requiredSubgroupSize` in `VkPipelineShaderStageRequiredSubgroupSizeCreateInfo` on the API side|`subgroupSizeControl` in `VK_EXT_subgroup_size_control` or Vulkan 1.3|
 |Metal|Not Supported|Not Supported|
 
+- Currently `VK_EXT_subgroup_control` is required to enable feature `Subgroups` so we can always enable `chromium_experimental_subgroup_size_control` when `Subgroups` can be enabled.
 - About [71.5%](https://vulkan.gpuinfo.org/listfeaturesextensions.php?extension=VK_EXT_subgroup_size_control) devices support `subgroupSizeControl` according to the report on GPUInfo.org.
 - This extension cannot be supported on Metal.
 - Due to the limited availability, this will need a `enable` statement to be used. For this
