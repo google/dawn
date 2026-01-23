@@ -11,7 +11,7 @@ uint insertBits_e3e3a2() {
   uint v = arg_0;
   uint v_1 = arg_1;
   uint v_2 = arg_2;
-  uint v_3 = (v_2 + arg_3);
+  uint v_3 = (min(v_2, 32u) + min(arg_3, 32u));
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   uint res = (((((v_2 < 32u)) ? ((v_1 << uint(v_2))) : (0u)) & v_5) | (v & ~(v_5)));
@@ -35,7 +35,7 @@ uint insertBits_e3e3a2() {
   uint v = arg_0;
   uint v_1 = arg_1;
   uint v_2 = arg_2;
-  uint v_3 = (v_2 + arg_3);
+  uint v_3 = (min(v_2, 32u) + min(arg_3, 32u));
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   uint res = (((((v_2 < 32u)) ? ((v_1 << uint(v_2))) : (0u)) & v_5) | (v & ~(v_5)));
@@ -69,7 +69,7 @@ uint insertBits_e3e3a2() {
   uint v = arg_0;
   uint v_1 = arg_1;
   uint v_2 = arg_2;
-  uint v_3 = (v_2 + arg_3);
+  uint v_3 = (min(v_2, 32u) + min(arg_3, 32u));
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   uint res = (((((v_2 < 32u)) ? ((v_1 << uint(v_2))) : (0u)) & v_5) | (v & ~(v_5)));

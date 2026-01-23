@@ -11,7 +11,7 @@ int2 insertBits_fe6ba6() {
   int2 v = arg_0;
   int2 v_1 = arg_1;
   uint v_2 = arg_2;
-  uint v_3 = (v_2 + arg_3);
+  uint v_3 = (min(v_2, 32u) + min(arg_3, 32u));
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   int2 v_6 = (((v_2 < 32u)) ? (asint((asuint(v_1) << uint2((v_2).xx)))) : ((int(0)).xx));
@@ -37,7 +37,7 @@ int2 insertBits_fe6ba6() {
   int2 v = arg_0;
   int2 v_1 = arg_1;
   uint v_2 = arg_2;
-  uint v_3 = (v_2 + arg_3);
+  uint v_3 = (min(v_2, 32u) + min(arg_3, 32u));
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   int2 v_6 = (((v_2 < 32u)) ? (asint((asuint(v_1) << uint2((v_2).xx)))) : ((int(0)).xx));
@@ -73,7 +73,7 @@ int2 insertBits_fe6ba6() {
   int2 v = arg_0;
   int2 v_1 = arg_1;
   uint v_2 = arg_2;
-  uint v_3 = (v_2 + arg_3);
+  uint v_3 = (min(v_2, 32u) + min(arg_3, 32u));
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   int2 v_6 = (((v_2 < 32u)) ? (asint((asuint(v_1) << uint2((v_2).xx)))) : ((int(0)).xx));

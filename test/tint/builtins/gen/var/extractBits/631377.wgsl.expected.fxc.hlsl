@@ -9,7 +9,7 @@ uint4 extractBits_631377() {
   uint arg_2 = 1u;
   uint4 v = arg_0;
   uint v_1 = min(arg_1, 32u);
-  uint v_2 = (32u - min(32u, (v_1 + arg_2)));
+  uint v_2 = (32u - min(32u, (v_1 + min(arg_2, 32u))));
   uint4 v_3 = (((v_2 < 32u)) ? ((v << uint4((v_2).xxxx))) : ((0u).xxxx));
   uint4 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint4(((v_2 + v_1)).xxxx))) : (((v_3 >> (31u).xxxx) >> (1u).xxxx)));
   return res;
@@ -30,7 +30,7 @@ uint4 extractBits_631377() {
   uint arg_2 = 1u;
   uint4 v = arg_0;
   uint v_1 = min(arg_1, 32u);
-  uint v_2 = (32u - min(32u, (v_1 + arg_2)));
+  uint v_2 = (32u - min(32u, (v_1 + min(arg_2, 32u))));
   uint4 v_3 = (((v_2 < 32u)) ? ((v << uint4((v_2).xxxx))) : ((0u).xxxx));
   uint4 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint4(((v_2 + v_1)).xxxx))) : (((v_3 >> (31u).xxxx) >> (1u).xxxx)));
   return res;
@@ -61,7 +61,7 @@ uint4 extractBits_631377() {
   uint arg_2 = 1u;
   uint4 v = arg_0;
   uint v_1 = min(arg_1, 32u);
-  uint v_2 = (32u - min(32u, (v_1 + arg_2)));
+  uint v_2 = (32u - min(32u, (v_1 + min(arg_2, 32u))));
   uint4 v_3 = (((v_2 < 32u)) ? ((v << uint4((v_2).xxxx))) : ((0u).xxxx));
   uint4 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint4(((v_2 + v_1)).xxxx))) : (((v_3 >> (31u).xxxx) >> (1u).xxxx)));
   return res;

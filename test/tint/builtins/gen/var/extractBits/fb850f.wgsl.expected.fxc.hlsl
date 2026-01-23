@@ -9,7 +9,7 @@ int4 extractBits_fb850f() {
   uint arg_2 = 1u;
   int4 v = arg_0;
   uint v_1 = min(arg_1, 32u);
-  uint v_2 = (32u - min(32u, (v_1 + arg_2)));
+  uint v_2 = (32u - min(32u, (v_1 + min(arg_2, 32u))));
   int4 v_3 = (((v_2 < 32u)) ? (asint((asuint(v) << uint4((v_2).xxxx)))) : ((int(0)).xxxx));
   int4 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint4(((v_2 + v_1)).xxxx))) : (((v_3 >> (31u).xxxx) >> (1u).xxxx)));
   return res;
@@ -30,7 +30,7 @@ int4 extractBits_fb850f() {
   uint arg_2 = 1u;
   int4 v = arg_0;
   uint v_1 = min(arg_1, 32u);
-  uint v_2 = (32u - min(32u, (v_1 + arg_2)));
+  uint v_2 = (32u - min(32u, (v_1 + min(arg_2, 32u))));
   int4 v_3 = (((v_2 < 32u)) ? (asint((asuint(v) << uint4((v_2).xxxx)))) : ((int(0)).xxxx));
   int4 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint4(((v_2 + v_1)).xxxx))) : (((v_3 >> (31u).xxxx) >> (1u).xxxx)));
   return res;
@@ -61,7 +61,7 @@ int4 extractBits_fb850f() {
   uint arg_2 = 1u;
   int4 v = arg_0;
   uint v_1 = min(arg_1, 32u);
-  uint v_2 = (32u - min(32u, (v_1 + arg_2)));
+  uint v_2 = (32u - min(32u, (v_1 + min(arg_2, 32u))));
   int4 v_3 = (((v_2 < 32u)) ? (asint((asuint(v) << uint4((v_2).xxxx)))) : ((int(0)).xxxx));
   int4 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint4(((v_2 + v_1)).xxxx))) : (((v_3 >> (31u).xxxx) >> (1u).xxxx)));
   return res;
