@@ -144,7 +144,6 @@ TEST_P(ScissorTest, EmptyRect) {
 TEST_P(ScissorTest, ZeroRectPointList2Draws) {
     // TODO(464436694): Zero size scissor fails on Intel Mac for this case.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Metal) && IsIntel());
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 

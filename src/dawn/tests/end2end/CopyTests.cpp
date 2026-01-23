@@ -478,12 +478,6 @@ class CopyTests_T2B : public CopyTests_WithFormatParam {
                                format == wgpu::TextureFormat::RGBA16Float ||
                                format == wgpu::TextureFormat::RG11B10Ufloat) &&
                               IsMacOS() && IsIntel() && IsMetal());
-        DAWN_SUPPRESS_TEST_IF((format == wgpu::TextureFormat::R32Float ||
-                               format == wgpu::TextureFormat::RG32Float ||
-                               format == wgpu::TextureFormat::RGBA32Float ||
-                               format == wgpu::TextureFormat::RGBA16Float ||
-                               format == wgpu::TextureFormat::RG11B10Ufloat) &&
-                              IsMacOS() && IsIntel() && IsWebGPUOn(wgpu::BackendType::Metal));
 
         // TODO(dawn:1935): Many 16 float formats tests failing for D3D11 and OpenGLES backends on
         // Intel Gen12.
