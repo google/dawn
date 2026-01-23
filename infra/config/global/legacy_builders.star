@@ -440,7 +440,7 @@ luci.console_view_entry(
 # ones defined using chromium-luci code. See crbug.com/459517292.
 # * cmake-linux-clang-dbg-x64
 #   * dawn-linux-x64-sws-cmake-dbg
-#   * dawn-cq-linux-x64-sws-cmake-rel
+#   * dawn-cq-linux-x64-sws-cmake-dbg
 # * cmake-linux-clang-rel-x64
 #   * dawn-linux-x64-sws-cmake-rel
 #   * dawn-cq-linux-x64-sws-cmake-rel

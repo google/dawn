@@ -27,6 +27,7 @@
 
 """CI Dawn builders using CMake for the build system instead of GN."""
 
+load("@chromium-luci//args.star", "args")
 load("@chromium-luci//builder_config.star", "builder_config")
 load("@chromium-luci//builders.star", "cpu", "os")
 load("@chromium-luci//ci.star", "ci")
@@ -121,6 +122,41 @@ dawn_ci_linux_cmake_builder(
     ),
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|cmake|rel",
+        short_name = "x64",
+    ),
+)
+
+dawn_ci_linux_cmake_builder(
+    name = "dawn-linux-x64-sws-cmake-asan",
+    description_html = "Compiles and tests release Dawn test binaries for Linux/x64 using CMake and Clang with ASan and UBSan enabled",
+    # TODO(crbug.com/459517292): Remove this override when the corresponding CQ
+    # builder is added.
+    gardener_rotations = args.ignore_default(None),
+    schedule = "triggered",
+    properties = {
+        "asan": True,
+        "clang": True,
+        "debug": False,
+        "target_cpu": "x64",
+        "ubsan": True,
+    },
+    # Not actually used by the recipe, but needed for chromium-luci mirroring
+    # code to work.
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+            apply_configs = [],
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.LINUX,
+        ),
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "linux|build|clang|cmake|san",
         short_name = "x64",
     ),
 )
