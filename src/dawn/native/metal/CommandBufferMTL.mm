@@ -669,23 +669,18 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
             BindGroup* group = ToBackend(mBindGroups[index]);
             auto* layout = ToBackend(mPipelineLayout->GetBindGroupLayout(index));
 
-            if (mUseArgumentBuffers) {
-                // Note, this argument buffer index must match to the ShaderModuleMTL
-                // #argument-buffer-index
-                uint32_t argumentBufferIdx = curBufferIdx--;
-                std::optional<uint32_t> dynamicBufferIdx = std::nullopt;
+            // Note, this argument buffer index must match to the ShaderModuleMTL
+            // #argument-buffer-index
+            uint32_t argumentBufferIdx = curBufferIdx--;
+            std::optional<uint32_t> dynamicBufferIdx = std::nullopt;
 
-                // TODO(crbug.com/363031535): The dynamic offsets should all be in a single grouping
-                // which is in the immediates buffer.
-                if (uint32_t(layout->GetDynamicBufferCount()) > 0u) {
-                    dynamicBufferIdx = curBufferIdx--;
-                }
-                ApplyBindGroupWithArgumentBuffers(encoder, group, argumentBufferIdx,
-                                                  dynamicBufferIdx, GetDynamicOffsets(index));
-            } else {
-                ApplyBindGroup(encoder, index, group, GetDynamicOffsets(index),
-                               ToBackend(mPipelineLayout));
+            // TODO(crbug.com/363031535): The dynamic offsets should all be in a single grouping
+            // which is in the immediates buffer.
+            if (uint32_t(layout->GetDynamicBufferCount()) > 0u) {
+                dynamicBufferIdx = curBufferIdx--;
             }
+            ApplyBindGroup(encoder, index, group, GetDynamicOffsets(index),
+                           ToBackend(mPipelineLayout), argumentBufferIdx, dynamicBufferIdx);
         }
 
         AfterApply();
@@ -701,7 +696,9 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                             BindGroupIndex index,
                             BindGroup* group,
                             const ityp::span<BindingIndex, uint64_t>& dynamicOffsets,
-                            PipelineLayout* pipelineLayout) {
+                            PipelineLayout* pipelineLayout,
+                            uint32_t argumentBufferIdx,
+                            std::optional<uint32_t> dynamicBufferIdx) {
         // TODO(crbug.com/dawn/854): Maintain buffers and offsets arrays in BindGroup
         // so that we only have to do one setVertexBuffers and one setFragmentBuffers
         // call here.
@@ -735,23 +732,24 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
             auto HandleTextureBinding = [&]() {
                 auto textureView = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                 id<MTLTexture> texture = textureView->GetMTLTexture();
-                if (hasVertStage &&
-                    mBoundTextures[SingleShaderStage::Vertex][vertIndex] != texture) {
-                    mBoundTextures[SingleShaderStage::Vertex][vertIndex] = texture;
-
-                    [render setVertexTexture:texture atIndex:vertIndex];
-                }
-                if (hasFragStage &&
-                    mBoundTextures[SingleShaderStage::Fragment][fragIndex] != texture) {
-                    mBoundTextures[SingleShaderStage::Fragment][fragIndex] = texture;
-
-                    [render setFragmentTexture:texture atIndex:fragIndex];
-                }
-                if (hasComputeStage &&
-                    mBoundTextures[SingleShaderStage::Compute][computeIndex] != texture) {
-                    mBoundTextures[SingleShaderStage::Compute][computeIndex] = texture;
-
-                    [compute setTexture:texture atIndex:computeIndex];
+                if (mUseArgumentBuffers) {
+                    // TODO(crbug.com/477317116): Need to make texture resident.
+                } else {
+                    if (hasVertStage &&
+                        mBoundTextures[SingleShaderStage::Vertex][vertIndex] != texture) {
+                        mBoundTextures[SingleShaderStage::Vertex][vertIndex] = texture;
+                        [render setVertexTexture:texture atIndex:vertIndex];
+                    }
+                    if (hasFragStage &&
+                        mBoundTextures[SingleShaderStage::Fragment][fragIndex] != texture) {
+                        mBoundTextures[SingleShaderStage::Fragment][fragIndex] = texture;
+                        [render setFragmentTexture:texture atIndex:fragIndex];
+                    }
+                    if (hasComputeStage &&
+                        mBoundTextures[SingleShaderStage::Compute][computeIndex] != texture) {
+                        mBoundTextures[SingleShaderStage::Compute][computeIndex] = texture;
+                        [compute setTexture:texture atIndex:computeIndex];
+                    }
                 }
             };
 
@@ -760,105 +758,88 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                 [&](const BufferBindingInfo& layout) {
                     const BufferBinding& binding = group->GetBindingAsBufferBinding(bindingIndex);
                     ToBackend(binding.buffer)->TrackUsage();
-                    const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
-                    NSUInteger offset = binding.offset;
-
-                    // TODO(crbug.com/dawn/854): Record bound buffer status to use
-                    // setBufferOffset to achieve better performance.
-
-                    // TODO(crbug.com/363031535): The dynamic offsets should come from the immediate
-                    // buffer.
-                    if (layout.hasDynamicOffset) {
-                        // Dynamic buffers are packed at the front of BindingIndices.
-                        offset += dynamicOffsets[bindingIndex];
-                    }
 
                     if (hasVertStage) {
                         mLengthTracker->data[SingleShaderStage::Vertex][vertIndex] = binding.size;
                         mLengthTracker->dirtyStages |= wgpu::ShaderStage::Vertex;
-                        [render setVertexBuffers:&buffer
-                                         offsets:&offset
-                                       withRange:NSMakeRange(vertIndex, 1)];
                     }
                     if (hasFragStage) {
                         mLengthTracker->data[SingleShaderStage::Fragment][fragIndex] = binding.size;
                         mLengthTracker->dirtyStages |= wgpu::ShaderStage::Fragment;
-                        [render setFragmentBuffers:&buffer
-                                           offsets:&offset
-                                         withRange:NSMakeRange(fragIndex, 1)];
                     }
                     if (hasComputeStage) {
                         mLengthTracker->data[SingleShaderStage::Compute][computeIndex] =
                             binding.size;
                         mLengthTracker->dirtyStages |= wgpu::ShaderStage::Compute;
-                        [compute setBuffers:&buffer
-                                    offsets:&offset
-                                  withRange:NSMakeRange(computeIndex, 1)];
+                    }
+
+                    const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
+                    if (mUseArgumentBuffers) {
+                        // TODO(crbug.com/477317116): Need to make buffer resident.
+                    } else {
+                        NSUInteger offset = binding.offset;
+
+                        // TODO(crbug.com/dawn/854): Record bound buffer status to use
+                        // setBufferOffset to achieve better performance.
+
+                        // TODO(crbug.com/363031535): The dynamic offsets should come from the
+                        // immediate buffer.
+                        if (layout.hasDynamicOffset) {
+                            // Dynamic buffers are packed at the front of BindingIndices.
+                            offset += dynamicOffsets[bindingIndex];
+                        }
+
+                        if (hasVertStage) {
+                            [render setVertexBuffers:&buffer
+                                             offsets:&offset
+                                           withRange:NSMakeRange(vertIndex, 1)];
+                        }
+                        if (hasFragStage) {
+                            [render setFragmentBuffers:&buffer
+                                               offsets:&offset
+                                             withRange:NSMakeRange(fragIndex, 1)];
+                        }
+                        if (hasComputeStage) {
+                            [compute setBuffers:&buffer
+                                        offsets:&offset
+                                      withRange:NSMakeRange(computeIndex, 1)];
+                        }
                     }
                 },
                 [&](const SamplerBindingInfo&) {
                     auto sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                     id<MTLSamplerState> samplerState = sampler->GetMTLSamplerState();
-                    if (hasVertStage &&
-                        mBoundSamplers[SingleShaderStage::Vertex][vertIndex] != samplerState) {
-                        mBoundSamplers[SingleShaderStage::Vertex][vertIndex] = samplerState;
-                        [render setVertexSamplerState:samplerState atIndex:vertIndex];
+                    if (mUseArgumentBuffers) {
+                        // (Note useResource is not needed; MTLSamplerState is not a MTLResource.)
+                    } else {
+                        if (hasVertStage &&
+                            mBoundSamplers[SingleShaderStage::Vertex][vertIndex] != samplerState) {
+                            mBoundSamplers[SingleShaderStage::Vertex][vertIndex] = samplerState;
+                            [render setVertexSamplerState:samplerState atIndex:vertIndex];
+                        }
+                        if (hasFragStage &&
+                            mBoundSamplers[SingleShaderStage::Fragment][fragIndex] !=
+                                samplerState) {
+                            mBoundSamplers[SingleShaderStage::Fragment][fragIndex] = samplerState;
+                            [render setFragmentSamplerState:samplerState atIndex:fragIndex];
+                        }
+                        if (hasComputeStage &&
+                            mBoundSamplers[SingleShaderStage::Compute][computeIndex] !=
+                                samplerState) {
+                            mBoundSamplers[SingleShaderStage::Compute][computeIndex] = samplerState;
+                            [compute setSamplerState:sampler->GetMTLSamplerState()
+                                             atIndex:computeIndex];
+                        }
                     }
-                    if (hasFragStage &&
-                        mBoundSamplers[SingleShaderStage::Fragment][fragIndex] != samplerState) {
-                        mBoundSamplers[SingleShaderStage::Fragment][fragIndex] = samplerState;
-                        [render setFragmentSamplerState:samplerState atIndex:fragIndex];
-                    }
-                    if (hasComputeStage &&
-                        mBoundSamplers[SingleShaderStage::Compute][computeIndex] != samplerState) {
-                        mBoundSamplers[SingleShaderStage::Compute][computeIndex] = samplerState;
-                        [compute setSamplerState:sampler->GetMTLSamplerState()
-                                         atIndex:computeIndex];
-                    }
                 },
-                [&](const StaticSamplerBindingInfo&) {
-                    // Static samplers are handled in the frontend.
-                    // TODO(crbug.com/dawn/2482): Implement static samplers in the
-                    // Metal backend.
-                    DAWN_UNREACHABLE();
-                },
-                [&](const TextureBindingInfo&) { HandleTextureBinding(); },
-                [&](const StorageTextureBindingInfo&) { HandleTextureBinding(); },
-                [&](const TexelBufferBindingInfo&) {
-                    // Metal does not support texel buffers.
-                    // TODO(crbug/382544164): Prototype texel buffer feature
-                    DAWN_UNREACHABLE();
-                },
-                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); },
-                [](const ExternalTextureBindingInfo&) { DAWN_UNREACHABLE(); });
-        }
-    }
-
-    void ApplyBindGroupWithArgumentBuffersImpl(
-        id<MTLRenderCommandEncoder> render,
-        id<MTLComputeCommandEncoder> compute,
-        BindGroup* group,
-        uint32_t argumentBufferIdx,
-        std::optional<uint32_t> dynamicBufferIdx,
-        const ityp::span<BindingIndex, uint64_t>& dynamicOffsets) {
-        for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {
-            const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
-
-            MatchVariant(
-                bindingInfo.bindingLayout,
-                [&](const BufferBindingInfo& layout) {
-                    const BufferBinding& binding = group->GetBindingAsBufferBinding(bindingIndex);
-                    ToBackend(binding.buffer)->TrackUsage();
-                },
-                [&](const SamplerBindingInfo&) {},
                 [&](const StaticSamplerBindingInfo&) {
                     // Static samplers are handled in the frontend.
                     // TODO(crbug.com/dawn/2482): Implement static samplers in the
                     // Metal backend.
                     DAWN_CHECK(false);
                 },
-                [&](const TextureBindingInfo&) {},  //
-                [&](const StorageTextureBindingInfo&) {},
+                [&](const TextureBindingInfo&) { HandleTextureBinding(); },
+                [&](const StorageTextureBindingInfo&) { HandleTextureBinding(); },
                 [&](const TexelBufferBindingInfo&) {
                     // Metal does not support texel buffers.
                     // TODO(crbug/382544164): Prototype texel buffer feature
@@ -868,53 +849,49 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                 [](const ExternalTextureBindingInfo&) { DAWN_CHECK(false); });
         }
 
-        uint32_t offset_size = uint32_t(dynamicOffsets.size());
-        if (render) {
-            [render setVertexBuffer:*(group->GetArgumentBuffer())
-                             offset:0
-                            atIndex:argumentBufferIdx];
+        if (mUseArgumentBuffers) {
+            uint32_t offset_size = uint32_t(dynamicOffsets.size());
+            if (render) {
+                [render setVertexBuffer:*(group->GetArgumentBuffer())
+                                 offset:0
+                                atIndex:argumentBufferIdx];
 
-            [render setFragmentBuffer:*(group->GetArgumentBuffer())
-                               offset:0
-                              atIndex:argumentBufferIdx];
+                [render setFragmentBuffer:*(group->GetArgumentBuffer())
+                                   offset:0
+                                  atIndex:argumentBufferIdx];
 
-            if (offset_size > 0) {
-                DAWN_ASSERT(dynamicBufferIdx.has_value());
-                [render setVertexBytes:dynamicOffsets.data()
-                                length:offset_size * sizeof(uint32_t)
-                               atIndex:dynamicBufferIdx.value()];
+                if (offset_size > 0) {
+                    DAWN_ASSERT(dynamicBufferIdx.has_value());
+                    [render setVertexBytes:dynamicOffsets.data()
+                                    length:offset_size * sizeof(uint32_t)
+                                   atIndex:dynamicBufferIdx.value()];
 
-                [render setFragmentBytes:dynamicOffsets.data()
-                                  length:offset_size * sizeof(uint32_t)
-                                 atIndex:dynamicBufferIdx.value()];
-            }
-        } else {
-            DAWN_ASSERT(compute != nullptr);
+                    [render setFragmentBytes:dynamicOffsets.data()
+                                      length:offset_size * sizeof(uint32_t)
+                                     atIndex:dynamicBufferIdx.value()];
+                }
+            } else {
+                DAWN_ASSERT(compute != nullptr);
 
-            [compute setBuffer:*(group->GetArgumentBuffer()) offset:0 atIndex:argumentBufferIdx];
+                [compute setBuffer:*(group->GetArgumentBuffer())
+                            offset:0
+                           atIndex:argumentBufferIdx];
 
-            if (offset_size > 0) {
-                DAWN_ASSERT(dynamicBufferIdx.has_value());
-                [compute setBytes:dynamicOffsets.data()
-                           length:offset_size * sizeof(uint32_t)
-                          atIndex:dynamicBufferIdx.value()];
+                if (offset_size > 0) {
+                    DAWN_ASSERT(dynamicBufferIdx.has_value());
+                    [compute setBytes:dynamicOffsets.data()
+                               length:offset_size * sizeof(uint32_t)
+                              atIndex:dynamicBufferIdx.value()];
+                }
             }
         }
     }
 
     template <typename... Args>
-    void ApplyBindGroupWithArgumentBuffers(id<MTLRenderCommandEncoder> encoder, Args&&... args) {
-        ApplyBindGroupWithArgumentBuffersImpl(encoder, nullptr, std::forward<Args&&>(args)...);
-    }
-    template <typename... Args>
     void ApplyBindGroup(id<MTLRenderCommandEncoder> encoder, Args&&... args) {
         ApplyBindGroupImpl(encoder, nullptr, std::forward<Args&&>(args)...);
     }
 
-    template <typename... Args>
-    void ApplyBindGroupWithArgumentBuffers(id<MTLComputeCommandEncoder> encoder, Args&&... args) {
-        ApplyBindGroupWithArgumentBuffersImpl(nullptr, encoder, std::forward<Args&&>(args)...);
-    }
     template <typename... Args>
     void ApplyBindGroup(id<MTLComputeCommandEncoder> encoder, Args&&... args) {
         ApplyBindGroupImpl(nullptr, encoder, std::forward<Args&&>(args)...);
