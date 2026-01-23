@@ -680,8 +680,6 @@ MaybeError Buffer::SynchronizeBufferBeforeUseOnGPU() {
             // Keep D3D12 fence alive until commands complete.
             device->ReferenceUntilUnused(d3dFence->GetD3DFence());
         }
-
-        MarkUsedInPendingCommands();
     }
 
     return {};
