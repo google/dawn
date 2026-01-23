@@ -70,14 +70,57 @@
 
 namespace dawn::native::webgpu {
 
+namespace {
+
+// Toggles in this list are the only ones enabled in webgpu::Device.
+// Other toggles are passed down to the inner device.
+constexpr Toggle kOuterToggles[] = {
+    // Toggles webgpu::Device needs
+    Toggle::SkipValidation,
+    Toggle::DisableBaseVertex,
+    Toggle::DisableBindGroupLayoutEntryArraySize,
+    Toggle::AllowUnsafeAPIs,
+    Toggle::EnableImmediateErrorHandling,
+
+    // Toggles enabled by default for all backend, do not force set them to avoid warnings.
+    Toggle::LazyClearResourceOnFirstUse,
+    Toggle::TimestampQuantization,
+    Toggle::BlobCacheHashValidation,
+    Toggle::UseUserDefinedLabelsInBackend,
+};
+
+}  // namespace
+
 // static
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           WGPUAdapter innerAdapter,
                                           const UnpackedPtr<DeviceDescriptor>& descriptor,
                                           const TogglesState& deviceToggles,
                                           Ref<DeviceBase::DeviceLostEvent>&& lostEvent) {
-    Ref<Device> device = AcquireRef(
-        new Device(adapter, innerAdapter, descriptor, deviceToggles, std::move(lostEvent)));
+    TogglesState outerDeviceToggles = deviceToggles;
+
+    // For the inner device, we want to enable the toggles if they are enabled in deviceToggles.
+    // TogglesState deviceToggles already has them resolved.
+
+    // For outer (this webgpu::Device), we want to disable everything else.
+    std::vector<Toggle> togglesToDisable;
+    for (size_t i : deviceToggles.GetEnabledToggles()) {
+        Toggle t = static_cast<Toggle>(i);
+        bool isOuter = false;
+        for (Toggle outer : kOuterToggles) {
+            if (t == outer) {
+                isOuter = true;
+                break;
+            }
+        }
+        if (!isOuter) {
+            outerDeviceToggles.ForceSet(t, false);
+        }
+    }
+
+    Ref<Device> device =
+        AcquireRef(new Device(adapter, innerAdapter, descriptor, outerDeviceToggles, deviceToggles,
+                              std::move(lostEvent)));
     DAWN_TRY(device->Initialize(descriptor));
     return device;
 }
@@ -86,6 +129,7 @@ Device::Device(AdapterBase* adapter,
                WGPUAdapter innerAdapter,
                const UnpackedPtr<DeviceDescriptor>& descriptor,
                const TogglesState& deviceToggles,
+               const TogglesState& innerDeviceToggles,
                Ref<DeviceBase::DeviceLostEvent>&& lostEvent)
     : DeviceBase(adapter, descriptor, deviceToggles, std::move(lostEvent)),
       ObjectWGPU(ToBackend(adapter->GetPhysicalDevice())->GetFunctions().deviceRelease),
@@ -99,17 +143,13 @@ Device::Device(AdapterBase* adapter,
     WGPUDawnTogglesDescriptor apiToggleDescriptor = WGPU_DAWN_TOGGLES_DESCRIPTOR_INIT;
 
     apiDesc.nextInChain = nullptr;
-    auto enabledTogglesName = deviceToggles.GetEnabledToggleNames();
-
-    std::vector<const char*> enabledToggles(enabledTogglesName.data(),
-                                            enabledTogglesName.data() + enabledTogglesName.size());
+    auto enabledTogglesName = innerDeviceToggles.GetEnabledToggleNames();
     // enable so we can capture the depth aspect of depth24plus and depth24plusStencil8
-    enabledToggles.push_back("use_blit_for_depth24plus_texture_to_buffer_copy");
+    enabledTogglesName.push_back("use_blit_for_depth24plus_texture_to_buffer_copy");
+    apiToggleDescriptor.enabledToggleCount = enabledTogglesName.size();
+    apiToggleDescriptor.enabledToggles = enabledTogglesName.data();
 
-    apiToggleDescriptor.enabledToggleCount = enabledToggles.size();
-    apiToggleDescriptor.enabledToggles = enabledToggles.data();
-
-    auto disabledTogglesName = deviceToggles.GetDisabledToggleNames();
+    auto disabledTogglesName = innerDeviceToggles.GetDisabledToggleNames();
     apiToggleDescriptor.disabledToggleCount = disabledTogglesName.size();
     apiToggleDescriptor.disabledToggles = disabledTogglesName.data();
 

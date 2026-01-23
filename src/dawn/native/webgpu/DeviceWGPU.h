@@ -83,6 +83,7 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
            WGPUAdapter innerAdapter,
            const UnpackedPtr<DeviceDescriptor>& descriptor,
            const TogglesState& deviceToggles,
+           const TogglesState& innerDeviceToggles,
            Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
 
     ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
