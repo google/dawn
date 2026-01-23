@@ -738,6 +738,7 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
             case Command::CopyBufferToTexture:
             case Command::CopyTextureToBuffer:
             case Command::CopyTextureToTexture:
+            case Command::ResolveQuerySet:
             case Command::WriteTimestamp:
             case Command::PushDebugGroup:
             case Command::InsertDebugMarker:

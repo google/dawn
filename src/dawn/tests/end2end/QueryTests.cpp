@@ -101,9 +101,6 @@ class OcclusionQueryTests : public QueryTests {
     void SetUp() override {
         QueryTests::SetUp();
 
-        // TODO(crbug.com/451389800): [Capture] implement query set.
-        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
-
         // Create basic render pipeline
         vsModule = utils::CreateShaderModule(device, R"(
             @vertex
