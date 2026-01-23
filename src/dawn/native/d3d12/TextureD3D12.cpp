@@ -894,12 +894,12 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
             BlockExtent3D largestMipSize = blockInfo.ToBlock(
                 GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel, aspect));
 
-            uint64_t bytesPerRow{
-                Align(blockInfo.ToBytes(largestMipSize.width), kTextureBytesPerRowAlignment)};
-
-            uint64_t uploadSize =
-                bytesPerRow *
-                blockInfo.ToBytes(largestMipSize.height * largestMipSize.depthOrArrayLayers);
+            uint64_t bytesPerRow =
+                Align(blockInfo.ToBytes(largestMipSize.width), kTextureBytesPerRowAlignment);
+            BlockCount blocksPerRow = blockInfo.BytesToBlocks(bytesPerRow);
+            BlockCount uploadBlocks =
+                blocksPerRow * largestMipSize.height * largestMipSize.depthOrArrayLayers;
+            uint64_t uploadSize = blockInfo.ToBytes(uploadBlocks);
 
             DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
                 uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {

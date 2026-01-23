@@ -692,17 +692,19 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
         // Encode a buffer to texture copy to clear each subresource.
         for (Aspect aspect : IterateEnumMask(range.aspects)) {
             // Compute the buffer size big enough to fill the largest mip.
-            const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(aspect).block;
+            const TypedTexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(aspect).block;
 
             // Computations for the bytes per row / image height are done using the physical size
             // so that enough data is reserved for compressed textures.
-            Extent3D largestMipSize =
-                GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel, aspect);
-            uint32_t largestMipBytesPerRow =
-                (largestMipSize.width / blockInfo.width) * blockInfo.byteSize;
-            uint64_t largestMipBytesPerImage = static_cast<uint64_t>(largestMipBytesPerRow) *
-                                               (largestMipSize.height / blockInfo.height);
-            uint64_t uploadSize = largestMipBytesPerImage * largestMipSize.depthOrArrayLayers;
+            BlockExtent3D largestMipSize = blockInfo.ToBlock(
+                GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel, aspect));
+
+            BlockCount uploadBlocks =
+                largestMipSize.width * largestMipSize.height * largestMipSize.depthOrArrayLayers;
+            uint64_t largestMipBytesPerRow = blockInfo.ToBytes(largestMipSize.width);
+            uint64_t largestMipBytesPerImage =
+                blockInfo.ToBytes(largestMipSize.width * largestMipSize.height);
+            uint64_t uploadSize = blockInfo.ToBytes(uploadBlocks);
 
             DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
                 uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
