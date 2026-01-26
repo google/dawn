@@ -27,7 +27,6 @@
 
 """CI Dawn builders using CMake for the build system instead of GN."""
 
-load("@chromium-luci//args.star", "args")
 load("@chromium-luci//builder_config.star", "builder_config")
 load("@chromium-luci//builders.star", "cpu", "os")
 load("@chromium-luci//ci.star", "ci")
@@ -129,9 +128,6 @@ dawn_ci_linux_cmake_builder(
 dawn_ci_linux_cmake_builder(
     name = "dawn-linux-x64-sws-cmake-asan",
     description_html = "Compiles and tests release Dawn test binaries for Linux/x64 using CMake and Clang with ASan and UBSan enabled",
-    # TODO(crbug.com/459517292): Remove this override when the corresponding CQ
-    # builder is added.
-    gardener_rotations = args.ignore_default(None),
     schedule = "triggered",
     properties = {
         "asan": True,
@@ -156,7 +152,7 @@ dawn_ci_linux_cmake_builder(
         ),
     ),
     console_view_entry = consoles.console_view_entry(
-        category = "linux|build|clang|cmake|san",
+        category = "linux|build|clang|cmake|asan",
         short_name = "x64",
     ),
 )

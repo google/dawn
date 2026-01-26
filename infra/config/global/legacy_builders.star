@@ -441,6 +441,12 @@ luci.console_view_entry(
 # * cmake-linux-clang-dbg-x64
 #   * dawn-linux-x64-sws-cmake-dbg
 #   * dawn-cq-linux-x64-sws-cmake-dbg
+# * cmake-linux-clang-rel-x64-asan
+#   * dawn-linux-x64-sws-cmake-asan
+#   * dawn-cq-linux-x64-sws-cmake-asan
+# * cmake-linux-clang-rel-x64-ubsan
+#   * dawn-linux-x64-sws-cmake-asan
+#   * dawn-cq-linux-x64-sws-cmake-asan
 # * cmake-linux-clang-rel-x64
 #   * dawn-linux-x64-sws-cmake-rel
 #   * dawn-cq-linux-x64-sws-cmake-rel
@@ -450,8 +456,6 @@ luci.console_view_entry(
 # * cmake-linux-clang-dbg-x64-asan
 # * cmake-linux-clang-dbg-x64-ubsan
 
-dawn_cmake_standalone_builder("cmake-linux-clang-rel-x64-asan", clang = True, debug = False, cpu = "x64", asan = True, ubsan = False)
-dawn_cmake_standalone_builder("cmake-linux-clang-rel-x64-ubsan", clang = True, debug = False, cpu = "x64", asan = False, ubsan = True)
 dawn_cmake_standalone_builder("cmake-mac-dbg", clang = True, debug = True, cpu = "x64", asan = False, ubsan = False, experimental = False)
 dawn_cmake_standalone_builder("cmake-mac-rel", clang = True, debug = False, cpu = "x64", asan = False, ubsan = False, experimental = False)
 dawn_cmake_standalone_builder("cmake-win-msvc-dbg-x64", clang = False, debug = True, cpu = "x64", asan = False, ubsan = False)
