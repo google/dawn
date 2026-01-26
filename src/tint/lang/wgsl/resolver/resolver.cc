@@ -2797,7 +2797,8 @@ const core::type::U8* Resolver::U8(const ast::Identifier* ident) {
     return validator_.CheckU8Enabled(ident->source) ? b.create<core::type::U8>() : nullptr;
 }
 
-const core::type::U16* Resolver::U16(const ast::Identifier*) {
+const core::type::U16* Resolver::U16(const ast::Identifier* ident) {
+    AddError(ident->source) << "u16 is unsupported in WGSL";
     return nullptr;
 }
 
