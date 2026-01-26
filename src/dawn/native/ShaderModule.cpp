@@ -1317,7 +1317,7 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
     bool usesSubgroupMatrix,
     uint32_t maxSubgroupSize,
     const LimitsForCompilationRequest& limits,
-    const LimitsForCompilationRequest& adaterSupportedlimits) {
+    const LimitsForCompilationRequest& adapterSupportedlimits) {
     DAWN_INVALID_IF(workgroupInfo.x < 1 || workgroupInfo.y < 1 || workgroupInfo.z < 1,
                     "Entry-point uses workgroup_size(%u, %u, %u) that are below the "
                     "minimum allowed (1, 1, 1).",
@@ -1327,11 +1327,11 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
         workgroupInfo.y > limits.maxComputeWorkgroupSizeY ||
         workgroupInfo.z > limits.maxComputeWorkgroupSizeZ) [[unlikely]] {
         uint32_t maxComputeWorkgroupSizeXAdapterLimit =
-            adaterSupportedlimits.maxComputeWorkgroupSizeX;
+            adapterSupportedlimits.maxComputeWorkgroupSizeX;
         uint32_t maxComputeWorkgroupSizeYAdapterLimit =
-            adaterSupportedlimits.maxComputeWorkgroupSizeY;
+            adapterSupportedlimits.maxComputeWorkgroupSizeY;
         uint32_t maxComputeWorkgroupSizeZAdapterLimit =
-            adaterSupportedlimits.maxComputeWorkgroupSizeZ;
+            adapterSupportedlimits.maxComputeWorkgroupSizeZ;
         std::string increaseLimitAdvice =
             (workgroupInfo.x <= maxComputeWorkgroupSizeXAdapterLimit &&
              workgroupInfo.y <= maxComputeWorkgroupSizeYAdapterLimit &&
@@ -1359,7 +1359,7 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
                     "The total number of workgroup invocations (%u) exceeds the "
                     "maximum allowed (%u).%s",
                     numInvocations, maxComputeInvocationsPerWorkgroup,
-                    DAWN_INCREASE_LIMIT_MESSAGE(adaterSupportedlimits,
+                    DAWN_INCREASE_LIMIT_MESSAGE(adapterSupportedlimits,
                                                 maxComputeInvocationsPerWorkgroup, numInvocations));
 
     uint32_t maxComputeWorkgroupStorageSize = limits.maxComputeWorkgroupStorageSize;
@@ -1368,7 +1368,7 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
         "The total use of workgroup storage (%u bytes) is larger than "
         "the maximum allowed (%u bytes).%s",
         workgroupInfo.storage_size, maxComputeWorkgroupStorageSize,
-        DAWN_INCREASE_LIMIT_MESSAGE(adaterSupportedlimits, maxComputeWorkgroupStorageSize,
+        DAWN_INCREASE_LIMIT_MESSAGE(adapterSupportedlimits, maxComputeWorkgroupStorageSize,
                                     workgroupInfo.storage_size));
 
     if (usesSubgroupMatrix) {
@@ -1391,6 +1391,23 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
     }
 
     return Extent3D{workgroupInfo.x, workgroupInfo.y, workgroupInfo.z};
+}
+
+MaybeError ValidateExplicitComputeSubgroupSize(const tint::WorkgroupInfo& workgroupInfo,
+                                               uint32_t minExplicitSubgroupSize,
+                                               uint32_t maxExplicitSubgroupSize) {
+    if (workgroupInfo.subgroup_size.has_value()) {
+        DAWN_ASSERT(minExplicitSubgroupSize > 0 && maxExplicitSubgroupSize > 0);
+        const uint32_t explicitSubgroupSize = workgroupInfo.subgroup_size.value();
+        DAWN_INVALID_IF(
+            explicitSubgroupSize < minExplicitSubgroupSize ||
+                explicitSubgroupSize > maxExplicitSubgroupSize,
+            "The subgroup_size attribute (%u) is not in the allowed range "
+            "[minExplicitComputeSubgroupSize, maxExplicitComputeSubgroupSize] ([%u, %u]).",
+            explicitSubgroupSize, minExplicitSubgroupSize, maxExplicitSubgroupSize);
+    }
+
+    return {};
 }
 
 CachedValidationError::CachedValidationError(std::unique_ptr<ErrorData>&& errorData) {

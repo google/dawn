@@ -125,6 +125,9 @@ MaybeError PhysicalDevice::InitializeImpl() {
     // https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics#:~:text=UINT%20WaveLaneCountMax
     mSubgroupMaxSize = 128u;
 
+    mMinExplicitComputeSubgroupSize = mDeviceInfo.waveLaneCountMin;
+    mMaxExplicitComputeSubgroupSize = mDeviceInfo.waveLaneCountMax;
+
     return {};
 }
 
@@ -967,9 +970,9 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     if (auto* explicitComputeSubgroupSizeConfigs =
             info.Get<AdapterPropertiesExplicitComputeSubgroupSizeConfigs>()) {
         explicitComputeSubgroupSizeConfigs->minExplicitComputeSubgroupSize =
-            mDeviceInfo.waveLaneCountMin;
+            GetMinExplicitComputeSubgroupSize();
         explicitComputeSubgroupSizeConfigs->maxExplicitComputeSubgroupSize =
-            mDeviceInfo.waveLaneCountMax;
+            GetMaxExplicitComputeSubgroupSize();
     }
 }
 

@@ -949,30 +949,8 @@ class SubgroupSizeControlTests : public DawnTest {
     void DoTest(uint32_t subgroupSize) {
         DAWN_ASSERT(IsPowerOfTwo(subgroupSize));
 
-        std::stringstream code;
-        code << R"(
-enable subgroups;
-enable chromium_experimental_subgroup_size_control;
-
-override kSubgroupSize : u32;
-
-@group(0) @binding(0)
-var<storage, read_write> output: u32;
-
-@compute @workgroup_size(kSubgroupSize) @subgroup_size(kSubgroupSize)
-fn main(@builtin(subgroup_size) sg_size : u32) {
-    if (subgroupElect()) {
-        output = sg_size;
-    }
-})";
-        wgpu::ShaderModule csModule = utils::CreateShaderModule(device, code.str().c_str());
-
-        wgpu::ConstantEntry entry = {nullptr, "kSubgroupSize", static_cast<double>(subgroupSize)};
-        wgpu::ComputePipelineDescriptor csDesc;
-        csDesc.compute.module = csModule;
-        csDesc.compute.constantCount = 1;
-        csDesc.compute.constants = &entry;
-        auto pipeline = device.CreateComputePipeline(&csDesc);
+        wgpu::ComputePipeline pipeline =
+            CreateComputePipelineWithSubgroupSizeAttribute(subgroupSize, true);
 
         uint32_t outputBufferSizeInBytes = sizeof(uint32_t);
         wgpu::BufferDescriptor outputBufferDesc;
@@ -997,6 +975,46 @@ fn main(@builtin(subgroup_size) sg_size : u32) {
         EXPECT_BUFFER_U32_EQ(subgroupSize, outputBuffer, 0);
     }
 
+    wgpu::ComputePipeline CreateComputePipelineWithSubgroupSizeAttribute(
+        uint32_t subgroupSize,
+        bool setSubgroupSizeAsOverride) {
+        std::stringstream code;
+
+        code << R"(
+enable subgroups;
+enable chromium_experimental_subgroup_size_control;)";
+
+        if (setSubgroupSizeAsOverride) {
+            code << "override kSubgroupSize : u32;\n";
+        } else {
+            code << "const kSubgroupSize = " << subgroupSize << ";\n";
+        }
+
+        code << R"(
+@group(0) @binding(0)
+var<storage, read_write> output: u32;
+
+@compute @workgroup_size(kSubgroupSize) @subgroup_size(kSubgroupSize)
+fn main(@builtin(subgroup_size) sg_size : u32) {
+    if (subgroupElect()) {
+        output = sg_size;
+    }
+}
+)";
+
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = utils::CreateShaderModule(device, code.str().c_str());
+
+        wgpu::ConstantEntry entry;
+        if (setSubgroupSizeAsOverride) {
+            entry = {nullptr, "kSubgroupSize", static_cast<double>(subgroupSize)};
+            csDesc.compute.constantCount = 1;
+            csDesc.compute.constants = &entry;
+        }
+
+        return device.CreateComputePipeline(&csDesc);
+    }
+
   private:
     bool mSupportsSubgroupSizeControl = false;
 };
@@ -1017,6 +1035,48 @@ TEST_P(SubgroupSizeControlTests, TestAllSubgroupSizes) {
     for (uint32_t subgroupSize = subgroupSizeConfigs.minExplicitComputeSubgroupSize;
          subgroupSize <= subgroupSizeConfigs.maxExplicitComputeSubgroupSize; subgroupSize *= 2) {
         DoTest(subgroupSize);
+    }
+}
+
+// Test an error occurs when a value that is less than `minExplicitComputeSubgroupSize` is used as
+// the attribute `@subgroup_size`.
+TEST_P(SubgroupSizeControlTests, LessThanMinExplicitComputeSubgroupSize) {
+    DAWN_TEST_UNSUPPORTED_IF(!SupportSubgroupSizeControl());
+
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesExplicitComputeSubgroupSizeConfigs subgroupSizeConfigs;
+    info.nextInChain = &subgroupSizeConfigs;
+    adapter.GetInfo(&info);
+
+    ASSERT_TRUE(IsPowerOfTwo(subgroupSizeConfigs.minExplicitComputeSubgroupSize));
+
+    uint32_t invalidSubgroupSize = subgroupSizeConfigs.minExplicitComputeSubgroupSize / 2;
+    ASSERT_TRUE(invalidSubgroupSize > 0);
+
+    for (bool setSubgroupSizeAsOverride : {true, false}) {
+        ASSERT_DEVICE_ERROR(CreateComputePipelineWithSubgroupSizeAttribute(
+            invalidSubgroupSize, setSubgroupSizeAsOverride));
+    }
+}
+
+// Test an error occurs when a value that is more than `maxExplicitComputeSubgroupSize` is used as
+// the attribute `@subgroup_size`.
+TEST_P(SubgroupSizeControlTests, MoreThanMaxExplicitComputeSubgroupSize) {
+    DAWN_TEST_UNSUPPORTED_IF(!SupportSubgroupSizeControl());
+
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesExplicitComputeSubgroupSizeConfigs subgroupSizeConfigs;
+    info.nextInChain = &subgroupSizeConfigs;
+    adapter.GetInfo(&info);
+
+    ASSERT_TRUE(IsPowerOfTwo(subgroupSizeConfigs.maxExplicitComputeSubgroupSize));
+
+    uint32_t invalidSubgroupSize = subgroupSizeConfigs.maxExplicitComputeSubgroupSize * 2;
+    ASSERT_TRUE(invalidSubgroupSize > 0);
+
+    for (bool setSubgroupSizeAsOverride : {true, false}) {
+        ASSERT_DEVICE_ERROR(CreateComputePipelineWithSubgroupSizeAttribute(
+            invalidSubgroupSize, setSubgroupSizeAsOverride));
     }
 }
 

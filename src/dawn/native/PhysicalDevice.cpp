@@ -221,4 +221,12 @@ void PhysicalDeviceBase::PopulateBackendFormatCapabilities(
     wgpu::TextureFormat format,
     UnpackedPtr<DawnFormatCapabilities>& capabilities) const {}
 
+uint32_t PhysicalDeviceBase::GetMinExplicitComputeSubgroupSize() const {
+    return mMinExplicitComputeSubgroupSize;
+}
+
+uint32_t PhysicalDeviceBase::GetMaxExplicitComputeSubgroupSize() const {
+    return mMaxExplicitComputeSubgroupSize;
+}
+
 }  // namespace dawn::native

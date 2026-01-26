@@ -1213,5 +1213,24 @@ TEST_F(SubgroupSizeControlValidationTest, ValidateTotalInvocationsPerWorkgroupAn
     TestTotalInvocationsPerWorkgroupAndSubgroupSize({8, 3, 2}, 32, false);
 }
 
+// Test it is a validation error to use a `@subgroup_size` that is greater than
+// `maxExplicitComputeSubgroupSize` or less than `minExplicitComputeSubgroupSize` on current
+// adapter.
+TEST_F(SubgroupSizeControlValidationTest, ValidateExplicitComputeSubgroupSizes) {
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesExplicitComputeSubgroupSizeConfigs subgroupSizeConfigs;
+    info.nextInChain = &subgroupSizeConfigs;
+    adapter.GetInfo(&info);
+
+    for (uint32_t subgroupSize = subgroupSizeConfigs.minExplicitComputeSubgroupSize / 2;
+         subgroupSize <= subgroupSizeConfigs.maxExplicitComputeSubgroupSize * 2;
+         subgroupSize *= 2) {
+        ASSERT_TRUE(IsPowerOfTwo(subgroupSize));
+        bool success = subgroupSize >= subgroupSizeConfigs.minExplicitComputeSubgroupSize &&
+                       subgroupSize <= subgroupSizeConfigs.maxExplicitComputeSubgroupSize;
+        TestTotalInvocationsPerWorkgroupAndSubgroupSize({subgroupSize}, subgroupSize, success);
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn
