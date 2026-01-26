@@ -28,11 +28,29 @@
 #include "dawn/native/webgpu/ExternalTextureWGPU.h"
 
 #include "dawn/common/StringViewUtils.h"
+#include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
 #include "dawn/native/webgpu/ToWGPU.h"
-
 namespace dawn::native::webgpu {
+
+ExternalTexture::CreationParams::CreationParams(const ExternalTextureDescriptor* descriptor) {
+    cropOrigin = descriptor->cropOrigin;
+    cropSize = descriptor->cropSize;
+    apparentSize = descriptor->apparentSize;
+    doYuvToRgbConversionOnly = descriptor->doYuvToRgbConversionOnly;
+    mirrored = descriptor->mirrored;
+    rotation = descriptor->rotation;
+
+    hasPlane1 = descriptor->plane1 != nullptr;
+
+    std::copy_n(descriptor->yuvToRgbConversionMatrix, 12, yuvToRgbConversionMatrix.begin());
+    std::copy_n(descriptor->srcTransferFunctionParameters, 7,
+                srcTransferFunctionParameters.begin());
+    std::copy_n(descriptor->dstTransferFunctionParameters, 7,
+                dstTransferFunctionParameters.begin());
+    std::copy_n(descriptor->gamutConversionMatrix, 9, gamutConversionMatrix.begin());
+}
 
 // static
 ResultOrError<Ref<ExternalTextureBase>> ExternalTexture::Create(
@@ -46,7 +64,8 @@ ResultOrError<Ref<ExternalTextureBase>> ExternalTexture::Create(
 ExternalTexture::ExternalTexture(Device* device, const ExternalTextureDescriptor* descriptor)
     : ExternalTextureBase(device, descriptor),
       RecordableObject(schema::ObjectType::ExternalTexture),
-      ObjectWGPU(device->wgpu.externalTextureRelease) {
+      ObjectWGPU(device->wgpu.externalTextureRelease),
+      mCreationParams(descriptor) {
     WGPUExternalTextureDescriptor desc = {
         .nextInChain = nullptr,
         .label = ToOutputStringView(GetLabel()),
@@ -81,13 +100,35 @@ void ExternalTexture::SetLabelImpl() {
 }
 
 MaybeError ExternalTexture::AddReferenced(CaptureContext& captureContext) {
-    // TODO(crbug.com/465184041): Capture ExternalTexture
-    DAWN_UNREACHABLE();
+    for (auto view : GetTextureViews()) {
+        if (view.Get() != nullptr) {
+            DAWN_TRY(captureContext.AddResource(ToBackend(view.Get())));
+        }
+    }
+    return {};
 }
 
-MaybeError ExternalTexture::CaptureCreationParameters(CaptureContext& context) {
-    // TODO(crbug.com/465184041): Capture ExternalTexture
-    DAWN_UNREACHABLE();
+MaybeError ExternalTexture::CaptureCreationParameters(CaptureContext& captureContext) {
+    schema::ExternalTexture tex{{
+        .plane0Id = captureContext.GetId(GetTextureViews()[0].Get()),
+        // ExternalTextureBase assigns mExternalTexturePlaceholderView to plane1 if it is not
+        // assigned explicitly in descriptor, so we need to avoid assigning the placeholder view.
+        .plane1Id =
+            mCreationParams.hasPlane1 ? captureContext.GetId(GetTextureViews()[1].Get()) : 0,
+        .cropOrigin = ToSchema(mCreationParams.cropOrigin),
+        .cropSize = ToSchema(mCreationParams.cropSize),
+        .apparentSize = ToSchema(mCreationParams.apparentSize),
+        .doYuvToRgbConversionOnly = mCreationParams.doYuvToRgbConversionOnly,
+        .yuvToRgbConversionMatrix = mCreationParams.yuvToRgbConversionMatrix,
+        .srcTransferFunctionParameters = mCreationParams.srcTransferFunctionParameters,
+        .dstTransferFunctionParameters = mCreationParams.dstTransferFunctionParameters,
+        .gamutConversionMatrix = mCreationParams.gamutConversionMatrix,
+        .mirrored = mCreationParams.mirrored,
+        .rotation = mCreationParams.rotation,
+    }};
+
+    Serialize(captureContext, tex);
+    return {};
 }
 
 }  // namespace dawn::native::webgpu

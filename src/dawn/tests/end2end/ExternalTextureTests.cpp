@@ -218,13 +218,6 @@ class ExternalTextureTestsBase : public Parent {
 
 class ExternalTextureTests : public ExternalTextureTestsBase<DawnTest> {
   protected:
-    void SetUp() override {
-        ExternalTextureTestsBase<DawnTest>::SetUp();
-
-        // TODO(crbug.com/465184041): [Capture] external texture.
-        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
-    }
-
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> requiredFeatures = {};
         if (SupportsFeatures({wgpu::FeatureName::Unorm16TextureFormats})) {
@@ -1670,9 +1663,6 @@ class ExternalTextureOOBTests : public ExternalTextureTestsBase<DawnTestWithPara
   protected:
     void SetUp() override {
         ExternalTextureTestsBase<DawnTestWithParams<OOBTestParams>>::SetUp();
-
-        // TODO(crbug.com/465184041): [Capture] external texture.
-        DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
         sourceTexturePlane0 = Create2DTexture(
             device, kPlaneWidth, kPlaneHeight, wgpu::TextureFormat::R8Unorm,

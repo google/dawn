@@ -30,6 +30,7 @@
 
 #include <webgpu/webgpu_cpp.h>
 
+#include <array>
 #include <cstdint>
 #include <string>
 #include <type_traits>
@@ -68,6 +69,14 @@ MaybeError Deserialize(ReadHead& s, std::vector<T>* v) {
     DAWN_TRY(Deserialize(s, &size));
     v->resize(size);
     for (size_t i = 0; i < size; ++i) {
+        DAWN_TRY(Deserialize(s, &(*v)[i]));
+    }
+    return {};
+}
+
+template <typename T, size_t N>
+MaybeError Deserialize(ReadHead& s, std::array<T, N>* v) {
+    for (size_t i = 0; i < N; ++i) {
         DAWN_TRY(Deserialize(s, &(*v)[i]));
     }
     return {};

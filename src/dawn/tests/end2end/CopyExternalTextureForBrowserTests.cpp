@@ -303,9 +303,6 @@ class CopyExternalTextureForBrowserTests_Basic
 TEST_P(CopyExternalTextureForBrowserTests_Basic, Copy) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
 
-    // TODO(crbug.com/465184041): [Capture] external texture.
-    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
-
     wgpu::CopyTextureForBrowserOptions options = {};
     options.flipY = GetParam().mFlipY;
 
@@ -422,9 +419,6 @@ class CopyExternalTextureForBrowserTests_Aspect : public CopyExternalTextureForB
 
 TEST_P(CopyExternalTextureForBrowserTests_Aspect, Copy) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
-
-    // TODO(crbug.com/465184041): [Capture] external texture.
-    DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
     wgpu::Origin3D srcOrigin = {};
     wgpu::Origin3D dstOrigin = {};

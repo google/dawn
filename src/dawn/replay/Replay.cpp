@@ -118,6 +118,8 @@ template wgpu::Sampler Replay::GetObjectByLabel<wgpu::Sampler>(std::string_view 
 template wgpu::ShaderModule Replay::GetObjectByLabel<wgpu::ShaderModule>(
     std::string_view label) const;
 template wgpu::Texture Replay::GetObjectByLabel<wgpu::Texture>(std::string_view label) const;
+template wgpu::ExternalTexture Replay::GetObjectByLabel<wgpu::ExternalTexture>(
+    std::string_view label) const;
 template wgpu::TextureView Replay::GetObjectByLabel<wgpu::TextureView>(
     std::string_view label) const;
 
@@ -142,11 +144,25 @@ wgpu::Origin3D ToWGPU(const schema::Origin3D& origin) {
     };
 }
 
+wgpu::Origin2D ToWGPU(const schema::Origin2D& origin) {
+    return wgpu::Origin2D{
+        .x = origin.x,
+        .y = origin.y,
+    };
+}
+
 wgpu::Extent3D ToWGPU(const schema::Extent3D& extent) {
     return wgpu::Extent3D{
         .width = extent.width,
         .height = extent.height,
         .depthOrArrayLayers = extent.depthOrArrayLayers,
+    };
+}
+
+wgpu::Extent2D ToWGPU(const schema::Extent2D& extent) {
+    return wgpu::Extent2D{
+        .width = extent.width,
+        .height = extent.height,
     };
 }
 
@@ -313,6 +329,12 @@ ResultOrError<wgpu::BindGroup> CreateBindGroup(const ReplayImpl& replay,
     DAWN_TRY(Deserialize(readHead, &bg));
 
     std::vector<wgpu::BindGroupEntry> entries;
+    entries.reserve(bg.numEntries);
+    // To make only the case with ExternalTexture more expensive, use
+    // unique_ptr<wgpu::ExternalTextureBindingEntry> for the vector member. vector::reserve is not
+    // needed since the member itself is pointer and the address would not change on reallocation.
+    std::vector<std::unique_ptr<wgpu::ExternalTextureBindingEntry>> externalTextureBindingEntries;
+
     for (uint32_t i = 0; i < bg.numEntries; ++i) {
         schema::BindGroupLayoutEntryType entryType;
         uint32_t binding;
@@ -349,6 +371,30 @@ ResultOrError<wgpu::BindGroup> CreateBindGroup(const ReplayImpl& replay,
                 });
                 break;
             }
+            case schema::BindGroupLayoutEntryType::ExternalTextureBinding: {
+                schema::BindGroupEntryTypeExternalTextureBindingData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+
+                if (data.externalTextureId != 0) {
+                    auto& externalBindingEntryPtr = externalTextureBindingEntries.emplace_back(
+                        std::make_unique<wgpu::ExternalTextureBindingEntry>());
+                    externalBindingEntryPtr->externalTexture =
+                        replay.GetObjectById<wgpu::ExternalTexture>(data.externalTextureId);
+
+                    entries.push_back(wgpu::BindGroupEntry{
+                        .nextInChain = externalBindingEntryPtr.get(),
+                        .binding = binding,
+                    });
+                } else {
+                    // External texture binding can bind a regular texture view
+                    DAWN_ASSERT(data.textureViewId != 0);
+                    entries.push_back(wgpu::BindGroupEntry{
+                        .binding = binding,
+                        .textureView = replay.GetObjectById<wgpu::TextureView>(data.textureViewId),
+                    });
+                }
+                break;
+            }
             default:
                 return DAWN_INTERNAL_ERROR("unsupported bind group entry type");
         }
@@ -372,6 +418,15 @@ ResultOrError<wgpu::BindGroupLayout> CreateBindGroupLayout(const ReplayImpl& rep
     DAWN_TRY(Deserialize(readHead, &bgl));
 
     std::vector<wgpu::BindGroupLayoutEntry> entries;
+    entries.reserve(bgl.numEntries);
+
+    // External texture binding layouts are chained structs that are set as a pointer within
+    // the bind group layout entry. We declare an entry here so that it can be used when needed
+    // in each BindGroupLayoutEntry and so it can stay alive until the call to
+    // device.CreateBindGroupLayout. Because ExternalTextureBindingLayout is an empty struct,
+    // there's no issue with using the same struct multiple times.
+    wgpu::ExternalTextureBindingLayout externalTextureBindingLayout;
+
     for (uint32_t i = 0; i < bgl.numEntries; ++i) {
         schema::BindGroupLayoutEntryType entryType;
         schema::BindGroupLayoutBinding binding;
@@ -445,6 +500,18 @@ ResultOrError<wgpu::BindGroupLayout> CreateBindGroupLayout(const ReplayImpl& rep
                 });
                 break;
             }
+            case schema::BindGroupLayoutEntryType::ExternalTextureBinding: {
+                schema::BindGroupLayoutEntryTypeExternalTextureBindingData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+
+                entries.push_back({
+                    .nextInChain = &externalTextureBindingLayout,
+                    .binding = binding.binding,
+                    .visibility = binding.visibility,
+                    .bindingArraySize = binding.bindingArraySize,
+                });
+                break;
+            }
             default:
                 return DAWN_INTERNAL_ERROR("unhandled bind group layout entry type");
         }
@@ -506,6 +573,32 @@ ResultOrError<wgpu::ComputePipeline> CreateComputePipeline(const ReplayImpl& rep
     };
     wgpu::ComputePipeline computePipeline = device.CreateComputePipeline(&desc);
     return {computePipeline};
+}
+
+ResultOrError<wgpu::ExternalTexture> CreateExternalTexture(const ReplayImpl& replay,
+                                                           wgpu::Device device,
+                                                           ReadHead& readHead,
+                                                           const std::string& label) {
+    schema::ExternalTexture tex;
+    DAWN_TRY(Deserialize(readHead, &tex));
+
+    wgpu::ExternalTextureDescriptor desc{
+        .label = wgpu::StringView(label),
+        .plane0 = replay.GetObjectById<wgpu::TextureView>(tex.plane0Id),
+        .plane1 = replay.GetObjectById<wgpu::TextureView>(tex.plane1Id),
+        .cropOrigin = ToWGPU(tex.cropOrigin),
+        .cropSize = ToWGPU(tex.cropSize),
+        .apparentSize = ToWGPU(tex.apparentSize),
+        .doYuvToRgbConversionOnly = tex.doYuvToRgbConversionOnly,
+        .yuvToRgbConversionMatrix = tex.yuvToRgbConversionMatrix.data(),
+        .srcTransferFunctionParameters = tex.srcTransferFunctionParameters.data(),
+        .dstTransferFunctionParameters = tex.dstTransferFunctionParameters.data(),
+        .gamutConversionMatrix = tex.gamutConversionMatrix.data(),
+        .mirrored = tex.mirrored,
+        .rotation = tex.rotation,
+    };
+    wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&desc);
+    return {externalTexture};
 }
 
 ResultOrError<wgpu::PipelineLayout> CreatePipelineLayout(const ReplayImpl& replay,
@@ -1254,6 +1347,14 @@ MaybeError ReplayImpl::CreateResource(wgpu::Device device, ReadHead& readHead) {
             return {};
         }
 
+        case schema::ObjectType::ExternalTexture: {
+            wgpu::ExternalTexture externalTexture;
+            DAWN_TRY_ASSIGN(externalTexture,
+                            CreateExternalTexture(*this, device, readHead, resource.label));
+            mResources.insert({resource.id, {resource.label, externalTexture}});
+            return {};
+        }
+
         case schema::ObjectType::PipelineLayout: {
             wgpu::PipelineLayout pipelineLayout;
             DAWN_TRY_ASSIGN(pipelineLayout,
@@ -1340,6 +1441,7 @@ MaybeError ReplayImpl::SetLabel(schema::ObjectId id,
         DAWN_SET_LABEL(CommandBuffer)
         DAWN_SET_LABEL(ComputePipeline)
         DAWN_SET_LABEL(Device)
+        DAWN_SET_LABEL(ExternalTexture)
         DAWN_SET_LABEL(PipelineLayout)
         DAWN_SET_LABEL(QuerySet)
         DAWN_SET_LABEL(RenderBundle)

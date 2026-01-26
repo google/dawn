@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_BINDGROUP_H_
 
 #include <array>
+#include <map>
 #include <optional>
 #include <vector>
 
@@ -113,11 +114,21 @@ class BindGroupBase : public ApiObjectBase {
 
     ~BindGroupBase() override;
 
+    // Get the bound ExternalTexture by the APIBindingIndex, if exists.
+    Ref<ExternalTextureBase> GetBoundExternalTexture(APIBindingIndex bindingIndex) const;
+
   private:
     BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
     Ref<BindGroupLayoutBase> mLayout;
     BindGroupLayoutInternalBase::BindingDataPointers mBindingData;
+
+    // This vector hosts the bound external textures of the bind group of each external texture
+    // binding entry.
+    // BindGroupLayoutInternalBase::GetExternalTextureBindingToExternalTextureIndexMap gives a map
+    // from APIBindingIndex to index in this vector. Note: This vector can have null reference entry
+    // because external texture binding entry can bind a texture view instead of an external
+    // texture.
     std::vector<Ref<ExternalTextureBase>> mBoundExternalTextures;
 };
 

@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_WEBGPU_EXTERNALTTEXTUREWGPU_H_
 #define SRC_DAWN_NATIVE_WEBGPU_EXTERNALTTEXTUREWGPU_H_
 
+#include <array>
+
 #include "dawn/native/ExternalTexture.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
 #include "dawn/native/webgpu/RecordableObject.h"
@@ -40,6 +42,23 @@ class ExternalTexture final : public ExternalTextureBase,
                               public RecordableObject,
                               public ObjectWGPU<WGPUExternalTexture> {
   public:
+    struct CreationParams {
+        Origin2D cropOrigin;
+        Extent2D cropSize;
+        Extent2D apparentSize;
+        bool doYuvToRgbConversionOnly;
+        std::array<float, 12> yuvToRgbConversionMatrix;
+        std::array<float, 7> srcTransferFunctionParameters;
+        std::array<float, 7> dstTransferFunctionParameters;
+        std::array<float, 9> gamutConversionMatrix;
+        bool mirrored;
+        wgpu::ExternalTextureRotation rotation;
+
+        bool hasPlane1;
+
+        explicit CreationParams(const ExternalTextureDescriptor* descriptor);
+    };
+
     static ResultOrError<Ref<ExternalTextureBase>> Create(
         Device* device,
         const ExternalTextureDescriptor* descriptor);
@@ -53,6 +72,7 @@ class ExternalTexture final : public ExternalTextureBase,
 
     void DestroyImpl(DestroyReason reason) override;
     void SetLabelImpl() override;
+    CreationParams mCreationParams;
 };
 
 }  // namespace dawn::native::webgpu

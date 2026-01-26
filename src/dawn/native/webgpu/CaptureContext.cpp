@@ -175,11 +175,25 @@ schema::Origin3D ToSchema(const TexelOrigin3D& origin) {
     }};
 }
 
+schema::Origin2D ToSchema(const Origin2D& origin) {
+    return {{
+        .x = origin.x,
+        .y = origin.y,
+    }};
+}
+
 schema::Extent3D ToSchema(const TexelExtent3D& extent) {
     return {{
         .width = static_cast<uint32_t>(extent.width),
         .height = static_cast<uint32_t>(extent.height),
         .depthOrArrayLayers = static_cast<uint32_t>(extent.depthOrArrayLayers),
+    }};
+}
+
+schema::Extent2D ToSchema(const Extent2D& extent) {
+    return {{
+        .width = extent.width,
+        .height = extent.height,
     }};
 }
 

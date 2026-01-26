@@ -2437,6 +2437,88 @@ TEST_P(CaptureAndReplayTests, Depth24PlusNotCopyable) {
     }
 }
 
+// Test that capturing and replaying a BindGroup with an ExternalTexture works.
+TEST_P(CaptureAndReplayTests, BindGroupWithExternalTexture) {
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.size = {1, 1, 1};
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+    wgpu::TextureView plane0 = texture.CreateView();
+
+    auto conversion = utils::GetNoopRGBColorSpaceConversionInfo();
+    wgpu::ExternalTextureDescriptor ethDesc;
+    ethDesc.plane0 = plane0;
+    ethDesc.yuvToRgbConversionMatrix = conversion.yuvToRgbConversionMatrix.data();
+    ethDesc.gamutConversionMatrix = conversion.gamutConversionMatrix.data();
+    ethDesc.srcTransferFunctionParameters = conversion.srcTransferFunctionParameters.data();
+    ethDesc.dstTransferFunctionParameters = conversion.dstTransferFunctionParameters.data();
+    ethDesc.cropOrigin = {0, 0};
+    ethDesc.cropSize = {texture.GetWidth(), texture.GetHeight()};
+    ethDesc.apparentSize = {texture.GetWidth(), texture.GetHeight()};
+    wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&ethDesc);
+
+    const char* shader = R"(
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0, 1);
+        }
+
+        @group(0) @binding(0) var s : sampler;
+        @group(0) @binding(1) var t : texture_external;
+
+        @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                    -> @location(0) vec4f {
+            return textureSampleBaseClampToEdge(t, s, FragCoord.xy / vec2f(4.0, 4.0));
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    // Create an explicit bind group layout.
+    auto bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
+                 {1, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
+    descriptor.vertex.module = module;
+    descriptor.cFragment.module = module;
+    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    auto pipeline = device.CreateRenderPipeline(&descriptor);
+
+    auto sampler = device.CreateSampler();
+
+    auto bg = utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, externalTexture}});
+    bg.SetLabel("MyBindGroup");
+
+    auto renderTexture = CreateTexture("renderTexture", {1}, wgpu::TextureFormat::RGBA8Unorm,
+                                       wgpu::TextureUsage::RenderAttachment);
+    utils::ComboRenderPassDescriptor renderPass({renderTexture.CreateView()});
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+    {
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bg);
+        pass.Draw(3);
+        pass.End();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    // Expect no errors.
+    // Verify that the bind group exists in the replayed device.
+    auto replayedBg = replay->GetObjectByLabel<wgpu::BindGroup>("MyBindGroup");
+    EXPECT_NE(replayedBg, nullptr);
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 class CaptureAndReplayDrawTests : public CaptureAndReplayTests {

@@ -30,6 +30,7 @@
 
 #include <webgpu/webgpu_cpp.h>
 
+#include <array>
 #include <cstdint>
 #include <string>
 #include <type_traits>
@@ -65,6 +66,13 @@ template <typename T>
 void Serialize(CaptureContext& context, const std::vector<T>& v) {
     Serialize(context, v.size());
     for (const auto& elem : v) {
+        Serialize(context, elem);
+    }
+}
+
+template <typename T, size_t N>
+void Serialize(CaptureContext& context, const std::array<T, N>& a) {
+    for (const auto& elem : a) {
         Serialize(context, elem);
     }
 }

@@ -701,6 +701,16 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
             [&](const ExternalTextureBindingInfo&) { counts[BindingTypeOrder_ExternalTexture]++; });
     }
 
+    // Populate map of binding to ordered index to access BindGroup::mBoundExternalTextures.
+    size_t externalTextureIndex = 0;
+    for (const auto& [bindingNumber, apiBindingIndex] : mBindingMap) {
+        const BindingInfo& info = GetAPIBindingInfo(apiBindingIndex);
+        if (std::holds_alternative<ExternalTextureBindingInfo>(info.bindingLayout)) {
+            mExternalTextureBindingToExternalTextureIndexMap.emplace(apiBindingIndex,
+                                                                     externalTextureIndex++);
+        }
+    }
+
     // Do a prefix sum to store the start offset of each binding type.
     BindingIndex sum{0};
     for (auto [type, count] : Enumerate(counts)) {
@@ -765,6 +775,12 @@ APIBindingIndex BindGroupLayoutInternalBase::GetAPIBindingIndex(BindingNumber bi
     const auto& it = mBindingMap.find(bindingNumber);
     DAWN_ASSERT(it != mBindingMap.end());
     return it->second;
+}
+
+const absl::flat_hash_map<APIBindingIndex, size_t>&
+BindGroupLayoutInternalBase::GetExternalTextureBindingToExternalTextureIndexMap() const {
+    DAWN_ASSERT(!IsError());
+    return mExternalTextureBindingToExternalTextureIndexMap;
 }
 
 BindingIndex BindGroupLayoutInternalBase::AsBindingIndex(APIBindingIndex bindingIndex) const {

@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_SERIALIZATION_SCHEMA_H_
 #define SRC_DAWN_SERIALIZATION_SCHEMA_H_
 
+#include <array>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -44,6 +45,12 @@ namespace schema {
 using ObjectId = uint64_t;
 // device is always 1
 const ObjectId kDeviceId = 1;
+
+// Use alias of std::array since the preprocessor doesn't consider < > to be parenthesis for the
+// logic of skipping commas (so the end up splitting macro invocation arguments).
+using FloatArray7 = std::array<float, 7>;
+using Mat3x3 = std::array<float, 9>;
+using Mat4x3 = std::array<float, 12>;
 
 // Helper to select the 1st or 2nd implementation
 #define DAWN_REPLAY_GET_X_MACRO(_1, _2, NAME, ...) NAME
@@ -165,12 +172,24 @@ DAWN_REPLAY_ROOT_COMMANDS_ENUM(DAWN_REPLAY_ENUM)
 
 DAWN_REPLAY_SERIALIZABLE(struct, Origin3D, ORIGIN3D_MEMBER){};
 
+#define ORIGIN2D_MEMBER(X) \
+    X(uint32_t, x)         \
+    X(uint32_t, y)
+
+DAWN_REPLAY_SERIALIZABLE(struct, Origin2D, ORIGIN2D_MEMBER){};
+
 #define EXTENT3D_MEMBER(X) \
     X(uint32_t, width)     \
     X(uint32_t, height)    \
     X(uint32_t, depthOrArrayLayers)
 
 DAWN_REPLAY_SERIALIZABLE(struct, Extent3D, EXTENT3D_MEMBER){};
+
+#define EXTENT2D_MEMBER(X) \
+    X(uint32_t, width)     \
+    X(uint32_t, height)
+
+DAWN_REPLAY_SERIALIZABLE(struct, Extent2D, EXTENT2D_MEMBER){};
 
 #define COLOR_MEMBER(X) \
     X(double, r)        \
@@ -318,6 +337,10 @@ DAWN_REPLAY_MAKE_BINDGROUP_LAYOUT_VARIANT(StorageTextureBinding,
 
 DAWN_REPLAY_MAKE_BINDGROUP_LAYOUT_VARIANT(TextureBinding, TEXTURE_BIND_GROUP_LAYOUT_MEMBER){};
 
+#define EXTERNAL_TEXTURE_BIND_GROUP_LAYOUT_MEMBER(X)
+DAWN_REPLAY_MAKE_BINDGROUP_LAYOUT_VARIANT(ExternalTextureBinding,
+                                          EXTERNAL_TEXTURE_BIND_GROUP_LAYOUT_MEMBER){};
+
 #define BIND_GROUP_LAYOUT_MEMBER(X) X(uint32_t, numEntries)
 
 DAWN_REPLAY_SERIALIZABLE(struct, BindGroupLayout, BIND_GROUP_LAYOUT_MEMBER){};
@@ -388,6 +411,22 @@ DAWN_REPLAY_SERIALIZABLE(struct, TextureView, TEXTURE_VIEW_CREATION_MEMBER){};
 
 DAWN_REPLAY_SERIALIZABLE(struct, QuerySet, QUERYSET_CREATION_MEMBER){};
 
+#define EXTERNAL_TEXTURE_CREATION_MEMBER(X)       \
+    X(ObjectId, plane0Id)                         \
+    X(ObjectId, plane1Id)                         \
+    X(Origin2D, cropOrigin)                       \
+    X(Extent2D, cropSize)                         \
+    X(Extent2D, apparentSize)                     \
+    X(bool, doYuvToRgbConversionOnly)             \
+    X(Mat4x3, yuvToRgbConversionMatrix)           \
+    X(FloatArray7, srcTransferFunctionParameters) \
+    X(FloatArray7, dstTransferFunctionParameters) \
+    X(Mat3x3, gamutConversionMatrix)              \
+    X(bool, mirrored)                             \
+    X(wgpu::ExternalTextureRotation, rotation)
+
+DAWN_REPLAY_SERIALIZABLE(struct, ExternalTexture, EXTERNAL_TEXTURE_CREATION_MEMBER){};
+
 // TODO(452840621): Make this use a chain instead of hard coded to WGSL only and handle other
 // chained structs.
 #define SHADER_MODULE_CREATION_MEMBER(X) X(std::string, code)
@@ -424,6 +463,13 @@ DAWN_REPLAY_MAKE_BINDGROUP_VARIANT(SamplerBinding, SAMPLER_BIND_GROUP_ENTRY_MEMB
 #define TEXTURE_BIND_GROUP_ENTRY_MEMBER(X) X(ObjectId, textureViewId)
 
 DAWN_REPLAY_MAKE_BINDGROUP_VARIANT(TextureBinding, TEXTURE_BIND_GROUP_ENTRY_MEMBER){};
+
+#define EXTERNAL_TEXTURE_BIND_GROUP_ENTRY_MEMBER(X) \
+    X(ObjectId, externalTextureId)                  \
+    X(ObjectId, textureViewId)
+
+DAWN_REPLAY_MAKE_BINDGROUP_VARIANT(ExternalTextureBinding,
+                                   EXTERNAL_TEXTURE_BIND_GROUP_ENTRY_MEMBER){};
 
 #define BIND_GROUP_CREATION_MEMBER(X) \
     X(ObjectId, layoutId)             \

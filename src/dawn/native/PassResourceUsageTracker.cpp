@@ -217,7 +217,10 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
     }
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {
-        mExternalTextureUsages.insert(externalTexture.Get());
+        // The ref of bound external texture can be null.
+        if (externalTexture) {
+            mExternalTextureUsages.insert(externalTexture.Get());
+        }
     }
 }
 
@@ -276,7 +279,10 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
     }
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {
-        mUsage.referencedExternalTextures.insert(externalTexture.Get());
+        // The ref of bound external texture can be null.
+        if (externalTexture) {
+            mUsage.referencedExternalTextures.insert(externalTexture.Get());
+        }
     }
 }
 

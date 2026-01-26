@@ -156,21 +156,48 @@ MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
     {
         const auto& bindingMap = layout->GetBindingMap();
         for (const auto& [bindingNumber, apiBindingIndex] : bindingMap) {
-            BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
             const auto& bindingInfo = layout->GetAPIBindingInfo(apiBindingIndex);
 
             DAWN_TRY(MatchVariant(
                 bindingInfo.bindingLayout,
                 [&](const SamplerBindingInfo& info) -> MaybeError {
+                    BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
                     return captureContext.AddResource(ToBackend(GetBindingAsSampler(bindingIndex)));
                 },
                 [&](const StorageTextureBindingInfo& info) -> MaybeError {
+                    BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
                     return captureContext.AddResource(
                         ToBackend(GetBindingAsTextureView(bindingIndex)));
                 },
                 [&](const TextureBindingInfo& info) -> MaybeError {
+                    BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
                     return captureContext.AddResource(
                         ToBackend(GetBindingAsTextureView(bindingIndex)));
+                },
+                [&](const ExternalTextureBindingInfo& info) -> MaybeError {
+                    Ref<ExternalTextureBase> externalTexture =
+                        GetBoundExternalTexture(apiBindingIndex);
+                    if (externalTexture) {
+                        DAWN_TRY(captureContext.AddResource(ToBackend(externalTexture.Get())));
+
+                        TextureViewBase* plane1 = GetBindingAsTextureView(info.plane1);
+                        if (plane1 != nullptr) {
+                            DAWN_TRY(captureContext.AddResource(ToBackend(plane1)));
+                        }
+
+                        // No need to add reference of the internal params buffer (info.metadata) as
+                        // it is not used in WebGPU backend. That of the replayed backend will still
+                        // be created internally.
+                    }
+
+                    // If not found, it must be a texture view used as an external texture.
+                    // plane0 is that texture view.
+                    TextureViewBase* plane0 = GetBindingAsTextureView(info.plane0);
+                    if (plane0 != nullptr) {
+                        DAWN_TRY(captureContext.AddResource(ToBackend(plane0)));
+                    }
+
+                    return {};
                 },
                 [&](const auto& info) -> MaybeError { return {}; }));
         }
@@ -190,13 +217,13 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
     Serialize(captureContext, bg);
 
     for (const auto& [bindingNumber, apiBindingIndex] : bindingMap) {
-        BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
         const auto& bindingInfo = layout->GetAPIBindingInfo(apiBindingIndex);
         uint32_t binding = uint32_t(bindingNumber);
 
         MatchVariant(
             bindingInfo.bindingLayout,
             [&](const BufferBindingInfo& info) {
+                BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
                 const auto& entry = GetBindingAsBufferBinding(bindingIndex);
                 schema::BindGroupEntryTypeBufferBinding data{{
                     .binding = binding,
@@ -209,6 +236,7 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
                 Serialize(captureContext, data);
             },
             [&](const SamplerBindingInfo& info) {
+                BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
                 const auto& entry = GetBindingAsSampler(bindingIndex);
                 schema::BindGroupEntryTypeSamplerBinding data{{
                     .binding = binding,
@@ -219,6 +247,7 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
                 Serialize(captureContext, data);
             },
             [&](const StorageTextureBindingInfo& info) {
+                BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
                 const auto& entry = GetBindingAsTextureView(bindingIndex);
                 schema::BindGroupEntryTypeTextureBinding data{{
                     .binding = binding,
@@ -229,11 +258,28 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
                 Serialize(captureContext, data);
             },
             [&](const TextureBindingInfo& info) {
+                BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
                 const auto& entry = GetBindingAsTextureView(bindingIndex);
                 schema::BindGroupEntryTypeTextureBinding data{{
                     .binding = binding,
                     .data{{
                         .textureViewId = captureContext.GetId(entry),
+                    }},
+                }};
+                Serialize(captureContext, data);
+            },
+            [&](const ExternalTextureBindingInfo& info) {
+                Ref<ExternalTextureBase> externalTexture = GetBoundExternalTexture(apiBindingIndex);
+
+                schema::BindGroupEntryTypeExternalTextureBinding data{{
+                    .binding = binding,
+                    .data{{
+                        .externalTextureId = captureContext.GetId(ToBackend(externalTexture)),
+                        // The binding could bind a regular texture view if not a externalTexture
+                        .textureViewId = externalTexture
+                                             ? 0
+                                             : captureContext.GetId(
+                                                   ToBackend(GetBindingAsTextureView(info.plane0))),
                     }},
                 }};
                 Serialize(captureContext, data);

@@ -617,6 +617,10 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
         new (&mBindingData.bindings[i]) Ref<ObjectBase>();
     }
 
+    // Fill mBoundTextures with nullptr since these binding entries can possibly be bound without an
+    // external texture.
+    mBoundExternalTextures.resize(layout->GetExternalTextureCount(), nullptr);
+
     // Gather bindings.
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
         UnpackedPtr<BindGroupEntry> entry = Unpack(&descriptor->entries[i]);
@@ -675,7 +679,10 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
                 // the bind group layout are created in this bind group and filled with the external
                 // texture's underlying resources.
                 if (auto* externalTextureBindingEntry = entry.Get<ExternalTextureBindingEntry>()) {
-                    mBoundExternalTextures.push_back(externalTextureBindingEntry->externalTexture);
+                    const auto& externalTextureMap =
+                        layout->GetExternalTextureBindingToExternalTextureIndexMap();
+                    mBoundExternalTextures[externalTextureMap.at(apiBindingIndex)] =
+                        externalTextureBindingEntry->externalTexture;
 
                     DAWN_ASSERT(mBindingData.bindings[info.plane0] == nullptr);
                     mBindingData.bindings[info.plane0] =
@@ -833,6 +840,18 @@ TexelBufferViewBase* BindGroupBase::GetBindingAsTexelBufferView(BindingIndex bin
 const std::vector<Ref<ExternalTextureBase>>& BindGroupBase::GetBoundExternalTextures() const {
     DAWN_ASSERT(!IsError());
     return mBoundExternalTextures;
+}
+
+Ref<ExternalTextureBase> BindGroupBase::GetBoundExternalTexture(
+    APIBindingIndex bindingIndex) const {
+    DAWN_ASSERT(!IsError());
+    const auto& externalTextureMap =
+        GetLayout()->GetExternalTextureBindingToExternalTextureIndexMap();
+    auto it = externalTextureMap.find(bindingIndex);
+    if (it != externalTextureMap.end()) {
+        return mBoundExternalTextures[it->second];
+    }
+    return {};
 }
 
 void BindGroupBase::ForEachUnverifiedBufferBindingIndex(
