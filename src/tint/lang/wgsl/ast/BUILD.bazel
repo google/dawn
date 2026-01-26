@@ -186,6 +186,7 @@ cc_library(
     "traverse_expressions.h",
     "type.h",
     "type_decl.h",
+    "type_traits.h",
     "unary_op_expression.h",
     "var.h",
     "variable.h",

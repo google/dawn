@@ -90,6 +90,7 @@
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/templated_identifier.h"
 #include "src/tint/lang/wgsl/ast/type.h"
+#include "src/tint/lang/wgsl/ast/type_traits.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/lang/wgsl/ast/var.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
@@ -112,73 +113,10 @@ class VariableDeclStatement;
 
 namespace tint::ast {
 
-/// Evaluates to true if T is a Infer, AInt or AFloat.
-template <typename T>
-static constexpr const bool IsInferOrAbstract =
-    std::is_same_v<std::decay_t<T>, core::fluent_types::Infer> || core::IsAbstract<std::decay_t<T>>;
-
-// Forward declare metafunction that evaluates to true iff T can be wrapped in a statement.
-template <typename T, typename = void>
-struct CanWrapInStatement;
-
 /// Builder is a mutable builder for AST nodes.
 /// To construct a Program, populate the builder and then `std::move` it to a
 /// Program.
 class Builder {
-    /// Evaluates to true if T is a Source
-    template <typename T>
-    static constexpr const bool IsSource = std::is_same_v<T, Source>;
-
-    /// Evaluates to true if T is a Number or bool.
-    template <typename T>
-    static constexpr const bool IsScalar =
-        std::is_integral_v<core::UnwrapNumber<T>> ||
-        std::is_floating_point_v<core::UnwrapNumber<T>> || std::is_same_v<T, bool>;
-
-    /// Evaluates to true if T can be converted to an identifier.
-    template <typename T>
-    static constexpr const bool IsIdentifierLike = std::is_same_v<T, Symbol> ||  // Symbol
-                                                   std::is_enum_v<T> ||          // Enum
-                                                   traits::IsStringLike<T>;      // String
-
-    /// A helper used to disable overloads if the first type in `TYPES` is a Source. Used to avoid
-    /// ambiguities in overloads that take a Source as the first parameter and those that
-    /// perfectly-forward the first argument.
-    template <typename... TYPES>
-    using DisableIfSource =
-        std::enable_if_t<!IsSource<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
-
-    /// A helper used to disable overloads if the first type in `TYPES` is a scalar type. Used to
-    /// avoid ambiguities in overloads that take a scalar as the first parameter and those that
-    /// perfectly-forward the first argument.
-    template <typename... TYPES>
-    using DisableIfScalar =
-        std::enable_if_t<!IsScalar<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
-
-    /// A helper used to enable overloads if the first type in `TYPES` is a scalar type. Used to
-    /// avoid ambiguities in overloads that take a scalar as the first parameter and those that
-    /// perfectly-forward the first argument.
-    template <typename... TYPES>
-    using EnableIfScalar =
-        std::enable_if_t<IsScalar<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
-
-    /// A helper used to disable overloads if the first type in `TYPES` is a Vector or
-    /// VectorRef.
-    template <typename... TYPES>
-    using DisableIfVectorLike =
-        std::enable_if_t<!IsVectorLike<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
-
-    /// A helper used to enable overloads if the first type in `TYPES` is identifier-like.
-    template <typename... TYPES>
-    using EnableIfIdentifierLike =
-        std::enable_if_t<IsIdentifierLike<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
-
-    /// A helper used to disable overloads if the first type in `TYPES` is Infer or an abstract
-    /// numeric.
-    template <typename... TYPES>
-    using DisableIfInferOrAbstract =
-        std::enable_if_t<!IsInferOrAbstract<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
-
     /// VarOptions is a helper for accepting an arbitrary number of order independent options for
     /// constructing an ast::Var.
     struct VarOptions {

@@ -178,6 +178,7 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/type.h
   lang/wgsl/ast/type_decl.cc
   lang/wgsl/ast/type_decl.h
+  lang/wgsl/ast/type_traits.h
   lang/wgsl/ast/unary_op_expression.cc
   lang/wgsl/ast/unary_op_expression.h
   lang/wgsl/ast/var.cc

@@ -184,6 +184,7 @@ libtint_source_set("ast") {
     "type.h",
     "type_decl.cc",
     "type_decl.h",
+    "type_traits.h",
     "unary_op_expression.cc",
     "unary_op_expression.h",
     "var.cc",
