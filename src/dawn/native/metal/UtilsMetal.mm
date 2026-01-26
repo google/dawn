@@ -26,15 +26,55 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/native/metal/UtilsMetal.h"
+#include <Metal/Metal.h>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/Math.h"
+#include "dawn/native/Buffer.h"
 #include "dawn/native/CommandBuffer.h"
+#include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/ShaderModule.h"
+#include "dawn/native/dawn_platform.h"
+#include "dawn/native/metal/BufferMTL.h"
 
 namespace dawn::native::metal {
 
 namespace {
+
+MTLResourceUsage ToMTLResourceUsage(wgpu::BufferUsage usage) {
+    if (IsSubset(usage, kReadOnlyBufferUsages)) {
+        return MTLResourceUsageRead;
+    } else {
+        // Technically some of these usages could be write-only, but we can't tell from here.
+        // Also it might not be safe to tell Metal those are write-only.
+        return MTLResourceUsageRead | MTLResourceUsageWrite;
+    }
+}
+
+MTLResourceUsage ToMTLResourceUsage(wgpu::TextureUsage usage) {
+    if (IsSubset(usage, kReadOnlyTextureUsages)) {
+        return MTLResourceUsageRead;
+    } else {
+        // Technically some of these usages could be write-only, but we can't tell from here.
+        // Also it might not be safe to tell Metal those are write-only.
+        return MTLResourceUsageRead | MTLResourceUsageWrite;
+    }
+}
+
+MTLRenderStages ToMTLRenderStages(wgpu::ShaderStage visibility) {
+    // Note wgpu::ShaderStage::Compute is intentionally ignored here. It may be present in the
+    // visibility (which comes from the bind group layout) but it's not relevant here.
+    MTLRenderStages stages = 0;
+    if (visibility & wgpu::ShaderStage::Vertex) {
+        stages |= MTLRenderStageVertex;
+    }
+    if (visibility & wgpu::ShaderStage::Fragment) {
+        stages |= MTLRenderStageFragment;
+    }
+    return stages;
+}
+
 // A helper struct to track state while doing workarounds for Metal render passes. It
 // contains a temporary texture and information about the attachment it replaces.
 // Helper methods encode copies between the two textures.
@@ -152,6 +192,76 @@ void ResolveInAnotherRenderPass(
 
     commandContext->BeginRender(mtlRenderPassForResolve);
     commandContext->EndRender();
+}
+
+// Overloads with matching signatures to make it simpler to call these in the templated function.
+void MakeResourceResident(id<MTLComputeCommandEncoder> encoder,
+                          id<MTLResource> resource,
+                          MTLResourceUsage usage,
+                          wgpu::ShaderStage stages) {
+    // This is a compute encoder. Skip any resources that can't possibly be visible to it.
+    if (stages & (wgpu::ShaderStage::Compute)) {
+        [encoder useResource:resource usage:usage];
+    }
+}
+void MakeResourceResident(id<MTLRenderCommandEncoder> encoder,
+                          id<MTLResource> resource,
+                          MTLResourceUsage usage,
+                          wgpu::ShaderStage stages) {
+    // This is a render encoder. Skip any resources that can't possibly be visible to it.
+    if (stages & (wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment)) {
+        [encoder useResource:resource usage:usage stages:ToMTLRenderStages(stages)];
+    }
+}
+
+// Templated over MTLComputeCommandEncoder/MTLRenderCommandEncoder.
+template <typename T>
+concept MTLEncoderType = std::is_same_v<T, id<MTLComputeCommandEncoder>> ||
+                         std::is_same_v<T, id<MTLRenderCommandEncoder>>;
+template <MTLEncoderType Encoder>
+void MakeResourcesResident(Encoder encoder, const SyncScopeResourceUsage& resourceUsage) {
+    for (size_t i = 0; i < resourceUsage.buffers.size(); ++i) {
+        id<MTLBuffer> buffer = ToBackend(resourceUsage.buffers[i])->GetMTLBuffer();
+        const auto& info = resourceUsage.bufferSyncInfos[i];
+
+        if (info.shaderStages == wgpu::ShaderStage::None) {
+            // This resource is not passed in an argument buffer, it's only used for something else
+            // (like an index buffer) that gets passed to Metal on the API side.
+            continue;
+        }
+
+        MakeResourceResident(encoder, buffer, ToMTLResourceUsage(info.usage), info.shaderStages);
+    }
+
+    for (size_t i = 0; i < resourceUsage.textures.size(); ++i) {
+        Texture* texture = ToBackend(resourceUsage.textures[i]);
+
+        // Collect all the aspects/usages/stages used for any subresource.
+        Aspect aspects{};
+        wgpu::TextureUsage usages{};
+        wgpu::ShaderStage stages{};
+        resourceUsage.textureSyncInfos[i].Iterate(
+            [&](const SubresourceRange& range, const TextureSyncInfo& syncInfo) {
+                aspects |= range.aspects;
+                usages |= syncInfo.usage;
+                stages |= syncInfo.shaderStages;
+            });
+
+        if (stages == wgpu::ShaderStage::None) {
+            // This resource is not passed in an argument buffer, it's only used for something else
+            // (like a render attachment) that gets passed to Metal on the API side.
+            continue;
+        }
+
+        // There are at most three planes. Call useResource for each plane that is used.
+        const Aspect kAspectsCorrespondingToPlane0{~(Aspect::Plane1 | Aspect::Plane2)};
+        for (Aspect plane : {kAspectsCorrespondingToPlane0, Aspect::Plane1, Aspect::Plane2}) {
+            if (aspects & plane) {
+                MakeResourceResident(encoder, texture->GetMTLTexture(plane),
+                                     ToMTLResourceUsage(usages), stages);
+            }
+        }
+    }
 }
 
 }  // anonymous namespace
@@ -668,6 +778,7 @@ MaybeError EnsureDestinationTextureInitialized(CommandRecordingContext* commandC
 
 MaybeError EncodeMetalRenderPass(Device* device,
                                  CommandRecordingContext* commandContext,
+                                 const RenderPassResourceUsage* resourceUsage,
                                  MTLRenderPassDescriptor* mtlRenderPass,
                                  uint32_t width,
                                  uint32_t height,
@@ -735,8 +846,8 @@ MaybeError EncodeMetalRenderPass(Device* device,
         }
 
         if (workaroundUsed) {
-            DAWN_TRY(EncodeMetalRenderPass(device, commandContext, mtlRenderPass, width, height,
-                                           std::move(encodeInside), renderPassCmd));
+            DAWN_TRY(EncodeMetalRenderPass(device, commandContext, nullptr, mtlRenderPass, width,
+                                           height, std::move(encodeInside), renderPassCmd));
 
             for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
                 if (originalAttachments[i].texture == nullptr) {
@@ -771,8 +882,8 @@ MaybeError EncodeMetalRenderPass(Device* device,
 
         // If we found a store + MSAA resolve we need to resolve in a different render pass.
         if (hasStoreAndMSAAResolve) {
-            DAWN_TRY(EncodeMetalRenderPass(device, commandContext, mtlRenderPass, width, height,
-                                           std::move(encodeInside), renderPassCmd));
+            DAWN_TRY(EncodeMetalRenderPass(device, commandContext, nullptr, mtlRenderPass, width,
+                                           height, std::move(encodeInside), renderPassCmd));
 
             ResolveInAnotherRenderPass(commandContext, mtlRenderPass, resolveTextures);
             return {};
@@ -781,9 +892,21 @@ MaybeError EncodeMetalRenderPass(Device* device,
 
     // No (more) workarounds needed! We can finally encode the actual render pass.
     commandContext->EndBlit();
-    DAWN_TRY(encodeInside(commandContext->BeginRender(mtlRenderPass), renderPassCmd));
+    auto renderCommandEncoder = commandContext->BeginRender(mtlRenderPass);
+    if (resourceUsage != nullptr && device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
+        MakeResourcesResident(renderCommandEncoder, *resourceUsage);
+    }
+    DAWN_TRY(encodeInside(renderCommandEncoder, renderPassCmd));
     commandContext->EndRender();
     return {};
+}
+
+void MetalComputePassMakeResourcesResident(DeviceBase* device,
+                                           id<MTLComputeCommandEncoder> encoder,
+                                           const SyncScopeResourceUsage& resourceUsage) {
+    if (device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
+        MakeResourcesResident(encoder, resourceUsage);
+    }
 }
 
 MaybeError EncodeEmptyMetalRenderPass(Device* device,
@@ -791,7 +914,7 @@ MaybeError EncodeEmptyMetalRenderPass(Device* device,
                                       MTLRenderPassDescriptor* mtlRenderPass,
                                       Extent3D size) {
     return EncodeMetalRenderPass(
-        device, commandContext, mtlRenderPass, size.width, size.height,
+        device, commandContext, nullptr, mtlRenderPass, size.width, size.height,
         [&](id<MTLRenderCommandEncoder>, BeginRenderPassCmd*) -> MaybeError { return {}; });
 }
 

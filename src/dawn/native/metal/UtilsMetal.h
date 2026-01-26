@@ -32,6 +32,7 @@
 
 #include "absl/container/inlined_vector.h"
 #include "dawn/common/NSRef.h"
+#include "dawn/native/PassResourceUsage.h"
 #include "dawn/native/dawn_platform.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/ShaderModuleMTL.h"
@@ -124,11 +125,16 @@ using EncodeInsideRenderPass =
     std::function<MaybeError(id<MTLRenderCommandEncoder>, BeginRenderPassCmd* renderPassCmd)>;
 MaybeError EncodeMetalRenderPass(Device* device,
                                  CommandRecordingContext* commandContext,
+                                 const RenderPassResourceUsage* resourceUsage,
                                  MTLRenderPassDescriptor* mtlRenderPass,
                                  uint32_t width,
                                  uint32_t height,
                                  EncodeInsideRenderPass encodeInside,
                                  BeginRenderPassCmd* renderPassCmd = nullptr);
+
+void MetalComputePassMakeResourcesResident(DeviceBase* device,
+                                           id<MTLComputeCommandEncoder> encoder,
+                                           const SyncScopeResourceUsage& resourceUsage);
 
 id<MTLTexture> CreateTextureMtlForPlane(MTLTextureUsage mtlUsage,
                                         const Format& format,

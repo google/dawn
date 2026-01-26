@@ -46,7 +46,7 @@ bool CheckMetalValidationEnabled(InstanceBase* instance) {
         return true;
     }
 
-    // Sometime validation layer can be enabled eternally via xcode or command line.
+    // Validation layer can also be enabled externally via Xcode or command line.
     if (GetEnvironmentVar("METAL_DEVICE_WRAPPER_TYPE").first == "1" ||
         GetEnvironmentVar("MTL_DEBUG_LAYER").first == "1") {
         return true;

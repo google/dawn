@@ -78,7 +78,8 @@ class CommandBuffer final : public CommandBufferBase {
     using CommandBufferBase::CommandBufferBase;
 
     MaybeError EncodeComputePass(CommandRecordingContext* commandContext,
-                                 BeginComputePassCmd* computePassCmd);
+                                 BeginComputePassCmd* computePassCmd,
+                                 const ComputePassResourceUsage& resourceUsage);
 
     // Empty occlusion queries aren't filled to zero on Apple GPUs. This set is used to
     // track which results should be explicitly zero'ed as a workaround. Use of empty queries

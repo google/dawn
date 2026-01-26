@@ -75,7 +75,7 @@ BindGroupLayout::BindGroupLayout(DeviceBase* device,
                 DAWN_CHECK(false);
             },
             [&](const TextureBindingInfo&) { desc.dataType = MTLDataTypeTexture; },
-            [&](const StorageTextureBindingInfo&) { DAWN_CHECK(false); },
+            [&](const StorageTextureBindingInfo&) { desc.dataType = MTLDataTypeTexture; },
             [&](const TexelBufferBindingInfo&) { DAWN_CHECK(false); },
             [](const InputAttachmentBindingInfo&) { DAWN_CHECK(false); },
             [](const ExternalTextureBindingInfo&) { DAWN_CHECK(false); });

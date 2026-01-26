@@ -28,6 +28,7 @@
 #include "dawn/native/metal/CommandBufferMTL.h"
 
 #include "absl/container/flat_hash_map.h"
+#include "dawn/common/Assert.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/common/Range.h"
 #include "dawn/native/BindGroupTracker.h"
@@ -36,6 +37,7 @@
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/ExternalTexture.h"
 #include "dawn/native/ImmediateConstantsTracker.h"
+#include "dawn/native/PassResourceUsage.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/metal/BindGroupLayoutMTL.h"
@@ -732,9 +734,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
             auto HandleTextureBinding = [&]() {
                 auto textureView = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                 id<MTLTexture> texture = textureView->GetMTLTexture();
-                if (mUseArgumentBuffers) {
-                    // TODO(crbug.com/477317116): Need to make texture resident.
-                } else {
+                if (!mUseArgumentBuffers) {
                     if (hasVertStage &&
                         mBoundTextures[SingleShaderStage::Vertex][vertIndex] != texture) {
                         mBoundTextures[SingleShaderStage::Vertex][vertIndex] = texture;
@@ -774,9 +774,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                     }
 
                     const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
-                    if (mUseArgumentBuffers) {
-                        // TODO(crbug.com/477317116): Need to make buffer resident.
-                    } else {
+                    if (!mUseArgumentBuffers) {
                         NSUInteger offset = binding.offset;
 
                         // TODO(crbug.com/dawn/854): Record bound buffer status to use
@@ -809,9 +807,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                 [&](const SamplerBindingInfo&) {
                     auto sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                     id<MTLSamplerState> samplerState = sampler->GetMTLSamplerState();
-                    if (mUseArgumentBuffers) {
-                        // (Note useResource is not needed; MTLSamplerState is not a MTLResource.)
-                    } else {
+                    if (!mUseArgumentBuffers) {
                         if (hasVertStage &&
                             mBoundSamplers[SingleShaderStage::Vertex][vertIndex] != samplerState) {
                             mBoundSamplers[SingleShaderStage::Vertex][vertIndex] = samplerState;
@@ -839,7 +835,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                     DAWN_CHECK(false);
                 },
                 [&](const TextureBindingInfo&) { HandleTextureBinding(); },
-                [&](const StorageTextureBindingInfo&) { HandleTextureBinding(); },
+                [&](const StorageTextureBindingInfo& info) { HandleTextureBinding(); },
                 [&](const TexelBufferBindingInfo&) {
                     // Metal does not support texel buffers.
                     // TODO(crbug/382544164): Prototype texel buffer feature
@@ -1096,17 +1092,17 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
             case Command::BeginComputePass: {
                 BeginComputePassCmd* cmd = mCommands.NextCommand<BeginComputePassCmd>();
 
-                for (TextureBase* texture :
-                     GetResourceUsages().computePasses[nextComputePassNumber].referencedTextures) {
+                const ComputePassResourceUsage& resourceUsage =
+                    GetResourceUsages().computePasses[nextComputePassNumber];
+                for (TextureBase* texture : resourceUsage.referencedTextures) {
                     ToBackend(texture)->SynchronizeTextureBeforeUse(commandContext);
                 }
-                for (const SyncScopeResourceUsage& scope :
-                     GetResourceUsages().computePasses[nextComputePassNumber].dispatchUsages) {
+                for (const SyncScopeResourceUsage& scope : resourceUsage.dispatchUsages) {
                     DAWN_TRY(LazyClearSyncScope(scope, commandContext));
                 }
                 commandContext->EndBlit();
 
-                DAWN_TRY(EncodeComputePass(commandContext, cmd));
+                DAWN_TRY(EncodeComputePass(commandContext, cmd, resourceUsage));
 
                 nextComputePassNumber++;
                 break;
@@ -1115,13 +1111,12 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
             case Command::BeginRenderPass: {
                 BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
 
-                for (TextureBase* texture :
-                     this->GetResourceUsages().renderPasses[nextRenderPassNumber].textures) {
+                const RenderPassResourceUsage& resourceUsage =
+                    GetResourceUsages().renderPasses[nextRenderPassNumber];
+                for (TextureBase* texture : resourceUsage.textures) {
                     ToBackend(texture)->SynchronizeTextureBeforeUse(commandContext);
                 }
-                for (ExternalTextureBase* externalTexture : this->GetResourceUsages()
-                                                                .renderPasses[nextRenderPassNumber]
-                                                                .externalTextures) {
+                for (ExternalTextureBase* externalTexture : resourceUsage.externalTextures) {
                     for (auto& view : externalTexture->GetTextureViews()) {
                         if (view.Get()) {
                             Texture* texture = ToBackend(view->GetTexture());
@@ -1129,8 +1124,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                         }
                     }
                 }
-                DAWN_TRY(LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber],
-                                            commandContext));
+                DAWN_TRY(LazyClearSyncScope(resourceUsage, commandContext));
                 commandContext->EndBlit();
 
                 // Before beginning, we encode a compute pass that converts multi draws into an ICB
@@ -1166,7 +1160,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
 
                 EmptyOcclusionQueries emptyOcclusionQueries;
                 DAWN_TRY(EncodeMetalRenderPass(
-                    device, commandContext, descriptor.Get(), cmd->width, cmd->height,
+                    device, commandContext, &resourceUsage, descriptor.Get(), cmd->width,
+                    cmd->height,
                     [&](id<MTLRenderCommandEncoder> encoder,
                         BeginRenderPassCmd* cmd) -> MaybeError {
                         return this->EncodeRenderPass(
@@ -1545,7 +1540,9 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
 }
 
 MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandContext,
-                                            BeginComputePassCmd* computePassCmd) {
+                                            BeginComputePassCmd* computePassCmd,
+                                            const ComputePassResourceUsage& resourceUsage) {
+    uint64_t currentDispatch = 0;
     ComputePipeline* lastPipeline = nullptr;
     StorageBufferLengthTracker storageBufferLengths = {};
     BindGroupTracker bindGroups(&storageBufferLengths,
@@ -1616,9 +1613,12 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                 bindGroups.Apply(encoder);
                 storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
+                MetalComputePassMakeResourcesResident(
+                    GetDevice(), encoder, resourceUsage.dispatchUsages[currentDispatch]);
 
                 [encoder dispatchThreadgroups:MTLSizeMake(dispatch->x, dispatch->y, dispatch->z)
                         threadsPerThreadgroup:lastPipeline->GetLocalWorkGroupSize()];
+                currentDispatch++;
                 break;
             }
 
@@ -1628,6 +1628,8 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                 bindGroups.Apply(encoder);
                 storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
+                MetalComputePassMakeResourcesResident(
+                    GetDevice(), encoder, resourceUsage.dispatchUsages[currentDispatch]);
 
                 Buffer* buffer = ToBackend(dispatch->indirectBuffer.Get());
                 buffer->TrackUsage();
@@ -1636,6 +1638,7 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                     dispatchThreadgroupsWithIndirectBuffer:indirectBuffer
                                       indirectBufferOffset:dispatch->indirectOffset
                                      threadsPerThreadgroup:lastPipeline->GetLocalWorkGroupSize()];
+                currentDispatch++;
                 break;
             }
 
