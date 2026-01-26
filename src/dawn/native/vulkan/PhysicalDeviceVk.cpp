@@ -1193,6 +1193,9 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::VulkanUseCreateRenderPass2, true);
     }
 
+    // Vulkan waiting is already thread safe.
+    deviceToggles->Default(Toggle::WaitIsThreadSafe, true);
+
     // Enable validation of generated SPIR-V by default.
     // Graphite and other native clients may turn this off.
     deviceToggles->Default(Toggle::EnableSpirvValidation, true);

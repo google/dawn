@@ -477,7 +477,7 @@ ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial wai
                 return VkResult::WrapUnsafe(VK_SUCCESS);
             }
             // Wait for the fence.
-            if (GetDevice()->GetState() == Device::State::Disconnected) [[unlikely]] {
+            if (device->GetState() == Device::State::Disconnected) [[unlikely]] {
                 // If WaitForQueueSerialImpl is called while we are Disconnected, it means that
                 // the device lost came from the ErrorInjector and we need to wait without allowing
                 // any more error to be injected. This is because the device lost was "fake" and
