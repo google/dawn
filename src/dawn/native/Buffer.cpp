@@ -979,10 +979,13 @@ bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) co
         case BufferState::Mapped:
             DAWN_ASSERT(bool{mMapMode & wgpu::MapMode::Read} ^
                         bool{mMapMode & wgpu::MapMode::Write});
-            if (!writable || (mMapMode & wgpu::MapMode::Write)) {
-                break;
+            if (writable && (mMapMode & wgpu::MapMode::Write) == 0) {
+                GetDevice()->EmitLog(
+                    wgpu::LoggingType::Error,
+                    "GetMappedRange: Mapping is read-only. Use GetConstMappedRange instead.");
+                return false;
             }
-            return false;
+            break;
 
         case BufferState::PendingMap:
         case BufferState::Unmapped:

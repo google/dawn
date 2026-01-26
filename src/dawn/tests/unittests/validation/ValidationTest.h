@@ -34,6 +34,7 @@
 
 #include <memory>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "dawn/common/Log.h"
@@ -81,6 +82,26 @@
         ADD_FAILURE() << "Expected device error in:\n " << #statement; \
     }                                                                  \
     do {                                                               \
+    } while (0)
+
+#define ASSERT_DEVICE_LOG(statement, type, messageMatcher)                   \
+    StartExpectDeviceLog(type, messageMatcher);                              \
+    statement;                                                               \
+    device.Tick();                                                           \
+    FlushWire();                                                             \
+    if (!EndExpectDeviceLog()) {                                             \
+        ADD_FAILURE() << "Missing expected device log in:\n " << #statement; \
+    }                                                                        \
+    do {                                                                     \
+    } while (0)
+
+#define ASSERT_NO_DEVICE_LOG(statement) \
+    StartExpectNoDeviceLog();           \
+    statement;                          \
+    device.Tick();                      \
+    FlushWire();                        \
+    EndExpectNoDeviceLog();             \
+    do {                                \
     } while (0)
 
 // Skip a test when the given condition is satisfied.
@@ -140,6 +161,11 @@ class ValidationTest : public testing::Test {
     void StartExpectDeviceError();
     bool EndExpectDeviceError();
     std::string GetLastDeviceErrorMessage() const;
+
+    void StartExpectDeviceLog(wgpu::LoggingType type, testing::Matcher<std::string> messageMatcher);
+    bool EndExpectDeviceLog();
+    void StartExpectNoDeviceLog();
+    void EndExpectNoDeviceLog();
 
     void ExpectDeviceDestruction();
 
@@ -209,6 +235,11 @@ class ValidationTest : public testing::Test {
     bool mExpectError = false;
     bool mError = false;
     testing::Matcher<std::string> mErrorMatcher;
+
+    static constexpr wgpu::LoggingType kExpectNoLog{0};
+    std::optional<std::tuple<wgpu::LoggingType, testing::Matcher<std::string>>> mExpectLog;
+    bool mGotLog = false;
+
     bool mExpectDestruction = false;
 };
 

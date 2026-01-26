@@ -167,15 +167,9 @@ var LibraryWebGPU = {
     importJsBuffer__deps: ['emwgpuCreateBuffer'],
     importJsBuffer: (buffer, parentPtr = 0) => {
       // At the moment, we do not allow importing pending buffers.
-      assert(buffer.mapState != "pending");
-      var mapState = buffer.mapState == "mapped" ?
-        {{{ gpu.BufferMapState.Mapped }}} :
-        {{{ gpu.BufferMapState.Unmapped }}};
-      var bufferPtr = _emwgpuCreateBuffer(parentPtr, mapState);
+      assert(buffer.mapState === "unmapped");
+      var bufferPtr = _emwgpuCreateBuffer(parentPtr);
       WebGPU.Internals.jsObjectInsert(bufferPtr, buffer);
-      if (buffer.mapState == "mapped") {
-        WebGPU.Internals.bufferOnUnmaps[bufferPtr] = [];
-      }
       return bufferPtr;
     },
     {{{ gpu.makeImportJsObject('CommandBuffer') }}}
@@ -731,14 +725,9 @@ var LibraryWebGPU = {
   // Standalone (non-method) functions
   // --------------------------------------------------------------------------
 
-  wgpuGetInstanceCapabilities: (capabilitiesPtr) => {
-    abort('TODO: wgpuGetInstanceCapabilities unimplemented');
-    return 0;
-  },
-
   wgpuGetProcAddress: (device, procName) => {
     abort('TODO(#11526): wgpuGetProcAddress unimplemented');
-    return 0;
+    return {{{ gpu.NULLPTR }}};
   },
 
   // --------------------------------------------------------------------------
@@ -985,7 +974,7 @@ var LibraryWebGPU = {
 #if ASSERTIONS
       err(`buffer.getMappedRange(${offset}, ${size}) failed: ${ex}`);
 #endif
-      return 0;
+      return {{{ gpu.NULLPTR }}};
     }
     var data = _memalign(16, mapped.byteLength);
     HEAPU8.set(new Uint8Array(mapped), data);
@@ -1011,7 +1000,7 @@ var LibraryWebGPU = {
 #if ASSERTIONS
       err(`buffer.getMappedRange(${offset}, ${size}) failed: ${ex}`);
 #endif
-      return 0;
+      return {{{ gpu.NULLPTR }}};
     }
 
     var data = _memalign(16, mapped.byteLength);
@@ -1966,7 +1955,7 @@ var LibraryWebGPU = {
 #if ASSERTIONS
     assert(context);
 #endif
-    if (!context) return 0;
+    if (!context) return {{{ gpu.NULLPTR }}};
 
     context.surfaceLabelWebGPU = WebGPU.makeStringFromOptionalStringView(
       descriptor + {{{ C_STRUCTS.WGPUSurfaceDescriptor.label }}}

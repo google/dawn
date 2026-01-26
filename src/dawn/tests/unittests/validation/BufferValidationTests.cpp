@@ -792,8 +792,10 @@ TEST_F(BufferValidationTest, GetMappedRange_OnUnmappedBuffer) {
         desc.usage = wgpu::BufferUsage::CopySrc;
         wgpu::Buffer buf = device.CreateBuffer(&desc);
 
-        ASSERT_EQ(nullptr, buf.GetMappedRange());
-        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
+        ASSERT_NO_DEVICE_LOG({
+            ASSERT_EQ(nullptr, buf.GetMappedRange());
+            ASSERT_EQ(nullptr, buf.GetConstMappedRange());
+        });
     }
 
     // Unmapped after mappedAtCreation case.
@@ -870,7 +872,10 @@ TEST_F(BufferValidationTest, GetMappedRange_NonConstOnMappedForReading) {
                  mockCb.Callback());
     WaitForAllOperations();
 
-    ASSERT_EQ(nullptr, buf.GetMappedRange());
+    ASSERT_DEVICE_LOG(ASSERT_EQ(nullptr, buf.GetMappedRange()), wgpu::LoggingType::Error,
+                      testing::HasSubstr("Use GetConstMappedRange instead"));
+
+    ASSERT_NO_DEVICE_LOG(ASSERT_NE(nullptr, buf.GetConstMappedRange()));
 }
 
 // Test valid cases to call GetMappedRange on a buffer.

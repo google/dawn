@@ -1299,9 +1299,8 @@ WGPUAdapter emwgpuCreateAdapter(const EventSource* source) {
   return ReturnToAPI(AcquireRef(new WGPUAdapterImpl(source)));
 }
 
-WGPUBuffer emwgpuCreateBuffer(const EventSource* source,
-                              WGPUBufferMapState mapState) {
-  return ReturnToAPI(AcquireRef(new WGPUBufferImpl(source, mapState)));
+WGPUBuffer emwgpuCreateBuffer(const EventSource* source) {
+  return ReturnToAPI(AcquireRef(new WGPUBufferImpl(source, false)));
 }
 
 WGPUDevice emwgpuCreateDevice(const EventSource* source, WGPUQueue queue) {
@@ -1468,7 +1467,9 @@ void* WGPUBufferImpl::GetMappedRange(size_t offset, size_t size) {
     return nullptr;
   }
   if (mPendingMapRequest.mode != WGPUMapMode_Write) {
-    assert(false);
+    DEBUG_PRINTF(
+        "GetMappedRange: Mapping is read-only. Use GetConstMappedRange "
+        "instead.\n");
     return nullptr;
   }
 
@@ -1482,7 +1483,9 @@ WGPUStatus WGPUBufferImpl::WriteMappedRange(size_t offset,
     return WGPUStatus_Error;
   }
   if (mPendingMapRequest.mode != WGPUMapMode_Write) {
-    assert(false);
+    DEBUG_PRINTF(
+        "GetMappedRange: Mapping is read-only. Use GetConstMappedRange "
+        "instead.\n");
     return WGPUStatus_Error;
   }
   return emwgpuBufferWriteMappedRange(this, offset, data, size);

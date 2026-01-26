@@ -418,7 +418,16 @@ WireResult Client::DoBufferMapAsyncCallback(ObjectHandle eventManager,
 }
 
 void* Buffer::APIGetMappedRange(size_t offset, size_t size) {
-    if (!IsMappedForWriting() || !CheckGetMappedRangeOffsetSize(offset, size)) {
+    if (!IsMappedForWriting()) {
+        if (IsMappedForReading()) {
+            std::string error =
+                "GetMappedRange: Mapping is read-only. Use GetConstMappedRange instead.";
+            mDevice->HandleLogging(WGPULoggingType_Error,
+                                   WGPUStringView{error.data(), error.size()});
+        }
+        return nullptr;
+    }
+    if (!CheckGetMappedRangeOffsetSize(offset, size)) {
         return nullptr;
     }
     return static_cast<uint8_t*>(mMappedData) + offset;

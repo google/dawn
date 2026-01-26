@@ -306,4 +306,21 @@ TEST_F(SpotTests, ImportExternalTexture) {
     });
 }
 
+TEST_F(SpotTests, MapReadGetMappedRange) {
+    wgpu::BufferDescriptor readbackDesc{
+        .usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead,
+        .size = sizeof(uint32_t),
+    };
+    auto buffer = mDevice.CreateBuffer(&readbackDesc);
+
+    mInstance.WaitAny(buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
+                                      wgpu::CallbackMode::WaitAnyOnly,
+                                      [&](wgpu::MapAsyncStatus, wgpu::StringView) {
+                                          EXPECT_EQ(buffer.GetMappedRange(), nullptr);
+                                          EXPECT_NE(buffer.GetConstMappedRange(), nullptr);
+                                          buffer.Unmap();
+                                      }),
+                      UINT64_MAX);
+}
+
 }  // namespace
