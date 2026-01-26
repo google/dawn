@@ -2947,6 +2947,8 @@ TEST_P(CopyTests_B2T, Texture3DMipUnaligned) {
 
 // Test that copying a texture 1D works.
 TEST_P(CopyTests_B2T, Texture1DFull) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 1;
     constexpr uint32_t kDepth = 1;
@@ -3291,6 +3293,8 @@ TEST_P(CopyTests_T2T, Texture2DArraySameTextureDifferentMipLevels) {
 
 // Test that copying whole 1D texture in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture1DFull) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 1;
     constexpr uint32_t kDepth = 1;
