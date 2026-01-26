@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-01-22 07:52:31AM
+# Last rolled: 2026-01-26 09:01:24AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -3836,6 +3836,7 @@ crbug.com/0000 [ intel-0x4680 linux renderer-skia-vulkan ] webgpu:web_platform,c
 crbug.com/0000 [ intel linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="bgra8unorm";alphaMode="premultiplied";webgl="webgl";upload="texImage2D" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux renderer-skia-vulkan ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="r32float";dstPremultiplied=false [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rg16unorm";dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux renderer-skia-vulkan ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rgba8unorm";dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux renderer-skia-vulkan ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r8unorm";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux renderer-skia-vulkan ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgba32float";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
