@@ -2170,7 +2170,8 @@ void CommandEncoder::APIResolveQuerySet(QuerySetBase* querySet,
 
             // Encode internal compute pipeline for timestamp query
             if (querySet->GetQueryType() == wgpu::QueryType::Timestamp &&
-                !GetDevice()->IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
+                !GetDevice()->IsToggleEnabled(Toggle::DisableTimestampQueryConversion) &&
+                GetDevice()->GetTimestampPeriodInNS() != 1.0f) {
                 // The below function might create new resources. Need to lock the Device.
                 // TODO(crbug.com/dawn/1618): In future, all temp resources should be created at
                 // Command Submit time, so the locking would be removed from here at that point.
