@@ -410,53 +410,53 @@ class Builder {
         ast::Type void_() const { return ast::Type{}; }
 
         /// @returns a 'bool' type
-        ast::Type bool_() const { return (*this)("bool"); }
+        ast::Type bool_() const { return AsType("bool"); }
 
         /// @param source the Source of the node
         /// @returns a 'bool' type
-        ast::Type bool_(const Source& source) const { return (*this)(source, "bool"); }
+        ast::Type bool_(const Source& source) const { return AsType(source, "bool"); }
 
         /// @returns a 'f16' type
-        ast::Type f16() const { return (*this)("f16"); }
+        ast::Type f16() const { return AsType("f16"); }
 
         /// @param source the Source of the node
         /// @returns a 'f16' type
-        ast::Type f16(const Source& source) const { return (*this)(source, "f16"); }
+        ast::Type f16(const Source& source) const { return AsType(source, "f16"); }
 
         /// @returns a 'f32' type
-        ast::Type f32() const { return (*this)("f32"); }
+        ast::Type f32() const { return AsType("f32"); }
 
         /// @param source the Source of the node
         /// @returns a 'f32' type
-        ast::Type f32(const Source& source) const { return (*this)(source, "f32"); }
+        ast::Type f32(const Source& source) const { return AsType(source, "f32"); }
 
         /// @returns a 'i32' type
-        ast::Type i32() const { return (*this)("i32"); }
+        ast::Type i32() const { return AsType("i32"); }
 
         /// @param source the Source of the node
         /// @returns a 'i32' type
-        ast::Type i32(const Source& source) const { return (*this)(source, "i32"); }
+        ast::Type i32(const Source& source) const { return AsType(source, "i32"); }
 
         /// @returns a 'u32' type
-        ast::Type u32() const { return (*this)("u32"); }
+        ast::Type u32() const { return AsType("u32"); }
 
         /// @param source the Source of the node
         /// @returns a 'u32' type
-        ast::Type u32(const Source& source) const { return (*this)(source, "u32"); }
+        ast::Type u32(const Source& source) const { return AsType(source, "u32"); }
 
         /// @returns a 'i8' type
-        ast::Type i8() const { return (*this)("i8"); }
+        ast::Type i8() const { return AsType("i8"); }
 
         /// @param source the Source of the node
         /// @returns a 'i8' type
-        ast::Type i8(const Source& source) const { return (*this)(source, "i8"); }
+        ast::Type i8(const Source& source) const { return AsType(source, "i8"); }
 
         /// @returns a 'u8' type
-        ast::Type u8() const { return (*this)("u8"); }
+        ast::Type u8() const { return AsType("u8"); }
 
         /// @param source the Source of the node
         /// @returns a 'u8' type
-        ast::Type u8(const Source& source) const { return (*this)(source, "u8"); }
+        ast::Type u8(const Source& source) const { return AsType(source, "u8"); }
 
         /// @param type vector subtype
         /// @param n vector width in elements
@@ -488,7 +488,7 @@ class Builder {
         /// @param type vector subtype
         /// @return a 2-element vector of @p type
         ast::Type vec2(const Source& source, ast::Type type) const {
-            return (*this)(source, "vec2", type);
+            return AsType(source, "vec2", type);
         }
 
         /// @param type vector subtype
@@ -499,7 +499,7 @@ class Builder {
         /// @param type vector subtype
         /// @return a 3-element vector of @p type
         ast::Type vec3(const Source& source, ast::Type type) const {
-            return (*this)(source, "vec3", type);
+            return AsType(source, "vec3", type);
         }
 
         /// @param type vector subtype
@@ -510,7 +510,7 @@ class Builder {
         /// @param type vector subtype
         /// @return a 4-element vector of @p type
         ast::Type vec4(const Source& source, ast::Type type) const {
-            return (*this)(source, "vec4", type);
+            return AsType(source, "vec4", type);
         }
 
         /// @param source the Source of the node
@@ -518,9 +518,9 @@ class Builder {
         template <typename T>
         ast::Type vec2(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "vec2");
+                return AsType(source, "vec2");
             } else {
-                return (*this)(source, "vec2", Of<T>());
+                return AsType(source, "vec2", Of<T>());
             }
         }
 
@@ -529,9 +529,9 @@ class Builder {
         template <typename T>
         ast::Type vec3(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "vec3");
+                return AsType(source, "vec3");
             } else {
-                return (*this)(source, "vec3", Of<T>());
+                return AsType(source, "vec3", Of<T>());
             }
         }
 
@@ -540,9 +540,9 @@ class Builder {
         template <typename T>
         ast::Type vec4(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "vec4");
+                return AsType(source, "vec4");
             } else {
-                return (*this)(source, "vec4", Of<T>());
+                return AsType(source, "vec4", Of<T>());
             }
         }
 
@@ -615,7 +615,7 @@ class Builder {
                     "mat4x2", "mat4x3", "mat4x4",  //
                 };
                 auto i = (columns - 2) * 3 + (rows - 2);
-                return (*this)(source, names[i], type);
+                return AsType(source, names[i], type);
             }
             TINT_ICE() << "invalid matrix dimensions " << columns << "x" << rows;
             return ast::Type{};
@@ -623,49 +623,59 @@ class Builder {
 
         /// @param type matrix subtype
         /// @return a 2x3 matrix of @p type.
-        ast::Type mat2x2(ast::Type type) const { return (*this)("mat2x2", type); }
+        ast::Type mat2x2(ast::Type type) const { return mat2x2(builder->source_, type); }
 
         /// @param type matrix subtype
         /// @return a 2x3 matrix of @p type.
-        ast::Type mat2x3(ast::Type type) const { return (*this)("mat2x3", type); }
+        ast::Type mat2x3(ast::Type type) const { return mat2x3(builder->source_, type); }
 
         /// @param type matrix subtype
         /// @return a 2x4 matrix of @p type.
-        ast::Type mat2x4(ast::Type type) const { return (*this)("mat2x4", type); }
+        ast::Type mat2x4(ast::Type type) const { return mat2x4(builder->source_, type); }
 
         /// @param type matrix subtype
         /// @return a 3x2 matrix of @p type.
-        ast::Type mat3x2(ast::Type type) const { return (*this)("mat3x2", type); }
+        ast::Type mat3x2(ast::Type type) const { return mat3x2(builder->source_, type); }
 
         /// @param type matrix subtype
         /// @return a 3x3 matrix of @p type.
-        ast::Type mat3x3(ast::Type type) const { return (*this)("mat3x3", type); }
+        ast::Type mat3x3(ast::Type type) const { return mat3x3(builder->source_, type); }
 
         /// @param type matrix subtype
         /// @return a 3x4 matrix of @p type.
-        ast::Type mat3x4(ast::Type type) const { return (*this)("mat3x4", type); }
+        ast::Type mat3x4(ast::Type type) const { return mat3x4(builder->source_, type); }
 
         /// @param type matrix subtype
         /// @return a 4x2 matrix of @p type.
-        ast::Type mat4x2(ast::Type type) const { return (*this)("mat4x2", type); }
+        ast::Type mat4x2(ast::Type type) const { return mat4x2(builder->source_, type); }
 
         /// @param type matrix subtype
         /// @return a 4x3 matrix of @p type.
-        ast::Type mat4x3(ast::Type type) const { return (*this)("mat4x3", type); }
+        ast::Type mat4x3(ast::Type type) const { return mat4x3(builder->source_, type); }
 
         /// @param type matrix subtype
         /// @return a 4x4 matrix of @p type.
-        ast::Type mat4x4(ast::Type type) const { return (*this)("mat4x4", type); }
+        ast::Type mat4x4(ast::Type type) const { return mat4x4(builder->source_, type); }
 
         /// @param source the source of the type
         /// @return a 2x2 matrix of the type `T`
         template <typename T>
         ast::Type mat2x2(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "mat2x2");
+                return mat2x2(source);
             } else {
-                return (*this)(source, "mat2x2", Of<T>());
+                return mat2x2(source, Of<T>());
             }
+        }
+
+        /// @param source the source of the type
+        /// @return a 2x2 matrix
+        ast::Type mat2x2(const Source& source) const { return AsType(source, "mat2x2"); }
+
+        /// @param source the source of the type
+        /// @return a 2x2 matrix of @p type
+        ast::Type mat2x2(const Source& source, ast::Type type) const {
+            return AsType(source, "mat2x2", type);
         }
 
         /// @param source the source of the type
@@ -673,10 +683,20 @@ class Builder {
         template <typename T>
         ast::Type mat2x3(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "mat2x3");
+                return mat2x3(source);
             } else {
-                return (*this)(source, "mat2x3", Of<T>());
+                return mat2x3(source, Of<T>());
             }
+        }
+
+        /// @param source the source of the type
+        /// @return a 2x3 matrix
+        ast::Type mat2x3(const Source& source) const { return AsType(source, "mat2x3"); }
+
+        /// @param source the source of the type
+        /// @return a 2x3 matrix of @p type
+        ast::Type mat2x3(const Source& source, ast::Type type) const {
+            return AsType(source, "mat2x3", type);
         }
 
         /// @param source the source of the type
@@ -684,10 +704,20 @@ class Builder {
         template <typename T>
         ast::Type mat2x4(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "mat2x4");
+                return mat2x4(source);
             } else {
-                return (*this)(source, "mat2x4", Of<T>());
+                return mat2x4(source, Of<T>());
             }
+        }
+
+        /// @param source the source of the type
+        /// @return a 2x4 matrix
+        ast::Type mat2x4(const Source& source) const { return AsType(source, "mat2x4"); }
+
+        /// @param source the source of the type
+        /// @return a 2x4 matrix of @p type
+        ast::Type mat2x4(const Source& source, ast::Type type) const {
+            return AsType(source, "mat2x4", type);
         }
 
         /// @param source the source of the type
@@ -695,10 +725,20 @@ class Builder {
         template <typename T>
         ast::Type mat3x2(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "mat3x2");
+                return mat3x2(source);
             } else {
-                return (*this)(source, "mat3x2", Of<T>());
+                return mat3x2(source, Of<T>());
             }
+        }
+
+        /// @param source the source of the type
+        /// @return a 3x2 matrix
+        ast::Type mat3x2(const Source& source) const { return AsType(source, "mat3x2"); }
+
+        /// @param source the source of the type
+        /// @return a 3x2 matrix of @p type
+        ast::Type mat3x2(const Source& source, ast::Type type) const {
+            return AsType(source, "mat3x2", type);
         }
 
         /// @param source the source of the type
@@ -706,10 +746,20 @@ class Builder {
         template <typename T>
         ast::Type mat3x3(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "mat3x3");
+                return mat3x3(source);
             } else {
-                return (*this)(source, "mat3x3", Of<T>());
+                return mat3x3(source, Of<T>());
             }
+        }
+
+        /// @param source the source of the type
+        /// @return a 3x3 matrix
+        ast::Type mat3x3(const Source& source) const { return AsType(source, "mat3x3"); }
+
+        /// @param source the source of the type
+        /// @return a 3x3 matrix of @p type
+        ast::Type mat3x3(const Source& source, ast::Type type) const {
+            return AsType(source, "mat3x3", type);
         }
 
         /// @param source the source of the type
@@ -717,10 +767,20 @@ class Builder {
         template <typename T>
         ast::Type mat3x4(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "mat3x4");
+                return mat3x4(source);
             } else {
-                return (*this)(source, "mat3x4", Of<T>());
+                return mat3x4(source, Of<T>());
             }
+        }
+
+        /// @param source the source of the type
+        /// @return a 3x4 matrix
+        ast::Type mat3x4(const Source& source) const { return AsType(source, "mat3x4"); }
+
+        /// @param source the source of the type
+        /// @return a 3x4 matrix of @p type
+        ast::Type mat3x4(const Source& source, ast::Type type) const {
+            return AsType(source, "mat3x4", type);
         }
 
         /// @param source the source of the type
@@ -728,10 +788,20 @@ class Builder {
         template <typename T>
         ast::Type mat4x2(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "mat4x2");
+                return mat4x2(source);
             } else {
-                return (*this)(source, "mat4x2", Of<T>());
+                return mat4x2(source, Of<T>());
             }
+        }
+
+        /// @param source the source of the type
+        /// @return a 4x2 matrix
+        ast::Type mat4x2(const Source& source) const { return AsType(source, "mat4x2"); }
+
+        /// @param source the source of the type
+        /// @return a 4x2 matrix of @p type
+        ast::Type mat4x2(const Source& source, ast::Type type) const {
+            return AsType(source, "mat4x2", type);
         }
 
         /// @param source the source of the type
@@ -739,10 +809,20 @@ class Builder {
         template <typename T>
         ast::Type mat4x3(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "mat4x3");
+                return mat4x3(source);
             } else {
-                return (*this)(source, "mat4x3", Of<T>());
+                return mat4x3(source, Of<T>());
             }
+        }
+
+        /// @param source the source of the type
+        /// @return a 4x3 matrix
+        ast::Type mat4x3(const Source& source) const { return AsType(source, "mat4x3"); }
+
+        /// @param source the source of the type
+        /// @return a 4x3 matrix of @p type
+        ast::Type mat4x3(const Source& source, ast::Type type) const {
+            return AsType(source, "mat4x3", type);
         }
 
         /// @param source the source of the type
@@ -750,10 +830,20 @@ class Builder {
         template <typename T>
         ast::Type mat4x4(const Source& source) const {
             if constexpr (IsInferOrAbstract<T>) {
-                return (*this)(source, "mat4x4");
+                return mat4x4(source);
             } else {
-                return (*this)(source, "mat4x4", Of<T>());
+                return mat4x4(source, Of<T>());
             }
+        }
+
+        /// @param source the source of the type
+        /// @return a 4x4 matrix
+        ast::Type mat4x4(const Source& source) const { return AsType(source, "mat4x4"); }
+
+        /// @param source the source of the type
+        /// @return a 4x4 matrix of @p type
+        ast::Type mat4x4(const Source& source, ast::Type type) const {
+            return AsType(source, "mat4x4", type);
         }
 
         /// @return a 2x2 matrix of the type `T`
@@ -855,6 +945,10 @@ class Builder {
             return mat<T>(builder->source_, COLUMNS, ROWS);
         }
 
+        /// @param source the source
+        /// @return an array of abstract type
+        ast::Type array(const Source& source) const { return AsType(source, "array"); }
+
         /// @param subtype the array element type
         /// @return an array of type `T`
         ast::Type array(ast::Type subtype) const { return array(builder->source_, subtype); }
@@ -917,7 +1011,7 @@ class Builder {
         ast::Type array() const {
             if constexpr (std::is_same_v<T, core::fluent_types::Infer>) {
                 static_assert(N == 0, "arrays with a count cannot be inferred");
-                return (*this)(builder->source_, "array");
+                return array(builder->source_);
             } else {
                 return array<T, N>(builder->source_);
             }
@@ -963,10 +1057,9 @@ class Builder {
                       ast::Type type,
                       core::Access access = core::Access::kUndefined) const {
             if (access != core::Access::kUndefined) {
-                return (*this)(source, "ptr", address_space, type, access);
-            } else {
-                return (*this)(source, "ptr", address_space, type);
+                return AsType(source, "ptr", address_space, type, access);
             }
+            return AsType(source, "ptr", address_space, type);
         }
 
         /// @param address_space the address space of the pointer
@@ -1024,9 +1117,9 @@ class Builder {
                       core::AddressSpace address_space,
                       core::Access access = core::Access::kUndefined) const {
             if (access != core::Access::kUndefined) {
-                return (*this)(source, "ptr", address_space, Of<T>(), access);
+                return ptr(source, address_space, Of<T>(), access);
             } else {
-                return (*this)(source, "ptr", address_space, Of<T>());
+                return ptr(source, address_space, Of<T>());
             }
         }
 
@@ -1034,12 +1127,12 @@ class Builder {
         /// @param type the type of the atomic
         /// @return the atomic to `type`
         ast::Type atomic(const Source& source, ast::Type type) const {
-            return (*this)(source, "atomic", type);
+            return AsType(source, "atomic", type);
         }
 
         /// @param type the type of the atomic
         /// @return the atomic to `type`
-        ast::Type atomic(ast::Type type) const { return (*this)("atomic", type); }
+        ast::Type atomic(ast::Type type) const { return AsType("atomic", type); }
 
         /// @return the atomic to type `T`
         template <typename T>
@@ -1059,9 +1152,9 @@ class Builder {
         ast::Type sampler(const Source& source, core::type::SamplerKind kind) const {
             switch (kind) {
                 case core::type::SamplerKind::kSampler:
-                    return (*this)(source, "sampler");
+                    return AsType(source, "sampler");
                 case core::type::SamplerKind::kComparisonSampler:
-                    return (*this)(source, "sampler_comparison");
+                    return AsType(source, "sampler_comparison");
             }
             TINT_ICE() << "invalid sampler kind " << kind;
             return ast::Type{};
@@ -1079,13 +1172,13 @@ class Builder {
         ast::Type depth_texture(const Source& source, core::type::TextureDimension dims) const {
             switch (dims) {
                 case core::type::TextureDimension::k2d:
-                    return (*this)(source, "texture_depth_2d");
+                    return AsType(source, "texture_depth_2d");
                 case core::type::TextureDimension::k2dArray:
-                    return (*this)(source, "texture_depth_2d_array");
+                    return AsType(source, "texture_depth_2d_array");
                 case core::type::TextureDimension::kCube:
-                    return (*this)(source, "texture_depth_cube");
+                    return AsType(source, "texture_depth_cube");
                 case core::type::TextureDimension::kCubeArray:
-                    return (*this)(source, "texture_depth_cube_array");
+                    return AsType(source, "texture_depth_cube_array");
                 default:
                     break;
             }
@@ -1105,7 +1198,7 @@ class Builder {
         ast::Type depth_multisampled_texture(const Source& source,
                                              core::type::TextureDimension dims) const {
             if (dims == core::type::TextureDimension::k2d) {
-                return (*this)(source, "texture_depth_multisampled_2d");
+                return AsType(source, "texture_depth_multisampled_2d");
             }
             TINT_ICE() << "invalid depth_multisampled_texture dimensions: " << dims;
             return ast::Type{};
@@ -1127,17 +1220,17 @@ class Builder {
                                   ast::Type subtype) const {
             switch (dims) {
                 case core::type::TextureDimension::k1d:
-                    return (*this)(source, "texture_1d", subtype);
+                    return AsType(source, "texture_1d", subtype);
                 case core::type::TextureDimension::k2d:
-                    return (*this)(source, "texture_2d", subtype);
+                    return AsType(source, "texture_2d", subtype);
                 case core::type::TextureDimension::k3d:
-                    return (*this)(source, "texture_3d", subtype);
+                    return AsType(source, "texture_3d", subtype);
                 case core::type::TextureDimension::k2dArray:
-                    return (*this)(source, "texture_2d_array", subtype);
+                    return AsType(source, "texture_2d_array", subtype);
                 case core::type::TextureDimension::kCube:
-                    return (*this)(source, "texture_cube", subtype);
+                    return AsType(source, "texture_cube", subtype);
                 case core::type::TextureDimension::kCubeArray:
-                    return (*this)(source, "texture_cube_array", subtype);
+                    return AsType(source, "texture_cube_array", subtype);
                 default:
                     break;
             }
@@ -1160,7 +1253,7 @@ class Builder {
                                        core::type::TextureDimension dims,
                                        ast::Type subtype) const {
             if (dims == core::type::TextureDimension::k2d) {
-                return (*this)(source, "texture_multisampled_2d", subtype);
+                return AsType(source, "texture_multisampled_2d", subtype);
             }
             TINT_ICE() << "invalid multisampled_texture dimensions: " << dims;
             return ast::Type{};
@@ -1187,13 +1280,13 @@ class Builder {
                                   core::Access access) const {
             switch (dims) {
                 case core::type::TextureDimension::k1d:
-                    return (*this)(source, "texture_storage_1d", format, access);
+                    return AsType(source, "texture_storage_1d", format, access);
                 case core::type::TextureDimension::k2d:
-                    return (*this)(source, "texture_storage_2d", format, access);
+                    return AsType(source, "texture_storage_2d", format, access);
                 case core::type::TextureDimension::k2dArray:
-                    return (*this)(source, "texture_storage_2d_array", format, access);
+                    return AsType(source, "texture_storage_2d_array", format, access);
                 case core::type::TextureDimension::k3d:
-                    return (*this)(source, "texture_storage_3d", format, access);
+                    return AsType(source, "texture_storage_3d", format, access);
                 default:
                     break;
             }
@@ -1201,14 +1294,11 @@ class Builder {
             return ast::Type{};
         }
 
-        /// @returns the external texture
-        ast::Type external_texture() const { return (*this)("texture_external"); }
-
         /// @param format the texel format
         /// @param access the access control
         /// @returns the texel buffer
         ast::Type texel_buffer(core::TexelFormat format, core::Access access) const {
-            return (*this)("texel_buffer", format, access);
+            return texel_buffer(builder->source_, format, access);
         }
 
         /// @param source the source
@@ -1218,20 +1308,23 @@ class Builder {
         ast::Type texel_buffer(const Source& source,
                                core::TexelFormat format,
                                core::Access access) const {
-            return (*this)(source, "texel_buffer", format, access);
+            return AsType(source, "texel_buffer", format, access);
         }
 
         /// @param subtype the texture subtype.
         /// @returns the input attachment
         ast::Type input_attachment(ast::Type subtype) const {
-            return (*this)("input_attachment", subtype);
+            return AsType("input_attachment", subtype);
         }
 
         /// @param source the Source of the node
         /// @returns the external texture
         ast::Type external_texture(const Source& source) const {
-            return (*this)(source, "texture_external");
+            return AsType(source, "texture_external");
         }
+
+        /// @returns the external texture
+        ast::Type external_texture() const { return external_texture(builder->source_); }
 
         /// @param el the subgroup matrix element type
         /// @param cols the column count
@@ -1251,7 +1344,7 @@ class Builder {
         template <typename C, typename R>
             requires(core::IsNumber<C> && core::IsNumeric<R>)
         ast::Type subgroup_matrix_result(const Source& source, ast::Type el, C cols, R rows) const {
-            return (*this)(source, "subgroup_matrix_result", el, cols, rows);
+            return AsType(source, "subgroup_matrix_result", el, cols, rows);
         }
 
         /// @param el the subgroup matrix element type
@@ -1279,7 +1372,7 @@ class Builder {
         /// @param rows the row count
         /// @returns the subgroup matrix
         ast::Type subgroup_matrix_right(ast::Type el, uint32_t cols, uint32_t rows) const {
-            return (*this)("subgroup_matrix_right", el, core::AInt(cols), core::AInt(rows));
+            return AsType("subgroup_matrix_right", el, core::AInt(cols), core::AInt(rows));
         }
 
         /// @param el the subgroup matrix element type
@@ -1287,7 +1380,7 @@ class Builder {
         /// @param rows the row count
         /// @returns the subgroup matrix
         ast::Type subgroup_matrix_left(ast::Type el, uint32_t cols, uint32_t rows) const {
-            return (*this)("subgroup_matrix_left", el, core::AInt(cols), core::AInt(rows));
+            return AsType("subgroup_matrix_left", el, core::AInt(cols), core::AInt(rows));
         }
 
         /// @param kind the subgroup matrix kind
@@ -1323,7 +1416,7 @@ class Builder {
         /// @returns the buffer
         ast::Type buffer(uint32_t size = 0) const {
             if (size == 0) {
-                return (*this)("buffer");
+                return AsType("buffer");
             }
             return buffer(core::AInt(size));
         }
@@ -1343,43 +1436,12 @@ class Builder {
 
         /// @param type the type
         /// @return an ast::Type of the type declaration.
-        ast::Type Of(const ast::TypeDecl* type) const { return (*this)(type->name->symbol); }
+        ast::Type Of(const ast::TypeDecl* type) const { return AsType(type->name->symbol); }
 
         /// The Builder
         Builder* const builder;
 
       private:
-        /// Creates a type
-        /// @param name the name
-        /// @param args the optional template arguments
-        /// @returns the type
-        template <typename NAME,
-                  typename... ARGS,
-                  typename = DisableIfSource<NAME>,
-                  typename = std::enable_if_t<!std::is_same_v<std::decay_t<NAME>, ast::Type>>>
-        ast::Type operator()(NAME&& name, ARGS&&... args) const {
-            if constexpr (traits::IsTypeOrDerived<traits::PtrElTy<NAME>, ast::Expression>) {
-                static_assert(sizeof...(ARGS) == 0);
-                return {name};
-            } else {
-                return {builder->Expr(
-                    builder->Ident(std::forward<NAME>(name), std::forward<ARGS>(args)...))};
-            }
-        }
-
-        /// Creates a type
-        /// @param source the Source of the node
-        /// @param name the name
-        /// @param args the optional template arguments
-        /// @returns the type
-        template <typename NAME,
-                  typename... ARGS,
-                  typename = std::enable_if_t<!std::is_same_v<std::decay_t<NAME>, ast::Type>>>
-        ast::Type operator()(const Source& source, NAME&& name, ARGS&&... args) const {
-            return {builder->Expr(
-                builder->Ident(source, std::forward<NAME>(name), std::forward<ARGS>(args)...))};
-        }
-
         /// CToAST<T> is specialized for various `T` types and each specialization
         /// contains a single static `get()` method for obtaining the corresponding
         /// AST type for the C type `T`.

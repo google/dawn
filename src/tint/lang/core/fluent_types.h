@@ -46,7 +46,7 @@ using u8 = tint::core::u8;
 using AFloat = tint::core::AFloat;
 using AInt = tint::core::AInt;
 
-// A sentinel type used by some template arguments to signal that the a type should be inferred.
+// A sentinel type used by some template arguments to signal that the type should be inferred.
 struct Infer {};
 
 /// A 'fluent' type helper used to construct an ast::Array or type::Array.
