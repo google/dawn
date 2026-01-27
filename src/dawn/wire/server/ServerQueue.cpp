@@ -62,11 +62,25 @@ WireResult Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue,
 WireResult Server::DoQueueWriteBuffer(Known<WGPUQueue> queue,
                                       Known<WGPUBuffer> buffer,
                                       uint64_t bufferOffset,
-                                      uint64_t size,
-                                      uint64_t writeHandleCreateInfoLength,
-                                      const uint8_t* writeHandleCreateInfo,
-                                      uint64_t writeDataUpdateInfoLength,
-                                      const uint8_t* writeDataUpdateInfo) {
+                                      const uint8_t* data,
+                                      uint64_t size) {
+    if (size > std::numeric_limits<size_t>::max()) {
+        return WireResult::FatalError;
+    }
+
+    mProcs.queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, data,
+                            static_cast<size_t>(size));
+    return WireResult::Success;
+}
+
+WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
+                                        Known<WGPUBuffer> buffer,
+                                        uint64_t bufferOffset,
+                                        uint64_t size,
+                                        uint64_t writeHandleCreateInfoLength,
+                                        const uint8_t* writeHandleCreateInfo,
+                                        uint64_t writeDataUpdateInfoLength,
+                                        const uint8_t* writeDataUpdateInfo) {
     if (size > std::numeric_limits<size_t>::max()) {
         return WireResult::FatalError;
     }
@@ -114,13 +128,28 @@ WireResult Server::DoQueueWriteBuffer(Known<WGPUQueue> queue,
 
 WireResult Server::DoQueueWriteTexture(Known<WGPUQueue> queue,
                                        const WGPUTexelCopyTextureInfo* destination,
+                                       const uint8_t* data,
                                        uint64_t dataSize,
                                        const WGPUTexelCopyBufferLayout* dataLayout,
-                                       const WGPUExtent3D* writeSize,
-                                       uint64_t writeHandleCreateInfoLength,
-                                       const uint8_t* writeHandleCreateInfo,
-                                       uint64_t writeDataUpdateInfoLength,
-                                       const uint8_t* writeDataUpdateInfo) {
+                                       const WGPUExtent3D* writeSize) {
+    if (dataSize > std::numeric_limits<size_t>::max()) {
+        return WireResult::FatalError;
+    }
+
+    mProcs.queueWriteTexture(queue->handle, destination, data, static_cast<size_t>(dataSize),
+                             dataLayout, writeSize);
+    return WireResult::Success;
+}
+
+WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
+                                         const WGPUTexelCopyTextureInfo* destination,
+                                         uint64_t dataSize,
+                                         const WGPUTexelCopyBufferLayout* dataLayout,
+                                         const WGPUExtent3D* writeSize,
+                                         uint64_t writeHandleCreateInfoLength,
+                                         const uint8_t* writeHandleCreateInfo,
+                                         uint64_t writeDataUpdateInfoLength,
+                                         const uint8_t* writeDataUpdateInfo) {
     if (dataSize > std::numeric_limits<size_t>::max()) {
         return WireResult::FatalError;
     }
