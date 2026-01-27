@@ -86,12 +86,12 @@ MaybeError PipelineLayout::AddReferenced(CaptureContext& captureContext) {
 }
 
 MaybeError PipelineLayout::CaptureCreationParameters(CaptureContext& captureContext) {
-    std::vector<schema::ObjectId> bindGroupLayoutIds;
+    std::vector<schema::ObjectId> bindGroupLayoutIds(kMaxBindGroups, 0);
 
     for (BindGroupIndex groupIndex : GetBindGroupLayoutsMask()) {
         auto frontendLayout = GetFrontendBindGroupLayout(groupIndex);
-        bindGroupLayoutIds.push_back(
-            captureContext.GetId(frontendLayout->GetInternalBindGroupLayout()));
+        bindGroupLayoutIds[static_cast<size_t>(groupIndex)] =
+            captureContext.GetId(frontendLayout->GetInternalBindGroupLayout());
     }
 
     schema::PipelineLayout data{{
