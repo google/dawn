@@ -356,6 +356,9 @@ TEST_P(DynamicBufferOffsetTests, BasicInheritRenderPipeline) {
     // TODO(42242119): fail on Qualcomm Adreno X1.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             @vertex
             fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
