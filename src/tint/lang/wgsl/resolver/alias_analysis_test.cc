@@ -739,8 +739,8 @@ TEST_F(ResolverAliasAnalysisTest, NoAccess_MemberAccessor) {
     Structure("S", Vector{Member("a", ty.i32())});
     Func("f2",
          Vector{
-             Param("p1", ty.ptr<function>(ty("S"))),
-             Param("p2", ty.ptr<function>(ty("S"))),
+             Param("p1", ty.ptr<function>(ty.AsType("S"))),
+             Param("p2", ty.ptr<function>(ty.AsType("S"))),
          },
          ty.void_(),
          Vector{
@@ -749,7 +749,7 @@ TEST_F(ResolverAliasAnalysisTest, NoAccess_MemberAccessor) {
          });
     Func("f1", tint::Empty, ty.void_(),
          Vector{
-             Decl(Var("v", ty("S"))),
+             Decl(Var("v", ty.AsType("S"))),
              CallStmt(Call("f2", AddressOf("v"), AddressOf("v"))),
          });
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -768,8 +768,8 @@ TEST_F(ResolverAliasAnalysisTest, Read_MemberAccessor) {
     Structure("S", Vector{Member("a", ty.i32())});
     Func("f2",
          Vector{
-             Param("p1", ty.ptr<function>(ty("S"))),
-             Param("p2", ty.ptr<function>(ty("S"))),
+             Param("p1", ty.ptr<function>(ty.AsType("S"))),
+             Param("p2", ty.ptr<function>(ty.AsType("S"))),
          },
          ty.void_(),
          Vector{
@@ -778,7 +778,7 @@ TEST_F(ResolverAliasAnalysisTest, Read_MemberAccessor) {
          });
     Func("f1", tint::Empty, ty.void_(),
          Vector{
-             Decl(Var("v", ty("S"))),
+             Decl(Var("v", ty.AsType("S"))),
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
          });
@@ -800,8 +800,8 @@ TEST_F(ResolverAliasAnalysisTest, Write_MemberAccessor) {
     Structure("S", Vector{Member("a", ty.i32())});
     Func("f2",
          Vector{
-             Param("p1", ty.ptr<function>(ty("S"))),
-             Param("p2", ty.ptr<function>(ty("S"))),
+             Param("p1", ty.ptr<function>(ty.AsType("S"))),
+             Param("p2", ty.ptr<function>(ty.AsType("S"))),
          },
          ty.void_(),
          Vector{
@@ -810,7 +810,7 @@ TEST_F(ResolverAliasAnalysisTest, Write_MemberAccessor) {
          });
     Func("f1", tint::Empty, ty.void_(),
          Vector{
-             Decl(Var("v", ty("S"))),
+             Decl(Var("v", ty.AsType("S"))),
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
          });

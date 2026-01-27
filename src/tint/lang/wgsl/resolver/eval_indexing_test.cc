@@ -343,7 +343,7 @@ TEST_F(ConstEvalTest, RuntimeArray_vec3_f32_Index_OOB_Low) {
 TEST_F(ConstEvalTest, BindingArray_Index_OOB_Low) {
     GlobalVar(
         "a", Binding(0_a), Group(0_a),
-        ty("binding_array", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), 4_u));
+        ty.binding_array(ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), 4_u));
     auto* acc = IndexAccessor("a", Expr(Source{{12, 34}}, -1_i));
     auto* call = Call("textureDimensions", acc);
     WrapInFunction(call);
@@ -355,7 +355,7 @@ TEST_F(ConstEvalTest, BindingArray_Index_OOB_Low) {
 TEST_F(ConstEvalTest, BindingArray_Index_OOB_High) {
     GlobalVar(
         "a", Binding(0_a), Group(0_a),
-        ty("binding_array", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), 4_u));
+        ty.binding_array(ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), 4_u));
     auto* acc = IndexAccessor("a", Expr(Source{{12, 34}}, 4_i));
     auto* call = Call("textureDimensions", acc);
     WrapInFunction(call);

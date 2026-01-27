@@ -132,7 +132,7 @@ TEST_F(FramebufferFetchExtensionTest, DuplicateColorStruct) {
                        Member("c", ty.vec4<f32>(), Vector{Color(Source{{1, 2}}, 1_a)}),
                    });
 
-    Func("f", Vector{Param("s", ty("S"))}, ty.void_(), Empty,
+    Func("f", Vector{Param("s", ty.AsType("S"))}, ty.void_(), Empty,
          Vector{Stage(ast::PipelineStage::kFragment)});
 
     EXPECT_FALSE(r()->Resolve());
@@ -157,7 +157,7 @@ TEST_F(FramebufferFetchExtensionTest, DuplicateColorParamAndStruct) {
     Func("f",
          Vector{
              Param("a", ty.vec4<f32>(), Vector{Color(2_a)}),
-             Param("s", ty("S")),
+             Param("s", ty.AsType("S")),
              Param("d", ty.vec4<f32>(), Vector{Color(3_a)}),
          },
          ty.void_(), Empty, Vector{Stage(ast::PipelineStage::kFragment)});

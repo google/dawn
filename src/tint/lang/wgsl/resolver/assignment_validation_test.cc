@@ -287,7 +287,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToLetMember_Fail) {
     //  a.i = 2i
     // }
     Structure("S", Vector{Member("i", ty.i32())});
-    WrapInFunction(Let(Source{{98, 76}}, "a", ty("S"), Call("S")),  //
+    WrapInFunction(Let(Source{{98, 76}}, "a", ty.AsType("S"), Call("S")),  //
                    Assign(MemberAccessor(Source{{12, 34}}, Expr(Source{{56, 78}}, "a"), "i"), 2_i));
 
     EXPECT_FALSE(r()->Resolve());

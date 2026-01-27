@@ -1246,7 +1246,7 @@ using MaterializeAbstractNumericToUnrelatedType = resolver::ResolverTest;
 
 TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarInit) {
     Structure("S", Vector{Member("a", ty.i32())});
-    WrapInFunction(Decl(Var("v", ty("S"), Expr(Source{{12, 34}}, 1_a))));
+    WrapInFunction(Decl(Var("v", ty.AsType("S"), Expr(Source{{12, 34}}, 1_a))));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
@@ -1255,7 +1255,7 @@ TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarInit) {
 
 TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructLetInit) {
     Structure("S", Vector{Member("a", ty.i32())});
-    WrapInFunction(Decl(Let("v", ty("S"), Expr(Source{{12, 34}}, 1_a))));
+    WrapInFunction(Decl(Let("v", ty.AsType("S"), Expr(Source{{12, 34}}, 1_a))));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),

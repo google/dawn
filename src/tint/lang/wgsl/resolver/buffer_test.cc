@@ -41,7 +41,7 @@ namespace {
 using ResolverBufferTest = ResolverTest;
 
 TEST_F(ResolverBufferTest, UnsizedBuffer) {
-    auto* alias = Alias("b", ty("buffer"));
+    auto* alias = Alias("b", ty.buffer());
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -51,7 +51,7 @@ TEST_F(ResolverBufferTest, UnsizedBuffer) {
 }
 
 TEST_F(ResolverBufferTest, SizedBuffer) {
-    auto* alias = Alias("b", ty("buffer", 16_u));
+    auto* alias = Alias("b", ty.buffer(16_u));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -61,25 +61,25 @@ TEST_F(ResolverBufferTest, SizedBuffer) {
 }
 
 TEST_F(ResolverBufferTest, SizedBufferNegative) {
-    Alias("b", ty("buffer", -1_i));
+    Alias("b", ty.AsType("buffer", -1_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: buffer size (-1) must be greater than 0)");
 }
 
 TEST_F(ResolverBufferTest, SizedBufferZero) {
-    Alias("b", ty("buffer", 0_i));
+    Alias("b", ty.AsType("buffer", 0_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: buffer size (0) must be greater than 0)");
 }
 
 TEST_F(ResolverBufferTest, EquivalentTypes) {
-    auto* a1 = Alias("b1", ty("buffer"));
-    auto* a2 = Alias("b2", ty("buffer"));
-    auto* a3 = Alias("b3", ty("buffer", 4_i));
-    auto* a4 = Alias("b4", ty("buffer", 16_u));
-    auto* a5 = Alias("b5", ty("buffer", 16_i));
+    auto* a1 = Alias("b1", ty.buffer());
+    auto* a2 = Alias("b2", ty.buffer());
+    auto* a3 = Alias("b3", ty.buffer(4_i));
+    auto* a4 = Alias("b4", ty.buffer(16_u));
+    auto* a5 = Alias("b5", ty.buffer(16_i));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -95,7 +95,7 @@ TEST_F(ResolverBufferTest, EquivalentTypes) {
 }
 
 TEST_F(ResolverBufferTest, Struct) {
-    Structure("S", Vector{Member("a", ty("buffer", 16_u))});
+    Structure("S", Vector{Member("a", ty.buffer(16_u))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -103,14 +103,14 @@ TEST_F(ResolverBufferTest, Struct) {
 }
 
 TEST_F(ResolverBufferTest, Array) {
-    Alias("b", ty("array", ty("buffer"), 4_u));
+    Alias("b", ty.array(ty.buffer(), 4_u));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: buffer cannot be used as an element type of an array)");
 }
 
 TEST_F(ResolverBufferTest, Pointer_Function) {
-    Alias("p", ty.ptr<function>(ty("buffer")));
+    Alias("p", ty.ptr<function>(ty.buffer()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -119,7 +119,7 @@ TEST_F(ResolverBufferTest, Pointer_Function) {
 }
 
 TEST_F(ResolverBufferTest, Pointer_Private) {
-    Alias("p", ty.ptr<private_>(ty("buffer")));
+    Alias("p", ty.ptr<private_>(ty.buffer()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -128,19 +128,19 @@ TEST_F(ResolverBufferTest, Pointer_Private) {
 }
 
 TEST_F(ResolverBufferTest, Pointer_Storage) {
-    Alias("p", ty.ptr<storage>(ty("buffer")));
+    Alias("p", ty.ptr<storage>(ty.buffer()));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferTest, Pointer_Uniform) {
-    Alias("p", ty.ptr<uniform>(ty("buffer", 16_u)));
+    Alias("p", ty.ptr<uniform>(ty.buffer(16_u)));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferTest, Pointer_Workgroup) {
-    Alias("p", ty.ptr<workgroup>(ty("buffer", 16_u)));
+    Alias("p", ty.ptr<workgroup>(ty.buffer(16_u)));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -148,7 +148,7 @@ TEST_F(ResolverBufferTest, Pointer_Workgroup) {
 TEST_F(ResolverBufferTest, Var_Function) {
     Func("foo", Empty, ty.void_(),
          Vector{
-             Decl(Var("v", function, ty("buffer", 16_u))),
+             Decl(Var("v", function, ty.buffer(16_u))),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -158,7 +158,7 @@ error: function-scope 'var' must have a constructible type)");
 }
 
 TEST_F(ResolverBufferTest, Var_Private) {
-    GlobalVar("v", private_, ty("buffer", 16_u));
+    GlobalVar("v", private_, ty.buffer(16_u));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -167,14 +167,14 @@ error: 'buffer' variables must have 'storage', 'uniform', or 'workgroup' address
 }
 
 TEST_F(ResolverBufferTest, Var_Storage) {
-    GlobalVar("v", storage, ty("buffer"), Group(0_a), Binding(0_a));
+    GlobalVar("v", storage, ty.buffer(), Group(0_a), Binding(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferTest, Var_Storage_Override) {
     Override("o", Expr(4_i));
-    GlobalVar("v", storage, ty("buffer", Expr(Ident("o"))), Group(0_a), Binding(0_a));
+    GlobalVar("v", storage, ty.AsType("buffer", Expr(Ident("o"))), Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -183,13 +183,13 @@ TEST_F(ResolverBufferTest, Var_Storage_Override) {
 }
 
 TEST_F(ResolverBufferTest, Var_Uniform) {
-    GlobalVar("v", uniform, ty("buffer", 16_u), Group(0_a), Binding(0_a));
+    GlobalVar("v", uniform, ty.buffer(16_u), Group(0_a), Binding(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferTest, Var_Uniform_Unsized) {
-    GlobalVar("v", uniform, ty("buffer"), Group(0_a), Binding(0_a));
+    GlobalVar("v", uniform, ty.buffer(), Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: buffer type must be sized in 'uniform' address space)");
@@ -197,7 +197,7 @@ TEST_F(ResolverBufferTest, Var_Uniform_Unsized) {
 
 TEST_F(ResolverBufferTest, Var_Uniform_Override) {
     Override("o", Expr(4_i));
-    GlobalVar("v", uniform, ty("buffer", Expr(Ident("o"))), Group(0_a), Binding(0_a));
+    GlobalVar("v", uniform, ty.AsType("buffer", Expr(Ident("o"))), Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -206,27 +206,27 @@ TEST_F(ResolverBufferTest, Var_Uniform_Override) {
 }
 
 TEST_F(ResolverBufferTest, Var_Workgroup) {
-    GlobalVar("v", workgroup, ty("buffer", 16_u));
+    GlobalVar("v", workgroup, ty.buffer(16_u));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferTest, Var_Workgroup_Override) {
     Override("o", Expr(4_i));
-    GlobalVar("v", workgroup, ty("buffer", Expr(Ident("o"))));
+    GlobalVar("v", workgroup, ty.AsType("buffer", Expr(Ident("o"))));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferTest, Var_Workgroup_Unsized) {
-    GlobalVar("v", workgroup, ty("buffer"), Group(0_a), Binding(0_a));
+    GlobalVar("v", workgroup, ty.buffer(), Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: buffer type must be sized in 'workgroup' address space)");
 }
 
 TEST_F(ResolverBufferTest, FunctionParameter) {
-    Func("foo", Vector{Param("b", ty("buffer"))}, ty.void_(), Empty);
+    Func("foo", Vector{Param("b", ty.buffer())}, ty.void_(), Empty);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -235,30 +235,30 @@ error: type of function parameter cannot be buffer)");
 }
 
 TEST_F(ResolverBufferTest, FunctionParameter_Pointer) {
-    Func("foo", Vector{Param("b", ty.ptr<storage>(ty("buffer")))}, ty.void_(), Empty);
+    Func("foo", Vector{Param("b", ty.ptr<storage>(ty.buffer()))}, ty.void_(), Empty);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferTest, FunctionParameter_SizedMatchesUnsized) {
-    Func("foo", Vector{Param("p", ty.ptr<storage>(ty("buffer")))}, ty.void_(), Empty);
-    auto* v = GlobalVar("v", storage, ty("buffer", 16_u), Group(0_a), Binding(0_a));
+    Func("foo", Vector{Param("p", ty.ptr<storage>(ty.buffer()))}, ty.void_(), Empty);
+    auto* v = GlobalVar("v", storage, ty.buffer(16_u), Group(0_a), Binding(0_a));
     Func("bar", Empty, ty.void_(), Vector{CallStmt(Call(Ident("foo"), AddressOf(v)))});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferTest, FunctionParameter_LargerSizedMatchesSmallerSized) {
-    Func("foo", Vector{Param("p", ty.ptr<storage>(ty("buffer", 8_i)))}, ty.void_(), Empty);
-    auto* v = GlobalVar("v", storage, ty("buffer", 16_u), Group(0_a), Binding(0_a));
+    Func("foo", Vector{Param("p", ty.ptr<storage>(ty.buffer(8_i)))}, ty.void_(), Empty);
+    auto* v = GlobalVar("v", storage, ty.buffer(16_u), Group(0_a), Binding(0_a));
     Func("bar", Empty, ty.void_(), Vector{CallStmt(Call(Ident("foo"), AddressOf(v)))});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferTest, FunctionParameter_UnsizedDoesNotMatchSized) {
-    Func("foo", Vector{Param("p", ty.ptr<storage>(ty("buffer", 16_u)))}, ty.void_(), Empty);
-    auto* v = GlobalVar("v", storage, ty("buffer"), Group(0_a), Binding(0_a));
+    Func("foo", Vector{Param("p", ty.ptr<storage>(ty.buffer(16_u)))}, ty.void_(), Empty);
+    auto* v = GlobalVar("v", storage, ty.buffer(), Group(0_a), Binding(0_a));
     Func("bar", Empty, ty.void_(), Vector{CallStmt(Call(Ident("foo"), AddressOf(v)))});
 
     EXPECT_FALSE(r()->Resolve());
@@ -270,44 +270,44 @@ TEST_F(ResolverBufferTest, FunctionParameter_UnsizedDoesNotMatchSized) {
 using ResolverBufferViewTest = ResolverTest;
 
 TEST_F(ResolverBufferViewTest, Storage_Unsized) {
-    auto* gv = GlobalVar("v", storage, ty("buffer"), Group(0_a), Binding(0_a));
-    Func("foo", Empty, ty.void_(),
-         Vector{Assign(Phony(),
-                       Call(Ident("bufferView", ty("array", ty.u32())), AddressOf(gv), 0_u))});
+    auto* gv = GlobalVar("v", storage, ty.buffer(), Group(0_a), Binding(0_a));
+    Func(
+        "foo", Empty, ty.void_(),
+        Vector{Assign(Phony(), Call(Ident("bufferView", ty.array(ty.u32())), AddressOf(gv), 0_u))});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferViewTest, Storage_Sized) {
-    auto* gv = GlobalVar("v", storage, ty("buffer", 16_a), Group(0_a), Binding(0_a));
-    Func("foo", Empty, ty.void_(),
-         Vector{Assign(Phony(),
-                       Call(Ident("bufferView", ty("array", ty.u32())), AddressOf(gv), 0_u))});
+    auto* gv = GlobalVar("v", storage, ty.buffer(16_a), Group(0_a), Binding(0_a));
+    Func(
+        "foo", Empty, ty.void_(),
+        Vector{Assign(Phony(), Call(Ident("bufferView", ty.array(ty.u32())), AddressOf(gv), 0_u))});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferViewTest, Uniform_Sized) {
-    auto* gv = GlobalVar("v", uniform, ty("buffer", 64_a), Group(0_a), Binding(0_a));
+    auto* gv = GlobalVar("v", uniform, ty.buffer(64_a), Group(0_a), Binding(0_a));
     Func("foo", Empty, ty.void_(),
          Vector{Assign(Phony(),
-                       Call(Ident("bufferView", ty("array", ty.u32(), 4_u)), AddressOf(gv), 0_u))});
+                       Call(Ident("bufferView", ty.array(ty.u32(), 4_u)), AddressOf(gv), 0_u))});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferViewTest, Workgroup_Sized) {
-    auto* gv = GlobalVar("v", workgroup, ty("buffer", 64_a));
+    auto* gv = GlobalVar("v", workgroup, ty.buffer(64_a));
     Func("foo", Empty, ty.void_(),
          Vector{Assign(Phony(),
-                       Call(Ident("bufferView", ty("array", ty.u32(), 4_u)), AddressOf(gv), 0_u))});
+                       Call(Ident("bufferView", ty.array(ty.u32(), 4_u)), AddressOf(gv), 0_u))});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBufferViewTest, ReturnTypeContainsAtomic) {
-    Structure("S", Vector{Member("a", ty("array", ty("atomic", ty.u32()), 4_u))});
-    auto* gv = GlobalVar("v", storage, ty("buffer"), Group(0_a), Binding(0_a));
+    Structure("S", Vector{Member("a", ty.array(ty.atomic(ty.u32()), 4_u))});
+    auto* gv = GlobalVar("v", storage, ty.buffer(), Group(0_a), Binding(0_a));
     Func("foo", Empty, ty.void_(),
          Vector{Assign(Phony(), Call(Ident("bufferView", Expr(Ident("S"))), AddressOf(gv), 0_u))});
 
@@ -316,7 +316,7 @@ TEST_F(ResolverBufferViewTest, ReturnTypeContainsAtomic) {
 }
 
 TEST_F(ResolverBufferViewTest, Offset_Unsigned_TooSmall) {
-    auto* gv = GlobalVar("v", storage, ty("buffer", 16_a), Group(0_a), Binding(0_a));
+    auto* gv = GlobalVar("v", storage, ty.buffer(16_a), Group(0_a), Binding(0_a));
     Func("foo", Empty, ty.void_(),
          Vector{Assign(Phony(), Call(Ident("bufferView", ty.u32()), AddressOf(gv), 20_u))});
 
@@ -327,7 +327,7 @@ TEST_F(ResolverBufferViewTest, Offset_Unsigned_TooSmall) {
 }
 
 TEST_F(ResolverBufferViewTest, Offset_Unsigned_Unaligned) {
-    auto* gv = GlobalVar("v", storage, ty("buffer", 16_a), Group(0_a), Binding(0_a));
+    auto* gv = GlobalVar("v", storage, ty.buffer(16_a), Group(0_a), Binding(0_a));
     Func("foo", Empty, ty.void_(),
          Vector{Assign(Phony(), Call(Ident("bufferView", ty.u32()), AddressOf(gv), 1_u))});
 
@@ -338,7 +338,7 @@ TEST_F(ResolverBufferViewTest, Offset_Unsigned_Unaligned) {
 }
 
 TEST_F(ResolverBufferViewTest, Offset_Signed_TooSmall) {
-    auto* gv = GlobalVar("v", storage, ty("buffer", 16_a), Group(0_a), Binding(0_a));
+    auto* gv = GlobalVar("v", storage, ty.buffer(16_a), Group(0_a), Binding(0_a));
     Func("foo", Empty, ty.void_(),
          Vector{Assign(Phony(), Call(Ident("bufferView", ty.u32()), AddressOf(gv), 20_i))});
 
@@ -349,7 +349,7 @@ TEST_F(ResolverBufferViewTest, Offset_Signed_TooSmall) {
 }
 
 TEST_F(ResolverBufferViewTest, Offset_Signed_Unaligned) {
-    auto* gv = GlobalVar("v", storage, ty("buffer", 16_a), Group(0_a), Binding(0_a));
+    auto* gv = GlobalVar("v", storage, ty.buffer(16_a), Group(0_a), Binding(0_a));
     Func("foo", Empty, ty.void_(),
          Vector{Assign(Phony(), Call(Ident("bufferView", ty.u32()), AddressOf(gv), 1_a))});
 
@@ -360,7 +360,7 @@ TEST_F(ResolverBufferViewTest, Offset_Signed_Unaligned) {
 }
 
 TEST_F(ResolverBufferViewTest, Offset_Signed_Negative) {
-    auto* gv = GlobalVar("v", storage, ty("buffer", 16_a), Group(0_a), Binding(0_a));
+    auto* gv = GlobalVar("v", storage, ty.buffer(16_a), Group(0_a), Binding(0_a));
     Func("foo", Empty, ty.void_(),
          Vector{Assign(Phony(), Call(Ident("bufferView", ty.u32()), AddressOf(gv), -1_i))});
 
@@ -369,19 +369,18 @@ TEST_F(ResolverBufferViewTest, Offset_Signed_Negative) {
 }
 
 TEST_F(ResolverBufferViewTest, Return_Buffer_Unsized) {
-    auto* gv = GlobalVar("v", storage, ty("buffer"), Group(0_a), Binding(0_a));
+    auto* gv = GlobalVar("v", storage, ty.buffer(), Group(0_a), Binding(0_a));
     Func("foo", Empty, ty.void_(),
-         Vector{Assign(Phony(), Call(Ident("bufferView", ty("buffer")), AddressOf(gv), 0_i))});
+         Vector{Assign(Phony(), Call(Ident("bufferView", ty.buffer()), AddressOf(gv), 0_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: return type of bufferView cannot be a buffer)");
 }
 
 TEST_F(ResolverBufferViewTest, Return_Buffer_Sized) {
-    auto* gv = GlobalVar("v", storage, ty("buffer"), Group(0_a), Binding(0_a));
-    Func(
-        "foo", Empty, ty.void_(),
-        Vector{Assign(Phony(), Call(Ident("bufferView", ty("buffer", 16_u)), AddressOf(gv), 0_i))});
+    auto* gv = GlobalVar("v", storage, ty.buffer(), Group(0_a), Binding(0_a));
+    Func("foo", Empty, ty.void_(),
+         Vector{Assign(Phony(), Call(Ident("bufferView", ty.buffer(16_u)), AddressOf(gv), 0_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: return type of bufferView cannot be a buffer)");
@@ -389,8 +388,8 @@ TEST_F(ResolverBufferViewTest, Return_Buffer_Sized) {
 
 TEST_F(ResolverBufferViewTest, Return_NonHostShareable) {
     Override("o", ty.u32());
-    auto* gv = GlobalVar("v", storage, ty("buffer"), Group(0_a), Binding(0_a));
-    auto array = ty("array", ty.u32(), Expr(Ident("o")));
+    auto* gv = GlobalVar("v", storage, ty.buffer(), Group(0_a), Binding(0_a));
+    auto array = ty.array(ty.u32(), Expr(Ident("o")));
     Func("foo", Empty, ty.void_(),
          Vector{Assign(Phony(), Call(Ident("bufferView", array), AddressOf(gv), 0_i))});
 

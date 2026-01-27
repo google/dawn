@@ -53,7 +53,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, StorageBuffer_UnalignedMember) 
                   Member(Source{{34, 56}}, "b", ty.f32(), Vector{MemberAlign(1_i)}),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty("S"), core::AddressSpace::kStorage, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.AsType("S"), core::AddressSpace::kStorage, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -82,7 +82,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, StorageBuffer_UnalignedMember_S
                        Member("b", ty.f32(), Vector{MemberAlign(4_i)}),
                    });
 
-    GlobalVar("a", ty("S"), core::AddressSpace::kStorage, Group(0_a), Binding(0_a));
+    GlobalVar("a", ty.AsType("S"), core::AddressSpace::kStorage, Group(0_a), Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -108,10 +108,10 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_S
     Structure(Ident(Source{{34, 56}}, "Outer"),
               Vector{
                   Member("scalar", ty.f32(), Vector{MemberSize(5_a)}),
-                  Member(Source{{56, 78}}, "inner", ty("Inner"), Vector{MemberAlign(1_a)}),
+                  Member(Source{{56, 78}}, "inner", ty.AsType("Inner"), Vector{MemberAlign(1_a)}),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), core::AddressSpace::kUniform, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.AsType("Outer"), core::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -151,10 +151,10 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
 
     Structure("Outer", Vector{
                            Member("scalar", ty.f32(), Vector{MemberSize(5_a)}),
-                           Member("inner", ty("Inner"), Vector{MemberAlign(4_i)}),
+                           Member("inner", ty.AsType("Inner"), Vector{MemberAlign(4_i)}),
                        });
 
-    GlobalVar("a", ty("Outer"), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
+    GlobalVar("a", ty.AsType("Outer"), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -178,11 +178,11 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
                        });
 
     Structure("Outer", Vector{
-                           Member("inner", ty("Inner")),
+                           Member("inner", ty.AsType("Inner")),
                            Member("scalar", ty.i32(), Vector{MemberAlign(16_i)}),
                        });
 
-    GlobalVar("a", ty("Outer"), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
+    GlobalVar("a", ty.AsType("Outer"), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -202,7 +202,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3MemberOffset_
                                              Member("s", ty.f32()),
                                          });
 
-    GlobalVar("a", ty("ScalarPackedAtEndOfVec3"), core::AddressSpace::kUniform, Group(0_a),
+    GlobalVar("a", ty.AsType("ScalarPackedAtEndOfVec3"), core::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -225,7 +225,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3F16MemberOffs
                                              Member("s", ty.f16()),
                                          });
 
-    GlobalVar("a", ty("ScalarPackedAtEndOfVec3"), core::AddressSpace::kUniform, Group(0_a),
+    GlobalVar("a", ty.AsType("ScalarPackedAtEndOfVec3"), core::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -241,7 +241,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, Immediate_UnalignedMember) {
     Structure(Ident(Source{{12, 34}}, "S"),
               Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
                      Member(Source{{34, 56}}, "b", ty.f32(), Vector{MemberAlign(1_i)})});
-    GlobalVar(Source{{78, 90}}, "a", ty("S"), core::AddressSpace::kImmediate);
+    GlobalVar(Source{{78, 90}}, "a", ty.AsType("S"), core::AddressSpace::kImmediate);
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -264,7 +264,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, Immediate_Aligned) {
     // var<immediate> a : S;
     Structure("S", Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
                           Member("b", ty.f32(), Vector{MemberAlign(4_i)})});
-    GlobalVar("a", ty("S"), core::AddressSpace::kImmediate);
+    GlobalVar("a", ty.AsType("S"), core::AddressSpace::kImmediate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -283,7 +283,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Storage)
                  Member("scalar", ty.u32()),
              });
 
-    GlobalVar(Source{{56, 78}}, "a", ty("S"), core::AddressSpace::kStorage,
+    GlobalVar(Source{{56, 78}}, "a", ty.AsType("S"), core::AddressSpace::kStorage,
               core::Access::kReadWrite, Group(0_a), Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -306,7 +306,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Workgrou
                  Member("scalar", ty.u32()),
              });
 
-    GlobalVar(Source{{56, 78}}, "a", ty("S"), core::AddressSpace::kWorkgroup, Group(0_a));
+    GlobalVar(Source{{56, 78}}, "a", ty.AsType("S"), core::AddressSpace::kWorkgroup, Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -328,7 +328,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Private)
                  Member("scalar", ty.u32()),
              });
 
-    GlobalVar(Source{{56, 78}}, "a", ty("S"), core::AddressSpace::kPrivate, Group(0_a));
+    GlobalVar(Source{{56, 78}}, "a", ty.AsType("S"), core::AddressSpace::kPrivate, Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -352,7 +352,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Function
                  Member("scalar", ty.u32()),
              });
 
-    GlobalVar(Source{{56, 78}}, "a", ty("S"), core::AddressSpace::kFunction, Group(0_a));
+    GlobalVar(Source{{56, 78}}, "a", ty.AsType("S"), core::AddressSpace::kFunction, Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(

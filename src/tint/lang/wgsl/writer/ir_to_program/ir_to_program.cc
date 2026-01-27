@@ -1198,7 +1198,7 @@ class State {
             return name;
         });
 
-        return b.ty(n);
+        return b.ty.AsType(n);
     }
 
     bool ContainsBuiltinStruct(const core::type::Type* ty) {

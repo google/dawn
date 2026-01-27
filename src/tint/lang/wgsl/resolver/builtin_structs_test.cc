@@ -44,7 +44,7 @@ TEST_P(ResolverBuiltinStructs, Resolve) {
     Enable(wgsl::Extension::kF16);
 
     // var<private> p : NAME;
-    auto* var = GlobalVar("p", ty(GetParam()), core::AddressSpace::kPrivate);
+    auto* var = GlobalVar("p", ty.AsType(ToString(GetParam())), core::AddressSpace::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* str = As<core::type::Struct>(TypeOf(var)->UnwrapRef());

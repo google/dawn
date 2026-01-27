@@ -301,7 +301,7 @@ TEST_F(ResolverBuiltinsValidationTest, StructBuiltinInsideEntryPoint_Ignored) {
                               }),
                    });
 
-    Func("fragShader", tint::Empty, ty.void_(), Vector{Decl(Var("s", ty("S")))},
+    Func("fragShader", tint::Empty, ty.void_(), Vector{Decl(Var("s", ty.AsType("S")))},
          Vector{
              Stage(ast::PipelineStage::kFragment),
          });

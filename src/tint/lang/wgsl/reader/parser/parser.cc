@@ -864,7 +864,7 @@ Maybe<ast::Type> Parser::type_specifier() {
     }
 
     if (!peek_is(Token::Type::kTemplateArgsLeft)) {
-        return builder_.ty(builder_.Ident(source(), ident.to_str()));
+        return builder_.ty.AsType(source(), ident.to_str());
     }
 
     auto args = expect_template_arg_block("type template arguments", [&] {
@@ -874,7 +874,7 @@ Maybe<ast::Type> Parser::type_specifier() {
     if (args.errored) {
         return Failure::kErrored;
     }
-    return builder_.ty(builder_.Ident(source(), ident.to_str(), std::move(args.value)));
+    return builder_.ty.AsType(source(), ident.to_str(), std::move(args.value));
 }
 
 template <typename ENUM>

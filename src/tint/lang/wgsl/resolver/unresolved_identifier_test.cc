@@ -55,7 +55,7 @@ Possible values: 'function', 'immediate', 'pixel_local', 'private', 'storage', '
 }
 
 TEST_F(ResolverUnresolvedIdentifierSuggestions, TexelFormat) {
-    GlobalVar("v", ty("texture_storage_1d", Expr(Source{{12, 34}}, "rba8unorm"), "read"));
+    GlobalVar("v", ty.AsType("texture_storage_1d", Expr(Source{{12, 34}}, "rba8unorm"), "read"));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: unresolved texel format 'rba8unorm'

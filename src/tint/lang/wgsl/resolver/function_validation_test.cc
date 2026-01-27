@@ -984,7 +984,7 @@ TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_StructOfAtomic) {
     Structure("S", Vector{
                        Member("m", ty.atomic(ty.i32())),
                    });
-    auto ret_type = ty(Source{{12, 34}}, "S");
+    auto ret_type = ty.AsType(Source{{12, 34}}, "S");
     Func("f", tint::Empty, ret_type, tint::Empty);
 
     EXPECT_FALSE(r()->Resolve());
@@ -1003,7 +1003,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterStoreType_NonAtomicFree) {
     Structure("S", Vector{
                        Member("m", ty.atomic(ty.i32())),
                    });
-    auto ret_type = ty(Source{{12, 34}}, "S");
+    auto ret_type = ty.AsType(Source{{12, 34}}, "S");
     auto* bar = Param("bar", ret_type);
     Func("f", Vector{bar}, ty.void_(), tint::Empty);
 
@@ -1015,7 +1015,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterStoreType_AtomicFree) {
     Structure("S", Vector{
                        Member("m", ty.i32()),
                    });
-    auto ret_type = ty(Source{{12, 34}}, "S");
+    auto ret_type = ty.AsType(Source{{12, 34}}, "S");
     auto* bar = Param(Source{{12, 34}}, "bar", ret_type);
     Func("f", Vector{bar}, ty.void_(), tint::Empty);
 
@@ -1084,7 +1084,7 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithoutUnrestrictedP
 
     auto& param = GetParam();
     Structure("S", Vector{Member("a", ty.i32())});
-    auto ptr_type = ty("ptr", Ident(Source{{12, 34}}, param.address_space), ty("S"));
+    auto ptr_type = ty.AsType("ptr", Ident(Source{{12, 34}}, param.address_space), ty.AsType("S"));
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
     Func("f", Vector{arg}, ty.void_(), tint::Empty);
 
@@ -1112,7 +1112,7 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithoutUnrestrictedP
 TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithUnrestrictedPointerParameters) {
     auto& param = GetParam();
     Structure("S", Vector{Member("a", ty.i32())});
-    auto ptr_type = ty("ptr", Ident(Source{{12, 34}}, param.address_space), ty("S"));
+    auto ptr_type = ty.AsType("ptr", Ident(Source{{12, 34}}, param.address_space), ty.AsType("S"));
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
     Func("f", Vector{arg}, ty.void_(), tint::Empty);
 

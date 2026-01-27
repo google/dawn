@@ -350,7 +350,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NestedStorageBufferLargeArray) {
     // var<storage> a : S;
     Structure("S",
               Vector{Member(Source{{12, 34}}, "a", ty.array(Source{{12, 20}}, ty.f32(), 65536_a))});
-    GlobalVar("a", ty(Source{{12, 30}}, "S"), core::AddressSpace::kStorage,
+    GlobalVar("a", ty.AsType(Source{{12, 30}}, "S"), core::AddressSpace::kStorage,
               Vector{Binding(0_u), Group(0_u)});
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -361,7 +361,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
     // }
     // var<private> a : array<S, 65535>;
     Structure("S", Vector{Member(Source{{12, 34}}, "a", ty.f32(), Vector{MemberSize(800000_a)})});
-    GlobalVar("a", ty.array(ty(Source{{12, 30}}, "S"), Expr(Source{{12, 34}}, 65535_a)),
+    GlobalVar("a", ty.array(ty.AsType(Source{{12, 30}}, "S"), Expr(Source{{12, 34}}, 65535_a)),
               core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -622,7 +622,7 @@ TEST_F(ResolverTypeValidationTest, PtrType_ArrayIncomplete) {
 
     Func("f",
          Vector{
-             Param("l", ty.ptr(function, ty(Source{{12, 34}}, "array"))),
+             Param("l", ty.ptr(function, ty.AsType(Source{{12, 34}}, "array"))),
          },
          ty.void_(), Empty);
 
@@ -666,8 +666,8 @@ TEST_F(ResolverTypeValidationTest, Struct_TooBig) {
 
     Structure(Source{{10, 34}}, "Bar", Vector{Member("a", ty.array<f32, 10000>())});
     Structure(Source{{12, 34}}, "Foo",
-              Vector{Member("a", ty.array(ty(Source{{12, 30}}, "Bar"), Expr(65535_a))),
-                     Member("b", ty.array(ty("Bar"), Expr(65535_a)))});
+              Vector{Member("a", ty.array(ty.AsType(Source{{12, 30}}, "Bar"), Expr(65535_a))),
+                     Member("b", ty.array(ty.AsType("Bar"), Expr(65535_a)))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -728,7 +728,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInArray) {
     // var<private> a : array<Foo, 4>;
 
     Structure("Foo", Vector{Member("rt", ty.array<f32>())});
-    GlobalVar("v", ty.array(ty(Source{{12, 34}}, "Foo"), 4_u), core::AddressSpace::kPrivate);
+    GlobalVar("v", ty.array(ty.AsType(Source{{12, 34}}, "Foo"), 4_u), core::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
@@ -1094,8 +1094,8 @@ TEST_P(StorageTextureDimensionTest, All) {
     // var a : texture_storage_*<r32uint, write>;
     auto& params = GetParam();
 
-    auto st = ty(Source{{12, 34}}, params.name, tint::ToString(core::TexelFormat::kR32Uint),
-                 tint::ToString(core::Access::kWrite));
+    auto st = ty.AsType(Source{{12, 34}}, params.name, tint::ToString(core::TexelFormat::kR32Uint),
+                        tint::ToString(core::Access::kWrite));
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1200,7 +1200,7 @@ TEST_F(StorageTextureAccessTest, MissingTemplates) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<r32uint>;
 
-    auto st = ty(Source{{12, 34}}, "texture_storage_1d");
+    auto st = ty.AsType(Source{{12, 34}}, "texture_storage_1d");
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1212,7 +1212,7 @@ TEST_F(StorageTextureAccessTest, MissingAccess_Fail) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<r32uint>;
 
-    auto st = ty(Source{{12, 34}}, "texture_storage_1d", "r32uint");
+    auto st = ty.AsType(Source{{12, 34}}, "texture_storage_1d", "r32uint");
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1469,7 +1469,7 @@ TEST_P(BuiltinTypeAliasTest, CheckEquivalent) {
 
     Enable(wgsl::Extension::kF16);
 
-    WrapInFunction(Decl(Var("aliased", ty(params.alias))),
+    WrapInFunction(Decl(Var("aliased", ty.AsType(params.alias))),
                    Decl(Var("explicit", params.type(*this))),  //
                    Assign("explicit", "aliased"));
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1528,7 +1528,7 @@ TEST_P(ResolverUntemplatedTypeUsedWithTemplateArgs, Builtin_UseWithTemplateArgs)
     // var<private> v : f32<true>;
 
     Enable(wgsl::Extension::kF16);
-    GlobalVar("v", core::AddressSpace::kPrivate, ty(Source{{12, 34}}, GetParam(), true));
+    GlobalVar("v", core::AddressSpace::kPrivate, ty.AsType(Source{{12, 34}}, GetParam(), true));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: type '" + std::string(GetParam()) +
@@ -1541,8 +1541,8 @@ TEST_P(ResolverUntemplatedTypeUsedWithTemplateArgs, BuiltinAlias_UseWithTemplate
     // var<private> v : A<true>;
 
     Enable(wgsl::Extension::kF16);
-    Alias(Source{{56, 78}}, "A", ty(GetParam()));
-    GlobalVar("v", core::AddressSpace::kPrivate, ty(Source{{12, 34}}, "A", true));
+    Alias(Source{{56, 78}}, "A", ty.AsType(GetParam()));
+    GlobalVar("v", core::AddressSpace::kPrivate, ty.AsType(Source{{12, 34}}, "A", true));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1595,7 +1595,7 @@ TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, Struct_Type) {
     // var<private> v : S<true>;
 
     Structure(Source{{56, 78}}, "S", Vector{Member("i", ty.i32())});
-    GlobalVar("v", core::AddressSpace::kPrivate, ty(Source{{12, 34}}, "S", true));
+    GlobalVar("v", core::AddressSpace::kPrivate, ty.AsType(Source{{12, 34}}, "S", true));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1608,7 +1608,7 @@ TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, Struct_Ctor) {
     // var<private> v = S<true>();
 
     Structure("S", Vector{Member("a", ty.i32())});
-    GlobalVar("v", core::AddressSpace::kPrivate, Call(ty(Source{{12, 34}}, "S", true)));
+    GlobalVar("v", core::AddressSpace::kPrivate, Call(ty.AsType(Source{{12, 34}}, "S", true)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: type 'S' does not take template arguments
@@ -1620,7 +1620,7 @@ TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, AliasedArray_Type) {
     // var<private> v : A<true>;
 
     Alias("A", ty.array<i32, 4>());
-    GlobalVar("v", core::AddressSpace::kPrivate, ty(Source{{12, 34}}, "A", true));
+    GlobalVar("v", core::AddressSpace::kPrivate, ty.AsType(Source{{12, 34}}, "A", true));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1633,7 +1633,7 @@ TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, AliasedArray_Ctor) {
     // var<private> v = A<true>();
 
     Alias("A", ty.array<i32, 4>());
-    GlobalVar("v", core::AddressSpace::kPrivate, Call(ty(Source{{12, 34}}, "A", true)));
+    GlobalVar("v", core::AddressSpace::kPrivate, Call(ty.AsType(Source{{12, 34}}, "A", true)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: type 'A' does not take template arguments

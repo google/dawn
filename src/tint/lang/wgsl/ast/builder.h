@@ -361,40 +361,50 @@ class Builder {
             return CToAST<T>::get(this);
         }
 
+        /// @param sym the name of the type
+        /// @returns a type with the given name
+        ast::Type AsType(Symbol sym) const { return AsType(builder->source_, sym); }
+
+        /// @param source the source
+        /// @param sym the name of the type
+        /// @returns a type with the given name
+        ast::Type AsType(const Source& source, Symbol sym) const {
+            return {builder->Expr(builder->Ident(source, sym))};
+        }
+
+        /// @param name the name of the type
+        /// @returns a type with the given name
+        ast::Type AsType(std::string_view name) const { return AsType(builder->source_, name); }
+
+        /// @param source the source
+        /// @param name the name of the type
+        /// @returns a type with the given name
+        ast::Type AsType(const Source& source, std::string_view name) const {
+            return {builder->Expr(builder->Ident(source, name))};
+        }
+
+        /// @param name the name of the type
+        /// @returns a type with the given name
+        template <typename... ARGS>
+        ast::Type AsType(std::string_view name, ARGS&&... args) const {
+            return AsType(builder->source_, name, std::forward<ARGS>(args)...);
+        }
+
+        /// @param source the source
+        /// @param name the name of the type
+        /// @returns a type with the given name
+        template <typename... ARGS>
+        ast::Type AsType(const Source& source, std::string_view name, ARGS&&... args) const {
+            return {builder->Expr(builder->Ident(source, name, std::forward<ARGS>(args)...))};
+        }
+
+        /// @param ident the name of the type
+        /// @returns a type with the given name
+        ast::Type AsType(const ast::IdentifierExpression* ident) const { return {ident}; }
+
         /// @param type the type to return
         /// @return type (passthrough)
         ast::Type operator()(const ast::Type& type) const { return type; }
-
-        /// Creates a type
-        /// @param name the name
-        /// @param args the optional template arguments
-        /// @returns the type
-        template <typename NAME,
-                  typename... ARGS,
-                  typename = DisableIfSource<NAME>,
-                  typename = std::enable_if_t<!std::is_same_v<std::decay_t<NAME>, ast::Type>>>
-        ast::Type operator()(NAME&& name, ARGS&&... args) const {
-            if constexpr (traits::IsTypeOrDerived<traits::PtrElTy<NAME>, ast::Expression>) {
-                static_assert(sizeof...(ARGS) == 0);
-                return {name};
-            } else {
-                return {builder->Expr(
-                    builder->Ident(std::forward<NAME>(name), std::forward<ARGS>(args)...))};
-            }
-        }
-
-        /// Creates a type
-        /// @param source the Source of the node
-        /// @param name the name
-        /// @param args the optional template arguments
-        /// @returns the type
-        template <typename NAME,
-                  typename... ARGS,
-                  typename = std::enable_if_t<!std::is_same_v<std::decay_t<NAME>, ast::Type>>>
-        ast::Type operator()(const Source& source, NAME&& name, ARGS&&... args) const {
-            return {builder->Expr(
-                builder->Ident(source, std::forward<NAME>(name), std::forward<ARGS>(args)...))};
-        }
 
         /// @returns a a nullptr expression wrapped in an ast::Type
         ast::Type void_() const { return ast::Type{}; }
@@ -1194,9 +1204,21 @@ class Builder {
         /// @returns the external texture
         ast::Type external_texture() const { return (*this)("texture_external"); }
 
+        /// @param format the texel format
+        /// @param access the access control
         /// @returns the texel buffer
         ast::Type texel_buffer(core::TexelFormat format, core::Access access) const {
             return (*this)("texel_buffer", format, access);
+        }
+
+        /// @param source the source
+        /// @param format the texel format
+        /// @param access the access control
+        /// @returns the texel buffer
+        ast::Type texel_buffer(const Source& source,
+                               core::TexelFormat format,
+                               core::Access access) const {
+            return (*this)(source, "texel_buffer", format, access);
         }
 
         /// @param subtype the texture subtype.
@@ -1211,6 +1233,63 @@ class Builder {
             return (*this)(source, "texture_external");
         }
 
+        /// @param el the subgroup matrix element type
+        /// @param cols the column count
+        /// @param rows the row count
+        /// @returns the subgroup matrix
+        template <typename C, typename R>
+            requires(core::IsNumber<C> && core::IsNumeric<R>)
+        ast::Type subgroup_matrix_result(ast::Type el, C cols, R rows) const {
+            return subgroup_matrix_result(builder->source_, el, cols, rows);
+        }
+
+        /// @param source the source
+        /// @param el the subgroup matrix element type
+        /// @param cols the column count
+        /// @param rows the row count
+        /// @returns the subgroup matrix
+        template <typename C, typename R>
+            requires(core::IsNumber<C> && core::IsNumeric<R>)
+        ast::Type subgroup_matrix_result(const Source& source, ast::Type el, C cols, R rows) const {
+            return (*this)(source, "subgroup_matrix_result", el, cols, rows);
+        }
+
+        /// @param el the subgroup matrix element type
+        /// @param cols the column count
+        /// @param rows the row count
+        /// @returns the subgroup matrix
+        ast::Type subgroup_matrix_result(ast::Type el, uint32_t cols, uint32_t rows) const {
+            return subgroup_matrix_result(builder->source_, el, cols, rows);
+        }
+
+        /// @param source the source
+        /// @param el the subgroup matrix element type
+        /// @param cols the column count
+        /// @param rows the row count
+        /// @returns the subgroup matrix
+        ast::Type subgroup_matrix_result(const Source& source,
+                                         ast::Type el,
+                                         uint32_t cols,
+                                         uint32_t rows) const {
+            return subgroup_matrix_result(source, el, core::AInt(cols), core::AInt(rows));
+        }
+
+        /// @param el the subgroup matrix element type
+        /// @param cols the column count
+        /// @param rows the row count
+        /// @returns the subgroup matrix
+        ast::Type subgroup_matrix_right(ast::Type el, uint32_t cols, uint32_t rows) const {
+            return (*this)("subgroup_matrix_right", el, core::AInt(cols), core::AInt(rows));
+        }
+
+        /// @param el the subgroup matrix element type
+        /// @param cols the column count
+        /// @param rows the row count
+        /// @returns the subgroup matrix
+        ast::Type subgroup_matrix_left(ast::Type el, uint32_t cols, uint32_t rows) const {
+            return (*this)("subgroup_matrix_left", el, core::AInt(cols), core::AInt(rows));
+        }
+
         /// @param kind the subgroup matrix kind
         /// @param el the subgroup matrix element type
         /// @param cols the column count
@@ -1220,18 +1299,24 @@ class Builder {
                                   ast::Type el,
                                   uint32_t cols,
                                   uint32_t rows) const {
-            auto c = core::AInt(cols);
-            auto r = core::AInt(rows);
             switch (kind) {
                 case core::SubgroupMatrixKind::kLeft:
-                    return (*this)("subgroup_matrix_left", el, c, r);
+                    return subgroup_matrix_left(el, cols, rows);
                 case core::SubgroupMatrixKind::kRight:
-                    return (*this)("subgroup_matrix_right", el, c, r);
+                    return subgroup_matrix_right(el, cols, rows);
                 case core::SubgroupMatrixKind::kResult:
-                    return (*this)("subgroup_matrix_result", el, c, r);
+                    return subgroup_matrix_result(el, cols, rows);
                 case core::SubgroupMatrixKind::kUndefined:
                     TINT_UNREACHABLE();
             }
+        }
+
+        /// @param size the buffer size (0 is unsized)
+        /// @returns the buffer
+        template <typename NUM>
+            requires(core::IsNumber<NUM>)
+        ast::Type buffer(NUM size) const {
+            return AsType("buffer", size);
         }
 
         /// @param size the buffer size (0 is unsized)
@@ -1240,8 +1325,7 @@ class Builder {
             if (size == 0) {
                 return (*this)("buffer");
             }
-            auto n = core::AInt(size);
-            return (*this)("buffer", n);
+            return buffer(core::AInt(size));
         }
 
         /// @param el the binding_array element type
@@ -1265,6 +1349,37 @@ class Builder {
         Builder* const builder;
 
       private:
+        /// Creates a type
+        /// @param name the name
+        /// @param args the optional template arguments
+        /// @returns the type
+        template <typename NAME,
+                  typename... ARGS,
+                  typename = DisableIfSource<NAME>,
+                  typename = std::enable_if_t<!std::is_same_v<std::decay_t<NAME>, ast::Type>>>
+        ast::Type operator()(NAME&& name, ARGS&&... args) const {
+            if constexpr (traits::IsTypeOrDerived<traits::PtrElTy<NAME>, ast::Expression>) {
+                static_assert(sizeof...(ARGS) == 0);
+                return {name};
+            } else {
+                return {builder->Expr(
+                    builder->Ident(std::forward<NAME>(name), std::forward<ARGS>(args)...))};
+            }
+        }
+
+        /// Creates a type
+        /// @param source the Source of the node
+        /// @param name the name
+        /// @param args the optional template arguments
+        /// @returns the type
+        template <typename NAME,
+                  typename... ARGS,
+                  typename = std::enable_if_t<!std::is_same_v<std::decay_t<NAME>, ast::Type>>>
+        ast::Type operator()(const Source& source, NAME&& name, ARGS&&... args) const {
+            return {builder->Expr(
+                builder->Ident(source, std::forward<NAME>(name), std::forward<ARGS>(args)...))};
+        }
+
         /// CToAST<T> is specialized for various `T` types and each specialization
         /// contains a single static `get()` method for obtaining the corresponding
         /// AST type for the C type `T`.

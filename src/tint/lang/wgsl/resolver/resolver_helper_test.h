@@ -635,7 +635,7 @@ struct DataType<alias<T, ID>> {
             auto type = DataType<T>::AST(b);
             b.AST().AddTypeDecl(b.ty.alias(name, type));
         }
-        return b.ty(name);
+        return b.ty.AsType(name);
     }
 
     /// @param b the ProgramBuilder

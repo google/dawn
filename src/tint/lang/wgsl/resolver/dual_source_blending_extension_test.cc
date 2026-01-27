@@ -301,7 +301,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcAsFragmentInput) {
                        Member("a", ty.vec4<f32>(), Vector{Location(0_a), BlendSrc(0_a)}),
                        Member("b", ty.vec4<f32>(), Vector{Location(0_a), BlendSrc(1_a)}),
                    });
-    Func("F", Vector{Param("s_in", ty("S"))}, ty("S"), Vector{Return(Call("S"))},
+    Func("F", Vector{Param("s_in", ty.AsType("S"))}, ty.AsType("S"), Vector{Return(Call("S"))},
          Vector{Stage(ast::PipelineStage::kFragment)});
 
     EXPECT_FALSE(r()->Resolve());
@@ -344,7 +344,7 @@ TEST_P(DualSourceBlendingExtensionTestWithParams,
                   Member("b", ty.vec4<f32>(), Vector{Location(0_a), BlendSrc(Source{{1, 2}}, 1_a)}),
                   Member(Source{{3, 4}}, "c", ty.vec4<f32>(), Vector{Location(AInt(GetParam()))}),
               });
-    Func("F", Empty, ty("S"), Vector{Return(Call("S"))},
+    Func("F", Empty, ty.AsType("S"), Vector{Return(Call("S"))},
          Vector{Stage(ast::PipelineStage::kFragment)});
 
     EXPECT_FALSE(r()->Resolve());
@@ -367,7 +367,7 @@ TEST_P(DualSourceBlendingExtensionTestWithParams,
                   Member(Source{{1, 2}}, "b", ty.vec4<f32>(), Vector{Location(0_a), BlendSrc(0_a)}),
                   Member("c", ty.vec4<f32>(), Vector{Location(0_a), BlendSrc(Source{{3, 4}}, 1_a)}),
               });
-    Func(Source{{5, 6}}, "F", Empty, ty("S"), Vector{Return(Call("S"))},
+    Func(Source{{5, 6}}, "F", Empty, ty.AsType("S"), Vector{Return(Call("S"))},
          Vector{Stage(ast::PipelineStage::kFragment)});
 
     EXPECT_FALSE(r()->Resolve());
