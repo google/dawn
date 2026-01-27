@@ -281,6 +281,16 @@ MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureCont
     if (fragment.module != nullptr) {
         for (auto slot : attachmentMask) {
             const auto& target = *GetColorTargetState(slot);
+
+            schema::ExpandResolveMode expandResolveMode = schema::ExpandResolveMode::Unused;
+            if (GetAttachmentState()->GetExpandResolveInfo().resolveTargetsMask.test(slot)) {
+                expandResolveMode =
+                    GetAttachmentState()->GetExpandResolveInfo().attachmentsToExpandResolve.test(
+                        slot)
+                        ? schema::ExpandResolveMode::Enabled
+                        : schema::ExpandResolveMode::Disabled;
+            }
+
             targets[size_t(slot)] = {{
                 .format = target.format,
                 .blend{{
@@ -288,6 +298,7 @@ MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureCont
                     .alpha = ToSchema(target.blend ? &target.blend->alpha : nullptr),
                 }},
                 .writeMask = target.writeMask,
+                .expandResolveMode = expandResolveMode,
             }};
         }
     }

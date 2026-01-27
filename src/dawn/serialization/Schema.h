@@ -144,6 +144,16 @@ DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES_ENUM(DAWN_REPLAY_ENUM)
 
 DAWN_REPLAY_COMMAND_BUFFER_COMMANDS_ENUM(DAWN_REPLAY_ENUM)
 
+#define DAWN_REPLAY_EXPAND_RESOLVE_MODES(X) \
+    X(Unused)                               \
+    X(Disabled)                             \
+    X(Enabled)
+
+#define DAWN_REPLAY_EXPAND_RESOLVE_MODES_ENUM(X) \
+    X(ExpandResolveMode, DAWN_REPLAY_EXPAND_RESOLVE_MODES)
+
+DAWN_REPLAY_EXPAND_RESOLVE_MODES_ENUM(DAWN_REPLAY_ENUM)
+
 #define DAWN_REPLAY_ROOT_COMMANDS(X) \
     X(Invalid, 0)                    \
     X(CreateResource)                \
@@ -291,10 +301,11 @@ DAWN_REPLAY_SERIALIZABLE(struct, BlendComponent, BLEND_COMPONENT_MEMBER){};
 
 DAWN_REPLAY_SERIALIZABLE(struct, BlendState, BLEND_STATE_MEMBER){};
 
-#define COLOR_TARGET_STATE_MEMBER(X) \
-    X(wgpu::TextureFormat, format)   \
-    X(BlendState, blend)             \
-    X(wgpu::ColorWriteMask, writeMask)
+#define COLOR_TARGET_STATE_MEMBER(X)   \
+    X(wgpu::TextureFormat, format)     \
+    X(BlendState, blend)               \
+    X(wgpu::ColorWriteMask, writeMask) \
+    X(ExpandResolveMode, expandResolveMode)
 
 DAWN_REPLAY_SERIALIZABLE(struct, ColorTargetState, COLOR_TARGET_STATE_MEMBER){};
 
@@ -537,6 +548,16 @@ DAWN_REPLAY_SERIALIZABLE(struct,
                          RenderPassDepthStencilAttachment,
                          RENDER_PASS_DEPTH_STENCIL_ATTACHMENT_MEMBER){};
 
+#define RESOLVE_RECT_MEMBER(X)  \
+    X(uint32_t, colorOffsetX)   \
+    X(uint32_t, colorOffsetY)   \
+    X(uint32_t, resolveOffsetX) \
+    X(uint32_t, resolveOffsetY) \
+    X(uint32_t, width)          \
+    X(uint32_t, height)
+
+DAWN_REPLAY_SERIALIZABLE(struct, ResolveRect, RESOLVE_RECT_MEMBER){};
+
 #define CREATE_RESOURCE_CMD_DATA_MEMBER(X) X(LabeledResource, resource)
 
 DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(CreateResource, CREATE_RESOURCE_CMD_DATA_MEMBER){};
@@ -630,7 +651,8 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(BeginComputePass,
     X(RenderPassDepthStencilAttachment, depthStencilAttachment) \
     X(ObjectId, occlusionQuerySetId)                            \
     X(TimestampWrites, timestampWrites)                         \
-    X(uint64_t, maxDrawCount)
+    X(uint64_t, maxDrawCount)                                   \
+    X(ResolveRect, resolveRect)
 
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(BeginRenderPass,
                                                  BEGIN_RENDER_PASS_CMD_DATA_MEMBER){};

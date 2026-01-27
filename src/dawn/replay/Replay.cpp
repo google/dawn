@@ -823,6 +823,8 @@ ResultOrError<wgpu::RenderPipeline> CreateRenderPipeline(const ReplayImpl& repla
     std::vector<wgpu::ConstantEntry> fragmentConstants =
         ToWGPU(pipeline.fragment.program.constants);
     std::vector<wgpu::ColorTargetState> colorTargets;
+    std::array<wgpu::ColorTargetStateExpandResolveTextureDawn, kMaxColorAttachments>
+        expandResolveChains;
     std::vector<wgpu::BlendState> blendStates(pipeline.fragment.targets.size());
     std::vector<wgpu::VertexBufferLayout> buffers;
 
@@ -857,7 +859,16 @@ ResultOrError<wgpu::RenderPipeline> CreateRenderPipeline(const ReplayImpl& repla
         for (const auto& target : pipeline.fragment.targets) {
             wgpu::BlendState& blend = blendStates[colorTargets.size()];
             blend = ToWGPU(target.blend);
+
+            wgpu::ChainedStruct* nextInChain = nullptr;
+            if (target.expandResolveMode != schema::ExpandResolveMode::Unused) {
+                auto expandResolve = &expandResolveChains[colorTargets.size()];
+                expandResolve->enabled =
+                    target.expandResolveMode == schema::ExpandResolveMode::Enabled;
+                nextInChain = expandResolve;
+            }
             colorTargets.push_back({
+                .nextInChain = nextInChain,
                 .format = target.format,
                 .blend = IsBlendEnabled(blend) ? &blend : nullptr,
                 .writeMask = target.writeMask,
@@ -965,9 +976,14 @@ ResultOrError<wgpu::Texture> CreateTexture(wgpu::Device device,
     schema::Texture tex;
     DAWN_TRY(Deserialize(readHead, &tex));
 
+    wgpu::TextureUsage usage = tex.usage;
+    if (!(usage & wgpu::TextureUsage::TransientAttachment)) {
+        usage |= wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    }
+
     wgpu::TextureDescriptor desc{
         .label = wgpu::StringView(label),
-        .usage = tex.usage | wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst,
+        .usage = usage,
         .dimension = tex.dimension,
         .size = ToWGPU(tex.size),
         .format = tex.format,
@@ -1196,6 +1212,18 @@ MaybeError ProcessEncoderCommands(const ReplayImpl& replay,
                         replay.GetObjectById<wgpu::QuerySet>(data.occlusionQuerySetId),
                     .timestampWrites = timestampWrites.querySet ? &timestampWrites : nullptr,
                 };
+
+                wgpu::RenderPassDescriptorResolveRect resolveRect;
+                if (data.resolveRect.width != 0) {
+                    resolveRect.colorOffsetX = data.resolveRect.colorOffsetX;
+                    resolveRect.colorOffsetY = data.resolveRect.colorOffsetY;
+                    resolveRect.resolveOffsetX = data.resolveRect.resolveOffsetX;
+                    resolveRect.resolveOffsetY = data.resolveRect.resolveOffsetY;
+                    resolveRect.width = data.resolveRect.width;
+                    resolveRect.height = data.resolveRect.height;
+                    desc.nextInChain = &resolveRect;
+                }
+
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&desc);
                 DAWN_TRY(ProcessRenderPassCommands(replay, readHead, device, pass));
                 break;
