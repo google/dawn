@@ -46,7 +46,7 @@
 %pointer_indices = OpFunctionParameter %_arr_uint_uint_1
          %16 = OpLabel
          %17 = OpCompositeExtract %uint %pointer_indices 0
-         %18 = OpIMul %uint %uint_16 %17
+         %18 = OpIMul %uint %17 %uint_16
          %20 = OpFunctionCall %str %21 %18
                OpReturnValue %20
                OpFunctionEnd

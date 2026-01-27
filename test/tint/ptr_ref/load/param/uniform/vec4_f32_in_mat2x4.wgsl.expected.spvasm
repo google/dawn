@@ -40,7 +40,7 @@
 %pointer_indices = OpFunctionParameter %_arr_uint_uint_1
          %15 = OpLabel
          %16 = OpCompositeExtract %uint %pointer_indices 0
-         %17 = OpIMul %uint %uint_16 %16
+         %17 = OpIMul %uint %16 %uint_16
          %19 = OpUDiv %uint %17 %uint_16
          %20 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %19
          %23 = OpLoad %v4uint %20 None

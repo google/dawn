@@ -18,7 +18,7 @@ mat2 v_2(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_6 = (8u * min(uint(i()), 1u));
+  uint v_6 = (min(uint(i()), 1u) * 8u);
   mat2 l_m = v_2(0u);
   uvec4 v_7 = v.inner[(v_6 / 16u)];
   vec2 l_m_i = uintBitsToFloat(mix(v_7.xy, v_7.zw, bvec2((((v_6 & 15u) >> 2u) == 2u))));

@@ -3,8 +3,8 @@ cbuffer cbuffer_S : register(b0) {
   uint4 S[1];
 };
 float2 func(uint pointer_indices[1]) {
-  uint4 v = S[((8u * pointer_indices[0u]) / 16u)];
-  return asfloat(((((((8u * pointer_indices[0u]) & 15u) >> 2u) == 2u)) ? (v.zw) : (v.xy)));
+  uint4 v = S[((pointer_indices[0u] * 8u) / 16u)];
+  return asfloat(((((((pointer_indices[0u] * 8u) & 15u) >> 2u) == 2u)) ? (v.zw) : (v.xy)));
 }
 
 [numthreads(1, 1, 1)]

@@ -26,7 +26,7 @@ f16mat4x3 v_2(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_10 = (8u * min(uint(i()), 3u));
+  uint v_10 = (min(uint(i()), 3u) * 8u);
   f16mat4x3 l_m = v_2(0u);
   uvec4 v_11 = v.inner[(v_10 / 16u)];
   f16vec3 l_m_i = tint_bitcast_to_f16(mix(v_11.xy, v_11.zw, bvec2((((v_10 & 15u) >> 2u) == 2u)))).xyz;

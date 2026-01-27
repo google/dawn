@@ -5,7 +5,7 @@ cbuffer cbuffer_ubo : register(b0) {
 RWByteAddressBuffer result : register(u2);
 [numthreads(1, 1, 1)]
 void f() {
-  uint v = (16u * min(uint(asint(ubo[4u].x)), 3u));
+  uint v = (min(uint(asint(ubo[4u].x)), 3u) * 16u);
   result.Store(0u, asuint(asint(ubo[(v / 16u)][((v & 15u) >> 2u)])));
 }
 

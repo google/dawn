@@ -137,7 +137,7 @@ void main1() {
   Mat4x3_ t_PosMtx = (Mat4x3_)0;
   float2 t_TexSpaceCoord = (0.0f).xx;
   float x_e15 = a_PosMtxIdx1;
-  Mat4x3_ x_e18 = v_5((48u * min(uint(tint_f32_to_i32(x_e15)), 31u)));
+  Mat4x3_ x_e18 = v_5((min(uint(tint_f32_to_i32(x_e15)), 31u) * 48u));
   t_PosMtx = x_e18;
   Mat4x3_ x_e23 = t_PosMtx;
   Mat4x4_ x_e24 = x_Mat4x4_1(x_e23);

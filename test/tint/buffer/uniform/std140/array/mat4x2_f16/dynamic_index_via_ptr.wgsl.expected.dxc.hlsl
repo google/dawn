@@ -48,8 +48,8 @@ ary_ret v_6(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  uint v_10 = (16u * min(uint(i()), 3u));
-  uint v_11 = (4u * min(uint(i()), 3u));
+  uint v_10 = (min(uint(i()), 3u) * 16u);
+  uint v_11 = (min(uint(i()), 3u) * 4u);
   matrix<float16_t, 4, 2> l_a[4] = v_6(0u);
   matrix<float16_t, 4, 2> l_a_i = v_2(v_10);
   vector<float16_t, 2> l_a_i_i = tint_bitcast_to_f16(a[((v_10 + v_11) / 16u)][(((v_10 + v_11) & 15u) >> 2u)]);

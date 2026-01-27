@@ -1357,6 +1357,22 @@ class Builder {
         return val->Type()->Equals(*to) ? val : Convert(to, val)->Result();
     }
 
+    /// Adds a call to bitcast if destination type is different then the value's type
+    /// @param to the type converted to
+    /// @param val the value to be converted
+    /// @returns either result of the conversion or original value
+    ir::Value* InsertBitcastIfNeeded(const core::type::Type* to, ir::Value* val) {
+        return val->Type()->Equals(*to) ? val : Bitcast(to, val)->Result();
+    }
+
+    /// Adds a call to bitcast if destination type is different then the instruction's type
+    /// @param to the type converted to
+    /// @param inst the instruction to be converted
+    /// @returns either result of the conversion or original instruction
+    ir::Instruction* InsertBitcastIfNeeded(const core::type::Type* to, ir::Instruction* inst) {
+        return inst->Result()->Type()->Equals(*to) ? inst : Bitcast(to, inst);
+    }
+
     /// Creates a value constructor instruction with an existing instruction result
     /// @param result the instruction result to use
     /// @param args the arguments to the constructor

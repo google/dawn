@@ -24,7 +24,7 @@ matrix<float16_t, 3, 2> v_2(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  uint v_5 = (4u * min(uint(i()), 2u));
+  uint v_5 = (min(uint(i()), 2u) * 4u);
   matrix<float16_t, 3, 2> l_m = v_2(0u);
   vector<float16_t, 2> l_m_i = tint_bitcast_to_f16(m[(v_5 / 16u)][((v_5 & 15u) >> 2u)]);
 }

@@ -37,12 +37,26 @@ class Module;
 
 namespace tint::core::ir::transform {
 
-/// DecomposeUniformAccess is a transform used to replace uniform buffer accesses with a
-/// the correct load of the HLSL primitive objects
+struct DecomposeUniformAccessOptions {
+    /// Specify whether all variables in the address space should be decomposed.
+    bool storage = false;
+    bool uniform = false;
+    bool workgroup = false;
+
+    // TODO(b/477295042): should there be a uniform standard layout option? When enabled uniform
+    // could be treated like every other storage class.
+};
+
+/// DecomposeUniformAccess is a transform used to replace uniform, storage, or workgroup variables
+/// with an a uniformly typed array instead.
+/// TODO(b/459523229): take options in the base version, rename this transform/file and update all
+/// uses.
 ///
 /// @param module the module to transform
 /// @returns success or failure
 Result<SuccessType> DecomposeUniformAccess(core::ir::Module& module);
+Result<SuccessType> DecomposeUniformAccessWithOptions(core::ir::Module& module,
+                                                      const DecomposeUniformAccessOptions& options);
 
 }  // namespace tint::core::ir::transform
 

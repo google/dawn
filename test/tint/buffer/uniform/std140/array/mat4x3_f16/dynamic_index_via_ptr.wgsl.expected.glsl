@@ -52,8 +52,8 @@ f16mat4x3[4] v_11(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_14 = (32u * min(uint(i()), 3u));
-  uint v_15 = (8u * min(uint(i()), 3u));
+  uint v_14 = (min(uint(i()), 3u) * 32u);
+  uint v_15 = (min(uint(i()), 3u) * 8u);
   f16mat4x3 l_a[4] = v_11(0u);
   f16mat4x3 l_a_i = v_3(v_14);
   uvec4 v_16 = v.inner[((v_14 + v_15) / 16u)];

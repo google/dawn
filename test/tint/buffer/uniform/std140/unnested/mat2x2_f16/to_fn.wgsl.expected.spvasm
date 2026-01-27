@@ -97,18 +97,18 @@
          %58 = OpLabel
          %59 = OpUDiv %uint %start_byte_offset %uint_16
          %61 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %59
-         %62 = OpBitwiseAnd %uint %start_byte_offset %uint_15
-         %64 = OpShiftRightLogical %uint %62 %uint_2
-         %66 = OpLoad %v4uint %61 None
-         %67 = OpVectorExtractDynamic %uint %66 %64
+         %62 = OpLoad %v4uint %61 None
+         %63 = OpBitwiseAnd %uint %start_byte_offset %uint_15
+         %65 = OpShiftRightLogical %uint %63 %uint_2
+         %67 = OpVectorExtractDynamic %uint %62 %65
          %68 = OpBitcast %v2half %67
          %69 = OpIAdd %uint %uint_4 %start_byte_offset
          %71 = OpUDiv %uint %69 %uint_16
          %72 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %71
-         %73 = OpBitwiseAnd %uint %69 %uint_15
-         %74 = OpShiftRightLogical %uint %73 %uint_2
-         %75 = OpLoad %v4uint %72 None
-         %76 = OpVectorExtractDynamic %uint %75 %74
+         %73 = OpLoad %v4uint %72 None
+         %74 = OpBitwiseAnd %uint %69 %uint_15
+         %75 = OpShiftRightLogical %uint %74 %uint_2
+         %76 = OpVectorExtractDynamic %uint %73 %75
          %77 = OpBitcast %v2half %76
          %78 = OpCompositeConstruct %mat2v2half %68 %77
                OpReturnValue %78

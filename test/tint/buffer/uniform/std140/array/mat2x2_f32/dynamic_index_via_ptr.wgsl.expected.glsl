@@ -41,8 +41,8 @@ mat2[4] v_7(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_10 = (16u * min(uint(i()), 3u));
-  uint v_11 = (8u * min(uint(i()), 1u));
+  uint v_10 = (min(uint(i()), 3u) * 16u);
+  uint v_11 = (min(uint(i()), 1u) * 8u);
   mat2 l_a[4] = v_7(0u);
   mat2 l_a_i = v_3(v_10);
   uvec4 v_12 = v.inner[((v_10 + v_11) / 16u)];

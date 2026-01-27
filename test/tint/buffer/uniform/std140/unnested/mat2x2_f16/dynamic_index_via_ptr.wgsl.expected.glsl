@@ -20,7 +20,7 @@ f16mat2 v_2(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_4 = (4u * min(uint(i()), 1u));
+  uint v_4 = (min(uint(i()), 1u) * 4u);
   f16mat2 l_m = v_2(0u);
   f16vec2 l_m_i = tint_bitcast_to_f16(v.inner[(v_4 / 16u)][((v_4 & 15u) >> 2u)]);
 }

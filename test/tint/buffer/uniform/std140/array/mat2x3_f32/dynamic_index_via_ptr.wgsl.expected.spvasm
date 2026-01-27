@@ -87,11 +87,11 @@
          %30 = OpFunctionCall %int %i
          %31 = OpBitcast %uint %30
          %32 = OpExtInst %uint %33 UMin %31 %uint_3
-         %35 = OpIMul %uint %uint_32 %32
+         %35 = OpIMul %uint %32 %uint_32
          %37 = OpFunctionCall %int %i
          %38 = OpBitcast %uint %37
          %39 = OpExtInst %uint %33 UMin %38 %uint_1
-         %41 = OpIMul %uint %uint_16 %39
+         %41 = OpIMul %uint %39 %uint_16
         %l_a = OpFunctionCall %_arr_mat2v3float_uint_4 %48 %uint_0
       %l_a_i = OpFunctionCall %mat2v3float %51 %35
          %52 = OpIAdd %uint %35 %41

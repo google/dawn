@@ -71,9 +71,9 @@ Outer[4] v_11(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_14 = (256u * min(uint(i()), 3u));
-  uint v_15 = (64u * min(uint(i()), 3u));
-  uint v_16 = (8u * min(uint(i()), 1u));
+  uint v_14 = (min(uint(i()), 3u) * 256u);
+  uint v_15 = (min(uint(i()), 3u) * 64u);
+  uint v_16 = (min(uint(i()), 1u) * 8u);
   Outer l_a[4] = v_11(0u);
   Outer l_a_i = v_10(v_14);
   Inner l_a_i_a[4] = v_7(v_14);

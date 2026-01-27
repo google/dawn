@@ -353,7 +353,7 @@
         %154 = OpFunctionCall %int %tint_f32_to_i32 %x_e15_0
         %157 = OpBitcast %uint %154
         %158 = OpExtInst %uint %159 UMin %157 %uint_31
-        %161 = OpIMul %uint %uint_48 %158
+        %161 = OpIMul %uint %158 %uint_48
     %x_e18_1 = OpFunctionCall %Mat4x3_ %164 %161
                OpStore %t_PosMtx %x_e18_1 None
       %x_e23 = OpLoad %Mat4x3_ %t_PosMtx None

@@ -17,7 +17,7 @@ float2x2 v(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  uint v_4 = (8u * min(uint(i()), 1u));
+  uint v_4 = (min(uint(i()), 1u) * 8u);
   float2x2 l_m = v(0u);
   uint4 v_5 = m[(v_4 / 16u)];
   float2 l_m_i = asfloat((((((v_4 & 15u) >> 2u) == 2u)) ? (v_5.zw) : (v_5.xy)));

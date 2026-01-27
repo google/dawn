@@ -62,7 +62,7 @@
          %26 = OpFunctionCall %int %i
          %27 = OpBitcast %uint %26
          %28 = OpExtInst %uint %29 UMin %27 %uint_2
-         %31 = OpIMul %uint %uint_16 %28
+         %31 = OpIMul %uint %28 %uint_16
         %l_m = OpFunctionCall %mat3v4float %37 %uint_0
          %39 = OpUDiv %uint %31 %uint_16
          %40 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %39

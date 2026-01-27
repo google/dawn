@@ -14,7 +14,7 @@ float2x4 v(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  uint v_1 = (16u * min(uint(i()), 1u));
+  uint v_1 = (min(uint(i()), 1u) * 16u);
   float2x4 l_m = v(0u);
   float4 l_m_i = asfloat(m[(v_1 / 16u)]);
 }

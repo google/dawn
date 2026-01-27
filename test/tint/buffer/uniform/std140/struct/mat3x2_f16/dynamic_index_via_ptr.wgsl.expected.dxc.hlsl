@@ -89,9 +89,9 @@ ary_ret_1 v_15(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  uint v_20 = (256u * min(uint(i()), 3u));
-  uint v_21 = (64u * min(uint(i()), 3u));
-  uint v_22 = (4u * min(uint(i()), 2u));
+  uint v_20 = (min(uint(i()), 3u) * 256u);
+  uint v_21 = (min(uint(i()), 3u) * 64u);
+  uint v_22 = (min(uint(i()), 2u) * 4u);
   Outer l_a[4] = v_15(0u);
   Outer l_a_i = v_12(v_20);
   Inner l_a_i_a[4] = v_7(v_20);

@@ -38,8 +38,8 @@ mat4x3[4] v_4(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_7 = (64u * min(uint(i()), 3u));
-  uint v_8 = (16u * min(uint(i()), 3u));
+  uint v_7 = (min(uint(i()), 3u) * 64u);
+  uint v_8 = (min(uint(i()), 3u) * 16u);
   mat4x3 l_a[4] = v_4(0u);
   mat4x3 l_a_i = v_3(v_7);
   vec3 l_a_i_i = uintBitsToFloat(v.inner[((v_7 + v_8) / 16u)].xyz);
