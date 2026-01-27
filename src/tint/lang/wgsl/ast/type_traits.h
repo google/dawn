@@ -30,6 +30,10 @@
 
 #include <type_traits>
 
+#include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/utils/diagnostic/source.h"
+#include "src/tint/utils/symbol/symbol.h"
+
 namespace tint::ast {
 
 /// Evaluates to true if T is a Infer, AInt or AFloat.
