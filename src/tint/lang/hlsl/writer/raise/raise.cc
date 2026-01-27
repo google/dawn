@@ -40,7 +40,7 @@
 #include "src/tint/lang/core/ir/transform/builtin_scalarize.h"
 #include "src/tint/lang/core/ir/transform/change_immediate_to_uniform.h"
 #include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
-#include "src/tint/lang/core/ir/transform/decompose_uniform_access.h"
+#include "src/tint/lang/core/ir/transform/decompose_access.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
@@ -259,7 +259,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     const bool pixel_local_enabled = !options.pixel_local.attachments.empty();
 
-    // ShaderIO must be run before DecomposeUniformAccess because it might
+    // ShaderIO must be run before DecomposeAccess because it might
     // introduce a uniform buffer for kNumWorkgroups.
     {
         raise::ShaderIOConfig config = {
@@ -309,7 +309,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // ChangeImmediateToUniform (see below after ChangeImmediateToUniform transform).
     }
 
-    // ChangeImmediateToUniformConfig must come before DecomposeUniformAccess (to write correct
+    // ChangeImmediateToUniformConfig must come before DecomposeAccess (to write correct
     // uniform access instructions).
     {
         core::ir::transform::ChangeImmediateToUniformConfig config = {
@@ -329,9 +329,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             array_offset_from_uniform_options.bindpoint_to_offset_index));
     }
 
-    // DecomposeUniformAccess must come after DecomposeStorageAccess, ChangeImmediateToUniform, and
+    // DecomposeAccess must come after DecomposeStorageAccess, ChangeImmediateToUniform, and
     // ArrayOffsetFrom* transforms
-    TINT_CHECK_RESULT(core::ir::transform::DecomposeUniformAccess(module));
+    core::ir::transform::DecomposeAccessOptions decompose_config{.uniform = true};
+    TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(module, decompose_config));
 
     // PixelLocal must run after DirectVariableAccess to avoid chasing pointer parameters.
     if (pixel_local_enabled) {

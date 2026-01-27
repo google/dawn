@@ -35,7 +35,7 @@
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
-#include "src/tint/lang/core/ir/transform/decompose_uniform_access.h"
+#include "src/tint/lang/core/ir/transform/decompose_access.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
@@ -168,10 +168,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     if (!options.use_uniform_buffers) {
-        // DecomposeUniformAccess must come before BlockDecoratedStructs, which will wrap the
+        // DecomposeAccess must come before BlockDecoratedStructs, which will wrap the
         // uniform variable in a structure. It must come after DirectVariableAccess which removes
         // uniform buffers passed as function parameters.
-        TINT_CHECK_RESULT(core::ir::transform::DecomposeUniformAccess(module));
+        core::ir::transform::DecomposeAccessOptions decompose_config{.uniform = true};
+        TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(module, decompose_config));
     } else {
         TINT_CHECK_RESULT(core::ir::transform::Std140(module));
     }

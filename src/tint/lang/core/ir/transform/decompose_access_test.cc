@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/transform/decompose_uniform_access.h"
+#include "src/tint/lang/core/ir/transform/decompose_access.h"
 
 #include <gtest/gtest.h>
 
@@ -40,9 +40,9 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::core::ir::transform {
 namespace {
 
-using IR_DecomposeUniformAccessTest = core::ir::transform::TransformTest;
+using IR_DecomposeAccessTest = core::ir::transform::TransformTest;
 
-TEST_F(IR_DecomposeUniformAccessTest, NoBufferAccess) {
+TEST_F(IR_DecomposeAccessTest, NoBufferAccess) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] { b.Return(func); });
 
@@ -56,12 +56,13 @@ TEST_F(IR_DecomposeUniformAccessTest, NoBufferAccess) {
     EXPECT_EQ(src, str());
 
     auto* expect = src;
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessChainFromUnnamedAccessChain) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessChainFromUnnamedAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                           {mod.symbols.New("d"), ty.u32()},
@@ -140,11 +141,12 @@ $B1: {  # root
 }
 )";
 
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessChainFromLetAccessChain) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessChainFromLetAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                       });
@@ -225,11 +227,12 @@ $B1: {  # root
 }
 )";
 
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessVectorLoad) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessVectorLoad) {
     auto* var = b.Var<uniform, vec4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -298,11 +301,12 @@ $B1: {  # root
   }
 }
 )";
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessScalarF16) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessScalarF16) {
     auto* var = b.Var<uniform, f16, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -344,11 +348,12 @@ $B1: {  # root
   }
 }
 )";
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessVectorF16) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessVectorF16) {
     auto* var = b.Var<uniform, vec4<f16>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -432,11 +437,12 @@ $B1: {  # root
   }
 }
 )";
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessMat2x3F16) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessMat2x3F16) {
     auto* var = b.Var<uniform, mat2x3<f16>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -523,11 +529,12 @@ $B1: {  # root
   }
 }
 )";
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessMatrix) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessMatrix) {
     auto* var = b.Var<uniform, mat4x4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -608,11 +615,12 @@ $B1: {  # root
   }
 }
 )";
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessArray) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessArray) {
     auto* var = b.Var<uniform, array<vec3<f32>, 5>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -694,11 +702,12 @@ $B1: {  # root
   }
 }
 )";
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessArrayWhichCanHaveSizesOtherThenFive) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessArrayWhichCanHaveSizesOtherThenFive) {
     auto* var = b.Var<uniform, array<vec3<f32>, 42>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -780,11 +789,12 @@ $B1: {  # root
   }
 }
 )";
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessStruct) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessStruct) {
     auto* SB = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.f32()},
@@ -865,11 +875,12 @@ $B1: {  # root
   }
 }
 )";
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessStructNested) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessStructNested) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("s"), ty.mat3x3<f32>()},
@@ -1057,11 +1068,12 @@ $B1: {  # root
   }
 }
 )";
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, UniformAccessChainReused) {
+TEST_F(IR_DecomposeAccessTest, UniformAccessChainReused) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("c"), ty.f32()},
                                                     {mod.symbols.New("d"), ty.vec3f()},
@@ -1127,11 +1139,12 @@ $B1: {  # root
 }
 )";
 
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Determinism_MultipleUsesOfLetFromVar) {
+TEST_F(IR_DecomposeAccessTest, Determinism_MultipleUsesOfLetFromVar) {
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.New("a"), ty.array<vec4<f32>, 2>()},
@@ -1266,11 +1279,12 @@ $B1: {  # root
 }
 )";
 
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Determinism_MultipleUsesOfLetFromAccess) {
+TEST_F(IR_DecomposeAccessTest, Determinism_MultipleUsesOfLetFromAccess) {
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.New("a"), ty.array<vec4<f32>, 2>()},
@@ -1406,11 +1420,12 @@ $B1: {  # root
 }
 )";
 
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Determinism_MultipleUsesOfAccess) {
+TEST_F(IR_DecomposeAccessTest, Determinism_MultipleUsesOfAccess) {
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.New("a"), ty.array<vec4<f32>, 2>()},
@@ -1545,11 +1560,12 @@ $B1: {  # root
 }
 )";
 
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_LoadF16) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadF16) {
     auto* var = b.Var("v", storage, ty.f16(), core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -1593,12 +1609,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU32_LoadF32) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_LoadF32) {
     auto* var = b.Var("v", storage, ty.f32(), core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -1641,12 +1657,12 @@ $B1: {  # root
 }
 )";
 
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_LoadU32) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadU32) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.u32()},
@@ -1721,12 +1737,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_LoadVec2h) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec2h) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec2h()},
@@ -1799,12 +1815,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_LoadVec3h) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec3h) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec3h()},
@@ -1879,12 +1895,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_LoadVec4h) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec4h) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec4h()},
@@ -1961,12 +1977,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_LoadVec2u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec2u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec2u()},
@@ -2046,12 +2062,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_LoadVec3u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec3u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec3u()},
@@ -2138,12 +2154,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_LoadVec4u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadVec4u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec4u()},
@@ -2235,12 +2251,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU32_LoadVec2u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_LoadVec2u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u32()},
                                                     {mod.symbols.New("b"), ty.vec2u()},
@@ -2312,12 +2328,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU32_LoadVec3u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_LoadVec3u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u32()},
                                                     {mod.symbols.New("b"), ty.vec3u()},
@@ -2392,12 +2408,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU32_LoadVec4u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_LoadVec4u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u32()},
                                                     {mod.symbols.New("b"), ty.vec4u()},
@@ -2473,12 +2489,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessVec2u_LoadVec2u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessVec2u_LoadVec2u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.vec2u()},
                                                     {mod.symbols.New("b"), ty.vec2u()},
@@ -2545,12 +2561,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessVec2u_LoadVec3u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessVec2u_LoadVec3u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.vec2u()},
                                                     {mod.symbols.New("b"), ty.vec3u()},
@@ -2627,12 +2643,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessVec2u_LoadVec4u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessVec2u_LoadVec4u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.vec2u()},
                                                     {mod.symbols.New("b"), ty.vec4u()},
@@ -2702,12 +2718,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Workgroup_AccessU16_LoadStruct) {
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_LoadStruct) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.array(ty.u32(), 2_u)},
@@ -2810,12 +2826,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.workgroup = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Workgroup_AccessU16_StoreStruct) {
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_StoreStruct) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.array(ty.u32(), 2_u)},
@@ -2915,12 +2931,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.workgroup = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Store_AccessU16_StoreF16) {
+TEST_F(IR_DecomposeAccessTest, Store_AccessU16_StoreF16) {
     auto* var = b.Var("v", storage, ty.f16(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -2962,12 +2978,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU32_StoreF32) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_StoreF32) {
     auto* var = b.Var("v", storage, ty.f32(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -3009,12 +3025,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessVec2u_StoreVec2f) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessVec2u_StoreVec2f) {
     auto* var = b.Var("v", storage, ty.vec2f(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -3056,12 +3072,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessVec4u_StoreVec4f) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessVec4u_StoreVec4f) {
     auto* var = b.Var("v", storage, ty.vec4f(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -3103,12 +3119,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_StoreU32) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_StoreU32) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.u32()},
@@ -3174,12 +3190,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_StoreVec2h) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_StoreVec2h) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec2h()},
@@ -3247,12 +3263,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_StoreVec3h) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_StoreVec3h) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec3h()},
@@ -3324,12 +3340,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_StoreVec4h) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_StoreVec4h) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec4h()},
@@ -3405,12 +3421,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_StoreVec2u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_StoreVec2u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec2u()},
@@ -3490,12 +3506,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_StoreVec3u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_StoreVec3u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec3u()},
@@ -3585,12 +3601,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU16_StoreVec4u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_StoreVec4u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.vec4u()},
@@ -3690,12 +3706,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU32_StoreVec2u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_StoreVec2u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u32()},
                                                     {mod.symbols.New("b"), ty.vec2u()},
@@ -3761,12 +3777,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU32_StoreVec3u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_StoreVec3u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u32()},
                                                     {mod.symbols.New("b"), ty.vec3u()},
@@ -3835,12 +3851,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessU32_StoreVec4u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_StoreVec4u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u32()},
                                                     {mod.symbols.New("b"), ty.vec4u()},
@@ -3912,12 +3928,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_AccessVec2u_StoreVec4u) {
+TEST_F(IR_DecomposeAccessTest, Storage_AccessVec2u_StoreVec4u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.vec2u()},
                                                     {mod.symbols.New("b"), ty.vec4u()},
@@ -3984,12 +4000,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_RuntimeArray) {
+TEST_F(IR_DecomposeAccessTest, Storage_RuntimeArray) {
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.New("a"), ty.runtime_array(ty.u32())},
@@ -4042,12 +4058,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Storage_UnsizedBuffer) {
+TEST_F(IR_DecomposeAccessTest, Storage_UnsizedBuffer) {
     auto* var = b.Var("v", storage, ty.unsized_buffer(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -4091,12 +4107,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Workgroup_SizedBuffer) {
+TEST_F(IR_DecomposeAccessTest, Workgroup_SizedBuffer) {
     auto* var = b.Var("v", workgroup, ty.buffer(64u), core::Access::kReadWrite);
     b.ir.root_block->Append(var);
 
@@ -4139,12 +4155,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.workgroup = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, Uniform_SizedBuffer) {
+TEST_F(IR_DecomposeAccessTest, Uniform_SizedBuffer) {
     auto* var = b.Var("v", uniform, ty.buffer(128u), core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -4188,11 +4204,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, BufferLength_Sized_FromType) {
+TEST_F(IR_DecomposeAccessTest, BufferLength_Sized_FromType) {
     auto* var = b.Var("v", uniform, ty.buffer(128u), core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -4233,11 +4250,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, DISABLED_BufferLength_Sized_FromOperand) {
+TEST_F(IR_DecomposeAccessTest, DISABLED_BufferLength_Sized_FromOperand) {
     auto* var = b.Var("v", uniform, ty.buffer(128u), core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -4278,11 +4296,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, BufferLength_Unsized) {
+TEST_F(IR_DecomposeAccessTest, BufferLength_Unsized) {
     auto* var = b.Var("v", storage, ty.unsized_buffer(), core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -4325,11 +4344,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    Run(DecomposeUniformAccess);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, ArrayLength_U32) {
+TEST_F(IR_DecomposeAccessTest, ArrayLength_U32) {
     auto* var = b.Var("v", storage, ty.runtime_array(ty.u32()), core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -4371,12 +4391,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, ArrayLength_F16) {
+TEST_F(IR_DecomposeAccessTest, ArrayLength_F16) {
     auto* var = b.Var("v", storage, ty.runtime_array(ty.f16()), core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -4418,12 +4438,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, ArrayLength_StructMinF16) {
+TEST_F(IR_DecomposeAccessTest, ArrayLength_StructMinF16) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.array(ty.u32(), 2_u)},
@@ -4480,12 +4500,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, ArrayLength_StructMinF16_Offset_Access) {
+TEST_F(IR_DecomposeAccessTest, ArrayLength_StructMinF16_Offset_Access) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.array(ty.u32(), 2_u)},
@@ -4561,12 +4581,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, ArrayLength_StructMinF16_Offset_BufferView) {
+TEST_F(IR_DecomposeAccessTest, ArrayLength_StructMinF16_Offset_BufferView) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.array(ty.u32(), 2_u)},
@@ -4642,12 +4662,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, ArrayLength_StructMinF16_Offset_BufferView_Runtime) {
+TEST_F(IR_DecomposeAccessTest, ArrayLength_StructMinF16_Offset_BufferView_Runtime) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.array(ty.u32(), 2_u)},
@@ -4732,12 +4752,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, ArrayLength_StructMinF16_Offset_Both) {
+TEST_F(IR_DecomposeAccessTest, ArrayLength_StructMinF16_Offset_Both) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
                                                     {mod.symbols.New("b"), ty.array(ty.u32(), 2_u)},
@@ -4826,12 +4846,12 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.storage = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DecomposeUniformAccessTest, LargeUBOIndexing) {
+TEST_F(IR_DecomposeAccessTest, LargeUBOIndexing) {
     auto* Input = ty.Struct(mod.symbols.New("Input"),
                             {
                                 {mod.symbols.New("vector_index"), ty.u32()},
@@ -4921,8 +4941,8 @@ $B1: {  # root
 )";
 
     capabilities.Add(Capability::kAllow16BitIntegers);
-    DecomposeUniformAccessOptions options{.uniform = true};
-    Run(DecomposeUniformAccessWithOptions, options);
+    DecomposeAccessOptions options{.uniform = true};
+    Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
 

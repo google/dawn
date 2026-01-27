@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/transform/decompose_uniform_access.h"
+#include "src/tint/lang/core/ir/transform/decompose_access.h"
 
 #include <algorithm>
 #include <limits>
@@ -51,7 +51,7 @@ struct State {
     core::ir::Module& ir;
 
     /// The transform options.
-    const DecomposeUniformAccessOptions& options;
+    const DecomposeAccessOptions& options;
 
     /// The IR builder.
     core::ir::Builder b{ir};
@@ -1298,13 +1298,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> DecomposeUniformAccess(core::ir::Module& ir) {
-    return DecomposeUniformAccessWithOptions(ir, {.uniform = true});
-}
-
-Result<SuccessType> DecomposeUniformAccessWithOptions(
-    core::ir::Module& ir,
-    const DecomposeUniformAccessOptions& options) {
+Result<SuccessType> DecomposeAccess(core::ir::Module& ir, const DecomposeAccessOptions& options) {
     TINT_CHECK_RESULT(
         ValidateAndDumpIfNeeded(ir, "core.DecomposeUniformAccess",
                                 core::ir::Capabilities{
