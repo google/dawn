@@ -398,10 +398,6 @@ class Builder {
         /// @returns a type with the given name
         ast::Type AsType(const ast::IdentifierExpression* ident) const;
 
-        /// @param type the type to return
-        /// @return type (passthrough)
-        ast::Type operator()(const ast::Type& type) const;
-
         /// @returns a a nullptr expression wrapped in an ast::Type
         ast::Type void_() const;
 

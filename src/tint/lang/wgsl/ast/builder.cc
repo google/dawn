@@ -117,10 +117,6 @@ ast::Type Builder::TypesBuilder::AsType(const ast::IdentifierExpression* ident) 
     return {ident};
 }
 
-ast::Type Builder::TypesBuilder::operator()(const ast::Type& type) const {
-    return type;
-}
-
 ast::Type Builder::TypesBuilder::void_() const {
     return ast::Type{};
 }

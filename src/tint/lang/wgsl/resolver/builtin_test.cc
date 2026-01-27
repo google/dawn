@@ -2196,7 +2196,7 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
     ast::Type GetCoordsType(core::type::TextureDimension dim, ast::Type scalar) {
         switch (dim) {
             case core::type::TextureDimension::k1d:
-                return ty(scalar);
+                return scalar;
             case core::type::TextureDimension::k2d:
             case core::type::TextureDimension::k2dArray:
                 return ty.vec2(scalar);
