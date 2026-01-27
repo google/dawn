@@ -19,10 +19,7 @@
       'dawn-linux-x64-fuzz-dbg': {
         'os_type': 'linux',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'linux-jammy',
-          'x86-64',
+          'gpu_linux_gce_stable',
         ],
         'test_suites': {
           'isolated_scripts': 'tint_fuzzer_corpus_check_tests',
@@ -31,10 +28,7 @@
       'dawn-linux-x64-fuzz-rel': {
         'os_type': 'linux',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'linux-jammy',
-          'x86-64',
+          'gpu_linux_gce_stable',
         ],
         'test_suites': {
           'isolated_scripts': 'tint_fuzzer_corpus_check_tests',
@@ -70,10 +64,7 @@
       'dawn-linux-x64-sws-clusterfuzz': {
         'os_type': 'linux',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'linux-jammy',
-          'x86-64',
+          'gpu_linux_gce_stable',
         ],
         'test_suites': {
           'gtest_tests': 'wire_trace_gtests',
@@ -83,10 +74,7 @@
       'dawn-linux-x64-sws-dbg': {
         'os_type': 'linux',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'linux-jammy',
-          'x86-64',
+          'gpu_linux_gce_stable',
         ],
         'test_suites': {
           'gtest_tests': 'swiftshader_gtests',
@@ -96,10 +84,7 @@
       'dawn-linux-x64-sws-rel': {
         'os_type': 'linux',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'linux-jammy',
-          'x86-64',
+          'gpu_linux_gce_stable',
         ],
         'test_suites': {
           'gtest_tests': 'swiftshader_gtests',
@@ -109,10 +94,7 @@
       'dawn-linux-x64-sws-tsan': {
         'os_type': 'linux',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'linux-jammy',
-          'x86-64',
+          'gpu_linux_gce_stable',
         ],
         'test_suites': {
           'gtest_tests': 'dawn_end2end_sws_tsan_gtests',
@@ -131,10 +113,7 @@
       'dawn-linux-x86-fuzz-dbg': {
         'os_type': 'linux',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'linux-jammy',
-          'x86-64',
+          'gpu_linux_gce_stable',
         ],
         'test_suites': {
           'isolated_scripts': 'tint_fuzzer_corpus_check_tests',
@@ -143,10 +122,7 @@
       'dawn-linux-x86-fuzz-rel': {
         'os_type': 'linux',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'linux-jammy',
-          'x86-64',
+          'gpu_linux_gce_stable',
         ],
         'test_suites': {
           'isolated_scripts': 'tint_fuzzer_corpus_check_tests',
@@ -155,10 +131,7 @@
       'dawn-linux-x86-sws-dbg': {
         'os_type': 'linux',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'linux-jammy',
-          'x86-64',
+          'gpu_linux_gce_stable',
         ],
         'test_suites': {
           'gtest_tests': 'swiftshader_gtests',
@@ -167,10 +140,7 @@
       'dawn-linux-x86-sws-rel': {
         'os_type': 'linux',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'linux-jammy',
-          'x86-64',
+          'gpu_linux_gce_stable',
         ],
         'test_suites': {
           'gtest_tests': 'swiftshader_gtests',
