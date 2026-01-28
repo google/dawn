@@ -4936,7 +4936,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -4962,7 +4962,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -4988,7 +4988,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -5011,7 +5011,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5036,7 +5036,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5058,7 +5058,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5089,7 +5089,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5111,7 +5111,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5142,7 +5142,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -5168,7 +5168,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -5194,7 +5194,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -5217,7 +5217,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5242,7 +5242,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5264,7 +5264,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5295,7 +5295,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5317,7 +5317,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5348,7 +5348,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -5374,7 +5374,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -5400,7 +5400,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -5423,7 +5423,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5448,7 +5448,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5470,7 +5470,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5501,7 +5501,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5523,7 +5523,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5554,7 +5554,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -5580,7 +5580,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -5606,7 +5606,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -5629,7 +5629,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5654,7 +5654,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5676,7 +5676,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5707,7 +5707,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -5729,7 +5729,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -6330,7 +6330,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -6356,7 +6356,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -6382,7 +6382,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -6405,7 +6405,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -6430,7 +6430,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -6452,7 +6452,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -6483,7 +6483,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -6509,7 +6509,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -6535,7 +6535,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
@@ -6558,7 +6558,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -6583,7 +6583,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
@@ -6605,7 +6605,7 @@
           "dimensions": {
             "cpu": "x86-64",
             "gpu": "none",
-            "os": "Windows-10-19045",
+            "os": "Windows-10",
             "pool": "chromium.tests.gpu"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"

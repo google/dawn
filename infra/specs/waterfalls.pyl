@@ -321,10 +321,7 @@
       'dawn-win-x64-sws-dbg': {
         'os_type': 'win',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'win10',
-          'x86-64',
+          'win10_gce_gpu_pool',
         ],
         'test_suites': {
           'gtest_tests': 'win_software_renderer_gtests',
@@ -334,10 +331,7 @@
       'dawn-win-x64-sws-msvc-dbg': {
         'os_type': 'win',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'win10',
-          'x86-64',
+          'win10_gce_gpu_pool',
         ],
         'test_suites': {
           'gtest_tests': 'win_software_renderer_gtests',
@@ -347,10 +341,7 @@
       'dawn-win-x64-sws-msvc-rel': {
         'os_type': 'win',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'win10',
-          'x86-64',
+          'win10_gce_gpu_pool',
         ],
         'test_suites': {
           'gtest_tests': 'win_software_renderer_gtests',
@@ -360,10 +351,7 @@
       'dawn-win-x64-sws-rel': {
         'os_type': 'win',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'win10',
-          'x86-64',
+          'win10_gce_gpu_pool',
         ],
         'test_suites': {
           'gtest_tests': 'win_software_renderer_gtests',
@@ -401,10 +389,7 @@
       'dawn-win-x86-sws-dbg': {
         'os_type': 'win',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'win10',
-          'x86-64',
+          'win10_gce_gpu_pool',
         ],
         'test_suites': {
           'gtest_tests': 'win_software_renderer_gtests',
@@ -413,10 +398,7 @@
       'dawn-win-x86-sws-rel': {
         'os_type': 'win',
         'mixins': [
-          'gpu-swarming-pool',
-          'no_gpu',
-          'win10',
-          'x86-64',
+          'win10_gce_gpu_pool',
         ],
         'test_suites': {
           'gtest_tests': 'win_software_renderer_gtests',
