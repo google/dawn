@@ -1089,10 +1089,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // extension is available. Override the decision if it is not applicable or
     // zeroInitializeWorkgroupMemoryFeatures.shaderZeroInitializeWorkgroupMemory == VK_FALSE.
     // Never use the extension on Mali devices due to a known bug (see crbug.com/tint/2101).
+    // Pixel 10 workgroup zero init does not always work as expected (see crbug.com/479242793).
     if (!GetDeviceInfo().HasExt(DeviceExt::ZeroInitializeWorkgroupMemory) ||
         GetDeviceInfo().zeroInitializeWorkgroupMemoryFeatures.shaderZeroInitializeWorkgroupMemory ==
             VK_FALSE ||
-        IsAndroidARM()) {
+        IsAndroidARM() || IsPixel10()) {
         deviceToggles->ForceSet(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension, false);
     }
     // By default try to initialize workgroup memory with OpConstantNull according to the Vulkan
