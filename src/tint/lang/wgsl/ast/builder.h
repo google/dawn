@@ -1028,21 +1028,22 @@ class Builder {
         /// @param name the alias name
         /// @param type the alias type
         /// @returns the alias pointer
-        template <typename NAME>
-        const ast::Alias* alias(NAME&& name, ast::Type type) const {
-            return alias(builder->source_, std::forward<NAME>(name), type);
-        }
+        const ast::Alias* alias(std::string_view name, ast::Type type) const;
+
+        /// Creates an alias type
+        /// @param name the alias name
+        /// @param type the alias type
+        /// @returns the alias pointer
+        const ast::Alias* alias(Symbol name, ast::Type type) const;
 
         /// Creates an alias type
         /// @param source the Source of the node
         /// @param name the alias name
         /// @param type the alias type
         /// @returns the alias pointer
-        template <typename NAME>
-        const ast::Alias* alias(const Source& source, NAME&& name, ast::Type type) const {
-            return builder->create<ast::Alias>(source, builder->Ident(std::forward<NAME>(name)),
-                                               type);
-        }
+        const ast::Alias* alias(const Source& source,
+                                const ast::Identifier* name,
+                                ast::Type type) const;
 
         /// @param address_space the address space of the pointer
         /// @param type the type of the pointer
@@ -2540,9 +2541,25 @@ class Builder {
     /// @param name the alias name
     /// @param type the alias target type
     /// @returns the alias type
-    template <typename NAME>
-    const ast::Alias* Alias(NAME&& name, ast::Type type) {
-        return Alias(source_, std::forward<NAME>(name), type);
+    const ast::Alias* Alias(std::string_view name, ast::Type type) {
+        return Alias(source_, name, type);
+    }
+
+    /// Creates a ast::Alias registering it with the AST().TypeDecls().
+    /// @param name the alias name
+    /// @param type the alias target type
+    /// @returns the alias type
+    const ast::Alias* Alias(Symbol name, ast::Type type) { return Alias(source_, name, type); }
+
+    /// Creates a ast::Alias registering it with the AST().TypeDecls().
+    /// @param source the source information
+    /// @param name the alias name
+    /// @param type the alias target type
+    /// @returns the alias type
+    const ast::Alias* Alias(const Source& source, Symbol name, ast::Type type) {
+        auto out = ty.alias(source, Ident(name), type);
+        AST().AddTypeDecl(out);
+        return out;
     }
 
     /// Creates a ast::Alias registering it with the AST().TypeDecls().
@@ -2550,9 +2567,8 @@ class Builder {
     /// @param name the alias name
     /// @param type the alias target type
     /// @returns the alias type
-    template <typename NAME>
-    const ast::Alias* Alias(const Source& source, NAME&& name, ast::Type type) {
-        auto out = ty.alias(source, std::forward<NAME>(name), type);
+    const ast::Alias* Alias(const Source& source, std::string_view name, ast::Type type) {
+        auto out = ty.alias(source, Ident(name), type);
         AST().AddTypeDecl(out);
         return out;
     }

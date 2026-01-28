@@ -361,6 +361,20 @@ ast::Type Builder::TypesBuilder::array(const Source& source, ast::Type subtype) 
                                                                 }))};
 }
 
+const ast::Alias* Builder::TypesBuilder::alias(std::string_view name, ast::Type type) const {
+    return alias(builder->source_, builder->Ident(name), type);
+}
+
+const ast::Alias* Builder::TypesBuilder::alias(Symbol name, ast::Type type) const {
+    return alias(builder->source_, builder->Ident(name), type);
+}
+
+const ast::Alias* Builder::TypesBuilder::alias(const Source& source,
+                                               const ast::Identifier* name,
+                                               ast::Type type) const {
+    return builder->create<ast::Alias>(source, builder->Ident(name), type);
+}
+
 ast::Type Builder::TypesBuilder::ptr(core::AddressSpace address_space,
                                      ast::Type type,
                                      core::Access access) const {
