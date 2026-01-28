@@ -27,10 +27,12 @@
 
 """CI Dawn builders using GN and a standalone Dawn checkout (instead of Chromium)."""
 
+load("@chromium-luci//args.star", "args")
 load("@chromium-luci//builder_config.star", "builder_config")
 load("@chromium-luci//builders.star", "os")
 load("@chromium-luci//ci.star", "ci")
 load("@chromium-luci//consoles.star", "consoles")
+load("@chromium-luci//gardener_rotations.star", "gardener_rotations")
 load("@chromium-luci//gn_args.star", "gn_args")
 load("//constants.star", "siso")
 
@@ -49,6 +51,8 @@ ci.defaults.set(
     siso_remote_jobs = siso.remote_jobs.DEFAULT,
     thin_tester_cores = 2,
     builderless = True,
+    notifies = ["gardener-notifier"],
+    gardener_rotations = gardener_rotations.rotation("dawn", None, None),
 )
 
 ################################################################################
@@ -781,6 +785,7 @@ ci.builder(
     # Run daily at 5PM Pacific.
     schedule = "0 0 * * *",
     triggered_by = [],
+    gardener_rotations = args.ignore_default(None),
     builder_spec = builder_config.builder_spec(
         gclient_config = builder_config.gclient_config(
             config = "dawn",
