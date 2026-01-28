@@ -361,6 +361,10 @@ class Builder {
             return CToAST<T>::get(this);
         }
 
+        /// @param type the type
+        /// @return an ast::Type of the type declaration.
+        ast::Type Of(const ast::TypeDecl* type) const;
+
         /// @param sym the name of the type
         /// @returns a type with the given name
         ast::Type AsType(Symbol sym) const;
@@ -524,19 +528,31 @@ class Builder {
         /// @return a 2-element vector of the type `T`
         template <typename T>
         ast::Type vec2() const {
-            return vec2<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("vec2");
+            } else {
+                return vec2(Of<T>());
+            }
         }
 
         /// @return a 3-element vector of the type `T`
         template <typename T>
         ast::Type vec3() const {
-            return vec3<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("vec3");
+            } else {
+                return vec3(Of<T>());
+            }
         }
 
         /// @return a 4-element vector of the type `T`
         template <typename T>
         ast::Type vec4() const {
-            return vec4<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("vec4");
+            } else {
+                return vec4(Of<T>());
+            }
         }
 
         /// @param source the Source of the node
@@ -553,20 +569,23 @@ class Builder {
                     return vec4<T>(source);
             }
             TINT_ICE() << "invalid vector width " << n;
-            return ast::Type{};
         }
 
         /// @return a @p N element vector of @p type
         template <typename T, uint32_t N>
         ast::Type vec() const {
-            return vec<T>(builder->source_, N);
+            return vec<T>(N);
         }
 
         /// @param n vector width in elements
         /// @return a @p n element vector of @p type
         template <typename T>
         ast::Type vec(uint32_t n) const {
-            return vec<T>(builder->source_, n);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("vec" + std::to_string(n));
+            } else {
+                return vec(Of<T>(), n);
+            }
         }
 
         /// @param type matrix subtype
@@ -792,55 +811,91 @@ class Builder {
         /// @return a 2x2 matrix of the type `T`
         template <typename T>
         ast::Type mat2x2() const {
-            return mat2x2<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("mat2x2");
+            } else {
+                return mat2x2(Of<T>());
+            }
         }
 
         /// @return a 2x3 matrix of the type `T`
         template <typename T>
         ast::Type mat2x3() const {
-            return mat2x3<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("mat2x3");
+            } else {
+                return mat2x3(Of<T>());
+            }
         }
 
         /// @return a 2x4 matrix of the type `T`
         template <typename T>
         ast::Type mat2x4() const {
-            return mat2x4<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("mat2x4");
+            } else {
+                return mat2x4(Of<T>());
+            }
         }
 
         /// @return a 3x2 matrix of the type `T`
         template <typename T>
         ast::Type mat3x2() const {
-            return mat3x2<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("mat3x2");
+            } else {
+                return mat3x2(Of<T>());
+            }
         }
 
         /// @return a 3x3 matrix of the type `T`
         template <typename T>
         ast::Type mat3x3() const {
-            return mat3x3<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("mat3x3");
+            } else {
+                return mat3x3(Of<T>());
+            }
         }
 
         /// @return a 3x4 matrix of the type `T`
         template <typename T>
         ast::Type mat3x4() const {
-            return mat3x4<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("mat3x4");
+            } else {
+                return mat3x4(Of<T>());
+            }
         }
 
         /// @return a 4x2 matrix of the type `T`
         template <typename T>
         ast::Type mat4x2() const {
-            return mat4x2<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("mat4x2");
+            } else {
+                return mat4x2(Of<T>());
+            }
         }
 
         /// @return a 4x3 matrix of the type `T`
         template <typename T>
         ast::Type mat4x3() const {
-            return mat4x3<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("mat4x3");
+            } else {
+                return mat4x3(Of<T>());
+            }
         }
 
         /// @return a 4x4 matrix of the type `T`
         template <typename T>
         ast::Type mat4x4() const {
-            return mat4x4<T>(builder->source_);
+            if constexpr (IsInferOrAbstract<T>) {
+                return AsType("mat4x4");
+            } else {
+                return mat4x4(Of<T>());
+            }
         }
 
         /// @param source the Source of the node
@@ -870,7 +925,6 @@ class Builder {
                     return mat4x4<T>(source);
                 default:
                     TINT_ICE() << "invalid matrix dimensions " << columns << "x" << rows;
-                    return ast::Type{};
             }
         }
 
@@ -879,13 +933,34 @@ class Builder {
         /// @return a matrix of @p type
         template <typename T>
         ast::Type mat(uint32_t columns, uint32_t rows) const {
-            return mat<T>(builder->source_, columns, rows);
+            switch ((columns - 2) * 3 + (rows - 2)) {
+                case 0:
+                    return mat2x2<T>();
+                case 1:
+                    return mat2x3<T>();
+                case 2:
+                    return mat2x4<T>();
+                case 3:
+                    return mat3x2<T>();
+                case 4:
+                    return mat3x3<T>();
+                case 5:
+                    return mat3x4<T>();
+                case 6:
+                    return mat4x2<T>();
+                case 7:
+                    return mat4x3<T>();
+                case 8:
+                    return mat4x4<T>();
+                default:
+                    TINT_ICE() << "invalid matrix dimensions " << columns << "x" << rows;
+            }
         }
 
         /// @return a matrix of @p type
         template <typename T, uint32_t COLUMNS, uint32_t ROWS>
         ast::Type mat() const {
-            return mat<T>(builder->source_, COLUMNS, ROWS);
+            return mat<T>(COLUMNS, ROWS);
         }
 
         /// @param source the source
@@ -915,12 +990,7 @@ class Builder {
         /// @return an array of size `n` of type `T`
         template <typename COUNT, typename = DisableIfVectorLike<COUNT>>
         ast::Type array(const Source& source, ast::Type subtype, COUNT&& n) const {
-            return ast::Type{builder->Expr(
-                builder->create<ast::TemplatedIdentifier>(source, builder->Sym("array"),
-                                                          Vector{
-                                                              subtype.expr,
-                                                              builder->Expr(std::forward<COUNT>(n)),
-                                                          }))};
+            return AsType(source, "array", subtype, std::forward<COUNT>(n));
         }
 
         /// @param source the Source of the node
@@ -998,7 +1068,7 @@ class Builder {
         template <typename T>
         ast::Type ptr(core::AddressSpace address_space,
                       core::Access access = core::Access::kUndefined) const {
-            return ptr<T>(builder->source_, address_space, access);
+            return ptr(address_space, Of<T>(), access);
         }
 
         /// @param source the Source of the node
@@ -1016,7 +1086,7 @@ class Builder {
         /// access control `ACCESS`.
         template <core::AddressSpace ADDRESS, core::Access ACCESS = core::Access::kUndefined>
         ast::Type ptr(ast::Type type) const {
-            return ptr(builder->source_, ADDRESS, type, ACCESS);
+            return ptr(ADDRESS, type, ACCESS);
         }
 
         /// @param source the Source of the node
@@ -1034,7 +1104,7 @@ class Builder {
                   typename T,
                   core::Access ACCESS = core::Access::kUndefined>
         ast::Type ptr() const {
-            return ptr<T>(builder->source_, ADDRESS, ACCESS);
+            return ptr<T>(ADDRESS, ACCESS);
         }
 
         /// @param source the Source of the node
@@ -1171,7 +1241,7 @@ class Builder {
         template <typename C, typename R>
             requires(core::IsNumber<C> && core::IsNumeric<R>)
         ast::Type subgroup_matrix_result(ast::Type el, C cols, R rows) const {
-            return subgroup_matrix_result(builder->source_, el, cols, rows);
+            return AsType("subgroup_matrix_result", el, cols, rows);
         }
 
         /// @param source the source
@@ -1240,20 +1310,8 @@ class Builder {
         /// @returns the binding array
         template <typename COUNT, typename = DisableIfVectorLike<COUNT>>
         ast::Type binding_array(ast::Type el, COUNT&& size) const {
-            return ast::Type{builder->Expr(builder->create<ast::TemplatedIdentifier>(
-                builder->source_, builder->Sym("binding_array"),
-                Vector{
-                    el.expr,
-                    builder->Expr(std::forward<COUNT>(size)),
-                }))};
+            return AsType("binding_array", el, std::forward<COUNT>(size));
         }
-
-        /// @param type the type
-        /// @return an ast::Type of the type declaration.
-        ast::Type Of(const ast::TypeDecl* type) const;
-
-        /// The Builder
-        Builder* const builder;
 
       private:
         /// CToAST<T> is specialized for various `T` types and each specialization
@@ -1263,6 +1321,9 @@ class Builder {
         ///    `static ast::Type get(Types* t)`
         template <typename T>
         struct CToAST {};
+
+        /// The Builder
+        Builder* const builder;
     };
 
     //////////////////////////////////////////////////////////////////////////////
