@@ -228,6 +228,15 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             // the difference is the uniform buffer object binding
             // (arrayLengthFromUniform.ubo_binding and arrayOffsetFromUniform.ubo_binding).
             BindingNumber bindingNum = bindingAndRegisterOffset.binding;
+
+            // Skip bindings not present for the stage because GenerateBindingRemapping doesn't
+            // provide a remapping for them, which could lead to collisions between used mappings
+            // and unused mappings.
+            APIBindingIndex apiBindingIndex = bgl->GetAPIBindingIndex(bindingNum);
+            if (!(bgl->GetAPIBindingInfo(apiBindingIndex).visibility & StageBit(stage))) {
+                continue;
+            }
+
             uint32_t registerOffset = bindingAndRegisterOffset.registerOffset;
             tint::BindingPoint bindingPoint{static_cast<uint32_t>(group),
                                             static_cast<uint32_t>(bindingNum)};

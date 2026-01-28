@@ -814,6 +814,156 @@ TEST_P(BindGroupTests, DynamicOffsetsWithAtomicOperations) {
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), storageBuffer, 0, expectedData.size());
 }
 
+// Test for crash reported in http://crbug.com/478206474
+// Tests that a dynamic buffer bound to one stage does attempt to get applied to the other stage,
+// resulting in a crash during Tint's ArrayOffsetFromUniform transform.
+// We do this by binding a uniform buffer to (0,0) to both vertex and fragment stages,
+// and a dynamic storage buffer to (0,1) to only the fragment stage.
+// When the vertex shader is compiled, because of the ordering of resources in
+// BindGroupLayoutInternalBase, (BindingTypeOrder_DynamicBuffer first, then
+// BindingTypeOrder_RegularBuffer), the uniform buffer's WGSL binding will be remapped from (0,0) to
+// (0,1) - the same as the storage buffer's WGSL binding. Before fixing this bug, we would hit an
+// assertion in Tint's ArrayOffsetFromUniform transform because it was erroneously attempting to
+// apply an offset to the uniform buffer. This was fixed by making sure to only populate
+// bindpoint_to_offset_index for bindpoints that are visible for the stage being processed.
+TEST_P(BindGroupTests, DynamicBufferInOneStageNotAppliedToOtherStage1) {
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 1);
+
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var<uniform> my_uniform: vec2<f32>; // Visible to both vertex and fragment shaders
+        @group(0) @binding(1) var<storage, read> my_dynamic_storage: f32; // Visible to only vertex shader
+
+        @vertex
+        fn vertexMain() -> @builtin(position) vec4f {
+            return vec4f(my_uniform, 0.0, 1.0);
+        }
+
+        @fragment
+        fn fragmentMain() -> @location(0) vec4f {
+            return vec4f(my_dynamic_storage, 0, 0, 1);
+        }
+    )");
+
+    wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment,
+                  wgpu::BufferBindingType::Uniform, false},
+                 {1, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::ReadOnlyStorage, true}});
+
+    wgpu::PipelineLayoutDescriptor plDesc;
+    plDesc.bindGroupLayoutCount = 1;
+    plDesc.bindGroupLayouts = &bindGroupLayout;
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&plDesc);
+
+    utils::ComboRenderPipelineDescriptor rpDesc;
+    rpDesc.layout = pipelineLayout;
+    rpDesc.cFragment.module = shaderModule;
+    rpDesc.vertex.module = shaderModule;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+}
+
+// Test for latent bug discovered when fixing the crash reported in http://crbug.com/478206474
+// Tests that a dynamic buffer bound to one stage does attempt to get applied to the other stage,
+// resulting in Tint's ArrayLengthFromUniform transform erroneously replacing arrayLength calls
+// on the non-dynamic storage buffer.
+// We do this by binding a regular storage buffer to (0,0) to both vertex and fragment stages,
+// and a dynamic storage buffer to (0,1) to only the fragment stage.
+// When the vertex shader is compiled, because of the ordering of resources in
+// BindGroupLayoutInternalBase, (BindingTypeOrder_DynamicBuffer first, then
+// BindingTypeOrder_RegularBuffer), the uniform buffer's WGSL binding will be remapped from (0,0) to
+// (0,1) - the same as the storage buffer's WGSL binding. Before fixing this bug,
+// ArrayLengthFromUniform would erroneously replace the arrayLength of the regular storage buffer,
+// resulting in the wrong value being retrieved at execution time. This was fixed by making sure to
+// only populate bindpoint_to_size_index for bindpoints that are visible for the stage being
+// processed.
+TEST_P(BindGroupTests, DynamicBufferInOneStageNotAppliedToOtherStage2) {
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 2);
+    // TODO(crbug.com/40287156): Remove when test is no longer flaky on Pixel 6
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var<storage, read> my_storage: array<f32>; // Visible to both vertex and fragment shaders
+        @group(0) @binding(1) var<storage, read> my_dynamic_storage: array<f32>; // Visible to only vertex shader
+
+        @group(1) @binding(0) var<storage, read_write> results: array<u32, 2>; // Visible to only fragment stage
+
+        struct VertexOut {
+            @builtin(position) position : vec4f,
+            @location(0) @interpolate(flat, either) my_storage_len : u32
+        }
+
+        @vertex
+        fn vertexMain() -> VertexOut {
+            let len = arrayLength(&my_storage);
+            return VertexOut(vec4f(0, 0, 0, 1), len);
+        }
+
+        @fragment
+        fn fragmentMain(vertexOut : VertexOut) -> @location(0) vec4f {
+            results[0] = vertexOut.my_storage_len;
+            results[1] = arrayLength(&my_dynamic_storage);
+            return vec4f(0, 0, 0, 1);
+        }
+    )");
+
+    wgpu::BindGroupLayout bindGroupLayouts[] = {
+        utils::MakeBindGroupLayout(
+            device,
+            {
+                {0, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment,
+                 wgpu::BufferBindingType::ReadOnlyStorage, false},
+                {1, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::ReadOnlyStorage, true},
+            }),
+        utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage, false}})};
+
+    wgpu::PipelineLayoutDescriptor plDesc;
+    plDesc.bindGroupLayoutCount = 2;
+    plDesc.bindGroupLayouts = bindGroupLayouts;
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&plDesc);
+
+    utils::ComboRenderPipelineDescriptor rpDesc;
+    rpDesc.layout = pipelineLayout;
+    rpDesc.cFragment.module = shaderModule;
+    rpDesc.vertex.module = shaderModule;
+    rpDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+    rpDesc.cTargets[0].format = renderPass.colorFormat;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+
+    // Non-dynamic buffer at (0,0) has array length of 3
+    wgpu::Buffer myStorage =
+        utils::CreateBufferFromData(device, wgpu::BufferUsage::Storage, {0, 0, 0});
+    // Dynamic buffer at (0,1) has array length of 5
+    wgpu::Buffer myDynamicStorage =
+        utils::CreateBufferFromData(device, wgpu::BufferUsage::Storage, {0, 0, 0, 0, 0});
+    // Result buffer
+    wgpu::Buffer results = utils::CreateBufferFromData(
+        device, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc, {0, 0});
+
+    wgpu::BindGroup bindGroups[] = {
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                             {{0, myStorage}, {1, myDynamicStorage}}),
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(1), {{0, results}})};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    uint32_t dynamicOffset = 0;
+    pass.SetBindGroup(0, bindGroups[0], 1, &dynamicOffset);
+    pass.SetBindGroup(1, bindGroups[1]);
+    pass.Draw(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    std::array<uint32_t, 2> expects{3, 5};
+    EXPECT_BUFFER_U32_RANGE_EQ(expects.data(), results, 0, 2);
+}
+
 // Test that the same renderpass can use 3 more pipelines
 TEST_P(BindGroupTests, ThreePipelinesInSameRenderpass) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
