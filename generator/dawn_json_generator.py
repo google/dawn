@@ -31,7 +31,7 @@ from collections import namedtuple, defaultdict
 from copy import deepcopy
 
 from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
-from webgpu_json_utility import build_doc_map, load_json_data
+from webgpu_docs_utility import build_doc_map, load_json_data
 
 ############################################################
 # OBJECT MODEL
@@ -908,7 +908,7 @@ def analyze_converter_usage(params_kotlin):
 
 def compute_kotlin_params(loaded_json,
                           kotlin_json,
-                          webgpu_json_data=None,
+                          webgpu_kt_docs_data=None,
                           doc_warn_log_file_path=None):
     params_kotlin = parse_json(loaded_json, enabled_tags=['art'])
     params_kotlin['kotlin_package'] = kotlin_json['kotlin_package']
@@ -1149,7 +1149,7 @@ def compute_kotlin_params(loaded_json,
         'doc_warn_log_filepath': doc_warn_log_file_path,
     }
     params_kotlin['kdocs'] = build_doc_map(by_category=by_category,
-                                           json_data=webgpu_json_data,
+                                           json_data=webgpu_kt_docs_data,
                                            params=kdocs_params)
     params_kotlin['chain_children'] = chain_children
     params_kotlin['kotlin_default'] = kotlin_default
@@ -1504,10 +1504,10 @@ class MultiGeneratorFromDawnJSON(Generator):
                             default=None,
                             type=str,
                             help='The KOTLIN JSON definition to use.')
-        parser.add_argument('--webgpu-json',
+        parser.add_argument('--webgpu-kt-docs',
                             default=None,
                             type=str,
-                            help='The WebGPU API documentation to use.')
+                            help='The WebGPU Kotlin API documentation to use.')
         parser.add_argument(
             '--targets',
             required=True,
@@ -1540,9 +1540,9 @@ class MultiGeneratorFromDawnJSON(Generator):
             with open(args.kotlin_json) as f:
                 kotlin_json = json.loads(f.read())
 
-        webgpu_json_data = None
-        if args.webgpu_json:
-            webgpu_json_data = load_json_data(args.webgpu_json)
+        webgpu_kt_docs_data = None
+        if args.webgpu_kt_docs:
+            webgpu_kt_docs_data = load_json_data(args.webgpu_kt_docs)
 
         doc_warn_log_file_path = args.doc_warn_log_file
 
@@ -1889,7 +1889,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'kotlin' in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json,
-                                                  webgpu_json_data,
+                                                  webgpu_kt_docs_data,
                                                   doc_warn_log_file_path)
             kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
             jni_name = params_kotlin['jni_name']
@@ -1969,7 +1969,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if "jni" in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json,
-                                                  webgpu_json_data,
+                                                  webgpu_kt_docs_data,
                                                   doc_warn_log_file_path)
 
             imported_templates += [

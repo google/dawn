@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc, generate_simple_kdoc, add_kdoc_disclaimer with context %}
+{% from 'art/api_kotlin_async_helpers.kt' import async_wrapper, analyze_callback with context %}
+{{ add_kdoc_disclaimer() }}
 package {{ kotlin_package }}
 
 import dalvik.annotation.optimization.FastNative
@@ -22,8 +26,6 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
 
-{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc, generate_simple_kdoc with context %}
-{% from 'art/api_kotlin_async_helpers.kt' import async_wrapper, analyze_callback with context %}
 
 //* Generating KDocs
 {% set all_objects_info = kdocs.objects%}

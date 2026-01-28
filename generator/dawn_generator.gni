@@ -90,9 +90,8 @@ template("dawn_json_generator") {
       rebase_path("${dawn_root}/src/dawn/dawn_kotlin.json", root_build_dir),
       "--targets",
       invoker.target,
-      "--webgpu-json",
-      rebase_path("${dawn_root}/third_party/webgpu-headers/src/webgpu.json",
-                  root_build_dir),
+      "--webgpu-kt-docs",
+      rebase_path("${dawn_root}/src/dawn/webgpu_kt_docs.json", root_build_dir),
 
       # IMPORTANT: If adding a new file here, add it to `inputs`, too. See
       # crbug.com/466134210 for more context.

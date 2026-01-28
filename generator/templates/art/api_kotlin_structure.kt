@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_definition, kotlin_declaration, generate_simple_kdoc, add_kdoc_disclaimer with context %}
+{{ add_kdoc_disclaimer() }}
 package {{ kotlin_package }}
-{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_definition, kotlin_declaration, generate_simple_kdoc with context %}
 
 {% set ns = namespace(callback_count = 0, default_count = 0) %}
 {%- set members = [] -%}

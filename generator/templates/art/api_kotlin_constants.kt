@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{% from 'art/api_kotlin_types.kt' import kotlin_declaration, generate_simple_kdoc with context %}
+
+{% from 'art/api_kotlin_types.kt' import kotlin_declaration, generate_simple_kdoc, add_kdoc_disclaimer with context %}
+{{ add_kdoc_disclaimer() }}
 package {{ kotlin_package }}
 {% set all_constants_info = kdocs.constants %}
 

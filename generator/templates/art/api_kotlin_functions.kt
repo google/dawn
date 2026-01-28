@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc, add_kdoc_disclaimer with context %}
+{{ add_kdoc_disclaimer() }}
 @file:JvmName("Functions")
 
 package {{ kotlin_package }}
@@ -20,7 +23,6 @@ package {{ kotlin_package }}
 import dalvik.annotation.optimization.FastNative
 
 public object GPU {
-    {% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc with context %}
 
     {% set all_functions_info = kdocs.functions %}
     {% for function in by_category['function'] if include_method(None, function) %}

@@ -184,8 +184,8 @@ function(DawnJSONGenerator)
              --targets
              ${arg_TARGET}
              ${arg_UNPARSED_ARGUMENTS}
-             --webgpu-json
-             "${DAWN_WEBGPU_HEADERS_DIR}/webgpu.json"
+             --webgpu-kt-docs
+             "${Dawn_SOURCE_DIR}/src/dawn/webgpu_kt_docs.json"
     )
 
     if (SOURCES AND NOT arg_OUTPUT_SOURCES)

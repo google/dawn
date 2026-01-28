@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+{% from 'art/api_kotlin_types.kt' import generate_simple_kdoc, add_kdoc_disclaimer with context %}
+{{ add_kdoc_disclaimer() }}
 package {{ kotlin_package }}
 
 import androidx.annotation.IntDef
@@ -20,7 +23,6 @@ import androidx.annotation.RestrictTo
 import kotlin.annotation.AnnotationRetention
 import kotlin.annotation.Retention
 import kotlin.annotation.Target
-{% from 'art/api_kotlin_types.kt' import generate_simple_kdoc with context %}
 
 @Retention(AnnotationRetention.SOURCE)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
