@@ -40,6 +40,9 @@
         ],
         "Condition": "tint_build_tintd"
     },
+    "mesa": {
+        "Condition": "tint_build_mesa"
+    },
     "metal": {
         "IncludePatterns": [
             "Metal/Metal.h"

@@ -129,6 +129,10 @@ if (tint_build_wgsl_reader) {
       deps += [ "${tint_src_dir}/lang/core/ir/binary:fuzz" ]
     }
 
+    if (tint_build_mesa) {
+      deps += [ "${tint_mesa_dir}:mesa" ]
+    }
+
     if (tint_build_msl_writer) {
       deps += [ "${tint_src_dir}/lang/msl/writer:fuzz" ]
     }
