@@ -271,7 +271,9 @@ ScopedCommandRecordingContext Queue::GetScopedPendingCommandContext(SubmitMode s
         if (submitMode == SubmitMode::Normal) {
             mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
         }
-        return ScopedCommandRecordingContext(std::move(commands), lockD3D11Scope);
+        auto context = ScopedCommandRecordingContext(std::move(commands), lockD3D11Scope);
+        PerformDeferredUnmaps(&context);
+        return std::move(context);
     });
 }
 
@@ -281,7 +283,9 @@ ScopedSwapStateCommandRecordingContext Queue::GetScopedSwapStatePendingCommandCo
         if (submitMode == SubmitMode::Normal) {
             mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
         }
-        return ScopedSwapStateCommandRecordingContext(std::move(commands));
+        auto context = ScopedSwapStateCommandRecordingContext(std::move(commands));
+        PerformDeferredUnmaps(&context);
+        return std::move(context);
     });
 }
 
@@ -336,18 +340,33 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
 
 MaybeError Queue::CheckAndMapReadyBuffers(ExecutionSerial completedSerial) {
     auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Passive);
-    for (const auto& bufferEntry : mPendingMapBuffers.IterateUpTo(completedSerial)) {
-        DAWN_TRY(
-            bufferEntry.buffer->FinalizeMap(&commandContext, completedSerial, bufferEntry.mode));
-    }
-    mPendingMapBuffers.ClearUpTo(completedSerial);
-    return {};
+    return mPendingMapBuffers.Use([&](auto pendingMapBuffers) -> MaybeError {
+        for (const auto& bufferEntry : pendingMapBuffers->IterateUpTo(completedSerial)) {
+            DAWN_TRY(bufferEntry.buffer->FinalizeMap(&commandContext, completedSerial,
+                                                     bufferEntry.mode));
+        }
+        pendingMapBuffers->ClearUpTo(completedSerial);
+        return {};
+    });
 }
 
 void Queue::TrackPendingMapBuffer(Ref<Buffer>&& buffer,
                                   wgpu::MapMode mode,
                                   ExecutionSerial readySerial) {
-    mPendingMapBuffers.Enqueue({buffer, mode}, readySerial);
+    mPendingMapBuffers->Enqueue({buffer, mode}, readySerial);
+}
+
+void Queue::DeferUnmap(Ref<Buffer>&& buffer) {
+    mPendingUnmapBuffers->push_back(std::move(buffer));
+}
+
+void Queue::PerformDeferredUnmaps(const ScopedCommandRecordingContext* commandContext) {
+    mPendingUnmapBuffers.Use([&](auto pendingUnmapBuffers) {
+        for (auto& buffer : *pendingUnmapBuffers) {
+            buffer->UnmapIfNeeded(commandContext);
+        }
+        pendingUnmapBuffers->clear();
+    });
 }
 
 MaybeError Queue::WriteBufferImpl(BufferBase* buffer,

@@ -91,6 +91,8 @@ class Buffer : public BufferBase {
     bool IsCPUWritable() const;
     bool IsCPUReadable() const;
 
+    void UnmapIfNeeded(const ScopedCommandRecordingContext* commandContext);
+
     // This performs GPU Clear. Unlike Clear(), this will always be affected by ID3D11Predicate.
     // Whereas Clear() might be unaffected by ID3D11Predicate if it's pure CPU clear.
     virtual MaybeError PredicatedClear(const ScopedSwapStateCommandRecordingContext* commandContext,

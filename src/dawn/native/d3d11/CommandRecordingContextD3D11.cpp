@@ -55,6 +55,11 @@ ScopedCommandRecordingContext::ScopedCommandRecordingContext(CommandRecordingCon
     DAWN_ASSERT(Get()->mIsOpen);
 }
 
+ScopedCommandRecordingContext::ScopedCommandRecordingContext(ScopedCommandRecordingContext&& other)
+    : mGuard(std::move(other.mGuard)), mLockD3D11Scope(other.mLockD3D11Scope) {
+    other.mLockD3D11Scope = false;
+}
+
 ScopedCommandRecordingContext::~ScopedCommandRecordingContext() {
     if (mLockD3D11Scope) {
         DAWN_ASSERT(this->Get());
@@ -202,8 +207,15 @@ ScopedSwapStateCommandRecordingContext::ScopedSwapStateCommandRecordingContext(
                                                         &mPreviousState);
 }
 
+ScopedSwapStateCommandRecordingContext::ScopedSwapStateCommandRecordingContext(
+    ScopedSwapStateCommandRecordingContext&& other)
+    : ScopedCommandRecordingContext(std::move(other)),
+      mPreviousState(std::move(other.mPreviousState)) {}
+
 ScopedSwapStateCommandRecordingContext::~ScopedSwapStateCommandRecordingContext() {
-    Get()->mD3D11DeviceContext3->SwapDeviceContextState(mPreviousState.Get(), nullptr);
+    if (mPreviousState) {
+        Get()->mD3D11DeviceContext3->SwapDeviceContextState(mPreviousState.Get(), nullptr);
+    }
 }
 
 ID3D11Device* ScopedSwapStateCommandRecordingContext::GetD3D11Device() const {

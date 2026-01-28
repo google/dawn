@@ -269,6 +269,94 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
     });
 }
 
+// Test that mapping, unmapping, and destroying buffers in parallel works.
+TEST_P(MultithreadTests, MapUnmapDestroyInParallel) {
+    // TODO(451928481): multithread support in GL is incomplete
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+    constexpr uint32_t kDataSize = 1000;
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    constexpr uint32_t kSize = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
+
+    utils::RunInParallel(10, [this, &myData = std::as_const(myData)](uint32_t) {
+        // Create buffer and request mapping
+        wgpu::Buffer buffer =
+            CreateBuffer(kSize, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
+
+        // Wait for the mapping to complete
+        ASSERT_EQ(
+            instance.WaitAny(buffer.MapAsync(wgpu::MapMode::Write, 0, kSize,
+                                             wgpu::CallbackMode::AllowProcessEvents,
+                                             [](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                                                 ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                                             }),
+                             UINT64_MAX),
+            wgpu::WaitStatus::Success);
+
+        // Buffer is mapped, write into it
+        memcpy(buffer.GetMappedRange(0, kSize), myData.data(), kSize);
+
+        // Unmap the buffer
+        buffer.Unmap();
+
+        // Destroy the buffer immediately after unmapping
+        buffer.Destroy();
+    });
+}
+
+// Test that multiple map/unmap cycles with partial writes in parallel works.
+TEST_P(MultithreadTests, MapUnmapMultipleCyclesInParallel) {
+    // TODO(451928481): multithread support in GL is incomplete
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+    constexpr uint32_t kDataSize = 1000;
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    constexpr uint32_t kSize = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
+    constexpr uint32_t kHalfSize = kSize / 2;
+
+    utils::RunInParallel(10, [this, &myData = std::as_const(myData)](uint32_t) {
+        // Create buffer
+        wgpu::Buffer buffer =
+            CreateBuffer(kSize, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
+
+        // First map: write first half
+        ASSERT_EQ(
+            instance.WaitAny(buffer.MapAsync(wgpu::MapMode::Write, 0, kSize,
+                                             wgpu::CallbackMode::AllowProcessEvents,
+                                             [](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                                                 ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                                             }),
+                             UINT64_MAX),
+            wgpu::WaitStatus::Success);
+
+        memcpy(buffer.GetMappedRange(0, kHalfSize), myData.data(), kHalfSize);
+        buffer.Unmap();
+
+        // Second map: write second half
+        ASSERT_EQ(
+            instance.WaitAny(buffer.MapAsync(wgpu::MapMode::Write, 0, kSize,
+                                             wgpu::CallbackMode::AllowProcessEvents,
+                                             [](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                                                 ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                                             }),
+                             UINT64_MAX),
+            wgpu::WaitStatus::Success);
+
+        memcpy(static_cast<uint8_t*>(buffer.GetMappedRange(0, kSize)) + kHalfSize,
+               reinterpret_cast<const uint8_t*>(myData.data()) + kHalfSize, kHalfSize);
+        buffer.Unmap();
+
+        // Check the content of the buffer
+        EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 0, kDataSize);
+    });
+}
+
 // Test that creating buffers with mappedAtCreation in parallel works.
 // Tests both buffers with MapWrite usage and without.
 TEST_P(MultithreadTests, MapAtCreationInParallel) {
@@ -1826,6 +1914,7 @@ DAWN_INSTANTIATE_TEST(MultithreadTests,
                       D3D11Backend(),
                       D3D11Backend({"d3d11_use_unmonitored_fence"}),
                       D3D11Backend({"d3d11_delay_flush_to_gpu"}),
+                      D3D11Backend({"d3d11_disable_cpu_buffers"}),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

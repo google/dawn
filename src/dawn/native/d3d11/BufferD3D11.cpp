@@ -517,6 +517,13 @@ void Buffer::UnmapInternal(const ScopedCommandRecordingContext* commandContext) 
     DAWN_UNREACHABLE();
 }
 
+void Buffer::UnmapIfNeeded(const ScopedCommandRecordingContext* commandContext) {
+    if (mMappedData == nullptr) {
+        return;
+    }
+    UnmapInternal(commandContext);
+}
+
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
     DAWN_ASSERT((mode == wgpu::MapMode::Write && IsCPUWritable()) ||
                 (mode == wgpu::MapMode::Read && IsCPUReadable()));
@@ -568,10 +575,8 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
     auto deviceGuard = GetDevice()->GetGuard();
 
     mMapReadySerial = kMaxExecutionSerial;
-    if (mMappedData) {
-        auto commandContext = ToBackend(GetDevice()->GetQueue())
-                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
-        UnmapInternal(&commandContext);
+    if (mMappedData && newState != BufferState::Destroyed) {
+        ToBackend(GetDevice()->GetQueue())->DeferUnmap(this);
     }
 }
 
@@ -590,6 +595,12 @@ void Buffer::DestroyImpl(DestroyReason reason) {
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the buffer since there are no other live refs.
     BufferBase::DestroyImpl(reason);
+
+    if (mMappedData != nullptr) {
+        auto commandContext = ToBackend(GetDevice()->GetQueue())
+                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Passive);
+        UnmapIfNeeded(&commandContext);
+    }
 }
 
 MaybeError Buffer::EnsureDataInitialized(const ScopedCommandRecordingContext* commandContext) {

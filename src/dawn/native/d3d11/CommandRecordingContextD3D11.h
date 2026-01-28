@@ -125,6 +125,7 @@ class CommandRecordingContext {
 class ScopedCommandRecordingContext : NonCopyable {
   public:
     ScopedCommandRecordingContext(CommandRecordingContext::Guard&& guard, bool lockD3D11Scope);
+    ScopedCommandRecordingContext(ScopedCommandRecordingContext&& other);
     ~ScopedCommandRecordingContext();
 
     Device* GetDevice() const;
@@ -189,7 +190,7 @@ class ScopedCommandRecordingContext : NonCopyable {
 
   private:
     CommandRecordingContext::Guard mGuard;
-    const bool mLockD3D11Scope = false;
+    bool mLockD3D11Scope = false;
 };
 
 // For using ID3D11DeviceContext directly. It swaps and resets ID3DDeviceContextState of
@@ -197,6 +198,7 @@ class ScopedCommandRecordingContext : NonCopyable {
 class ScopedSwapStateCommandRecordingContext : public ScopedCommandRecordingContext {
   public:
     explicit ScopedSwapStateCommandRecordingContext(CommandRecordingContext::Guard&& guard);
+    ScopedSwapStateCommandRecordingContext(ScopedSwapStateCommandRecordingContext&& other);
     ~ScopedSwapStateCommandRecordingContext();
 
     ID3D11Device* GetD3D11Device() const;
