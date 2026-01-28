@@ -86,10 +86,7 @@ def apply_mac_cq_builder_defaults(kwargs):
     Returns:
         |kwargs| with Mac/CMake defaults set.
     """
-
-    # TODO(crbug.com/459517292): Use apply_cq_builder_defaults() once we're
-    # ready to actually add Mac/CMake to the CQ.
-    kwargs.setdefault("max_concurrent_builds", 5)
+    kwargs = apply_cq_builder_defaults(kwargs)
     kwargs.setdefault("cpu", cpu.X86_64)
     kwargs.setdefault("os", os.MAC_DEFAULT)
     kwargs.setdefault("pool", "luci.chromium.gpu.try")
@@ -113,10 +110,7 @@ def dawn_linux_cmake_cq_tester(**kwargs):
 
 def dawn_mac_cmake_cq_tester(**kwargs):
     kwargs = apply_mac_cq_builder_defaults(kwargs)
-
-    # TODO(crbug.com/459517292): Add to milestones as well once we confirm that
-    # Mac/CMake works as expected.
-    try_.builder(**kwargs)
+    add_builder_to_main_and_milestone_cq_groups(kwargs)
 
 ## CQ Builders
 
