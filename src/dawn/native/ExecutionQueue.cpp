@@ -64,11 +64,6 @@ ExecutionSerial ExecutionQueueBase::GetCompletedCommandSerial() const {
 }
 
 MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Nanoseconds timeout) {
-    // Serial is already complete.
-    if (waitSerial <= GetCompletedCommandSerial()) {
-        return {};
-    }
-
     // We currently have two differing implementations for this function depending on whether the
     // backend supports thread safe waits. Note that while currently only the Metal backend
     // explicitly enables thread safe wait, the main blocking backend is D3D11 which is using the
@@ -81,6 +76,11 @@ MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Na
                 // Serial has not been submitted yet. Submit it now.
                 DAWN_TRY(EnsureCommandsFlushed(waitSerial));
             }
+        }
+
+        // Serial is already complete.
+        if (waitSerial <= GetCompletedCommandSerial()) {
+            return {};
         }
 
         if (timeout > Nanoseconds(0)) {
@@ -97,6 +97,11 @@ MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Na
         if (waitSerial > GetLastSubmittedCommandSerial()) {
             // Serial has not been submitted yet. Submit it now.
             DAWN_TRY(EnsureCommandsFlushed(waitSerial));
+        }
+
+        // Serial is already complete.
+        if (waitSerial <= GetCompletedCommandSerial()) {
+            return UpdateCompletedSerial();
         }
 
         if (timeout > Nanoseconds(0)) {
