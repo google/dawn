@@ -399,8 +399,10 @@ MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
     // D3D11 requires that buffers are unmapped before being used in a copy.
     DAWN_TRY(source->Unmap());
 
-    auto commandContext =
-        ToBackend(GetQueue())->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+    ScopedCommandRecordingContext commandContext;
+    DAWN_TRY_ASSIGN(
+        commandContext,
+        ToBackend(GetQueue())->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal));
     return Buffer::Copy(&commandContext, ToBackend(source), sourceOffset, size,
                         ToBackend(destination), destinationOffset);
 }
@@ -511,10 +513,14 @@ bool Device::ReduceMemoryUsageImpl() {
 
     // D3D11 defers the deletion of resources until we call Flush().
     // So trigger a Flush() here to force deleting any pending resources.
-    auto commandContext =
-        ToBackend(GetQueue())
-            ->GetScopedPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive);
-    commandContext.Flush();
+    ScopedCommandRecordingContext commandContext;
+    // TODO(crbug.com/479477220): make ReduceMemoryUsageImpl propagate error.
+    if (!ConsumedError(
+            ToBackend(GetQueue())
+                ->GetScopedPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive),
+            &commandContext)) {
+        commandContext.Flush();
+    }
 
     // Call Trim() to delete any internal resources created by the driver.
     ComPtr<IDXGIDevice3> dxgiDevice3;

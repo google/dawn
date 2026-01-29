@@ -234,8 +234,9 @@ MaybeError Queue::InitializePendingContext() {
                     CommandRecordingContext::CreateInternalUniformBuffer(GetDevice()));
 
     {
-        auto persistentCommandContext =
-            GetScopedSwapStatePendingCommandContext(SubmitMode::Passive);
+        ScopedSwapStateCommandRecordingContext persistentCommandContext;
+        DAWN_TRY_ASSIGN(persistentCommandContext,
+                        GetScopedSwapStatePendingCommandContext(SubmitMode::Passive));
         DAWN_TRY(persistentCommandContext.SetInternalUniformBuffer(std::move(uniformBuffer)));
     }
 
@@ -265,9 +266,10 @@ ResultOrError<Ref<d3d::SharedFence>> Queue::GetOrCreateSharedFence() {
     return mSharedFence;
 }
 
-ScopedCommandRecordingContext Queue::GetScopedPendingCommandContext(SubmitMode submitMode,
-                                                                    bool lockD3D11Scope) {
-    return mPendingCommands.Use([&](auto commands) {
+ResultOrError<ScopedCommandRecordingContext> Queue::GetScopedPendingCommandContext(
+    SubmitMode submitMode,
+    bool lockD3D11Scope) {
+    return mPendingCommands.Use([&](auto commands) -> ResultOrError<ScopedCommandRecordingContext> {
         if (submitMode == SubmitMode::Normal) {
             mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
         }
@@ -277,16 +279,17 @@ ScopedCommandRecordingContext Queue::GetScopedPendingCommandContext(SubmitMode s
     });
 }
 
-ScopedSwapStateCommandRecordingContext Queue::GetScopedSwapStatePendingCommandContext(
-    SubmitMode submitMode) {
-    return mPendingCommands.Use([&](auto commands) {
-        if (submitMode == SubmitMode::Normal) {
-            mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
-        }
-        auto context = ScopedSwapStateCommandRecordingContext(std::move(commands));
-        PerformDeferredUnmaps(&context);
-        return std::move(context);
-    });
+ResultOrError<ScopedSwapStateCommandRecordingContext>
+Queue::GetScopedSwapStatePendingCommandContext(SubmitMode submitMode) {
+    return mPendingCommands.Use(
+        [&](auto commands) -> ResultOrError<ScopedSwapStateCommandRecordingContext> {
+            if (submitMode == SubmitMode::Normal) {
+                mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
+            }
+            auto context = ScopedSwapStateCommandRecordingContext(std::move(commands));
+            PerformDeferredUnmaps(&context);
+            return std::move(context);
+        });
 }
 
 MaybeError Queue::SubmitPendingCommandsImpl() {
@@ -307,8 +310,9 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     // context.
     TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D11::Execute");
     {
-        auto commandContext =
-            GetScopedSwapStatePendingCommandContext(QueueBase::SubmitMode::Normal);
+        ScopedSwapStateCommandRecordingContext commandContext;
+        DAWN_TRY_ASSIGN(commandContext,
+                        GetScopedSwapStatePendingCommandContext(QueueBase::SubmitMode::Normal));
         for (uint32_t i = 0; i < commandCount; ++i) {
             DAWN_TRY(ToBackend(commands[i])->Execute(&commandContext));
         }
@@ -339,7 +343,8 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
 }
 
 MaybeError Queue::CheckAndMapReadyBuffers(ExecutionSerial completedSerial) {
-    auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Passive);
+    ScopedCommandRecordingContext commandContext;
+    DAWN_TRY_ASSIGN(commandContext, GetScopedPendingCommandContext(QueueBase::SubmitMode::Passive));
     return mPendingMapBuffers.Use([&](auto pendingMapBuffers) -> MaybeError {
         for (const auto& bufferEntry : pendingMapBuffers->IterateUpTo(completedSerial)) {
             DAWN_TRY(bufferEntry.buffer->FinalizeMap(&commandContext, completedSerial,
@@ -357,7 +362,11 @@ void Queue::TrackPendingMapBuffer(Ref<Buffer>&& buffer,
 }
 
 void Queue::DeferUnmap(Ref<Buffer>&& buffer) {
-    mPendingUnmapBuffers->push_back(std::move(buffer));
+    mPendingUnmapBuffers->insert(std::move(buffer));
+}
+
+void Queue::CancelDeferredUnmap(Buffer* buffer) {
+    mPendingUnmapBuffers->erase(buffer);
 }
 
 void Queue::PerformDeferredUnmaps(const ScopedCommandRecordingContext* commandContext) {
@@ -378,7 +387,8 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
         return {};
     }
 
-    auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+    ScopedCommandRecordingContext commandContext;
+    DAWN_TRY_ASSIGN(commandContext, GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal));
     return ToBackend(buffer)->Write(&commandContext, bufferOffset, data, size);
 }
 
@@ -392,7 +402,8 @@ MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
         return {};
     }
 
-    auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+    ScopedCommandRecordingContext commandContext;
+    DAWN_TRY_ASSIGN(commandContext, GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal));
     TextureCopy textureCopy;
     textureCopy.texture = destination.texture;
     textureCopy.mipLevel = destination.mipLevel;
@@ -434,7 +445,8 @@ MaybeError MonitoredFenceQueue::Initialize() {
 }
 
 MaybeError MonitoredFenceQueue::NextSerial() {
-    auto commandContext = GetScopedPendingCommandContext(SubmitMode::Passive);
+    ScopedCommandRecordingContext commandContext;
+    DAWN_TRY_ASSIGN(commandContext, GetScopedPendingCommandContext(SubmitMode::Passive));
 
     DAWN_TRY(commandContext.FlushBuffersForSyncingWithCPU());
 
@@ -480,7 +492,8 @@ MaybeError SystemEventQueue::Initialize() {
 }
 
 MaybeError SystemEventQueue::NextSerial() {
-    auto commandContext = GetScopedPendingCommandContext(SubmitMode::Passive);
+    ScopedCommandRecordingContext commandContext;
+    DAWN_TRY_ASSIGN(commandContext, GetScopedPendingCommandContext(SubmitMode::Passive));
 
     DAWN_TRY(commandContext.FlushBuffersForSyncingWithCPU());
 
@@ -626,7 +639,8 @@ MaybeError DelayFlushQueue::Initialize() {
 }
 
 MaybeError DelayFlushQueue::NextSerial() {
-    auto commandContext = GetScopedPendingCommandContext(SubmitMode::Passive);
+    ScopedCommandRecordingContext commandContext;
+    DAWN_TRY_ASSIGN(commandContext, GetScopedPendingCommandContext(SubmitMode::Passive));
 
     DAWN_TRY(commandContext.FlushBuffersForSyncingWithCPU());
 
@@ -695,7 +709,8 @@ MaybeError DelayFlushQueue::CheckPendingQueries(
 ResultOrError<ExecutionSerial> DelayFlushQueue::CheckCompletedSerialsImpl() {
     ExecutionSerial completedSerial;
     {
-        auto commandContext = GetScopedPendingCommandContext(SubmitMode::Passive);
+        ScopedCommandRecordingContext commandContext;
+        DAWN_TRY_ASSIGN(commandContext, GetScopedPendingCommandContext(SubmitMode::Passive));
 
         completedSerial = GetCompletedCommandSerial();
 
@@ -729,8 +744,9 @@ ResultOrError<ExecutionSerial> DelayFlushQueue::WaitForQueueSerialImpl(Execution
     // function polls for completion by repeatedly calling GetData(). Holding a scope lock for the
     // entire polling duration would be inefficient and could lead to deadlocks if the driver
     // attempts to acquire the same lock internally.
-    auto commandContext =
-        GetScopedPendingCommandContext(SubmitMode::Passive, /*lockD3D11Scope=*/false);
+    ScopedCommandRecordingContext commandContext;
+    DAWN_TRY_ASSIGN(commandContext,
+                    GetScopedPendingCommandContext(SubmitMode::Passive, /*lockD3D11Scope=*/false));
 
     if (mPendingQueries.empty() || waitSerial < mPendingQueries.front().Serial()) {
         // Empty list must mean the serial have already completed.
