@@ -160,6 +160,21 @@ dawn_linux_cmake_cq_tester(
 )
 
 dawn_mac_cmake_cq_tester(
+    name = "dawn-cq-mac-x64-sws-cmake-dbg",
+    description_html = "Compiles and tests debug Dawn test binaries for Mac/x64 using CMake and Clang. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-mac-x64-sws-cmake-dbg",
+    ],
+    properties = {
+        "asan": False,
+        "clang": True,
+        "debug": True,
+        "target_cpu": "x64",
+        "ubsan": False,
+    },
+)
+
+dawn_mac_cmake_cq_tester(
     name = "dawn-cq-mac-x64-sws-cmake-rel",
     description_html = "Compiles and tests release Dawn test binaries for Mac/x64 using CMake and Clang. Blocks CL submission",
     mirrors = [

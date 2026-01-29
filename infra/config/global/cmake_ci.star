@@ -173,6 +173,38 @@ dawn_ci_linux_cmake_builder(
 )
 
 dawn_ci_mac_cmake_builder(
+    name = "dawn-mac-x64-sws-cmake-dbg",
+    description_html = "Compiles and tests debug Dawn test binaries for Mac/x64 using CMake and Clang",
+    schedule = "triggered",
+    properties = {
+        "asan": False,
+        "clang": True,
+        "debug": True,
+        "target_cpu": "x64",
+        "ubsan": False,
+    },
+    # Not actually used by the recipe, but needed for chromium-luci mirroring
+    # code to work.
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+            apply_configs = [],
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.DEBUG,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.MAC,
+        ),
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "mac|build|clang|cmake|dbg",
+        short_name = "x64",
+    ),
+)
+
+dawn_ci_mac_cmake_builder(
     name = "dawn-mac-x64-sws-cmake-rel",
     description_html = "Compiles and tests release Dawn test binaries for Mac/x64 using CMake and Clang",
     schedule = "triggered",
