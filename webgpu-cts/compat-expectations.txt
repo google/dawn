@@ -2508,6 +2508,8 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limi
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=false;bindingCombination="vertex" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,memory_layout:write_layout:case="mat2x3h_size";aspace="storage" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="overLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow" [ Skip ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba32sint" [ Skip ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,memory_layout:read_layout:case="mat3x4h_align8";aspace="private" [ Skip ]
 
 # Failures in immediates tests on all backends
 crbug.com/458102548 webgpu:api,validation,encoding,programmable,pipeline_immediate:overprovisioned_immediate_data:encoderType="compute%20pass";scenario="larger_than_layout" [ Failure ]
