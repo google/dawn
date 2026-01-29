@@ -1101,9 +1101,12 @@ def main() -> None:
     # We want this entry to be in the commit message, but we do not want it to
     # be present for _apply_changed_deps() since it is not actually a DEPS
     # entry.
-    chromium_luci_entry = _sync_chromium_luci_revision(
-        revision_range.new_revision)
-    entries_for_commit_message = changed_entries + [chromium_luci_entry]
+    # TODO(crbug.com/452840620): Re-enable chromium-luci syncing once
+    # roller-specific issues with it are ironed out.
+    # chromium_luci_entry = _sync_chromium_luci_revision(
+    #     revision_range.new_revision)
+    # entries_for_commit_message = changed_entries + [chromium_luci_entry]
+    entries_for_commit_message = changed_entries
 
     # Create the commit message before adding the entry for the Chromium
     # revision since Chromium information is explicitly added to the message.
