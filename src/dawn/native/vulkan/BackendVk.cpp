@@ -32,6 +32,7 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/GPUInfo.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/native/ChainUtils.h"
@@ -176,16 +177,18 @@ namespace dawn::native::vulkan {
 
 namespace {
 
+// This should always be sorted such that fallback ICDs are searched first to ensure that we return
+// the correct adapters when users are asking for forced fallback adapters.
 static constexpr ICD kICDs[] = {
+#if defined(DAWN_ENABLE_SWIFTSHADER)
+    ICD::SwiftShader,
+#endif  // defined(DAWN_ENABLE_SWIFTSHADER)
 // Other drivers should not be loaded with MSAN because they don't have MSAN instrumentation.
 // MSAN will produce false positives since it cannot detect changes to memory that the driver
 // has made.
 #if !defined(MEMORY_SANITIZER)
     ICD::None,
 #endif
-#if defined(DAWN_ENABLE_SWIFTSHADER)
-    ICD::SwiftShader,
-#endif  // defined(DAWN_ENABLE_SWIFTSHADER)
 };
 
 // Suppress validation errors that are known. Returns false in that case.
@@ -550,6 +553,16 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
     const UnpackedPtr<RequestAdapterOptions>& options) {
     std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
     InstanceBase* instance = GetInstance();
+
+    auto IsFallbackAdapter = [](const PhysicalDevice* physicalDevice) {
+        // Swiftshader is the only fallback adapter that we currently have.
+        if (gpu_info::IsGoogleSwiftshader(physicalDevice->GetVendorId(),
+                                          physicalDevice->GetDeviceId())) {
+            return true;
+        }
+        return false;
+    };
+
     for (ICD icd : kICDs) {
 #if DAWN_PLATFORM_IS(MACOS)
         // On Mac, we don't expect non-Swiftshader Vulkan to be available.
@@ -557,7 +570,9 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
             continue;
         }
 #endif  // DAWN_PLATFORM_IS(MACOS)
-        if (options->forceFallbackAdapter && icd != ICD::SwiftShader) {
+        // We always search for fallback adapters first, so if we already found one, don't bother
+        // looking for more.
+        if (options->forceFallbackAdapter && !physicalDevices.empty()) {
             continue;
         }
         if (mPhysicalDevices[icd].empty()) {
@@ -583,6 +598,9 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
                 Ref<PhysicalDevice> physicalDevice =
                     AcquireRef(new PhysicalDevice(mVulkanInstances[icd].Get(), vkPhysicalDevice));
                 if (instance->ConsumedErrorAndWarnOnce(physicalDevice->Initialize())) {
+                    continue;
+                }
+                if (options->forceFallbackAdapter && !IsFallbackAdapter(physicalDevice.Get())) {
                     continue;
                 }
                 // This loop can't filter adapters based on SupportsFeatureLevel() since the results
