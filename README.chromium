@@ -1,6 +1,7 @@
 Name: Dawn
 Short Name: dawn
 URL: https://dawn.googlesource.com/dawn
+Update Mechanism: Autoroll
 Version: N/A
 Revision: DEPS
 License: BSD-3-Clause

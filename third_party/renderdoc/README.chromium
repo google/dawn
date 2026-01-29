@@ -1,6 +1,7 @@
 Name: renderdoc
 Short Name: renderdoc
 URL: https://github.com/baldurk/renderdoc
+Update Mechanism: Manual
 Version: 1.40
 License: MIT License
 License File: LICENSE

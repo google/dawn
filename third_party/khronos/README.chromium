@@ -1,6 +1,7 @@
 Name: Khronos EGL
 Short Name: khronos
 URL: https://www.khronos.org
+Update Mechanism: Manual
 Security Critical: no
 Version: N/A
 Revision: DEPS
