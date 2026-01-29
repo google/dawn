@@ -128,6 +128,7 @@ cc_library(
     "evaluation_stage_test.cc",
     "expression_kind_test.cc",
     "f16_extension_test.cc",
+    "filtering_parameters_extension_test.cc",
     "framebuffer_fetch_extension_test.cc",
     "function_validation_test.cc",
     "host_shareable_validation_test.cc",

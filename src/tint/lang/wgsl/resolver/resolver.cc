@@ -116,6 +116,7 @@
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/text_style.h"
+#include "src/utils/compiler.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 
@@ -1521,11 +1522,6 @@ sem::BuiltinEnumExpression<core::AddressSpace>* Resolver::AddressSpaceExpression
     return address_space_expr;
 }
 
-sem::BuiltinEnumExpression<core::TexelFormat>* Resolver::TexelFormatExpression(
-    const ast::Expression* expr) {
-    return sem_.AsTexelFormat(Expression(expr));
-}
-
 sem::BuiltinEnumExpression<core::Access>* Resolver::AccessExpression(const ast::Expression* expr) {
     return sem_.AsAccess(Expression(expr));
 }
@@ -2656,8 +2652,7 @@ const core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
         case core::BuiltinType::kPtr:
             return Ptr(ident);
         case core::BuiltinType::kSampler:
-            return check_no_tmpl_args(
-                b.create<core::type::Sampler>(core::type::SamplerKind::kSampler));
+            return Sampler(ident);
         case core::BuiltinType::kSamplerComparison:
             return check_no_tmpl_args(
                 b.create<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler));
@@ -3000,9 +2995,42 @@ const core::type::Pointer* Resolver::Ptr(const ast::Identifier* ident) {
     return out;
 }
 
+const core::type::Sampler* Resolver::Sampler(const ast::Identifier* ident) {
+    if (!allowed_features_.features.contains(wgsl::LanguageFeature::kFilteringParameters)) {
+        return DAWN_LIKELY(CheckNotTemplated("type", ident))
+                   ? b.create<core::type::Sampler>(core::type::SamplerKind::kSampler)
+                   : nullptr;
+    }
+
+    core::SamplerFiltering filtering = core::SamplerFiltering::kUndefined;
+    if (auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>()) {
+        // If we are templated, then there must be at least one template item
+        if (!CheckTemplatedIdentifierArgs(tmpl_ident, 1)) {
+            return nullptr;
+        }
+
+        if (auto resolved = dependencies_.resolved_identifiers.Get(ident)) {
+            if (auto* ast_node = resolved->Node()) {
+                sem_.NoteDeclarationSource(ast_node);
+            }
+        }
+
+        filtering = sem_.GetSamplerFiltering(tmpl_ident->arguments[0]);
+        if (DAWN_UNLIKELY(filtering == core::SamplerFiltering::kUndefined)) {
+            return nullptr;
+        }
+    }
+    return b.create<core::type::Sampler>(core::type::SamplerKind::kSampler, filtering);
+}
+
 const core::type::SampledTexture* Resolver::SampledTexture(const ast::Identifier* ident,
                                                            core::type::TextureDimension dim) {
-    auto* tmpl_ident = TemplatedIdentifier(ident, 1);
+    uint32_t allowed_args = 1;
+    if (allowed_features_.features.contains(wgsl::LanguageFeature::kFilteringParameters)) {
+        allowed_args = 2;
+    }
+
+    auto* tmpl_ident = TemplatedIdentifier(ident, 1, allowed_args);
     if (DAWN_UNLIKELY(!tmpl_ident)) {
         return nullptr;
     }
@@ -3012,7 +3040,22 @@ const core::type::SampledTexture* Resolver::SampledTexture(const ast::Identifier
         return nullptr;
     }
 
-    auto* out = b.create<core::type::SampledTexture>(dim, ty_expr);
+    core::TextureFilterable filterable = core::TextureFilterable::kUndefined;
+    if (tmpl_ident->arguments.Length() > 1) {
+        filterable = sem_.GetTextureFilterable(tmpl_ident->arguments[1]);
+        if (DAWN_UNLIKELY(filterable == core::TextureFilterable::kUndefined)) {
+            return nullptr;
+        }
+
+        if (!ty_expr->IsAnyOf<core::type::F32, core::type::F16>()) {
+            AddError(tmpl_ident->arguments[1]->source)
+                << "texture filterability only applies to float textures, got '"
+                << sem_.TypeNameOf(ty_expr) << "'";
+            return nullptr;
+        }
+    }
+
+    auto* out = b.create<core::type::SampledTexture>(dim, ty_expr, filterable);
     return validator_.SampledTexture(out, ident->source) ? out : nullptr;
 }
 
@@ -3469,6 +3512,22 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return CheckNotTemplated("texel format", ident)
                    ? b.create<sem::BuiltinEnumExpression<core::TexelFormat>>(
                          expr, current_statement_, fmt)
+                   : nullptr;
+    }
+
+    if (auto filterable = resolved->TextureFilterable();
+        filterable != core::TextureFilterable::kUndefined) {
+        return CheckNotTemplated("texture filterable", ident)
+                   ? b.create<sem::BuiltinEnumExpression<core::TextureFilterable>>(
+                         expr, current_statement_, filterable)
+                   : nullptr;
+    }
+
+    if (auto filterable = resolved->SamplerFiltering();
+        filterable != core::SamplerFiltering::kUndefined) {
+        return CheckNotTemplated("sampler filtering", ident)
+                   ? b.create<sem::BuiltinEnumExpression<core::SamplerFiltering>>(
+                         expr, current_statement_, filterable)
                    : nullptr;
     }
 

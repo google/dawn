@@ -987,6 +987,32 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                              core::type::TextureDimension::kCube,
                              core::type::TextureDimension::kCubeArray));
 
+using SampledTextureFilterabilityTest = ResolverTestWithParam<core::TextureFilterable>;
+TEST_P(SampledTextureFilterabilityTest, All) {
+    auto& params = GetParam();
+    GlobalVar(Source{{12, 34}}, "a",
+              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32(), params), Group(0_a),
+              Binding(0_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
+                         SampledTextureFilterabilityTest,
+                         testing::Values(  //
+                             core::TextureFilterable::kFilterable,
+                             core::TextureFilterable::kUnfilterable));
+
+TEST_F(ResolverTypeValidationTest, SampledTextureNonFloatFilterability) {
+    GlobalVar(Source{{12, 34}}, "a",
+              ty.sampled_texture(core::type::TextureDimension::k2d, ty.i32(),
+                                 core::TextureFilterable::kFilterable),
+              Group(0_a), Binding(0_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: texture filterability only applies to float textures, got 'i32')");
+}
+
 using MultisampledTextureDimensionTest = ResolverTestWithParam<core::type::TextureDimension>;
 TEST_P(MultisampledTextureDimensionTest, All) {
     auto& params = GetParam();
@@ -1291,6 +1317,23 @@ TEST_F(StorageTextureAccessTest, RWAccess_FeatureDisallowed) {
 }
 
 }  // namespace StorageTextureTests
+
+namespace SamplerTests {
+
+using SamplerFilteringTest = ResolverTestWithParam<core::SamplerFiltering>;
+TEST_P(SamplerFilteringTest, All) {
+    auto& params = GetParam();
+    GlobalVar(Source{{12, 34}}, "a", ty.sampler(params), Group(0_a), Binding(0_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
+                         SamplerFilteringTest,
+                         testing::Values(  //
+                             core::SamplerFiltering::kFiltering,
+                             core::SamplerFiltering::kNonFiltering));
+
+}  // namespace SamplerTests
 
 namespace MatrixTests {
 struct Params {

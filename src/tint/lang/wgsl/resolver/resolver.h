@@ -214,6 +214,9 @@ class Resolver {
     /// @returns a pointer resolved from the templated identifier @p ident.
     const core::type::Pointer* Ptr(const ast::Identifier* ident);
 
+    /// @returns a sampler resolved from the templated identifier @p ident
+    const core::type::Sampler* Sampler(const ast::Identifier* ident);
+
     /// @returns a sampled texture resolved from the templated identifier @p ident with the
     /// dimensions @p dim.
     const core::type::SampledTexture* SampledTexture(const ast::Identifier* ident,
@@ -260,13 +263,6 @@ class Resolver {
     /// sem::BuiltinEnumExpression<core::AddressSpace>, then an error diagnostic is raised and
     /// nullptr is returned.
     sem::BuiltinEnumExpression<core::AddressSpace>* AddressSpaceExpression(
-        const ast::Expression* expr);
-
-    /// @returns the call of Expression() cast to a
-    /// sem::BuiltinEnumExpression<core::type::TexelFormat>. If the sem::Expression is not a
-    /// sem::BuiltinEnumExpression<core::type::TexelFormat>, then an error diagnostic is raised and
-    /// nullptr is returned.
-    sem::BuiltinEnumExpression<core::TexelFormat>* TexelFormatExpression(
         const ast::Expression* expr);
 
     /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<core::Access>*.
