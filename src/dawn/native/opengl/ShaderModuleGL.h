@@ -53,8 +53,6 @@ class EmulatedTextureBuiltinRegistrar;
 class PipelineLayout;
 struct OpenGLFunctions;
 
-std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber);
-
 #define COMBINED_SAMPLER_ELEMENT_MEMBERS(X)                                                 \
     X(BindGroupIndex, group)                                                                \
     X(BindingIndex, index)                                                                  \

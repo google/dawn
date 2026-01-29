@@ -297,13 +297,6 @@ bool GenerateArrayLengthFromuniformData(
 
 }  // namespace
 
-std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber) {
-    std::ostringstream o;
-    o << "dawn_binding_" << static_cast<uint32_t>(group) << "_"
-      << static_cast<uint32_t>(bindingNumber);
-    return o.str();
-}
-
 bool operator<(const CombinedSamplerElement& a, const CombinedSamplerElement& b) {
     return std::tie(a.group, a.index, a.shaderArraySize) <
            std::tie(b.group, b.index, b.shaderArraySize);
