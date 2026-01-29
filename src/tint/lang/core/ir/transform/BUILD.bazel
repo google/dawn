@@ -165,6 +165,7 @@ cc_library(
     "remove_terminator_args_test.cc",
     "remove_uniform_vector_component_loads_test.cc",
     "rename_conflicts_test.cc",
+    "resource_table_test.cc",
     "robustness_test.cc",
     "signed_integer_polyfill_test.cc",
     "single_entry_point_test.cc",

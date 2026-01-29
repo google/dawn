@@ -166,6 +166,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/remove_terminator_args_test.cc
   lang/core/ir/transform/remove_uniform_vector_component_loads_test.cc
   lang/core/ir/transform/rename_conflicts_test.cc
+  lang/core/ir/transform/resource_table_test.cc
   lang/core/ir/transform/robustness_test.cc
   lang/core/ir/transform/signed_integer_polyfill_test.cc
   lang/core/ir/transform/single_entry_point_test.cc
