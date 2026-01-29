@@ -1032,11 +1032,11 @@ def compute_kotlin_params(loaded_json,
             # to insert the bitwise equivalent of a signed number.
             if arg.type.name.get() in ['int', 'int32_t', 'uint32_t'
                                        ] and arg.default_value == '0xFFFFFFFF':
-                return '-0x7FFFFFFF'
+                return '-1'
             if arg.type.name.get() in [
                     'int64_t', 'uint64_t', 'size_t'
             ] and arg.default_value == '0xFFFFFFFFFFFFFFFF':
-                return '-0x7FFFFFFFFFFFFFFF'
+                return '-1'
 
             # In all remaining cases the default as specified in dawn.json will work verbatim in
             # Kotlin.
