@@ -192,6 +192,54 @@ std::string_view ToString(InterpolationType value) {
     return "<unknown>";
 }
 
+/// ParseSamplerFiltering parses a SamplerFiltering from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or SamplerFiltering::kUndefined if the string could not be parsed.
+SamplerFiltering ParseSamplerFiltering(std::string_view str) {
+    if (str == "filtering") {
+        return SamplerFiltering::kFiltering;
+    }
+    if (str == "non_filtering") {
+        return SamplerFiltering::kNonFiltering;
+    }
+    return SamplerFiltering::kUndefined;
+}
+std::string_view ToString(SamplerFiltering value) {
+    switch (value) {
+        case SamplerFiltering::kUndefined:
+            return "undefined";
+        case SamplerFiltering::kFiltering:
+            return "filtering";
+        case SamplerFiltering::kNonFiltering:
+            return "non_filtering";
+    }
+    return "<unknown>";
+}
+
+/// ParseTextureFilterable parses a TextureFilterable from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or TextureFilterable::kUndefined if the string could not be parsed.
+TextureFilterable ParseTextureFilterable(std::string_view str) {
+    if (str == "filterable") {
+        return TextureFilterable::kFilterable;
+    }
+    if (str == "unfilterable") {
+        return TextureFilterable::kUnfilterable;
+    }
+    return TextureFilterable::kUndefined;
+}
+std::string_view ToString(TextureFilterable value) {
+    switch (value) {
+        case TextureFilterable::kUndefined:
+            return "undefined";
+        case TextureFilterable::kFilterable:
+            return "filterable";
+        case TextureFilterable::kUnfilterable:
+            return "unfilterable";
+    }
+    return "<unknown>";
+}
+
 /// ParseSubgroupMatrixKind parses a SubgroupMatrixKind from a string.
 /// @param str the string to parse
 /// @returns the parsed enum, or SubgroupMatrixKind::kUndefined if the string could not be parsed.

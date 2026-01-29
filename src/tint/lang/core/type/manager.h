@@ -322,6 +322,14 @@ class Manager final {
 
     /// @param dim the dimensionality of the texture
     /// @param type the data type of the sampled texture
+    /// @param filterable the filterablity
+    /// @returns a sampled texture type with the provided params
+    const core::type::SampledTexture* sampled_texture(TextureDimension dim,
+                                                      const core::type::Type* type,
+                                                      TextureFilterable filterable);
+
+    /// @param dim the dimensionality of the texture
+    /// @param type the data type of the sampled texture
     /// @returns a multisampled texture type with the provided params
     const core::type::MultisampledTexture* multisampled_texture(TextureDimension dim,
                                                                 const core::type::Type* type);
@@ -668,6 +676,12 @@ class Manager final {
     /// @returns the sampler type
     const core::type::Sampler* sampler() {
         return Get<core::type::Sampler>(core::type::SamplerKind::kSampler);
+    }
+
+    /// @param filtering the sampler filtering parameter
+    /// @returns the sampler type
+    const core::type::Sampler* sampler(SamplerFiltering filtering) {
+        return Get<core::type::Sampler>(core::type::SamplerKind::kSampler, filtering);
     }
 
     /// @returns the comparison sampler type

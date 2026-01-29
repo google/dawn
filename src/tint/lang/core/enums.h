@@ -198,6 +198,66 @@ constexpr std::string_view kInterpolationTypeStrings[] = {
     "perspective",
 };
 
+/// The sampler filtering.
+enum class SamplerFiltering : uint8_t {
+    kUndefined,
+    kFiltering,
+    kNonFiltering,
+};
+
+/// @param value the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(SamplerFiltering value);
+
+/// @param out the stream to write to
+/// @param value the SamplerFiltering
+/// @returns @p out so calls can be chained
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
+auto& operator<<(STREAM& out, SamplerFiltering value) {
+    return out << ToString(value);
+}
+
+/// ParseSamplerFiltering parses a SamplerFiltering from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or SamplerFiltering::kUndefined if the string could not be parsed.
+SamplerFiltering ParseSamplerFiltering(std::string_view str);
+
+constexpr std::string_view kSamplerFilteringStrings[] = {
+    "filtering",
+    "non_filtering",
+};
+
+/// The texture filterable.
+enum class TextureFilterable : uint8_t {
+    kUndefined,
+    kFilterable,
+    kUnfilterable,
+};
+
+/// @param value the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(TextureFilterable value);
+
+/// @param out the stream to write to
+/// @param value the TextureFilterable
+/// @returns @p out so calls can be chained
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
+auto& operator<<(STREAM& out, TextureFilterable value) {
+    return out << ToString(value);
+}
+
+/// ParseTextureFilterable parses a TextureFilterable from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or TextureFilterable::kUndefined if the string could not be parsed.
+TextureFilterable ParseTextureFilterable(std::string_view str);
+
+constexpr std::string_view kTextureFilterableStrings[] = {
+    "filterable",
+    "unfilterable",
+};
+
 /// Address space of a given pointer.
 enum class SubgroupMatrixKind : uint8_t {
     kUndefined,
