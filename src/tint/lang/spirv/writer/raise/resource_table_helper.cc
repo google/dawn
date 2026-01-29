@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/writer/raise/resource_table.h"
+#include "src/tint/lang/spirv/writer/raise/resource_table_helper.h"
 
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/resource_type.h"

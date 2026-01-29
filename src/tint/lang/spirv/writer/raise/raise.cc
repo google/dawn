@@ -62,7 +62,7 @@
 #include "src/tint/lang/spirv/writer/raise/merge_return.h"
 #include "src/tint/lang/spirv/writer/raise/pass_matrix_by_pointer.h"
 #include "src/tint/lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.h"
-#include "src/tint/lang/spirv/writer/raise/resource_table.h"
+#include "src/tint/lang/spirv/writer/raise/resource_table_helper.h"
 #include "src/tint/lang/spirv/writer/raise/shader_io.h"
 #include "src/tint/lang/spirv/writer/raise/unary_polyfill.h"
 #include "src/tint/lang/spirv/writer/raise/var_for_dynamic_index.h"
