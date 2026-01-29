@@ -703,6 +703,7 @@ source_set("end2end_tests_sources") {
     "end2end/SamplerFilterAnisotropicTests.cpp",
     "end2end/SamplerTests.cpp",
     "end2end/ScissorTests.cpp",
+    "end2end/SelectNonShortCircuiting.cpp",
     "end2end/ShaderAtomicTests.cpp",
     "end2end/ShaderBuiltinPartialConstArgsErrorTests.cpp",
     "end2end/ShaderF16Tests.cpp",

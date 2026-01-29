@@ -65,6 +65,7 @@
 #include "src/tint/lang/hlsl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/decompose_storage_access.h"
+#include "src/tint/lang/hlsl/writer/raise/extract_ternary_values.h"
 #include "src/tint/lang/hlsl/writer/raise/localize_struct_array_assignment.h"
 #include "src/tint/lang/hlsl/writer/raise/pixel_local.h"
 #include "src/tint/lang/hlsl/writer/raise/promote_initializers.h"
@@ -353,6 +354,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(raise::BuiltinPolyfill(module));
     TINT_CHECK_RESULT(core::ir::transform::VectorizeScalarMatrixConstructors(module));
     TINT_CHECK_RESULT(core::ir::transform::RemoveContinueInSwitch(module));
+
+    // ExtractTernaryValues must come after BuiltinPolyfill because that's what introduces the
+    // ternary builtins.
+    TINT_CHECK_RESULT(raise::ExtractTernaryValues(module));
 
     core::ir::transform::BuiltinScalarizeConfig scalarize_config{
         .scalarize_clamp = options.workarounds.scalarize_max_min_clamp,
