@@ -111,6 +111,7 @@ class DAWN_SCOPED_LOCKABLE Guard : public NonMovable, StackAllocated {
     }
 
   protected:
+    Guard() : mLock() {}
     Guard(T* obj, typename Traits::MutexType& mutex, class Defer* defer = nullptr)
         : mLock(Traits::GetMutex(mutex)), mObj(obj), mDefer(defer) {}
     Guard(Guard&& other)
@@ -120,9 +121,19 @@ class DAWN_SCOPED_LOCKABLE Guard : public NonMovable, StackAllocated {
         other.mObj = nullptr;
     }
 
+    Guard& operator=(Guard&& other) {
+        if (this != &other) {
+            mLock = std::move(other.mLock);
+            mObj = std::move(other.mObj);
+            mDefer = std::move(other.mDefer);
+            other.mObj = nullptr;
+            other.mDefer = nullptr;
+        }
+        return *this;
+    }
+
     Guard(const Guard& other) = delete;
     Guard& operator=(const Guard& other) = delete;
-    Guard& operator=(Guard&& other) = delete;
 
     auto* Get() const { return Traits::GetObj(mObj); }
 

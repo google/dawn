@@ -57,7 +57,9 @@ class CommandRecordingContextGuard : public ::dawn::detail::Guard<Ctx, Traits> {
   public:
     using Base = ::dawn::detail::Guard<Ctx, Traits>;
 
+    CommandRecordingContextGuard() = default;
     CommandRecordingContextGuard(CommandRecordingContextGuard&& rhs) = default;
+    CommandRecordingContextGuard& operator=(CommandRecordingContextGuard&& other) = default;
     CommandRecordingContextGuard(Ctx* ctx,
                                  typename Traits::MutexType& mutex,
                                  Defer* defer = nullptr)
@@ -66,7 +68,6 @@ class CommandRecordingContextGuard : public ::dawn::detail::Guard<Ctx, Traits> {
 
     CommandRecordingContextGuard(const CommandRecordingContextGuard& other) = delete;
     CommandRecordingContextGuard& operator=(const CommandRecordingContextGuard& other) = delete;
-    CommandRecordingContextGuard& operator=(CommandRecordingContextGuard&& other) = delete;
 };
 
 class CommandRecordingContext {
@@ -124,8 +125,10 @@ class CommandRecordingContext {
 // When enabled, it synchronizes access to the D3D11 context external to Dawn.
 class ScopedCommandRecordingContext : NonCopyable {
   public:
+    ScopedCommandRecordingContext() = default;
     ScopedCommandRecordingContext(CommandRecordingContext::Guard&& guard, bool lockD3D11Scope);
     ScopedCommandRecordingContext(ScopedCommandRecordingContext&& other);
+    ScopedCommandRecordingContext& operator=(ScopedCommandRecordingContext&& other);
     ~ScopedCommandRecordingContext();
 
     Device* GetDevice() const;
@@ -197,8 +200,11 @@ class ScopedCommandRecordingContext : NonCopyable {
 // ID3D11DeviceContext for a scope. It is needed for sharing ID3D11Device between dawn and ANGLE.
 class ScopedSwapStateCommandRecordingContext : public ScopedCommandRecordingContext {
   public:
+    ScopedSwapStateCommandRecordingContext() = default;
     explicit ScopedSwapStateCommandRecordingContext(CommandRecordingContext::Guard&& guard);
     ScopedSwapStateCommandRecordingContext(ScopedSwapStateCommandRecordingContext&& other);
+    ScopedSwapStateCommandRecordingContext& operator=(
+        ScopedSwapStateCommandRecordingContext&& other);
     ~ScopedSwapStateCommandRecordingContext();
 
     ID3D11Device* GetD3D11Device() const;
