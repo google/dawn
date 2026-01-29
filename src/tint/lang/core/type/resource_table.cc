@@ -25,49 +25,47 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_SPIRV_TYPE_RESOURCE_TABLE_H_
-#define SRC_TINT_LANG_SPIRV_TYPE_RESOURCE_TABLE_H_
+#include "src/tint/lang/core/type/resource_table.h"
 
-#include <string>
+#include <sstream>
 
-#include "src/tint/lang/core/enums.h"
-#include "src/tint/lang/core/type/type.h"
+#include "src/tint/lang/core/type/manager.h"
 
-namespace tint::spirv::type {
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::ResourceTable);
 
-/// ResourceTable represents an OpTypeRuntimeArray of resources
-class ResourceTable final : public Castable<ResourceTable, core::type::Type> {
-  public:
-    /// Constructor
-    /// @param binding_type the type of the table
-    explicit ResourceTable(const core::type::Type* binding_type);
+namespace tint::core::type {
 
-    /// @param other the other node to compare against
-    /// @returns true if the this type is equal to @p other
-    bool Equals(const UniqueNode& other) const override;
+ResourceTable::ResourceTable(const core::type::Type* binding_type)
+    : Base(static_cast<size_t>(Hash(tint::TypeCode::Of<ResourceTable>().bits, binding_type)),
+           core::type::Flags{}),
+      binding_type_(binding_type) {}
 
-    const core::type::Type* GetBindingType() const { return binding_type_; }
+bool ResourceTable::Equals(const UniqueNode& other) const {
+    if (auto* o = other.As<ResourceTable>()) {
+        return o->binding_type_ == binding_type_;
+    }
+    return false;
+}
 
-    /// @copydoc core::type::Type::Elements
-    core::type::TypeAndCount Elements(const core::type::Type* type_if_invalid = nullptr,
-                                      uint32_t count_if_invalid = 0) const override;
+std::string ResourceTable::FriendlyName() const {
+    std::stringstream str;
+    str << "resource_table<" << binding_type_->FriendlyName() << ">";
+    return str.str();
+}
 
-    /// @copydoc core::type::Type::Element
-    const core::type::Type* Element(uint32_t index) const override;
+core::type::TypeAndCount ResourceTable::Elements(
+    [[maybe_unused]] const core::type::Type* type_if_unused,
+    uint32_t count_if_invalid) const {
+    return {binding_type_, count_if_invalid};
+}
 
-    /// @returns the friendly name for this type
-    std::string FriendlyName() const override;
+const core::type::Type* ResourceTable::Element([[maybe_unused]] uint32_t index) const {
+    return binding_type_;
+}
 
-    bool IsHandle() const override { return true; }
+ResourceTable* ResourceTable::Clone(core::type::CloneContext& ctx) const {
+    auto* binding_type = binding_type_->Clone(ctx);
+    return ctx.dst.mgr->Get<ResourceTable>(binding_type);
+}
 
-    /// @param ctx the clone context
-    /// @returns a clone of this type
-    ResourceTable* Clone(core::type::CloneContext& ctx) const override;
-
-  private:
-    const core::type::Type* binding_type_;
-};
-
-}  // namespace tint::spirv::type
-
-#endif  // SRC_TINT_LANG_SPIRV_TYPE_RESOURCE_TABLE_H_
+}  // namespace tint::core::type

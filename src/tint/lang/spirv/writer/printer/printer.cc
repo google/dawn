@@ -80,6 +80,7 @@
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/resource_table.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/subgroup_matrix.h"
@@ -92,7 +93,6 @@
 #include "src/tint/lang/spirv/ir/copy_logical.h"
 #include "src/tint/lang/spirv/ir/literal_operand.h"
 #include "src/tint/lang/spirv/type/explicit_layout_array.h"
-#include "src/tint/lang/spirv/type/resource_table.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/lang/spirv/writer/common/binary_writer.h"
 #include "src/tint/lang/spirv/writer/common/function.h"
@@ -569,7 +569,7 @@ class Printer {
                     module_.PushType(spv::Op::OpTypeArray,
                                      {id, Type(arr->ElemType()), Constant(count)});
                 },
-                [&](const spirv::type::ResourceTable* rb) {
+                [&](const core::type::ResourceTable* rb) {
                     module_.PushCapability(SpvCapabilityRuntimeDescriptorArray);
                     module_.PushExtension("SPV_EXT_descriptor_indexing");
                     module_.PushType(spv::Op::OpTypeRuntimeArray, {id, Type(rb->GetBindingType())});
