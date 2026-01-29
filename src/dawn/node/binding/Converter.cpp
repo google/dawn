@@ -1834,6 +1834,9 @@ bool Converter::Convert(wgpu::WGSLLanguageFeatureName& out, interop::WGSLLanguag
         case interop::WGSLLanguageFeatureName::kBufferView:
             out = wgpu::WGSLLanguageFeatureName::BufferView;
             return true;
+        case interop::WGSLLanguageFeatureName::kFilteringParameters:
+            out = wgpu::WGSLLanguageFeatureName::FilteringParameters;
+            return true;
     }
     return false;
 }
@@ -1881,6 +1884,9 @@ bool Converter::Convert(interop::WGSLLanguageFeatureName& out, wgpu::WGSLLanguag
             return true;
         case wgpu::WGSLLanguageFeatureName::BufferView:
             out = interop::WGSLLanguageFeatureName::kBufferView;
+            return true;
+        case wgpu::WGSLLanguageFeatureName::FilteringParameters:
+            out = interop::WGSLLanguageFeatureName::kFilteringParameters;
             return true;
 
         case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented:
