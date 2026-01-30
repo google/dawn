@@ -115,7 +115,7 @@ def dawn_mac_cmake_cq_tester(**kwargs):
 ## CQ Builders
 
 dawn_linux_cmake_cq_tester(
-    name = "dawn-cq-linux-x64-sws-cmake-asan",
+    name = "dawn-cq-linux-x64-cmake-asan",
     description_html = "Compiles and tests release Dawn test binaries for Linux/x64 using CMake and Clang with ASan and UBSan enabled. Blocks CL submission",
     mirrors = [
         "ci/dawn-linux-x64-sws-cmake-asan",
@@ -130,7 +130,7 @@ dawn_linux_cmake_cq_tester(
 )
 
 dawn_linux_cmake_cq_tester(
-    name = "dawn-cq-linux-x64-sws-cmake-dbg",
+    name = "dawn-cq-linux-x64-cmake-dbg",
     description_html = "Compiles and tests debug Dawn test binaries for Linux/x64 using CMake and Clang. Blocks CL submission",
     mirrors = [
         "ci/dawn-linux-x64-sws-cmake-dbg",
@@ -145,7 +145,7 @@ dawn_linux_cmake_cq_tester(
 )
 
 dawn_linux_cmake_cq_tester(
-    name = "dawn-cq-linux-x64-sws-cmake-rel",
+    name = "dawn-cq-linux-x64-cmake-rel",
     description_html = "Compiles and tests release Dawn test binaries for Linux/x64 using CMake and Clang. Blocks CL submission",
     mirrors = [
         "ci/dawn-linux-x64-sws-cmake-rel",
@@ -160,7 +160,7 @@ dawn_linux_cmake_cq_tester(
 )
 
 dawn_mac_cmake_cq_tester(
-    name = "dawn-cq-mac-x64-sws-cmake-dbg",
+    name = "dawn-cq-mac-x64-cmake-dbg",
     description_html = "Compiles and tests debug Dawn test binaries for Mac/x64 using CMake and Clang. Blocks CL submission",
     mirrors = [
         "ci/dawn-mac-x64-sws-cmake-dbg",
@@ -175,7 +175,7 @@ dawn_mac_cmake_cq_tester(
 )
 
 dawn_mac_cmake_cq_tester(
-    name = "dawn-cq-mac-x64-sws-cmake-rel",
+    name = "dawn-cq-mac-x64-cmake-rel",
     description_html = "Compiles and tests release Dawn test binaries for Mac/x64 using CMake and Clang. Blocks CL submission",
     mirrors = [
         "ci/dawn-mac-x64-sws-cmake-rel",
