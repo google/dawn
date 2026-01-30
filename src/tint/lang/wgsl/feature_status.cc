@@ -42,6 +42,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kImmediateAddressSpace:
         case LanguageFeature::kBufferView:
         case LanguageFeature::kFilteringParameters:
+        case LanguageFeature::kSwizzleAssignment:
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////

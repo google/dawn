@@ -223,6 +223,9 @@ LanguageFeature ParseLanguageFeature(std::string_view str) {
     if (str == "subgroup_uniformity") {
         return LanguageFeature::kSubgroupUniformity;
     }
+    if (str == "swizzle_assignment") {
+        return LanguageFeature::kSwizzleAssignment;
+    }
     if (str == "texel_buffers") {
         return LanguageFeature::kTexelBuffers;
     }
@@ -273,6 +276,8 @@ std::string_view ToString(LanguageFeature value) {
             return "subgroup_id";
         case LanguageFeature::kSubgroupUniformity:
             return "subgroup_uniformity";
+        case LanguageFeature::kSwizzleAssignment:
+            return "swizzle_assignment";
         case LanguageFeature::kTexelBuffers:
             return "texel_buffers";
         case LanguageFeature::kTextureAndSamplerLet:

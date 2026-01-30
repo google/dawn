@@ -474,6 +474,7 @@
 "subgroup_uniformity"
 "subgroups"
 "switch"
+"swizzle_assignment"
 "tan"
 "tanh"
 "texel"
