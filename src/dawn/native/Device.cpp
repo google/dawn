@@ -641,6 +641,9 @@ void DeviceBase::Destroy(DestroyReason reason) {
         return;
     }
 
+    // Move away from the Alive state now so that the application cannot use this device anymore.
+    auto state = mState.exchange(State::BeingDisconnected);
+
     // This function may be called re-entrantly inside APITick(). Tick triggers callbacks
     // inside which the application may destroy the device. Thus, we should be careful not
     // to delete objects that are needed inside Tick after callbacks have been called.
@@ -651,7 +654,7 @@ void DeviceBase::Destroy(DestroyReason reason) {
     // from Tick() whether or not there is any more pending work.
 
     // Skip handling device facilities if they haven't even been created (or failed doing so)
-    if (mState != State::BeingCreated) {
+    if (state != State::BeingCreated) {
         // The device is being destroyed so it will be lost, call the application callback.
         HandleDeviceLost(wgpu::DeviceLostReason::Destroyed, "Device was destroyed.");
 
@@ -667,7 +670,7 @@ void DeviceBase::Destroy(DestroyReason reason) {
     }
 
     // Disconnect the device, depending on which state we are currently in.
-    switch (mState) {
+    switch (state) {
         case State::BeingCreated:
             // The GPU timeline was never started so we don't have to wait.
             break;
@@ -699,7 +702,7 @@ void DeviceBase::Destroy(DestroyReason reason) {
             break;
     }
 
-    if (mState != State::BeingCreated) {
+    if (state != State::BeingCreated) {
         // The GPU timeline is finished.
         mQueue->AssumeCommandsComplete();
         DAWN_ASSERT(mQueue->GetCompletedCommandSerial() >= mQueue->GetLastSubmittedCommandSerial());
