@@ -1123,6 +1123,9 @@ crbug.com/448397616 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,b
 # The spec doesn't precisely require a behavior and the CTS tests only one of them. Remove suppressions once the spec / CTS is fixed.
 crbug.com/449980070 webgpu:api,validation,encoding,encoder_open_state:* [ Failure ]
 
+# Increase in binding limits resulted in test timeouts on Windows intel
+crbug.com/479909173 [ intel-0x9bc5 win ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
+
 # Windows code-coverage bots - "The source image could not be decoded"
 crbug.com/469328920 [ clang-coverage webgpu-dedicated-worker win ] webgpu:web_platform,copyToTexture,image_file:from_orientation_metadata_file:imageName="four-colors*.jpg";objectTypeFromFile="ImageBitmap-from-Blob";* [ Failure ]
 

@@ -65,18 +65,19 @@
     X(v1, Maximum, maxBufferSize, 0x10000000, 0x10000000, 0x40000000, 0x80000000, 0x100000000)
 
 // Tiers for limits related to resource bindings.
+// Note that changing these limits may require updating hard-coded constants common/Constants.h.
 // TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where one
 // offers slightly better than default limits.
-//                                                                     compat      tier0       tier1
-#define LIMITS_RESOURCE_BINDINGS(X)                                                                   \
-    X(v1,     Maximum,   maxDynamicUniformBuffersPerPipelineLayout,         8,         8,         10) \
-    X(v1,     Maximum,   maxDynamicStorageBuffersPerPipelineLayout,         4,         4,          8) \
-    X(v1,     Maximum,            maxSampledTexturesPerShaderStage,        16,        16,         16) \
-    X(v1,     Maximum,                   maxSamplersPerShaderStage,        16,        16,         16) \
-    X(v1,     Maximum,            maxStorageTexturesPerShaderStage,         4,         4,          8) \
-    X(compat, Maximum,           maxStorageTexturesInFragmentStage,         4,         4,          8) \
-    X(compat, Maximum,             maxStorageTexturesInVertexStage,         0,         4,          8) \
-    X(v1,     Maximum,             maxUniformBuffersPerShaderStage,        12,        12,         12)
+//                                                                     compat      tier0       tier1       tier2
+#define LIMITS_RESOURCE_BINDINGS(X)                                                                              \
+    X(v1,     Maximum,   maxDynamicUniformBuffersPerPipelineLayout,         8,         8,         10,        10) \
+    X(v1,     Maximum,   maxDynamicStorageBuffersPerPipelineLayout,         4,         4,          8,         8) \
+    X(v1,     Maximum,            maxSampledTexturesPerShaderStage,        16,        16,         16,        48) \
+    X(v1,     Maximum,                   maxSamplersPerShaderStage,        16,        16,         16,        16) \
+    X(v1,     Maximum,            maxStorageTexturesPerShaderStage,         4,         4,          8,         8) \
+    X(compat, Maximum,           maxStorageTexturesInFragmentStage,         4,         4,          8,         8) \
+    X(compat, Maximum,             maxStorageTexturesInVertexStage,         0,         4,          8,         8) \
+    X(v1,     Maximum,             maxUniformBuffersPerShaderStage,        12,        12,         12,        12)
 
 // Tiers for limits related to storage buffer bindings. Should probably be merged with
 // LIMITS_RESOURCE_BINDINGS.
@@ -124,7 +125,7 @@
 // TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros
 // in this file expect more than one tier.
-//                                                                                         compat      tier0      tier1
+//                                                                                         compat      tier0      tier1       tier2
 #define LIMITS_OTHER(X)                                                                                                             \
     X(v1,                              Maximum,                                     maxBindGroups,         4,         4,          4) \
     X(v1,                              Maximum,                    maxBindGroupsPlusVertexBuffers,        24,        24,         24) \
