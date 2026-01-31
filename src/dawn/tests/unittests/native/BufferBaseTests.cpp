@@ -37,8 +37,10 @@
 #include "gtest/gtest.h"
 #include "mocks/BufferMock.h"
 #include "mocks/DawnMockTest.h"
+#include "webgpu/webgpu_cpp.h"
 
 using testing::_;
+using testing::AnyOf;
 using testing::ByMove;
 using testing::Eq;
 using testing::HasSubstr;
@@ -46,6 +48,8 @@ using testing::Return;
 
 namespace dawn::native {
 namespace {
+
+using BufferState = BufferBase::BufferState;
 
 constexpr size_t kBufferSize = 16;
 constexpr std::string_view kValidationErrorMessage = "Concurrent buffer operations are not allowed";
@@ -288,13 +292,32 @@ TEST_F(BufferBaseThreadedTest, ConcurrentMapDestroy) {
                 Call(_, wgpu::ErrorType::Validation, HasSubstr(kValidationErrorMessage)))
         .WillOnce([&]() { errorEvent.Signal(); });
 
+    std::optional<wgpu::MapAsyncStatus> expectedStatus;
+    std::optional<wgpu::MapAsyncStatus> returnedStatus;
+
+    // The MapAsyncEvent will be scheduled so UnmapImpl() will always run. It's possible MapAsync()
+    // is successful, so FinalizeMapImpl() will run and then buffer gets unmapped from destroy.
+    // Alternatively, unmap can be called while the buffer is still PendingMap and MapAsync() is
+    // aborted. The test allows either order.
+    EXPECT_CALL(*mBufferMock.Get(), UnmapImpl)
+        .WillOnce([&](BufferState oldState, BufferState newState) {
+            if (oldState == BufferState::PendingMap) {
+                expectedStatus = wgpu::MapAsyncStatus::Aborted;
+            } else {
+                ASSERT_EQ(oldState, BufferState::Mapped);
+                expectedStatus = wgpu::MapAsyncStatus::Success;
+            }
+        });
     EXPECT_CALL(*mBufferMock.Get(), DestroyImpl);
-    // Map shouldn't complete since buffer is destroyed first.
-    EXPECT_CALL(*mBufferMock.Get(), FinalizeMapImpl).Times(0);
 
     std::thread mapThread([&]() {
         MockMapAsyncCallback cb;
-        EXPECT_CALL(cb, Call(Eq(wgpu::MapAsyncStatus::Aborted), _));
+        EXPECT_CALL(
+            cb,
+            Call(AnyOf(Eq(wgpu::MapAsyncStatus::Aborted), Eq(wgpu::MapAsyncStatus::Success)), _))
+            .WillOnce([&](wgpu::MapAsyncStatus status, wgpu::StringView message) {
+                returnedStatus = status;
+            });
         mBuffer.MapAsync(wgpu::MapMode::Write, 0, kBufferSize, wgpu::CallbackMode::AllowSpontaneous,
                          cb.Callback());
     });
@@ -305,6 +328,9 @@ TEST_F(BufferBaseThreadedTest, ConcurrentMapDestroy) {
 
     mapThread.join();
     destroyThread.join();
+
+    // Make sure that status returned from MapAsync() is as expected.
+    EXPECT_EQ(expectedStatus, returnedStatus);
 }
 
 // Tests calling Unmap() on one thread and then Destroy() concurrently on another thread. Destroy()
