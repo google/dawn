@@ -106,3 +106,16 @@ crbug.com/402178306 [ webgpu-dxc-disabled win ] webgpu:shader,execution,limits:s
 [ android ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=3;rows=4 [ Slow ]
 [ android ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=3 [ Slow ]
 [ android ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ Slow ]
+
+# Timeouts when running with code coverage
+crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=false;sampleCount=4;rasterizationMask=1 [ Slow ]
+crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=1;rasterizationMask=1 [ Slow ]
+crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba16sint" [ Slow ]
+crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Slow ]
+crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:api,validation,render_pipeline,vertex_state:vertex_attribute_contained_in_stride:format="sint32x4" [ Slow ]
+crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:api,validation,render_pipeline,vertex_state:vertex_attribute_contained_in_stride:format="uint32x2" [ Slow ]
+crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";vectorize="undef" [ Slow ]
+crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:shader,validation,expression,call,builtin,fma:values:stage="override";type="vec4%3Cf32%3E" [ Slow ]
+crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="override";type="vec4%3Cf32%3E" [ Slow ]
+crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:shader,execution,expression,call,builtin,subgroupAll:compute,split:predicate="lower_half" [ Slow ]
+crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:shader,execution,expression,call,builtin,subgroupAny:compute,split:predicate="every_even" [ Slow ]
