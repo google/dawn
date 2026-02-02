@@ -120,6 +120,18 @@ TEST_F(ResolverCompoundAssignmentValidationTest, VectorScalar_Pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverCompoundAssignmentValidationTest, RhsSwizzleView_Pass) {
+    // var v : vec4<f32>;
+    // var w : vec2<f32>;
+    // v += w.xxyy;
+    auto* v = Var("v", ty.vec4<f32>());
+    auto* w = Var("w", ty.vec2<f32>());
+    auto* swizzle = MemberAccessor("v", "xxyy");
+    WrapInFunction(v, w, CompoundAssign("v", swizzle, core::BinaryOp::kAdd));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 TEST_F(ResolverCompoundAssignmentValidationTest, ScalarVector_Fail) {
     // {
     //   var a : f32;

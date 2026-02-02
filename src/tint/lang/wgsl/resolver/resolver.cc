@@ -4861,8 +4861,17 @@ sem::Statement* Resolver::CompoundAssignmentStatement(
 
         auto stage = core::EarliestStage(lhs->Stage(), rhs->Stage());
 
-        auto overload = intrinsic_table_.Lookup(stmt->op, lhs->Type()->UnwrapRef(),
-                                                rhs->Type()->UnwrapRef(), stage, true);
+        // TODO(crbug.com/477255032): See if this can be cleaned up by improving the consistency of
+        // resolver subexpression loading.
+        auto* rhs_type = rhs->Type();
+        if (auto* swizzle_view = rhs_type->As<core::type::SwizzleView>()) {
+            // Use the swizzle result type as the arg type for intrinsic lookup.
+            rhs_type = swizzle_view->StoreType();
+        } else {
+            rhs_type = rhs_type->UnwrapRef();
+        }
+        auto overload =
+            intrinsic_table_.Lookup(stmt->op, lhs->Type()->UnwrapRef(), rhs_type, stage, true);
         if (overload != Success) {
             AddError(stmt->source) << overload.Failure();
             return false;
