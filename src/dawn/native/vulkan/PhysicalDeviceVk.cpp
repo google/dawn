@@ -350,6 +350,12 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::DepthClipControl);
     }
 
+    if (mDeviceInfo.HasExt(DeviceExt::MultisampledRenderToSingleSampled) &&
+        mDeviceInfo.multisampledRenderToSingleSampledFeatures.multisampledRenderToSingleSampled ==
+            VK_TRUE) {
+        EnableFeature(Feature::MSAARenderToSingleSampled);
+    }
+
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer) &&
         mDeviceInfo.samplerYCbCrConversionFeatures.samplerYcbcrConversion == VK_TRUE) {
         EnableFeature(Feature::YCbCrVulkanSamplers);
@@ -926,6 +932,32 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
     adapterToggles->Default(
         Toggle::DecomposeUniformBuffers,
         platform->IsFeatureEnabled(platform::Features::kWebGPUDecomposeUniformBuffers));
+
+    // VulkanUseDynamicRendering and VulkanUseCreateRenderPass2 are treated as Adapter toggles
+    // because they affect whether or not the MSAARenderToSingleSampled feature is available.
+
+    // Use dynamic rendering by default if the corresponding extension is available.
+    // Also disable on older Intel devices, which have been observed to have driver issues with
+    // the dynamic rendering path.
+    if (!GetDeviceInfo().HasExt(DeviceExt::DynamicRendering) ||
+        GetDeviceInfo().dynamicRenderingFeatures.dynamicRendering == VK_FALSE ||
+        (gpu_info::IsIntel(GetVendorId()) &&
+         gpu_info::GetIntelGen(GetVendorId(), GetDeviceId()) <= gpu_info::IntelGen::Gen9)) {
+        adapterToggles->ForceSet(Toggle::VulkanUseDynamicRendering, false);
+    } else {
+        // TODO(crbug.com/463893794): Defaulted to false until ExpandResolveTexture is supported
+        // when dynamic rendering is enabled.
+        adapterToggles->Default(Toggle::VulkanUseDynamicRendering, false);
+    }
+
+    // Use CreateRenderPass2KHR by default if the corresponding extension is available. Disabled if
+    // dynamic rendering is being used for clarity.
+    if (!GetDeviceInfo().HasExt(DeviceExt::CreateRenderPass2) ||
+        adapterToggles->IsEnabled(Toggle::VulkanUseDynamicRendering)) {
+        adapterToggles->ForceSet(Toggle::VulkanUseCreateRenderPass2, false);
+    } else {
+        adapterToggles->Default(Toggle::VulkanUseCreateRenderPass2, true);
+    }
 }
 
 void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
@@ -1172,29 +1204,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->ForceSet(Toggle::UseSpirv14, false);
     }
 
-    // Use dynamic rendering by default if the corresponding extension is available.
-    // Also disable on older Intel devices, which have been observed to have driver issues with
-    // the dynamic rendering path.
-    if (!GetDeviceInfo().HasExt(DeviceExt::DynamicRendering) ||
-        GetDeviceInfo().dynamicRenderingFeatures.dynamicRendering == VK_FALSE ||
-        (gpu_info::IsIntel(GetVendorId()) &&
-         gpu_info::GetIntelGen(GetVendorId(), GetDeviceId()) <= gpu_info::IntelGen::Gen9)) {
-        deviceToggles->ForceSet(Toggle::VulkanUseDynamicRendering, false);
-    } else {
-        // TODO(crbug.com/463893794): Defaulted to false until ExpandResolveTexture is supported
-        // when dynamic rendering is enabled.
-        deviceToggles->Default(Toggle::VulkanUseDynamicRendering, false);
-    }
-
-    // Use CreateRenderPass2KHR by default if the corresponding extension is available. Disabled if
-    // dynamic rendering is being used for clarity.
-    if (!GetDeviceInfo().HasExt(DeviceExt::CreateRenderPass2) ||
-        deviceToggles->IsEnabled(Toggle::VulkanUseDynamicRendering)) {
-        deviceToggles->ForceSet(Toggle::VulkanUseCreateRenderPass2, false);
-    } else {
-        deviceToggles->Default(Toggle::VulkanUseCreateRenderPass2, true);
-    }
-
     // Enable validation of generated SPIR-V by default.
     // Graphite and other native clients may turn this off.
     deviceToggles->Default(Toggle::EnableSpirvValidation, true);
@@ -1246,6 +1255,18 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
                 !toggles.IsEnabled(Toggle::VulkanEnableF16OnNvidia)) {
                 return FeatureValidationResult(
                     absl::StrFormat("Feature %s is not yet supported on Nvidia GPUs", feature));
+            }
+            break;
+
+        case wgpu::FeatureName::MSAARenderToSingleSampled:
+            // Must be using either Dynamic Rendering or CreateRenderPass2 for this feature to be
+            // available.
+            if (!toggles.IsEnabled(Toggle::VulkanUseDynamicRendering) &&
+                !toggles.IsEnabled(Toggle::VulkanUseCreateRenderPass2)) {
+                return FeatureValidationResult(
+                    absl::StrFormat("Feature %s requires either the VulkanUseDynamicRendering or "
+                                    "VulkanUseCreateRenderPass2 toggle on Vulkan",
+                                    feature));
             }
             break;
 

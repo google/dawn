@@ -224,8 +224,6 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     Ref<TextureViewBase> CreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
     ApiObjectList* GetViewTrackingList();
 
-    bool IsImplicitMSAARenderTextureViewSupported() const;
-
     void DumpMemoryStatistics(dawn::native::MemoryDump* dump, const char* prefix) const;
 
     uint64_t ComputeEstimatedByteSize() const;

@@ -1,16 +1,16 @@
 # MSAA Render To Single Sampled/Multisampled Render To Single Sampled
 
-The `msaa-render-to-single-sampled` feature allows a render pass to include single-sampled attachments while rendering is done with a specified number of samples. When this feature is used, the client doesn't need to explicitly allocate any multi-sammpled color textures. We denote this kind of render passes as "implicit multi-sampled" render passes.
+The `msaa-render-to-single-sampled` feature (MSRTSS) allows a render pass to include single-sampled attachments while rendering is done with a specified number of samples. When this feature is used, the client doesn't need to explicitly allocate any multi-sampled color textures.
 
 Additional functionalities:
- - Adds `wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled` as chained struct for `wgpu::RenderPassColorAtttachment` to specify number of samples to be rendered for the respective single-sampled attachment.
- - Adds `wgpu::DawnMultisampleStateRenderToSingleSampled` as chained struct for `wgpu::RenderPipelineDescriptor::MultisampleState` to indicate that the render pipeline is going to be used in a "implicit multi-sampled" render pass.
+ - Adds `wgpu::DawnRenderPassSampleCount` as chained struct for `wgpu::RenderPassDescriptor` to specify number of samples to be rendered for the respective single-sampled attachment.
 
 Example Usage:
 ```
-// Create texture with TextureBinding usage.
+// Create texture with RenderAttachment usage.
 wgpu::TextureDescriptor desc = ...;
-desc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
+desc.sampleCount = 1;
+desc.usage = wgpu::TextureUsage::RenderAttachment;
 
 auto texture = device.CreateTexture(&desc);
 
@@ -19,25 +19,21 @@ wgpu::RenderPipelineDescriptor pipelineDesc = ...;
 auto pipeline = device.CreateRenderPipeline(&pipelineDesc);
 
 // Create a render pass with "implicit multi-sampled" enabled.
-wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled colorAttachmentRenderToSingleSampledDesc;
-colorAttachmentRenderToSingleSampledDesc.implicitSampleCount = 4;
+wgpu::DawnRenderPassSampleCount renderPassSampleCount;
+renderPassSampleCount.sampleCount = 4;
 
 wgpu::RenderPassDescriptor renderPassDesc = ...;
 renderPassDesc.colorAttachments[0].view = texture.CreateView();
-renderPassDesc.colorAttachments[0].nextInChain
-  = &colorAttachmentRenderToSingleSampledDesc;
+renderPassDesc.nextInChain = &renderPassSampleCount;
 
 auto renderPassEncoder = encoder.BeginRenderPass(&renderPassDesc);
 
 renderPassEncoder.SetPipeline(pipeline);
 renderPassEncoder.Draw(3);
 renderPassEncoder.End();
-
 ```
 
 Notes:
- - If a texture needs to be used as an attachment in a "implicit multi-sampled" render pass, it must have `wgpu::TextureUsage::TextureBinding` usage.
- - If a texture is attached to a "implicit multi-sampled" render pass. It must be single-sampled. It mustn't be assigned to the `resolveTarget` field of the the render pass' color attachment.
- - Depth stencil textures can be attached to a "implicit multi-sampled" render pass. But its sample count must match the number specified in one color attachment's `wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled`'s `implicitSampleCount` field.
- - Currently only one color attachment is supported, this could be changed in future.
- - The texture is not supported if it is not resolvable by WebGPU standard. This means this feature currently doesn't work with integer textures.
+ - To trigger MSRTSS load or store behavior, a single-sampled color attachment must be attached to a render pass with an explicit sample count given by the `wgpu::DawnRenderPassSampleCount` chained struct. The `resolveTarget` field of the the color attachment must be `nullptr`.
+ - Traditional multi-sampled color or depth/stencil attachments can be mixed with the MSRTSS color attachments. They must have the match the `sampleCount` specified by the `wgpu::DawnRenderPassSampleCount` chained struct and color attachments may have a `resolveTarget` as usual.
+ - If a texture is not resolvable by WebGPU standard it cannot be used as an MSRTSS color attachment. This means this feature currently doesn't work with integer textures.

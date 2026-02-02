@@ -1473,6 +1473,17 @@ MaybeError InternalTexture::Initialize(VkImageUsageFlags extraUsages) {
         createInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
     }
 
+    // If the MSAARenderToSingleSampled feature is enabled, textures with RenderAttachment
+    // usage need to have VK_IMAGE_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT set
+    // so that they can be used as a render target with an implicit sample count. syoussefi@
+    // has confirmed that this is expected to be very cheap or no cost on hardware that
+    // supports the extension.
+    if (device->HasFeature(Feature::MSAARenderToSingleSampled) &&
+        (GetInternalUsage() & wgpu::TextureUsage::RenderAttachment) && GetSampleCount() == 1 &&
+        !GetFormat().HasDepthOrStencil()) {
+        createInfo.flags |= VK_IMAGE_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT;
+    }
+
     // Add the view format list only when the usage does not have storage. Otherwise, the VVL will
     // say creation of the texture is invalid.
     // See https://github.com/gpuweb/gpuweb/issues/4426.

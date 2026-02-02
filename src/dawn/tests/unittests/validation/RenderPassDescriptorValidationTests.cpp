@@ -1314,16 +1314,16 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, DepthStencilAttachmentSam
     }
 }
 
-// Creating a render pass with DawnRenderPassColorAttachmentRenderToSingleSampled chained struct
-// without MSAARenderToSingleSampled feature enabled should result in error.
+// Creating a render pass with DawnRenderPassSampleCount chained struct without
+// MSAARenderToSingleSampled feature enabled should result in error.
 TEST_F(MultisampledRenderPassDescriptorValidationTest,
        CreateMSAARenderToSingleSampledRenderPassWithoutFeatureEnabled) {
     wgpu::TextureView colorTextureView = CreateNonMultisampledColorTextureView();
 
-    wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled renderToSingleSampledDesc;
-    renderToSingleSampledDesc.implicitSampleCount = 4;
+    wgpu::DawnRenderPassSampleCount renderPassSampleCount;
+    renderPassSampleCount.sampleCount = 4;
     utils::ComboRenderPassDescriptor renderPass({colorTextureView});
-    renderPass.cColorAttachments[0].nextInChain = &renderToSingleSampledDesc;
+    renderPass.nextInChain = &renderPassSampleCount;
 
     AssertBeginRenderPassError(&renderPass, testing::HasSubstr("feature is not enabled"));
 }
@@ -1823,7 +1823,7 @@ class MSAARenderToSingleSampledRenderPassDescriptorValidationTest
     void SetUp() override {
         MultisampledRenderPassDescriptorValidationTest::SetUp();
 
-        mRenderToSingleSampledDesc.implicitSampleCount = kSampleCount;
+        mRenderPassSampleCount.sampleCount = kSampleCount;
     }
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
@@ -1834,24 +1834,23 @@ class MSAARenderToSingleSampledRenderPassDescriptorValidationTest
         wgpu::TextureView colorAttachment,
         wgpu::TextureView depthStencilAttachment = nullptr) {
         utils::ComboRenderPassDescriptor renderPass({colorAttachment}, depthStencilAttachment);
-        renderPass.cColorAttachments[0].nextInChain = &mRenderToSingleSampledDesc;
+        renderPass.nextInChain = &mRenderPassSampleCount;
 
         return renderPass;
     }
 
     // Create a view for a texture that can be used with a MSAA render to single sampled render
     // pass.
-    wgpu::TextureView CreateCompatibleColorTextureView() {
+    wgpu::TextureView CreateCompatibleColorTextureView(uint32_t sampleCount = 1) {
         wgpu::Texture colorTexture = CreateTexture(
             device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers,
-            kLevelCount, /*sampleCount=*/1,
-            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding);
+            kLevelCount, sampleCount, wgpu::TextureUsage::RenderAttachment);
 
         return colorTexture.CreateView();
     }
 
   private:
-    wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled mRenderToSingleSampledDesc;
+    wgpu::DawnRenderPassSampleCount mRenderPassSampleCount;
 };
 
 // Test that using a valid color attachment with enabled MSAARenderToSingleSampled doesn't raise any
@@ -1862,18 +1861,6 @@ TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest, ColorAttachm
 
     auto renderPass = CreateMultisampledRenderToSingleSampledRenderPass(textureView);
     AssertBeginRenderPassSuccess(&renderPass);
-}
-
-// When MSAARenderToSingleSampled is enabled for a color attachment, it must be created with
-// TextureBinding usage.
-TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest, ColorAttachmentInvalidUsage) {
-    // Create a texture with sample count = 1.
-    auto texture =
-        CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers,
-                      kLevelCount, /*sampleCount=*/1, wgpu::TextureUsage::RenderAttachment);
-
-    auto renderPass = CreateMultisampledRenderToSingleSampledRenderPass(texture.CreateView());
-    AssertBeginRenderPassError(&renderPass, testing::HasSubstr("usage"));
 }
 
 // When MSAARenderToSingleSampled is enabled for a color attachment, there must be no explicit
@@ -1888,37 +1875,99 @@ TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest, ErrorSetting
     AssertBeginRenderPassError(&renderPass, testing::HasSubstr("as a resolve target"));
 }
 
-// Using unsupported implicit sample count in DawnRenderPassColorAttachmentRenderToSingleSampled
-// chained struct should result in error.
+// Using unsupported implicit sample count in DawnRenderPassSampleCount chained struct should result
+// in error.
 TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest, UnsupportedSampleCountError) {
     // Create a texture with sample count = 1.
     auto textureView = CreateCompatibleColorTextureView();
 
     // Create a render pass with implicit sample count = 3. Which is not supported.
-    wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled renderToSingleSampledDesc;
-    renderToSingleSampledDesc.implicitSampleCount = 3;
+    wgpu::DawnRenderPassSampleCount renderPassSampleCount;
+    renderPassSampleCount.sampleCount = 3;
     utils::ComboRenderPassDescriptor renderPass({textureView});
-    renderPass.cColorAttachments[0].nextInChain = &renderToSingleSampledDesc;
+    renderPass.nextInChain = &renderPassSampleCount;
 
     AssertBeginRenderPassError(&renderPass,
-                               testing::HasSubstr("implicit sample count (3) is not supported"));
+                               testing::HasSubstr("sample count (3) is not supported"));
 
     // Create a render pass with implicit sample count = 1. Which is also not supported.
-    renderToSingleSampledDesc.implicitSampleCount = 1;
-    renderPass.cColorAttachments[0].nextInChain = &renderToSingleSampledDesc;
+    renderPassSampleCount.sampleCount = 1;
+    renderPass.nextInChain = &renderPassSampleCount;
 
     AssertBeginRenderPassError(&renderPass,
-                               testing::HasSubstr("implicit sample count (1) is not supported"));
+                               testing::HasSubstr("sample count (1) is not supported"));
 }
 
-// When MSAARenderToSingleSampled is enabled in a color attachment, there should be an error if a
+// When MSAARenderToSingleSampled it only applies to attachments with a sample count of 1.
+// Attachments can also have a sample count matching the MSAARenderToSingleSampled sample count.
+TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest, MixedSampleCounts) {
+    auto textureView1 = CreateCompatibleColorTextureView(1);
+    auto textureView2 = CreateCompatibleColorTextureView(4);
+    auto resolveTextureView = CreateCompatibleColorTextureView(1);
+
+    // Render passes may contain a mix of both attachments matching the pass sample count and 1
+    {
+        wgpu::DawnRenderPassSampleCount renderPassSampleCount;
+        renderPassSampleCount.sampleCount = 4;
+        utils::ComboRenderPassDescriptor renderPass({textureView1, textureView2});
+        renderPass.nextInChain = &renderPassSampleCount;
+
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Order does not matter
+    {
+        wgpu::DawnRenderPassSampleCount renderPassSampleCount;
+        renderPassSampleCount.sampleCount = 4;
+        utils::ComboRenderPassDescriptor renderPass({textureView2, textureView1});
+        renderPass.nextInChain = &renderPassSampleCount;
+
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Single-sample attachments (still) cannot have resolve targets
+    {
+        wgpu::DawnRenderPassSampleCount renderPassSampleCount;
+        renderPassSampleCount.sampleCount = 4;
+        utils::ComboRenderPassDescriptor renderPass({textureView1, textureView2});
+        renderPass.cColorAttachments[0].resolveTarget = resolveTextureView;
+        renderPass.nextInChain = &renderPassSampleCount;
+
+        AssertBeginRenderPassError(&renderPass, testing::HasSubstr("has a sample count of 1"));
+    }
+
+    // Multisample attachments can have resolve targets as usual
+    {
+        wgpu::DawnRenderPassSampleCount renderPassSampleCount;
+        renderPassSampleCount.sampleCount = 4;
+        utils::ComboRenderPassDescriptor renderPass({textureView1, textureView2});
+        renderPass.cColorAttachments[1].resolveTarget = resolveTextureView;
+        renderPass.nextInChain = &renderPassSampleCount;
+
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Render passes may contain only sample counts matching the pass sample count.
+    // (MSRTSS will not be triggered in this case.)
+    {
+        auto textureView3 = CreateCompatibleColorTextureView(4);
+
+        wgpu::DawnRenderPassSampleCount renderPassSampleCount;
+        renderPassSampleCount.sampleCount = 4;
+        utils::ComboRenderPassDescriptor renderPass({textureView2, textureView3});
+        renderPass.nextInChain = &renderPassSampleCount;
+
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+}
+
+// When MSAARenderToSingleSampled is enabled in a render pass, there should be an error if a
 // color attachment's format doesn't support resolve. Example, RGBA8Sint format.
 TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest, UnresolvableColorFormatError) {
     // Create a texture with sample count = 1.
-    auto texture =
-        CreateTexture(device, wgpu::TextureDimension::e2D, wgpu::TextureFormat::RGBA8Sint, kSize,
-                      kSize, kArrayLayers, kLevelCount, /*sampleCount=*/1,
-                      wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding);
+    auto texture = CreateTexture(
+        device, wgpu::TextureDimension::e2D, wgpu::TextureFormat::RGBA8Sint, kSize, kSize,
+        kArrayLayers, kLevelCount, /*sampleCount=*/1, wgpu::TextureUsage::RenderAttachment);
 
     auto renderPass = CreateMultisampledRenderToSingleSampledRenderPass(texture.CreateView());
     AssertBeginRenderPassError(&renderPass, testing::HasSubstr("does not support resolve"));
@@ -1939,6 +1988,17 @@ TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest, DepthStencil
         colorTextureView, depthStencilTexture.CreateView());
 
     AssertBeginRenderPassSuccess(&renderPass);
+
+    // Create depth stencil texture with sample count = 1.
+    depthStencilTexture =
+        CreateTexture(device, wgpu::TextureDimension::e2D, wgpu::TextureFormat::Depth24PlusStencil8,
+                      kSize, kSize, 1, 1, /*sampleCount=*/1, wgpu::TextureUsage::RenderAttachment);
+
+    renderPass = CreateMultisampledRenderToSingleSampledRenderPass(
+        colorTextureView, depthStencilTexture.CreateView());
+
+    AssertBeginRenderPassError(
+        &renderPass, testing::HasSubstr("does not match the render pass explicit sample count"));
 }
 
 // Using depth stencil attachment with sample count not matching the implicit sample count will
@@ -1957,7 +2017,8 @@ TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest,
     auto renderPass = CreateMultisampledRenderToSingleSampledRenderPass(
         colorTextureView, depthStencilTexture.CreateView());
 
-    AssertBeginRenderPassError(&renderPass, testing::HasSubstr("does not match the sample count"));
+    AssertBeginRenderPassError(
+        &renderPass, testing::HasSubstr("does not match the render pass explicit sample count"));
 }
 
 class DawnLoadResolveTextureValidationTest : public MultisampledRenderPassDescriptorValidationTest {

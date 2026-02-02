@@ -642,6 +642,12 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         featuresChain.Add(&usedKnobs.dynamicRenderingFeatures);
     }
 
+    if (HasFeature(Feature::MSAARenderToSingleSampled)) {
+        usedKnobs.multisampledRenderToSingleSampledFeatures =
+            mDeviceInfo.multisampledRenderToSingleSampledFeatures;
+        featuresChain.Add(&usedKnobs.multisampledRenderToSingleSampledFeatures);
+    }
+
     // Find a universal queue family
     {
         // Note that GRAPHICS and COMPUTE imply TRANSFER so we don't need to check for it.

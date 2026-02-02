@@ -151,6 +151,7 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::Robustness2, "VK_EXT_robustness2"},
     {DeviceExt::DisplayTiming, "VK_GOOGLE_display_timing"},
     {DeviceExt::CooperativeMatrix, "VK_KHR_cooperative_matrix"},
+    {DeviceExt::MultisampledRenderToSingleSampled, "VK_EXT_multisampled_render_to_single_sampled"},
 
     {DeviceExt::ExternalMemoryAndroidHardwareBuffer,
      "VK_ANDROID_external_memory_android_hardware_buffer"},
@@ -254,6 +255,11 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
 
             case DeviceExt::DisplayTiming:
                 hasDependencies = HasDep(DeviceExt::Swapchain);
+                break;
+
+            case DeviceExt::MultisampledRenderToSingleSampled:
+                hasDependencies =
+                    HasDep(DeviceExt::CreateRenderPass2) && HasDep(DeviceExt::DepthStencilResolve);
                 break;
 
             case DeviceExt::Spirv14:

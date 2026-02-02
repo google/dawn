@@ -183,6 +183,7 @@ struct BeginRenderPassCmd {
     uint32_t height;
     // Used for partial resolve
     ResolveRect resolveRect;
+    bool msaaRenderToSingleSampled = false;
 
     Ref<QuerySetBase> occlusionQuerySet;
     TimestampWrites timestampWrites;

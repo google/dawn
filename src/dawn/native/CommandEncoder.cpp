@@ -125,16 +125,42 @@ class RenderPassValidationState final : public NonMovable {
 
         const std::string_view attachmentTypeStr = GetAttachmentTypeStr(attachmentType);
 
-        std::string_view implicitPrefixStr;
-        // Not need to validate the implicit sample count for the depth stencil attachment.
-        if (mImplicitSampleCount > 1 && attachmentType != AttachmentType::DepthStencilAttachment) {
-            DAWN_INVALID_IF(attachment->GetTexture()->GetSampleCount() != 1,
-                            "The %s %s sample count (%u) is not 1 when it has implicit "
-                            "sample count (%u).",
+        // Validate attachment sample count.
+        if (mMsrtssAllowed) {
+            switch (attachmentType) {
+                case AttachmentType::ColorAttachment:
+                    // Color attachments must match either the implicit sample count or 1
+                    DAWN_INVALID_IF(
+                        attachment->GetTexture()->GetSampleCount() != 1 &&
+                            attachment->GetTexture()->GetSampleCount() != mSampleCount,
+                        "The %s %s sample count (%u) is not 1 or %u when the render pass "
+                        "has an explicit sample count (%u).",
+                        attachmentTypeStr, attachment, attachment->GetTexture()->GetSampleCount(),
+                        mSampleCount, mSampleCount);
+                    break;
+                case AttachmentType::DepthStencilAttachment:
+                    // Depth/stencil attachments must match the implicit sample count
+                    DAWN_INVALID_IF(attachment->GetTexture()->GetSampleCount() != mSampleCount,
+                                    "The %s %s sample count (%u) does not match the render pass "
+                                    "explicit sample count (%u).",
+                                    attachmentTypeStr, attachment,
+                                    attachment->GetTexture()->GetSampleCount(), mSampleCount);
+                    break;
+                case AttachmentType::ResolveTarget:
+                    // Resolve target sample counts are already validated to be 1 elsewhere.
+                    break;
+                case AttachmentType::StorageAttachment:
+                    // PLS is not currently compatible with MSRTSS.
+                    DAWN_UNREACHABLE();
+            }
+        } else if (HasAttachment()) {
+            // If no explicit sample count is set, all attachment sample counts must match.
+            DAWN_INVALID_IF(attachmentType != AttachmentType::ResolveTarget &&
+                                attachment->GetTexture()->GetSampleCount() != mSampleCount,
+                            "The %s %s sample count (%u) does not match the sample count of the "
+                            "other attachments (%u).",
                             attachmentTypeStr, attachment,
-                            attachment->GetTexture()->GetSampleCount(), mImplicitSampleCount);
-
-            implicitPrefixStr = "implicit ";
+                            attachment->GetTexture()->GetSampleCount(), mSampleCount);
         }
 
         Extent3D renderSize = attachment->GetSingleSubresourceVirtualSize();
@@ -239,22 +265,15 @@ class RenderPassValidationState final : public NonMovable {
                     break;
                 }
             }
-
-            // Skip the sampleCount validation for resolve target
-            DAWN_INVALID_IF(attachmentType != AttachmentType::ResolveTarget &&
-                                attachment->GetTexture()->GetSampleCount() != mSampleCount,
-                            "The %s %s %ssample count (%u) does not match the sample count of the "
-                            "other attachments (%u).",
-                            attachmentTypeStr, attachment, implicitPrefixStr,
-                            attachment->GetTexture()->GetSampleCount(), mSampleCount);
         } else {
             DAWN_ASSERT(attachmentType != AttachmentType::ResolveTarget);
             mRenderWidth = renderSize.width;
             mRenderHeight = renderSize.height;
             mAttachmentValidationWidth = attachmentValidationSize.width;
             mAttachmentValidationHeight = attachmentValidationSize.height;
-            mSampleCount = mImplicitSampleCount > 1 ? mImplicitSampleCount
-                                                    : attachment->GetTexture()->GetSampleCount();
+            if (!mMsrtssAllowed) {
+                mSampleCount = attachment->GetTexture()->GetSampleCount();
+            }
             DAWN_ASSERT(mRenderWidth != 0);
             DAWN_ASSERT(mRenderHeight != 0);
             DAWN_ASSERT(mAttachmentValidationWidth != 0);
@@ -298,7 +317,9 @@ class RenderPassValidationState final : public NonMovable {
         mRenderHeight = renderSize.height;
         mAttachmentValidationWidth = mRenderWidth;
         mAttachmentValidationHeight = mRenderHeight;
-        mSampleCount = attachment->GetTexture()->GetSampleCount();
+        if (!mMsrtssAllowed) {
+            mSampleCount = attachment->GetTexture()->GetSampleCount();
+        }
 
         DAWN_ASSERT(mRenderWidth != 0);
         DAWN_ASSERT(mRenderHeight != 0);
@@ -313,8 +334,7 @@ class RenderPassValidationState final : public NonMovable {
     bool HasAttachment() const { return !mRecords.empty(); }
 
     bool IsValidState() const {
-        return ((mRenderWidth > 0) && (mRenderHeight > 0) && (mSampleCount > 0) &&
-                (mImplicitSampleCount == 0 || mImplicitSampleCount == mSampleCount));
+        return ((mRenderWidth > 0) && (mRenderHeight > 0) && (mSampleCount > 0));
     }
 
     uint32_t GetRenderWidth() const { return mRenderWidth; }
@@ -323,10 +343,11 @@ class RenderPassValidationState final : public NonMovable {
 
     uint32_t GetSampleCount() const { return mSampleCount; }
 
-    uint32_t GetImplicitSampleCount() const { return mImplicitSampleCount; }
+    uint32_t IsMsrtssAllowed() const { return mMsrtssAllowed; }
 
-    void SetImplicitSampleCount(uint32_t implicitSampleCount) {
-        mImplicitSampleCount = implicitSampleCount;
+    void SetExplicitSampleCount(uint32_t sampleCount) {
+        mSampleCount = sampleCount;
+        mMsrtssAllowed = true;
     }
 
     bool WillExpandResolveTexture() const { return mWillExpandResolveTexture; }
@@ -343,8 +364,7 @@ class RenderPassValidationState final : public NonMovable {
     uint32_t mRenderWidth = 0;
     uint32_t mRenderHeight = 0;
     uint32_t mSampleCount = 0;
-    // The implicit multisample count used by MSAA render to single sampled.
-    uint32_t mImplicitSampleCount = 0;
+    bool mMsrtssAllowed = false;
 
     uint32_t mAttachmentValidationWidth = 0;
     uint32_t mAttachmentValidationHeight = 0;
@@ -529,6 +549,60 @@ MaybeError ValidateColorAttachmentDepthSlice(const TextureViewBase* attachment,
     return {};
 }
 
+MaybeError ValidateDawnRenderPassSampleCount(
+    const DeviceBase* device,
+    const DawnRenderPassSampleCount* renderPassSampleCount) {
+    DAWN_ASSERT(renderPassSampleCount != nullptr);
+
+    DAWN_INVALID_IF(
+        !device->HasFeature(Feature::MSAARenderToSingleSampled),
+        "The render pass has an explicit sample count while the %s feature is not enabled.",
+        ToAPI(Feature::MSAARenderToSingleSampled));
+
+    DAWN_INVALID_IF(!IsValidSampleCount(renderPassSampleCount->sampleCount) ||
+                        renderPassSampleCount->sampleCount <= 1,
+                    "The render pass sample count (%u) is not supported.",
+                    renderPassSampleCount->sampleCount);
+
+    return {};
+}
+
+MaybeError ValidateColorAttachmentRenderToSingleSampled(
+    const DeviceBase* device,
+    const RenderPassColorAttachment& colorAttachment,
+    const DawnRenderPassSampleCount* renderPassSampleCount) {
+    DAWN_ASSERT(renderPassSampleCount != nullptr);
+    DAWN_ASSERT(device->HasFeature(Feature::MSAARenderToSingleSampled));
+
+    uint32_t passSampleCount = renderPassSampleCount->sampleCount;
+    uint32_t attachmentSampleCount = colorAttachment.view->GetTexture()->GetSampleCount();
+    DAWN_INVALID_IF(attachmentSampleCount != 1 && attachmentSampleCount != passSampleCount,
+                    "The color attachment %s sample count (%u) must be either 1 or %u when the "
+                    "render pass is using MSAARenderToSingleSampled with a sample count of %u.",
+                    colorAttachment.view, attachmentSampleCount, passSampleCount, passSampleCount);
+
+    if (attachmentSampleCount != 1) {
+        // The following rules only apply to attachments that will actually be resolved.
+        return {};
+    }
+
+    DAWN_INVALID_IF(!colorAttachment.view->GetFormat().SupportsResolveTarget(),
+                    "The color attachment %s format (%s) does not support being used with a render "
+                    "pass using MSAARenderToSingleSampled with a sample count of %u. The format "
+                    "does not support resolve.",
+                    colorAttachment.view, colorAttachment.view->GetFormat().format,
+                    passSampleCount);
+
+    DAWN_INVALID_IF(colorAttachment.resolveTarget != nullptr,
+                    "Cannot set %s as a resolve target. No resolve target should be specified "
+                    "for the color attachment %s when the render pass is using "
+                    "MSAARenderToSingleSampled with a sample count of %u.",
+                    colorAttachment.resolveTarget, colorAttachment.view, passSampleCount);
+
+    return {};
+}
+
+// TODO(crbug.com/463893793): Remove once the deprecated attachment-based MSRTSS path is disabled.
 MaybeError ValidateColorAttachmentRenderToSingleSampled(
     const DeviceBase* device,
     const RenderPassColorAttachment& colorAttachment,
@@ -544,12 +618,6 @@ MaybeError ValidateColorAttachmentRenderToSingleSampled(
                         msaaRenderToSingleSampledDesc->implicitSampleCount <= 1,
                     "The color attachment %s's implicit sample count (%u) is not supported.",
                     colorAttachment.view, msaaRenderToSingleSampledDesc->implicitSampleCount);
-
-    DAWN_INVALID_IF(!colorAttachment.view->GetTexture()->IsImplicitMSAARenderTextureViewSupported(),
-                    "Color attachment %s was not created with %s usage, which is required for "
-                    "having implicit sample count (%u).",
-                    colorAttachment.view, wgpu::TextureUsage::TextureBinding,
-                    msaaRenderToSingleSampledDesc->implicitSampleCount);
 
     DAWN_INVALID_IF(!colorAttachment.view->GetFormat().SupportsResolveTarget(),
                     "The color attachment %s format (%s) does not support being used with "
@@ -616,12 +684,13 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
     UnpackedPtr<RenderPassColorAttachment> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(&colorAttachment));
 
+    // TODO(crbug.com/463893793): Remove once the attachment-based MSRTSS path is disabled.
     const auto* msaaRenderToSingleSampledDesc =
         unpacked.Get<DawnRenderPassColorAttachmentRenderToSingleSampled>();
     if (msaaRenderToSingleSampledDesc) {
         DAWN_TRY(ValidateColorAttachmentRenderToSingleSampled(device, colorAttachment,
                                                               msaaRenderToSingleSampledDesc));
-        validationState->SetImplicitSampleCount(msaaRenderToSingleSampledDesc->implicitSampleCount);
+        validationState->SetExplicitSampleCount(msaaRenderToSingleSampledDesc->implicitSampleCount);
         // Note: we don't need to check whether the implicit sample count of different attachments
         // are the same. That already is done by indirectly comparing the sample count in
         // ValidateOrSetColorAttachmentSampleCount.
@@ -671,19 +740,15 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
     DAWN_TRY(validationState->AddAttachment(attachment, AttachmentType::ColorAttachment,
                                             colorAttachment.depthSlice));
 
-    if (validationState->GetImplicitSampleCount() <= 1) {
-        // This step is skipped if implicitSampleCount > 1, because in that case, there shoudn't be
-        // any explicit resolveTarget specified.
-        DAWN_TRY(ValidateResolveTarget(device, colorAttachment, usageValidationMode));
+    DAWN_TRY(ValidateResolveTarget(device, colorAttachment, usageValidationMode));
 
-        if (colorAttachment.loadOp == wgpu::LoadOp::ExpandResolveTexture) {
-            DAWN_TRY(ValidateExpandResolveTextureLoadOp(device, colorAttachment, validationState));
-        }
-        // Add resolve target after adding color attachment to make sure there is already a color
-        // attachment for the comparation of with and height.
-        DAWN_TRY(validationState->AddAttachment(colorAttachment.resolveTarget,
-                                                AttachmentType::ResolveTarget));
+    if (colorAttachment.loadOp == wgpu::LoadOp::ExpandResolveTexture) {
+        DAWN_TRY(ValidateExpandResolveTextureLoadOp(device, colorAttachment, validationState));
     }
+    // Add resolve target after adding color attachment to make sure there is already a color
+    // attachment for the comparison of width and height.
+    DAWN_TRY(validationState->AddAttachment(colorAttachment.resolveTarget,
+                                            AttachmentType::ResolveTarget));
 
     return {};
 }
@@ -872,10 +937,20 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
         validationState->SetExpandResolveRect(*expandResolveRect);
     }
 
+    const auto* renderPassSampleCount = descriptor.Get<DawnRenderPassSampleCount>();
+    if (renderPassSampleCount) {
+        DAWN_TRY(ValidateDawnRenderPassSampleCount(device, renderPassSampleCount));
+        validationState->SetExplicitSampleCount(renderPassSampleCount->sampleCount);
+    }
+
     for (auto [i, attachment] : Enumerate(colorAttachments)) {
         DAWN_TRY_CONTEXT(ValidateRenderPassColorAttachment(device, attachment, usageValidationMode,
                                                            validationState),
                          "validating colorAttachments[%u].", i);
+        if (renderPassSampleCount) {
+            DAWN_TRY(ValidateColorAttachmentRenderToSingleSampled(device, attachment,
+                                                                  renderPassSampleCount));
+        }
         if (attachment.view) {
             colorAttachmentFormats.push_back(&attachment.view->GetFormat());
         }
@@ -912,13 +987,7 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
 
     DAWN_INVALID_IF(!validationState->HasAttachment(), "Render pass has no attachments.");
 
-    if (validationState->GetImplicitSampleCount() > 1) {
-        // TODO(dawn:1710): support multiple attachments.
-        DAWN_INVALID_IF(
-            descriptor->colorAttachmentCount != 1,
-            "colorAttachmentCount (%u) is not supported when the render pass has implicit sample "
-            "count (%u). (Currently) colorAttachmentCount = 1 is supported.",
-            descriptor->colorAttachmentCount, validationState->GetImplicitSampleCount());
+    if (validationState->IsMsrtssAllowed()) {
         // TODO(dawn:1704): Consider supporting MSAARenderToSingleSampled + PLS
         DAWN_INVALID_IF(
             pls != nullptr,
@@ -1441,6 +1510,10 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                 if (resolveTarget != nullptr) {
                     usageTracker.TextureViewUsedAs(resolveTarget,
                                                    wgpu::TextureUsage::RenderAttachment);
+                } else if (colorTarget->GetTexture()->GetSampleCount() == 1 &&
+                           attachmentState->GetSampleCount() > 1) {
+                    // Detect if multisample render to single-sampled is in use
+                    cmd->msaaRenderToSingleSampled = true;
                 }
             }
 

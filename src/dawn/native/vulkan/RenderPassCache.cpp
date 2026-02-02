@@ -153,7 +153,8 @@ void InitializePassInfo(Device* device, const RenderPassCacheQuery& query, InfoT
 
         attachmentDesc.flags = 0;
         attachmentDesc.format = VulkanImageFormat(device, query.colorFormats[i]);
-        attachmentDesc.samples = vkSampleCount;
+        attachmentDesc.samples =
+            query.renderToSingleSampleMask[i] ? VK_SAMPLE_COUNT_1_BIT : vkSampleCount;
         attachmentDesc.loadOp = VulkanAttachmentLoadOp(query.colorLoadOp[i]);
         attachmentDesc.storeOp = VulkanAttachmentStoreOp(query.colorStoreOp[i]);
         attachmentDesc.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -275,7 +276,6 @@ void InitializePassInfo(Device* device, const RenderPassCacheQuery& query, InfoT
     subpassDesc.pInputAttachments = nullptr;
     subpassDesc.colorAttachmentCount = static_cast<uint8_t>(highestColorAttachmentIndexPlusOne);
     subpassDesc.pColorAttachments = passInfo.colorAttachmentRefs.data();
-    subpassCount++;
 
     // Qualcomm GPUs have a driver bug on some devices where passing a zero-length array to the
     // resolveAttachments causes a VK_ERROR_OUT_OF_HOST_MEMORY. nullptr must be passed instead.
@@ -289,6 +289,7 @@ void InitializePassInfo(Device* device, const RenderPassCacheQuery& query, InfoT
         query.hasDepthStencil ? &passInfo.depthStencilAttachmentRef : nullptr;
     subpassDesc.preserveAttachmentCount = 0;
     subpassDesc.pPreserveAttachments = nullptr;
+    subpassCount++;
 
     // Chain everything in VkRenderPassCreateInfo
     passInfo.createInfo.flags = 0;
@@ -307,13 +308,15 @@ void RenderPassCacheQuery::SetColor(ColorAttachmentIndex index,
                                     wgpu::TextureFormat format,
                                     wgpu::LoadOp loadOp,
                                     wgpu::StoreOp storeOp,
-                                    bool hasResolveTarget) {
+                                    bool hasResolveTarget,
+                                    bool renderToSingleSampled) {
     colorMask.set(index);
     colorFormats[index] = format;
     colorLoadOp[index] = loadOp;
     colorStoreOp[index] = storeOp;
     resolveTargetMask[index] = hasResolveTarget;
     expandResolveMask.set(index, loadOp == wgpu::LoadOp::ExpandResolveTexture);
+    renderToSingleSampleMask[index] = renderToSingleSampled;
 }
 
 void RenderPassCacheQuery::SetDepthStencil(wgpu::TextureFormat format,
@@ -370,16 +373,46 @@ ResultOrError<RenderPassCache::RenderPassInfo> RenderPassCache::CreateRenderPass
         RenderPassCreateInfo2 passInfo2;
         InitializePassInfo(mDevice, query, passInfo2);
 
-        // Create the render pass from the zillion parameters
         RenderPassInfo renderPassInfo;
         renderPassInfo.mainSubpass = passInfo2.createInfo.subpassCount - 1;
         renderPassInfo.uniqueId = nextRenderPassId++;
+
+        VkMultisampledRenderToSingleSampledInfoEXT msrtss = {};
+        VkSubpassDescriptionDepthStencilResolveKHR depthStencilResolve = {};
+
+        if (query.renderToSingleSampleMask.any()) {
+            VkSubpassDescription2& subpass = passInfo2.subpassDescs[renderPassInfo.mainSubpass];
+            PNextChainBuilder subpassChain(&subpass);
+
+            msrtss.multisampledRenderToSingleSampledEnable = VK_TRUE;
+            msrtss.rasterizationSamples = VulkanSampleCount(query.sampleCount);
+
+            subpassChain.Add(&msrtss,
+                             VK_STRUCTURE_TYPE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_INFO_EXT);
+
+            if (subpass.pDepthStencilAttachment != nullptr) {
+                // VUID-VkSubpassDescription2-pNext-06871: If MSRTSS is used and the depth/stencil
+                // attachment is not null a depth/stencil resolve description must be chained to the
+                // subpass.
+                depthStencilResolve.depthResolveMode = VK_RESOLVE_MODE_SAMPLE_ZERO_BIT;
+                depthStencilResolve.stencilResolveMode = VK_RESOLVE_MODE_SAMPLE_ZERO_BIT;
+                depthStencilResolve.pDepthStencilResolveAttachment = nullptr;
+
+                subpassChain.Add(&depthStencilResolve,
+                                 VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE_KHR);
+            }
+        }
+
+        // Create the render pass from the zillion parameters
         DAWN_TRY(CheckVkSuccess(
             mDevice->fn.CreateRenderPass2KHR(mDevice->GetVkDevice(), &passInfo2.createInfo, nullptr,
                                              &*renderPassInfo.renderPass),
             "CreateRenderPass2KHR"));
         return renderPassInfo;
     }
+
+    // MSAA Render To Single Sampled should not be enabled unless CreateRenderPass2 is also enabled.
+    DAWN_ASSERT(!query.renderToSingleSampleMask.any());
 
     RenderPassCreateInfo passInfo;
     InitializePassInfo(mDevice, query, passInfo);
@@ -407,7 +440,7 @@ size_t RenderPassCache::CacheFuncs::operator()(const RenderPassCacheQuery& query
     for (auto i : query.colorMask) {
         HashCombine(&hash, query.colorFormats[i], query.colorLoadOp[i], query.colorStoreOp[i]);
     }
-    HashCombine(&hash, query.expandResolveMask);
+    HashCombine(&hash, query.expandResolveMask, query.renderToSingleSampleMask);
 
     HashCombine(&hash, query.hasDepthStencil);
     if (query.hasDepthStencil) {
@@ -442,6 +475,10 @@ bool RenderPassCache::CacheFuncs::operator()(const RenderPassCacheQuery& a,
     }
 
     if (a.expandResolveMask != b.expandResolveMask) {
+        return false;
+    }
+
+    if (a.renderToSingleSampleMask != b.renderToSingleSampleMask) {
         return false;
     }
 

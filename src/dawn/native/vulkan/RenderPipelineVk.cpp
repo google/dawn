@@ -629,8 +629,12 @@ MaybeError RenderPipeline::InitializeImpl() {
                 // an appropriate query.
                 colorLoadOp = wgpu::LoadOp::ExpandResolveTexture;
             }
+            // This bool should match the value used in the final RenderPass, but we don't have the
+            // appropriate MSRTSS values exposed here. Issue can be safely ignored, though.
+            // See comments on skipped message VUID-vkCmdDraw-renderPass-02684 in BackendVk.cpp.
+            bool renderToSingleSample = false;
             query.SetColor(i, GetColorAttachmentFormat(i), colorLoadOp, wgpu::StoreOp::Store,
-                           hasResolveTarget);
+                           hasResolveTarget, renderToSingleSample);
         }
 
         if (HasDepthStencilAttachment()) {

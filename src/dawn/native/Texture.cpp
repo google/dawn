@@ -1505,10 +1505,6 @@ TextureViewBase* TextureBase::APICreateErrorView(const TextureViewDescriptor* de
     return ReturnToAPI(CreateErrorView(descriptor));
 }
 
-bool TextureBase::IsImplicitMSAARenderTextureViewSupported() const {
-    return GetUsage() & wgpu::TextureUsage::TextureBinding;
-}
-
 void TextureBase::SetSharedResourceMemoryContentsForTesting(
     Ref<SharedResourceMemoryContents> contents) {
     mSharedResourceMemoryContents = std::move(contents);
