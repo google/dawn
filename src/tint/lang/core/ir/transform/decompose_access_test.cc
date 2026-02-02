@@ -1662,6 +1662,53 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU32_LoadBool) {
+    auto* var = b.Var("v", workgroup, ty.bool_());
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(var));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, bool, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:bool = load %v
+    %a:bool = let %3
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 1>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    %4:u32 = load %3
+    %5:bool = convert %4
+    %a:bool = let %5
+    ret
+  }
+}
+)";
+
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_LoadU32) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
@@ -1738,6 +1785,83 @@ $B1: {  # root
 
     capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_LoadBool) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u16()},
+                                                    {mod.symbols.New("b"), ty.bool_()},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)
+                              ->Result()));
+        b.Let("b",
+              b.Load(b.Access(ty.ptr(workgroup, ty.bool_(), core::Access::kReadWrite), var, 1_u)
+                         ->Result()));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(4) {
+  a:u16 @offset(0)
+  b:bool @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    %4:u16 = load %3
+    %a:u16 = let %4
+    %6:ptr<workgroup, bool, read_write> = access %v, 1u
+    %7:bool = load %6
+    %b:bool = let %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(4) {
+  a:u16 @offset(0)
+  b:bool @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    %4:u16 = load %3
+    %a:u16 = let %4
+    %6:ptr<workgroup, u16, read_write> = access %v, 2u
+    %7:u16 = load %6
+    %8:ptr<workgroup, u16, read_write> = access %v, 3u
+    %9:u16 = load %8
+    %10:vec2<u16> = construct %7, %9
+    %11:u32 = bitcast %10
+    %12:bool = convert %11
+    %b:bool = let %12
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -2256,6 +2380,277 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_LoadVec2b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u16()},
+                                                    {mod.symbols.New("b"), ty.vec2(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)
+                              ->Result()));
+        b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec2(ty.bool_()), core::Access::kReadWrite),
+                                   var, 1_u)
+                              ->Result()));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(8) {
+  a:u16 @offset(0)
+  b:vec2<bool> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    %4:u16 = load %3
+    %a:u16 = let %4
+    %6:ptr<workgroup, vec2<bool>, read_write> = access %v, 1u
+    %7:vec2<bool> = load %6
+    %b:vec2<bool> = let %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(8) {
+  a:u16 @offset(0)
+  b:vec2<bool> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 8>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    %4:u16 = load %3
+    %a:u16 = let %4
+    %6:ptr<workgroup, u16, read_write> = access %v, 4u
+    %7:u16 = load %6
+    %8:ptr<workgroup, u16, read_write> = access %v, 5u
+    %9:u16 = load %8
+    %10:ptr<workgroup, u16, read_write> = access %v, 6u
+    %11:u16 = load %10
+    %12:ptr<workgroup, u16, read_write> = access %v, 7u
+    %13:u16 = load %12
+    %14:vec2<u16> = construct %7, %9
+    %15:u32 = bitcast %14
+    %16:vec2<u16> = construct %11, %13
+    %17:u32 = bitcast %16
+    %18:vec2<u32> = construct %15, %17
+    %19:vec2<bool> = convert %18
+    %b:vec2<bool> = let %19
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_LoadVec3b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u16()},
+                                                    {mod.symbols.New("b"), ty.vec3(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)
+                              ->Result()));
+        b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec3(ty.bool_()), core::Access::kReadWrite),
+                                   var, 1_u)
+                              ->Result()));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  a:u16 @offset(0)
+  b:vec3<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    %4:u16 = load %3
+    %a:u16 = let %4
+    %6:ptr<workgroup, vec3<bool>, read_write> = access %v, 1u
+    %7:vec3<bool> = load %6
+    %b:vec3<bool> = let %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:u16 @offset(0)
+  b:vec3<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 16>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    %4:u16 = load %3
+    %a:u16 = let %4
+    %6:ptr<workgroup, u16, read_write> = access %v, 8u
+    %7:u16 = load %6
+    %8:ptr<workgroup, u16, read_write> = access %v, 9u
+    %9:u16 = load %8
+    %10:ptr<workgroup, u16, read_write> = access %v, 10u
+    %11:u16 = load %10
+    %12:ptr<workgroup, u16, read_write> = access %v, 11u
+    %13:u16 = load %12
+    %14:ptr<workgroup, u16, read_write> = access %v, 12u
+    %15:u16 = load %14
+    %16:ptr<workgroup, u16, read_write> = access %v, 13u
+    %17:u16 = load %16
+    %18:vec2<u16> = construct %7, %9
+    %19:u32 = bitcast %18
+    %20:vec2<u16> = construct %11, %13
+    %21:u32 = bitcast %20
+    %22:vec2<u16> = construct %15, %17
+    %23:u32 = bitcast %22
+    %24:vec3<u32> = construct %19, %21, %23
+    %25:vec3<u32> = swizzle %24, xyz
+    %26:vec3<bool> = convert %25
+    %b:vec3<bool> = let %26
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_LoadVec4b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u16()},
+                                                    {mod.symbols.New("b"), ty.vec4(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u)
+                              ->Result()));
+        b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec4(ty.bool_()), core::Access::kReadWrite),
+                                   var, 1_u)
+                              ->Result()));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  a:u16 @offset(0)
+  b:vec4<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    %4:u16 = load %3
+    %a:u16 = let %4
+    %6:ptr<workgroup, vec4<bool>, read_write> = access %v, 1u
+    %7:vec4<bool> = load %6
+    %b:vec4<bool> = let %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:u16 @offset(0)
+  b:vec4<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 16>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    %4:u16 = load %3
+    %a:u16 = let %4
+    %6:ptr<workgroup, u16, read_write> = access %v, 8u
+    %7:u16 = load %6
+    %8:ptr<workgroup, u16, read_write> = access %v, 9u
+    %9:u16 = load %8
+    %10:ptr<workgroup, u16, read_write> = access %v, 10u
+    %11:u16 = load %10
+    %12:ptr<workgroup, u16, read_write> = access %v, 11u
+    %13:u16 = load %12
+    %14:ptr<workgroup, u16, read_write> = access %v, 12u
+    %15:u16 = load %14
+    %16:ptr<workgroup, u16, read_write> = access %v, 13u
+    %17:u16 = load %16
+    %18:ptr<workgroup, u16, read_write> = access %v, 14u
+    %19:u16 = load %18
+    %20:ptr<workgroup, u16, read_write> = access %v, 15u
+    %21:u16 = load %20
+    %22:vec2<u16> = construct %7, %9
+    %23:u32 = bitcast %22
+    %24:vec2<u16> = construct %11, %13
+    %25:u32 = bitcast %24
+    %26:vec2<u16> = construct %15, %17
+    %27:u32 = bitcast %26
+    %28:vec2<u16> = construct %19, %21
+    %29:u32 = bitcast %28
+    %30:vec4<u32> = construct %23, %25, %27, %29
+    %31:vec4<bool> = convert %30
+    %b:vec4<bool> = let %31
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_LoadVec2u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u32()},
@@ -2494,6 +2889,241 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU32_LoadVec2b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u32()},
+                                                    {mod.symbols.New("b"), ty.vec2(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u)
+                              ->Result()));
+        b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec2(ty.bool_()), core::Access::kReadWrite),
+                                   var, 1_u)
+                              ->Result()));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(8) {
+  a:u32 @offset(0)
+  b:vec2<bool> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    %4:u32 = load %3
+    %a:u32 = let %4
+    %6:ptr<workgroup, vec2<bool>, read_write> = access %v, 1u
+    %7:vec2<bool> = load %6
+    %b:vec2<bool> = let %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(8) {
+  a:u32 @offset(0)
+  b:vec2<bool> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    %4:u32 = load %3
+    %a:u32 = let %4
+    %6:ptr<workgroup, u32, read_write> = access %v, 2u
+    %7:u32 = load %6
+    %8:ptr<workgroup, u32, read_write> = access %v, 3u
+    %9:u32 = load %8
+    %10:vec2<u32> = construct %7, %9
+    %11:vec2<bool> = convert %10
+    %b:vec2<bool> = let %11
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU32_LoadVec3b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u32()},
+                                                    {mod.symbols.New("b"), ty.vec3(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u)
+                              ->Result()));
+        b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec3(ty.bool_()), core::Access::kReadWrite),
+                                   var, 1_u)
+                              ->Result()));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  a:u32 @offset(0)
+  b:vec3<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    %4:u32 = load %3
+    %a:u32 = let %4
+    %6:ptr<workgroup, vec3<bool>, read_write> = access %v, 1u
+    %7:vec3<bool> = load %6
+    %b:vec3<bool> = let %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:u32 @offset(0)
+  b:vec3<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 8>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    %4:u32 = load %3
+    %a:u32 = let %4
+    %6:ptr<workgroup, u32, read_write> = access %v, 4u
+    %7:u32 = load %6
+    %8:ptr<workgroup, u32, read_write> = access %v, 5u
+    %9:u32 = load %8
+    %10:ptr<workgroup, u32, read_write> = access %v, 6u
+    %11:u32 = load %10
+    %12:vec3<u32> = construct %7, %9, %11
+    %13:vec3<u32> = swizzle %12, xyz
+    %14:vec3<bool> = convert %13
+    %b:vec3<bool> = let %14
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU32_LoadVec4b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u32()},
+                                                    {mod.symbols.New("b"), ty.vec4(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u)
+                              ->Result()));
+        b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec4(ty.bool_()), core::Access::kReadWrite),
+                                   var, 1_u)
+                              ->Result()));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  a:u32 @offset(0)
+  b:vec4<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    %4:u32 = load %3
+    %a:u32 = let %4
+    %6:ptr<workgroup, vec4<bool>, read_write> = access %v, 1u
+    %7:vec4<bool> = load %6
+    %b:vec4<bool> = let %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:u32 @offset(0)
+  b:vec4<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 8>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    %4:u32 = load %3
+    %a:u32 = let %4
+    %6:ptr<workgroup, u32, read_write> = access %v, 4u
+    %7:u32 = load %6
+    %8:ptr<workgroup, u32, read_write> = access %v, 5u
+    %9:u32 = load %8
+    %10:ptr<workgroup, u32, read_write> = access %v, 6u
+    %11:u32 = load %10
+    %12:ptr<workgroup, u32, read_write> = access %v, 7u
+    %13:u32 = load %12
+    %14:vec4<u32> = construct %7, %9, %11, %13
+    %15:vec4<bool> = convert %14
+    %b:vec4<bool> = let %15
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_DecomposeAccessTest, Storage_AccessVec2u_LoadVec2u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.vec2u()},
@@ -2719,6 +3349,241 @@ $B1: {  # root
 
     capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessVec2u_LoadVec2b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.vec2u()},
+                                                    {mod.symbols.New("b"), ty.vec2(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(workgroup, ty.vec2u(), core::Access::kReadWrite), var, 0_u)
+                         ->Result()));
+        b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec2(ty.bool_()), core::Access::kReadWrite),
+                                   var, 1_u)
+                              ->Result()));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(8) {
+  a:vec2<u32> @offset(0)
+  b:vec2<bool> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, vec2<u32>, read_write> = access %v, 0u
+    %4:vec2<u32> = load %3
+    %a:vec2<u32> = let %4
+    %6:ptr<workgroup, vec2<bool>, read_write> = access %v, 1u
+    %7:vec2<bool> = load %6
+    %b:vec2<bool> = let %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(8) {
+  a:vec2<u32> @offset(0)
+  b:vec2<bool> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<vec2<u32>, 2>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, vec2<u32>, read_write> = access %v, 0u
+    %4:vec2<u32> = load %3
+    %a:vec2<u32> = let %4
+    %6:ptr<workgroup, vec2<u32>, read_write> = access %v, 1u
+    %7:vec2<u32> = load %6
+    %8:vec2<bool> = convert %7
+    %b:vec2<bool> = let %8
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessVec2u_LoadVec3b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.vec2u()},
+                                                    {mod.symbols.New("b"), ty.vec3(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(workgroup, ty.vec2u(), core::Access::kReadWrite), var, 0_u)
+                         ->Result()));
+        b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec3(ty.bool_()), core::Access::kReadWrite),
+                                   var, 1_u)
+                              ->Result()));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  a:vec2<u32> @offset(0)
+  b:vec3<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, vec2<u32>, read_write> = access %v, 0u
+    %4:vec2<u32> = load %3
+    %a:vec2<u32> = let %4
+    %6:ptr<workgroup, vec3<bool>, read_write> = access %v, 1u
+    %7:vec3<bool> = load %6
+    %b:vec3<bool> = let %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    // The base type of the variable drops to u32 here since 2 vec2u is too large.
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:vec2<u32> @offset(0)
+  b:vec3<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 8>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    %4:u32 = load %3
+    %5:ptr<workgroup, u32, read_write> = access %v, 1u
+    %6:u32 = load %5
+    %7:vec2<u32> = construct %4, %6
+    %a:vec2<u32> = let %7
+    %9:ptr<workgroup, u32, read_write> = access %v, 4u
+    %10:u32 = load %9
+    %11:ptr<workgroup, u32, read_write> = access %v, 5u
+    %12:u32 = load %11
+    %13:ptr<workgroup, u32, read_write> = access %v, 6u
+    %14:u32 = load %13
+    %15:vec3<u32> = construct %10, %12, %14
+    %16:vec3<u32> = swizzle %15, xyz
+    %17:vec3<bool> = convert %16
+    %b:vec3<bool> = let %17
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessVec2u_LoadVec4b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.vec2u()},
+                                                    {mod.symbols.New("b"), ty.vec4(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a",
+              b.Load(b.Access(ty.ptr(workgroup, ty.vec2u(), core::Access::kReadWrite), var, 0_u)
+                         ->Result()));
+        b.Let("b", b.Load(b.Access(ty.ptr(workgroup, ty.vec4(ty.bool_()), core::Access::kReadWrite),
+                                   var, 1_u)
+                              ->Result()));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  a:vec2<u32> @offset(0)
+  b:vec4<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, vec2<u32>, read_write> = access %v, 0u
+    %4:vec2<u32> = load %3
+    %a:vec2<u32> = let %4
+    %6:ptr<workgroup, vec4<bool>, read_write> = access %v, 1u
+    %7:vec4<bool> = load %6
+    %b:vec4<bool> = let %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:vec2<u32> @offset(0)
+  b:vec4<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<vec2<u32>, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, vec2<u32>, read_write> = access %v, 0u
+    %4:vec2<u32> = load %3
+    %a:vec2<u32> = let %4
+    %6:ptr<workgroup, vec2<u32>, read_write> = access %v, 2u
+    %7:vec2<u32> = load %6
+    %8:ptr<workgroup, vec2<u32>, read_write> = access %v, 3u
+    %9:vec2<u32> = load %8
+    %10:vec4<u32> = construct %7, %9
+    %11:vec4<bool> = convert %10
+    %b:vec4<bool> = let %11
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3124,6 +3989,52 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessVec4u_StoreVec4b) {
+    auto* var = b.Var("v", workgroup, ty.vec4(ty.bool_()), core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Store(var, b.Zero(ty.vec4(ty.bool_())));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, vec4<bool>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    store %v, vec4<bool>(false)
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, array<vec4<u32>, 1>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:vec4<u32> = convert vec4<bool>(false)
+    %4:ptr<workgroup, vec4<u32>, read_write> = access %v, 0u
+    store %4, %3
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_DecomposeAccessTest, Storage_AccessU16_StoreU32) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u16()},
@@ -3191,6 +4102,78 @@ $B1: {  # root
 
     capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_StoreBool) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u16()},
+                                                    {mod.symbols.New("b"), ty.bool_()},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u), u16(0));
+        b.Store(b.Access(ty.ptr(workgroup, ty.bool_(), core::Access::kReadWrite), var, 1_u),
+                b.Constant(false));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(4) {
+  a:u16 @offset(0)
+  b:bool @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    store %3, 0u16
+    %4:ptr<workgroup, bool, read_write> = access %v, 1u
+    store %4, false
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(4) {
+  a:u16 @offset(0)
+  b:bool @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    store %3, 0u16
+    %4:u32 = convert false
+    %5:vec2<u16> = bitcast %4
+    %6:ptr<workgroup, u16, read_write> = access %v, 2u
+    %7:u16 = access %5, 0u
+    store %6, %7
+    %8:ptr<workgroup, u16, read_write> = access %v, 3u
+    %9:u16 = access %5, 1u
+    store %8, %9
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }
@@ -3711,6 +4694,309 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_StoreVec2b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u16()},
+                                                    {mod.symbols.New("b"), ty.vec2(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u), u16(0));
+        b.Store(
+            b.Access(ty.ptr(workgroup, ty.vec2(ty.bool_()), core::Access::kReadWrite), var, 1_u),
+            b.Zero(ty.vec2(ty.bool_())));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(8) {
+  a:u16 @offset(0)
+  b:vec2<bool> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    store %3, 0u16
+    %4:ptr<workgroup, vec2<bool>, read_write> = access %v, 1u
+    store %4, vec2<bool>(false)
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(8) {
+  a:u16 @offset(0)
+  b:vec2<bool> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 8>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    store %3, 0u16
+    %4:bool = access vec2<bool>(false), 0u
+    %5:u32 = convert %4
+    %6:vec2<u16> = bitcast %5
+    %7:u16 = access %6, 0u
+    %8:ptr<workgroup, u16, read_write> = access %v, 4u
+    store %8, %7
+    %9:bool = access vec2<bool>(false), 0u
+    %10:u32 = convert %9
+    %11:vec2<u16> = bitcast %10
+    %12:u16 = access %11, 1u
+    %13:ptr<workgroup, u16, read_write> = access %v, 5u
+    store %13, %12
+    %14:bool = access vec2<bool>(false), 1u
+    %15:u32 = convert %14
+    %16:vec2<u16> = bitcast %15
+    %17:u16 = access %16, 0u
+    %18:ptr<workgroup, u16, read_write> = access %v, 6u
+    store %18, %17
+    %19:bool = access vec2<bool>(false), 1u
+    %20:u32 = convert %19
+    %21:vec2<u16> = bitcast %20
+    %22:u16 = access %21, 1u
+    %23:ptr<workgroup, u16, read_write> = access %v, 7u
+    store %23, %22
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_StoreVec3b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u16()},
+                                                    {mod.symbols.New("b"), ty.vec3(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u), u16(0));
+        b.Store(
+            b.Access(ty.ptr(workgroup, ty.vec3(ty.bool_()), core::Access::kReadWrite), var, 1_u),
+            b.Zero(ty.vec3(ty.bool_())));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  a:u16 @offset(0)
+  b:vec3<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    store %3, 0u16
+    %4:ptr<workgroup, vec3<bool>, read_write> = access %v, 1u
+    store %4, vec3<bool>(false)
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:u16 @offset(0)
+  b:vec3<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 16>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    store %3, 0u16
+    %4:bool = access vec3<bool>(false), 0u
+    %5:u32 = convert %4
+    %6:vec2<u16> = bitcast %5
+    %7:u16 = access %6, 0u
+    %8:ptr<workgroup, u16, read_write> = access %v, 8u
+    store %8, %7
+    %9:bool = access vec3<bool>(false), 0u
+    %10:u32 = convert %9
+    %11:vec2<u16> = bitcast %10
+    %12:u16 = access %11, 1u
+    %13:ptr<workgroup, u16, read_write> = access %v, 9u
+    store %13, %12
+    %14:bool = access vec3<bool>(false), 1u
+    %15:u32 = convert %14
+    %16:vec2<u16> = bitcast %15
+    %17:u16 = access %16, 0u
+    %18:ptr<workgroup, u16, read_write> = access %v, 10u
+    store %18, %17
+    %19:bool = access vec3<bool>(false), 1u
+    %20:u32 = convert %19
+    %21:vec2<u16> = bitcast %20
+    %22:u16 = access %21, 1u
+    %23:ptr<workgroup, u16, read_write> = access %v, 11u
+    store %23, %22
+    %24:bool = access vec3<bool>(false), 2u
+    %25:u32 = convert %24
+    %26:vec2<u16> = bitcast %25
+    %27:u16 = access %26, 0u
+    %28:ptr<workgroup, u16, read_write> = access %v, 12u
+    store %28, %27
+    %29:bool = access vec3<bool>(false), 2u
+    %30:u32 = convert %29
+    %31:vec2<u16> = bitcast %30
+    %32:u16 = access %31, 1u
+    %33:ptr<workgroup, u16, read_write> = access %v, 13u
+    store %33, %32
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU16_StoreVec4b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u16()},
+                                                    {mod.symbols.New("b"), ty.vec4(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr(workgroup, ty.u16(), core::Access::kReadWrite), var, 0_u), u16(0));
+        b.Store(
+            b.Access(ty.ptr(workgroup, ty.vec4(ty.bool_()), core::Access::kReadWrite), var, 1_u),
+            b.Zero(ty.vec4(ty.bool_())));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  a:u16 @offset(0)
+  b:vec4<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    store %3, 0u16
+    %4:ptr<workgroup, vec4<bool>, read_write> = access %v, 1u
+    store %4, vec4<bool>(false)
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:u16 @offset(0)
+  b:vec4<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u16, 16>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u16, read_write> = access %v, 0u
+    store %3, 0u16
+    %4:bool = access vec4<bool>(false), 0u
+    %5:u32 = convert %4
+    %6:vec2<u16> = bitcast %5
+    %7:u16 = access %6, 0u
+    %8:ptr<workgroup, u16, read_write> = access %v, 8u
+    store %8, %7
+    %9:bool = access vec4<bool>(false), 0u
+    %10:u32 = convert %9
+    %11:vec2<u16> = bitcast %10
+    %12:u16 = access %11, 1u
+    %13:ptr<workgroup, u16, read_write> = access %v, 9u
+    store %13, %12
+    %14:bool = access vec4<bool>(false), 1u
+    %15:u32 = convert %14
+    %16:vec2<u16> = bitcast %15
+    %17:u16 = access %16, 0u
+    %18:ptr<workgroup, u16, read_write> = access %v, 10u
+    store %18, %17
+    %19:bool = access vec4<bool>(false), 1u
+    %20:u32 = convert %19
+    %21:vec2<u16> = bitcast %20
+    %22:u16 = access %21, 1u
+    %23:ptr<workgroup, u16, read_write> = access %v, 11u
+    store %23, %22
+    %24:bool = access vec4<bool>(false), 2u
+    %25:u32 = convert %24
+    %26:vec2<u16> = bitcast %25
+    %27:u16 = access %26, 0u
+    %28:ptr<workgroup, u16, read_write> = access %v, 12u
+    store %28, %27
+    %29:bool = access vec4<bool>(false), 2u
+    %30:u32 = convert %29
+    %31:vec2<u16> = bitcast %30
+    %32:u16 = access %31, 1u
+    %33:ptr<workgroup, u16, read_write> = access %v, 13u
+    store %33, %32
+    %34:bool = access vec4<bool>(false), 3u
+    %35:u32 = convert %34
+    %36:vec2<u16> = bitcast %35
+    %37:u16 = access %36, 0u
+    %38:ptr<workgroup, u16, read_write> = access %v, 14u
+    store %38, %37
+    %39:bool = access vec4<bool>(false), 3u
+    %40:u32 = convert %39
+    %41:vec2<u16> = bitcast %40
+    %42:u16 = access %41, 1u
+    %43:ptr<workgroup, u16, read_write> = access %v, 15u
+    store %43, %42
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_DecomposeAccessTest, Storage_AccessU32_StoreVec2u) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.u32()},
@@ -3929,6 +5215,237 @@ $B1: {  # root
 
     capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU32_StoreVec2b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u32()},
+                                                    {mod.symbols.New("b"), ty.vec2(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u), u32(0));
+        b.Store(
+            b.Access(ty.ptr(workgroup, ty.vec2(ty.bool_()), core::Access::kReadWrite), var, 1_u),
+            b.Zero(ty.vec2(ty.bool_())));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(8) {
+  a:u32 @offset(0)
+  b:vec2<bool> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    store %3, 0u
+    %4:ptr<workgroup, vec2<bool>, read_write> = access %v, 1u
+    store %4, vec2<bool>(false)
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(8) {
+  a:u32 @offset(0)
+  b:vec2<bool> @offset(8)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    store %3, 0u
+    %4:bool = access vec2<bool>(false), 0u
+    %5:u32 = convert %4
+    %6:ptr<workgroup, u32, read_write> = access %v, 2u
+    store %6, %5
+    %7:bool = access vec2<bool>(false), 1u
+    %8:u32 = convert %7
+    %9:ptr<workgroup, u32, read_write> = access %v, 3u
+    store %9, %8
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU32_StoreVec3b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u32()},
+                                                    {mod.symbols.New("b"), ty.vec3(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u), u32(0));
+        b.Store(
+            b.Access(ty.ptr(workgroup, ty.vec3(ty.bool_()), core::Access::kReadWrite), var, 1_u),
+            b.Zero(ty.vec3(ty.bool_())));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  a:u32 @offset(0)
+  b:vec3<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    store %3, 0u
+    %4:ptr<workgroup, vec3<bool>, read_write> = access %v, 1u
+    store %4, vec3<bool>(false)
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:u32 @offset(0)
+  b:vec3<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 8>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    store %3, 0u
+    %4:bool = access vec3<bool>(false), 0u
+    %5:u32 = convert %4
+    %6:ptr<workgroup, u32, read_write> = access %v, 4u
+    store %6, %5
+    %7:bool = access vec3<bool>(false), 1u
+    %8:u32 = convert %7
+    %9:ptr<workgroup, u32, read_write> = access %v, 5u
+    store %9, %8
+    %10:bool = access vec3<bool>(false), 2u
+    %11:u32 = convert %10
+    %12:ptr<workgroup, u32, read_write> = access %v, 6u
+    store %12, %11
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DecomposeAccessTest, Workgroup_AccessU32_StoreVec4b) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.u32()},
+                                                    {mod.symbols.New("b"), ty.vec4(ty.bool_())},
+                                                });
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr(workgroup, ty.u32(), core::Access::kReadWrite), var, 0_u), u32(0));
+        b.Store(
+            b.Access(ty.ptr(workgroup, ty.vec4(ty.bool_()), core::Access::kReadWrite), var, 1_u),
+            b.Zero(ty.vec4(ty.bool_())));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  a:u32 @offset(0)
+  b:vec4<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    store %3, 0u
+    %4:ptr<workgroup, vec4<bool>, read_write> = access %v, 1u
+    store %4, vec4<bool>(false)
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:u32 @offset(0)
+  b:vec4<bool> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 8>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 0u
+    store %3, 0u
+    %4:bool = access vec4<bool>(false), 0u
+    %5:u32 = convert %4
+    %6:ptr<workgroup, u32, read_write> = access %v, 4u
+    store %6, %5
+    %7:bool = access vec4<bool>(false), 1u
+    %8:u32 = convert %7
+    %9:ptr<workgroup, u32, read_write> = access %v, 5u
+    store %9, %8
+    %10:bool = access vec4<bool>(false), 2u
+    %11:u32 = convert %10
+    %12:ptr<workgroup, u32, read_write> = access %v, 6u
+    store %12, %11
+    %13:bool = access vec4<bool>(false), 3u
+    %14:u32 = convert %13
+    %15:ptr<workgroup, u32, read_write> = access %v, 7u
+    store %15, %14
+    ret
+  }
+}
+)";
+
+    capabilities.Add(Capability::kAllow16BitIntegers);
+    DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
 }

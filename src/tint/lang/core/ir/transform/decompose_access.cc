@@ -94,9 +94,7 @@ struct State {
                        (var_ty->AddressSpace() == AddressSpace::kUniform && options.uniform) ||
                        (var_ty->AddressSpace() == AddressSpace::kWorkgroup && options.workgroup)) {
                 // Atomics could be handled in some backends, but not in a generic way.
-                // Bool is spec'd as same as u32 so that could also be handled.
-                // TODO(b/474819671): Should bool be supported? WebGPU issue 5338.
-                if (!ContainsAtomicOrBool(var_ty->StoreType())) {
+                if (!ContainsAtomic(var_ty->StoreType())) {
                     var_worklist.Push(var);
                 }
             }
@@ -203,15 +201,14 @@ struct State {
         Vector<core::ir::Value*, 4> byte_offset_expr{};
     };
 
-    bool ContainsAtomicOrBool(const type::Type* type) const {
+    bool ContainsAtomic(const type::Type* type) const {
         return tint::Switch(
             type,  //
-            [&](const type::Bool*) { return true; }, [&](const type::Atomic*) { return true; },
-            [&](const type::Vector* vec_ty) { return ContainsAtomicOrBool(vec_ty->Type()); },
-            [&](const type::Array* array_ty) { return ContainsAtomicOrBool(array_ty->ElemType()); },
+            [&](const type::Atomic*) { return true; },
+            [&](const type::Array* array_ty) { return ContainsAtomic(array_ty->ElemType()); },
             [&](const type::Struct* struct_ty) {
                 for (auto* member : struct_ty->Members()) {
-                    if (ContainsAtomicOrBool(member->Type())) {
+                    if (ContainsAtomic(member->Type())) {
                         return true;
                     }
                 }
@@ -526,11 +523,6 @@ struct State {
                                     core::ir::Var* var,
                                     const core::type::Type* result_ty,
                                     core::ir::Value* byte_idx) {
-        // TODO(b/474819671): Update if we support bool.
-        if (result_ty->IsFloatScalar() || result_ty->IsIntegerScalar()) {
-            return MakeScalarLoad(var, result_ty, byte_idx);
-        }
-
         return tint::Switch(
             result_ty,
             [&](const core::type::Struct* s) {
@@ -546,11 +538,13 @@ struct State {
                 return b.Call(fn, byte_idx);
             },
             [&](const core::type::Vector* v) { return MakeVectorLoad(var, v, byte_idx); },
+            [&](const core::type::Scalar* s) { return MakeScalarLoad(var, s, byte_idx); },
             TINT_ICE_ON_NO_MATCH);
     }
 
     // Returns a vector of `num_loads` load instructions of BaseEleType from `var` starting from
     // `start_idx`.
+    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
     Vector<Instruction*, 4> MakeNLoadInsts(Var* var, Value* start_idx, uint32_t num_loads) {
         Vector<Instruction*, 4> loads;
         auto* idx = start_idx;
@@ -570,6 +564,7 @@ struct State {
 
     // Returns a vector of `num_loads` load values of BaseEleType from `var` starting from
     // `start_idx`.
+    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
     Vector<Value*, 4> MakeNLoads(Var* var, Value* start_idx, uint32_t num_loads) {
         auto insts = MakeNLoadInsts(var, start_idx, num_loads);
         Vector<Value*, 4> vals;
@@ -578,6 +573,40 @@ struct State {
             vals.Push(inst->Result());
         }
         return vals;
+    }
+
+    // Returns a value that is appropriately bitcasted or converted as necessary.
+    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
+    core::ir::Value* BitcastOrConvertIfNeeded(const core::type::Type* result_ty,
+                                              core::ir::Value* from) {
+        Value* value = from;
+        if (result_ty->DeepestElement()->Is<type::Bool>()) {
+            auto* new_ty = ty.MatchWidth(ty.u32(), result_ty);
+            value = b.InsertBitcastIfNeeded(new_ty, from);
+            return b.Convert(result_ty, value)->Result();
+        }
+        if (from->Type()->DeepestElement()->Is<type::Bool>()) {
+            auto* new_ty = ty.MatchWidth(ty.u32(), from->Type());
+            value = b.Convert(new_ty, from)->Result();
+        }
+        return b.InsertBitcastIfNeeded(result_ty, value);
+    }
+
+    // Returns an instruction that is appropriately bitcasted or converted as necessary.
+    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
+    core::ir::Instruction* BitcastOrConvertIfNeeded(const core::type::Type* result_ty,
+                                                    core::ir::Instruction* from) {
+        Instruction* inst = from;
+        if (result_ty->DeepestElement()->Is<type::Bool>()) {
+            auto* new_ty = ty.MatchWidth(ty.u32(), result_ty);
+            inst = b.InsertBitcastIfNeeded(new_ty, from);
+            return b.Convert(result_ty, inst);
+        }
+        if (from->Result()->Type()->DeepestElement()->Is<type::Bool>()) {
+            auto* new_ty = ty.MatchWidth(ty.u32(), from->Result()->Type());
+            inst = b.Convert(new_ty, from);
+        }
+        return b.InsertBitcastIfNeeded(result_ty, inst);
     }
 
     core::ir::Instruction* MakeScalarLoad(core::ir::Var* var,
@@ -593,7 +622,7 @@ struct State {
             auto* vec_ty = ty.vec(BaseEleType(), num_array_eles);
             auto loads = MakeNLoads(var, array_idx, num_array_eles);
             auto* construct = b.Construct(vec_ty, loads);
-            return b.Bitcast(result_ty, construct);
+            return BitcastOrConvertIfNeeded(result_ty, construct);
         }
 
         auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
@@ -609,7 +638,7 @@ struct State {
         if (result_ty->Size() < load->Result()->Type()->Size()) {
             return ExtractScalar2Bytes(load, result_ty, byte_idx);
         }
-        return b.InsertBitcastIfNeeded(result_ty, load);
+        return BitcastOrConvertIfNeeded(result_ty, load);
     }
 
     // Currently this could only be f16, but in the future that will not be true.
@@ -737,7 +766,7 @@ struct State {
         } else {
             TINT_IR_UNREACHABLE(ir);
         }
-        return b.InsertBitcastIfNeeded(result_ty, load);
+        return BitcastOrConvertIfNeeded(result_ty, load);
     }
 
     // Returns the instruction for getting a vector-of-f16 value of type `result_ty`
@@ -1058,7 +1087,7 @@ struct State {
             TINT_IR_ASSERT(ir, num_array_eles == 2);
             TINT_IR_ASSERT(ir, BaseEleType()->Is<type::U16>());
             auto* vec_ty = ty.vec(BaseEleType(), num_array_eles);
-            auto* cast = b.Bitcast(vec_ty, from);
+            auto* cast = BitcastOrConvertIfNeeded(vec_ty, from);
             for (uint32_t i = 0; i < num_array_eles; i++) {
                 auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
                 b.Store(access, b.Access(BaseEleType(), cast, u32(i)));
@@ -1076,7 +1105,7 @@ struct State {
         // For stores, we know that the base type size must be less than or equal to the store size
         // (or we'd have picked a smaller base type). Above we eliminated the smaller size case.
         TINT_IR_ASSERT(ir, st_ty->Size() == BaseEleType()->Size());
-        auto* value = b.InsertBitcastIfNeeded(BaseEleType(), from);
+        Value* value = BitcastOrConvertIfNeeded(BaseEleType(), from);
         auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
         b.Store(access, value);
     }
@@ -1103,13 +1132,13 @@ struct State {
             // | vec2u     | vec2u, vec4u, vec4h (NOT vec3u) | 1 or 2      |
             // | vec4u     | vec4u                           | 1           |
             if (num_array_eles == 1) {
-                Value* value = b.InsertBitcastIfNeeded(BaseEleType(), from);
+                Value* value = BitcastOrConvertIfNeeded(BaseEleType(), from);
                 auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
                 b.Store(access, value);
             } else {
                 auto* sub_vec_ty = ty.vec2(st_ty->DeepestElement());
                 Instruction* first = b.Swizzle(sub_vec_ty, from, {0, 1});
-                first = b.InsertBitcastIfNeeded(sub_vec_ty, first);
+                first = BitcastOrConvertIfNeeded(BaseEleType(), first);
                 auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
                 b.Store(access, first);
 
@@ -1119,7 +1148,7 @@ struct State {
                     array_idx = b.Add(array_idx, 1_u)->Result();
                 }
                 Instruction* second = b.Swizzle(sub_vec_ty, from, {2, 3});
-                second = b.InsertBitcastIfNeeded(sub_vec_ty, second);
+                second = BitcastOrConvertIfNeeded(BaseEleType(), second);
                 access = b.Access(BaseEleTypePtr(), var, array_idx);
                 b.Store(access, second);
             }
@@ -1130,11 +1159,11 @@ struct State {
             for (uint32_t i = 0; i < num_array_eles; i++) {
                 Instruction* value = b.Access(st_ele_ty, from, u32(i / ratio));
                 if (ratio == 2) {
-                    value = b.Bitcast(ty.vec2(BaseEleType()), value);
+                    value = BitcastOrConvertIfNeeded(ty.vec2(BaseEleType()), value);
                     uint32_t sub_idx = i % 2;
                     value = b.Access(BaseEleType(), value, u32(sub_idx));
                 } else if (st_ele_ty != BaseEleType()) {
-                    value = b.Bitcast(BaseEleType(), value);
+                    value = BitcastOrConvertIfNeeded(BaseEleType(), value);
                 }
                 auto* access = b.Access(BaseEleTypePtr(), var, array_idx);
                 b.Store(access, value);
@@ -1154,12 +1183,6 @@ struct State {
                    core::ir::Var* var,
                    core::ir::Value* from,
                    core::ir::Value* byte_idx) {
-        // TODO(b/474819671): Update if we support bool.
-        if (from->Type()->IsFloatScalar() || from->Type()->IsIntegerScalar()) {
-            MakeScalarStore(var, from, byte_idx);
-            return;
-        }
-
         tint::Switch(
             from->Type(),  //
             [&](const type::Struct* s) {
@@ -1175,6 +1198,7 @@ struct State {
                 b.Call(fn, byte_idx, from);
             },
             [&](const type::Vector*) { MakeVectorStore(var, from, byte_idx); },
+            [&](const type::Scalar*) { MakeScalarStore(var, from, byte_idx); },
             TINT_ICE_ON_NO_MATCH);
     }
 
