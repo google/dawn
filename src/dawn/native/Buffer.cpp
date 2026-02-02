@@ -546,6 +546,8 @@ wgpu::BufferMapState BufferBase::APIGetMapState() const {
         case BufferState::InUse:
         case BufferState::SharedMemoryNoAccess:
             return wgpu::BufferMapState::Unmapped;
+        default:
+            DAWN_UNREACHABLE();
     }
 }
 

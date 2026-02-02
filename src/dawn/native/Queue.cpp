@@ -389,7 +389,7 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
     // Note that validating texture copy range ensures that writeSizePixel->width and
     // writeSizePixel->height are multiples of blockWidth and blockHeight respectively.
     BlockCount rowsPerImage = writeSize.height;
-    uint32_t bytesPerRow = blockInfo.ToBytes(writeSize.width);
+    uint32_t bytesPerRow = uint32_t(blockInfo.ToBytes(writeSize.width));
     uint32_t alignedBytesPerRow = Align(bytesPerRow, GetDevice()->GetOptimalBytesPerRowAlignment());
     BlockCount alignedBlocksPerRow = blockInfo.BytesToBlocks(alignedBytesPerRow);
 

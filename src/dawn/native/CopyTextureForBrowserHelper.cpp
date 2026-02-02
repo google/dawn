@@ -499,7 +499,7 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
         // Get gamma-linear conversion params from https://en.wikipedia.org/wiki/SRGB with some
         // mathematics. Order: {G, A, B, C, D, E, F, }
         uniformData.gammaDecodingForDstSrgbParams = {
-            2.4, 1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92, 4.045e-02, 0.0, 0.0};
+            2.4f, 1.0f / 1.055f, 0.055f / 1.055f, 1.0f / 12.92f, 4.045e-02f, 0.0f, 0.0f};
     }
 
     // Upload uniform data
@@ -563,8 +563,9 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
     // the copy from src texture to dst texture with transformation.
     passEncoder->APISetPipeline(pipeline);
     passEncoder->APISetBindGroup(0, bindGroup.Get());
-    passEncoder->APISetViewport(destination->origin.x, destination->origin.y, copySize->width,
-                                copySize->height, 0.0, 1.0);
+    passEncoder->APISetViewport(
+        static_cast<float>(destination->origin.x), static_cast<float>(destination->origin.y),
+        static_cast<float>(copySize->width), static_cast<float>(copySize->height), 0.0f, 1.0f);
     passEncoder->APIDraw(3);
     passEncoder->End();
 

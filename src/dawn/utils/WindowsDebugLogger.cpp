@@ -83,8 +83,8 @@ class WindowsDebugLogger : public PlatformDebugLogger {
                 std::array<HANDLE, 2> waitHandles = {shouldExit, dbWinDataReady.Get()};
                 while (true) {
                     SetEvent(dbWinBufferReady.Get());
-                    DWORD wait = WaitForMultipleObjects(waitHandles.size(), waitHandles.data(),
-                                                        FALSE, INFINITE);
+                    DWORD wait = WaitForMultipleObjects(DWORD(waitHandles.size()),
+                                                        waitHandles.data(), FALSE, INFINITE);
                     if (wait == WAIT_OBJECT_0) {
                         break;
                     }

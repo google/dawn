@@ -109,7 +109,7 @@ class UserImmediateConstantsTrackerBase {
     template <typename U>
     void UpdateImmediateConstants(size_t dataOffset, const U& data) {
         constexpr size_t dataSize = sizeof(U);
-        U* destData = mContent.template Get<U>(dataOffset);
+        U* destData = mContent.template Get<U>(uint32_t(dataOffset));
         if (memcmp(destData, &data, dataSize) != 0) {
             memcpy(destData, &data, dataSize);
             mDirty |= GetImmediateConstantBlockBits(dataOffset, dataSize);

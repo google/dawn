@@ -254,7 +254,7 @@ void RenderPassEncoder::APISetViewport(float x,
 
                 const CombinedLimits& limits = GetDevice()->GetLimits();
                 uint32_t maxViewportSize = limits.v1.maxTextureDimension2D;
-                float maxViewportBounds = maxViewportSize * 2.0;
+                float maxViewportBounds = maxViewportSize * 2.0f;
 
                 DAWN_INVALID_IF(
                     width < 0 || height < 0,

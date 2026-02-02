@@ -194,7 +194,7 @@ TimestampParams::TimestampParams(uint32_t first,
     // so we need to keep the multiplier under 2^16. At the same time, the larger the
     // multiplier, the better the precision, so we maximize the value of the right shift while
     // keeping the multiplier under 2 ^ 16
-    uint32_t upperLog2 = ceil(log2(period));
+    uint32_t upperLog2 = uint32_t(ceil(log2(period)));
 
     // Clamp the shift to 16 because we're doing computations in 16bit chunks. The
     // multiplication by the period will overflow the chunks, but timestamps are mostly

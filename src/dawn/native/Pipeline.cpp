@@ -82,7 +82,7 @@ uint32_t ComputeNumTextureSamplerCombinations(const dawn::native::EntryPointMeta
                                            return !sampledTextures.contains(nonSampledBindingPoint);
                                        });
     return numSamplerTexturePairs + numNonSampled + numSamplerExternalTexturePairs * 3 +
-           sampledExternalTextures.size();
+           uint32_t(sampledExternalTextures.size());
 }
 
 }  // namespace
@@ -90,7 +90,7 @@ uint32_t ComputeNumTextureSamplerCombinations(const dawn::native::EntryPointMeta
 ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* device,
                                                                 const ShaderModuleBase* module,
                                                                 StringView entryPointName,
-                                                                uint32_t constantCount,
+                                                                size_t constantCount,
                                                                 const ConstantEntry* constants,
                                                                 const PipelineLayoutBase* layout,
                                                                 SingleShaderStage stage) {

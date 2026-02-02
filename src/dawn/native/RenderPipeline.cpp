@@ -227,7 +227,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
         DAWN_TRY_CONTEXT(ValidateVertexBufferLayout(device, &descriptor->buffers[i], vertexMetadata,
                                                     &attributesSetMask),
                          "validating buffers[%u].", i);
-        totalAttributesNum += descriptor->buffers[i].attributeCount;
+        totalAttributesNum += uint32_t(descriptor->buffers[i].attributeCount);
     }
 
     if (device->IsCompatibilityMode() &&
@@ -953,7 +953,7 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
                    descriptor->label,
                    GetRenderStagesAndSetPlaceholderShader(device, *descriptor)),
       mAttachmentState(device->GetOrCreateAttachmentState(descriptor, GetLayout())) {
-    mVertexBufferCount = descriptor->vertex.bufferCount;
+    mVertexBufferCount = uint32_t(descriptor->vertex.bufferCount);
 
     auto buffers =
         ityp::SpanFromUntyped<VertexBufferSlot>(descriptor->vertex.buffers, mVertexBufferCount);

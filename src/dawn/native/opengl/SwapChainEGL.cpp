@@ -220,8 +220,8 @@ MaybeError SwapChainEGL::CreateEGLSurface(const DisplayEGL* display) {
 #endif  // DAWN_PLATFORM_IS(WIN32)
 #if defined(DAWN_USE_X11)
             case Surface::Type::XlibWindow:
-                mEGLSurface = egl.CreateWindowSurface(eglDisplay, config, surface->GetXWindow(),
-                                                      attribs.data());
+                mEGLSurface = egl.CreateWindowSurface(
+                    eglDisplay, config, uint32_t(surface->GetXWindow()), attribs.data());
                 return {};
 #endif  // defined(DAWN_USE_X11)
 

@@ -116,7 +116,7 @@ class Surface final : public ErrorMonad {
 
     // Valid to call if the type is WindowsXlib
     void* GetXDisplay() const;
-    uint32_t GetXWindow() const;
+    uint64_t GetXWindow() const;
 
     const std::string& GetLabel() const;
 
@@ -182,7 +182,7 @@ class Surface final : public ErrorMonad {
 
     // Xlib
     raw_ptr<void> mXDisplay = nullptr;
-    uint32_t mXWindow = 0;
+    uint64_t mXWindow = 0;
 };
 
 // Not defined in webgpu_absl_format.h/cpp because you can't forward-declare a nested type.

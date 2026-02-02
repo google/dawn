@@ -52,7 +52,7 @@ class RenderPipelineBase;
 ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* device,
                                                                 const ShaderModuleBase* module,
                                                                 StringView entryPointName,
-                                                                uint32_t constantCount,
+                                                                size_t constantCount,
                                                                 const ConstantEntry* constants,
                                                                 const PipelineLayoutBase* layout,
                                                                 SingleShaderStage stage);

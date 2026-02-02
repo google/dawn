@@ -455,7 +455,7 @@ void* Surface::GetXDisplay() const {
     DAWN_ASSERT(mType == Type::XlibWindow);
     return mXDisplay;
 }
-uint32_t Surface::GetXWindow() const {
+uint64_t Surface::GetXWindow() const {
     DAWN_ASSERT(!IsError());
     DAWN_ASSERT(mType == Type::XlibWindow);
     return mXWindow;

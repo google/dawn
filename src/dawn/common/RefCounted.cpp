@@ -82,7 +82,7 @@ bool RefCount::Increment() {
     // don't delete `this`.
     // See the explanation in the Boost documentation:
     //     https://www.boost.org/doc/libs/1_55_0/doc/html/atomic/usage_examples.html
-    uint32_t previousValue = mRefCount.fetch_add(kRefCountIncrement, std::memory_order_relaxed);
+    uint64_t previousValue = mRefCount.fetch_add(kRefCountIncrement, std::memory_order_relaxed);
 
     return (previousValue & ~kPayloadMask) == 0;
 }

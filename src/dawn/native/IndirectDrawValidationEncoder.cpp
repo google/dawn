@@ -516,7 +516,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
 
             Batch newBatch;
             newBatch.metadata = &batch;
-            newBatch.dataSize = GetBatchDataSize(batch.draws.size());
+            newBatch.dataSize = GetBatchDataSize(uint32_t(batch.draws.size()));
             newBatch.inputIndirectOffset = minOffsetAlignedDown;
             newBatch.inputIndirectSize =
                 batch.maxOffset + indirectDrawCommandSize - minOffsetAlignedDown;
@@ -670,7 +670,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
                     static_cast<uint32_t>((draw.numIndexBufferElements >> 32) & 0xFFFFFFFF);
 
                 // This is only used in the GL backend.
-                indirectDraw->indexOffsetAsNumElements = draw.indexBufferOffsetInElements;
+                indirectDraw->indexOffsetAsNumElements = uint32_t(draw.indexBufferOffsetInElements);
                 indirectDraw++;
 
                 draw.cmd->indirectBuffer = outputParamsBuffer.GetBuffer();

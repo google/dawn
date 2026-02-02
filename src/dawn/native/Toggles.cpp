@@ -820,13 +820,13 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
 
 void TogglesSet::Set(Toggle toggle, bool enabled) {
     DAWN_ASSERT(toggle != Toggle::InvalidEnum);
-    const size_t toggleIndex = static_cast<size_t>(toggle);
+    const uint32_t toggleIndex = uint32_t(toggle);
     bitset.set(toggleIndex, enabled);
 }
 
 bool TogglesSet::Has(Toggle toggle) const {
     DAWN_ASSERT(toggle != Toggle::InvalidEnum);
-    const size_t toggleIndex = static_cast<size_t>(toggle);
+    const uint32_t toggleIndex = uint32_t(toggle);
     return bitset.test(toggleIndex);
 }
 

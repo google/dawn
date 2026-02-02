@@ -499,11 +499,11 @@ void ComputePassEncoder::APISetImmediates(uint32_t offset, const void* data, siz
 
             SetImmediatesCmd* cmd = allocator->Allocate<SetImmediatesCmd>(Command::SetImmediates);
             cmd->offset = offset;
-            cmd->size = size;
+            cmd->size = uint32_t(size);
             uint8_t* immediateDatas = allocator->AllocateData<uint8_t>(cmd->size);
             memcpy(immediateDatas, data, size);
 
-            mCommandBufferState.SetImmediateData(offset, size);
+            mCommandBufferState.SetImmediateData(offset, uint32_t(size));
 
             return {};
         },

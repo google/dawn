@@ -145,7 +145,7 @@ tint::VertexPullingConfig BuildVertexPullingTransformConfig(
     const RenderPipelineBase& renderPipeline,
     BindGroupIndex pullingBufferBindingSet) {
     tint::VertexPullingConfig cfg;
-    cfg.pulling_group = static_cast<uint32_t>(pullingBufferBindingSet);
+    cfg.pulling_group = uint32_t(pullingBufferBindingSet);
 
     cfg.vertex_state.resize(renderPipeline.GetVertexBufferCount());
     for (VertexBufferSlot slot : renderPipeline.GetVertexBuffersUsed()) {
@@ -153,7 +153,7 @@ tint::VertexPullingConfig BuildVertexPullingTransformConfig(
         tint::VertexBufferLayoutDescriptor* tintInfo =
             &cfg.vertex_state[static_cast<uint8_t>(slot)];
 
-        tintInfo->array_stride = dawnInfo.arrayStride;
+        tintInfo->array_stride = uint32_t(dawnInfo.arrayStride);
         tintInfo->step_mode = ToTintVertexStepMode(dawnInfo.stepMode);
     }
 
@@ -161,8 +161,8 @@ tint::VertexPullingConfig BuildVertexPullingTransformConfig(
         const VertexAttributeInfo& dawnInfo = renderPipeline.GetAttribute(location);
         tint::VertexAttributeDescriptor tintInfo;
         tintInfo.format = ToTintVertexFormat(dawnInfo.format);
-        tintInfo.offset = dawnInfo.offset;
-        tintInfo.shader_location = static_cast<uint32_t>(static_cast<uint8_t>(location));
+        tintInfo.offset = uint32_t(dawnInfo.offset);
+        tintInfo.shader_location = uint32_t(static_cast<uint8_t>(location));
 
         uint8_t vertexBufferSlot = static_cast<uint8_t>(dawnInfo.vertexBufferSlot);
         cfg.vertex_state[vertexBufferSlot].attributes.push_back(tintInfo);

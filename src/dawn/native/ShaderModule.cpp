@@ -860,7 +860,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         // Vertex output (inter-stage variables) reflection.
         uint32_t clipDistancesSlots = 0;
         if (entryPoint.clip_distances_size.has_value()) {
-            clipDistancesSlots = RoundUp(*entryPoint.clip_distances_size, 4) / 4;
+            clipDistancesSlots = uint32_t(RoundUp(*entryPoint.clip_distances_size, 4) / 4);
         }
         uint32_t minInvalidLocation = maxInterStageShaderVariables - clipDistancesSlots;
         for (const auto& outputVar : entryPoint.output_variables) {
@@ -899,7 +899,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
         // Other vertex metadata.
         metadata->totalInterStageShaderVariables =
-            entryPoint.output_variables.size() + clipDistancesSlots;
+            uint32_t(entryPoint.output_variables.size()) + clipDistancesSlots;
         if (metadata->totalInterStageShaderVariables > maxInterStageShaderVariables) {
             size_t userDefinedOutputVariables = entryPoint.output_variables.size();
 
@@ -958,7 +958,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             }
         }
 
-        uint32_t totalInterStageShaderVariables = entryPoint.input_variables.size();
+        uint32_t totalInterStageShaderVariables = uint32_t(entryPoint.input_variables.size());
 
         // Other fragment metadata
         metadata->usesSampleMaskOutput = entryPoint.output_sample_mask_used;
@@ -1715,6 +1715,8 @@ MaybeError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo& s
                 return "i32";
             case tint::SubgroupMatrixType::kU32:
                 return "u32";
+            default:
+                DAWN_UNREACHABLE();
         }
     };
 
@@ -2110,7 +2112,7 @@ ShaderModuleParseRequest ShaderModuleBase::GenerateShaderModuleParseRequest(
             spirvOptionsDescriptor.allowNonUniformDerivatives = mAllowSpirvNonUniformDerivitives;
             spirvDescriptor.nextInChain = &spirvOptionsDescriptor;
 
-            spirvDescriptor.codeSize = mOriginalSpirv.size();
+            spirvDescriptor.codeSize = uint32_t(mOriginalSpirv.size());
             spirvDescriptor.code = mOriginalSpirv.data();
             descriptor.nextInChain = &spirvDescriptor;
             break;

@@ -713,6 +713,8 @@ wgpu::ComponentSwizzle ComposeSwizzleComponent(wgpu::TextureComponentSwizzle swi
             return swizzle.a;
         case wgpu::ComponentSwizzle::Undefined:
             return wgpu::ComponentSwizzle::Undefined;
+        default:
+            DAWN_UNREACHABLE();
     }
 }
 
