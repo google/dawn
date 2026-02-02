@@ -807,7 +807,7 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInArray) {
     // fn foo() {
     //   workgroupUniformLoad(&v);
     // }
-    GlobalVar("v", ty.array(ty.atomic<i32>(), 4_a), core::AddressSpace::kWorkgroup);
+    GlobalVar("v", ty.array(ty.atomic<i32>(), Expr(4_a)), core::AddressSpace::kWorkgroup);
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf(Source{{12, 34}}, "v"))));
 
     EXPECT_FALSE(r()->Resolve());
@@ -830,9 +830,10 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInStruct) {
     // fn foo() {
     //   workgroupUniformLoad(&v);
     // }
-    Structure("Inner", Vector{Member("a", ty.array(ty.atomic<i32>(), 4_a))});
+    Structure("Inner", Vector{Member("a", ty.array(ty.atomic<i32>(), Expr(4_a)))});
     Structure("S", Vector{Member("i", ty.AsType("Inner"))});
-    GlobalVar(Source{{12, 34}}, "v", ty.array(ty.AsType("S"), 4_a), core::AddressSpace::kWorkgroup);
+    GlobalVar(Source{{12, 34}}, "v", ty.array(ty.AsType("S"), Expr(4_a)),
+              core::AddressSpace::kWorkgroup);
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf("v"))));
 
     EXPECT_FALSE(r()->Resolve());

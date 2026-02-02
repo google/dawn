@@ -348,8 +348,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NestedStorageBufferLargeArray) {
     //  a : array<f32, 65536>,
     // }
     // var<storage> a : S;
-    Structure("S",
-              Vector{Member(Source{{12, 34}}, "a", ty.array(Source{{12, 20}}, ty.f32(), 65536_a))});
+    Structure("S", Vector{Member(Source{{12, 34}}, "a",
+                                 ty.array(Source{{12, 20}}, ty.f32(), Expr(65536_a)))});
     GlobalVar("a", ty.AsType(Source{{12, 30}}, "S"), core::AddressSpace::kStorage,
               Vector{Binding(0_u), Group(0_u)});
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -372,7 +372,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_PrivateVar) {
     // override size = 10i;
     // var<private> a : array<f32, size>;
     Override("size", Expr(10_i));
-    GlobalVar("a", ty.array(Source{{12, 34}}, ty.f32(), "size"), core::AddressSpace::kPrivate);
+    GlobalVar("a", ty.array(Source{{12, 34}}, ty.f32(), Expr("size")),
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
@@ -384,7 +385,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_InArray) {
     // override size = 10i;
     // var<workgroup> a : array<array<f32, size>, 4>;
     Override("size", Expr(10_i));
-    GlobalVar("a", ty.array(ty.array(Source{{12, 34}}, ty.f32(), "size"), 4_a),
+    GlobalVar("a", ty.array(ty.array(Source{{12, 34}}, ty.f32(), Expr("size")), 4u),
               core::AddressSpace::kWorkgroup);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -398,7 +399,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_InStruct) {
     //   a : array<f32, size>
     // };
     Override("size", Expr(10_i));
-    Structure("S", Vector{Member("a", ty.array(Source{{12, 34}}, ty.f32(), "size"))});
+    Structure("S", Vector{Member("a", ty.array(Source{{12, 34}}, ty.f32(), Expr("size")))});
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: 'array' with an 'override' element count can only be used as the store "
@@ -413,7 +414,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionVar_Explicit)
     Override("size", Expr(10_i));
     Func("f", tint::Empty, ty.void_(),
          Vector{
-             Decl(Var("a", ty.array(Source{{12, 34}}, ty.f32(), "size"))),
+             Decl(Var("a", ty.array(Source{{12, 34}}, ty.f32(), Expr("size")))),
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -429,10 +430,10 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionLet_Explicit)
     //   let l : array<f32, size> = a;
     // }
     Override("size", Expr(10_i));
-    GlobalVar("w", ty.array(ty.f32(), "size"), core::AddressSpace::kWorkgroup);
+    GlobalVar("w", ty.array(ty.f32(), Expr("size")), core::AddressSpace::kWorkgroup);
     Func("f", tint::Empty, ty.void_(),
          Vector{
-             Decl(Let(Source{{12, 34}}, "a", ty.array(ty.f32(), "size"), Expr("w"))),
+             Decl(Let(Source{{12, 34}}, "a", ty.array(ty.f32(), Expr("size")), Expr("w"))),
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -448,7 +449,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionVar_Implicit)
     //   var a = w;
     // }
     Override("size", Expr(10_i));
-    GlobalVar("w", ty.array(ty.f32(), "size"), core::AddressSpace::kWorkgroup);
+    GlobalVar("w", ty.array(ty.f32(), Expr("size")), core::AddressSpace::kWorkgroup);
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(Var(Source{{12, 34}}, "a", Expr(Source{{12, 34}}, "w"))),
@@ -467,7 +468,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionLet_Implicit)
     //   let a = w;
     // }
     Override("size", Expr(10_i));
-    GlobalVar("w", ty.array(ty.f32(), "size"), core::AddressSpace::kWorkgroup);
+    GlobalVar("w", ty.array(ty.f32(), Expr("size")), core::AddressSpace::kWorkgroup);
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(Let(Source{{12, 34}}, "a", Expr("w"))),
@@ -501,7 +502,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_Param) {
     // fn f(a : array<f32, size>) {
     // }
     Override("size", Expr(10_i));
-    Func("f", Vector{Param("a", ty.array(Source{{12, 34}}, ty.f32(), "size"))}, ty.void_(),
+    Func("f", Vector{Param("a", ty.array(Source{{12, 34}}, ty.f32(), Expr("size")))}, ty.void_(),
          tint::Empty);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -515,7 +516,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_PointerParam_Workgrou
     // fn f(a : ptr<workgroup, array<f32, size>>) {
     // }
     Override("size", Expr(10_i));
-    Func("f", Vector{Param("a", ty.ptr(workgroup, ty.array(Source{{12, 34}}, ty.f32(), "size")))},
+    Func("f",
+         Vector{Param("a", ty.ptr(workgroup, ty.array(Source{{12, 34}}, ty.f32(), Expr("size"))))},
          ty.void_(), tint::Empty);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -525,7 +527,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_PointerParam_Private)
     // fn f(a : ptr<private, array<f32, size>>) {
     // }
     Override("size", Expr(10_i));
-    Func("f", Vector{Param("a", ty.ptr(private_, ty.array(Source{{12, 34}}, ty.f32(), "size")))},
+    Func("f",
+         Vector{Param("a", ty.ptr(private_, ty.array(Source{{12, 34}}, ty.f32(), Expr("size"))))},
          ty.void_(), tint::Empty);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -539,7 +542,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_ReturnType) {
     // fn f() -> array<f32, size> {
     // }
     Override("size", Expr(10_i));
-    Func("f", tint::Empty, ty.array(Source{{12, 34}}, ty.f32(), "size"), tint::Empty);
+    Func("f", tint::Empty, ty.array(Source{{12, 34}}, ty.f32(), Expr("size")), tint::Empty);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: function return type must be a constructible type");
 }
@@ -903,7 +906,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
 
 TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
     auto tex_ty = ty.sampled_texture(Source{{12, 34}}, core::type::TextureDimension::k2d, ty.f32());
-    GlobalVar("arr", ty.array(tex_ty, 4_i), core::AddressSpace::kPrivate);
+    GlobalVar("arr", ty.array(tex_ty, Expr(4_i)), core::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

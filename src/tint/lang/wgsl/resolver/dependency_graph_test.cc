@@ -482,7 +482,7 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
         }
         case SymbolUseKind::GlobalVarArrayElemType: {
             auto node = b.ty.AsType(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.array(node, 4_i), core::AddressSpace::kPrivate);
+            b.GlobalVar(b.Sym(), b.ty.array(node, b.Expr(4_i)), core::AddressSpace::kPrivate);
             return node->identifier;
         }
         case SymbolUseKind::GlobalVarArraySizeValue: {
@@ -523,7 +523,7 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
         }
         case SymbolUseKind::GlobalConstArrayElemType: {
             auto node = b.ty.AsType(source, symbol);
-            b.GlobalConst(b.Sym(), b.ty.array(node, 4_i), b.Expr(1_i));
+            b.GlobalConst(b.Sym(), b.ty.array(node, b.Expr(4_i)), b.Expr(1_i));
             return node->identifier;
         }
         case SymbolUseKind::GlobalConstArraySizeValue: {

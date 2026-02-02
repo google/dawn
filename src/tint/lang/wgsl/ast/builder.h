@@ -963,6 +963,9 @@ class Builder {
             return mat<T>(COLUMNS, ROWS);
         }
 
+        /// @return an array of abstract type
+        ast::Type array() const;
+
         /// @param source the source
         /// @return an array of abstract type
         ast::Type array(const Source& source) const;
@@ -977,39 +980,58 @@ class Builder {
         ast::Type array(const Source& source, ast::Type subtype) const;
 
         /// @param subtype the array element type
-        /// @param n the array size. nullptr represents a runtime-array
+        /// @param n the array size.
         /// @return an array of size `n` of type `T`
-        template <typename COUNT, typename = DisableIfVectorLike<COUNT>>
-        ast::Type array(ast::Type subtype, COUNT&& n) const {
-            return array(builder->source_, subtype, std::forward<COUNT>(n));
-        }
+        ast::Type array(ast::Type subtype, uint32_t n) const;
+
+        /// @param subtype the array element type
+        /// @param expr the array size. nullptr means runtime array
+        /// @return an array of size `n` of type `T`
+        ast::Type array(ast::Type subtype, const ast::Const* expr) const;
+
+        /// @param subtype the array element type
+        /// @param expr the array size. nullptr means runtime array
+        /// @return an array of size `n` of type `T`
+        ast::Type array(ast::Type subtype, const ast::Expression* expr) const;
+
+        /// @param subtype the array element type
+        /// @param expr the array size. nullptr means runtime array
+        /// @return an array of size `n` of type `T`
+        ast::Type array(ast::Type subtype, const ast::Override* expr) const;
 
         /// @param source the Source of the node
         /// @param subtype the array element type
-        /// @param n the array size. nullptr represents a runtime-array
+        /// @param n the array size.
         /// @return an array of size `n` of type `T`
-        template <typename COUNT, typename = DisableIfVectorLike<COUNT>>
-        ast::Type array(const Source& source, ast::Type subtype, COUNT&& n) const {
-            return AsType(source, "array", subtype, std::forward<COUNT>(n));
-        }
+        ast::Type array(const Source& source, ast::Type subtype, uint32_t n) const;
+
+        /// @param source the Source of the node
+        /// @param subtype the array element type
+        /// @param expr the array size. nullptr means runtime array
+        /// @return an array of size `n` of type `T`
+        ast::Type array(const Source& source, ast::Type subtype, const ast::Const* expr) const;
+
+        /// @param source the Source of the node
+        /// @param subtype the array element type
+        /// @param expr the array size. nullptr means runtime array
+        /// @return an array of size `n` of type `T`
+        ast::Type array(const Source& source, ast::Type subtype, const ast::Expression* expr) const;
+
+        /// @param source the Source of the node
+        /// @param subtype the array element type
+        /// @param expr the array size. nullptr means runtime array
+        /// @return an array of size `n` of type `T`
+        ast::Type array(const Source& source, ast::Type subtype, const ast::Override* expr) const;
 
         /// @param source the Source of the node
         /// @return a inferred-size or runtime-sized array of type `T`
         template <typename T, int N = 0, typename = DisableIfInferOrAbstract<T>>
         ast::Type array(const Source& source) const {
             if constexpr (N == 0) {
-                return ast::Type{builder->Expr(
-                    builder->create<ast::TemplatedIdentifier>(source, builder->Sym("array"),
-                                                              Vector<const ast::Expression*, 1>{
-                                                                  Of<T>().expr,
-                                                              }))};
+                ast::Expression* expr = nullptr;
+                return array(source, Of<T>(), expr);
             } else {
-                return ast::Type{builder->Expr(builder->create<ast::TemplatedIdentifier>(
-                    source, builder->Sym("array"),
-                    Vector{
-                        Of<T>().expr,
-                        builder->Expr(builder->source_, core::u32(N)),
-                    }))};
+                return array(source, Of<T>(), uint32_t(N));
             }
         }
 
@@ -1018,9 +1040,9 @@ class Builder {
         ast::Type array() const {
             if constexpr (std::is_same_v<T, core::fluent_types::Infer>) {
                 static_assert(N == 0, "arrays with a count cannot be inferred");
-                return array(builder->source_);
+                return array();
             } else {
-                return array<T, N>(builder->source_);
+                return array(Of<T>(), uint32_t(N));
             }
         }
 

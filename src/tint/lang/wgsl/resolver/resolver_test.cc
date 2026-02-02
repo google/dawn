@@ -1329,7 +1329,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
     //
 
     auto* stB = Structure("B", Vector{Member("foo", ty.vec4<f32>())});
-    auto* stA = Structure("A", Vector{Member("mem", ty.array(ty.Of(stB), 3_i))});
+    auto* stA = Structure("A", Vector{Member("mem", ty.array(ty.Of(stB), Expr(3_i)))});
     GlobalVar("c", ty.Of(stA), core::AddressSpace::kPrivate);
 
     auto* mem =

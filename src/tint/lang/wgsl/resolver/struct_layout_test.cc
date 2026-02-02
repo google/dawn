@@ -214,8 +214,8 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayOfStructure) {
                                          Member("a", ty.vec2<i32>()),
                                          Member("b", ty.vec3<i32>()),
                                          Member("c", ty.vec4<i32>()),
-                                     });        // size: 48
-    auto outer = ty.array(ty.Of(inner), 12_u);  // size: 12 * 48
+                                     });       // size: 48
+    auto outer = ty.array(ty.Of(inner), 12u);  // size: 12 * 48
     auto* s = Structure("S", Vector{
                                  Member("c", outer),
                              });

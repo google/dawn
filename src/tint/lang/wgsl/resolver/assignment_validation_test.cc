@@ -84,7 +84,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignArraysWithDifferentSizeExpression
     GlobalConst("len", Expr(4_u));
 
     auto* a = Var("a", ty.array<f32, 4>());
-    auto* b = Var("b", ty.array(ty.f32(), "len"));
+    auto* b = Var("b", ty.array(ty.f32(), Expr("len")));
 
     auto* assign = Assign(Source{{12, 34}}, "a", "b");
     WrapInFunction(a, b, assign);
@@ -103,7 +103,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignArraysWithDifferentSizeExpression
     GlobalConst("len", Expr(5_u));
 
     auto* a = Var("a", ty.array<f32, 4>());
-    auto* b = Var("b", ty.array(ty.f32(), "len"));
+    auto* b = Var("b", ty.array(ty.f32(), Expr("len")));
 
     auto* assign = Assign(Source{{12, 34}}, "a", "b");
     WrapInFunction(a, b, assign);

@@ -366,7 +366,7 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
             Func("F", tint::Empty, target_ty(), Vector{Return(abstract_expr)});
             break;
         case Method::kArray:
-            WrapInFunction(Call(ty.array(target_ty(), 1_i), abstract_expr));
+            WrapInFunction(Call(ty.array(target_ty(), Expr(1_i)), abstract_expr));
             break;
         case Method::kStruct:
             Structure("S", Vector{Member("v", target_ty())});

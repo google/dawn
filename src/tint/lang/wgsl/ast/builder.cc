@@ -350,6 +350,10 @@ ast::Type Builder::TypesBuilder::array(const Source& source) const {
     return AsType(source, "array");
 }
 
+ast::Type Builder::TypesBuilder::array() const {
+    return array(builder->source_);
+}
+
 ast::Type Builder::TypesBuilder::array(ast::Type subtype) const {
     return array(builder->source_, subtype);
 }
@@ -360,6 +364,56 @@ ast::Type Builder::TypesBuilder::array(const Source& source, ast::Type subtype) 
                                                                 Vector{
                                                                     subtype.expr,
                                                                 }))};
+}
+
+ast::Type Builder::TypesBuilder::array(ast::Type subtype, uint32_t n) const {
+    return array(builder->source_, subtype, core::u32(n));
+}
+
+ast::Type Builder::TypesBuilder::array(ast::Type subtype, const ast::Const* expr) const {
+    return array(builder->source_, subtype, expr);
+}
+
+ast::Type Builder::TypesBuilder::array(ast::Type subtype, const ast::Expression* expr) const {
+    return array(builder->source_, subtype, expr);
+}
+
+ast::Type Builder::TypesBuilder::array(ast::Type subtype, const ast::Override* expr) const {
+    return array(builder->source_, subtype, expr);
+}
+
+ast::Type Builder::TypesBuilder::array(const Source& source, ast::Type subtype, uint32_t n) const {
+    if (n == 0) {
+        return AsType(source, "array", subtype);
+    }
+    return AsType(source, "array", subtype, core::u32(n));
+}
+
+ast::Type Builder::TypesBuilder::array(const Source& source,
+                                       ast::Type subtype,
+                                       const ast::Const* expr) const {
+    if (expr == nullptr) {
+        return AsType(source, "array", subtype);
+    }
+    return AsType(source, "array", subtype, expr);
+}
+
+ast::Type Builder::TypesBuilder::array(const Source& source,
+                                       ast::Type subtype,
+                                       const ast::Expression* expr) const {
+    if (expr == nullptr) {
+        return AsType(source, "array", subtype);
+    }
+    return AsType(source, "array", subtype, expr);
+}
+
+ast::Type Builder::TypesBuilder::array(const Source& source,
+                                       ast::Type subtype,
+                                       const ast::Override* expr) const {
+    if (expr == nullptr) {
+        return AsType(source, "array", subtype);
+    }
+    return AsType(source, "array", subtype, expr);
 }
 
 const ast::Alias* Builder::TypesBuilder::alias(std::string_view name, ast::Type type) const {
