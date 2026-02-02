@@ -271,9 +271,7 @@ ScopedCommandRecordingContext Queue::GetScopedPendingCommandContext(SubmitMode s
         if (submitMode == SubmitMode::Normal) {
             mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
         }
-        auto context = ScopedCommandRecordingContext(std::move(commands), lockD3D11Scope);
-        PerformDeferredUnmaps(&context);
-        return std::move(context);
+        return ScopedCommandRecordingContext(std::move(commands), lockD3D11Scope);
     });
 }
 
@@ -283,9 +281,7 @@ ScopedSwapStateCommandRecordingContext Queue::GetScopedSwapStatePendingCommandCo
         if (submitMode == SubmitMode::Normal) {
             mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
         }
-        auto context = ScopedSwapStateCommandRecordingContext(std::move(commands));
-        PerformDeferredUnmaps(&context);
-        return std::move(context);
+        return ScopedSwapStateCommandRecordingContext(std::move(commands));
     });
 }
 
@@ -354,19 +350,6 @@ void Queue::TrackPendingMapBuffer(Ref<Buffer>&& buffer,
                                   wgpu::MapMode mode,
                                   ExecutionSerial readySerial) {
     mPendingMapBuffers->Enqueue({buffer, mode}, readySerial);
-}
-
-void Queue::DeferUnmap(Ref<Buffer>&& buffer) {
-    mPendingUnmapBuffers->push_back(std::move(buffer));
-}
-
-void Queue::PerformDeferredUnmaps(const ScopedCommandRecordingContext* commandContext) {
-    mPendingUnmapBuffers.Use([&](auto pendingUnmapBuffers) {
-        for (auto& buffer : *pendingUnmapBuffers) {
-            buffer->UnmapIfNeeded(commandContext);
-        }
-        pendingUnmapBuffers->clear();
-    });
 }
 
 MaybeError Queue::WriteBufferImpl(BufferBase* buffer,

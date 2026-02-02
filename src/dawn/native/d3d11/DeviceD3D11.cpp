@@ -399,6 +399,8 @@ MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
     // D3D11 requires that buffers are unmapped before being used in a copy.
     DAWN_TRY(source->Unmap());
 
+    auto scopedUseBuffer = source->UseInternal();
+
     auto commandContext =
         ToBackend(GetQueue())->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
     return Buffer::Copy(&commandContext, ToBackend(source), sourceOffset, size,

@@ -153,6 +153,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     bool IsFullBufferRange(uint64_t offset, uint64_t size) const;
     bool NeedsInitialization() const;
     void MarkUsedInPendingCommands();
+    void MarkUsedInPendingCommands(ExecutionSerial pendingSerial);
     virtual MaybeError UploadData(uint64_t bufferOffset, const void* data, size_t size);
 
     // SharedResource impl.

@@ -60,10 +60,6 @@ class Queue : public d3d::Queue {
                                wgpu::MapMode mode,
                                ExecutionSerial readySerial);
 
-    // Defer buffer unmap until next time GetScopedPendingCommandContext() or
-    // GetScopedSwapStatePendingCommandContext() is called.
-    void DeferUnmap(Ref<Buffer>&& buffer);
-
     const Ref<SharedFence>& GetSharedFence() const { return mSharedFence; }
 
   protected:
@@ -99,9 +95,6 @@ class Queue : public d3d::Queue {
     // Check all pending map buffers, and actually map the ready ones.
     MaybeError CheckAndMapReadyBuffers(ExecutionSerial completedSerial);
 
-    // Perform deferred unmaps on pending buffers.
-    void PerformDeferredUnmaps(const ScopedCommandRecordingContext* commandContext);
-
     ComPtr<ID3D11Fence> mFence;
     Ref<SharedFence> mSharedFence;
     MutexProtected<CommandRecordingContext, CommandRecordingContextGuard> mPendingCommands;
@@ -112,7 +105,6 @@ class Queue : public d3d::Queue {
         wgpu::MapMode mode;
     };
     MutexProtected<SerialMap<ExecutionSerial, BufferMapEntry>> mPendingMapBuffers;
-    MutexProtected<std::vector<Ref<Buffer>>> mPendingUnmapBuffers;
 };
 
 }  // namespace dawn::native::d3d11

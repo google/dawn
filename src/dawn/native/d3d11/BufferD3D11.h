@@ -34,6 +34,7 @@
 #include <utility>
 
 #include "absl/container/flat_hash_map.h"
+#include "dawn/common/Atomic.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/d3d/d3d_platform.h"
@@ -93,6 +94,9 @@ class Buffer : public BufferBase {
 
     void UnmapIfNeeded(const ScopedCommandRecordingContext* commandContext);
 
+    MaybeError TrackUsage(const ScopedCommandRecordingContext* commandContext,
+                          ExecutionSerial pendingSerial);
+
     // This performs GPU Clear. Unlike Clear(), this will always be affected by ID3D11Predicate.
     // Whereas Clear() might be unaffected by ID3D11Predicate if it's pure CPU clear.
     virtual MaybeError PredicatedClear(const ScopedSwapStateCommandRecordingContext* commandContext,
@@ -105,7 +109,8 @@ class Buffer : public BufferBase {
     virtual MaybeError WriteInternal(const ScopedCommandRecordingContext* commandContext,
                                      uint64_t bufferOffset,
                                      const void* data,
-                                     size_t size) = 0;
+                                     size_t size,
+                                     bool isInitialWrite) = 0;
     // Copy this buffer to the destination without checking if the buffer is initialized.
     virtual MaybeError CopyToInternal(const ScopedCommandRecordingContext* commandContext,
                                       uint64_t sourceOffset,
@@ -172,7 +177,7 @@ class Buffer : public BufferBase {
 
     virtual MaybeError ClearPaddingInternal(const ScopedCommandRecordingContext* commandContext);
 
-    raw_ptr<uint8_t, AllowPtrArithmetic> mMappedData = nullptr;
+    Atomic<uint8_t*, std::memory_order::relaxed> mMappedData{nullptr};
 
   private:
     MaybeError Initialize(bool mappedAtCreation,
@@ -257,7 +262,8 @@ class GPUUsableBuffer final : public Buffer {
     MaybeError WriteInternal(const ScopedCommandRecordingContext* commandContext,
                              uint64_t bufferOffset,
                              const void* data,
-                             size_t size) override;
+                             size_t size,
+                             bool isInitialWrite) override;
 
     ResultOrError<ComPtr<ID3D11ShaderResourceView>> CreateD3D11ShaderResourceViewFromD3DBuffer(
         ID3D11Buffer* d3d11Buffer,

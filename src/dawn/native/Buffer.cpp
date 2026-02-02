@@ -1026,11 +1026,16 @@ bool BufferBase::NeedsInitialization() const {
 }
 
 void BufferBase::MarkUsedInPendingCommands() {
+    // TODO(crbug.com/422741977): Consider storing the pending serial once, perhaps in a
+    // CommandRecordingContextBase, so that we don't need to load the atomic value repeatedly.
+    MarkUsedInPendingCommands(GetDevice()->GetQueue()->GetPendingCommandSerial());
+}
+
+void BufferBase::MarkUsedInPendingCommands(ExecutionSerial pendingSerial) {
     DAWN_ASSERT(!GetDevice()->IsValidationEnabled() ||
                 mState.load(std::memory_order::relaxed) == BufferState::InUse);
-    ExecutionSerial serial = GetDevice()->GetQueue()->GetPendingCommandSerial();
-    DAWN_ASSERT(serial >= mLastUsageSerial);
-    mLastUsageSerial = serial;
+    DAWN_ASSERT(pendingSerial >= mLastUsageSerial);
+    mLastUsageSerial = pendingSerial;
 }
 
 ExecutionSerial BufferBase::GetLastUsageSerial() const {
