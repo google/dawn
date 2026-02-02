@@ -4492,5 +4492,99 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvReaderTest, TexSamplerAsParams_Dref) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability ImageQuery
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+
+               OpDecorate %var_img Binding 12
+               OpDecorate %var_img DescriptorSet 0
+               OpDecorate %var_samp Binding 13
+               OpDecorate %var_samp DescriptorSet 0
+
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+        %img = OpTypeImage %float 2D 1 1 0 1 Unknown
+    %ptr_img = OpTypePointer UniformConstant %img
+       %samp = OpTypeSampler
+   %ptr_samp = OpTypePointer UniformConstant %samp
+%sampled_img = OpTypeSampledImage %img
+       %1282 = OpTypeFunction %void
+       %2564 = OpTypeFunction %float %ptr_img %ptr_samp
+%ptr_v4float = OpTypePointer Function %v4float
+  %ptr_float = OpTypePointer Function %float
+
+    %float_0 = OpConstant %float 0
+  %v4float_0 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
+
+   %var_samp = OpVariable %ptr_samp UniformConstant
+    %var_img = OpVariable %ptr_img UniformConstant
+
+       %main = OpFunction %void None %1282
+      %12243 = OpLabel
+      %param = OpVariable %ptr_v4float Function
+    %param_0 = OpVariable %ptr_float Function
+      %22971 = OpFunctionCall %float %bounce %var_img %var_samp
+               OpReturn
+               OpFunctionEnd
+
+     %bounce = OpFunction %float None %2564
+         %p1 = OpFunctionParameter %ptr_img
+         %p2 = OpFunctionParameter %ptr_samp
+         %90 = OpLabel
+         %80 = OpFunctionCall %float %shadow_fn %p1 %p2
+               OpReturnValue %80
+               OpFunctionEnd
+
+  %shadow_fn = OpFunction %float None %2564
+  %param_img = OpFunctionParameter %ptr_img
+ %param_samp = OpFunctionParameter %ptr_samp
+       %5000 = OpLabel
+       %6208 = OpLoad %img %param_img
+      %25104 = OpLoad %samp %param_samp
+       %8422 = OpSampledImage %sampled_img %6208 %25104
+       %7977 = OpImageSampleDrefImplicitLod %float %8422 %v4float_0 %float_0
+               OpReturnValue %float_0
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 13)
+  %2:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 12)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %4:ptr<function, vec4<f32>, read_write> = var undef
+    %5:ptr<function, f32, read_write> = var undef
+    %6:texture_depth_2d_array = load %2
+    %7:sampler_comparison = load %1
+    %8:f32 = call %9, %6, %7
+    ret
+  }
+}
+%9 = func(%10:texture_depth_2d_array, %11:sampler_comparison):f32 {
+  $B3: {
+    %12:f32 = call %13, %10, %11
+    ret %12
+  }
+}
+%13 = func(%14:texture_depth_2d_array, %15:sampler_comparison):f32 {
+  $B4: {
+    %16:vec2<f32> = swizzle vec4<f32>(0.0f), xy
+    %17:f32 = swizzle vec4<f32>(0.0f), z
+    %18:i32 = convert %17
+    %19:f32 = textureSampleCompare %14, %15, %16, %18, 0.0f
+    ret 0.0f
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
