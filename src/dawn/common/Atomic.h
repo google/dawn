@@ -76,7 +76,7 @@ template <typename T>
 T FetchMax(std::atomic<T>& t, T arg) {
     // Atomically set |t| to |arg| if |arg| > |t|.
     T current = t.load(std::memory_order::acquire);
-    while (arg > current && t.compare_exchange_weak(current, arg, std::memory_order::acq_rel)) {
+    while (arg > current && !t.compare_exchange_weak(current, arg, std::memory_order::acq_rel)) {
     }
     return current;
 }
