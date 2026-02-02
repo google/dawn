@@ -30,7 +30,6 @@
 
 #include <vector>
 
-#include "absl/container/flat_hash_set.h"
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/SerialMap.h"
 #include "dawn/native/d3d/QueueD3D.h"
@@ -46,10 +45,9 @@ class Queue : public d3d::Queue {
   public:
     static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
 
-    ResultOrError<ScopedCommandRecordingContext> GetScopedPendingCommandContext(
-        SubmitMode submitMode,
-        bool lockD3D11Scope = true);
-    ResultOrError<ScopedSwapStateCommandRecordingContext> GetScopedSwapStatePendingCommandContext(
+    ScopedCommandRecordingContext GetScopedPendingCommandContext(SubmitMode submitMode,
+                                                                 bool lockD3D11Scope = true);
+    ScopedSwapStateCommandRecordingContext GetScopedSwapStatePendingCommandContext(
         SubmitMode submitMode);
     virtual MaybeError NextSerial() = 0;
 
@@ -65,9 +63,6 @@ class Queue : public d3d::Queue {
     // Defer buffer unmap until next time GetScopedPendingCommandContext() or
     // GetScopedSwapStatePendingCommandContext() is called.
     void DeferUnmap(Ref<Buffer>&& buffer);
-
-    // Cancel a deferred unmap for the given buffer.
-    void CancelDeferredUnmap(Buffer* buffer);
 
     const Ref<SharedFence>& GetSharedFence() const { return mSharedFence; }
 
@@ -116,28 +111,8 @@ class Queue : public d3d::Queue {
         Ref<Buffer> buffer;
         wgpu::MapMode mode;
     };
-
-    // Hash and equality functors for Ref<Buffer> with heterogeneous lookup support
-    // This allows erasing using raw Buffer* without creating a Ref<>
-    struct BufferRefHash {
-        using is_transparent = void;
-
-        size_t operator()(const Ref<Buffer>& ref) const { return std::hash<Buffer*>{}(ref.Get()); }
-        size_t operator()(Buffer* ptr) const { return std::hash<Buffer*>{}(ptr); }
-    };
-    struct BufferRefEqual {
-        using is_transparent = void;
-
-        bool operator()(const Ref<Buffer>& a, const Ref<Buffer>& b) const {
-            return a.Get() == b.Get();
-        }
-        bool operator()(const Ref<Buffer>& a, Buffer* b) const { return a.Get() == b; }
-        bool operator()(Buffer* a, const Ref<Buffer>& b) const { return a == b.Get(); }
-    };
-
     MutexProtected<SerialMap<ExecutionSerial, BufferMapEntry>> mPendingMapBuffers;
-    MutexProtected<absl::flat_hash_set<Ref<Buffer>, BufferRefHash, BufferRefEqual>>
-        mPendingUnmapBuffers;
+    MutexProtected<std::vector<Ref<Buffer>>> mPendingUnmapBuffers;
 };
 
 }  // namespace dawn::native::d3d11

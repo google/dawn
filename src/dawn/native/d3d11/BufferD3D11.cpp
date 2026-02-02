@@ -463,10 +463,9 @@ MaybeError Buffer::Initialize(bool mappedAtCreation,
         if (commandContext) {
             DAWN_TRY(ClearInitialResource(commandContext));
         } else {
-            ScopedCommandRecordingContext tmpCommandContext;
-            DAWN_TRY_ASSIGN(tmpCommandContext,
-                            ToBackend(GetDevice()->GetQueue())
-                                ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal));
+            auto tmpCommandContext =
+                ToBackend(GetDevice()->GetQueue())
+                    ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
             DAWN_TRY(ClearInitialResource(&tmpCommandContext));
         }
     }
@@ -502,10 +501,8 @@ bool Buffer::IsCPUReadable() const {
 
 MaybeError Buffer::MapAtCreationImpl() {
     DAWN_ASSERT(IsCPUWritable());
-    ScopedCommandRecordingContext commandContext;
-    DAWN_TRY_ASSIGN(commandContext,
-                    ToBackend(GetDevice()->GetQueue())
-                        ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal));
+    auto commandContext = ToBackend(GetDevice()->GetQueue())
+                              ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
     return MapInternal(&commandContext, wgpu::MapMode::Write);
 }
 
@@ -540,10 +537,8 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     if (mMapReadySerial > completedSerial) {
         ToBackend(GetDevice()->GetQueue())->TrackPendingMapBuffer({this}, mode, mMapReadySerial);
     } else {
-        ScopedCommandRecordingContext commandContext;
-        DAWN_TRY_ASSIGN(commandContext,
-                        ToBackend(GetDevice()->GetQueue())
-                            ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal));
+        auto commandContext = ToBackend(GetDevice()->GetQueue())
+                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
         DAWN_TRY(FinalizeMap(&commandContext, completedSerial, mode));
     }
 
@@ -600,11 +595,10 @@ void Buffer::DestroyImpl(DestroyReason reason) {
     //   other threads using the buffer since there are no other live refs.
     BufferBase::DestroyImpl(reason);
 
-    if (reason != DestroyReason::CppDestructor) {
-        // Cancel any deferred unmap on this buffer. We don't need to do this if the buffer is
-        // destroyed in dtor. Because dtor won't be reached if the queue still holds a ref to this
-        // buffer in its pending unmap list.
-        ToBackend(GetDevice()->GetQueue())->CancelDeferredUnmap(this);
+    if (mMappedData != nullptr) {
+        auto commandContext = ToBackend(GetDevice()->GetQueue())
+                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Passive);
+        UnmapIfNeeded(&commandContext);
     }
 }
 
@@ -1240,13 +1234,8 @@ ID3D11Buffer* GPUUsableBuffer::GetD3D11ConstantBufferForTesting() {
         !mStorages[StorageType::GPUCopyDstConstantBuffer]) {
         return nullptr;
     }
-    ScopedCommandRecordingContext tempCommandContext;
-    if (GetDevice()->ConsumedError(
-            ToBackend(GetDevice()->GetQueue())
-                ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal),
-            &tempCommandContext)) {
-        return nullptr;
-    }
+    auto tempCommandContext = ToBackend(GetDevice()->GetQueue())
+                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
     ID3D11Buffer* buffer;
     if (GetDevice()->ConsumedError(GetD3D11ConstantBuffer(&tempCommandContext), &buffer)) {
         return nullptr;
@@ -1260,13 +1249,8 @@ ID3D11Buffer* GPUUsableBuffer::GetD3D11NonConstantBufferForTesting() {
         !mStorages[StorageType::GPUWritableNonConstantBuffer]) {
         return nullptr;
     }
-    ScopedCommandRecordingContext tempCommandContext;
-    if (GetDevice()->ConsumedError(
-            ToBackend(GetDevice()->GetQueue())
-                ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal),
-            &tempCommandContext)) {
-        return nullptr;
-    }
+    auto tempCommandContext = ToBackend(GetDevice()->GetQueue())
+                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
     ID3D11Buffer* buffer;
     if (GetDevice()->ConsumedError(GetD3D11NonConstantBuffer(&tempCommandContext), &buffer)) {
         return nullptr;

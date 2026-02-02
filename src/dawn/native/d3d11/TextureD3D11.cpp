@@ -276,10 +276,8 @@ MaybeError Texture::InitializeAsInternalTexture() {
     // Staging texture is used internally, so we don't need to clear it.
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) &&
         mKind == Kind::Normal) {
-        ScopedCommandRecordingContext commandContext;
-        DAWN_TRY_ASSIGN(commandContext,
-                        ToBackend(device->GetQueue())
-                            ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal));
+        auto commandContext = ToBackend(device->GetQueue())
+                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
         DAWN_TRY(Clear(&commandContext, GetAllSubresources(), TextureBase::ClearValue::NonZero));
     }
 
