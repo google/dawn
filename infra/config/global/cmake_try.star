@@ -92,6 +92,27 @@ def apply_mac_cq_builder_defaults(kwargs):
     kwargs.setdefault("pool", "luci.chromium.gpu.try")
     return kwargs
 
+def apply_win_cq_builder_defaults(kwargs):
+    """Sets default arguments for Win CMake CQ builders.
+
+    Args:
+        kwargs: The kwargs for creating a try builder.
+
+    Returns:
+        |kwargs| with Win/CMake defaults set.
+    """
+
+    # TODO(crbug.com/459517292): Call apply_cq_builder_defaults() instead once
+    # we confirm that Win/CMake works as expected.
+    # kwargs = apply_cq_builder_defaults(kwargs)
+    kwargs.setdefault("max_concurrent_builds", 5)
+    kwargs.setdefault("builderless", True)
+    kwargs.setdefault("cpu", cpu.X86_64)
+    kwargs.setdefault("os", os.WINDOWS_DEFAULT)
+    kwargs.setdefault("pool", "luci.chromium.gpu.try")
+    kwargs.setdefault("ssd", None)
+    return kwargs
+
 def add_builder_to_main_and_milestone_cq_groups(kwargs):
     # Dawn standalone builders run fine unbranched on branched CLs.
     try_.builder(**kwargs)
@@ -111,6 +132,13 @@ def dawn_linux_cmake_cq_tester(**kwargs):
 def dawn_mac_cmake_cq_tester(**kwargs):
     kwargs = apply_mac_cq_builder_defaults(kwargs)
     add_builder_to_main_and_milestone_cq_groups(kwargs)
+
+def dawn_win_cmake_cq_tester(**kwargs):
+    kwargs = apply_win_cq_builder_defaults(kwargs)
+
+    # TODO(crbug.com/459517292): Call add_builder_to_main_and_milestone_cq_groups
+    # instead once we confirm that Win/CMake/MSVC works as expected.
+    try_.builder(**kwargs)
 
 ## CQ Builders
 
@@ -183,6 +211,21 @@ dawn_mac_cmake_cq_tester(
     properties = {
         "asan": False,
         "clang": True,
+        "debug": False,
+        "target_cpu": "x64",
+        "ubsan": False,
+    },
+)
+
+dawn_win_cmake_cq_tester(
+    name = "dawn-cq-win-x64-msvc-cmake-rel",
+    description_html = "Compiles and tests release Dawn test binaries for Win/x64 using CMake and MSVC. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-win-x64-sws-msvc-cmake-rel",
+    ],
+    properties = {
+        "asan": False,
+        "clang": False,
         "debug": False,
         "target_cpu": "x64",
         "ubsan": False,
