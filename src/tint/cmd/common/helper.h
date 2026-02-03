@@ -45,6 +45,10 @@
 #include "src/tint/lang/spirv/reader/common/options.h"
 #endif
 
+#if TINT_BUILD_WGSL_WRITER
+#include "src/tint/lang/wgsl/writer/common/options.h"
+#endif
+
 // Forward declarations
 namespace tint {
 class Program;
@@ -82,6 +86,10 @@ struct LoadProgramOptions {
 #if TINT_BUILD_SPV_READER
     /// Spirv-reader options
     tint::spirv::reader::Options spirv_reader_options;
+#endif
+#if TINT_BUILD_WGSL_WRITER
+    /// WGSL writer options
+    tint::wgsl::writer::Options wgsl_writer_options;
 #endif
     /// The text printer to use for output
     StyledTextPrinter* printer = nullptr;

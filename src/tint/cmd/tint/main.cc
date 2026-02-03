@@ -150,10 +150,12 @@ struct Options {
 
     bool dump_ir = false;
     bool ir_roundtrip = false;
-    bool minify = false;
 
 #if TINT_BUILD_SPV_READER
     tint::spirv::reader::Options spirv_reader_options;
+#endif  // TINT_BUILD_SPV_READER
+#if TINT_BUILD_WGSL_WRITER
+    tint::wgsl::writer::Options wgsl_writer_options;
 #endif  // TINT_BUILD_SPV_READER
 
 #if TINT_BUILD_SPV_WRITER
@@ -311,8 +313,10 @@ If not provided, will be inferred from output filename extension:
     auto& rename_all = options.Add<BoolOption>("rename-all", "Renames all symbols", Default{false});
     TINT_DEFER(opts->rename_all = *rename_all.value);
 
+#if TINT_BUILD_WGSL_WRITER
     auto& minify = options.Add<BoolOption>("minify", "Minify the output WGSL", Default{false});
-    TINT_DEFER(opts->minify = *minify.value);
+    TINT_DEFER(opts->wgsl_writer_options.minify = *minify.value);
+#endif
 
     auto& overrides = options.Add<StringOption>(
         "overrides", "Override values as IDENTIFIER=VALUE, comma-separated");
@@ -373,19 +377,29 @@ of the hash codes in the comma separated list of hashes)");
         }
     });
 
-#if TINT_BUILD_SPV_READER
-    auto& allow_nud =
-        options.Add<BoolOption>("allow-non-uniform-derivatives",
-                                R"(When using SPIR-V input, allow non-uniform derivatives by
-inserting a module-scope directive to suppress any uniformity
+#if TINT_BUILD_WGSL_WRITER
+    auto& allow_nud = options.Add<BoolOption>(
+        "allow-non-uniform-derivatives",
+        R"(Allow non-uniform derivatives by inserting a module-scope directive to suppress any uniformity
 violations that may be produced)",
-                                Default{false});
+        Default{false});
     TINT_DEFER({
         if (allow_nud.value.value_or(false)) {
-            opts->spirv_reader_options.allow_non_uniform_derivatives = true;
+            opts->wgsl_writer_options.allow_non_uniform_derivatives = true;
         }
     });
 
+    auto& ignore_unreachable = options.Add<BoolOption>(
+        "disable-unreachable-code-warning",
+        R"(Disable the warning for unreachable code when converting to WGSL)", Default{false});
+    TINT_DEFER({
+        if (ignore_unreachable.value.value_or(false)) {
+            opts->wgsl_writer_options.disable_unreachable_code_warning = true;
+        }
+    });
+#endif
+
+#if TINT_BUILD_SPV_READER
     auto& sampler_mapping = options.Add<StringOption>(
         "sampler-mapping",
         "Allows remapping the binding points of samplers from the SPIR-V file. "
@@ -951,10 +965,7 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
                   [[maybe_unused]] tint::inspector::Inspector& inspector,
                   [[maybe_unused]] tint::Program& program) {
 #if TINT_BUILD_WGSL_WRITER
-    tint::wgsl::writer::Options writer_options{
-        .minify = options.minify,
-    };
-    auto result = tint::wgsl::writer::Generate(program, writer_options);
+    auto result = tint::wgsl::writer::Generate(program, options.wgsl_writer_options);
     if (result != tint::Success) {
         std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;
@@ -1468,12 +1479,15 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
 #if TINT_BUILD_SPV_READER
         .spirv_reader_options = options.spirv_reader_options,
 #endif
+#if TINT_BUILD_WGSL_WRITER
+        .wgsl_writer_options = options.wgsl_writer_options,
+#endif
         .printer = options.printer.get(),
     };
 
-#if TINT_BUILD_SPV_READER
+#if TINT_BUILD_WGSL_WRITER
     // Allow the shader-f16 extension
-    opts.spirv_reader_options.allowed_features = tint::wgsl::AllowedFeatures::Everything();
+    opts.wgsl_writer_options.allowed_features = tint::wgsl::AllowedFeatures::Everything();
 #endif
 
     auto info = tint::cmd::LoadProgramInfo(opts);

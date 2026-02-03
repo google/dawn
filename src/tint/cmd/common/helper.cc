@@ -120,11 +120,7 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
     }
 
     // Convert the IR module to a Program.
-    tint::wgsl::writer::Options writer_options;
-    writer_options.allow_non_uniform_derivatives =
-        opts.spirv_reader_options.allow_non_uniform_derivatives;
-    writer_options.allowed_features = opts.spirv_reader_options.allowed_features;
-    auto prog_result = tint::wgsl::writer::ProgramFromIR(result.Get(), writer_options);
+    auto prog_result = tint::wgsl::writer::ProgramFromIR(result.Get(), opts.wgsl_writer_options);
     if (prog_result != Success) {
         std::cerr << "Failed to convert IR to Program:\n\n" << prog_result.Failure() << "\n\n";
         std::cerr << tint::core::ir::Disassembler(result.Get()).Plain() << "\n";
