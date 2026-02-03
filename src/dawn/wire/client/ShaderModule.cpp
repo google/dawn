@@ -72,11 +72,40 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
         // Deep copy the WGPUCompilationInfo
         mShader->mMessageStrings.reserve(info->messageCount);
         mShader->mMessages.reserve(info->messageCount);
+        mShader->mUtf16s.reserve(info->messageCount);
         for (size_t i = 0; i < info->messageCount; i++) {
             DAWN_ASSERT(info->messages[i].length != WGPU_STRLEN);
             mShader->mMessageStrings.push_back(ToString(info->messages[i].message));
             mShader->mMessages.push_back(info->messages[i]);
             mShader->mMessages[i].message = ToOutputStringView(mShader->mMessageStrings[i]);
+            mShader->mMessages[i].nextInChain = nullptr;
+
+            // Iterate the message chain for extensions that we want to handle.
+            WGPUChainedStruct** tail = &mShader->mMessages[i].nextInChain;
+            WGPUChainedStruct* chain = info->messages[i].nextInChain;
+            while (chain != nullptr) {
+                switch (chain->sType) {
+                    case WGPUSType_DawnCompilationMessageUtf16: {
+                        mShader->mUtf16s.push_back(
+                            *reinterpret_cast<const WGPUDawnCompilationMessageUtf16*>(chain));
+                        *tail = &mShader->mUtf16s[i].chain;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+
+                // Update the tail if we added one, and go to the next chain.
+                if (*tail) {
+                    tail = &(*tail)->next;
+                }
+                chain = chain->next;
+            }
+
+            // Ensure that the tail is pointing to nothing else.
+            if (*tail) {
+                **tail = {nullptr, WGPUSType(0)};
+            }
         }
         mShader->mCompilationInfo = {nullptr, mShader->mMessages.size(), mShader->mMessages.data()};
 
