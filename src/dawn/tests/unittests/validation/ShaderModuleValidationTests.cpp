@@ -1203,14 +1203,19 @@ fn main(@builtin(subgroup_invocation_id) sg_id : u32,
     }
 };
 
-// Test total invocations per workgroup should be a multiple of subgroup size when the
+// Test the X-dimension of the work group size must be a multiple of subgroup size when the
 // `@subgroup_size` attribute is used.
 TEST_F(SubgroupSizeControlValidationTest, ValidateTotalInvocationsPerWorkgroupAndSubgroupSize) {
     TestTotalInvocationsPerWorkgroupAndSubgroupSize({32}, 16, true);
-    TestTotalInvocationsPerWorkgroupAndSubgroupSize({8, 4}, 16, true);
-    TestTotalInvocationsPerWorkgroupAndSubgroupSize({8, 4, 2}, 32, true);
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({16, 4}, 16, true);
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({16, 4, 2}, 16, true);
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({4, 16}, 16, false);
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({4, 2, 16}, 16, false);
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({8, 4}, 16, false);
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({8, 4, 2}, 32, false);
     TestTotalInvocationsPerWorkgroupAndSubgroupSize({24}, 16, false);
     TestTotalInvocationsPerWorkgroupAndSubgroupSize({8, 3, 2}, 32, false);
+    TestTotalInvocationsPerWorkgroupAndSubgroupSize({32}, 32, true);
 }
 
 // Test it is a validation error to use a `@subgroup_size` that is greater than

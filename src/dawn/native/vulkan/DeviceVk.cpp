@@ -475,7 +475,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         }
 
         // robustBufferAccess requires robustBufferAccessUpdateAfterBind to be used with descriptor
-        // indexing enabled. If it is not available, we manual implement robustness for shader
+        // indexing enabled. If it is not available, we manually implement robustness for shader
         // buffers and rely on pipelineRobustness for vertex buffer robustness.
         if ((HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) &&
             !mDeviceInfo.descriptorIndexingProperties.robustBufferAccessUpdateAfterBind) {

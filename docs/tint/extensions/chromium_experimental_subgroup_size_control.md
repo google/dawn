@@ -17,11 +17,12 @@ The usage is restricted to `compute` shaders.
 |Backend|Implementation|Requirements|
 |---|---|---|
 |D3D12|`[WaveSize(<numLanes>)]` in HLSL|Shader Model 6.6|
-|Vulkan|`requiredSubgroupSize` in `VkPipelineShaderStageRequiredSubgroupSizeCreateInfo` on the API side|`subgroupSizeControl` in `VK_EXT_subgroup_size_control` or Vulkan 1.3|
+|Vulkan|`requiredSubgroupSize` in `VkPipelineShaderStageRequiredSubgroupSizeCreateInfo` on the API side|`subgroupSizeControl` and `computeFullSubgroups` in `VK_EXT_subgroup_size_control` or Vulkan 1.3|
 |Metal|Not Supported|Not Supported|
 
 - Currently `VK_EXT_subgroup_control` is required to enable feature `Subgroups` so we can always enable `chromium_experimental_subgroup_size_control` when `Subgroups` can be enabled.
-- About [71.5%](https://vulkan.gpuinfo.org/listfeaturesextensions.php?extension=VK_EXT_subgroup_size_control) devices support `subgroupSizeControl` according to the report on GPUInfo.org.
+- `computeFullSubgroups` is required on Vulkan because we need to set `VK_PIPELINE_SHADER_STAGE_CREATE_REQUIRE_FULL_SUBGROUPS_BIT` when creating Vulkan compute pipeline to ensure subgroup sizes will always be launched with all invocations active.
+- About [71.5%](https://vulkan.gpuinfo.org/listfeaturesextensions.php?extension=VK_EXT_subgroup_size_control) devices support `subgroupSizeControl` and `computeFullSubgroups` according to the report on GPUInfo.org.
 - This extension cannot be supported on Metal.
 - Due to the limited availability, this will need a `enable` statement to be used. For this
 experimental extension it would be `enable chromium_experimental_subgroup_size_control`.

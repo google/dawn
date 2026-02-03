@@ -479,11 +479,11 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // Some devices (PowerVR GE8320) can apparently report subgroup size of 1.
     const bool allowSubgroupSizeRanges =
         mSubgroupMinSize >= kDefaultSubgroupMinSize && mSubgroupMaxSize <= kDefaultSubgroupMaxSize;
-    if (hasBaseSubgroupSupport && hasRequiredF16Support && allowSubgroupSizeRanges) {
-        EnableFeature(Feature::Subgroups);
 
-        // We have already required `VK_EXT_subgroup_size_control` for `Subgroups` (see condition 4)
-        EnableFeature(Feature::ChromiumExperimentalSubgroupSizeControl);
+    const bool supportsSubgroupsFeature =
+        hasBaseSubgroupSupport && hasRequiredF16Support && allowSubgroupSizeRanges;
+    if (supportsSubgroupsFeature) {
+        EnableFeature(Feature::Subgroups);
     }
 
     // Enable subgroup matrix if all of the following are true:
@@ -512,6 +512,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         if (!badDriver) {
             EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
         }
+    }
+
+    if (supportsSubgroupsFeature && hasComputeFullSubgroups) {
+        EnableFeature(Feature::ChromiumExperimentalSubgroupSizeControl);
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryHost) &&
