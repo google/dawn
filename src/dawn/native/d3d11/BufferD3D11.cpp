@@ -372,6 +372,10 @@ class StagingBuffer final : public Buffer {
         return {};
     }
 
+    ComPtr<ID3D11Buffer> GetD3D11MappedBuffer() override {
+        return mMappedData ? mD3d11Buffer : nullptr;
+    }
+
     ComPtr<ID3D11Buffer> mD3d11Buffer;
 };
 
@@ -647,21 +651,13 @@ void Buffer::DestroyImpl(DestroyReason reason) {
     //   other threads using the buffer since there are no other live refs.
     BufferBase::DestroyImpl(reason);
 
-    // If buffer is still mapped, unmap it now. If we don't do that, there might be some issues
-    // on certain drivers such as Intel's.
-    // TODO(crbug.com/422741977): Consider a way to unmap without acquiring the context lock.
-    if (mMappedData != nullptr) {
-        auto commandContext = ToBackend(GetDevice()->GetQueue())
-                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Passive);
-
-        if (!mMapAtCreationData) {
-            // We don't need to unmap if the mapping was done on a shadow copy because no real
-            // buffer is mapped yet.
-            auto error = UnmapIfNeeded(&commandContext);
-            // Error could only be returned when a shadow copy is transferred. So just use an
-            // assertion here.
-            DAWN_CHECK(error.IsSuccess());
-        }
+    // If buffer is still mapped, we need to unmap it before releasing the D3D11 resource. If we
+    // don't do that, there might be some issues on certain drivers such as Intel's.
+    if (mMappedData != nullptr && !mMapAtCreationData) {
+        // We don't need to unmap if the mapping was done on a shadow copy because no real
+        // buffer is mapped yet.
+        ToBackend(GetDevice())->DeferUnmapDestroyedBuffer(GetD3D11MappedBuffer());
+        mMappedData = nullptr;
     }
 }
 
@@ -770,6 +766,10 @@ MaybeError Buffer::ClearPaddingInternal(const ScopedCommandRecordingContext* com
     DAWN_TRY(ClearInternal(commandContext, 0, clearOffset, clearSize));
 
     return {};
+}
+
+ComPtr<ID3D11Buffer> Buffer::GetD3D11MappedBuffer() {
+    return nullptr;
 }
 
 MaybeError Buffer::Write(const ScopedCommandRecordingContext* commandContext,
@@ -1689,6 +1689,10 @@ MaybeError GPUUsableBuffer::PredicatedClear(
     IncrStorageRevAndMakeLatest(commandContext, gpuWritableStorage);
 
     return {};
+}
+
+ComPtr<ID3D11Buffer> GPUUsableBuffer::GetD3D11MappedBuffer() {
+    return mMappedStorage ? mMappedStorage->GetD3D11Buffer() : nullptr;
 }
 
 }  // namespace dawn::native::d3d11

@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "dawn/common/LRUCache.h"
+#include "dawn/common/MutexProtected.h"
 #include "dawn/common/SerialQueue.h"
 #include "dawn/common/Sha3.h"
 #include "dawn/native/d3d/DeviceD3D.h"
@@ -124,6 +125,8 @@ class Device final : public d3d::Device {
     ResultOrError<ComPtr<ID3D11ComputeShader>> GetOrCreateComputeShader(
         const d3d::CompiledShader& args);
 
+    void DeferUnmapDestroyedBuffer(ComPtr<ID3D11Buffer> buffer);
+
   private:
     using Base = d3d::Device;
     Device(AdapterBase* adapter,
@@ -174,6 +177,8 @@ class Device final : public d3d::Device {
     void AppendDebugLayerMessages(ErrorData* error) override;
     void AppendDeviceLostMessage(ErrorData* error) override;
 
+    void UnmapDestroyedBuffers();
+
     ComPtr<ID3D11Device> mD3d11Device;
     bool mIsDebugLayerEnabled = false;
     ComPtr<ID3D11Device3> mD3d11Device3;
@@ -194,6 +199,14 @@ class Device final : public d3d::Device {
     LRUCache<Sha3_256::Output, ComPtr<ID3D11VertexShader>, Sha3CacheFuncs> mVertexShaderCache;
     LRUCache<Sha3_256::Output, ComPtr<ID3D11PixelShader>, Sha3CacheFuncs> mPixelShaderCache;
     LRUCache<Sha3_256::Output, ComPtr<ID3D11ComputeShader>, Sha3CacheFuncs> mComputeShaderCache;
+
+    // List of D3D11 buffers that were still mapped when destroyed and need to be unmapped.
+    // This allows Buffer::DestroyImpl to defer the unmap operation to avoid acquiring the
+    // CommandContext lock during destruction. The unmapping is performed later when
+    // Tick() or ReduceMemoryUsage() is called.
+    // MutexProtected is required because in the future Buffer::DestroyImpl might no longer be
+    // protected by the device guard, making concurrent access possible from multiple threads.
+    MutexProtected<std::vector<ComPtr<ID3D11Buffer>>> mPendingDestroyedBufferUnmaps;
 };
 
 }  // namespace dawn::native::d3d11

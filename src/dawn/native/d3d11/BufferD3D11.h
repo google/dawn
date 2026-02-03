@@ -177,6 +177,8 @@ class Buffer : public BufferBase {
 
     virtual MaybeError ClearPaddingInternal(const ScopedCommandRecordingContext* commandContext);
 
+    virtual ComPtr<ID3D11Buffer> GetD3D11MappedBuffer();
+
     Atomic<uint8_t*, std::memory_order::relaxed> mMappedData{nullptr};
 
   private:
@@ -266,6 +268,8 @@ class GPUUsableBuffer final : public Buffer {
                              const void* data,
                              size_t size,
                              bool isInitialWrite) override;
+
+    ComPtr<ID3D11Buffer> GetD3D11MappedBuffer() override;
 
     ResultOrError<ComPtr<ID3D11ShaderResourceView>> CreateD3D11ShaderResourceViewFromD3DBuffer(
         ID3D11Buffer* d3d11Buffer,
