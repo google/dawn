@@ -706,8 +706,7 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
     for (const auto& [bindingNumber, apiBindingIndex] : mBindingMap) {
         const BindingInfo& info = GetAPIBindingInfo(apiBindingIndex);
         if (std::holds_alternative<ExternalTextureBindingInfo>(info.bindingLayout)) {
-            mExternalTextureBindingToExternalTextureIndexMap.emplace(apiBindingIndex,
-                                                                     externalTextureIndex++);
+            mBoundExternalTextureMap.emplace(apiBindingIndex, externalTextureIndex++);
         }
     }
 
@@ -777,10 +776,10 @@ APIBindingIndex BindGroupLayoutInternalBase::GetAPIBindingIndex(BindingNumber bi
     return it->second;
 }
 
-const absl::flat_hash_map<APIBindingIndex, size_t>&
-BindGroupLayoutInternalBase::GetExternalTextureBindingToExternalTextureIndexMap() const {
+const BindGroupLayoutInternalBase::BoundExternalTextureMap&
+BindGroupLayoutInternalBase::GetBoundExternalTextureMap() const {
     DAWN_ASSERT(!IsError());
-    return mExternalTextureBindingToExternalTextureIndexMap;
+    return mBoundExternalTextureMap;
 }
 
 BindingIndex BindGroupLayoutInternalBase::AsBindingIndex(APIBindingIndex bindingIndex) const {

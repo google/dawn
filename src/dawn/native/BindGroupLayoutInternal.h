@@ -130,8 +130,9 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     BindingIndex AsBindingIndex(APIBindingIndex index) const;
     APIBindingIndex GetAPIBindingIndex(BindingNumber bindingNumber) const;
 
-    const absl::flat_hash_map<APIBindingIndex, size_t>&
-    GetExternalTextureBindingToExternalTextureIndexMap() const;
+    // Map used to convert APIBindingIndex to indices in BindGroupBase::GetBoundExternalTextures.
+    using BoundExternalTextureMap = absl::flat_hash_map<APIBindingIndex, size_t>;
+    const BoundExternalTextureMap& GetBoundExternalTextureMap() const;
 
     // Returns the number of internal bindings, excluding things like ExternalTexture.
     BindingIndex GetBindingCount() const;
@@ -237,7 +238,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
 
     // Map from APIBindingIndex of External Texture to its index in
     // BindGroupBase::mBoundExternalTextures.
-    absl::flat_hash_map<APIBindingIndex, size_t> mExternalTextureBindingToExternalTextureIndexMap;
+    BoundExternalTextureMap mBoundExternalTextureMap;
 
     BindingCounts mValidationBindingCounts = {};
     bool mNeedsCrossBindingValidation = false;
