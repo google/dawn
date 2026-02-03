@@ -176,6 +176,7 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverViewHeap) {
             device, &redColor, sizeof(redColor), wgpu::BufferUsage::Uniform);
 
         for (uint32_t i = 0; i < heapSize + 1; ++i) {
+            // Allocates one descriptor
             pass.SetBindGroup(0, utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
                                                       {{0, uniformBuffer, 0, sizeof(redColor)}}));
             pass.Draw(3);
@@ -190,8 +191,94 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverViewHeap) {
     EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + HeapVersionID(1));
 }
 
-// Verify the shader visible sampler heaps does not switch over within a single submit.
-TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
+// Verify the shader visible view heap switches over within a single submit because bind group 0
+// requires more descriptors than available in the heap, while there's still enough for group 1.
+TEST_P(D3D12DescriptorHeapTests, SwitchOverViewHeapBecauseOfBindingGroup0) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+
+    // Fill in a view heap with "view only" bindgroups (1x view per group) by creating a
+    // view bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps must switch over.
+    renderPipelineDescriptor.vertex.module = mSimpleVSModule;
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+            struct U {
+                color : vec4f
+            }
+            @group(0) @binding(0) var<uniform> cb1 : U;
+            @group(0) @binding(1) var<uniform> cb2 : U;
+            @group(0) @binding(2) var<uniform> cb3 : U;
+            @group(0) @binding(3) var<uniform> cb4 : U;
+
+            @group(1) @binding(0) var<uniform> cb5: U;
+
+            @fragment fn main() -> @location(0) vec4f {
+                return cb1.color + cb2.color + cb3.color + cb4.color + cb5.color;
+            }
+    )");
+
+    Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
+    auto& allocator = d3dDevice->GetViewShaderVisibleDescriptorAllocator();
+    const uint64_t heapSize = allocator->GetShaderVisibleHeapSizeForTesting();
+
+    // This test is written assuming a certain heap size to trigger
+    // AllocateAndSwitchShaderVisibleHeap when binding group 0 (see below). If this value is
+    // changed, we likely need to update this test.
+    DAWN_ASSERT(heapSize == 32);
+
+    const HeapVersionID heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+        wgpu::RenderPipeline renderPipeline =
+            device.CreateRenderPipeline(&renderPipelineDescriptor);
+        pass.SetPipeline(renderPipeline);
+
+        uint32_t numDescriptorsPerIter = 5;
+        uint32_t allocOnIter = (heapSize / numDescriptorsPerIter + 1);
+
+        // "small heap" size is 32 for CBV_SRV_UAV, so 32 / 5 = 6.4; on the 7th iteration,
+        // there will only be room enough for 32 - (5*6) = 2 descriptors, so the
+        // group->PopulateViews() will fail for group 0 as it needs 4 descriptors, but would succeed
+        // for group 1 as it only needs 1. This should trigger an
+        // AllocateAndSwitchShaderVisibleHeap, but previously didn't because the failure of the
+        // allocation of group 0 was overwritten by the success of group 1.
+
+        std::array<float, 4> redColor = {1, 0, 0, 1};
+        wgpu::Buffer uniformBuffer = utils::CreateBufferFromData(
+            device, &redColor, sizeof(redColor), wgpu::BufferUsage::Uniform);
+
+        for (uint32_t i = 0; i < allocOnIter; ++i) {
+            // Allocates descriptors
+            pass.SetBindGroup(0, utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, uniformBuffer, 0, sizeof(redColor)},
+                                                          {1, uniformBuffer, 0, sizeof(redColor)},
+                                                          {2, uniformBuffer, 0, sizeof(redColor)},
+                                                          {3, uniformBuffer, 0, sizeof(redColor)},
+                                                      }));
+            pass.SetBindGroup(1, utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(1),
+                                                      {
+                                                          {0, uniformBuffer, 0, sizeof(redColor)},
+                                                      }));
+            pass.Draw(3);
+        }
+        pass.End();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + HeapVersionID(1));
+}
+
+// Verify the shader visible sampler heaps does not switch over within a single submit when samplers
+// are cached.
+TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeapBecauseOfCache) {
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
 
     // Fill in a sampler heap with "sampler only" bindgroups (1x sampler per group) by creating
@@ -209,8 +296,6 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
                 return vec4f(0.0, 0.0, 0.0, 0.0);
             })");
 
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
-    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::Sampler sampler = device.CreateSampler();
 
@@ -218,10 +303,13 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
     auto& allocator = d3dDevice->GetSamplerShaderVisibleDescriptorAllocator();
     const uint64_t samplerHeapSize = allocator->GetShaderVisibleHeapSizeForTesting();
 
-    const HeapVersionID HeapVersionID = allocator->GetShaderVisibleHeapSerialForTesting();
+    const HeapVersionID heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
+        wgpu::RenderPipeline renderPipeline =
+            device.CreateRenderPipeline(&renderPipelineDescriptor);
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
 
         pass.SetPipeline(renderPipeline);
@@ -238,7 +326,274 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), HeapVersionID);
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial);
+}
+
+// Verify the shader visible sampler heap switches over within a single submit
+TEST_P(D3D12DescriptorHeapTests, SwitchOverSamplerHeap) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+
+    // "small heap" size is 16 for SAMPLERS, so we want to allocate more than 16 samplers in one
+    // submit. Since the max number of samplers per stage is also 16, we have to do this in two draw
+    // calls: the first allocates 16 samplers, and the second allocates 1, which should result in an
+    // heap change. Note that we cannot issue two draw calls with the same pipeline because samplers
+    // are cached by bind group, so the second draw would reuse the samplers from the first.
+
+    Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
+    auto& allocator = d3dDevice->GetSamplerShaderVisibleDescriptorAllocator();
+    [[maybe_unused]] const uint64_t samplerHeapSize =
+        allocator->GetShaderVisibleHeapSizeForTesting();
+
+    // This test is written assuming a certain heap size. If this value is changed, we likely need
+    // to update this test.
+    DAWN_ASSERT(samplerHeapSize == 16);
+
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+
+    renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
+            @vertex fn main() -> @builtin(position) vec4f {
+                return vec4f(0.0, 0.0, 0.0, 1.0);
+            })");
+
+    // Allocates 16 sampler descriptors, will succeed on current heap, leaving 0 slots
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var sampler1 : sampler;
+            @group(0) @binding(2) var sampler2 : sampler;
+            @group(0) @binding(3) var sampler3 : sampler;
+            @group(0) @binding(4) var sampler4 : sampler;
+            @group(0) @binding(5) var sampler5 : sampler;
+            @group(0) @binding(6) var sampler6 : sampler;
+            @group(0) @binding(7) var sampler7 : sampler;
+            @group(0) @binding(8) var sampler8 : sampler;
+            @group(0) @binding(9) var sampler9 : sampler;
+            @group(0) @binding(10) var sampler10 : sampler;
+            @group(0) @binding(11) var sampler11 : sampler;
+            @group(0) @binding(12) var sampler12 : sampler;
+            @group(0) @binding(13) var sampler13 : sampler;
+            @group(0) @binding(14) var sampler14 : sampler;
+            @group(0) @binding(15) var sampler15 : sampler;
+
+            @fragment fn main() -> @location(0) vec4f {
+                _ = sampler0;
+                _ = sampler1;
+                _ = sampler2;
+                _ = sampler3;
+                _ = sampler4;
+                _ = sampler5;
+                _ = sampler6;
+                _ = sampler7;
+                _ = sampler8;
+                _ = sampler9;
+                _ = sampler10;
+                _ = sampler11;
+                _ = sampler12;
+                _ = sampler13;
+                _ = sampler14;
+                _ = sampler15;
+                return vec4f(0.0, 0.0, 0.0, 0.0);
+            })");
+
+    wgpu::RenderPipeline pipeline16Samplers =
+        device.CreateRenderPipeline(&renderPipelineDescriptor);
+
+    // Allocates 1 sampler descriptor, will fail because no slots left, resulting in a heap change.
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var sampler0 : sampler;
+
+            @fragment fn main() -> @location(0) vec4f {
+                _ = sampler0;
+                return vec4f(0.0, 0.0, 0.0, 0.0);
+            })");
+    wgpu::RenderPipeline pipeline1Sampler = device.CreateRenderPipeline(&renderPipelineDescriptor);
+
+    wgpu::Sampler sampler = device.CreateSampler();
+
+    const HeapVersionID heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+        pass.SetPipeline(pipeline16Samplers);
+        pass.SetBindGroup(0, utils::MakeBindGroup(device, pipeline16Samplers.GetBindGroupLayout(0),
+                                                  {
+                                                      {0, sampler},
+                                                      {1, sampler},
+                                                      {2, sampler},
+                                                      {3, sampler},
+                                                      {4, sampler},
+                                                      {5, sampler},
+                                                      {6, sampler},
+                                                      {7, sampler},
+                                                      {8, sampler},
+                                                      {9, sampler},
+                                                      {10, sampler},
+                                                      {11, sampler},
+                                                      {12, sampler},
+                                                      {13, sampler},
+                                                      {14, sampler},
+                                                      {15, sampler},
+                                                  }));
+        pass.Draw(3);
+
+        wgpu::RenderPipeline pipeline1Sampler =
+            device.CreateRenderPipeline(&renderPipelineDescriptor);
+        pass.SetPipeline(pipeline1Sampler);
+        pass.SetBindGroup(0, utils::MakeBindGroup(device, pipeline1Sampler.GetBindGroupLayout(0),
+                                                  {
+                                                      {0, sampler},
+                                                  }));
+        pass.Draw(3);
+
+        pass.End();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + HeapVersionID(1));
+}
+
+// Verify the shader visible sampler heap switches over within a single submit because bind group 0
+// requires more descriptors than available in the heap, while there's still enough for group 1.
+TEST_P(D3D12DescriptorHeapTests, SwitchOverSamplerHeapBecauseOfBindingGroup0) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+
+    // "small heap" size is 16 for SAMPLERS, so we want to allocate sampler descriptors such
+    // that group 0 fails, but group 1 succeeds. Because the max number of samplers per stage is
+    // also 16, we cannot induce this situation on the first draw, but can on the second. Also,
+    // since samplers are cached per bind group layout, we create two pipelines, each with different
+    // bind group layouts. The first pipeline uses 15 samplers for bind group 0. The second pipeline
+    // uses 2 samplers for bind group 0, and 1 for bind group 1; this way, when processing the
+    // second draw, attempting to allocate the 2 sampler descriptors for bind group 0 will fail, as
+    // there's only one slot left, but allocating the 1 sampler descriptor for bind group 1 would
+    // succeed. We expect the allocation failure on bind group 0 to result in
+    // AllocateAndSwitchShaderVisibleHeap being called, but previously didn't because the failure of
+    // the allocation of group 0 was overwritten by the success of group 1.
+
+    Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
+    auto& allocator = d3dDevice->GetSamplerShaderVisibleDescriptorAllocator();
+    [[maybe_unused]] const uint64_t samplerHeapSize =
+        allocator->GetShaderVisibleHeapSizeForTesting();
+
+    // This test is written assuming a certain heap size to trigger. If this value is changed, we
+    // likely need to update this test.
+    DAWN_ASSERT(samplerHeapSize == 16);
+
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+
+    renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
+            @vertex fn main() -> @builtin(position) vec4f {
+                return vec4f(0.0, 0.0, 0.0, 1.0);
+            })");
+
+    // Allocates 15 sampler descriptors, will succeed on current heap, leaving 1 slot
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var sampler1 : sampler;
+            @group(0) @binding(2) var sampler2 : sampler;
+            @group(0) @binding(3) var sampler3 : sampler;
+            @group(0) @binding(4) var sampler4 : sampler;
+            @group(0) @binding(5) var sampler5 : sampler;
+            @group(0) @binding(6) var sampler6 : sampler;
+            @group(0) @binding(7) var sampler7 : sampler;
+            @group(0) @binding(8) var sampler8 : sampler;
+            @group(0) @binding(9) var sampler9 : sampler;
+            @group(0) @binding(10) var sampler10 : sampler;
+            @group(0) @binding(11) var sampler11 : sampler;
+            @group(0) @binding(12) var sampler12 : sampler;
+            @group(0) @binding(13) var sampler13 : sampler;
+            @group(0) @binding(14) var sampler14 : sampler;
+
+            @fragment fn main() -> @location(0) vec4f {
+                _ = sampler0;
+                _ = sampler1;
+                _ = sampler2;
+                _ = sampler3;
+                _ = sampler4;
+                _ = sampler5;
+                _ = sampler6;
+                _ = sampler7;
+                _ = sampler8;
+                _ = sampler9;
+                _ = sampler10;
+                _ = sampler11;
+                _ = sampler12;
+                _ = sampler13;
+                _ = sampler14;
+                return vec4f(0.0, 0.0, 0.0, 0.0);
+            })");
+
+    wgpu::RenderPipeline pipeline15Samplers =
+        device.CreateRenderPipeline(&renderPipelineDescriptor);
+
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var sampler1 : sampler;
+
+            @group(1) @binding(0) var sampler2 : sampler;
+
+            @fragment fn main() -> @location(0) vec4f {
+                _ = sampler0;
+                _ = sampler1;
+                _ = sampler2;
+                return vec4f(0.0, 0.0, 0.0, 0.0);
+            })");
+    wgpu::RenderPipeline pipeline3Samplers = device.CreateRenderPipeline(&renderPipelineDescriptor);
+
+    wgpu::Sampler sampler = device.CreateSampler();
+
+    const HeapVersionID heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+        pass.SetPipeline(pipeline15Samplers);
+        pass.SetBindGroup(0, utils::MakeBindGroup(device, pipeline15Samplers.GetBindGroupLayout(0),
+                                                  {
+                                                      {0, sampler},
+                                                      {1, sampler},
+                                                      {2, sampler},
+                                                      {3, sampler},
+                                                      {4, sampler},
+                                                      {5, sampler},
+                                                      {6, sampler},
+                                                      {7, sampler},
+                                                      {8, sampler},
+                                                      {9, sampler},
+                                                      {10, sampler},
+                                                      {11, sampler},
+                                                      {12, sampler},
+                                                      {13, sampler},
+                                                      {14, sampler},
+                                                  }));
+        pass.Draw(3);
+
+        pass.SetPipeline(pipeline3Samplers);
+        pass.SetBindGroup(0, utils::MakeBindGroup(device, pipeline3Samplers.GetBindGroupLayout(0),
+                                                  {
+                                                      {0, sampler},
+                                                      {1, sampler},
+                                                  }));
+        pass.SetBindGroup(1, utils::MakeBindGroup(device, pipeline3Samplers.GetBindGroupLayout(1),
+                                                  {
+                                                      {0, sampler},
+                                                  }));
+        pass.Draw(3);
+
+        pass.End();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + HeapVersionID(1));
 }
 
 // Verify shader-visible heaps can be recycled for multiple submits.

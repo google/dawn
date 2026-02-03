@@ -487,23 +487,20 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
         // the signal to change the bounded heaps.
         // Re-populating all bindgroups after the last one fails causes duplicated allocations
         // to occur on overflow.
-        bool didCreateBindGroupViews = true;
-        bool didCreateBindGroupSamplers = true;
+        bool populatedViews = true;
+        bool populatedSamplers = true;
         for (BindGroupIndex index : mDirtyBindGroups) {
             BindGroup* group = ToBackend(mBindGroups[index]);
-            didCreateBindGroupViews = group->PopulateViews(viewAllocator);
-            didCreateBindGroupSamplers = group->PopulateSamplers(samplerAllocator);
-            if (!didCreateBindGroupViews && !didCreateBindGroupSamplers) {
-                break;
-            }
+            populatedViews = populatedViews && group->PopulateViews(viewAllocator);
+            populatedSamplers = populatedSamplers && group->PopulateSamplers(samplerAllocator);
         }
 
-        if (!didCreateBindGroupViews || !didCreateBindGroupSamplers) {
-            if (!didCreateBindGroupViews) {
+        if (!populatedViews || !populatedSamplers) {
+            if (!populatedViews) {
                 DAWN_TRY(viewAllocator->AllocateAndSwitchShaderVisibleHeap());
             }
 
-            if (!didCreateBindGroupSamplers) {
+            if (!populatedSamplers) {
                 DAWN_TRY(samplerAllocator->AllocateAndSwitchShaderVisibleHeap());
             }
 
@@ -515,10 +512,10 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
 
             for (BindGroupIndex index : mBindGroupLayoutsMask) {
                 BindGroup* group = ToBackend(mBindGroups[index]);
-                didCreateBindGroupViews = group->PopulateViews(viewAllocator);
-                didCreateBindGroupSamplers = group->PopulateSamplers(samplerAllocator);
-                DAWN_ASSERT(didCreateBindGroupViews);
-                DAWN_ASSERT(didCreateBindGroupSamplers);
+                populatedViews = group->PopulateViews(viewAllocator);
+                populatedSamplers = group->PopulateSamplers(samplerAllocator);
+                DAWN_ASSERT(populatedViews);
+                DAWN_ASSERT(populatedSamplers);
             }
         }
 
