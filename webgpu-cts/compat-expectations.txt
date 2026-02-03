@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-01-28 07:56:20AM
+# Last rolled: 2026-02-02 08:26:29AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -3098,6 +3098,32 @@ crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,texture_view,write:fo
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,texture_view,write:format:method="storage-write-fragment";format="rgba8unorm";sampleCount=1;viewUsageMethod="inherit" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,texture_view,write:format:method="storage-write-fragment";format="rgba8unorm";sampleCount=1;viewUsageMethod="minimal" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,create:limit: [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mapped: [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mapped: [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mapped: [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappedAgain: [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappedAgain: [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappedAgain: [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappedAtCreation: [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappedAtCreation: [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappedAtCreation: [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending: [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending: [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,buffer,mapping:mapAsync,abort_over_invalid_error: [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,buffer,mapping:mapAsync,abort_over_invalid_error: [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,mapping:mapAsync,abort_over_invalid_error: [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,buffer,mapping:mapAsync,state,mapped: [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,buffer,mapping:mapAsync,state,mapped: [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,mapping:mapAsync,state,mapped: [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappedAtCreation: [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappedAtCreation: [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappedAtCreation: [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxColorAttachmentBytesPerSample:beginRenderPass,at_over:limitTest="overMaximum";testValueName="atLimit";sampleCount=4;interleaveFormat="rg16uint" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxColorAttachmentBytesPerSample:createRenderBundle,at_over:limitTest="atDefault";testValueName="atLimit";sampleCount=1;interleaveFormat="rg8unorm" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxColorAttachmentBytesPerSample:createRenderBundle,at_over:limitTest="atMaximum";testValueName="overLimit";sampleCount=4;interleaveFormat="rgba16uint" [ Failure ]
