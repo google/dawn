@@ -17,12 +17,14 @@ package androidx.webgpu
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
+import androidx.webgpu.WebGpuTestConstants.EMULATOR_TESTS_MIN_API_LEVEL
 import androidx.webgpu.helper.createWebGpu
 import androidx.webgpu.helper.WebGpu
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -39,6 +41,7 @@ class MultisampleStateTest {
 
     private lateinit var device: GPUDevice
     private lateinit var webGpu: WebGpu
+    @get:Rule val apiSkipRule = ApiLevelSkipRule()
 
     @Before
     fun setup() = runBlocking {
@@ -166,27 +169,28 @@ class MultisampleStateTest {
     }
 
     @Test
+    @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
     fun verifyDefaultMaskEnablesAllSamplesInMSAARender() {
         // Default mask (0xFFFFFFFF or -1) should allow drawing.
         // We draw White on Black background -> Expect White (255).
-        val resultRed = executeMsaaTest(
+        val actualValue = executeMsaaTest(
             GPUMultisampleState(
                 count = MSAA_COUNT,
             )
         )
-        assertEquals("Should be White (255)", 255, resultRed)
+        assertEquals("Should be White (255)", 255, actualValue)
     }
 
     @Test
     fun verifyZeroMaskDisablesUpdates() {
         // Zero mask (0x0) should block all samples from being updated.
         // We draw White on Black background -> Expect Black (0) because the draw was masked out.
-        val resultRed = executeMsaaTest(
+        val actualValue = executeMsaaTest(
             GPUMultisampleState(
                 count = MSAA_COUNT,
                 mask = 0
             )
         )
-        assertEquals("Should be Black (0) because mask prevented write", 0, resultRed)
+        assertEquals("Should be Black (0) because mask prevented write", 0, actualValue)
     }
 }
