@@ -396,6 +396,131 @@ TEST_P(MultithreadTests, MapAtCreationInParallel) {
     });
 }
 
+// Test map at creation, copy to uniform buffer, draw, then map again, copy and draw in parallel.
+TEST_P(MultithreadTests, MapAtCreationThenMapAgainWithRenderPassInParallel) {
+    // TODO(crbug.com/451928481): multithread support in GL is incomplete
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+
+    constexpr uint32_t kNumThreads = 4;
+    const float kRed[] = {1.0f, 0.0f, 0.0f, 1.0f};
+    const float kBlue[] = {0.0f, 0.0f, 1.0f, 1.0f};
+
+    // Create render pipeline
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        struct VertexOut {
+            @location(0) color : vec4f,
+            @builtin(position) position : vec4f,
+        }
+
+        struct Uniforms {
+            color : vec4f,
+        }
+        @binding(0) @group(0) var<uniform> uniforms : Uniforms;
+
+        const vertexPos = array(
+            vec2f(-1.0, -1.0),
+            vec2f( 3.0, -1.0),
+            vec2f(-1.0,  3.0));
+
+        @vertex
+        fn main(@builtin(vertex_index) vertexIndex : u32) -> VertexOut {
+            var output : VertexOut;
+            output.position = vec4f(vertexPos[vertexIndex], 0.0, 1.0);
+            output.color = uniforms.color;
+            return output;
+        })");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        @fragment
+        fn main(@location(0) color : vec4f) -> @location(0) vec4f {
+            return color;
+        })");
+
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fsModule;
+    pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
+    utils::RunInParallel(kNumThreads, [&](uint32_t index) {
+        // Step 1: Create MapWrite | CopySrc buffer mapped at creation
+        wgpu::BufferDescriptor mapBufferDesc;
+        mapBufferDesc.size = sizeof(kRed);
+        mapBufferDesc.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+        mapBufferDesc.mappedAtCreation = true;
+        wgpu::Buffer mapBuffer = device.CreateBuffer(&mapBufferDesc);
+
+        // Step 2: Write red color
+        memcpy(mapBuffer.GetMappedRange(), kRed, sizeof(kRed));
+        mapBuffer.Unmap();
+
+        // Create uniform buffer for rendering
+        wgpu::BufferDescriptor uniformBufferDesc;
+        uniformBufferDesc.size = sizeof(kRed);
+        uniformBufferDesc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer uniformBuffer = device.CreateBuffer(&uniformBufferDesc);
+
+        // Step 3: Copy from map buffer to uniform buffer
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(mapBuffer, 0, uniformBuffer, 0, sizeof(kRed));
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Step 4: Verify with render pass (should be red)
+        wgpu::BindGroup uniformsBindGroup = utils::MakeBindGroup(
+            device, renderPipeline.GetBindGroupLayout(0), {{0, uniformBuffer, 0, sizeof(kRed)}});
+
+        auto redRenderPass = utils::CreateBasicRenderPass(device, 1, 1);
+        encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPassEncoder =
+            encoder.BeginRenderPass(&redRenderPass.renderPassInfo);
+        renderPassEncoder.SetPipeline(renderPipeline);
+        renderPassEncoder.SetBindGroup(0, uniformsBindGroup);
+        renderPassEncoder.Draw(3);
+        renderPassEncoder.End();
+        commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, redRenderPass.color, 0, 0);
+
+        // Step 5: Map buffer again
+        std::atomic_bool done = false;
+        mapBuffer.MapAsync(wgpu::MapMode::Write, 0, sizeof(kBlue),
+                           wgpu::CallbackMode::AllowProcessEvents,
+                           [&done](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                               EXPECT_EQ(wgpu::MapAsyncStatus::Success, status);
+                               done = true;
+                           });
+
+        while (!done) {
+            WaitABit();
+        }
+
+        // Step 6: Write blue color
+        memcpy(mapBuffer.GetMappedRange(), kBlue, sizeof(kBlue));
+        mapBuffer.Unmap();
+
+        // Step 7: Copy from map buffer to uniform buffer
+        encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(mapBuffer, 0, uniformBuffer, 0, sizeof(kBlue));
+        commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Step 8: Verify with another render pass (should be blue)
+        auto blueRenderPass = utils::CreateBasicRenderPass(device, 1, 1);
+        encoder = device.CreateCommandEncoder();
+        renderPassEncoder = encoder.BeginRenderPass(&blueRenderPass.renderPassInfo);
+        renderPassEncoder.SetPipeline(renderPipeline);
+        renderPassEncoder.SetBindGroup(0, uniformsBindGroup);
+        renderPassEncoder.Draw(3);
+        renderPassEncoder.End();
+        commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kBlue, blueRenderPass.color, 0, 0);
+    });
+}
+
 // Test that copy a texture to a buffer then map that buffer in parallel works.
 TEST_P(MultithreadTests, T2BThenMapInParallel) {
     // TODO(451928481): multithread support in GL is incomplete

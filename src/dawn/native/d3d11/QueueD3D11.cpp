@@ -265,23 +265,40 @@ ResultOrError<Ref<d3d::SharedFence>> Queue::GetOrCreateSharedFence() {
     return mSharedFence;
 }
 
+template <typename ScopedContextType, typename... Args>
+ScopedContextType Queue::CreateScopedCommandContext(SubmitMode submitMode,
+                                                    CommandRecordingContext::Guard&& commands,
+                                                    Args&&... args) {
+    if (submitMode == SubmitMode::Normal) {
+        mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
+    }
+    return ScopedContextType(std::move(commands), std::forward<Args>(args)...);
+}
+
 ScopedCommandRecordingContext Queue::GetScopedPendingCommandContext(SubmitMode submitMode,
                                                                     bool lockD3D11Scope) {
-    return mPendingCommands.Use([&](auto commands) {
-        if (submitMode == SubmitMode::Normal) {
-            mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
-        }
-        return ScopedCommandRecordingContext(std::move(commands), lockD3D11Scope);
+    return mPendingCommands.Use([&](auto commands) -> ScopedCommandRecordingContext {
+        return CreateScopedCommandContext<ScopedCommandRecordingContext>(
+            submitMode, std::move(commands), lockD3D11Scope);
     });
+}
+
+std::optional<ScopedCommandRecordingContext> Queue::TryGetScopedPendingCommandContext(
+    SubmitMode submitMode,
+    bool lockD3D11Scope) {
+    std::optional<CommandRecordingContext::Guard> guard = mPendingCommands.TryUse();
+    if (!guard) {
+        return std::nullopt;
+    }
+    return CreateScopedCommandContext<ScopedCommandRecordingContext>(submitMode, std::move(*guard),
+                                                                     lockD3D11Scope);
 }
 
 ScopedSwapStateCommandRecordingContext Queue::GetScopedSwapStatePendingCommandContext(
     SubmitMode submitMode) {
     return mPendingCommands.Use([&](auto commands) {
-        if (submitMode == SubmitMode::Normal) {
-            mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
-        }
-        return ScopedSwapStateCommandRecordingContext(std::move(commands));
+        return CreateScopedCommandContext<ScopedSwapStateCommandRecordingContext>(
+            submitMode, std::move(commands));
     });
 }
 

@@ -31,6 +31,8 @@
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
+#include <optional>
+#include <type_traits>
 #include <utility>
 
 #include "dawn/common/Compiler.h"
@@ -62,10 +64,20 @@ struct MutexProtectedTraits {
     using LockType = std::unique_lock<std::mutex>;
     using ObjectType = T;
 
+    static constexpr bool kSupportsTryLock = true;
+
     static MutexType CreateMutex() { return std::mutex(); }
     static std::mutex& GetMutex(MutexType& m) { return m; }
     static ObjectType* GetObj(T* const obj) { return obj; }
     static const ObjectType* GetObj(const T* const obj) { return obj; }
+
+    static std::optional<LockType> TryLock(MutexType& mutex) {
+        LockType lock(GetMutex(mutex), std::try_to_lock);
+        if (!lock.owns_lock()) {
+            return std::nullopt;
+        }
+        return lock;
+    }
 };
 
 template <typename T>
@@ -73,6 +85,8 @@ struct MutexProtectedTraits<Ref<T>> {
     using MutexType = Ref<Mutex>;
     using LockType = Mutex::AutoLock;
     using ObjectType = T;
+
+    static constexpr bool kSupportsTryLock = false;
 
     static MutexType CreateMutex() { return AcquireRef(new Mutex()); }
     static Mutex* GetMutex(MutexType& m) { return m.Get(); }
@@ -85,10 +99,20 @@ struct MutexProtectedSupportTraits {
     using MutexType = std::mutex;
     using LockType = std::unique_lock<std::mutex>;
 
+    static constexpr bool kSupportsTryLock = true;
+
     static MutexType CreateMutex() { return std::mutex(); }
     static std::mutex& GetMutex(MutexType& m) { return m; }
     static auto* GetObj(T* const obj) { return &obj->mImpl; }
     static const auto* GetObj(const T* const obj) { return &obj->mImpl; }
+
+    static std::optional<LockType> TryLock(MutexType& mutex) {
+        LockType lock(GetMutex(mutex), std::try_to_lock);
+        if (!lock.owns_lock()) {
+            return std::nullopt;
+        }
+        return lock;
+    }
 };
 
 template <typename T, typename Traits>
@@ -114,6 +138,8 @@ class DAWN_SCOPED_LOCKABLE Guard : public NonMovable, StackAllocated {
     Guard() : mLock() {}
     Guard(T* obj, typename Traits::MutexType& mutex, class Defer* defer = nullptr)
         : mLock(Traits::GetMutex(mutex)), mObj(obj), mDefer(defer) {}
+    Guard(T* obj, Traits::LockType&& lock, class Defer* defer = nullptr)
+        : mLock(std::move(lock)), mObj(obj), mDefer(defer) {}
     Guard(Guard&& other)
         : mLock(std::move(other.mLock)),
           mObj(std::move(other.mObj)),
@@ -186,6 +212,11 @@ class CondVarGuard : public NonMovable, StackAllocated {
                  class Defer* defer = nullptr,
                  std::condition_variable* cv = nullptr)
         : mNotifyScope(cv), mGuard(obj, mutex, defer) {}
+    CondVarGuard(T* obj,
+                 Traits::LockType&& lock,
+                 class Defer* defer = nullptr,
+                 std::condition_variable* cv = nullptr)
+        : mNotifyScope(cv), mGuard(obj, std::move(lock), defer) {}
 
     auto* Get() const { return mGuard.Get(); }
 
@@ -239,8 +270,19 @@ class MutexProtectedBase {
         return fn(UseWithDefer(defer));
     }
 
+    std::optional<Usage> TryUse()
+        requires Traits::kSupportsTryLock
+    {
+        auto maybeLock = Traits::TryLock(this->mMutex);
+        if (!maybeLock.has_value()) {
+            return std::nullopt;
+        }
+        return Use(std::move(*maybeLock));
+    }
+
   protected:
     virtual Usage Use() = 0;
+    virtual Usage Use(Traits::LockType&& lock) = 0;
     virtual Usage UseWithDefer(Defer& defer) = 0;
     virtual ConstUsage ConstUse() const = 0;
 
@@ -294,6 +336,7 @@ class MutexProtected
     // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
     MutexProtected(Args&&... args) : mObj(std::forward<Args>(args)...) {}
 
+    using Base::TryUse;
     using Base::Use;
     using Base::UseWithDefer;
 
@@ -302,6 +345,7 @@ class MutexProtected
 
   private:
     Usage Use() override { return Usage(&mObj, this->mMutex); }
+    Usage Use(Traits::LockType&& lock) override { return Usage(&mObj, std::move(lock), nullptr); }
     Usage UseWithDefer(Defer& defer) override { return Usage(&mObj, this->mMutex, &defer); }
     ConstUsage ConstUse() const override { return ConstUsage(&mObj, this->mMutex); }
 };
@@ -339,10 +383,14 @@ class MutexCondVarProtected : public MutexProtected<T, Guard> {
     // entire critical section, if a user calls |Wait| within |Fn|, the lock may be released and
     // reacquired in order for another thread to update the condition.
     using Base::Base::ConstUse;
+    using Base::Base::TryUse;
     using Base::Base::Use;
 
   private:
     Usage Use() override { return Usage(&this->mObj, this->mMutex, nullptr, &mCv); }
+    Usage Use(Base::Traits::LockType&& lock) override {
+        return Usage(&this->mObj, std::move(lock), nullptr, &mCv);
+    }
     ConstUsage ConstUse() const override {
         return ConstUsage(&this->mObj, this->mMutex, nullptr, &mCv);
     }
@@ -380,11 +428,15 @@ class MutexProtectedSupport
     using typename Base::ConstUsage;
     using typename Base::Usage;
 
+    using Base::TryUse;
     using Base::Use;
     using Base::UseWithDefer;
 
   private:
     Usage Use() override { return Usage(static_cast<T*>(this), this->mMutex); }
+    Usage Use(Traits::LockType&& lock) override {
+        return Usage(static_cast<T*>(this), std::move(lock), nullptr);
+    }
     Usage UseWithDefer(Defer& defer) override {
         return Usage(static_cast<T*>(this), this->mMutex, &defer);
     }

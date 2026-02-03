@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D11_COMMANDRECORDINGCONTEXT_D3D11_H_
 #define SRC_DAWN_NATIVE_D3D11_COMMANDRECORDINGCONTEXT_D3D11_H_
 
+#include <utility>
+
 #include "absl/container/flat_hash_set.h"
 #include "absl/container/inlined_vector.h"
 #include "dawn/common/Constants.h"
@@ -63,8 +65,9 @@ class CommandRecordingContextGuard : public ::dawn::detail::Guard<Ctx, Traits> {
     CommandRecordingContextGuard(Ctx* ctx,
                                  typename Traits::MutexType& mutex,
                                  Defer* defer = nullptr)
-        : Base(ctx, mutex, defer) {
-    }
+        : Base(ctx, mutex, defer) {}
+    CommandRecordingContextGuard(Ctx* ctx, typename Traits::LockType&& lock, Defer* defer = nullptr)
+        : Base(ctx, std::move(lock), defer) {}
 
     CommandRecordingContextGuard(const CommandRecordingContextGuard& other) = delete;
     CommandRecordingContextGuard& operator=(const CommandRecordingContextGuard& other) = delete;

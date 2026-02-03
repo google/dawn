@@ -92,7 +92,7 @@ class Buffer : public BufferBase {
     bool IsCPUWritable() const;
     bool IsCPUReadable() const;
 
-    void UnmapIfNeeded(const ScopedCommandRecordingContext* commandContext);
+    MaybeError UnmapIfNeeded(const ScopedCommandRecordingContext* commandContext);
 
     MaybeError TrackUsage(const ScopedCommandRecordingContext* commandContext,
                           ExecutionSerial pendingSerial);
@@ -195,6 +195,8 @@ class Buffer : public BufferBase {
     // Internal usage indicating the native buffer supports mapping for read and/or write or not.
     const wgpu::BufferUsage mInternalMappableFlags;
     ExecutionSerial mMapReadySerial = kMaxExecutionSerial;
+    // Temporary storage for MapAtCreation when the lock cannot be acquired.
+    std::unique_ptr<uint8_t[]> mMapAtCreationData;
 };
 
 // Buffer that can be used by GPU. It manages several copies of the buffer, each with its own
