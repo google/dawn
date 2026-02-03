@@ -521,6 +521,36 @@ TEST_P(MultithreadTests, MapAtCreationThenMapAgainWithRenderPassInParallel) {
     });
 }
 
+// Test MapAsync followed by Unmap without waiting for the map to complete.
+TEST_P(MultithreadTests, MapAsyncThenCancelInParallel) {
+    // TODO(crbug.com/451928481): multithread support in GL is incomplete
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+
+    constexpr uint32_t kNumThreads = 8;
+    utils::RunInParallel(kNumThreads, [&](uint32_t) {
+        wgpu::BufferDescriptor desc = {};
+        desc.size = 256;
+        desc.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+        wgpu::Buffer buffer = device.CreateBuffer(&desc);
+
+        // Use the buffer in a queue operation
+        wgpu::BufferDescriptor dstDesc = {};
+        dstDesc.size = desc.size;
+        dstDesc.usage = wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer dst = device.CreateBuffer(&dstDesc);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(buffer, 0, dst, 0, desc.size);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // MapAsync then immediately Unmap without waiting
+        buffer.MapAsync(wgpu::MapMode::Write, 0, desc.size, wgpu::CallbackMode::AllowProcessEvents,
+                        [](wgpu::MapAsyncStatus, wgpu::StringView) {});
+        buffer.Unmap();
+    });
+}
+
 // Test that copy a texture to a buffer then map that buffer in parallel works.
 TEST_P(MultithreadTests, T2BThenMapInParallel) {
     // TODO(451928481): multithread support in GL is incomplete

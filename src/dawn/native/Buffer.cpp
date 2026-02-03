@@ -915,10 +915,7 @@ MaybeError BufferBase::UnmapInternal(bool forDestroy) {
                       forDestroy ? BufferState::Destroyed : BufferState::Unmapped);
             mState.store(BufferState::Unmapped, std::memory_order::release);
 
-            GetDevice()->DeferIfLocked(
-                [eventManager = GetInstance()->GetEventManager(), mapEvent = std::move(event)]() {
-                    eventManager->SetFutureReady(mapEvent.Get());
-                });
+            GetInstance()->GetEventManager()->SetFutureReady(event.Get());
             return {};
         }
 
