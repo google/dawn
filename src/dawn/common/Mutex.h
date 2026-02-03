@@ -58,7 +58,10 @@ class DAWN_MUTEX_CAPABILITY MutexBase : public RefCounted, NonCopyable {
             other.mMutex = nullptr;
         }
 
-        AutoLockBase& operator=(AutoLockBase&& other) {
+        // The move operator conditionally unlocks, and the static thread-safety analysis cannot
+        // currently handle conditional locking, so we turn off the analysis here to avoid spurious
+        // warnings.
+        AutoLockBase& operator=(AutoLockBase&& other) DAWN_NO_THREAD_SAFETY_ANALYSIS {
             if (this != &other) {
                 if (mMutex != nullptr) {
                     mMutex->Unlock();
