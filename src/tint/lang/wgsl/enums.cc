@@ -579,9 +579,6 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "step") {
         return BuiltinFn::kStep;
     }
-    if (name == "storageBarrier") {
-        return BuiltinFn::kStorageBarrier;
-    }
     if (name == "tan") {
         return BuiltinFn::kTan;
     }
@@ -615,11 +612,14 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "unpack4xU8") {
         return BuiltinFn::kUnpack4XU8;
     }
-    if (name == "workgroupBarrier") {
-        return BuiltinFn::kWorkgroupBarrier;
-    }
     if (name == "workgroupUniformLoad") {
         return BuiltinFn::kWorkgroupUniformLoad;
+    }
+    if (name == "storageBarrier") {
+        return BuiltinFn::kStorageBarrier;
+    }
+    if (name == "workgroupBarrier") {
+        return BuiltinFn::kWorkgroupBarrier;
     }
     if (name == "textureBarrier") {
         return BuiltinFn::kTextureBarrier;
@@ -986,8 +986,6 @@ const char* str(BuiltinFn i) {
             return "sqrt";
         case BuiltinFn::kStep:
             return "step";
-        case BuiltinFn::kStorageBarrier:
-            return "storageBarrier";
         case BuiltinFn::kTan:
             return "tan";
         case BuiltinFn::kTanh:
@@ -1010,10 +1008,12 @@ const char* str(BuiltinFn i) {
             return "unpack4xI8";
         case BuiltinFn::kUnpack4XU8:
             return "unpack4xU8";
-        case BuiltinFn::kWorkgroupBarrier:
-            return "workgroupBarrier";
         case BuiltinFn::kWorkgroupUniformLoad:
             return "workgroupUniformLoad";
+        case BuiltinFn::kStorageBarrier:
+            return "storageBarrier";
+        case BuiltinFn::kWorkgroupBarrier:
+            return "workgroupBarrier";
         case BuiltinFn::kTextureBarrier:
             return "textureBarrier";
         case BuiltinFn::kTextureDimensions:
