@@ -564,9 +564,9 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
 MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     Device* device = ToBackend(GetDevice());
 
+    // The real mapped pointer is never returned for zero sized buffers. MappedAtCreation buffers
+    // are initialized in BufferBase already.
     if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
-        // Clear full allocated size, including padding bytes, except for zero sized buffers. For
-        // zero sized buffers GetMappedPointerImpl() points to const data which we can't clear.
         std::memset(GetMappedPointerImpl(), 0, GetAllocatedSize());
         GetDevice()->IncrementLazyClearCountForTesting();
         SetInitialized(true);
