@@ -353,7 +353,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mDeviceInfo.HasExt(DeviceExt::MultisampledRenderToSingleSampled) &&
         mDeviceInfo.multisampledRenderToSingleSampledFeatures.multisampledRenderToSingleSampled ==
             VK_TRUE) {
-        EnableFeature(Feature::MSAARenderToSingleSampled);
+        // TODO(crbug.com/481324378): Re-enable MSAARenderToSingleSampled after Skia usage of the
+        // feature is fixed.
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer) &&
