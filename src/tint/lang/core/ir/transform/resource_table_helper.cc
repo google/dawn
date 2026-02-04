@@ -32,10 +32,7 @@
 #include <vector>
 
 #include "src/tint/lang/core/ir/core_builtin_call.h"
-#include "src/tint/lang/core/ir/load.h"
-#include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/resource_type.h"
-#include "src/tint/utils/rtti/switch.h"
 
 namespace tint::core::ir::transform {
 
