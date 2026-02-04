@@ -96,6 +96,10 @@ const core::type::Type* ResourceTypeToType(core::type::Manager& ty, ResourceType
         case ResourceType::kTextureDepthMultisampled2d:
             return ty.depth_multisampled_texture(core::type::TextureDimension::k2d);
 
+        case ResourceType::kSampler:
+            return ty.sampler();
+        case ResourceType::kSampler_comparison:
+            return ty.comparison_sampler();
         default:
             TINT_UNREACHABLE();
     }
@@ -176,6 +180,12 @@ ResourceType TypeToResourceType(const core::type::Type* in_type) {
                 default:
                     TINT_UNREACHABLE();
             }
+        },
+        [&](const core::type::Sampler* s) {
+            if (s->IsComparison()) {
+                return ResourceType::kSampler_comparison;
+            }
+            return ResourceType::kSampler;
         },
         TINT_ICE_ON_NO_MATCH);
 }

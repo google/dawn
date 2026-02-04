@@ -3047,6 +3047,29 @@ fn nested() {
     EXPECT_EQ(ResourceType::kTextureCube_f32, types[3]);
 }
 
+TEST_F(InspectorGetResourceTableInfoTest, ResourceTable_Samplers) {
+    auto* src = R"(
+enable chromium_experimental_resource_table;
+
+@fragment fn ep() {
+  _ = hasResource<sampler>(0);
+  _ = getResource<sampler_comparison>(1);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetResourceTableInfo("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(2u, result.size());
+
+    std::vector<ResourceType> types(result.begin(), result.end());
+    std::sort(types.begin(), types.end());
+    EXPECT_EQ(ResourceType::kSampler, types[0]);
+    EXPECT_EQ(ResourceType::kSampler_comparison, types[1]);
+}
+
 class InspectorGetSamplerTextureUsesTest : public TestHelper, public testing::Test {
   public:
     using ResultExpectation = std::initializer_list<SamplerTexturePair>;
