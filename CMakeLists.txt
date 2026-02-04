@@ -197,6 +197,7 @@ set_if_not_defined(DAWN_SPIRV_TOOLS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-tools/src
 set_if_not_defined(DAWN_SPIRV_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-headers/src" "Directory in which to find SPIRV-Headers")
 set_if_not_defined(DAWN_GLSLANG_DIR "${DAWN_THIRD_PARTY_DIR}/glslang/src" "Directory in which to find GLSLang")
 set_if_not_defined(DAWN_VULKAN_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-headers/src" "Directory in which to find Vulkan-Headers")
+set_if_not_defined(DAWN_VULKAN_LOADER_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-loader/src" "Directory in which to find Vulkan-Loader")
 set_if_not_defined(DAWN_VULKAN_UTILITY_LIBRARIES_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-utility-libraries/src" "Directory in which to find Vulkan-Utility-Libraries")
 set_if_not_defined(DAWN_WEBGPU_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/webgpu-headers/src" "Directory in which to find webgpu headers")
 
@@ -243,6 +244,7 @@ option(TINT_BUILD_NULL_WRITER "Build the NULL output writer" ${DAWN_ENABLE_NULL}
 
 option(TINT_BUILD_IR_BINARY "Build IR binary format support" ${DAWN_BUILD_PROTOBUF})
 option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
+option(TINT_BUILD_FUZZER_VULKAN_SUPPORT "Build fuzzing Vulkan drivers" OFF)
 option(TINT_BUILD_BENCHMARKS "Build Tint benchmarks" OFF)
 option(TINT_BUILD_TESTS "Build tests" ON)
 option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
@@ -325,8 +327,9 @@ message(STATUS "")
 
 message(STATUS "Tint build command line executable tools: ${TINT_BUILD_CMD_TOOLS}")
 message(STATUS "Tint install: ${TINT_ENABLE_INSTALL}")
-message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
 message(STATUS "Tint build IR binary: ${TINT_BUILD_IR_BINARY}")
+message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
+message(STATUS "Tint build fuzzing vulkan drivers: ${TINT_BUILD_FUZZER_VULKAN_SUPPORT}")
 message(STATUS "Tint build benchmarks: ${TINT_BUILD_BENCHMARKS}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
 message(STATUS "Tint build tintd: ${TINT_BUILD_TINTD}")
@@ -357,6 +360,10 @@ message(STATUS "Node API Headers dir: ${NODE_API_HEADERS_DIR}")
 message(STATUS "Webgpu IDL path: ${WEBGPU_IDL_PATH}")
 message(STATUS "Go exe: ${GO_EXECUTABLE}")
 message(STATUS "")
+
+if (TINT_BUILD_FUZZER_VULKAN_SUPPORT AND NOT TINT_BUILD_FUZZERS)
+    message(FATAL_ERROR "Cannot enable TINT_BUILD_FUZZER_VULKAN_SUPPORT without enabling TINT_BUILD_FUZZERS")
+endif()
 
 # Much of the backend code is shared among desktop OpenGL and OpenGL ES
 if (${DAWN_ENABLE_DESKTOP_GL} OR ${DAWN_ENABLE_OPENGLES})

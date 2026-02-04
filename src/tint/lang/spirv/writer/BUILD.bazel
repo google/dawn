@@ -147,6 +147,11 @@ cc_library(
 )
 
 alias(
+  name = "tint_build_fuzzer_vulkan_support",
+  actual = "//src/tint:tint_build_fuzzer_vulkan_support_true",
+)
+
+alias(
   name = "tint_build_spv_reader",
   actual = "//src/tint:tint_build_spv_reader_true",
 )

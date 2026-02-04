@@ -108,6 +108,9 @@ void Register(const IRFuzzer& fuzzer) {
             ir_context.options.run_concurrently = context.options.run_concurrently;
             ir_context.options.verbose = context.options.verbose;
             ir_context.options.dxc = context.options.dxc;
+#if TINT_BUILD_FUZZER_VULKAN_SUPPORT
+            ir_context.options.vk_icd = context.options.vk_icd;
+#endif
             ir_context.options.dump = context.options.dump;
             auto result = fn(ir.Get(), ir_context, data);
             if (result != Success && context.options.verbose) {

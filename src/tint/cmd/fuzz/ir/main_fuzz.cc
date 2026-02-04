@@ -115,6 +115,9 @@ extern "C" __attribute__((visibility("default"))) int LLVMFuzzerInitialize(int* 
         opts.Add<tint::cli::BoolOption>("concurrent", "runs the fuzzers concurrently");
     auto& opt_verbose =
         opts.Add<tint::cli::BoolOption>("verbose", "prints the name of each fuzzer before running");
+#if TINT_BUILD_FUZZER_VULKAN_SUPPORT
+    auto& opt_vk_icd = opts.Add<tint::cli::StringOption>("vk_icd", "path to Vulkan ICD JSON");
+#endif
 
     tint::cli::ParseOptions parse_opts;
     parse_opts.ignore_unknown = true;
@@ -132,6 +135,9 @@ extern "C" __attribute__((visibility("default"))) int LLVMFuzzerInitialize(int* 
     options.filter = opt_filter.value.value_or("");
     options.run_concurrently = opt_concurrent.value.value_or(false);
     options.verbose = opt_verbose.value.value_or(false);
+#if TINT_BUILD_FUZZER_VULKAN_SUPPORT
+    options.vk_icd = opt_vk_icd.value.value_or("");
+#endif
     return 0;
 }
 

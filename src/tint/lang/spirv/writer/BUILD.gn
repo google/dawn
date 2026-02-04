@@ -176,6 +176,13 @@ if (tint_build_spv_writer) {
       "${tint_src_dir}/utils/text",
     ]
 
+    if (tint_build_fuzzer_vulkan_support) {
+      deps += [
+        "${dawn_vulkan_headers_dir}:vulkan_headers",
+        "${dawn_vulkan_loader_dir}:libvulkan",
+      ]
+    }
+
     if (tint_build_spv_reader || tint_build_spv_writer) {
       deps += [
         "${tint_spirv_tools_dir}:spvtools_headers",

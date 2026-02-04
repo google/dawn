@@ -161,6 +161,13 @@ declare_args() {
 }
 
 declare_args() {
+  # Enable Vulkan support in Tint fuzzers
+  if (!defined(tint_build_fuzzer_vulkan_support)) {
+    tint_build_fuzzer_vulkan_support = tint_build_mesa
+  }
+}
+
+declare_args() {
   # Directory holding tint source
   if (!defined(tint_src_dir)) {
     tint_src_dir = "${tint_root_dir}/src/tint"

@@ -197,6 +197,13 @@ tint_target_add_external_dependencies(tint_lang_spirv_writer_fuzz fuzz
   "src_utils"
 )
 
+if(TINT_BUILD_FUZZER_VULKAN_SUPPORT)
+  tint_target_add_external_dependencies(tint_lang_spirv_writer_fuzz fuzz
+    "libvulkan"
+    "vulkan-headers"
+  )
+endif(TINT_BUILD_FUZZER_VULKAN_SUPPORT)
+
 if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_writer_fuzz fuzz
     tint_lang_spirv_validate

@@ -27,11 +27,22 @@
 
 #include "src/tint/lang/spirv/writer/writer.h"
 
+#include <string>
+#include <vector>
+
 #include "src/tint/api/helpers/generate_bindings.h"
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
+#include "src/tint/utils/macros/defer.h"
+
+#if TINT_BUILD_FUZZER_VULKAN_SUPPORT
+#include <vulkan/vulkan.h>
+// One of the indirectly included graphics headers here #defines
+// Success, which causes build issues
+#undef Success
+#endif  // TINT_BUILD_FUZZER_VULKAN_SUPPORT
 
 namespace tint::spirv::writer {
 
@@ -105,8 +116,83 @@ struct FuzzedOptions {
 
 namespace {
 
+#if TINT_BUILD_FUZZER_VULKAN_SUPPORT
+Result<SuccessType> ValidateUsingVulkan(const std::string& vk_icd_path,
+                                        Slice<const uint32_t> spirv) {
+#if TINT_BUILD_IS_WIN
+#error "TINT_BUILD_FUZZER_VULKAN_SUPPORT is not supported on Windows"
+#endif  // TINT_BUILD_IS_WIN
+    // This setenv call is why this works on Linux/Mac but not Windows
+    setenv("VK_ICD_FILENAMES", vk_icd_path.c_str(), 1);
+
+    VkApplicationInfo app_info = {
+        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        .apiVersion = VK_API_VERSION_1_1,
+    };
+
+    VkInstanceCreateInfo create_info = {
+        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        .pApplicationInfo = &app_info,
+    };
+
+    VkInstance instance;
+    if (vkCreateInstance(&create_info, nullptr, &instance) != VK_SUCCESS) {
+        return Failure{"Failed to create Vulkan instance"};
+    }
+    TINT_DEFER(vkDestroyInstance(instance, nullptr));
+
+    uint32_t count = 0;
+    vkEnumeratePhysicalDevices(instance, &count, nullptr);
+    if (count == 0) {
+        return Failure{"Failed to enumerate physical devices"};
+    }
+
+    std::vector<VkPhysicalDevice> physical_devices(count);
+    VkResult res = vkEnumeratePhysicalDevices(instance, &count, physical_devices.data());
+    if ((res != VK_SUCCESS && res != VK_INCOMPLETE) || count == 0) {
+        return Failure{"Failed to enumerate physical devices"};
+    }
+    VkPhysicalDevice physical_device = physical_devices[0];
+
+    float queue_priority = 1.0f;
+    VkDeviceQueueCreateInfo queue_create_info = {
+        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+        .queueFamilyIndex = 0,
+        .queueCount = 1,
+        .pQueuePriorities = &queue_priority,
+    };
+
+    VkDeviceCreateInfo device_create_info = {
+        .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        .queueCreateInfoCount = 1,
+        .pQueueCreateInfos = &queue_create_info,
+    };
+
+    VkDevice device;
+    if (vkCreateDevice(physical_device, &device_create_info, nullptr, &device) != VK_SUCCESS) {
+        return Failure{"Failed to create Vulkan device"};
+    }
+    TINT_DEFER(vkDestroyDevice(device, nullptr));
+
+    VkShaderModuleCreateInfo shader_module_create_info = {
+        .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        .codeSize = spirv.len * sizeof(uint32_t),
+        .pCode = spirv.data,
+    };
+
+    VkShaderModule shader_module;
+    if (vkCreateShaderModule(device, &shader_module_create_info, nullptr, &shader_module) !=
+        VK_SUCCESS) {
+        return Failure{"Failed to create shader module"};
+    }
+    vkDestroyShaderModule(device, shader_module, nullptr);
+
+    return Success;
+}
+#endif  // TINT_BUILD_FUZZER_VULKAN_SUPPORT
+
 Result<SuccessType> IRFuzzer(core::ir::Module& module,
-                             const fuzz::ir::Context&,
+                             const fuzz::ir::Context& context,
                              FuzzedOptions fuzzed_options) {
     // TODO(375388101): We cannot run the backend for every entry point in the module unless we
     // clone the whole module each time, so for now we just generate the first entry point.
@@ -194,6 +280,13 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
                                 << res.Failure() << "\n\n"
                                 << "IR:\n"
                                 << core::ir::Disassembler(module).Plain();
+
+#if TINT_BUILD_FUZZER_VULKAN_SUPPORT
+    if (!context.options.vk_icd.empty()) {
+        TINT_CHECK_RESULT(
+            ValidateUsingVulkan(context.options.vk_icd, Slice(spirv.data(), spirv.size())));
+    }
+#endif
 
     return Success;
 }

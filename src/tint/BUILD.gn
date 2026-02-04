@@ -146,6 +146,12 @@ config("tint_public_config") {
     defines += [ "TINT_ENABLE_IR_VALIDATION=0" ]
   }
 
+  if (tint_build_fuzzer_vulkan_support) {
+    defines += [ "TINT_BUILD_FUZZER_VULKAN_SUPPORT=1" ]
+  } else {
+    defines += [ "TINT_BUILD_FUZZER_VULKAN_SUPPORT=0" ]
+  }
+
   include_dirs = [
     "${tint_root_dir}/",
     "${tint_root_dir}/include/",
