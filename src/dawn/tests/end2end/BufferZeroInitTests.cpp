@@ -1381,6 +1381,8 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
 
 DAWN_INSTANTIATE_TEST(BufferZeroInitTest,
                       D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      D3D11Backend({"nonzero_clear_resources_on_creation_for_testing",
+                                    "d3d11_disable_cpu_buffers"}),
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                                    {"d3d12_create_not_zeroed_heap"}),

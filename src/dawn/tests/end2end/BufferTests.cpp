@@ -670,8 +670,9 @@ TEST_P(BufferMappingTests, RegressChromium1421170) {
 }
 
 DAWN_INSTANTIATE_TEST_P(BufferMappingTests,
-                        {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
-                         OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
+                        {D3D11Backend(), D3D11Backend({"d3d11_disable_cpu_buffers"}),
+                         D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
+                         VulkanBackend(), WebGPUBackend()},
                         std::initializer_list<wgpu::CallbackMode>{
                             wgpu::CallbackMode::WaitAnyOnly, wgpu::CallbackMode::AllowProcessEvents,
                             wgpu::CallbackMode::AllowSpontaneous});
@@ -847,8 +848,8 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
 }
 
 DAWN_INSTANTIATE_TEST_P(BufferMappingCallbackTests,
-                        {D3D11Backend(), D3D12Backend(), MetalBackend(), VulkanBackend(),
-                         WebGPUBackend()},
+                        {D3D11Backend(), D3D11Backend({"d3d11_disable_cpu_buffers"}),
+                         D3D12Backend(), MetalBackend(), VulkanBackend(), WebGPUBackend()},
                         std::initializer_list<wgpu::CallbackMode>{
                             wgpu::CallbackMode::WaitAnyOnly, wgpu::CallbackMode::AllowProcessEvents,
                             wgpu::CallbackMode::AllowSpontaneous});
@@ -1101,6 +1102,7 @@ TEST_P(BufferMappedAtCreationTests, GetMappedRangeZeroSized) {
 
 DAWN_INSTANTIATE_TEST(BufferMappedAtCreationTests,
                       D3D11Backend(),
+                      D3D11Backend({"d3d11_disable_cpu_buffers"}),
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),
                       MetalBackend(),
