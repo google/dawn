@@ -101,11 +101,7 @@ def apply_win_cq_builder_defaults(kwargs):
     Returns:
         |kwargs| with Win/CMake defaults set.
     """
-
-    # TODO(crbug.com/459517292): Call apply_cq_builder_defaults() instead once
-    # we confirm that Win/CMake works as expected.
-    # kwargs = apply_cq_builder_defaults(kwargs)
-    kwargs.setdefault("max_concurrent_builds", 5)
+    kwargs = apply_cq_builder_defaults(kwargs)
     kwargs.setdefault("builderless", True)
     kwargs.setdefault("cpu", cpu.X86_64)
     kwargs.setdefault("os", os.WINDOWS_DEFAULT)
@@ -135,10 +131,7 @@ def dawn_mac_cmake_cq_tester(**kwargs):
 
 def dawn_win_cmake_cq_tester(**kwargs):
     kwargs = apply_win_cq_builder_defaults(kwargs)
-
-    # TODO(crbug.com/459517292): Call add_builder_to_main_and_milestone_cq_groups
-    # instead once we confirm that Win/CMake/MSVC works as expected.
-    try_.builder(**kwargs)
+    add_builder_to_main_and_milestone_cq_groups(kwargs)
 
 ## CQ Builders
 
