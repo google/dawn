@@ -117,6 +117,8 @@ function(tint_default_compile_options TARGET)
     -Wno-unsafe-buffer-usage-in-libc-call
     -Wno-covered-switch-default
     -Wno-c2y-extensions
+    -Wno-lifetime-safety-intra-tu-suggestions
+    -Wno-lifetime-safety-cross-tu-suggestions
   )
 
   if(COMPILER_IS_GNU)
