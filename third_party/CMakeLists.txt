@@ -194,7 +194,7 @@ if (NOT TARGET Vulkan::Headers AND DAWN_ENABLE_VULKAN)
     add_subdirectory(${DAWN_VULKAN_HEADERS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-headers/src")
 endif()
 
-if (NOT TARGET Vulkan::Loader AND DAWN_ENABLE_VULKAN)
+if (NOT TARGET Vulkan::Loader AND DAWN_ENABLE_VULKAN AND TINT_BUILD_FUZZER_VULKAN_SUPPORT)
     message(STATUS "Dawn: using Vulkan::Loader at ${DAWN_VULKAN_LOADER_DIR}")
     add_subdirectory(${DAWN_VULKAN_LOADER_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-loader/src")
 endif()
