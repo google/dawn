@@ -422,14 +422,7 @@ ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
     } else if (IsStaging(actualUsage)) {
         buffer = AcquireRef(new StagingBuffer(device, descriptor));
     } else {
-        const auto& devInfo = ToBackend(device->GetPhysicalDevice())->GetDeviceInfo();
-        // Use D3D11_MAP_WRITE_NO_OVERWRITE when possible to guarantee driver that we don't
-        // overwrite data in use by GPU. MapAsync() already ensures that any GPU commands using this
-        // buffer already finish. In return driver won't try to stall CPU for mapping access.
-        D3D11_MAP mapWriteMode = devInfo.supportsMapNoOverwriteDynamicBuffers
-                                     ? D3D11_MAP_WRITE_NO_OVERWRITE
-                                     : D3D11_MAP_WRITE;
-        buffer = AcquireRef(new GPUUsableBuffer(device, descriptor, mapWriteMode));
+        buffer = AcquireRef(new GPUUsableBuffer(device, descriptor));
     }
     DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation, commandContext));
     return buffer;
@@ -895,7 +888,7 @@ class GPUUsableBuffer::Storage : public RefCounted, NonCopyable {
 
     bool IsCPUWritable() const { return mMappableCopyableFlags & wgpu::BufferUsage::MapWrite; }
     bool IsCPUReadable() const { return mMappableCopyableFlags & wgpu::BufferUsage::MapRead; }
-    bool IsStaging() const { return IsCPUReadable(); }
+    bool IsDynamic() const { return mD3d11Usage == D3D11_USAGE_DYNAMIC; }
     bool SupportsCopyDst() const { return mMappableCopyableFlags & wgpu::BufferUsage::CopyDst; }
     bool IsGPUWritable() const { return mD3d11Usage == D3D11_USAGE_DEFAULT; }
 
@@ -909,8 +902,7 @@ class GPUUsableBuffer::Storage : public RefCounted, NonCopyable {
 
 // GPUUsableBuffer
 GPUUsableBuffer::GPUUsableBuffer(DeviceBase* device,
-                                 const UnpackedPtr<BufferDescriptor>& descriptor,
-                                 D3D11_MAP mapWriteMode)
+                                 const UnpackedPtr<BufferDescriptor>& descriptor)
     : Buffer(device,
              descriptor,
              /*internalMappableFlags=*/
@@ -921,8 +913,7 @@ GPUUsableBuffer::GPUUsableBuffer(DeviceBase* device,
                      mappableFlags |= wgpu::BufferUsage::MapWrite;
                  }
                  return mappableFlags;
-             }(descriptor)),
-      mD3DMapWriteMode(mapWriteMode) {}
+             }(descriptor)) {}
 
 GPUUsableBuffer::~GPUUsableBuffer() = default;
 
@@ -940,8 +931,7 @@ void GPUUsableBuffer::DestroyImpl(DestroyReason reason) {
     mUAVCache.clear();
 
     mLastUpdatedStorage = nullptr;
-    mCPUWritableStorage = nullptr;
-    mMappedStorage = nullptr;
+    mMappableStorage = nullptr;
 
     mStorages = {};
 }
@@ -979,6 +969,20 @@ MaybeError GPUUsableBuffer::InitializeInternal() {
 
     wgpu::BufferUsage usagesToHandle = GetInternalUsage();
 
+    // If the buffer has MapRead usage, allocate a staging storage for both MapRead & MapWrite.
+    // Example: If user creates a buffer with MapWrite + MapRead + Vertex usages:
+    // - We will allocate:
+    //   - A storage for both MapWrite + MapRead.
+    //   - A storage for Vertex usage.
+    //   - This will require a copy for vertex input whenever the user maps the buffer (either for
+    //   writing or reading).
+    //   - This is acceptable since a buffer with both MapWrite + MapRead is rare.
+    if (usagesToHandle & wgpu::BufferUsage::MapRead) {
+        DAWN_TRY_ASSIGN(mLastUpdatedStorage, GetOrCreateStorage(StorageType::Staging));
+        mMappableStorage = mLastUpdatedStorage;
+        usagesToHandle &= ~kStagingUsages;
+    }
+
     // We need to create a separate storage for uniform usage, because D3D11 doesn't allow constant
     // buffer to be used for other purposes.
     if (usagesToHandle & wgpu::BufferUsage::Uniform) {
@@ -993,7 +997,7 @@ MaybeError GPUUsableBuffer::InitializeInternal() {
             usagesToHandle &= ~wgpu::BufferUsage::MapWrite;
             DAWN_TRY_ASSIGN(mLastUpdatedStorage,
                             GetOrCreateStorage(StorageType::CPUWritableConstantBuffer));
-            mCPUWritableStorage = mLastUpdatedStorage;
+            mMappableStorage = mLastUpdatedStorage;
         } else {
             // For constant buffer, the only supported GPU op is copy. So create one storage for
             // that.
@@ -1008,31 +1012,23 @@ MaybeError GPUUsableBuffer::InitializeInternal() {
     }
 
     // Create separate storage for non-constant buffer usages if required.
-    if (!IsStaging(usagesToHandle)) {
-        if (usagesToHandle & wgpu::BufferUsage::MapWrite) {
-            // Note: we only need one CPU writable storage. If there are both const buffer and
-            // non-const buffer usages, we favor CPU writable const buffer first. Since that's most
-            // likely the common use case where users want to update const buffer on CPU.
-            DAWN_ASSERT(mCPUWritableStorage == nullptr);
-            usagesToHandle &= ~wgpu::BufferUsage::MapWrite;
-            // If a buffer is created with both Storage and MapWrite usages, then
-            // we will lazily create a GPU writable storage later. Note: we favor CPU writable
-            // over GPU writable when creating non-constant buffer storage. This is to optimize
-            // the most common cases where MapWrite buffers are mostly updated by CPU.
-            DAWN_TRY_ASSIGN(mLastUpdatedStorage,
-                            GetOrCreateStorage(StorageType::CPUWritableNonConstantBuffer));
-            mCPUWritableStorage = mLastUpdatedStorage;
-        } else {
-            usagesToHandle &= ~wgpu::BufferUsage::CopyDst;
-            DAWN_TRY_ASSIGN(mLastUpdatedStorage,
-                            GetOrCreateStorage(StorageType::GPUWritableNonConstantBuffer));
-        }
-    }
-
-    // Special storage for staging.
-    if (IsMappable(usagesToHandle)) {
-        DAWN_TRY_ASSIGN(mLastUpdatedStorage, GetOrCreateStorage(StorageType::Staging));
-        mCPUWritableStorage = mLastUpdatedStorage;
+    if (usagesToHandle & wgpu::BufferUsage::MapWrite) {
+        // Note: we only need one CPU writable storage. If there are both const buffer and
+        // non-const buffer usages, we favor CPU writable const buffer first. Since that's most
+        // likely the common use case where users want to update const buffer on CPU.
+        DAWN_ASSERT(mMappableStorage == nullptr);
+        usagesToHandle &= ~wgpu::BufferUsage::MapWrite;
+        // If a buffer is created with both Storage and MapWrite usages, then
+        // we will lazily create a GPU writable storage later. Note: we favor CPU writable
+        // over GPU writable when creating non-constant buffer storage. This is to optimize
+        // the most common cases where MapWrite buffers are mostly updated by CPU.
+        DAWN_TRY_ASSIGN(mLastUpdatedStorage,
+                        GetOrCreateStorage(StorageType::CPUWritableNonConstantBuffer));
+        mMappableStorage = mLastUpdatedStorage;
+    } else {
+        usagesToHandle &= ~wgpu::BufferUsage::CopyDst;
+        DAWN_TRY_ASSIGN(mLastUpdatedStorage,
+                        GetOrCreateStorage(StorageType::GPUWritableNonConstantBuffer));
     }
 
     return {};
@@ -1214,68 +1210,47 @@ MaybeError GPUUsableBuffer::SyncGPUWritesToStaging(
 MaybeError GPUUsableBuffer::MapInternal(const ScopedCommandRecordingContext* commandContext,
                                         wgpu::MapMode mode) {
     DAWN_ASSERT(!mMappedData);
+    DAWN_ASSERT(mMappableStorage);
 
-    D3D11_MAP mapType;
-    Storage* storage;
-
-    if (mode == wgpu::MapMode::Write) {
-        storage = mCPUWritableStorage;
-    } else {
-        // If buffer has MapRead usage, a staging storage should already be created in
-        // InitializeInternal().
-        storage = mStorages[StorageType::Staging].Get();
-    }
-
-    if (storage->IsStaging()) {
-        // Always map buffer with D3D11_MAP_READ_WRITE if possible even for mapping
-        // wgpu::MapMode:Read, because we need write permission to initialize the buffer.
-        // TODO(dawn:1705): investigate the performance impact of mapping with
-        // D3D11_MAP_READ_WRITE.
-        mapType = D3D11_MAP_READ_WRITE;
-    } else {
+    if (mMappableStorage->IsDynamic()) {
         DAWN_ASSERT(mode == wgpu::MapMode::Write);
-        mapType = mD3DMapWriteMode;
+        // Dynamic buffer can only use D3D11_MAP_WRITE_NO_OVERWRITE
+        mD3DMapTypeUsed = D3D11_MAP_WRITE_NO_OVERWRITE;
+    } else {
+        if (NeedsInitialization()) {
+            // Map buffer with D3D11_MAP_READ_WRITE because we need write permission to initialize
+            // the buffer.
+            // TODO(dawn:1705): investigate the performance impact of mapping with
+            // D3D11_MAP_READ_WRITE.
+            mD3DMapTypeUsed = D3D11_MAP_READ_WRITE;
+        } else {
+            mD3DMapTypeUsed = (mode == wgpu::MapMode::Read) ? D3D11_MAP_READ : D3D11_MAP_WRITE;
+        }
     }
-
-    DAWN_ASSERT(storage);
 
     // Sync previously modified content before mapping.
-    DAWN_TRY(SyncStorage(commandContext, storage));
+    DAWN_TRY(SyncStorage(commandContext, mMappableStorage));
 
     D3D11_MAPPED_SUBRESOURCE mappedResource;
-    DAWN_TRY(CheckHRESULT(commandContext->Map(storage->GetD3D11Buffer(),
-                                              /*Subresource=*/0, mapType,
+    DAWN_TRY(CheckHRESULT(commandContext->Map(mMappableStorage->GetD3D11Buffer(),
+                                              /*Subresource=*/0, mD3DMapTypeUsed,
                                               /*MapFlags=*/0, &mappedResource),
                           "ID3D11DeviceContext::Map"));
     mMappedData = static_cast<uint8_t*>(mappedResource.pData);
-    mMappedStorage = storage;
 
     return {};
 }
 
 void GPUUsableBuffer::UnmapInternal(const ScopedCommandRecordingContext* commandContext) {
     DAWN_ASSERT(mMappedData);
-    commandContext->Unmap(mMappedStorage->GetD3D11Buffer(),
+    DAWN_ASSERT(mMappableStorage);
+    commandContext->Unmap(mMappableStorage->GetD3D11Buffer(),
                           /*Subresource=*/0);
     mMappedData = nullptr;
-    // Since D3D11_MAP_READ_WRITE is used even for MapMode::Read, we need to increment the
-    // revision.
-    IncrStorageRevAndMakeLatest(commandContext, mMappedStorage);
-
-    auto* stagingStorage = mStorages[StorageType::Staging].Get();
-
-    if (stagingStorage && mLastUpdatedStorage != stagingStorage) {
-        // If we have staging buffer (for MapRead), it has to be updated so later when user calls
-        // Map + Read on this buffer, the stall might be avoided. Note: This is uncommon case where
-        // the buffer is created with both MapRead & MapWrite. Technically it's impossible for the
-        // following code to return error. Because in staging storage case, only CopyResource()
-        // needs to be used. No extra allocations needed.
-        [[maybe_unused]] bool hasError =
-            GetDevice()->ConsumedError(SyncStorage(commandContext, stagingStorage));
-        DAWN_ASSERT(!hasError);
+    // Only increment revision if the buffer was mapped for writing.
+    if (mD3DMapTypeUsed != D3D11_MAP_READ) {
+        IncrStorageRevAndMakeLatest(commandContext, mMappableStorage);
     }
-
-    mMappedStorage = nullptr;
 }
 
 ResultOrError<ID3D11Buffer*> GPUUsableBuffer::GetD3D11ConstantBuffer(
@@ -1706,7 +1681,7 @@ MaybeError GPUUsableBuffer::PredicatedClear(
 }
 
 ComPtr<ID3D11Buffer> GPUUsableBuffer::GetD3D11MappedBuffer() {
-    return mMappedStorage ? mMappedStorage->GetD3D11Buffer() : nullptr;
+    return mMappedData ? mMappableStorage->GetD3D11Buffer() : nullptr;
 }
 
 }  // namespace dawn::native::d3d11

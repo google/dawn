@@ -212,9 +212,7 @@ class Buffer : public BufferBase {
 // TODO(349848481): Consider making this the only Buffer class since it could cover all use cases.
 class GPUUsableBuffer final : public Buffer {
   public:
-    GPUUsableBuffer(DeviceBase* device,
-                    const UnpackedPtr<BufferDescriptor>& descriptor,
-                    D3D11_MAP mapWriteMode);
+    GPUUsableBuffer(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& descriptor);
     ~GPUUsableBuffer() override;
 
     ResultOrError<ID3D11Buffer*> GetD3D11ConstantBuffer(
@@ -344,17 +342,16 @@ class GPUUsableBuffer final : public Buffer {
 
     // The storage contains most up-to-date content.
     raw_ptr<Storage> mLastUpdatedStorage;
-    // This points to either CPU writable constant buffer or CPU writable non-constant buffer. We
-    // don't need both to exist.
-    raw_ptr<Storage> mCPUWritableStorage;
-    raw_ptr<Storage> mMappedStorage;
+    // This points to either CPU writable constant buffer or CPU writable non-constant buffer or a
+    // staging buffer. We don't need multiple CPU writable buffers to exist.
+    raw_ptr<Storage> mMappableStorage;
 
     // TODO(dawn:381045722): Use LRU to limit number of cached entries.
     using BufferViewKey = std::tuple<ID3D11Buffer*, uint64_t, uint64_t>;
     absl::flat_hash_map<BufferViewKey, ComPtr<ID3D11ShaderResourceView>> mSRVCache;
     absl::flat_hash_map<BufferViewKey, ComPtr<ID3D11UnorderedAccessView1>> mUAVCache;
 
-    const D3D11_MAP mD3DMapWriteMode = D3D11_MAP_WRITE;
+    D3D11_MAP mD3DMapTypeUsed = D3D11_MAP_WRITE;
 };
 
 static inline GPUUsableBuffer* ToGPUUsableBuffer(BufferBase* buffer) {
