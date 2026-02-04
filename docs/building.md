@@ -188,6 +188,48 @@ cache-able. Updating the repo, editing source files, and changing build
 flags will all cause misses, since entries in the cache are based on
 flags + contents of the source file.
 
+### Weird CMake build breaks on Linux
+If you see errors like this:
+```
+error: satisfaction of constraint 'is_constructible_v<_Tp, _Up>' depends on itself
+  && is_constructible_v<_Tp, _Up>
+     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
+or similar complaints about constraints depending on themselves, this
+is a known [issue](https://github.com/llvm/llvm-project/issues/62096)
+with older versions of Clang (17ish through 19ish) and newer versions
+of GCC (15+).
+
+Specifically Clang by default uses the standard library from GCC, and
+GCC 15 introduces a construct that older Clang thinks is out of spec,
+thought it is not.
+
+Currently there is no provided hermetic Linux build for CMake to be
+used to avoid this problem, so you either need to use a newer version
+of Clang or use an older version of GCC for your entire system.
+
+For some environments currently, Clang 19.x is the newest version
+available, and GCC 15 is the default compiler, so it cannot be
+down-rev'd.
+
+In this case you will need to install a parallel GCC toolchain and
+tell Clang to use that.
+
+For Debian based systems this can be done as follows:
+```sh
+sudo apt-get install gcc-14 libgcc-14-dev
+...
+cmake -DCMAKE_CXX_FLAGS="--gcc-install-dir=/usr/lib/gcc/x86_64-linux-gnu/14" <other cmake flags> <path to repo root>
+```
+
+This assumes gcc-14 is installed to
+`/usr/lib/gcc/x86_64-linux-gnu/14`, which may not be true depending on
+your specific distro and architecture.
+
+It is likely CMake will not correctly pick up this type of dev env
+change if you run this in an existing build directory, so it is
+recommended that you setup a new build directory to use this.
+
 ### Fuzzers on MacOS
 As of Late Oct 2025, fuzzing on a dev Mac is not in a good state.
 
