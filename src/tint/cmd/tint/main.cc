@@ -136,6 +136,7 @@ struct Options {
     bool emit_single_entry_point = false;
 
     Format format = Format::kUnknown;
+    tint::cmd::InputFormat input_format = tint::cmd::InputFormat::kUnknown;
 
     bool verbose = false;
     bool parse_only = false;
@@ -269,6 +270,25 @@ If not provided, will be inferred from output filename extension:
   .hlsl   -> hlsl)",
                                                 format_enum_names, ShortName{"f"});
     TINT_DEFER(opts->format = fmt.value.value_or(Format::kUnknown));
+
+    tint::Vector<EnumName<tint::cmd::InputFormat>, 3> input_format_enum_names;
+#if TINT_BUILD_WGSL_READER
+    input_format_enum_names.Emplace(tint::cmd::InputFormat::kWgsl, "wgsl");
+#endif
+
+#if TINT_BUILD_SPV_READER
+    input_format_enum_names.Emplace(tint::cmd::InputFormat::kSpirvBin, "spirv");
+    input_format_enum_names.Emplace(tint::cmd::InputFormat::kSpirvAsm, "spvasm");
+#endif
+    auto& input_fmt =
+        options.Add<EnumOption<tint::cmd::InputFormat>>("input-format",
+                                                        R"(Input format.
+If not provided, will be inferred from input filename extension:
+.spvasm -> spvasm
+.spv    -> spirv
+.wgsl   -> wgsl)",
+                                                        input_format_enum_names, ShortName{"if"});
+    TINT_DEFER(opts->input_format = input_fmt.value.value_or(tint::cmd::InputFormat::kUnknown));
 
     const auto default_color_mode =
         exe_mode == ExeMode::kServer ? tint::ColorMode::kPlain : tint::ColorModeDefault();
@@ -1463,6 +1483,10 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
         std::cerr << "Cannot emit binary SPIR-V to stdout in server mode\n";
         return 1;
     }
+    if (exe_mode == ExeMode::kServer && options.input_format == tint::cmd::InputFormat::kSpirvBin) {
+        std::cerr << "Cannot read binary SPIR-V from stdin in server mode\n";
+        return 1;
+    }
 
     // Implement output format defaults.
     if (options.format == Format::kUnknown) {
@@ -1476,6 +1500,7 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
 
     tint::cmd::LoadProgramOptions opts{
         .filename = options.input_filename,
+        .input_format = options.input_format,
 #if TINT_BUILD_SPV_READER
         .spirv_reader_options = options.spirv_reader_options,
 #endif

@@ -33,6 +33,7 @@
 #ifndef SRC_TINT_CMD_COMMON_HELPER_H_
 #define SRC_TINT_CMD_COMMON_HELPER_H_
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -56,6 +57,13 @@ class InternalCompilerError;
 }  // namespace tint
 
 namespace tint::cmd {
+
+enum class InputFormat {
+    kUnknown,
+    kWgsl,
+    kSpirvBin,
+    kSpirvAsm,
+};
 
 /// Information on a loaded program
 struct ProgramInfo {
@@ -81,8 +89,10 @@ void PrintInspectorBindings(tint::inspector::Inspector& inspector);
 
 /// Options for the LoadProgramInfo call
 struct LoadProgramOptions {
-    /// The file to be loaded
+    /// The file to be loaded, might be "-" for stdin
     std::string filename;
+    /// The input format. Optional for files, mandatory for stdin
+    InputFormat input_format;
 #if TINT_BUILD_SPV_READER
     /// Spirv-reader options
     tint::spirv::reader::Options spirv_reader_options;
@@ -143,6 +153,13 @@ std::string OverrideTypeToString(tint::inspector::Override::Type type);
 
 /// Returns true if the given `name` is either empty or `-` which signifies `stdout` is selected.
 bool IsStdout(const std::string& name);
+
+/// Returns true if the given `name` is either empty or `-` which signifies `stdin` is selected.
+bool IsStdin(const std::string& name);
+
+/// On Windows, sets the standard input stream stdin into binary mode. Non-Windows platforms are
+/// not affected. If stdin is in text mode reading the byte 0x1A might be interpreted as EOF signal.
+void SetStdinModeBinary();
 
 /// Writes the given `buffer` to standard output. If any error occurs, returns false and outputs
 /// error message to standard error. The ContainerT type must have data() and size() methods, like
@@ -214,12 +231,7 @@ bool WriteFile(const std::string& output_file, const std::string mode, const Con
 /// Assumes the size of a `T` object is divisible by its required alignment.
 /// @returns true if we successfully read the file.
 template <typename T>
-bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
-    if (!buffer) {
-        std::cerr << "The buffer pointer was null\n";
-        return false;
-    }
-
+bool ReadFileImpl(const std::string& input_file, std::vector<T>* buffer) {
     FILE* file = nullptr;
 #if defined(_MSC_VER)
     fopen_s(&file, input_file.c_str(), "rb");
@@ -253,6 +265,60 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
     }
 
     return true;
+}
+
+/// Copies the content from stdin to `buffer`,
+/// assuming each element in the stream is of type `T`.
+/// writes error messages to the standard error stream and returns false.
+/// Assumes the size of a `T` object is divisible by its required alignment.
+/// @returns true if we successfully read from stream.
+template <typename T>
+bool ReadStdinImpl(std::vector<T>* buffer) {
+    buffer->clear();
+    SetStdinModeBinary();
+    constexpr size_t kItemsPerChunk = 1024;
+    constexpr size_t kBytesPerChunk = sizeof(T) * kItemsPerChunk;
+    std::vector<T> chunk(kItemsPerChunk);
+    while (!std::feof(stdin)) {
+        size_t bytes_read = std::fread(chunk.data(), 1, kBytesPerChunk, stdin);
+        if (bytes_read == 0) {
+            if (std::ferror(stdin)) {
+                std::perror("Error reading from standard input");
+                return false;
+            }
+            // EOF
+            break;
+        }
+        if (bytes_read % sizeof(T) != 0) {
+            std::cerr << "Encountered non-aligned read from input stream, read '" << bytes_read
+                      << "' bytes, which is not an integral number of objects of size '"
+                      << sizeof(T) << "'\n";
+            return false;
+        }
+        // std::min for extra safety
+        size_t items_read = std::min(chunk.size(), bytes_read / sizeof(T));
+        buffer->reserve(buffer->size() + items_read);
+        std::copy(chunk.begin(), chunk.begin() + int32_t(items_read), std::back_inserter(*buffer));
+    }
+    return true;
+}
+
+/// Copies the content from the file named `input_file` to `buffer`.
+/// If `input_file` is empty or "-", reads from standard input.
+/// assuming each element in the file is of type `T`.  If any error occurs,
+/// writes error messages to the standard error stream and returns false.
+/// @returns true on success
+template <typename T>
+bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
+    if (!buffer) {
+        std::cerr << "The buffer pointer was null\n";
+        return false;
+    }
+
+    if (IsStdin(input_file)) {
+        return ReadStdinImpl(buffer);
+    }
+    return ReadFileImpl(input_file, buffer);
 }
 
 /// @param str the string to quote
