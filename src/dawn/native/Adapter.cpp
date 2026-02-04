@@ -459,6 +459,10 @@ const TogglesState& AdapterBase::GetTogglesState() const {
     return mTogglesState;
 }
 
+std::vector<const char*> AdapterBase::GetTogglesUsed() const {
+    return mTogglesState.GetEnabledToggleNames();
+}
+
 wgpu::FeatureLevel AdapterBase::GetFeatureLevel() const {
     return mFeatureLevel;
 }

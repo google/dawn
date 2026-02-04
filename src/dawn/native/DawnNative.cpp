@@ -30,6 +30,7 @@
 #include <vector>
 
 #include "dawn/common/Log.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/Device.h"
@@ -51,6 +52,9 @@ const DawnProcTable& GetProcsAutogen();
 
 const DawnProcTable& GetProcs() {
     return GetProcsAutogen();
+}
+std::vector<const char*> GetTogglesUsed(const wgpu::Adapter& adapter) {
+    return FromAPI(adapter.Get())->GetTogglesUsed();
 }
 
 std::vector<const char*> GetTogglesUsed(WGPUDevice device) {
