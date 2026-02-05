@@ -957,8 +957,19 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
     }
 
     if (options.validate && options.skip_hash.count(hash) == 0) {
-        // Use Vulkan 1.1, since this is what Tint, internally, uses.
-        spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
+        // Use Vulkan 1.1, since this is the minimum version required by Dawn.
+        spv_target_env target_env = SPV_ENV_MAX;
+        switch (options.spirv_version) {
+            case tint::spirv::writer::SpvVersion::kSpv13:
+                target_env = SPV_ENV_VULKAN_1_1;
+                break;
+            case tint::spirv::writer::SpvVersion::kSpv14:
+                target_env = SPV_ENV_VULKAN_1_1_SPIRV_1_4;
+                break;
+            case tint::spirv::writer::SpvVersion::kSpv15:
+                TINT_UNREACHABLE() << "SPIR-V 1.5 validation not yet supported";
+        }
+        spvtools::SpirvTools tools(target_env);
         tools.SetMessageConsumer(
             [](spv_message_level_t, const char*, const spv_position_t& pos, const char* msg) {
                 std::cerr << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg << "\n";
