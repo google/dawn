@@ -344,6 +344,10 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         "Vulkan.CompileShaderToSPIRV");
 
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
+    if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
+        DumpSpirv(GetDevice(), compilation->spirv.data(), compilation->spirv.size());
+    }
+
     if (GetDevice()->IsToggleEnabled(Toggle::EnableSpirvValidation)) {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "Vulkan.ValidateSpirv");
 
@@ -351,10 +355,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         const bool spv14 = GetDevice()->IsToggleEnabled(Toggle::UseSpirv14);
         DAWN_TRY(ValidateSpirv(GetDevice(), compilation->spirv.data(), compilation->spirv.size(),
                                spv14));
-    }
-
-    if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
-        DumpSpirv(GetDevice(), compilation->spirv.data(), compilation->spirv.size());
     }
 #endif
 
