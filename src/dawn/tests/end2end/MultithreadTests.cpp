@@ -551,6 +551,56 @@ TEST_P(MultithreadTests, MapAsyncThenCancelInParallel) {
     });
 }
 
+// Test that Destroy() doesn't race with remap scheduling when using auto map.
+TEST_P(MultithreadTests, MapThenSubmitThenDestroy) {
+    // TODO(crbug.com/451928481): multithread support in GL is incomplete
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+
+    constexpr uint32_t kNumThreads = 8;
+    utils::RunInParallel(kNumThreads, [&](uint32_t) {
+        wgpu::BufferDescriptor desc = {};
+        desc.size = 16;
+        desc.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+        wgpu::Buffer buffer = device.CreateBuffer(&desc);
+
+        // MapAsync, write red color data, and unmap
+        std::atomic_bool mapped = false;
+        buffer.MapAsync(wgpu::MapMode::Write, 0, desc.size, wgpu::CallbackMode::AllowProcessEvents,
+                        [&mapped](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                            EXPECT_EQ(status, wgpu::MapAsyncStatus::Success);
+                            mapped = true;
+                        });
+
+        while (!mapped) {
+            WaitABit();
+        }
+
+        uint32_t* data = static_cast<uint32_t*>(buffer.GetMappedRange(0, desc.size));
+        ASSERT_NE(data, nullptr);
+        // Write red color (RGBA)
+        data[0] = 0xFF0000FF;  // R
+        data[1] = 0xFF0000FF;  // G
+        data[2] = 0xFF0000FF;  // B
+        data[3] = 0xFF0000FF;  // A
+        buffer.Unmap();
+
+        // Use the buffer in a queue operation
+        wgpu::BufferDescriptor copyDesc = {};
+        copyDesc.size = desc.size;
+        copyDesc.usage = wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer dst = device.CreateBuffer(&copyDesc);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(buffer, 0, dst, 0, desc.size);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // This tests that buffer Destroy() doesn't race with remap scheduling that happens
+        // with auto map after queue submission.
+        buffer.Destroy();
+    });
+}
+
 // Test that copy a texture to a buffer then map that buffer in parallel works.
 TEST_P(MultithreadTests, T2BThenMapInParallel) {
     // TODO(451928481): multithread support in GL is incomplete
@@ -2070,6 +2120,7 @@ DAWN_INSTANTIATE_TEST(MultithreadTests,
                       D3D11Backend({"d3d11_use_unmonitored_fence"}),
                       D3D11Backend({"d3d11_delay_flush_to_gpu"}),
                       D3D11Backend({"d3d11_disable_cpu_buffers"}),
+                      D3D11Backend({"auto_map_backend_buffer", "d3d11_disable_cpu_buffers"}),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

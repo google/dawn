@@ -346,24 +346,24 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
     DAWN_TRY_ASSIGN(completedSerial, CheckCompletedSerialsImpl());
 
     // Finalize Mapping on ready buffers.
-    DAWN_TRY(CheckAndMapReadyBuffers(completedSerial));
+    DAWN_TRY(CheckScheduledBufferMappings(completedSerial));
 
     return completedSerial;
 }
 
-MaybeError Queue::CheckAndMapReadyBuffers(ExecutionSerial completedSerial) {
+MaybeError Queue::CheckScheduledBufferMappings(ExecutionSerial completedSerial) {
     auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Passive);
     return mPendingMapBuffers.Use([&](auto pendingMapBuffers) -> MaybeError {
         for (const auto& bufferEntry : pendingMapBuffers->IterateUpTo(completedSerial)) {
-            DAWN_TRY(bufferEntry.buffer->FinalizeMap(&commandContext, completedSerial,
-                                                     bufferEntry.mode));
+            DAWN_TRY(
+                bufferEntry.buffer->TryMapNow(&commandContext, completedSerial, bufferEntry.mode));
         }
         pendingMapBuffers->ClearUpTo(completedSerial);
         return {};
     });
 }
 
-void Queue::TrackPendingMapBuffer(Ref<Buffer>&& buffer,
+void Queue::ScheduleBufferMapping(Ref<Buffer>&& buffer,
                                   wgpu::MapMode mode,
                                   ExecutionSerial readySerial) {
     mPendingMapBuffers->Enqueue({buffer, mode}, readySerial);

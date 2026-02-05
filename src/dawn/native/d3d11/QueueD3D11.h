@@ -59,8 +59,8 @@ class Queue : public d3d::Queue {
     // DeviceBase is fully created.
     MaybeError InitializePendingContext();
 
-    // Register the pending map buffer to be checked.
-    void TrackPendingMapBuffer(Ref<Buffer>&& buffer,
+    // Schedule a buffer for mapping.
+    void ScheduleBufferMapping(Ref<Buffer>&& buffer,
                                wgpu::MapMode mode,
                                ExecutionSerial readySerial);
 
@@ -96,8 +96,8 @@ class Queue : public d3d::Queue {
 
     virtual ResultOrError<ExecutionSerial> CheckCompletedSerialsImpl() = 0;
 
-    // Check all pending map buffers, and actually map the ready ones.
-    MaybeError CheckAndMapReadyBuffers(ExecutionSerial completedSerial);
+    // Check and process scheduled buffer mappings.
+    MaybeError CheckScheduledBufferMappings(ExecutionSerial completedSerial);
 
     // Helper template to create scoped command contexts with common logic
     template <typename ScopedContextType, typename... Args>
