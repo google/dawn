@@ -81,13 +81,18 @@
 
 // Tiers for limits related to storage buffer bindings. Should probably be merged with
 // LIMITS_RESOURCE_BINDINGS.
+//
+// TODO(crbug.com/363031535): Once the Metal backend uses argument buffers, it might be possible
+// to just merge tier1 and tier2 using 16 as the limit. Currently we can't do that because that
+// would result in all Metal devices dropping down to tier0.
+//
 // TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where one
 // offers slightly better than default limits.
-//
-#define LIMITS_STORAGE_BUFFER_BINDINGS(X)                                                              \
-    X(v1,     Maximum,             maxStorageBuffersPerShaderStage,         8,         8,          10) \
-    X(compat, Maximum,            maxStorageBuffersInFragmentStage,         4,         8,          10) \
-    X(compat, Maximum,              maxStorageBuffersInVertexStage,         0,         8,          10)
+//                                                                     compat      tier0       tier1       tier2
+#define LIMITS_STORAGE_BUFFER_BINDINGS(X)                                                                        \
+    X(v1,     Maximum,             maxStorageBuffersPerShaderStage,         8,         8,         10,        16) \
+    X(compat, Maximum,            maxStorageBuffersInFragmentStage,         4,         8,         10,        16) \
+    X(compat, Maximum,              maxStorageBuffersInVertexStage,         0,         8,         10,        16)
 
 // TODO(crbug.com/dawn/685):
 // These limits aren't really tiered and could probably be grouped better.
@@ -466,14 +471,17 @@ void NormalizeLimits(CombinedLimits* limits) {
         std::min(limits->v1.maxDynamicStorageBuffersPerPipelineLayout,
                  kMaxDynamicStorageBuffersPerPipelineLayout);
     // Compat limits.
-    limits->compat.maxStorageBuffersInVertexStage =
-        std::min(limits->compat.maxStorageBuffersInVertexStage, kMaxStorageBuffersPerShaderStage);
+    limits->compat.maxStorageBuffersInVertexStage = std::min(
+        limits->compat.maxStorageBuffersInVertexStage, limits->v1.maxStorageBuffersPerShaderStage);
     limits->compat.maxStorageTexturesInVertexStage =
-        std::min(limits->compat.maxStorageTexturesInVertexStage, kMaxStorageTexturesPerShaderStage);
+        std::min(limits->compat.maxStorageTexturesInVertexStage,
+                 limits->v1.maxStorageTexturesPerShaderStage);
     limits->compat.maxStorageBuffersInFragmentStage =
-        std::min(limits->compat.maxStorageBuffersInFragmentStage, kMaxStorageBuffersPerShaderStage);
-    limits->compat.maxStorageTexturesInFragmentStage = std::min(
-        limits->compat.maxStorageTexturesInFragmentStage, kMaxStorageTexturesPerShaderStage);
+        std::min(limits->compat.maxStorageBuffersInFragmentStage,
+                 limits->v1.maxStorageBuffersPerShaderStage);
+    limits->compat.maxStorageTexturesInFragmentStage =
+        std::min(limits->compat.maxStorageTexturesInFragmentStage,
+                 limits->v1.maxStorageTexturesPerShaderStage);
 
     // Additional enforcement for dependent limits.
     limits->v1.maxStorageBufferBindingSize =
