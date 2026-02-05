@@ -67,9 +67,11 @@ class MemoryTransferService;
 // void Server::MyCallbackHandler(MyUserdata* userdata, Other args) { }
 struct CallbackUserdata {
     const std::weak_ptr<Server> server;
+    const std::shared_ptr<const DawnProcTable> procs;
 
     CallbackUserdata() = delete;
-    explicit CallbackUserdata(const std::weak_ptr<Server>& server);
+    CallbackUserdata(const std::weak_ptr<Server>& server,
+                     std::shared_ptr<const DawnProcTable>& procs);
 };
 
 template <auto F, typename _ = decltype(F)>
@@ -84,13 +86,22 @@ struct ForwardToServerHelper<F, void (Server::*)(UserdataT*, Args...)> {
         std::unique_ptr<Userdata> data(static_cast<Userdata*>(userdata));
         auto server = data->server.lock();
         if (!server) {
-            // Do nothing if the server has already been destroyed.
+            // If the server is destroyed, release any callback owned results and return.
+            (
+                []<typename T>(const DawnProcTable& procs, T arg) {
+                    if constexpr (WGPUTraits<T>::Release != nullptr) {
+                        if (arg) {
+                            (procs.*WGPUTraits<T>::Release)(arg);
+                        }
+                    }
+                }(*(data->procs), std::forward<Args>(args)),
+                ...);
             return;
         }
         // Forward the arguments and the typed userdata to the Server:: member function.
         {
             auto serverGuard = server.get()->GetGuard();
-            (server.get()->*F)(data.get(), std::forward<decltype(args)>(args)...);
+            (server.get()->*F)(data.get(), std::forward<Args>(args)...);
         }
         server.get()->Flush();
     }
@@ -191,7 +202,7 @@ class Server : public ServerBase {
     template <typename T,
               typename Enable = std::enable_if<std::is_base_of<CallbackUserdata, T>::value>>
     std::unique_ptr<T> MakeUserdata() {
-        return std::unique_ptr<T>(new T(mSelf));
+        return std::unique_ptr<T>(new T(mSelf, mProcs));
     }
 
     template <typename CallbackInfo,
@@ -222,11 +233,12 @@ class Server : public ServerBase {
     template <typename Struct>
     class FreeMembers : public Struct {
       public:
-        explicit FreeMembers(const DawnProcTable& procs) : Struct({}), mProcs(procs) {}
-        ~FreeMembers() { (mProcs.*WGPUTraits<Struct>::FreeMembers)(*this); }
+        explicit FreeMembers(std::shared_ptr<const DawnProcTable>& procs)
+            : Struct({}), mProcs(procs) {}
+        ~FreeMembers() { ((*mProcs).*WGPUTraits<Struct>::FreeMembers)(*this); }
 
       private:
-        const DawnProcTable& mProcs;
+        std::shared_ptr<const DawnProcTable> mProcs;
     };
 
     void SetForwardingDeviceCallbacks(Known<WGPUDevice> device);

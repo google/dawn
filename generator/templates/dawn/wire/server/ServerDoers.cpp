@@ -63,7 +63,7 @@ namespace dawn::wire::server {
                         {{ assert(ret|length == 0) }}
                         {{ assert(not method.returns) }}
                     {% endif %}
-                    mProcs.{{as_varName(type.name, method.name)}}(
+                    mProcs->{{as_varName(type.name, method.name)}}(
                         {%- for member in command.members if not member.is_return_value -%}
                             {{as_varName(member.name)}}
                             {%- if not loop.last -%}, {% endif %}

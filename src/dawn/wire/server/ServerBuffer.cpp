@@ -118,7 +118,7 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
     userdata->offset = offset;
     userdata->size = size;
 
-    mProcs.bufferMapAsync(
+    mProcs->bufferMapAsync(
         buffer->handle, mode, offset, size,
         MakeCallbackInfo<WGPUBufferMapCallbackInfo, &Server::OnBufferMapAsyncCallback>(
             userdata.release()));
@@ -136,7 +136,7 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
     // Create and register the buffer object.
     Reserved<WGPUBuffer> buffer;
     WIRE_TRY(Allocate(&buffer, bufferHandle));
-    buffer->handle = mProcs.deviceCreateBuffer(device->handle, descriptor);
+    buffer->handle = mProcs->deviceCreateBuffer(device->handle, descriptor);
     buffer->usage = descriptor->usage;
     buffer->mappedAtCreation = (descriptor->mappedAtCreation != 0u);
 
@@ -178,7 +178,7 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
         writeHandle->SetDataLength(descriptor->size);
 
         if (descriptor->mappedAtCreation) {
-            void* mapping = mProcs.bufferGetMappedRange(buffer->handle, 0, descriptor->size);
+            void* mapping = mProcs->bufferGetMappedRange(buffer->handle, 0, descriptor->size);
             if (mapping == nullptr) {
                 DAWN_ASSERT(descriptor->size % 4 != 0);
                 // GetMappedRange can still fail if the buffer's size isn't aligned.
@@ -273,7 +273,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
     if (isSuccess) {
         if (isRead) {
             // Get the serialization size of the message to initialize ReadHandle data.
-            readData = mProcs.bufferGetConstMappedRange(data->bufferObj, data->offset, data->size);
+            readData = mProcs->bufferGetConstMappedRange(data->bufferObj, data->offset, data->size);
             readDataUpdateInfoLength =
                 buffer->readHandle->SizeOfSerializeDataUpdate(data->offset, data->size);
             cmd.readDataUpdateInfoLength = readDataUpdateInfoLength;
@@ -287,7 +287,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
             // modified (i.e. we don't want getMappedRange(0, wholeBufferSize) if only a
             // subset of the buffer is actually mapped) in case the implementation does some
             // range tracking.
-            buffer->writeHandle->SetTarget(static_cast<uint8_t*>(mProcs.bufferGetMappedRange(
+            buffer->writeHandle->SetTarget(static_cast<uint8_t*>(mProcs->bufferGetMappedRange(
                                                data->bufferObj, data->offset, data->size)) -
                                            data->offset);
         }

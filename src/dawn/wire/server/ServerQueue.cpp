@@ -53,7 +53,7 @@ WireResult Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue,
     userdata->eventManager = eventManager;
     userdata->future = future;
 
-    mProcs.queueOnSubmittedWorkDone(
+    mProcs->queueOnSubmittedWorkDone(
         queue->handle, MakeCallbackInfo<WGPUQueueWorkDoneCallbackInfo, &Server::OnQueueWorkDone>(
                            userdata.release()));
     return WireResult::Success;
@@ -68,8 +68,8 @@ WireResult Server::DoQueueWriteBuffer(Known<WGPUQueue> queue,
         return WireResult::FatalError;
     }
 
-    mProcs.queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, data,
-                            static_cast<size_t>(size));
+    mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, data,
+                             static_cast<size_t>(size));
     return WireResult::Success;
 }
 
@@ -100,8 +100,8 @@ WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
     // it. If so, we can avoid a copy.
     uint8_t* sourceData = writeHandle->GetSourceData();
     if (sourceData) {
-        mProcs.queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, sourceData,
-                                static_cast<size_t>(size));
+        mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, sourceData,
+                                 static_cast<size_t>(size));
         return WireResult::Success;
     }
 
@@ -121,8 +121,8 @@ WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
         return WireResult::FatalError;
     }
 
-    mProcs.queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, backingData.get(),
-                            static_cast<size_t>(size));
+    mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, backingData.get(),
+                             static_cast<size_t>(size));
     return WireResult::Success;
 }
 
@@ -136,8 +136,8 @@ WireResult Server::DoQueueWriteTexture(Known<WGPUQueue> queue,
         return WireResult::FatalError;
     }
 
-    mProcs.queueWriteTexture(queue->handle, destination, data, static_cast<size_t>(dataSize),
-                             dataLayout, writeSize);
+    mProcs->queueWriteTexture(queue->handle, destination, data, static_cast<size_t>(dataSize),
+                              dataLayout, writeSize);
     return WireResult::Success;
 }
 
@@ -169,8 +169,8 @@ WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
     // it. If so, we can avoid a copy.
     uint8_t* sourceData = writeHandle->GetSourceData();
     if (sourceData) {
-        mProcs.queueWriteTexture(queue->handle, destination, sourceData,
-                                 static_cast<size_t>(dataSize), dataLayout, writeSize);
+        mProcs->queueWriteTexture(queue->handle, destination, sourceData,
+                                  static_cast<size_t>(dataSize), dataLayout, writeSize);
         return WireResult::Success;
     }
 
@@ -190,8 +190,8 @@ WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
         return WireResult::FatalError;
     }
 
-    mProcs.queueWriteTexture(queue->handle, destination, backingData.get(),
-                             static_cast<size_t>(dataSize), dataLayout, writeSize);
+    mProcs->queueWriteTexture(queue->handle, destination, backingData.get(),
+                              static_cast<size_t>(dataSize), dataLayout, writeSize);
     return WireResult::Success;
 }
 

@@ -72,7 +72,7 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
         },
         nullptr, device->info.get()};
 
-    mProcs.adapterRequestDevice(
+    mProcs->adapterRequestDevice(
         adapter->handle, &desc,
         MakeCallbackInfo<WGPURequestDeviceCallbackInfo, &Server::OnRequestDeviceCallback,
                          WGPUCallbackMode_AllowSpontaneous>(userdata.release()));
@@ -100,13 +100,13 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     // Note: We fail the callback here, instead of immediately upon receiving
     // the request to preserve callback ordering.
     FreeMembers<WGPUSupportedFeatures> supportedFeatures(mProcs);
-    mProcs.deviceGetFeatures(device, &supportedFeatures);
+    mProcs->deviceGetFeatures(device, &supportedFeatures);
     absl::Span<const WGPUFeatureName> features(supportedFeatures.features,
                                                supportedFeatures.featureCount);
     for (WGPUFeatureName feature : features) {
         if (!IsFeatureSupported(feature)) {
             // Release the device.
-            mProcs.deviceRelease(device);
+            mProcs->deviceRelease(device);
             device = nullptr;
 
             cmd.status = WGPURequestDeviceStatus_Error;
@@ -131,7 +131,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     WGPUResourceTableLimits resourceTableLimits = WGPU_RESOURCE_TABLE_LIMITS_INIT;
     texelCopyBufferRowAlignmentLimits.chain.next = &resourceTableLimits.chain;
 
-    mProcs.deviceGetLimits(device, &limits);
+    mProcs->deviceGetLimits(device, &limits);
     cmd.limits = &limits;
 
     // Assign the handle and allocated status if the device is created successfully.

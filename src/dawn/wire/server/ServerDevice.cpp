@@ -73,7 +73,7 @@ WireResult Server::DoDevicePopErrorScope(Known<WGPUDevice> device,
     userdata->eventManager = eventManager;
     userdata->future = future;
 
-    mProcs.devicePopErrorScope(
+    mProcs->devicePopErrorScope(
         device->handle,
         MakeCallbackInfo<WGPUPopErrorScopeCallbackInfo, &Server::OnDevicePopErrorScope>(
             userdata.release()));
@@ -109,7 +109,7 @@ WireResult Server::DoDeviceCreateComputePipelineAsync(
     userdata->future = future;
     userdata->pipelineObjectID = pipeline.id;
 
-    mProcs.deviceCreateComputePipelineAsync(
+    mProcs->deviceCreateComputePipelineAsync(
         device->handle, descriptor,
         MakeCallbackInfo<WGPUCreateComputePipelineAsyncCallbackInfo,
                          &Server::OnCreateComputePipelineAsyncCallback>(userdata.release()));
@@ -149,7 +149,7 @@ WireResult Server::DoDeviceCreateRenderPipelineAsync(
     userdata->future = future;
     userdata->pipelineObjectID = pipeline.id;
 
-    mProcs.deviceCreateRenderPipelineAsync(
+    mProcs->deviceCreateRenderPipelineAsync(
         device->handle, descriptor,
         MakeCallbackInfo<WGPUCreateRenderPipelineAsyncCallbackInfo,
                          &Server::OnCreateRenderPipelineAsyncCallback>(userdata.release()));

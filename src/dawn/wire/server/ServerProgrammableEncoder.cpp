@@ -36,8 +36,8 @@ WireResult Server::DoRenderPassEncoderSetImmediates(Known<WGPURenderPassEncoder>
                                                     uint32_t immediateDataRangeOffsetBytes,
                                                     const uint8_t* data,
                                                     size_t size) {
-    mProcs.renderPassEncoderSetImmediates(renderPassEncoder->handle, immediateDataRangeOffsetBytes,
-                                          data, size);
+    mProcs->renderPassEncoderSetImmediates(renderPassEncoder->handle, immediateDataRangeOffsetBytes,
+                                           data, size);
     return WireResult::Success;
 }
 
@@ -46,8 +46,8 @@ WireResult Server::DoRenderBundleEncoderSetImmediates(
     uint32_t immediateDataRangeOffsetBytes,
     const uint8_t* data,
     size_t size) {
-    mProcs.renderBundleEncoderSetImmediates(renderBundleEncoder->handle,
-                                            immediateDataRangeOffsetBytes, data, size);
+    mProcs->renderBundleEncoderSetImmediates(renderBundleEncoder->handle,
+                                             immediateDataRangeOffsetBytes, data, size);
     return WireResult::Success;
 }
 
@@ -56,8 +56,8 @@ WireResult Server::DoComputePassEncoderSetImmediates(
     uint32_t immediateDataRangeOffsetBytes,
     const uint8_t* data,
     size_t size) {
-    mProcs.computePassEncoderSetImmediates(computePassEncoder->handle,
-                                           immediateDataRangeOffsetBytes, data, size);
+    mProcs->computePassEncoderSetImmediates(computePassEncoder->handle,
+                                            immediateDataRangeOffsetBytes, data, size);
     return WireResult::Success;
 }
 

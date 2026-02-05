@@ -28,6 +28,7 @@
 #ifndef DAWNWIRE_SERVER_SERVERBASE_AUTOGEN_H_
 #define DAWNWIRE_SERVER_SERVERBASE_AUTOGEN_H_
 
+#include <memory>
 #include <tuple>
 
 #include "dawn/common/Mutex.h"
@@ -43,14 +44,14 @@ namespace dawn::wire::server {
 
     class ServerBase : public ChunkedCommandHandler, public ObjectIdResolver {
       public:
-        ServerBase(const DawnProcTable& procs) : mProcs(procs) {}
+        ServerBase(const DawnProcTable& procs) : mProcs(std::make_shared<DawnProcTable>(procs)) {}
         ~ServerBase() override = default;
 
         Mutex::AutoLock GetGuard() { return Mutex::AutoLock(&mMutex); }
 
       protected:
         // Proc table may be used by children as well.
-        DawnProcTable mProcs;
+        std::shared_ptr<const DawnProcTable> mProcs;
 
         // Template functions that implement helpers on KnownObjects.
         template <typename T>
@@ -103,7 +104,7 @@ namespace dawn::wire::server {
 
         template <typename T>
         void Release(T handle) {
-            (mProcs.*WGPUTraits<T>::Release)(handle);
+            ((*mProcs).*WGPUTraits<T>::Release)(handle);
         }
         void DestroyAllObjects() {
             //* Release devices first to force completion of any async work.
