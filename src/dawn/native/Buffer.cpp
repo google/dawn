@@ -474,7 +474,10 @@ void BufferBase::DestroyImpl(DestroyReason reason) {
             case BufferState::MappedAtCreation: {
                 [[maybe_unused]] bool hadError =
                     GetDevice()->ConsumedError(UnmapInternal(true), "calling %s.Destroy().", this);
-                state = mState.load(std::memory_order::acquire);
+                // The buffer state should be unmapped after UnmapInternal() returns. Use that state
+                // in the next compare exchange but another thread can update the state causing this
+                // loop to run again.
+                state = BufferState::Unmapped;
                 break;
             }
             case BufferState::InUse: {
