@@ -127,6 +127,16 @@ MaybeError PhysicalDevice::InitializeImpl() {
 
     mMinExplicitComputeSubgroupSize = mDeviceInfo.waveLaneCountMin;
     mMaxExplicitComputeSubgroupSize = mDeviceInfo.waveLaneCountMax;
+    if (mDeviceInfo.waveLaneCountMin > 0) {
+        // D3D12 doesn't have limit on the maximum subgroups in one workgroup so we choose a value
+        // to
+        // ensure `computeInvocationsPerWorkgroup <= maxComputeWorkgroupSubgroups *
+        // computeSubgroupSize` is always satisfied.
+        mMaxComputeWorkgroupSubgroups =
+            D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP / mDeviceInfo.waveLaneCountMin;
+    } else {
+        mMaxComputeWorkgroupSubgroups = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
+    }
 
     return {};
 }
@@ -973,6 +983,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             GetMinExplicitComputeSubgroupSize();
         explicitComputeSubgroupSizeConfigs->maxExplicitComputeSubgroupSize =
             GetMaxExplicitComputeSubgroupSize();
+        explicitComputeSubgroupSizeConfigs->maxComputeWorkgroupSubgroups =
+            GetMaxComputeWorkgroupSubgroups();
     }
 }
 

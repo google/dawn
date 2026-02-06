@@ -946,6 +946,11 @@ class SubgroupSizeControlTests : public DawnTest {
 
     bool SupportSubgroupSizeControl() const { return mSupportsSubgroupSizeControl; }
 
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxComputeInvocationsPerWorkgroup = supported.maxComputeInvocationsPerWorkgroup;
+    }
+
     void DoTest(uint32_t subgroupSize) {
         DAWN_ASSERT(IsPowerOfTwo(subgroupSize));
 

@@ -210,6 +210,8 @@ MaybeError PhysicalDevice::InitializeImpl() {
 
     mMinExplicitComputeSubgroupSize = mDeviceInfo.subgroupSizeControlProperties.minSubgroupSize;
     mMaxExplicitComputeSubgroupSize = mDeviceInfo.subgroupSizeControlProperties.maxSubgroupSize;
+    mMaxComputeWorkgroupSubgroups =
+        mDeviceInfo.subgroupSizeControlProperties.maxComputeWorkgroupSubgroups;
 
     // Check for essential Vulkan extensions and features
 
@@ -1568,6 +1570,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             GetMinExplicitComputeSubgroupSize();
         explicitComputeSubgroupSizeConfigs->maxExplicitComputeSubgroupSize =
             GetMaxExplicitComputeSubgroupSize();
+        explicitComputeSubgroupSizeConfigs->maxComputeWorkgroupSubgroups =
+            GetMaxComputeWorkgroupSubgroups();
     }
 }
 

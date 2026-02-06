@@ -210,6 +210,8 @@ void Adapter::SetInfo(const WGPUAdapterInfo* info) {
                     subgroupSizeConfigs->minExplicitComputeSubgroupSize;
                 mExplicitComputeSubgroupSizeConfigs.maxExplicitComputeSubgroupSize =
                     subgroupSizeConfigs->maxExplicitComputeSubgroupSize;
+                mExplicitComputeSubgroupSizeConfigs.maxComputeWorkgroupSubgroups =
+                    subgroupSizeConfigs->maxComputeWorkgroupSubgroups;
                 break;
             }
             default:
@@ -281,6 +283,8 @@ WGPUStatus Adapter::APIGetInfo(WGPUAdapterInfo* info) const {
                     mExplicitComputeSubgroupSizeConfigs.minExplicitComputeSubgroupSize;
                 explicitComputeSubgroupSizeConfigs->maxExplicitComputeSubgroupSize =
                     mExplicitComputeSubgroupSizeConfigs.maxExplicitComputeSubgroupSize;
+                explicitComputeSubgroupSizeConfigs->maxComputeWorkgroupSubgroups =
+                    mExplicitComputeSubgroupSizeConfigs.maxComputeWorkgroupSubgroups;
                 break;
             }
 

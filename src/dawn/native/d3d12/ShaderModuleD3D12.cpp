@@ -321,6 +321,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             device->GetAdapter()->GetPhysicalDevice()->GetMinExplicitComputeSubgroupSize();
         req.hlsl.maxExplicitComputeSubgroupSize =
             device->GetAdapter()->GetPhysicalDevice()->GetMaxExplicitComputeSubgroupSize();
+        req.hlsl.maxComputeWorkgroupSubgroups =
+            device->GetAdapter()->GetPhysicalDevice()->GetMaxComputeWorkgroupSubgroups();
     }
 
     CacheResult<d3d::CompiledShader> compiledShader;

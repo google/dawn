@@ -4764,7 +4764,8 @@
         "tags": ["dawn"],
         "members": [
             {"name": "min explicit compute subgroup size", "type": "uint32_t"},
-            {"name": "max explicit compute subgroup size", "type": "uint32_t"}
+            {"name": "max explicit compute subgroup size", "type": "uint32_t"},
+            {"name": "max compute workgroup subgroups", "type": "uint32_t"}
         ]
     }
 }

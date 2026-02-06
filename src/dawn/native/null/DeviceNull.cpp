@@ -134,6 +134,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             GetMinExplicitComputeSubgroupSize();
         explicitComputeSubgroupSizeConfigs->maxExplicitComputeSubgroupSize =
             GetMaxExplicitComputeSubgroupSize();
+        explicitComputeSubgroupSizeConfigs->maxComputeWorkgroupSubgroups =
+            GetMaxComputeWorkgroupSubgroups();
     }
 }
 
@@ -528,7 +530,8 @@ MaybeError ComputePipeline::InitializeImpl() {
     DAWN_TRY(ValidateExplicitComputeSubgroupSize(
         tintResult->workgroup_info,
         GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMinExplicitComputeSubgroupSize(),
-        GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMaxExplicitComputeSubgroupSize()));
+        GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMaxExplicitComputeSubgroupSize(),
+        GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMaxComputeWorkgroupSubgroups()));
 
     return {};
 }

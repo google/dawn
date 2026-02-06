@@ -1237,5 +1237,32 @@ TEST_F(SubgroupSizeControlValidationTest, ValidateExplicitComputeSubgroupSizes) 
     }
 }
 
+// Test it is a validation error to use a `@subgroup_size` that makes the total invocations per
+// workgroup exceed the product of `@subgroup_size` and `maxComputeWorkgroupSubgroups` on current
+// adapter.
+TEST_F(SubgroupSizeControlValidationTest, ValidateMaxComputeWorkgroupSubgroups) {
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesExplicitComputeSubgroupSizeConfigs subgroupSizeConfigs;
+    info.nextInChain = &subgroupSizeConfigs;
+    adapter.GetInfo(&info);
+    wgpu::Limits limits;
+    adapter.GetLimits(&limits);
+
+    uint32_t maxWorkgroupSubgroups = subgroupSizeConfigs.maxComputeWorkgroupSubgroups;
+    uint32_t maxInvocationsPerWorkgroup = limits.maxComputeInvocationsPerWorkgroup;
+
+    for (uint32_t subgroupSize = subgroupSizeConfigs.minExplicitComputeSubgroupSize;
+         subgroupSize <= subgroupSizeConfigs.maxExplicitComputeSubgroupSize; subgroupSize *= 2) {
+        ASSERT_TRUE(IsPowerOfTwo(subgroupSize));
+        uint32_t totalInvocations = maxInvocationsPerWorkgroup;
+        uint32_t workgroupSizeX = subgroupSize;
+        uint32_t workgroupSizeY = totalInvocations / workgroupSizeX;
+        ASSERT_LE(workgroupSizeY, limits.maxComputeWorkgroupSizeY);
+        bool success = maxInvocationsPerWorkgroup <= subgroupSize * maxWorkgroupSubgroups;
+        TestTotalInvocationsPerWorkgroupAndSubgroupSize({workgroupSizeX, workgroupSizeY},
+                                                        subgroupSize, success);
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn

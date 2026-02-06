@@ -76,6 +76,7 @@ using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterS
     X(uint32_t, maxSubgroupSize)                                                     \
     X(uint32_t, minExplicitComputeSubgroupSize)                                      \
     X(uint32_t, maxExplicitComputeSubgroupSize)                                      \
+    X(uint32_t, maxComputeWorkgroupSubgroups)                                        \
     X(bool, disableSymbolRenaming)                                                   \
     X(bool, dumpShaders)                                                             \
     X(bool, dumpShadersOnFailure)

@@ -114,6 +114,7 @@ ShaderModule::~ShaderModule() = default;
     X(uint32_t, maxSubgroupSize)                                                     \
     X(uint32_t, minExplicitComputeSubgroupSize)                                      \
     X(uint32_t, maxExplicitComputeSubgroupSize)                                      \
+    X(uint32_t, maxComputeWorkgroupSubgroups)                                        \
     X(bool, usesSubgroupMatrix)                                                      \
     X(std::vector<SubgroupMatrixConfig>, subgroupMatrixConfig)                       \
     X(tint::spirv::writer::Options, tintOptions)                                     \
@@ -286,6 +287,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMinExplicitComputeSubgroupSize();
         req.maxExplicitComputeSubgroupSize =
             GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMaxExplicitComputeSubgroupSize();
+        req.maxComputeWorkgroupSubgroups =
+            GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMaxComputeWorkgroupSubgroups();
     }
 
     CacheResult<CompiledSpirv> compilation;
@@ -328,9 +331,9 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                     _, ValidateComputeStageWorkgroupSize(
                            tintResult->workgroup_info, r.usesSubgroupMatrix, r.maxSubgroupSize,
                            r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
-                DAWN_TRY(ValidateExplicitComputeSubgroupSize(tintResult->workgroup_info,
-                                                             r.minExplicitComputeSubgroupSize,
-                                                             r.maxExplicitComputeSubgroupSize));
+                DAWN_TRY(ValidateExplicitComputeSubgroupSize(
+                    tintResult->workgroup_info, r.minExplicitComputeSubgroupSize,
+                    r.maxExplicitComputeSubgroupSize, r.maxComputeWorkgroupSubgroups));
             }
 
             DAWN_TRY(ValidateSubgroupMatrixConfiguration(tintResult->subgroup_matrix_info,

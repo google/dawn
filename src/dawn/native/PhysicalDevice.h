@@ -135,6 +135,7 @@ class PhysicalDeviceBase : public RefCounted {
 
     uint32_t GetMinExplicitComputeSubgroupSize() const;
     uint32_t GetMaxExplicitComputeSubgroupSize() const;
+    uint32_t GetMaxComputeWorkgroupSubgroups() const;
 
   protected:
     uint32_t mVendorId = 0xFFFFFFFF;
@@ -151,6 +152,7 @@ class PhysicalDeviceBase : public RefCounted {
     uint32_t mSubgroupMaxSize = kDefaultSubgroupMaxSize;
     uint32_t mMinExplicitComputeSubgroupSize = kDefaultSubgroupMinSize;
     uint32_t mMaxExplicitComputeSubgroupSize = kDefaultSubgroupMaxSize;
+    uint32_t mMaxComputeWorkgroupSubgroups = 0xFFFFFFFF;
 
     // Juat a wrapper of ValidateFeatureSupportedWithToggles, return true if a feature is supported
     // by this adapter AND suitable with given toggles.
