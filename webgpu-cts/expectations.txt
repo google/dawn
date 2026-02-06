@@ -96,6 +96,21 @@
 # conflicts_allowed: true
 # full_wildcard_support: true
 
+#######################################################################################
+# WebGPU expectations categories format
+#
+#  At the end of the line we add '# CAT:'  and then a comma deliminated categories.
+#
+#  Known categories:
+#          Accuracy - A small deviation in output that is not significant in practice
+#          Critical - A significant error that could impact users and needs investigation
+#          PermSkip - Decision has been made not to fix
+#
+#  Examples:
+#   crbug.com/123 [ android ] webgpu:shader,execution,limits:* [ Skip ] # CAT:PermaSkip, Accuracy
+#
+#######################################################################################
+
 ################################################################################
 # Permanent Skip Expectations
 #
