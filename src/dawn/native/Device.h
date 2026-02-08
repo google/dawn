@@ -319,6 +319,7 @@ class DeviceBase : public ErrorSink,
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) = 0;
+    // TODO(https://issues.chromium.org/424536624): Use BlockExtent3D instead of Extent3D.
     MaybeError CopyFromStagingToTexture(BufferBase* source,
                                         const TexelCopyBufferLayout& src,
                                         const TextureCopy& dst,

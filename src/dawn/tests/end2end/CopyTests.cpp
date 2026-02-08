@@ -1676,6 +1676,24 @@ TEST_P(CopyTests_T2B, BytesPerRowShouldNotCauseBufferOOBIfCopyHeightIsOne) {
     }
 }
 
+// Test copying rows with bytesPerRow extremely large (32k texels). This is to test a special case
+// in Metal where we need to split the copy to be row-by-row in that case.
+TEST_P(CopyTests_T2B, ReallyLargeBytesPerRow) {
+    // TODO(https://issues.chromium.org/481934465): Fails on Intel D3D12 / Vulkan which don't have
+    // the workaround.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && (IsD3D12() || IsVulkan()));
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {2, 2, 2};
+
+    const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(textureSpec.format);
+    const uint32_t bytesPerRow = 32 * 1024 * bytesPerTexel;
+    BufferSpec bufferSpec = MinimumBufferSpec({2, 2, 2}, /*overrideBytesPerRow=*/bytesPerRow);
+
+    // Check various offsets to cover each code path in the 2D split code in TextureCopySplitter.
+    DoTest(textureSpec, bufferSpec, {2, 2, 2});
+}
+
 // Test that copying whole texture 2D array layers in one texture-to-buffer-copy works.
 TEST_P(CopyTests_T2B, Texture2DArrayFull) {
     // TODO(crbug.com/40238674): Fails on Pixel 10 gles and vulkan.

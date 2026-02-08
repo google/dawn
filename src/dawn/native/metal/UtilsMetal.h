@@ -72,6 +72,16 @@ void SetDebugName(DeviceBase* device, T* mtlObj, const char* prefix, std::string
 Aspect GetDepthStencilAspects(MTLPixelFormat format);
 MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction);
 
+// Helpers to convert from typed Origin/Extent to the Metal equivalent. Metal always counts in
+// texels so there are no overloads with BlockExtent/Origin3D on purpose.
+MTLSize ToMTLSize(const TexelExtent3D& extent);
+MTLOrigin ToMTLOrigin(const TexelOrigin3D& origin);
+
+// For different reasons a WebGPU copy may need to be split into multiple copies for Metal. This
+// structure and its associated function `ComputeTextureBufferCopySplit` have the necessary logic
+// for the splits.
+// They also convert from Dawn's types (with blocks origin/extent and blocks per row/image) to the
+// types that Metal expect (TexelExtent/Origin3D as that's what matches MTLSize/Origin's semantics)
 struct TextureBufferCopySplit {
     // Avoid allocations except in the worse case. Most cases require at most 3 regions.
     static constexpr uint32_t kNumCommonTextureBufferCopyRegions = 3;
@@ -80,8 +90,8 @@ struct TextureBufferCopySplit {
         CopyInfo(NSUInteger bufferOffset,
                  NSUInteger bytesPerRow,
                  NSUInteger bytesPerImage,
-                 Origin3D textureOrigin,
-                 Extent3D copyExtent)
+                 TexelOrigin3D textureOrigin,
+                 TexelExtent3D copyExtent)
             : bufferOffset(bufferOffset),
               bytesPerRow(bytesPerRow),
               bytesPerImage(bytesPerImage),
@@ -91,8 +101,8 @@ struct TextureBufferCopySplit {
         NSUInteger bufferOffset;
         NSUInteger bytesPerRow;
         NSUInteger bytesPerImage;
-        Origin3D textureOrigin;
-        Extent3D copyExtent;
+        TexelOrigin3D textureOrigin;
+        TexelExtent3D copyExtent;
     };
 
     absl::InlinedVector<CopyInfo, kNumCommonTextureBufferCopyRegions> copies;
@@ -101,15 +111,14 @@ struct TextureBufferCopySplit {
     auto end() const { return copies.end(); }
     void push_back(const CopyInfo& copyInfo) { copies.push_back(copyInfo); }
 };
-
 TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
                                                      uint32_t mipLevel,
-                                                     Origin3D origin,
-                                                     Extent3D copyExtent,
+                                                     BlockOrigin3D origin,
+                                                     BlockExtent3D copyExtent,
                                                      uint64_t bufferSize,
                                                      uint64_t bufferOffset,
-                                                     uint32_t bytesPerRow,
-                                                     uint32_t rowsPerImage,
+                                                     BlockCount blocksPerRow,
+                                                     BlockCount rowsPerImage,
                                                      Aspect aspect);
 
 MaybeError EnsureDestinationTextureInitialized(CommandRecordingContext* commandContext,

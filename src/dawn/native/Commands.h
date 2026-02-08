@@ -157,6 +157,7 @@ struct RenderPassDepthStencilAttachmentInfo {
 };
 
 struct ResolveRect {
+    // TODO(https://issues.chromium.org/424536624): Use TexelCount instead of uint32_t.
     uint32_t colorOffsetX = 0;
     uint32_t colorOffsetY = 0;
     uint32_t resolveOffsetX = 0;
@@ -179,6 +180,7 @@ struct BeginRenderPassCmd {
     std::array<RenderPassStorageAttachmentInfo, kMaxPLSSlots> storageAttachments;
 
     // Cache the width and height of all attachments for convenience
+    // TODO(https://issues.chromium.org/424536624): Use TexelCount instead of uint32_t.
     uint32_t width;
     uint32_t height;
     // Used for partial resolve
@@ -229,18 +231,21 @@ struct CopyBufferToBufferCmd {
 struct CopyBufferToTextureCmd {
     BufferCopy source;
     TextureCopy destination;
+    // TODO(https://issues.chromium.org/424536624): Use BlockCount instead of TexelCount.
     TexelExtent3D copySize;
 };
 
 struct CopyTextureToBufferCmd {
     TextureCopy source;
     BufferCopy destination;
+    // TODO(https://issues.chromium.org/424536624): Use BlockCount instead of TexelCount.
     TexelExtent3D copySize;
 };
 
 struct CopyTextureToTextureCmd {
     TextureCopy source;
     TextureCopy destination;
+    // TODO(https://issues.chromium.org/424536624): Use BlockCount instead of TexelCount.
     TexelExtent3D copySize;
 };
 

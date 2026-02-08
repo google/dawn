@@ -356,6 +356,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     Texture* texture = ToBackend(dst.texture.Get());
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(dst);
     texture->SynchronizeTextureBeforeUse(ToBackend(GetQueue())->GetPendingCommandContext());
     DAWN_TRY(EnsureDestinationTextureInitialized(
         ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive), texture,
@@ -364,8 +365,9 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
     RecordCopyBufferToTexture(
         ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive),
         ToBackend(source)->GetMTLBuffer(), source->GetSize(), dataLayout.offset,
-        dataLayout.bytesPerRow, dataLayout.rowsPerImage, texture, dst.mipLevel,
-        dst.origin.ToOrigin3D(), dst.aspect, copySizePixels);
+        blockInfo.BytesToBlocks(dataLayout.bytesPerRow), BlockCount(dataLayout.rowsPerImage),
+        texture, dst.mipLevel, blockInfo.ToBlock(dst.origin), dst.aspect,
+        blockInfo.ToBlock(TexelExtent3D(copySizePixels)));
     return {};
 }
 

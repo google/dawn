@@ -205,12 +205,15 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     // TODO(crbug.com/424536624): Return BlockExtent3D for these functions.
     Extent3D GetMipLevelSingleSubresourcePhysicalSize(uint32_t level, Aspect aspect) const;
     Extent3D GetMipLevelSingleSubresourceVirtualSize(uint32_t level, Aspect aspect) const;
+    // TODO(https://issues.chromium.org/424536624): Return TexelExtent3D and take typed
+    // origin/extent.
     Extent3D ClampToMipLevelVirtualSize(uint32_t level,
                                         Aspect aspect,
                                         const Origin3D& origin,
                                         const Extent3D& extent) const;
     // For 2d-array textures, these 2 functions keeps the array layers in contrast to
     // GetMipLevelSingleSubresource(Physical/Virtual)Size.
+    // TODO(https://issues.chromium.org/424536624): Return TexelExtent3D.
     Extent3D GetMipLevelSubresourcePhysicalSize(uint32_t level, Aspect aspect) const;
     Extent3D GetMipLevelSubresourceVirtualSize(uint32_t level, Aspect aspect) const;
 

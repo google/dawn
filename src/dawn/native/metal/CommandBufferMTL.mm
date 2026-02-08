@@ -972,15 +972,16 @@ void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
                                id<MTLBuffer> mtlBuffer,
                                uint64_t bufferSize,
                                uint64_t offset,
-                               uint32_t bytesPerRow,
-                               uint32_t rowsPerImage,
+                               BlockCount blocksPerRow,
+                               BlockCount rowsPerImage,
                                Texture* texture,
                                uint32_t mipLevel,
-                               const Origin3D& origin,
+                               const BlockOrigin3D& origin,
                                Aspect aspect,
-                               const Extent3D& copySize) {
-    TextureBufferCopySplit splitCopies = ComputeTextureBufferCopySplit(
-        texture, mipLevel, origin, copySize, bufferSize, offset, bytesPerRow, rowsPerImage, aspect);
+                               const BlockExtent3D& copySize) {
+    TextureBufferCopySplit splitCopies =
+        ComputeTextureBufferCopySplit(texture, mipLevel, origin, copySize, bufferSize, offset,
+                                      blocksPerRow, rowsPerImage, aspect);
 
     MTLBlitOption blitOption = texture->ComputeMTLBlitOption(aspect);
 
@@ -990,26 +991,25 @@ void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
             case wgpu::TextureDimension::Undefined:
                 DAWN_UNREACHABLE();
             case wgpu::TextureDimension::e1D: {
-                [commandContext->EnsureBlit()
-                         copyFromBuffer:mtlBuffer
-                           sourceOffset:bufferOffset
-                      sourceBytesPerRow:copyInfo.bytesPerRow
-                    sourceBytesPerImage:copyInfo.bytesPerImage
-                             sourceSize:MTLSizeMake(copyInfo.copyExtent.width, 1, 1)
-                              toTexture:texture->GetMTLTexture(aspect)
-                       destinationSlice:0
-                       destinationLevel:mipLevel
-                      destinationOrigin:MTLOriginMake(copyInfo.textureOrigin.x, 0, 0)
-                                options:blitOption];
+                [commandContext->EnsureBlit() copyFromBuffer:mtlBuffer
+                                                sourceOffset:bufferOffset
+                                           sourceBytesPerRow:copyInfo.bytesPerRow
+                                         sourceBytesPerImage:copyInfo.bytesPerImage
+                                                  sourceSize:ToMTLSize(copyInfo.copyExtent)
+                                                   toTexture:texture->GetMTLTexture(aspect)
+                                            destinationSlice:0
+                                            destinationLevel:mipLevel
+                                           destinationOrigin:ToMTLOrigin(copyInfo.textureOrigin)
+                                                     options:blitOption];
                 break;
             }
             case wgpu::TextureDimension::e2D: {
-                const MTLOrigin textureOrigin =
-                    MTLOriginMake(copyInfo.textureOrigin.x, copyInfo.textureOrigin.y, 0);
-                const MTLSize copyExtent =
-                    MTLSizeMake(copyInfo.copyExtent.width, copyInfo.copyExtent.height, 1);
+                const MTLOrigin textureOrigin = ToMTLOrigin(
+                    {copyInfo.textureOrigin.x, copyInfo.textureOrigin.y, TexelCount(0)});
+                const MTLSize copyExtent = ToMTLSize(
+                    {copyInfo.copyExtent.width, copyInfo.copyExtent.height, TexelCount(1)});
 
-                for (uint32_t z = copyInfo.textureOrigin.z;
+                for (TexelCount z = copyInfo.textureOrigin.z;
                      z < copyInfo.textureOrigin.z + copyInfo.copyExtent.depthOrArrayLayers; ++z) {
                     [commandContext->EnsureBlit() copyFromBuffer:mtlBuffer
                                                     sourceOffset:bufferOffset
@@ -1017,7 +1017,7 @@ void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
                                              sourceBytesPerImage:copyInfo.bytesPerImage
                                                       sourceSize:copyExtent
                                                        toTexture:texture->GetMTLTexture(aspect)
-                                                destinationSlice:z
+                                                destinationSlice:uint32_t(z)
                                                 destinationLevel:mipLevel
                                                destinationOrigin:textureOrigin
                                                          options:blitOption];
@@ -1026,21 +1026,16 @@ void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
                 break;
             }
             case wgpu::TextureDimension::e3D: {
-                [commandContext->EnsureBlit()
-                         copyFromBuffer:mtlBuffer
-                           sourceOffset:bufferOffset
-                      sourceBytesPerRow:copyInfo.bytesPerRow
-                    sourceBytesPerImage:copyInfo.bytesPerImage
-                             sourceSize:MTLSizeMake(copyInfo.copyExtent.width,
-                                                    copyInfo.copyExtent.height,
-                                                    copyInfo.copyExtent.depthOrArrayLayers)
-                              toTexture:texture->GetMTLTexture(aspect)
-                       destinationSlice:0
-                       destinationLevel:mipLevel
-                      destinationOrigin:MTLOriginMake(copyInfo.textureOrigin.x,
-                                                      copyInfo.textureOrigin.y,
-                                                      copyInfo.textureOrigin.z)
-                                options:blitOption];
+                [commandContext->EnsureBlit() copyFromBuffer:mtlBuffer
+                                                sourceOffset:bufferOffset
+                                           sourceBytesPerRow:copyInfo.bytesPerRow
+                                         sourceBytesPerImage:copyInfo.bytesPerImage
+                                                  sourceSize:ToMTLSize(copyInfo.copyExtent)
+                                                   toTexture:texture->GetMTLTexture(aspect)
+                                            destinationSlice:0
+                                            destinationLevel:mipLevel
+                                           destinationOrigin:ToMTLOrigin(copyInfo.textureOrigin)
+                                                     options:blitOption];
                 break;
             }
         }
@@ -1226,10 +1221,9 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 buffer->TrackUsage();
                 texture->SynchronizeTextureBeforeUse(commandContext);
                 RecordCopyBufferToTexture(commandContext, buffer->GetMTLBuffer(), buffer->GetSize(),
-                                          src.offset, blockInfo.ToBytes(src.blocksPerRow),
-                                          static_cast<uint32_t>(src.rowsPerImage), texture,
-                                          dst.mipLevel, dst.origin.ToOrigin3D(), dst.aspect,
-                                          copySize.ToExtent3D());
+                                          src.offset, src.blocksPerRow, src.rowsPerImage, texture,
+                                          dst.mipLevel, blockInfo.ToBlock(dst.origin), dst.aspect,
+                                          blockInfo.ToBlock(copySize));
                 break;
             }
 
@@ -1254,9 +1248,9 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 buffer->TrackUsage();
 
                 TextureBufferCopySplit splitCopies = ComputeTextureBufferCopySplit(
-                    texture, src.mipLevel, src.origin.ToOrigin3D(), copySize.ToExtent3D(),
-                    buffer->GetSize(), dst.offset, blockInfo.ToBytes(dst.blocksPerRow),
-                    static_cast<uint32_t>(dst.rowsPerImage), src.aspect);
+                    texture, src.mipLevel, blockInfo.ToBlock(src.origin),
+                    blockInfo.ToBlock(copySize), buffer->GetSize(), dst.offset, dst.blocksPerRow,
+                    dst.rowsPerImage, src.aspect);
 
                 for (const auto& copyInfo : splitCopies) {
                     MTLBlitOption blitOption = texture->ComputeMTLBlitOption(src.aspect);
@@ -1270,10 +1264,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                                          copyFromTexture:texture->GetMTLTexture(src.aspect)
                                              sourceSlice:0
                                              sourceLevel:src.mipLevel
-                                            sourceOrigin:MTLOriginMake(copyInfo.textureOrigin.x, 0,
-                                                                       0)
-                                              sourceSize:MTLSizeMake(copyInfo.copyExtent.width, 1,
-                                                                     1)
+                                            sourceOrigin:ToMTLOrigin(copyInfo.textureOrigin)
+                                              sourceSize:ToMTLSize(copyInfo.copyExtent.width)
                                                 toBuffer:buffer->GetMTLBuffer()
                                        destinationOffset:bufferOffset
                                   destinationBytesPerRow:copyInfo.bytesPerRow
@@ -1283,18 +1275,20 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                         }
 
                         case wgpu::TextureDimension::e2D: {
-                            const MTLOrigin textureOrigin = MTLOriginMake(
-                                copyInfo.textureOrigin.x, copyInfo.textureOrigin.y, 0);
-                            const MTLSize copyExtent = MTLSizeMake(copyInfo.copyExtent.width,
-                                                                   copyInfo.copyExtent.height, 1);
+                            const MTLOrigin textureOrigin =
+                                ToMTLOrigin({copyInfo.textureOrigin.x, copyInfo.textureOrigin.y,
+                                             TexelCount(0)});
+                            const MTLSize copyExtent =
+                                ToMTLSize({copyInfo.copyExtent.width, copyInfo.copyExtent.height,
+                                           TexelCount(1)});
 
-                            for (uint32_t z = copyInfo.textureOrigin.z;
+                            for (TexelCount z = copyInfo.textureOrigin.z;
                                  z <
                                  copyInfo.textureOrigin.z + copyInfo.copyExtent.depthOrArrayLayers;
                                  ++z) {
                                 [commandContext->EnsureBlit()
                                              copyFromTexture:texture->GetMTLTexture(src.aspect)
-                                                 sourceSlice:z
+                                                 sourceSlice:uint32_t(z)
                                                  sourceLevel:src.mipLevel
                                                 sourceOrigin:textureOrigin
                                                   sourceSize:copyExtent
@@ -1312,13 +1306,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                                          copyFromTexture:texture->GetMTLTexture(src.aspect)
                                              sourceSlice:0
                                              sourceLevel:src.mipLevel
-                                            sourceOrigin:MTLOriginMake(copyInfo.textureOrigin.x,
-                                                                       copyInfo.textureOrigin.y,
-                                                                       copyInfo.textureOrigin.z)
-                                              sourceSize:MTLSizeMake(
-                                                             copyInfo.copyExtent.width,
-                                                             copyInfo.copyExtent.height,
-                                                             copyInfo.copyExtent.depthOrArrayLayers)
+                                            sourceOrigin:ToMTLOrigin(copyInfo.textureOrigin)
+                                              sourceSize:ToMTLSize(copyInfo.copyExtent)
                                                 toBuffer:buffer->GetMTLBuffer()
                                        destinationOffset:bufferOffset
                                   destinationBytesPerRow:copyInfo.bytesPerRow

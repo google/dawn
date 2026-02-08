@@ -30,6 +30,7 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Math.h"
+#include "dawn/common/Range.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/EnumMaskIterator.h"
@@ -605,18 +606,27 @@ MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction)
     }
 }
 
+MTLSize ToMTLSize(const TexelExtent3D& extent) {
+    return MTLSizeMake(uint32_t(extent.width), uint32_t(extent.height),
+                       uint32_t(extent.depthOrArrayLayers));
+}
+
+MTLOrigin ToMTLOrigin(const TexelOrigin3D& origin) {
+    return MTLOriginMake(uint32_t(origin.x), uint32_t(origin.y), uint32_t(origin.z));
+}
+
 TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
                                                      uint32_t mipLevel,
-                                                     Origin3D origin,
-                                                     Extent3D copyExtent,
+                                                     BlockOrigin3D origin,
+                                                     BlockExtent3D copyExtent,
                                                      uint64_t bufferSize,
                                                      uint64_t bufferOffset,
-                                                     uint32_t bytesPerRow,
-                                                     uint32_t rowsPerImage,
+                                                     BlockCount blocksPerRow,
+                                                     BlockCount rowsPerImage,
                                                      Aspect aspect) {
     TextureBufferCopySplit copy;
     const Format textureFormat = texture->GetFormat();
-    const TexelBlockInfo& blockInfo = textureFormat.GetAspectInfo(aspect).block;
+    const TypedTexelBlockInfo& blockInfo = textureFormat.GetAspectInfo(aspect).block;
 
     // When copying textures from/to an unpacked buffer, the Metal validation layer has 3
     // issues.
@@ -645,13 +655,13 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     // 3. Some Metal Drivers (Intel Pre MacOS 13.1?) Incorrectly calculation the size
     // needed for the destination buffer. Their calculation is something like
     //
-    //   sizeNeeded = bufferOffset + desintationBytesPerImage * numImages +
+    //   sizeNeeded = bufferOffset + destinationBytesPerImage * numImages +
     //                destinationBytesPerRow * (numRows - 1) +
     //                bytesPerPixel * width
     //
     // where as it should be
     //
-    //   sizeNeeded = bufferOffset + desintationBytesPerImage * (numImages - 1) +
+    //   sizeNeeded = bufferOffset + destinationBytesPerImage * (numImages - 1) +
     //                destinationBytesPerRow * (numRows - 1) +
     //                bytesPerPixel * width
     //
@@ -660,14 +670,13 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     // The workaround is if you're only copying a single row then pass 0 for
     // destinationBytesPerImage
 
-    uint32_t bytesPerImage = bytesPerRow * rowsPerImage;
-
     // Metal validation layer requires that if the texture's pixel format is a compressed
     // format, the sourceSize must be a multiple of the pixel format's block size or be
     // clamped to the edge of the texture if the block extends outside the bounds of a
     // texture.
-    const Extent3D clampedCopyExtent =
-        texture->ClampToMipLevelVirtualSize(mipLevel, aspect, origin, copyExtent);
+    const TexelExtent3D clampedCopyExtent = texture->ClampToMipLevelVirtualSize(
+        mipLevel, aspect, blockInfo.ToTexel(origin).ToOrigin3D(),
+        blockInfo.ToTexel(copyExtent).ToExtent3D());
 
     // Note: all current GPUs have a 3D texture size limit of 2048 and otherwise 16348
     // for non-3D textures except for Apple2 GPUs (iPhone6) which has a non-3D texture
@@ -675,43 +684,51 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     // See: https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
     const uint32_t kMetalMax3DTextureDimensions = 2048u;
     const uint32_t kMetalMaxNon3DTextureDimensions = 16384u;
-    uint32_t maxTextureDimension = texture->GetDimension() == wgpu::TextureDimension::e3D
-                                       ? kMetalMax3DTextureDimensions
-                                       : kMetalMaxNon3DTextureDimensions;
-    uint32_t bytesPerPixel = blockInfo.byteSize;
-    uint32_t maxBytesPerRow = maxTextureDimension * bytesPerPixel;
+    const uint32_t maxTextureDimension = texture->GetDimension() == wgpu::TextureDimension::e3D
+                                             ? kMetalMax3DTextureDimensions
+                                             : kMetalMaxNon3DTextureDimensions;
+    const uint32_t maxBytesPerRow = maxTextureDimension * blockInfo.byteSize;
 
-    bool needCopyRowByRow = bytesPerRow > maxBytesPerRow;
+    const bool needCopyRowByRow = blockInfo.ToBytes(blocksPerRow) > maxBytesPerRow;
     if (needCopyRowByRow) {
         // handle workaround case 2
         // Since we're copying a row at a time bytesPerRow shouldn't matter but just to
-        // try to have it make sense, pass correct or max valid value
-        const uint32_t localBytesPerRow = std::min(bytesPerRow, maxBytesPerRow);
+        // try to have it make sense, pass the max valid value
+        const uint32_t localBytesPerRow = maxBytesPerRow;
         const uint32_t localBytesPerImage = 0;  // workaround case 3
-        DAWN_ASSERT(copyExtent.height % blockInfo.height == 0);
-        DAWN_ASSERT(copyExtent.width % blockInfo.width == 0);
-        const uint32_t blockRows = copyExtent.height / blockInfo.height;
-        for (uint32_t slice = 0; slice < copyExtent.depthOrArrayLayers; ++slice) {
-            for (uint32_t blockRow = 0; blockRow < blockRows; ++blockRow) {
+        const TexelExtent3D localCopySize = {clampedCopyExtent.width, blockInfo.height,
+                                             TexelCount(1)};
+
+        for (BlockCount slice : Range(copyExtent.depthOrArrayLayers)) {
+            for (BlockCount row : Range(copyExtent.height)) {
+                const uint64_t additionalOffset =
+                    blockInfo.ToBytes((slice * rowsPerImage + row) * blocksPerRow);
+                const BlockOrigin3D rowOrigin = {origin.x, origin.y + row, origin.z + slice};
+
                 copy.push_back(TextureBufferCopySplit::CopyInfo(
-                    bufferOffset + slice * rowsPerImage * bytesPerRow + blockRow * bytesPerRow,
-                    localBytesPerRow, localBytesPerImage,
-                    {origin.x, origin.y + blockRow * blockInfo.height, origin.z + slice},
-                    {clampedCopyExtent.width, blockInfo.height, 1}));
+                    bufferOffset + additionalOffset, localBytesPerRow, localBytesPerImage,
+                    blockInfo.ToTexel(rowOrigin), localCopySize));
             }
         }
         return copy;
     }
 
+    const BlockCount blocksPerImage = blocksPerRow * rowsPerImage;
+    const uint32_t bytesPerRow = blockInfo.ToBytes(blocksPerRow);
+    const uint32_t bytesPerImage = blockInfo.ToBytes(blocksPerImage);
+
     // Check whether buffer size is big enough.
-    bool needCopyLastImageAndLastRowSeparately =
-        bufferSize - bufferOffset < bytesPerImage * copyExtent.depthOrArrayLayers;
+    const uint64_t sizeRequiredByValidation =
+        blockInfo.ToBytes(blocksPerImage * copyExtent.depthOrArrayLayers);
+    const bool needCopyLastImageAndLastRowSeparately =
+        bufferSize - bufferOffset < sizeRequiredByValidation;
     if (!needCopyLastImageAndLastRowSeparately) {
-        const uint32_t localBytesPerImage =
-            copyExtent.depthOrArrayLayers == 1 ? 0 : bytesPerImage;  // workaround case 3
-        copy.push_back(TextureBufferCopySplit::CopyInfo(
-            bufferOffset, bytesPerRow, localBytesPerImage, origin,
-            {clampedCopyExtent.width, clampedCopyExtent.height, copyExtent.depthOrArrayLayers}));
+        const uint32_t localBytesPerImage = copyExtent.depthOrArrayLayers == BlockCount(1)
+                                                ? 0
+                                                : bytesPerImage;  // workaround case 3
+        copy.push_back(
+            TextureBufferCopySplit::CopyInfo(bufferOffset, bytesPerRow, localBytesPerImage,
+                                             blockInfo.ToTexel(origin), clampedCopyExtent));
         return copy;
     }
 
@@ -719,45 +736,51 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     uint64_t currentOffset = bufferOffset;
 
     // Doing all the copy except the last image.
-    if (copyExtent.depthOrArrayLayers > 1) {
-        const uint32_t localDepthOrArrayLayers = copyExtent.depthOrArrayLayers - 1;
+    if (copyExtent.depthOrArrayLayers > BlockCount(1)) {
+        const BlockCount localDepthOrArrayLayers = copyExtent.depthOrArrayLayers - BlockCount(1);
         const uint32_t localBytesPerImage =
-            localDepthOrArrayLayers == 1 ? 0 : bytesPerImage;  // workaround case 3
+            localDepthOrArrayLayers == BlockCount(1) ? 0 : bytesPerImage;  // workaround case 3
+        const TexelExtent3D localSize = {clampedCopyExtent.width, clampedCopyExtent.height,
+                                         blockInfo.ToTexelDepth(localDepthOrArrayLayers)};
         copy.push_back(TextureBufferCopySplit::CopyInfo(
-            currentOffset, bytesPerRow, localBytesPerImage, origin,
-            {clampedCopyExtent.width, clampedCopyExtent.height, localDepthOrArrayLayers}));
+            currentOffset, bytesPerRow, localBytesPerImage, blockInfo.ToTexel(origin), localSize));
+
         // Update offset to copy to the last image.
-        currentOffset += (copyExtent.depthOrArrayLayers - 1) * bytesPerImage;
+        const BlockCount copiedBlocks =
+            (copyExtent.depthOrArrayLayers - BlockCount(1)) * blocksPerImage;
+        currentOffset += blockInfo.ToBytes(copiedBlocks);
     }
 
     // Doing all the copy in last image except the last row.
-    uint32_t copyBlockRowCount = copyExtent.height / blockInfo.height;
-    if (copyBlockRowCount > 1) {
-        DAWN_ASSERT(copyExtent.height - blockInfo.height <
-                    texture->GetMipLevelSingleSubresourceVirtualSize(mipLevel, aspect).height);
+    if (copyExtent.height > BlockCount(1)) {
         const uint32_t localBytesPerImage = 0;  // workaround case 3
-        copy.push_back(TextureBufferCopySplit::CopyInfo(
-            currentOffset, bytesPerRow, localBytesPerImage,
-            {origin.x, origin.y, origin.z + copyExtent.depthOrArrayLayers - 1},
-            {clampedCopyExtent.width, copyExtent.height - blockInfo.height, 1}));
+        const BlockOrigin3D localOrigin = {
+            origin.x, origin.y, origin.z + copyExtent.depthOrArrayLayers - BlockCount(1)};
+        const TexelExtent3D localSize = {clampedCopyExtent.width,
+                                         blockInfo.ToTexelHeight(copyExtent.height - BlockCount(1)),
+                                         TexelCount(1)};
+        copy.push_back(TextureBufferCopySplit::CopyInfo(currentOffset, bytesPerRow,
+                                                        localBytesPerImage,
+                                                        blockInfo.ToTexel(localOrigin), localSize));
 
         // Update offset to copy to the last row.
-        currentOffset += (copyBlockRowCount - 1) * bytesPerRow;
+        const BlockCount copiedBlocks = (copyExtent.height - BlockCount(1)) * blocksPerRow;
+        currentOffset += blockInfo.ToBytes(copiedBlocks);
     }
 
     // Doing the last row copy with the exact number of bytes in last row.
     // Workaround this issue in a way just like the copy to a 1D texture.
-    uint32_t lastRowDataSize = (copyExtent.width / blockInfo.width) * blockInfo.byteSize;
-    uint32_t lastImageDataSize = 0;  // workaround case 3
-    uint32_t lastRowCopyExtentHeight =
-        blockInfo.height + clampedCopyExtent.height - copyExtent.height;
+    const uint32_t lastRowDataSize = blockInfo.ToBytes(copyExtent.width);
+    const uint32_t lastImageDataSize = 0;  // workaround case 3
+    const TexelCount lastRowCopyExtentHeight =
+        clampedCopyExtent.height - blockInfo.ToTexelHeight(copyExtent.height - BlockCount(1));
     DAWN_ASSERT(lastRowCopyExtentHeight <= blockInfo.height);
 
-    copy.push_back(
-        TextureBufferCopySplit::CopyInfo(currentOffset, lastRowDataSize, lastImageDataSize,
-                                         {origin.x, origin.y + copyExtent.height - blockInfo.height,
-                                          origin.z + copyExtent.depthOrArrayLayers - 1},
-                                         {clampedCopyExtent.width, lastRowCopyExtentHeight, 1}));
+    const BlockOrigin3D localOrigin = {origin.x, origin.y + copyExtent.height - BlockCount(1),
+                                       origin.z + copyExtent.depthOrArrayLayers - BlockCount(1)};
+    copy.push_back(TextureBufferCopySplit::CopyInfo(
+        currentOffset, lastRowDataSize, lastImageDataSize, blockInfo.ToTexel(localOrigin),
+        {clampedCopyExtent.width, lastRowCopyExtentHeight, TexelCount(1)}));
 
     return copy;
 }
