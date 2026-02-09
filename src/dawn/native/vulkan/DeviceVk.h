@@ -141,6 +141,8 @@ class Device final : public DeviceBase {
 
     QuerySetBase* GetEmptyPassQuerySet();
 
+    bool UseDynamicRendering() { return mUseDynamicRendering; }
+
   private:
     Device(AdapterBase* adapter,
            const UnpackedPtr<DeviceDescriptor>& descriptor,
@@ -225,6 +227,8 @@ class Device final : public DeviceBase {
 
     Ref<QuerySetBase> mEmptyPassQuerySet;
     std::atomic<uint64_t> mNextTextureViewId = 1;
+
+    bool mUseDynamicRendering = false;
 
     MaybeError ImportExternalImage(const ExternalImageDescriptorVk* descriptor,
                                    ExternalMemoryHandle memoryHandle,

@@ -627,7 +627,7 @@ MaybeError RecordBeginDynamicRenderPass(CommandRecordingContext* recordingContex
 MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
                                  Device* device,
                                  BeginRenderPassCmd* renderPass) {
-    if (device->IsToggleEnabled(Toggle::VulkanUseDynamicRendering)) {
+    if (device->UseDynamicRendering()) {
         return RecordBeginDynamicRenderPass(recordingContext, device, renderPass);
     }
 
@@ -757,7 +757,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
 void RecordEndRenderPass(CommandRecordingContext* recordingContext, Device* device) {
     VkCommandBuffer commands = recordingContext->commandBuffer;
 
-    if (device->IsToggleEnabled(Toggle::VulkanUseDynamicRendering)) {
+    if (device->UseDynamicRendering()) {
         device->fn.CmdEndRenderingKHR(commands);
     } else {
         device->fn.CmdEndRenderPass(commands);

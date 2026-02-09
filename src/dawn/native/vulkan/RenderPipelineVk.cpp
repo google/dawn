@@ -563,7 +563,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo;
     PerColorAttachment<VkFormat> colorAttachmentFormats;
 
-    if (device->IsToggleEnabled(Toggle::VulkanUseDynamicRendering)) {
+    if (device->UseDynamicRendering()) {
         // Dynamic rendering doesn't need a VkRenderPass object, just a description of the
         // attachments formats that will be used with this pipeline.
         VkRenderPass nullRenderPass = VK_NULL_HANDLE;

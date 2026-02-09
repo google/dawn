@@ -636,10 +636,16 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         featuresChain.Add(&usedKnobs.descriptorIndexingFeatures);
     }
 
-    if (IsToggleEnabled(Toggle::VulkanUseDynamicRendering)) {
+    // Dynamic Rendering can be used if the extension is available AND the DawnLoadResolveTexture
+    // feature is not being used.
+    // TODO(crbug.com/463893794): Remove this restriction when DawnLoadResolveTexture is supported
+    // by the Dynamic Rendering path.
+    if (IsToggleEnabled(Toggle::VulkanUseDynamicRendering) &&
+        !HasFeature(Feature::DawnLoadResolveTexture)) {
         DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::DynamicRendering));
         usedKnobs.dynamicRenderingFeatures = mDeviceInfo.dynamicRenderingFeatures;
         featuresChain.Add(&usedKnobs.dynamicRenderingFeatures);
+        mUseDynamicRendering = true;
     }
 
     if (HasFeature(Feature::MSAARenderToSingleSampled)) {

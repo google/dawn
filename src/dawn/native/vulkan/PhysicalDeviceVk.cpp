@@ -952,9 +952,7 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
          gpu_info::GetIntelGen(GetVendorId(), GetDeviceId()) <= gpu_info::IntelGen::Gen9)) {
         adapterToggles->ForceSet(Toggle::VulkanUseDynamicRendering, false);
     } else {
-        // TODO(crbug.com/463893794): Defaulted to false until ExpandResolveTexture is supported
-        // when dynamic rendering is enabled.
-        adapterToggles->Default(Toggle::VulkanUseDynamicRendering, false);
+        adapterToggles->Default(Toggle::VulkanUseDynamicRendering, true);
     }
 
     // Use CreateRenderPass2KHR by default if the corresponding extension is available. Disabled if
