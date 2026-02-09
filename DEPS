@@ -47,7 +47,7 @@ vars = {
   # reclient CIPD package version
   'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
   # siso CIPD package version.
-  'siso_version': 'git_revision:73b1681189a8d8a4d922cd84246dcec2494142a5',
+  'siso_version': 'git_revision:2599cc0037d82d9187beea5c13349ce05716817b',
 
   # 'magic' text to tell depot_tools that git submodules should be accepted
   # but parity with DEPS file is expected.
@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '365ea4f3cdace8b9661654a8b0d9aa124470e677',
+  'chromium_revision': '99c5d6bdd062b8423e88c68661444861a99b4747',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -112,7 +112,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@9fd48a305e18b9bbaf61734557ce2c46497192b3',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@06b875921815b3d28e6f739b2f31138a233c53bd',
     'condition': 'dawn_standalone',
   },
 
@@ -128,7 +128,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@d99c56d4b9f6663bff528c4fac5313bceb32e762',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@5705ee75b1fafbf96ff11534a9976f10d6c47dfd',
     'condition': 'dawn_standalone',
   },
 
@@ -143,11 +143,11 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@17b369ad87c1bb5d7fc7cde4fcfdac260b249e4f',
+  'url': '{chromium_git}/chromium/src/build@6efd145f258a1ba389bd1ee5e32c2f0a80193f95',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@c9cac29ea48c54aec24526f3e81fb122d9a99cc0',
+  'url': '{chromium_git}/chromium/src/tools/clang@7fd7d7092fa5ee06380f06f66f1b7bd03fca71a8',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -253,7 +253,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@2ae45eb1ec67784e60d0c618a8dfcf319e61233e',
+    'url': '{chromium_git}/chromium/src/testing@67ba60aaf81dc778947026122385872dceffae20',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -608,7 +608,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@bb5a3e33f5ea17a2e27059d99b12273b1b1c3604',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@51b41d1d8503d591014d98df29bdd94db18279a9',
     'condition': 'dawn_standalone',
   },
 
