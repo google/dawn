@@ -45,6 +45,8 @@ DynamicUploader::DynamicUploader(DeviceBase* device) : mDevice(device) {}
 
 ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSize,
                                                           uint64_t offsetAlignment) {
+    DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
+
     // Disable further sub-allocation should the request be too large.
     if (allocationSize > kRingBufferSize) {
         BufferDescriptor bufferDesc = {};
@@ -156,6 +158,8 @@ MaybeError DynamicUploader::MaybeSubmitPendingCommands() {
 }
 
 void DynamicUploader::Deallocate(ExecutionSerial lastCompletedSerial, bool freeAll) {
+    DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
+
     // Reclaim memory within the ring buffers by ticking (or removing requests no longer
     // in-flight).
     size_t i = 0;
