@@ -248,6 +248,7 @@ option(TINT_BUILD_FUZZER_VULKAN_SUPPORT "Build fuzzing Vulkan drivers" OFF)
 option(TINT_BUILD_BENCHMARKS "Build Tint benchmarks" OFF)
 option(TINT_BUILD_TESTS "Build tests" ON)
 option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
+option(TINT_BUILD_MESA "Build Mesa" OFF)
 
 if (EMSCRIPTEN)
   # Skip tint tests in emscripten build
@@ -337,6 +338,7 @@ message(STATUS "Tint enable IR validation: ${TINT_ENABLE_IR_VALIDATION}")
 message(STATUS "Tint enable break in debugger: ${TINT_ENABLE_BREAK_IN_DEBUGGER}")
 message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
 message(STATUS "Tint randomize hashes: ${TINT_RANDOMIZE_HASHES}")
+message(STATUS "Tint build Mesa: ${TINT_BUILD_MESA}")
 message(STATUS "")
 
 message(STATUS "Dawn third_party dir: ${DAWN_THIRD_PARTY_DIR}")

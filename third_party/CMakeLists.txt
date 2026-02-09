@@ -368,3 +368,8 @@ if (TINT_BUILD_TINTD)
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp" EXCLUDE_FROM_ALL)
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/langsvr" EXCLUDE_FROM_ALL)
 endif()
+
+if (TINT_BUILD_MESA)
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mesa" "${CMAKE_CURRENT_BINARY_DIR}/mesa")
+endif()
+
