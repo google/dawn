@@ -707,29 +707,29 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
             }
         }
 
-        DAWN_TRY_ASSIGN(framebuffer,
-                        device->GetFramebufferCache()->GetOrCreate(
-                            framebufferQuery,
-                            [&](const FramebufferCacheQuery& query)
-                                -> ResultOrError<VkFramebuffer> {
-                                VkFramebufferCreateInfo createInfo;
-                                createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-                                createInfo.pNext = nullptr;
-                                createInfo.flags = 0;
-                                createInfo.renderPass = renderPassVK;
-                                createInfo.attachmentCount = query.attachmentCount;
-                                createInfo.pAttachments = AsVkArray(query.attachments.data());
-                                createInfo.width = query.width;
-                                createInfo.height = query.height;
-                                createInfo.layers = 1;
+        DAWN_TRY_ASSIGN(
+            framebuffer,
+            device->GetFramebufferCache()->GetOrCreate(
+                framebufferQuery,
+                [&](const FramebufferCacheQuery& query) -> ResultOrError<VkFramebuffer> {
+                    VkFramebufferCreateInfo createInfo;
+                    createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+                    createInfo.pNext = nullptr;
+                    createInfo.flags = 0;
+                    createInfo.renderPass = renderPassVK;
+                    createInfo.attachmentCount = query.attachmentCount;
+                    createInfo.pAttachments = AsVkArray(query.attachments.data());
+                    createInfo.width = query.width;
+                    createInfo.height = query.height;
+                    createInfo.layers = 1;
 
-                                VkFramebuffer framebuffer;
-                                DAWN_TRY(CheckVkSuccess(
-                                    device->fn.CreateFramebuffer(device->GetVkDevice(), &createInfo,
-                                                                 nullptr, &*framebuffer),
-                                    "CreateFramebuffer"));
-                                return framebuffer;
-                            }));
+                    VkFramebuffer framebuffer;
+                    DAWN_TRY(CheckVkSuccess(
+                        device->fn.CreateFramebuffer(device->GetVkDevice(), &createInfo, nullptr,
+                                                     &*framebuffer),
+                        "CreateFramebuffer"));
+                    return framebuffer;
+                }));
     }
 
     VkRenderPassBeginInfo beginInfo;

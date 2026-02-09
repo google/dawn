@@ -37,7 +37,9 @@ class SamplerValidationTest : public ValidationTest {};
 
 // Test NaN and INFINITY values are not allowed
 TEST_F(SamplerValidationTest, InvalidLOD) {
-    { device.CreateSampler(); }
+    {
+        device.CreateSampler();
+    }
     {
         wgpu::SamplerDescriptor samplerDesc;
         samplerDesc.lodMinClamp = NAN;
@@ -106,7 +108,9 @@ TEST_F(SamplerValidationTest, ValidFilterAnisotropic) {
     kValidAnisoSamplerDesc.minFilter = wgpu::FilterMode::Linear;
     kValidAnisoSamplerDesc.magFilter = wgpu::FilterMode::Linear;
     kValidAnisoSamplerDesc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
-    { device.CreateSampler(); }
+    {
+        device.CreateSampler();
+    }
     {
         wgpu::SamplerDescriptor samplerDesc = kValidAnisoSamplerDesc;
         samplerDesc.maxAnisotropy = 16;
@@ -140,7 +144,9 @@ TEST_F(SamplerValidationTest, ValidFilterAnisotropicWithUndefined) {
     kValidAnisoSamplerDesc.minFilter = wgpu::FilterMode::Undefined;
     kValidAnisoSamplerDesc.magFilter = wgpu::FilterMode::Undefined;
     kValidAnisoSamplerDesc.mipmapFilter = wgpu::MipmapFilterMode::Undefined;
-    { device.CreateSampler(); }
+    {
+        device.CreateSampler();
+    }
 }
 
 }  // anonymous namespace

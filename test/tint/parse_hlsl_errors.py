@@ -44,12 +44,14 @@ parser.add_argument('--ir-only', dest='ir_only', action='store_true')
 parser.set_defaults(ir_only=False)
 args = parser.parse_args()
 
+
 def add_error(error_to_files, error, file):
     error = error.strip()
     if not error in error_to_files:
         error_to_files[error] = [file]
     else:
         error_to_files[error].append(file)
+
 
 def find_error(f, all_lines, error_to_files, is_fxc):
     # Search for specific errors from top to bottom
@@ -71,13 +73,13 @@ def find_error(f, all_lines, error_to_files, is_fxc):
         # DXC
         if not is_fxc:
             if line.startswith('error: validation errors'):
-                continue # Skip line, next line should have better error
+                continue  # Skip line, next line should have better error
 
             if line.startswith('error:'):
                 add_error(error_to_files, line, f)
                 return True
 
-            m = re.search('.*\.hlsl:[0-9]+:.*?(error.*)', line) # DXC???
+            m = re.search('.*\.hlsl:[0-9]+:.*?(error.*)', line)  # DXC???
             if m:
                 add_error(error_to_files, m.groups()[0], f)
                 return True
@@ -102,9 +104,9 @@ def find_and_print_errors(glob_pathname, is_fxc):
         with open(f, "r") as fs:
             all_lines = fs.readlines()
             first_line = all_lines[0]
-            if not first_line.startswith("SKIP:"): # Only process SKIPs
+            if not first_line.startswith("SKIP:"):  # Only process SKIPs
                 continue
-            if first_line.startswith("SKIP: INVALID"): # Except for INVALIDs
+            if first_line.startswith("SKIP: INVALID"):  # Except for INVALIDs
                 continue
             found_error = find_error(f, all_lines, error_to_files, is_fxc)
 
@@ -112,8 +114,9 @@ def find_and_print_errors(glob_pathname, is_fxc):
             # If no error message was found, add the SKIP line as it may contain the reason for skipping
             add_error(error_to_files, first_line, f)
 
-    for error,files in sorted(error_to_files.items()):
-        print('[{}] {} (count: {})'.format('fxc' if is_fxc else 'dxc', error, len(files)))
+    for error, files in sorted(error_to_files.items()):
+        print('[{}] {} (count: {})'.format('fxc' if is_fxc else 'dxc', error,
+                                           len(files)))
         if args.list_files:
             for f in files:
                 print('\t{}'.format(f))

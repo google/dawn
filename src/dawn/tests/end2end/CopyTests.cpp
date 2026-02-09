@@ -965,9 +965,7 @@ class CopyTests_T2T : public CopyTests_T2TBase<DawnTestWithParams<CopyTextureFor
         TextureSpec() { format = GetParam().mTextureFormat; }
     };
 
-    void SetUp() override {
-        DawnTestWithParams<CopyTextureFormatParams>::SetUp();
-    }
+    void SetUp() override { DawnTestWithParams<CopyTextureFormatParams>::SetUp(); }
 };
 
 class CopyTests_T2T_Srgb : public CopyTests_T2TBase<DawnTestWithParams<CopyTextureFormatParams>> {

@@ -296,7 +296,6 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeapBecauseOfCache) {
                 return vec4f(0.0, 0.0, 0.0, 0.0);
             })");
 
-
     wgpu::Sampler sampler = device.CreateSampler();
 
     Device* d3dDevice = reinterpret_cast<Device*>(device.Get());

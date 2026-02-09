@@ -143,6 +143,5 @@ TEST_F(YCbCrInfoWithFeatureValidationTest, YCbCrTextureViewSupported) {
     texture.CreateView(&descriptor);
 }
 
-
 }  // anonymous namespace
 }  // namespace dawn

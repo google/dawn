@@ -743,6 +743,8 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
             AddFormat(internalFormat);
         };
 
+    // clang-format off
+
     // Depth-stencil formats
     AddStencilFormat(wgpu::TextureFormat::Stencil8, Format::supported);
     AddDepthFormat(wgpu::TextureFormat::Depth16Unorm, 2, Format::supported);
@@ -841,6 +843,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     const UnsupportedReason multiPlanarFormatNv12aUnsupportedReason = device->HasFeature(Feature::MultiPlanarFormatNv12a) ?  Format::supported : RequiresFeature{wgpu::FeatureName::MultiPlanarFormatNv12a};
     AddMultiAspectFormat(wgpu::TextureFormat::R8BG8A8Triplanar420Unorm, TextureSubsampling::e420, Aspect::Plane0 | Aspect::Plane1 | Aspect::Plane2,
         multiPlanarCapabilities, multiPlanarFormatNv12aUnsupportedReason, ComponentCount(4), wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::R8Unorm);
+
     // clang-format on
 
     // This checks that each format is set at least once, the second part of checking that all

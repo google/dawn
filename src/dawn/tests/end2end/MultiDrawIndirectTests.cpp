@@ -168,10 +168,7 @@ TEST_P(MultiDrawIndirectTest, IndirectOffset) {
 }
 
 // TODO(crbug.com/462151798): Implement MultiDraw*Indirect for WebGPU backend.
-DAWN_INSTANTIATE_TEST(MultiDrawIndirectTest,
-                      VulkanBackend(),
-                      D3D12Backend(),
-                      MetalBackend());
+DAWN_INSTANTIATE_TEST(MultiDrawIndirectTest, VulkanBackend(), D3D12Backend(), MetalBackend());
 
 class MultiDrawIndirectUsingFirstVertexTest : public DawnTest {
   protected:

@@ -85,8 +85,10 @@ import types
 
 if sys.version_info[0] == 2:
     # python2-based LLDB accepts utf8-encoded ascii strings only.
-    def to_lldb_str(s): return s.encode(
-        'utf8', 'backslashreplace') if isinstance(s, unicode) else s
+    def to_lldb_str(s):
+        return s.encode('utf8', 'backslashreplace') if isinstance(
+            s, unicode) else s
+
     range = xrange
 else:
     to_lldb_str = str
@@ -119,16 +121,17 @@ def __lldb_init_module(debugger, dict):
 
 def attach_synthetic_to_type(synth_class, type_name, is_regex=False):
     global module, tint_category
-    synth = lldb.SBTypeSynthetic.CreateWithClassName(
-        __name__ + '.' + synth_class.__name__)
+    synth = lldb.SBTypeSynthetic.CreateWithClassName(__name__ + '.' +
+                                                     synth_class.__name__)
     synth.SetOptions(lldb.eTypeOptionCascade)
     ret = tint_category.AddTypeSynthetic(
         lldb.SBTypeNameSpecifier(type_name, is_regex), synth)
     log.debug('attaching synthetic %s to "%s", is_regex=%s -> %s',
               synth_class.__name__, type_name, is_regex, ret)
 
-    def summary_fn(valobj, dict): return get_synth_summary(
-        synth_class, valobj, dict)
+    def summary_fn(valobj, dict):
+        return get_synth_summary(synth_class, valobj, dict)
+
     # LLDB accesses summary fn's by name, so we need to create a unique one.
     summary_fn.__name__ = '_get_synth_summary_' + synth_class.__name__
     setattr(module, summary_fn.__name__, summary_fn)
@@ -137,8 +140,8 @@ def attach_synthetic_to_type(synth_class, type_name, is_regex=False):
 
 def attach_summary_to_type(summary_fn, type_name, is_regex=False):
     global module, tint_category
-    summary = lldb.SBTypeSummary.CreateWithFunctionName(
-        __name__ + '.' + summary_fn.__name__)
+    summary = lldb.SBTypeSummary.CreateWithFunctionName(__name__ + '.' +
+                                                        summary_fn.__name__)
     summary.SetOptions(lldb.eTypeOptionCascade)
     ret = tint_category.AddTypeSummary(
         lldb.SBTypeNameSpecifier(type_name, is_regex), summary)
@@ -232,7 +235,8 @@ class UtilsSlicePrinter(Printer):
         self.elem_size = self.elem_type.GetByteSize()
 
     def get_summary(self):
-        return 'length={} capacity={}'.format(self.len.GetValueAsUnsigned(), self.cap.GetValueAsUnsigned())
+        return 'length={} capacity={}'.format(self.len.GetValueAsUnsigned(),
+                                              self.cap.GetValueAsUnsigned())
 
     def num_children(self):
         # NOTE: VS Code on MacOS hangs if we try to expand something too large, so put an artificial limit
@@ -248,7 +252,8 @@ class UtilsSlicePrinter(Printer):
                 return None
             # TODO: return self.value_at(index)
             offset = index * self.elem_size
-            return self.data.CreateChildAtOffset('[%s]' % index, offset, self.elem_type)
+            return self.data.CreateChildAtOffset('[%s]' % index, offset,
+                                                 self.elem_type)
         except Exception as e:
             log.error('%s', e)
             raise
@@ -256,7 +261,8 @@ class UtilsSlicePrinter(Printer):
     def value_at(self, index):
         '''Returns array value at index'''
         offset = index * self.elem_size
-        return self.data.CreateChildAtOffset('[%s]' % index, offset, self.elem_type)
+        return self.data.CreateChildAtOffset('[%s]' % index, offset,
+                                             self.elem_type)
 
 
 class UtilsVectorPrinter(Printer):
@@ -270,7 +276,8 @@ class UtilsVectorPrinter(Printer):
 
     def get_summary(self):
         using_heap = self.cap.GetValueAsUnsigned() > self.fixed_size
-        return 'heap={} {}'.format(using_heap, self.slice_printer.get_summary())
+        return 'heap={} {}'.format(using_heap,
+                                   self.slice_printer.get_summary())
 
     def num_children(self):
         return self.slice_printer.num_children()
@@ -294,7 +301,8 @@ class UtilsVectorRefPrinter(Printer):
         self.can_move = self.member('can_move_')
 
     def get_summary(self):
-        return 'can_move={} {}'.format(self.can_move.GetValue(), self.slice_printer.get_summary())
+        return 'can_move={} {}'.format(self.can_move.GetValue(),
+                                       self.slice_printer.get_summary())
 
     def num_children(self):
         return self.slice_printer.num_children()
@@ -344,7 +352,8 @@ class UtilsHashmapBasePrinter(Printer):
             # the default printer for std::optional.
             kvp = slot, entry
 
-        return kvp[1].CreateChildAtOffset('[{}]'.format(kvp[0]), 0, kvp[1].GetType())
+        return kvp[1].CreateChildAtOffset('[{}]'.format(kvp[0]), 0,
+                                          kvp[1].GetType())
 
     def try_read_std_optional(self, slot, entry):
         return None

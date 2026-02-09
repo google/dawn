@@ -731,8 +731,8 @@ TEST_P(DepthStencilStateTest, StencilFail) {
         {
             {baseState, utils::RGBA8(255, 255, 255, 255), 1.f,
              1},  // Triangle to set stencil value to 1
-            {state, utils::RGBA8(0, 0, 0, 255), 0.f,
-             2}  // Triangle with stencil reference 2 fails the Less comparison function
+            {state, utils::RGBA8(0, 0, 0, 255), 0.f, 2}
+            // Triangle with stencil reference 2 fails the Less comparison function
         },
         2);  // Replace the stencil on failure, so it should be 2
 }

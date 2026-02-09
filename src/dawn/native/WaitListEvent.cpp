@@ -34,8 +34,7 @@
 namespace dawn::native {
 
 WaitListEvent::WaitListEvent(uint64_t requiredSignalCount)
-    : mRemainingSignalCount(requiredSignalCount) {
-}
+    : mRemainingSignalCount(requiredSignalCount) {}
 WaitListEvent::~WaitListEvent() = default;
 
 bool WaitListEvent::IsSignaled() const {

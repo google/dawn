@@ -117,7 +117,7 @@ class Pipe {
 };
 
 bool ExecutableExists(const std::string& path) {
-    struct stat s {};
+    struct stat s{};
     if (stat(path.c_str(), &s) != 0) {
         return false;
     }

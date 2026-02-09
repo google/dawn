@@ -39,6 +39,7 @@ from webgpu_docs_utility import build_doc_map, load_json_data
 
 
 class Metadata:
+
     def __init__(self, metadata):
         self.api = metadata['api']
         self.namespace = metadata['namespace']
@@ -48,7 +49,9 @@ class Metadata:
         self.native_namespace = metadata['native_namespace']
         self.copyright_year = metadata.get('copyright_year', None)
 
+
 class Name:
+
     def __init__(self, name, native=False):
         self.native = native
         self.name = name
@@ -99,6 +102,7 @@ class Name:
             result += chunk.lower()
         return result
 
+
 def concat_names(*names):
     return ' '.join([name.canonical_case() for name in names])
 
@@ -121,6 +125,7 @@ def validate_and_get_tags(json_data):
 
 
 class Type:
+
     def __init__(self, name, json_data, native=False):
         self.json_data = json_data
         self.dict_name = name
@@ -138,6 +143,7 @@ EnumValue = namedtuple('EnumValue', ['name', 'value', 'valid', 'json_data'])
 
 
 class EnumType(Type):
+
     def __init__(self, is_enabled, name, json_data):
         Type.__init__(self, name, json_data)
 
@@ -209,6 +215,7 @@ BitmaskValue = namedtuple('BitmaskValue', ['name', 'value', 'json_data'])
 
 
 class BitmaskType(Type):
+
     def __init__(self, is_enabled, name, json_data):
         Type.__init__(self, name, json_data)
         self.values = [
@@ -230,6 +237,7 @@ class CallbackFunctionType(Type):
 
 
 class FunctionPointerType(Type):
+
     def __init__(self, is_enabled, name, json_data):
         Type.__init__(self, name, json_data)
         self.returns = None
@@ -237,12 +245,14 @@ class FunctionPointerType(Type):
 
 
 class TypedefType(Type):
+
     def __init__(self, is_enabled, name, json_data):
         Type.__init__(self, name, json_data)
         self.type = None
 
 
 class NativeType(Type):
+
     def __init__(self, is_enabled, name, json_data):
         Type.__init__(self, name, json_data, native=True)
         self.is_wire_transparent = json_data.get('wire transparent', True)
@@ -318,6 +328,7 @@ class Method():
 
 
 class ObjectType(Type):
+
     def __init__(self, is_enabled, name, json_data):
         json_data_override = {'methods': []}
         if 'methods' in json_data:
@@ -328,12 +339,14 @@ class ObjectType(Type):
 
 
 class Record:
+
     def __init__(self, name):
         self.name = Name(name)
         self.members = []
         self.may_have_dawn_object = False
 
     def update_metadata(self):
+
         def may_have_dawn_object(member):
             if isinstance(member.type, ObjectType):
                 return True
@@ -353,6 +366,7 @@ class Record:
 
 
 class StructureType(Record, Type):
+
     def __init__(self, is_enabled, name, json_data):
         tags = validate_and_get_tags(json_data)
         if tags == ['emscripten']:
@@ -422,12 +436,14 @@ class StructureType(Record, Type):
 
 
 class CallbackInfoType(StructureType):
+
     def __init__(self, is_enabled, name, json_data):
         StructureType.__init__(self, is_enabled, name, json_data)
         self.extensible = 'in'
 
 
 class ConstantDefinition():
+
     def __init__(self, is_enabled, name, json_data):
         self.type = None
         self.value = json_data['value']
@@ -437,6 +453,7 @@ class ConstantDefinition():
 
 
 class FunctionDeclaration():
+
     def __init__(self, is_enabled, name, json_data, no_cpp=False):
         self.returns = None
         self.arguments = []
@@ -446,6 +463,7 @@ class FunctionDeclaration():
 
 
 class Command(Record):
+
     def __init__(self, name, members=None):
         Record.__init__(self, name)
         self.members = members or []
@@ -515,12 +533,15 @@ def link_object(obj, types):
     obj.methods = [make_method(m) for m in obj.json_data.get('methods', [])]
     obj.methods.sort(key=lambda method: method.name)
 
+
 def link_structure(struct, types):
     struct.members = linked_record_members(struct.json_data['members'], types)
     for root in struct.json_data.get('chain roots', []):
         struct.chain_roots.append(types[root])
         types[root].extensions.append(struct)
-    struct.chain_roots = [types[root] for root in struct.json_data.get('chain roots', [])]
+    struct.chain_roots = [
+        types[root] for root in struct.json_data.get('chain roots', [])
+    ]
     assert all((root.category == 'structure' for root in struct.chain_roots))
 
 
@@ -550,6 +571,7 @@ def link_function(function, types):
 
     function.arguments = linked_record_members(
         function.json_data.get('args', []), types)
+
 
 # Sort structures so that if struct A has struct B as a member, then B is
 # listed before A.
@@ -968,7 +990,6 @@ def compute_kotlin_params(loaded_json,
 
             yield member
 
-
     # Calculate if we should, and can, provide a Kotlin default value for a given argument.
     # This will affect its order in the method parameter and structure field lists.
     def kotlin_default(arg):
@@ -1194,6 +1215,7 @@ def as_cType(c_prefix, name):
     else:
         return c_prefix + name.CamelCase()
 
+
 def as_cppType(name):
     # Special case for 'bool' because it has a typedef for compatibility.
     if name.native and name.get() != 'bool':
@@ -1384,7 +1406,8 @@ def find_by_name(members, name):
 
 
 def has_callback_arguments(method):
-    return any(arg.type.category == 'function pointer' for arg in method.arguments)
+    return any(arg.type.category == 'function pointer'
+               for arg in method.arguments)
 
 
 # TODO: crbug.com/dawn/2509 - Remove this helper when once we deprecate older APIs.
@@ -1483,6 +1506,7 @@ def make_base_render_params(metadata):
 
 
 class MultiGeneratorFromDawnJSON(Generator):
+
     def get_description(self):
         return 'Generates code for various target from Dawn.json.'
 
@@ -1750,24 +1774,27 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/' + native_dir + '/ValidationUtils_autogen.h',
                            frontend_params))
             renders.append(
-                FileRender('dawn/native/ValidationUtils.cpp',
-                           'src/' + native_dir + '/ValidationUtils_autogen.cpp',
-                           frontend_params))
+                FileRender(
+                    'dawn/native/ValidationUtils.cpp',
+                    'src/' + native_dir + '/ValidationUtils_autogen.cpp',
+                    frontend_params))
             renders.append(
-                FileRender('dawn/native/dawn_platform.h',
-                           'src/' + native_dir + '/' + prefix + '_platform_autogen.h',
-                           frontend_params))
+                FileRender(
+                    'dawn/native/dawn_platform.h',
+                    'src/' + native_dir + '/' + prefix + '_platform_autogen.h',
+                    frontend_params))
             renders.append(
-                FileRender('dawn/native/api_structs.h',
-                           'src/' + native_dir + '/' + namespace + '_structs_autogen.h',
-                           frontend_params))
+                FileRender(
+                    'dawn/native/api_structs.h', 'src/' + native_dir + '/' +
+                    namespace + '_structs_autogen.h', frontend_params))
             renders.append(
-                FileRender('dawn/native/api_structs.cpp',
-                           'src/' + native_dir + '/' + namespace + '_structs_autogen.cpp',
-                           frontend_params))
+                FileRender(
+                    'dawn/native/api_structs.cpp', 'src/' + native_dir + '/' +
+                    namespace + '_structs_autogen.cpp', frontend_params))
             renders.append(
                 FileRender('dawn/native/ProcTable.cpp',
-                           'src/' + native_dir + '/ProcTable.cpp', frontend_params))
+                           'src/' + native_dir + '/ProcTable.cpp',
+                           frontend_params))
             renders.append(
                 FileRender('dawn/native/ChainUtils.h',
                            'src/' + native_dir + '/ChainUtils_autogen.h',
@@ -1785,13 +1812,14 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/' + native_dir + '/Features_autogen.inl',
                            frontend_params))
             renders.append(
-                FileRender('dawn/native/api_absl_format.h',
-                           'src/' + native_dir + '/' + api + '_absl_format_autogen.h',
-                           frontend_params))
+                FileRender(
+                    'dawn/native/api_absl_format.h',
+                    'src/' + native_dir + '/' + api + '_absl_format_autogen.h',
+                    frontend_params))
             renders.append(
-                FileRender('dawn/native/api_absl_format.cpp',
-                           'src/' + native_dir + '/' + api + '_absl_format_autogen.cpp',
-                           frontend_params))
+                FileRender(
+                    'dawn/native/api_absl_format.cpp', 'src/' + native_dir +
+                    '/' + api + '_absl_format_autogen.cpp', frontend_params))
             renders.append(
                 FileRender(
                     'dawn/native/api_StreamImpl.cpp', 'src/' + native_dir +

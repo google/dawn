@@ -463,7 +463,9 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaults2DArray) {
     constexpr uint32_t kDefaultArrayLayers = 8;
     wgpu::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
 
-    { texture.CreateView(); }
+    {
+        texture.CreateView();
+    }
     {
         wgpu::TextureViewDescriptor descriptor;
         descriptor.format = wgpu::TextureFormat::Undefined;
@@ -527,7 +529,9 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaults2DNonArray) {
     constexpr uint32_t kDefaultArrayLayers = 1;
     wgpu::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
 
-    { texture.CreateView(); }
+    {
+        texture.CreateView();
+    }
     {
         wgpu::TextureViewDescriptor descriptor;
         descriptor.format = wgpu::TextureFormat::Undefined;
@@ -570,7 +574,9 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaults2DNonArray) {
 TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaults3D) {
     wgpu::Texture texture = Create3DTexture(device);
 
-    { texture.CreateView(); }
+    {
+        texture.CreateView();
+    }
     {
         wgpu::TextureViewDescriptor descriptor;
         descriptor.format = wgpu::TextureFormat::Undefined;

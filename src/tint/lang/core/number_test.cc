@@ -460,7 +460,8 @@ INSTANTIATE_TEST_SUITE_P(
 #undef OVERFLOW  // corecrt_math.h :(
 #endif
 #define OVERFLOW \
-    {}
+    {            \
+    }
 
 // An error value.  IEEE 754 exceptions map to this, including overflow,
 // invalid operation, and division by zero.

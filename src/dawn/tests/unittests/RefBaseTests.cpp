@@ -116,7 +116,9 @@ TEST(RefBase, Acquire) {
     Ref ref(tracker1);
 
     events.clear();
-    { ref.Acquire(tracker2); }
+    {
+        ref.Acquire(tracker2);
+    }
     EXPECT_THAT(events, testing::ElementsAre(Event{Action::kRelease, 1},   // release ref
                                              Event{Action::kAssign, 1, 2}  // acquire tracker2
                                              ));
@@ -128,7 +130,9 @@ TEST(RefBase, Detach) {
     Ref ref(tracker);
 
     events.clear();
-    { [[maybe_unused]] auto ptr = ref.Detach(); }
+    {
+        [[maybe_unused]] auto ptr = ref.Detach();
+    }
     EXPECT_THAT(events, testing::ElementsAre(Event{Action::kAssign, 1, 0}  // nullify ref
                                              ));
 }
@@ -253,7 +257,9 @@ TEST(RefBase, RefMoveAssignmentSelf) {
     Ref& self = ref;
 
     events.clear();
-    { ref = std::move(self); }
+    {
+        ref = std::move(self);
+    }
     EXPECT_THAT(events, testing::ElementsAre());
 }
 
@@ -278,7 +284,9 @@ TEST(RefBase, TMoveAssignment) {
     Ref ref;
 
     events.clear();
-    { ref = std::move(tracker); }
+    {
+        ref = std::move(tracker);
+    }
     EXPECT_THAT(events, testing::ElementsAre(Event{Action::kAddRef, 1},  //
                                              Event{Action::kAssign, 0, 1}));
 }

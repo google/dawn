@@ -130,6 +130,7 @@ def process_args(ports):
 
 # Hooks that affect linker invocations
 
+
 def _compute_library_compile_flags(settings):
     # Emscripten automatically handles many necessary compile flags (LTO, PIC,
     # wasm64). The ones it does not handle are handled below.

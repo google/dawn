@@ -72,7 +72,9 @@ class BindGroupValidationTest : public ValidationTest {
             descriptor.usage = wgpu::BufferUsage::Storage;
             mSSBO = device.CreateBuffer(&descriptor);
         }
-        { mSampler = device.CreateSampler(); }
+        {
+            mSampler = device.CreateSampler();
+        }
         {
             mSampledTexture =
                 CreateTexture(wgpu::TextureUsage::TextureBinding, kDefaultTextureFormat, 1);

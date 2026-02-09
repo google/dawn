@@ -39,13 +39,10 @@ class GPUTimestampCalibrationTestsMetal : public GPUTimestampCalibrationTestBack
         mBackendDevice = dawn::native::metal::ToBackend(dawn::native::FromAPI(device.Get()));
     }
 
-    bool IsSupported() const override {
-            return true;
-    }
+    bool IsSupported() const override { return true; }
 
     void GetTimestampCalibration(uint64_t* gpuTimestamp, uint64_t* cpuTimestamp) override {
-            [mBackendDevice->GetMTLDevice() sampleTimestamps:cpuTimestamp
-                                                gpuTimestamp:gpuTimestamp];
+        [mBackendDevice->GetMTLDevice() sampleTimestamps:cpuTimestamp gpuTimestamp:gpuTimestamp];
     }
 
     float GetTimestampPeriod() const override { return mBackendDevice->GetTimestampPeriodInNS(); }

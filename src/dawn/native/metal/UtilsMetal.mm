@@ -424,122 +424,122 @@ MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat fo
 #endif
 
         case wgpu::TextureFormat::ETC2RGB8Unorm:
-                return MTLPixelFormatETC2_RGB8;
+            return MTLPixelFormatETC2_RGB8;
 
         case wgpu::TextureFormat::ETC2RGB8UnormSrgb:
 
-                return MTLPixelFormatETC2_RGB8_sRGB;
+            return MTLPixelFormatETC2_RGB8_sRGB;
 
         case wgpu::TextureFormat::ETC2RGB8A1Unorm:
-                return MTLPixelFormatETC2_RGB8A1;
+            return MTLPixelFormatETC2_RGB8A1;
 
         case wgpu::TextureFormat::ETC2RGB8A1UnormSrgb:
 
-                return MTLPixelFormatETC2_RGB8A1_sRGB;
+            return MTLPixelFormatETC2_RGB8A1_sRGB;
 
         case wgpu::TextureFormat::ETC2RGBA8Unorm:
-                return MTLPixelFormatEAC_RGBA8;
+            return MTLPixelFormatEAC_RGBA8;
 
         case wgpu::TextureFormat::ETC2RGBA8UnormSrgb:
 
-                return MTLPixelFormatEAC_RGBA8_sRGB;
+            return MTLPixelFormatEAC_RGBA8_sRGB;
 
         case wgpu::TextureFormat::EACR11Unorm:
 
-                return MTLPixelFormatEAC_R11Unorm;
+            return MTLPixelFormatEAC_R11Unorm;
 
         case wgpu::TextureFormat::EACR11Snorm:
-                return MTLPixelFormatEAC_R11Snorm;
+            return MTLPixelFormatEAC_R11Snorm;
 
         case wgpu::TextureFormat::EACRG11Unorm:
 
-                return MTLPixelFormatEAC_RG11Unorm;
+            return MTLPixelFormatEAC_RG11Unorm;
 
         case wgpu::TextureFormat::EACRG11Snorm:
 
-                return MTLPixelFormatEAC_RG11Snorm;
+            return MTLPixelFormatEAC_RG11Snorm;
 
         case wgpu::TextureFormat::ASTC4x4Unorm:
-                return MTLPixelFormatASTC_4x4_LDR;
+            return MTLPixelFormatASTC_4x4_LDR;
 
         case wgpu::TextureFormat::ASTC4x4UnormSrgb:
-                return MTLPixelFormatASTC_4x4_sRGB;
+            return MTLPixelFormatASTC_4x4_sRGB;
 
         case wgpu::TextureFormat::ASTC5x4Unorm:
 
-                return MTLPixelFormatASTC_5x4_LDR;
+            return MTLPixelFormatASTC_5x4_LDR;
 
         case wgpu::TextureFormat::ASTC5x4UnormSrgb:
-                return MTLPixelFormatASTC_5x4_sRGB;
+            return MTLPixelFormatASTC_5x4_sRGB;
 
         case wgpu::TextureFormat::ASTC5x5Unorm:
-                return MTLPixelFormatASTC_5x5_LDR;
+            return MTLPixelFormatASTC_5x5_LDR;
 
         case wgpu::TextureFormat::ASTC5x5UnormSrgb:
-                return MTLPixelFormatASTC_5x5_sRGB;
+            return MTLPixelFormatASTC_5x5_sRGB;
 
         case wgpu::TextureFormat::ASTC6x5Unorm:
-                return MTLPixelFormatASTC_6x5_LDR;
+            return MTLPixelFormatASTC_6x5_LDR;
 
         case wgpu::TextureFormat::ASTC6x5UnormSrgb:
-                return MTLPixelFormatASTC_6x5_sRGB;
+            return MTLPixelFormatASTC_6x5_sRGB;
 
         case wgpu::TextureFormat::ASTC6x6Unorm:
-                return MTLPixelFormatASTC_6x6_LDR;
+            return MTLPixelFormatASTC_6x6_LDR;
 
         case wgpu::TextureFormat::ASTC6x6UnormSrgb:
-                return MTLPixelFormatASTC_6x6_sRGB;
+            return MTLPixelFormatASTC_6x6_sRGB;
 
         case wgpu::TextureFormat::ASTC8x5Unorm:
-                return MTLPixelFormatASTC_8x5_LDR;
+            return MTLPixelFormatASTC_8x5_LDR;
 
         case wgpu::TextureFormat::ASTC8x5UnormSrgb:
-                return MTLPixelFormatASTC_8x5_sRGB;
+            return MTLPixelFormatASTC_8x5_sRGB;
 
         case wgpu::TextureFormat::ASTC8x6Unorm:
-                return MTLPixelFormatASTC_8x6_LDR;
+            return MTLPixelFormatASTC_8x6_LDR;
 
         case wgpu::TextureFormat::ASTC8x6UnormSrgb:
-                return MTLPixelFormatASTC_8x6_sRGB;
+            return MTLPixelFormatASTC_8x6_sRGB;
 
         case wgpu::TextureFormat::ASTC8x8Unorm:
-                return MTLPixelFormatASTC_8x8_LDR;
+            return MTLPixelFormatASTC_8x8_LDR;
 
         case wgpu::TextureFormat::ASTC8x8UnormSrgb:
-                return MTLPixelFormatASTC_8x8_sRGB;
+            return MTLPixelFormatASTC_8x8_sRGB;
 
         case wgpu::TextureFormat::ASTC10x5Unorm:
-                return MTLPixelFormatASTC_10x5_LDR;
+            return MTLPixelFormatASTC_10x5_LDR;
 
         case wgpu::TextureFormat::ASTC10x5UnormSrgb:
-                return MTLPixelFormatASTC_10x5_sRGB;
+            return MTLPixelFormatASTC_10x5_sRGB;
 
         case wgpu::TextureFormat::ASTC10x6Unorm:
-                return MTLPixelFormatASTC_10x6_LDR;
+            return MTLPixelFormatASTC_10x6_LDR;
 
         case wgpu::TextureFormat::ASTC10x6UnormSrgb:
-                return MTLPixelFormatASTC_10x6_sRGB;
+            return MTLPixelFormatASTC_10x6_sRGB;
 
         case wgpu::TextureFormat::ASTC10x8Unorm:
-                return MTLPixelFormatASTC_10x8_LDR;
+            return MTLPixelFormatASTC_10x8_LDR;
         case wgpu::TextureFormat::ASTC10x8UnormSrgb:
-                return MTLPixelFormatASTC_10x8_sRGB;
+            return MTLPixelFormatASTC_10x8_sRGB;
 
         case wgpu::TextureFormat::ASTC10x10Unorm:
-                return MTLPixelFormatASTC_10x10_LDR;
+            return MTLPixelFormatASTC_10x10_LDR;
 
         case wgpu::TextureFormat::ASTC10x10UnormSrgb:
-                return MTLPixelFormatASTC_10x10_sRGB;
+            return MTLPixelFormatASTC_10x10_sRGB;
         case wgpu::TextureFormat::ASTC12x10Unorm:
-                return MTLPixelFormatASTC_12x10_LDR;
+            return MTLPixelFormatASTC_12x10_LDR;
 
         case wgpu::TextureFormat::ASTC12x10UnormSrgb:
-                return MTLPixelFormatASTC_12x10_sRGB;
+            return MTLPixelFormatASTC_12x10_sRGB;
         case wgpu::TextureFormat::ASTC12x12Unorm:
-                return MTLPixelFormatASTC_12x12_LDR;
+            return MTLPixelFormatASTC_12x12_LDR;
 
         case wgpu::TextureFormat::ASTC12x12UnormSrgb:
-                return MTLPixelFormatASTC_12x12_sRGB;
+            return MTLPixelFormatASTC_12x12_sRGB;
 
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
         case wgpu::TextureFormat::R8BG8Biplanar422Unorm:

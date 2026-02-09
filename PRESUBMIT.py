@@ -86,6 +86,7 @@ NONINCLUSIVE_LANGUAGE_REGEXES = [
 
 LINT_FILTERS = []
 
+
 def _NonInclusiveFileFilter(file):
     """Filters files that are exempt from the non-inclusive language check."""
     filter_list = [
@@ -387,9 +388,7 @@ def CheckChange(input_api, output_api):
     # Check for formatting.
     results.extend(
         input_api.canned_checks.CheckPatchFormatted(
-            input_api,
-            output_api,
-            result_factory=result_factory))
+            input_api, output_api, result_factory=result_factory))
     results.extend(
         input_api.canned_checks.CheckGNFormatted(input_api, output_api))
     results.extend(

@@ -94,7 +94,7 @@ constexpr ImmediateConstantMask GetImmediateConstantBlockBits(size_t byteOffset,
 // representing "userConstants: 4 | trivial_constants: 0 (2 at most)|clamp_frag:2",
 // maps to pipeline immediate constant layout: "userConstants:4 | clamp_frag:2
 template <typename Object, typename Member>
-uint32_t GetImmediateByteOffsetInPipeline(Member Object::*ptr,
+uint32_t GetImmediateByteOffsetInPipeline(Member Object::* ptr,
                                           const ImmediateConstantMask& pipelineImmediateMask) {
     Object obj = {};
     ptrdiff_t offset = reinterpret_cast<char*>(&(obj.*ptr)) - reinterpret_cast<char*>(&obj);
@@ -106,7 +106,7 @@ uint32_t GetImmediateByteOffsetInPipeline(Member Object::*ptr,
 }
 
 template <typename Object, typename Member>
-bool HasImmediateConstants(Member Object::*ptr,
+bool HasImmediateConstants(Member Object::* ptr,
                            const ImmediateConstantMask& pipelineImmediateMask) {
     Object obj = {};
     ptrdiff_t offset = reinterpret_cast<char*>(&(obj.*ptr)) - reinterpret_cast<char*>(&obj);

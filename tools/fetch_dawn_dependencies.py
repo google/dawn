@@ -225,6 +225,7 @@ class Var:
     Mock Var class, that the content of DEPS files assume to exist when they
     are exec-ed.
     """
+
     def __init__(self, name):
         self.name = name
 

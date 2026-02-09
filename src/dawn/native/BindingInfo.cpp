@@ -66,7 +66,7 @@ void IncrementBindingCounts(BindingCounts* bindingCounts,
 
     bindingCounts->totalCount += arraySize;
 
-    uint32_t PerStageBindingCounts::*perStageBindingCountMember = nullptr;
+    uint32_t PerStageBindingCounts::* perStageBindingCountMember = nullptr;
 
     if (entry->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
         bindingCounts->bufferCount += arraySize;

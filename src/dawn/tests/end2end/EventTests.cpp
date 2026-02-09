@@ -171,11 +171,11 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
 
     void UseSecondInstance() {
         wgpu::InstanceDescriptor desc;
-            static constexpr auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
-            desc.requiredFeatureCount = 1;
-            desc.requiredFeatures = &kTimedWaitAny;
-            std::tie(testInstance, testDevice) = CreateExtraInstance(GetWireHelper(), &desc);
-            testQueue = testDevice.GetQueue();
+        static constexpr auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
+        desc.requiredFeatureCount = 1;
+        desc.requiredFeatures = &kTimedWaitAny;
+        std::tie(testInstance, testDevice) = CreateExtraInstance(GetWireHelper(), &desc);
+        testQueue = testDevice.GetQueue();
     }
 
     void LoseTestDevice() {

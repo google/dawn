@@ -43,7 +43,6 @@ _DEBUGGING = True
 # OTOH, it's less useful when using gdb/lldb's print command.
 _DISPLAY_MEMBERS_AS_CHILDREN = False
 
-
 # Tips for debugging using VS Code:
 # - Set a breakpoint where you can view the types you want to debug/write pretty printers for.
 # - Debug Console: source /path/to/dawn/src/tint/tint_gdb.py
@@ -56,7 +55,6 @@ _DISPLAY_MEMBERS_AS_CHILDREN = False
 #   Especially:
 #     Types: https://sourceware.org/gdb/onlinedocs/gdb/Types-In-Python.html#Types-In-Python
 #     Values: https://sourceware.org/gdb/onlinedocs/gdb/Values-From-Inferior.html#Values-From-Inferior
-
 
 pp_set = gdb.printing.RegexpCollectionPrettyPrinter("tint")
 
@@ -242,6 +240,5 @@ class UtilsHashmapPrinter(UtilsHashmapBasePrinter):
 
 
 pp_set.add_printer('UtilsHashmap', '^tint::Hashmap<.*>$', UtilsHashmapPrinter)
-
 
 gdb.printing.register_pretty_printer(gdb, pp_set, replace=_DEBUGGING)

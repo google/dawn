@@ -101,11 +101,12 @@ void PrintParamStructField(std::ostream& o, const T& param, const char* type) {
             : BaseStructName(param), DAWN_PP_CONCATENATE(_Dawn_, StructName) {                     \
             std::forward<Args>(args)...                                                            \
         }                                                                                          \
-        {}                                                                                         \
+        {                                                                                          \
+        }                                                                                          \
     };                                                                                             \
     inline std::ostream& operator<<(std::ostream& o, const StructName& param) {                    \
         o << static_cast<const BaseStructName&>(param);                                            \
-        o << static_cast<const DAWN_PP_CONCATENATE(_Dawn_, StructName)&>(param);                   \
+        o << static_cast<const DAWN_PP_CONCATENATE(_Dawn_, StructName) &>(param);                  \
         return o;                                                                                  \
     }                                                                                              \
     static_assert(true, "require semicolon")
@@ -136,10 +137,11 @@ struct Placeholder {};
         StructName(Args&&... args) : DAWN_PP_CONCATENATE(_Dawn_, StructName) {                     \
             std::forward<Args>(args)...                                                            \
         }                                                                                          \
-        {}                                                                                         \
+        {                                                                                          \
+        }                                                                                          \
     };                                                                                             \
     inline std::ostream& operator<<(std::ostream& o, const StructName& param) {                    \
-        o << static_cast<const DAWN_PP_CONCATENATE(_Dawn_, StructName)&>(param);                   \
+        o << static_cast<const DAWN_PP_CONCATENATE(_Dawn_, StructName) &>(param);                  \
         return o;                                                                                  \
     }                                                                                              \
     static_assert(true, "require semicolon")

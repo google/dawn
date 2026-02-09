@@ -59,7 +59,7 @@ ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
 
 // static
 uint64_t Buffer::QueryMaxBufferLength(id<MTLDevice> mtlDevice) {
-        return [mtlDevice maxBufferLength];
+    return [mtlDevice maxBufferLength];
 }
 
 Buffer::Buffer(DeviceBase* dev, const UnpackedPtr<BufferDescriptor>& desc)

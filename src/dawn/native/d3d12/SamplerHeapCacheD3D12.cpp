@@ -48,9 +48,7 @@ SamplerHeapCacheEntry::SamplerHeapCacheEntry(std::vector<Sampler*> samplers)
 SamplerHeapCacheEntry::SamplerHeapCacheEntry(SamplerHeapCache* cache,
                                              std::vector<Sampler*> samplers,
                                              CPUDescriptorHeapAllocation allocation)
-    : mCPUAllocation(std::move(allocation)),
-      mSamplers(std::move(samplers)),
-      mCache(cache) {
+    : mCPUAllocation(std::move(allocation)), mSamplers(std::move(samplers)), mCache(cache) {
     DAWN_ASSERT(mCache != nullptr);
     DAWN_ASSERT(mCPUAllocation.IsValid());
     DAWN_ASSERT(!mSamplers.empty());
