@@ -116,7 +116,7 @@ struct TableIndex {
 };
 
 /// Index type used to index TableData::template_types
-using TemplateIndex = TableIndex<TableIndexNamespace::kTemplate, uint8_t>;
+using TemplateIndex = TableIndex<TableIndexNamespace::kTemplate, uint16_t>;
 
 /// Index type used to index TableData::type_matchers or TableData::number_matchers
 using MatcherIndex = TableIndex<TableIndexNamespace::kMatcher, uint8_t>;
