@@ -234,7 +234,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, TooFewArgs) {
     EXPECT_EQ(res.Failure().reason,
               R"(:7:17 error: Load: no matching call to 'Load(hlsl.byte_address_buffer<read>)'
 
-24 candidate functions:
+28 candidate functions:
  • 'Load(byte_address_buffer<read' or 'read_write>  ✓ , offset: u32  ✗ ) -> u32'
  • 'Load(texture: texture_depth_2d  ✗ , location: vec3<i32>  ✗ ) -> vec4<f32>'
  • 'Load(texture: texture_depth_2d_array  ✗ , location: vec4<i32>  ✗ ) -> vec4<f32>'
@@ -246,6 +246,18 @@ TEST_F(IR_HlslMemberBuiltinCallTest, TooFewArgs) {
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'Load(texture: texture_3d<T>  ✗ , location: vec4<i32>  ✗ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'Load(texture: texture_1d<f32, F>  ✗ , location: vec2<i32>  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32'
+      ✗  'F' is 'filterable' or 'unfilterable'
+ • 'Load(texture: texture_2d<f32, F>  ✗ , location: vec3<i32>  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32'
+      ✗  'F' is 'filterable' or 'unfilterable'
+ • 'Load(texture: texture_2d_array<f32, F>  ✗ , location: vec4<i32>  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32'
+      ✗  'F' is 'filterable' or 'unfilterable'
+ • 'Load(texture: texture_3d<f32, F>  ✗ , location: vec4<i32>  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32'
+      ✗  'F' is 'filterable' or 'unfilterable'
  • 'Load(texture: rasterizer_ordered_texture_2d<F>  ✗ , location: vec2<C>  ✗ ) -> vec4<f32>' where:
       ✗  'F' is 'r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat'
       ✗  'C' is 'i32' or 'u32'
@@ -336,7 +348,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, TooManyArgs) {
         res.Failure().reason,
         R"(:7:17 error: Load: no matching call to 'Load(hlsl.byte_address_buffer<read>, u32, u32, u32)'
 
-24 candidate functions:
+28 candidate functions:
  • 'Load(byte_address_buffer<read' or 'read_write>  ✓ , offset: u32  ✓ ) -> u32' where:
       ✗  overload expects 2 arguments, call passed 4 arguments
  • 'Load(texture: texture_depth_multisampled_2d  ✗ , location: vec2<i32>  ✗ , sample_index: i32  ✗ ) -> vec4<f32>'
@@ -352,6 +364,18 @@ TEST_F(IR_HlslMemberBuiltinCallTest, TooManyArgs) {
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'Load(texture: texture_3d<T>  ✗ , location: vec4<i32>  ✗ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'Load(texture: texture_1d<f32, F>  ✗ , location: vec2<i32>  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32'
+      ✗  'F' is 'filterable' or 'unfilterable'
+ • 'Load(texture: texture_2d<f32, F>  ✗ , location: vec3<i32>  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32'
+      ✗  'F' is 'filterable' or 'unfilterable'
+ • 'Load(texture: texture_2d_array<f32, F>  ✗ , location: vec4<i32>  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32'
+      ✗  'F' is 'filterable' or 'unfilterable'
+ • 'Load(texture: texture_3d<f32, F>  ✗ , location: vec4<i32>  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32'
+      ✗  'F' is 'filterable' or 'unfilterable'
  • 'Load(texture: rasterizer_ordered_texture_2d<F>  ✗ , location: vec2<C>  ✗ ) -> vec4<f32>' where:
       ✗  'F' is 'r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat'
       ✗  'C' is 'i32' or 'u32'
