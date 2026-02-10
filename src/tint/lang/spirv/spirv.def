@@ -39,6 +39,7 @@ import "src/tint/lang/core/address_space.def"
 import "src/tint/lang/core/access.def"
 import "src/tint/lang/core/subgroup_matrix_kind.def"
 import "src/tint/lang/core/texel_format.def"
+import "src/tint/lang/core/filtering_parameters.def"
 
 type bool
 type f32
@@ -62,8 +63,12 @@ type mat4x4<T>
 @display("vec{N}<{T}>")     type vec<N: num, T>
 @display("mat{N}x{M}<{T}>") type mat<N: num, M: num, T>
 type atomic<T>
+
 type sampler
+@display("sampler<{F}>") type sampler_filtered<F: sampler_filtering>
+
 type sampler_comparison
+
 type ptr<S: address_space, T, A: access>
 
 type struct_with_runtime_array
@@ -1640,12 +1645,24 @@ implicit(F: texel_format)
 //////////////////////////////////////////////
 implicit(T: fiu32, S: samplers, F: texel_format)
   fn op_sampled_image<I: image<T, dim_1d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >(I, S) -> sampled_image<I>
+implicit(T: f32, K: sampler_filter, F: texel_format)
+  fn op_sampled_image<I: image<T, dim_1d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >(I, sampler_filtered<K>) -> sampled_image<I>
+
 implicit(T: fiu32, S: samplers, F: texel_format)
   fn op_sampled_image<I: image<T, dim_2d, non_depth, any_arrayed, single_sampled, sampling_compatible, F, readable> >(I, S) -> sampled_image<I>
+implicit(T: f32, K: sampler_filter, F: texel_format)
+  fn op_sampled_image<I: image<T, dim_2d, non_depth, any_arrayed, single_sampled, sampling_compatible, F, readable> >(I, sampler_filtered<K>) -> sampled_image<I>
+
 implicit(T: fiu32, S: samplers, F: texel_format)
   fn op_sampled_image<I: image<T, dim_3d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >(I, S) -> sampled_image<I>
+implicit(T: f32, K: sampler_filter, F: texel_format)
+  fn op_sampled_image<I: image<T, dim_3d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >(I, sampler_filtered<K>) -> sampled_image<I>
+
 implicit(T: fiu32, S: samplers, F: texel_format)
   fn op_sampled_image<I: image<T, dim_cube, non_depth, any_arrayed, single_sampled, sampling_compatible, F, readable> >(I, S) -> sampled_image<I>
+implicit(T: f32, K: sampler_filter, F: texel_format)
+  fn op_sampled_image<I: image<T, dim_cube, non_depth, any_arrayed, single_sampled, sampling_compatible, F, readable> >(I, sampler_filtered<K>) -> sampled_image<I>
+
 implicit(S: samplers, F: texel_format)
   fn op_sampled_image<I: image<f32, dim_2d, is_depth, any_arrayed, single_sampled, sampling_compatible, F, readable> >(I, S) -> sampled_image<I>
 implicit(S: samplers, F: texel_format)
