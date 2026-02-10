@@ -578,8 +578,8 @@
             {"value": 13, "name": "one minus constant"},
             {"value": 14, "name": "src1"},
             {"value": 15, "name": "one minus src1"},
-            {"value": 16, "name": "src1 alpha"},
-            {"value": 17, "name": "one minus src1 alpha"}
+            {"value": 16, "name": "src1 alpha", "jsrepr": "'src1-alpha'"},
+            {"value": 17, "name": "one minus src1 alpha", "jsrepr": "'one-minus-src1-alpha'"}
         ]
     },
     "blend operation": {
