@@ -106,9 +106,6 @@ std::string_view GetAttachmentTypeStr(AttachmentType type) {
 // attachment.
 class RenderPassValidationState final : public NonMovable {
   public:
-    explicit RenderPassValidationState(bool unsafeApi) : mUnsafeApi(unsafeApi) {}
-    ~RenderPassValidationState() = default;
-
     // Record the attachment in the render pass if it passes all validations:
     // - the attachment has same with, height and sample count with other attachments
     // - no overlaps with other attachments
@@ -248,15 +245,9 @@ class RenderPassValidationState final : public NonMovable {
                     break;
                 }
                 case AttachmentType::DepthStencilAttachment: {
-                    // TODO(chromium:324422644): re-enable this validation code.
-                    // This validation code will block skia to chromium autoroll, so disable it
-                    // temporarily.
-                    const bool disableValidation =
-                        mUnsafeApi && mAttachmentValidationWidth != mRenderWidth;
                     DAWN_INVALID_IF(
-                        !disableValidation &&
-                            (attachmentValidationSize.width != mAttachmentValidationWidth ||
-                             attachmentValidationSize.height != mAttachmentValidationHeight),
+                        attachmentValidationSize.width != mAttachmentValidationWidth ||
+                            attachmentValidationSize.height != mAttachmentValidationHeight,
                         "The depth stencil attachment %s size (width: %u, height: %u) does not "
                         "match the size of the other attachments' base plane (width: %u, height: "
                         "%u).",
@@ -358,8 +349,6 @@ class RenderPassValidationState final : public NonMovable {
     }
 
   private:
-    const bool mUnsafeApi;
-
     // The attachment's width, height and sample count.
     uint32_t mRenderWidth = 0;
     uint32_t mRenderHeight = 0;
@@ -1432,8 +1421,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
     bool stencilReadOnly = false;
     Ref<AttachmentState> attachmentState;
 
-    RenderPassValidationState validationState(
-        GetDevice()->IsToggleEnabled(Toggle::AllowUnsafeAPIs));
+    RenderPassValidationState validationState;
 
     // Lazy make error function to be called if we error and need to return an error encoder.
     auto MakeError = [&]() {
