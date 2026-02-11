@@ -355,8 +355,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mDeviceInfo.HasExt(DeviceExt::MultisampledRenderToSingleSampled) &&
         mDeviceInfo.multisampledRenderToSingleSampledFeatures.multisampledRenderToSingleSampled ==
             VK_TRUE) {
-        // TODO(crbug.com/481324378): Re-enable MSAARenderToSingleSampled after Skia usage of the
-        // feature is fixed.
+        EnableFeature(Feature::MSAARenderToSingleSampled);
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer) &&
@@ -955,10 +954,8 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
         adapterToggles->Default(Toggle::VulkanUseDynamicRendering, true);
     }
 
-    // Use CreateRenderPass2KHR by default if the corresponding extension is available. Disabled if
-    // dynamic rendering is being used for clarity.
-    if (!GetDeviceInfo().HasExt(DeviceExt::CreateRenderPass2) ||
-        adapterToggles->IsEnabled(Toggle::VulkanUseDynamicRendering)) {
+    // Use CreateRenderPass2KHR by default if the corresponding extension is available.
+    if (!GetDeviceInfo().HasExt(DeviceExt::CreateRenderPass2)) {
         adapterToggles->ForceSet(Toggle::VulkanUseCreateRenderPass2, false);
     } else {
         adapterToggles->Default(Toggle::VulkanUseCreateRenderPass2, true);
