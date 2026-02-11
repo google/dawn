@@ -2452,7 +2452,6 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
             }
             break;
         }
-
         default:
             break;
     }
@@ -3044,13 +3043,6 @@ const core::type::SampledTexture* Resolver::SampledTexture(const ast::Identifier
     if (tmpl_ident->arguments.Length() > 1) {
         filterable = sem_.GetTextureFilterable(tmpl_ident->arguments[1]);
         if (DAWN_UNLIKELY(filterable == core::TextureFilterable::kUndefined)) {
-            return nullptr;
-        }
-
-        if (!ty_expr->IsAnyOf<core::type::F32, core::type::F16>()) {
-            AddError(tmpl_ident->arguments[1]->source)
-                << "texture filterability only applies to float textures, got '"
-                << sem_.TypeNameOf(ty_expr) << "'";
             return nullptr;
         }
     }

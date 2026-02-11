@@ -60,8 +60,8 @@ enable chromium_experimental_resource_table;
 const kHouseTexture = 0u;
 
 @fragment fn fs() {
-    if (hasResource<texture_2d<f32>>(kHouseTexture)) {
-        let tex = textureLoad(getResource<texture_2d<f32>>(kHouseTexture));
+    if (hasResource<texture_2d<f32, filterable>>(kHouseTexture)) {
+        let tex = textureLoad(getResource<texture_2d<f32, filterable>>(kHouseTexture));
     }
 }
 ```

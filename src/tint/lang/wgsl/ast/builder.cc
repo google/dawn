@@ -520,12 +520,6 @@ ast::Type Builder::TypesBuilder::sampled_texture(core::type::TextureDimension di
     return sampled_texture(builder->source_, dims, subtype);
 }
 
-ast::Type Builder::TypesBuilder::sampled_texture(core::type::TextureDimension dims,
-                                                 ast::Type subtype,
-                                                 core::TextureFilterable filterable) const {
-    return sampled_texture(builder->source_, dims, subtype, filterable);
-}
-
 ast::Type Builder::TypesBuilder::sampled_texture(const Source& source,
                                                  core::type::TextureDimension dims,
                                                  ast::Type subtype) const {
@@ -548,6 +542,12 @@ ast::Type Builder::TypesBuilder::sampled_texture(const Source& source,
     TINT_ICE() << "invalid sampled_texture dimensions: " << dims;
 }
 
+ast::Type Builder::TypesBuilder::sampled_texture(core::type::TextureDimension dims,
+                                                 ast::Type subtype,
+                                                 core::TextureFilterable filterable) const {
+    return sampled_texture(builder->source_, dims, subtype, filterable);
+}
+
 ast::Type Builder::TypesBuilder::sampled_texture(const Source& source,
                                                  core::type::TextureDimension dims,
                                                  ast::Type subtype,
@@ -555,23 +555,36 @@ ast::Type Builder::TypesBuilder::sampled_texture(const Source& source,
     TINT_ASSERT(filterable == core::TextureFilterable::kFilterable ||
                 filterable == core::TextureFilterable::kUnfilterable);
 
+    std::string_view name;
     switch (dims) {
         case core::type::TextureDimension::k1d:
-            return AsType(source, "texture_1d", subtype, filterable);
-        case core::type::TextureDimension::k2d:
-            return AsType(source, "texture_2d", subtype, filterable);
-        case core::type::TextureDimension::k3d:
-            return AsType(source, "texture_3d", subtype, filterable);
-        case core::type::TextureDimension::k2dArray:
-            return AsType(source, "texture_2d_array", subtype, filterable);
-        case core::type::TextureDimension::kCube:
-            return AsType(source, "texture_cube", subtype, filterable);
-        case core::type::TextureDimension::kCubeArray:
-            return AsType(source, "texture_cube_array", subtype, filterable);
-        default:
+            name = "texture_1d";
             break;
+        case core::type::TextureDimension::k2d:
+            name = "texture_2d";
+            break;
+        case core::type::TextureDimension::k3d:
+            name = "texture_3d";
+            break;
+        case core::type::TextureDimension::k2dArray:
+            name = "texture_2d_array";
+            break;
+        case core::type::TextureDimension::kCube:
+            name = "texture_cube";
+            break;
+        case core::type::TextureDimension::kCubeArray:
+            name = "texture_cube_array";
+            break;
+        default:
+            TINT_ICE() << "invalid sampled_texture dimensions: " << dims;
     }
-    TINT_ICE() << "invalid sampled_texture dimensions: " << dims;
+
+    return ast::Type{builder->Expr(
+        builder->create<ast::TemplatedIdentifier>(source, builder->Sym(name),
+                                                  Vector{
+                                                      subtype.expr,
+                                                      builder->Expr(builder->Ident(filterable)),
+                                                  }))};
 }
 
 ast::Type Builder::TypesBuilder::multisampled_texture(core::type::TextureDimension dims,

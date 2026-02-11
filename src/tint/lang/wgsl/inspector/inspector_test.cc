@@ -2967,7 +2967,7 @@ TEST_F(InspectorGetResourceTableInfoTest, ResourceTable) {
 enable chromium_experimental_resource_table;
 
 @fragment fn ep() {
-  _ = hasResource<texture_2d<f32>>(0);
+  _ = hasResource<texture_2d<f32, filterable>>(0);
   _ = getResource<texture_3d<i32>>(1);
 }
 )";
@@ -2990,11 +2990,11 @@ TEST_F(InspectorGetResourceTableInfoTest, ResourceTable_Multiple) {
 enable chromium_experimental_resource_table;
 
 @fragment fn ep() {
-  _ = textureDimensions(getResource<texture_cube<f32>>(3));
-  _ = textureDimensions(getResource<texture_1d<f32>>(3));
+  _ = textureDimensions(getResource<texture_cube<f32, unfilterable>>(3));
+  _ = textureDimensions(getResource<texture_1d<f32, filterable>>(3));
 
-  _ = hasResource<texture_2d<f32>>(0);
-  _ = getResource<texture_3d<f32>>(1);
+  _ = hasResource<texture_2d<f32, filterable>>(0);
+  _ = getResource<texture_3d<f32, filterable>>(1);
 }
 )";
 
@@ -3019,11 +3019,11 @@ TEST_F(InspectorGetResourceTableInfoTest, ResourceTable_Nested) {
 enable chromium_experimental_resource_table;
 
 fn nested() {
-  _ = textureDimensions(getResource<texture_cube<f32>>(3));
-  _ = textureDimensions(getResource<texture_1d<f32>>(3));
+  _ = textureDimensions(getResource<texture_cube<f32, filterable>>(3));
+  _ = textureDimensions(getResource<texture_1d<f32, unfilterable>>(3));
 
-  _ = hasResource<texture_2d<f32>>(0);
-  _ = getResource<texture_3d<f32>>(1);
+  _ = hasResource<texture_2d<f32, filterable>>(0);
+  _ = getResource<texture_3d<f32, filterable>>(1);
 }
 
 @fragment fn ep() {
@@ -3052,7 +3052,7 @@ TEST_F(InspectorGetResourceTableInfoTest, ResourceTable_Samplers) {
 enable chromium_experimental_resource_table;
 
 @fragment fn ep() {
-  _ = hasResource<sampler>(0);
+  _ = hasResource<sampler<filtering>>(0);
   _ = getResource<sampler_comparison>(1);
 }
 )";

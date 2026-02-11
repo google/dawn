@@ -29,9 +29,7 @@
 #define SRC_TINT_LANG_WGSL_RESOLVER_VALIDATOR_H_
 
 #include <cstdint>
-#include <set>
 #include <string>
-#include <utility>
 
 #include "src/tint/lang/core/evaluation_stage.h"
 #include "src/tint/lang/core/type/input_attachment.h"
@@ -45,7 +43,6 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/source.h"
 #include "src/tint/utils/math/hash.h"
-#include "src/tint/utils/text/styled_text.h"
 
 // Forward declarations
 namespace tint::ast {

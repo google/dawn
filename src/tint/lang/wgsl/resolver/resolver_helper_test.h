@@ -28,7 +28,6 @@
 #ifndef SRC_TINT_LANG_WGSL_RESOLVER_RESOLVER_HELPER_TEST_H_
 #define SRC_TINT_LANG_WGSL_RESOLVER_RESOLVER_HELPER_TEST_H_
 
-#include <functional>
 #include <memory>
 #include <ostream>
 #include <string>

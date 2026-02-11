@@ -537,6 +537,7 @@ struct Encoder {
     void TypeSampledTexture(pb::TypeSampledTexture& texture_out,
                             const core::type::SampledTexture* texture_in) {
         texture_out.set_dimension(TextureDimension(texture_in->Dim()));
+        texture_out.set_filterable(pb::TextureFilterable(texture_in->Filterable()));
         texture_out.set_sub_type(Type(texture_in->Type()));
     }
 
@@ -573,6 +574,7 @@ struct Encoder {
 
     void TypeSampler(pb::TypeSampler& sampler_out, const core::type::Sampler* sampler_in) {
         sampler_out.set_kind(SamplerKind(sampler_in->Kind()));
+        sampler_out.set_filtering(pb::SamplerFiltering(sampler_in->Filtering()));
     }
 
     void TypeSubgroupMatrix(pb::TypeSubgroupMatrix& subgroup_matrix_out,

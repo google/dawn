@@ -33,6 +33,7 @@ Checks: "-*,\
           -bugprone-suspicious-stringview-data-usage,\
           -bugprone-swapped-arguments,\
           -bugprone-switch-missing-default-case,\
+          -bugprone-throwing-static-initialization,\
           -bugprone-too-small-loop-variable,\
           -bugprone-unchecked-optional-access,\
           -bugprone-unhandled-self-assignment,\
@@ -50,6 +51,7 @@ Checks: "-*,\
           -cert-dcl58-cpp,\
           -cert-err33-c,\
           -cert-err34-c,\
+          -cert-err58-cpp,\
           -cert-exp42-c,\
           -cert-flp37-c,\
           -cert-int09-c,\

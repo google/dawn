@@ -484,6 +484,8 @@ requires texel_buffers;
 {{-     else if eq .Target.Name "unsized_buffer" -}}buffer
 {{-     else if HasPrefix .Target.Name "vec" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
 {{-     else if HasPrefix .Target.Name "mat" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
+{{-     else if eq .Target.Name "sampler_filtered" -}}sampler<{{template "Type" (index .TemplateArguments 0)}}>
+{{-     else if and (HasPrefix .Target.Name "texture_") (HasSuffix .Target.Name "_filtered") -}}{{TrimSuffix .Target.Name "_filtered"}}<{{template "Type" (index .TemplateArguments 0)}}, {{template "Type" (index .TemplateArguments 1)}}>
 {{-     else                                 -}}{{.Target.Name}}{{template "TemplateArguments" .TemplateArguments}}
 {{-     end                                  -}}
 {{-   else if IsEnumEntry   .Target -}}{{.Target.Name}}

@@ -4,7 +4,7 @@ enable chromium_experimental_resource_table;
 
 @fragment
 fn fs() {
-  if (hasResource<sampler>(0)) {
+  if (hasResource<sampler<non_filtering>>(0)) {
     o += 1;
   }
   if (hasResource<sampler_comparison>(1)) {

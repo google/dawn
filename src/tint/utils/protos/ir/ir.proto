@@ -135,6 +135,7 @@ message TypeDepthTexture {
 message TypeSampledTexture {
     TextureDimension dimension = 1;
     uint32 sub_type = 2;  // Module.types
+    TextureFilterable filterable = 3;
 }
 
 message TypeMultisampledTexture {
@@ -158,6 +159,7 @@ message TypeExternalTexture {}
 
 message TypeSampler {
     SamplerKind kind = 1;
+    SamplerFiltering filtering = 2;
 }
 
 message TypeInputAttachment {
@@ -508,6 +510,12 @@ enum TextureDimension {
     cube_array = 5;
 }
 
+enum TextureFilterable {
+    filterable_undefined = 0;
+    filterable = 1;
+    unfilterable = 2;
+}
+
 enum TexelFormat {
     bgra8_unorm = 0;
     r8_unorm = 1;
@@ -554,6 +562,12 @@ enum TexelFormat {
 enum SamplerKind {
     sampler = 0;
     comparison = 1;
+}
+
+enum SamplerFiltering {
+    filtering_undefined = 0;
+    filtering = 1;
+    non_filtering = 2;
 }
 
 enum InterpolationType {
