@@ -488,9 +488,6 @@ crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin
 crbug.com/42251260 [ webgpu-dxc-disabled win ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_load_store:accessValueType="u32";memType="non_atomic_texture";accessPair="rw";normalBarrier=true [ Failure ]
 crbug.com/42251260 [ webgpu-dxc-disabled win ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_store_load:accessValueType="u32";memType="non_atomic_texture";accessPair="wr";normalBarrier=true [ Failure ]
 
-# macOS + AMD failures with storage buffer of tightly-packed f16 values
-crbug.com/42251267 [ amd mac ] webgpu:shader,execution,expression,call,builtin,tanh:f16:* [ Failure ]
-
 # Many sampleWithVideoFrameWithVisibleRectParam tests failing across backends
 crbug.com/407133969 [ intel-0x3e9b mac ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Failure ]
 crbug.com/407133969 [ android-14 arm ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt601-hflip.mp4";* [ Failure ]

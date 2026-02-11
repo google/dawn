@@ -149,22 +149,23 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     }
 
     {
-        core::ir::transform::BuiltinPolyfillConfig core_polyfills{};
-        core_polyfills.clamp_int = true;
-        core_polyfills.clamp_float = options.workarounds.polyfill_clamp_float;
-        core_polyfills.degrees = true;
-        core_polyfills.dot_4x8_packed = true;
-        core_polyfills.extract_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
-        core_polyfills.first_leading_bit = true;
-        core_polyfills.first_trailing_bit = true;
-        core_polyfills.fwidth_fine = true;
-        core_polyfills.insert_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
-        core_polyfills.pack_unpack_4x8 = true;
-        core_polyfills.pack_4xu8_clamp = true;
-        core_polyfills.radians = true;
-        core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
-        core_polyfills.abs_signed_int = true;
-        core_polyfills.subgroup_broadcast_f16 = options.workarounds.polyfill_subgroup_broadcast_f16;
+        core::ir::transform::BuiltinPolyfillConfig core_polyfills{
+            .clamp_int = true,
+            .clamp_float = options.workarounds.polyfill_clamp_float,
+            .abs_signed_int = true,
+            .degrees = true,
+            .extract_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck,
+            .first_leading_bit = true,
+            .first_trailing_bit = true,
+            .fwidth_fine = true,
+            .insert_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck,
+            .radians = true,
+            .texture_sample_base_clamp_to_edge_2d_f32 = true,
+            .dot_4x8_packed = true,
+            .pack_unpack_4x8 = true,
+            .pack_4xu8_clamp = true,
+            .subgroup_broadcast_f16 = options.workarounds.polyfill_subgroup_broadcast_f16,
+        };
         TINT_CHECK_RESULT(core::ir::transform::BuiltinPolyfill(module, core_polyfills));
     }
 
@@ -265,6 +266,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         module, {
                     .polyfill_unpack_2x16_snorm = options.workarounds.polyfill_unpack_2x16_snorm,
                     .polyfill_unpack_2x16_unorm = options.workarounds.polyfill_unpack_2x16_unorm,
+                    .polyfill_tanh_f16 = options.workarounds.polyfill_tanh_f16,
                 }));
     // After 'BuiltinPolyfill' as that transform can introduce signed dot products.
     core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{

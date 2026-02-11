@@ -143,15 +143,22 @@ struct State {
                         builtin_worklist.Push(builtin);
                         break;
                     case core::BuiltinFn::kUnpack2X16Snorm:
-                        if ((config.polyfill_unpack_2x16_snorm)) {
+                        if (config.polyfill_unpack_2x16_snorm) {
                             builtin_worklist.Push(builtin);
                         }
                         break;
                     case core::BuiltinFn::kUnpack2X16Unorm:
-                        if ((config.polyfill_unpack_2x16_unorm)) {
+                        if (config.polyfill_unpack_2x16_unorm) {
                             builtin_worklist.Push(builtin);
                         }
                         break;
+                    case core::BuiltinFn::kTanh: {
+                        if (builtin->Args()[0]->Type()->DeepestElement()->Is<core::type::F16>() &&
+                            config.polyfill_tanh_f16) {
+                            builtin_worklist.Push(builtin);
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -327,6 +334,11 @@ struct State {
                     SubgroupMatrixScalarMultiply(builtin);
                     break;
 
+                // Workarounds
+                case core::BuiltinFn::kTanh:
+                    Tanh(builtin);
+                    break;
+
                 default:
                     break;
             }
@@ -468,6 +480,24 @@ struct State {
                 b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
                                                        msl::BuiltinFn::kDot, arg0, arg1);
             }
+        });
+        builtin->Destroy();
+    }
+
+    /// Polyfill a tanh f16 call
+    /// @param builtin the builtin call instruction
+    ///
+    /// Converts the `f16` to an `f32`, runs `tanh` on the `f32` and converts back to the `f16`
+    /// result.
+    void Tanh(core::ir::CoreBuiltinCall* builtin) {
+        const auto& args = builtin->Args();
+
+        b.InsertBefore(builtin, [&] {
+            auto* f32_ty = ty.MatchWidth(ty.f32(), builtin->Result()->Type());
+
+            auto* in = b.Convert(f32_ty, args[0]);
+            auto* c = b.Call(f32_ty, core::BuiltinFn::kTanh, in);
+            b.ConvertWithResult(builtin->DetachResult(), c);
         });
         builtin->Destroy();
     }

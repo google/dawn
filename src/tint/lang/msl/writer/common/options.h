@@ -115,13 +115,17 @@ struct Options {
         /// Set to `true` to polyfill `unpack2x16unorm()`.
         bool polyfill_unpack_2x16_unorm = false;
 
+        /// Set to `true` to polyfill tanh with an f16 value
+        bool polyfill_tanh_f16 = false;
+
         TINT_REFLECT(Workarounds,
                      scalarize_max_min_clamp,
                      disable_module_constant_f16,
                      polyfill_subgroup_broadcast_f16,
                      polyfill_clamp_float,
                      polyfill_unpack_2x16_snorm,
-                     polyfill_unpack_2x16_unorm);
+                     polyfill_unpack_2x16_unorm,
+                     polyfill_tanh_f16);
         TINT_REFLECT_EQUALS(Workarounds);
         TINT_REFLECT_HASH_CODE(Workarounds);
     };

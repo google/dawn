@@ -104,6 +104,7 @@ enum class Toggle {
     MetalKeepMultisubresourceDepthStencilTexturesInitialized,
     MetalPolyfillUnpack2x16snorm,
     MetalPolyfillUnpack2x16unorm,
+    MetalPolyfillTanhF16,
     VulkanPolyfillF32Negation,
     VulkanPolyfillF32Abs,
     MetalFillEmptyOcclusionQueriesWithZero,

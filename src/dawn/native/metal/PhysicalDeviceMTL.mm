@@ -467,9 +467,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::MetalPolyfillUnpack2x16snorm, true);
         deviceToggles->Default(Toggle::MetalPolyfillUnpack2x16unorm, true);
     }
-
-    // chromium:407109056: Floating point clamp is slightly inaccurate for subnormal values.
     if (gpu_info::IsAMD(vendorId)) {
+        // chromium:42251267 tanh with f16 is incorrect on AMD.
+        deviceToggles->Default(Toggle::MetalPolyfillTanhF16, true);
+        // chromium:407109056: Floating point clamp is slightly inaccurate for subnormal values.
         deviceToggles->Default(Toggle::MetalPolyfillClampFloat, true);
     }
 
