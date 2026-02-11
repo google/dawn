@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '31a539d3330c9e6e0cbe9eb2299292d8ae736bab',
+  'chromium_revision': 'd3b7c541a70917743324afa8d815bf66e2518cca',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -112,7 +112,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@42786f6e46c25c30dd58f69283ab6fcd0c959f58',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@6c6a6572eb0e27efd41f8724b4631ac2aa9df460',
     'condition': 'dawn_standalone',
   },
 
@@ -128,7 +128,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@4f89a98f364a8b42b19890afb5ba3ffa526a34f0',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@2f7df07563d93f442b05a711769e2613715ad279',
     'condition': 'dawn_standalone',
   },
 
@@ -143,7 +143,7 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@8ea67bb19a916825f5b8223f502ed2d60e114551',
+  'url': '{chromium_git}/chromium/src/build@d0790d159683f591bcbea765f8f72f9c8f62f866',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
@@ -253,7 +253,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@78f1b4debb9b1cd0814affafae6cb8616b0819da',
+    'url': '{chromium_git}/chromium/src/testing@265c79ac1aa8dcb9d1c42ddde44e6230521d16ab',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -365,7 +365,7 @@ deps = {
   },
 
   'third_party/abseil-cpp': {
-    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@6ee40bbc15ddee73a7a27fac491917678c8d51f8',
+    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@7ef32bbacabd0d04a6cfac92a542841c531e1b21',
     'condition': 'dawn_standalone',
   },
 
