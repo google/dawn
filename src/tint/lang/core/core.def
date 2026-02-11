@@ -3209,7 +3209,7 @@ ctor mat4x4<T: f32_f16>(T, T, T, T,
   fn hasResource<T: texture_cube<K> >(index: I) -> bool
 @must_use implicit(K: iu32, I: iu32)
   fn hasResource<T: texture_cube_array<K> >(index: I) -> bool
-@must_use implicit(K: iu32, I: iu32)
+@must_use implicit(K: fiu32, I: iu32)
   fn hasResource<T: texture_multisampled_2d<K> >(index: I) -> bool
 @must_use implicit(I: iu32)
   fn hasResource<T: texture_depth_2d>(index: I) -> bool
