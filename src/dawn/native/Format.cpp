@@ -211,8 +211,7 @@ void ComputeFormatCapabilities(const DeviceBase* device, FormatTable& table) {
                 format.unsupportedReason =
                     requestedFeature == Feature::CoreFeaturesAndLimits
                         ? UnsupportedReason{CompatibilityMode{}}
-                        : UnsupportedReason{
-                              RequiresFeature{static_cast<wgpu::FeatureName>(requestedFeature)}};
+                        : UnsupportedReason{RequiresFeature{ToAPI(requestedFeature)}};
             }
         }
     };
