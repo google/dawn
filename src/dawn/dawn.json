@@ -3135,16 +3135,6 @@
             {"name": "clear value", "type": "color"}
         ]
     },
-    "dawn render pass color attachment render to single sampled": {
-        "_comment": "TODO(crbug.com/463893793): Remove this and associated sType after deprecation period.",
-        "tags": ["dawn", "deprecated"],
-        "category": "structure",
-        "chained": "in",
-        "chain roots": ["render pass color attachment"],
-        "members": [
-            {"name": "implicit sample count", "type": "uint32_t", "default": 1}
-        ]
-    },
     "render pass depth stencil attachment": {
         "category": "structure",
         "extensible": "in",
@@ -4036,8 +4026,7 @@
             {"value": 79, "name": "request adapter options angle virtualization group", "tags": ["dawn", "native"]},
             {"value": 80, "name": "resource table limits", "tags": ["dawn"]},
             {"value": 81, "name": "pipeline layout resource table", "tags": ["dawn"]},
-            {"value": 82, "name": "adapter properties explicit compute subgroup size configs", "tags": ["dawn"]},
-            {"value": 83, "name": "dawn render pass color attachment render to single sampled", "tags": ["dawn", "deprecated"]}
+            {"value": 82, "name": "adapter properties explicit compute subgroup size configs", "tags": ["dawn"]}
         ]
     },
     "texture": {

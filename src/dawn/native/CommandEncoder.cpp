@@ -591,38 +591,6 @@ MaybeError ValidateColorAttachmentRenderToSingleSampled(
     return {};
 }
 
-// TODO(crbug.com/463893793): Remove once the deprecated attachment-based MSRTSS path is disabled.
-MaybeError ValidateColorAttachmentRenderToSingleSampled(
-    const DeviceBase* device,
-    const RenderPassColorAttachment& colorAttachment,
-    const DawnRenderPassColorAttachmentRenderToSingleSampled* msaaRenderToSingleSampledDesc) {
-    DAWN_ASSERT(msaaRenderToSingleSampledDesc != nullptr);
-
-    DAWN_INVALID_IF(
-        !device->HasFeature(Feature::MSAARenderToSingleSampled),
-        "The color attachment %s has implicit sample count while the %s feature is not enabled.",
-        colorAttachment.view, ToAPI(Feature::MSAARenderToSingleSampled));
-
-    DAWN_INVALID_IF(!IsValidSampleCount(msaaRenderToSingleSampledDesc->implicitSampleCount) ||
-                        msaaRenderToSingleSampledDesc->implicitSampleCount <= 1,
-                    "The color attachment %s's implicit sample count (%u) is not supported.",
-                    colorAttachment.view, msaaRenderToSingleSampledDesc->implicitSampleCount);
-
-    DAWN_INVALID_IF(!colorAttachment.view->GetFormat().SupportsResolveTarget(),
-                    "The color attachment %s format (%s) does not support being used with "
-                    "implicit sample count (%u). The format does not support resolve.",
-                    colorAttachment.view, colorAttachment.view->GetFormat().format,
-                    msaaRenderToSingleSampledDesc->implicitSampleCount);
-
-    DAWN_INVALID_IF(colorAttachment.resolveTarget != nullptr,
-                    "Cannot set %s as a resolve target. No resolve target should be specified "
-                    "for the color attachment %s with implicit sample count (%u).",
-                    colorAttachment.resolveTarget, colorAttachment.view,
-                    msaaRenderToSingleSampledDesc->implicitSampleCount);
-
-    return {};
-}
-
 MaybeError ValidateExpandResolveTextureLoadOp(const DeviceBase* device,
                                               const RenderPassColorAttachment& colorAttachment,
                                               RenderPassValidationState* validationState) {
@@ -672,18 +640,6 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
 
     UnpackedPtr<RenderPassColorAttachment> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(&colorAttachment));
-
-    // TODO(crbug.com/463893793): Remove once the attachment-based MSRTSS path is disabled.
-    const auto* msaaRenderToSingleSampledDesc =
-        unpacked.Get<DawnRenderPassColorAttachmentRenderToSingleSampled>();
-    if (msaaRenderToSingleSampledDesc) {
-        DAWN_TRY(ValidateColorAttachmentRenderToSingleSampled(device, colorAttachment,
-                                                              msaaRenderToSingleSampledDesc));
-        validationState->SetExplicitSampleCount(msaaRenderToSingleSampledDesc->implicitSampleCount);
-        // Note: we don't need to check whether the implicit sample count of different attachments
-        // are the same. That already is done by indirectly comparing the sample count in
-        // ValidateOrSetColorAttachmentSampleCount.
-    }
 
     // Plane0, Plane1, and Plane2 aspects for multiplanar texture views should be allowed as color
     // attachments.

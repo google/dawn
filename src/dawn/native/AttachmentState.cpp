@@ -129,21 +129,7 @@ AttachmentState::AttachmentState(const UnpackedPtr<RenderPassDescriptor>& descri
         mColorAttachmentsSet.set(i);
         mColorFormats[i] = attachment->GetFormat().format;
 
-        // TODO(crbug.com/463893793): Remove once the attachment-based MSRTSS path is disabled.
-        UnpackedPtr<RenderPassColorAttachment> unpackedColorAttachment = Unpack(&colorAttachment);
-        auto* msaaRenderToSingleSampledDesc =
-            unpackedColorAttachment.Get<DawnRenderPassColorAttachmentRenderToSingleSampled>();
-        uint32_t attachmentSampleCount;
-        if (msaaRenderToSingleSampledDesc != nullptr &&
-            msaaRenderToSingleSampledDesc->implicitSampleCount > 1) {
-            dawn::WarningLog()
-                << "Use DawnRenderPassDescriptorRenderToSingleSampled instead of "
-                   "DawnRenderPassColorAttachmentRenderToSingleSampled, which is deprecated.";
-            attachmentSampleCount = msaaRenderToSingleSampledDesc->implicitSampleCount;
-        } else {
-            attachmentSampleCount = attachment->GetTexture()->GetSampleCount();
-        }
-
+        uint32_t attachmentSampleCount = attachment->GetTexture()->GetSampleCount();
         if (mSampleCount == 0) {
             mSampleCount = attachmentSampleCount;
         } else {
