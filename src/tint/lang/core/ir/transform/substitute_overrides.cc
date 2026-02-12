@@ -29,6 +29,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <utility>
 
 #include "src/tint/lang/core/binary_op.h"
@@ -211,9 +212,18 @@ struct State {
             }
 
             uint32_t num_elements = new_value->Value()->ValueAs<uint32_t>();
+            uint64_t new_ary_size = uint64_t{num_elements} * old_ty->ImplicitStride();
+            if (new_ary_size > std::numeric_limits<uint32_t>::max()) {
+                diag::Diagnostic error{};
+                error.severity = diag::Severity::Error;
+                error.source = ir.SourceOf(cnt->value);
+                error << "array size (" << new_ary_size << ") is too large";
+                return diag::Failure(error);
+            }
+
             auto* new_cnt = ty.Get<core::type::ConstantArrayCount>(num_elements);
             auto* new_ty = ty.Get<core::type::Array>(old_ty->ElemType(), new_cnt,
-                                                     num_elements * old_ty->ImplicitStride());
+                                                     static_cast<uint32_t>(new_ary_size));
 
             auto* new_ptr = ty.ptr(old_ptr->AddressSpace(), new_ty, old_ptr->Access());
             var->Result()->SetType(new_ptr);
