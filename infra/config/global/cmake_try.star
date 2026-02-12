@@ -27,8 +27,8 @@
 
 """Try Dawn builders using CMake for the build system instead of GN."""
 
-load("@chromium-luci//builders.star", "cpu", "os")
 load("@chromium-luci//try.star", "try_")
+load("//cmake_shared.star", "cmake_builder_defaults")
 load("//constants.star", "siso")
 load("//location_filters.star", "exclusion_filters")
 load("//project.star", "ACTIVE_MILESTONES")
@@ -37,11 +37,8 @@ try_.defaults.set(
     executable = "recipe:dawn/cmake",
     builder_group = "try",
     bucket = "try",
-    # TODO(crbug.com/459517292): Switch this to the GPU pool once we confirm
-    # we have enough capacity. Also update the builderless dimension since
-    # luci.flex.* does not expose that.
-    pool = "luci.flex.try",
-    builderless = None,
+    pool = "luci.chromium.gpu.try",
+    builderless = True,
     build_numbers = True,
     list_view = "try",
     cq_group = "Dawn-CQ",
@@ -71,10 +68,12 @@ def apply_linux_cq_builder_defaults(kwargs):
     Returns:
         |kwargs| with Linux/CMake defaults set.
     """
+    kwargs = cmake_builder_defaults.apply_linux_cmake_builder_defaults(kwargs)
     kwargs = apply_cq_builder_defaults(kwargs)
-    kwargs.setdefault("cpu", cpu.X86_64)
-    kwargs.setdefault("os", os.LINUX_NOBLE)
-    kwargs.setdefault("ssd", None)
+
+    # TODO(crbug.com/459517292): Remove this and rely on file-wide defaults
+    # once we move Linux CMake builders into the luci.chromium.gpu.* pools.
+    kwargs.setdefault("pool", "luci.flex.try")
     return kwargs
 
 def apply_mac_cq_builder_defaults(kwargs):
@@ -86,10 +85,8 @@ def apply_mac_cq_builder_defaults(kwargs):
     Returns:
         |kwargs| with Mac/CMake defaults set.
     """
+    kwargs = cmake_builder_defaults.apply_mac_cmake_builder_defaults(kwargs)
     kwargs = apply_cq_builder_defaults(kwargs)
-    kwargs.setdefault("cpu", cpu.X86_64)
-    kwargs.setdefault("os", os.MAC_DEFAULT)
-    kwargs.setdefault("pool", "luci.chromium.gpu.try")
     return kwargs
 
 def apply_win_cq_builder_defaults(kwargs):
@@ -101,12 +98,8 @@ def apply_win_cq_builder_defaults(kwargs):
     Returns:
         |kwargs| with Win/CMake defaults set.
     """
+    kwargs = cmake_builder_defaults.apply_win_cmake_builder_defaults(kwargs)
     kwargs = apply_cq_builder_defaults(kwargs)
-    kwargs.setdefault("builderless", True)
-    kwargs.setdefault("cpu", cpu.X86_64)
-    kwargs.setdefault("os", os.WINDOWS_DEFAULT)
-    kwargs.setdefault("pool", "luci.chromium.gpu.try")
-    kwargs.setdefault("ssd", None)
     return kwargs
 
 def add_builder_to_main_and_milestone_cq_groups(kwargs):
