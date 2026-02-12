@@ -47,7 +47,7 @@ vars = {
   # reclient CIPD package version
   'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
   # siso CIPD package version.
-  'siso_version': 'git_revision:2599cc0037d82d9187beea5c13349ce05716817b',
+  'siso_version': 'git_revision:9863d88c26094a24fb848f8994da81e005810c76',
 
   # 'magic' text to tell depot_tools that git submodules should be accepted
   # but parity with DEPS file is expected.
@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': 'd3b7c541a70917743324afa8d815bf66e2518cca',
+  'chromium_revision': 'e4d654447522856ef4b05403b4d4cfab8276116f',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -112,7 +112,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@6c6a6572eb0e27efd41f8724b4631ac2aa9df460',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@425882d8c0acaab53bf2f8abbe7efcf5db5b168b',
     'condition': 'dawn_standalone',
   },
 
@@ -128,7 +128,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@2f7df07563d93f442b05a711769e2613715ad279',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@d38523b674e26b7c8d61ed2e48d6cfe248b12da0',
     'condition': 'dawn_standalone',
   },
 
@@ -143,7 +143,7 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@d0790d159683f591bcbea765f8f72f9c8f62f866',
+  'url': '{chromium_git}/chromium/src/build@4c2c31b6776c1fe03a029f66ef530796f0add90d',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
@@ -247,13 +247,13 @@ deps = {
 
   # Used for Dawn-side GN arg definitions.
   'tools/mb': {
-    'url': '{chromium_git}/chromium/src/tools/mb@1fc5adbbce8acd2a5fdccefde5af9865b982429d',
+    'url': '{chromium_git}/chromium/src/tools/mb@a975ec0340bd4b7dab6c8e43b15dbc638621a23c',
     'condition': 'dawn_standalone',
   },
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@265c79ac1aa8dcb9d1c42ddde44e6230521d16ab',
+    'url': '{chromium_git}/chromium/src/testing@4d438b31b58e2dc84b592a052b6b97e05ceb6497',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -266,7 +266,7 @@ deps = {
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@a476f554f8865b7d162ec9f1ad8aae1eab38e048',
+    'url': '{chromium_git}/catapult.git@59090f1f5e2b3ad9c90e4dc5fc8e79aed9110587',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
