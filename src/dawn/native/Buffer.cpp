@@ -502,6 +502,11 @@ void BufferBase::DestroyImpl(DestroyReason reason) {
     mTexelBufferViews.Destroy(DestroyReason::EarlyDestroy);
 }
 
+std::optional<DeviceGuard> BufferBase::UseDeviceGuardForDestroy() {
+    // Backends with thread-safe DestroyImpl() methods can override this to return nullopt.
+    return GetDevice()->GetGuard();
+}
+
 // static
 Ref<BufferBase> BufferBase::MakeError(DeviceBase* device, const BufferDescriptor* descriptor) {
     return AcquireRef(new ErrorBuffer(device, descriptor));
@@ -811,6 +816,7 @@ void* BufferBase::GetMappedRange(size_t offset, size_t size, bool writable) {
 }
 
 void BufferBase::APIDestroy() {
+    auto deviceGuard = UseDeviceGuardForDestroy();
     Destroy();
 }
 

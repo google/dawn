@@ -39,6 +39,7 @@
 #include "dawn/native/Buffer.h"
 #include "dawn/native/d3d/d3d_platform.h"
 #include "dawn/native/d3d11/Forward.h"
+#include "dawn/native/d3d11/QueueD3D11.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::d3d11 {
@@ -192,15 +193,19 @@ class Buffer : public BufferBase {
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;
     void* GetMappedPointerImpl() override;
+    std::optional<DeviceGuard> UseDeviceGuardForDestroy() override;
 
     MaybeError InitializeToZero(const ScopedCommandRecordingContext* commandContext);
 
     // Internal usage indicating the native buffer supports mapping for read and/or write or not.
     const wgpu::BufferUsage mInternalMappableFlags;
     const wgpu::MapMode mAutoMapMode;
-    ExecutionSerial mMapReadySerial = kMaxExecutionSerial;
     // Temporary storage for MapAtCreation when the lock cannot be acquired.
     std::unique_ptr<uint8_t[]> mMapAtCreationData;
+
+    // A buffer can only have one scheduled map request at a time, so we embed the request object
+    // here to avoid heap allocations.
+    Queue::BufferMapRequest mMapRequest{this, wgpu::MapMode::None};
 };
 
 // Buffer that can be used by GPU. It manages several copies of the buffer, each with its own

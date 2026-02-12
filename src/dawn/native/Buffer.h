@@ -37,6 +37,7 @@
 #include "dawn/common/NonCopyable.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
+#include "dawn/native/DeviceGuard.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
@@ -216,6 +217,10 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
 
   private:
     class MapAsyncEvent;
+
+    // TODO(crbug.com/481211676): Remove this once all backends' DestroyImpl methods are
+    // thread-safe.
+    virtual std::optional<DeviceGuard> UseDeviceGuardForDestroy();
 
     virtual MaybeError MapAtCreationImpl() = 0;
 

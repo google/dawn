@@ -698,7 +698,8 @@
                 "no autolock": true
             },
             {
-                "name": "destroy"
+                "name": "destroy",
+                "no autolock": true
             }
         ]
     },

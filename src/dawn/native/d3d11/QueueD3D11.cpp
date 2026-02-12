@@ -354,19 +354,65 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
 MaybeError Queue::CheckScheduledBufferMappings(ExecutionSerial completedSerial) {
     auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Passive);
     return mPendingMapBuffers.Use([&](auto pendingMapBuffers) -> MaybeError {
-        for (const auto& bufferEntry : pendingMapBuffers->IterateUpTo(completedSerial)) {
-            DAWN_TRY(
-                bufferEntry.buffer->TryMapNow(&commandContext, completedSerial, bufferEntry.mode));
+        auto& serialQueue = pendingMapBuffers->serialQueue;
+        auto& requestMap = pendingMapBuffers->requestMap;
+
+        // Process all serials up to and including completedSerial
+        auto it = serialQueue.begin();
+        while (it != serialQueue.end() && it->first <= completedSerial) {
+            LinkedList<BufferMapRequest>& list = it->second;
+
+            // Process all buffers in this serial's list
+            while (!list.empty()) {
+                LinkNode<BufferMapRequest>* node = list.head();
+                BufferMapRequest* request = node->value();
+                Buffer* buffer = request->buffer;
+
+                DAWN_ASSERT(buffer);
+                DAWN_TRY(buffer->TryMapNow(&commandContext, completedSerial, request->mode));
+
+                request->RemoveFromList();
+                requestMap.erase(buffer);
+            }
+
+            // Erase this serial's entry and advance iterator
+            it = serialQueue.erase(it);
         }
-        pendingMapBuffers->ClearUpTo(completedSerial);
+
         return {};
     });
 }
 
-void Queue::ScheduleBufferMapping(Ref<Buffer>&& buffer,
-                                  wgpu::MapMode mode,
-                                  ExecutionSerial readySerial) {
-    mPendingMapBuffers->Enqueue({buffer, mode}, readySerial);
+void Queue::ScheduleBufferMapping(BufferMapRequest* request, ExecutionSerial readySerial) {
+    DAWN_ASSERT(request->buffer != nullptr);
+    mPendingMapBuffers.Use([&](auto pendingMapBuffers) {
+        auto& serialQueue = pendingMapBuffers->serialQueue;
+        auto& requestMap = pendingMapBuffers->requestMap;
+
+        auto& storedRequest = requestMap[request->buffer];
+        // Cancel old schedule if any. This is because we only allow one schedule per buffer.
+        // Any new schedule will overwrite the old one.
+        if (storedRequest) {
+            storedRequest->RemoveFromList();
+        }
+        storedRequest = request;
+
+        DAWN_ASSERT(!request->IsInList());
+        serialQueue[readySerial].Append(request);
+    });
+}
+
+void Queue::CancelScheduledBufferMapping(Buffer* buffer) {
+    mPendingMapBuffers.Use([&](auto pendingMapBuffers) {
+        auto& requestMap = pendingMapBuffers->requestMap;
+
+        auto it = requestMap.find(buffer);
+        if (it != requestMap.end()) {
+            BufferMapRequest* entry = it->second;
+            entry->RemoveFromList();
+            requestMap.erase(it);
+        }
+    });
 }
 
 MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
