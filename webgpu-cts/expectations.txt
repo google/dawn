@@ -175,6 +175,11 @@ crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,buil
 crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Skip ]
 crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:*;offset=true [ Skip ]
 
+# Fine derivatives are course on Intel Mac
+crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
+crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
+crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:* [ Failure ]
+
 ################################################################################
 # Temporary Skip Expectations
 #
@@ -517,11 +522,6 @@ crbug.com/407133969 [ asan dawn-no-backend-validation no-clang-coverage nvidia-0
 # D3D debug layer bug which reports that the same subresource of a 3d texture cannot be written twice.
 crbug.com/42241218 [ arch-arm64 dawn-backend-validation graphite-disabled qualcomm-0x36334330 win11 ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:sameTexture=true [ Failure ]
 crbug.com/42241218 [ arch-x86_64 dawn-backend-validation graphite-enabled release-x64 win10 ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:sameTexture=true [ Failure ]
-
-# Derivative tests
-crbug.com/42251283 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
-crbug.com/42251283 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
-crbug.com/42251283 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:* [ Failure ]
 
 # crbug.com/360916910:
 crbug.com/360916910 [ intel-0x9bc5 linux mesa_ge_23.2 no-clang-coverage ] webgpu:api,operation,storage_texture,read_only:basic:format="rgba8snorm";* [ Failure ]
