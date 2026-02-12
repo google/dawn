@@ -56,9 +56,9 @@
       %false = OpConstantFalse %bool
       %int_1 = OpConstant %int 1
      %uint_1 = OpConstant %uint 1
-    %uint_27 = OpConstant %uint 27
+    %uint_34 = OpConstant %uint 34
 %_ptr_StorageBuffer_uint_0 = OpTypePointer StorageBuffer %uint
-    %uint_28 = OpConstant %uint 28
+    %uint_35 = OpConstant %uint 35
          %fs = OpFunction %void None %18
          %19 = OpLabel
          %20 = OpBitcast %uint %int_0
@@ -70,7 +70,7 @@
          %30 = OpLabel
          %49 = OpAccessChain %_ptr_StorageBuffer_uint %12 %uint_1 %20
          %51 = OpLoad %uint %49 None
-         %33 = OpIEqual %bool %51 %uint_27
+         %33 = OpIEqual %bool %51 %uint_34
                OpBranch %29
          %31 = OpLabel
                OpBranch %29
@@ -95,7 +95,7 @@
          %43 = OpLabel
          %58 = OpAccessChain %_ptr_StorageBuffer_uint %12 %uint_1 %37
          %59 = OpLoad %uint %58 None
-         %46 = OpIEqual %bool %59 %uint_28
+         %46 = OpIEqual %bool %59 %uint_35
                OpBranch %42
          %44 = OpLabel
                OpBranch %42

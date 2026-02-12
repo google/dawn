@@ -155,7 +155,7 @@ tint_resource_table_buffer = struct @align(4) {
 
 $B1: {  # root
   %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(3, 2)
-  %2:ptr<handle, resource_table<texture_1d<f32>>, read> = var undef @binding_point(0, 1)
+  %2:ptr<handle, resource_table<texture_1d<f32, filterable>>, read> = var undef @binding_point(0, 1)
   %3:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
   %4:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
   %5:ptr<storage, tint_resource_table_buffer, read> = var undef @binding_point(1, 2)
@@ -177,7 +177,7 @@ $B1: {  # root
             .storage_buffer_binding = {1, 2},
             .default_binding_type_order =
                 {
-                    ResourceType::kTexture1d_f32,
+                    ResourceType::kTexture1d_f32_filterable,
                     ResourceType::kTexture3d_i32,
                     ResourceType::kTexture2dArray_u32,
                 },
@@ -213,7 +213,7 @@ tint_resource_table_buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, resource_table<texture_1d<f32, filterable>>, read> = var undef @binding_point(0, 1)
   %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
   %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
   %4:ptr<storage, tint_resource_table_buffer, read> = var undef @binding_point(1, 2)
@@ -228,7 +228,7 @@ $B1: {  # root
       $B3: {  # true
         %10:ptr<storage, u32, read> = access %4, 1u, 1u
         %11:u32 = load %10
-        %12:bool = eq %11, 9u
+        %12:bool = eq %11, 12u
         exit_if %12  # if_1
       }
       $B4: {  # false
@@ -250,7 +250,7 @@ $B1: {  # root
             .storage_buffer_binding = {1, 2},
             .default_binding_type_order =
                 {
-                    ResourceType::kTexture1d_f32,
+                    ResourceType::kTexture1d_f32_filterable,
                     ResourceType::kTexture3d_i32,
                     ResourceType::kTexture2dArray_u32,
                 },
@@ -284,7 +284,7 @@ tint_resource_table_buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, resource_table<texture_1d<f32, filterable>>, read> = var undef @binding_point(0, 1)
   %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
   %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
   %4:ptr<storage, tint_resource_table_buffer, read> = var undef @binding_point(1, 2)
@@ -299,7 +299,7 @@ $B1: {  # root
       $B3: {  # true
         %10:ptr<storage, u32, read> = access %4, 1u, 1u
         %11:u32 = load %10
-        %12:bool = eq %11, 9u
+        %12:bool = eq %11, 12u
         exit_if %12  # if_1
       }
       $B4: {  # false
@@ -333,7 +333,7 @@ $B1: {  # root
             .storage_buffer_binding = {1, 2},
             .default_binding_type_order =
                 {
-                    ResourceType::kTexture1d_f32,
+                    ResourceType::kTexture1d_f32_filterable,
                     ResourceType::kTexture3d_i32,
                     ResourceType::kTexture2dArray_u32,
                 },

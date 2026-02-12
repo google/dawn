@@ -57,8 +57,8 @@
     %v2float = OpTypeVector %float 2
          %62 = OpConstantNull %v2float
      %uint_1 = OpConstant %uint 1
-     %uint_4 = OpConstant %uint 4
-    %uint_27 = OpConstant %uint 27
+     %uint_5 = OpConstant %uint 5
+    %uint_33 = OpConstant %uint 33
        %void = OpTypeVoid
          %77 = OpTypeFunction %void
    %fs_inner = OpFunction %v4float None %19
@@ -71,7 +71,7 @@
          %29 = OpLabel
          %64 = OpAccessChain %_ptr_StorageBuffer_uint %10 %uint_1 %uint_2
          %66 = OpLoad %uint %64 None
-         %32 = OpIEqual %bool %66 %uint_4
+         %32 = OpIEqual %bool %66 %uint_5
                OpBranch %28
          %30 = OpLabel
                OpBranch %28
@@ -98,7 +98,7 @@
          %47 = OpLabel
          %70 = OpAccessChain %_ptr_StorageBuffer_uint %10 %uint_1 %uint_3
          %71 = OpLoad %uint %70 None
-         %50 = OpIEqual %bool %71 %uint_27
+         %50 = OpIEqual %bool %71 %uint_33
                OpBranch %46
          %48 = OpLabel
                OpBranch %46

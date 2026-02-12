@@ -75,9 +75,9 @@
       %v3int = OpTypeVector %int 3
         %116 = OpConstantComposite %v3int %int_2 %int_1 %int_0
      %v4uint = OpTypeVector %uint 4
-     %uint_5 = OpConstant %uint 5
-    %uint_12 = OpConstant %uint 12
      %uint_2 = OpConstant %uint 2
+     %uint_7 = OpConstant %uint 7
+    %uint_16 = OpConstant %uint 16
          %fs = OpFunction %void None %22
          %23 = OpLabel
          %24 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_0
@@ -88,7 +88,7 @@
          %31 = OpLabel
         %121 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_1 %uint_0
         %122 = OpLoad %uint %121 None
-         %34 = OpIEqual %bool %122 %uint_1
+         %34 = OpIEqual %bool %122 %uint_2
                OpBranch %30
          %32 = OpLabel
                OpBranch %30
@@ -99,9 +99,9 @@
          %37 = OpLabel
                OpBranch %36
          %38 = OpLabel
-        %123 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_0
-        %124 = OpLoad %uint %123 None
-         %40 = OpIAdd %uint %uint_0 %124
+        %124 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_0
+        %125 = OpLoad %uint %124 None
+         %40 = OpIAdd %uint %uint_0 %125
                OpBranch %36
          %36 = OpLabel
          %39 = OpPhi %uint %uint_0 %37 %40 %38
@@ -123,9 +123,9 @@
                OpSelectionMerge %62 None
                OpBranchConditional %61 %63 %64
          %63 = OpLabel
-        %125 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_1 %57
-        %126 = OpLoad %uint %125 None
-         %66 = OpIEqual %bool %126 %uint_5
+        %126 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_1 %57
+        %127 = OpLoad %uint %126 None
+         %66 = OpIEqual %bool %127 %uint_7
                OpBranch %62
          %64 = OpLabel
                OpBranch %62
@@ -136,9 +136,9 @@
          %68 = OpLabel
                OpBranch %67
          %69 = OpLabel
-        %128 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_0
-        %129 = OpLoad %uint %128 None
-         %71 = OpIAdd %uint %uint_1 %129
+        %129 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_0
+        %130 = OpLoad %uint %129 None
+         %71 = OpIAdd %uint %uint_1 %130
                OpBranch %67
          %67 = OpLabel
          %70 = OpPhi %uint %57 %68 %71 %69
@@ -160,9 +160,9 @@
                OpSelectionMerge %94 None
                OpBranchConditional %93 %95 %96
          %95 = OpLabel
-        %130 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_1 %89
-        %131 = OpLoad %uint %130 None
-         %98 = OpIEqual %bool %131 %uint_12
+        %131 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_1 %89
+        %132 = OpLoad %uint %131 None
+         %98 = OpIEqual %bool %132 %uint_16
                OpBranch %94
          %96 = OpLabel
                OpBranch %94
@@ -173,9 +173,9 @@
         %100 = OpLabel
                OpBranch %99
         %101 = OpLabel
-        %133 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_0
-        %134 = OpLoad %uint %133 None
-        %103 = OpIAdd %uint %uint_2 %134
+        %134 = OpAccessChain %_ptr_StorageBuffer_uint %16 %uint_0
+        %135 = OpLoad %uint %134 None
+        %103 = OpIAdd %uint %uint_2 %135
                OpBranch %99
          %99 = OpLabel
         %102 = OpPhi %uint %89 %100 %103 %101

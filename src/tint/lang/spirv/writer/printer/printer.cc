@@ -150,6 +150,9 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
             if (s->IsComparison()) {
                 return types.Get<core::type::Sampler>(core::type::SamplerKind::kSampler);
             }
+            if (s->Filtering() != core::SamplerFiltering::kUndefined) {
+                return types.Get<core::type::Sampler>(core::type::SamplerKind::kSampler);
+            }
             return s;
         },
 

@@ -2818,7 +2818,7 @@ TEST_F(ResolverBuiltinTest_Resources, hasResource) {
     EXPECT_TRUE(TypeOf(call)->Is<core::type::Bool>());
 }
 
-TEST_F(ResolverBuiltinTest_Resources, DISABLED_getResource_SampledTexture_F32_RequriesFilterable) {
+TEST_F(ResolverBuiltinTest_Resources, getResource_SampledTexture_F32_RequiresFilterable) {
     Enable(wgsl::Extension::kChromiumExperimentalResourceTable);
 
     auto tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
@@ -2875,7 +2875,7 @@ TEST_F(ResolverBuiltinTest_Resources, DISABLED_getResource_SampledTexture_F32_Re
       ✓  'I' is 'i32' or 'u32'
  • 'getResource<T  ✗ >(index: I  ✓ ) -> T' where:
       ✗  'T' is 'texture_multisampled_2d<K>'
-      ✗  'K' is 'i32' or 'u32'
+      ✗  'K' is 'f32', 'i32' or 'u32'
       ✓  'I' is 'i32' or 'u32'
  • 'getResource<T  ✗ >(index: I  ✓ ) -> T' where:
       ✗  'T' is 'texture_1d<f32, F>'
@@ -2908,7 +2908,7 @@ TEST_F(ResolverBuiltinTest_Resources, DISABLED_getResource_SampledTexture_F32_Re
 )");
 }
 
-TEST_F(ResolverBuiltinTest_Resources, DISABLED_getResource_Sampler_RequiresFiltering) {
+TEST_F(ResolverBuiltinTest_Resources, getResource_Sampler_RequiresFiltering) {
     Enable(wgsl::Extension::kChromiumExperimentalResourceTable);
 
     auto samp_ty = ty.sampler(core::type::SamplerKind::kSampler);
@@ -2964,7 +2964,7 @@ TEST_F(ResolverBuiltinTest_Resources, DISABLED_getResource_Sampler_RequiresFilte
       ✓  'I' is 'i32' or 'u32'
  • 'getResource<T  ✗ >(index: I  ✓ ) -> T' where:
       ✗  'T' is 'texture_multisampled_2d<K>'
-      ✗  'K' is 'i32' or 'u32'
+      ✗  'K' is 'f32', 'i32' or 'u32'
       ✓  'I' is 'i32' or 'u32'
  • 'getResource<T  ✗ >(index: I  ✓ ) -> T' where:
       ✗  'T' is 'texture_1d<f32, F>'
@@ -2997,7 +2997,7 @@ TEST_F(ResolverBuiltinTest_Resources, DISABLED_getResource_Sampler_RequiresFilte
 )");
 }
 
-TEST_F(ResolverBuiltinTest_Resources, DISABLED_hasResource_SampledTexture_F32_RequriesFilterable) {
+TEST_F(ResolverBuiltinTest_Resources, hasResource_SampledTexture_F32_RequriesFilterable) {
     Enable(wgsl::Extension::kChromiumExperimentalResourceTable);
 
     auto tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
@@ -3054,7 +3054,7 @@ TEST_F(ResolverBuiltinTest_Resources, DISABLED_hasResource_SampledTexture_F32_Re
       ✓  'I' is 'i32' or 'u32'
  • 'hasResource<T  ✗ >(index: I  ✓ ) -> bool' where:
       ✗  'T' is 'texture_multisampled_2d<K>'
-      ✗  'K' is 'i32' or 'u32'
+      ✗  'K' is 'f32', 'i32' or 'u32'
       ✓  'I' is 'i32' or 'u32'
  • 'hasResource<T  ✗ >(index: I  ✓ ) -> bool' where:
       ✗  'T' is 'texture_1d<f32, F>'
@@ -3087,7 +3087,7 @@ TEST_F(ResolverBuiltinTest_Resources, DISABLED_hasResource_SampledTexture_F32_Re
 )");
 }
 
-TEST_F(ResolverBuiltinTest_Resources, DISABLED_hasResource_Sampler_RequiresFiltering) {
+TEST_F(ResolverBuiltinTest_Resources, hasResource_Sampler_RequiresFiltering) {
     Enable(wgsl::Extension::kChromiumExperimentalResourceTable);
 
     auto samp_ty = ty.sampler(core::type::SamplerKind::kSampler);
@@ -3143,7 +3143,7 @@ TEST_F(ResolverBuiltinTest_Resources, DISABLED_hasResource_Sampler_RequiresFilte
       ✓  'I' is 'i32' or 'u32'
  • 'hasResource<T  ✗ >(index: I  ✓ ) -> bool' where:
       ✗  'T' is 'texture_multisampled_2d<K>'
-      ✗  'K' is 'i32' or 'u32'
+      ✗  'K' is 'f32', 'i32' or 'u32'
       ✓  'I' is 'i32' or 'u32'
  • 'hasResource<T  ✗ >(index: I  ✓ ) -> bool' where:
       ✗  'T' is 'texture_1d<f32, F>'

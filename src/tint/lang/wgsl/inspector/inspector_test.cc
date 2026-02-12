@@ -2981,7 +2981,7 @@ enable chromium_experimental_resource_table;
 
     std::vector<ResourceType> types(result.begin(), result.end());
     std::sort(types.begin(), types.end());
-    EXPECT_EQ(ResourceType::kTexture2d_f32, types[0]);
+    EXPECT_EQ(ResourceType::kTexture2d_f32_filterable, types[0]);
     EXPECT_EQ(ResourceType::kTexture3d_i32, types[1]);
 }
 
@@ -2991,6 +2991,7 @@ enable chromium_experimental_resource_table;
 
 @fragment fn ep() {
   _ = textureDimensions(getResource<texture_cube<f32, unfilterable>>(3));
+  _ = textureDimensions(getResource<texture_cube<f32, filterable>>(3));
   _ = textureDimensions(getResource<texture_1d<f32, filterable>>(3));
 
   _ = hasResource<texture_2d<f32, filterable>>(0);
@@ -3003,15 +3004,16 @@ enable chromium_experimental_resource_table;
     auto result = inspector.GetResourceTableInfo("ep");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    ASSERT_EQ(4u, result.size());
+    ASSERT_EQ(5u, result.size());
 
     std::vector<ResourceType> types(result.begin(), result.end());
     std::sort(types.begin(), types.end());
 
-    EXPECT_EQ(ResourceType::kTexture1d_f32, types[0]);
-    EXPECT_EQ(ResourceType::kTexture2d_f32, types[1]);
-    EXPECT_EQ(ResourceType::kTexture3d_f32, types[2]);
-    EXPECT_EQ(ResourceType::kTextureCube_f32, types[3]);
+    EXPECT_EQ(ResourceType::kTexture1d_f32_filterable, types[0]);
+    EXPECT_EQ(ResourceType::kTexture2d_f32_filterable, types[1]);
+    EXPECT_EQ(ResourceType::kTexture3d_f32_filterable, types[2]);
+    EXPECT_EQ(ResourceType::kTextureCube_f32_filterable, types[3]);
+    EXPECT_EQ(ResourceType::kTextureCube_f32_unfilterable, types[4]);
 }
 
 TEST_F(InspectorGetResourceTableInfoTest, ResourceTable_Nested) {
@@ -3024,6 +3026,8 @@ fn nested() {
 
   _ = hasResource<texture_2d<f32, filterable>>(0);
   _ = getResource<texture_3d<f32, filterable>>(1);
+  _ = hasResource<texture_2d<f32, unfilterable>>(0);
+  _ = getResource<texture_3d<f32, unfilterable>>(1);
 }
 
 @fragment fn ep() {
@@ -3036,15 +3040,17 @@ fn nested() {
     auto result = inspector.GetResourceTableInfo("ep");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    ASSERT_EQ(4u, result.size());
+    ASSERT_EQ(6u, result.size());
 
     std::vector<ResourceType> types(result.begin(), result.end());
     std::sort(types.begin(), types.end());
 
-    EXPECT_EQ(ResourceType::kTexture1d_f32, types[0]);
-    EXPECT_EQ(ResourceType::kTexture2d_f32, types[1]);
-    EXPECT_EQ(ResourceType::kTexture3d_f32, types[2]);
-    EXPECT_EQ(ResourceType::kTextureCube_f32, types[3]);
+    EXPECT_EQ(ResourceType::kTexture1d_f32_unfilterable, types[0]);
+    EXPECT_EQ(ResourceType::kTexture2d_f32_filterable, types[1]);
+    EXPECT_EQ(ResourceType::kTexture2d_f32_unfilterable, types[2]);
+    EXPECT_EQ(ResourceType::kTexture3d_f32_filterable, types[3]);
+    EXPECT_EQ(ResourceType::kTexture3d_f32_unfilterable, types[4]);
+    EXPECT_EQ(ResourceType::kTextureCube_f32_filterable, types[5]);
 }
 
 TEST_F(InspectorGetResourceTableInfoTest, ResourceTable_Samplers) {
@@ -3066,7 +3072,7 @@ enable chromium_experimental_resource_table;
 
     std::vector<ResourceType> types(result.begin(), result.end());
     std::sort(types.begin(), types.end());
-    EXPECT_EQ(ResourceType::kSampler, types[0]);
+    EXPECT_EQ(ResourceType::kSampler_filtering, types[0]);
     EXPECT_EQ(ResourceType::kSampler_comparison, types[1]);
 }
 

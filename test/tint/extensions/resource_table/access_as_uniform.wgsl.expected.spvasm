@@ -64,7 +64,7 @@
       %v3int = OpTypeVector %int 3
          %57 = OpConstantNull %v3int
     %v4float = OpTypeVector %float 4
-    %uint_10 = OpConstant %uint 10
+    %uint_13 = OpConstant %uint 13
          %fs = OpFunction %void None %19
          %20 = OpLabel
          %21 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
@@ -78,7 +78,7 @@
          %32 = OpLabel
          %62 = OpAccessChain %_ptr_StorageBuffer_uint %13 %uint_1 %25
          %63 = OpLoad %uint %62 None
-         %35 = OpIEqual %bool %63 %uint_10
+         %35 = OpIEqual %bool %63 %uint_13
                OpBranch %31
          %33 = OpLabel
                OpBranch %31

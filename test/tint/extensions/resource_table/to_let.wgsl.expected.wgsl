@@ -6,7 +6,7 @@ const kHouseSampler = 3u;
 
 @fragment
 fn fs() -> @location(0) vec4f {
-  let tex = getResource<texture_2d<f32>>(kHouseTexture);
-  let samp = getResource<sampler>(kHouseSampler);
+  let tex = getResource<texture_2d<f32, filterable>>(kHouseTexture);
+  let samp = getResource<sampler<filtering>>(kHouseSampler);
   return textureSample(tex, samp, vec2f(0));
 }

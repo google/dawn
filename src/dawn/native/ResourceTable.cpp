@@ -49,8 +49,7 @@ tint::ResourceType ComputeTypeId(const TextureViewBase* view) {
 
     // TODO(https://issues.chromium.org/473354065): In the future we should allow the same
     // compatibility rules that exist between TextureView and BGLEntry. This means that a depth
-    // texture can be either a texture_depth_2d, or a texture_2d<f32> (unfilterable). We should
-    // also find a way to differentiate unfilterable and filterable texture_2d<f32>.
+    // texture can be either a texture_depth_2d, or a texture_2d<f3, unfilterable>).
 
     if (texture->IsMultisampledTexture()) {
         DAWN_ASSERT(view->GetDimension() == wgpu::TextureViewDimension::e2D);
@@ -92,21 +91,47 @@ tint::ResourceType ComputeTypeId(const TextureViewBase* view) {
         }
     }
 
-    switch (view->GetFormat().GetAspectInfo(view->GetAspects()).baseType) {
+    const auto& aspect_info = view->GetFormat().GetAspectInfo(view->GetAspects());
+    bool filterable = (aspect_info.supportedSampleTypes & SampleTypeBit::Float);
+    switch (aspect_info.baseType) {
         case TextureComponentType::Float:
             switch (view->GetDimension()) {
-                case wgpu::TextureViewDimension::e1D:
-                    return tint::ResourceType::kTexture1d_f32;
-                case wgpu::TextureViewDimension::e2D:
-                    return tint::ResourceType::kTexture2d_f32;
-                case wgpu::TextureViewDimension::e2DArray:
-                    return tint::ResourceType::kTexture2dArray_f32;
-                case wgpu::TextureViewDimension::Cube:
-                    return tint::ResourceType::kTextureCube_f32;
-                case wgpu::TextureViewDimension::CubeArray:
-                    return tint::ResourceType::kTextureCubeArray_f32;
-                case wgpu::TextureViewDimension::e3D:
-                    return tint::ResourceType::kTexture3d_f32;
+                case wgpu::TextureViewDimension::e1D: {
+                    if (filterable) {
+                        return tint::ResourceType::kTexture1d_f32_filterable;
+                    }
+                    return tint::ResourceType::kTexture1d_f32_unfilterable;
+                }
+                case wgpu::TextureViewDimension::e2D: {
+                    if (filterable) {
+                        return tint::ResourceType::kTexture2d_f32_filterable;
+                    }
+                    return tint::ResourceType::kTexture2d_f32_unfilterable;
+                }
+                case wgpu::TextureViewDimension::e2DArray: {
+                    if (filterable) {
+                        return tint::ResourceType::kTexture2dArray_f32_filterable;
+                    }
+                    return tint::ResourceType::kTexture2dArray_f32_unfilterable;
+                }
+                case wgpu::TextureViewDimension::Cube: {
+                    if (filterable) {
+                        return tint::ResourceType::kTextureCube_f32_filterable;
+                    }
+                    return tint::ResourceType::kTextureCube_f32_unfilterable;
+                }
+                case wgpu::TextureViewDimension::CubeArray: {
+                    if (filterable) {
+                        return tint::ResourceType::kTextureCubeArray_f32_filterable;
+                    }
+                    return tint::ResourceType::kTextureCubeArray_f32_unfilterable;
+                }
+                case wgpu::TextureViewDimension::e3D: {
+                    if (filterable) {
+                        return tint::ResourceType::kTexture3d_f32_filterable;
+                    }
+                    return tint::ResourceType::kTexture3d_f32_unfilterable;
+                }
                 default:
                     DAWN_UNREACHABLE();
             }
@@ -146,6 +171,43 @@ tint::ResourceType ComputeTypeId(const TextureViewBase* view) {
             }
         default:
             DAWN_UNREACHABLE();
+    }
+}
+
+// This helper function is used in ASSERTs to check that the default resources are compatible with
+// the typeIds that they will be used as defaults for.
+[[maybe_unused]] bool AreTypeIDCompatible(tint::ResourceType resourceTypeId,
+                                          tint::ResourceType slotTypeId) {
+    if (resourceTypeId == slotTypeId) {
+        return true;
+    }
+
+    // Cases where conversions are allowed:
+    switch (slotTypeId) {
+        case tint::ResourceType::kTexture1d_f32_unfilterable:
+            return resourceTypeId == tint::ResourceType::kTexture1d_f32_filterable;
+
+        case tint::ResourceType::kTexture2d_f32_unfilterable:
+            return resourceTypeId == tint::ResourceType::kTexture2d_f32_filterable ||
+                   resourceTypeId == tint::ResourceType::kTextureDepth2d;
+
+        case tint::ResourceType::kTexture2dArray_f32_unfilterable:
+            return resourceTypeId == tint::ResourceType::kTexture2dArray_f32_filterable ||
+                   resourceTypeId == tint::ResourceType::kTextureDepth2dArray;
+
+        case tint::ResourceType::kTextureCube_f32_unfilterable:
+            return resourceTypeId == tint::ResourceType::kTextureCube_f32_filterable ||
+                   resourceTypeId == tint::ResourceType::kTextureDepthCube;
+
+        case tint::ResourceType::kTextureCubeArray_f32_unfilterable:
+            return resourceTypeId == tint::ResourceType::kTextureCubeArray_f32_filterable ||
+                   resourceTypeId == tint::ResourceType::kTextureDepthCubeArray;
+
+        case tint::ResourceType::kTexture3d_f32_unfilterable:
+            return resourceTypeId == tint::ResourceType::kTexture3d_f32_filterable;
+
+        default:
+            return false;
     }
 }
 
@@ -195,12 +257,18 @@ MaybeError ValidateBindingResource(const DeviceBase* device, const BindingResour
 
 ityp::span<ResourceTableSlot, const tint::ResourceType> GetDefaultResourceOrder() {
     static constexpr auto kDefaults = std::array{
-        tint::ResourceType::kTexture1d_f32,
-        tint::ResourceType::kTexture2d_f32,
-        tint::ResourceType::kTexture2dArray_f32,
-        tint::ResourceType::kTextureCube_f32,
-        tint::ResourceType::kTextureCubeArray_f32,
-        tint::ResourceType::kTexture3d_f32,
+        tint::ResourceType::kTexture1d_f32_filterable,
+        tint::ResourceType::kTexture2d_f32_filterable,
+        tint::ResourceType::kTexture2dArray_f32_filterable,
+        tint::ResourceType::kTextureCube_f32_filterable,
+        tint::ResourceType::kTextureCubeArray_f32_filterable,
+        tint::ResourceType::kTexture3d_f32_filterable,
+        tint::ResourceType::kTexture1d_f32_unfilterable,
+        tint::ResourceType::kTexture2d_f32_unfilterable,
+        tint::ResourceType::kTexture2dArray_f32_unfilterable,
+        tint::ResourceType::kTextureCube_f32_unfilterable,
+        tint::ResourceType::kTextureCubeArray_f32_unfilterable,
+        tint::ResourceType::kTexture3d_f32_unfilterable,
 
         tint::ResourceType::kTexture1d_u32,
         tint::ResourceType::kTexture2d_u32,
@@ -587,8 +655,8 @@ ResourceTableDefaultResources::GetOrCreateSampledTextureDefaults(DeviceBase* dev
 
         // Check that the resource we will have will match the order of default textures that we
         // will give to the shader compilation.
-        DAWN_ASSERT(ComputeTypeId(view.Get()) ==
-                    GetDefaultResourceOrder()[mSampledTextureDefaults.size()]);
+        DAWN_ASSERT(AreTypeIDCompatible(ComputeTypeId(view.Get()),
+                                        GetDefaultResourceOrder()[mSampledTextureDefaults.size()]));
         mSampledTextureDefaults.push_back(view);
 
         return {};
@@ -620,25 +688,30 @@ ResourceTableDefaultResources::GetOrCreateSampledTextureDefaults(DeviceBase* dev
         Ref<TextureBase> t3D;
         DAWN_TRY_ASSIGN(t3D, device->CreateTexture(&tDesc));
 
-        // Create all the default binding view, reusing the 2D texture between
-        // 2D/2DArray/Cube/CubeArray.
-        DAWN_TRY(AddDefaultResource(t1D.Get()));
+        // There are two different sets of default resources for R8Unorm because we first add all
+        // the filterable f32 sample types, then all the unfilterable f32 sample types.
+        uint32_t timesToAdd = format == wgpu::TextureFormat::R8Unorm ? 2 : 1;
+        for (uint32_t i = 0; i < timesToAdd; i++) {
+            // Create all the default binding view, reusing the 2D texture between
+            // 2D/2DArray/Cube/CubeArray.
+            DAWN_TRY(AddDefaultResource(t1D.Get()));
 
-        TextureViewDescriptor vDesc{
-            .label = "default SampledTexture resource",
-        };
-        vDesc.arrayLayerCount = 1;
-        vDesc.dimension = wgpu::TextureViewDimension::e2D;
-        DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
-        vDesc.dimension = wgpu::TextureViewDimension::e2DArray;
-        DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
-        vDesc.arrayLayerCount = 6;
-        vDesc.dimension = wgpu::TextureViewDimension::Cube;
-        DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
-        vDesc.dimension = wgpu::TextureViewDimension::CubeArray;
-        DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
+            TextureViewDescriptor vDesc{
+                .label = "default SampledTexture resource",
+            };
+            vDesc.arrayLayerCount = 1;
+            vDesc.dimension = wgpu::TextureViewDimension::e2D;
+            DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
+            vDesc.dimension = wgpu::TextureViewDimension::e2DArray;
+            DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
+            vDesc.arrayLayerCount = 6;
+            vDesc.dimension = wgpu::TextureViewDimension::Cube;
+            DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
+            vDesc.dimension = wgpu::TextureViewDimension::CubeArray;
+            DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
 
-        DAWN_TRY(AddDefaultResource(t3D.Get()));
+            DAWN_TRY(AddDefaultResource(t3D.Get()));
+        }
     }
 
     // Create the color format multi-sampled views.

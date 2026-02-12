@@ -3202,23 +3202,6 @@ implicit(T: fa_f32_f16) ctor mat4x4(T, T, T, T,
 @must_use implicit(I: iu32)
   fn hasResource<S: sampler_comparison>(index: I) -> bool
 
-/// TEMPORARY until ResourceTypes updated
-@must_use implicit(K: f32, I: iu32)
-  fn hasResource<T: texture_1d<K> >(index: I) -> bool
-@must_use implicit(K: f32, I: iu32)
-  fn hasResource<T: texture_2d<K> >(index: I) -> bool
-@must_use implicit(K: f32, I: iu32)
-  fn hasResource<T: texture_2d_array<K> >(index: I) -> bool
-@must_use implicit(K: f32, I: iu32)
-  fn hasResource<T: texture_3d<K> >(index: I) -> bool
-@must_use implicit(K: f32, I: iu32)
-  fn hasResource<T: texture_cube<K> >(index: I) -> bool
-@must_use implicit(K: f32, I: iu32)
-  fn hasResource<T: texture_cube_array<K> >(index: I) -> bool
-@must_use implicit(I: iu32)
-  fn hasResource<S: sampler>(index: I) -> bool
-/// END TEMPORARY
-
 @must_use implicit(F: texture_filter, I: iu32)
   fn hasResource<T: texture_1d_filtered<f32, F> >(index: I) -> bool
 @must_use implicit(F: texture_filter, I: iu32)
@@ -3246,24 +3229,6 @@ implicit(T: fa_f32_f16) ctor mat4x4(T, T, T, T,
   fn getResource<T: texture_cube<K> >(index: I) -> T
 @must_use implicit(K: iu32, I: iu32)
   fn getResource<T: texture_cube_array<K> >(index: I) -> T
-
-/// TEMPORARY until ResourceTypes updated
-@must_use implicit(K: f32, I: iu32)
-  fn getResource<T: texture_1d<K> >(index: I) -> T
-@must_use implicit(K: f32, I: iu32)
-  fn getResource<T: texture_2d<K> >(index: I) -> T
-@must_use implicit(K: f32, I: iu32)
-  fn getResource<T: texture_2d_array<K> >(index: I) -> T
-@must_use implicit(K: f32, I: iu32)
-  fn getResource<T: texture_3d<K> >(index: I) -> T
-@must_use implicit(K: f32, I: iu32)
-  fn getResource<T: texture_cube<K> >(index: I) -> T
-@must_use implicit(K: f32, I: iu32)
-  fn getResource<T: texture_cube_array<K> >(index: I) -> T
-@must_use implicit(I: iu32)
-  fn getResource<S: sampler>(index: I) -> S
-
-/// END TEMPORARY
 
 @must_use implicit(K: fiu32, I: iu32)
   fn getResource<T: texture_multisampled_2d<K> >(index: I) -> T
