@@ -211,6 +211,21 @@ dawn_mac_cmake_cq_tester(
 )
 
 dawn_win_cmake_cq_tester(
+    name = "dawn-cq-win-x64-msvc-cmake-dbg",
+    description_html = "Compiles and tests debug Dawn test binaries for Win/x64 using CMake and MSVC. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-win-x64-sws-msvc-cmake-dbg",
+    ],
+    properties = {
+        "asan": False,
+        "clang": False,
+        "debug": True,
+        "target_cpu": "x64",
+        "ubsan": False,
+    },
+)
+
+dawn_win_cmake_cq_tester(
     name = "dawn-cq-win-x64-msvc-cmake-rel",
     description_html = "Compiles and tests release Dawn test binaries for Win/x64 using CMake and MSVC. Blocks CL submission",
     mirrors = [

@@ -456,6 +456,9 @@ luci.console_view_entry(
 # * cmake-mac-rel
 #   * dawn-mac-x64-sws-cmake-rel
 #   * dawn-cq-mac-x64-sws-cmake-rel
+# * cmake-win-msvc-dbg-x64
+#   * dawn-win-x64-sws-msvc-cmake-dbg
+#   * dawn-cq-win-x64-msvc-cmake-dbg
 # * cmake-win-msvc-rel-x64
 #   * dawn-win-x64-sws-msvc-cmake-rel
 #   * dawn-cq-win-x64-msvc-cmake-rel
@@ -464,8 +467,6 @@ luci.console_view_entry(
 # not providing value in go/dawn-standalone-builders-dd.
 # * cmake-linux-clang-dbg-x64-asan
 # * cmake-linux-clang-dbg-x64-ubsan
-
-dawn_cmake_standalone_builder("cmake-win-msvc-dbg-x64", clang = False, debug = True, cpu = "x64", asan = False, ubsan = False)
 
 clang_tidy_dawn_tryjob()
 
