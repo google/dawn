@@ -619,6 +619,8 @@ MaybeError RecordBeginDynamicRenderPass(CommandRecordingContext* recordingContex
         renderInfo.pNext = &msrtss;
     }
 
+    // TODO(crbug.com/463893794): Handle ExpandResolveTexture.
+
     device->fn.CmdBeginRenderingKHR(recordingContext->commandBuffer, &renderInfo);
 
     return {};
@@ -627,7 +629,7 @@ MaybeError RecordBeginDynamicRenderPass(CommandRecordingContext* recordingContex
 MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
                                  Device* device,
                                  BeginRenderPassCmd* renderPass) {
-    if (device->UseDynamicRendering()) {
+    if (device->GetRenderPassType() == VulkanRenderPassType::DynamicRendering) {
         return RecordBeginDynamicRenderPass(recordingContext, device, renderPass);
     }
 
@@ -757,7 +759,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
 void RecordEndRenderPass(CommandRecordingContext* recordingContext, Device* device) {
     VkCommandBuffer commands = recordingContext->commandBuffer;
 
-    if (device->UseDynamicRendering()) {
+    if (device->GetRenderPassType() == VulkanRenderPassType::DynamicRendering) {
         device->fn.CmdEndRenderingKHR(commands);
     } else {
         device->fn.CmdEndRenderPass(commands);

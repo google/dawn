@@ -57,6 +57,16 @@ class FramebufferCache;
 class RenderPassCache;
 class ResourceMemoryAllocator;
 
+// Describes what method should be used for submitting render passes
+enum class VulkanRenderPassType {
+    // Vulkan 1.0
+    CreateRenderPass,
+    // VK_KHR_create_renderpass2 or Vulkan 1.2
+    CreateRenderPass2,
+    // VK_KHR_dynamic_rendering or Vulkan 1.3
+    DynamicRendering,
+};
+
 class Device final : public DeviceBase {
   public:
     static ResultOrError<Ref<Device>> Create(AdapterBase* adapter,
@@ -141,7 +151,7 @@ class Device final : public DeviceBase {
 
     QuerySetBase* GetEmptyPassQuerySet();
 
-    bool UseDynamicRendering() { return mUseDynamicRendering; }
+    VulkanRenderPassType GetRenderPassType() { return mRenderPassType; }
 
   private:
     Device(AdapterBase* adapter,
@@ -228,7 +238,7 @@ class Device final : public DeviceBase {
     Ref<QuerySetBase> mEmptyPassQuerySet;
     std::atomic<uint64_t> mNextTextureViewId = 1;
 
-    bool mUseDynamicRendering = false;
+    VulkanRenderPassType mRenderPassType = VulkanRenderPassType::CreateRenderPass;
 
     MaybeError ImportExternalImage(const ExternalImageDescriptorVk* descriptor,
                                    ExternalMemoryHandle memoryHandle,

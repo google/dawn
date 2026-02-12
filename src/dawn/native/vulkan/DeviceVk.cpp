@@ -636,6 +636,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         featuresChain.Add(&usedKnobs.descriptorIndexingFeatures);
     }
 
+    // Determine what Vulkan render pass method will be used for the device.
     // Dynamic Rendering can be used if the extension is available AND the DawnLoadResolveTexture
     // feature is not being used.
     // TODO(crbug.com/463893794): Remove this restriction when DawnLoadResolveTexture is supported
@@ -645,7 +646,13 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::DynamicRendering));
         usedKnobs.dynamicRenderingFeatures = mDeviceInfo.dynamicRenderingFeatures;
         featuresChain.Add(&usedKnobs.dynamicRenderingFeatures);
-        mUseDynamicRendering = true;
+        mRenderPassType = VulkanRenderPassType::DynamicRendering;
+    } else if (IsToggleEnabled(Toggle::VulkanUseCreateRenderPass2)) {
+        // If dynamic rendering is not used, but CreateRenderPass2 is supported prefer it.
+        mRenderPassType = VulkanRenderPassType::CreateRenderPass2;
+    } else {
+        // Otherwise use Vulkan's original CreateRenderPass method.
+        mRenderPassType = VulkanRenderPassType::CreateRenderPass;
     }
 
     if (HasFeature(Feature::MSAARenderToSingleSampled)) {

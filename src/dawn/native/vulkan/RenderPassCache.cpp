@@ -369,62 +369,71 @@ ResultOrError<RenderPassCache::RenderPassInfo> RenderPassCache::GetRenderPass(
 
 ResultOrError<RenderPassCache::RenderPassInfo> RenderPassCache::CreateRenderPassForQuery(
     const RenderPassCacheQuery& query) {
-    if (mDevice->IsToggleEnabled(Toggle::VulkanUseCreateRenderPass2)) {
-        RenderPassCreateInfo2 passInfo2;
-        InitializePassInfo(mDevice, query, passInfo2);
+    RenderPassInfo renderPassInfo;
+    renderPassInfo.uniqueId = nextRenderPassId++;
 
-        RenderPassInfo renderPassInfo;
-        renderPassInfo.mainSubpass = passInfo2.createInfo.subpassCount - 1;
-        renderPassInfo.uniqueId = nextRenderPassId++;
+    switch (mDevice->GetRenderPassType()) {
+        case VulkanRenderPassType::CreateRenderPass2: {
+            RenderPassCreateInfo2 passInfo2;
+            InitializePassInfo(mDevice, query, passInfo2);
 
-        VkMultisampledRenderToSingleSampledInfoEXT msrtss = {};
-        VkSubpassDescriptionDepthStencilResolveKHR depthStencilResolve = {};
+            renderPassInfo.mainSubpass = passInfo2.createInfo.subpassCount - 1;
 
-        if (query.renderToSingleSampleMask.any()) {
-            VkSubpassDescription2& subpass = passInfo2.subpassDescs[renderPassInfo.mainSubpass];
-            PNextChainBuilder subpassChain(&subpass);
+            VkMultisampledRenderToSingleSampledInfoEXT msrtss = {};
+            VkSubpassDescriptionDepthStencilResolveKHR depthStencilResolve = {};
 
-            msrtss.multisampledRenderToSingleSampledEnable = VK_TRUE;
-            msrtss.rasterizationSamples = VulkanSampleCount(query.sampleCount);
+            if (query.renderToSingleSampleMask.any()) {
+                VkSubpassDescription2& subpass = passInfo2.subpassDescs[renderPassInfo.mainSubpass];
+                PNextChainBuilder subpassChain(&subpass);
 
-            subpassChain.Add(&msrtss,
-                             VK_STRUCTURE_TYPE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_INFO_EXT);
+                msrtss.multisampledRenderToSingleSampledEnable = VK_TRUE;
+                msrtss.rasterizationSamples = VulkanSampleCount(query.sampleCount);
 
-            if (subpass.pDepthStencilAttachment != nullptr) {
-                // VUID-VkSubpassDescription2-pNext-06871: If MSRTSS is used and the depth/stencil
-                // attachment is not null a depth/stencil resolve description must be chained to the
-                // subpass.
-                depthStencilResolve.depthResolveMode = VK_RESOLVE_MODE_SAMPLE_ZERO_BIT;
-                depthStencilResolve.stencilResolveMode = VK_RESOLVE_MODE_SAMPLE_ZERO_BIT;
-                depthStencilResolve.pDepthStencilResolveAttachment = nullptr;
+                subpassChain.Add(&msrtss,
+                                 VK_STRUCTURE_TYPE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_INFO_EXT);
 
-                subpassChain.Add(&depthStencilResolve,
-                                 VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE_KHR);
+                if (subpass.pDepthStencilAttachment != nullptr) {
+                    // VUID-VkSubpassDescription2-pNext-06871: If MSRTSS is used and the
+                    // depth/stencil attachment is not null a depth/stencil resolve description must
+                    // be chained to the subpass.
+                    depthStencilResolve.depthResolveMode = VK_RESOLVE_MODE_SAMPLE_ZERO_BIT;
+                    depthStencilResolve.stencilResolveMode = VK_RESOLVE_MODE_SAMPLE_ZERO_BIT;
+                    depthStencilResolve.pDepthStencilResolveAttachment = nullptr;
+
+                    subpassChain.Add(
+                        &depthStencilResolve,
+                        VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE_KHR);
+                }
             }
-        }
 
-        // Create the render pass from the zillion parameters
-        DAWN_TRY(CheckVkSuccess(
-            mDevice->fn.CreateRenderPass2KHR(mDevice->GetVkDevice(), &passInfo2.createInfo, nullptr,
+            // Create the render pass from the zillion parameters
+            DAWN_TRY(CheckVkSuccess(
+                mDevice->fn.CreateRenderPass2KHR(mDevice->GetVkDevice(), &passInfo2.createInfo,
+                                                 nullptr, &*renderPassInfo.renderPass),
+                "CreateRenderPass2KHR"));
+            break;
+        }
+        case VulkanRenderPassType::CreateRenderPass: {
+            // MSAA Render To Single Sampled should not be enabled unless CreateRenderPass2 is also
+            // enabled.
+            DAWN_ASSERT(!query.renderToSingleSampleMask.any());
+
+            RenderPassCreateInfo passInfo;
+            InitializePassInfo(mDevice, query, passInfo);
+
+            // Create the render pass from the zillion parameters
+            renderPassInfo.mainSubpass = passInfo.createInfo.subpassCount - 1;
+            DAWN_TRY(CheckVkSuccess(
+                mDevice->fn.CreateRenderPass(mDevice->GetVkDevice(), &passInfo.createInfo, nullptr,
                                              &*renderPassInfo.renderPass),
-            "CreateRenderPass2KHR"));
-        return renderPassInfo;
+                "CreateRenderPass"));
+            break;
+        }
+        case VulkanRenderPassType::DynamicRendering:
+            DAWN_UNREACHABLE();
+            break;
     }
 
-    // MSAA Render To Single Sampled should not be enabled unless CreateRenderPass2 is also enabled.
-    DAWN_ASSERT(!query.renderToSingleSampleMask.any());
-
-    RenderPassCreateInfo passInfo;
-    InitializePassInfo(mDevice, query, passInfo);
-
-    // Create the render pass from the zillion parameters
-    RenderPassInfo renderPassInfo;
-    renderPassInfo.mainSubpass = passInfo.createInfo.subpassCount - 1;
-    renderPassInfo.uniqueId = nextRenderPassId++;
-    DAWN_TRY(
-        CheckVkSuccess(mDevice->fn.CreateRenderPass(mDevice->GetVkDevice(), &passInfo.createInfo,
-                                                    nullptr, &*renderPassInfo.renderPass),
-                       "CreateRenderPass"));
     return renderPassInfo;
 }
 

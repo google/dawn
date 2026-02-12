@@ -563,7 +563,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo;
     PerColorAttachment<VkFormat> colorAttachmentFormats;
 
-    if (device->UseDynamicRendering()) {
+    if (device->GetRenderPassType() == VulkanRenderPassType::DynamicRendering) {
         // Dynamic rendering doesn't need a VkRenderPass object, just a description of the
         // attachments formats that will be used with this pipeline.
         VkRenderPass nullRenderPass = VK_NULL_HANDLE;
@@ -604,8 +604,6 @@ MaybeError RenderPipeline::InitializeImpl() {
                 pipelineRenderingCreateInfo.stencilAttachmentFormat = vkDsFormat;
             }
         }
-
-        // TODO(crbug.com/463893794): Handle ExpandResolveTexture.
     } else {
         // Get a VkRenderPass that matches the attachment formats for this pipeline.
         // VkRenderPass compatibility rules let us provide placeholder data for a bunch of
