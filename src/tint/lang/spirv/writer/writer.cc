@@ -136,32 +136,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
     }
 
-    // Check for unsupported shader IO builtins.
-    auto check_io_attributes = [&](const core::IOAttributes& attributes) -> Result<SuccessType> {
-        if (attributes.color.has_value()) {
-            return Failure("@color attribute is not supported by the SPIR-V backend");
-        }
-        return Success;
-    };
-    // Check input attributes.
-    for (auto* param : ep_func->Params()) {
-        if (auto* str = param->Type()->As<core::type::Struct>()) {
-            for (auto* member : str->Members()) {
-                TINT_CHECK_RESULT(check_io_attributes(member->Attributes()));
-            }
-        } else {
-            TINT_CHECK_RESULT(check_io_attributes(param->Attributes()));
-        }
-    }
-    // Check output attributes.
-    if (auto* str = ep_func->ReturnType()->As<core::type::Struct>()) {
-        for (auto* member : str->Members()) {
-            TINT_CHECK_RESULT(check_io_attributes(member->Attributes()));
-        }
-    } else {
-        TINT_CHECK_RESULT(check_io_attributes(ep_func->ReturnAttributes()));
-    }
-
     TINT_CHECK_RESULT(ValidateBindingOptions(options));
 
     return Success;

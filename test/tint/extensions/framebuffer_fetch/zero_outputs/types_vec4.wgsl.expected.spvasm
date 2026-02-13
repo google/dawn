@@ -1,0 +1,77 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 41
+; Schema: 0
+               OpCapability Shader
+               OpCapability InputAttachment
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %f "f"
+               OpExecutionMode %f OriginUpperLeft
+               OpName %f_Input "f_Input"
+               OpName %f_Input_0 "f_Input"
+               OpName %f_Input_1 "f_Input"
+               OpName %g "g"
+               OpName %g_0 "g"
+               OpName %h "h"
+               OpName %i "i"
+               OpName %f_inner "f_inner"
+               OpName %zero "zero"
+               OpName %one "one"
+               OpName %two "two"
+               OpName %f "f"
+               OpDecorate %f_Input DescriptorSet 66
+               OpDecorate %f_Input Binding 0
+               OpDecorate %f_Input InputAttachmentIndex 0
+               OpDecorate %f_Input_0 DescriptorSet 66
+               OpDecorate %f_Input_0 Binding 1
+               OpDecorate %f_Input_0 InputAttachmentIndex 1
+               OpDecorate %f_Input_1 DescriptorSet 66
+               OpDecorate %f_Input_1 Binding 2
+               OpDecorate %f_Input_1 InputAttachmentIndex 2
+        %int = OpTypeInt 32 1
+          %3 = OpTypeImage %int SubpassData 0 0 0 2 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+    %f_Input = OpVariable %_ptr_UniformConstant_3 UniformConstant
+       %uint = OpTypeInt 32 0
+          %7 = OpTypeImage %uint SubpassData 0 0 0 2 Unknown
+%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+  %f_Input_0 = OpVariable %_ptr_UniformConstant_7 UniformConstant
+      %float = OpTypeFloat 32
+         %11 = OpTypeImage %float SubpassData 0 0 0 2 Unknown
+%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
+  %f_Input_1 = OpVariable %_ptr_UniformConstant_11 UniformConstant
+       %void = OpTypeVoid
+      %v4int = OpTypeVector %int 4
+     %v4uint = OpTypeVector %uint 4
+    %v4float = OpTypeVector %float 4
+         %21 = OpTypeFunction %void %v4int %v4uint %v4float
+         %30 = OpTypeFunction %void
+      %v2int = OpTypeVector %int 2
+         %34 = OpConstantNull %v2int
+          %g = OpFunction %void None %21
+        %g_0 = OpFunctionParameter %v4int
+          %h = OpFunctionParameter %v4uint
+          %i = OpFunctionParameter %v4float
+         %22 = OpLabel
+               OpReturn
+               OpFunctionEnd
+    %f_inner = OpFunction %void None %21
+       %zero = OpFunctionParameter %v4int
+        %one = OpFunctionParameter %v4uint
+        %two = OpFunctionParameter %v4float
+         %27 = OpLabel
+         %28 = OpFunctionCall %void %g %zero %one %two
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %30
+         %31 = OpLabel
+         %32 = OpLoad %3 %f_Input None
+         %33 = OpImageRead %v4int %32 %34
+         %36 = OpLoad %7 %f_Input_0 None
+         %37 = OpImageRead %v4uint %36 %34
+         %38 = OpLoad %11 %f_Input_1 None
+         %39 = OpImageRead %v4float %38 %34
+         %40 = OpFunctionCall %void %f_inner %33 %37 %39
+               OpReturn
+               OpFunctionEnd

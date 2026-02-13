@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct f_inputs {
+  int2 zero [[color(0)]];
+  uint2 one [[color(1)]];
+  float2 two [[color(2)]];
+};
+
+void g(int2 d, uint2 e, float2 f_1) {
+}
+
+void f_inner(int2 zero, uint2 one, float2 two) {
+  g(zero, one, two);
+}
+
+fragment void f(f_inputs inputs [[stage_in]]) {
+  f_inner(inputs.zero, inputs.one, inputs.two);
+}

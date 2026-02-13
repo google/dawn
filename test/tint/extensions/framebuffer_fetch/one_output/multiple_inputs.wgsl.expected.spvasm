@@ -1,5 +1,55 @@
-SKIP: FAILED
-
-@color attribute is not supported by the SPIR-V backend
-
-tint executable returned error: exit status 1
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 27
+; Schema: 0
+               OpCapability Shader
+               OpCapability InputAttachment
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %f "f" %f_loc0_Output
+               OpExecutionMode %f OriginUpperLeft
+               OpName %f_Input "f_Input"
+               OpName %f_Input_0 "f_Input"
+               OpName %f_loc0_Output "f_loc0_Output"
+               OpName %f_inner "f_inner"
+               OpName %fbf_1 "fbf_1"
+               OpName %fbf_3 "fbf_3"
+               OpName %f "f"
+               OpDecorate %f_Input DescriptorSet 66
+               OpDecorate %f_Input Binding 0
+               OpDecorate %f_Input InputAttachmentIndex 1
+               OpDecorate %f_Input_0 DescriptorSet 66
+               OpDecorate %f_Input_0 Binding 1
+               OpDecorate %f_Input_0 InputAttachmentIndex 3
+               OpDecorate %f_loc0_Output Location 0
+      %float = OpTypeFloat 32
+          %3 = OpTypeImage %float SubpassData 0 0 0 2 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+    %f_Input = OpVariable %_ptr_UniformConstant_3 UniformConstant
+  %f_Input_0 = OpVariable %_ptr_UniformConstant_3 UniformConstant
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%f_loc0_Output = OpVariable %_ptr_Output_v4float Output
+         %12 = OpTypeFunction %v4float %v4float %v4float
+       %void = OpTypeVoid
+         %17 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+         %21 = OpConstantNull %v2int
+    %f_inner = OpFunction %v4float None %12
+      %fbf_1 = OpFunctionParameter %v4float
+      %fbf_3 = OpFunctionParameter %v4float
+         %13 = OpLabel
+         %14 = OpFAdd %v4float %fbf_1 %fbf_3
+               OpReturnValue %14
+               OpFunctionEnd
+          %f = OpFunction %void None %17
+         %18 = OpLabel
+         %19 = OpLoad %3 %f_Input None
+         %20 = OpImageRead %v4float %19 %21
+         %24 = OpLoad %3 %f_Input_0 None
+         %25 = OpImageRead %v4float %24 %21
+         %26 = OpFunctionCall %v4float %f_inner %20 %25
+               OpStore %f_loc0_Output %26 None
+               OpReturn
+               OpFunctionEnd

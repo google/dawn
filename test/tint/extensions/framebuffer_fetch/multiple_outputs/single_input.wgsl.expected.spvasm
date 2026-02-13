@@ -1,5 +1,66 @@
-SKIP: FAILED
-
-@color attribute is not supported by the SPIR-V backend
-
-tint executable returned error: exit status 1
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 33
+; Schema: 0
+               OpCapability Shader
+               OpCapability InputAttachment
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %f "f" %f_loc0_Output %f_loc2_Output %f_loc3_Output
+               OpExecutionMode %f OriginUpperLeft
+               OpName %f_Input "f_Input"
+               OpName %f_loc0_Output "f_loc0_Output"
+               OpName %f_loc2_Output "f_loc2_Output"
+               OpName %f_loc3_Output "f_loc3_Output"
+               OpName %f_inner "f_inner"
+               OpMemberName %Out 0 "x"
+               OpMemberName %Out 1 "y"
+               OpMemberName %Out 2 "z"
+               OpName %Out "Out"
+               OpName %fbf "fbf"
+               OpName %f "f"
+               OpDecorate %f_Input DescriptorSet 66
+               OpDecorate %f_Input Binding 0
+               OpDecorate %f_Input InputAttachmentIndex 0
+               OpDecorate %f_loc0_Output Location 0
+               OpDecorate %f_loc2_Output Location 2
+               OpDecorate %f_loc3_Output Location 3
+      %float = OpTypeFloat 32
+          %3 = OpTypeImage %float SubpassData 0 0 0 2 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+    %f_Input = OpVariable %_ptr_UniformConstant_3 UniformConstant
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%f_loc0_Output = OpVariable %_ptr_Output_v4float Output
+%f_loc2_Output = OpVariable %_ptr_Output_v4float Output
+%f_loc3_Output = OpVariable %_ptr_Output_v4float Output
+        %Out = OpTypeStruct %v4float %v4float %v4float
+         %13 = OpTypeFunction %Out %v4float
+   %float_10 = OpConstant %float 10
+         %16 = OpConstantComposite %v4float %float_10 %float_10 %float_10 %float_10
+   %float_30 = OpConstant %float 30
+         %18 = OpConstantComposite %v4float %float_30 %float_30 %float_30 %float_30
+       %void = OpTypeVoid
+         %22 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+         %26 = OpConstantNull %v2int
+    %f_inner = OpFunction %Out None %13
+        %fbf = OpFunctionParameter %v4float
+         %14 = OpLabel
+         %15 = OpCompositeConstruct %Out %16 %fbf %18
+               OpReturnValue %15
+               OpFunctionEnd
+          %f = OpFunction %void None %22
+         %23 = OpLabel
+         %24 = OpLoad %3 %f_Input None
+         %25 = OpImageRead %v4float %24 %26
+         %29 = OpFunctionCall %Out %f_inner %25
+         %30 = OpCompositeExtract %v4float %29 0
+               OpStore %f_loc0_Output %30 None
+         %31 = OpCompositeExtract %v4float %29 1
+               OpStore %f_loc2_Output %31 None
+         %32 = OpCompositeExtract %v4float %29 2
+               OpStore %f_loc3_Output %32 None
+               OpReturn
+               OpFunctionEnd

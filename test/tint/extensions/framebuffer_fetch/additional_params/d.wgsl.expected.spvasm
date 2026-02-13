@@ -1,5 +1,90 @@
-SKIP: FAILED
-
-@color attribute is not supported by the SPIR-V backend
-
-tint executable returned error: exit status 1
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 50
+; Schema: 0
+               OpCapability Shader
+               OpCapability InputAttachment
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %f "f" %f_position_Input %f_loc0_Input
+               OpExecutionMode %f OriginUpperLeft
+               OpName %f_Input "f_Input"
+               OpName %f_position_Input "f_position_Input"
+               OpName %f_loc0_Input "f_loc0_Input"
+               OpName %f_Input_0 "f_Input"
+               OpName %g "g"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %c "c"
+               OpName %d "d"
+               OpName %f_inner "f_inner"
+               OpName %fbf_2 "fbf_2"
+               OpMemberName %In 0 "pos"
+               OpName %In "In"
+               OpName %in "in"
+               OpName %uv "uv"
+               OpName %fbf_0 "fbf_0"
+               OpName %f "f"
+               OpDecorate %f_Input DescriptorSet 66
+               OpDecorate %f_Input Binding 0
+               OpDecorate %f_Input InputAttachmentIndex 2
+               OpDecorate %f_position_Input BuiltIn FragCoord
+               OpDecorate %f_loc0_Input Location 0
+               OpDecorate %f_Input_0 DescriptorSet 66
+               OpDecorate %f_Input_0 Binding 1
+               OpDecorate %f_Input_0 InputAttachmentIndex 0
+        %int = OpTypeInt 32 1
+          %3 = OpTypeImage %int SubpassData 0 0 0 2 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+    %f_Input = OpVariable %_ptr_UniformConstant_3 UniformConstant
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%f_position_Input = OpVariable %_ptr_Input_v4float Input
+%f_loc0_Input = OpVariable %_ptr_Input_v4float Input
+       %uint = OpTypeInt 32 0
+         %12 = OpTypeImage %uint SubpassData 0 0 0 2 Unknown
+%_ptr_UniformConstant_12 = OpTypePointer UniformConstant %12
+  %f_Input_0 = OpVariable %_ptr_UniformConstant_12 UniformConstant
+       %void = OpTypeVoid
+         %20 = OpTypeFunction %void %int %float %float %uint
+      %v4int = OpTypeVector %int 4
+         %In = OpTypeStruct %v4float
+     %v4uint = OpTypeVector %uint 4
+         %30 = OpTypeFunction %void %v4int %In %v4float %v4uint
+         %38 = OpTypeFunction %void
+      %v2int = OpTypeVector %int 2
+         %42 = OpConstantNull %v2int
+          %g = OpFunction %void None %20
+          %a = OpFunctionParameter %int
+          %b = OpFunctionParameter %float
+          %c = OpFunctionParameter %float
+          %d = OpFunctionParameter %uint
+         %21 = OpLabel
+               OpReturn
+               OpFunctionEnd
+    %f_inner = OpFunction %void None %30
+      %fbf_2 = OpFunctionParameter %v4int
+         %in = OpFunctionParameter %In
+         %uv = OpFunctionParameter %v4float
+      %fbf_0 = OpFunctionParameter %v4uint
+         %31 = OpLabel
+         %32 = OpCompositeExtract %int %fbf_2 2
+         %33 = OpCompositeExtract %float %in 0 0
+         %34 = OpCompositeExtract %float %uv 0
+         %35 = OpCompositeExtract %uint %fbf_0 1
+         %36 = OpFunctionCall %void %g %32 %33 %34 %35
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %38
+         %39 = OpLabel
+         %40 = OpLoad %3 %f_Input None
+         %41 = OpImageRead %v4int %40 %42
+         %44 = OpLoad %v4float %f_position_Input None
+         %45 = OpCompositeConstruct %In %44
+         %46 = OpLoad %v4float %f_loc0_Input None
+         %47 = OpLoad %12 %f_Input_0 None
+         %48 = OpImageRead %v4uint %47 %42
+         %49 = OpFunctionCall %void %f_inner %41 %45 %46 %48
+               OpReturn
+               OpFunctionEnd

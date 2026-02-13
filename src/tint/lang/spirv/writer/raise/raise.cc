@@ -232,9 +232,14 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
     TINT_CHECK_RESULT(raise::RemoveUnreachableInLoopContinuing(module));
     TINT_CHECK_RESULT(raise::ShaderIO(
-        module, raise::ShaderIOConfig{immediate_data_layout, options.emit_vertex_point_size,
-                                      !options.extensions.use_storage_input_output_16,
-                                      options.polyfill_pixel_center, options.depth_range_offsets}));
+        module, raise::ShaderIOConfig{
+                    .immediate_data_layout = immediate_data_layout,
+                    .colour_index_to_binding_point = options.colour_index_to_binding_point,
+                    .emit_vertex_point_size = options.emit_vertex_point_size,
+                    .polyfill_f16_io = !options.extensions.use_storage_input_output_16,
+                    .polyfill_pixel_center = options.polyfill_pixel_center,
+                    .depth_range_offsets = options.depth_range_offsets,
+                }));
 
     // ForkExplicitLayoutTypes must come after DecomposeAccess, since it rewrites
     // host-shareable array types to use the explicitly laid array type defined by the SPIR-V

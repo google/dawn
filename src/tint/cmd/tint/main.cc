@@ -906,6 +906,20 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
     }
     gen_options.substitute_overrides_config = substitute_override_cfg.Get();
 
+    std::unordered_map<uint32_t, tint::BindingPoint> colour_binding_points{};
+    uint32_t binding = 0;
+    for (auto& var : entry_point.input_variables) {
+        if (var.attributes.color.has_value()) {
+            // TODO(dsinclair): At some point, we may want to add a config option to set the default
+            // group number for input attachment bindings
+            colour_binding_points.emplace(var.attributes.color.value(), tint::BindingPoint{
+                                                                            .group = 66,
+                                                                            .binding = binding++,
+                                                                        });
+        }
+    }
+    gen_options.colour_index_to_binding_point = colour_binding_points;
+
     // Immediate data Offset must be 4-byte aligned.
     uint32_t offset = tint::RoundUp(4u, entry_point.immediate_data_size);
 

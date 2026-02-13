@@ -24,6 +24,7 @@ In `Device::CreateRenderPipeline` or `Device::CreateRenderPipelineAsync`:
 * Requires fragment shader
 * Requires T to be `i32`, `u32`, `f32`, `vec{2,3,4}{f,u,i}`
 * Requires `N` to be unique per `color`
+* The `N` value must be in the range of `[0..7]`
 
 ### Metal
 

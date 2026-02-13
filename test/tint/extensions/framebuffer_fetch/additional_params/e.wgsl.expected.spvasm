@@ -1,5 +1,64 @@
-SKIP: FAILED
-
-@color attribute is not supported by the SPIR-V backend
-
-tint executable returned error: exit status 1
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 34
+; Schema: 0
+               OpCapability Shader
+               OpCapability InputAttachment
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %f "f" %f_position_Input
+               OpExecutionMode %f OriginUpperLeft
+               OpName %f_Input "f_Input"
+               OpName %f_position_Input "f_position_Input"
+               OpName %g "g"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %f_inner "f_inner"
+               OpMemberName %In 0 "fbf"
+               OpMemberName %In 1 "pos"
+               OpName %In "In"
+               OpName %in "in"
+               OpName %f "f"
+               OpDecorate %f_Input DescriptorSet 66
+               OpDecorate %f_Input Binding 0
+               OpDecorate %f_Input InputAttachmentIndex 3
+               OpDecorate %f_position_Input BuiltIn FragCoord
+        %int = OpTypeInt 32 1
+          %3 = OpTypeImage %int SubpassData 0 0 0 2 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+    %f_Input = OpVariable %_ptr_UniformConstant_3 UniformConstant
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%f_position_Input = OpVariable %_ptr_Input_v4float Input
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void %int %float
+      %v4int = OpTypeVector %int 4
+         %In = OpTypeStruct %v4int %v4float
+         %19 = OpTypeFunction %void %In
+         %25 = OpTypeFunction %void
+      %v2int = OpTypeVector %int 2
+         %29 = OpConstantNull %v2int
+          %g = OpFunction %void None %13
+          %a = OpFunctionParameter %int
+          %b = OpFunctionParameter %float
+         %14 = OpLabel
+               OpReturn
+               OpFunctionEnd
+    %f_inner = OpFunction %void None %19
+         %in = OpFunctionParameter %In
+         %20 = OpLabel
+         %21 = OpCompositeExtract %int %in 0 3
+         %22 = OpCompositeExtract %float %in 1 0
+         %23 = OpFunctionCall %void %g %21 %22
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %25
+         %26 = OpLabel
+         %27 = OpLoad %3 %f_Input None
+         %28 = OpImageRead %v4int %27 %29
+         %31 = OpLoad %v4float %f_position_Input None
+         %32 = OpCompositeConstruct %In %28 %31
+         %33 = OpFunctionCall %void %f_inner %32
+               OpReturn
+               OpFunctionEnd
