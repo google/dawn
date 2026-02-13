@@ -1100,10 +1100,14 @@ def main() -> None:
 
     # We want this entry to be in the commit message, but we do not want it to
     # be present for _apply_changed_deps() since it is not actually a DEPS
-    # entry.
+    # entry. We also don't want it to be present if no actual changes occurred.
     chromium_luci_entry = _sync_chromium_luci_revision(
         revision_range.new_revision)
-    entries_for_commit_message = changed_entries + [chromium_luci_entry]
+    entries_for_commit_message = changed_entries
+    if chromium_luci_entry.old_revision != chromium_luci_entry.new_revision:
+        entries_for_commit_message = entries_for_commit_message + [
+            chromium_luci_entry
+        ]
 
     # Create the commit message before adding the entry for the Chromium
     # revision since Chromium information is explicitly added to the message.
