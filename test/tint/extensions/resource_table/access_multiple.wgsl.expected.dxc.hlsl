@@ -6,47 +6,48 @@ ByteAddressBuffer tint_resource_table_metadata : register(t52, space42);
 void fs() {
   bool v = false;
   if ((0u < tint_resource_table_metadata.Load(0u))) {
-    v = (tint_resource_table_metadata.Load(4u) == 2u);
+    uint2 v_1 = uint2((tint_resource_table_metadata.Load(4u)).xx);
+    v = any((v_1 == uint2(2u, 1u)));
   } else {
     v = false;
   }
-  uint v_1 = 0u;
+  uint v_2 = 0u;
   if (v) {
-    v_1 = 0u;
+    v_2 = 0u;
   } else {
-    v_1 = (0u + tint_resource_table_metadata.Load(0u));
+    v_2 = (0u + tint_resource_table_metadata.Load(0u));
   }
-  uint v_2 = v_1;
-  float4 t1d = tint_resource_table_array[v_2].Load(int2(int(0), int(0)));
-  uint v_3 = uint(int(1));
-  bool v_4 = false;
-  if ((v_3 < tint_resource_table_metadata.Load(0u))) {
-    v_4 = (tint_resource_table_metadata.Load((4u + (v_3 * 4u))) == 7u);
+  uint v_3 = v_2;
+  float4 t1d = tint_resource_table_array[v_3].Load(int2(int(0), int(0)));
+  uint v_4 = uint(int(1));
+  bool v_5 = false;
+  if ((v_4 < tint_resource_table_metadata.Load(0u))) {
+    v_5 = (tint_resource_table_metadata.Load((4u + (v_4 * 4u))) == 7u);
   } else {
-    v_4 = false;
+    v_5 = false;
   }
-  uint v_5 = 0u;
-  if (v_4) {
-    v_5 = v_3;
+  uint v_6 = 0u;
+  if (v_5) {
+    v_6 = v_4;
   } else {
-    v_5 = (1u + tint_resource_table_metadata.Load(0u));
+    v_6 = (1u + tint_resource_table_metadata.Load(0u));
   }
-  uint v_6 = v_5;
-  int4 t2d = tint_resource_table_array_1[v_6].Load(int3(int2(int(0), int(1)), int(0)));
-  uint v_7 = uint(int(2));
-  bool v_8 = false;
-  if ((v_7 < tint_resource_table_metadata.Load(0u))) {
-    v_8 = (tint_resource_table_metadata.Load((4u + (v_7 * 4u))) == 16u);
+  uint v_7 = v_6;
+  int4 t2d = tint_resource_table_array_1[v_7].Load(int3(int2(int(0), int(1)), int(0)));
+  uint v_8 = uint(int(2));
+  bool v_9 = false;
+  if ((v_8 < tint_resource_table_metadata.Load(0u))) {
+    v_9 = (tint_resource_table_metadata.Load((4u + (v_8 * 4u))) == 16u);
   } else {
-    v_8 = false;
+    v_9 = false;
   }
-  uint v_9 = 0u;
-  if (v_8) {
-    v_9 = v_7;
+  uint v_10 = 0u;
+  if (v_9) {
+    v_10 = v_8;
   } else {
-    v_9 = (2u + tint_resource_table_metadata.Load(0u));
+    v_10 = (2u + tint_resource_table_metadata.Load(0u));
   }
-  uint v_10 = v_9;
-  uint4 tcube = tint_resource_table_array_2[v_10].Load(int4(int3(int(2), int(1), int(0)), int(0)));
+  uint v_11 = v_10;
+  uint4 tcube = tint_resource_table_array_2[v_11].Load(int4(int3(int(2), int(1), int(0)), int(0)));
 }
 

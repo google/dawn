@@ -7,21 +7,22 @@ void fs() {
   uint v = uint(int(0));
   bool v_1 = false;
   if ((v < tint_resource_table_metadata.Load(0u))) {
-    v_1 = (tint_resource_table_metadata.Load((4u + (v * 4u))) == 34u);
+    uint2 v_2 = uint2((tint_resource_table_metadata.Load((4u + (v * 4u)))).xx);
+    v_1 = any((v_2 == uint2(34u, 33u)));
   } else {
     v_1 = false;
   }
   if (v_1) {
     o.Store(0u, (o.Load(0u) + 1u));
   }
-  uint v_2 = uint(int(1));
-  bool v_3 = false;
-  if ((v_2 < tint_resource_table_metadata.Load(0u))) {
-    v_3 = (tint_resource_table_metadata.Load((4u + (v_2 * 4u))) == 35u);
+  uint v_3 = uint(int(1));
+  bool v_4 = false;
+  if ((v_3 < tint_resource_table_metadata.Load(0u))) {
+    v_4 = (tint_resource_table_metadata.Load((4u + (v_3 * 4u))) == 35u);
   } else {
-    v_3 = false;
+    v_4 = false;
   }
-  if (v_3) {
+  if (v_4) {
     o.Store(0u, (o.Load(0u) + 1u));
   }
 }

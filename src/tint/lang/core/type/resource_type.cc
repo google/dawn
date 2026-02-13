@@ -275,4 +275,42 @@ ResourceType TypeToResourceType(const core::type::Type* in_type) {
         TINT_ICE_ON_NO_MATCH);
 }
 
+std::vector<ResourceType> ConvertsFrom(const core::type::Type* in_type) {
+    return tint::Switch(
+        in_type,
+        [&](const core::type::SampledTexture* sa) -> std::vector<ResourceType> {
+            if (sa->Filterable() != core::TextureFilterable::kUnfilterable) {
+                return {};
+            }
+            TINT_ASSERT((sa->Type()->Is<core::type::F32>()));
+
+            switch (sa->Dim()) {
+                case core::type::TextureDimension::k1d:
+                    return {ResourceType::kTexture1d_f32_filterable};
+                case core::type::TextureDimension::k2d:
+                    return {ResourceType::kTexture2d_f32_filterable, ResourceType::kTextureDepth2d};
+                case core::type::TextureDimension::k2dArray:
+                    return {ResourceType::kTexture2dArray_f32_filterable,
+                            ResourceType::kTextureDepth2dArray};
+                case core::type::TextureDimension::k3d:
+                    return {ResourceType::kTexture3d_f32_filterable};
+                case core::type::TextureDimension::kCube:
+                    return {ResourceType::kTextureCube_f32_filterable,
+                            ResourceType::kTextureDepthCube};
+                case core::type::TextureDimension::kCubeArray:
+                    return {ResourceType::kTextureCubeArray_f32_unfilterable,
+                            ResourceType::kTextureDepthCubeArray};
+                case core::type::TextureDimension::kNone:
+                    TINT_UNREACHABLE();
+            }
+        },
+        [&](const core::type::Sampler* s) -> std::vector<ResourceType> {
+            if (s->Filtering() == core::SamplerFiltering::kNonFiltering) {
+                return {ResourceType::kSampler_filtering};
+            }
+            return {};
+        },
+        [](Default) -> std::vector<ResourceType> { return {}; });
+}
+
 }  // namespace tint::core::type

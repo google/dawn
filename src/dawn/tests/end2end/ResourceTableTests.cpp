@@ -370,6 +370,24 @@ TEST_P(ResourceTableTests, HasResourceOneTexturePinUnpin) {
     TestHasResource(table, {false, false, false});
 }
 
+// Test WGSL `hasResource` reflects the state of the resource table.
+TEST_P(ResourceTableTests, HasResourceFilterableToUnfilterable) {
+    // TODO(crbug.com/473354062): Implement on D3D12
+    DAWN_SUPPRESS_TEST_IF(IsD3D12());
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::ResourceTable table = MakeResourceTable(3, {{1, {.textureView = tex.CreateView()}}});
+
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    TestHasResource(table, {false, true, false}, "texture_2d<f32, unfilterable>");
+}
+
 // Test that calling texture.Destroy() implicitly unpins it.
 TEST_P(ResourceTableTests, HasResourceOneTexturePinDestroy) {
     wgpu::TextureDescriptor tDesc{
