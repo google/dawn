@@ -922,6 +922,9 @@ TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadBySampling) {
 // Test that a stencil texture that is written via copy, then discarded, sees
 // zero contents when it is read via copy.
 TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadByCopy) {
+    // TODO(crbug.com/479416037): QC's D3D11's DiscardView seems to have some bugs.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     for (wgpu::TextureFormat format :
          {wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8}) {
         wgpu::Texture depthStencilTexture = CreateAndFillStencilTexture(format);
@@ -952,6 +955,9 @@ TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadByCopy) {
 // Test that a stencil texture that is written via copy, then discarded, then copied to
 // another texture, sees zero contents when it is read via copy.
 TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndCopyToTextureThenReadByCopy) {
+    // TODO(crbug.com/479416037): QC's D3D11's DiscardView seems to have some bugs.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     // TODO(crbug.com/468047554): Fails on Win11/NVIDIA GTX 1660.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsNvidia() && IsD3D12() && IsBackendValidationEnabled());
 
@@ -1382,6 +1388,9 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
 // Then expect the render texture to not store the data from sample texture
 // because it will be lazy cleared by the EXPECT_TEXTURE_EQ call.
 TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
+    // TODO(crbug.com/479416037): QC's D3D11's DiscardView seems to have some bugs.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     // Create needed resources
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst, kColorFormat);
@@ -1526,6 +1535,9 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
 // Test that if one mip of a texture is initialized and another is uninitialized, lazy clearing the
 // uninitialized mip does not clear the initialized mip.
 TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
+    // TODO(crbug.com/479416037): QC's D3D11's DiscardView seems to have some bugs.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     wgpu::TextureDescriptor sampleTextureDescriptor =
         CreateTextureDescriptor(2, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
@@ -1602,6 +1614,9 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
 // Test that if one layer of a texture is initialized and another is uninitialized, lazy clearing
 // the uninitialized layer does not clear the initialized layer.
 TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
+    // TODO(crbug.com/479416037): QC's D3D11's DiscardView seems to have some bugs.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     // TODO(crbug.com/346362367): Compatibility mode does not support binding a `2d-array` texture
     // to a WGSL variable of type `texture_2d`.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
