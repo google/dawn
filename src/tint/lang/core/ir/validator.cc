@@ -2490,15 +2490,21 @@ void Validator::CheckType(const core::type::Type* root,
             continue;
         }
 
+        // Visit the elements of a composite type.
         auto type_count = ty->Elements();
-        if (type_count.type && seen.Add(type_count.type)) {
-            stack.Push(type_count.type);
-            continue;
-        }
-
-        for (uint32_t i = 0; i < type_count.count; i++) {
-            if (auto* subtype = ty->Element(i); subtype && seen.Add(subtype)) {
-                stack.Push(subtype);
+        if (type_count.type) {
+            // Every element has the same type (e.g. array, vector, matrix, ...), so validate that
+            // type once if it has not been seen before.
+            if (seen.Add(type_count.type)) {
+                stack.Push(type_count.type);
+            }
+        } else {
+            // Different elements have different types (e.g. a struct), so we need to validate each
+            // of them if they have not been seen before.
+            for (uint32_t i = 0; i < type_count.count; i++) {
+                if (auto* subtype = ty->Element(i); subtype && seen.Add(subtype)) {
+                    stack.Push(subtype);
+                }
             }
         }
     }
