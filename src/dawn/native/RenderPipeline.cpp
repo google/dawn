@@ -260,7 +260,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
         return DAWN_VALIDATION_ERROR(
             "Vertex attribute slot %u used in (%s, %s) is not present in the "
             "VertexState.",
-            uint8_t(firstMissing), descriptor->module, &entryPoint);
+            uint8_t(firstMissing), descriptor->module, entryPoint);
     }
 
     return entryPoint;
@@ -645,14 +645,14 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
         DAWN_INVALID_IF(depthStencil == nullptr,
                         "Depth stencil state is not present when fragment stage (%s, %s) is "
                         "writing to frag_depth.",
-                        descriptor->module, &entryPoint);
+                        descriptor->module, entryPoint);
         const Format* depthStencilFormat;
         DAWN_TRY_ASSIGN(depthStencilFormat, device->GetInternalFormat(depthStencil->format));
         DAWN_INVALID_IF(!depthStencilFormat->HasDepth(),
                         "Depth stencil state format (%s) has no depth aspect when fragment stage "
                         "(%s, %s) is "
                         "writing to frag_depth.",
-                        depthStencil->format, descriptor->module, &entryPoint);
+                        depthStencil->format, descriptor->module, entryPoint);
     }
 
     uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
@@ -743,12 +743,12 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
         DAWN_INVALID_IF(
             fragmentMetadata.usesSampleMaskOutput,
             "sample_mask is not supported in compatibility mode in the fragment stage (%s, %s)",
-            descriptor->module, &entryPoint);
+            descriptor->module, entryPoint);
 
         DAWN_INVALID_IF(
             fragmentMetadata.usesSampleIndex,
             "sample_index is not supported in compatibility mode in the fragment stage (%s, %s)",
-            descriptor->module, &entryPoint);
+            descriptor->module, entryPoint);
 
         // Check that all the color target states match.
         ColorAttachmentIndex firstColorTargetIndex{};

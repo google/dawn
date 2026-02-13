@@ -122,7 +122,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
         for (const std::string& limit : metadata.infringedLimitErrors) {
             limitList << " - " << limit << "\n";
         }
-        return DAWN_VALIDATION_ERROR("%s infringes limits:\n%s", &entryPoint, limitList.str());
+        return DAWN_VALIDATION_ERROR("%s infringes limits:\n%s", entryPoint, limitList.str());
     }
 
     DAWN_INVALID_IF(metadata.stage != stage,

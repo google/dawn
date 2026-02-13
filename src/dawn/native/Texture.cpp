@@ -354,7 +354,7 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
                 ? MakeIncreaseLimitMessage(limitName, limitValue)
                 : "";
         return DAWN_VALIDATION_ERROR("Texture size (%s) exceeded maximum texture size (%s).%s",
-                                     &descriptor->size, &maxExtent, increaseLimitAdvice);
+                                     descriptor->size, maxExtent, increaseLimitAdvice);
     }
 
     switch (descriptor->dimension) {
@@ -370,7 +370,7 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
             DAWN_INVALID_IF(
                 Log2(maxMippedDimension) + 1 < descriptor->mipLevelCount,
                 "Texture mip level count (%u) exceeds the maximum (%u) for its size (%s).",
-                descriptor->mipLevelCount, Log2(maxMippedDimension) + 1, &descriptor->size);
+                descriptor->mipLevelCount, Log2(maxMippedDimension) + 1, descriptor->size);
             break;
         }
         case wgpu::TextureDimension::e3D: {
@@ -380,7 +380,7 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
             DAWN_INVALID_IF(
                 Log2(maxMippedDimension) + 1 < descriptor->mipLevelCount,
                 "Texture mip level count (%u) exceeds the maximum (%u) for its size (%s).",
-                descriptor->mipLevelCount, Log2(maxMippedDimension) + 1, &descriptor->size);
+                descriptor->mipLevelCount, Log2(maxMippedDimension) + 1, descriptor->size);
             break;
         }
     }
@@ -392,7 +392,7 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
                 descriptor->size.height % blockInfo.height != 0,
             "The size (%s) of the texture is not a multiple of the block width (%u) and "
             "height (%u) of the texture format (%s).",
-            &descriptor->size, blockInfo.width, blockInfo.height, format->format);
+            descriptor->size, blockInfo.width, blockInfo.height, format->format);
     }
 
     return {};
@@ -796,7 +796,7 @@ MaybeError ValidateTextureDescriptor(
 
     DAWN_INVALID_IF(descriptor->size.width == 0 || descriptor->size.height == 0 ||
                         descriptor->size.depthOrArrayLayers == 0 || descriptor->mipLevelCount == 0,
-                    "The texture size (%s) or mipLevelCount (%u) is empty.", &descriptor->size,
+                    "The texture size (%s) or mipLevelCount (%u) is empty.", descriptor->size,
                     descriptor->mipLevelCount);
 
     if (format->isCompressed) {

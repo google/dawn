@@ -692,7 +692,7 @@ MaybeError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
                 static_cast<uint64_t>(sourceSize.height) ||
             static_cast<uint64_t>(source->origin.z) > 0,
         "Texture copy range (origin: %s, copySize: %s) touches outside of %s source size (%s).",
-        &source->origin, copySize, source->externalTexture, &sourceSize);
+        source->origin, *copySize, source->externalTexture, sourceSize);
     DAWN_INVALID_IF(source->origin.z > 0, "Source has a non-zero z origin (%u).", source->origin.z);
     DAWN_INVALID_IF(
         options->internalUsage && !device->HasFeature(Feature::DawnInternalUsages),

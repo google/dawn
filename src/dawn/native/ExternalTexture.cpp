@@ -113,17 +113,17 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
     }
 
     DAWN_INVALID_IF(descriptor->cropSize.width == 0 || descriptor->cropSize.height == 0,
-                    "cropSize %s has 0 on width or height.", &descriptor->cropSize);
+                    "cropSize %s has 0 on width or height.", descriptor->cropSize);
 
     const Extent3D textureSize = descriptor->plane0->GetSingleSubresourceVirtualSize();
     DAWN_INVALID_IF(descriptor->cropSize.width > textureSize.width ||
                         descriptor->cropSize.height > textureSize.height,
                     "cropSize %s exceeds the texture size, defined by Plane0 size (%u, %u).",
-                    &descriptor->cropSize, textureSize.width, textureSize.height);
+                    descriptor->cropSize, textureSize.width, textureSize.height);
     DAWN_INVALID_IF(descriptor->cropOrigin.x > textureSize.width - descriptor->cropSize.width ||
                         descriptor->cropOrigin.y > textureSize.height - descriptor->cropSize.height,
                     "cropRect[Origin: %s, Size: %s] exceeds plane0's size (%u, %u).",
-                    &descriptor->cropOrigin, &descriptor->cropSize, textureSize.width,
+                    descriptor->cropOrigin, descriptor->cropSize, textureSize.width,
                     textureSize.height);
 
     DAWN_INVALID_IF(descriptor->apparentSize.width == 0 || descriptor->apparentSize.height == 0,

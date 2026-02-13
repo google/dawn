@@ -185,8 +185,8 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemoryBase::CreateTexture(
         (descriptor->size.width != mProperties.size.width) ||
             (descriptor->size.height != mProperties.size.height) ||
             (descriptor->size.depthOrArrayLayers != mProperties.size.depthOrArrayLayers),
-        "SharedTextureMemory size (%s) doesn't match descriptor size (%s).", &mProperties.size,
-        &descriptor->size);
+        "SharedTextureMemory size (%s) doesn't match descriptor size (%s).", mProperties.size,
+        descriptor->size);
 
     // Validate that the texture format exactly matches the shared texture memory's format.
     DAWN_INVALID_IF(descriptor->format != mProperties.format,

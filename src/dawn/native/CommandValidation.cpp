@@ -463,7 +463,7 @@ MaybeError ValidateTexelCopyTextureInfo(DeviceBase const* device,
             "Copy origin (%s) and size (%s) does not cover the entire subresource (origin: "
             "[x: 0, y: 0], size: %s) of %s. The entire subresource must be copied when the "
             "format (%s) is a depth/stencil format or the sample count (%u) is > 1.",
-            &textureCopy.origin, &copySize, &subresourceSize, texture, texture->GetFormat().format,
+            textureCopy.origin, copySize, subresourceSize, texture, texture->GetFormat().format,
             texture->GetSampleCount());
     }
 
@@ -499,7 +499,7 @@ MaybeError ValidateTextureCopyRange(DeviceBase const* device,
                 static_cast<uint64_t>(mipSize.depthOrArrayLayers),
         "Texture copy range (origin: %s, copySize: %s) touches outside of %s mip level %u "
         "size (%s).",
-        &textureCopy.origin, &copySize, texture, textureCopy.mipLevel, &mipSize);
+        textureCopy.origin, copySize, texture, textureCopy.mipLevel, mipSize);
 
     // Validation for the texel block alignments:
     if (format.isCompressed) {

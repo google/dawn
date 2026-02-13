@@ -53,62 +53,42 @@ namespace dawn::native {
 //
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
-AbslFormatConvert(const Color* value, const absl::FormatConversionSpec& spec, absl::FormatSink* s) {
-    if (value == nullptr) {
-        s->Append("[null]");
-        return {true};
-    }
+AbslFormatConvert(const Color& value, const absl::FormatConversionSpec& spec, absl::FormatSink* s) {
     s->Append(
-        absl::StrFormat("[Color r:%f, g:%f, b:%f, a:%f]", value->r, value->g, value->b, value->a));
+        absl::StrFormat("[Color r:%f, g:%f, b:%f, a:%f]", value.r, value.g, value.b, value.a));
     return {true};
 }
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const Extent2D* value,
+    const Extent2D& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    if (value == nullptr) {
-        s->Append("[null]");
-        return {true};
-    }
-    s->Append(absl::StrFormat("[Extent2D width:%u, height:%u]", value->width, value->height));
+    s->Append(absl::StrFormat("[Extent2D width:%u, height:%u]", value.width, value.height));
     return {true};
 }
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const Extent3D* value,
+    const Extent3D& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    if (value == nullptr) {
-        s->Append("[null]");
-        return {true};
-    }
-    s->Append(absl::StrFormat("[Extent3D width:%u, height:%u, depthOrArrayLayers:%u]", value->width,
-                              value->height, value->depthOrArrayLayers));
+    s->Append(absl::StrFormat("[Extent3D width:%u, height:%u, depthOrArrayLayers:%u]", value.width,
+                              value.height, value.depthOrArrayLayers));
     return {true};
 }
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const Origin2D* value,
+    const Origin2D& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    if (value == nullptr) {
-        s->Append("[null]");
-        return {true};
-    }
-    s->Append(absl::StrFormat("[Origin2D x:%u, y:%u]", value->x, value->y));
+    s->Append(absl::StrFormat("[Origin2D x:%u, y:%u]", value.x, value.y));
     return {true};
 }
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const Origin3D* value,
+    const Origin3D& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    if (value == nullptr) {
-        s->Append("[null]");
-        return {true};
-    }
-    s->Append(absl::StrFormat("[Origin3D x:%u, y:%u, z:%u]", value->x, value->y, value->z));
+    s->Append(absl::StrFormat("[Origin3D x:%u, y:%u, z:%u]", value.x, value.y, value.z));
     return {true};
 }
 
@@ -253,42 +233,30 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 }
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const TexelCopyTextureInfo* value,
+    const TexelCopyTextureInfo& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    if (value == nullptr) {
-        s->Append("[null]");
-        return {true};
-    }
     s->Append(
         absl::StrFormat("[TexelCopyTextureInfo texture: %s, mipLevel: %u, origin: %s, aspect: %s]",
-                        value->texture, value->mipLevel, &value->origin, value->aspect));
+                        value.texture, value.mipLevel, value.origin, value.aspect));
     return {true};
 }
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const TexelCopyBufferLayout* value,
+    const TexelCopyBufferLayout& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    if (value == nullptr) {
-        s->Append("[null]");
-        return {true};
-    }
     s->Append(absl::StrFormat("[TexelCopyBufferLayout offset:%u, bytesPerRow:%u, rowsPerImage:%u]",
-                              value->offset, value->bytesPerRow, value->rowsPerImage));
+                              value.offset, value.bytesPerRow, value.rowsPerImage));
     return {true};
 }
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const ShaderModuleEntryPoint* value,
+    const ShaderModuleEntryPoint& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    if (value == nullptr) {
-        s->Append("[null]");
-        return {true};
-    }
-    s->Append(absl::StrFormat("[EntryPoint \"%s\"", value->name));
-    if (value->defaulted) {
+    s->Append(absl::StrFormat("[EntryPoint \"%s\"", value.name));
+    if (value.defaulted) {
         s->Append(" (defaulted)");
     }
     s->Append("]");
