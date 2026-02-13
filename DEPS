@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': 'fb186c5a89514fdb8a56483217932a9c474df224',
+  'chromium_revision': '364552c56b305a873bb743a1cc6bac5a2f6b44c8',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -112,7 +112,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@ccffb57777dca15a09c9a1029acdd776d4ae9a06',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@f1715a77db07495fe3c9d5e0be2c3af5508e57a7',
     'condition': 'dawn_standalone',
   },
 
@@ -253,7 +253,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@d274a4df83dc1781e42bade23902491faf30a0d2',
+    'url': '{chromium_git}/chromium/src/testing@0d162a91dd3d69496866e368f9553bf89acfe7bc',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -266,7 +266,7 @@ deps = {
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@520359912034c843ec1903864f88182b1afb88d1',
+    'url': '{chromium_git}/catapult.git@8ce759d4b71fd2dac753a603ca50d7d98067a585',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
