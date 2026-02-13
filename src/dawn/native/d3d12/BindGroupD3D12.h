@@ -51,7 +51,9 @@ class BindGroup final : public BindGroupBase, public PlacementAllocated {
               const UnpackedPtr<BindGroupDescriptor>& descriptor,
               const CPUDescriptorHeapAllocation& viewAllocation);
 
-    // Returns true if the BindGroup was successfully populated.
+    // Returns true if the BindGroup was successfully populated (now or on a previous call)
+    // in the current allocator's heap. If false is returned, caller should
+    // AllocateAndSwitchShaderVisibleHeap and populate again.
     bool PopulateViews(MutexProtected<ShaderVisibleDescriptorAllocator>& viewAllocator);
     bool PopulateSamplers(MutexProtected<ShaderVisibleDescriptorAllocator>& samplerAllocator);
 

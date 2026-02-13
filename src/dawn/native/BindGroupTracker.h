@@ -108,6 +108,7 @@ class BindGroupTrackerBase {
             mDirtyBindGroups &= mBindGroupLayoutsMask;
             mDirtyBindGroupsObjectChangedOrIsDynamic &= mBindGroupLayoutsMask;
         } else {
+            // All bind groups (in the mask) are dirty
             mDirtyBindGroups = mBindGroupLayoutsMask;
             mDirtyBindGroupsObjectChangedOrIsDynamic = mBindGroupLayoutsMask;
         }

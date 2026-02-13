@@ -67,6 +67,7 @@ class ShaderVisibleDescriptorAllocator {
 
     ShaderVisibleDescriptorAllocator(Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType);
 
+    // Sub-allocates GPU descriptors in the current heap.
     // Returns true if the allocation was successful, when false is returned the current heap is
     // full and AllocateAndSwitchShaderVisibleHeap() must be called.
     bool AllocateGPUDescriptors(uint32_t descriptorCount,
@@ -76,7 +77,11 @@ class ShaderVisibleDescriptorAllocator {
 
     void Tick(ExecutionSerial completedSerial);
 
+    // Returns the current heap.
     ID3D12DescriptorHeap* GetShaderVisibleHeap() const;
+
+    // Switches the current heap to either a larger one (allocated) or a max size one (retrieved
+    // from a pool), and bumps heap serial, invalidating existing GPU descriptor sub-allocations.
     MaybeError AllocateAndSwitchShaderVisibleHeap();
 
     // For testing purposes only.

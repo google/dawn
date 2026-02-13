@@ -275,7 +275,8 @@ bool BindGroup::PopulateViews(MutexProtected<ShaderVisibleDescriptorAllocator>& 
     }
 
     // Attempt to allocate descriptors for the currently bound shader-visible heaps.
-    // If either failed, return early to re-allocate and switch the heaps.
+    // Return false if allocation fails to indicate that AllocateAndSwitchShaderVisibleHeap should
+    // be called.
     Device* device = ToBackend(GetDevice());
 
     D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptor;

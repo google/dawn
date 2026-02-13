@@ -36,6 +36,7 @@
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/PlatformFunctionsD3D12.h"
+#include "dawn/native/d3d12/ResourceTableD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
 
 using Microsoft::WRL::ComPtr;
@@ -60,6 +61,12 @@ static constexpr uint32_t kDynamicStorageBufferOffsetsBaseRegister = 0;
 static constexpr uint32_t kImmediatesRegisterSpace = kMaxBindGroups + 4;
 static constexpr uint32_t kImmediatesBaseRegister = 0;
 
+// Keep this last as we need a large range of register spaces for resource table descriptors,
+// one per resource type. For example, for all texture types, we need 26 spaces.
+static constexpr uint32_t kBaseResourceTableRegisterSpace = kMaxBindGroups + 5;
+
+static constexpr uint32_t kInvalidResourceTableRootParameterIndex =
+    std::numeric_limits<uint32_t>::max();
 static constexpr uint32_t kInvalidDynamicStorageBufferLengthsParameterIndex =
     std::numeric_limits<uint32_t>::max();
 static constexpr uint32_t kInvalidDynamicStorageBufferOffsetsParameterIndex =
@@ -179,49 +186,65 @@ MaybeError PipelineLayout::Initialize() {
         staticSamplerCount += bindGroupLayout->GetStaticSamplerCount();
     }
 
+    std::vector<D3D12_DESCRIPTOR_RANGE1> resourceTableCbvUavSrvDescriptorRanges;
+    if (UsesResourceTable()) {
+        resourceTableCbvUavSrvDescriptorRanges = ResourceTable::GetCbvUavSrvDescriptorRanges(*this);
+        rangesCount += resourceTableCbvUavSrvDescriptorRanges.size();
+    }
+
     // We are taking pointers to `ranges`, so we cannot let it resize while we're pushing to it.
     std::vector<D3D12_DESCRIPTOR_RANGE1> ranges(rangesCount);
     staticSamplers.reserve(staticSamplerCount);
 
     uint32_t rangeIndex = 0;
 
+    // Set the root descriptor table parameter and copy ranges. An optional registerSpace can be
+    // passed in and is set only on ranges with kRegisterSpacePlaceholder. Returns whether or not
+    // the parameter was set. A root parameter is not set if the number of ranges is 0.
+    auto SetRootDescriptorTable = [&](std::span<const D3D12_DESCRIPTOR_RANGE1> descriptorRanges,
+                                      uint32_t registerSpace = kRegisterSpacePlaceholder) -> bool {
+        auto rangeCount = descriptorRanges.size();
+        if (rangeCount == 0) {
+            return false;
+        }
+
+        D3D12_ROOT_PARAMETER1 rootParameter = {};
+        rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+        rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        rootParameter.DescriptorTable.NumDescriptorRanges = static_cast<uint32_t>(rangeCount);
+        rootParameter.DescriptorTable.pDescriptorRanges = &ranges[rangeIndex];
+
+        for (auto& range : descriptorRanges) {
+            ranges[rangeIndex] = range;
+            if (range.RegisterSpace == kRegisterSpacePlaceholder) {
+                ranges[rangeIndex].RegisterSpace = registerSpace;
+            }
+            rangeIndex++;
+        }
+
+        rootParameters.emplace_back(rootParameter);
+        return true;
+    };
+
+    mResourceTableRootParameterIndex = kInvalidResourceTableRootParameterIndex;
+    if (UsesResourceTable()) {
+        if (SetRootDescriptorTable(resourceTableCbvUavSrvDescriptorRanges)) {
+            mResourceTableRootParameterIndex = static_cast<uint32_t>(rootParameters.size() - 1u);
+        }
+    }
+
     for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
 
-        // Set the root descriptor table parameter and copy ranges. Ranges are offset by the
-        // bind group index Returns whether or not the parameter was set. A root parameter is
-        // not set if the number of ranges is 0
-        auto SetRootDescriptorTable =
-            [&](const std::vector<D3D12_DESCRIPTOR_RANGE1>& descriptorRanges) -> bool {
-            auto rangeCount = descriptorRanges.size();
-            if (rangeCount == 0) {
-                return false;
-            }
-
-            D3D12_ROOT_PARAMETER1 rootParameter = {};
-            rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-            rootParameter.DescriptorTable.NumDescriptorRanges = static_cast<uint32_t>(rangeCount);
-            rootParameter.DescriptorTable.pDescriptorRanges = &ranges[rangeIndex];
-
-            for (auto& range : descriptorRanges) {
-                DAWN_ASSERT(range.RegisterSpace == kRegisterSpacePlaceholder);
-                ranges[rangeIndex] = range;
-                ranges[rangeIndex].RegisterSpace = static_cast<uint32_t>(group);
-                rangeIndex++;
-            }
-
-            rootParameters.emplace_back(rootParameter);
-
-            return true;
-        };
-
-        // Note that CbvUavSrvDescriptorRanges includes dynamic storage buffers
-        if (SetRootDescriptorTable(bindGroupLayout->GetCbvUavSrvDescriptorRanges())) {
-            mCbvUavSrvRootParameterInfo[group] = static_cast<uint32_t>(rootParameters.size() - 1u);
+        // Note that CbvUavSrvDescriptorRanges includes dynamic storage buffers.
+        if (SetRootDescriptorTable(bindGroupLayout->GetCbvUavSrvDescriptorRanges(),
+                                   static_cast<uint32_t>(group))) {
+            mCbvUavSrvRootParameterIndices[group] =
+                static_cast<uint32_t>(rootParameters.size() - 1u);
         }
-        if (SetRootDescriptorTable(bindGroupLayout->GetSamplerDescriptorRanges())) {
-            mSamplerRootParameterInfo[group] = static_cast<uint32_t>(rootParameters.size() - 1u);
+        if (SetRootDescriptorTable(bindGroupLayout->GetSamplerDescriptorRanges(),
+                                   static_cast<uint32_t>(group))) {
+            mSamplerRootParameterIndices[group] = static_cast<uint32_t>(rootParameters.size() - 1u);
         }
 
         // Combine the static samplers from the all of the bind group layouts to one vector.
@@ -441,14 +464,23 @@ void PipelineLayout::DestroyImpl(DestroyReason reason) {
     }
 }
 
+uint32_t PipelineLayout::GetResourceTableRootParameterIndex() const {
+    DAWN_ASSERT(mResourceTableRootParameterIndex != kInvalidResourceTableRootParameterIndex);
+    return mResourceTableRootParameterIndex;
+}
+
+uint32_t PipelineLayout::GetBaseResourceTableRegisterSpace() const {
+    return kBaseResourceTableRegisterSpace;
+}
+
 uint32_t PipelineLayout::GetCbvUavSrvRootParameterIndex(BindGroupIndex group) const {
     DAWN_ASSERT(group < kMaxBindGroupsTyped);
-    return mCbvUavSrvRootParameterInfo[group];
+    return mCbvUavSrvRootParameterIndices[group];
 }
 
 uint32_t PipelineLayout::GetSamplerRootParameterIndex(BindGroupIndex group) const {
     DAWN_ASSERT(group < kMaxBindGroupsTyped);
-    return mSamplerRootParameterInfo[group];
+    return mSamplerRootParameterIndices[group];
 }
 
 ID3D12RootSignature* PipelineLayout::GetRootSignature() const {

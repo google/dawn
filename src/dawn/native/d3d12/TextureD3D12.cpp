@@ -355,8 +355,15 @@ void Texture::DestroyImpl(DestroyReason reason) {
 }
 
 MaybeError Texture::PinImpl(wgpu::TextureUsage usage) {
-    // TODO(crbug.com/473354062): Transition usage like for Vulkan
     DAWN_ASSERT(!HasPinnedUsage());
+    SubresourceRange pinnedSubresources = GetAllSubresources();
+
+    CommandRecordingContext* commandContext =
+        ToBackend(GetDevice()->GetQueue())->GetPendingCommandContext(Queue::SubmitMode::Passive);
+    DAWN_TRY(EnsureSubresourceContentInitialized(commandContext, pinnedSubresources));
+
+    // TODO(crbug.com/482008255): Handle residency of pinned resources
+    TrackUsageAndTransitionNow(commandContext, usage, pinnedSubresources);
 
     // TODO(https://issues.chromium.org/473444516): Investigate what to do for imported textures.
     // Should we consider a pin/unpin pair similar to an access on a queue such that we need to
