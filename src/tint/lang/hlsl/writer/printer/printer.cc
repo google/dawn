@@ -90,6 +90,7 @@
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/resource_table.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
@@ -647,6 +648,8 @@ class Printer : public tint::TextGenerator {
         auto* type_for_register = ptr->StoreType();
         if (auto* arr = type_for_register->As<core::type::BindingArray>()) {
             type_for_register = arr->ElemType();
+        } else if (auto* rt = type_for_register->As<core::type::ResourceTable>()) {
+            type_for_register = rt->GetBindingType();
         }
 
         char register_space = Switch(
@@ -1409,6 +1412,14 @@ class Printer : public tint::TextGenerator {
             },
             [&](const core::type::Sampler* sampler) { EmitSamplerType(out, sampler); },
             [&](const core::type::Texture* tex) { EmitTextureType(out, tex); },
+            [&](const core::type::ResourceTable* rt) {
+                // We want to emit an unbounded array of the internal binding type
+                // e.g. "Texture1D<float4> tint_bindless[]"
+                EmitType(out, rt->GetBindingType());
+                TINT_ASSERT(!name.empty() && name_printed);
+                out << " " << name << "[]";
+                *name_printed = true;
+            },
             TINT_ICE_ON_NO_MATCH);
     }
 

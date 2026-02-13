@@ -51,6 +51,7 @@ cc_library(
     "raise.cc",
     "replace_default_only_switch.cc",
     "replace_non_indexable_mat_vec_stores.cc",
+    "resource_table_helper.cc",
     "shader_io.cc",
   ],
   hdrs = [
@@ -66,6 +67,7 @@ cc_library(
     "raise.h",
     "replace_default_only_switch.h",
     "replace_non_indexable_mat_vec_stores.h",
+    "resource_table_helper.h",
     "shader_io.h",
   ],
   deps = [

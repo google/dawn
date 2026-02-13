@@ -75,9 +75,11 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             continue;
         }
 
-        if (call->Func() == core::BuiltinFn::kGetResource ||
-            call->Func() == core::BuiltinFn::kHasResource) {
-            return Failure("resource tables not supported by the HLSL backend");
+        if ((call->Func() == core::BuiltinFn::kGetResource ||
+             call->Func() == core::BuiltinFn::kHasResource) &&
+            options.compiler == Options::Compiler::kFXC) {
+            return Failure(
+                "resource tables not supported by the HLSL backend for compiling with FXC");
         }
         if (call->Func() == core::BuiltinFn::kPrint) {
             return Failure("print is not supported by the HLSL backend");

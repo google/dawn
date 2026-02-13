@@ -48,6 +48,7 @@
 #include "src/tint/lang/core/ir/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
+#include "src/tint/lang/core/ir/transform/resource_table.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
@@ -71,6 +72,7 @@
 #include "src/tint/lang/hlsl/writer/raise/promote_initializers.h"
 #include "src/tint/lang/hlsl/writer/raise/replace_default_only_switch.h"
 #include "src/tint/lang/hlsl/writer/raise/replace_non_indexable_mat_vec_stores.h"
+#include "src/tint/lang/hlsl/writer/raise/resource_table_helper.h"
 #include "src/tint/lang/hlsl/writer/raise/shader_io.h"
 
 namespace tint::hlsl::writer {
@@ -182,6 +184,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         TINT_CHECK_RESULT(core::ir::transform::Robustness(module, config));
 
         TINT_CHECK_RESULT(core::ir::transform::PreventInfiniteLoops(module));
+    }
+
+    if (options.resource_table.has_value()) {
+        hlsl::writer::raise::ResourceTableHelper helper;
+        TINT_CHECK_RESULT(
+            core::ir::transform::ResourceTable(module, options.resource_table.value(), &helper));
     }
 
     {

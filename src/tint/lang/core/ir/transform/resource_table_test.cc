@@ -93,14 +93,14 @@ $B1: {  # root
 )";
 
     auto* expect = R"(
-tint_resource_table_buffer = struct @align(4) {
+tint_resource_table_metadata_struct = struct @align(4) {
   array_length:u32 @offset(0)
   bindings:array<u32> @offset(4)
 }
 
 $B1: {  # root
   %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(3, 2)
-  %2:ptr<storage, tint_resource_table_buffer, read> = var undef @binding_point(1, 2)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -148,7 +148,7 @@ $B1: {  # root
 )";
 
     auto* expect = R"(
-tint_resource_table_buffer = struct @align(4) {
+tint_resource_table_metadata_struct = struct @align(4) {
   array_length:u32 @offset(0)
   bindings:array<u32> @offset(4)
 }
@@ -158,7 +158,7 @@ $B1: {  # root
   %2:ptr<handle, resource_table<texture_1d<f32, filterable>>, read> = var undef @binding_point(0, 1)
   %3:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
   %4:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
-  %5:ptr<storage, tint_resource_table_buffer, read> = var undef @binding_point(1, 2)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -207,7 +207,7 @@ TEST_F(IR_ResourceTableTest, HasResource) {
 )";
 
     auto* expect = R"(
-tint_resource_table_buffer = struct @align(4) {
+tint_resource_table_metadata_struct = struct @align(4) {
   array_length:u32 @offset(0)
   bindings:array<u32> @offset(4)
 }
@@ -216,17 +216,17 @@ $B1: {  # root
   %1:ptr<handle, resource_table<texture_1d<f32, filterable>>, read> = var undef @binding_point(0, 1)
   %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
   %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
-  %4:ptr<storage, tint_resource_table_buffer, read> = var undef @binding_point(1, 2)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func():void {
   $B2: {
-    %6:ptr<storage, u32, read> = access %4, 0u
+    %6:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
     %7:u32 = load %6
     %8:bool = lt 1u, %7
     %9:bool = if %8 [t: $B3, f: $B4] {  # if_1
       $B3: {  # true
-        %10:ptr<storage, u32, read> = access %4, 1u, 1u
+        %10:ptr<storage, u32, read> = access %tint_resource_table_metadata, 1u, 1u
         %11:u32 = load %10
         %12:bool = eq %11, 12u
         exit_if %12  # if_1
@@ -278,7 +278,7 @@ TEST_F(IR_ResourceTableTest, GetResource) {
 )";
 
     auto* expect = R"(
-tint_resource_table_buffer = struct @align(4) {
+tint_resource_table_metadata_struct = struct @align(4) {
   array_length:u32 @offset(0)
   bindings:array<u32> @offset(4)
 }
@@ -287,17 +287,17 @@ $B1: {  # root
   %1:ptr<handle, resource_table<texture_1d<f32, filterable>>, read> = var undef @binding_point(0, 1)
   %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
   %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
-  %4:ptr<storage, tint_resource_table_buffer, read> = var undef @binding_point(1, 2)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func():void {
   $B2: {
-    %6:ptr<storage, u32, read> = access %4, 0u
+    %6:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
     %7:u32 = load %6
     %8:bool = lt 1u, %7
     %9:bool = if %8 [t: $B3, f: $B4] {  # if_1
       $B3: {  # true
-        %10:ptr<storage, u32, read> = access %4, 1u, 1u
+        %10:ptr<storage, u32, read> = access %tint_resource_table_metadata, 1u, 1u
         %11:u32 = load %10
         %12:bool = eq %11, 12u
         exit_if %12  # if_1
@@ -311,7 +311,7 @@ $B1: {  # root
         exit_if 1u  # if_2
       }
       $B6: {  # false
-        %14:ptr<storage, u32, read> = access %4, 0u
+        %14:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
         %15:u32 = load %14
         %16:u32 = add 2u, %15
         exit_if %16  # if_2

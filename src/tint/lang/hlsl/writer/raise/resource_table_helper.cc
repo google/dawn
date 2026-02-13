@@ -1,4 +1,4 @@
-// Copyright 2025 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,51 +25,42 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/transform/resource_table_helper.h"
+#include "src/tint/lang/hlsl/writer/raise/resource_table_helper.h"
 
-#include <algorithm>
-#include <utility>
-#include <vector>
-
-#include "src/tint/lang/core/ir/core_builtin_call.h"
+#include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/resource_table.h"
 #include "src/tint/lang/core/type/resource_type.h"
 
-namespace tint::core::ir::transform {
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
-std::optional<ResourceTableConfig> GenerateResourceTableConfig(Module& mod) {
-    ResourceTableConfig cfg{
-        .resource_table_binding = BindingPoint{.group = 43, .binding = 51},
-        .storage_buffer_binding = BindingPoint{.group = 42, .binding = 52},
-        .default_binding_type_order = {},
-    };
+namespace tint::hlsl::writer::raise {
 
-    std::vector<ResourceType> default_binding_type_order;
+// Returns a map of types to the var which is used to access the memory of that type
+Hashmap<const core::type::Type*, core::ir::Var*, 4> ResourceTableHelper::GenerateVars(
+    core::ir::Builder& b,
+    const BindingPoint& bp,
+    const std::vector<ResourceType>& types) const {
+    Hashmap<const core::type::Type*, core::ir::Var*, 4> res;
 
-    for (auto* inst : mod.Instructions()) {
-        auto* call = inst->As<core::ir::CoreBuiltinCall>();
-        if (!call) {
-            continue;
-        }
+    // HLSL does not allow register ranges to overlap, so each unbounded array is bound to
+    // a monotonically increasing group number from the base one: bp.group.
+    uint32_t group_offset = 0;
 
-        if (call->Func() != core::BuiltinFn::kGetResource &&
-            call->Func() != core::BuiltinFn::kHasResource) {
-            continue;
-        }
-        auto exp = call->ExplicitTemplateParams();
-        TINT_IR_ASSERT(mod, exp.Length() == 1);
+    // TODO(crbug.com/480103159): Only emit vars that are actually referenced.
+    for (auto& type : types) {
+        auto* t = core::type::ResourceTypeToType(b.ir.Types(), type);
 
-        default_binding_type_order.push_back(type::TypeToResourceType(exp[0]));
-    }
-    // If we found any resource uses, then we can just return an empty config.
-    if (default_binding_type_order.empty()) {
-        return {};
+        // The 'handle' type that the printer uses to emit the unbounded array of type 't'.
+        auto* binding_type = t;
+        auto* handle_ty = b.ir.Types().Get<core::type::ResourceTable>(binding_type);
+
+        auto* v = b.Var("tint_resource_table_array", b.ir.Types().ptr(handle, handle_ty));
+        v->SetBindingPoint(bp.group + group_offset++, bp.binding);
+        res.Add(t, v);
     }
 
-    // Sort so we get stable generated results
-    std::sort(default_binding_type_order.begin(), default_binding_type_order.end());
-    cfg.default_binding_type_order = std::move(default_binding_type_order);
-
-    return cfg;
+    return res;
 }
 
-}  // namespace tint::core::ir::transform
+}  // namespace tint::hlsl::writer::raise

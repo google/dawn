@@ -181,14 +181,14 @@ struct State {
     }
 
     core::ir::Var* InjectStorageBuffer(const BindingPoint& bp) {
-        auto* str = ty.Struct(ir.symbols.New("tint_resource_table_buffer"),
+        auto* str = ty.Struct(ir.symbols.New("tint_resource_table_metadata_struct"),
                               Vector<core::type::Manager::StructMemberDesc, 2>{
                                   {ir.symbols.New("array_length"), ty.u32()},
                                   {ir.symbols.New("bindings"), ty.array<u32>()},
                               });
 
         auto* sb_ty = ty.ptr(storage, str, read);
-        auto* sb = b.Var(sb_ty);
+        auto* sb = b.Var("tint_resource_table_metadata", sb_ty);
         sb->SetBindingPoint(bp.group, bp.binding);
 
         return sb;

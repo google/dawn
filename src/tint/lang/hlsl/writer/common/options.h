@@ -36,6 +36,7 @@
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/api/common/bindings.h"
+#include "src/tint/api/common/resource_table_config.h"
 #include "src/tint/api/common/substitute_overrides_config.h"
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/utils/math/hash.h"
@@ -255,6 +256,9 @@ struct Options {
     /// Pixel local configuration
     PixelLocalOptions pixel_local;
 
+    /// Resource table information
+    std::optional<ResourceTableConfig> resource_table;
+
     // Configuration for substitute overrides
     SubstituteOverridesConfig substitute_overrides_config = {};
 
@@ -282,6 +286,7 @@ struct Options {
                  bindings,
                  ignored_by_robustness_transform,
                  pixel_local,
+                 resource_table,
                  substitute_overrides_config);
     TINT_REFLECT_EQUALS(Options);
 };

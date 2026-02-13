@@ -1197,6 +1197,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
     gen_options.compiler = for_fxc ? tint::hlsl::writer::Options::Compiler::kFXC
                                    : tint::hlsl::writer::Options::Compiler::kDXC;
     gen_options.bindings = tint::GenerateBindings(ir, options.ep_name, false, false);
+    gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(ir);
 
     // Run SubstituteOverrides to replace override instructions with constants.
     // This needs to run after SingleEntryPoint which removes unused overrides.
