@@ -1,5 +1,5 @@
 {
-	"lucicfg": "1.46.2",
+	"lucicfg": "1.46.1",
 	"packages": [
 		{
 			"name": "@dawn-project",
@@ -18,7 +18,7 @@
 			"name": "@chromium-luci",
 			"source": {
 				"repo": "https://chromium.googlesource.com/infra/chromium/+/refs/heads/main",
-				"revision": "76c662527154a5f02454d66f1d42f412c418c19f",
+				"revision": "baf9a25908b533878f5f0706161c97e8a954c5d8",
 				"path": "starlark-libs/chromium-luci"
 			},
 			"lucicfg": "1.46.1"

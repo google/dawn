@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': 'e4d654447522856ef4b05403b4d4cfab8276116f',
+  'chromium_revision': 'fb186c5a89514fdb8a56483217932a9c474df224',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -112,7 +112,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@425882d8c0acaab53bf2f8abbe7efcf5db5b168b',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@ccffb57777dca15a09c9a1029acdd776d4ae9a06',
     'condition': 'dawn_standalone',
   },
 
@@ -143,11 +143,11 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@4c2c31b6776c1fe03a029f66ef530796f0add90d',
+  'url': '{chromium_git}/chromium/src/build@bc3e93b3c459cfa0bb6bef8944b6398bbd9a7be8',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@7fd7d7092fa5ee06380f06f66f1b7bd03fca71a8',
+  'url': '{chromium_git}/chromium/src/tools/clang@a5853661c6321f4c95da0778910aca27a5a0c729',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -253,7 +253,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@4d438b31b58e2dc84b592a052b6b97e05ceb6497',
+    'url': '{chromium_git}/chromium/src/testing@d274a4df83dc1781e42bade23902491faf30a0d2',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -266,7 +266,7 @@ deps = {
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@59090f1f5e2b3ad9c90e4dc5fc8e79aed9110587',
+    'url': '{chromium_git}/catapult.git@520359912034c843ec1903864f88182b1afb88d1',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
@@ -365,7 +365,7 @@ deps = {
   },
 
   'third_party/abseil-cpp': {
-    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@7ef32bbacabd0d04a6cfac92a542841c531e1b21',
+    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@dbbc047a2ee070c4e9d82eb00c92ccadeb5bdbc0',
     'condition': 'dawn_standalone',
   },
 
