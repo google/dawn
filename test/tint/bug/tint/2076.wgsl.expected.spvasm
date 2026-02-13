@@ -57,6 +57,9 @@
                OpDecorate %6 NonWritable
                OpDecorate %depthTexture DescriptorSet 0
                OpDecorate %depthTexture Binding 2
+               OpDecorate %randomTexture_plane0 RelaxedPrecision
+               OpDecorate %randomTexture_plane1 RelaxedPrecision
+               OpDecorate %depthTexture RelaxedPrecision
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
@@ -393,6 +396,7 @@
                OpDecorate %Sampler Binding 1
                OpDecorate %depthTexture DescriptorSet 0
                OpDecorate %depthTexture Binding 2
+               OpDecorate %depthTexture RelaxedPrecision
           %3 = OpTypeSampler
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
     %Sampler = OpVariable %_ptr_UniformConstant_3 UniformConstant

@@ -63,6 +63,7 @@ cc_binary(
     "//src/tint/lang/spirv/ir:test",
     "//src/tint/lang/spirv/reader/lower:test",
     "//src/tint/lang/spirv/type:test",
+    "//src/tint/lang/spirv/writer/analysis:test",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast:test",
     "//src/tint/lang/wgsl/intrinsic:test",

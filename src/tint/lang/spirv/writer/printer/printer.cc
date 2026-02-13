@@ -94,6 +94,7 @@
 #include "src/tint/lang/spirv/ir/literal_operand.h"
 #include "src/tint/lang/spirv/type/explicit_layout_array.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
+#include "src/tint/lang/spirv/writer/analysis/relaxed_precision_decorations.h"
 #include "src/tint/lang/spirv/writer/common/binary_writer.h"
 #include "src/tint/lang/spirv/writer/common/function.h"
 #include "src/tint/lang/spirv/writer/common/module.h"
@@ -322,6 +323,15 @@ class Printer {
             TINT_CHECK_RESULT(EmitFunction(func));
         }
 
+        // Emit RelaxedPrecision decorations.
+        auto relaxed_precision_decorations = analysis::GetRelaxedPrecisionDecorations(ir_);
+        for (const auto& deco : relaxed_precision_decorations) {
+            module_.PushAnnot(spv::Op::OpDecorate, {
+                                                       Value(deco),
+                                                       U32Operand(SpvDecorationRelaxedPrecision),
+                                                   });
+        }
+
         return Success;
     }
 
@@ -399,7 +409,7 @@ class Printer {
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
     /// @param constant the constant to get the ID for
     /// @returns the result ID of the constant
-    uint32_t Constant(core::ir::Constant* constant) {
+    uint32_t Constant(const core::ir::Constant* constant) {
         // If it is a literal operand, just return the value.
         if (auto* literal = constant->As<spirv::ir::LiteralOperand>()) {
             return literal->Value()->ValueAs<uint32_t>();
@@ -659,11 +669,11 @@ class Printer {
     /// Get the result ID of the value `value`, emitting its instruction if necessary.
     /// @param value the value to get the ID for
     /// @returns the result ID of the value
-    uint32_t Value(core::ir::Value* value) {
+    uint32_t Value(const core::ir::Value* value) {
         return Switch(
             value,  //
-            [&](core::ir::Constant* constant) { return Constant(constant); },
-            [&](core::ir::Value*) {
+            [&](const core::ir::Constant* constant) { return Constant(constant); },
+            [&](const core::ir::Value*) {
                 return values_.GetOrAdd(value, [&] { return module_.NextId(); });
             });
     }
@@ -3019,7 +3029,7 @@ class Printer {
     /// Set the debug name of an instruction.
     void PushName(uint32_t id, core::ir::Instruction* inst) { PushName(id, ir_.NameOf(inst)); }
     /// Set the debug name of a value.
-    void PushName(uint32_t id, core::ir::Value* value) { PushName(id, ir_.NameOf(value)); }
+    void PushName(uint32_t id, const core::ir::Value* value) { PushName(id, ir_.NameOf(value)); }
     /// Set the debug name for a SPIR-V ID.
     void PushName(uint32_t id, const Symbol& name) {
         // Only set the name if it is valid and if we are not stripping user identifiers.

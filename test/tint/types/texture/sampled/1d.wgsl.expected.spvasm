@@ -23,6 +23,9 @@
                OpDecorate %t_i Binding 1
                OpDecorate %t_u DescriptorSet 0
                OpDecorate %t_u Binding 2
+               OpDecorate %t_f RelaxedPrecision
+               OpDecorate %t_i RelaxedPrecision
+               OpDecorate %t_u RelaxedPrecision
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 1D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

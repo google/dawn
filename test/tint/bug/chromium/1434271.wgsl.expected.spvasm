@@ -512,6 +512,7 @@
                OpDecorate %tex_out Binding 7
                OpDecorate %tex_out NonReadable
                OpDecorate %export_level_global_invocation_id_Input BuiltIn GlobalInvocationId
+               OpDecorate %tex_out RelaxedPrecision
        %uint = OpTypeInt 32 0
      %v4uint = OpTypeVector %uint 4
      %uint_1 = OpConstant %uint 1

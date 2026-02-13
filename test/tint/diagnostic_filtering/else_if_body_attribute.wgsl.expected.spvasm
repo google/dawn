@@ -30,6 +30,8 @@
                OpDecorate %s DescriptorSet 0
                OpDecorate %s Binding 2
                OpDecorate %main_loc0_Input Location 0
+               OpDecorate %27 RelaxedPrecision
+               OpDecorate %t RelaxedPrecision
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

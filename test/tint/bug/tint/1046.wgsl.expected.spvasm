@@ -65,6 +65,7 @@
                OpDecorate %main_loc2_Input Location 2
                OpDecorate %main_loc3_Input Location 3
                OpDecorate %main_loc0_Output Location 0
+               OpDecorate %myTexture RelaxedPrecision
        %uint = OpTypeInt 32 0
      %v4uint = OpTypeVector %uint 4
     %uint_10 = OpConstant %uint 10

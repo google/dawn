@@ -574,7 +574,7 @@ TEST_F(SpirvWriterTest, TextureVar) {
     EXPECT_INST(R"(
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0, RelaxedPrecision
 )");
     EXPECT_INST("%load = OpLoad %3 %v");
 }
@@ -667,7 +667,7 @@ TEST_F(SpirvWriterTest, ReadOnlyStorageTextureVar) {
     EXPECT_INST(R"(
           %3 = OpTypeImage %float 2D 0 0 0 2 Rgba8
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0, NonWritable
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0, NonWritable, RelaxedPrecision
 )");
 }
 
@@ -695,7 +695,7 @@ TEST_F(SpirvWriterTest, ReadWriteStorageTextureVar) {
     EXPECT_INST(R"(
           %3 = OpTypeImage %float 2D 0 0 0 2 Rgba8
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0, Coherent
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0, Coherent, RelaxedPrecision
 )");
 }
 
@@ -723,7 +723,7 @@ TEST_F(SpirvWriterTest, WriteOnlyStorageTextureVar) {
     EXPECT_INST(R"(
           %3 = OpTypeImage %float 2D 0 0 0 2 Rgba8
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0, NonReadable
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0, NonReadable, RelaxedPrecision
 )");
 }
 

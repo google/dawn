@@ -16,6 +16,7 @@
                OpName %tint_carry "tint_carry"
                OpDecorate %texture DescriptorSet 0
                OpDecorate %texture Binding 0
+               OpDecorate %texture RelaxedPrecision
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

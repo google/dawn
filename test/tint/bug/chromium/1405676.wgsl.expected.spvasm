@@ -15,6 +15,8 @@
                OpName %l "l"
                OpDecorate %arg_0 DescriptorSet 0
                OpDecorate %arg_0 Binding 0
+               OpDecorate %23 RelaxedPrecision
+               OpDecorate %arg_0 RelaxedPrecision
         %int = OpTypeInt 32 1
           %3 = OpTypeImage %int 1D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

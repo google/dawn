@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+include(lang/spirv/writer/analysis/BUILD.cmake)
 include(lang/spirv/writer/common/BUILD.cmake)
 include(lang/spirv/writer/printer/BUILD.cmake)
 include(lang/spirv/writer/raise/BUILD.cmake)

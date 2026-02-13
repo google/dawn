@@ -16,6 +16,8 @@
                OpName %fs "fs"
                OpDecorate %sampled_textures DescriptorSet 0
                OpDecorate %sampled_textures Binding 0
+               OpDecorate %texture_load RelaxedPrecision
+               OpDecorate %t RelaxedPrecision
       %float = OpTypeFloat 32
           %4 = OpTypeImage %float 2D 0 0 0 1 Unknown
        %uint = OpTypeInt 32 0

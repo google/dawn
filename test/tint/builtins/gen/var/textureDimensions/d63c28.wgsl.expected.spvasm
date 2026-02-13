@@ -25,6 +25,7 @@
                OpDecorate %arg_0 DescriptorSet 1
                OpDecorate %arg_0 Binding 0
                OpDecorate %arg_0 NonReadable
+               OpDecorate %arg_0 RelaxedPrecision
        %uint = OpTypeInt 32 0
      %v2uint = OpTypeVector %uint 2
 %prevent_dce_block = OpTypeStruct %v2uint
@@ -85,6 +86,7 @@
                OpDecorate %arg_0 DescriptorSet 1
                OpDecorate %arg_0 Binding 0
                OpDecorate %arg_0 NonReadable
+               OpDecorate %arg_0 RelaxedPrecision
        %uint = OpTypeInt 32 0
      %v2uint = OpTypeVector %uint 2
 %prevent_dce_block = OpTypeStruct %v2uint

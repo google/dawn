@@ -65,6 +65,7 @@
                OpDecorate %main_workgroup_id_Input BuiltIn WorkgroupId
                OpDecorate %main_local_invocation_id_Input BuiltIn LocalInvocationId
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
+               OpDecorate %outputTex RelaxedPrecision
           %3 = OpTypeSampler
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
        %samp = OpVariable %_ptr_UniformConstant_3 UniformConstant

@@ -66,6 +66,7 @@
                OpDecorate %outImage DescriptorSet 0
                OpDecorate %outImage Binding 1
                OpDecorate %outImage NonReadable
+               OpDecorate %outImage RelaxedPrecision
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

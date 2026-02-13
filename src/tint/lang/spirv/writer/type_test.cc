@@ -718,9 +718,9 @@ TEST_F(SpirvWriterTest, Type_DepthTexture_DedupWithSampledTexture) {
     EXPECT_INST(R"(      %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-         %v1 = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 1
+         %v1 = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 1, RelaxedPrecision
 %_ptr_UniformConstant_3_0 = OpTypePointer UniformConstant %3
-         %v2 = OpVariable %_ptr_UniformConstant_3_0 UniformConstant     ; DescriptorSet 0, Binding 2
+         %v2 = OpVariable %_ptr_UniformConstant_3_0 UniformConstant     ; DescriptorSet 0, Binding 2, RelaxedPrecision
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
 )");
@@ -767,9 +767,9 @@ TEST_F(SpirvWriterTest, Type_DepthMultisampledTexture_DedupWithMultisampledTextu
     EXPECT_INST(R"(      %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 1 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-         %v1 = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 1
+         %v1 = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 1, RelaxedPrecision
 %_ptr_UniformConstant_3_0 = OpTypePointer UniformConstant %3
-         %v2 = OpVariable %_ptr_UniformConstant_3_0 UniformConstant     ; DescriptorSet 0, Binding 2
+         %v2 = OpVariable %_ptr_UniformConstant_3_0 UniformConstant     ; DescriptorSet 0, Binding 2, RelaxedPrecision
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
 )");

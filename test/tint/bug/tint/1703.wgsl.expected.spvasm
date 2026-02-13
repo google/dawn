@@ -30,6 +30,9 @@
                OpDecorate %my_texture Binding 1
                OpDecorate %my_sampler DescriptorSet 0
                OpDecorate %my_sampler Binding 2
+               OpDecorate %r_0 RelaxedPrecision
+               OpDecorate %r RelaxedPrecision
+               OpDecorate %my_texture RelaxedPrecision
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Private_v4float = OpTypePointer Private %v4float
