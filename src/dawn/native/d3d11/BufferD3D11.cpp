@@ -336,35 +336,26 @@ MaybeError Buffer::Initialize(bool mappedAtCreation,
 
     SetLabelImpl();
 
-    const bool needsClearResource =
-        GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) ||
-        GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting);
     // The buffers with mappedAtCreation == true will be initialized in
     // BufferBase::MapAtCreation().
-    if (!mappedAtCreation && needsClearResource) {
+    if (!mappedAtCreation &&
+        GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
         auto scopedUseDuringCreation = UseInternal();
         if (commandContext) {
-            DAWN_TRY(ClearInitialResource(commandContext));
+            DAWN_TRY(ClearWholeBuffer(commandContext, 1u));
         } else {
             auto tmpCommandContext =
                 ToBackend(GetDevice()->GetQueue())
                     ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
-            DAWN_TRY(ClearInitialResource(&tmpCommandContext));
+            DAWN_TRY(ClearWholeBuffer(&tmpCommandContext, 1u));
         }
     }
 
-    return {};
-}
-
-MaybeError Buffer::ClearInitialResource(const ScopedCommandRecordingContext* commandContext) {
-    if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-        DAWN_TRY(ClearWholeBuffer(commandContext, 1u));
+    // Mark padding as cleared if there's no padding.
+    if (GetAllocatedSize() == GetSize()) {
+        mPaddingCleared = true;
     }
 
-    // Initialize the padding bytes to zero.
-    if (GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
-        DAWN_TRY(ClearPaddingInternal(commandContext));
-    }
     return {};
 }
 
@@ -600,6 +591,9 @@ std::optional<DeviceGuard> Buffer::UseDeviceGuardForDestroy() {
 }
 
 MaybeError Buffer::EnsureDataInitialized(const ScopedCommandRecordingContext* commandContext) {
+    // Clear padding on first use, regardless of initialization state.
+    DAWN_TRY(EnsurePaddingInitialized(commandContext));
+
     if (!NeedsInitialization()) {
         return {};
     }
@@ -612,6 +606,9 @@ MaybeError Buffer::EnsureDataInitializedAsDestination(
     const ScopedCommandRecordingContext* commandContext,
     uint64_t offset,
     uint64_t size) {
+    // Clear padding on first use as destination, regardless of initialization state.
+    DAWN_TRY(EnsurePaddingInitialized(commandContext));
+
     if (!NeedsInitialization()) {
         return {};
     }
@@ -628,6 +625,9 @@ MaybeError Buffer::EnsureDataInitializedAsDestination(
 MaybeError Buffer::EnsureDataInitializedAsDestination(
     const ScopedCommandRecordingContext* commandContext,
     const CopyTextureToBufferCmd* copy) {
+    // Clear padding on first use as destination, regardless of initialization state.
+    DAWN_TRY(EnsurePaddingInitialized(commandContext));
+
     if (!NeedsInitialization()) {
         return {};
     }
@@ -692,6 +692,15 @@ MaybeError Buffer::ClearInternal(const ScopedCommandRecordingContext* commandCon
     std::vector<uint8_t> clearData(size, clearValue);
     return WriteInternal(commandContext, offset, clearData.data(), size,
                          /*isInitialWrite=*/true);
+}
+
+MaybeError Buffer::EnsurePaddingInitialized(const ScopedCommandRecordingContext* commandContext) {
+    if (mPaddingCleared) [[likely]] {
+        return {};
+    }
+    DAWN_TRY(ClearPaddingInternal(commandContext));
+    mPaddingCleared = true;
+    return {};
 }
 
 MaybeError Buffer::ClearPaddingInternal(const ScopedCommandRecordingContext* commandContext) {
