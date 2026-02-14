@@ -37,7 +37,6 @@
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/d3d/d3d_platform.h"
-
 #include "tint/tint.h"
 
 namespace dawn::native::stream {

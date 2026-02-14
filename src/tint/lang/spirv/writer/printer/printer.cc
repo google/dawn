@@ -33,7 +33,6 @@
 
 #include "spirv/unified1/GLSL.std.450.h"
 #include "spirv/unified1/spirv.h"
-
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"

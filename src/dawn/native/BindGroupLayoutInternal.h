@@ -46,7 +46,6 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/ObjectBase.h"
-
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {

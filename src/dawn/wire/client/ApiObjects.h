@@ -28,13 +28,13 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_
 #define SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_
 
-#include "dawn/wire/client/ObjectBase.h"
-
 #include "dawn/wire/client/Adapter.h"
+#include "dawn/wire/client/ApiObjects_autogen.h"
 #include "dawn/wire/client/Buffer.h"
 #include "dawn/wire/client/ComputePassEncoder.h"
 #include "dawn/wire/client/Device.h"
 #include "dawn/wire/client/Instance.h"
+#include "dawn/wire/client/ObjectBase.h"
 #include "dawn/wire/client/QuerySet.h"
 #include "dawn/wire/client/Queue.h"
 #include "dawn/wire/client/RenderBundleEncoder.h"
@@ -43,7 +43,5 @@
 #include "dawn/wire/client/ShaderModule.h"
 #include "dawn/wire/client/Surface.h"
 #include "dawn/wire/client/Texture.h"
-
-#include "dawn/wire/client/ApiObjects_autogen.h"
 
 #endif  // SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_

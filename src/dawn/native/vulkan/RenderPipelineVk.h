@@ -28,10 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_RENDERPIPELINEVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_RENDERPIPELINEVK_H_
 
-#include "dawn/native/RenderPipeline.h"
-
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/RenderPipeline.h"
 #include "dawn/native/vulkan/PipelineVk.h"
 
 namespace dawn::native::vulkan {

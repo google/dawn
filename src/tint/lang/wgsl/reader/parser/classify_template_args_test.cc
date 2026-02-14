@@ -25,9 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gmock/gmock.h"
-
 #include "src/tint/lang/wgsl/reader/parser/classify_template_args.h"
+
+#include "gmock/gmock.h"
 #include "src/tint/lang/wgsl/reader/parser/lexer.h"
 #include "src/tint/utils/containers/transform.h"
 

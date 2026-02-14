@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_CORE_NUMBER_H_
 
 #include <stdint.h>
+
 #include <cmath>
 #include <functional>
 #include <limits>

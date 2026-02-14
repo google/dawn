@@ -28,9 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_WEBGPU_BINDGROUPWGPU_H_
 #define SRC_DAWN_NATIVE_WEBGPU_BINDGROUPWGPU_H_
 
-#include "dawn/native/BindGroup.h"
-
 #include "dawn/common/PlacementAllocated.h"
+#include "dawn/native/BindGroup.h"
 #include "dawn/native/webgpu/Forward.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
 #include "dawn/native/webgpu/RecordableObject.h"

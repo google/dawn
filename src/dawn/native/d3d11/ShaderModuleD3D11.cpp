@@ -48,7 +48,6 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-
 #include "tint/tint.h"
 
 namespace dawn::native::d3d11 {

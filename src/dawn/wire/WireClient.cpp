@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/wire/WireClient.h"
+
 #include "dawn/wire/client/Client.h"
 
 namespace dawn::wire {

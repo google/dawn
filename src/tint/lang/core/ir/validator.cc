@@ -120,6 +120,7 @@
 #define TINT_DUMP_IR_WHEN_VALIDATING 0
 #if TINT_DUMP_IR_WHEN_VALIDATING
 #include <iostream>
+
 #include "src/tint/utils/text/styled_text_printer.h"
 #endif
 

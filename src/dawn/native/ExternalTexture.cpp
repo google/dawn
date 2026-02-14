@@ -35,9 +35,8 @@
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/Texture.h"
-#include "dawn/native/utils/WGPUHelpers.h"
-
 #include "dawn/native/dawn_platform.h"
+#include "dawn/native/utils/WGPUHelpers.h"
 
 namespace dawn::native {
 

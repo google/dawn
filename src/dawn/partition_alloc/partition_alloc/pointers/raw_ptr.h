@@ -40,6 +40,7 @@
 #include <functional>
 #include <type_traits>
 #include <utility>
+
 #include "dawn/common/Compiler.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 

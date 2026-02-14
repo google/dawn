@@ -28,11 +28,10 @@
 #ifndef SRC_DAWN_NATIVE_DEVICE_H_
 #define SRC_DAWN_NATIVE_DEVICE_H_
 
-#include <shared_mutex>
-
 #include <atomic>
 #include <memory>
 #include <optional>
+#include <shared_mutex>
 #include <string>
 #include <utility>
 #include <vector>
@@ -50,6 +49,7 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "dawn/native/DawnNative.h"
 #include "dawn/native/DeviceGuard.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ErrorSink.h"
@@ -63,11 +63,9 @@
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/Toggles.h"
 #include "dawn/native/UsageValidationMode.h"
+#include "dawn/native/dawn_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
-
-#include "dawn/native/DawnNative.h"
-#include "dawn/native/dawn_platform.h"
 
 namespace dawn::platform {
 class WorkerTaskPool;

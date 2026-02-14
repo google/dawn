@@ -32,13 +32,12 @@
 #include <string>
 #include <vector>
 
-#include "dawn/native/BackendConnection.h"
-
 #include "absl/container/flat_hash_map.h"
 #include "dawn/common/DynamicLib.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/ityp_array.h"
+#include "dawn/native/BackendConnection.h"
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/VulkanFunctions.h"
 #include "dawn/native/vulkan/VulkanInfo.h"

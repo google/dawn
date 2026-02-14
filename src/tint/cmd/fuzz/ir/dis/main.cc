@@ -30,6 +30,7 @@
 #include <memory>
 #include <string>
 
+#include "spirv-tools/libspirv.hpp"
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/ir/binary/decode.h"
@@ -45,8 +46,6 @@
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/styled_text_printer.h"
-
-#include "spirv-tools/libspirv.hpp"
 
 TINT_BEGIN_DISABLE_PROTOBUF_WARNINGS();
 #include "src/tint/utils/protos/ir_fuzz/ir_fuzz.pb.h"

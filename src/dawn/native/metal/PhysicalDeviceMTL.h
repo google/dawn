@@ -28,11 +28,10 @@
 #ifndef SRC_DAWN_NATIVE_METAL_PHYSICALDEVICEMTL_H_
 #define SRC_DAWN_NATIVE_METAL_PHYSICALDEVICEMTL_H_
 
-#include "dawn/native/PhysicalDevice.h"
+#import <Metal/Metal.h>
 
 #include "dawn/common/NSRef.h"
-
-#import <Metal/Metal.h>
+#include "dawn/native/PhysicalDevice.h"
 
 namespace dawn::native::metal {
 

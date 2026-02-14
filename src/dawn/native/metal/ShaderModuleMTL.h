@@ -28,16 +28,15 @@
 #ifndef SRC_DAWN_NATIVE_METAL_SHADERMODULEMTL_H_
 #define SRC_DAWN_NATIVE_METAL_SHADERMODULEMTL_H_
 
+#import <Metal/Metal.h>
+
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "dawn/native/ShaderModule.h"
-
 #include "dawn/common/NSRef.h"
 #include "dawn/native/Error.h"
-
-#import <Metal/Metal.h>
+#include "dawn/native/ShaderModule.h"
 
 namespace dawn::native {
 struct ProgrammableStage;

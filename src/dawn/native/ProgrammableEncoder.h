@@ -35,9 +35,8 @@
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
-#include "partition_alloc/pointers/raw_ptr.h"
-
 #include "dawn/native/dawn_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 

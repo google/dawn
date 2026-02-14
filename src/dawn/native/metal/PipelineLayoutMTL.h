@@ -28,13 +28,12 @@
 #ifndef SRC_DAWN_NATIVE_METAL_PIPELINELAYOUTMTL_H_
 #define SRC_DAWN_NATIVE_METAL_PIPELINELAYOUTMTL_H_
 
+#import <Metal/Metal.h>
+
 #include "dawn/common/ityp_stack_vec.h"
 #include "dawn/native/BindingInfo.h"
-#include "dawn/native/PipelineLayout.h"
-
 #include "dawn/native/PerStage.h"
-
-#import <Metal/Metal.h>
+#include "dawn/native/PipelineLayout.h"
 
 namespace dawn::native::metal {
 

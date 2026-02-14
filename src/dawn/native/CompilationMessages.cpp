@@ -32,7 +32,6 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/dawn_platform.h"
-
 #include "tint/tint.h"
 
 namespace dawn::native {

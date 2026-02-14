@@ -34,7 +34,6 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Error.h"
-
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {

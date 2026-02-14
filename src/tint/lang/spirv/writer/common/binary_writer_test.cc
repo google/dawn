@@ -31,6 +31,7 @@
 #endif
 
 #include "src/tint/lang/spirv/writer/common/binary_writer.h"
+
 #include "gtest/gtest.h"
 
 namespace tint::spirv::writer {

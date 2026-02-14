@@ -28,11 +28,11 @@
 #ifndef SRC_DAWN_NATIVE_METAL_BUFFERMTL_H_
 #define SRC_DAWN_NATIVE_METAL_BUFFERMTL_H_
 
+#import <Metal/Metal.h>
+
 #include "dawn/common/NSRef.h"
 #include "dawn/common/SerialQueue.h"
 #include "dawn/native/Buffer.h"
-
-#import <Metal/Metal.h>
 
 namespace dawn::native::metal {
 

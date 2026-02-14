@@ -35,10 +35,8 @@
 #include "dawn/tests/StringViewMatchers.h"
 #include "dawn/tests/unittests/wire/WireFutureTest.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
-
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
-
 #include "webgpu/webgpu_cpp.h"
 
 namespace dawn::wire {

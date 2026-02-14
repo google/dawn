@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "gmock/gmock.h"
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
@@ -32,8 +33,6 @@
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/text/string_stream.h"
-
-#include "gmock/gmock.h"
 
 namespace tint::resolver {
 

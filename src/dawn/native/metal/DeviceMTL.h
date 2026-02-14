@@ -28,21 +28,20 @@
 #ifndef SRC_DAWN_NATIVE_METAL_DEVICEMTL_H_
 #define SRC_DAWN_NATIVE_METAL_DEVICEMTL_H_
 
+#import <IOSurface/IOSurfaceRef.h>
+#import <Metal/Metal.h>
+#import <QuartzCore/QuartzCore.h>
+
 #include <atomic>
 #include <memory>
 #include <mutex>
 #include <vector>
 
-#include "dawn/native/dawn_platform.h"
-
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/dawn_platform.h"
 #include "dawn/native/metal/CommandRecordingContext.h"
 #include "dawn/native/metal/Forward.h"
-
-#import <IOSurface/IOSurfaceRef.h>
-#import <Metal/Metal.h>
-#import <QuartzCore/QuartzCore.h>
 
 namespace dawn::native::metal {
 

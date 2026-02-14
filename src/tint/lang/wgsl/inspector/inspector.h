@@ -38,7 +38,6 @@
 #include <vector>
 
 #include "src/tint/api/common/override_id.h"
-
 #include "src/tint/api/common/resource_type.h"
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/wgsl/inspector/entry_point.h"

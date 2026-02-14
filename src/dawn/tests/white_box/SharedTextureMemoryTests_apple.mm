@@ -28,9 +28,8 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreVideo/CVPixelBuffer.h>
 #include <IOSurface/IOSurface.h>
-#include <webgpu/webgpu_cpp.h>
-
 #import <Metal/Metal.h>
+#include <webgpu/webgpu_cpp.h>
 
 #include <thread>
 

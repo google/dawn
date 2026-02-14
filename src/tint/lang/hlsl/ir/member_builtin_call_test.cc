@@ -28,7 +28,6 @@
 #include "src/tint/lang/hlsl/ir/member_builtin_call.h"
 
 #include "gtest/gtest.h"
-
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/validator.h"

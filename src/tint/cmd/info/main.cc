@@ -28,13 +28,12 @@
 
 #include <iostream>
 
-#include "src/tint/utils/text/styled_text_printer.h"
-
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/wgsl/inspector/entry_point.h"
 #include "src/tint/utils/command/args.h"
 #include "src/tint/utils/text/string.h"
+#include "src/tint/utils/text/styled_text_printer.h"
 
 namespace {
 

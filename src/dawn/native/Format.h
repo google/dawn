@@ -31,16 +31,14 @@
 #include <array>
 #include <variant>
 
-#include "dawn/native/dawn_platform.h"
-
+#include "absl/strings/str_format.h"
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/EnumClassBitmasks.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Subresource.h"
-
-#include "absl/strings/str_format.h"
+#include "dawn/native/dawn_platform.h"
 
 // About multi-planar formats.
 //

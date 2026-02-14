@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "dawn/tests/unittests/validation/ValidationTest.h"
+
 #include <webgpu/webgpu.h>
 
 #include <algorithm>
@@ -40,7 +42,6 @@
 #include "dawn/tests/PartitionAllocSupport.h"
 #include "dawn/tests/StringViewMatchers.h"
 #include "dawn/tests/ToggleParser.h"
-#include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/WireHelper.h"
 #include "dawn/webgpu_cpp_print.h"
 

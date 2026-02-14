@@ -35,12 +35,10 @@
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Ref.h"
-
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/BlockInfo.h"
 #include "dawn/native/Texture.h"
-
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {

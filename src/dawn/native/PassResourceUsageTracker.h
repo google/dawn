@@ -31,9 +31,8 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/native/PassResourceUsage.h"
-
 #include "absl/container/flat_hash_set.h"
+#include "dawn/native/PassResourceUsage.h"
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {

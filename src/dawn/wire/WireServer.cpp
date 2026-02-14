@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/wire/WireServer.h"
+
 #include "dawn/wire/server/Server.h"
 
 namespace dawn::wire {

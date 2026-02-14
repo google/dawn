@@ -37,6 +37,7 @@
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 #include <dbghelp.h>
+
 #include <string>
 
 #include "src/tint/utils/macros/defer.h"

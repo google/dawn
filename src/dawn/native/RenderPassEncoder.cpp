@@ -28,6 +28,7 @@
 #include "dawn/native/RenderPassEncoder.h"
 
 #include <math.h>
+
 #include <cstring>
 #include <utility>
 

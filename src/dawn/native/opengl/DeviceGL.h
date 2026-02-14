@@ -35,12 +35,11 @@
 #include <vector>
 
 #include "dawn/common/MutexProtected.h"
-#include "dawn/native/dawn_platform.h"
-
 #include "dawn/common/Platform.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ExecutionQueue.h"
 #include "dawn/native/QuerySet.h"
+#include "dawn/native/dawn_platform.h"
 #include "dawn/native/opengl/ContextEGL.h"
 #include "dawn/native/opengl/EGLFunctions.h"
 #include "dawn/native/opengl/Forward.h"

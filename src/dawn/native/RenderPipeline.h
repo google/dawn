@@ -38,7 +38,6 @@
 #include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/Pipeline.h"
-
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {

@@ -31,7 +31,6 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
-
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/utils/containers/hashmap.h"
 

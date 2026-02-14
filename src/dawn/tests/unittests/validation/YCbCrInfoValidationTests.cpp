@@ -29,7 +29,6 @@
 
 // This must be included instead of vulkan.h so that we can wrap it with vulkan_platform.h.
 #include "dawn/common/vulkan_platform.h"
-
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 

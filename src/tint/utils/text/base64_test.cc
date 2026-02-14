@@ -31,7 +31,6 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/text/string.h"
 

@@ -28,6 +28,7 @@
 #include "dawn/replay/Replay.h"
 
 #include <webgpu/webgpu_cpp.h>
+
 #include <algorithm>
 #include <iostream>
 #include <memory>

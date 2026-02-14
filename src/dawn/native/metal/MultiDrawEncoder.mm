@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/native/metal/MultiDrawEncoder.h"
+
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/ToBackend.h"
 #include "dawn/native/metal/BufferMTL.h"

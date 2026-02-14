@@ -28,7 +28,6 @@
 #include "src/tint/lang/spirv/writer/analysis/relaxed_precision_decorations.h"
 
 #include "gmock/gmock.h"
-
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"

@@ -29,6 +29,7 @@
 #define SRC_TINT_UTILS_RTTI_CASTABLE_H_
 
 #include <stdint.h>
+
 #include <functional>
 #include <tuple>
 #include <type_traits>

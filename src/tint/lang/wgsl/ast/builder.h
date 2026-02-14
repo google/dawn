@@ -31,7 +31,6 @@
 #include <utility>
 
 #include "src/tint/api/common/override_id.h"
-
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/interpolation.h"

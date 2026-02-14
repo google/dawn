@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/ir/convert.h"
+
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::core::ir {

@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/tint/lang/wgsl/inspector/inspector.h"
+
 #include <algorithm>
 #include <memory>
 #include <unordered_set>
 
 #include "gmock/gmock.h"
-
 #include "src/tint/lang/core/fluent_types.h"  // IWYU pragma: export
 #include "src/tint/lang/wgsl/inspector/entry_point.h"
-#include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT

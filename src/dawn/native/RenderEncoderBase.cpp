@@ -28,6 +28,7 @@
 #include "dawn/native/RenderEncoderBase.h"
 
 #include <math.h>
+
 #include <cstring>
 #include <utility>
 

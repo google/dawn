@@ -31,9 +31,8 @@
 #include <optional>
 #include <vector>
 
-#include "dawn/native/Error.h"
-
 #include "dawn/native/DawnNative.h"
+#include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/PassResourceUsage.h"
 #include "dawn/native/Texture.h"

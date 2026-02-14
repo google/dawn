@@ -27,13 +27,12 @@
 
 #include "src/tint/lang/wgsl/sem/materialize.h"
 
+#include "gmock/gmock.h"
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/lang/wgsl/sem/array.h"
 #include "src/tint/utils/rtti/switch.h"
-
-#include "gmock/gmock.h"
 
 namespace tint::resolver {
 namespace {

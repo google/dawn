@@ -38,7 +38,6 @@
 #include "dawn/tests/ParamGenerator.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/WireServer.h"
-
 #include "gtest/gtest.h"
 
 namespace dawn::wire {

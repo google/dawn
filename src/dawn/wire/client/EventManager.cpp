@@ -30,13 +30,13 @@
 #pragma allow_unsafe_buffers
 #endif
 
+#include "dawn/wire/client/EventManager.h"
+
 #include <map>
 #include <optional>
 #include <span>
 #include <utility>
 #include <vector>
-
-#include "dawn/wire/client/EventManager.h"
 
 #include "dawn/common/Log.h"
 #include "dawn/common/Time.h"

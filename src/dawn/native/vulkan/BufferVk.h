@@ -28,13 +28,12 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_BUFFERVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_BUFFERVK_H_
 
-#include "dawn/native/Buffer.h"
-#include "partition_alloc/pointers/raw_ptr.h"
-
 #include "absl/container/flat_hash_set.h"
 #include "dawn/common/SerialQueue.h"
 #include "dawn/common/vulkan_platform.h"
+#include "dawn/native/Buffer.h"
 #include "dawn/native/ResourceMemoryAllocation.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::vulkan {
 

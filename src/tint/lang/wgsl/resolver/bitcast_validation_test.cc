@@ -27,10 +27,9 @@
 
 #include <type_traits>
 
+#include "gmock/gmock.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
-
-#include "gmock/gmock.h"
 
 namespace tint::resolver {
 namespace {

@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_METAL_UTILSMETAL_H_
 #define SRC_DAWN_NATIVE_METAL_UTILSMETAL_H_
 
+#import <Metal/Metal.h>
+
 #include <string>
 
 #include "absl/container/inlined_vector.h"
@@ -37,8 +39,6 @@
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/ShaderModuleMTL.h"
 #include "dawn/native/metal/TextureMTL.h"
-
-#import <Metal/Metal.h>
 
 namespace dawn::native {
 struct BeginRenderPassCmd;

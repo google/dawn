@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_WEBGPU_RENDERPIPELINEWGPU_H_
 
 #include <array>
+
 #include "dawn/common/Constants.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"

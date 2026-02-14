@@ -29,6 +29,7 @@
 #define SRC_DAWN_WIRE_CLIENT_QUEUE_H_
 
 #include <webgpu/webgpu.h>
+
 #include <atomic>
 
 #include "dawn/wire/WireClient.h"

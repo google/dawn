@@ -27,6 +27,8 @@
 
 // GEN_BUILD:CONDITION(tint_build_wgsl_reader)
 
+#include "src/tint/lang/wgsl/resolver/uniformity.h"
+
 #include <memory>
 #include <string>
 #include <string_view>
@@ -34,14 +36,12 @@
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
-#include "src/tint/lang/wgsl/resolver/uniformity.h"
 #include "src/tint/utils/text/string_stream.h"
-
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 
 namespace tint::resolver {
 namespace {

@@ -37,7 +37,6 @@
 #include <vector>
 
 #include "dawn/common/Preprocessor.h"
-
 #include "gtest/gtest.h"
 
 namespace dawn {

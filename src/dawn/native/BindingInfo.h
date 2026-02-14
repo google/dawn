@@ -40,7 +40,6 @@
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/PerStage.h"
 #include "dawn/native/Serializable.h"
-
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {

@@ -28,11 +28,11 @@
 #include "src/tint/utils/text/string_stream.h"
 
 #include <math.h>
+
 #include <cstring>
 #include <limits>
 
 #include "gtest/gtest.h"
-
 #include "src/tint/utils/rtti/traits.h"
 
 namespace tint::utils {

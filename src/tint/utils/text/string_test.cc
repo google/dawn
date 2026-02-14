@@ -28,10 +28,9 @@
 #include "src/tint/utils/text/string.h"
 
 #include "gmock/gmock.h"
+#include "src/tint/utils/containers/transform.h"  // Used by ToStringList()
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/text/styled_text.h"
-
-#include "src/tint/utils/containers/transform.h"  // Used by ToStringList()
 
 namespace tint {
 namespace {

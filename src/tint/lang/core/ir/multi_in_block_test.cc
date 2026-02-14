@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/ir/multi_in_block.h"
+
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 

@@ -39,7 +39,6 @@
 #include "dawn/native/IndirectDrawMetadata.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/PassResourceUsage.h"
-
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {

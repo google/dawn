@@ -39,7 +39,6 @@
 #include "dawn/native/Surface.h"
 #include "dawn/native/TintUtils.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-
 #include "tint/tint.h"
 
 namespace dawn::native::null {

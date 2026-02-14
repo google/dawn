@@ -28,7 +28,6 @@
 #include <cmath>
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
-
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {

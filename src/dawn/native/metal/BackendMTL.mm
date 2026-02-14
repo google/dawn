@@ -27,15 +27,15 @@
 
 #include "dawn/native/metal/BackendMTL.h"
 
+#include <string>
+#include <vector>
+
 #include "dawn/common/NSRef.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/MetalBackend.h"
 #include "dawn/native/metal/PhysicalDeviceMTL.h"
-
-#include <string>
-#include <vector>
 
 namespace dawn::native::metal {
 

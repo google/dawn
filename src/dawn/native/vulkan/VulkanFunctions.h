@@ -30,7 +30,6 @@
 
 #include "dawn/common/Compiler.h"
 #include "dawn/common/vulkan_platform.h"
-
 #include "dawn/native/Error.h"
 
 namespace dawn {

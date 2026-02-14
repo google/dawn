@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/tint/lang/core/ir/const_param_validator.h"
+
 #include <string>
 
 #include "gtest/gtest.h"
-
 #include "src/tint/lang/core/binary_op.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/const_param_validator.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/validator.h"

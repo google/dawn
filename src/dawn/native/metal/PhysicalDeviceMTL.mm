@@ -43,6 +43,7 @@
 
 #if DAWN_PLATFORM_IS(MACOS)
 #import <IOKit/IOKitLib.h>
+
 #include "dawn/common/IOKitRef.h"
 #endif
 

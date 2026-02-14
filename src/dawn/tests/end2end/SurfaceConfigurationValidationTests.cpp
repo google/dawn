@@ -30,14 +30,13 @@
 #include <string>
 #include <vector>
 
+#include "GLFW/glfw3.h"
 #include "dawn/common/Constants.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "webgpu/webgpu_glfw.h"
-
-#include "GLFW/glfw3.h"
 
 namespace dawn::utils {
 static constexpr std::array<wgpu::CompositeAlphaMode, 5> kAllAlphaModes = {

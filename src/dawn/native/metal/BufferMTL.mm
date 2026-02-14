@@ -27,6 +27,8 @@
 
 #include "dawn/native/metal/BufferMTL.h"
 
+#include <limits>
+
 #include "dawn/common/Math.h"
 #include "dawn/common/Platform.h"
 #include "dawn/native/CallbackTaskManager.h"
@@ -36,8 +38,6 @@
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/QueueMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
-
-#include <limits>
 
 namespace dawn::native::metal {
 // The size of uniform buffer and storage buffer need to be aligned to 16 bytes which is the

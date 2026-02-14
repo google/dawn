@@ -28,7 +28,6 @@
 #include "src/tint/cmd/fuzz/ir/helpers/substitute_overrides_config.h"
 
 #include "gtest/gtest.h"
-
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 

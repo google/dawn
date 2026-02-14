@@ -27,6 +27,10 @@
 
 #include "dawn/native/metal/ShaderModuleMTL.h"
 
+#include <tint/tint.h>
+
+#include <sstream>
+
 #include "dawn/common/MatchVariant.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/Range.h"
@@ -46,10 +50,6 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-
-#include <tint/tint.h>
-
-#include <sstream>
 
 namespace dawn::native::metal {
 namespace {

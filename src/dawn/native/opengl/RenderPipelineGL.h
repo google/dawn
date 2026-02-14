@@ -31,7 +31,6 @@
 #include <vector>
 
 #include "dawn/native/RenderPipeline.h"
-
 #include "dawn/native/opengl/PipelineGL.h"
 #include "dawn/native/opengl/opengl_platform.h"
 

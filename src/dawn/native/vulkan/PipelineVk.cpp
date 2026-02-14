@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/native/vulkan/PipelineVk.h"
+
 #include "dawn/native/vulkan/PipelineLayoutVk.h"
 
 namespace dawn::native::vulkan {

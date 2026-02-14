@@ -34,7 +34,6 @@
 #include "dawn/mock_webgpu.h"
 #include "dawn/tests/MockCallback.h"
 #include "gtest/gtest.h"
-
 #include "webgpu/webgpu_cpp.h"
 
 namespace dawn {

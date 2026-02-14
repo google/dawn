@@ -35,16 +35,15 @@
 #include "dawn/common/SerialMap.h"
 #include "dawn/common/WeakRefSupport.h"
 #include "dawn/native/CallbackTaskManager.h"
+#include "dawn/native/DawnNative.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ExecutionQueue.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
-#include "partition_alloc/pointers/raw_ptr.h"
-
-#include "dawn/native/DawnNative.h"
 #include "dawn/native/dawn_platform.h"
 #include "dawn/platform/DawnPlatform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 

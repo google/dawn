@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gtest/gtest.h"
-
 #include "src/tint/lang/core/constant/eval.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/type/f16.h"

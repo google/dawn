@@ -31,7 +31,6 @@
 #include "dawn/native/Sampler.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
 #include "dawn/native/webgpu/RecordableObject.h"
-
 #include "dawn/webgpu.h"
 
 namespace dawn::native::webgpu {

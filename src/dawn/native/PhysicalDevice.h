@@ -31,12 +31,11 @@
 #include <string>
 #include <vector>
 
-#include "dawn/native/DawnNative.h"
-
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/ityp_span.h"
+#include "dawn/native/DawnNative.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Features.h"

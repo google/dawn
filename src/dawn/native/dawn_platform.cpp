@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/native/dawn_platform.h"
+
 #include "dawn/native/Texture.h"
 
 namespace dawn::native {

@@ -30,15 +30,15 @@
 
 #include <IOSurface/IOSurfaceRef.h>
 #import <Metal/Metal.h>
-#include <vector>
 
-#include "dawn/native/Texture.h"
+#include <vector>
 
 #include "absl/container/inlined_vector.h"
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/NSRef.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/MetalBackend.h"
+#include "dawn/native/Texture.h"
 
 namespace dawn::native::metal {
 

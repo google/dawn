@@ -31,6 +31,7 @@
 #include <deque>
 #include <memory>
 #include <utility>
+
 #include "dawn/common/MutexProtected.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/webgpu/Forward.h"

@@ -32,12 +32,13 @@
 #pragma allow_unsafe_buffers
 #endif
 
-#include "src/tint/utils/file/tmpfile.h"
-
 #include <fcntl.h>
 #include <io.h>
 #include <stdio.h>
+
 #include <cstdio>
+
+#include "src/tint/utils/file/tmpfile.h"
 
 namespace tint {
 

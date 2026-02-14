@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/wgsl/sem/load.h"
+
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/texture_dimension.h"

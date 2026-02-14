@@ -38,7 +38,6 @@
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/ShaderModule.h"
 #include "dawn/native/stream/Stream.h"
-
 #include "tint/tint.h"
 
 namespace dawn::native {

@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_CORE_TYPE_SWIZZLE_VIEW_H_
 
 #include <string>
+
 #include "src/tint/lang/core/type/memory_view.h"
 
 namespace tint::core::type {

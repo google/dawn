@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/tint/lang/core/number.h"
+
 #include <cmath>
 #include <cstdint>
 #include <tuple>
@@ -32,11 +34,9 @@
 #include <variant>
 #include <vector>
 
-#include "src/tint/lang/core/number.h"
+#include "gtest/gtest.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/text/string_stream.h"
-
-#include "gtest/gtest.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 

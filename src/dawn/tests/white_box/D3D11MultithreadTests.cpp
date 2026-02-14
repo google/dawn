@@ -27,6 +27,7 @@
 
 #include <d3d11.h>
 #include <wrl/client.h>
+
 #include <vector>
 
 #include "dawn/native/D3D11Backend.h"

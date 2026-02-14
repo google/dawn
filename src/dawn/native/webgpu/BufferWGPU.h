@@ -29,7 +29,6 @@
 #define SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
 
 #include "dawn/native/Buffer.h"
-
 #include "dawn/native/webgpu/Forward.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
 #include "dawn/native/webgpu/RecordableObject.h"

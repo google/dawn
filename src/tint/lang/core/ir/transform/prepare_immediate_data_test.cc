@@ -28,7 +28,6 @@
 #include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 
 #include "gmock/gmock.h"
-
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 
 namespace tint::core::ir::transform {

@@ -25,8 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/writer/writer.h"
-
 #include <string>
 #include <vector>
 
@@ -35,6 +33,7 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
+#include "src/tint/lang/spirv/writer/writer.h"
 #include "src/tint/utils/macros/defer.h"
 
 #if TINT_BUILD_FUZZER_VULKAN_SUPPORT

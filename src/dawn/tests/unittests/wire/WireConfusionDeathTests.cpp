@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/tests/unittests/wire/WireTest.h"
-
 #include "dawn/utils/WGPUHelpers.h"
 #include "dawn/wire/WireClient.h"
 

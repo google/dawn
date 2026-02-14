@@ -31,7 +31,6 @@
 #endif
 
 #include "dawn/common/GPUInfo.h"
-#include "dawn/common/GPUInfo_autogen.h"
 
 #include <algorithm>
 #include <array>
@@ -39,6 +38,7 @@
 #include <sstream>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/GPUInfo_autogen.h"
 
 namespace dawn::gpu_info {
 namespace {

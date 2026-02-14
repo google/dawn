@@ -32,10 +32,10 @@
 
 // GEN_BUILD:CONDITION(tint_build_is_linux || tint_build_is_mac)
 
-#include <unistd.h>
-
 #include <sys/select.h>
 #include <termios.h>
+#include <unistd.h>
+
 #include <chrono>
 #include <cstdint>
 #include <cstdio>

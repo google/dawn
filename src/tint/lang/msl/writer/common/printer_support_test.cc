@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/msl/writer/common/printer_support.h"
+
 #include "gtest/gtest.h"
 
 namespace tint::msl::writer {

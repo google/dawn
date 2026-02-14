@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_METAL_COMMANDBUFFERMTL_H_
 #define SRC_DAWN_NATIVE_METAL_COMMANDBUFFERMTL_H_
 
+#import <Metal/Metal.h>
+
 #include <set>
 #include <utility>
 #include <vector>
@@ -36,8 +38,6 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/metal/MultiDrawEncoder.h"
-
-#import <Metal/Metal.h>
 
 namespace dawn::native {
 class CommandEncoder;

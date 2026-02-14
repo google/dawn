@@ -32,7 +32,6 @@
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/RenderPipeline.h"
-
 #include "tint/tint.h"
 
 namespace dawn::native {

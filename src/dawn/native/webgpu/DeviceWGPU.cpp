@@ -65,7 +65,6 @@
 #include "dawn/native/webgpu/ShaderModuleWGPU.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
 #include "dawn/native/webgpu/ToWGPU.h"
-
 #include "tint/tint.h"
 
 namespace dawn::native::webgpu {

@@ -29,9 +29,8 @@
 #define SRC_DAWN_NATIVE_OPENGL_BUFFERGL_H_
 
 #include "dawn/native/Buffer.h"
-#include "partition_alloc/pointers/raw_ptr.h"
-
 #include "dawn/native/opengl/opengl_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::opengl {
 

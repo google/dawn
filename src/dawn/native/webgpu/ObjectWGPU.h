@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_WEBGPU_OBJECTWGPU_H_
 
 #include <webgpu/webgpu.h>
+
 #include "dawn/common/NonMovable.h"
 
 namespace dawn::native::webgpu {

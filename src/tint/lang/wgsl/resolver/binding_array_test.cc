@@ -26,10 +26,10 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/type/binding_array.h"
-#include "src/tint/lang/wgsl/resolver/resolver.h"
-#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 
 #include "gmock/gmock.h"
+#include "src/tint/lang/wgsl/resolver/resolver.h"
+#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT

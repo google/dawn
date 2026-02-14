@@ -28,10 +28,9 @@
 #ifndef SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_SAMPLERMOCK_H_
 #define SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_SAMPLERMOCK_H_
 
-#include "gmock/gmock.h"
-
 #include "dawn/native/Sampler.h"
 #include "dawn/tests/unittests/native/mocks/DeviceMock.h"
+#include "gmock/gmock.h"
 
 namespace dawn::native {
 

@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/native/TexelBufferView.h"
+
 #include "dawn/native/Buffer.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"

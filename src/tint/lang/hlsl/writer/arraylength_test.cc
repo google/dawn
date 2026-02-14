@@ -25,12 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "gtest/gtest.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/hlsl/writer/helper_test.h"
-
-#include "gtest/gtest.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT

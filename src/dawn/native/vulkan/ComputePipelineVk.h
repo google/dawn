@@ -28,9 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_COMPUTEPIPELINEVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_COMPUTEPIPELINEVK_H_
 
-#include "dawn/native/ComputePipeline.h"
-
 #include "dawn/common/vulkan_platform.h"
+#include "dawn/native/ComputePipeline.h"
 #include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/vulkan/PipelineVk.h"

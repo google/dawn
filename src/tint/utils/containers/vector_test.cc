@@ -31,7 +31,6 @@
 #include <tuple>
 
 #include "gmock/gmock.h"
-
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/memory/bitcast.h"

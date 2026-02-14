@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/type/type.h"
+
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"

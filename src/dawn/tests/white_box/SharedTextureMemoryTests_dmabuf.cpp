@@ -37,7 +37,6 @@
 
 // This must be included instead of vulkan.h so that we can wrap it with vulkan_platform.h.
 #include "dawn/common/vulkan_platform.h"
-
 #include "dawn/tests/white_box/SharedTextureMemoryTests.h"
 
 namespace dawn {

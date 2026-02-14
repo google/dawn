@@ -29,7 +29,6 @@
 #define SRC_DAWN_NATIVE_OPENGL_EGLFUNCTIONS_H_
 
 #include "dawn/common/egl_platform.h"
-
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Error.h"
 

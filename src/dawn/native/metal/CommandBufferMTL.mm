@@ -27,6 +27,8 @@
 
 #include "dawn/native/metal/CommandBufferMTL.h"
 
+#include <tint/tint.h>
+
 #include "absl/container/flat_hash_map.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/MatchVariant.h"
@@ -52,8 +54,6 @@
 #include "dawn/native/metal/TextureMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-
-#include <tint/tint.h>
 
 namespace dawn::native::metal {
 

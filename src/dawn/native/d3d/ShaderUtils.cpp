@@ -40,7 +40,6 @@
 #include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-
 #include "tint/tint.h"
 
 namespace dawn::native::d3d {

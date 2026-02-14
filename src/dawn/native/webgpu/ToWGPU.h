@@ -29,8 +29,10 @@
 #define SRC_DAWN_NATIVE_WEBGPU_TOWGPU_H_
 
 #include <webgpu/webgpu.h>
+
 #include <string>
 #include <vector>
+
 #include "dawn/native/ShaderModule.h"
 #include "dawn/native/wgpu_structs_autogen.h"
 

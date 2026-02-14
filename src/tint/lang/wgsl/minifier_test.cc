@@ -27,11 +27,10 @@
 
 // GEN_BUILD:CONDITION(tint_build_wgsl_reader && tint_build_wgsl_writer)
 
+#include "gtest/gtest.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/diagnostic/source.h"
-
-#include "gtest/gtest.h"
 
 namespace tint::wgsl {
 namespace {

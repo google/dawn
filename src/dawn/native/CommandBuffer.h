@@ -32,8 +32,6 @@
 #include <type_traits>
 #include <vector>
 
-#include "dawn/native/dawn_platform.h"
-
 #include "dawn/native/CommandAllocator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
@@ -41,6 +39,7 @@
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/PassResourceUsage.h"
 #include "dawn/native/Texture.h"
+#include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

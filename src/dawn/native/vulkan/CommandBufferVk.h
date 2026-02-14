@@ -30,10 +30,9 @@
 
 #include <set>
 
+#include "dawn/common/vulkan_platform.h"
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/Error.h"
-
-#include "dawn/common/vulkan_platform.h"
 
 namespace dawn::native {
 struct BeginComputePassCmd;

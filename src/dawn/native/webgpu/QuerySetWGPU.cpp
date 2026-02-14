@@ -28,8 +28,8 @@
 #include "src/dawn/native/webgpu/QuerySetWGPU.h"
 
 #include <webgpu/webgpu.h>
-#include "dawn/common/StringViewUtils.h"
 
+#include "dawn/common/StringViewUtils.h"
 #include "src/dawn/native/webgpu/DeviceWGPU.h"
 #include "src/dawn/native/webgpu/ToWGPU.h"
 

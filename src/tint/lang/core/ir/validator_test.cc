@@ -30,7 +30,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/type/array_count.h"

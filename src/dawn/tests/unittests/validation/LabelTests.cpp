@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
+
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"

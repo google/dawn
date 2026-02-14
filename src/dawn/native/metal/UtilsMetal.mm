@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/native/metal/UtilsMetal.h"
+
 #include <Metal/Metal.h>
 
 #include "dawn/common/Assert.h"

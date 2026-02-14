@@ -27,6 +27,8 @@
 
 #include "dawn/native/metal/TextureMTL.h"
 
+#include <CoreVideo/CVPixelBuffer.h>
+
 #include "absl/strings/str_format.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/IOSurfaceUtils.h"
@@ -42,8 +44,6 @@
 #include "dawn/native/metal/SharedFenceMTL.h"
 #include "dawn/native/metal/SharedTextureMemoryMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
-
-#include <CoreVideo/CVPixelBuffer.h>
 
 namespace dawn::native::metal {
 

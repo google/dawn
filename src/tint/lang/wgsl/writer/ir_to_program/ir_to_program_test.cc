@@ -27,6 +27,8 @@
 
 // GEN_BUILD:CONDITION(tint_build_wgsl_writer)
 
+#include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
+
 #include <limits>
 #include <sstream>
 #include <string>
@@ -37,7 +39,6 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
-#include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program_test.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/text/string.h"

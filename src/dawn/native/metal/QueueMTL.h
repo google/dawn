@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_METAL_QUEUEMTL_H_
 
 #import <Metal/Metal.h>
+
 #include <map>
 
 #include "dawn/common/MutexProtected.h"

@@ -28,7 +28,6 @@
 #include "src/tint/lang/msl/writer/raise/simd_ballot.h"
 
 #include "gtest/gtest.h"
-
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/number.h"

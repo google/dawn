@@ -26,7 +26,9 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/native/SystemEvent.h"
+
 #include <limits>
+
 #include "dawn/common/Assert.h"
 #include "dawn/utils/SystemHandle.h"
 

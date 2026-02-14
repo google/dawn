@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "dawn/native/ObjectBase.h"
+
 #include <atomic>
 #include <mutex>
 #include <utility>
@@ -33,7 +35,6 @@
 #include "absl/strings/str_format.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/Device.h"
-#include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/utils/WGPUHelpers.h"
 

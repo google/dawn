@@ -30,7 +30,6 @@
 
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/CreatePipelineAsyncEvent.h"
-
 #include "dawn/native/d3d/d3d_platform.h"
 
 namespace dawn::native::d3d11 {

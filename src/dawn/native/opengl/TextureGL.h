@@ -29,7 +29,6 @@
 #define SRC_DAWN_NATIVE_OPENGL_TEXTUREGL_H_
 
 #include "dawn/native/Texture.h"
-
 #include "dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native::opengl {

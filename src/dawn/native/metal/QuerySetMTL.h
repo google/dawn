@@ -28,11 +28,10 @@
 #ifndef SRC_DAWN_NATIVE_METAL_QUERYSETMTL_H_
 #define SRC_DAWN_NATIVE_METAL_QUERYSETMTL_H_
 
-#include "dawn/native/QuerySet.h"
+#import <Metal/Metal.h>
 
 #include "dawn/common/NSRef.h"
-
-#import <Metal/Metal.h>
+#include "dawn/native/QuerySet.h"
 
 namespace dawn::native::metal {
 

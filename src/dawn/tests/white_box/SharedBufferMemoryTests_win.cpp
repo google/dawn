@@ -26,7 +26,9 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <d3d12.h>
+
 #include <vector>
+
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/tests/DawnTest.h"

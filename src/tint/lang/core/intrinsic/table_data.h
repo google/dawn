@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_CORE_INTRINSIC_TABLE_DATA_H_
 
 #include <stdint.h>
+
 #include <limits>
 #include <string>
 

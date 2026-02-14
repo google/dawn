@@ -40,9 +40,8 @@
 #include "dawn/native/PerStage.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/ShaderModule.h"
-#include "partition_alloc/pointers/raw_ptr.h"
-
 #include "dawn/native/dawn_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 

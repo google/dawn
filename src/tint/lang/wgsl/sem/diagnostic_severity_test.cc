@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/wgsl/sem/helper_test.h"
-
 #include "src/tint/lang/wgsl/sem/module.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT

@@ -33,7 +33,7 @@
 #include "dawn/native/stream/Stream.h"
 #include "dawn/native/vulkan/RenderPassCache.h"
 
-#include <vulkan/utility/vk_struct_helper.hpp>  // NOLINT(build/include_order)
+#include <vulkan/utility/vk_struct_helper.hpp>
 
 namespace dawn::native {
 

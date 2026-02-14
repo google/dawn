@@ -45,7 +45,6 @@
 #include "dawn/native/vulkan/Forward.h"
 #include "dawn/native/vulkan/VulkanFunctions.h"
 #include "dawn/native/vulkan/VulkanInfo.h"
-
 #include "dawn/native/vulkan/external_memory/MemoryService.h"
 #include "dawn/native/vulkan/external_semaphore/SemaphoreService.h"
 

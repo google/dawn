@@ -28,6 +28,7 @@
 #include "src/tint/lang/hlsl/writer/raise/pixel_local.h"
 
 #include <gtest/gtest.h>
+
 #include <tuple>
 
 #include "src/tint/lang/core/fluent_types.h"

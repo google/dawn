@@ -28,7 +28,6 @@
 // GEN_BUILD:CONDITION(tint_build_wgsl_reader && tint_build_wgsl_writer)
 
 #include "gtest/gtest.h"
-
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/lang/wgsl/reader/reader.h"

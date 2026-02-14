@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_COMMON_NSREF_H_
 #define SRC_DAWN_COMMON_NSREF_H_
 
-#include "dawn/common/RefBase.h"
-
 #import <Foundation/NSObject.h>
+
+#include "dawn/common/RefBase.h"
 
 #if !defined(__OBJC__)
 #error "NSRef can only be used in Objective C/C++ code."

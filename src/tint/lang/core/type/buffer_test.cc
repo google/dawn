@@ -25,9 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/type/helper_test.h"
-
 #include "src/tint/lang/core/type/buffer.h"
+
+#include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/core/type/manager.h"
 
 namespace tint::core::type {
