@@ -36,6 +36,7 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/MatchVariant.h"
+#include "dawn/common/Math.h"
 #include "dawn/common/Numeric.h"
 #include "dawn/common/Range.h"
 #include "dawn/common/ityp_stack_vec.h"
@@ -137,6 +138,9 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
         DAWN_INVALID_IF(!device->GetInstance()->HasFeature(
                             wgpu::WGSLLanguageFeatureName::ImmediateAddressSpace),
                         "ImmediateAddressSpace feature is not enabled");
+        DAWN_INVALID_IF(!IsAligned(descriptor->immediateSize, kImmediateConstantElementByteSize),
+                        "immediateSize (%i) is not a multiple of %i bytes.",
+                        descriptor->immediateSize, kImmediateConstantElementByteSize);
         uint32_t maxImmediateSize = device->GetLimits().v1.maxImmediateSize;
         DAWN_INVALID_IF(descriptor->immediateSize > maxImmediateSize,
                         "immediateSize (%i) is larger than the maximum allowed (%i).",

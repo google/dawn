@@ -80,7 +80,7 @@ struct ImmediateDataDisableTest : ValidationTestWithParam<FeatureMode> {
 // without the feature enabled.
 TEST_P(ImmediateDataDisableTest, ImmediateSizeNotAllowed) {
     wgpu::PipelineLayoutDescriptor desc{};
-    desc.immediateSize = 1;
+    desc.immediateSize = 4;
 
     if (GetParam() == FeatureMode::Enabled) {
         device.CreatePipelineLayout(&desc);
@@ -174,7 +174,44 @@ TEST_F(ImmediateDataTest, ValidateImmediateSize) {
 
     // Failed case with invalid immediateSize that exceed limits.
     {
-        desc.immediateSize = kMaxImmediateDataBytes + 1;
+        desc.immediateSize = kMaxImmediateDataBytes + 4;
+        ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
+    }
+}
+
+// Check that immediateSize must be aligned to kImmediateConstantElementByteSize (4 bytes).
+TEST_F(ImmediateDataTest, ValidateImmediateSizeAlignment) {
+    wgpu::PipelineLayoutDescriptor desc{};
+
+    // Success case: aligned to 4 bytes.
+    {
+        desc.immediateSize = 4;
+        device.CreatePipelineLayout(&desc);
+    }
+    {
+        desc.immediateSize = 8;
+        device.CreatePipelineLayout(&desc);
+    }
+    {
+        desc.immediateSize = kMaxImmediateDataBytes;
+        device.CreatePipelineLayout(&desc);
+    }
+
+    // Failed case: not aligned to 4 bytes.
+    {
+        desc.immediateSize = 1;
+        ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
+    }
+    {
+        desc.immediateSize = 2;
+        ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
+    }
+    {
+        desc.immediateSize = 3;
+        ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
+    }
+    {
+        desc.immediateSize = 5;
         ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
     }
 }
