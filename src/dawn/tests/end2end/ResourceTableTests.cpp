@@ -513,21 +513,27 @@ TEST_P(ResourceTableTests, HasResourceMultipleTexturesTable) {
 
 constexpr auto kWgslSampledTextureTypes = std::array{
     "texture_1d<f32, filterable>",
+    "texture_1d<f32, unfilterable>",
     "texture_1d<i32>",
     "texture_1d<u32>",
     "texture_2d<f32, filterable>",
+    "texture_2d<f32, unfilterable>",
     "texture_2d<i32>",
     "texture_2d<u32>",
     "texture_2d_array<f32, filterable>",
+    "texture_2d_array<f32, unfilterable>",
     "texture_2d_array<i32>",
     "texture_2d_array<u32>",
     "texture_cube<f32, filterable>",
+    "texture_cube<f32, unfilterable>",
     "texture_cube<i32>",
     "texture_cube<u32>",
     "texture_cube_array<f32, filterable>",
+    "texture_cube_array<f32, unfilterable>",
     "texture_cube_array<i32>",
     "texture_cube_array<u32>",
     "texture_3d<f32, filterable>",
+    "texture_3d<f32, unfilterable>",
     "texture_3d<i32>",
     "texture_3d<u32>",
 
@@ -582,12 +588,12 @@ struct TextureDescForTypeIDCase {
 std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
     std::vector<TextureDescForTypeIDCase> cases;
 
-    // TODO(https://issues.chromium.org/473354065): Add tests of filterable vs. unfilterable floats
-    // when get/hasResource is able to make the difference.
+    // TODO(https://issues.chromium.org/484770625): Add tests for the unorm unfilterable
+    // formats that they only match a unfilterable texture.
 
     // Regular 1D textures.
     cases.push_back({
-        .wgslTypes = {{"texture_1d<f32, filterable>"}},
+        .wgslTypes = {{"texture_1d<f32, filterable>"}, {"texture_1d<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e1D,
     });
@@ -604,7 +610,7 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
 
     // Regular 2D textures.
     cases.push_back({
-        .wgslTypes = {{"texture_2d<f32, filterable>"}},
+        .wgslTypes = {{"texture_2d<f32, filterable>"}, {"texture_2d<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e2D,
     });
@@ -621,7 +627,8 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
 
     // Regular 2D array textures.
     cases.push_back({
-        .wgslTypes = {{"texture_2d_array<f32, filterable>"}},
+        .wgslTypes = {{"texture_2d_array<f32, filterable>"},
+                      {"texture_2d_array<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e2D,
         .viewDimension = wgpu::TextureViewDimension::e2DArray,
@@ -641,7 +648,7 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
 
     // Regular cube textures.
     cases.push_back({
-        .wgslTypes = {{"texture_cube<f32, filterable>"}},
+        .wgslTypes = {{"texture_cube<f32, filterable>"}, {"texture_cube<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e2D,
         .viewDimension = wgpu::TextureViewDimension::Cube,
@@ -661,7 +668,8 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
 
     // Regular cube array textures.
     cases.push_back({
-        .wgslTypes = {{"texture_cube_array<f32, filterable>"}},
+        .wgslTypes = {{"texture_cube_array<f32, filterable>"},
+                      {"texture_cube_array<f32, unfilterable"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e2D,
         .viewDimension = wgpu::TextureViewDimension::CubeArray,
@@ -681,7 +689,7 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
 
     // Regular 3d textures.
     cases.push_back({
-        .wgslTypes = {{"texture_3d<f32, filterable>"}},
+        .wgslTypes = {{"texture_3d<f32, filterable>"}, {"texture_3d<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e3D,
     });
@@ -717,27 +725,25 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
     });
 
     // Depth textures (including multisampled).
-    // TODO(https://issues.chromium.org/473354065): In the future we should allow depth textures to
-    // be used as texture_*<f32>.
     cases.push_back({
-        .wgslTypes = {{"texture_depth_2d"}},
+        .wgslTypes = {{"texture_depth_2d"}, {"texture_2d<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::Depth32Float,
         .dimension = wgpu::TextureDimension::e2D,
     });
     cases.push_back({
-        .wgslTypes = {{"texture_depth_2d_array"}},
+        .wgslTypes = {{"texture_depth_2d_array"}, {"texture_2d_array<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::Depth32Float,
         .dimension = wgpu::TextureDimension::e2D,
         .viewDimension = wgpu::TextureViewDimension::e2DArray,
     });
     cases.push_back({
-        .wgslTypes = {{"texture_depth_cube"}},
+        .wgslTypes = {{"texture_depth_cube"}, {"texture_cube<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::Depth32Float,
         .dimension = wgpu::TextureDimension::e2D,
         .viewDimension = wgpu::TextureViewDimension::Cube,
     });
     cases.push_back({
-        .wgslTypes = {{"texture_depth_cube_array"}},
+        .wgslTypes = {{"texture_depth_cube_array"}, {"texture_cube_array<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::Depth32Float,
         .dimension = wgpu::TextureDimension::e2D,
         .viewDimension = wgpu::TextureViewDimension::CubeArray,
@@ -776,7 +782,7 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
 
     // Depth-stencil textures with only one aspect selected.
     cases.push_back({
-        .wgslTypes = {{"texture_depth_2d"}},
+        .wgslTypes = {{"texture_depth_2d"}, {"texture_2d<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::Depth24PlusStencil8,
         .dimension = wgpu::TextureDimension::e2D,
         .viewAspect = wgpu::TextureAspect::DepthOnly,
