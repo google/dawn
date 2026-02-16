@@ -28,6 +28,7 @@
 #include "dawn/native/ComputePassEncoder.h"
 
 #include "dawn/common/Range.h"
+#include "dawn/common/Strings.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupLayout.h"
@@ -59,42 +60,42 @@ ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDispatchValidationPipelin
     // shader in various failure modes.
     // Type 'bool' cannot be used in address space 'uniform' as it is non-host-shareable.
     Ref<ShaderModuleBase> shaderModule;
-    DAWN_TRY_ASSIGN(shaderModule, utils::CreateShaderModule(device, R"(
-                struct UniformParams {
-                    maxComputeWorkgroupsPerDimension: u32,
-                    clientOffsetInU32: u32,
-                    enableValidation: u32,
-                    duplicateNumWorkgroups: u32,
+    DAWN_TRY_ASSIGN(shaderModule, utils::CreateShaderModule(device, DAWN_MULTILINE(
+        struct UniformParams {
+            maxComputeWorkgroupsPerDimension: u32,
+            clientOffsetInU32: u32,
+            enableValidation: u32,
+            duplicateNumWorkgroups: u32,
+        }
+
+        struct IndirectParams {
+            data: array<u32>
+        }
+
+        struct ValidatedParams {
+            data: array<u32>
+        }
+
+        @group(0) @binding(0) var<uniform> uniformParams: UniformParams;
+        @group(0) @binding(1) var<storage, read_write> clientParams: IndirectParams;
+        @group(0) @binding(2) var<storage, read_write> validatedParams: ValidatedParams;
+
+        @compute @workgroup_size(1, 1, 1)
+        fn main() {
+            for (var i = 0u; i < 3u; i = i + 1u) {
+                var numWorkgroups = clientParams.data[uniformParams.clientOffsetInU32 + i];
+                if (uniformParams.enableValidation > 0u &&
+                    numWorkgroups > uniformParams.maxComputeWorkgroupsPerDimension) {
+                    numWorkgroups = 0u;
                 }
+                validatedParams.data[i] = numWorkgroups;
 
-                struct IndirectParams {
-                    data: array<u32>
+                if (uniformParams.duplicateNumWorkgroups > 0u) {
+                        validatedParams.data[i + 3u] = numWorkgroups;
                 }
-
-                struct ValidatedParams {
-                    data: array<u32>
-                }
-
-                @group(0) @binding(0) var<uniform> uniformParams: UniformParams;
-                @group(0) @binding(1) var<storage, read_write> clientParams: IndirectParams;
-                @group(0) @binding(2) var<storage, read_write> validatedParams: ValidatedParams;
-
-                @compute @workgroup_size(1, 1, 1)
-                fn main() {
-                    for (var i = 0u; i < 3u; i = i + 1u) {
-                        var numWorkgroups = clientParams.data[uniformParams.clientOffsetInU32 + i];
-                        if (uniformParams.enableValidation > 0u &&
-                            numWorkgroups > uniformParams.maxComputeWorkgroupsPerDimension) {
-                            numWorkgroups = 0u;
-                        }
-                        validatedParams.data[i] = numWorkgroups;
-
-                        if (uniformParams.duplicateNumWorkgroups > 0u) {
-                             validatedParams.data[i + 3u] = numWorkgroups;
-                        }
-                    }
-                }
-            )"));
+            }
+        }
+    )));
 
     Ref<BindGroupLayoutBase> bindGroupLayout;
     DAWN_TRY_ASSIGN(bindGroupLayout,

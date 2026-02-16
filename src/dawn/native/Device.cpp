@@ -503,9 +503,7 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
     // If placeholder fragment shader module is needed, initialize it
     if (IsToggleEnabled(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline)) {
         // The empty fragment shader, used as a work around for vertex-only render pipeline
-        constexpr char kEmptyFragmentShader[] = R"(
-                @fragment fn fs_empty_main() {}
-            )";
+        constexpr char kEmptyFragmentShader[] = "@fragment fn fs_empty_main() {}";
         ShaderModuleDescriptor shaderDesc;
         ShaderSourceWGSL wgslDesc;
         wgslDesc.code = kEmptyFragmentShader;

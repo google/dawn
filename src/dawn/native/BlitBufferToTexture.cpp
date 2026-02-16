@@ -33,6 +33,7 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/Strings.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/CommandEncoder.h"
@@ -47,131 +48,138 @@ namespace dawn::native {
 
 namespace {
 
-constexpr std::string_view kShaderCommonSrc = R"(
-@vertex fn vert_fullscreen_quad(
-  @builtin(vertex_index) vertex_index : u32
-) -> @builtin(position) vec4f {
-  const pos = array(
-      vec2f(-1.0, -1.0),
-      vec2f( 3.0, -1.0),
-      vec2f(-1.0,  3.0));
-  return vec4f(pos[vertex_index], 0.0, 1.0);
-}
+constexpr std::string_view kShaderCommonSrc = DAWN_MULTILINE(
+    @vertex fn vert_fullscreen_quad(
+    @builtin(vertex_index) vertex_index : u32
+    ) -> @builtin(position) vec4f {
+    const pos = array(
+        vec2f(-1.0, -1.0),
+        vec2f( 3.0, -1.0),
+        vec2f(-1.0,  3.0));
+    return vec4f(pos[vertex_index], 0.0, 1.0);
+    }
 
-struct Params {
-  srcOffset : u32,
-  bytesPerRow : u32,
-  dstOrigin : vec2u
-};
+    struct Params {
+    srcOffset : u32,
+    bytesPerRow : u32,
+    dstOrigin : vec2u
+    };
 
-@group(0) @binding(0) var<storage, read> src_buf : array<u32>;
-@group(0) @binding(1) var<uniform> params : Params;
+    @group(0) @binding(0) var<storage, read> src_buf : array<u32>;
+    @group(0) @binding(1) var<uniform> params : Params;
 
-fn loadU8AsU32(byteOffset: u32) -> u32 {
-    let uintOffset = byteOffset >> 2;
-    let uintModOffset = byteOffset & 3;
-    let bitShift = uintModOffset * 8;
-    return (src_buf[uintOffset] >> bitShift) & 0xff;
-}
+    fn loadU8AsU32(byteOffset: u32) -> u32 {
+        let uintOffset = byteOffset >> 2;
+        let uintModOffset = byteOffset & 3;
+        let bitShift = uintModOffset * 8;
+        return (src_buf[uintOffset] >> bitShift) & 0xff;
+    }
 
-fn loadU16AsU32(byteOffset: u32) -> u32 {
-    let firstHalf = loadU8AsU32(byteOffset);
-    let secondHalf = loadU8AsU32(byteOffset + 1);
-    return firstHalf | (secondHalf << 8);
-}
+    fn loadU16AsU32(byteOffset: u32) -> u32 {
+        let firstHalf = loadU8AsU32(byteOffset);
+        let secondHalf = loadU8AsU32(byteOffset + 1);
+        return firstHalf | (secondHalf << 8);
+    }
 
-// byteOffset is expected to be aligned to 4.
-fn loadU32(byteOffset: u32) -> u32 {
-    let uintOffset = byteOffset >> 2;
-    return src_buf[uintOffset];
-}
+    // byteOffset is expected to be aligned to 4.
+    fn loadU32(byteOffset: u32) -> u32 {
+        let uintOffset = byteOffset >> 2;
+        return src_buf[uintOffset];
+    }
 
-// byteOffset is expected to be aligned to 4.
-fn loadTwoU32s(byteOffset: u32) -> vec2u {
-    return vec2u(loadU32(byteOffset), loadU32(byteOffset + 4));
-}
+    // byteOffset is expected to be aligned to 4.
+    fn loadTwoU32s(byteOffset: u32) -> vec2u {
+        return vec2u(loadU32(byteOffset), loadU32(byteOffset + 4));
+    }
 
-@fragment fn blit_buffer_to_texture(
-    @builtin(position) screen_position : vec4f
-) -> @location(0) vec4f {
-    let iposition = vec2u(screen_position.xy) - params.dstOrigin;
+    @fragment fn blit_buffer_to_texture(
+        @builtin(position) screen_position : vec4f
+    ) -> @location(0) vec4f {
+        let iposition = vec2u(screen_position.xy) - params.dstOrigin;
 
-    let srcOffset = params.srcOffset + iposition.x * kPixelSize + iposition.y * params.bytesPerRow;
+        let srcOffset = params.srcOffset + iposition.x * kPixelSize + iposition.y * params.bytesPerRow;
 
-    return unpackData(srcOffset);
-}
-)";
+        return unpackData(srcOffset);
+    }
+);
 
-constexpr std::string_view kUnpackR8Unorm = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    return unpack4x8unorm(loadU8AsU32(byteOffset));
-}
-)";
+constexpr std::string_view kUnpackR8Unorm = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        //
+        return unpack4x8unorm(loadU8AsU32(byteOffset));
+    }
+);
 
-constexpr std::string_view kUnpackRG8Unorm = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    return unpack4x8unorm(loadU16AsU32(byteOffset));
-}
-)";
+constexpr std::string_view kUnpackRG8Unorm = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        //
+        return unpack4x8unorm(loadU16AsU32(byteOffset));
+    }
+);
 
-constexpr std::string_view kUnpackRGBA8Unorm = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    return unpack4x8unorm(loadU32(byteOffset));
-}
-)";
+constexpr std::string_view kUnpackRGBA8Unorm = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        //
+        return unpack4x8unorm(loadU32(byteOffset));
+    }
+);
 
-constexpr std::string_view kUnpackBGRA8Unorm = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    return unpack4x8unorm(loadU32(byteOffset)).bgra;
-}
-)";
+constexpr std::string_view kUnpackBGRA8Unorm = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        //
+        return unpack4x8unorm(loadU32(byteOffset)).bgra;
+    }
+);
 
-constexpr std::string_view kUnpackRGB10A2Unorm = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    let data = loadU32(byteOffset);
-    let r = f32((data & 0x3ff)) / 1023.0;
-    let g = f32(((data >> 10) & 0x3ff)) / 1023.0;
-    let b = f32(((data >> 20) & 0x3ff)) / 1023.0;
-    let a = f32(((data >> 30) & 0x3)) / 3.0;
-    return vec4f(r, g, b, a);
-}
-)";
+constexpr std::string_view kUnpackRGB10A2Unorm = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        let data = loadU32(byteOffset);
+        let r = f32((data & 0x3ff)) / 1023.0;
+        let g = f32(((data >> 10) & 0x3ff)) / 1023.0;
+        let b = f32(((data >> 20) & 0x3ff)) / 1023.0;
+        let a = f32(((data >> 30) & 0x3)) / 3.0;
+        return vec4f(r, g, b, a);
+    }
+);
 
-constexpr std::string_view kUnpackR16Float = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    return vec4f(unpack2x16float(loadU16AsU32(byteOffset)), 0.0, 1.0);
-}
-)";
+constexpr std::string_view kUnpackR16Float = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        //
+        return vec4f(unpack2x16float(loadU16AsU32(byteOffset)), 0.0, 1.0);
+    }
+);
 
-constexpr std::string_view kUnpackR16Unorm = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    return vec4f(f32(loadU16AsU32(byteOffset)) / f32(0xffff), 0.0, 0.0, 1.0);
-}
-)";
+constexpr std::string_view kUnpackR16Unorm = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        //
+        return vec4f(f32(loadU16AsU32(byteOffset)) / f32(0xffff), 0.0, 0.0, 1.0);
+    }
+);
 
-constexpr std::string_view kUnpackRG16Float = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    return vec4f(unpack2x16float(loadU32(byteOffset)), 0.0, 1.0);
-}
-)";
+constexpr std::string_view kUnpackRG16Float = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        //
+        return vec4f(unpack2x16float(loadU32(byteOffset)), 0.0, 1.0);
+    }
+);
 
-constexpr std::string_view kUnpackRG16Unorm = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    let word = loadU32(byteOffset);
-    let x = f32(word & 0xffff);
-    let y = f32(word >> 16);
-    return vec4f(vec2f(x, y) / f32(0xffff), 0.0, 1.0);
-}
-)";
+constexpr std::string_view kUnpackRG16Unorm = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        let word = loadU32(byteOffset);
+        let x = f32(word & 0xffff);
+        let y = f32(word >> 16);
+        return vec4f(vec2f(x, y) / f32(0xffff), 0.0, 1.0);
+    }
+);
 
-constexpr std::string_view kUnpackRGBA16Float = R"(
+constexpr std::string_view kUnpackRGBA16Float = DAWN_MULTILINE(
 fn unpackData(byteOffset: u32) -> vec4f {
     let data = loadTwoU32s(byteOffset);
     return vec4f(unpack2x16float(data.x), unpack2x16float(data.y));
 }
-)";
+);
 
-constexpr std::string_view kUnpackRGBA16Unorm = R"(
+constexpr std::string_view kUnpackRGBA16Unorm = DAWN_MULTILINE(
 fn unpackData(byteOffset: u32) -> vec4f {
     let words = loadTwoU32s(byteOffset);
     let x = f32(words[0] & 0xffff);
@@ -180,27 +188,28 @@ fn unpackData(byteOffset: u32) -> vec4f {
     let w = f32(words[1] >> 16);
     return vec4f(x, y, z, w) / f32(0xffff);
 }
-)";
+);
 
-constexpr std::string_view kUnpackR32Float = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    return vec4f(bitcast<f32>(loadU32(byteOffset)), 0.0, 0.0, 1.0);
-}
-)";
+constexpr std::string_view kUnpackR32Float = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        //
+        return vec4f(bitcast<f32>(loadU32(byteOffset)), 0.0, 0.0, 1.0);
+    }
+);
 
-constexpr std::string_view kUnpackRG32Float = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    let color = bitcast<vec2f>(loadTwoU32s(byteOffset));
-    return vec4f(color, 0.0, 1.0);
-}
-)";
+constexpr std::string_view kUnpackRG32Float = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        let color = bitcast<vec2f>(loadTwoU32s(byteOffset));
+        return vec4f(color, 0.0, 1.0);
+    }
+);
 
-constexpr std::string_view kUnpackRGBA32Float = R"(
-fn unpackData(byteOffset: u32) -> vec4f {
-    return vec4f(bitcast<vec2f>(loadTwoU32s(byteOffset)),
-                 bitcast<vec2f>(loadTwoU32s(byteOffset + 8)));
-}
-)";
+constexpr std::string_view kUnpackRGBA32Float = DAWN_MULTILINE(
+    fn unpackData(byteOffset: u32) -> vec4f {
+        return vec4f(bitcast<vec2f>(loadTwoU32s(byteOffset)),
+                    bitcast<vec2f>(loadTwoU32s(byteOffset + 8)));
+    }
+);
 
 std::string GenerateShaderSource(wgpu::TextureFormat format) {
     int pixelSize = 0;
@@ -266,7 +275,7 @@ std::string GenerateShaderSource(wgpu::TextureFormat format) {
             DAWN_UNREACHABLE();
     }
 
-    ss << "const kPixelSize = " << pixelSize << ";\n";
+    ss << "const kPixelSize = " << pixelSize << ";";
     ss << kShaderCommonSrc;
 
     return ss.str();

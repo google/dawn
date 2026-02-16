@@ -412,12 +412,11 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             // category. -Wunused-variable in particular comes up a lot in generated code, and
             // some (old?) Metal drivers accidentally treat it as a MTLLibraryErrorCompileError
             // instead of a warning.
-            msl = R"(
-                    #ifdef __clang__
-                    #pragma clang diagnostic ignored "-Wall"
-                    #endif
-                )" +
-                  math_mode_heading + msl;
+            msl = R"(#ifdef __clang__
+#pragma clang diagnostic ignored "-Wall"
+#endif
+)" + math_mode_heading +
+                  msl;
 
             return MslCompilation{{
                 std::move(msl),

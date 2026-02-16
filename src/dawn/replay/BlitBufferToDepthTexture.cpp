@@ -4,45 +4,44 @@
 
 #include "dawn/replay/BlitBufferToDepthTexture.h"
 
-#include <string>
+#include "dawn/common/Strings.h"
 
 namespace dawn::replay {
 
 namespace {
 
-constexpr std::string_view kShaderSrc = R"(
-const kPixelSize = 4;
+constexpr std::string_view kShaderSrc = DAWN_MULTILINE(
+    const kPixelSize = 4;
 
-@vertex fn vert_fullscreen_quad(
-  @builtin(vertex_index) vertex_index : u32
-) -> @builtin(position) vec4f {
-  const pos = array(
-      vec2f(-1.0, -1.0),
-      vec2f( 3.0, -1.0),
-      vec2f(-1.0,  3.0));
-  return vec4f(pos[vertex_index], 0.0, 1.0);
-}
+    @vertex fn vert_fullscreen_quad(
+    @builtin(vertex_index) vertex_index : u32
+    ) -> @builtin(position) vec4f {
+    const pos = array(
+        vec2f(-1.0, -1.0),
+        vec2f( 3.0, -1.0),
+        vec2f(-1.0,  3.0));
+    return vec4f(pos[vertex_index], 0.0, 1.0);
+    }
 
-struct Params {
-  srcOffset : u32,
-  bytesPerRow : u32,
-  dstOrigin : vec2u
-};
+    struct Params {
+    srcOffset : u32,
+    bytesPerRow : u32,
+    dstOrigin : vec2u
+    };
 
-@group(0) @binding(0) var<storage, read> src_buf : array<f32>;
-@group(0) @binding(1) var<uniform> params : Params;
+    @group(0) @binding(0) var<storage, read> src_buf : array<f32>;
+    @group(0) @binding(1) var<uniform> params : Params;
 
-@fragment fn blit_buffer_to_texture(
-    @builtin(position) screen_position : vec4f
-) -> @builtin(frag_depth) f32 {
-    let iposition = vec2u(screen_position.xy) - params.dstOrigin;
+    @fragment fn blit_buffer_to_texture(
+        @builtin(position) screen_position : vec4f
+    ) -> @builtin(frag_depth) f32 {
+        let iposition = vec2u(screen_position.xy) - params.dstOrigin;
 
-    let srcOffset = params.srcOffset + iposition.x * kPixelSize + iposition.y * params.bytesPerRow;
+        let srcOffset = params.srcOffset + iposition.x * kPixelSize + iposition.y * params.bytesPerRow;
 
-    return src_buf[srcOffset >> 2];
-}
-
-)";
+        return src_buf[srcOffset >> 2];
+    }
+);
 
 ResultOrError<wgpu::RenderPipeline> CreatePipeline(wgpu::Device device,
                                                    wgpu::TextureFormat format) {

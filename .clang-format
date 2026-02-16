@@ -36,3 +36,9 @@ IndentWidth: 4
 ObjCBlockIndentWidth: 4
 AccessModifierOffset: -2
 
+# Note this option is buggy and won't always actually prevent macro contents
+# from being reformatted. It sort of works though.
+WhitespaceSensitiveMacros:
+    - "DAWN_MULTILINE"
+    # Note: if we run into issues with EM_ASM being autoformatted incorrectly, we should add it here.
+    # https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#calling-javascript-from-c-c
