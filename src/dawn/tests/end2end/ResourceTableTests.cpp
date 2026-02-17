@@ -55,8 +55,7 @@ class ResourceTableTests : public DawnTest {
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         if (SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable})) {
-            return {wgpu::FeatureName::Float32Filterable,
-                    wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable};
+            return {wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable};
         }
         return {};
     }
@@ -352,7 +351,7 @@ TEST_P(ResourceTableTests, HasResourceOneTexturePinUnpin) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
-        .format = wgpu::TextureFormat::R32Float,
+        .format = wgpu::TextureFormat::R8Unorm,
     };
     wgpu::Texture tex = device.CreateTexture(&tDesc);
 
@@ -378,7 +377,7 @@ TEST_P(ResourceTableTests, HasResourceFilterableToUnfilterable) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
-        .format = wgpu::TextureFormat::R32Float,
+        .format = wgpu::TextureFormat::R8Unorm,
     };
     wgpu::Texture tex = device.CreateTexture(&tDesc);
 
@@ -393,7 +392,7 @@ TEST_P(ResourceTableTests, HasResourceOneTexturePinDestroy) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
-        .format = wgpu::TextureFormat::R32Float,
+        .format = wgpu::TextureFormat::R8Unorm,
     };
     wgpu::Texture tex = device.CreateTexture(&tDesc);
 
@@ -416,7 +415,7 @@ TEST_P(ResourceTableTests, HasResourceSameTextureMultipleTimesPinUnpin) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
-        .format = wgpu::TextureFormat::R32Float,
+        .format = wgpu::TextureFormat::R8Unorm,
     };
     wgpu::Texture tex = device.CreateTexture(&tDesc);
 
@@ -443,7 +442,7 @@ TEST_P(ResourceTableTests, HasResourceUpdateWithTextureAlreadyDestroyed) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
-        .format = wgpu::TextureFormat::R32Float,
+        .format = wgpu::TextureFormat::R8Unorm,
     };
     wgpu::Texture tex = device.CreateTexture(&tDesc);
     tex.Destroy();
@@ -459,7 +458,7 @@ TEST_P(ResourceTableTests, HasResourceSameTextureMultipleTables) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
-        .format = wgpu::TextureFormat::R32Float,
+        .format = wgpu::TextureFormat::R8Unorm,
     };
     wgpu::Texture tex = device.CreateTexture(&tDesc);
 
@@ -485,7 +484,7 @@ TEST_P(ResourceTableTests, HasResourceMultipleTexturesTable) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
-        .format = wgpu::TextureFormat::R32Float,
+        .format = wgpu::TextureFormat::R8Unorm,
     };
     wgpu::Texture tex0 = device.CreateTexture(&tDesc);
     wgpu::Texture tex1 = device.CreateTexture(&tDesc);
@@ -588,12 +587,14 @@ struct TextureDescForTypeIDCase {
 std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
     std::vector<TextureDescForTypeIDCase> cases;
 
-    // TODO(https://issues.chromium.org/484770625): Add tests for the unorm unfilterable
-    // formats that they only match a unfilterable texture.
-
     // Regular 1D textures.
     cases.push_back({
         .wgslTypes = {{"texture_1d<f32, filterable>"}, {"texture_1d<f32, unfilterable>"}},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+        .dimension = wgpu::TextureDimension::e1D,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_1d<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e1D,
     });
@@ -611,6 +612,11 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
     // Regular 2D textures.
     cases.push_back({
         .wgslTypes = {{"texture_2d<f32, filterable>"}, {"texture_2d<f32, unfilterable>"}},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+        .dimension = wgpu::TextureDimension::e2D,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_2d<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e2D,
     });
@@ -629,6 +635,12 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
     cases.push_back({
         .wgslTypes = {{"texture_2d_array<f32, filterable>"},
                       {"texture_2d_array<f32, unfilterable>"}},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::e2DArray,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_2d_array<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e2D,
         .viewDimension = wgpu::TextureViewDimension::e2DArray,
@@ -649,6 +661,12 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
     // Regular cube textures.
     cases.push_back({
         .wgslTypes = {{"texture_cube<f32, filterable>"}, {"texture_cube<f32, unfilterable>"}},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::Cube,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_cube<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e2D,
         .viewDimension = wgpu::TextureViewDimension::Cube,
@@ -670,6 +688,12 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
     cases.push_back({
         .wgslTypes = {{"texture_cube_array<f32, filterable>"},
                       {"texture_cube_array<f32, unfilterable"}},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::CubeArray,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_cube_array<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e2D,
         .viewDimension = wgpu::TextureViewDimension::CubeArray,
@@ -690,6 +714,11 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
     // Regular 3d textures.
     cases.push_back({
         .wgslTypes = {{"texture_3d<f32, filterable>"}, {"texture_3d<f32, unfilterable>"}},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+        .dimension = wgpu::TextureDimension::e3D,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_3d<f32, unfilterable>"}},
         .format = wgpu::TextureFormat::RGBA32Float,
         .dimension = wgpu::TextureDimension::e3D,
     });
@@ -799,6 +828,10 @@ std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
 
 // Test that hasResource() works as expected for all supported types in WGSL.
 TEST_P(ResourceTableTests, HasResourceTextureCompatibilityAllTypes) {
+    // We rely on RGBA32Float being unfilterable for this test so that we can test both filterable /
+    // unfilterable float without needing any additional extensions.
+    DAWN_ASSERT(!device.HasFeature(wgpu::FeatureName::Float32Filterable));
+
     auto textureCases = MakeTextureDescForTypeIDCases();
 
     // Make a resource table with all of our test texture views.
@@ -850,7 +883,7 @@ TEST_P(ResourceTableTests, HasResourceOOBIsFalse) {
     wgpu::TextureDescriptor tDesc{
         .usage = wgpu::TextureUsage::TextureBinding,
         .size = {1, 1},
-        .format = wgpu::TextureFormat::R32Float,
+        .format = wgpu::TextureFormat::R8Unorm,
     };
     wgpu::Texture tex = device.CreateTexture(&tDesc);
     tex.Pin(wgpu::TextureUsage::TextureBinding);
