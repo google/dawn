@@ -74,6 +74,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     std::optional<uint32_t> local_invocation_index_index;
     std::optional<uint32_t> first_clip_distance_index;
     std::optional<uint32_t> second_clip_distance_index;
+    std::optional<uint32_t> global_invocation_id_index;
+    std::optional<uint32_t> global_invocation_index_index;
+    std::optional<uint32_t> workgroup_index_index;
+    std::optional<uint32_t> workgroup_id_index;
     Hashset<uint32_t, 4> truncated_indices;
 
     // If set, points to a var of type struct with fields for offsets to apply to vertex_index and
@@ -84,14 +88,22 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     core::ir::Var* tint_subgroup_id_counter = nullptr;
     // If set, holds a function var that contains the subgroup_id value.
     core::ir::Var* tint_subgroup_id = nullptr;
+    // If set, holds a function var that contains the num_workgroups value.
+    core::ir::Value* tint_num_workgroups = nullptr;
+    // If set, holds a value that contains the workgroup_index value.
+    core::ir::Value* tint_workgroup_index = nullptr;
+    // If set, holds a value that contains the global_invocation_index value.
+    core::ir::Value* tint_global_invocation_index = nullptr;
     // If the entry point has a linear workgroup size, this will hold that linearized size.
     std::optional<uint32_t> linear_workgroup_size = std::nullopt;
+    std::optional<std::array<uint32_t, 3>> workgroup_size = std::nullopt;
 
     /// Constructor
     StateImpl(core::ir::Module& mod, core::ir::Function* f, const ShaderIOConfig& c)
         : ShaderIOBackendState(mod, f), config(c) {
         // Check if we have a linear workgroup size.
         if (auto wgsize = func->WorkgroupSizeAsConst()) {
+            workgroup_size = wgsize;
             linear_workgroup_size = 1;
             for (uint32_t i = 0; i < 3; i++) {
                 if (wgsize->at(i) > 1u) {
@@ -149,6 +161,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             case core::BuiltinValue::kSubgroupInvocationId:
             case core::BuiltinValue::kSubgroupSize:
             case core::BuiltinValue::kNumSubgroups:
+            case core::BuiltinValue::kGlobalInvocationIndex:
+            case core::BuiltinValue::kWorkgroupIndex:
                 // These are sorted, but don't actually end up as members. Value doesn't really
                 // matter, so just make it larger than the rest.
                 return std::numeric_limits<uint32_t>::max();
@@ -233,19 +247,59 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             }
         }
 
-        // Check if we need to add local_invocation_index to polyfill subgroup_id.
-        // We use local_invocation_index when the workgroup size is linear.
+        // Check if we need to add certain builtins for polyfills:
+        // * local_invocation_index for global_invocation_index or subgroup_id (with linear
+        // workgroup size)
+        // * workgroup_id for workgroup_index or global_invocation_index
+        // * num_workgroups for workgroup_index or global_invocation_index
         const bool has_subgroup_id = inputs.Any([](auto& struct_mem_desc) {
             return struct_mem_desc.attributes.builtin == core::BuiltinValue::kSubgroupId;
         });
         const bool has_local_invocation_index = inputs.Any([](auto& struct_mem_desc) {
             return struct_mem_desc.attributes.builtin == core::BuiltinValue::kLocalInvocationIndex;
         });
-        if (has_subgroup_id && linear_workgroup_size && !has_local_invocation_index) {
+        const bool has_global_invocation_index = inputs.Any([](auto& struct_mem_desc) {
+            return struct_mem_desc.attributes.builtin == core::BuiltinValue::kGlobalInvocationIndex;
+        });
+        const bool has_num_workgroups = inputs.Any([](auto& struct_mem_desc) {
+            return struct_mem_desc.attributes.builtin == core::BuiltinValue::kNumWorkgroups;
+        });
+        const bool has_workgroup_id = inputs.Any([](auto& struct_mem_desc) {
+            return struct_mem_desc.attributes.builtin == core::BuiltinValue::kWorkgroupId;
+        });
+        const bool has_workgroup_index = inputs.Any([](auto& struct_mem_desc) {
+            return struct_mem_desc.attributes.builtin == core::BuiltinValue::kWorkgroupIndex;
+        });
+        const bool has_global_invocation_id = inputs.Any([](auto& struct_mem_desc) {
+            return struct_mem_desc.attributes.builtin == core::BuiltinValue::kGlobalInvocationId;
+        });
+        const bool needs_local_invocation_index = has_subgroup_id && linear_workgroup_size;
+        if (needs_local_invocation_index && !has_local_invocation_index) {
             core::IOAttributes attrs{
                 .builtin = core::BuiltinValue::kLocalInvocationIndex,
             };
             AddInput(ir.symbols.New("local_invocation_index"), ty.u32(), attrs);
+        }
+        const bool needs_workgroup_id = has_workgroup_index;
+        if (needs_workgroup_id && !has_workgroup_id) {
+            core::IOAttributes attrs{
+                .builtin = core::BuiltinValue::kWorkgroupId,
+            };
+            AddInput(ir.symbols.New("workgroup_id"), ty.vec3u(), attrs);
+        }
+        const bool needs_num_workgroups = has_workgroup_index || has_global_invocation_index;
+        if (needs_num_workgroups && !has_num_workgroups) {
+            core::IOAttributes attrs{
+                .builtin = core::BuiltinValue::kNumWorkgroups,
+            };
+            AddInput(ir.symbols.New("num_workgroups"), ty.vec3u(), attrs);
+        }
+        const bool needs_global_invocation_id = has_global_invocation_index;
+        if (needs_global_invocation_id && !has_global_invocation_id) {
+            core::IOAttributes attrs{
+                .builtin = core::BuiltinValue::kGlobalInvocationId,
+            };
+            AddInput(ir.symbols.New("global_invocation_id"), ty.vec3u(), attrs);
         }
 
         Vector<MemberInfo, 4> input_data;
@@ -271,6 +325,14 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                     has_vertex_or_instance_index = true;
                 } else if (*builtin == core::BuiltinValue::kInstanceIndex) {
                     has_vertex_or_instance_index = true;
+                } else if (*builtin == core::BuiltinValue::kGlobalInvocationIndex) {
+                    global_invocation_index_index = i;
+                } else if (*builtin == core::BuiltinValue::kWorkgroupIndex) {
+                    workgroup_index_index = i;
+                } else if (*builtin == core::BuiltinValue::kWorkgroupId) {
+                    workgroup_id_index = i;
+                } else if (*builtin == core::BuiltinValue::kGlobalInvocationId) {
+                    global_invocation_id_index = i;
                 }
             }
 
@@ -304,11 +366,13 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         Vector<core::type::Manager::StructMemberDesc, 4> input_struct_members;
         for (auto& input : input_data) {
             // Don't add members for certain builtins
-            if (input.idx == subgroup_id_index ||             //
-                input.idx == subgroup_invocation_id_index ||  //
-                input.idx == subgroup_size_index ||           //
-                input.idx == num_subgroups_index ||           //
-                input.idx == num_workgroups_index) {
+            if (input.idx == subgroup_id_index ||              //
+                input.idx == subgroup_invocation_id_index ||   //
+                input.idx == subgroup_size_index ||            //
+                input.idx == num_subgroups_index ||            //
+                input.idx == num_workgroups_index ||           //
+                input.idx == global_invocation_index_index ||  //
+                input.idx == workgroup_index_index) {
                 // Invalid value, should not be indexed
                 input_indices[input.idx] = std::numeric_limits<uint32_t>::max();
                 continue;
@@ -437,6 +501,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     /// Handles kNumWorkgroups builtin by emitting a UBO to hold the num_workgroups value,
     /// along with the load of the value. Returns the loaded value.
     core::ir::Value* GetInputForNumWorkgroups(core::ir::Builder& builder) {
+        if (tint_num_workgroups) {
+            return tint_num_workgroups;
+        }
+
         // Create uniform var that will receive the number of workgroups
         core::ir::Var* num_wg_var = nullptr;
         builder.Append(ir.root_block, [&] {
@@ -462,7 +530,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             num_wg_var->SetBindingPoint(group, 0);
         }
         auto* load = builder.Load(num_wg_var);
-        return load->Result();
+        tint_num_workgroups = load->Result();
+        return tint_num_workgroups;
     }
 
     /// Create the atomic counter used to polyfill subgroup_id and num_subgroups, and add the code
@@ -551,6 +620,62 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         return builder.Call<u32>(core::BuiltinFn::kAtomicLoad, tint_subgroup_id_counter)->Result();
     }
 
+    core::ir::Value* PolyfillWorkgroupIndex(core::ir::Builder& builder) {
+        if (tint_workgroup_index != nullptr) {
+            return tint_workgroup_index;
+        }
+
+        // workgroup_index = workgroup_id.x +
+        //                   (workgroup_id.y * num_workgroups.x) +
+        //                   (workgroup_id.z * num_workgroups.x * num_workgroups.y)
+        auto* workgroup_id = GetInput(builder, workgroup_id_index.value());
+        auto* num_workgroups = GetInput(builder, num_workgroups_index.value());
+
+        auto* num_workgroups_x = builder.Access(ty.u32(), num_workgroups, 0_u);
+        auto* num_workgroups_y = builder.Access(ty.u32(), num_workgroups, 1_u);
+        auto* z_part = builder.Multiply(num_workgroups_x, num_workgroups_y)->Result();
+        z_part = builder.Multiply(builder.Access(ty.u32(), workgroup_id, 2_u), z_part)->Result();
+        auto* y_part =
+            builder.Multiply(builder.Access(ty.u32(), workgroup_id, 1_u), num_workgroups_x)
+                ->Result();
+        auto* init = builder.Add(builder.Access(ty.u32(), workgroup_id, 0_u), y_part)->Result();
+        init = builder.Add(init, z_part)->Result();
+        tint_workgroup_index = init;
+        return tint_workgroup_index;
+    }
+
+    core::ir::Value* PolyfillGlobalInvocationIndex(core::ir::Builder& builder) {
+        if (tint_global_invocation_index) {
+            return tint_global_invocation_index;
+        }
+
+        // global_invocation_index =
+        //   global_invocation_id.x +
+        //   (global_invocation_id.y * num_workgroups.x * workgroup_size.x) +
+        //   (global_invocation_id.z * num_workgroups.x * workgroup_size.x * num_workgroups.y *
+        //   workgroup_size.y)
+        auto* num_workgroups = GetInput(builder, num_workgroups_index.value());
+        auto* global_id = GetInput(builder, global_invocation_id_index.value());
+
+        auto* global_id_x = builder.Access(ty.u32(), global_id, 0_u);
+        auto* global_id_y = builder.Access(ty.u32(), global_id, 1_u);
+        auto* global_id_z = builder.Access(ty.u32(), global_id, 2_u);
+
+        auto* num_workgroups_x = builder.Access(ty.u32(), num_workgroups, 0_u);
+        auto* num_workgroups_y = builder.Access(ty.u32(), num_workgroups, 1_u);
+
+        auto* x_size = builder.Multiply(num_workgroups_x, u32(workgroup_size->at(0)));
+        auto* y_size = builder.Multiply(num_workgroups_y, u32(workgroup_size->at(1)));
+
+        auto* z_part = builder.Multiply(x_size, y_size);
+        z_part = builder.Multiply(global_id_z, z_part);
+        auto* y_part = builder.Multiply(global_id_y, x_size);
+        auto* value = builder.Add(global_id_x, y_part);
+        value = builder.Add(value, z_part);
+        tint_global_invocation_index = value->Result();
+        return tint_global_invocation_index;
+    }
+
     core::ir::Value* GetSubgroupSize(core::ir::Builder& builder) {
         return builder.Call<hlsl::ir::BuiltinCall>(ty.u32(), hlsl::BuiltinFn::kWaveGetLaneCount)
             ->Result();
@@ -563,6 +688,12 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         }
         if (num_subgroups_index == idx) {
             return PolyfillNumSubgroups(builder);
+        }
+        if (global_invocation_index_index == idx) {
+            return PolyfillGlobalInvocationIndex(builder);
+        }
+        if (workgroup_index_index == idx) {
+            return PolyfillWorkgroupIndex(builder);
         }
         if (subgroup_invocation_id_index == idx) {
             return builder
