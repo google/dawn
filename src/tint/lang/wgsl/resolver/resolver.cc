@@ -1898,9 +1898,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
         return nullptr;
     }
 
-    // If we're extracting from a memory view, we return a reference.
-    // TODO(crbug.com/477280751): The swizzle view exception preserves some existing buggy behavior
-    // in single element swizzle of a swizzle assignment, but this should be fixed in a follow up.
+    // If we're extracting from a memory view that will need to be loaded, we return a reference.
     if (memory_view && !memory_view->Is<core::type::SwizzleView>()) {
         ty =
             b.create<core::type::Reference>(memory_view->AddressSpace(), ty, memory_view->Access());
@@ -3647,10 +3645,9 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
             if (size == 1) {
                 // A single element swizzle is just the type of the vector.
                 ty = vec->Type();
-                // If we're extracting from a memory view, we return a reference.
-                // TODO(crbug.com/477280751): The swizzle view exception preserves some existing
-                // buggy behavior in single element swizzle of a swizzle assignment, but this should
-                // be fixed in a follow up.
+
+                // If we're extracting from a memory view that will need to be loaded, we return a
+                // reference.
                 if (memory_view && !memory_view->Is<core::type::SwizzleView>()) {
                     ty = b.create<core::type::Reference>(memory_view->AddressSpace(), ty,
                                                          memory_view->Access());
