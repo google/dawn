@@ -37,6 +37,7 @@
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/CacheRequest.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/opengl/BindGroupLayoutGL.h"
@@ -340,9 +341,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     const OpenGLFunctions& gl,
     const ProgrammableStage& programmableStage,
     SingleShaderStage stage,
-    bool usesVertexIndex,
-    bool usesInstanceIndex,
-    bool usesFragDepth,
+    const ImmediateConstantMask& pipelineImmediateMask,
     VertexAttributeMask bgraSwizzleAttributes,
     std::vector<CombinedSampler>* combinedSamplersOut,
     const PipelineLayout* layout,
@@ -431,18 +430,29 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.tintOptions.disable_workgroup_init =
         GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
 
-    if (usesVertexIndex) {
-        req.tintOptions.first_vertex_offset = 4 * PipelineLayout::ImmediateLocation::FirstVertex;
+    // If the size or alignment of the vertex and fragment stage immediate variables differ (e.g.,
+    // the vertex shader immediates contain a vec4 and the fragment shader do not), the generated
+    // structs may have differing alignment or size, and GLSL will give an error at link time. Count
+    // the actual used slots, round up to the widest possible alignment (4 u32s), multiply by the
+    // element byte size and pass that to Tint.
+    auto immediateCount = RoundUp(pipelineImmediateMask.count(), 4u);
+
+    req.tintOptions.minimum_immediate_size = immediateCount * kImmediateConstantElementByteSize;
+    if (HasImmediateConstants(&RenderImmediateConstants::firstVertex, pipelineImmediateMask)) {
+        req.tintOptions.first_vertex_offset = GetImmediateByteOffsetInPipelineIfAny(
+            &RenderImmediateConstants::firstVertex, pipelineImmediateMask);
     }
 
-    if (usesInstanceIndex) {
-        req.tintOptions.first_instance_offset =
-            4 * PipelineLayout::ImmediateLocation::FirstInstance;
+    if (HasImmediateConstants(&RenderImmediateConstants::firstInstance, pipelineImmediateMask)) {
+        req.tintOptions.first_instance_offset = GetImmediateByteOffsetInPipelineIfAny(
+            &RenderImmediateConstants::firstInstance, pipelineImmediateMask);
     }
 
-    if (usesFragDepth) {
-        req.tintOptions.depth_range_offsets = {4 * PipelineLayout::ImmediateLocation::MinDepth,
-                                               4 * PipelineLayout::ImmediateLocation::MaxDepth};
+    if (HasImmediateConstants(&RenderImmediateConstants::clampFragDepth, pipelineImmediateMask)) {
+        uint32_t offsetStartBytes = GetImmediateByteOffsetInPipeline(
+            &RenderImmediateConstants::clampFragDepth, pipelineImmediateMask);
+        req.tintOptions.depth_range_offsets = {
+            offsetStartBytes, offsetStartBytes + kImmediateConstantElementByteSize};
     }
 
     if (stage == SingleShaderStage::Vertex) {

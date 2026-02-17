@@ -211,9 +211,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
     TINT_CHECK_RESULT(core::ir::transform::SignedIntegerPolyfill(module, signed_integer_cfg));
 
-    // Must come after BuiltinPolyfill as builtins can add bitcasts
-    TINT_CHECK_RESULT(raise::BitcastPolyfill(module));
-
     TINT_CHECK_RESULT(core::ir::transform::VectorizeScalarMatrixConstructors(module));
     TINT_CHECK_RESULT(core::ir::transform::RemoveContinueInSwitch(module));
 
@@ -225,6 +222,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(raise::OffsetFirstIndex(
         module, raise::OffsetFirstIndexConfig{immediate_data_layout, options.first_vertex_offset,
                                               options.first_instance_offset}));
+
+    TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(
+        module, {.immediate = true, .minimum_array_size = options.minimum_immediate_size}));
+
+    // Must come after DecomposeImmediateAccess and BuiltinPolyfill as those can add bitcasts.
+    TINT_CHECK_RESULT(raise::BitcastPolyfill(module));
 
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.

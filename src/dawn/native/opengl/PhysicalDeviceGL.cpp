@@ -406,6 +406,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     DAWN_TRY_ASSIGN(v[1], GetIndexed(gl, GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1));
     DAWN_TRY_ASSIGN(v[2], GetIndexed(gl, GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2));
     limits->v1.maxComputeWorkgroupsPerDimension = std::min({v[0], v[1], v[2]});
+    limits->v1.maxImmediateSize = kMaxImmediateDataBytes;
     return {};
 }
 

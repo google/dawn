@@ -47,8 +47,7 @@ void ComputePipeline::DestroyImpl(DestroyReason reason) {
 
 MaybeError ComputePipeline::InitializeImpl() {
     return InitializeBase(ToBackend(GetDevice())->GetGL(), ToBackend(GetLayout()), GetAllStages(),
-                          /* usesVertexIndex */ false, /* usesInstanceIndex */ false,
-                          /* usesFragDepth */ false, /* bgraSwizzleAttributes */ {});
+                          mImmediateMask, /* bgraSwizzleAttributes */ {});
 }
 
 MaybeError ComputePipeline::ApplyNow(const OpenGLFunctions& gl) {

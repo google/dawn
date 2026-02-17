@@ -185,6 +185,9 @@ struct Options {
     /// The GLSL version to emit
     Version version;
 
+    /// Minimum size in bytes of all immediate data in the pipeline, both internal and user-defined.
+    uint32_t minimum_immediate_size = 0;
+
     /// Offset of the firstVertex immediate data.
     std::optional<uint32_t> first_vertex_offset;
 
@@ -231,6 +234,7 @@ struct Options {
                  use_uniform_buffers,
                  entry_point_name,
                  version,
+                 minimum_immediate_size,
                  first_vertex_offset,
                  first_instance_offset,
                  depth_range_offsets,

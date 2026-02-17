@@ -227,9 +227,22 @@ MaybeError RenderPipeline::InitializeImpl() {
         bgraSwizzleAttributes.set(i, GetAttribute(i).format == wgpu::VertexFormat::Unorm8x4BGRA);
     }
 
+    if (UsesVertexIndex()) {
+        mImmediateMask |= GetImmediateConstantBlockBits(
+            offsetof(RenderImmediateConstants, firstVertex), kImmediateConstantElementByteSize);
+    }
+    if (UsesInstanceIndex()) {
+        mImmediateMask |= GetImmediateConstantBlockBits(
+            offsetof(RenderImmediateConstants, firstInstance), kImmediateConstantElementByteSize);
+    }
+    if (UsesFragDepth()) {
+        mImmediateMask |= GetImmediateConstantBlockBits(
+            offsetof(RenderImmediateConstants, clampFragDepth), sizeof(ClampFragDepthArgs));
+    }
+
     auto gl = ToBackend(GetDevice())->GetGL();
-    DAWN_TRY(InitializeBase(gl, ToBackend(GetLayout()), GetAllStages(), UsesVertexIndex(),
-                            UsesInstanceIndex(), UsesFragDepth(), bgraSwizzleAttributes));
+    DAWN_TRY(InitializeBase(gl, ToBackend(GetLayout()), GetAllStages(), mImmediateMask,
+                            bgraSwizzleAttributes));
     DAWN_TRY(CreateVAOForVertexState(gl));
     return {};
 }

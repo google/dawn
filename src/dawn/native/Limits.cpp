@@ -120,7 +120,7 @@
 // Tiered limits for immediate data sizes.
 //                                 compat  tier0
 #define LIMITS_IMMEDIATE_SIZE(X) \
-  X(v1, Maximum, maxImmediateSize,      0,    kMaxImmediateDataBytes)
+  X(v1, Maximum, maxImmediateSize,     64,    kMaxImmediateDataBytes)
 
 // Limits for the resource table.
 //                                                                   compat     tier0

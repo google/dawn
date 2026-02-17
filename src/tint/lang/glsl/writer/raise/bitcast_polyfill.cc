@@ -279,7 +279,8 @@ Result<SuccessType> BitcastPolyfill(core::ir::Module& ir) {
     TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(
         ir, "glsl.BitcastPolyfill",
         core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings,
-                               core::ir::Capability::kAllowDuplicateBindings}));
+                               core::ir::Capability::kAllowDuplicateBindings,
+                               core::ir::Capability::kLoosenValidationForShaderIO}));
 
     State{ir}.Process();
 

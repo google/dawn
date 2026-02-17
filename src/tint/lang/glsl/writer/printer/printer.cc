@@ -1119,17 +1119,10 @@ class Printer : public tint::TextGenerator {
     void EmitImmediateVar(core::ir::Var* var) {
         // We need to use the same name for the immediate data structure and variable between
         // different pipeline stages.
-        constexpr const char* kImmediateStructName = "tint_immediate_struct";
         constexpr const char* kImmediateVarName = "tint_immediates";
 
         auto out = Line();
         EmitLayoutLocation(out, {0}, std::nullopt);
-
-        auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-        auto* str = ptr->StoreType()->As<core::type::Struct>();
-        TINT_IR_ASSERT(ir_, str);
-        names_.Add(str, kImmediateStructName);
-        EmitStructType(str);
 
         names_.Add(var->Result(), kImmediateVarName);
         EmitTypeAndName(out, var->Result()->Type(), kImmediateVarName);
