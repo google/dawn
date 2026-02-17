@@ -31,6 +31,7 @@
 #include "src/tint/api/helpers/generate_bindings.h"
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 #include "src/tint/lang/spirv/writer/writer.h"
@@ -190,6 +191,73 @@ Result<SuccessType> ValidateUsingVulkan(const std::string& vk_icd_path,
 }
 #endif  // TINT_BUILD_FUZZER_VULKAN_SUPPORT
 
+std::unordered_map<uint32_t, tint::BindingPoint> GenerateColourBindings(core::ir::Module& mod,
+                                                                        std::string_view ep_name) {
+    std::unordered_map<uint32_t, tint::BindingPoint> bindings;
+
+    core::ir::Function* ep_func = nullptr;
+    for (auto* f : mod.functions) {
+        if (!f->IsEntryPoint()) {
+            continue;
+        }
+        // Colour only applies to fragment.
+        if (f->Stage() != core::ir::Function::PipelineStage::kFragment) {
+            continue;
+        }
+        if (mod.NameOf(f).NameView() == ep_name) {
+            ep_func = f;
+            break;
+        }
+    }
+    // No entrypoint, so no bindings needed
+    if (!ep_func) {
+        return bindings;
+    }
+
+    uint32_t group = 66;
+    uint32_t binding = 0;
+
+    auto check_attrs = [&](const core::IOAttributes& attrs) {
+        if (attrs.color.has_value()) {
+            bindings.emplace(attrs.color.value(),
+                             tint::BindingPoint{.group = group, .binding = binding++});
+            return true;
+        }
+        return false;
+    };
+    std::function<void(const core::type::Struct*)> check_struct =
+        [&](const core::type::Struct* str) {
+            if (!str) {
+                return;
+            }
+
+            for (auto& mem : str->Members()) {
+                if (check_attrs(mem->Attributes())) {
+                    continue;
+                }
+                check_struct(mem->Type()->As<core::type::Struct>());
+            }
+        };
+
+    for (auto& p : ep_func->Params()) {
+        if (check_attrs(p->Attributes())) {
+            continue;
+        }
+        check_struct(p->Type()->As<core::type::Struct>());
+    }
+
+    core::ir::ReferencedModuleVars<const core::ir::Module> referenced_module_vars{mod};
+    auto& refs = referenced_module_vars.TransitiveReferences(ep_func);
+    for (auto& r : refs) {
+        if (check_attrs(r->Attributes())) {
+            continue;
+        }
+        check_struct(r->Result()->Type()->As<core::type::Struct>());
+    }
+
+    return bindings;
+}
+
 Result<SuccessType> IRFuzzer(core::ir::Module& module,
                              const fuzz::ir::Context& context,
                              FuzzedOptions fuzzed_options) {
@@ -218,6 +286,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     Options options;
     options.entry_point_name = ep_name;
     options.bindings = GenerateBindings(module, ep_name, false, false);
+    options.colour_index_to_binding_point = GenerateColourBindings(module, ep_name);
     options.strip_all_names = fuzzed_options.strip_all_names;
     options.disable_robustness = fuzzed_options.disable_robustness;
     options.disable_workgroup_init = fuzzed_options.disable_workgroup_init;
