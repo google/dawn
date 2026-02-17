@@ -64,6 +64,8 @@ class ComputePassEncoder final : public ProgrammableEncoder {
     void APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
     void APISetPipeline(ComputePipelineBase* pipeline);
 
+    void APISetResourceTable(ResourceTableBase* table);
+
     void APISetBindGroup(uint32_t groupIndex,
                          BindGroupBase* group,
                          uint32_t dynamicOffsetCount = 0,

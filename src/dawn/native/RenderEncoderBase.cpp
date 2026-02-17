@@ -571,6 +571,20 @@ void RenderEncoderBase::APISetPipeline(RenderPipelineBase* pipeline) {
         "encoding %s.SetPipeline(%s).", this, pipeline);
 }
 
+void RenderEncoderBase::APISetResourceTable(ResourceTableBase* table) {
+    mEncodingContext->TryEncode(
+        this,
+        [&](CommandAllocator* allocator) -> MaybeError {
+            DAWN_TRY(ProgrammableEncoder::SetResourceTable(table, allocator));
+            mCommandBufferState.SetResourceTable(table);
+            if (table) {
+                mUsageTracker.AddResourceTableUsage(table);
+            }
+            return {};
+        },
+        "encoding %s.SetResourceTable(%s).", this, table);
+}
+
 void RenderEncoderBase::APISetIndexBuffer(BufferBase* buffer,
                                           wgpu::IndexFormat format,
                                           uint64_t offset,

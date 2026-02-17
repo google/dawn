@@ -38,6 +38,7 @@
 #include "dawn/native/Instance.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/PhysicalDevice.h"
+#include "dawn/native/ResourceTable.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/native/utils/WGPUHelpers.h"
 
@@ -239,6 +240,26 @@ void ProgrammableEncoder::RecordSetBindGroup(CommandAllocator* allocator,
         uint32_t* offsets = allocator->AllocateData<uint32_t>(cmd->dynamicOffsetCount);
         memcpy(offsets, dynamicOffsets, dynamicOffsetCount * sizeof(uint32_t));
     }
+}
+
+MaybeError ProgrammableEncoder::SetResourceTable(ResourceTableBase* table,
+                                                 CommandAllocator* allocator) {
+    DAWN_ASSERT(allocator);
+
+    if (GetDevice()->IsValidationEnabled()) {
+        if (table) {
+            DAWN_TRY(GetDevice()->ValidateObject(table));
+        }
+        DAWN_INVALID_IF(
+            !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
+            "setResourceTable requires the %s feature enabled.",
+            wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
+    }
+
+    SetResourceTableCmd* cmd = allocator->Allocate<SetResourceTableCmd>(Command::SetResourceTable);
+    cmd->table = table;
+
+    return {};
 }
 
 }  // namespace dawn::native

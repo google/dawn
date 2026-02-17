@@ -82,6 +82,7 @@ class CommandBufferStateTracker {
     using ValidationAspects = std::bitset<kNumAspects>;
 
     BindGroupBase* GetBindGroup(BindGroupIndex index) const;
+    ResourceTableBase* GetResourceTable() const;
     const std::vector<uint32_t>& GetDynamicOffsets(BindGroupIndex index) const;
     bool HasPipeline() const;
     bool IndexBufferSet() const;

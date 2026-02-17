@@ -522,6 +522,9 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
             for (const ExternalTextureBase* externalTexture : scope.externalTextures) {
                 DAWN_TRY(externalTexture->ValidateCanUseInSubmitNow());
             }
+            for (const ResourceTableBase* resourceTable : scope.usedResourceTables) {
+                DAWN_TRY(resourceTable->ValidateCanUseInSubmitNow());
+            }
         }
 
         for (const ComputePassResourceUsage& pass : usages.computePasses) {
@@ -534,6 +537,9 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
             for (const ExternalTextureBase* externalTexture : pass.referencedExternalTextures) {
                 DAWN_TRY(externalTexture->ValidateCanUseInSubmitNow());
             }
+            for (const ResourceTableBase* resourceTable : pass.referencedResourceTables) {
+                DAWN_TRY(resourceTable->ValidateCanUseInSubmitNow());
+            }
         }
 
         for (BufferBase* buffer : usages.topLevelBuffers) {
@@ -544,9 +550,6 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
         }
         for (const QuerySetBase* querySet : usages.usedQuerySets) {
             DAWN_TRY(querySet->ValidateCanUseInSubmitNow());
-        }
-        for (const ResourceTableBase* resourceTable : usages.usedResourceTables) {
-            DAWN_TRY(resourceTable->ValidateCanUseInSubmitNow());
         }
 
         // Validate that pinned textures are only used with their pinned usage. This is done in a

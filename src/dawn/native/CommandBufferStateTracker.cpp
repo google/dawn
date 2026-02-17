@@ -556,7 +556,7 @@ void CommandBufferStateTracker::RecomputeLazyAspects(ValidationAspects aspects) 
     }
 
     if (aspects[VALIDATION_ASPECT_RESOURCE_TABLES]) {
-        // If current pipeline uses a resource table, make sure one has been set on the command
+        // If current pipeline uses a resource table, make sure one has been set on the pass
         // encoder
         if (!mLastPipelineLayout->UsesResourceTable() || mResourceTable) {
             mAspects.set(VALIDATION_ASPECT_RESOURCE_TABLES);
@@ -626,7 +626,7 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
     if (aspects[VALIDATION_ASPECT_RESOURCE_TABLES]) {
         return DAWN_VALIDATION_ERROR(
             "The current pipeline (%s) was created with `usesResourceTable` but no resource table "
-            "was set on the command encoder.",
+            "was set on the pass encoder.",
             mLastPipeline);
     }
 
@@ -838,6 +838,10 @@ void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
 
 BindGroupBase* CommandBufferStateTracker::GetBindGroup(BindGroupIndex index) const {
     return mBindgroups[index];
+}
+
+ResourceTableBase* CommandBufferStateTracker::GetResourceTable() const {
+    return mResourceTable;
 }
 
 const std::vector<uint32_t>& CommandBufferStateTracker::GetDynamicOffsets(

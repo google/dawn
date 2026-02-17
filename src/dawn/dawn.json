@@ -952,13 +952,6 @@
                 "args": [
                     {"name": "label", "type": "string view"}
                 ]
-            },
-            {
-                "name": "set resource table",
-                "tags": ["dawn"],
-                "args": [
-                    {"name": "table", "type": "resource table", "optional": true}
-                ]
             }
         ]
     },
@@ -1127,6 +1120,13 @@
                     {"name": "offset", "type": "uint32_t"},
                     {"name": "data", "type": "void", "annotation": "const*", "length": "size"},
                     {"name": "size", "type": "size_t"}
+                ]
+            },
+            {
+                "name": "set resource table",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "table", "type": "resource table", "optional": true}
                 ]
             }
         ]
@@ -3098,6 +3098,13 @@
                     {"name": "data", "type": "void", "annotation": "const*", "length": "size"},
                     {"name": "size", "type": "size_t"}
                 ]
+            },
+            {
+                "name": "set resource table",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "table", "type": "resource table", "optional": true}
+                ]
             }
         ]
     },
@@ -3415,6 +3422,13 @@
                     {"name": "offset", "type": "uint32_t"},
                     {"name": "data", "type": "void", "annotation": "const*", "length": "size"},
                     {"name": "size", "type": "size_t"}
+                ]
+            },
+            {
+                "name": "set resource table",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "table", "type": "resource table", "optional": true}
                 ]
             }
         ]

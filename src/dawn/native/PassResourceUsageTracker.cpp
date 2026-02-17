@@ -117,6 +117,10 @@ void SyncScopeUsageTracker::MergeResourceUsages(const SyncScopeResourceUsage& us
     for (ExternalTextureBase* t : usages.externalTextures) {
         mExternalTextureUsages.insert(t);
     }
+
+    for (ResourceTableBase* t : usages.usedResourceTables) {
+        mUsedResourceTables.insert(t);
+    }
 }
 
 void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
@@ -224,6 +228,10 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
     }
 }
 
+void SyncScopeUsageTracker::AddResourceTableUsage(ResourceTableBase* table) {
+    mUsedResourceTables.insert(table);
+}
+
 SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
     SyncScopeResourceUsage result;
     result.buffers.reserve(mBufferSyncInfos.size());
@@ -248,6 +256,11 @@ SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
     }
     mExternalTextureUsages.clear();
 
+    for (auto* const it : mUsedResourceTables) {
+        result.usedResourceTables.push_back(it);
+    }
+    mUsedResourceTables.clear();
+
     return result;
 }
 
@@ -261,6 +274,10 @@ void ComputePassResourceUsageTracker::AddDispatch(SyncScopeResourceUsage scope) 
 
 void ComputePassResourceUsageTracker::AddReferencedBuffer(BufferBase* buffer) {
     mUsage.referencedBuffers.insert(buffer);
+}
+
+void ComputePassResourceUsageTracker::AddReferencedResourceTable(ResourceTableBase* table) {
+    mUsage.referencedResourceTables.insert(table);
 }
 
 void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGroupBase* group) {

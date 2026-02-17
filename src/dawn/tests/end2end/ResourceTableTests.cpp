@@ -32,6 +32,7 @@
 
 #include "dawn/common/Enumerator.h"
 #include "dawn/tests/DawnTest.h"
+#include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/ScopedIgnoreValidationErrors.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -124,8 +125,8 @@ class ResourceTableTests : public DawnTest {
 
         // Run the test.
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.SetResourceTable(table);
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetResourceTable(table);
         pass.SetImmediates(0, &resourceCount, sizeof(resourceCount));
         pass.SetBindGroup(0, resultBG);
         pass.SetPipeline(testPipeline);
@@ -180,28 +181,41 @@ class ResourceTableTests : public DawnTest {
         return tex.CreateView();
     }
 
-    // Test that `table` has a texture_2d<u32> iff the `expected` has a value, and that the textures
-    // have the expected value, if any.
-    void TestHasU8Bindings(wgpu::ResourceTable table,
-                           std::vector<std::optional<uint8_t>> expected) {
-        ASSERT_EQ(table.GetSize(), expected.size());
-
+    // For each table in `cases`, sets the `table` and dipatches on a compute pass encoder,
+    // and validates that each `table` has a texture_2d<u32> iff the `expected` has a value, and
+    // that the textures have the expected value, if any.
+    struct TableAndExpected {
+        wgpu::ResourceTable table;
+        std::vector<std::optional<uint8_t>> expected;
+    };
+    void TestHasU8BindingsCompute(std::vector<TableAndExpected> cases) {
         wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
             enable chromium_experimental_resource_table;
 
             @group(0) @binding(0) var<storage, read_write> results : array<u32>;
-            var<immediate> resourceCount : u32;
+            struct Immediates {
+                resourceCount : u32,
+                offset : u32,
+            }
+            var<immediate> immediates : Immediates;
             @compute @workgroup_size(1) fn main() {
-                for (var i = 0u; i < resourceCount; i++) {
+                for (var i = 0u; i < immediates.resourceCount; i++) {
                     if !hasResource<texture_2d<u32>>(i) {
-                        results[i] = 0xBEEF;
+                        results[immediates.offset + i] = 0xBEEF;
                     } else {
                         let tex = getResource<texture_2d<u32>>(i);
-                        results[i] = textureLoad(tex, vec2(0), 0).x;
+                        results[immediates.offset + i] = textureLoad(tex, vec2(0), 0).x;
                     }
                 }
             }
         )");
+
+        // Make the result buffer large enough for all cases
+        size_t resultSize = 0;
+        for (auto& [table, expected] : cases) {
+            ASSERT_EQ(table.GetSize(), expected.size());
+            resultSize += expected.size();
+        }
 
         wgpu::ComputePipelineDescriptor csDesc = {.compute = {
                                                       .module = module,
@@ -211,21 +225,28 @@ class ResourceTableTests : public DawnTest {
         // Create the result buffer.
         wgpu::BufferDescriptor bDesc = {
             .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
-            .size = sizeof(uint32_t) * expected.size(),
+            .size = sizeof(uint32_t) * resultSize,
         };
         wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
         wgpu::BindGroup resultBG =
             utils::MakeBindGroup(device, testPipeline.GetBindGroupLayout(0), {{0, resultBuffer}});
-        uint32_t resourceCount = table.GetSize();
 
         // Run the test.
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.SetResourceTable(table);
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-        pass.SetImmediates(0, &resourceCount, sizeof(resourceCount));
-        pass.SetBindGroup(0, resultBG);
-        pass.SetPipeline(testPipeline);
-        pass.DispatchWorkgroups(1);
+        uint32_t offset = 0;
+        for (auto& [table, expected] : cases) {
+            pass.SetResourceTable(table);
+
+            uint32_t immediates[] = {table.GetSize(), offset};
+            pass.SetImmediates(0, &immediates, sizeof(immediates));
+            offset += expected.size();
+
+            pass.SetBindGroup(0, resultBG);
+
+            pass.SetPipeline(testPipeline);
+            pass.DispatchWorkgroups(1);
+        }
         pass.End();
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -233,11 +254,137 @@ class ResourceTableTests : public DawnTest {
 
         // Check we have the expected results.
         std::vector<uint32_t> expectedU32;
-        for (auto optValue : expected) {
-            expectedU32.push_back(optValue ? *optValue : 0xBEEFu);
+        for (auto& [_, expected] : cases) {
+            for (auto optValue : expected) {
+                expectedU32.push_back(optValue ? *optValue : 0xBEEFu);
+            }
         }
 
         EXPECT_BUFFER_U32_RANGE_EQ(expectedU32.data(), resultBuffer, 0, expectedU32.size());
+    }
+
+    // For each table in `cases`, sets the `table` and dipatches on a render pass/bundle encoder,
+    // and validates that each `table` has a texture_2d<u32> iff the `expected` has a value, and
+    // that the textures have the expected value, if any.
+    void TestHasU8BindingsRender(std::vector<TableAndExpected> cases, bool useRenderBundles) {
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_resource_table;
+
+            @vertex fn vs() -> @builtin(position) vec4f {
+                return vec4f(0, 0, 0.5, 0.5);
+            }
+
+            @group(0) @binding(0) var<storage, read_write> results : array<u32>;
+            struct Immediates {
+                resourceCount : u32,
+                offset : u32,
+            }
+            var<immediate> immediates : Immediates;
+
+            @fragment fn main() -> @location(0) vec4f {
+                for (var i = 0u; i < immediates.resourceCount; i++) {
+                    if !hasResource<texture_2d<u32>>(i) {
+                        results[immediates.offset + i] = 0xBEEF;
+                    } else {
+                        let tex = getResource<texture_2d<u32>>(i);
+                        results[immediates.offset + i] = textureLoad(tex, vec2(0), 0).x;
+                    }
+                }
+                return vec4();
+            }
+        )");
+
+        // Make the result buffer large enough for all cases
+        size_t resultSize = 0;
+        for (auto& [table, expected] : cases) {
+            ASSERT_EQ(table.GetSize(), expected.size());
+            resultSize += expected.size();
+        }
+
+        wgpu::BindGroupLayout resultBGL = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
+
+        wgpu::RenderPipeline testPipeline;
+        {
+            utils::ComboRenderPipelineDescriptor desc;
+            desc.layout = MakePipelineLayoutWithTable({resultBGL}, 8);
+            desc.vertex.module = module;
+            desc.cFragment.module = module;
+            desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+            testPipeline = device.CreateRenderPipeline(&desc);
+        }
+
+        // Create the result buffer.
+        wgpu::BufferDescriptor bDesc = {
+            .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+            .size = sizeof(uint32_t) * resultSize,
+        };
+        wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+        wgpu::BindGroup resultBG = utils::MakeBindGroup(device, resultBGL, {{0, resultBuffer}});
+
+        // Run the test.
+        auto rp = utils::CreateBasicRenderPass(device, 1, 1);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+
+        if (useRenderBundles) {
+            utils::ComboRenderBundleEncoderDescriptor desc = {};
+            desc.colorFormatCount = 1;
+            desc.cColorFormats[0] = rp.colorFormat;
+            wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
+
+            uint32_t offset = 0;
+            for (auto& [table, expected] : cases) {
+                uint32_t immediates[] = {table.GetSize(), offset};
+                rbe.SetResourceTable(table);
+                rbe.SetImmediates(0, &immediates, sizeof(immediates));
+                rbe.SetBindGroup(0, resultBG);
+                rbe.SetPipeline(testPipeline);
+                rbe.Draw(1);
+                offset += expected.size();
+            }
+
+            wgpu::RenderBundle bundle = rbe.Finish();
+            pass.ExecuteBundles(1, &bundle);
+        } else {
+            uint32_t offset = 0;
+            for (auto& [table, expected] : cases) {
+                uint32_t immediates[] = {table.GetSize(), offset};
+                pass.SetResourceTable(table);
+                pass.SetImmediates(0, &immediates, sizeof(immediates));
+                pass.SetBindGroup(0, resultBG);
+                pass.SetPipeline(testPipeline);
+                pass.Draw(1);
+                offset += expected.size();
+            }
+        }
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
+
+        // Check we have the expected results.
+        std::vector<uint32_t> expectedU32;
+        for (auto& [_, expected] : cases) {
+            for (auto optValue : expected) {
+                expectedU32.push_back(optValue ? *optValue : 0xBEEFu);
+            }
+        }
+
+        EXPECT_BUFFER_U32_RANGE_EQ(expectedU32.data(), resultBuffer, 0, expectedU32.size());
+    }
+
+    // Convenience that tests cases using compute, render, and render bundle encoders
+    void TestHasU8BindingsAll(std::vector<TableAndExpected> cases) {
+        TestHasU8BindingsCompute(cases);
+        TestHasU8BindingsRender(cases, true);
+        TestHasU8BindingsRender(cases, false);
+    }
+
+    // Convenience for single table
+    void TestHasU8BindingsAll(wgpu::ResourceTable table,
+                              std::vector<std::optional<uint8_t>> expected) {
+        TestHasU8BindingsAll({{table, expected}});
     }
 };
 
@@ -906,8 +1053,8 @@ TEST_P(ResourceTableTests, HasResourceOOBIsFalse) {
 
     // Run the test and check results are the expected ones.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.SetResourceTable(table);
     wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetResourceTable(table);
     pass.SetImmediates(0, &resourceCount, sizeof(resourceCount));
     pass.SetBindGroup(0, resultBG);
     pass.SetPipeline(pipeline);
@@ -1005,8 +1152,8 @@ TEST_P(ResourceTableTests, DefaultBindingsAreZeroAndSizeOne) {
 
     // Run the test and check results are the expected ones.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.SetResourceTable(table);
     wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetResourceTable(table);
     pass.SetBindGroup(0, bg);
     pass.SetPipeline(pipeline);
     pass.DispatchWorkgroups(1);
@@ -1073,8 +1220,8 @@ TEST_P(ResourceTableTests, PinDoesZeroInit) {
         tex.Pin(wgpu::TextureUsage::TextureBinding);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.SetResourceTable(table);
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetResourceTable(table);
         pass.SetBindGroup(0, bg);
         pass.SetPipeline(pipeline);
         pass.DispatchWorkgroups(1);
@@ -1115,8 +1262,8 @@ TEST_P(ResourceTableTests, PinDoesZeroInit) {
         tex.Pin(wgpu::TextureUsage::TextureBinding);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.SetResourceTable(table);
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetResourceTable(table);
         pass.SetBindGroup(0, bg);
         pass.SetPipeline(pipeline);
         pass.DispatchWorkgroups(1);
@@ -1234,17 +1381,17 @@ TEST_P(ResourceTableTests, UpdateAndInsertBindingMakeBindingVisible) {
     wgpu::ResourceTable table = MakeResourceTable(2);
 
     // Before we do anything, the table has no valid entries.
-    TestHasU8Bindings(table, {{}, {}});
+    TestHasU8BindingsAll(table, {{}, {}});
 
     // Update makes the entry visible.
     wgpu::BindingResource resource0 = {.textureView = MakePinnedU8View(17)};
     EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource0));
-    TestHasU8Bindings(table, {{17}, {}});
+    TestHasU8BindingsAll(table, {{17}, {}});
 
     // InsertBinding makes the entry visible.
     wgpu::BindingResource resource1 = {.textureView = MakePinnedU8View(42)};
     EXPECT_EQ(1u, table.InsertBinding(&resource1));
-    TestHasU8Bindings(table, {{17}, {42}});
+    TestHasU8BindingsAll(table, {{17}, {42}});
 }
 
 // Check that RemoveBinding instantly makes the binding not visible, both for entries added with
@@ -1263,13 +1410,13 @@ TEST_P(ResourceTableTests, RemoveBindingMakeBindingInvalid) {
     EXPECT_EQ(1u, table.InsertBinding(&resource1));
 
     // Before we remove bindings, they are all valid.
-    TestHasU8Bindings(table, {{100}, {101}});
+    TestHasU8BindingsAll(table, {{100}, {101}});
 
     // RemoveBinding immediately makes bindings invalid.
     EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(1));
-    TestHasU8Bindings(table, {{100}, {}});
+    TestHasU8BindingsAll(table, {{100}, {}});
     EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
-    TestHasU8Bindings(table, {{}, {}});
+    TestHasU8BindingsAll(table, {{}, {}});
 }
 
 // Check that removing a binding and adding a different one works.
@@ -1283,16 +1430,16 @@ TEST_P(ResourceTableTests, ReplaceBinding) {
     EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
 
     // Test removing a binding that was previously there.
-    TestHasU8Bindings(table, {{19}});
+    TestHasU8BindingsAll(table, {{19}});
     EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
-    TestHasU8Bindings(table, {{}});
+    TestHasU8BindingsAll(table, {{}});
 
     /// Add it back a new entry, the shader should be seeing the updated entry.
     WaitForAllOperations();
 
     wgpu::BindingResource newResource = {.textureView = MakePinnedU8View(23)};
     EXPECT_EQ(wgpu::Status::Success, table.Update(0, &newResource));
-    TestHasU8Bindings(table, {{23}});
+    TestHasU8BindingsAll(table, {{23}});
 }
 
 // Check that removing a binding and adding it back works.
@@ -1306,15 +1453,54 @@ TEST_P(ResourceTableTests, ReplaceWithSameBinding) {
     EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
 
     // Test removing a binding that was previously there.
-    TestHasU8Bindings(table, {{19}});
+    TestHasU8BindingsAll(table, {{19}});
     EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0));
-    TestHasU8Bindings(table, {{}});
+    TestHasU8BindingsAll(table, {{}});
 
     /// Add it back a new entry, the shader should be seeing the updated entry.
     WaitForAllOperations();
 
     EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
-    TestHasU8Bindings(table, {{19}});
+    TestHasU8BindingsAll(table, {{19}});
+}
+
+// Check that setting multiple resource table, on per dispatch/draw/executebundle, on a single pass
+// works.
+TEST_P(ResourceTableTests, SinglePassMultipleResourceTables) {
+    // TODO(crbug.com/385158827): Fails on older WARP 10.0.19041.5794
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
+    std::vector<wgpu::BindingResource> resources;
+
+    wgpu::ResourceTable table0 = MakeResourceTable(2);
+    resources.push_back(wgpu::BindingResource{.textureView = MakePinnedU8View(17)});
+    EXPECT_EQ(wgpu::Status::Success, table0.Update(0, &resources.back()));
+    resources.push_back(wgpu::BindingResource{.textureView = MakePinnedU8View(18)});
+    EXPECT_EQ(wgpu::Status::Success, table0.Update(1, &resources.back()));
+
+    wgpu::ResourceTable table1 = MakeResourceTable(3);
+    resources.push_back(wgpu::BindingResource{.textureView = MakePinnedU8View(27)});
+    EXPECT_EQ(wgpu::Status::Success, table1.Update(0, &resources.back()));
+    // Leave slot 1 empty
+    resources.push_back(wgpu::BindingResource{.textureView = MakePinnedU8View(29)});
+    EXPECT_EQ(wgpu::Status::Success, table1.Update(2, &resources.back()));
+
+    wgpu::ResourceTable table2 = MakeResourceTable(4);
+    resources.push_back(wgpu::BindingResource{.textureView = MakePinnedU8View(37)});
+    EXPECT_EQ(wgpu::Status::Success, table2.Update(0, &resources.back()));
+    resources.push_back(wgpu::BindingResource{.textureView = MakePinnedU8View(38)});
+    EXPECT_EQ(wgpu::Status::Success, table2.Update(1, &resources.back()));
+    // Leave slot 2 empty
+    resources.push_back(wgpu::BindingResource{.textureView = MakePinnedU8View(40)});
+    EXPECT_EQ(wgpu::Status::Success, table2.Update(3, &resources.back()));
+
+    auto case0 = TableAndExpected(table0, {{17, 18}});
+    auto case1 = TableAndExpected(table1, {{27, {}, 29}});
+    auto case2 = TableAndExpected(table2, {{37, 38, {}, 40}});
+
+    TestHasU8BindingsAll({case0, case1, case2});
+    TestHasU8BindingsAll({case1, case0, case2});
+    TestHasU8BindingsAll({case2, case1, case0});
 }
 
 // Check that logic to dirty or reuse VkDescriptorSet takes into account the resource table in the
@@ -1396,8 +1582,8 @@ TEST_P(ResourceTableTests, SwitchUseResourceTableAndNot) {
     uint32_t resultIndex = 0;
     auto rp = utils::CreateBasicRenderPass(device, 1, 1);
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.SetResourceTable(table);
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+    pass.SetResourceTable(table);
     pass.SetBindGroup(0, resultBG);
 
     // Start by not using the resource table.

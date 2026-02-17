@@ -93,9 +93,6 @@ RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
         mMaxDrawCount = maxDrawCountInfo->maxDrawCount;
     }
     GetObjectTrackingList()->Track(this);
-    if (auto* resourceTable = mCommandEncoder->GetResourceTable()) {
-        mCommandBufferState.SetResourceTable(resourceTable);
-    }
 }
 
 // static
