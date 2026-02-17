@@ -642,6 +642,7 @@ enum class BuiltinValue : uint8_t {
     kFragDepth,
     kFrontFacing,
     kGlobalInvocationId,
+    kGlobalInvocationIndex,
     kInstanceIndex,
     kLocalInvocationId,
     kLocalInvocationIndex,
@@ -656,6 +657,7 @@ enum class BuiltinValue : uint8_t {
     kSubgroupSize,
     kVertexIndex,
     kWorkgroupId,
+    kWorkgroupIndex,
 };
 
 /// @param value the enum value
@@ -682,6 +684,7 @@ constexpr std::string_view kBuiltinValueStrings[] = {
     "frag_depth",
     "front_facing",
     "global_invocation_id",
+    "global_invocation_index",
     "instance_index",
     "local_invocation_id",
     "local_invocation_index",
@@ -696,6 +699,7 @@ constexpr std::string_view kBuiltinValueStrings[] = {
     "subgroup_size",
     "vertex_index",
     "workgroup_id",
+    "workgroup_index",
 };
 
 /// Builtin depth mode defined with `@builtin(<name>, <depth_mode>)`.

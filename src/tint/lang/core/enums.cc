@@ -1041,6 +1041,9 @@ BuiltinValue ParseBuiltinValue(std::string_view str) {
     if (str == "global_invocation_id") {
         return BuiltinValue::kGlobalInvocationId;
     }
+    if (str == "global_invocation_index") {
+        return BuiltinValue::kGlobalInvocationIndex;
+    }
     if (str == "instance_index") {
         return BuiltinValue::kInstanceIndex;
     }
@@ -1083,6 +1086,9 @@ BuiltinValue ParseBuiltinValue(std::string_view str) {
     if (str == "workgroup_id") {
         return BuiltinValue::kWorkgroupId;
     }
+    if (str == "workgroup_index") {
+        return BuiltinValue::kWorkgroupIndex;
+    }
     return BuiltinValue::kUndefined;
 }
 std::string_view ToString(BuiltinValue value) {
@@ -1103,6 +1109,8 @@ std::string_view ToString(BuiltinValue value) {
             return "front_facing";
         case BuiltinValue::kGlobalInvocationId:
             return "global_invocation_id";
+        case BuiltinValue::kGlobalInvocationIndex:
+            return "global_invocation_index";
         case BuiltinValue::kInstanceIndex:
             return "instance_index";
         case BuiltinValue::kLocalInvocationId:
@@ -1131,6 +1139,8 @@ std::string_view ToString(BuiltinValue value) {
             return "vertex_index";
         case BuiltinValue::kWorkgroupId:
             return "workgroup_id";
+        case BuiltinValue::kWorkgroupIndex:
+            return "workgroup_index";
     }
     return "<unknown>";
 }

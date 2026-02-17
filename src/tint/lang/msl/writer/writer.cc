@@ -86,6 +86,12 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         if (attributes.builtin == core::BuiltinValue::kCullDistance) {
             return Failure("cull_distance is not supported by the MSL backend");
         }
+        if (attributes.builtin == core::BuiltinValue::kGlobalInvocationIndex) {
+            return Failure("@builtin(global_invocation_index) is not supported by the MSL backend");
+        }
+        if (attributes.builtin == core::BuiltinValue::kWorkgroupIndex) {
+            return Failure("@builtin(workgroup_index) is not supported by the MSL backend");
+        }
         return Success;
     };
 

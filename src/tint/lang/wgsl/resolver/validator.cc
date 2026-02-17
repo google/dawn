@@ -1110,6 +1110,24 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
+        case core::BuiltinValue::kGlobalInvocationIndex:
+        case core::BuiltinValue::kWorkgroupIndex:
+            if (!allowed_features_.features.contains(wgsl::LanguageFeature::kLinearIndexing)) {
+                AddError(attr->source)
+                    << "use of " << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum(builtin), ")") << " attribute requires the "
+                    << style::Code("linear_indexing") << " language feature";
+                return false;
+            }
+            if (stage != ast::PipelineStage::kNone &&
+                !(stage == ast::PipelineStage::kCompute && is_input)) {
+                is_stage_mismatch = true;
+            }
+            if (!type->Is<core::type::U32>()) {
+                err_builtin_type("u32");
+                return false;
+            }
+            break;
         case core::BuiltinValue::kVertexIndex:
         case core::BuiltinValue::kInstanceIndex:
             if (stage != ast::PipelineStage::kNone &&

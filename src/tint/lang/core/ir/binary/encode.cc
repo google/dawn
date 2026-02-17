@@ -1075,6 +1075,8 @@ struct Encoder {
                 return pb::BuiltinValue::front_facing;
             case core::BuiltinValue::kGlobalInvocationId:
                 return pb::BuiltinValue::global_invocation_id;
+            case core::BuiltinValue::kGlobalInvocationIndex:
+                return pb::BuiltinValue::global_invocation_index;
             case core::BuiltinValue::kInstanceIndex:
                 return pb::BuiltinValue::instance_index;
             case core::BuiltinValue::kLocalInvocationId:
@@ -1101,6 +1103,8 @@ struct Encoder {
                 return pb::BuiltinValue::vertex_index;
             case core::BuiltinValue::kWorkgroupId:
                 return pb::BuiltinValue::workgroup_id;
+            case core::BuiltinValue::kWorkgroupIndex:
+                return pb::BuiltinValue::workgroup_index;
             case core::BuiltinValue::kClipDistances:
                 return pb::BuiltinValue::clip_distances;
             case core::BuiltinValue::kPrimitiveIndex:

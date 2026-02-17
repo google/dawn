@@ -606,6 +606,8 @@ enum BuiltinValue {
     primitive_index = 18;
     barycentric_coord = 19;
     num_subgroups = 20;
+    global_invocation_index = 21;
+    workgroup_index = 22;
 }
 
 enum BuiltinFn {

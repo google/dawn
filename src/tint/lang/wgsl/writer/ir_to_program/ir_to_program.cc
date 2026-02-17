@@ -243,8 +243,14 @@ class State {
                     case core::BuiltinValue::kGlobalInvocationId:
                         attrs.Push(b.Builtin(core::BuiltinValue::kGlobalInvocationId));
                         break;
+                    case core::BuiltinValue::kGlobalInvocationIndex:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kGlobalInvocationIndex));
+                        break;
                     case core::BuiltinValue::kWorkgroupId:
                         attrs.Push(b.Builtin(core::BuiltinValue::kWorkgroupId));
+                        break;
+                    case core::BuiltinValue::kWorkgroupIndex:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kWorkgroupIndex));
                         break;
                     case core::BuiltinValue::kNumWorkgroups:
                         attrs.Push(b.Builtin(core::BuiltinValue::kNumWorkgroups));

@@ -399,6 +399,9 @@ class Printer {
                 module_.PushExtension("SPV_KHR_fragment_shader_barycentric");
                 module_.PushCapability(SpvCapabilityFragmentBarycentricKHR);
                 return SpvBuiltInBaryCoordKHR;
+            // These are lowered elsewhere
+            case core::BuiltinValue::kGlobalInvocationIndex:
+            case core::BuiltinValue::kWorkgroupIndex:
             case core::BuiltinValue::kUndefined:
                 return SpvBuiltInMax;
         }

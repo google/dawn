@@ -1840,6 +1840,9 @@ bool Converter::Convert(wgpu::WGSLLanguageFeatureName& out, interop::WGSLLanguag
         case interop::WGSLLanguageFeatureName::kSwizzleAssignment:
             out = wgpu::WGSLLanguageFeatureName::SwizzleAssignment;
             return true;
+        case interop::WGSLLanguageFeatureName::kLinearIndexing:
+            out = wgpu::WGSLLanguageFeatureName::LinearIndexing;
+            return true;
     }
     return false;
 }
@@ -1893,6 +1896,9 @@ bool Converter::Convert(interop::WGSLLanguageFeatureName& out, wgpu::WGSLLanguag
             return true;
         case wgpu::WGSLLanguageFeatureName::SwizzleAssignment:
             out = interop::WGSLLanguageFeatureName::kSwizzleAssignment;
+            return true;
+        case wgpu::WGSLLanguageFeatureName::LinearIndexing:
+            out = interop::WGSLLanguageFeatureName::kLinearIndexing;
             return true;
 
         case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented:

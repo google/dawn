@@ -669,6 +669,8 @@ const BuiltInChecker& BuiltinCheckerFor(BuiltinValue builtin, const Capabilities
         case BuiltinValue::kLocalInvocationId:
             return kLocalInvocationIdChecker;
         case BuiltinValue::kLocalInvocationIndex:
+        case BuiltinValue::kGlobalInvocationIndex:
+        case BuiltinValue::kWorkgroupIndex:
             return kLocalInvocationIndexChecker;
         case BuiltinValue::kNumSubgroups:
             return kNumSubgroupsChecker;

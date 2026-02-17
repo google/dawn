@@ -121,6 +121,7 @@ enum language_feature {
   buffer_view
   filtering_parameters
   swizzle_assignment
+  linear_indexing
 
   // Non-standard language features for Chromium developers.
   chromium_print

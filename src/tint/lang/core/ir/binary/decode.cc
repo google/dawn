@@ -1749,6 +1749,8 @@ struct Decoder {
                 return core::BuiltinValue::kFrontFacing;
             case pb::BuiltinValue::global_invocation_id:
                 return core::BuiltinValue::kGlobalInvocationId;
+            case pb::BuiltinValue::global_invocation_index:
+                return core::BuiltinValue::kGlobalInvocationIndex;
             case pb::BuiltinValue::instance_index:
                 return core::BuiltinValue::kInstanceIndex;
             case pb::BuiltinValue::local_invocation_id:
@@ -1775,6 +1777,8 @@ struct Decoder {
                 return core::BuiltinValue::kVertexIndex;
             case pb::BuiltinValue::workgroup_id:
                 return core::BuiltinValue::kWorkgroupId;
+            case pb::BuiltinValue::workgroup_index:
+                return core::BuiltinValue::kWorkgroupIndex;
             case pb::BuiltinValue::clip_distances:
                 return core::BuiltinValue::kClipDistances;
             case pb::BuiltinValue::primitive_index:

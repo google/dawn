@@ -43,6 +43,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kBufferView:
         case LanguageFeature::kFilteringParameters:
         case LanguageFeature::kSwizzleAssignment:
+        case LanguageFeature::kLinearIndexing:
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////

@@ -95,9 +95,19 @@ static constexpr Params cases[] = {
                          ast::PipelineStage::kCompute,
                          true),
 
+    ParamsFor<u32>(core::BuiltinValue::kGlobalInvocationIndex, ast::PipelineStage::kVertex, false),
+    ParamsFor<u32>(core::BuiltinValue::kGlobalInvocationIndex,
+                   ast::PipelineStage::kFragment,
+                   false),
+    ParamsFor<u32>(core::BuiltinValue::kGlobalInvocationIndex, ast::PipelineStage::kCompute, true),
+
     ParamsFor<vec3<u32>>(core::BuiltinValue::kWorkgroupId, ast::PipelineStage::kVertex, false),
     ParamsFor<vec3<u32>>(core::BuiltinValue::kWorkgroupId, ast::PipelineStage::kFragment, false),
     ParamsFor<vec3<u32>>(core::BuiltinValue::kWorkgroupId, ast::PipelineStage::kCompute, true),
+
+    ParamsFor<u32>(core::BuiltinValue::kWorkgroupIndex, ast::PipelineStage::kVertex, false),
+    ParamsFor<u32>(core::BuiltinValue::kWorkgroupIndex, ast::PipelineStage::kFragment, false),
+    ParamsFor<u32>(core::BuiltinValue::kWorkgroupIndex, ast::PipelineStage::kCompute, true),
 
     ParamsFor<vec3<u32>>(core::BuiltinValue::kNumWorkgroups, ast::PipelineStage::kVertex, false),
     ParamsFor<vec3<u32>>(core::BuiltinValue::kNumWorkgroups, ast::PipelineStage::kFragment, false),
@@ -702,6 +712,8 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_Pass) {
     //   @builtin(global_invocationId) gi: vec3<u32>,
     //   @builtin(workgroup_id) wi: vec3<u32>,
     //   @builtin(num_workgroups) nwgs: vec3<u32>,
+    //   @builtin(global_invocation_index) gindex : u32,
+    //   @builtin(workgroup_index) wgindex : u32,
     // ) {}
 
     auto* li_id = Param("li_id", ty.vec3<u32>(),
@@ -724,8 +736,12 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_Pass) {
                        Vector{
                            Builtin(core::BuiltinValue::kNumWorkgroups),
                        });
+    auto* gindex =
+        Param("gindex", ty.u32(), Vector{Builtin(core::BuiltinValue::kGlobalInvocationIndex)});
+    auto* wgindex =
+        Param("wgindex", ty.u32(), Vector{Builtin(core::BuiltinValue::kWorkgroupIndex)});
 
-    Func("main", Vector{li_id, li_index, gi, wi, nwgs}, ty.void_(), tint::Empty,
+    Func("main", Vector{li_id, li_index, gi, wi, nwgs, gindex, wgindex}, ty.void_(), tint::Empty,
          Vector{Stage(ast::PipelineStage::kCompute),
                 WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2_i))});
 

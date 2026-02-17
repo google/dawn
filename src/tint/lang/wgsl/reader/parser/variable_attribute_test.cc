@@ -298,7 +298,7 @@ TEST_P(BuiltinTest, Attribute_Builtin_DepthMode_First) {
         EXPECT_EQ(attr.value, nullptr);
         EXPECT_TRUE(p->has_error());
         EXPECT_EQ(p->error(), R"(1:9: expected builtin value name
-Possible values: 'barycentric_coord', 'clip_distances', 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_subgroups', 'num_workgroups', 'position', 'primitive_index', 'sample_index', 'sample_mask', 'subgroup_id', 'subgroup_invocation_id', 'subgroup_size', 'vertex_index', 'workgroup_id')");
+Possible values: 'barycentric_coord', 'clip_distances', 'frag_depth', 'front_facing', 'global_invocation_id', 'global_invocation_index', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_subgroups', 'num_workgroups', 'position', 'primitive_index', 'sample_index', 'sample_mask', 'subgroup_id', 'subgroup_invocation_id', 'subgroup_size', 'vertex_index', 'workgroup_id', 'workgroup_index')");
     }
 }
 INSTANTIATE_TEST_SUITE_P(WGSLParserTest,
@@ -311,7 +311,9 @@ INSTANTIATE_TEST_SUITE_P(WGSLParserTest,
                                          core::BuiltinValue::kLocalInvocationId,
                                          core::BuiltinValue::kLocalInvocationIndex,
                                          core::BuiltinValue::kGlobalInvocationId,
+                                         core::BuiltinValue::kGlobalInvocationIndex,
                                          core::BuiltinValue::kWorkgroupId,
+                                         core::BuiltinValue::kWorkgroupIndex,
                                          core::BuiltinValue::kNumWorkgroups,
                                          core::BuiltinValue::kSampleIndex,
                                          core::BuiltinValue::kSampleMask));
@@ -328,7 +330,7 @@ TEST_P(BuiltinDepthModeTest, Attribute_Builtin_DepthModeOnly) {
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), R"(1:9: expected builtin value name
-Possible values: 'barycentric_coord', 'clip_distances', 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_subgroups', 'num_workgroups', 'position', 'primitive_index', 'sample_index', 'sample_mask', 'subgroup_id', 'subgroup_invocation_id', 'subgroup_size', 'vertex_index', 'workgroup_id')");
+Possible values: 'barycentric_coord', 'clip_distances', 'frag_depth', 'front_facing', 'global_invocation_id', 'global_invocation_index', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_subgroups', 'num_workgroups', 'position', 'primitive_index', 'sample_index', 'sample_mask', 'subgroup_id', 'subgroup_invocation_id', 'subgroup_size', 'vertex_index', 'workgroup_id', 'workgroup_index')");
 }
 TEST_P(BuiltinDepthModeTest, Attribute_Builtin_DepthMode_Twice) {
     auto param = GetParam();
@@ -390,7 +392,7 @@ TEST_F(WGSLParserTest, Attribute_Builtin_MissingValue) {
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), R"(1:9: expected builtin value name
-Possible values: 'barycentric_coord', 'clip_distances', 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_subgroups', 'num_workgroups', 'position', 'primitive_index', 'sample_index', 'sample_mask', 'subgroup_id', 'subgroup_invocation_id', 'subgroup_size', 'vertex_index', 'workgroup_id')");
+Possible values: 'barycentric_coord', 'clip_distances', 'frag_depth', 'front_facing', 'global_invocation_id', 'global_invocation_index', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_subgroups', 'num_workgroups', 'position', 'primitive_index', 'sample_index', 'sample_mask', 'subgroup_id', 'subgroup_invocation_id', 'subgroup_size', 'vertex_index', 'workgroup_id', 'workgroup_index')");
 }
 
 TEST_F(WGSLParserTest, Attribute_Builtin_MisspelledValue) {
@@ -402,7 +404,7 @@ TEST_F(WGSLParserTest, Attribute_Builtin_MisspelledValue) {
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), R"(1:9: expected builtin value name
 Did you mean 'position'?
-Possible values: 'barycentric_coord', 'clip_distances', 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_subgroups', 'num_workgroups', 'position', 'primitive_index', 'sample_index', 'sample_mask', 'subgroup_id', 'subgroup_invocation_id', 'subgroup_size', 'vertex_index', 'workgroup_id')");
+Possible values: 'barycentric_coord', 'clip_distances', 'frag_depth', 'front_facing', 'global_invocation_id', 'global_invocation_index', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_subgroups', 'num_workgroups', 'position', 'primitive_index', 'sample_index', 'sample_mask', 'subgroup_id', 'subgroup_invocation_id', 'subgroup_size', 'vertex_index', 'workgroup_id', 'workgroup_index')");
 }
 
 TEST_F(WGSLParserTest, Attribute_Interpolate_Flat) {
