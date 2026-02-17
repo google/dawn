@@ -1387,5 +1387,238 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_ShaderIOTest, WorkgroupIndex_ReuseExistingBuiltins) {
+    auto* workgroup_id = b.FunctionParam("wgid", ty.vec3u());
+    workgroup_id->SetBuiltin(core::BuiltinValue::kWorkgroupId);
+
+    auto* num_workgroups = b.FunctionParam("numwgs", ty.vec3u());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* workgroup_index = b.FunctionParam("wgindex", ty.u32());
+    workgroup_index->SetBuiltin(core::BuiltinValue::kWorkgroupIndex);
+
+    auto* ep = b.ComputeFunction("foo", 3_u, 2_u, 1_u);
+    ep->SetParams({workgroup_id, num_workgroups, workgroup_index});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Add(workgroup_index, 0_u));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(3u, 2u, 1u) func(%wgid:vec3<u32> [@workgroup_id], %numwgs:vec3<u32> [@num_workgroups], %wgindex:u32 [@workgroup_index]):void {
+  $B1: {
+    %5:u32 = add %wgindex, 0u
+    %x:u32 = let %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo_inner = func(%wgid:vec3<u32>, %numwgs:vec3<u32>, %wgindex:u32):void {
+  $B1: {
+    %5:u32 = add %wgindex, 0u
+    %x:u32 = let %5
+    ret
+  }
+}
+%foo = @compute @workgroup_size(3u, 2u, 1u) func(%wgid_1:vec3<u32> [@workgroup_id], %numwgs_1:vec3<u32> [@num_workgroups]):void {  # %wgid_1: 'wgid', %numwgs_1: 'numwgs'
+  $B2: {
+    %10:u32 = access %numwgs_1, 0u
+    %11:u32 = access %numwgs_1, 1u
+    %12:u32 = mul %10, %11
+    %13:u32 = access %wgid_1, 2u
+    %14:u32 = mul %13, %12
+    %15:u32 = access %wgid_1, 1u
+    %16:u32 = mul %15, %10
+    %17:u32 = access %wgid_1, 0u
+    %18:u32 = add %17, %16
+    %19:u32 = add %18, %14
+    %20:void = call %foo_inner, %wgid_1, %numwgs_1, %19
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ShaderIOTest, WorkgroupIndex_AddMissingBuiltins) {
+    auto* workgroup_index = b.FunctionParam("wgindex", ty.u32());
+    workgroup_index->SetBuiltin(core::BuiltinValue::kWorkgroupIndex);
+
+    auto* ep = b.ComputeFunction("foo", 3_u, 2_u, 1_u);
+    ep->SetParams({workgroup_index});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Add(workgroup_index, 0_u));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(3u, 2u, 1u) func(%wgindex:u32 [@workgroup_index]):void {
+  $B1: {
+    %3:u32 = add %wgindex, 0u
+    %x:u32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo_inner = func(%wgindex:u32):void {
+  $B1: {
+    %3:u32 = add %wgindex, 0u
+    %x:u32 = let %3
+    ret
+  }
+}
+%foo = @compute @workgroup_size(3u, 2u, 1u) func(%workgroup_id:vec3<u32> [@workgroup_id], %num_workgroups:vec3<u32> [@num_workgroups]):void {
+  $B2: {
+    %8:u32 = access %num_workgroups, 0u
+    %9:u32 = access %num_workgroups, 1u
+    %10:u32 = mul %8, %9
+    %11:u32 = access %workgroup_id, 2u
+    %12:u32 = mul %11, %10
+    %13:u32 = access %workgroup_id, 1u
+    %14:u32 = mul %13, %8
+    %15:u32 = access %workgroup_id, 0u
+    %16:u32 = add %15, %14
+    %17:u32 = add %16, %12
+    %18:void = call %foo_inner, %17
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ShaderIOTest, GlobalInvocationIndex_ReuseExistingBuiltins) {
+    auto* num_workgroups = b.FunctionParam("numwgs", ty.vec3u());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* global_index = b.FunctionParam("gindex", ty.u32());
+    global_index->SetBuiltin(core::BuiltinValue::kGlobalInvocationIndex);
+
+    auto* ep = b.ComputeFunction("foo", 3_u, 2_u, 1_u);
+    ep->SetParams({num_workgroups, global_index});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Add(global_index, 0_u));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(3u, 2u, 1u) func(%numwgs:vec3<u32> [@num_workgroups], %gindex:u32 [@global_invocation_index]):void {
+  $B1: {
+    %4:u32 = add %gindex, 0u
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo_inner = func(%numwgs:vec3<u32>, %gindex:u32):void {
+  $B1: {
+    %4:u32 = add %gindex, 0u
+    %x:u32 = let %4
+    ret
+  }
+}
+%foo = @compute @workgroup_size(3u, 2u, 1u) func(%numwgs_1:vec3<u32> [@num_workgroups], %global_invocation_id:vec3<u32> [@global_invocation_id]):void {  # %numwgs_1: 'numwgs'
+  $B2: {
+    %9:u32 = access %global_invocation_id, 0u
+    %10:u32 = access %global_invocation_id, 1u
+    %11:u32 = access %global_invocation_id, 2u
+    %12:u32 = access %numwgs_1, 0u
+    %13:u32 = access %numwgs_1, 1u
+    %14:u32 = mul %12, 3u
+    %15:u32 = mul %13, 2u
+    %16:u32 = mul %14, %15
+    %17:u32 = mul %11, %16
+    %18:u32 = mul %10, %14
+    %19:u32 = add %9, %18
+    %20:u32 = add %19, %17
+    %21:void = call %foo_inner, %numwgs_1, %20
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ShaderIOTest, GlobalInvocationIndex_AddMissingBuiltins) {
+    auto* global_index = b.FunctionParam("gindex", ty.u32());
+    global_index->SetBuiltin(core::BuiltinValue::kGlobalInvocationIndex);
+
+    auto* ep = b.ComputeFunction("foo", 3_u, 2_u, 1_u);
+    ep->SetParams({global_index});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Add(global_index, 0_u));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(3u, 2u, 1u) func(%gindex:u32 [@global_invocation_index]):void {
+  $B1: {
+    %3:u32 = add %gindex, 0u
+    %x:u32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo_inner = func(%gindex:u32):void {
+  $B1: {
+    %3:u32 = add %gindex, 0u
+    %x:u32 = let %3
+    ret
+  }
+}
+%foo = @compute @workgroup_size(3u, 2u, 1u) func(%num_workgroups:vec3<u32> [@num_workgroups], %global_invocation_id:vec3<u32> [@global_invocation_id]):void {
+  $B2: {
+    %8:u32 = access %global_invocation_id, 0u
+    %9:u32 = access %global_invocation_id, 1u
+    %10:u32 = access %global_invocation_id, 2u
+    %11:u32 = access %num_workgroups, 0u
+    %12:u32 = access %num_workgroups, 1u
+    %13:u32 = mul %11, 3u
+    %14:u32 = mul %12, 2u
+    %15:u32 = mul %13, %14
+    %16:u32 = mul %10, %15
+    %17:u32 = mul %9, %13
+    %18:u32 = add %8, %17
+    %19:u32 = add %18, %16
+    %20:void = call %foo_inner, %19
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise
