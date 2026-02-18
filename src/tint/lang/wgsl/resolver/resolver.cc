@@ -4983,6 +4983,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
         address_space != core::AddressSpace::kWorkgroup) {
         AddError(usage) << "buffer types cannot be declared in the " << style::Enum(address_space)
                         << " address space";
+        return false;
     }
 
     if (core::IsHostShareable(address_space) && !ty->IsHostShareable()) {

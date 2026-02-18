@@ -153,7 +153,7 @@ TEST_F(ResolverBufferTest, Var_Function) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(error: buffer types cannot be declared in the 'function' address space
-error: function-scope 'var' must have a constructible type)");
+note: while instantiating 'var' v)");
 }
 
 TEST_F(ResolverBufferTest, Var_Private) {
@@ -162,7 +162,7 @@ TEST_F(ResolverBufferTest, Var_Private) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(error: buffer types cannot be declared in the 'private' address space
-error: 'buffer' variables must have 'storage', 'uniform', or 'workgroup' address space)");
+note: while instantiating 'var' v)");
 }
 
 TEST_F(ResolverBufferTest, Var_Storage) {
@@ -230,7 +230,7 @@ TEST_F(ResolverBufferTest, FunctionParameter) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(error: buffer types cannot be declared in the 'undefined' address space
-error: type of function parameter cannot be buffer)");
+note: while instantiating parameter b)");
 }
 
 TEST_F(ResolverBufferTest, FunctionParameter_Pointer) {
