@@ -686,8 +686,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> VertexPulling(core::ir::Module& ir, const VertexPullingConfig& config) {
-    TINT_CHECK_RESULT(
-        ValidateAndDumpIfNeeded(ir, "core.VertexPulling", kVertexPullingCapabilities));
+    TINT_CHECK_RESULT(ValidateBeforeIfNeeded(ir, kVertexPullingCapabilities, "core.VertexPulling"));
 
     State{config, ir}.Process();
 

@@ -1244,7 +1244,7 @@ struct State {
 
 Result<SuccessType> BuiltinPolyfill(Module& ir, const BuiltinPolyfillConfig& config) {
     TINT_CHECK_RESULT(
-        ValidateAndDumpIfNeeded(ir, "core.BuiltinPolyfill", kBuiltinPolyfillCapabilities));
+        ValidateBeforeIfNeeded(ir, kBuiltinPolyfillCapabilities, "core.BuiltinPolyfill"));
 
     State{config, ir}.Process();
 

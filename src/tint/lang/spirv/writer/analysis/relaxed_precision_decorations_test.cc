@@ -150,7 +150,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will be relaxed precision due to the f16 texel format.
     // The texel value will be relaxed precision since it is converted to f16.
@@ -196,7 +196,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will be relaxed precision due to the f16 texel format.
     // The texel value will be relaxed precision since it is converted to f16.
@@ -237,7 +237,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will be relaxed precision due to the f16 texel format.
     // The texel value will NOT be relaxed precision since it is used as an f32 value.
@@ -276,7 +276,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will be relaxed precision due to the f16 texel format.
     // The texel value will be relaxed precision since it is converted from f16.
@@ -321,7 +321,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will be relaxed precision since it is used with an f16 conversion.
     // The texel value will be relaxed precision since it is converted from f16.
@@ -359,7 +359,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will be relaxed precision due to the f16 texel format.
     // The texel value will NOT be relaxed precision since it is not converted from f16.
@@ -400,7 +400,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will be relaxed precision since all accesses are converted to/from f16.
     // The texel value will be relaxed precision since it is converted to f16.
@@ -441,7 +441,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // Neither the image variable nor the texel value get relaxed precision.
     auto decorations = GetRelaxedPrecisionDecorations(mod);
@@ -479,7 +479,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable and the texel value will be relaxed precision.
     auto decorations = GetRelaxedPrecisionDecorations(mod);
@@ -517,7 +517,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // Neither the image variable nor the texel value get relaxed precision.
     auto decorations = GetRelaxedPrecisionDecorations(mod);
@@ -568,7 +568,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The first texel value will be relaxed precision since it is converted to f16.
     // The image variable and second texel value will NOT be relaxed precision.
@@ -617,7 +617,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will NOT be relaxed precision since one write is not relaxed.
     // The first texel value will be relaxed precision since it is converted from f16.
@@ -671,7 +671,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will be relaxed precision since all accesses are converted to/from f16.
     // The sampled value will be relaxed precision since it is converted to f16.
@@ -725,7 +725,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // Neither the image variable nor the texel value get relaxed precision.
     auto decorations = GetRelaxedPrecisionDecorations(mod);
@@ -764,7 +764,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will be relaxed precision due to the f16 texel format.
     // The texel value will NOT be relaxed precision since it is converted to i32.
@@ -808,7 +808,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will NOT be relaxed precision because it is an integer format.
     // The texel value WILL be relaxed precision since it is converted to f16.
@@ -864,7 +864,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable will be relaxed precision since all accesses are converted to/from f16.
     // The texel value will be relaxed precision since it is converted to f16.
@@ -918,7 +918,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // Neither the image variable, function parameter, nor the texel value get relaxed precision.
     auto decorations = GetRelaxedPrecisionDecorations(mod);
@@ -986,7 +986,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The image variable, both function parameters, and the texel value will be relaxed precision.
     auto decorations = GetRelaxedPrecisionDecorations(mod);
@@ -1051,7 +1051,7 @@ $B1: {  # root
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, kValidationCapabilities), Success);
+    EXPECT_EQ(ValidateBefore(mod, kValidationCapabilities), Success);
 
     // The first texel value will be relaxed precision since it is converted to f16.
     // The image variable, function parameter, and second texel value will NOT be relaxed precision.

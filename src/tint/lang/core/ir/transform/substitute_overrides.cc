@@ -373,7 +373,7 @@ struct State {
 
 Result<SuccessType> SubstituteOverrides(Module& ir, const SubstituteOverridesConfig& cfg) {
     TINT_CHECK_RESULT(
-        ValidateAndDumpIfNeeded(ir, "core.SubstituteOverrides", kSubstituteOverridesCapabilities));
+        ValidateBeforeIfNeeded(ir, kSubstituteOverridesCapabilities, "core.SubstituteOverrides"));
     {
         auto result = State{ir, cfg}.Process();
         if (result != Success) {

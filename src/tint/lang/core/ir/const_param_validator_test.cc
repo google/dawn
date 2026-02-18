@@ -234,7 +234,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSubgroupsShuffle_SignedLow) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():f32 {
@@ -262,7 +262,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainkExtractBits) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():u32 {
@@ -289,7 +289,7 @@ TEST_F(IR_ConstParamValidatorTest, CorrectDomainkExtractBits) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():u32 {
@@ -314,7 +314,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainkExtractBits_Vec) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():vec4<i32> {
@@ -342,7 +342,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainkInsertBits_Vec) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():vec4<u32> {
@@ -371,7 +371,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainkInsertBits) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():u32 {
@@ -400,7 +400,7 @@ TEST_F(IR_ConstParamValidatorTest, CorrectDomainkInsertBits) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():u32 {
@@ -426,7 +426,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainClamp) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():f32 {
@@ -453,7 +453,7 @@ TEST_F(IR_ConstParamValidatorTest, CorrectDomainClamp) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():f32 {
@@ -480,7 +480,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainClamp_Vec) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():vec4<f16> {
@@ -507,7 +507,7 @@ TEST_F(IR_ConstParamValidatorTest, CorrectDomainSmoothstep) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():f32 {
@@ -534,7 +534,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSmoothstep_Vec) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():vec4<f16> {
@@ -562,7 +562,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainLdexp_Vec) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():vec4<f32> {
@@ -589,7 +589,7 @@ TEST_F(IR_ConstParamValidatorTest, CorrectDomainLdexp_Vec) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():vec4<f16> {
@@ -614,7 +614,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainLdexp) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():f16 {
@@ -640,7 +640,7 @@ TEST_F(IR_ConstParamValidatorTest, CorrectDomainLdexp) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():f32 {
@@ -665,7 +665,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectPack2x16Float) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():u32 {
@@ -690,7 +690,7 @@ TEST_F(IR_ConstParamValidatorTest, CorrectPack2x16Float) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():u32 {
@@ -714,7 +714,7 @@ TEST_F(IR_ConstParamValidatorTest, CorrectDomainShiftLeft) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():u32 {
@@ -739,7 +739,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainShiftLeft) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():u32 {
@@ -768,7 +768,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainShiftRight_Vec) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():vec4<i32> {
@@ -796,7 +796,7 @@ TEST_F(IR_ConstParamValidatorTest, CorrectDomainDiv) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():u32 {
@@ -821,7 +821,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainDiv) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():u32 {
@@ -848,7 +848,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainModulo_Vec) {
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
-    ASSERT_EQ(ir::Validate(mod), Success);
+    ASSERT_EQ(ir::ValidateBefore(mod), Success);
 
     auto* src = R"(
 %foo = func():vec4<i32> {

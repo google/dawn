@@ -1264,9 +1264,9 @@ struct State {
 }  // namespace
 
 Result<SuccessType> TexturePolyfill(core::ir::Module& ir, const TexturePolyfillConfig& cfg) {
-    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(
-        ir, "glsl.TexturePolyfill",
-        core::ir::Capabilities{core::ir::Capability::kAllowDuplicateBindings}));
+    TINT_CHECK_RESULT(ValidateBeforeIfNeeded(
+        ir, core::ir::Capabilities{core::ir::Capability::kAllowDuplicateBindings},
+        "glsl.TexturePolyfill"));
 
     State{ir, cfg}.Process();
 

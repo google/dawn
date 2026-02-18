@@ -107,7 +107,7 @@ struct State {
 
 Result<SuccessType> ModuleConstant(core::ir::Module& ir, const ModuleConstantConfig& config) {
     TINT_CHECK_RESULT(
-        ValidateAndDumpIfNeeded(ir, "msl.ModuleConstant", kModuleConstantCapabilities));
+        ValidateBeforeIfNeeded(ir, kModuleConstantCapabilities, "msl.ModuleConstant"));
 
     State{ir, config}.Process();
 

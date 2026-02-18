@@ -156,13 +156,14 @@ struct State {
 }  // namespace
 
 Result<SuccessType> SimdBallot(core::ir::Module& ir) {
-    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "msl.SimdBallot",
-                                              tint::core::ir::Capabilities{
-                                                  core::ir::Capability::kAllow8BitIntegers,
-                                                  core::ir::Capability::kAllowPointSizeBuiltin,
-                                                  core::ir::Capability::kAllowDuplicateBindings,
-                                                  core::ir::Capability::kAllowNonCoreTypes,
-                                              }));
+    TINT_CHECK_RESULT(ValidateBeforeIfNeeded(ir,
+                                             tint::core::ir::Capabilities{
+                                                 core::ir::Capability::kAllow8BitIntegers,
+                                                 core::ir::Capability::kAllowPointSizeBuiltin,
+                                                 core::ir::Capability::kAllowDuplicateBindings,
+                                                 core::ir::Capability::kAllowNonCoreTypes,
+                                             },
+                                             "msl.SimdBallot"));
 
     State{ir}.Process();
 

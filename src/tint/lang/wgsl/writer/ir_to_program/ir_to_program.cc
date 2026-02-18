@@ -108,8 +108,7 @@ class State {
             core::ir::Capability::kAllowPhonyInstructions,
             core::ir::Capability::kAllowRefTypes,
         };
-        if (auto res = core::ir::ValidateAndDumpIfNeeded(mod, "wgsl.to_program", caps);
-            res != Success) {
+        if (auto res = ValidateBeforeIfNeeded(mod, caps, "wgsl.to_program"); res != Success) {
             // IR module failed validation.
             b.Diagnostics().AddError(Source{}) << res.Failure();
             return Program{resolver::Resolve(b)};

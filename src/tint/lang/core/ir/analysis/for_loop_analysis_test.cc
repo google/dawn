@@ -109,7 +109,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     ForLoopAnalysis analysis(*loop);
     EXPECT_EQ(ifelse->Condition(), analysis.GetIfCondition());
@@ -197,7 +197,7 @@ $B1: {  # root
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     ForLoopAnalysis analysis(*loop);
 
@@ -300,7 +300,7 @@ $B1: {  # root
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     ForLoopAnalysis analysis(*loop);
     EXPECT_EQ(ifelse->Condition(), analysis.GetIfCondition());
@@ -424,7 +424,7 @@ $B1: {  # root
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     ForLoopAnalysis analysis(*loop);
     EXPECT_EQ(nullptr, analysis.GetIfCondition());
@@ -496,7 +496,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailLet) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     ForLoopAnalysis analysis(*loop);
     EXPECT_EQ(nullptr, analysis.GetIfCondition());
@@ -572,7 +572,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailStore) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     ForLoopAnalysis analysis(*loop);
     EXPECT_EQ(nullptr, analysis.GetIfCondition());
@@ -644,7 +644,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailNonCanonicalIfFlipped) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     ForLoopAnalysis analysis(*loop);
     EXPECT_EQ(nullptr, analysis.GetIfCondition());
@@ -711,7 +711,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailNonCanonicalIfOnlyExit) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     ForLoopAnalysis analysis(*loop);
     EXPECT_EQ(nullptr, analysis.GetIfCondition());

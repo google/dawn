@@ -135,6 +135,19 @@ struct ValidatedType {
 
 namespace {
 
+/// Prints out the current IR state, iff TINT_DUMP_IR_WHEN_VALIDATING is set.
+void DumpIRIfEnabled([[maybe_unused]] const Module& ir,
+                     [[maybe_unused]] const char* msg = "",
+                     [[maybe_unused]] std::string_view timing = "") {
+#if TINT_DUMP_IR_WHEN_VALIDATING
+    auto printer = StyledTextPrinter::Create(stdout);
+    std::cout << "=========================================================\n";
+    std::cout << "== IR dump " << timing << " " << msg << ":\n";
+    std::cout << "=========================================================\n";
+    printer->Print(Disassembler(ir).Text());
+#endif
+}
+
 using SupportedStages = tint::EnumSet<Function::PipelineStage>;
 
 /// @returns a human-readable string of all the entries in a EnumSet
@@ -5290,29 +5303,46 @@ const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* in
 
 }  // namespace
 
-Result<SuccessType> Validate(const Module& mod, Capabilities capabilities) {
+Result<SuccessType> Validate(const Module& mod,
+                             Capabilities capabilities,
+                             [[maybe_unused]] const char* msg,
+                             [[maybe_unused]] std::string_view timing) {
+    DumpIRIfEnabled(mod, msg, timing);
     Validator v(mod, capabilities);
     TINT_CHECK_RESULT(v.Run());
     return Success;
 }
 
-Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
-                                            [[maybe_unused]] const char* msg,
-                                            [[maybe_unused]] Capabilities capabilities,
-                                            [[maybe_unused]] std::string_view timing) {
-#if TINT_DUMP_IR_WHEN_VALIDATING
-    auto printer = StyledTextPrinter::Create(stdout);
-    std::cout << "=========================================================\n";
-    std::cout << "== IR dump " << timing << " " << msg << ":\n";
-    std::cout << "=========================================================\n";
-    printer->Print(Disassembler(ir).Text());
-#endif
+Result<SuccessType> ValidateBefore(const Module& mod, Capabilities capabilities, const char* msg) {
+    return Validate(mod, capabilities, msg, "before");
+}
 
+Result<SuccessType> ValidateAfter(const Module& mod, Capabilities capabilities, const char* msg) {
+    return Validate(mod, capabilities, msg, "after");
+}
+
+Result<SuccessType> ValidateIfNeeded([[maybe_unused]] const Module& mod,
+                                     [[maybe_unused]] Capabilities capabilities,
+                                     [[maybe_unused]] const char* msg,
+                                     [[maybe_unused]] std::string_view timing) {
+    DumpIRIfEnabled(mod, msg, timing);
 #if TINT_ENABLE_IR_VALIDATION
-    TINT_CHECK_RESULT(Validate(ir, capabilities));
+    Validator v(mod, capabilities);
+    TINT_CHECK_RESULT(v.Run());
 #endif
-
     return Success;
+}
+
+Result<SuccessType> ValidateBeforeIfNeeded(const Module& mod,
+                                           Capabilities capabilities,
+                                           const char* msg) {
+    return ValidateIfNeeded(mod, capabilities, msg, "before");
+}
+
+Result<SuccessType> ValidateAfterIfNeeded(const Module& mod,
+                                          Capabilities capabilities,
+                                          const char* msg) {
+    return ValidateIfNeeded(mod, capabilities, msg, "after");
 }
 
 }  // namespace tint::core::ir

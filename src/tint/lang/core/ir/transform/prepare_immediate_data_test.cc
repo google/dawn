@@ -43,7 +43,7 @@ class IR_PrepareImmediateDataTests : public TransformTest {
         TINT_CHECK_RESULT_UNWRAP(result, PrepareImmediateData(mod, config));
 
         // Validate the output IR.
-        EXPECT_EQ(ir::Validate(mod, capabilities), Success);
+        EXPECT_EQ(ir::ValidateAfter(mod, capabilities), Success);
 
         return result;
     }

@@ -393,11 +393,12 @@ struct State {
 
 Result<SuccessType> ArgumentBuffers(core::ir::Module& ir, const ArgumentBuffersConfig& config) {
     TINT_CHECK_RESULT(
-        ValidateAndDumpIfNeeded(ir, "msl.ArgumentBuffers",
-                                tint::core::ir::Capabilities{
-                                    tint::core::ir::Capability::kAllowPointSizeBuiltin,
-                                    tint::core::ir::Capability::kAllowDuplicateBindings,
-                                }));
+        ValidateBeforeIfNeeded(ir,
+                               tint::core::ir::Capabilities{
+                                   tint::core::ir::Capability::kAllowPointSizeBuiltin,
+                                   tint::core::ir::Capability::kAllowDuplicateBindings,
+                               },
+                               "msl.ArgumentBuffers"));
 
     return State{config, ir}.Process();
 }

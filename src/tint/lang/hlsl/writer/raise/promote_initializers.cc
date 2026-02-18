@@ -238,8 +238,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> PromoteInitializers(core::ir::Module& ir) {
-    TINT_CHECK_RESULT(
-        ValidateAndDumpIfNeeded(ir, "hlsl.PromoteInitializers", kPromoteInitializersCapabilities));
+    TINT_CHECK_RESULT(core::ir::ValidateBeforeIfNeeded(ir, kPromoteInitializersCapabilities,
+                                                       "hlsl.PromoteInitializers"));
 
     State{ir}.Process();
 

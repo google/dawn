@@ -62,7 +62,7 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
         // WGSL-dialect -> core-dialect
         TINT_CHECK_RESULT(wgsl::reader::Lower(result));
 
-        TINT_CHECK_RESULT(core::ir::Validate(result, kCapabilities));
+        TINT_CHECK_RESULT(core::ir::ValidateAfter(result, kCapabilities));
         return result;
     }
 
@@ -75,7 +75,7 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
             .allowed_features = wgsl::AllowedFeatures::Everything(),
         };
         TINT_CHECK_RESULT_UNWRAP(result, wgsl::reader::WgslToIR(&file, options));
-        TINT_CHECK_RESULT(core::ir::Validate(result, kCapabilities));
+        TINT_CHECK_RESULT(core::ir::ValidateAfter(result, kCapabilities));
 
         return result;
     }

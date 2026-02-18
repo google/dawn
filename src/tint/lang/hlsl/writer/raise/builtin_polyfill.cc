@@ -1916,12 +1916,13 @@ struct State {
 
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
     TINT_CHECK_RESULT(
-        ValidateAndDumpIfNeeded(ir, "hlsl.BuiltinPolyfill",
-                                core::ir::Capabilities{
-                                    core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
-                                    core::ir::Capability::kAllowDuplicateBindings,
-                                    core::ir::Capability::kAllowNonCoreTypes,
-                                }));
+        ValidateBeforeIfNeeded(ir,
+                               core::ir::Capabilities{
+                                   core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
+                                   core::ir::Capability::kAllowDuplicateBindings,
+                                   core::ir::Capability::kAllowNonCoreTypes,
+                               },
+                               "hlsl.BuiltinPolyfill"));
 
     State{ir}.Process();
     return Success;

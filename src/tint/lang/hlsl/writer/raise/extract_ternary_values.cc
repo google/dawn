@@ -98,8 +98,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ExtractTernaryValues(core::ir::Module& ir) {
-    TINT_CHECK_RESULT(ValidateAndDumpIfNeeded(ir, "hlsl.ExtractTernaryValues",
-                                              kExtractTernaryValuesCapabilities));
+    TINT_CHECK_RESULT(
+        ValidateBeforeIfNeeded(ir, kExtractTernaryValuesCapabilities, "hlsl.ExtractTernaryValues"));
 
     State{ir}.Process();
 

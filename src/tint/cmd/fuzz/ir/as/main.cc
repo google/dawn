@@ -185,7 +185,6 @@ tint::Result<tint::core::ir::Module> GenerateIrModule(const tint::Program& progr
 
     auto cfg = tint::fuzz::ir::SubstituteOverridesConfig(ir);
     TINT_CHECK_RESULT(tint::core::ir::transform::SubstituteOverrides(ir, cfg));
-
     TINT_CHECK_RESULT(tint::core::ir::Validate(ir));
 
     return ir;

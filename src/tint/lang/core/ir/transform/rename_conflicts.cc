@@ -302,7 +302,7 @@ struct State {
 
 Result<SuccessType> RenameConflicts(core::ir::Module& ir) {
     TINT_CHECK_RESULT(
-        ValidateAndDumpIfNeeded(ir, "core.RenameConflicts", kRenameConflictsCapabilities));
+        ValidateBeforeIfNeeded(ir, kRenameConflictsCapabilities, "core.RenameConflicts"));
 
     State{ir}.Process();
 

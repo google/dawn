@@ -160,8 +160,7 @@ class Printer : public tint::TextGenerator {
 
     /// @returns the generated HLSL shader
     tint::Result<Output> Generate() {
-        TINT_CHECK_RESULT(
-            core::ir::ValidateAndDumpIfNeeded(ir_, "hlsl.Printer", kPrinterCapabilities));
+        TINT_CHECK_RESULT(core::ir::ValidateIfNeeded(ir_, kPrinterCapabilities, "hlsl.Printer"));
 
         // Emit module-scope declarations.
         EmitRootBlock(ir_.root_block);

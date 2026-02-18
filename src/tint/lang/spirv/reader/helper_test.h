@@ -65,9 +65,9 @@ class SpirvReaderTestHelperBase : public BASE {
 
         // Validate the IR module against the capabilities supported by the core dialect.
         TINT_CHECK_RESULT(
-            core::ir::Validate(parsed, core::ir::Capabilities{
-                                           core::ir::Capability::kAllowMultipleEntryPoints,
-                                       }));
+            core::ir::ValidateAfter(parsed, core::ir::Capabilities{
+                                                core::ir::Capability::kAllowMultipleEntryPoints,
+                                            }));
 
         // Return the disassembled IR module.
         return "\n" + core::ir::Disassembler(parsed).Plain();

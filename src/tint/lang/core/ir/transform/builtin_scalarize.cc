@@ -136,7 +136,7 @@ struct State {
 
 Result<SuccessType> BuiltinScalarize(Module& ir, const BuiltinScalarizeConfig& config) {
     TINT_CHECK_RESULT(
-        ValidateAndDumpIfNeeded(ir, "core.BuiltinScalarize", kBuiltinScalarizeCapabilities));
+        ValidateBeforeIfNeeded(ir, kBuiltinScalarizeCapabilities, "core.BuiltinScalarize"));
 
     State{config, ir}.Process();
 

@@ -127,7 +127,7 @@ class Printer : public tint::TextGenerator {
     /// @returns the generated MSL shader
     tint::Result<Output> Generate() {
         TINT_CHECK_RESULT(
-            core::ir::ValidateAndDumpIfNeeded(ir_, "msl.Printer", kPrinterCapabilities));
+            core::ir::ValidateBeforeIfNeeded(ir_, kPrinterCapabilities, "msl.Printer"));
 
         {
             TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);

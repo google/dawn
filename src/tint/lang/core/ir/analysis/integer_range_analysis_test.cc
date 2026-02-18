@@ -64,7 +64,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_u32_XYZ) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     const IntegerRangeInfo& info = analysis.GetInfo(localInvocationIndex);
@@ -100,7 +100,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_i32_XYZ) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     const IntegerRangeInfo& info = analysis.GetInfo(localInvocationIndex);
@@ -136,7 +136,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_1_Y_1) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     const IntegerRangeInfo& info = analysis.GetInfo(localInvocationIndex);
@@ -172,7 +172,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_1_1_Z) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     const IntegerRangeInfo& info = analysis.GetInfo(localInvocationIndex);
@@ -226,7 +226,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_XYZ) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -269,7 +269,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_1_Y_1) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -312,7 +312,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_1_1_Z) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -360,7 +360,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Success_sint) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -397,7 +397,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Success_uint) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -425,7 +425,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_MissingInitia
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -457,7 +457,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_MissingVarIni
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -494,7 +494,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_NotInitialize
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -533,7 +533,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_NotInitialize
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -579,7 +579,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_InitializerTo
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -628,7 +628,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_AddOne_sint) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -679,7 +679,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_AddOne_uint) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -730,7 +730,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_OneAddLoopCont
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -781,7 +781,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_OneAddLoopCont
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -832,7 +832,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_MinusOne_sint)
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -883,7 +883,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_MinusOne_uint)
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -931,7 +931,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_TooFewInstruct
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -983,7 +983,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_TooManyInstruc
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1033,7 +1033,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_FirstInstructi
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1088,7 +1088,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_NoLoadFromLoop
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr,
@@ -1137,7 +1137,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_SecondInstruct
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1187,7 +1187,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_AddTwo) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1237,7 +1237,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_MinusTwo) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1287,7 +1287,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_OneMinusLoopCo
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1339,7 +1339,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_AddNonConstant
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1391,7 +1391,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_MinusNonConsta
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1441,7 +1441,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_NeitherAddNorM
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1499,7 +1499,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_NoStoreFromLoo
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1554,7 +1554,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_NoStoreToLoopC
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1623,7 +1623,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThan_Const
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1698,7 +1698,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_in
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1774,7 +1774,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThan_Const
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1849,7 +1849,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_in
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -1925,7 +1925,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThanEqual_
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2000,7 +2000,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThanEqual_
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2074,7 +2074,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_LessThanEqu
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2149,7 +2149,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_LessThanEqu
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2225,7 +2225,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThan_co
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2301,7 +2301,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThan_co
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2377,7 +2377,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_GreaterThan
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2453,7 +2453,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_GreaterThan
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2529,7 +2529,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThanEqu
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2605,7 +2605,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThanEqu
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2681,7 +2681,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_GreaterThan
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2757,7 +2757,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_GreaterThan
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2834,7 +2834,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_InstructionsOtherTha
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2902,7 +2902,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_FirstInstructionIsNo
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -2970,7 +2970,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NoLoadFromLoopContro
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3050,7 +3050,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_StoreLoopControlVari
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3118,7 +3118,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_SecondInstructionNot
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3186,7 +3186,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_BinaryOpIsNotCompari
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3254,7 +3254,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_IndexCompareWithNonC
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3322,7 +3322,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NonConstCompareWithI
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3391,7 +3391,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NonIndexCompareWithC
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3460,7 +3460,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_ConstCompareWithNonI
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3526,7 +3526,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThan_Zero_
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3592,7 +3592,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Zero_GreaterThan_Ind
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3658,7 +3658,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThan_Ma
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3724,7 +3724,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_u32_LessThan_Ind
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3790,7 +3790,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThan_Min_I
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3856,7 +3856,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Min_I32_GreaterThan_
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3922,7 +3922,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThan_Ma
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -3988,7 +3988,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_I32_LessThan_Ind
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4054,7 +4054,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThanEqual_
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4120,7 +4120,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThanEqual_
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4186,7 +4186,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Min_i32_LessThanEqua
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4252,7 +4252,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Min_u32_LessThanEqua
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4318,7 +4318,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThanEqu
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4384,7 +4384,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThanEqu
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4450,7 +4450,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_i32_GreaterThanE
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4516,7 +4516,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_u32_GreaterThanE
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4585,7 +4585,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NotIfElseAfterCompar
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4654,7 +4654,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NotUseLastComparison
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4725,7 +4725,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_MultipleInstructions
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4790,7 +4790,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_ExitLoopInTrueBlock)
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4860,7 +4860,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_TooManyInstructionsI
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4925,7 +4925,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NoExitLoopInFalseBlo
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -4989,7 +4989,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_EmptyFalseBlock) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5057,7 +5057,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_LessThanEqual_init_equal
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5134,7 +5134,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_LessThanEqual_init_equal
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5211,7 +5211,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThanEqual_init_great
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5282,7 +5282,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThanEqual_init_great
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5353,7 +5353,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThanEqual_cons
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5424,7 +5424,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_GreaterThanEqual_init_eq
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5500,7 +5500,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_GreaterThanEqual_init_eq
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5576,7 +5576,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThanEqual_init_le
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5647,7 +5647,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThanEqual_init_le
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5719,7 +5719,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5790,7 +5790,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_LessThanEqual_max_
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5865,7 +5865,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_LessThanEqual_max_
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -5940,7 +5940,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_GreaterThanEqual_m
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6015,7 +6015,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_GreaterThanEqual_m
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6090,7 +6090,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_greater_th
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6161,7 +6161,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_equals_rhs
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6232,7 +6232,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_greater_th
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6303,7 +6303,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_equals_rhs
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6374,7 +6374,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThan_constant_
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6445,7 +6445,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_less_th
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6516,7 +6516,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_equals_
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6587,7 +6587,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_less_th
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6658,7 +6658,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_equals_
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6729,7 +6729,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_GreaterThan_consta
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6800,7 +6800,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_LessThanEqual_init_e
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6875,7 +6875,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_LessThanEqual_init_e
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -6951,7 +6951,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThanEqual_init_L
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7022,7 +7022,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThanEqual_init_L
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7094,7 +7094,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7165,7 +7165,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_min_u32_add_1_LessThanEq
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7240,7 +7240,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_min_i32_add_1_LessThanEq
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7316,7 +7316,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThanEqual_ini
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7392,7 +7392,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThanEqual_ini
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7469,7 +7469,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7541,7 +7541,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7613,7 +7613,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7684,7 +7684,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_max_u32_minus_1_GreaterT
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7759,7 +7759,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_max_i32_minus_1_GreaterT
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7835,7 +7835,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_equals
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7906,7 +7906,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_equals
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -7977,7 +7977,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessTh
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -8048,7 +8048,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessTh
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -8119,7 +8119,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_constant_LessThan_in
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -8191,7 +8191,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_equ
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -8262,7 +8262,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThan_init_equ
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -8333,7 +8333,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_Gre
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -8404,7 +8404,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_Gre
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -8475,7 +8475,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_constant_GreaterThan
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -8550,7 +8550,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithRange) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -8638,7 +8638,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithoutRange) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
@@ -8674,7 +8674,7 @@ $B1: {  # root
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_FALSE(analysis.GetInfo(load_a).IsValid());
@@ -8707,7 +8707,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToLocalInvocationID) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -8758,7 +8758,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, NotAccessToFunctionParam) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     const auto& info = analysis.GetInfo(access);
@@ -8792,7 +8792,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToFunctionParamNoRange) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     ASSERT_FALSE(analysis.GetInfo(access_x).IsValid());
@@ -8819,7 +8819,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToNonIntegerFunctionParam) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     const auto& info = analysis.GetInfo(access);
@@ -8851,7 +8851,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, NonConstantAccessIndex) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -8877,7 +8877,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, SignedIntegerScalarConstant) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     const auto& info = analysis.GetInfo(constant);
@@ -8906,7 +8906,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, UnsignedIntegerScalarConstant) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     const auto& info = analysis.GetInfo(constant);
@@ -8935,7 +8935,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, NonIntegerConstant) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     const auto& info = analysis.GetInfo(constant);
@@ -8964,7 +8964,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsScalarFunctionParameter) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9007,7 +9007,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsVectorFunctionParameter) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9041,7 +9041,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsAccess) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9134,7 +9134,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsLoadAndConstant) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9229,8 +9229,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsVar) {
 }
 )";
     EXPECT_EQ(src, str());
-
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9275,7 +9274,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetWithAccess) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9350,7 +9349,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetWithLoad) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9390,7 +9389,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetWithBinary) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9430,7 +9429,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetAsOperand) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9524,8 +9523,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, MultipleBinaryAdds) {
 }
 )";
     EXPECT_EQ(src, str());
-
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9565,7 +9563,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_U32_Overflow) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9642,7 +9640,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_I32_Overflow) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9719,7 +9717,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_I32_Underflow) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9801,8 +9799,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -9929,7 +9926,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -10056,7 +10053,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -10133,7 +10130,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Overflow_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -10210,7 +10207,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -10333,7 +10330,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -10460,7 +10457,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -10587,7 +10584,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_lhs) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -10710,7 +10707,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_rhs) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -10787,7 +10784,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_I32
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -10864,7 +10861,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_I32
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -10941,7 +10938,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_U32
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -11018,7 +11015,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_U32
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -11049,7 +11046,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Success_U32ToI32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
     const auto& info = analysis.GetInfo(convert);
@@ -11124,7 +11121,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Success_I32ToU32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -11200,7 +11197,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_NegativeI32ToU32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -11272,7 +11269,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_LargeU32ToI32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -11343,7 +11340,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_ConvertToNonInteger) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -11465,7 +11462,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -11593,7 +11590,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -11721,7 +11718,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_GreaterThanOne) 
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -11849,7 +11846,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_LessThanOne) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -11977,7 +11974,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -12105,7 +12102,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -12233,7 +12230,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeLHS) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -12357,7 +12354,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeRHS) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -12481,7 +12478,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -12605,7 +12602,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -12729,7 +12726,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -12858,7 +12855,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_I32_NonZero) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -12987,7 +12984,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_I32_Zero) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -13116,7 +13113,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_Negative) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -13240,7 +13237,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_NoLessThan32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -13364,7 +13361,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_NoLessThan32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -13488,7 +13485,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_Overflow) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -13564,7 +13561,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_HighestValue_Overflow)
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -13688,7 +13685,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_Overflow) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -13764,7 +13761,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_HighestValue_Overflow)
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -13888,7 +13885,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_U32_NonZero) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14017,7 +14014,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_I32_NonZero) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14146,7 +14143,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_U32_Zero) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14275,7 +14272,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_I32_Zero) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14404,7 +14401,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_I32_Negative) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14482,7 +14479,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_U32_NoLessThan32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14560,7 +14557,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_I32_NoLessThan32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14592,7 +14589,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_F32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14625,7 +14622,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_Vector_I32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14658,7 +14655,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_Vector_U32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14690,7 +14687,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_BothInvalidRange_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14722,7 +14719,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_BothInvalidRange_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14846,7 +14843,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothAreConstantValues_I3
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -14975,7 +14972,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothAreConstantValues_U3
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15104,7 +15101,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothValidRange_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15233,7 +15230,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothValidRange_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15269,7 +15266,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_FirstIsInvalidRange_Inva
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15301,7 +15298,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_FirstIsInvalidRange_Inva
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15333,7 +15330,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_SecondIsInvalidRange_Inv
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15365,7 +15362,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Failure_SecondIsInvalidRange_Inv
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15446,7 +15443,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_FirstIsInvalidRange_I32)
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15532,7 +15529,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_FirstIsInvalidRange_U32)
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15618,7 +15615,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_SecondIsInvalidRange_I32
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15704,7 +15701,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_SecondIsInvalidRange_U32
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15741,7 +15738,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_F32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15774,7 +15771,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_Vector_I32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15807,7 +15804,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_Vector_U32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15839,7 +15836,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_BothInvalidRange_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15871,7 +15868,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_BothInvalidRange_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -15995,7 +15992,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothAreConstantValues_I3
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16124,7 +16121,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothAreConstantValues_U3
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16253,7 +16250,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothValidRange_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16382,7 +16379,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothValidRange_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16418,7 +16415,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_FirstIsInvalidRange_Inva
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16450,7 +16447,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_FirstIsInvalidRange_Inva
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16482,7 +16479,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_SecondIsInvalidRange_Inv
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16514,7 +16511,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Failure_SecondIsInvalidRange_Inv
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16595,7 +16592,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_FirstIsInvalidRange_I32)
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16681,7 +16678,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_FirstIsInvalidRange_U32)
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16767,7 +16764,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_SecondIsInvalidRange_I32
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16853,7 +16850,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_SecondIsInvalidRange_U32
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16894,7 +16891,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Builtin_Input_Success_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -16947,7 +16944,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Builtin_Input_Success_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -17002,7 +16999,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Builtin_Input_Success_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -17055,7 +17052,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Builtin_Input_Success_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -17105,7 +17102,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_LHS_RHS_F32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `modulo` (`param % 2.0f`)
     IntegerRangeAnalysis analysis(&mod);
@@ -17136,7 +17133,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_LHS_RHS_Vec4I) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `modulo` (`param % vec4i(1, 2, 3, 4)`)
     IntegerRangeAnalysis analysis(&mod);
@@ -17176,7 +17173,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_LHS_Negative_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -17235,7 +17232,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_NonConstant_I32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -17295,7 +17292,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_NonConstant_U32) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
 
@@ -17343,7 +17340,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_Negative_I32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `modulo` (`call_min % (-6)`)
     IntegerRangeAnalysis analysis(&mod);
@@ -17428,7 +17425,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_Zero_I32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // The range of idx is [0, 0]
     IntegerRangeAnalysis analysis(&mod);
@@ -17521,7 +17518,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_Zero_U32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // The range of idx is [0u, 0u]
     IntegerRangeAnalysis analysis(&mod);
@@ -17558,7 +17555,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_LHS_NoRange_I32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `param` is [i32::kLowestValue, i32::kHighestValue]
     // Range of `modulo` (`param % 3i`)
@@ -17588,7 +17585,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Success_LHS_NoRange_U32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `param` is [u32::kLowestValue, u32::kHighestValue]
     // Range of `modulo` (`param % 3u`) is [0u, 2u]
@@ -17631,7 +17628,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `call_min` is [6, 12]
     // Range of `modulo` (`call_min % 5`) is [0, 4] (10 % 5 == 0, and 9 % 5 == 4)
@@ -17674,7 +17671,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `call_min` is [6u, 12u]
     // Range of `modulo` (`call_min % 6u`) is [0u, 5u] (12 % 6 == 0, and 11 % 6 == 5)
@@ -17717,7 +17714,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `call_min` is [8, 12]
     // Range of `modulo` (`call_min % 7`) is [1, 5] (8 % 7 == 1, 12 % 7 == 5)
@@ -17760,7 +17757,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `call_min` is [8u, 12u]
     // Range of `modulo` (`call_min % 7u`) is [1u, 5u] (8 % 7 == 1, 12 % 7 == 5)
@@ -17802,7 +17799,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Success_RHS_Is_One_I32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `call_min` is [8, 9]
     // Range of `modulo` (`call_min % 1`) is [0, 0]
@@ -17836,7 +17833,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Success_RHS_Is_One_U32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `param` is [u32::kLowestValue, u32::kHighestValue]
     // Range of `modulo` (`param % 1u`) is [0u, 0u]
@@ -17874,7 +17871,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Success_RHS_Is_Highest_I32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `call_max` is [0, i32::kHighestValue]
     // Range of `modulo` (`call_max % i32::kHighestValue`) is [0, i32::kHighestValue - 1]
@@ -17908,7 +17905,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Success_RHS_Is_Highest_U32) {
 )";
 
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod), Success);
+    EXPECT_EQ(ValidateBefore(mod), Success);
 
     // Range of `param` is [u32::kLowestValue, u32::kHighestValue]
     // Range of `modulo` (`param % u32::kHighestValue`) is [0u, u32::kHighestValue - 1u]

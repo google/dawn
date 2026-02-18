@@ -679,13 +679,14 @@ struct State {
 
 Result<SuccessType> PackedVec3(core::ir::Module& ir) {
     TINT_CHECK_RESULT(
-        ValidateAndDumpIfNeeded(ir, "msl.PackedVec3",
-                                tint::core::ir::Capabilities{
-                                    core::ir::Capability::kAllow8BitIntegers,
-                                    tint::core::ir::Capability::kAllowPointSizeBuiltin,
-                                    tint::core::ir::Capability::kAllowDuplicateBindings,
-                                    core::ir::Capability::kAllowNonCoreTypes,
-                                }));
+        ValidateBeforeIfNeeded(ir,
+                               tint::core::ir::Capabilities{
+                                   core::ir::Capability::kAllow8BitIntegers,
+                                   tint::core::ir::Capability::kAllowPointSizeBuiltin,
+                                   tint::core::ir::Capability::kAllowDuplicateBindings,
+                                   core::ir::Capability::kAllowNonCoreTypes,
+                               },
+                               "msl.PackedVec3"));
 
     State{ir}.Process();
 

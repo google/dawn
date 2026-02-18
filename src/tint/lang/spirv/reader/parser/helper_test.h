@@ -72,15 +72,16 @@ class SpirvParserTestHelperBase : public BASE {
 
         // Validate the IR module against the capabilities supported by the SPIR-V dialect.
         TINT_CHECK_RESULT(
-            ValidateAndDumpIfNeeded(parsed, "spirv.test",
-                                    core::ir::Capabilities{
-                                        core::ir::Capability::kAllowMultipleEntryPoints,
-                                        core::ir::Capability::kAllowOverrides,
-                                        core::ir::Capability::kAllowPhonyInstructions,
-                                        core::ir::Capability::kAllowVectorElementPointer,
-                                        core::ir::Capability::kAllowNonCoreTypes,
-                                        core::ir::Capability::kAllowStructMatrixDecorations,
-                                    }));
+            core::ir::ValidateAfterIfNeeded(parsed,
+                                            core::ir::Capabilities{
+                                                core::ir::Capability::kAllowMultipleEntryPoints,
+                                                core::ir::Capability::kAllowOverrides,
+                                                core::ir::Capability::kAllowPhonyInstructions,
+                                                core::ir::Capability::kAllowVectorElementPointer,
+                                                core::ir::Capability::kAllowNonCoreTypes,
+                                                core::ir::Capability::kAllowStructMatrixDecorations,
+                                            },
+                                            "spirv.test"));
 
         // Return the disassembled IR module.
         return core::ir::Disassembler(parsed).Plain();

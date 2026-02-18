@@ -146,7 +146,7 @@ struct State {
 
 Result<SuccessType> Bgra8UnormPolyfill(Module& ir) {
     TINT_CHECK_RESULT(
-        ValidateAndDumpIfNeeded(ir, "core.Bgra8UnormPolyfill", kBgra8UnormPolyfillCapabilities));
+        ValidateBeforeIfNeeded(ir, kBgra8UnormPolyfillCapabilities, "core.Bgra8UnormPolyfill"));
 
     State{ir}.Process();
 
