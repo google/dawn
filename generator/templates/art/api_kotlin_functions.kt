@@ -37,6 +37,9 @@ public object GPU {
             {{ generate_kdoc(main_doc, return_doc, arg_docs_map, function_args , line_wrap_prefix = "\n * ") }}
 
         {%- endif %}
+        {% if function.has_default %}
+            @JvmOverloads
+        {% endif %}
         @FastNative
         {% if function.returns and function.returns.type.name.canonical_case() == 'status' %}
             @Throws({{"WebGpuException::class"}})

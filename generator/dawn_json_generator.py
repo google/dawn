@@ -1183,6 +1183,20 @@ def compute_kotlin_params(loaded_json,
     params_kotlin['jni_name'] = jni_name
     params_kotlin['include_callback'] = include_callback
 
+    def check_jvm_overload_usage(functions):
+        """Checks functions to see if they have default parameters.
+
+        Sets a `has_default` flag on each function, which is used to add @JvmOverloads.
+        """
+        for func in functions:
+            func.has_default = False
+            for arg in func.arguments:
+                if kotlin_default(arg) is not None:
+                    func.has_default = True
+                    break
+
+    check_jvm_overload_usage(params_kotlin['by_category']['function'])
+
     params_kotlin['has_kotlin_classes'] = (
         [
             callback for callback in by_category['callback function'] +
