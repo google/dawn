@@ -187,6 +187,7 @@ class ResourceTableValidationTestDisabled : public ValidationTest {
 // Test that validates that the feature must be enabled
 TEST_F(ResourceTableValidationTestDisabled, FeatureNotEnabled) {
     wgpu::ResourceTableDescriptor descriptor;
+    descriptor.size = 1u;
     ASSERT_DEVICE_ERROR(device.CreateResourceTable(&descriptor));
 }
 
