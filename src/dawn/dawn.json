@@ -4349,7 +4349,7 @@
             {"name": "base array layer", "type": "uint32_t", "default": "0"},
             {"name": "array layer count", "type": "uint32_t", "default": "array layer count undefined"},
             {"name": "aspect", "type": "texture aspect", "default": "all"},
-            {"name": "usage", "type": "texture usage"}
+            {"name": "usage", "type": "texture usage", "default": "none"}
         ]
     },
     "texel buffer view descriptor": {

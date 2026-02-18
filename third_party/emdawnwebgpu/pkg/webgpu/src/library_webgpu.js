@@ -2617,6 +2617,7 @@ var LibraryWebGPU = {
         "baseArrayLayer": {{{ makeGetValue('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.baseArrayLayer, 'u32') }}},
         "arrayLayerCount": arrayLayerCount === {{{ gpu.ARRAY_LAYER_COUNT_UNDEFINED }}} ? undefined : arrayLayerCount,
         "aspect": {{{ gpu.makeGetEnum('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.aspect, 'TextureAspect') }}},
+        "usage": {{{ makeGetValue('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.usage, 'u32') }}},
         "swizzle": swizzle,
       };
     }
