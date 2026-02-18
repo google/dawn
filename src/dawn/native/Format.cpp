@@ -206,7 +206,8 @@ void ComputeFormatCapabilities(const DeviceBase* device, FormatTable& table) {
             if (supported) {
                 format.caps = caps;  // set the initial capabilities
                 format.unsupportedReason = Format::supported;
-            } else if (format.caps == Cap::None) {
+            } else if (format.caps == Cap::None &&
+                       std::holds_alternative<std::monostate>(format.unsupportedReason)) {
                 auto requestedFeature = *feature;
                 format.unsupportedReason =
                     requestedFeature == Feature::CoreFeaturesAndLimits
