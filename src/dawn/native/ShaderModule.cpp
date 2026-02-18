@@ -579,13 +579,13 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
 
     // Check that it is of the same type as in the layout.
     BindingInfoType shaderBindingType = GetShaderBindingType(shaderInfo);
-    BindingInfoType requiredType = GetBindingInfoType(layoutInfo);
-    if (requiredType == BindingInfoType::StaticSampler) {
-        requiredType = BindingInfoType::Sampler;
+    BindingInfoType bglBindingType = GetBindingInfoType(layoutInfo);
+    if (bglBindingType == BindingInfoType::StaticSampler) {
+        bglBindingType = BindingInfoType::Sampler;
     }
-    DAWN_INVALID_IF(requiredType != shaderBindingType,
+    DAWN_INVALID_IF(bglBindingType != shaderBindingType,
                     "Binding type in the shader (%s) doesn't match the type in the layout (%s).",
-                    shaderBindingType, requiredType);
+                    shaderBindingType, bglBindingType);
 
     DAWN_INVALID_IF((layoutInfo.visibility & StageBit(entryPointStage)) == 0,
                     "Entry point's stage (%s) is not in the binding visibility in the layout (%s).",
@@ -605,76 +605,76 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
     // Validation specific to each type of binding.
     return MatchVariant(
         shaderInfo.bindingInfo,
-        [&](const TextureBindingInfo& bindingInfo) -> MaybeError {
+        [&](const TextureBindingInfo& shaderBindingInfo) -> MaybeError {
             const TextureBindingInfo& bindingLayout =
                 std::get<TextureBindingInfo>(layoutInfo.bindingLayout);
             DAWN_INVALID_IF(
-                bindingLayout.multisampled != bindingInfo.multisampled,
+                bindingLayout.multisampled != shaderBindingInfo.multisampled,
                 "Binding multisampled flag (%u) doesn't match the layout's multisampled "
                 "flag (%u)",
-                bindingLayout.multisampled, bindingInfo.multisampled);
+                bindingLayout.multisampled, shaderBindingInfo.multisampled);
 
-            wgpu::TextureSampleType requiredShaderType = bindingLayout.sampleType;
+            wgpu::TextureSampleType bglShaderType = bindingLayout.sampleType;
             // Both UnfilterableFloat and kInternalResolveAttachmentSampleType are compatible with
             // texture_Nd<f32> instead of having a specific WGSL type.
-            if (requiredShaderType == kInternalResolveAttachmentSampleType ||
-                requiredShaderType == wgpu::TextureSampleType::UnfilterableFloat) {
-                requiredShaderType = wgpu::TextureSampleType::Float;
+            if (bglShaderType == kInternalResolveAttachmentSampleType ||
+                bglShaderType == wgpu::TextureSampleType::UnfilterableFloat) {
+                bglShaderType = wgpu::TextureSampleType::Float;
             }
-            DAWN_INVALID_IF(bindingInfo.sampleType != requiredShaderType,
+            DAWN_INVALID_IF(shaderBindingInfo.sampleType != bglShaderType,
                             "The shader's texture sample type (%s) isn't compatible with the "
                             "layout's texture sample type (%s) (it is only compatible with %s for "
                             "the shader texture sample type).",
-                            bindingInfo.sampleType, bindingLayout.sampleType, requiredShaderType);
+                            shaderBindingInfo.sampleType, bindingLayout.sampleType, bglShaderType);
 
             DAWN_INVALID_IF(
-                bindingLayout.viewDimension != bindingInfo.viewDimension,
+                bindingLayout.viewDimension != shaderBindingInfo.viewDimension,
                 "The shader's binding dimension (%s) doesn't match the layout's binding "
                 "dimension (%s).",
-                bindingLayout.viewDimension, bindingInfo.viewDimension);
+                bindingLayout.viewDimension, shaderBindingInfo.viewDimension);
             return {};
         },
-        [&](const StorageTextureBindingInfo& bindingInfo) -> MaybeError {
+        [&](const StorageTextureBindingInfo& shaderBindingInfo) -> MaybeError {
             const StorageTextureBindingInfo& bindingLayout =
                 std::get<StorageTextureBindingInfo>(layoutInfo.bindingLayout);
             DAWN_ASSERT(bindingLayout.format != wgpu::TextureFormat::Undefined);
-            DAWN_ASSERT(bindingInfo.format != wgpu::TextureFormat::Undefined);
+            DAWN_ASSERT(shaderBindingInfo.format != wgpu::TextureFormat::Undefined);
 
             DAWN_INVALID_IF(!IsShaderCompatibleWithPipelineLayoutOnStorageTextureAccess(
-                                bindingLayout, bindingInfo),
+                                bindingLayout, shaderBindingInfo),
                             "The layout's binding access (%s) isn't compatible with the shader's "
                             "binding access (%s).",
-                            bindingLayout.access, bindingInfo.access);
+                            bindingLayout.access, shaderBindingInfo.access);
 
-            DAWN_INVALID_IF(bindingLayout.format != bindingInfo.format,
+            DAWN_INVALID_IF(bindingLayout.format != shaderBindingInfo.format,
                             "The layout's binding format (%s) doesn't match the shader's binding "
                             "format (%s).",
-                            bindingLayout.format, bindingInfo.format);
+                            bindingLayout.format, shaderBindingInfo.format);
 
-            DAWN_INVALID_IF(bindingLayout.viewDimension != bindingInfo.viewDimension,
+            DAWN_INVALID_IF(bindingLayout.viewDimension != shaderBindingInfo.viewDimension,
                             "The layout's binding dimension (%s) doesn't match the "
                             "shader's binding dimension (%s).",
-                            bindingLayout.viewDimension, bindingInfo.viewDimension);
+                            bindingLayout.viewDimension, shaderBindingInfo.viewDimension);
             return {};
         },
-        [&](const TexelBufferBindingInfo& bindingInfo) -> MaybeError {
+        [&](const TexelBufferBindingInfo& shaderBindingInfo) -> MaybeError {
             const TexelBufferBindingInfo& bindingLayout =
                 std::get<TexelBufferBindingInfo>(layoutInfo.bindingLayout);
             DAWN_ASSERT(bindingLayout.format != wgpu::TextureFormat::Undefined);
-            DAWN_ASSERT(bindingInfo.format != wgpu::TextureFormat::Undefined);
+            DAWN_ASSERT(shaderBindingInfo.format != wgpu::TextureFormat::Undefined);
 
-            DAWN_INVALID_IF(bindingLayout.access != bindingInfo.access,
+            DAWN_INVALID_IF(bindingLayout.access != shaderBindingInfo.access,
                             "The layout's binding access (%s) doesn't match the shader's binding "
                             "access (%s).",
-                            bindingLayout.access, bindingInfo.access);
+                            bindingLayout.access, shaderBindingInfo.access);
 
-            DAWN_INVALID_IF(bindingLayout.format != bindingInfo.format,
+            DAWN_INVALID_IF(bindingLayout.format != shaderBindingInfo.format,
                             "The layout's binding format (%s) doesn't match the shader's binding "
                             "format (%s).",
-                            bindingLayout.format, bindingInfo.format);
+                            bindingLayout.format, shaderBindingInfo.format);
             return {};
         },
-        [&](const BufferBindingInfo& bindingInfo) -> MaybeError {
+        [&](const BufferBindingInfo& shaderBindingInfo) -> MaybeError {
             const BufferBindingInfo& bindingLayout =
                 std::get<BufferBindingInfo>(layoutInfo.bindingLayout);
             // Binding mismatch between shader and bind group is invalid. For example, a
@@ -684,26 +684,28 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
             // layout is also valid.
             bool validBindingConversion =
                 (bindingLayout.type == kInternalStorageBufferBinding &&
-                 bindingInfo.type == wgpu::BufferBindingType::Storage) ||
+                 shaderBindingInfo.type == wgpu::BufferBindingType::Storage) ||
                 (bindingLayout.type == kInternalReadOnlyStorageBufferBinding &&
-                 bindingInfo.type == wgpu::BufferBindingType::ReadOnlyStorage);
+                 shaderBindingInfo.type == wgpu::BufferBindingType::ReadOnlyStorage);
 
             DAWN_INVALID_IF(
-                bindingLayout.type != bindingInfo.type && !validBindingConversion,
+                bindingLayout.type != shaderBindingInfo.type && !validBindingConversion,
                 "The buffer type in the shader (%s) is not compatible with the type in the "
                 "layout (%s).",
-                bindingInfo.type, bindingLayout.type);
+                shaderBindingInfo.type, bindingLayout.type);
 
             DAWN_INVALID_IF(bindingLayout.minBindingSize != 0 &&
-                                bindingInfo.minBindingSize > bindingLayout.minBindingSize,
+                                shaderBindingInfo.minBindingSize > bindingLayout.minBindingSize,
                             "The shader uses more bytes of the buffer (%u) than the layout's "
                             "minBindingSize (%u).",
-                            bindingInfo.minBindingSize, bindingLayout.minBindingSize);
+                            shaderBindingInfo.minBindingSize, bindingLayout.minBindingSize);
             return {};
         },
-        [&](const SamplerBindingInfo& bindingInfo) -> MaybeError {
-            bool comparisonInShader = bindingInfo.type == wgpu::SamplerBindingType::Comparison;
-            bool comparisonInLayout;
+        [&](const SamplerBindingInfo& shaderBindingInfo) -> MaybeError {
+            bool comparisonInShader =
+                shaderBindingInfo.type == wgpu::SamplerBindingType::Comparison;
+
+            bool comparisonInLayout = true;
             if (auto* staticBindingLayout =
                     std::get_if<StaticSamplerBindingInfo>(&layoutInfo.bindingLayout)) {
                 comparisonInLayout = staticBindingLayout->sampler->IsComparison();
@@ -724,12 +726,12 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
             // There are no other things to validate for the external textures.
             return {};
         },
-        [&](const InputAttachmentBindingInfo& bindingInfo) -> MaybeError {
+        [&](const InputAttachmentBindingInfo& shaderBindingInfo) -> MaybeError {
             // Internal use only, no validation, only assertions.
             const InputAttachmentBindingInfo& bindingLayout =
                 std::get<InputAttachmentBindingInfo>(layoutInfo.bindingLayout);
 
-            DAWN_ASSERT(bindingLayout.sampleType == bindingInfo.sampleType);
+            DAWN_ASSERT(bindingLayout.sampleType == shaderBindingInfo.sampleType);
 
             return {};
         });
