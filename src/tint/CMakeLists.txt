@@ -93,7 +93,6 @@ function(tint_default_compile_options TARGET)
   set(COMMON_GNU_OPTIONS
     -Wall
     -Wextra
-    -Wno-documentation-unknown-command
     -Wno-padded
     -Wno-switch-enum
     -Wno-unknown-pragmas
@@ -106,6 +105,8 @@ function(tint_default_compile_options TARGET)
     -Wno-c++98-compat
     -Wno-c++98-compat-pedantic
     -Wno-deprecated-copy-with-dtor
+    -Wno-documentation
+    -Wno-documentation-unknown-command
     -Wno-format-pedantic
     -Wno-poison-system-directories
     -Wno-return-std-move-in-c++11
