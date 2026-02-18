@@ -71,14 +71,13 @@ namespace dawn::native::webgpu {
 
 namespace {
 
-// Toggles in this list are the only ones enabled in webgpu::Device.
-// Other toggles are passed down to the inner device.
+// Toggles in this list are the only ones with ToggleStage::Device that enabled in webgpu::Device.
+// Other toggles are only passed down to the inner device.
 constexpr Toggle kOuterToggles[] = {
     // Toggles webgpu::Device needs
     Toggle::SkipValidation,
     Toggle::DisableBaseVertex,
     Toggle::DisableBindGroupLayoutEntryArraySize,
-    Toggle::AllowUnsafeAPIs,
     Toggle::EnableImmediateErrorHandling,
 
     // Toggles enabled by default for all backend, do not force set them to avoid warnings.
@@ -102,9 +101,15 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
     // TogglesState deviceToggles already has them resolved.
 
     // For outer (this webgpu::Device), we want to disable everything else.
-    std::vector<Toggle> togglesToDisable;
     for (size_t i : deviceToggles.GetEnabledToggles()) {
         Toggle t = static_cast<Toggle>(i);
+        const ToggleInfo* info = TogglesInfo::GetToggleInfo(t);
+
+        if (info->stage != ToggleStage::Device) {
+            // Bypass any force settings if not a device stage toggle.
+            continue;
+        }
+
         bool isOuter = false;
         for (Toggle outer : kOuterToggles) {
             if (t == outer) {
