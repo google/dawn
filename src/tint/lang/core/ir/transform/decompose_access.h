@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_DECOMPOSE_ACCESS_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_DECOMPOSE_ACCESS_H_
 
+#include <cstdint>
+
 #include "src/tint/utils/result.h"
 
 // Forward declarations.
