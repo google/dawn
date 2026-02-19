@@ -4315,14 +4315,15 @@
             {"value": 100, "name": "ASTC 12x12 unorm",       "jsrepr": "'astc-12x12-unorm'"},
             {"value": 101, "name": "ASTC 12x12 unorm srgb",  "jsrepr": "'astc-12x12-unorm-srgb'"},
 
-            {"value": 6, "name": "R8 BG8 Biplanar 420 unorm", "tags": ["dawn"]},
-            {"value": 7, "name": "R10X6 BG10X6 Biplanar 420 unorm", "tags": ["dawn"]},
-            {"value": 8, "name": "R8 BG8 A8 Triplanar 420 unorm", "tags": ["dawn"]},
-            {"value": 9, "name": "R8 BG8 Biplanar 422 unorm", "tags": ["dawn"]},
-            {"value": 10, "name": "R8 BG8 Biplanar 444 unorm", "tags": ["dawn"]},
-            {"value": 11, "name": "R10X6 BG10X6 Biplanar 422 unorm", "tags": ["dawn"]},
-            {"value": 12, "name": "R10X6 BG10X6 Biplanar 444 unorm", "tags": ["dawn"]},
-            {"value": 13, "name": "External", "tags": ["dawn"]}
+            {"value": 0, "name": "R8 BG8 biplanar 420 unorm", "tags": ["dawn"]},
+            {"value": 1, "name": "R10X6 BG10X6 biplanar 420 unorm", "tags": ["dawn"]},
+            {"value": 2, "name": "R8 BG8 A8 triplanar 420 unorm", "tags": ["dawn"]},
+            {"value": 3, "name": "R8 BG8 biplanar 422 unorm", "tags": ["dawn"]},
+            {"value": 4, "name": "R8 BG8 biplanar 444 unorm", "tags": ["dawn"]},
+            {"value": 5, "name": "R10X6 BG10X6 biplanar 422 unorm", "tags": ["dawn"]},
+            {"value": 6, "name": "R10X6 BG10X6 biplanar 444 unorm", "tags": ["dawn"]},
+            {"value": 7, "name": "external", "tags": ["dawn", "deprecated"], "enum_value_conflict": true},
+            {"value": 7, "name": "opaque y cb cr android", "tags": ["dawn"], "enum_value_conflict": true}
         ]
     },
     "texture usage": {

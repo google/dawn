@@ -171,12 +171,18 @@ typename std::bitset<kKnownFormatCount>::reference FormatSet::operator[](const F
 FormatIndex ComputeFormatIndex(wgpu::TextureFormat format) {
     uint32_t formatValue = static_cast<uint32_t>(format);
     switch (formatValue & kEnumPrefixMask) {
-        case 0:
+        case 0: {
             // This takes advantage of overflows to make the index of TextureFormat::Undefined
             // outside of the range of the FormatTable.
             static_assert(static_cast<uint32_t>(wgpu::TextureFormat::Undefined) - 1 >
                           kKnownFormatCount);
-            return static_cast<FormatIndex>(formatValue - 1);
+
+            uint32_t index = formatValue - 1;
+            if (index < kWebGPUFormatCount) {
+                return static_cast<FormatIndex>(index);
+            }
+            break;
+        }
         case kDawnEnumPrefix: {
             uint32_t dawnIndex = formatValue & ~kEnumPrefixMask;
             if (dawnIndex < kDawnFormatCount) {
