@@ -1785,6 +1785,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::SharedTextureMemoryD3D12Resource:
         case wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable:
         case wgpu::FeatureName::ChromiumExperimentalSubgroupSizeControl:
+        case wgpu::FeatureName::AtomicVec2uMinMax:
             return false;
     }
     return false;

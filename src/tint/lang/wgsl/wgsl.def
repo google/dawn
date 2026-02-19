@@ -102,6 +102,8 @@ enum extension {
   chromium_experimental_resource_table
   // A Chromium-specific extension for the attribute `subgroup_size`
   chromium_experimental_subgroup_size_control
+  // WGSL Extension for atomic vec2u min max
+  atomic_vec2u_min_max
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec
@@ -2488,6 +2490,11 @@ match uniform_or_storage
   fn atomicExchange(ptr<S, atomic<T>, read_write>, T) -> T
 @stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage)
   fn atomicCompareExchangeWeak(ptr<S, atomic<T>, read_write>, T, T) -> __atomic_compare_exchange_result<T>
+
+@stage("fragment", "compute")
+  fn atomicStoreMax(ptr<storage, atomic<vec2<u32> >, read_write>, vec2<u32>)
+@stage("fragment", "compute")
+  fn atomicStoreMin(ptr<storage, atomic<vec2<u32> >, read_write>, vec2<u32>)
 
 //////////////////////////////////////////
 // subgroups

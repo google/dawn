@@ -1834,6 +1834,10 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (mEnabledFeatures.IsEnabled(Feature::ShaderF16)) {
         mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kF16);
     }
+
+    if (mEnabledFeatures.IsEnabled(Feature::AtomicVec2uMinMax)) {
+        mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kAtomicVec2UMinMax);
+    }
     if (mEnabledFeatures.IsEnabled(Feature::Subgroups)) {
         mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kSubgroups);
     }

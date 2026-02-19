@@ -25,7 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <gtest/gtest.h>
+
 #include "gmock/gmock.h"
+#include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/utils/text/string_stream.h"
@@ -978,9 +982,17 @@ class AtomicPointers
   protected:
     static constexpr std::string_view kPass = "<PASS>";
 
+    bool IsAtomicStoreMinMax(wgsl::BuiltinFn fn) {
+        return fn == wgsl::BuiltinFn::kAtomicStoreMax || fn == wgsl::BuiltinFn::kAtomicStoreMin;
+    }
+
     ast::Type Ptr() {
         auto address_space = std::get<2>(GetParam());
         if (address_space == storage) {
+            auto fn1 = std::get<0>(GetParam());
+            if (IsAtomicStoreMinMax(fn1)) {
+                return ty.ptr<storage, atomic<vec2u>, read_write>();
+            }
             return ty.ptr<storage, atomic<i32>, read_write>();
         } else {
             return ty.ptr<atomic<i32>>(address_space);
@@ -988,13 +1000,35 @@ class AtomicPointers
     }
 
     void SetUp() override {
+        auto fn1 = std::get<0>(GetParam());
+        auto fn2 = std::get<1>(GetParam());
+        if (IsAtomicStoreMinMax(fn1) && IsAtomicStoreMinMax(fn2)) {
+            Enable(wgsl::Extension::kAtomicVec2UMinMax);
+        }
+        if (IsAtomicStoreMinMax(fn1) != IsAtomicStoreMinMax(fn2)) {
+            // AtomicStoreMin/Max requires the same type (vec2u)
+            GTEST_SKIP();
+        }
+
         auto address_space = std::get<2>(GetParam());
         if (address_space == storage) {
-            GlobalVar("v1", address_space, read_write, ty.Of<atomic<i32>>(),  //
-                      Binding(0_a), Group(0_a));
-            GlobalVar("v2", address_space, read_write, ty.Of<atomic<i32>>(),  //
-                      Binding(1_a), Group(0_a));
+            {
+                auto type_of_atomic =
+                    IsAtomicStoreMinMax(fn1) ? ty.Of<atomic<vec2u>>() : ty.Of<atomic<i32>>();
+                GlobalVar("v1", address_space, read_write, type_of_atomic,  //
+                          Binding(0_a), Group(0_a));
+            }
+            {
+                auto type_of_atomic =
+                    IsAtomicStoreMinMax(fn1) ? ty.Of<atomic<vec2u>>() : ty.Of<atomic<i32>>();
+                GlobalVar("v2", address_space, read_write, type_of_atomic,  //
+                          Binding(1_a), Group(0_a));
+            }
         } else {
+            // Workgroup memory is not supported by vec2u atomic operations
+            if (IsAtomicStoreMinMax(fn1)) {
+                GTEST_SKIP();
+            }
             GlobalVar("v1", address_space, ty.Of<atomic<i32>>());
             GlobalVar("v2", address_space, ty.Of<atomic<i32>>());
         }
@@ -1012,6 +1046,8 @@ class AtomicPointers
             case wgsl::BuiltinFn::kAtomicXor:
             case wgsl::BuiltinFn::kAtomicExchange:
             case wgsl::BuiltinFn::kAtomicCompareExchangeWeak:
+            case wgsl::BuiltinFn::kAtomicStoreMin:
+            case wgsl::BuiltinFn::kAtomicStoreMax:
                 return true;
             default:
                 return false;
@@ -1038,6 +1074,9 @@ class AtomicPointers
             case wgsl::BuiltinFn::kAtomicXor:
             case wgsl::BuiltinFn::kAtomicExchange:
                 return CallStmt(Call(fn, ptr, 42_a));
+            case wgsl::BuiltinFn::kAtomicStoreMin:
+            case wgsl::BuiltinFn::kAtomicStoreMax:
+                return CallStmt(Call(fn, ptr, Call<vec2<u32>>(1_u, 1_u)));
             case wgsl::BuiltinFn::kAtomicCompareExchangeWeak:
                 return CallStmt(Call(fn, ptr, 10_a, 42_a));
             default:
@@ -1194,6 +1233,8 @@ std::array kAtomicFns{
     wgsl::BuiltinFn::kAtomicXor,
     wgsl::BuiltinFn::kAtomicExchange,
     wgsl::BuiltinFn::kAtomicCompareExchangeWeak,
+    wgsl::BuiltinFn::kAtomicStoreMin,
+    wgsl::BuiltinFn::kAtomicStoreMax,
 };
 
 INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,

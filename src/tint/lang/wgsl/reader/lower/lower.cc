@@ -207,6 +207,10 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
         case tint::wgsl::BuiltinFn::kWorkgroupUniformLoad:  // should be handled in Lower()
         case tint::wgsl::BuiltinFn::kTintMaterialize:
         case tint::wgsl::BuiltinFn::kNone:
+        case tint::wgsl::BuiltinFn::kAtomicStoreMax:  // should have been lowered in
+                                                      // AtomicVec2UToU64
+        case tint::wgsl::BuiltinFn::kAtomicStoreMin:  // should have been lowered in
+                                                      // AtomicVec2UToU64
             break;
     }
     TINT_ICE() << "unhandled builtin function: " << fn;

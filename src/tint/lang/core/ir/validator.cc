@@ -1218,7 +1218,8 @@ class Validator {
     /// @param ignore_caps a set of capabilities to ignore for this check
     void CheckType(const core::type::Type* type,
                    std::function<diag::Diagnostic&()> diag,
-                   Capabilities ignore_caps = {});
+                   Capabilities ignore_caps = {},
+                   Capabilities allow_caps = {});
 
     /// Validates the root block
     /// @param blk the block
@@ -2136,7 +2137,8 @@ bool Validator::CheckResultsAndOperands(const ir::Instruction* inst,
 
 void Validator::CheckType(const core::type::Type* root,
                           std::function<diag::Diagnostic&()> diag,
-                          Capabilities ignore_caps) {
+                          Capabilities ignore_caps,
+                          Capabilities allow_caps) {
     if (root == nullptr) {
         return;
     }
@@ -2331,7 +2333,8 @@ void Validator::CheckType(const core::type::Type* root,
             },
             [&](const core::type::U64*) {
                 // u64 types are guarded by the Allow64BitIntegers capability.
-                if (!capabilities_.Contains(Capability::kAllow64BitIntegers)) {
+                if (!capabilities_.Contains(Capability::kAllow64BitIntegers) &&
+                    !allow_caps.Contains(Capability::kAllow64BitIntegers)) {
                     diag() << "64-bit integer types are not permitted";
                     return false;
                 }
@@ -2395,8 +2398,17 @@ void Validator::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::Atomic* a) {
-                if (!a->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
-                    diag() << "atomic subtype must be i32 or u32";
+                // Prior to lowering we allow for atomic operations on vec2u to support the
+                // AtomicVec2UMinMax feature.
+                if (auto* vec = a->Type()->As<core::type::Vector>()) {
+                    if (vec->Width() == 2 && vec->Type()->Is<core::type::U32>()) {
+                        return true;
+                    }
+                }
+
+                if (!a->Type()->IsAnyOf<core::type::I32, core::type::U32, core::type::U64>()) {
+                    diag() << "atomic subtype must be i32, u32 or u64 type is "
+                           << NameOf(a->Type());
                     return false;
                 }
                 return true;
@@ -3379,13 +3391,21 @@ void Validator::CheckInstruction(const Instruction* inst) {
         return;
     }
 
+    Capabilities allowed_types{};
+    if (inst->Is<core::ir::Bitcast>()) {
+        allowed_types.Add(Capability::kAllow64BitIntegers);
+    }
+
     auto results = inst->Results();
     for (size_t i = 0; i < results.Length(); ++i) {
         auto* res = results[i];
         if (!res) {
             continue;
         }
-        CheckType(res->Type(), [&]() -> diag::Diagnostic& { return AddResultError(inst, i); });
+
+        CheckType(
+            res->Type(), [&]() -> diag::Diagnostic& { return AddResultError(inst, i); }, {},
+            allowed_types);
     }
 
     auto ops = inst->Operands();
@@ -3395,7 +3415,9 @@ void Validator::CheckInstruction(const Instruction* inst) {
             continue;
         }
 
-        CheckType(op->Type(), [&]() -> diag::Diagnostic& { return AddError(inst, i); });
+        CheckType(
+            op->Type(), [&]() -> diag::Diagnostic& { return AddError(inst, i); }, {},
+            allowed_types);
     }
 
     tint::Switch(
@@ -4083,6 +4105,12 @@ void Validator::CheckBitcastTypes(const Bitcast* bitcast) {
                 add_error();
                 return;
             }
+        }
+
+        // atomic vec2u support vec2u to u64 bitcast required
+        if (val_elements.count == 2 && val_elements.type->Is<core::type::U32>() &&
+            result_type->Is<core::type::U64>()) {
+            return;  // assume backend supported
         }
 
         if (val_elements.type->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {

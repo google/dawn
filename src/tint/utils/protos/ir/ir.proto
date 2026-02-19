@@ -80,6 +80,7 @@ enum TypeBasic {
     f16 = 5;
     i8 = 6;
     u8 = 7;
+    u64 = 8;
 }
 
 message TypeVector {
@@ -772,4 +773,6 @@ enum BuiltinFn {
     get_resource = 156;
     buffer_view = 157;
     buffer_length = 158;
+    atomic_store_max = 159;
+    atomic_store_min = 160;
 }

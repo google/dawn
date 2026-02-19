@@ -79,6 +79,12 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             call->Func() == core::BuiltinFn::kHasResource) {
             return Failure("resource tables not supported by the MSL backend");
         }
+
+        if (call->Func() == core::BuiltinFn::kAtomicStoreMax ||
+            call->Func() == core::BuiltinFn::kAtomicStoreMin) {
+            return Failure(
+                "64-bit (vec2u) atomic operations are not yet supported by the MSL backend");
+        }
     }
 
     // Check for unsupported shader IO builtins.

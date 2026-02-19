@@ -212,6 +212,8 @@ struct State {
                     case core::BuiltinFn::kAtomicAdd:
                     case core::BuiltinFn::kAtomicAnd:
                     case core::BuiltinFn::kAtomicCompareExchangeWeak:
+                    case core::BuiltinFn::kAtomicStoreMax:
+                    case core::BuiltinFn::kAtomicStoreMin:
                     case core::BuiltinFn::kAtomicExchange:
                     case core::BuiltinFn::kAtomicLoad:
                     case core::BuiltinFn::kAtomicMax:
@@ -290,6 +292,8 @@ struct State {
                 case core::BuiltinFn::kAtomicStore:
                 case core::BuiltinFn::kAtomicSub:
                 case core::BuiltinFn::kAtomicXor:
+                case core::BuiltinFn::kAtomicStoreMax:
+                case core::BuiltinFn::kAtomicStoreMin:
                     Atomic(builtin);
                     break;
                 case core::BuiltinFn::kDot:
@@ -514,6 +518,17 @@ struct State {
                     call = build(spirv::BuiltinFn::kAtomicUMin);
                 }
                 call->AppendArg(builtin->Args()[1]);
+                break;
+            case core::BuiltinFn::kAtomicStoreMax: {
+                call = build(spirv::BuiltinFn::kAtomicUMax);
+                call->AppendArg(builtin->Args()[1]);
+                call->Result()->SetType(ty.u64());
+                break;
+            }
+            case core::BuiltinFn::kAtomicStoreMin:
+                call = build(spirv::BuiltinFn::kAtomicUMin);
+                call->AppendArg(builtin->Args()[1]);
+                call->Result()->SetType(ty.u64());
                 break;
             case core::BuiltinFn::kAtomicStore:
                 call = build(spirv::BuiltinFn::kAtomicStore);

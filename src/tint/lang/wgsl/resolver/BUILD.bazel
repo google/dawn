@@ -93,6 +93,7 @@ cc_library(
     "alias_analysis_test.cc",
     "array_accessor_test.cc",
     "assignment_validation_test.cc",
+    "atomic_vec2u_min_max_extension_test.cc",
     "atomics_test.cc",
     "atomics_validation_test.cc",
     "attribute_validation_test.cc",

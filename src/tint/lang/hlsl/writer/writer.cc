@@ -84,6 +84,11 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         if (call->Func() == core::BuiltinFn::kPrint) {
             return Failure("print is not supported by the HLSL backend");
         }
+        if (call->Func() == core::BuiltinFn::kAtomicStoreMax ||
+            call->Func() == core::BuiltinFn::kAtomicStoreMin) {
+            return Failure(
+                "64-bit (vec2u) atomic operations are not yet supported by the HLSL backend");
+        }
     }
 
     core::ir::Function* ep_func = nullptr;

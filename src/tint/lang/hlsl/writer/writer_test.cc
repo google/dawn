@@ -111,5 +111,55 @@ TEST_F(HlslWriterTest, CanGenerate_TexelBufferUnsupported) {
                 testing::HasSubstr("texel buffers are not supported by the HLSL backend"));
 }
 
+TEST_F(HlslWriterTest, CanGenerate_AtomicStoreMax_Unsupported) {
+    auto* sb =
+        ty.Struct(mod.symbols.New("SB"), {
+                                             {mod.symbols.Register("a"), ty.atomic(ty.u64())},
+                                         });
+    auto* var = b.Var("sb", ty.ptr<storage, read_write>(sb));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr<storage, read_write>(ty.atomic(ty.u64())), var, 0_u);
+        b.Call<void>(core::BuiltinFn::kAtomicStoreMax, access, 1_u);
+        b.Return(func);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    auto result = CanGenerate(mod, options);
+    ASSERT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr(
+                    "64-bit (vec2u) atomic operations are not yet supported by the HLSL backend"));
+}
+
+TEST_F(HlslWriterTest, CanGenerate_AtomicStoreMin_Unsupported) {
+    auto* sb =
+        ty.Struct(mod.symbols.New("SB"), {
+                                             {mod.symbols.Register("a"), ty.atomic(ty.u64())},
+                                         });
+    auto* var = b.Var("sb", ty.ptr<storage, read_write>(sb));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr<storage, read_write>(ty.atomic(ty.u64())), var, 0_u);
+        b.Call<void>(core::BuiltinFn::kAtomicStoreMin, access, 1_u);
+        b.Return(func);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    auto result = CanGenerate(mod, options);
+    ASSERT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr(
+                    "64-bit (vec2u) atomic operations are not yet supported by the HLSL backend"));
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

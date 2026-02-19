@@ -48,6 +48,9 @@ namespace tint::wgsl {
 /// @param str the string to parse
 /// @returns the parsed enum, or Extension::kUndefined if the string could not be parsed.
 Extension ParseExtension(std::string_view str) {
+    if (str == "atomic_vec2u_min_max") {
+        return Extension::kAtomicVec2UMinMax;
+    }
     if (str == "chromium_disable_uniformity_analysis") {
         return Extension::kChromiumDisableUniformityAnalysis;
     }
@@ -93,6 +96,8 @@ std::string_view ToString(Extension value) {
     switch (value) {
         case Extension::kUndefined:
             return "undefined";
+        case Extension::kAtomicVec2UMinMax:
+            return "atomic_vec2u_min_max";
         case Extension::kChromiumDisableUniformityAnalysis:
             return "chromium_disable_uniformity_analysis";
         case Extension::kChromiumExperimentalBarycentricCoord:
@@ -710,6 +715,12 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "atomicCompareExchangeWeak") {
         return BuiltinFn::kAtomicCompareExchangeWeak;
     }
+    if (name == "atomicStoreMax") {
+        return BuiltinFn::kAtomicStoreMax;
+    }
+    if (name == "atomicStoreMin") {
+        return BuiltinFn::kAtomicStoreMin;
+    }
     if (name == "subgroupBallot") {
         return BuiltinFn::kSubgroupBallot;
     }
@@ -1075,6 +1086,10 @@ const char* str(BuiltinFn i) {
             return "atomicExchange";
         case BuiltinFn::kAtomicCompareExchangeWeak:
             return "atomicCompareExchangeWeak";
+        case BuiltinFn::kAtomicStoreMax:
+            return "atomicStoreMax";
+        case BuiltinFn::kAtomicStoreMin:
+            return "atomicStoreMin";
         case BuiltinFn::kSubgroupBallot:
             return "subgroupBallot";
         case BuiltinFn::kSubgroupElect:

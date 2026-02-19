@@ -123,6 +123,7 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::ImageFormatList, "VK_KHR_image_format_list"},
     {DeviceExt::ShaderFloat16Int8, "VK_KHR_shader_float16_int8"},
     {DeviceExt::ShaderSubgroupExtendedTypes, "VK_KHR_shader_subgroup_extended_types"},
+    {DeviceExt::ShaderBufferInt64Atomics, "VK_KHR_shader_atomic_int64"},
     {DeviceExt::DrawIndirectCount, "VK_KHR_draw_indirect_count"},
     {DeviceExt::VulkanMemoryModel, "VK_KHR_vulkan_memory_model"},
     {DeviceExt::ShaderFloatControls, "VK_KHR_shader_float_controls"},
@@ -215,6 +216,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::Robustness2:
             case DeviceExt::SubgroupSizeControl:
             case DeviceExt::ShaderSubgroupExtendedTypes:
+            case DeviceExt::ShaderBufferInt64Atomics:
             case DeviceExt::VulkanMemoryModel:
             case DeviceExt::CooperativeMatrix:
             case DeviceExt::ShaderFloatControls:

@@ -263,6 +263,11 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR);
     }
 
+    if (info.extensions[DeviceExt::ShaderBufferInt64Atomics]) {
+        featuresChain.Add(&info.shaderAtomicInt64Features,
+                          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_INT64_FEATURES_KHR);
+    }
+
     if (info.extensions[DeviceExt::SubgroupSizeControl]) {
         featuresChain.Add(&info.subgroupSizeControlFeatures,
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT);

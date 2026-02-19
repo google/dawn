@@ -2603,6 +2603,15 @@ match workgroup
 @stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage)
   fn atomicCompareExchangeWeak(ptr<S, atomic<T>, read_write>, T, T) -> __atomic_compare_exchange_result<T>
 
+// u64 is an (currently) internal type and not part of WGSL.
+type u64
+
+@stage("fragment", "compute")
+  fn atomicStoreMax(ptr<storage, atomic<u64>, read_write>, u64)
+@stage("fragment", "compute")
+  fn atomicStoreMin(ptr<storage, atomic<u64>, read_write>, u64)
+
+
 //////////////////////////////////////////
 // subgroups
 //////////////////////////////////////////

@@ -976,7 +976,8 @@ const WGSLExtensionInfo kExtensions[] = {
     {"chromium_experimental_framebuffer_fetch", true, {wgpu::FeatureName::FramebufferFetch}, {}},
     {"chromium_experimental_subgroup_matrix", true, {wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix}, {}},
     {"chromium_experimental_resource_table", true, {wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}, {}},
-    {"chromium_experimental_subgroup_size_control", true, {wgpu::FeatureName::ChromiumExperimentalSubgroupSizeControl}, {"subgroups"}}
+    {"chromium_experimental_subgroup_size_control", true, {wgpu::FeatureName::ChromiumExperimentalSubgroupSizeControl}, {"subgroups"}},
+    {"atomic_vec2u_min_max", true, {wgpu::FeatureName::AtomicVec2uMinMax}, {}}
 
     // Currently the following WGSL extensions are not enabled under any situation.
     /*

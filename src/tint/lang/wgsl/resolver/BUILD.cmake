@@ -94,6 +94,7 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/alias_analysis_test.cc
   lang/wgsl/resolver/array_accessor_test.cc
   lang/wgsl/resolver/assignment_validation_test.cc
+  lang/wgsl/resolver/atomic_vec2u_min_max_extension_test.cc
   lang/wgsl/resolver/atomics_test.cc
   lang/wgsl/resolver/atomics_validation_test.cc
   lang/wgsl/resolver/attribute_validation_test.cc

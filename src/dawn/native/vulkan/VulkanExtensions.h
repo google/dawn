@@ -82,6 +82,7 @@ enum class DeviceExt {
     ImageFormatList,
     ShaderFloat16Int8,
     ShaderSubgroupExtendedTypes,
+    ShaderBufferInt64Atomics,
     DrawIndirectCount,
     VulkanMemoryModel,
     ShaderFloatControls,

@@ -1559,7 +1559,7 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
 
 #if TINT_BUILD_WGSL_WRITER && TINT_BUILD_WGSL_READER
     if (options.ir_roundtrip) {
-        auto ir = tint::wgsl::reader::ProgramToIR(info.program);
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(info.program);
         if (ir != tint::Success) {
             std::cerr << "Failed convert program to IR: " << ir.Failure() << "\n";
             return 1;

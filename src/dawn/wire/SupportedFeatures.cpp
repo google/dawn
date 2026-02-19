@@ -124,6 +124,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_AdapterPropertiesWGPU:
         case WGPUFeatureName_ChromiumExperimentalSamplingResourceTable:
         case WGPUFeatureName_ChromiumExperimentalSubgroupSizeControl:
+        case WGPUFeatureName_AtomicVec2uMinMax:
             return true;
     }
 
