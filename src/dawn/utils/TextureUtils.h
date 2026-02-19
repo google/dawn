@@ -322,10 +322,9 @@ class SubsamplingFactor {
     const uint32_t verticalFactor = 1;
 };
 
-bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format,
-                                         const wgpu::Device& device,
-                                         bool isCompatibilityMode);
-bool TextureFormatSupportsReadWriteStorageTexture(wgpu::TextureFormat format);
+bool TextureFormatSupportsStorageTexture(const wgpu::Device& device, wgpu::TextureFormat format);
+bool TextureFormatSupportsReadWriteStorageTexture(const wgpu::Device& device,
+                                                  wgpu::TextureFormat format);
 
 bool IsBCTextureFormat(wgpu::TextureFormat textureFormat);
 bool IsNormalizedUncompressedColorTextureFormat(wgpu::TextureFormat textureFormat);

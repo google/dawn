@@ -916,7 +916,7 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
     // TODO(crbug.com/40238674): Fails on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
-        if (!utils::TextureFormatSupportsStorageTexture(format, device, IsCompatibilityMode())) {
+        if (!utils::TextureFormatSupportsStorageTexture(device, format)) {
             continue;
         }
 
@@ -949,7 +949,7 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
     DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesInFragmentStage < 1);
 
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
-        if (!utils::TextureFormatSupportsStorageTexture(format, device, IsCompatibilityMode())) {
+        if (!utils::TextureFormatSupportsStorageTexture(device, format)) {
             continue;
         }
 

@@ -325,7 +325,7 @@ TEST_P(SurfaceConfigurationValidationTests, StorageRequiresCapableFormat) {
         config.usage = wgpu::TextureUsage::StorageBinding;
         config.format = caps.formats[i];
 
-        if (utils::TextureFormatSupportsStorageTexture(config.format, device, false)) {
+        if (utils::TextureFormatSupportsStorageTexture(device, config.format)) {
             surface.Configure(&config);
         } else {
             ASSERT_DEVICE_ERROR_MSG(surface.Configure(&config),

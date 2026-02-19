@@ -666,7 +666,7 @@ TEST_P(SurfaceTests, Storage) {
 
     wgpu::TextureFormat storageCapableFormat = wgpu::TextureFormat::Undefined;
     for (uint32_t i = 0; i < caps.formatCount; i++) {
-        if (utils::TextureFormatSupportsStorageTexture(caps.formats[i], device, false)) {
+        if (utils::TextureFormatSupportsStorageTexture(device, caps.formats[i])) {
             storageCapableFormat = caps.formats[i];
             break;
         }
