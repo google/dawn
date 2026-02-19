@@ -122,11 +122,6 @@
 #define LIMITS_IMMEDIATE_SIZE(X) \
   X(v1, Maximum, maxImmediateSize,     64,    kMaxImmediateDataBytes)
 
-// Limits for the resource table.
-//                                                                   compat     tier0
-#define LIMITS_RESOURCE_TABLE(X) \
-  X(resourceTableLimits, Maximum, maxResourceTableSize,                   0,    50'000)
-
 // TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros
 // in this file expect more than one tier.
@@ -156,7 +151,6 @@
     X(LIMITS_INTER_STAGE_SHADER_VARIABLES) \
     X(LIMITS_TEXTURE_DIMENSIONS)           \
     X(LIMITS_IMMEDIATE_SIZE)               \
-    X(LIMITS_RESOURCE_TABLE)               \
     X(LIMITS_OTHER)
 
 #define LIMITS(X)                          \
@@ -170,7 +164,6 @@
     LIMITS_INTER_STAGE_SHADER_VARIABLES(X) \
     LIMITS_TEXTURE_DIMENSIONS(X)           \
     LIMITS_IMMEDIATE_SIZE(X)               \
-    LIMITS_RESOURCE_TABLE(X)               \
     LIMITS_OTHER(X)
 
 namespace dawn::native {
@@ -291,10 +284,6 @@ MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
         out->compat = *compatibilityModeLimits;
         out->compat.nextInChain = nullptr;
     }
-    if (auto* resourceTableLimits = unpacked.Get<ResourceTableLimits>()) {
-        out->resourceTableLimits = *resourceTableLimits;
-        out->resourceTableLimits.nextInChain = nullptr;
-    }
 
     // TODO(crbug.com/378361783): Add validation and default values to support requiring limits for
     // DawnTexelCopyBufferRowAlignmentLimits. Test this, see old test removed here:
@@ -325,10 +314,6 @@ void UnpackLimitsIn(const Limits* chainedLimits, CombinedLimits* out) {
     if (auto* compatibilityModeLimits = unpacked.Get<CompatibilityModeLimits>()) {
         out->compat = *compatibilityModeLimits;
         out->compat.nextInChain = nullptr;
-    }
-    if (auto* resourceTableLimits = unpacked.Get<ResourceTableLimits>()) {
-        out->resourceTableLimits = *resourceTableLimits;
-        out->resourceTableLimits.nextInChain = nullptr;
     }
 }
 
@@ -571,8 +556,7 @@ MaybeError FillLimits(Limits* outputLimits,
     FillExtensionLimits(unpacked.Get<DawnHostMappedPointerLimits>(),
                         &CombinedLimits::hostMappedPointerLimits,
                         wgpu::FeatureName::HostMappedPointer);
-    FillExtensionLimits(unpacked.Get<ResourceTableLimits>(), &CombinedLimits::resourceTableLimits,
-                        wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
+
     return {};
 }
 

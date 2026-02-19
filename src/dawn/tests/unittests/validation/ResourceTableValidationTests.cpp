@@ -203,7 +203,7 @@ TEST_F(ResourceTableValidationTest, InvalidSize) {
     descriptor.size = 1u;
     device.CreateResourceTable(&descriptor);
 
-    // Size of maxResourceTableSize is valid
+    // Size of kMaxResourceTableSize is valid
     descriptor.size = kMaxResourceTableSize;
     device.CreateResourceTable(&descriptor);
 

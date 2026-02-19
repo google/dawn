@@ -67,7 +67,6 @@ std::vector<D3D12_DESCRIPTOR_RANGE1> ResourceTable::GetCbvUavSrvDescriptorRanges
 
     const uint32_t baseRegisterSpace = layout.GetBaseResourceTableRegisterSpace();
     const uint32_t defaultResourceCount = static_cast<uint32_t>(GetDefaultResourceCount());
-    auto* device = layout.GetDevice();
 
     // The metadata storage buffer is bound to (kBaseResourceTableRegisterSpace, 0)
     ranges.push_back(D3D12_DESCRIPTOR_RANGE1{
@@ -84,8 +83,7 @@ std::vector<D3D12_DESCRIPTOR_RANGE1> ResourceTable::GetCbvUavSrvDescriptorRanges
     for (uint32_t i : Range(defaultResourceCount)) {
         ranges.push_back(D3D12_DESCRIPTOR_RANGE1{
             .RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
-            .NumDescriptors =
-                device->GetLimits().resourceTableLimits.maxResourceTableSize + defaultResourceCount,
+            .NumDescriptors = kMaxResourceTableSize + defaultResourceCount,
             // HLSL doesn't allow overlapping register ranges, so each one is in its own space
             // (group), and starts at register (binding) 0 with no other range bound after it.
             .BaseShaderRegister = 0,

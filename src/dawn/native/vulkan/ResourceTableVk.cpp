@@ -64,8 +64,7 @@ ResultOrError<VkDescriptorSetLayout> ResourceTable::MakeDescriptorSetLayout(Devi
          {
              .binding = 1,
              .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-             .descriptorCount = device->GetLimits().resourceTableLimits.maxResourceTableSize +
-                                uint32_t(GetDefaultResourceCount()),
+             .descriptorCount = kMaxResourceTableSize + uint32_t{GetDefaultResourceCount()},
              .stageFlags = VulkanShaderStages(kAllStages),
              .pImmutableSamplers = nullptr,
          }}};

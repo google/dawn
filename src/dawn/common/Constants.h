@@ -111,13 +111,11 @@ static constexpr uint32_t kTimestampQuantizationMask = 0xFFFF0000;
 static constexpr uint32_t kMaxDynamicUniformBuffersPerPipelineLayout = 16u;
 static constexpr uint32_t kMaxDynamicStorageBuffersPerPipelineLayout = 16u;
 
-// Default limit for the ResourceTable size.
-// TODO(https://issues.chromium.org/465122000): Update once the spec decides on a value.
-static constexpr uint32_t kMaxResourceTableSize = 50'000;
+// Maximum ResourceTable size.
+static constexpr uint32_t kMaxResourceTableSize = 64 * 1024;
 // TODO(https://issues.chromium.org/465122000): Find if this is a reasonable amount to
 // reserve for placeholders.
 static constexpr uint32_t kReservedResourceTableSlots = 1000;
-
 }  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_CONSTANTS_H_

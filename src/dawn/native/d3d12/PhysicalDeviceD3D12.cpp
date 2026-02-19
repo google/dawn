@@ -440,8 +440,6 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
             kMaxRootSignatureSize);
     }
 
-    limits->resourceTableLimits.maxResourceTableSize = kMaxResourceTableSize;
-
     return {};
 }
 

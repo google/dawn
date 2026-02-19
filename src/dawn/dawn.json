@@ -1831,15 +1831,6 @@
             {"name": "rotation", "type": "external texture rotation", "default": "rotate 0 degrees"}
         ]
     },
-    "resource table limits": {
-        "category": "structure",
-        "chained": "out",
-        "chain roots": ["limits"],
-        "tags": ["dawn"],
-        "members": [
-            {"name": "max resource table size", "type": "uint32_t", "default": "limit u32 undefined"}
-        ]
-    },
     "status": {
         "category": "enum",
         "values": [
@@ -4040,9 +4031,8 @@
             {"value": 77, "name": "shared buffer memory D3D12 shared memory file mapping handle descriptor", "tags": ["dawn", "native"]},
             {"value": 78, "name": "shared texture memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
             {"value": 79, "name": "request adapter options angle virtualization group", "tags": ["dawn", "native"]},
-            {"value": 80, "name": "resource table limits", "tags": ["dawn"]},
-            {"value": 81, "name": "pipeline layout resource table", "tags": ["dawn"]},
-            {"value": 82, "name": "adapter properties explicit compute subgroup size configs", "tags": ["dawn"]}
+            {"value": 80, "name": "pipeline layout resource table", "tags": ["dawn"]},
+            {"value": 81, "name": "adapter properties explicit compute subgroup size configs", "tags": ["dawn"]}
         ]
     },
     "texture": {

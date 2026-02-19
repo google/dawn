@@ -62,7 +62,7 @@ ResourceTable::ResourceTable(const ObjectBaseParams& params,
 
     uint32_t sizeLimit = 0;
     if (limitsAndFeatures.HasFeature(WGPUFeatureName_ChromiumExperimentalSamplingResourceTable)) {
-        sizeLimit = limitsAndFeatures.GetResourceTableLimits().maxResourceTableSize;
+        sizeLimit = kMaxResourceTableSize;
     }
 
     if (descriptor->size <= sizeLimit) {

@@ -312,9 +312,9 @@ MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
 
     DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain is not nullptr.");
 
-    DAWN_INVALID_IF(descriptor->size > device->GetLimits().resourceTableLimits.maxResourceTableSize,
-                    "Resource table size (%u) is larger than maxResourceTableSize (%u)",
-                    descriptor->size, device->GetLimits().resourceTableLimits.maxResourceTableSize);
+    DAWN_INVALID_IF(descriptor->size > kMaxResourceTableSize,
+                    "Resource table size (%u) is larger than the maximum resource table size (%u)",
+                    descriptor->size, kMaxResourceTableSize);
 
     return {};
 }
@@ -336,7 +336,7 @@ ResourceTableBase::ResourceTableBase(DeviceBase* device,
     // Create the vector of SlotState even for an error resource table because we need to do state
     // tracking used for the validation of synchronous errors. However skip creating it for tables
     // above the limit because that's a special error case caught on the content-timeline as well.
-    if (descriptor->size <= device->GetLimits().resourceTableLimits.maxResourceTableSize) {
+    if (descriptor->size <= kMaxResourceTableSize) {
         mAPISize = ResourceTableSlot(descriptor->size);
         mSlots.resize(mAPISize);
     } else {

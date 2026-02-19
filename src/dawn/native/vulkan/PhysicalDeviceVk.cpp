@@ -891,20 +891,6 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
             kMinimumHostMappedPointerAlignment;
     }
 
-    // Compute the limits for bindless, it requires checking a dozen vulkan limits.
-    if (mDeviceInfo.HasExt(DeviceExt::DescriptorIndexing)) {
-        const auto& vkProperties = mDeviceInfo.descriptorIndexingProperties;
-        uint32_t vkMax = 0;
-        vkMax = std::max(vkMax, vkProperties.maxPerStageDescriptorUpdateAfterBindSamplers);
-        vkMax = std::max(vkMax, vkProperties.maxPerStageDescriptorUpdateAfterBindSampledImages);
-        vkMax = std::max(vkMax, vkProperties.maxPerStageUpdateAfterBindResources);
-        vkMax = std::max(vkMax, vkProperties.maxDescriptorSetUpdateAfterBindSamplers);
-        vkMax = std::max(vkMax, vkProperties.maxDescriptorSetUpdateAfterBindSampledImages);
-        vkMax = std::max(vkMax, vkProperties.maxUpdateAfterBindDescriptorsInAllPools);
-
-        limits->resourceTableLimits.maxResourceTableSize = vkMax - kReservedResourceTableSlots;
-    }
-
     return {};
 }
 

@@ -43,8 +43,6 @@ class LimitsAndFeatures {
     bool HasFeature(WGPUFeatureName feature) const;
     void ToSupportedFeatures(WGPUSupportedFeatures* supportedFeatures) const;
 
-    const WGPUResourceTableLimits& GetResourceTableLimits() const;
-
     void SetLimits(const WGPULimits* limits);
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
 
@@ -53,7 +51,6 @@ class LimitsAndFeatures {
     WGPULimits mLimits;
     WGPUCompatibilityModeLimits mCompatLimits;
     WGPUDawnTexelCopyBufferRowAlignmentLimits mTexelCopyBufferRowAlignmentLimits;
-    WGPUResourceTableLimits mResourceTableLimits;
     absl::flat_hash_set<WGPUFeatureName> mFeatures;
 };
 
