@@ -123,6 +123,10 @@ std::string TextureDimensionToString(tint::inspector::ResourceBinding::TextureDi
 /// @returns the text name
 std::string SampledKindToString(tint::inspector::ResourceBinding::SampledKind kind);
 
+/// @param type the sampler type
+/// @returns the text name
+std::string SamplerTypeToString(tint::inspector::ResourceBinding::SamplerType type);
+
 /// @param format the texel format
 /// @returns the text name
 std::string TexelFormatToString(tint::inspector::ResourceBinding::TexelFormat format);

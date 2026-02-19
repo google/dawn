@@ -1919,7 +1919,8 @@ fn ep_func() {
     EXPECT_EQ(1u, result[5].binding);
     EXPECT_FALSE(result[5].array_size.has_value());
 
-    EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler, result[6].resource_type);
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[6].resource_type);
+    EXPECT_EQ(ResourceBinding::SamplerType::kComparison, result[6].sampler_type);
     EXPECT_EQ(3u, result[6].bind_group);
     EXPECT_EQ(2u, result[6].binding);
     EXPECT_FALSE(result[6].array_size.has_value());
@@ -1939,6 +1940,103 @@ fn ep_func() {
     EXPECT_EQ(1u, result[9].binding);
     EXPECT_TRUE(result[9].array_size.has_value());
     EXPECT_EQ(3u, result[9].array_size.value());
+}
+
+TEST_F(InspectorGetResourceBindingsTest, TextureFilterable) {
+    auto* src = R"(
+@group(0) @binding(0) var tex1 : texture_2d<f32, filterable>;
+@group(0) @binding(1) var tex2 : texture_2d<f32>;
+@group(0) @binding(2) var tex3 : texture_2d<f32, unfilterable>;
+@group(0) @binding(3) var tex4 : texture_depth_2d;
+@group(0) @binding(4) var tex5 : texture_multisampled_2d<f32>;
+@group(0) @binding(5) var tex6 : texture_2d<i32>;
+
+@fragment
+fn ep_func() {
+    _ = tex1;
+    _ = tex2;
+    _ = tex3;
+    _ = tex4;
+    _ = tex5;
+    _ = tex6;
+}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetResourceBindings("ep_func");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+    ASSERT_EQ(6u, result.size());
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[0].resource_type);
+    EXPECT_EQ(0u, result[0].bind_group);
+    EXPECT_EQ(0u, result[0].binding);
+    EXPECT_EQ(inspector::ResourceBinding::SampledKind::kFilterable, result[0].sampled_kind);
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[1].resource_type);
+    EXPECT_EQ(0u, result[1].bind_group);
+    EXPECT_EQ(1u, result[1].binding);
+    EXPECT_EQ(inspector::ResourceBinding::SampledKind::kUnknownFilterable, result[1].sampled_kind);
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[2].resource_type);
+    EXPECT_EQ(0u, result[2].bind_group);
+    EXPECT_EQ(2u, result[2].binding);
+    EXPECT_EQ(inspector::ResourceBinding::SampledKind::kUnfilterable, result[2].sampled_kind);
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kDepthTexture, result[3].resource_type);
+    EXPECT_EQ(0u, result[3].bind_group);
+    EXPECT_EQ(3u, result[3].binding);
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kMultisampledTexture, result[4].resource_type);
+    EXPECT_EQ(0u, result[4].bind_group);
+    EXPECT_EQ(4u, result[4].binding);
+    EXPECT_EQ(inspector::ResourceBinding::SampledKind::kFloat, result[4].sampled_kind);
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[5].resource_type);
+    EXPECT_EQ(0u, result[5].bind_group);
+    EXPECT_EQ(5u, result[5].binding);
+    EXPECT_EQ(inspector::ResourceBinding::SampledKind::kSInt, result[5].sampled_kind);
+}
+
+TEST_F(InspectorGetResourceBindingsTest, SamplerFiltering) {
+    auto* src = R"(
+@group(0) @binding(0) var samp1 : sampler<filtering>;
+@group(0) @binding(1) var samp2 : sampler;
+@group(0) @binding(2) var samp3 : sampler<non_filtering>;
+@group(0) @binding(3) var samp4 : sampler_comparison;
+
+@fragment
+fn ep_func() {
+    _ = samp1;
+    _ = samp2;
+    _ = samp3;
+    _ = samp4;
+}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetResourceBindings("ep_func");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+    ASSERT_EQ(4u, result.size());
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[0].resource_type);
+    EXPECT_EQ(0u, result[0].bind_group);
+    EXPECT_EQ(0u, result[0].binding);
+    EXPECT_EQ(inspector::ResourceBinding::SamplerType::kFiltering, result[0].sampler_type);
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[1].resource_type);
+    EXPECT_EQ(0u, result[1].bind_group);
+    EXPECT_EQ(1u, result[1].binding);
+    EXPECT_EQ(inspector::ResourceBinding::SamplerType::kUnknownFiltering, result[1].sampler_type);
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[2].resource_type);
+    EXPECT_EQ(0u, result[2].bind_group);
+    EXPECT_EQ(2u, result[2].binding);
+    EXPECT_EQ(inspector::ResourceBinding::SamplerType::kNonFiltering, result[2].sampler_type);
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[3].resource_type);
+    EXPECT_EQ(0u, result[3].bind_group);
+    EXPECT_EQ(3u, result[3].binding);
+    EXPECT_EQ(inspector::ResourceBinding::SamplerType::kComparison, result[3].sampler_type);
 }
 
 TEST_F(InspectorGetResourceBindingsTest, InputAttachment) {
@@ -2538,7 +2636,8 @@ var<private> foo_depth: f32;
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
     ASSERT_EQ(2u, result.size());
-    EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler, result[1].resource_type);
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[1].resource_type);
+    EXPECT_EQ(ResourceBinding::SamplerType::kComparison, result[1].sampler_type);
     EXPECT_EQ(0u, result[1].bind_group);
     EXPECT_EQ(0u, result[1].binding);
 }
@@ -2597,18 +2696,19 @@ var<private> foo_coords: )" +
 INSTANTIATE_TEST_SUITE_P(
     InspectorGetResourceBindingsTest,
     InspectorGetResourceBindingsTest_WithSampledTextureParams,
-    testing::Values(SampledTextureTestParams{core::type::TextureDimension::k1d,
-                                             inspector::ResourceBinding::TextureDimension::k1d,
-                                             inspector::ResourceBinding::SampledKind::kFloat},
-                    SampledTextureTestParams{core::type::TextureDimension::k2d,
-                                             inspector::ResourceBinding::TextureDimension::k2d,
-                                             inspector::ResourceBinding::SampledKind::kFloat},
-                    SampledTextureTestParams{core::type::TextureDimension::k3d,
-                                             inspector::ResourceBinding::TextureDimension::k3d,
-                                             inspector::ResourceBinding::SampledKind::kFloat},
-                    SampledTextureTestParams{core::type::TextureDimension::kCube,
-                                             inspector::ResourceBinding::TextureDimension::kCube,
-                                             inspector::ResourceBinding::SampledKind::kFloat}));
+    testing::Values(
+        SampledTextureTestParams{core::type::TextureDimension::k1d,
+                                 inspector::ResourceBinding::TextureDimension::k1d,
+                                 inspector::ResourceBinding::SampledKind::kUnknownFilterable},
+        SampledTextureTestParams{core::type::TextureDimension::k2d,
+                                 inspector::ResourceBinding::TextureDimension::k2d,
+                                 inspector::ResourceBinding::SampledKind::kUnknownFilterable},
+        SampledTextureTestParams{core::type::TextureDimension::k3d,
+                                 inspector::ResourceBinding::TextureDimension::k3d,
+                                 inspector::ResourceBinding::SampledKind::kUnknownFilterable},
+        SampledTextureTestParams{core::type::TextureDimension::kCube,
+                                 inspector::ResourceBinding::TextureDimension::kCube,
+                                 inspector::ResourceBinding::SampledKind::kUnknownFilterable}));
 
 using ArraySampledTextureTestParams = SampledTextureTestParams;
 using InspectorGetResourceBindingsTest_WithArraySampledTextureParams =
@@ -2643,16 +2743,17 @@ var<private> foo_array_index: i32;
 using MultisampledTextureTestParams = SampledTextureTestParams;
 using InspectorGetResourceBindingsTest_WithMultisampledTextureParams =
     InspectorTestWithParam<MultisampledTextureTestParams>;
-INSTANTIATE_TEST_SUITE_P(
-    InspectorGetResourceBindingsTest,
-    InspectorGetResourceBindingsTest_WithArraySampledTextureParams,
-    testing::Values(
-        ArraySampledTextureTestParams{core::type::TextureDimension::k2dArray,
-                                      inspector::ResourceBinding::TextureDimension::k2dArray,
-                                      inspector::ResourceBinding::SampledKind::kFloat},
-        ArraySampledTextureTestParams{core::type::TextureDimension::kCubeArray,
-                                      inspector::ResourceBinding::TextureDimension::kCubeArray,
-                                      inspector::ResourceBinding::SampledKind::kFloat}));
+INSTANTIATE_TEST_SUITE_P(InspectorGetResourceBindingsTest,
+                         InspectorGetResourceBindingsTest_WithArraySampledTextureParams,
+                         testing::Values(
+                             ArraySampledTextureTestParams{
+                                 core::type::TextureDimension::k2dArray,
+                                 inspector::ResourceBinding::TextureDimension::k2dArray,
+                                 inspector::ResourceBinding::SampledKind::kUnknownFilterable},
+                             ArraySampledTextureTestParams{
+                                 core::type::TextureDimension::kCubeArray,
+                                 inspector::ResourceBinding::TextureDimension::kCubeArray,
+                                 inspector::ResourceBinding::SampledKind::kUnknownFilterable}));
 
 std::string BaseType(ResourceBinding::SampledKind sampled_kind) {
     switch (sampled_kind) {

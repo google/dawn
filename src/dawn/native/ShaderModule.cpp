@@ -79,7 +79,6 @@ BindingInfoType TintResourceTypeToBindingInfoType(
         case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageBuffer:
             return BindingInfoType::Buffer;
         case tint::inspector::ResourceBinding::ResourceType::kSampler:
-        case tint::inspector::ResourceBinding::ResourceType::kComparisonSampler:
             return BindingInfoType::Sampler;
         case tint::inspector::ResourceBinding::ResourceType::kSampledTexture:
         case tint::inspector::ResourceBinding::ResourceType::kMultisampledTexture:
@@ -224,11 +223,29 @@ wgpu::TextureSampleType TintSampledKindToSampleType(
             return wgpu::TextureSampleType::Sint;
         case tint::inspector::ResourceBinding::SampledKind::kUInt:
             return wgpu::TextureSampleType::Uint;
+        case tint::inspector::ResourceBinding::SampledKind::kFilterable:
+        case tint::inspector::ResourceBinding::SampledKind::kUnfilterable:
+        case tint::inspector::ResourceBinding::SampledKind::kUnknownFilterable:
         case tint::inspector::ResourceBinding::SampledKind::kFloat:
+            // TODO(dsinclair): For now, maintain old behaviour that all types are Float.
             // Note that Float is compatible with both Float and UnfilterableFloat.
             return wgpu::TextureSampleType::Float;
-        case tint::inspector::ResourceBinding::SampledKind::kUnknown:
-            return wgpu::TextureSampleType::BindingNotUsed;
+    }
+    DAWN_UNREACHABLE();
+}
+
+wgpu::SamplerBindingType TintSamplerTypeToSamplerBindingType(
+    tint::inspector::ResourceBinding::SamplerType type) {
+    switch (type) {
+        case tint::inspector::ResourceBinding::SamplerType::kComparison:
+            return wgpu::SamplerBindingType::Comparison;
+
+        case tint::inspector::ResourceBinding::SamplerType::kFiltering:
+        case tint::inspector::ResourceBinding::SamplerType::kNonFiltering:
+        case tint::inspector::ResourceBinding::SamplerType::kUnknownFiltering:
+            // TODO(dsinclair): For now, maintain old behaviour that all types are
+            // filtering.
+            return wgpu::SamplerBindingType::Filtering;
     }
     DAWN_UNREACHABLE();
 }
@@ -1129,16 +1146,11 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
             case BindingInfoType::Sampler: {
                 SamplerBindingInfo bindingInfo = {};
-                switch (resource.resource_type) {
-                    case tint::inspector::ResourceBinding::ResourceType::kSampler:
-                        bindingInfo.type = wgpu::SamplerBindingType::Filtering;
-                        break;
-                    case tint::inspector::ResourceBinding::ResourceType::kComparisonSampler:
-                        bindingInfo.type = wgpu::SamplerBindingType::Comparison;
-                        break;
-                    default:
-                        DAWN_UNREACHABLE();
-                }
+
+                DAWN_ASSERT(resource.resource_type ==
+                            tint::inspector::ResourceBinding::ResourceType::kSampler);
+
+                bindingInfo.type = TintSamplerTypeToSamplerBindingType(resource.sampler_type);
                 info.bindingInfo = bindingInfo;
                 break;
             }

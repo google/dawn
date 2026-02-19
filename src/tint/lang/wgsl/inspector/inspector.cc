@@ -164,18 +164,13 @@ ResourceBinding ConvertHandleToResourceBinding(const tint::sem::GlobalVariable* 
         handle_type,
 
         [&](const core::type::Sampler* sampler) {
-            if (sampler->Kind() == core::type::SamplerKind::kSampler) {
-                result.resource_type = ResourceBinding::ResourceType::kSampler;
-            } else {
-                TINT_ASSERT(sampler->Kind() == core::type::SamplerKind::kComparisonSampler);
-                result.resource_type = ResourceBinding::ResourceType::kComparisonSampler;
-            }
+            result.resource_type = ResourceBinding::ResourceType::kSampler;
+            result.sampler_type = SamplerToSamplerType(sampler);
         },
-
         [&](const core::type::SampledTexture* tex) {
             result.resource_type = ResourceBinding::ResourceType::kSampledTexture;
             result.dim = TypeTextureDimensionToResourceBindingTextureDimension(tex->Dim());
-            result.sampled_kind = BaseTypeToSampledKind(tex->Type());
+            result.sampled_kind = ToFilterableSampledKind(tex);
         },
         [&](const core::type::MultisampledTexture* tex) {
             result.resource_type = ResourceBinding::ResourceType::kMultisampledTexture;
