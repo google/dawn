@@ -249,12 +249,10 @@ static_assert(kCompressedFormats.size() ==
                   kBCFormats.size() + kETC2Formats.size() + kASTCFormats.size(),
               "Number of compressed format must equal number of BC, ETC2, and ASTC formats.");
 
-#ifndef __EMSCRIPTEN__
 static constexpr std::array<wgpu::TextureFormat, 6> kNorm16Formats = {
     wgpu::TextureFormat::R16Unorm, wgpu::TextureFormat::RG16Unorm, wgpu::TextureFormat::RGBA16Unorm,
     wgpu::TextureFormat::R16Snorm, wgpu::TextureFormat::RG16Snorm, wgpu::TextureFormat::RGBA16Snorm,
 };
-#endif  // __EMSCRIPTEN__
 
 static constexpr std::array<wgpu::TextureFormat, 5> kDepthFormats = {
     wgpu::TextureFormat::Depth16Unorm,         wgpu::TextureFormat::Depth32Float,

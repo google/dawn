@@ -1295,6 +1295,70 @@ TEST_F(TextureFormatsTier1TextureTest, StorageBindingSuppport) {
     }
 }
 
+// Test that TextureFormatsTier1 makes Norm16 formats only compatible with the unfilterable-float
+// sample type.
+TEST_F(TextureFormatsTier1TextureTest, Norm16IsUnfilterable) {
+    for (wgpu::TextureFormat format : utils::kNorm16Formats) {
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
+
+        wgpu::TextureDescriptor tDesc = {
+            .usage = wgpu::TextureUsage::TextureBinding,
+            .size = {1, 1},
+            .format = format,
+        };
+        wgpu::Texture t = device.CreateTexture(&tDesc);
+
+        wgpu::BindGroupLayout unfilterableBGL = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::UnfilterableFloat}});
+        wgpu::BindGroupLayout filterableBGL = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
+
+        // Control case: the texture can be used unfiltered.
+        utils::MakeBindGroup(device, unfilterableBGL, {{0, t.CreateView()}});
+
+        // Error case: the texture cannot be filtered.
+        ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, filterableBGL, {{0, t.CreateView()}}));
+    }
+}
+
+// Test that TextureFormatsTier1 makes Norm16 formats only compatible with rendering, not resolving.
+TEST_F(TextureFormatsTier1TextureTest, Norm16IsNotResolvable) {
+    for (wgpu::TextureFormat format : utils::kNorm16Formats) {
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
+
+        wgpu::TextureDescriptor tDesc = {
+            .usage = wgpu::TextureUsage::RenderAttachment,
+            .size = {1, 1},
+            .format = format,
+        };
+        wgpu::Texture resolve = device.CreateTexture(&tDesc);
+
+        tDesc.sampleCount = 4;
+        wgpu::Texture colorAttachment = device.CreateTexture(&tDesc);
+
+        // Control case, rendering to the format is allowed.
+        utils::ComboRenderPassDescriptor passDesc;
+        passDesc.colorAttachmentCount = 1;
+        passDesc.cColorAttachments[0].view = colorAttachment.CreateView();
+
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDesc);
+            pass.End();
+            encoder.Finish();
+        }
+
+        // Error case, resolving to the format is not allowed.
+        passDesc.cColorAttachments[0].resolveTarget = resolve.CreateView();
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDesc);
+            pass.End();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+}
+
 class TextureFormatsTier2TextureTest : public TextureValidationTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
