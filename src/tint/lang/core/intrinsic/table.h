@@ -43,11 +43,6 @@
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/text/styled_text.h"
 
-// Forward declarations
-namespace tint::diag {
-class List;
-}  // namespace tint::diag
-
 namespace tint::core::intrinsic {
 
 /// Overload describes a fully matched builtin function overload

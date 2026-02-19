@@ -59,7 +59,6 @@
 namespace tint::ast {
 class IndexAccessorExpression;
 class BinaryExpression;
-class BitcastExpression;
 class CallExpression;
 class CallStatement;
 class CaseStatement;
@@ -83,7 +82,6 @@ class ForLoopStatement;
 class IfStatement;
 class LoopStatement;
 class Statement;
-class StructMember;
 class SwitchStatement;
 class ValueConstructor;
 class ValueConversion;

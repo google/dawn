@@ -35,6 +35,11 @@
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/builder.h"
 
+// Forward declarations
+namespace tint {
+class ProgramBuilder;
+}
+
 namespace tint::ast::test {
 
 /// The name of the texture global variable used by the tests.

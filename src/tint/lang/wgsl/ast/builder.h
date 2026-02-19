@@ -36,7 +36,6 @@
 #include "src/tint/lang/core/interpolation.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/sampler_kind.h"
-#include "src/tint/lang/core/type/texel_buffer.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -103,12 +102,6 @@
 #ifdef CURRENTLY_IN_TINT_PUBLIC_HEADER
 #error "internal tint header being #included from tint.h"
 #endif
-
-// Forward declarations
-namespace tint::ast {
-class CloneContext;
-class VariableDeclStatement;
-}  // namespace tint::ast
 
 namespace tint::ast {
 

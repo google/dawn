@@ -46,36 +46,20 @@
 
 // Forward declarations
 namespace tint::ast {
-class IndexAccessorExpression;
-class BinaryExpression;
-class BitcastExpression;
 class CallExpression;
-class CallStatement;
-class CaseStatement;
-class ForLoopStatement;
 class Function;
-class IdentifierExpression;
-class LoopStatement;
-class MemberAccessorExpression;
 class ReturnStatement;
 class SwitchStatement;
-class UnaryOpExpression;
 class Variable;
-class WhileStatement;
 }  // namespace tint::ast
 namespace tint::sem {
 class Array;
-class BlockStatement;
 class BreakIfStatement;
-class BuiltinFn;
 class Call;
-class CaseStatement;
 class ForLoopStatement;
 class IfStatement;
 class LoopStatement;
-class Materialize;
 class Statement;
-class SwitchStatement;
 class WhileStatement;
 }  // namespace tint::sem
 namespace tint::core::type {

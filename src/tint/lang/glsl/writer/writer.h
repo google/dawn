@@ -35,9 +35,6 @@
 #include "src/tint/utils/result.h"
 
 // Forward declarations
-namespace tint {
-class Program;
-}  // namespace tint
 namespace tint::core::ir {
 class Module;
 }  // namespace tint::core::ir

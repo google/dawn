@@ -36,7 +36,6 @@
 // Forward declarations
 namespace tint::core::ir {
 class Module;
-class Function;
 }  // namespace tint::core::ir
 
 namespace tint::core::ir {

@@ -53,7 +53,7 @@
 // Forward declarations
 namespace tint {
 class Program;
-class InternalCompilerError;
+class StyledTextPrinter;
 }  // namespace tint
 
 namespace tint::cmd {
