@@ -183,7 +183,7 @@ bool Resolver::Resolve() {
     if (result && !disable_uniformity_analysis) {
         // Run the uniformity analysis, which requires a complete semantic module.
         const bool subgroup_uniformity =
-            allowed_features_.features.count(wgsl::LanguageFeature::kSubgroupUniformity);
+            allowed_features_.features.contains(wgsl::LanguageFeature::kSubgroupUniformity);
         if (!AnalyzeUniformity(b, dependencies_, subgroup_uniformity)) {
             return false;
         }
@@ -1865,8 +1865,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     const core::type::Type* storage_ty = object_ty->UnwrapRef();
     if (memory_view) {
         if (memory_view->Is<core::type::Pointer>() &&
-            (allowed_features_.features.count(wgsl::LanguageFeature::kPointerCompositeAccess) ==
-             0u)) {
+            !allowed_features_.features.contains(wgsl::LanguageFeature::kPointerCompositeAccess)) {
             AddError(expr->source)
                 << "pointer composite access requires the pointer_composite_access language "
                    "feature, which is not allowed in the current environment";
@@ -3542,8 +3541,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
     const core::type::Type* storage_ty = object_ty->UnwrapRef();
     if (memory_view) {
         if (memory_view->Is<core::type::Pointer>() &&
-            (allowed_features_.features.count(wgsl::LanguageFeature::kPointerCompositeAccess) ==
-             0u)) {
+            !allowed_features_.features.contains(wgsl::LanguageFeature::kPointerCompositeAccess)) {
             AddError(expr->source)
                 << "pointer composite access requires the pointer_composite_access language "
                    "feature, which is not allowed in the current environment";
@@ -4230,7 +4228,7 @@ bool Resolver::Enable(const ast::Enable* enable) {
     for (auto* ext : enable->extensions) {
         Mark(ext);
         enabled_extensions_.Add(ext->name);
-        if (!allowed_features_.extensions.count(ext->name)) {
+        if (!allowed_features_.extensions.contains(ext->name)) {
             AddError(ext->source) << "extension " << style::Code(ext->name)
                                   << " is not allowed in the current environment";
             return false;
@@ -4241,7 +4239,7 @@ bool Resolver::Enable(const ast::Enable* enable) {
 
 bool Resolver::Requires(const ast::Requires* req) {
     for (auto feature : req->features) {
-        if (!allowed_features_.features.count(feature)) {
+        if (!allowed_features_.features.contains(feature)) {
             AddError(req->source) << "language feature " << style::Code(wgsl::ToString(feature))
                                   << " is not allowed in the current environment";
             return false;
