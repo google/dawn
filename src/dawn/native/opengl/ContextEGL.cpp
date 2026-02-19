@@ -61,14 +61,14 @@ namespace {
 thread_local ContextEGL* gCurrentContextInScope = nullptr;
 
 MaybeError MakeContextCurrent(DisplayEGL* display, const ContextEGL::ContextState& state) {
-    if (display->egl.GetCurrentContext() != state.context ||
-        display->egl.GetCurrentSurface(EGL_DRAW) != state.drawSurface ||
-        display->egl.GetCurrentSurface(EGL_READ) != state.readSurface) {
-        EGLBoolean success = display->egl.MakeCurrent(display->GetDisplay(), state.drawSurface,
+    if (display->egl->GetCurrentContext() != state.context ||
+        display->egl->GetCurrentSurface(EGL_DRAW) != state.drawSurface ||
+        display->egl->GetCurrentSurface(EGL_READ) != state.readSurface) {
+        EGLBoolean success = display->egl->MakeCurrent(display->GetDisplay(), state.drawSurface,
 
-                                                      state.readSurface, state.context);
+                                                       state.readSurface, state.context);
 
-        return CheckEGL(display->egl, static_cast<EGLBoolean>(success == EGL_TRUE),
+        return CheckEGL(display->egl.get(), static_cast<EGLBoolean>(success == EGL_TRUE),
                         "eglMakeCurrent");
     }
     return {};
@@ -98,15 +98,15 @@ ContextEGL::ContextEGL(Ref<DisplayEGL> display, bool bindContextOnlyDuringUse)
 
 ContextEGL::~ContextEGL() {
     if (mOffscreenSurface != EGL_NO_SURFACE) {
-        mDisplay->egl.DestroySurface(mDisplay->GetDisplay(), mOffscreenSurface);
+        mDisplay->egl->DestroySurface(mDisplay->GetDisplay(), mOffscreenSurface);
         mOffscreenSurface = EGL_NO_SURFACE;
     }
     if (mState.context != EGL_NO_CONTEXT) {
-        if (mState.context == mDisplay->egl.GetCurrentContext()) {
-            mDisplay->egl.MakeCurrent(mDisplay->GetDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
-                                      EGL_NO_CONTEXT);
+        if (mState.context == mDisplay->egl->GetCurrentContext()) {
+            mDisplay->egl->MakeCurrent(mDisplay->GetDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
+                                       EGL_NO_CONTEXT);
         }
-        mDisplay->egl.DestroyContext(mDisplay->GetDisplay(), mState.context);
+        mDisplay->egl->DestroyContext(mDisplay->GetDisplay(), mState.context);
         mState.context = EGL_NO_CONTEXT;
     }
 }
@@ -117,7 +117,7 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
                                   bool useANGLETextureSharing,
                                   bool forceES31AndMinExtensions,
                                   EGLint angleVirtualizationGroup) {
-    const EGLFunctions& egl = mDisplay->egl;
+    const EGLFunctions& egl = mDisplay->egl.get();
 
     // Unless EGL_KHR_no_config is present, we need to choose an EGLConfig on context creation that
     // will lock the EGLContext to be use with a single kind of color buffer. In that case the
@@ -232,7 +232,7 @@ void ContextEGL::RequestRequiredExtensionsExplicitly() {
         return;
     }
 
-    const EGLFunctions& egl = mDisplay->egl;
+    const EGLFunctions& egl = mDisplay->egl.get();
     // Copied from third_party/angle/include/GLES/gl.h
     typedef void(KHRONOS_APIENTRY * PFNGLREQUESTEXTENSIONANGLEPROC)(const GLchar* name);
 
@@ -340,9 +340,9 @@ MaybeError ContextEGL::ScopedMakeCurrent::Initialize() {
     }
     mLock = std::unique_lock<std::mutex>(mContext->mExclusiveMakeCurrentMutex);
 
-    mPrevState.context = mContext->mDisplay->egl.GetCurrentContext();
-    mPrevState.drawSurface = mContext->mDisplay->egl.GetCurrentSurface(EGL_DRAW);
-    mPrevState.readSurface = mContext->mDisplay->egl.GetCurrentSurface(EGL_READ);
+    mPrevState.context = mContext->mDisplay->egl->GetCurrentContext();
+    mPrevState.drawSurface = mContext->mDisplay->egl->GetCurrentSurface(EGL_DRAW);
+    mPrevState.readSurface = mContext->mDisplay->egl->GetCurrentSurface(EGL_READ);
 
     // Assert that the context is not current on another thread.
     DAWN_ASSERT(mContext->IsNotCurrentOnAnotherThread());

@@ -92,7 +92,7 @@ MaybeError SwapChainEGL::Initialize(SwapChainBase* previousSwapChain) {
     }
 
     EGLint swapInterval = GetPresentMode() == wgpu::PresentMode::Immediate ? 0 : 1;
-    display->egl.SwapInterval(display->GetDisplay(), swapInterval);
+    display->egl->SwapInterval(display->GetDisplay(), swapInterval);
 
     return {};
 }
@@ -178,7 +178,7 @@ MaybeError SwapChainEGL::CreateEGLSurface(const DisplayEGL* display) {
     }
 
     // [[maybe_unused]] to prevent unused variable warnings when platform code is disabled.
-    [[maybe_unused]] const EGLFunctions& egl = display->egl;
+    [[maybe_unused]] const EGLFunctions& egl = display->egl.get();
     [[maybe_unused]] EGLDisplay eglDisplay = display->GetDisplay();
     Surface* surface = GetSurface();
 

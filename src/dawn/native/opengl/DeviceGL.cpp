@@ -589,7 +589,7 @@ const EGLFunctions& Device::GetEGL(bool makeCurrent) const {
         mContext->DeprecatedMakeCurrent();
         MarkGLUsed(ExecutionQueueBase::SubmitMode::Normal);
     }
-    return ToBackend(GetPhysicalDevice())->GetDisplay()->egl;
+    return ToBackend(GetPhysicalDevice())->GetDisplay()->egl.get();
 }
 
 EGLDisplay Device::GetEGLDisplay() const {

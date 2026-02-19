@@ -150,7 +150,7 @@ bool PhysicalDevice::SupportsExternalImages() const {
 }
 
 MaybeError PhysicalDevice::InitializeImpl() {
-    DAWN_TRY(mFunctions.Initialize(mDisplay->egl.GetProcAddress));
+    DAWN_TRY(mFunctions.Initialize(mDisplay->egl->GetProcAddress));
 
     // In some cases (like like of EGL_KHR_create_context) we don't know before this point that we
     // got a GL context that supports the required version. Check it now.
@@ -251,18 +251,18 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::TextureCompressionETC2);
     }
 
-    if (mDisplay->egl.HasExt(EGLExt::DisplayTextureShareGroup)) {
+    if (mDisplay->egl->HasExt(EGLExt::DisplayTextureShareGroup)) {
         EnableFeature(dawn::native::Feature::ANGLETextureSharing);
     }
 
-    if (mDisplay->egl.HasExt(EGLExt::ImageNativeBuffer) &&
-        mDisplay->egl.HasExt(EGLExt::GetNativeClientBuffer)) {
+    if (mDisplay->egl->HasExt(EGLExt::ImageNativeBuffer) &&
+        mDisplay->egl->HasExt(EGLExt::GetNativeClientBuffer)) {
         EnableFeature(dawn::native::Feature::SharedTextureMemoryAHardwareBuffer);
     }
 
-    if (mDisplay->egl.HasExt(EGLExt::WaitSync) &&
+    if (mDisplay->egl->HasExt(EGLExt::WaitSync) &&
         mFunctions.IsGLExtensionSupported("GL_OES_EGL_sync")) {
-        if (mDisplay->egl.HasExt(EGLExt::NativeFenceSync)) {
+        if (mDisplay->egl->HasExt(EGLExt::NativeFenceSync)) {
             EnableFeature(dawn::native::Feature::SharedFenceSyncFD);
         }
         EnableFeature(dawn::native::Feature::SharedFenceEGLSync);

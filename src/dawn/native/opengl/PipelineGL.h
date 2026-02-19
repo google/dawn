@@ -130,7 +130,7 @@ class EmulatedTextureBuiltinRegistrar {
     EmulatedTextureBuiltinInfo AcquireInfo();
 
   private:
-    const PipelineLayout* mLayout;
+    raw_ptr<const PipelineLayout> mLayout;
     uint32_t mCurrentIndex = 0;
     EmulatedTextureBuiltinInfo mEmulatedTextureBuiltinInfo;
 };
