@@ -1,0 +1,32 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct Buf {
+  /* 0x0000 */ uint4 res;
+};
+
+struct tint_module_vars_struct {
+  device Buf* buf;
+};
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v_1(device Buf* buf [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.buf=buf};
+  uint4 v = uint4(1u, 2u, 3u, 4u);
+  uint4 const v_2 = v;
+  v = uint4(v_2.x, uint2(5u, 6u).y, uint2(5u, 6u).x, v_2.w);
+  uint4 const v_3 = v;
+  v = uint4(v_3.x, uint2(99u, 100u).y, uint2(99u, 100u).x, v_3.w);
+  v.z = 200u;
+  uint3 const v_4 = (v.xyz * uint3(100u));
+  v = uint4(v_4.x, v_4.y, v_4.z, v.w);
+  device uint4* const p = (&(*tint_module_vars.buf).res);
+  (*p) = uint4(uint4(0u).x, uint4(0u).y, uint4(0u).z, uint4(0u).w);
+  uint4 const v_5 = (*p);
+  (*p) = uint4(v_5.x, uint2(1u, 2u).y, uint2(1u, 2u).x, v_5.w);
+  uint4 const v_6 = (*p);
+  (*p) = uint4(v_6.x, uint2(3u, 4u).y, uint2(3u, 4u).x, v_6.w);
+  (*p).z = 5u;
+  uint3 const v_7 = ((*p).xyz + uint3(10u));
+  (*p) = uint4(v_7.x, v_7.y, v_7.z, (*p).w);
+}

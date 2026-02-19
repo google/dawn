@@ -44,9 +44,8 @@ SwizzleView::SwizzleView(core::AddressSpace address_space,
     : Base(Hash(tint::TypeCode::Of<SwizzleView>().bits), address_space, store_type, access),
       from_(from),
       to_(to) {
-    TINT_ASSERT(1 < from_ && from_ < 5);
-    TINT_ASSERT(1 < to_ && to_ < 5);
-    TINT_ASSERT(store_type->Is<core::type::Vector>());
+    TINT_ASSERT(1 <= from_ && from_ < 5);
+    TINT_ASSERT(1 <= to_ && to_ < 5);
 }
 
 bool SwizzleView::Equals(const UniqueNode& other) const {

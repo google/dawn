@@ -158,6 +158,7 @@ if (tint_build_unittests) {
       "subgroup_matrix_test.cc",
       "subgroup_size_control_extension_test.cc",
       "subgroups_extension_test.cc",
+      "swizzle_assignment_test.cc",
       "texel_buffer_test.cc",
       "texture_and_sampler_let_extension_test.cc",
       "type_validation_test.cc",

@@ -3653,6 +3653,14 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 if (memory_view && !memory_view->Is<core::type::SwizzleView>()) {
                     ty = b.create<core::type::Reference>(memory_view->AddressSpace(), ty,
                                                          memory_view->Access());
+                } else if (memory_view && memory_view->Is<core::type::SwizzleView>() &&
+                           allowed_features_.features.contains(
+                               wgsl::LanguageFeature::kSwizzleAssignment)) {
+                    // If the swizzle assignment language feature is enabled, a single element
+                    // swizzle into a swizzle view must also be a swizzle view.
+                    ty = b.create<core::type::SwizzleView>(memory_view->AddressSpace(), ty,
+                                                           memory_view->Access(), vec->Width(),
+                                                           static_cast<uint32_t>(size));
                 }
             } else {
                 if (memory_view) {
@@ -4781,7 +4789,14 @@ sem::Statement* Resolver::AssignmentStatement(const ast::AssignmentStatement* st
         }
 
         if (!is_phony_assignment) {
-            rhs = Materialize(rhs, lhs->Type()->UnwrapRef());
+            const core::type::Type* lhs_type = nullptr;
+            if (lhs->Type()->Is<core::type::SwizzleView>() &&
+                allowed_features_.features.contains(wgsl::LanguageFeature::kSwizzleAssignment)) {
+                lhs_type = lhs->Type()->As<core::type::SwizzleView>()->StoreType();
+            } else {
+                lhs_type = lhs->Type()->UnwrapRef();
+            }
+            rhs = Materialize(rhs, lhs_type);
             if (!rhs) {
                 return false;
             }
@@ -4861,8 +4876,17 @@ sem::Statement* Resolver::CompoundAssignmentStatement(
         } else {
             rhs_type = rhs_type->UnwrapRef();
         }
-        auto overload =
-            intrinsic_table_.Lookup(stmt->op, lhs->Type()->UnwrapRef(), rhs_type, stage, true);
+
+        auto* lhs_type = lhs->Type();
+        if (auto* lhs_swizzle_view = lhs_type->As<core::type::SwizzleView>();
+            lhs_swizzle_view &&
+            allowed_features_.features.contains(wgsl::LanguageFeature::kSwizzleAssignment)) {
+            lhs_type = lhs_swizzle_view->StoreType();
+        } else {
+            lhs_type = lhs_type->UnwrapRef();
+        }
+
+        auto overload = intrinsic_table_.Lookup(stmt->op, lhs_type, rhs_type, stage, true);
         if (overload != Success) {
             AddError(stmt->source) << overload.Failure();
             return false;

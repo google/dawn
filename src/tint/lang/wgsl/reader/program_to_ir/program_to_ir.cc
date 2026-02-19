@@ -163,6 +163,11 @@ class Impl {
         core::ir::Value* index = nullptr;
     };
 
+    struct CollapsedSwizzle {
+        const sem::ValueExpression* vector = nullptr;
+        tint::Vector<uint32_t, 4> indices;
+    };
+
     using ValueOrVecElAccess = std::variant<core::ir::Value*, VectorRefElementAccess>;
 
     /// The current block for expressions.
@@ -442,6 +447,23 @@ class Impl {
             return;
         }
 
+        auto b = builder_.Append(current_block_);
+        const auto* sem_swizzle = program_.Sem().Get<sem::Swizzle>(stmt->lhs);
+        if (sem_swizzle) {
+            CollapsedSwizzle swizzle = CollapseSwizzle(sem_swizzle);
+
+            auto lhs = EmitValueExpression(swizzle.vector->Declaration());
+            auto rhs = EmitValueExpression(stmt->rhs);
+
+            if (swizzle.indices.Length() == 1) {
+                b.StoreVectorElement(lhs, b.Constant(u32(swizzle.indices[0])), rhs);
+            } else {
+                rhs = ConstructSwizzleAssignmentRhs(lhs, rhs, swizzle.indices);
+                b.Store(lhs, rhs);
+            }
+            return;
+        }
+
         auto lhs = EmitExpression(stmt->lhs);
 
         auto rhs = EmitValueExpression(stmt->rhs);
@@ -449,7 +471,6 @@ class Impl {
             return;
         }
 
-        auto b = builder_.Append(current_block_);
         if (auto* v = std::get_if<core::ir::Value*>(&lhs)) {
             b.Store(*v, rhs);
         } else if (auto ref = std::get_if<VectorRefElementAccess>(&lhs)) {
@@ -476,6 +497,28 @@ class Impl {
             return;
         }
 
+        const auto* sem_swizzle = program_.Sem().Get<sem::Swizzle>(stmt->lhs);
+        auto* lhs_val = std::get_if<core::ir::Value*>(&lhs);
+
+        // This branch supports swizzle assignment, which includes multi-element swizzles and
+        // single-element swizzles chained onto nested swizzle views. For single-element swizzles
+        // directly onto a vector, lhs will be a VecElAccess, so lhs_val is a nullptr.
+        if (sem_swizzle && lhs_val != nullptr) {
+            auto b = builder_.Append(current_block_);
+            auto* inst = current_block_->Append(BinaryOp(*lhs_val, rhs, stmt->op));
+            CollapsedSwizzle swizzle = CollapseSwizzle(sem_swizzle);
+            auto* swizzle_lhs = EmitValueExpression(swizzle.vector->Declaration());
+
+            if (swizzle.indices.Length() == 1) {
+                b.StoreVectorElement(swizzle_lhs, b.Constant(u32(swizzle.indices[0])),
+                                     inst->Result());
+            } else {
+                rhs = ConstructSwizzleAssignmentRhs(swizzle_lhs, inst->Result(), swizzle.indices);
+                b.Store(swizzle_lhs, rhs);
+            }
+            return;
+        }
+
         EmitCompoundAssignment(lhs, rhs, stmt->op);
     }
 
@@ -490,6 +533,66 @@ class Impl {
             auto* inst = b.Append(BinaryOp(load->Result(), rhs, op));
             b.StoreVectorElement(ref->vector, ref->index, inst);
         }
+    }
+
+    // Collapse a possibly nested chain of swizzles into a single set of swizzle indices on the base
+    // vector. Note that target components cannot be repeated in lhs swizzles used for assignment,
+    // so each consecutive swizzle on a vector will produce a smaller or equal sized vector (i.e.
+    // v.xyzw.xy.yx.x).
+    CollapsedSwizzle CollapseSwizzle(const sem::Swizzle* swizzle) {
+        // Initialize with the outermost swizzle object and indices.
+        CollapsedSwizzle res{
+            .vector = swizzle->Object(),
+            .indices = swizzle->Indices(),
+        };
+        // If the inner object is also a swizzle, collapse it down.
+        while (auto* inner_swizzle = res.vector->As<sem::Swizzle>()) {
+            tint::Vector<uint32_t, 4> combined;
+            // For each index in the outer swizzle, get the corresponding index into the inner
+            // swizzle.
+            for (uint32_t i : res.indices) {
+                combined.Push(inner_swizzle->Indices()[i]);
+            }
+            res.indices = std::move(combined);
+            res.vector = inner_swizzle->Object();
+        }
+        return res;
+    }
+
+    core::ir::Value* ConstructSwizzleAssignmentRhs(core::ir::Value* lhs,
+                                                   core::ir::Value* rhs,
+                                                   VectorRef<uint32_t> indices) {
+        auto b = builder_.Append(current_block_);
+        auto* vec_ty = lhs->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
+        TINT_ASSERT(vec_ty);
+        auto* elem_ty = vec_ty->Type();
+
+        // Reserve the result vector which will eventually be stored.
+        tint::Vector<core::ir::Value*, 4> new_vec_args;
+        new_vec_args.Resize(vec_ty->Width());
+
+        // For indices that are referenced in the swizzle, use the appropriate new vals from the
+        // rhs to populate the result vector.
+        for (size_t i = 0; i < indices.Length(); i++) {
+            auto* access = b.Access(elem_ty->Clone(clone_ctx_.type_ctx), rhs, b.Constant(u32(i)));
+
+            uint32_t target_index = indices[i];
+            new_vec_args[target_index] = access->Result();
+        }
+
+        // For indices which were not referenced in the swizzle, fill in the old vals from the
+        // loaded lhs vector.
+        auto* lhs_val = b.Load(lhs);
+        for (uint32_t i = 0; i < vec_ty->Width(); i++) {
+            if (new_vec_args[i] == nullptr) {
+                auto* access =
+                    b.Access(elem_ty->Clone(clone_ctx_.type_ctx), lhs_val, b.Constant(u32(i)));
+                new_vec_args[i] = access->Result();
+            }
+        }
+
+        // Construct the result vector.
+        return b.Construct(vec_ty->Clone(clone_ctx_.type_ctx), new_vec_args)->Result();
     }
 
     void EmitBlock(const ast::BlockStatement* block) {

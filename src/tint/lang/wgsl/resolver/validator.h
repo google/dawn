@@ -38,6 +38,7 @@
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/sem_helper.h"
+#include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/containers/vector.h"
@@ -593,6 +594,12 @@ class Validator {
     bool AddressSpaceLayout(const core::type::Type* type,
                             core::AddressSpace sc,
                             Source source) const;
+
+    /// Validates a swizzle assignment
+    /// @param lhs the lhs swizzle to validate
+    /// @param source the source of the swizzle
+    /// @returns true on success, false otherwise.
+    bool SwizzleAssignment(const sem::Swizzle* lhs, const Source& source) const;
 
   private:
     /// @param ty the type to check
