@@ -49,6 +49,17 @@ pkg.depend(
     ),
 )
 
+pkg.depend(
+    name = "@chromium-targets",
+    source = pkg.source.googlesource(
+        host = "chromium",
+        repo = "chromium/src",
+        ref = "refs/heads/main",
+        path = "infra/config/targets",
+        revision = "8dacb01b4161b87c8deaeede8dd312f4a088bdf5",
+    ),
+)
+
 pkg.resources([
     "milestones.json",
 ])
