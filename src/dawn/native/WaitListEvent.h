@@ -89,7 +89,7 @@ bool WaitListEvent::WaitAny(It eventAndReadyStateBegin,
     }
 
     struct EventState {
-        WaitListEvent* event = nullptr;
+        raw_ptr<WaitListEvent> event = nullptr;
         size_t origIndex;
         bool isReady = false;
     };

@@ -40,6 +40,7 @@
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/dawn_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace tint {
 enum class ResourceType : uint32_t;
@@ -132,7 +133,7 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     };
     struct ResourceUpdate {
         ResourceTableSlot slot;
-        TextureViewBase* textureView = nullptr;
+        raw_ptr<TextureViewBase> textureView = nullptr;
     };
     struct Updates {
         std::vector<MetadataUpdate> metadataUpdates;
