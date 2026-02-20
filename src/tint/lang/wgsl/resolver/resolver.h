@@ -340,10 +340,6 @@ class Resolver {
     bool MaybeMaterializeAndLoadArguments(Vector<const sem::ValueExpression*, N>& args,
                                           const sem::CallTarget* target);
 
-    /// @returns true if an argument of an abstract numeric type, passed to a parameter of type
-    /// `parameter_ty` should be materialized.
-    bool ShouldMaterializeArgument(const core::type::Type* parameter_ty) const;
-
     /// Converts `c` to `target_ty`
     /// @returns true on success, false on failure.
     bool Convert(const core::constant::Value*& c,

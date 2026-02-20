@@ -1741,7 +1741,7 @@ const sem::ValueExpression* Resolver::Materialize(
     auto* decl = expr->Declaration();
 
     auto* concrete_ty = ConcreteType(expr->Type(), target_type, decl->source);
-    if (!concrete_ty) {
+    if (!concrete_ty || concrete_ty->DeepestElement()->Is<core::type::AbstractNumeric>()) {
         return expr;  // Does not require materialization
     }
 
@@ -1780,13 +1780,12 @@ bool Resolver::MaybeMaterializeAndLoadArguments(Vector<const sem::ValueExpressio
                                                 const sem::CallTarget* target) {
     for (size_t i = 0, n = std::min(args.Length(), target->Parameters().Length()); i < n; i++) {
         const auto* param_ty = target->Parameters()[i]->Type();
-        if (ShouldMaterializeArgument(param_ty)) {
-            auto* materialized = Materialize(args[i], param_ty);
-            if (!materialized) {
-                return false;
-            }
-            args[i] = materialized;
+        auto* materialized = Materialize(args[i], param_ty);
+        if (!materialized) {
+            return false;
         }
+        args[i] = materialized;
+
         if (!param_ty->Is<core::type::Reference>()) {
             auto* load = Load(args[i]);
             if (!load) {
@@ -1796,11 +1795,6 @@ bool Resolver::MaybeMaterializeAndLoadArguments(Vector<const sem::ValueExpressio
         }
     }
     return true;
-}
-
-bool Resolver::ShouldMaterializeArgument(const core::type::Type* parameter_ty) const {
-    const auto* param_el_ty = parameter_ty->DeepestElement();
-    return (param_el_ty != nullptr) && !param_el_ty->Is<core::type::AbstractNumeric>();
 }
 
 bool Resolver::Convert(const core::constant::Value*& c,
@@ -3725,17 +3719,13 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
     // Parameter types
     auto* lhs_ty = overload->parameters[0].type;
     auto* rhs_ty = overload->parameters[1].type;
-    if (ShouldMaterializeArgument(lhs_ty)) {
-        lhs = Materialize(lhs, lhs_ty);
-        if (!lhs) {
-            return nullptr;
-        }
+    lhs = Materialize(lhs, lhs_ty);
+    if (!lhs) {
+        return nullptr;
     }
-    if (ShouldMaterializeArgument(rhs_ty)) {
-        rhs = Materialize(rhs, rhs_ty);
-        if (!rhs) {
-            return nullptr;
-        }
+    rhs = Materialize(rhs, rhs_ty);
+    if (!rhs) {
+        return nullptr;
     }
 
     if (!validator_.BinaryExpression(expr, expr->op, lhs, rhs)) {
@@ -3852,11 +3842,9 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
             }
             ty = overload->return_type;
             auto* param_ty = overload->parameters[0].type;
-            if (ShouldMaterializeArgument(param_ty)) {
-                expr = Materialize(expr, param_ty);
-                if (!expr) {
-                    return nullptr;
-                }
+            expr = Materialize(expr, param_ty);
+            if (!expr) {
+                return nullptr;
             }
 
             // Load expr if it is a reference
