@@ -80,7 +80,7 @@ wgpu::TextureComponentSwizzle ComposeSwizzle(wgpu::TextureComponentSwizzle first
                                              wgpu::TextureComponentSwizzle secondSwizzle);
 
 // The default swizzle as defined by the WebGPU specification.
-static constexpr wgpu::TextureComponentSwizzle kRGBASwizzle = {
+inline constexpr wgpu::TextureComponentSwizzle kRGBASwizzle = {
     wgpu::ComponentSwizzle::R,
     wgpu::ComponentSwizzle::G,
     wgpu::ComponentSwizzle::B,
@@ -88,28 +88,28 @@ static constexpr wgpu::TextureComponentSwizzle kRGBASwizzle = {
 };
 
 // The swizzle typically used for depth and stencil textures.
-static constexpr wgpu::TextureComponentSwizzle kR001Swizzle = {
+inline constexpr wgpu::TextureComponentSwizzle kR001Swizzle = {
     wgpu::ComponentSwizzle::R,
     wgpu::ComponentSwizzle::Zero,
     wgpu::ComponentSwizzle::Zero,
     wgpu::ComponentSwizzle::One,
 };
 
-static constexpr wgpu::TextureUsage kReadOnlyTextureUsages =
+inline constexpr wgpu::TextureUsage kReadOnlyTextureUsages =
     wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding | kReadOnlyRenderAttachment |
     kReadOnlyStorageTexture;
 
 // Valid texture usages for a resolve texture that are loaded from at the beginning of a render
 // pass.
-static constexpr wgpu::TextureUsage kResolveTextureLoadAndStoreUsages =
+inline constexpr wgpu::TextureUsage kResolveTextureLoadAndStoreUsages =
     kResolveAttachmentLoadingUsage | wgpu::TextureUsage::RenderAttachment;
 
-static constexpr wgpu::TextureUsage kShaderTextureUsages =
+inline constexpr wgpu::TextureUsage kShaderTextureUsages =
     wgpu::TextureUsage::TextureBinding | kReadOnlyStorageTexture |
     wgpu::TextureUsage::StorageBinding | kWriteOnlyStorageTexture;
 
 // Usages that are used to validate operations that act on texture views.
-static constexpr wgpu::TextureUsage kTextureViewOnlyUsages =
+inline constexpr wgpu::TextureUsage kTextureViewOnlyUsages =
     kShaderTextureUsages | kResolveTextureLoadAndStoreUsages |
     wgpu::TextureUsage::TransientAttachment | wgpu::TextureUsage::StorageAttachment;
 

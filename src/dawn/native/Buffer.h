@@ -54,20 +54,20 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
     DeviceBase* device,
     const BufferDescriptor* descriptor);
 
-static constexpr wgpu::BufferUsage kReadOnlyBufferUsages =
+inline constexpr wgpu::BufferUsage kReadOnlyBufferUsages =
     wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Index |
     wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Uniform | kReadOnlyTexelBuffer |
     kReadOnlyStorageBuffer | kIndirectBufferForFrontendValidation |
     kIndirectBufferForBackendResourceTracking;
 
-static constexpr wgpu::BufferUsage kMappableBufferUsages =
+inline constexpr wgpu::BufferUsage kMappableBufferUsages =
     wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;
 
-static constexpr wgpu::BufferUsage kShaderBufferUsages =
+inline constexpr wgpu::BufferUsage kShaderBufferUsages =
     wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage | wgpu::BufferUsage::TexelBuffer |
     kInternalStorageBuffer | kReadOnlyStorageBuffer | kReadOnlyTexelBuffer;
 
-static constexpr wgpu::BufferUsage kReadOnlyShaderBufferUsages =
+inline constexpr wgpu::BufferUsage kReadOnlyShaderBufferUsages =
     kShaderBufferUsages & kReadOnlyBufferUsages;
 
 // Return the actual internal buffer usages that will be used to create a buffer.

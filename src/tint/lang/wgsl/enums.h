@@ -166,7 +166,7 @@ constexpr std::string_view kExtensionStrings[] = {
 };
 
 /// All extensions
-static constexpr Extension kAllExtensions[] = {
+inline constexpr Extension kAllExtensions[] = {
     Extension::kAtomicVec2UMinMax,
     Extension::kChromiumDisableUniformityAnalysis,
     Extension::kChromiumExperimentalBarycentricCoord,
@@ -246,7 +246,7 @@ constexpr std::string_view kLanguageFeatureStrings[] = {
 };
 
 /// All features
-static constexpr LanguageFeature kAllLanguageFeatures[] = {
+inline constexpr LanguageFeature kAllLanguageFeatures[] = {
     LanguageFeature::kBufferView,
     LanguageFeature::kChromiumPrint,
     LanguageFeature::kChromiumTestingExperimental,

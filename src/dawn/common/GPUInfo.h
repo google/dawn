@@ -40,7 +40,7 @@ namespace dawn::gpu_info {
 // D3D12: AA.BB.CCC.DDDD
 // Vulkan: AAA.BBB.CCC.DDD on Nvidia, CCC.DDDD for Intel Windows, and AA.BB.CCC for others,
 // See https://vulkan.gpuinfo.org/
-static constexpr uint32_t kMaxVersionFields = 4;
+inline constexpr uint32_t kMaxVersionFields = 4;
 
 class DriverVersion {
   public:

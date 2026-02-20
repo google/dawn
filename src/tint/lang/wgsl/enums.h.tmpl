@@ -40,7 +40,7 @@ namespace tint::wgsl {
 {{ Eval "DeclareEnum" $extensions_enum}}
 
 /// All extensions
-static constexpr Extension kAllExtensions[] = {
+inline constexpr Extension kAllExtensions[] = {
 {{-   range $entry := $extensions_enum.Entries }}
     Extension::k{{PascalCase $entry.Name}},
 {{-   end }}
@@ -51,7 +51,7 @@ static constexpr Extension kAllExtensions[] = {
 {{ Eval "DeclareEnum" "Enum" $language_feature_enum "EmitOStream" false}}
 
 /// All features
-static constexpr LanguageFeature kAllLanguageFeatures[] = {
+inline constexpr LanguageFeature kAllLanguageFeatures[] = {
 {{-   range $entry := $language_feature_enum.Entries }}
     LanguageFeature::k{{PascalCase $entry.Name}},
 {{-   end }}

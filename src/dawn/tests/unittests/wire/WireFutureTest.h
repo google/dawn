@@ -46,7 +46,7 @@ struct WireFutureTestParam {
     wgpu::CallbackMode callbackMode;
 };
 std::ostream& operator<<(std::ostream& os, const WireFutureTestParam& param);
-static constexpr std::array kWgpuCallbackModes = {
+inline constexpr std::array kWgpuCallbackModes = {
     WireFutureTestParam{wgpu::CallbackMode::WaitAnyOnly},
     WireFutureTestParam{wgpu::CallbackMode::AllowProcessEvents},
     WireFutureTestParam{wgpu::CallbackMode::AllowSpontaneous}};

@@ -33,89 +33,89 @@
 
 namespace dawn {
 
-static constexpr uint32_t kMaxBindGroups = 4u;
-static constexpr uint32_t kMaxBindingsPerBindGroup = 1000u;
-static constexpr uint8_t kMaxVertexAttributes = 30u;
-static constexpr uint8_t kMaxVertexBuffers = 8u;
-static constexpr uint32_t kMaxVertexBufferArrayStride = 2048u;
-static constexpr uint32_t kMaxBindGroupsPlusVertexBuffers = 24u;
-static constexpr uint32_t kNumStages = 3;
-static constexpr uint8_t kMaxColorAttachments = 8u;
-static constexpr uint32_t kTextureBytesPerRowAlignment = 256u;
-static constexpr uint32_t kQueryResolveAlignment = 256u;
-static constexpr uint32_t kMaxInterStageShaderVariables = 16u;
-static constexpr uint64_t kAssumedMaxBufferSize =
+inline constexpr uint32_t kMaxBindGroups = 4u;
+inline constexpr uint32_t kMaxBindingsPerBindGroup = 1000u;
+inline constexpr uint8_t kMaxVertexAttributes = 30u;
+inline constexpr uint8_t kMaxVertexBuffers = 8u;
+inline constexpr uint32_t kMaxVertexBufferArrayStride = 2048u;
+inline constexpr uint32_t kMaxBindGroupsPlusVertexBuffers = 24u;
+inline constexpr uint32_t kNumStages = 3;
+inline constexpr uint8_t kMaxColorAttachments = 8u;
+inline constexpr uint32_t kTextureBytesPerRowAlignment = 256u;
+inline constexpr uint32_t kQueryResolveAlignment = 256u;
+inline constexpr uint32_t kMaxInterStageShaderVariables = 16u;
+inline constexpr uint64_t kAssumedMaxBufferSize =
     0x80000000u;  // Use 2 GB when the limit is unavailable
 
 // All Immediate constants are 32 bit
-static constexpr uint32_t kImmediateConstantElementByteSize = sizeof(uint32_t);
+inline constexpr uint32_t kImmediateConstantElementByteSize = sizeof(uint32_t);
 
 // Total number of "internal" 32-bit immediates, which includes both external (user) immediates
 // and any other immediates used by Dawn internally (e.g. workgroup sizes).
 // Vulkan's min-max push constant limit is 128 bytes / 4 = 32 values,
 // while D3D12's limit is 256 bytes / 4 = 64 values, so we pick 32 here.
-static constexpr uint32_t kMaxImmediateConstantsPerPipeline = 32u;
+inline constexpr uint32_t kMaxImmediateConstantsPerPipeline = 32u;
 
 // Adapter Max limitation for user immediate constants is 64 bytes.
-static constexpr uint32_t kMaxImmediateDataBytes = 64u;
+inline constexpr uint32_t kMaxImmediateDataBytes = 64u;
 
 // Known as 'Immediate Data' that users can update via the API
-static constexpr uint32_t kMaxExternalImmediateConstantsPerPipeline =
+inline constexpr uint32_t kMaxExternalImmediateConstantsPerPipeline =
     kMaxImmediateDataBytes / kImmediateConstantElementByteSize;
 
 // Default subgroup sizes.
-static constexpr uint32_t kDefaultSubgroupMinSize = 4u;
-static constexpr uint32_t kDefaultSubgroupMaxSize = 128u;
+inline constexpr uint32_t kDefaultSubgroupMinSize = 4u;
+inline constexpr uint32_t kDefaultSubgroupMaxSize = 128u;
 
 // Per stage maximum limits used to optimized Dawn internals.
-static constexpr uint32_t kMaxSampledTexturesPerShaderStage = 48;
-static constexpr uint32_t kMaxSamplersPerShaderStage = 16;
-static constexpr uint32_t kMaxStorageBuffersPerShaderStage = 16;
-static constexpr uint32_t kMaxStorageTexturesPerShaderStage = 8;
-static constexpr uint32_t kMaxUniformBuffersPerShaderStage = 12;
+inline constexpr uint32_t kMaxSampledTexturesPerShaderStage = 48;
+inline constexpr uint32_t kMaxSamplersPerShaderStage = 16;
+inline constexpr uint32_t kMaxStorageBuffersPerShaderStage = 16;
+inline constexpr uint32_t kMaxStorageTexturesPerShaderStage = 8;
+inline constexpr uint32_t kMaxUniformBuffersPerShaderStage = 12;
 
 // Indirect command sizes
-static constexpr uint64_t kDispatchIndirectSize = 3 * sizeof(uint32_t);
-static constexpr uint64_t kDrawIndirectSize = 4 * sizeof(uint32_t);
-static constexpr uint64_t kDrawIndexedIndirectSize = 5 * sizeof(uint32_t);
+inline constexpr uint64_t kDispatchIndirectSize = 3 * sizeof(uint32_t);
+inline constexpr uint64_t kDrawIndirectSize = 4 * sizeof(uint32_t);
+inline constexpr uint64_t kDrawIndexedIndirectSize = 5 * sizeof(uint32_t);
 
 // Non spec defined constants.
-static constexpr float kLodMin = 0.0;
-static constexpr float kLodMax = 1000.0;
+inline constexpr float kLodMin = 0.0;
+inline constexpr float kLodMax = 1000.0;
 
 // Offset alignment for CopyB2B. Strictly speaking this alignment is required only
 // on macOS, but we decide to do it on all platforms.
-static constexpr uint64_t kCopyBufferToBufferOffsetAlignment = 4u;
+inline constexpr uint64_t kCopyBufferToBufferOffsetAlignment = 4u;
 
 // Metal has a maximum size of 32Kb for a counter set buffer. Each query is 8 bytes.
 // So, the maximum nymber of queries is 32Kb / 8.
-static constexpr uint32_t kMaxQueryCount = 4096;
+inline constexpr uint32_t kMaxQueryCount = 4096;
 
 // An external texture occupies multiple binding slots. These are the per-external-texture bindings
 // needed.
-static constexpr uint8_t kSampledTexturesPerExternalTexture = 4u;
-static constexpr uint8_t kSamplersPerExternalTexture = 1u;
-static constexpr uint8_t kUniformsPerExternalTexture = 1u;
+inline constexpr uint8_t kSampledTexturesPerExternalTexture = 4u;
+inline constexpr uint8_t kSamplersPerExternalTexture = 1u;
+inline constexpr uint8_t kUniformsPerExternalTexture = 1u;
 
-static constexpr uint8_t kMaxPLSSlots = 4;
-static constexpr size_t kPLSSlotByteSize = 4;
-static constexpr uint8_t kMaxPLSSize = kMaxPLSSlots * kPLSSlotByteSize;
+inline constexpr uint8_t kMaxPLSSlots = 4;
+inline constexpr size_t kPLSSlotByteSize = 4;
+inline constexpr uint8_t kMaxPLSSize = kMaxPLSSlots * kPLSSlotByteSize;
 
 // Wire buffer alignments.
-static constexpr size_t kWireBufferAlignment = 8u;
+inline constexpr size_t kWireBufferAlignment = 8u;
 
 // Timestamp query quantization mask to perform a granularity of ~0.1ms.
-static constexpr uint32_t kTimestampQuantizationMask = 0xFFFF0000;
+inline constexpr uint32_t kTimestampQuantizationMask = 0xFFFF0000;
 
 // Max dynamic offset counts used to optimize Dawn internals.
-static constexpr uint32_t kMaxDynamicUniformBuffersPerPipelineLayout = 16u;
-static constexpr uint32_t kMaxDynamicStorageBuffersPerPipelineLayout = 16u;
+inline constexpr uint32_t kMaxDynamicUniformBuffersPerPipelineLayout = 16u;
+inline constexpr uint32_t kMaxDynamicStorageBuffersPerPipelineLayout = 16u;
 
 // Maximum ResourceTable size.
-static constexpr uint32_t kMaxResourceTableSize = 64 * 1024;
+inline constexpr uint32_t kMaxResourceTableSize = 64 * 1024;
 // TODO(https://issues.chromium.org/465122000): Find if this is a reasonable amount to
 // reserve for placeholders.
-static constexpr uint32_t kReservedResourceTableSlots = 1000;
+inline constexpr uint32_t kReservedResourceTableSlots = 1000;
 }  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_CONSTANTS_H_

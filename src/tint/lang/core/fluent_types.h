@@ -196,20 +196,20 @@ using vec4u = vec<4, u32>;
 ////////////////////////////////////////////////////////////////////////////////
 // Address space aliases
 ////////////////////////////////////////////////////////////////////////////////
-static constexpr core::AddressSpace function = core::AddressSpace::kFunction;
-static constexpr core::AddressSpace handle = core::AddressSpace::kHandle;
-static constexpr core::AddressSpace private_ = core::AddressSpace::kPrivate;
-static constexpr core::AddressSpace immediate = core::AddressSpace::kImmediate;
-static constexpr core::AddressSpace storage = core::AddressSpace::kStorage;
-static constexpr core::AddressSpace uniform = core::AddressSpace::kUniform;
-static constexpr core::AddressSpace workgroup = core::AddressSpace::kWorkgroup;
+inline constexpr core::AddressSpace function = core::AddressSpace::kFunction;
+inline constexpr core::AddressSpace handle = core::AddressSpace::kHandle;
+inline constexpr core::AddressSpace private_ = core::AddressSpace::kPrivate;
+inline constexpr core::AddressSpace immediate = core::AddressSpace::kImmediate;
+inline constexpr core::AddressSpace storage = core::AddressSpace::kStorage;
+inline constexpr core::AddressSpace uniform = core::AddressSpace::kUniform;
+inline constexpr core::AddressSpace workgroup = core::AddressSpace::kWorkgroup;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Access control aliases
 ////////////////////////////////////////////////////////////////////////////////
-static constexpr core::Access read = core::Access::kRead;
-static constexpr core::Access read_write = core::Access::kReadWrite;
-static constexpr core::Access write = core::Access::kWrite;
+inline constexpr core::Access read = core::Access::kRead;
+inline constexpr core::Access read_write = core::Access::kReadWrite;
+inline constexpr core::Access write = core::Access::kWrite;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Traits

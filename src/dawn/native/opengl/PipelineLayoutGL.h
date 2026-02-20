@@ -38,10 +38,10 @@
 namespace dawn::native::opengl {
 
 // According to gpuinfo.org, devices report GL_MAX_TEXTURE_IMAGE_UNITS <= 128
-static constexpr size_t kGLMaxTextureImageUnitsReported = 128;
+inline constexpr size_t kGLMaxTextureImageUnitsReported = 128;
 
 // According to gpuinfo.org, devices report GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS <= 96
-static constexpr size_t kGLMaxShaderStorageBufferBindingsReported = 96;
+inline constexpr size_t kGLMaxShaderStorageBufferBindingsReported = 96;
 
 class Device;
 
