@@ -28,6 +28,7 @@
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
@@ -865,6 +866,17 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     } else {
         limits->v1.maxBufferSize = mDeviceInfo.propertiesMaintenance3.maxMemoryAllocationSize;
     }
+
+    // OpArrayLength returns 0 for buffers >= 2GB for some NVIDIA devices.
+    // There is an open bug with NVIDIA to resolve. Likely some issue with the sign bit.
+    // See: crbug.com/435684920
+    if (gpu_info::IsNvidia(GetVendorId())) {
+        // 2GB limits will actually be capped to 2GB - 4 by Chrome tier limits but we do so
+        // explicitly here to avoid failures in Dawn native.
+        const uint64_t k2GbMinus4 = 0x80000000 - 4;
+        limits->v1.maxStorageBufferBindingSize = std::min(limits->v1.maxBufferSize, k2GbMinus4);
+    }
+
     if (limits->v1.maxBufferSize < baseLimits.v1.maxBufferSize) {
         return DAWN_INTERNAL_ERROR("Insufficient Vulkan maxBufferSize limit");
     }

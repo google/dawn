@@ -1256,6 +1256,22 @@ bool DawnTestBase::IsChromeOS() const {
 #endif
 }
 
+bool DawnTestBase::IsX86() const {
+#if DAWN_PLATFORM_IS(X86)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool DawnTestBase::Is32Bit() const {
+#if DAWN_PLATFORM_IS(32_BIT)
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool DawnTestBase::IsMesa(const std::string& mesaVersion) const {
 #if DAWN_PLATFORM_IS(LINUX)
     std::string mesaString = "Mesa " + mesaVersion;

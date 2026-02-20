@@ -316,6 +316,8 @@ class DawnTestBase {
     bool IsMacOS(int32_t majorVersion = -1, int32_t minorVersion = -1) const;
     bool IsAndroid() const;
     bool IsChromeOS() const;
+    bool IsX86() const;
+    bool Is32Bit() const;
 
     bool IsMesa(const std::string& mesaVersion = "") const;
 
