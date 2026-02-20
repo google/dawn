@@ -49,12 +49,12 @@ tint_add_target(tint_lang_msl_writer_raise lib
   lang/msl/writer/raise/builtin_polyfill.h
   lang/msl/writer/raise/convert_print_to_log.cc
   lang/msl/writer/raise/convert_print_to_log.h
+  lang/msl/writer/raise/fix_type_layout.cc
+  lang/msl/writer/raise/fix_type_layout.h
   lang/msl/writer/raise/module_constant.cc
   lang/msl/writer/raise/module_constant.h
   lang/msl/writer/raise/module_scope_vars.cc
   lang/msl/writer/raise/module_scope_vars.h
-  lang/msl/writer/raise/packed_vec3.cc
-  lang/msl/writer/raise/packed_vec3.h
   lang/msl/writer/raise/raise.cc
   lang/msl/writer/raise/raise.h
   lang/msl/writer/raise/shader_io.cc
@@ -112,9 +112,9 @@ tint_add_target(tint_lang_msl_writer_raise_test test
   lang/msl/writer/raise/binary_polyfill_test.cc
   lang/msl/writer/raise/builtin_polyfill_test.cc
   lang/msl/writer/raise/convert_print_to_log_test.cc
+  lang/msl/writer/raise/fix_type_layout_test.cc
   lang/msl/writer/raise/module_constant_test.cc
   lang/msl/writer/raise/module_scope_vars_test.cc
-  lang/msl/writer/raise/packed_vec3_test.cc
   lang/msl/writer/raise/shader_io_test.cc
   lang/msl/writer/raise/simd_ballot_test.cc
   lang/msl/writer/raise/validate_subgroup_matrix_test.cc

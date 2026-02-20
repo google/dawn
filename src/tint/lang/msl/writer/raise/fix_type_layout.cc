@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/msl/writer/raise/packed_vec3.h"
+#include "src/tint/lang/msl/writer/raise/fix_type_layout.h"
 
 #include <cstdint>
 #include <utility>
@@ -48,6 +48,9 @@ static constexpr uint32_t kMaxSeriallyUnpackedArraySize = 8;
 struct State {
     /// The IR module.
     core::ir::Module& ir;
+
+    /// The transform options.
+    const FixTypeLayoutOptions options;
 
     /// The IR builder.
     core::ir::Builder b{ir};
@@ -156,9 +159,8 @@ struct State {
                     return RewriteStruct(str);
                 },
                 [&](const core::type::Vector* vec) {
+                    auto* el_ty = vec->Type();
                     if (vec->Width() == 3) {
-                        auto* el_ty = vec->Type();
-
                         // The packed_bool* types are reserved in MSL and cause issues in some
                         // drivers (see crbug.com/424772881), so use packed_uint3 instead. We then
                         // convert between `bool` and `u32` when we load or store the values.
@@ -168,7 +170,16 @@ struct State {
 
                         return ty.packed_vec(el_ty, 3);
                     }
+                    if (options.replace_bool_with_u32 && el_ty->Is<core::type::Bool>()) {
+                        return ty.vec(ty.u32(), vec->Width());
+                    }
                     return vec;
+                },
+                [&](const core::type::Bool*) -> const core::type::Type* {  //
+                    if (options.replace_bool_with_u32) {
+                        return ty.u32();
+                    }
+                    return type;
                 },
                 [&](Default) {
                     // This type cannot contain a vec3, so no changes needed.
@@ -423,21 +434,24 @@ struct State {
             },
             [&](const core::type::Vector* vec) {
                 // Load the packed vector and convert it to the unpacked equivalent.
-                auto* load = b.Load(from)->Result(0);
+                auto* value = b.Load(from)->Result(0);
                 if (vec->Type()->Is<core::type::Bool>()) {
-                    // The vector was originally a vec3<bool>, which will have been rewritten as a
-                    // vec3<u32>. We need to unpack the packed_vec3<u32> to a vec3<u32> and then
-                    // convert it to a vec3<bool>.
-                    auto* unpacked =
-                        b.Call<msl::ir::BuiltinCall>(ty.vec3u(), msl::BuiltinFn::kConvert, load)
-                            ->Result();
-                    return b.Convert<vec3<bool>>(unpacked)->Result();
+                    // The vector was originally a vecN<bool>, which will have been rewritten as a
+                    // vecN<u32>. We need to unpack the packed_vecN<u32> to a vecN<u32> and then
+                    // convert it to a vecN<bool>.
+                    if (packed_type->As<core::type::Vector>()->Packed()) {
+                        value = b.Call<msl::ir::BuiltinCall>(ty.vec3u(), msl::BuiltinFn::kConvert,
+                                                             value)
+                                    ->Result();
+                    }
+                    return b.Convert(ty.MatchWidth(ty.bool_(), vec), value)->Result();
                 } else {
                     return b
-                        .Call<msl::ir::BuiltinCall>(unpacked_type, msl::BuiltinFn::kConvert, load)
+                        .Call<msl::ir::BuiltinCall>(unpacked_type, msl::BuiltinFn::kConvert, value)
                         ->Result();
                 }
             },
+            [&](const core::type::Bool*) { return b.Convert<bool>(b.Load(from))->Result(); },
             TINT_ICE_ON_NO_MATCH);
     }
 
@@ -575,14 +589,18 @@ struct State {
             [&](const core::type::Vector* vec) {  //
                 // Convert the vector to the packed equivalent and store it.
                 // For vectors that were originally booleans we need to convert the value to a
-                // vec3<u32> before storing it.
+                // vecN<u32> before storing it.
                 if (vec->Type()->Is<core::type::Bool>()) {
-                    value = b.Convert<vec3<u32>>(value)->Result();
+                    value = b.Convert(ty.MatchWidth(ty.u32(), vec), value)->Result();
                 }
-                b.Store(to,
+                if (packed_type->As<core::type::Vector>()->Packed()) {
+                    value =
                         b.Call<msl::ir::BuiltinCall>(packed_type, msl::BuiltinFn::kConvert, value)
-                            ->Result());
+                            ->Result();
+                }
+                b.Store(to, value);
             },
+            [&](const core::type::Bool*) { b.Store(to, b.Convert<u32>(value)); },
             TINT_ICE_ON_NO_MATCH);
     }
 
@@ -677,7 +695,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> PackedVec3(core::ir::Module& ir) {
+Result<SuccessType> FixTypeLayout(core::ir::Module& ir, const FixTypeLayoutOptions& options) {
     TINT_CHECK_RESULT(
         ValidateBeforeIfNeeded(ir,
                                tint::core::ir::Capabilities{
@@ -686,9 +704,9 @@ Result<SuccessType> PackedVec3(core::ir::Module& ir) {
                                    tint::core::ir::Capability::kAllowDuplicateBindings,
                                    core::ir::Capability::kAllowNonCoreTypes,
                                },
-                               "msl.PackedVec3"));
+                               "msl.FixTypeLayout"));
 
-    State{ir}.Process();
+    State{ir, options}.Process();
 
     return Success;
 }

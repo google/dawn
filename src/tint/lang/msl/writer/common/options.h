@@ -118,6 +118,9 @@ struct Options {
         /// Set to `true` to polyfill tanh with an f16 value
         bool polyfill_tanh_f16 = false;
 
+        /// Set to `true` to replace bool types in workgroup storage with u32.
+        bool replace_workgroup_bool_with_u32 = false;
+
         TINT_REFLECT(Workarounds,
                      scalarize_max_min_clamp,
                      disable_module_constant_f16,
@@ -125,7 +128,8 @@ struct Options {
                      polyfill_clamp_float,
                      polyfill_unpack_2x16_snorm,
                      polyfill_unpack_2x16_unorm,
-                     polyfill_tanh_f16);
+                     polyfill_tanh_f16,
+                     replace_workgroup_bool_with_u32);
         TINT_REFLECT_EQUALS(Workarounds);
         TINT_REFLECT_HASH_CODE(Workarounds);
     };

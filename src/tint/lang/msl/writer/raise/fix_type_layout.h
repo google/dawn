@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_PACKED_VEC3_H_
-#define SRC_TINT_LANG_MSL_WRITER_RAISE_PACKED_VEC3_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_FIX_TYPE_LAYOUT_H_
+#define SRC_TINT_LANG_MSL_WRITER_RAISE_FIX_TYPE_LAYOUT_H_
 
 #include "src/tint/utils/result.h"
 
@@ -37,9 +37,16 @@ class Module;
 
 namespace tint::msl::writer::raise {
 
+/// Configuration options for the FixTypeLayout transform.
+struct FixTypeLayoutOptions {
+    /// If `true`, replace bool types in workgroup storage with u32.
+    bool replace_bool_with_u32 = false;
+};
+
 /// This transform is necessary in order to emit vec3 types with the correct size (so that scalars
 /// can follow them in structures), and also to ensure that padding bytes are preserved when writing
-/// to a vec3, an array of vec3 elements, or a matrix with vec3 column type.
+/// to a vec3, an array of vec3 elements, or a matrix with vec3 column type. It can also be used to
+/// replace bool with u32 in workgroup storage to workaround issues on AMD and Intel drivers.
 ///
 /// The transform will:
 /// * Replace `vec3<T>` types with an internal `__packed_vec3` type when they are used in
@@ -51,9 +58,10 @@ namespace tint::msl::writer::raise {
 ///   them from memory, and the vice versa before storing values to memory.
 ///
 /// @param module the module to transform
+/// @param options the transform options
 /// @returns success or failure
-Result<SuccessType> PackedVec3(core::ir::Module& module);
+Result<SuccessType> FixTypeLayout(core::ir::Module& module, const FixTypeLayoutOptions& options);
 
 }  // namespace tint::msl::writer::raise
 
-#endif  // SRC_TINT_LANG_MSL_WRITER_RAISE_PACKED_VEC3_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_RAISE_FIX_TYPE_LAYOUT_H_

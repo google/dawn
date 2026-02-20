@@ -65,9 +65,9 @@
 #include "src/tint/lang/msl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/msl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/msl/writer/raise/convert_print_to_log.h"
+#include "src/tint/lang/msl/writer/raise/fix_type_layout.h"
 #include "src/tint/lang/msl/writer/raise/module_constant.h"
 #include "src/tint/lang/msl/writer/raise/module_scope_vars.h"
-#include "src/tint/lang/msl/writer/raise/packed_vec3.h"
 #include "src/tint/lang/msl/writer/raise/shader_io.h"
 #include "src/tint/lang/msl/writer/raise/simd_ballot.h"
 #include "src/tint/lang/msl/writer/raise/validate_subgroup_matrix.h"
@@ -219,7 +219,12 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(raise::ShaderIO(
         module, raise::ShaderIOConfig{immediate_data_layout, options.emit_vertex_point_size,
                                       options.fixed_sample_mask, options.depth_range_offsets}));
-    TINT_CHECK_RESULT(raise::PackedVec3(module));
+
+    raise::FixTypeLayoutOptions fix_type_layout_options{
+        .replace_bool_with_u32 = options.workarounds.replace_workgroup_bool_with_u32,
+    };
+    TINT_CHECK_RESULT(raise::FixTypeLayout(module, fix_type_layout_options));
+
     TINT_CHECK_RESULT(raise::SimdBallot(module));
 
     // ArgumentBuffers must come before ModuleScopeVars

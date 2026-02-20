@@ -343,6 +343,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         device->IsToggleEnabled(Toggle::MetalPolyfillUnpack2x16unorm);
     req.tintOptions.workarounds.polyfill_tanh_f16 =
         device->IsToggleEnabled(Toggle::MetalPolyfillTanhF16);
+    req.tintOptions.workarounds.replace_workgroup_bool_with_u32 =
+        device->IsToggleEnabled(Toggle::MetalReplaceWorkgroupBoolWithU32);
 
     req.tintOptions.extensions.disable_demote_to_helper =
         device->IsToggleEnabled(Toggle::DisableDemoteToHelper);

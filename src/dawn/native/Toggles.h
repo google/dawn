@@ -180,6 +180,7 @@ enum class Toggle {
     VulkanUseDynamicRendering,
     EnableSpirvValidation,
     VulkanUseCreateRenderPass2,
+    MetalReplaceWorkgroupBoolWithU32,
 
     // Once all backends have been updated to be thread safe for waiting, we can remove this toggle.
     WaitIsThreadSafe,

@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/msl/writer/raise/packed_vec3.h"
+#include "src/tint/lang/msl/writer/raise/fix_type_layout.h"
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/fluent_types.h"
@@ -38,9 +38,13 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::msl::writer::raise {
 namespace {
 
-using MslWriter_PackedVec3Test = core::ir::transform::TransformTest;
+class MslWriter_FixTypeLayoutTest : public core::ir::transform::TransformTest {
+  protected:
+    FixTypeLayoutOptions options;
+    void Run() { core::ir::transform::TransformTest::Run(FixTypeLayout, options); }
+};
 
-TEST_F(MslWriter_PackedVec3Test, NoModify_PrivateVar) {
+TEST_F(MslWriter_FixTypeLayoutTest, NoModify_PrivateVar) {
     auto* var = b.Var<private_, vec3<u32>>("v");
     mod.root_block->Append(var);
 
@@ -65,12 +69,12 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, NoModify_Vec2) {
+TEST_F(MslWriter_FixTypeLayoutTest, NoModify_Vec2) {
     auto* var = b.Var<uniform, vec2<u32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -96,12 +100,12 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, NoModify_Mat3x2) {
+TEST_F(MslWriter_FixTypeLayoutTest, NoModify_Mat3x2) {
     auto* var = b.Var<uniform, mat3x2<f32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -127,12 +131,12 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, NoModify_ArrayOfVec4) {
+TEST_F(MslWriter_FixTypeLayoutTest, NoModify_ArrayOfVec4) {
     auto* var = b.Var<uniform, array<vec4<u32>, 3>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -158,12 +162,12 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, WorkgroupVar_Vec3) {
+TEST_F(MslWriter_FixTypeLayoutTest, WorkgroupVar_Vec3) {
     auto* var = b.Var<workgroup, vec3<u32>>("v");
     mod.root_block->Append(var);
 
@@ -200,12 +204,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, UniformVar_Vec3) {
+TEST_F(MslWriter_FixTypeLayoutTest, UniformVar_Vec3) {
     auto* var = b.Var<uniform, vec3<u32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -243,12 +247,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Vec3_LoadVector) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Vec3_LoadVector) {
     auto* var = b.Var<storage, vec3<u32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -286,12 +290,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Vec3_LoadElement) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Vec3_LoadElement) {
     auto* var = b.Var<storage, vec3<u32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -334,12 +338,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Vec3_StoreVector) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Vec3_StoreVector) {
     auto* var = b.Var<storage, vec3<u32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -380,12 +384,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Vec3_StoreElement) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Vec3_StoreElement) {
     auto* var = b.Var<storage, vec3<u32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -431,12 +435,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Mat4x3_LoadMatrix) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Mat4x3_LoadMatrix) {
     auto* var = b.Var<storage, mat4x3<f32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -486,12 +490,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Mat4x3_LoadColumn) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Mat4x3_LoadColumn) {
     auto* var = b.Var<storage, mat4x3<f32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -560,12 +564,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Mat4x3_LoadElement) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Mat4x3_LoadElement) {
     auto* var = b.Var<storage, mat4x3<f32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -630,12 +634,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Mat4x3_StoreMatrix) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Mat4x3_StoreMatrix) {
     auto* var = b.Var<storage, mat4x3<f32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -694,12 +698,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Mat4x3_StoreColumn) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Mat4x3_StoreColumn) {
     auto* var = b.Var<storage, mat4x3<f32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -764,12 +768,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Mat4x3_StoreElement) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Mat4x3_StoreElement) {
     auto* var = b.Var<storage, mat4x3<f32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -830,12 +834,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Mat2x3_F16_LoadMatrix) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Mat2x3_F16_LoadMatrix) {
     auto* var = b.Var<storage, mat2x3<f16>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -881,12 +885,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Array_LoadArray) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Array_LoadArray) {
     auto* var = b.Var<storage, array<vec3<f32>, 2>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -939,12 +943,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Array_LoadArray_LargeCount) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Array_LoadArray_LargeCount) {
     auto* var = b.Var<storage, array<vec3<f32>, 1024>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1015,12 +1019,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Array_LoadVector) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Array_LoadVector) {
     auto* var = b.Var<storage, array<vec3<f32>, 2>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1073,12 +1077,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Array_LoadElement) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Array_LoadElement) {
     auto* var = b.Var<storage, array<vec3<f32>, 2>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1129,12 +1133,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Array_StoreArray) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Array_StoreArray) {
     auto* var = b.Var<storage, array<vec3<f32>, 2>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1191,12 +1195,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Array_StoreArray_LargeCount) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Array_StoreArray_LargeCount) {
     auto* var = b.Var<storage, array<vec3<f32>, 1024>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1267,12 +1271,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Array_StoreVector) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Array_StoreVector) {
     auto* var = b.Var<storage, array<vec3<f32>, 2>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1325,12 +1329,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Array_StoreElement) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Array_StoreElement) {
     auto* var = b.Var<storage, array<vec3<f32>, 2>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1381,12 +1385,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Array_F16_LoadArray) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Array_F16_LoadArray) {
     auto* var = b.Var<storage, array<vec3<f16>, 2>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1439,12 +1443,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_NestedArray_LoadOuter) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_NestedArray_LoadOuter) {
     auto* var = b.Var<storage, array<array<vec3<f32>, 2>, 3>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1509,12 +1513,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_NestedArray_LoadOuter_LargeCount) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_NestedArray_LoadOuter_LargeCount) {
     auto* var = b.Var<storage, array<array<vec3<f32>, 2>, 1024>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1596,12 +1600,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_NestedArray_LoadInner) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_NestedArray_LoadInner) {
     auto* var = b.Var<storage, array<array<vec3<f32>, 2>, 3>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1656,12 +1660,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_NestedArray_StoreOuter) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_NestedArray_StoreOuter) {
     auto* var = b.Var<storage, array<array<vec3<f32>, 2>, 3>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1732,12 +1736,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_NestedArray_StoreOuter_LargeCount) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_NestedArray_StoreOuter_LargeCount) {
     auto* var = b.Var<storage, array<array<vec3<f32>, 2>, 1024>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1820,12 +1824,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_RuntimeArray_LoadVector) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_RuntimeArray_LoadVector) {
     auto* var = b.Var<storage, array<vec3<f32>>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -1878,12 +1882,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Struct_LoadStruct) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Struct_LoadStruct) {
     auto* s =
         ty.Struct(mod.symbols.New("S"), {
                                             {mod.symbols.Register("vec"), ty.vec3u()},
@@ -1983,12 +1987,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Struct_LoadMembers) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Struct_LoadMembers) {
     auto* s =
         ty.Struct(mod.symbols.New("S"), {
                                             {mod.symbols.Register("vec"), ty.vec3u()},
@@ -2089,12 +2093,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Struct_StoreStruct) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Struct_StoreStruct) {
     auto* s =
         ty.Struct(mod.symbols.New("S"), {
                                             {mod.symbols.Register("vec"), ty.vec3f()},
@@ -2206,12 +2210,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Struct_StoreMembers) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Struct_StoreMembers) {
     auto* s =
         ty.Struct(mod.symbols.New("S"), {
                                             {mod.symbols.Register("vec"), ty.vec3f()},
@@ -2295,12 +2299,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Struct_WithUnpackedMembers_LoadStruct) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Struct_WithUnpackedMembers_LoadStruct) {
     auto* s = ty.Struct(mod.symbols.New("S"),
                         {
                             {mod.symbols.Register("u32"), ty.u32()},
@@ -2424,12 +2428,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Struct_WithUnpackedMembers_LoadMembers) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Struct_WithUnpackedMembers_LoadMembers) {
     auto* s = ty.Struct(mod.symbols.New("S"),
                         {
                             {mod.symbols.Register("u32"), ty.u32()},
@@ -2566,12 +2570,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Struct_WithUnpackedMembers_StoreStruct) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Struct_WithUnpackedMembers_StoreStruct) {
     auto* s = ty.Struct(mod.symbols.New("S"),
                         {
                             {mod.symbols.Register("u32"), ty.u32()},
@@ -2711,12 +2715,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_Struct_NonDefaultOffset) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_Struct_NonDefaultOffset) {
     auto* s = ty.Struct(
         mod.symbols.New("S"),
         Vector{
@@ -2790,12 +2794,12 @@ $B1: {  # root
 
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_DeeplyNestedType) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_DeeplyNestedType) {
     auto* s = ty.Struct(mod.symbols.New("S"),
                         {
                             {mod.symbols.Register("vec3"), ty.vec3u()},
@@ -3026,12 +3030,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_PointerInLet) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_PointerInLet) {
     auto* var = b.Var<storage, mat4x3<f32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -3091,12 +3095,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_PointerInFunctionParameter) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_PointerInFunctionParameter) {
     auto* var = b.Var<storage, mat4x3<f32>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -3181,12 +3185,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_PointerInFunctionParameter_LoadStoreHelpers) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_PointerInFunctionParameter_LoadStoreHelpers) {
     auto* var = b.Var<storage, array<vec3<u32>, 4>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -3294,12 +3298,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_ArrayLengthBuiltinCall) {
+TEST_F(MslWriter_FixTypeLayoutTest, StorageVar_ArrayLengthBuiltinCall) {
     auto* var = b.Var<storage, array<vec3<f32>>>("v");
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -3341,12 +3345,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, MultipleAddressSpaces_LoadArray) {
+TEST_F(MslWriter_FixTypeLayoutTest, MultipleAddressSpaces_LoadArray) {
     auto* uvar = b.Var<uniform, array<vec3<f32>, 2>>("u");
     uvar->SetBindingPoint(0, 0);
     mod.root_block->Append(uvar);
@@ -3445,12 +3449,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, MultipleAddressSpaces_StoreArray) {
+TEST_F(MslWriter_FixTypeLayoutTest, MultipleAddressSpaces_StoreArray) {
     auto* svar = b.Var<storage, array<vec3<f32>, 2>>("s");
     svar->SetBindingPoint(0, 0);
     mod.root_block->Append(svar);
@@ -3525,12 +3529,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, MultipleAddressSpaces_LoadStruct) {
+TEST_F(MslWriter_FixTypeLayoutTest, MultipleAddressSpaces_LoadStruct) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("vec"), ty.vec3u()},
                                                   {mod.symbols.Register("u"), ty.u32()},
@@ -3642,12 +3646,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, MultipleAddressSpaces_StoreStruct) {
+TEST_F(MslWriter_FixTypeLayoutTest, MultipleAddressSpaces_StoreStruct) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("vec"), ty.vec3u()},
                                                   {mod.symbols.Register("u"), ty.u32()},
@@ -3736,12 +3740,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, AtomicOnPackedStructMember) {
+TEST_F(MslWriter_FixTypeLayoutTest, AtomicOnPackedStructMember) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("vec"), ty.vec3u()},
                                                   {mod.symbols.Register("u"), ty.atomic<u32>()},
@@ -3801,12 +3805,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, AtomicOnPackedStructMember_ViaLet) {
+TEST_F(MslWriter_FixTypeLayoutTest, AtomicOnPackedStructMember_ViaLet) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("vec"), ty.vec3u()},
                                                   {mod.symbols.Register("u"), ty.atomic<u32>()},
@@ -3868,14 +3872,14 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
 // Workgroup is the only address space that requires packed types that supports bool types.
 // These are rewritten as packed_vec3<u32> types since MSL does not support packed bool vectors.
-TEST_F(MslWriter_PackedVec3Test, WorkgroupVar_Vec3_Bool) {
+TEST_F(MslWriter_FixTypeLayoutTest, WorkgroupVar_Vec3_Bool) {
     auto* var = b.Var<workgroup, vec3<bool>>("v");
     mod.root_block->Append(var);
 
@@ -3918,14 +3922,14 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
 // Workgroup is the only address space that requires packed types that supports bool types.
 // These are rewritten as packed_vec3<u32> types since MSL does not support packed bool vectors.
-TEST_F(MslWriter_PackedVec3Test, WorkgroupVar_Vec3_Bool_VectorElementLoadAndStore) {
+TEST_F(MslWriter_FixTypeLayoutTest, WorkgroupVar_Vec3_Bool_VectorElementLoadAndStore) {
     auto* var = b.Var<workgroup, vec3<bool>>("v");
     mod.root_block->Append(var);
 
@@ -3967,12 +3971,12 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, WorkgroupVar_Struct_Vec3_Bool_VectorElementLoadAndStore) {
+TEST_F(MslWriter_FixTypeLayoutTest, WorkgroupVar_Struct_Vec3_Bool_VectorElementLoadAndStore) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("data"), ty.vec3<bool>()},
                                               });
@@ -4032,7 +4036,272 @@ $B1: {  # root
 }
 )";
 
-    Run(PackedVec3);
+    Run();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_FixTypeLayoutTest, WorkgroupVar_Bool_NoReplacement) {
+    auto* var = b.Var<workgroup, bool>("v");
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        b.Store(var, b.And(b.Load(var), true));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, bool, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:bool = load %v
+    %4:bool = and %3, true
+    store %v, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    options.replace_bool_with_u32 = false;
+    Run();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_FixTypeLayoutTest, WorkgroupVar_Bool_WithReplacement) {
+    auto* var = b.Var<workgroup, bool>("v");
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        b.Store(var, b.And(b.Load(var), true));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, bool, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:bool = load %v
+    %4:bool = and %3, true
+    store %v, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, u32, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:u32 = load %v
+    %4:bool = convert %3
+    %5:bool = and %4, true
+    %6:u32 = convert %5
+    store %v, %6
+    ret
+  }
+}
+)";
+
+    options.replace_bool_with_u32 = true;
+    Run();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_FixTypeLayoutTest, WorkgroupVar_Vec4Bool_NoReplacement) {
+    auto* var = b.Var<workgroup, vec4<bool>>("v");
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        auto* value = b.Load(var);
+        b.Store(var, b.And(value, b.Composite<vec4<bool>>(false, true, false, true)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, vec4<bool>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:vec4<bool> = load %v
+    %4:vec4<bool> = and %3, vec4<bool>(false, true, false, true)
+    store %v, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    options.replace_bool_with_u32 = false;
+    Run();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_FixTypeLayoutTest, WorkgroupVar_Vec4Bool_WithReplacement) {
+    auto* var = b.Var<workgroup, vec4<bool>>("v");
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        auto* value = b.Load(var);
+        b.Store(var, b.And(value, b.Composite<vec4<bool>>(false, true, false, true)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, vec4<bool>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:vec4<bool> = load %v
+    %4:vec4<bool> = and %3, vec4<bool>(false, true, false, true)
+    store %v, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, vec4<u32>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:vec4<u32> = load %v
+    %4:vec4<bool> = convert %3
+    %5:vec4<bool> = and %4, vec4<bool>(false, true, false, true)
+    %6:vec4<u32> = convert %5
+    store %v, %6
+    ret
+  }
+}
+)";
+
+    options.replace_bool_with_u32 = true;
+    Run();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_FixTypeLayoutTest, WorkgroupVar_BoolArray_WithReplacement) {
+    auto* var = b.Var<workgroup, array<bool, 4>>("v");
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        auto* one_value = b.Load(b.Access<ptr<workgroup, bool>>(var, 1_u));
+        auto* whole_array = b.Load(var);
+        b.Store(var, whole_array);
+        b.Store(b.Access<ptr<workgroup, bool>>(var, 1_u), one_value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, array<bool, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, bool, read_write> = access %v, 1u
+    %4:bool = load %3
+    %5:array<bool, 4> = load %v
+    store %v, %5
+    %6:ptr<workgroup, bool, read_write> = access %v, 1u
+    store %6, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, u32, read_write> = access %v, 1u
+    %4:u32 = load %3
+    %5:bool = convert %4
+    %6:array<bool, 4> = call %tint_load_array_packed_vec3, %v
+    %8:void = call %tint_store_array_packed_vec3, %v, %6
+    %10:ptr<workgroup, u32, read_write> = access %v, 1u
+    %11:u32 = convert %5
+    store %10, %11
+    ret
+  }
+}
+%tint_load_array_packed_vec3 = func(%from:ptr<workgroup, array<u32, 4>, read_write>):array<bool, 4> {
+  $B3: {
+    %13:ptr<workgroup, u32, read_write> = access %from, 0u
+    %14:u32 = load %13
+    %15:bool = convert %14
+    %16:ptr<workgroup, u32, read_write> = access %from, 1u
+    %17:u32 = load %16
+    %18:bool = convert %17
+    %19:ptr<workgroup, u32, read_write> = access %from, 2u
+    %20:u32 = load %19
+    %21:bool = convert %20
+    %22:ptr<workgroup, u32, read_write> = access %from, 3u
+    %23:u32 = load %22
+    %24:bool = convert %23
+    %25:array<bool, 4> = construct %15, %18, %21, %24
+    ret %25
+  }
+}
+%tint_store_array_packed_vec3 = func(%to:ptr<workgroup, array<u32, 4>, read_write>, %value:array<bool, 4>):void {
+  $B4: {
+    %28:bool = access %value, 0u
+    %29:ptr<workgroup, u32, read_write> = access %to, 0u
+    %30:u32 = convert %28
+    store %29, %30
+    %31:bool = access %value, 1u
+    %32:ptr<workgroup, u32, read_write> = access %to, 1u
+    %33:u32 = convert %31
+    store %32, %33
+    %34:bool = access %value, 2u
+    %35:ptr<workgroup, u32, read_write> = access %to, 2u
+    %36:u32 = convert %34
+    store %35, %36
+    %37:bool = access %value, 3u
+    %38:ptr<workgroup, u32, read_write> = access %to, 3u
+    %39:u32 = convert %37
+    store %38, %39
+    ret
+  }
+}
+)";
+
+    options.replace_bool_with_u32 = true;
+    Run();
 
     EXPECT_EQ(expect, str());
 }
