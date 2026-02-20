@@ -379,10 +379,6 @@ TEST_P(WireBufferMappingTests, DestroyInsideMapCallback) {
 // Test that the callback isn't fired twice when Release() is called inside the callback with the
 // last ref.
 TEST_P(WireBufferMappingTests, ReleaseInsideMapCallback) {
-    // TODO(dawn:1621): Suppressed because the mapping handling still touches the buffer after it is
-    // destroyed triggering an ASAN error when in MapWrite mode.
-    DAWN_SKIP_TEST_IF(GetMapMode() == wgpu::MapMode::Write);
-
     TestCancelInCallback([&]() { buffer = nullptr; },
                          [&]() { EXPECT_CALL(api, BufferRelease(apiBuffer)); });
 }
@@ -684,6 +680,48 @@ TEST_P(WireBufferMappedAtCreationTests, MapFailure) {
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
     buffer.Unmap();
 
+    FlushClient();
+}
+
+// Tests that releasing a buffer created after the client has already disconnected doesn't crash.
+// This is a regression test for crbug.com/479440916.
+TEST_F(WireBufferMappedAtCreationTests, DisconnectThenCreateRelease) {
+    GetWireClient()->Disconnect();
+
+    wgpu::BufferDescriptor descriptor = {};
+    descriptor.size = kBufferSize;
+    descriptor.mappedAtCreation = true;
+
+    buffer = device.CreateBuffer(&descriptor);
+    buffer = nullptr;
+    FlushClient();
+}
+
+// Tests that destroying a buffer created after the client has already disconnected doesn't crash.
+// This is a regression test for crbug.com/479440916.
+TEST_F(WireBufferMappedAtCreationTests, DisconnectThenCreateDestroy) {
+    GetWireClient()->Disconnect();
+
+    wgpu::BufferDescriptor descriptor = {};
+    descriptor.size = kBufferSize;
+    descriptor.mappedAtCreation = true;
+
+    buffer = device.CreateBuffer(&descriptor);
+    buffer.Destroy();
+    FlushClient();
+}
+
+// Tests that unmapping a buffer created after the client has already disconnected doesn't crash.
+// This is a regression test for crbug.com/479440916.
+TEST_F(WireBufferMappedAtCreationTests, DisconnectThenCreateUnmap) {
+    GetWireClient()->Disconnect();
+
+    wgpu::BufferDescriptor descriptor = {};
+    descriptor.size = kBufferSize;
+    descriptor.mappedAtCreation = true;
+
+    buffer = device.CreateBuffer(&descriptor);
+    buffer.Unmap();
     FlushClient();
 }
 

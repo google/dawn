@@ -259,6 +259,8 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     // as server expects allocating ids to be monotonically increasing
     Ref<Buffer> buffer =
         wireClient->Make<Buffer>(device->GetEventManagerHandle(), device, descriptor);
+    buffer->mReadHandle = std::move(readHandle);
+    buffer->mWriteHandle = std::move(writeHandle);
 
     if (descriptor->mappedAtCreation) {
         // If the buffer is mapped at creation, a write handle is created and will be
@@ -267,8 +269,8 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
         buffer->mMappedState = MapState::MappedAtCreation;
         buffer->mMappedOffset = 0;
         buffer->mMappedSize = buffer->mSize;
-        DAWN_ASSERT(writeHandle != nullptr);
-        buffer->mMappedData = writeHandle->GetData();
+        DAWN_ASSERT(buffer->mWriteHandle != nullptr);
+        buffer->mMappedData = buffer->mWriteHandle->GetData();
     }
 
     cmd.result = buffer->GetWireHandle(wireClient);
@@ -281,18 +283,16 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
         // Extensions to replace fields skipped by skip_serialize.
         CommandExtension{readHandleCreateInfoLength,
                          [&](char* readHandleBuffer) {
-                             if (readHandle != nullptr) {
+                             if (buffer->mReadHandle != nullptr) {
                                  // Serialize the ReadHandle into the space after the command.
-                                 readHandle->SerializeCreate(readHandleBuffer);
-                                 buffer->mReadHandle = std::move(readHandle);
+                                 buffer->mReadHandle->SerializeCreate(readHandleBuffer);
                              }
                          }},
         CommandExtension{writeHandleCreateInfoLength,
                          [&](char* writeHandleBuffer) {
-                             if (writeHandle != nullptr) {
+                             if (buffer->mWriteHandle != nullptr) {
                                  // Serialize the WriteHandle into the space after the command.
-                                 writeHandle->SerializeCreate(writeHandleBuffer);
-                                 buffer->mWriteHandle = std::move(writeHandle);
+                                 buffer->mWriteHandle->SerializeCreate(writeHandleBuffer);
                              }
                          }});
     // clang-format on
@@ -475,6 +475,7 @@ void Buffer::APIUnmap() {
     if (IsMappedForWriting()) {
         // Writes need to be flushed before Unmap is sent. Unmap calls all associated
         // in-flight callbacks which may read the updated data.
+        DAWN_ASSERT(mWriteHandle != nullptr);
 
         // Get the serialization size of data update writes.
         size_t writeDataUpdateInfoLength =
