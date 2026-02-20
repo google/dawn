@@ -101,6 +101,7 @@
 #include "dawn/utils/CommandLineParser.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "dawn/webgpu_cpp_print.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 #include "webgpu/webgpu_glfw.h"
 
 template <typename T>
@@ -124,7 +125,7 @@ void CycleIn(T* value, const std::vector<T>& cycle) {
 }
 
 struct WindowData {
-    GLFWwindow* window = nullptr;
+    raw_ptr<GLFWwindow> window = nullptr;
     uint64_t serial = 0;
 
     float clearCycle = 1.0f;
