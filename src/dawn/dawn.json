@@ -2430,7 +2430,8 @@
             {"value": 57, "name": "shared texture memory D3D12 resource", "tags": ["dawn", "native"]},
             {"value": 58, "name": "chromium experimental sampling resource table", "tags": ["dawn"]},
             {"value": 59, "name": "chromium experimental subgroup size control", "tags": ["dawn"]},
-            {"value": 60, "name": "atomic vec2u min max", "tags": ["dawn"]}
+            {"value": 60, "name": "atomic vec2u min max", "tags": ["dawn"]},
+            {"value": 61, "name": "unorm16 formats for external texture", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

@@ -291,6 +291,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // Unorm16TextureFormats
     if (mFunctions.IsGLExtensionSupported("GL_EXT_texture_norm16")) {
         EnableFeature(Feature::Unorm16TextureFormats);
+        EnableFeature(Feature::Unorm16FormatsForExternalTexture);
     }
 
     // Float32Blendable

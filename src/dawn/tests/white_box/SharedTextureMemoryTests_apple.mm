@@ -121,8 +121,8 @@ class Backend : public SharedTextureMemoryTestBackend {
         if (device.HasFeature(wgpu::FeatureName::MultiPlanarFormatP410)) {
             features.push_back(wgpu::FeatureName::MultiPlanarFormatP410);
         }
-        if (device.HasFeature(wgpu::FeatureName::Unorm16TextureFormats)) {
-            features.push_back(wgpu::FeatureName::Unorm16TextureFormats);
+        if (device.HasFeature(wgpu::FeatureName::Unorm16FormatsForExternalTexture)) {
+            features.push_back(wgpu::FeatureName::Unorm16FormatsForExternalTexture);
         }
 
         return features;

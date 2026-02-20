@@ -442,7 +442,16 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Support the \"enable atomic_vec2u_min_max;\" directive for 64-bit atomics via vec2<u32> "
       "types",
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/atomic-64-min-max.md",
-      FeatureInfo::FeatureState::Experimental}}};
+      FeatureInfo::FeatureState::Experimental}},
+    {Feature::Unorm16FormatsForExternalTexture,
+     {"Supports R/RG/RGBA16Unorm formats for ExternalTexture planes even if not all the required "
+      "feature support has been enabled.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "unorm16_formats_for_external_texture.md",
+      FeatureInfo::FeatureState::Stable}},
+
+    // Comment to separate the } so it is clearer what to copy-paste to add a feature.
+};
 
 }  // anonymous namespace
 

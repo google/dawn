@@ -1000,8 +1000,6 @@ TEST_F(ExternalTextureTest, SubmitTextureViewWithDestroyedTexture) {
 
 class ExternalTextureNorm16Test : public ExternalTextureTest {
   protected:
-    void SetUp() override { ExternalTextureTest::SetUp(); }
-
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         return {wgpu::FeatureName::Unorm16TextureFormats};
     }
@@ -1030,6 +1028,88 @@ TEST_F(ExternalTextureNorm16Test, CreateMultiplanarExternalTextureValidation) {
 
         device.CreateExternalTexture(&externalDesc);
     }
+}
+
+class ExternalTextureUnorm16Test : public ExternalTextureTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::Unorm16FormatsForExternalTexture,
+                wgpu::FeatureName::MultiPlanarFormatP210,
+                wgpu::FeatureName::MultiPlanarFormatExtendedUsages};
+    }
+};
+
+// Test that with Unorm16FormatsForExternalTexture it is possible to create an ExternalTexture from
+// a YUV HDR biplanar texture that has plane formats that are R/RG16Unorm. Normally this should not
+// be allowed because the formats are not filterable-float, but the Unorm16FormatsForExternalTexture
+// feature bypasses this check.
+TEST_F(ExternalTextureUnorm16Test, CreateMultiPlanarTextureFromHDRYUV) {
+    // Create the YUV HDR texture. Direct creation of the texture requires
+    // MultiPlanarFormatExtendedUsages and the use of the YUV HDR format requires
+    // MultiPlanarFormatP210.
+    wgpu::TextureDescriptor yuvDesc = {
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {kWidth, kHeight},
+        .format = wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm,
+    };
+    wgpu::Texture yuv = device.CreateTexture(&yuvDesc);
+
+    // Create plane views with formats that are not normally allowed, but can be used only when
+    // retrieving the planes.
+    wgpu::TextureViewDescriptor plane0Desc = {
+        .format = wgpu::TextureFormat::R16Unorm,
+        .aspect = wgpu::TextureAspect::Plane0Only,
+    };
+    wgpu::TextureView plane0 = yuv.CreateView(&plane0Desc);
+
+    wgpu::TextureViewDescriptor plane1Desc = {
+        .format = wgpu::TextureFormat::RG16Unorm,
+        .aspect = wgpu::TextureAspect::Plane1Only,
+    };
+    wgpu::TextureView plane1 = yuv.CreateView(&plane1Desc);
+
+    // The ExternalTexture creation validation will allow these unfilterable-float formats to be
+    // used.
+    wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
+    externalDesc.plane0 = plane0;
+    externalDesc.plane1 = plane1;
+    device.CreateExternalTexture(&externalDesc);
+}
+
+class ExternalTextureUnorm16Test_FeatureDisabled : public ExternalTextureTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::MultiPlanarFormatP210,
+                wgpu::FeatureName::MultiPlanarFormatExtendedUsages};
+    }
+};
+
+// Check that without Unorm16FormatsForExternalTexture it's not possible to create the views from an
+// HDR YUV texture.
+TEST_F(ExternalTextureUnorm16Test_FeatureDisabled, CannotCreateViewsFromHDRYUV) {
+    // Create the YUV HDR texture. Direct creation of the texture requires
+    // MultiPlanarFormatExtendedUsages and the use of the YUV HDR format requires
+    // MultiPlanarFormatP210.
+    wgpu::TextureDescriptor yuvDesc = {
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {kWidth, kHeight},
+        .format = wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm,
+    };
+    wgpu::Texture yuv = device.CreateTexture(&yuvDesc);
+
+    // Create plane views with formats that are not normally allowed, but can be used only when
+    // retrieving the planes.
+    wgpu::TextureViewDescriptor plane0Desc = {
+        .format = wgpu::TextureFormat::R16Unorm,
+        .aspect = wgpu::TextureAspect::Plane0Only,
+    };
+    ASSERT_DEVICE_ERROR(yuv.CreateView(&plane0Desc));
+
+    wgpu::TextureViewDescriptor plane1Desc = {
+        .format = wgpu::TextureFormat::RG16Unorm,
+        .aspect = wgpu::TextureAspect::Plane1Only,
+    };
+    ASSERT_DEVICE_ERROR(yuv.CreateView(&plane1Desc));
 }
 
 }  // anonymous namespace

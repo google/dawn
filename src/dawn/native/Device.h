@@ -151,10 +151,11 @@ class DeviceBase : public ErrorSink,
     ResultOrError<const Format*> GetInternalFormat(wgpu::TextureFormat format) const;
 
     // Returns the Format corresponding to the wgpu::TextureFormat and assumes the format is
-    // valid and supported.
+    // valid (such that the FormatTable contains an entry for it).
     // The reference returned has the same lifetime as the device.
     const Format& GetValidInternalFormat(wgpu::TextureFormat format) const;
     const Format& GetValidInternalFormat(FormatIndex formatIndex) const;
+
     // Get compatible view formats. The returned span contains all compatible formats not equal to
     // `format`.
     std::vector<const Format*> GetCompatibleViewFormats(const Format& format) const;

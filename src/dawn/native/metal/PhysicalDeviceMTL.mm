@@ -738,6 +738,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::SharedFenceMTLSharedEvent);
 
     EnableFeature(Feature::Unorm16TextureFormats);
+    EnableFeature(Feature::Unorm16FormatsForExternalTexture);
 
     EnableFeature(Feature::HostMappedPointer);
 
