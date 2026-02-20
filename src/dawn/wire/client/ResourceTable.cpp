@@ -40,6 +40,10 @@ namespace dawn::wire::client {
 // static
 WGPUResourceTable ResourceTable::Create(Device* device,
                                         const WGPUResourceTableDescriptor* descriptor) {
+    if (descriptor->size > kMaxResourceTableSize) {
+        return nullptr;
+    }
+
     Client* wireClient = device->GetClient();
 
     DeviceCreateResourceTableCmd cmd;

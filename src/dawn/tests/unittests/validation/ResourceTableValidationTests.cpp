@@ -49,7 +49,7 @@ class ResourceTableValidationTest : public ValidationTest {
         return device.CreateResourceTable(&desc);
     }
 
-    wgpu::ResourceTable MakeErrorResourceTable(uint32_t size) {
+    wgpu::ResourceTable MakeErrorResourceTable(uint32_t size = 1) {
         wgpu::RenderPassMaxDrawCount maxDraw;
         maxDraw.maxDrawCount = 1000;
         wgpu::ResourceTableDescriptor desc{
@@ -191,7 +191,7 @@ TEST_F(ResourceTableValidationTestDisabled, FeatureNotEnabled) {
     ASSERT_DEVICE_ERROR(device.CreateResourceTable(&descriptor));
 }
 
-// Test that setting invalid size is an error
+// Test that setting invalid size returns nullptr
 TEST_F(ResourceTableValidationTest, InvalidSize) {
     wgpu::ResourceTableDescriptor descriptor;
 
@@ -209,7 +209,8 @@ TEST_F(ResourceTableValidationTest, InvalidSize) {
 
     // Size > limits is invalid
     descriptor.size = kMaxResourceTableSize + 1u;
-    ASSERT_DEVICE_ERROR(device.CreateResourceTable(&descriptor));
+    wgpu::ResourceTable table = device.CreateResourceTable(&descriptor);
+    ASSERT_EQ(table.Get(), nullptr);
 }
 
 // Test that setting nextInChain to anything is an error
@@ -561,8 +562,7 @@ TEST_F(ResourceTableValidationTest, ComputePassEncoder_SetResourceTable) {
 
     // Failure case: invalid resource table
     {
-        size_t tableSize = kMaxResourceTableSize + 1u;  // Invalid size
-        ASSERT_DEVICE_ERROR(wgpu::ResourceTable resourceTable = MakeResourceTable(tableSize));
+        ASSERT_DEVICE_ERROR(wgpu::ResourceTable resourceTable = MakeErrorResourceTable());
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
@@ -606,8 +606,7 @@ TEST_F(ResourceTableValidationTest, RenderPassEncoder_SetResourceTable) {
 
     // Failure case: invalid resource table
     {
-        size_t tableSize = kMaxResourceTableSize + 1u;  // Invalid size
-        ASSERT_DEVICE_ERROR(wgpu::ResourceTable resourceTable = MakeResourceTable(tableSize));
+        ASSERT_DEVICE_ERROR(wgpu::ResourceTable resourceTable = MakeErrorResourceTable());
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
@@ -652,8 +651,7 @@ TEST_F(ResourceTableValidationTest, RenderBundleEncoder_SetResourceTable) {
 
     // Failure case: invalid resource table
     {
-        size_t tableSize = kMaxResourceTableSize + 1u;  // Invalid size
-        ASSERT_DEVICE_ERROR(wgpu::ResourceTable resourceTable = MakeResourceTable(tableSize));
+        ASSERT_DEVICE_ERROR(wgpu::ResourceTable resourceTable = MakeErrorResourceTable());
 
         wgpu::RenderBundleEncoder rbe = device.CreateRenderBundleEncoder(&desc);
         rbe.SetResourceTable(resourceTable);
@@ -1946,16 +1944,6 @@ TEST_F(ResourceTableValidationTest, MutatorsOnInvalidTable) {
         ASSERT_DEVICE_ERROR(EXPECT_EQ(wgpu::Status::Success, table.RemoveBinding(0)));
         ASSERT_DEVICE_ERROR(EXPECT_NE(wgpu::kInvalidBinding, table.InsertBinding(&resource)));
     }
-
-    // Test on an invalid table due to being too large.
-    {
-        wgpu::ResourceTable table;
-        ASSERT_DEVICE_ERROR(table = MakeResourceTable(kMaxResourceTableSize + 1));
-
-        EXPECT_EQ(wgpu::Status::Error, table.Update(0, &resource));
-        EXPECT_EQ(wgpu::Status::Error, table.RemoveBinding(0));
-        EXPECT_EQ(wgpu::kInvalidBinding, table.InsertBinding(&resource));
-    }
 }
 
 // Test that Update() can be called on a table slot if it has never been used before.
@@ -2144,14 +2132,6 @@ TEST_F(ResourceTableValidationTest, GetSizeAfterCreation) {
         EXPECT_EQ(0u, MakeErrorResourceTable(0).GetSize());
         EXPECT_EQ(42u, MakeErrorResourceTable(42).GetSize());
         EXPECT_EQ(kMaxResourceTableSize, MakeErrorResourceTable(kMaxResourceTableSize).GetSize());
-    }
-
-    // Invalid resource table with a size above the limit is a special case that doesn't allocate
-    // state tracking.
-    {
-        wgpu::ResourceTable table;
-        ASSERT_DEVICE_ERROR(table = MakeResourceTable(kMaxResourceTableSize + 1));
-        EXPECT_EQ(0u, table.GetSize());
     }
 }
 

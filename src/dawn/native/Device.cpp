@@ -2325,6 +2325,16 @@ ResultOrError<Ref<ResourceTableBase>> DeviceBase::CreateResourceTable(
                          descriptor);
     }
 
+    // Not checked in ValidateResourceTableDescriptor because if size > kMaxResourceTableSize, we
+    // throw a RangeError in WebGPU, which means returning nullptr here.
+    if (descriptor->size > kMaxResourceTableSize) {
+        auto error = DAWN_VALIDATION_ERROR(
+            "Resource table size (%u) is larger than the maximum resource table size (%u)",
+            descriptor->size, kMaxResourceTableSize);
+        EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage());
+        return nullptr;
+    }
+
     return CreateResourceTableImpl(descriptor);
 }
 

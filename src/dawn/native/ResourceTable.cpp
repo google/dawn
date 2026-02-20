@@ -312,10 +312,6 @@ MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
 
     DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain is not nullptr.");
 
-    DAWN_INVALID_IF(descriptor->size > kMaxResourceTableSize,
-                    "Resource table size (%u) is larger than the maximum resource table size (%u)",
-                    descriptor->size, kMaxResourceTableSize);
-
     return {};
 }
 
