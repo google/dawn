@@ -106,7 +106,7 @@ class Buffer final : public BufferBase {
     ExecutionSerial mLastUsedSerial = std::numeric_limits<ExecutionSerial>::max();
 
     D3D12_RANGE mWrittenMappedRange = {0, 0};
-    void* mMappedData = nullptr;
+    raw_ptr<void> mMappedData = nullptr;
 
     std::unique_ptr<Heap> mHostMappedHeap;
     wgpu::Callback mHostMappedDisposeCallback = nullptr;
