@@ -2284,16 +2284,9 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
                                         supported_stages, *overload->info);
     });
 
-    if (fn == wgsl::BuiltinFn::kTintMaterialize) {
-        args[0] = Materialize(args[0]);
-        if (!args[0]) {
-            return nullptr;
-        }
-    } else {
-        // Materialize arguments if the parameter type is not abstract
-        if (!MaybeMaterializeArguments(args, target)) {
-            return nullptr;
-        }
+    // Materialize arguments if the parameter type is not abstract
+    if (!MaybeMaterializeArguments(args, target)) {
+        return nullptr;
     }
 
     if (target->IsDeprecated()) {

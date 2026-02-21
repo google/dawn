@@ -205,7 +205,6 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
         CASE(kBufferLength)
         case tint::wgsl::BuiltinFn::kBitcast:               // should lower to ir::Bitcast
         case tint::wgsl::BuiltinFn::kWorkgroupUniformLoad:  // should be handled in Lower()
-        case tint::wgsl::BuiltinFn::kTintMaterialize:
         case tint::wgsl::BuiltinFn::kNone:
         case tint::wgsl::BuiltinFn::kAtomicStoreMax:  // should have been lowered in
                                                       // AtomicVec2UToU64

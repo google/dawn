@@ -116,7 +116,6 @@
 "__modf_result_vec4_f32"
 "__out"
 "__point_size"
-"__tint_materialize"
 "a"
 "abs"
 "acos"

@@ -826,9 +826,6 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "print") {
         return BuiltinFn::kPrint;
     }
-    if (name == "__tint_materialize") {
-        return BuiltinFn::kTintMaterialize;
-    }
     if (name == "hasResource") {
         return BuiltinFn::kHasResource;
     }
@@ -1160,8 +1157,6 @@ const char* str(BuiltinFn i) {
             return "bufferLength";
         case BuiltinFn::kPrint:
             return "print";
-        case BuiltinFn::kTintMaterialize:
-            return "__tint_materialize";
         case BuiltinFn::kHasResource:
             return "hasResource";
         case BuiltinFn::kGetResource:

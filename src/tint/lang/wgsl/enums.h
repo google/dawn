@@ -479,7 +479,6 @@ enum class BuiltinFn : uint8_t {
     kBufferView,
     kBufferLength,
     kPrint,
-    kTintMaterialize,
     kHasResource,
     kGetResource,
     kNone,
@@ -664,7 +663,6 @@ constexpr BuiltinFn kBuiltinFns[] = {
     BuiltinFn::kBufferView,
     BuiltinFn::kBufferLength,
     BuiltinFn::kPrint,
-    BuiltinFn::kTintMaterialize,
     BuiltinFn::kHasResource,
     BuiltinFn::kGetResource,
 };
@@ -830,7 +828,6 @@ constexpr const char* kBuiltinFnStrings[] = {
     "bufferView",
     "bufferLength",
     "print",
-    "__tint_materialize",
     "hasResource",
     "getResource",
 };

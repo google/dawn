@@ -842,9 +842,6 @@ enum class Method {
 
     // abstract_expr[runtime-index]
     kRuntimeIndex,
-
-    // _tint_materialize()
-    kTintMaterializeBuiltin,
 };
 
 static std::ostream& operator<<(std::ostream& o, Method m) {
@@ -867,8 +864,6 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
             return o << "index";
         case Method::kRuntimeIndex:
             return o << "runtime-index";
-        case Method::kTintMaterializeBuiltin:
-            return o << "_tint_materialize";
     }
     return o << "<unknown>";
 }
@@ -965,11 +960,6 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
             WrapInFunction(runtime_index, IndexAccessor(abstract_expr(), runtime_index));
             break;
         }
-        case Method::kTintMaterializeBuiltin: {
-            auto* call = Call(wgsl::BuiltinFn::kTintMaterialize, abstract_expr());
-            WrapInFunction(Decl(Const("c", call)));
-            break;
-        }
     }
 
     switch (expectation) {
@@ -1005,7 +995,6 @@ constexpr Method kScalarMethods[] = {
     Method::kLet,
     Method::kVar,
     Method::kBitcastI32Arg,
-    Method::kTintMaterializeBuiltin,
 };
 
 /// Methods that support vector materialization
@@ -1014,21 +1003,18 @@ constexpr Method kVectorMethods[] = {
     Method::kVar,
     Method::kBitcastVec3I32Arg,
     Method::kRuntimeIndex,
-    Method::kTintMaterializeBuiltin,
 };
 
 /// Methods that support matrix materialization
 constexpr Method kMatrixMethods[] = {
     Method::kLet,
     Method::kVar,
-    Method::kTintMaterializeBuiltin,
 };
 
 /// Methods that support array materialization
 constexpr Method kArrayMethods[] = {
     Method::kLet,
     Method::kVar,
-    Method::kTintMaterializeBuiltin,
 };
 
 INSTANTIATE_TEST_SUITE_P(
