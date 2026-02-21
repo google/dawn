@@ -103,11 +103,14 @@
 #
 #  Known categories:
 #          Accuracy - A small deviation in output that is not significant in practice
+#                     eg. tanh inaccuracies, sampling in cubemap corners
 #          Critical - A significant error that could impact users and needs investigation
-#          PermSkip - Decision has been made not to fix
+#                     eg. integer arithmetic errors,
+#          Spurious - Failure due to practical limitation. Similar to WGSL Spurious failure.
+#                     eg. compiler stress test, slow coverage testing
 #
 #  Examples:
-#   crbug.com/123 [ android ] webgpu:shader,execution,limits:* [ Skip ] # CAT:PermaSkip, Accuracy
+#   crbug.com/123 [ android ] webgpu:shader,execution,limits:* [ Skip ] # CAT:Spurious
 #
 #######################################################################################
 
@@ -120,15 +123,15 @@
 ################################################################################
 
 # Pixel 4 timeouts
-crbug.com/407076121 [ android-pixel-4 ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
+crbug.com/407076121 [ android-pixel-4 ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ] # CAT:Spurious
 crbug.com/448716473 [ android-pixel-4 ] webgpu:api,validation,buffer,mapping:gc_behavior,mapAsync:* [ Skip ]
 crbug.com/448716479 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,quadSwap:*;op="quadSwapX";* [ Skip ]
 
 # Pixel 6 timeouts
-crbug.com/407076121 [ android-pixel-6 ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
+crbug.com/407076121 [ android-pixel-6 ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ] # CAT:Spurious
 
 # Intel Linux timeouts. This passes if the Mesa cache is warmed up.
-crbug.com/407076121 [ intel linux ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
+crbug.com/407076121 [ intel linux ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ] # CAT:Spurious
 
 # SharedWorker is not available on Android
 crbug.com/42241436 [ android webgpu-shared-worker ] * [ Skip ]
@@ -162,23 +165,23 @@ crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin
 crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=*;mapId="remap";scalarType="*" [ Skip ]
 
 # Mac AMD does not correctly respect lodMinClamp/lodMaxClamp
-crbug.com/409266267 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:* [ Skip ]
+crbug.com/409266267 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:* [ Skip ] # CAT:Accuracy
 
 # textureSampleCompare(Level):arrayed_3d_coords on Pixel 4
-crbug.com/408250014 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_3d_coords:* [ Skip ]
-crbug.com/408250014 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_3d_coords:* [ Skip ]
+crbug.com/408250014 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_3d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/408250014 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_3d_coords:* [ Skip ] # CAT:Accuracy
 
 # textureGather with offset broken on android-t and android-14
-crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_2d_coords:*;offset=true [ Skip ]
-crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:*;offset=true [ Skip ]
-crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:*;offset=true [ Skip ]
-crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Skip ]
-crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:*;offset=true [ Skip ]
+crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_2d_coords:*;offset=true [ Skip ] # CAT:Accuracy
+crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:*;offset=true [ Skip ] # CAT:Accuracy
+crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:*;offset=true [ Skip ] # CAT:Accuracy
+crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:*;offset=true [ Skip ] # CAT:Accuracy
 
 # Fine derivatives are course on Intel Mac
-crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
-crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
-crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:* [ Failure ]
+crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ] # CAT:Accuracy
+crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ] # CAT:Accuracy
+crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:* [ Failure ] # CAT:Accuracy
 
 ################################################################################
 # Temporary Skip Expectations
@@ -211,150 +214,151 @@ crbug.com/41491936 [ nvidia-0x2184 win10 ] webgpu:api,validation,state,device_lo
 # Skipped since they kill WindowsServer on Mac AMD.
 # Skipped on Mac Intel as well, because MacBook Pro AMD are dual GPU machines,
 # so Intel expectations apply to them as well, overriding AMD expectations.
-crbug.com/374691235 [ intel mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:stage="*";format="stencil8";* [ Skip ]
-crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_2d_coords:* [ Skip ]
-crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:* [ Skip ]
-crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Skip ]
-crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Skip ]
+crbug.com/374691235 [ intel mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:stage="*";format="stencil8";* [ Skip ] # CAT:Critical
+crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_2d_coords:* [ Skip ] # CAT:Critical
+crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:* [ Skip ] # CAT:Critical
+crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Skip ] # CAT:Critical
+crbug.com/374691235 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Skip ] # CAT:Critical
 
 # Wrapping is incorrect for texture gather (skip or fail? - they'll never pass, but skip means no testing)
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc1-rgba-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc1-rgba-unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc2-rgba-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc2-rgba-unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc3-rgba-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc3-rgba-unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc4-r-snorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc4-r-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc5-rg-snorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc5-rg-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc7-rgba-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc7-rgba-unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bgra8unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bgra8unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="depth16unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="depth32float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r16float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r16sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r16uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r32float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r8sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r8snorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r8uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r8unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg11b10ufloat";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg16float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg16sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg16uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg32float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg8sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg8snorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg8uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg8unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgb10a2uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgb10a2unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgb9e5ufloat";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba16float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba16sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba16uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba32float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba8sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba8snorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba8uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba8unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba8unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="stencil8";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc1-rgba-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc1-rgba-unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc2-rgba-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc2-rgba-unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc3-rgba-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc3-rgba-unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc4-r-snorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc4-r-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc5-rg-snorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc5-rg-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc7-rgba-unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc7-rgba-unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bgra8unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bgra8unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth16unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth32float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r16float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r16sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r16uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r32float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r8sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r8snorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r8uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r8unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg11b10ufloat";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg16float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg16sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg16uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg32float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg8sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg8snorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg8uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg8unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgb10a2uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgb10a2unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgb9e5ufloat";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba16float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba16sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba16uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba32float";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba8sint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba8snorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba8uint";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba8unorm";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba8unorm-srgb";* [ Skip ]
-crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="stencil8";* [ Skip ]
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc1-rgba-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc1-rgba-unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc2-rgba-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc2-rgba-unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc3-rgba-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc3-rgba-unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc4-r-snorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc4-r-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc5-rg-snorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc5-rg-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc7-rgba-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bc7-rgba-unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bgra8unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="bgra8unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="depth16unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="depth32float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r16float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r16sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r16uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r32float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r8sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r8snorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r8uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="r8unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg11b10ufloat";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg16float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg16sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg16uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg32float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg8sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg8snorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg8uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rg8unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgb10a2uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgb10a2unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgb9e5ufloat";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba16float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba16sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba16uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba32float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba8sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba8snorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba8uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba8unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="rgba8unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="stencil8";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc1-rgba-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc1-rgba-unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc2-rgba-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc2-rgba-unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc3-rgba-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc3-rgba-unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc4-r-snorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc4-r-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc5-rg-snorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc5-rg-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc7-rgba-unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bc7-rgba-unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bgra8unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="bgra8unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth16unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth32float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r16float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r16sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r16uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r32float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r8sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r8snorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r8uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="r8unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg11b10ufloat";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg16float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg16sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg16uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg32float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg8sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg8snorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg8uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rg8unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgb10a2uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgb10a2unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgb9e5ufloat";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba16float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba16sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba16uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba32float";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba8sint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba8snorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba8uint";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba8unorm";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="rgba8unorm-srgb";* [ Skip ] # CAT:Accuracy
+crbug.com/376240232 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="stencil8";* [ Skip ] # CAT:Accuracy
 
-crbug.com/407088838 [ arm ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_2d_coords:* [ Skip ]
-crbug.com/407088838 [ arm ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_2d_coords:* [ Skip ]
-crbug.com/407088838 [ arm ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_3d_coords:* [ Skip ]
+crbug.com/407088838 [ arm ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407088838 [ arm ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407088838 [ arm ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_3d_coords:* [ Skip ] # CAT:Accuracy
 
-crbug.com/407088838 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
-crbug.com/407088838 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:* [ Skip ]
-crbug.com/407088838 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Skip ]
-crbug.com/407088838 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:* [ Skip ]
-crbug.com/407088838 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Skip ]
-crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Skip ]
-crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
-crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:* [ Skip ]
-crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Skip ]
-crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_3d_coords:* [ Skip ]
+crbug.com/407088838 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407088838 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407088838 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407088838 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407088838 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_3d_coords:* [ Skip ] # CAT:Accuracy
 
-crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:* [ Skip ]
-crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:* [ Skip ]
-crbug.com/407109060 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";*offset=true [ Skip ]
+crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/407109060 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";*offset=true [ Skip ] # CAT:Accuracy
 
-crbug.com/364595481 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:* [ Skip ]
-crbug.com/364595481 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ Skip ]
-crbug.com/364595481 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Skip ]
+crbug.com/364595481 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:* [ Skip ] # CAT:Accuracy
+crbug.com/364595481 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ Skip ] # CAT:Accuracy
+crbug.com/364595481 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Skip ] # CAT:Accuracy
 
 # textureGather on intel mac does not gather across cube face edges
-crbug.com/414842427 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Failure ]
-crbug.com/414842427 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_3d_coords:* [ Skip ]
-crbug.com/414842427 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Skip ]
-crbug.com/414842427 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Failure ]
-crbug.com/414842427 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_3d_coords:* [ Skip ]
-crbug.com/414842427 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Skip ]
+crbug.com/414842427 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/414842427 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_3d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/414842427 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/414842427 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/414842427 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_3d_coords:* [ Skip ] # CAT:Accuracy
+crbug.com/414842427 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Skip ] # CAT:Accuracy
 
 # textureSampleLevel is broken on Intel Mac unless you use argument buffers.
-crbug.com/372283570 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords,lodClamp:*;filt="linear" [ Skip ]
-crbug.com/372283570 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:*;filt="linear" [ Skip ]
-crbug.com/372283570 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords,lodClamp:*;filt="linear" [ Skip ]
-crbug.com/372283570 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:*;filt="linear" [ Skip ]
+crbug.com/372283570 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords,lodClamp:*;filt="linear" [ Skip ] # CAT:Accuracy
+crbug.com/372283570 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:*;filt="linear" [ Skip ] # CAT:Accuracy
+crbug.com/372283570 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords,lodClamp:*;filt="linear" [ Skip ] # CAT:Accuracy
+crbug.com/372283570 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:*;filt="linear" [ Skip ] # CAT:Accuracy
 
 # textureSampleGrad/Level fail with offsets on Intel Mac
-crbug.com/414844446 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:*;offset=true [ Skip ]
-crbug.com/414844446 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:*;offset=true [ Skip ]
-crbug.com/414844446 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:*;offset=true [ Skip ]
-crbug.com/414844446 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:*;offset=true [ Skip ]
+crbug.com/414844446 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:*;offset=true [ Skip ] # CAT:Accuracy
+crbug.com/414844446 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:*;offset=true [ Skip ] # CAT:Accuracy
+crbug.com/414844446 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:*;offset=true [ Skip ] # CAT:Accuracy
+crbug.com/414844446 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:*;offset=true [ Skip ] # CAT:Accuracy
 
 # Timeouts on error_scope
+# These should likely be made permanent skips.
 crbug.com/367513506 [ asan win ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Skip ]
 crbug.com/367513506 [ amd mac ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Skip ]
 crbug.com/367513506 [ intel win ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Skip ]
@@ -364,11 +368,11 @@ crbug.com/367513506 [ android ] webgpu:api,validation,error_scope:current_scope:
 crbug.com/367513506 [ android ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Skip ]
 
 # maxBufferSize test causing instability
-crbug.com/407109048 [ arm ] webgpu:api,validation,capability_checks,limits,maxBufferSize:* [ Skip ]
+crbug.com/407109048 [ arm ] webgpu:api,validation,capability_checks,limits,maxBufferSize:* [ Skip ] # CAT:Critical
 
 # Flaky VUID-VkImageViewCreateInfo-pNext-01585, seems to leak to other tests
-crbug.com/41489034 [ dawn-backend-validation intel ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:format:* [ Skip ]
-crbug.com/41489034 [ dawn-backend-validation intel ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:* [ Skip ]
+crbug.com/41489034 [ dawn-backend-validation intel ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:format:* [ Skip ] # CAT:Critical
+crbug.com/41489034 [ dawn-backend-validation intel ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:* [ Skip ] # CAT:Critical
 
 ################################################################################
 # Triaged or Manually-Added Flakes and Failures
@@ -417,37 +421,37 @@ crbug.com/42241372 [ android-14 android-pixel-6 ] webgpu:web_platform,external_t
 crbug.com/42241404 [ apple-angle-metal-renderer:-apple-m2 mac ] webgpu:api,operation,resource_init,buffer:copy_texture_to_partial_buffer: [ Failure ]
 
 # Failures due to AMD Macbook OS upgrade
-crbug.com/42251220 [ amd mac ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_r";vectorize=3 [ Failure ]
-crbug.com/42251220 [ amd mac ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_rw";vectorize=3 [ Failure ]
-crbug.com/42251220 [ amd mac ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="uniform";vectorize=3 [ Failure ]
+crbug.com/42251220 [ amd mac ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_r";vectorize=3 [ Failure ] # CAT:Accuracy
+crbug.com/42251220 [ amd mac ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_rw";vectorize=3 [ Failure ] # CAT:Accuracy
+crbug.com/42251220 [ amd mac ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="uniform";vectorize=3 [ Failure ] # CAT:Accuracy
 
 # Failures due to Linux/Intel UHD 630 OS/driver upgrade
-crbug.com/42251290 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:shader,execution,memory_model,atomicity:atomicity:memType="atomic_storage";testType="inter_workgroup" [ Failure ]
+crbug.com/42251290 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:shader,execution,memory_model,atomicity:atomicity:memType="atomic_storage";testType="inter_workgroup" [ Failure ] # CAT:Critical
 
 # Intel failures for robust access on Windows
 # crbug.com/tint/2213: F16 tests always fail.
 # crbug.com/42251180: Non-f16 tests are flaky on DXC.
 # As these are overlapping, mark the whole lot as Failure.
-crbug.com/42251180 [ asan dawn-no-backend-validation intel-0x9bc5 release-x64 target-cpu-64 webgpu-dxc-enabled win10 ] webgpu:shader,execution,robust_access:linear_memory:* [ Failure ]
-crbug.com/42251180 [ dawn-no-backend-validation intel-0x9bc5 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win10 ] webgpu:shader,execution,robust_access:linear_memory:* [ Failure ]
+crbug.com/42251180 [ asan dawn-no-backend-validation intel-0x9bc5 release-x64 target-cpu-64 webgpu-dxc-enabled win10 ] webgpu:shader,execution,robust_access:linear_memory:* [ Failure ] # CAT:Critical
+crbug.com/42251180 [ dawn-no-backend-validation intel-0x9bc5 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win10 ] webgpu:shader,execution,robust_access:linear_memory:* [ Failure ] # CAT:Critical
 
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x3h_align8";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x4h_align8";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x4h_align8";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x2f_size";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x2f_size";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat2x3f_size";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x3f_size";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x3f_size";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat2x4f_size";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x4f_size";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x4f_size";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x3h_size";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x3h_size";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x4h_size";aspace="workgroup" [ Failure ]
-crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x4h_size";aspace="workgroup" [ Failure ]
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x3h_align8";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x4h_align8";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x4h_align8";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x2f_size";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x2f_size";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat2x3f_size";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x3f_size";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x3f_size";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat2x4f_size";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x4f_size";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x4f_size";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x3h_size";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x3h_size";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat3x4h_size";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/341991439 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,memory_layout:write_layout:case="mat4x4h_size";aspace="workgroup" [ Failure ] # CAT:Critical
 
-crbug.com/341991440 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="array";* [ Failure ]
+crbug.com/341991440 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="array";* [ Failure ] # CAT:Critical
 
 # Video tests fail on Mac SwiftShader
 crbug.com/40924444 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
@@ -479,19 +483,19 @@ crbug.com/42240846 [ android-t ] webgpu:api,operation,vertex_state,index_format:
 crbug.com/42240846 [ android-t ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="triangle-list" [ Failure ]
 
 # Shader corr failing very flakily on Android ARM (Pixel 6) (too flaky for RetryOnFailure)
-crbug.com/41479550 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ Failure ]
+crbug.com/41479550 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ Failure ] # CAT:Critical
 
 # Tint Pixel 4 failures
-crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_storage_basic:workgroupSize=1;dispatchSize=16;mapId="remap";scalarType="u32" [ Failure ]
-crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_storage_basic:workgroupSize=1;dispatchSize=4;mapId="remap";scalarType="u32" [ Failure ]
-crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_storage_basic:workgroupSize=1;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ]
-crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=16;mapId="remap";scalarType="u32" [ Failure ]
-crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=4;mapId="remap";scalarType="u32" [ Failure ]
-crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ]
+crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_storage_basic:workgroupSize=1;dispatchSize=16;mapId="remap";scalarType="u32" [ Failure ] # CAT:Critical
+crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_storage_basic:workgroupSize=1;dispatchSize=4;mapId="remap";scalarType="u32" [ Failure ] # CAT:Critical
+crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_storage_basic:workgroupSize=1;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ] # CAT:Critical
+crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=16;mapId="remap";scalarType="u32" [ Failure ] # CAT:Critical
+crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=4;mapId="remap";scalarType="u32" [ Failure ] # CAT:Critical
+crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ] # CAT:Critical
 
 # Win10 workgroup_barrier tests fail
-crbug.com/42251260 [ webgpu-dxc-disabled win ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_load_store:accessValueType="u32";memType="non_atomic_texture";accessPair="rw";normalBarrier=true [ Failure ]
-crbug.com/42251260 [ webgpu-dxc-disabled win ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_store_load:accessValueType="u32";memType="non_atomic_texture";accessPair="wr";normalBarrier=true [ Failure ]
+crbug.com/42251260 [ webgpu-dxc-disabled win ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_load_store:accessValueType="u32";memType="non_atomic_texture";accessPair="rw";normalBarrier=true [ Failure ] # CAT:Critical
+crbug.com/42251260 [ webgpu-dxc-disabled win ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_store_load:accessValueType="u32";memType="non_atomic_texture";accessPair="wr";normalBarrier=true [ Failure ] # CAT:Critical
 
 # Many sampleWithVideoFrameWithVisibleRectParam tests failing across backends
 crbug.com/407133969 [ intel-0x3e9b mac ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Failure ]
@@ -525,12 +529,12 @@ crbug.com/373485785 [ dawn-backend-validation intel-0x9bc5 no-asan release-x64 t
 crbug.com/373485785 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-disabled win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
 
 # textureSampleCompareLevel failures with offset=true, in compute shader only, on Mac Intel
-crbug.com/408250017 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:stage="c";*;offset=true [ Failure ]
-crbug.com/408250017 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:stage="c";*;offset=true [ Failure ]
+crbug.com/408250017 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:stage="c";*;offset=true [ Failure ] # CAT:Accuracy
+crbug.com/408250017 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:stage="c";*;offset=true [ Failure ] # CAT:Accuracy
 
 # All textureSampleCompareLevel:2d_coords/3d_coords fail on Pixel 4
-crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Failure ]
-crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:3d_coords:* [ Failure ]
+crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:3d_coords:* [ Failure ] # CAT:Accuracy
 
 # VulkanValidationLayers have incorrect tracking of partial compressed texture copies.
 crbug.com/407076125 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="astc*";dimension="2d" [ Failure ]
@@ -549,26 +553,26 @@ crbug.com/407109053 [ intel-0x9bc5 linux no-clang-coverage webgpu-adapter-defaul
 crbug.com/407109054 [ android-r qualcomm ] webgpu:api,operation,render_pipeline,overrides:precision:isAsync=true [ Failure ]
 crbug.com/407109054 [ android-r qualcomm ] webgpu:api,operation,render_pipeline,overrides:shared_shader_module:isAsync=true [ Failure ]
 
-crbug.com/407109057 [ android-pixel-6 arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
-crbug.com/407109057 [ android-pixel-6 android-t arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
-crbug.com/407109057 [ android-pixel-6 arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
-crbug.com/407109057 [ android-pixel-6 android-t arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
-crbug.com/407109057 [ android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
-crbug.com/407109057 [ android-pixel-6 android-t ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
-crbug.com/407109057 [ android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
-crbug.com/407109057 [ android-pixel-6 android-t ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/407109057 [ android-pixel-6 arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ] # CAT:Accuracy
+crbug.com/407109057 [ android-pixel-6 android-t arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ] # CAT:Accuracy
+crbug.com/407109057 [ android-pixel-6 arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ] # CAT:Accuracy
+crbug.com/407109057 [ android-pixel-6 android-t arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ] # CAT:Accuracy
+crbug.com/407109057 [ android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ] # CAT:Accuracy
+crbug.com/407109057 [ android-pixel-6 android-t ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ] # CAT:Accuracy
+crbug.com/407109057 [ android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ] # CAT:Accuracy
+crbug.com/407109057 [ android-pixel-6 android-t ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ] # CAT:Accuracy
 
 # `memory_layout:read_layout` failures on Pixel 4
-crbug.com/407109058 [ android-pixel-4 ] webgpu:shader,execution,memory_layout:read_layout:case="array_stride_size";aspace="function" [ Failure ]
-crbug.com/407109058 [ android-pixel-4 ] webgpu:shader,execution,memory_layout:read_layout:case="array_stride_size";aspace="private" [ Failure ]
+crbug.com/407109058 [ android-pixel-4 ] webgpu:shader,execution,memory_layout:read_layout:case="array_stride_size";aspace="function" [ Failure ] # CAT:Critical
+crbug.com/407109058 [ android-pixel-4 ] webgpu:shader,execution,memory_layout:read_layout:case="array_stride_size";aspace="private" [ Failure ] # CAT:Critical
 
 # `memory_layout:read_layout` vec3h/vec4 failures on Win Intel DXC
-crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec3h_align8";aspace="function" [ Failure ]
-crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec3h_align8";aspace="private" [ Failure ]
-crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec3h_align8";aspace="workgroup" [ Failure ]
-crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec4h_align8";aspace="function" [ Failure ]
-crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec4h_align8";aspace="private" [ Failure ]
-crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec4h_align8";aspace="workgroup" [ Failure ]
+crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec3h_align8";aspace="function" [ Failure ] # CAT:Critical
+crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec3h_align8";aspace="private" [ Failure ] # CAT:Critical
+crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec3h_align8";aspace="workgroup" [ Failure ] # CAT:Critical
+crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec4h_align8";aspace="function" [ Failure ] # CAT:Critical
+crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec4h_align8";aspace="private" [ Failure ] # CAT:Critical
+crbug.com/407076131 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,memory_layout:read_layout:case="vec4h_align8";aspace="workgroup" [ Failure ] # CAT:Critical
 
 # Assorted copyToTexture test failures
 crbug.com/358165874 [ linux nvidia-0x2184 ] webgpu:web_platform,copyToTexture,* [ Failure ]
@@ -635,132 +639,132 @@ crbug.com/407076132 [ qualcomm-0x36334330 webgpu-dedicated-worker win ] webgpu:w
 crbug.com/407076132 [ qualcomm-0x36334330 webgpu-shared-worker win ] webgpu:web_platform,copyToTexture,image_file:from_orientation_metadata_file:imageName="*";objectTypeFromFile="ImageBitmap-from-Blob";* [ Failure ]
 
 # Widespread texture builtin failures on Intel (Linux/Win/Mac)
-crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_3d_coords:* [ Failure ]
-crbug.com/407088850 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Failure ]
+crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="depth24plus-stencil8";* [ Failure ]
-crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="depth24plus";* [ Failure ]
-crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="depth32float-stencil8";* [ Failure ]
-crbug.com/407088850 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Failure ]
-crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth24plus-stencil8";* [ Failure ]
-crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth24plus";* [ Failure ]
-crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth32float-stencil8";* [ Failure ]
-crbug.com/407088850 [ angle-d3d11 desktop graphite-enabled intel-0x4680 no-asan no-clang-coverage release-x64 renderer-skia-gl target-cpu-64 win10 ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Failure ]
-crbug.com/407088850 [ desktop graphite-enabled intel-gen-9 no-clang-coverage release renderer-skia-gl ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Failure ]
-crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_3d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_3d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:* [ Failure ]
-crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:* [ Failure ]
-crbug.com/407088850 [ intel webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ]
-crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_3d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_3d_coords:* [ Failure ]
-crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:* [ Failure ]
+crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="depth24plus";* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="depth32float-stencil8";* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth24plus-stencil8";* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth24plus";* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth32float-stencil8";* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ angle-d3d11 desktop graphite-enabled intel-0x4680 no-asan no-clang-coverage release-x64 renderer-skia-gl target-cpu-64 win10 ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ desktop graphite-enabled intel-gen-9 no-clang-coverage release renderer-skia-gl ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:* [ Failure ] # CAT:Critical
+crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:* [ Failure ] # CAT:Accuracy
 
 # Linux Intel failing many ASTC texture sampling tests
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="astc-12x10-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="astc-6x5-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:stage="*";format="astc-5x4-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:stage="*";format="astc-8x6-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:stage="c";format="astc-12x12-unorm";texture_type="texture_2d_array" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:stage="v";format="astc-12x12-unorm";texture_type="texture_2d_array" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="astc-5x4-unorm";dim="cube";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="astc-8x5-unorm";dim="cube";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="astc-8x6-unorm";dim="cube";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:format="astc-5x4-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:format="astc-8x6-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:format="astc-10x6-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:format="astc-12x10-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:format="astc-4x4-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:format="astc-6x5-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:format="astc-6x6-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:format="astc-10x6-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:format="astc-12x10-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:format="astc-4x4-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:format="astc-6x5-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:format="astc-6x6-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:stage="*";format="astc-5x4-unorm";dim="cube";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:stage="*";format="astc-8x5-unorm";dim="cube";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:stage="*";format="astc-8x6-unorm";dim="cube";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="*";format="astc-10x5-unorm";dim="3d";filt="linear" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="*";format="astc-10x8-unorm";dim="3d";filt="*" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="*";format="astc-5x4-unorm";dim="3d";filt="*" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="*";format="astc-6x6-unorm";dim="3d";filt="linear" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="c";format="astc-12x10-unorm";dim="cube";filt="linear" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="c";format="astc-4x4-unorm";dim="cube";filt="linear" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="f";format="astc-12x10-unorm";dim="cube";filt="linear" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="f";format="astc-12x10-unorm";dim="cube";filt="nearest" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="f";format="astc-4x4-unorm";dim="cube";filt="linear" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="v";format="astc-12x10-unorm";dim="cube";filt="linear" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="v";format="astc-4x4-unorm";dim="cube";filt="linear" [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="*";format="astc-12x10-unorm";dim="cube";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="*";format="astc-4x4-unorm";dim="cube";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="*";format="astc-6x6-unorm";dim="3d";filt="nearest";mode="r";offset=true [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-10x5-unorm";dim="3d";filt="linear";mode="r";offset=false [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-10x8-unorm";dim="3d";filt="*";mode="c";offset=false [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-10x8-unorm";dim="3d";filt="linear";mode="m";offset=* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-10x8-unorm";dim="3d";filt="linear";mode="r";offset=* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-10x8-unorm";dim="3d";filt="nearest";mode="r";offset=true [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-5x4-unorm";dim="3d";filt="*";mode="c";offset=false [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-5x4-unorm";dim="3d";filt="*";mode="r";offset=* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-5x4-unorm";dim="3d";filt="linear";mode="c";offset=true [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-5x4-unorm";dim="3d";filt="linear";mode="m";offset=* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-5x4-unorm";dim="3d";filt="nearest";mode="m";offset=true [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-6x6-unorm";dim="3d";filt="linear";mode="m";offset=* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-6x6-unorm";dim="3d";filt="linear";mode="r";offset=* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-10x5-unorm";dim="3d";filt="linear";mode="*";offset=false [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-10x8-unorm";dim="3d";filt="*";mode="c";offset=false [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-10x8-unorm";dim="3d";filt="linear";mode="m";offset=true [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-10x8-unorm";dim="3d";filt="linear";mode="r";offset=false [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-10x8-unorm";dim="3d";filt="linear";mode="r";offset=true [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-5x4-unorm";dim="3d";filt="linear";mode="*";offset=* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-5x4-unorm";dim="3d";filt="nearest";mode="c";offset=* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-5x4-unorm";dim="3d";filt="nearest";mode="m";offset=true [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-5x4-unorm";dim="3d";filt="nearest";mode="r";offset=* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-6x6-unorm";dim="3d";filt="linear";mode="c";offset=true [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-6x6-unorm";dim="3d";filt="linear";mode="r";offset=* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x5-unorm";dim="3d";filt="linear";mode="c";offset=false [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x5-unorm";dim="3d";filt="linear";mode="m";offset=false [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="*";mode="r";offset=true [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="linear";mode="*";offset=false [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="linear";mode="m";offset=true [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="nearest";mode="c";offset=false [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="nearest";mode="m";offset=false [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-5x4-unorm";dim="3d";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-6x6-unorm";dim="3d";filt="linear";mode="*";offset=* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:stage="*";format="astc-5x4-unorm";* [ Failure ]
-crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:stage="*";format="astc-8x6-unorm";* [ Failure ]
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="astc-12x10-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="*";format="astc-6x5-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:stage="*";format="astc-5x4-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:stage="*";format="astc-8x6-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:stage="c";format="astc-12x12-unorm";texture_type="texture_2d_array" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:stage="v";format="astc-12x12-unorm";texture_type="texture_2d_array" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="astc-5x4-unorm";dim="cube";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="astc-8x5-unorm";dim="cube";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="astc-8x6-unorm";dim="cube";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:format="astc-5x4-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:format="astc-8x6-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:format="astc-10x6-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:format="astc-12x10-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:format="astc-4x4-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:format="astc-6x5-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:format="astc-6x6-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:format="astc-10x6-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:format="astc-12x10-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:format="astc-4x4-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:format="astc-6x5-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:format="astc-6x6-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:stage="*";format="astc-5x4-unorm";dim="cube";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:stage="*";format="astc-8x5-unorm";dim="cube";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:stage="*";format="astc-8x6-unorm";dim="cube";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="*";format="astc-10x5-unorm";dim="3d";filt="linear" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="*";format="astc-10x8-unorm";dim="3d";filt="*" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="*";format="astc-5x4-unorm";dim="3d";filt="*" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="*";format="astc-6x6-unorm";dim="3d";filt="linear" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="c";format="astc-12x10-unorm";dim="cube";filt="linear" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="c";format="astc-4x4-unorm";dim="cube";filt="linear" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="f";format="astc-12x10-unorm";dim="cube";filt="linear" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="f";format="astc-12x10-unorm";dim="cube";filt="nearest" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="f";format="astc-4x4-unorm";dim="cube";filt="linear" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="v";format="astc-12x10-unorm";dim="cube";filt="linear" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="v";format="astc-4x4-unorm";dim="cube";filt="linear" [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="*";format="astc-12x10-unorm";dim="cube";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="*";format="astc-4x4-unorm";dim="cube";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="*";format="astc-6x6-unorm";dim="3d";filt="nearest";mode="r";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-10x5-unorm";dim="3d";filt="linear";mode="r";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-10x8-unorm";dim="3d";filt="*";mode="c";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-10x8-unorm";dim="3d";filt="linear";mode="m";offset=* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-10x8-unorm";dim="3d";filt="linear";mode="r";offset=* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-10x8-unorm";dim="3d";filt="nearest";mode="r";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-5x4-unorm";dim="3d";filt="*";mode="c";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-5x4-unorm";dim="3d";filt="*";mode="r";offset=* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-5x4-unorm";dim="3d";filt="linear";mode="c";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-5x4-unorm";dim="3d";filt="linear";mode="m";offset=* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-5x4-unorm";dim="3d";filt="nearest";mode="m";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-6x6-unorm";dim="3d";filt="linear";mode="m";offset=* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="astc-6x6-unorm";dim="3d";filt="linear";mode="r";offset=* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-10x5-unorm";dim="3d";filt="linear";mode="*";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-10x8-unorm";dim="3d";filt="*";mode="c";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-10x8-unorm";dim="3d";filt="linear";mode="m";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-10x8-unorm";dim="3d";filt="linear";mode="r";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-10x8-unorm";dim="3d";filt="linear";mode="r";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-5x4-unorm";dim="3d";filt="linear";mode="*";offset=* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-5x4-unorm";dim="3d";filt="nearest";mode="c";offset=* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-5x4-unorm";dim="3d";filt="nearest";mode="m";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-5x4-unorm";dim="3d";filt="nearest";mode="r";offset=* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-6x6-unorm";dim="3d";filt="linear";mode="c";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="astc-6x6-unorm";dim="3d";filt="linear";mode="r";offset=* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x5-unorm";dim="3d";filt="linear";mode="c";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x5-unorm";dim="3d";filt="linear";mode="m";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="*";mode="r";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="linear";mode="*";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="linear";mode="m";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="nearest";mode="c";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="nearest";mode="m";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-5x4-unorm";dim="3d";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-6x6-unorm";dim="3d";filt="linear";mode="*";offset=* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:stage="*";format="astc-5x4-unorm";* [ Failure ] # CAT:Accuracy
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:stage="*";format="astc-8x6-unorm";* [ Failure ] # CAT:Accuracy
 
 # textureLoad:multisampled failures on Windows FXC
-crbug.com/407088851 [ nvidia-0x2184 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ]
-crbug.com/407088851 [ angle-d3d11 desktop graphite-enabled no-clang-coverage release-x64 renderer-skia-gl webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_depth_multisampled_2d";* [ Failure ]
+crbug.com/407088851 [ nvidia-0x2184 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ] # CAT:Accuracy
+crbug.com/407088851 [ angle-d3d11 desktop graphite-enabled no-clang-coverage release-x64 renderer-skia-gl webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_depth_multisampled_2d";* [ Failure ] # CAT:Accuracy
 
 # One case of textureSampleGrad fails on NVIDIA (Linux/Win)
-crbug.com/407088852 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ]
-crbug.com/407088852 [ nvidia win ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ]
+crbug.com/407088852 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ] # CAT:Accuracy
+crbug.com/407088852 [ nvidia win ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ] # CAT:Accuracy
 
 # All textureSample/textureGather tests marked failing on Pixel 6
-crbug.com/407076133 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Failure ]
-crbug.com/407076133 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSample:* [ Failure ]
+crbug.com/407076133 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Failure ] # CAT:Accuracy
+crbug.com/407076133 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSample:* [ Failure ] # CAT:Accuracy
 
 # All textureGather tests marked failing on Windows
-crbug.com/407076134 [ asan dawn-no-backend-validation intel-0x9bc5 no-clang-coverage release-x64 target-cpu-64 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Failure ]
-crbug.com/407076134 [ asan dawn-no-backend-validation intel-0x9bc5 no-clang-coverage release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Failure ]
-crbug.com/407076134 [ intel no-asan no-clang-coverage win ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Failure ]
+crbug.com/407076134 [ asan dawn-no-backend-validation intel-0x9bc5 no-clang-coverage release-x64 target-cpu-64 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Failure ] # CAT:Accuracy
+crbug.com/407076134 [ asan dawn-no-backend-validation intel-0x9bc5 no-clang-coverage release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Failure ] # CAT:Accuracy
+crbug.com/407076134 [ intel no-asan no-clang-coverage win ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Failure ] # CAT:Accuracy
 
 # textureSampleBias failures on Mac AMD
-crbug.com/407109059 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:* [ Failure ]
-crbug.com/407109059 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_2d_coords:format="bc7-rgba-unorm-srgb";filt="linear";modeU="c";modeV="r";offset=true [ Failure ]
+crbug.com/407109059 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/407109059 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_2d_coords:format="bc7-rgba-unorm-srgb";filt="linear";modeU="c";modeV="r";offset=true [ Failure ] # CAT:Accuracy
 
 # All textureSampleBias tests marked failing on Mac M2
-crbug.com/407076135 [ apple-angle-metal-renderer:-apple-m2 mac ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
+crbug.com/407076135 [ apple-angle-metal-renderer:-apple-m2 mac ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ] # CAT:Accuracy
 
 # fragment_builtins with multisampling and "sample" mode failing on many Vulkan devices
 crbug.com/407144390 [ android-14 android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
@@ -768,19 +772,19 @@ crbug.com/407144390 [ intel linux ] webgpu:shader,execution,shader_io,fragment_b
 crbug.com/407144390 [ linux nvidia-0x2184 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
 
 # `texture_utils:readTextureToTexelViews` failures with "stencil8" arrays/cubes on Mac (AMD/Intel)
-crbug.com/407147670 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d-array";sampleCount=1 [ Failure ]
-crbug.com/407147670 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d-array";sampleCount=1 [ Failure ]
-crbug.com/407147670 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d-array";sampleCount=1 [ Failure ]
-crbug.com/407147670 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=1 [ Failure ]
-crbug.com/407147670 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=1 [ Failure ]
-crbug.com/407147670 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=1 [ Failure ]
-crbug.com/407147670 [ amd mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=4 [ Failure ]
-crbug.com/407147670 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube-array";sampleCount=1 [ Failure ]
-crbug.com/407147670 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube-array";sampleCount=1 [ Failure ]
-crbug.com/407147670 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube-array";sampleCount=1 [ Failure ]
-crbug.com/407147670 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube";sampleCount=1 [ Failure ]
-crbug.com/407147670 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube";sampleCount=1 [ Failure ]
-crbug.com/407147670 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube";sampleCount=1 [ Failure ]
+crbug.com/407147670 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d-array";sampleCount=1 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d-array";sampleCount=1 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d-array";sampleCount=1 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=1 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=1 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=1 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ amd mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="2d";sampleCount=4 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube-array";sampleCount=1 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube-array";sampleCount=1 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube-array";sampleCount=1 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube";sampleCount=1 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube";sampleCount=1 [ Failure ] # CAT:Accuracy
+crbug.com/407147670 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube";sampleCount=1 [ Failure ] # CAT:Accuracy
 
 # Some AbstractFloat matrix arithmetic tests failing on Win (mostly Intel, some NVIDIA)
 crbug.com/407159836 [ dawn-no-backend-validation intel no-asan webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_addition:matrix:inputSource="const";cols=4;rows=4 [ Failure ]
@@ -853,11 +857,11 @@ crbug.com/419047170 [ dawn-backend-validation intel linux ] webgpu:api,operation
 crbug.com/419047170 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="astc*";dimension="3d" [ Failure ]
 
 # AMD mac textureSampleLevel on 3d  bc7-rgba-norm-srgb, offset=true
-crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="bc7-rgba-unorm-srgb";dim="3d";filt="linear";mode="m";offset=true [ Failure ]
-crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="bc7-rgba-unorm-srgb";dim="3d";filt="linear";mode="c";offset=true [ Failure ]
-crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="bc7-rgba-unorm-srgb";dim="3d";filt="linear";mode="m";offset=true [ Failure ]
-crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="bc7-rgba-unorm-srgb";dim="3d";filt="linear";mode="c";offset=true [ Failure ]
-crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="bc7-rgba-unorm-srgb";dim="3d";filt="linear";mode="m";offset=true [ Failure ]
+crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="bc7-rgba-unorm-srgb";dim="3d";filt="linear";mode="m";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="bc7-rgba-unorm-srgb";dim="3d";filt="linear";mode="c";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="f";format="bc7-rgba-unorm-srgb";dim="3d";filt="linear";mode="m";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="bc7-rgba-unorm-srgb";dim="3d";filt="linear";mode="c";offset=true [ Failure ] # CAT:Accuracy
+crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="bc7-rgba-unorm-srgb";dim="3d";filt="linear";mode="m";offset=true [ Failure ] # CAT:Accuracy
 
 # Win/GTX 1660 failures when going from Win10/driver 546.01 to Win11/driver 576.02
 crbug.com/417768352 [ dawn-backend-validation nvidia-0x2184 win11 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;*;sampleMask=0 [ Failure ]
@@ -876,7 +880,7 @@ crbug.com/417770938 [ dawn-backend-validation nvidia-0x2184 win11 ] webgpu:api,v
 crbug.com/417770938 [ dawn-backend-validation nvidia-0x2184 win11 ] webgpu:api,validation,capability_checks,limits,maxUniformBuffersPerShaderStage:createBindGroupLayout,at_over:* [ Failure ]
 crbug.com/417770938 [ dawn-backend-validation nvidia-0x2184 webgpu-dxc-disabled win11 ] webgpu:api,validation,capability_checks,limits,maxUniformBuffersPerShaderStage:createPipeline,at_over:* [ Failure ]
 crbug.com/417770938 [ dawn-backend-validation nvidia-0x2184 win11 ] webgpu:api,validation,state,device_lost,destroy:* [ Failure ]
-crbug.com/418173490 [ nvidia-0x2184 win11 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="f";format="r8snorm";filt="linear";modeU="m";modeV="c";offset=true [ Failure ]
+crbug.com/418173490 [ nvidia-0x2184 win11 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="f";format="r8snorm";filt="linear";modeU="m";modeV="c";offset=true [ Failure ] # CAT:Accuracy
 crbug.com/418226002 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win11 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";* [ Failure ]
 crbug.com/418226002 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win11 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";* [ Failure ]
 crbug.com/418226002 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win11 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";* [ Failure ]
@@ -929,13 +933,13 @@ crbug.com/473827154 [ qualcomm-0x36334330 win ] webgpu:api,operation,texture_vie
 crbug.com/473827154 [ qualcomm-0x36334330 win ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:format="depth*";func="textureSampleCompare*" [ Failure ]
 crbug.com/473827156 [ qualcomm-0x36334330 win ] webgpu:api,validation,capability_checks,* [ RetryOnFailure ]
 crbug.com/473827158 [ qualcomm-0x36334330 win ] webgpu:api,validation,encoding,encoder_state:pass_end_invalid_order:* [ Failure ]
-crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,*i32* [ Failure ]
-crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,insertBits:integer:inputSource="const";signed=true;* [ Failure ]
-crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_decrement_underflow: [ Failure ]
-crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_increment: [ Failure ]
-crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:vec3_element_increment: [ Failure ]
-crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:vec4_element_increment: [ Failure ]
-crbug.com/475877305 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ]
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,*i32* [ Failure ] # CAT:Critical
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,insertBits:integer:inputSource="const";signed=true;* [ Failure ] # CAT:Critical
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_decrement_underflow: [ Failure ] # CAT:Critical
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:scalar_i32_increment: [ Failure ] # CAT:Critical
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:vec3_element_increment: [ Failure ] # CAT:Critical
+crbug.com/475891205 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,statement,increment_decrement:vec4_element_increment: [ Failure ] # CAT:Critical
+crbug.com/475877305 [ qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ] # CAT:Critical
 crbug.com/477643914 [ dawn-backend-validation qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:api,validation,state,device_lost,destroy:createTexture,2d,* [ Failure ]
 crbug.com/477643914 [ dawn-backend-validation qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:api,validation,state,device_lost,destroy:createView,2d,* [ Failure ]
 
@@ -1041,24 +1045,24 @@ crbug.com/412395829 [ dawn-backend-validation graphite-enabled nvidia release-x6
 crbug.com/412395829 [ dawn-backend-validation graphite-enabled nvidia release-x64 target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";srcAndDstInSameGPUDevice=false;* [ RetryOnFailure ]
 
 # Pixel 4 failures, likely exposed by change to remove loop unrolling
-crbug.com/428272702 [ android-pixel-4 ] webgpu:shader,execution,expression,binary,f32_matrix_scalar_multiplication:* [ Failure ]
-crbug.com/428272702 [ android-pixel-4 ] webgpu:shader,execution,expression,binary,f32_matrix_subtraction:* [ Failure ]
-crbug.com/428272877 [ android-pixel-4 ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_vector_scalar_compound:* [ Failure ]
+crbug.com/428272702 [ android-pixel-4 ] webgpu:shader,execution,expression,binary,f32_matrix_scalar_multiplication:* [ Failure ] # CAT:Critical
+crbug.com/428272702 [ android-pixel-4 ] webgpu:shader,execution,expression,binary,f32_matrix_subtraction:* [ Failure ] # CAT:Critical
+crbug.com/428272877 [ android-pixel-4 ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_vector_scalar_compound:* [ Failure ] # CAT:Critical
 
 # NVIDIA 1660 failures, likely exposed by change to remove loop unrolling
-crbug.com/428272702 [ linux no-clang-coverage nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:shader,execution,expression,binary,f32_matrix_scalar_multiplication:matrix_scalar_compound:* [ Failure ]
+crbug.com/428272702 [ linux no-clang-coverage nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:shader,execution,expression,binary,f32_matrix_scalar_multiplication:matrix_scalar_compound:* [ Failure ] # CAT:Critical
 
-crbug.com/432294346 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,workgroupUniformLoad:types:type="ComplexStruct";* [ Failure ]
+crbug.com/432294346 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,workgroupUniformLoad:types:type="ComplexStruct";* [ Failure ] # CAT:Critical
 
 # Seemingly flaky but always flake on retry too (at least some of these)
 crbug.com/432284622 [ intel sequoia webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Failure ]
 crbug.com/432284622 [ intel sequoia webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 
 # Seemingly flaky but always flake on retry too (at least some of these)
-crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Failure ]
-crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:* [ Failure ]
-crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:* [ Failure ]
-crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ Failure ]
+crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Failure ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:* [ Failure ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:* [ Failure ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ Failure ] # CAT:Accuracy
 
 # rgb10a2unorm precision issue on Intel 770
 crbug.com/445458866 [ intel-0x4680 linux ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";* [ Failure ]
@@ -1069,23 +1073,23 @@ crbug.com/421941589 [ angle-opengl arch-x86_64 desktop display-server-x graphite
 crbug.com/421941589 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgb10a2unorm";* [ Failure ]
 
 # Unsure if these ever pass on retry, or if they also are flaky-but-fail-on-retry
-crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:* [ RetryOnFailure ]
-crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ RetryOnFailure ]
+crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:* [ RetryOnFailure ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ RetryOnFailure ] # CAT:Accuracy
 
-crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Failure ]
-crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:* [ Failure ]
+crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
+crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:* [ Failure ] # CAT:Accuracy
 
 # Failures on brya devices running Android Desktop.
 crbug.com/445230380 [ android android-brya dawn-no-backend-validation webgpu-service-worker ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
 crbug.com/445230380 [ android android-brya webgpu-no-worker ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
 crbug.com/445232714 [ android android-brya webgpu-no-worker ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";* [ Failure ]
-crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGather:*d_coords:* [ Failure ]
-crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:*d_coords:* [ Failure ]
-crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:*d_coords:* [ Failure ]
-crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:*d_coords:* [ Failure ]
-crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:*d_coords:* [ Failure ]
-crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:*d_coords:* [ Failure ]
-crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:*d_coords:* [ Failure ]
+crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGather:*d_coords:* [ Failure ] # CAT:Critical
+crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:*d_coords:* [ Failure ] # CAT:Critical
+crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:*d_coords:* [ Failure ] # CAT:Critical
+crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:*d_coords:* [ Failure ] # CAT:Critical
+crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:*d_coords:* [ Failure ] # CAT:Critical
+crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:*d_coords:* [ Failure ] # CAT:Critical
+crbug.com/445241198 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:*d_coords:* [ Failure ] # CAT:Critical
 crbug.com/445242488 [ android android-brya webgpu-no-worker ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:* [ Failure ]
 crbug.com/445242964 [ android android-brya webgpu-no-worker ] webgpu:web_platform,copyToTexture,image_file:from_multiple_formats:imageName="four-colors.avif";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/445242964 [ android android-brya webgpu-no-worker ] webgpu:web_platform,copyToTexture,image_file:from_multiple_formats:imageName="four-colors.avif";srcDoFlipYDuringCopy=true [ Failure ]
@@ -1139,15 +1143,15 @@ crbug.com/469120957 [ clang-coverage win ] webgpu:shader,execution,zero_init:com
 
 # Untriaged failures of Pixel 10
 # See crbug.com/40238674 and crbug.com/475503907
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:* [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:* [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:* [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureLoad:* [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureStore:* [ Skip ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:* [ Skip ] # CAT:Accuracy
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ Skip ] # CAT:Accuracy
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Skip ] # CAT:Accuracy
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:* [ Skip ] # CAT:Accuracy
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:* [ Skip ] # CAT:Accuracy
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureGather:* [ Skip ] # CAT:Accuracy
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Skip ] # CAT:Accuracy
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureLoad:* [ Skip ] # CAT:Accuracy
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureStore:* [ Skip ] # CAT:Accuracy
 crbug.com/0000 [ android-pixel-10 dawn-backend-validation ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=* [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,operation,storage_texture,read_only:basic:* [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,encoding,encoder_open_state:* [ Failure ]
@@ -1235,18 +1239,18 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,buil
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:f32:vectorize=3;non_uniform_discard=true [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:f32:vectorize=4;non_uniform_discard=false [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:f32:vectorize=4;non_uniform_discard=true [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[111,3] [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[13,10] [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[13,53] [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[15,15] [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[16,16] [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[17,17] [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[19,13] [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[3,111] [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[3,3] [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[3,35] [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[35,3] [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[53,13] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[111,3] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[13,10] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[13,53] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[15,15] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[16,16] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[17,17] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[19,13] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[3,111] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[3,3] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[3,35] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[35,3] [ Failure ]
+crbug.com/485209424 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:fragment:size=[53,13] [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,texture_utils:weights:stage="compute" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,texture_utils:weights:stage="fragment" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,texture_utils:weights:stage="vertex" [ Failure ]
