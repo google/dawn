@@ -202,10 +202,11 @@ MaybeError PipelineLayout::Initialize() {
     // passed in and is set only on ranges with kRegisterSpacePlaceholder. Returns whether or not
     // the parameter was set. A root parameter is not set if the number of ranges is 0.
     auto SetRootDescriptorTable = [&](std::span<const D3D12_DESCRIPTOR_RANGE1> descriptorRanges,
-                                      uint32_t registerSpace = kRegisterSpacePlaceholder) -> bool {
+                                      uint32_t registerSpace =
+                                          kRegisterSpacePlaceholder) -> std::optional<uint32_t> {
         auto rangeCount = descriptorRanges.size();
         if (rangeCount == 0) {
-            return false;
+            return {};
         }
 
         D3D12_ROOT_PARAMETER1 rootParameter = {};
@@ -223,13 +224,13 @@ MaybeError PipelineLayout::Initialize() {
         }
 
         rootParameters.emplace_back(rootParameter);
-        return true;
+        return static_cast<uint32_t>(rootParameters.size() - 1);
     };
 
     mResourceTableRootParameterIndex = kInvalidResourceTableRootParameterIndex;
     if (UsesResourceTable()) {
-        if (SetRootDescriptorTable(resourceTableCbvUavSrvDescriptorRanges)) {
-            mResourceTableRootParameterIndex = static_cast<uint32_t>(rootParameters.size() - 1u);
+        if (auto paramIndex = SetRootDescriptorTable(resourceTableCbvUavSrvDescriptorRanges)) {
+            mResourceTableRootParameterIndex = *paramIndex;
         }
     }
 
@@ -237,14 +238,13 @@ MaybeError PipelineLayout::Initialize() {
         const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
 
         // Note that CbvUavSrvDescriptorRanges includes dynamic storage buffers.
-        if (SetRootDescriptorTable(bindGroupLayout->GetCbvUavSrvDescriptorRanges(),
-                                   static_cast<uint32_t>(group))) {
-            mCbvUavSrvRootParameterIndices[group] =
-                static_cast<uint32_t>(rootParameters.size() - 1u);
+        if (auto paramIndex = SetRootDescriptorTable(
+                bindGroupLayout->GetCbvUavSrvDescriptorRanges(), static_cast<uint32_t>(group))) {
+            mCbvUavSrvRootParameterIndices[group] = *paramIndex;
         }
-        if (SetRootDescriptorTable(bindGroupLayout->GetSamplerDescriptorRanges(),
-                                   static_cast<uint32_t>(group))) {
-            mSamplerRootParameterIndices[group] = static_cast<uint32_t>(rootParameters.size() - 1u);
+        if (auto paramIndex = SetRootDescriptorTable(bindGroupLayout->GetSamplerDescriptorRanges(),
+                                                     static_cast<uint32_t>(group))) {
+            mSamplerRootParameterIndices[group] = *paramIndex;
         }
 
         // Combine the static samplers from the all of the bind group layouts to one vector.
@@ -287,7 +287,6 @@ MaybeError PipelineLayout::Initialize() {
 
             // Set root descriptors in root signatures.
             rootParameter.Descriptor = rootDescriptor;
-            mDynamicUniformRootParameterIndices[group][dynamicBindingIndex] = rootParameters.size();
 
             // Set parameter types according to bind group layout descriptor.
             rootParameter.ParameterType =
@@ -296,6 +295,7 @@ MaybeError PipelineLayout::Initialize() {
             // Set visibilities according to bind group layout descriptor.
             rootParameter.ShaderVisibility = ShaderVisibilityType(bindingInfo.visibility);
 
+            mDynamicUniformRootParameterIndices[group][dynamicBindingIndex] = rootParameters.size();
             rootParameters.emplace_back(rootParameter);
         }
     }
