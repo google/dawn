@@ -192,7 +192,6 @@ class DawnRootCommandVisitor : public RootCommandVisitor {
     MaybeError operator()(const schema::RootCommandQueueSubmitCmdData& data) override;
     MaybeError operator()(const schema::RootCommandSetLabelCmdData& data) override;
     MaybeError operator()(const schema::RootCommandInitTextureCmdData& data) override;
-    MaybeError operator()(const schema::RootCommandUnmapBufferCmdData& data) override { return {}; }
     MaybeError operator()(const schema::RootCommandEndCmdData& data) override { return {}; }
 
     ResourceVisitor& GetResourceVisitor() override { return mResourceVisitor; }

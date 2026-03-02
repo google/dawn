@@ -226,7 +226,6 @@ DAWN_REPLAY_EXPAND_RESOLVE_MODES_ENUM(DAWN_REPLAY_ENUM)
     X(QueueSubmit)                   \
     X(WriteBuffer)                   \
     X(WriteTexture)                  \
-    X(UnmapBuffer)                   \
     X(SetLabel)                      \
     X(InitTexture)                   \
     X(End)
@@ -699,10 +698,6 @@ DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(InitTexture, INIT_TEXTURE_CMD_DATA_MEMBER
 #define QUEUE_SUBMIT_CMD_DATA_MEMBER(X) X(std::vector<ObjectId>, commandBuffers)
 
 DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(QueueSubmit, QUEUE_SUBMIT_CMD_DATA_MEMBER){};
-
-#define UNMAP_BUFFER_CMD_DATA_MEMBER(X)
-
-DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(UnmapBuffer, UNMAP_BUFFER_CMD_DATA_MEMBER){};
 
 #define END_ROOT_CMD_DATA_MEMBER(X)
 

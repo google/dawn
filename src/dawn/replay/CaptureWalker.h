@@ -225,7 +225,6 @@ class RootCommandVisitor {
     virtual MaybeError operator()(const schema::RootCommandQueueSubmitCmdData& data) = 0;
     virtual MaybeError operator()(const schema::RootCommandSetLabelCmdData& data) = 0;
     virtual MaybeError operator()(const schema::RootCommandInitTextureCmdData& data) = 0;
-    virtual MaybeError operator()(const schema::RootCommandUnmapBufferCmdData& data) = 0;
     virtual MaybeError operator()(const schema::RootCommandEndCmdData& data) = 0;
     virtual MaybeError operator()(const std::monostate&);
 };
