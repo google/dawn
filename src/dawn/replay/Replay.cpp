@@ -1508,12 +1508,15 @@ std::unique_ptr<ReplayImpl> ReplayImpl::Create(wgpu::Device device,
 }
 
 ReplayImpl::ReplayImpl(wgpu::Device device, std::unique_ptr<CaptureImpl> capture)
-    : mVisitor(new DawnRootCommandVisitor(device)), mWalker(std::move(capture)) {
+    : mVisitor(new DawnRootCommandVisitor(device)), mCapture(std::move(capture)) {
     mVisitor->AddResource(schema::kDeviceId, "", device);
 }
 
 MaybeError ReplayImpl::Play() {
-    return mWalker.Walk(*mVisitor);
+    if (mCapture->Walk(*mVisitor)) {
+        return {};
+    }
+    return DAWN_INTERNAL_ERROR("Capture walk failed");
 }
 
 template <typename T>

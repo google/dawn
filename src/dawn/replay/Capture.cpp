@@ -62,6 +62,10 @@ CaptureImpl::CaptureImpl(std::vector<uint8_t> commands, std::vector<uint8_t> con
 
 CaptureImpl::~CaptureImpl() {}
 
+bool CaptureImpl::Walk(RootCommandVisitor& visitor) {
+    return CaptureWalker::Walk(visitor).IsSuccess();
+}
+
 ReadHead CaptureImpl::GetCommandReadHead() const {
     return ReadHead(mCommands);
 }

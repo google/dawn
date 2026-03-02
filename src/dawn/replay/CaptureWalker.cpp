@@ -32,7 +32,6 @@
 #include <variant>
 #include <vector>
 
-#include "dawn/replay/Capture.h"
 #include "dawn/replay/Deserialization.h"
 
 namespace dawn::replay {
@@ -313,12 +312,9 @@ MaybeError RootCommandVisitor::operator()(const std::monostate&) {
     return DAWN_INTERNAL_ERROR("Invalid command (monostate)");
 }
 
-CaptureWalker::CaptureWalker(std::unique_ptr<const CaptureImpl> capture)
-    : mCapture(std::move(capture)) {}
-
 MaybeError CaptureWalker::Walk(RootCommandVisitor& visitor) {
-    auto readHead = mCapture->GetCommandReadHead();
-    auto contentReadHead = mCapture->GetContentReadHead();
+    auto readHead = GetCommandReadHead();
+    auto contentReadHead = GetContentReadHead();
     visitor.SetContentReadHead(&contentReadHead);
 
     while (!readHead.IsDone()) {

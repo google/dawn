@@ -39,6 +39,8 @@ namespace dawn::replay {
 
 using CaptureStream = std::istream;
 
+class RootCommandVisitor;
+
 // The public API of a Capture.
 // In the future it should have calls to get information (e.g. number of commands)
 class DAWN_REPLAY_EXPORT Capture {
@@ -48,6 +50,9 @@ class DAWN_REPLAY_EXPORT Capture {
                                            CaptureStream& contentStream,
                                            size_t contentSize);
     virtual ~Capture() = 0;
+
+    // Returns true if walk successful.
+    virtual bool Walk(RootCommandVisitor& visitor) = 0;
 };
 
 // The public API of a replay controller of a capture.

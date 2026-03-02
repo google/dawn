@@ -37,6 +37,7 @@
 
 namespace dawn::replay {
 
+class CaptureImpl;
 class DawnRootCommandVisitor;
 
 // Replays a capture. For now we only support replaying the entire capture.
@@ -66,7 +67,7 @@ class ReplayImpl : public Replay {
     ReplayImpl(wgpu::Device device, std::unique_ptr<CaptureImpl> capture);
 
     std::unique_ptr<DawnRootCommandVisitor> mVisitor;
-    CaptureWalker mWalker;
+    std::unique_ptr<CaptureImpl> mCapture;
 };
 
 }  // namespace dawn::replay
