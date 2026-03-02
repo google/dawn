@@ -37,7 +37,7 @@ set(private_headers
     "Error.h"
     "ReadHead.h"
     "ReplayImpl.h"
-    "ReplayImplBase.h"
+    "CaptureWalker.h"
 )
 
 set(sources
@@ -47,7 +47,7 @@ set(sources
     "Error.cpp"
     "ReadHead.cpp"
     "Replay.cpp"
-    "ReplayImplBase.cpp"
+    "CaptureWalker.cpp"
 )
 
 dawn_add_library(

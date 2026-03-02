@@ -33,7 +33,7 @@
 #include <string_view>
 
 #include "dawn/replay/Replay.h"
-#include "src/dawn/replay/ReplayImplBase.h"
+#include "src/dawn/replay/CaptureWalker.h"
 
 namespace dawn::replay {
 
@@ -66,7 +66,7 @@ class ReplayImpl : public Replay {
     ReplayImpl(wgpu::Device device, std::unique_ptr<CaptureImpl> capture);
 
     std::unique_ptr<DawnRootCommandVisitor> mVisitor;
-    ReplayImplBase mBase;
+    CaptureWalker mWalker;
 };
 
 }  // namespace dawn::replay

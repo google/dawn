@@ -37,6 +37,8 @@ static_library("replay") {
     "BlitBufferToDepthTexture.h",
     "Capture.cpp",
     "Capture.h",
+    "CaptureWalker.cpp",
+    "CaptureWalker.h",
     "Deserialization.cpp",
     "Deserialization.h",
     "Error.cpp",
@@ -45,8 +47,6 @@ static_library("replay") {
     "ReadHead.h",
     "Replay.cpp",
     "ReplayImpl.h",
-    "ReplayImplBase.cpp",
-    "ReplayImplBase.h",
   ]
 
   deps = [

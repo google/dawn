@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_REPLAY_REPLAYIMPLBASE_H_
-#define SRC_DAWN_REPLAY_REPLAYIMPLBASE_H_
+#ifndef SRC_DAWN_REPLAY_CAPTUREWALKER_H_
+#define SRC_DAWN_REPLAY_CAPTUREWALKER_H_
 
 #include <memory>
 #include <string>
@@ -237,10 +237,10 @@ MaybeError ProcessComputePassCommands(ReadHead* readHead, ComputePassVisitor* vi
 MaybeError ProcessRenderPassCommands(ReadHead* readHead, RenderPassVisitor* visitor);
 MaybeError ProcessRenderBundleCommands(ReadHead* readHead, RenderBundleVisitor* visitor);
 
-class ReplayImplBase {
+class CaptureWalker {
   public:
-    explicit ReplayImplBase(std::unique_ptr<const CaptureImpl> capture);
-    MaybeError Play(RootCommandVisitor& visitor);
+    explicit CaptureWalker(std::unique_ptr<const CaptureImpl> capture);
+    MaybeError Walk(RootCommandVisitor& visitor);
 
   private:
     std::unique_ptr<const CaptureImpl> mCapture;
@@ -248,4 +248,4 @@ class ReplayImplBase {
 
 }  // namespace dawn::replay
 
-#endif  // SRC_DAWN_REPLAY_REPLAYIMPLBASE_H_
+#endif  // SRC_DAWN_REPLAY_CAPTUREWALKER_H_
