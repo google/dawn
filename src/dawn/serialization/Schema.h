@@ -185,19 +185,25 @@ DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES_ENUM(DAWN_REPLAY_ENUM)
     DAWN_REPLAY_RENDER_COMMANDS(X)          \
     X(End)
 
-#define DAWN_REPLAY_ENCODER_COMMANDS(X) \
-    X(BeginComputePass)                 \
-    X(BeginRenderPass)                  \
-    X(ClearBuffer)                      \
-    X(CopyBufferToBuffer)               \
-    X(CopyBufferToTexture)              \
-    X(CopyTextureToBuffer)              \
-    X(CopyTextureToTexture)             \
-    X(ResolveQuerySet)                  \
-    X(WriteBuffer)                      \
-    X(WriteTimestamp)                   \
-    DAWN_REPLAY_DEBUG_COMMANDS(X)       \
+#define DAWN_REPLAY_ENCODER_CREATION_COMMANDS(X) \
+    X(BeginComputePass)                          \
+    X(BeginRenderPass)
+
+#define DAWN_REPLAY_ENCODER_NON_CREATION_COMMANDS(X) \
+    X(ClearBuffer)                                   \
+    X(CopyBufferToBuffer)                            \
+    X(CopyBufferToTexture)                           \
+    X(CopyTextureToBuffer)                           \
+    X(CopyTextureToTexture)                          \
+    X(ResolveQuerySet)                               \
+    X(WriteBuffer)                                   \
+    X(WriteTimestamp)                                \
+    DAWN_REPLAY_DEBUG_COMMANDS(X)                    \
     X(End)
+
+#define DAWN_REPLAY_ENCODER_COMMANDS(X)      \
+    DAWN_REPLAY_ENCODER_CREATION_COMMANDS(X) \
+    DAWN_REPLAY_ENCODER_NON_CREATION_COMMANDS(X)
 
 #define DAWN_REPLAY_COMMAND_BUFFER_COMMANDS_ENUM(X) \
     X(CommandBufferCommand, DAWN_REPLAY_COMMAND_BUFFER_COMMANDS)

@@ -106,6 +106,48 @@ struct BindGroupLayoutData {
 
 class ReadHead;
 
+class ComputePassVisitor {
+  public:
+    virtual ~ComputePassVisitor() = default;
+#define VISITOR_METHOD(NAME) \
+    virtual MaybeError operator()(const schema::CommandBufferCommand##NAME##CmdData& data) = 0;
+    DAWN_REPLAY_COMPUTE_PASS_COMMANDS(VISITOR_METHOD)
+#undef VISITOR_METHOD
+};
+
+class RenderPassVisitor {
+  public:
+    virtual ~RenderPassVisitor() = default;
+#define VISITOR_METHOD(NAME) \
+    virtual MaybeError operator()(const schema::CommandBufferCommand##NAME##CmdData& data) = 0;
+    DAWN_REPLAY_RENDER_PASS_COMMANDS(VISITOR_METHOD)
+#undef VISITOR_METHOD
+};
+
+class RenderBundleVisitor {
+  public:
+    virtual ~RenderBundleVisitor() = default;
+#define VISITOR_METHOD(NAME) \
+    virtual MaybeError operator()(const schema::CommandBufferCommand##NAME##CmdData& data) = 0;
+    DAWN_REPLAY_RENDER_BUNDLE_COMMANDS(VISITOR_METHOD)
+#undef VISITOR_METHOD
+};
+
+class EncoderVisitor {
+  public:
+    virtual ~EncoderVisitor() = default;
+
+    virtual ResultOrError<ComputePassVisitor*> BeginComputePass(
+        const schema::CommandBufferCommandBeginComputePassCmdData& data) = 0;
+    virtual ResultOrError<RenderPassVisitor*> BeginRenderPass(
+        const schema::CommandBufferCommandBeginRenderPassCmdData& data) = 0;
+
+#define VISITOR_METHOD(NAME) \
+    virtual MaybeError operator()(const schema::CommandBufferCommand##NAME##CmdData& data) = 0;
+    DAWN_REPLAY_ENCODER_NON_CREATION_COMMANDS(VISITOR_METHOD)
+#undef VISITOR_METHOD
+};
+
 struct CommandBufferData {
     ReadHead* readHead;
 };
@@ -136,6 +178,7 @@ struct RenderBundleData {
     X(RenderPipeline, schema::RenderPipeline)   \
     X(Sampler, schema::Sampler)                 \
     X(ShaderModule, schema::ShaderModule)       \
+    X(TexelBufferView, schema::TexelBufferView) \
     X(Texture, schema::Texture)                 \
     X(TextureView, schema::TextureView)
 
@@ -188,6 +231,11 @@ class RootCommandVisitor {
     virtual MaybeError operator()(const schema::RootCommandEndCmdData& data) = 0;
     virtual MaybeError operator()(const std::monostate&);
 };
+
+MaybeError ProcessEncoderCommands(ReadHead* readHead, EncoderVisitor* visitor);
+MaybeError ProcessComputePassCommands(ReadHead* readHead, ComputePassVisitor* visitor);
+MaybeError ProcessRenderPassCommands(ReadHead* readHead, RenderPassVisitor* visitor);
+MaybeError ProcessRenderBundleCommands(ReadHead* readHead, RenderBundleVisitor* visitor);
 
 class ReplayImplBase {
   public:

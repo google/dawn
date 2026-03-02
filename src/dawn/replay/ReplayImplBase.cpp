@@ -222,6 +222,94 @@ MaybeError DeserializeRootCommand(ReadHead& readHead,
 
 }  // anonymous namespace
 
+#define PASS_COMMAND_CASE(NAME)                                                   \
+    case schema::CommandBufferCommand::NAME: {                                    \
+        schema::CommandBufferCommand##NAME##CmdData data;                         \
+        DAWN_TRY(Deserialize(*readHead, &data));                                  \
+        DAWN_TRY((*visitor)(data));                                               \
+        if constexpr (std::is_same_v<schema::CommandBufferCommand##NAME##CmdData, \
+                                     schema::CommandBufferCommandEndCmdData>) {   \
+            return {};                                                            \
+        }                                                                         \
+        break;                                                                    \
+    }
+
+#define PROCESS_COMMANDS_FUNC(PASS_NAME, COMMANDS)                                             \
+    MaybeError Process##PASS_NAME##Commands(ReadHead* readHead, PASS_NAME##Visitor* visitor) { \
+        while (!readHead->IsDone()) {                                                          \
+            schema::CommandBufferCommand cmd;                                                  \
+            DAWN_TRY(Deserialize(*readHead, &cmd));                                            \
+            switch (cmd) {                                                                     \
+                COMMANDS(PASS_COMMAND_CASE)                                                    \
+                default:                                                                       \
+                    return DAWN_INTERNAL_ERROR("unhandled " #PASS_NAME " command");            \
+            }                                                                                  \
+        }                                                                                      \
+        return DAWN_INTERNAL_ERROR("Missing " #PASS_NAME " End command");                      \
+    }
+
+PROCESS_COMMANDS_FUNC(ComputePass, DAWN_REPLAY_COMPUTE_PASS_COMMANDS)
+PROCESS_COMMANDS_FUNC(RenderPass, DAWN_REPLAY_RENDER_PASS_COMMANDS)
+PROCESS_COMMANDS_FUNC(RenderBundle, DAWN_REPLAY_RENDER_BUNDLE_COMMANDS)
+
+#undef PROCESS_COMMANDS_FUNC
+
+MaybeError ProcessEncoderCommands(ReadHead* readHead, EncoderVisitor* visitor) {
+    while (!readHead->IsDone()) {
+        schema::CommandBufferCommand cmd;
+        DAWN_TRY(Deserialize(*readHead, &cmd));
+
+        switch (cmd) {
+            case schema::CommandBufferCommand::BeginComputePass: {
+                schema::CommandBufferCommandBeginComputePassCmdData data;
+                DAWN_TRY(Deserialize(*readHead, &data));
+                ComputePassVisitor* subVisitor;
+                DAWN_TRY_ASSIGN(subVisitor, visitor->BeginComputePass(data));
+                DAWN_TRY(ProcessComputePassCommands(readHead, subVisitor));
+                break;
+            }
+            case schema::CommandBufferCommand::BeginRenderPass: {
+                schema::CommandBufferCommandBeginRenderPassCmdData data;
+                DAWN_TRY(Deserialize(*readHead, &data));
+                RenderPassVisitor* subVisitor;
+                DAWN_TRY_ASSIGN(subVisitor, visitor->BeginRenderPass(data));
+                DAWN_TRY(ProcessRenderPassCommands(readHead, subVisitor));
+                break;
+            }
+
+#define ENCODER_ONLY_COMMAND_CASE(NAME)                                           \
+    case schema::CommandBufferCommand::NAME: {                                    \
+        schema::CommandBufferCommand##NAME##CmdData data;                         \
+        DAWN_TRY(Deserialize(*readHead, &data));                                  \
+        DAWN_TRY((*visitor)(data));                                               \
+        if constexpr (std::is_same_v<schema::CommandBufferCommand##NAME##CmdData, \
+                                     schema::CommandBufferCommandEndCmdData>) {   \
+            return {};                                                            \
+        }                                                                         \
+        break;                                                                    \
+    }
+
+                DAWN_REPLAY_DEBUG_COMMANDS(ENCODER_ONLY_COMMAND_CASE)
+                ENCODER_ONLY_COMMAND_CASE(ClearBuffer)
+                ENCODER_ONLY_COMMAND_CASE(CopyBufferToBuffer)
+                ENCODER_ONLY_COMMAND_CASE(CopyBufferToTexture)
+                ENCODER_ONLY_COMMAND_CASE(CopyTextureToBuffer)
+                ENCODER_ONLY_COMMAND_CASE(CopyTextureToTexture)
+                ENCODER_ONLY_COMMAND_CASE(ResolveQuerySet)
+                ENCODER_ONLY_COMMAND_CASE(WriteBuffer)
+                ENCODER_ONLY_COMMAND_CASE(WriteTimestamp)
+                ENCODER_ONLY_COMMAND_CASE(End)
+#undef ENCODER_ONLY_COMMAND_CASE
+
+            default:
+                return DAWN_INTERNAL_ERROR("unhandled encoder command");
+        }
+    }
+    return DAWN_INTERNAL_ERROR("Missing encoder End command");
+}
+
+#undef PASS_COMMAND_CASE
+
 MaybeError ResourceVisitor::operator()(const InvalidData& data) {
     return DAWN_INTERNAL_ERROR("Invalid resource data");
 }
