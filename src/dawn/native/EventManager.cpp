@@ -315,16 +315,18 @@ FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
 
     if (const auto* queueAndSerial = event->GetIfQueueAndSerial()) {
         if (auto q = queueAndSerial->queue.Promote()) {
-            q->TrackSerialTask(queueAndSerial->completionSerial, [this, event]() {
-                // If this is executed, we can be sure that the raw pointer to this EventManager is
-                // valid because the task is ran by the Queue and:
-                //   Queue -[refs]->
-                //     Device -[refs]->
-                //       Adapter -[refs]->
-                //         Instance -[owns]->
-                //           EventManager.
-                SetFutureReady(event.Get());
-            });
+            q->TrackSerialTask(QueuePriority::UserVisible, queueAndSerial->completionSerial,
+                               [this, event]() {
+                                   // If this is executed, we can be sure that the raw pointer to
+                                   // this EventManager is valid because the task is ran by the
+                                   // Queue and:
+                                   //   Queue -[refs]->
+                                   //     Device -[refs]->
+                                   //       Adapter -[refs]->
+                                   //         Instance -[owns]->
+                                   //           EventManager.
+                                   SetFutureReady(event.Get());
+                               });
         }
     }
 

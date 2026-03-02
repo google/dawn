@@ -344,7 +344,7 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
     for (size_t i = 0; i < mRecordingContext.commandBufferList.size(); ++i) {
         CommandPoolAndBuffer commands = {mRecordingContext.commandPoolList[i],
                                          mRecordingContext.commandBufferList[i]};
-        TrackSerialTask(lastSubmittedSerial, [commands, this]() {
+        TrackSerialTask(QueuePriority::UserVisible, lastSubmittedSerial, [commands, this]() {
             Device* device = ToBackend(GetDevice());
             VkDevice vkDevice = device->GetVkDevice();
 

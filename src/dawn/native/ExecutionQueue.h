@@ -38,12 +38,33 @@
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/SerialMap.h"
 #include "dawn/common/Time.h"
+#include "dawn/common/ityp_array.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
+
+// Queue task priority can be specified such that when user facing code is called, i.e. |WaitAny|,
+// we can do the minimum amount of work to remain responsive. For other classes of priority, we may
+// defer and execute them either on another thread if full spontaneous is enabled, or when
+// |Tick| is called in the meantime. Higher numeric values correspond to higher priority. Note that
+// this is loosely based off of TaskPriority in Chromium:
+//   https://source.chromium.org/chromium/chromium/src/+/main:base/task/task_traits.h
+// Note that when the queue is asked to process tasks of a given priorty, it will process any tasks
+// of that priority or higher.
+enum class QueuePriority : size_t {
+    // This will always be the lowest priority available. We use 1 instead of 0 because we implement
+    // a decrement operator to iterate through the priorities and by reserving 0, we can assert that
+    // we don't underflow.
+    Lowest = 1,
+
+    BestEffort = Lowest,
+    UserVisible,
+
+    Highest = UserVisible,
+};
 
 // Represents an engine which processes a stream of GPU work. It handles the tracking and
 // update of the various ExecutionSerials related to that work.
@@ -87,7 +108,7 @@ class ExecutionQueueBase : public ApiObjectBase {
     // should not be used anymore.
     // TODO(crbug.com/42240396): Remove |CheckPassedSerials| in favor of |UpdateCompletedSerial|.
     MaybeError CheckPassedSerials();
-    MaybeError UpdateCompletedSerial();
+    MaybeError UpdateCompletedSerial(QueuePriority priority);
 
     // For the commands being internally recorded in backend, that were not urgent to submit, this
     // method makes them to be submitted as soon as possible in next ticks.
@@ -117,10 +138,10 @@ class ExecutionQueueBase : public ApiObjectBase {
 
     // Registers a SerialProcessor that will be notified of serial updates. Note that serial
     // processors are always notified before handling serial tasks.
-    void RegisterSerialProcessor(Ref<SerialProcessor>&& serialProcessor);
+    void RegisterSerialProcessor(QueuePriority priority, Ref<SerialProcessor>&& serialProcessor);
 
     // Tracks new tasks to complete when |serial| is reached.
-    void TrackSerialTask(ExecutionSerial serial, Task&& task);
+    void TrackSerialTask(QueuePriority priority, ExecutionSerial serial, Task&& task);
 
     // In the 'Normal' mode, currently recorded commands in the backend submitted in the next Tick.
     // However in the 'Passive' mode, the submission will be postponed as late as possible, for
@@ -138,7 +159,7 @@ class ExecutionQueueBase : public ApiObjectBase {
     // calls into the backend specific polling mechanisms implemented in
     // CheckAndUpdateCompletedSerials. Alternatively, the backend can actively call
     // UpdateCompletedSerialTo when a new serial is complete to make forward progress proactively.
-    void UpdateCompletedSerialTo(ExecutionSerial completedSerial);
+    void UpdateCompletedSerialTo(QueuePriority priority, ExecutionSerial completedSerial);
 
   private:
     // Each backend should implement to check their passed fences if there are any and return a
@@ -159,7 +180,9 @@ class ExecutionQueueBase : public ApiObjectBase {
     // Submit any pending commands that are enqueued.
     virtual MaybeError SubmitPendingCommandsImpl() = 0;
 
-    void UpdateCompletedSerialToInternal(ExecutionSerial completedSerial, bool forceTasks = false);
+    void UpdateCompletedSerialToInternal(QueuePriority priority,
+                                         ExecutionSerial completedSerial,
+                                         bool forceTasks = false);
 
     // |mCompletedSerial| tracks the last completed command serial that the fence has returned. This
     // is currently implicitly guarded by the lock for |mWaitingTasks| since we only update this
@@ -175,12 +198,16 @@ class ExecutionQueueBase : public ApiObjectBase {
     //   1) Callback ordering is guaranteed.
     //   2) Re-entrant callbacks do not cause lock-inversion issues w.r.t this lock and the
     //      device lock.
+    template <typename T>
+    using QueuePriorityArray =
+        ityp::array<QueuePriority, T, static_cast<size_t>(QueuePriority::Highest) + 1>;
+
     struct State {
         bool mCallingCallbacks = false;
         bool mWaitingForIdle = false;
         bool mAssumeCompleted = false;
-        std::vector<Ref<SerialProcessor>> mWaitingProcessors;
-        SerialMap<ExecutionSerial, Task> mWaitingTasks;
+        QueuePriorityArray<std::vector<Ref<SerialProcessor>>> mWaitingProcessors;
+        QueuePriorityArray<SerialMap<ExecutionSerial, Task>> mWaitingTasks;
     };
     MutexCondVarProtected<State> mState;
 };
