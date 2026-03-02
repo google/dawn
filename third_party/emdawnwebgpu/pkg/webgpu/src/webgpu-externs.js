@@ -102,7 +102,15 @@ GPUSupportedLimits.prototype.maxSamplersPerShaderStage;
 /** @type {number} */
 GPUSupportedLimits.prototype.maxStorageBuffersPerShaderStage;
 /** @type {number} */
+GPUSupportedLimits.prototype.maxStorageBuffersInVertexStage;
+/** @type {number} */
+GPUSupportedLimits.prototype.maxStorageBuffersInFragmentStage;
+/** @type {number} */
 GPUSupportedLimits.prototype.maxStorageTexturesPerShaderStage;
+/** @type {number} */
+GPUSupportedLimits.prototype.maxStorageTexturesInVertexStage;
+/** @type {number} */
+GPUSupportedLimits.prototype.maxStorageTexturesInFragmentStage;
 /** @type {number} */
 GPUSupportedLimits.prototype.maxUniformBuffersPerShaderStage;
 /** @type {number} */
@@ -141,6 +149,8 @@ GPUSupportedLimits.prototype.maxComputeWorkgroupSizeY;
 GPUSupportedLimits.prototype.maxComputeWorkgroupSizeZ;
 /** @type {number} */
 GPUSupportedLimits.prototype.maxComputeWorkgroupsPerDimension;
+/** @type {number} */
+GPUSupportedLimits.prototype.maxImmediateSize;
 
 /**
  * @constructor
