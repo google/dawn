@@ -423,7 +423,7 @@ struct State {
         const auto& args = uc->Args();
 
         Vector<size_t, 2> to_convert;
-        for (size_t i = 0; i < args.Length(); ++i) {
+        for (size_t i = 0; i < args.size(); ++i) {
             if (params[i]->Type() != args[i]->Type()) {
                 to_convert.Push(i);
             }

@@ -73,8 +73,9 @@ struct State {
                     use.instruction,
                     [&](core::ir::Access* access) {
                         b.InsertBefore(access, [&]() {
-                            Vector<core::ir::Value*, 1> indices_copy = access->Indices();
-                            auto* element_ptr = b.Access(element_ptr_ty, ba_ptr, indices_copy);
+                            std::span<core::ir::Value* const> indices_span = access->Indices();
+                            auto* element_ptr = b.Access(element_ptr_ty, ba_ptr,
+                                                         Vector<core::ir::Value*, 1>{indices_span});
                             b.LoadWithResult(access->DetachResult(), element_ptr);
                             access->Destroy();
                         });

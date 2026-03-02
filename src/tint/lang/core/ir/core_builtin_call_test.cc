@@ -87,7 +87,7 @@ TEST_F(IR_CoreBuiltinCallTest, Clone) {
     EXPECT_EQ(core::BuiltinFn::kAbs, new_b->Func());
 
     auto args = new_b->Args();
-    EXPECT_EQ(2u, args.Length());
+    EXPECT_EQ(2u, args.size());
 
     auto* val0 = args[0]->As<Constant>()->Value();
     EXPECT_EQ(1_u, val0->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
@@ -106,7 +106,7 @@ TEST_F(IR_CoreBuiltinCallTest, CloneNoArgs) {
     EXPECT_EQ(core::BuiltinFn::kAbs, new_b->Func());
 
     auto args = new_b->Args();
-    EXPECT_TRUE(args.IsEmpty());
+    EXPECT_TRUE(args.empty());
 }
 
 }  // namespace

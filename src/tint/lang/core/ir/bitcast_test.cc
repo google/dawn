@@ -48,7 +48,7 @@ TEST_F(IR_BitcastTest, Bitcast) {
     ASSERT_NE(inst->Result()->Type(), nullptr);
 
     auto args = inst->Args();
-    ASSERT_EQ(args.Length(), 1u);
+    ASSERT_EQ(args.size(), 1u);
     ASSERT_TRUE(args[0]->Is<Constant>());
     auto val = args[0]->As<Constant>()->Value();
     ASSERT_TRUE(val->Is<core::constant::Scalar<i32>>());
@@ -67,7 +67,7 @@ TEST_F(IR_BitcastTest, Bitcast_Usage) {
     auto* inst = b.Bitcast(mod.Types().i32(), 4_i);
 
     auto args = inst->Args();
-    ASSERT_EQ(args.Length(), 1u);
+    ASSERT_EQ(args.size(), 1u);
     ASSERT_NE(args[0], nullptr);
     EXPECT_THAT(args[0]->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 }

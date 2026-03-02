@@ -98,9 +98,9 @@ struct State {
     void ReplaceAccess(const Access& access) {
         auto* object = access.inst->Object();
 
-        if (access.inst->Indices().Length() > 1) {
+        if (access.inst->Indices().size() > 1) {
             // Create a new access instruction that stops at the vector pointer.
-            Vector<core::ir::Value*, 8> partial_indices{access.inst->Indices()};
+            auto partial_indices = Vector<core::ir::Value*, 8>{access.inst->Indices()};
             partial_indices.Pop();
 
             auto* ptr = object->Type()->As<core::type::Pointer>();
@@ -113,7 +113,7 @@ struct State {
         }
 
         // Replace all uses of the original access instruction.
-        auto* index = access.inst->Indices().Back();
+        auto* index = access.inst->Indices().back();
         ReplaceAccessUses(access.inst, object, index);
 
         // Destroy the original access instruction.

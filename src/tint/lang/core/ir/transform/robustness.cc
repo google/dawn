@@ -272,7 +272,7 @@ struct State {
     void ClampAccessIndices(ir::Access* access) {
         auto* type = access->Object()->Type()->UnwrapPtr();
         auto indices = access->Indices();
-        for (size_t i = 0; i < indices.Length(); i++) {
+        for (size_t i = 0; i < indices.size(); i++) {
             auto* idx = indices[i];
             auto* const_idx = idx->As<ir::Constant>();
 
@@ -364,7 +364,7 @@ struct State {
         // Select which arguments to clamp based on the function overload.
         switch (call->Func()) {
             case core::BuiltinFn::kTextureDimensions: {
-                if (args.Length() > 1) {
+                if (args.size() > 1) {
                     clamp_level(1u);
                 }
                 break;

@@ -50,7 +50,7 @@ TEST_F(IR_SpirvBuiltinCallTest, Clone) {
     EXPECT_TRUE(new_b->ExplicitTemplateParams().IsEmpty());
 
     auto args = new_b->Args();
-    EXPECT_EQ(2u, args.Length());
+    EXPECT_EQ(2u, args.size());
 
     auto* val0 = args[0]->As<core::ir::Constant>()->Value();
     EXPECT_EQ(1_u, val0->As<core::constant::Scalar<core::u32>>()->ValueAs<core::u32>());
@@ -73,7 +73,7 @@ TEST_F(IR_SpirvBuiltinCallTest, CloneWithExplicitParams) {
     EXPECT_EQ(BuiltinFn::kArrayLength, new_b->Func());
 
     auto args = new_b->Args();
-    EXPECT_EQ(2u, args.Length());
+    EXPECT_EQ(2u, args.size());
 
     auto* val0 = args[0]->As<core::ir::Constant>()->Value();
     EXPECT_EQ(1_u, val0->As<core::constant::Scalar<core::u32>>()->ValueAs<core::u32>());
@@ -99,7 +99,7 @@ TEST_F(IR_SpirvBuiltinCallTest, CloneNoArgs) {
     EXPECT_TRUE(new_b->ExplicitTemplateParams().IsEmpty());
 
     auto args = new_b->Args();
-    EXPECT_TRUE(args.IsEmpty());
+    EXPECT_TRUE(args.empty());
 }
 
 }  // namespace

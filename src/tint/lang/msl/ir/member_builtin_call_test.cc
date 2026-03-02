@@ -64,7 +64,7 @@ TEST_F(IR_MslMemberBuiltinCallTest, Clone) {
     EXPECT_TRUE(new_b->Object()->Type()->Is<core::type::SampledTexture>());
 
     auto args = new_b->Args();
-    ASSERT_EQ(2u, args.Length());
+    ASSERT_EQ(2u, args.size());
     EXPECT_TRUE(args[0]->Type()->Is<core::type::Sampler>());
     EXPECT_TRUE(args[1]->Type()->Is<core::type::Vector>());
 }

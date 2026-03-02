@@ -52,7 +52,7 @@ TEST_F(IR_GlslBuiltinCallTest, Clone) {
     EXPECT_EQ(BuiltinFn::kBarrier, new_b->Func());
 
     auto args = new_b->Args();
-    EXPECT_EQ(0u, args.Length());
+    EXPECT_EQ(0u, args.size());
 }
 
 }  // namespace

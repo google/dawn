@@ -1048,8 +1048,8 @@ class Printer {
         tint::Switch(  //
             t,         //
             [&](core::ir::Return*) {
-                if (!t->Args().IsEmpty()) {
-                    TINT_IR_ASSERT(ir_, t->Args().Length() == 1u);
+                if (!t->Args().empty()) {
+                    TINT_IR_ASSERT(ir_, t->Args().size() == 1u);
                     OperandList operands;
                     operands.push_back(Value(t->Args()[0]));
                     current_function_.PushInst(spv::Op::OpReturnValue, operands);
@@ -2338,7 +2338,7 @@ class Printer {
 
         // If there is just a single argument with the same type as the result, this is an identity
         // constructor and we can just pass through the ID of the argument.
-        if (construct->Args().Length() == 1 && result_ty == construct->Args()[0]->Type()) {
+        if (construct->Args().size() == 1 && result_ty == construct->Args()[0]->Type()) {
             values_.Add(construct->Result(), Value(construct->Args()[0]));
             return;
         }

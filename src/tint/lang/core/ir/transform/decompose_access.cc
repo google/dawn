@@ -1059,7 +1059,7 @@ struct State {
         TINT_IR_ASSERT(ir, buffer_ty && (buffer_ty->Count()->Is<type::RuntimeArrayCount>() ||
                                          buffer_ty->Count()->Is<type::ConstantArrayCount>()));
 
-        if (call->Args().Length() > 1) {
+        if (call->Args().size() > 1) {
             // Direct variable access encoded a lower limit.
             call->Result()->ReplaceAllUsesWith(call->Args()[1]);
         } else if (auto* cnst = buffer_ty->Count()->As<type::ConstantArrayCount>()) {

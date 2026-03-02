@@ -227,7 +227,7 @@ struct State {
                 exit_if->SetIf(cond);
 
                 auto exit_args = exit_if->Args();
-                if (!exit_args.IsEmpty()) {
+                if (!exit_args.empty()) {
                     cond->SetResults(tint::Transform<8>(exit_args, [&](auto* arg) {  //
                         return b.InstructionResult(arg->Type());
                     }));

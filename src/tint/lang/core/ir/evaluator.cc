@@ -151,9 +151,9 @@ Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
     auto result_ty = c->Result()->Type();
 
     Vector<const core::type::Type*, 4> arg_types;
-    arg_types.Reserve(c->Args().Length());
+    arg_types.Reserve(c->Args().size());
     Vector<const core::constant::Value*, 4> arg_values;
-    arg_values.Reserve(c->Args().Length());
+    arg_values.Reserve(c->Args().size());
 
     for (auto* arg : c->Args()) {
         arg_types.Push(arg->Type());
@@ -344,9 +344,9 @@ Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* 
     intrinsic::Context context{c->TableData(), b_.ir.Types(), b_.ir.symbols};
 
     Vector<const core::type::Type*, 0> arg_types;
-    arg_types.Reserve(c->Args().Length());
+    arg_types.Reserve(c->Args().size());
     Vector<const core::constant::Value*, 0> args;
-    args.Reserve(c->Args().Length());
+    args.Reserve(c->Args().size());
     for (auto* arg : c->Args()) {
         arg_types.Push(arg->Type());
 

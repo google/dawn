@@ -359,7 +359,7 @@ struct State {
         TINT_ASSERT(sm_ty);
 
         auto args = construct->Args();
-        if (args.Length() > 0) {
+        if (args.size() > 0) {
             value = args[0];
         } else {
             value = b.Zero(sm_ty->DeepestElement());
@@ -635,7 +635,7 @@ struct State {
             // If we need a LOD argument, use the one provided or default to 0.
             core::ir::Value* lod = nullptr;
             if (needs_lod_arg) {
-                if (builtin->Args().Length() == 1) {
+                if (builtin->Args().size() == 1) {
                     lod = b.Value(u32(0));
                 } else {
                     lod = builtin->Args()[1];
@@ -678,10 +678,10 @@ struct State {
         auto* component = builtin->Args()[0]->As<core::ir::Constant>();
         if (component) {
             tex = builtin->Args()[1];
-            args = builtin->Args().Offset(2);
+            args = Vector<core::ir::Value*, 4>{builtin->Args().subspan(2)};
         } else {
             tex = builtin->Args()[0];
-            args = builtin->Args().Offset(1);
+            args = Vector<core::ir::Value*, 4>{builtin->Args().subspan(1)};
         }
         auto* tex_type = tex->Type()->As<core::type::Texture>();
 
@@ -713,7 +713,7 @@ struct State {
     /// @param builtin the builtin call instruction
     void TextureGatherCompare(core::ir::CoreBuiltinCall* builtin) {
         // The MSL intrinsic is a member function, so we split the first argument off as the object.
-        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().subspan(1));
         auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
             builtin->DetachResult(), msl::BuiltinFn::kGatherCompare, builtin->Args()[0],
             std::move(args));
@@ -813,7 +813,7 @@ struct State {
     /// @param builtin the builtin call instruction
     void TextureSample(core::ir::CoreBuiltinCall* builtin) {
         // The MSL intrinsic is a member function, so we split the first argument off as the object.
-        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().subspan(1));
         auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
             builtin->DetachResult(), msl::BuiltinFn::kSample, builtin->Args()[0], std::move(args));
         call->InsertBefore(builtin);
@@ -827,7 +827,7 @@ struct State {
         // The MSL intrinsic is a member function, so we split the first argument off as the object.
         auto* tex = builtin->Args()[0];
         auto* tex_type = tex->Type()->As<core::type::Texture>();
-        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().subspan(1));
 
         b.InsertBefore(builtin, [&] {
             // Wrap the bias argument in a constructor for the MSL `bias` builtin type.
@@ -850,7 +850,7 @@ struct State {
     /// @param builtin the builtin call instruction
     void TextureSampleCompare(core::ir::CoreBuiltinCall* builtin) {
         // The MSL intrinsic is a member function, so we split the first argument off as the object.
-        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().subspan(1));
         auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
             builtin->DetachResult(), msl::BuiltinFn::kSampleCompare, builtin->Args()[0],
             std::move(args));
@@ -864,7 +864,7 @@ struct State {
     void TextureSampleCompareLevel(core::ir::CoreBuiltinCall* builtin) {
         // The MSL intrinsic is a member function, so we split the first argument off as the object.
         auto* tex = builtin->Args()[0];
-        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().subspan(1));
 
         // The overloads that don't use an offset all have the depth_ref as their final argument.
         const bool has_offset = !args.Back()->Type()->Is<core::type::F32>();
@@ -893,7 +893,7 @@ struct State {
         // The MSL intrinsic is a member function, so we split the first argument off as the object.
         auto* tex = builtin->Args()[0];
         auto* tex_type = tex->Type()->As<core::type::Texture>();
-        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().subspan(1));
 
         b.InsertBefore(builtin, [&] {
             // Find the ddx and ddy arguments.
@@ -947,7 +947,7 @@ struct State {
         // The MSL intrinsic is a member function, so we split the first argument off as the object.
         auto* tex = builtin->Args()[0];
         auto* tex_type = tex->Type()->As<core::type::Texture>();
-        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().subspan(1));
 
         b.InsertBefore(builtin, [&] {
             // Wrap the LOD argument in a constructor for the MSL `level` builtin type.

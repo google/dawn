@@ -55,7 +55,7 @@ TEST_F(IR_MslBuiltinCallTest, Clone) {
     EXPECT_EQ(BuiltinFn::kThreadgroupBarrier, new_b->Func());
 
     auto args = new_b->Args();
-    EXPECT_EQ(1u, args.Length());
+    EXPECT_EQ(1u, args.size());
 
     auto* val0 = args[0]->As<core::ir::Constant>()->Value();
     EXPECT_EQ(0_u, val0->As<core::constant::Scalar<core::u32>>()->ValueAs<core::u32>());

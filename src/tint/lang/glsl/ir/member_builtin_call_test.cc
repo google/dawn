@@ -62,7 +62,7 @@ TEST_F(IR_GlslMemberBuiltinCallTest, Clone) {
     EXPECT_TRUE(new_b->Object()->Type()->UnwrapPtr()->Is<core::type::Array>());
 
     auto args = new_b->Args();
-    ASSERT_EQ(0u, args.Length());
+    ASSERT_EQ(0u, args.size());
 }
 
 TEST_F(IR_GlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {

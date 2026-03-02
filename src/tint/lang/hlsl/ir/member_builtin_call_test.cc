@@ -64,7 +64,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, Clone) {
     EXPECT_TRUE(new_b->Object()->Type()->Is<hlsl::type::ByteAddressBuffer>());
 
     auto args = new_b->Args();
-    ASSERT_EQ(1u, args.Length());
+    ASSERT_EQ(1u, args.size());
     EXPECT_TRUE(args[0]->Type()->Is<core::type::U32>());
 }
 

@@ -460,7 +460,7 @@ struct State {
             if (!chain) {
                 continue;
             }
-            TINT_ASSERT(chain->Indices().Length() >= 1);
+            TINT_ASSERT(chain->Indices().size() >= 1);
 
             // A member access has to be a constant index
             auto* cnst = chain->Indices()[0]->As<core::ir::Constant>();

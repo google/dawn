@@ -279,7 +279,7 @@ struct State {
         const core::type::Matrix* mat_ty = nullptr;
         auto indices = access->Indices();
         int32_t matrix_index = -1;
-        for (uint32_t i = 0; i < indices.Length(); ++i) {
+        for (uint32_t i = 0; i < indices.size(); ++i) {
             auto* idx = indices[i];
 
             if (auto* struct_ty = cur_ty->As<core::type::Struct>()) {
@@ -345,15 +345,16 @@ struct State {
         // This isn't a pointer access, so we'll just split the access in half, transpose the
         // matrix itself and then access that matrix with the rest of the expression.
 
-        Vector<core::ir::Value*, 4> mat_indices = indices.Truncate(size_t(matrix_index) + 1);
+        auto mat_indices =
+            Vector<core::ir::Value*, 4>{indices.subspan(0, static_cast<size_t>(matrix_index) + 1)};
 
         b.InsertBefore(access, [&] {
             auto* m = b.Access(mat_ty, access->Object(), mat_indices);
             auto* t = b.Call(RewriteType(mat_ty, true), core::BuiltinFn::kTranspose, m)->Result();
 
-            if (uint32_t(matrix_index) != indices.Length() - 1) {
-                Vector<core::ir::Value*, 4> access_indices =
-                    indices.Offset(size_t(matrix_index) + 1);
+            if (static_cast<uint32_t>(matrix_index) != indices.size() - 1) {
+                auto access_indices = Vector<core::ir::Value*, 4>{
+                    indices.subspan(static_cast<size_t>(matrix_index) + 1)};
                 b.AccessWithResult(access->DetachResult(), t, access_indices)->Result();
             } else {
                 access->Result()->ReplaceAllUsesWith(t);

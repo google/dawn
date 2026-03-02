@@ -31,6 +31,7 @@
 #include <array>
 #include <cstdint>
 #include <iterator>
+#include <span>
 
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/memory/bitcast.h"
@@ -177,6 +178,11 @@ struct Slice {
     template <size_t N>
     constexpr Slice(std::array<T, N>& array)  // NOLINT
         : data(array.data()), len(N), cap(N) {}
+
+    /// Constructor
+    /// @param span std::span of elements
+    constexpr Slice(std::span<T> span)  // NOLINT
+        : data(span.data()), len(span.size()), cap(span.size()) {}
 
     /// Reinterprets this slice as `const Slice<TO>&`
     /// @returns the reinterpreted slice

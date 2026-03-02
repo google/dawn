@@ -185,7 +185,7 @@ struct State {
             [&](core::ir::Load* load) -> HandleVariablePath { return PathForHandle(load->From()); },
             [&](core::ir::Access* access) -> HandleVariablePath {
                 auto* binding_array = access->Object();
-                TINT_IR_ASSERT(ir, access->Indices().Length() == 1);
+                TINT_IR_ASSERT(ir, access->Indices().size() == 1);
                 auto* index = access->Indices()[0];
 
                 HandleVariablePath path = PathForHandle(binding_array);
@@ -531,7 +531,7 @@ struct State {
                   tex_ty->Is<core::type::DepthMultisampledTexture>())) {
                 // Add a LOD to any texture other then storage, and multi-sampled textures
                 // which does not already have an LOD.
-                if (args.Length() == 1) {
+                if (args.size() == 1) {
                     new_args.Push(b.Constant(0_i));
                 } else {
                     // Make sure the LOD is a i32
@@ -768,7 +768,7 @@ struct State {
             }
 
             auto fn = glsl::BuiltinFn::kTextureGather;
-            if (idx < args.Length()) {
+            if (idx < args.size()) {
                 fn = glsl::BuiltinFn::kTextureGatherOffset;
                 params.Push(args[idx++]);
             }
@@ -821,7 +821,7 @@ struct State {
             params.Push(args[idx++]);
 
             auto fn = glsl::BuiltinFn::kTextureGather;
-            if (idx < args.Length()) {
+            if (idx < args.size()) {
                 fn = glsl::BuiltinFn::kTextureGatherOffset;
                 params.Push(args[idx++]);
             }
@@ -896,7 +896,7 @@ struct State {
             }
 
             auto fn = glsl::BuiltinFn::kTexture;
-            if (idx < args.Length()) {
+            if (idx < args.size()) {
                 // In GLSL ES `textureOffset` does not support depth 2d array textures. In order to
                 // support this texture we polyfill with a `textureGradOffset` and explicitly
                 // calculate the `dPdx` and `dPdy` values.
@@ -964,7 +964,7 @@ struct State {
             auto bias = args[idx++];
 
             auto fn = glsl::BuiltinFn::kTexture;
-            if (idx < args.Length()) {
+            if (idx < args.size()) {
                 fn = glsl::BuiltinFn::kTextureOffset;
 
                 params.Push(args[idx++]);
@@ -1047,7 +1047,7 @@ struct State {
             params.Push(b.InsertConvertIfNeeded(ty.f32(), args[idx++]));
 
             auto fn = needs_ext ? glsl::BuiltinFn::kExtTextureLod : glsl::BuiltinFn::kTextureLod;
-            if (idx < args.Length()) {
+            if (idx < args.size()) {
                 fn = needs_ext ? glsl::BuiltinFn::kExtTextureLodOffset
                                : glsl::BuiltinFn::kTextureLodOffset;
                 params.Push(args[idx++]);
@@ -1103,7 +1103,7 @@ struct State {
             params.Push(args[idx++]);  // dPdy
 
             auto fn = glsl::BuiltinFn::kTextureGrad;
-            if (idx < args.Length()) {
+            if (idx < args.size()) {
                 fn = glsl::BuiltinFn::kTextureGradOffset;
                 params.Push(args[idx++]);
             }
@@ -1164,7 +1164,7 @@ struct State {
             }
 
             auto fn = glsl::BuiltinFn::kTexture;
-            if (idx < args.Length()) {
+            if (idx < args.size()) {
                 // In GLSL ES `textureOffset` does not support depth 2d array textures. In order to
                 // support this texture we polyfill with a `textureGradOffset` and explicitly
                 // calculate the `dPdx` and `dPdy` values.
@@ -1240,7 +1240,7 @@ struct State {
             }
 
             auto fn = glsl::BuiltinFn::kTexture;
-            if (idx < args.Length()) {
+            if (idx < args.size()) {
                 // In GLSL ES `textureOffset` does not support depth 2d array textures. In order to
                 // support this texture we polyfill with a `textureGradOffset` and pass zero for
                 // the `dPdx` and `dPdy` values.

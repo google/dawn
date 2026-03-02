@@ -849,15 +849,15 @@ class Printer : public tint::TextGenerator {
     void EmitReturn(const core::ir::Return* r) {
         // If this return has no arguments and the current block is for the function which is
         // being returned, skip the return.
-        if (current_block_ == current_function_->Block() && r->Args().IsEmpty()) {
+        if (current_block_ == current_function_->Block() && r->Args().empty()) {
             return;
         }
 
         auto out = Line();
         out << "return";
-        if (!r->Args().IsEmpty()) {
+        if (!r->Args().empty()) {
             out << " ";
-            EmitValue(out, r->Args().Front());
+            EmitValue(out, r->Args().front());
         }
         out << ";";
     }

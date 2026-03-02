@@ -1855,7 +1855,7 @@ class Parser {
             for (auto incoming : loop->Continuing()->InboundSiblingBranches()) {
                 TINT_ASSERT(incoming->Is<core::ir::Continue>());
 
-                if (incoming->Args().Length() == loop->Continuing()->Params().Length()) {
+                if (incoming->Args().size() == loop->Continuing()->Params().Length()) {
                     continue;
                 }
 

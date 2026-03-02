@@ -590,6 +590,13 @@ class Builder {
                       "compile-time. Use ToVector<N>(Slice&&) instead.");
     }
 
+    template <typename T>
+    auto Values(std::span<T>&&) {
+        static_assert(sizeof(T) != sizeof(T),  // Condition must be type-dependent
+                      "Cannot construct a Vector from a span as the size is not known at "
+                      "compile-time. Use ToVector<N>(span&&) instead.");
+    }
+
     /// Overload for Values() with tint::Empty argument
     /// @return tint::Empty
     tint::EmptyType Values(tint::EmptyType) { return tint::Empty; }

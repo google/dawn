@@ -66,7 +66,7 @@ TEST_F(IR_NextIterationTest, Clone) {
     EXPECT_EQ(new_loop, new_inst->Loop());
 
     auto args = new_inst->Args();
-    EXPECT_EQ(2u, args.Length());
+    EXPECT_EQ(2u, args.size());
 
     auto* val0 = args[0]->As<Constant>()->Value();
     EXPECT_EQ(1_u, val0->As<core::constant::Scalar<u32>>()->ValueAs<u32>());

@@ -137,7 +137,7 @@ struct State {
             },
             [&](core::ir::Access* access) -> TextureVariablePath {
                 auto* binding_array = access->Object();
-                TINT_IR_ASSERT(ir, access->Indices().Length() == 1);
+                TINT_IR_ASSERT(ir, access->Indices().size() == 1);
                 auto* index = access->Indices()[0];
 
                 TextureVariablePath path = PathForTexture(binding_array);

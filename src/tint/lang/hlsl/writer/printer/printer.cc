@@ -732,15 +732,15 @@ class Printer : public tint::TextGenerator {
     void EmitReturn(const core::ir::Return* r) {
         // If this return has no arguments and the current block is for the function which is
         // being returned, skip the return.
-        if (current_block_ == current_function_->Block() && r->Args().IsEmpty()) {
+        if (current_block_ == current_function_->Block() && r->Args().empty()) {
             return;
         }
 
         auto out = Line();
         out << "return";
-        if (!r->Args().IsEmpty()) {
+        if (!r->Args().empty()) {
             out << " ";
-            EmitValue(out, r->Args().Front());
+            EmitValue(out, r->Args().front());
         }
         out << ";";
     }
@@ -903,7 +903,7 @@ class Printer : public tint::TextGenerator {
                 // Swizzle single value if it's not already the right type
                 // (typically a single scalar value).
                 const bool swizzle_value =
-                    (c->Args().Length() == 1) && (c->Args()[0]->Type() != c->Result()->Type());
+                    (c->Args().size() == 1) && (c->Args()[0]->Type() != c->Result()->Type());
                 if (swizzle_value) {
                     out << "(";
                 }
@@ -985,7 +985,7 @@ class Printer : public tint::TextGenerator {
                     current_type = member->Type();
                 },
                 [&](const core::type::Vector*) {
-                    TINT_IR_ASSERT(ir_, index == a->Indices().Back());
+                    TINT_IR_ASSERT(ir_, index == a->Indices().back());
                     EmitVectorAccess(out, index);
                 },
                 [&](Default) {

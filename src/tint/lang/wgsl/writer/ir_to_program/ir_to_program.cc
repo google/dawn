@@ -592,7 +592,7 @@ class State {
     void BreakIf(const core::ir::BreakIf* i) { Append(b.BreakIf(Expr(i->Condition()))); }
 
     void Return(const core::ir::Return* ret) {
-        if (ret->Args().IsEmpty()) {
+        if (ret->Args().empty()) {
             // Return has no arguments.
             // If this block is nested withing some control flow, then we must
             // emit a 'return' statement, otherwise we've just naturally reached
@@ -604,11 +604,11 @@ class State {
         }
 
         // Return has arguments - this is the return value.
-        if (ret->Args().Length() != 1) {
-            TINT_IR_ICE(mod) << "expected 1 value for return, got " << ret->Args().Length();
+        if (ret->Args().size() != 1) {
+            TINT_IR_ICE(mod) << "expected 1 value for return, got " << ret->Args().size();
         }
 
-        Append(b.Return(Expr(ret->Args().Front())));
+        Append(b.Return(Expr(ret->Args().front())));
     }
 
     void Var(const core::ir::Var* var) {

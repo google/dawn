@@ -309,7 +309,7 @@ struct State {
             VariantSignature signature;
 
             // For each argument / parameter...
-            for (size_t i = 0, n = call->Args().Length(); i < n; i++) {
+            for (size_t i = 0, n = call->Args().size(); i < n; i++) {
                 auto* arg = call->Args()[i];
                 auto* param = target->Params()[i];
 
