@@ -360,7 +360,7 @@ struct State {
 
             core::ir::Value* offset_buffer = group_to_dynamic_offset_buffer.GetOr(group, nullptr);
             if (!offset_buffer) {
-                TINT_IR_ICE(ir) << "missing dynamic offset buffer";
+                return access->Result();
             }
 
             core::ir::Value* result = nullptr;
