@@ -64,7 +64,7 @@ ResultOrError<Ref<ExternalTextureBase>> ExternalTexture::Create(
 ExternalTexture::ExternalTexture(Device* device, const ExternalTextureDescriptor* descriptor)
     : ExternalTextureBase(device, descriptor),
       RecordableObject(schema::ObjectType::ExternalTexture),
-      ObjectWGPU(device->wgpu.externalTextureRelease),
+      ObjectWGPU(device->wgpu->externalTextureRelease),
       mCreationParams(descriptor) {
     WGPUExternalTextureDescriptor desc = {
         .nextInChain = nullptr,
@@ -83,7 +83,7 @@ ExternalTexture::ExternalTexture(Device* device, const ExternalTextureDescriptor
         .rotation = ToAPI(descriptor->rotation),
     };
 
-    mInnerHandle = device->wgpu.deviceCreateExternalTexture(device->GetInnerHandle(), &desc);
+    mInnerHandle = device->wgpu->deviceCreateExternalTexture(device->GetInnerHandle(), &desc);
     DAWN_ASSERT(mInnerHandle);
 }
 
@@ -91,7 +91,7 @@ ExternalTexture::~ExternalTexture() = default;
 
 void ExternalTexture::DestroyImpl(DestroyReason reason) {
     ExternalTextureBase::DestroyImpl(reason);
-    auto& wgpu = ToBackend(GetDevice())->wgpu;
+    auto& wgpu = ToBackend(GetDevice())->wgpu.get();
     wgpu.externalTextureDestroy(mInnerHandle);
 }
 

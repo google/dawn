@@ -63,7 +63,7 @@ BindGroupLayout::BindGroupLayout(Device* device,
                                  const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor)
     : BindGroupLayoutInternalBase(device, descriptor),
       RecordableObject(schema::ObjectType::BindGroupLayout),
-      ObjectWGPU(device->wgpu.bindGroupLayoutRelease),
+      ObjectWGPU(device->wgpu->bindGroupLayoutRelease),
       mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
     // Rebuild the descriptor and resolve internal bindings to regular ones.
     absl::InlinedVector<WGPUBindGroupLayoutEntry, 8> entries(descriptor->entryCount);
@@ -102,7 +102,7 @@ BindGroupLayout::BindGroupLayout(Device* device,
     desc.entryCount = descriptor->entryCount;
     desc.entries = entries.data();
 
-    mInnerHandle = device->wgpu.deviceCreateBindGroupLayout(device->GetInnerHandle(), &desc);
+    mInnerHandle = device->wgpu->deviceCreateBindGroupLayout(device->GetInnerHandle(), &desc);
     DAWN_ASSERT(mInnerHandle);
 }
 

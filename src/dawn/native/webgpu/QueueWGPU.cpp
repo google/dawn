@@ -48,8 +48,8 @@ ResultOrError<Ref<Queue>> Queue::Create(Device* device, const QueueDescriptor* d
 }
 
 Queue::Queue(Device* device, const QueueDescriptor* descriptor)
-    : QueueBase(device, descriptor), ObjectWGPU(device->wgpu.queueRelease) {
-    mInnerHandle = device->wgpu.deviceGetQueue(device->GetInnerHandle());
+    : QueueBase(device, descriptor), ObjectWGPU(device->wgpu->queueRelease) {
+    mInnerHandle = device->wgpu->deviceGetQueue(device->GetInnerHandle());
 }
 
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
@@ -80,7 +80,7 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
         innerCommandBuffers[i] = ToBackend(commands[i])->Encode();
     }
 
-    auto& wgpu = ToBackend(GetDevice())->wgpu;
+    auto& wgpu = ToBackend(GetDevice())->wgpu.get();
     wgpu.queueSubmit(mInnerHandle, commandCount, innerCommandBuffers.data());
 
     for (uint32_t i = 0; i < commandCount; ++i) {
@@ -106,7 +106,7 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
 
     auto innerBuffer = ToBackend(buffer)->GetInnerHandle();
     ToBackend(GetDevice())
-        ->wgpu.queueWriteBuffer(mInnerHandle, innerBuffer, bufferOffset, data, size);
+        ->wgpu->queueWriteBuffer(mInnerHandle, innerBuffer, bufferOffset, data, size);
     buffer->MarkUsedInPendingCommands();
 
     return {};
@@ -136,14 +136,14 @@ MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
     };
     WGPUExtent3D writeSize = ToWGPU(writeSizePixel);
     ToBackend(GetDevice())
-        ->wgpu.queueWriteTexture(mInnerHandle, &dest, data, dataSize, &layout, &writeSize);
+        ->wgpu->queueWriteTexture(mInnerHandle, &dest, data, dataSize, &layout, &writeSize);
     destination.texture->SetInitialized(true);
 
     return {};
 }
 
 ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
-    auto& wgpu = ToBackend(GetDevice())->wgpu;
+    auto& wgpu = ToBackend(GetDevice())->wgpu.get();
     return mFuturesInFlight.Use([&](auto futuresInFlight) -> ResultOrError<ExecutionSerial> {
         ExecutionSerial fenceSerial(GetCompletedCommandSerial());
         while (!futuresInFlight->empty()) {
@@ -188,7 +188,7 @@ MaybeError Queue::SubmitFutureSync() {
     // from CheckAndUpdateCompletedSerials to WGPUQueueWorkDoneCallbackInfo::callback
     WGPUFuture future =
         ToBackend(GetDevice())
-            ->wgpu.queueOnSubmittedWorkDone(
+            ->wgpu->queueOnSubmittedWorkDone(
                 mInnerHandle,
                 {nullptr, WGPUCallbackMode_AllowSpontaneous,
                  [](WGPUQueueWorkDoneStatus, WGPUStringView, void*, void*) {}, nullptr, nullptr});
@@ -222,8 +222,8 @@ ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial wai
         WGPUFutureWaitInfo waitInfo = {future, false};
         WGPUWaitStatus status =
             ToBackend(GetDevice())
-                ->wgpu.instanceWaitAny(ToBackend(GetDevice())->GetInnerInstance(), 1, &waitInfo,
-                                       static_cast<uint64_t>(timeout));
+                ->wgpu->instanceWaitAny(ToBackend(GetDevice())->GetInnerInstance(), 1, &waitInfo,
+                                        static_cast<uint64_t>(timeout));
 
         switch (status) {
             case WGPUWaitStatus_TimedOut:
@@ -238,7 +238,7 @@ ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial wai
 }
 
 MaybeError Queue::WaitForIdleForDestructionImpl() {
-    auto& wgpu = ToBackend(GetDevice())->wgpu;
+    auto& wgpu = ToBackend(GetDevice())->wgpu.get();
     mFuturesInFlight.Use([&](auto futuresInFlight) {
         while (!futuresInFlight->empty()) {
             WGPUFuture future = futuresInFlight->front().first;

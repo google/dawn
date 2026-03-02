@@ -41,7 +41,7 @@ ResultOrError<Ref<ShaderModule>> ShaderModule::Create(
     const std::vector<tint::wgsl::Extension>& internalExtensions) {
     auto desc = ToAPI(*descriptor);
     WGPUShaderModule innerShaderModule =
-        device->wgpu.deviceCreateShaderModule(device->GetInnerHandle(), desc);
+        device->wgpu->deviceCreateShaderModule(device->GetInnerHandle(), desc);
     DAWN_ASSERT(innerShaderModule);
 
     Ref<ShaderModule> shader =
@@ -56,7 +56,7 @@ ShaderModule::ShaderModule(Device* device,
                            WGPUShaderModule innerShaderModule)
     : ShaderModuleBase(device, descriptor, std::move(internalExtensions)),
       RecordableObject(schema::ObjectType::ShaderModule),
-      ObjectWGPU(device->wgpu.shaderModuleRelease) {
+      ObjectWGPU(device->wgpu->shaderModuleRelease) {
     mInnerHandle = innerShaderModule;
 
     // TODO(452840621): Make this use a chain instead of hard coded to WGSL only and handle other

@@ -122,11 +122,11 @@ ResultOrError<Ref<BindGroup>> BindGroup::Create(
 BindGroup::BindGroup(Device* device, const UnpackedPtr<BindGroupDescriptor>& descriptor)
     : BindGroupBase(this, device, descriptor),
       RecordableObject(schema::ObjectType::BindGroup),
-      ObjectWGPU(device->wgpu.bindGroupRelease) {
+      ObjectWGPU(device->wgpu->bindGroupRelease) {
     ComboBindGroupDescriptor desc(descriptor, GetLayout()->GetExternalTextureCount());
     mInnerHandle =
         ToBackend(GetDevice())
-            ->wgpu.deviceCreateBindGroup(ToBackend(GetDevice())->GetInnerHandle(), desc.Get());
+            ->wgpu->deviceCreateBindGroup(ToBackend(GetDevice())->GetInnerHandle(), desc.Get());
     DAWN_ASSERT(mInnerHandle);
 }
 
@@ -228,7 +228,7 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
                 schema::BindGroupEntryTypeBufferBinding data{{
                     .binding = binding,
                     .data{{
-                        .bufferId = captureContext.GetId(entry.buffer),
+                        .bufferId = captureContext.GetId(entry.buffer.get()),
                         .offset = entry.offset,
                         .size = entry.size,
                     }},

@@ -78,11 +78,11 @@ ResultOrError<Ref<Sampler>> Sampler::Create(Device* device, const SamplerDescrip
 Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
     : SamplerBase(device, descriptor),
       RecordableObject(schema::ObjectType::Sampler),
-      ObjectWGPU(device->wgpu.samplerRelease),
+      ObjectWGPU(device->wgpu->samplerRelease),
       mSamplerParams(ToSchema(descriptor)) {
     WGPUSamplerDescriptor desc = ToWGPU(descriptor);
     mInnerHandle = ToBackend(GetDevice())
-                       ->wgpu.deviceCreateSampler(ToBackend(GetDevice())->GetInnerHandle(), &desc);
+                       ->wgpu->deviceCreateSampler(ToBackend(GetDevice())->GetInnerHandle(), &desc);
     DAWN_ASSERT(mInnerHandle);
 }
 

@@ -53,12 +53,12 @@ CaptureContext::ScopedContentWriter::~ScopedContentWriter() {
     if (offset) {
         static char zero[3] = {0};
         uint64_t paddingNeeded = 4 - offset;
-        mContext.WriteContentBytes(zero, paddingNeeded);
+        mContext->WriteContentBytes(zero, paddingNeeded);
     }
 }
 
 void CaptureContext::ScopedContentWriter::WriteContentBytes(const void* data, size_t size) {
-    mContext.WriteContentBytes(data, size);
+    mContext->WriteContentBytes(data, size);
     mBytesWritten += size;
 }
 
@@ -85,7 +85,7 @@ CaptureContext::CaptureContext(Device* device,
 
 CaptureContext::~CaptureContext() {
     if (mCopyBuffer) {
-        mDevice->wgpu.bufferDestroy(mCopyBuffer);
+        mDevice->wgpu->bufferDestroy(mCopyBuffer);
     }
 }
 
@@ -96,17 +96,17 @@ WGPUBuffer CaptureContext::GetCopyBuffer() {
         desc.label = ToOutputStringView("Capture Copy Buffer");
         desc.size = kCopyBufferSize;
         desc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_MapRead;
-        mCopyBuffer = mDevice->wgpu.deviceCreateBuffer(mDevice->GetInnerHandle(), &desc);
+        mCopyBuffer = mDevice->wgpu->deviceCreateBuffer(mDevice->GetInnerHandle(), &desc);
     }
     return mCopyBuffer;
 }
 
 void CaptureContext::WriteContentBytes(const void* data, size_t size) {
-    mContentStream.write(reinterpret_cast<const char*>(data), size);
+    mContentStream->write(reinterpret_cast<const char*>(data), size);
 }
 
 void CaptureContext::WriteCommandBytes(const void* data, size_t size) {
-    mCommandStream.write(reinterpret_cast<const char*>(data), size);
+    mCommandStream->write(reinterpret_cast<const char*>(data), size);
     mCommandBytesWritten += size;
 }
 

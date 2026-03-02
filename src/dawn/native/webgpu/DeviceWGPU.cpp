@@ -193,7 +193,7 @@ Device::Device(AdapterBase* adapter,
 
     // TODO(crbug.com/413053623): use adapterRequestDevice instead as dawn_wire doesn't support
     // adapterCreateDevice.
-    mInnerHandle = wgpu.adapterCreateDevice(innerAdapter, &apiDesc);
+    mInnerHandle = wgpu->adapterCreateDevice(innerAdapter, &apiDesc);
 }
 
 Device::~Device() {
@@ -298,7 +298,7 @@ void Device::DestroyImpl(DestroyReason reason) {
     //   other threads using the device since there are no other live refs.
 
     if (mInnerHandle) {
-        wgpu.deviceDestroy(mInnerHandle);
+        wgpu->deviceDestroy(mInnerHandle);
     }
 }
 
@@ -311,7 +311,7 @@ MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
                                            BufferBase* destination,
                                            uint64_t destinationOffset,
                                            uint64_t size) {
-    wgpu.queueWriteBuffer(
+    wgpu->queueWriteBuffer(
         ToBackend(GetQueue())->GetInnerHandle(), ToBackend(destination)->GetInnerHandle(),
         sourceOffset,
         // The staging buffers in the DynamicUploader are assumed in Dawn to be persistently mapped
@@ -319,7 +319,7 @@ MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
         // buffers in a copyB2B we would need to unmap them but the DynamicUploader doesn't support
         // that. Instead keep the buffers mapped and use queueWriteBuffer to read directly from the
         // mapped staging memory.
-        wgpu.bufferGetConstMappedRange(ToBackend(source)->GetInnerHandle(), 0, source->GetSize()),
+        wgpu->bufferGetConstMappedRange(ToBackend(source)->GetInnerHandle(), 0, source->GetSize()),
         size);
     return {};
 }
@@ -332,20 +332,20 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
     WGPUTexelCopyTextureInfo innerDestination = ToWGPU(dst);
     size_t bufferSize = source->GetSize();
     WGPUExtent3D size = ToWGPU(copySizePixels);
-    wgpu.queueWriteTexture(
+    wgpu->queueWriteTexture(
         ToBackend(GetQueue())->GetInnerHandle(), &innerDestination,
         // The staging buffers in the DynamicUploader are assumed in Dawn to be persistently mapped
         // buffers that always have the mapped pointer accessible. n the WebGPU backend, to use the
         // buffers in a copyB2T we would need to unmap them but the DynamicUploader doesn't support
         // that. Instead keep the buffers mapped and use queueWriteTexture to read directly from the
         // mapped staging memory.
-        wgpu.bufferGetConstMappedRange(ToBackend(source)->GetInnerHandle(), 0, bufferSize),
+        wgpu->bufferGetConstMappedRange(ToBackend(source)->GetInnerHandle(), 0, bufferSize),
         bufferSize, &innerSource, &size);
     return {};
 }
 
 MaybeError Device::TickImpl() {
-    wgpu.deviceTick(mInnerHandle);
+    wgpu->deviceTick(mInnerHandle);
     return {};
 }
 

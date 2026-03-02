@@ -47,7 +47,7 @@ namespace dawn::native {
 class BufferBase;
 
 struct UploadReservation {
-    void* mappedPointer = nullptr;
+    raw_ptr<void> mappedPointer = nullptr;
     uint64_t offsetInBuffer = 0;
     Ref<BufferBase> buffer;
 };

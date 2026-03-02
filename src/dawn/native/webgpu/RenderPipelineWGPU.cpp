@@ -51,7 +51,7 @@ RenderPipeline::RenderPipeline(Device* device,
                                const UnpackedPtr<RenderPipelineDescriptor>& descriptor)
     : RenderPipelineBase(device, descriptor),
       RecordableObject(schema::ObjectType::RenderPipeline),
-      ObjectWGPU(device->wgpu.renderPipelineRelease) {}
+      ObjectWGPU(device->wgpu->renderPipelineRelease) {}
 
 MaybeError RenderPipeline::InitializeImpl() {
     auto device = ToBackend(GetDevice());
@@ -182,7 +182,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         desc.fragment = nullptr;
     }
 
-    mInnerHandle = device->wgpu.deviceCreateRenderPipeline(device->GetInnerHandle(), &desc);
+    mInnerHandle = device->wgpu->deviceCreateRenderPipeline(device->GetInnerHandle(), &desc);
     DAWN_ASSERT(mInnerHandle);
     return {};
 }

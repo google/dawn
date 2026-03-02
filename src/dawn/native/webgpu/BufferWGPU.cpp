@@ -70,7 +70,7 @@ ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
     desc.size = descriptor->size;
     desc.mappedAtCreation = descriptor->mappedAtCreation;
 
-    WGPUBuffer innerBuffer = device->wgpu.deviceCreateBuffer(device->GetInnerHandle(), &desc);
+    WGPUBuffer innerBuffer = device->wgpu->deviceCreateBuffer(device->GetInnerHandle(), &desc);
     if (innerBuffer == nullptr) {
         // innerBuffer can be nullptr when mappedAtCreation == true and fails.
         // Return an error buffer.
@@ -87,18 +87,18 @@ Buffer::Buffer(Device* device,
                WGPUBuffer innerBuffer)
     : BufferBase(device, descriptor),
       RecordableObject(schema::ObjectType::Buffer),
-      ObjectWGPU(device->wgpu.bufferRelease) {
+      ObjectWGPU(device->wgpu->bufferRelease) {
     mInnerHandle = innerBuffer;
     mAllocatedSize = GetSize();
 }
 
 bool Buffer::IsCPUWritableAtCreation() const {
-    return ToBackend(GetDevice())->wgpu.bufferGetMapState(mInnerHandle) ==
+    return ToBackend(GetDevice())->wgpu->bufferGetMapState(mInnerHandle) ==
            WGPUBufferMapState_Mapped;
 }
 
 MaybeError Buffer::MapAtCreationImpl() {
-    mMappedData = ToBackend(GetDevice())->wgpu.bufferGetMappedRange(mInnerHandle, 0, GetSize());
+    mMappedData = ToBackend(GetDevice())->wgpu->bufferGetMappedRange(mInnerHandle, 0, GetSize());
     return {};
 }
 
@@ -121,7 +121,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     innerCallbackInfo.userdata1 = &mapAsyncResult;
     innerCallbackInfo.userdata2 = this;
 
-    auto& wgpu = ToBackend(GetDevice())->wgpu;
+    auto& wgpu = ToBackend(GetDevice())->wgpu.get();
 
     // TODO(crbug.com/413053623): We do not have a way to efficiently process the async event
     // on the inner webgpu layer. For now we simply wait on the future.
@@ -170,14 +170,14 @@ void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
     }
 
     if (mInnerHandle) {
-        ToBackend(GetDevice())->wgpu.bufferUnmap(mInnerHandle);
+        ToBackend(GetDevice())->wgpu->bufferUnmap(mInnerHandle);
     }
     mMappedData = nullptr;
 }
 
 void Buffer::DestroyImpl(DestroyReason reason) {
     BufferBase::DestroyImpl(reason);
-    auto& wgpu = ToBackend(GetDevice())->wgpu;
+    auto& wgpu = ToBackend(GetDevice())->wgpu.get();
     wgpu.bufferDestroy(mInnerHandle);
 }
 
@@ -256,7 +256,7 @@ MaybeError Buffer::AddContentToCapture(CaptureContext& captureContext) {
 
     Device* device = ToBackend(GetDevice());
     WGPUDevice innerDevice = device->GetInnerHandle();
-    auto& wgpu = device->wgpu;
+    auto& wgpu = device->wgpu.get();
 
     CaptureContext::ScopedContentWriter writer(captureContext);
     for (uint64_t offset = 0; offset < copyableSize; offset += CaptureContext::kCopyBufferSize) {

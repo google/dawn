@@ -804,7 +804,7 @@ void* BufferBase::GetMappedPointer() {
     if (!IsMappedState(mState.load(std::memory_order::acquire))) {
         return nullptr;
     }
-    return mMappedPointer;
+    return mMappedPointer.get();
 }
 
 void* BufferBase::GetMappedRange(size_t offset, size_t size, bool writable) {

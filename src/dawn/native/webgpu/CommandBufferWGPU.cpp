@@ -177,7 +177,7 @@ void EncodeRenderPass(const Device* device,
                       WGPUCommandEncoder innerEncoder,
                       CommandIterator& commands,
                       BeginRenderPassCmd* renderPassCmd) {
-    const DawnProcTable& wgpu = device->wgpu;
+    const DawnProcTable& wgpu = device->wgpu.get();
 
     PerColorAttachment<WGPURenderPassColorAttachment> colorAttachments = {};
 
@@ -977,7 +977,7 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
 }
 
 WGPUCommandBuffer CommandBuffer::Encode() {
-    auto& wgpu = ToBackend(GetDevice())->wgpu;
+    auto& wgpu = ToBackend(GetDevice())->wgpu.get();
 
     // TODO(crbug.com/413053623): Use stored command encoder descriptor
     WGPUCommandEncoder innerEncoder =

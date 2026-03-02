@@ -52,7 +52,7 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
 Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor)
     : TextureBase(device, descriptor),
       RecordableObject(schema::ObjectType::Texture),
-      ObjectWGPU(device->wgpu.textureRelease) {
+      ObjectWGPU(device->wgpu->textureRelease) {
     wgpu::TextureUsage actualUsage = GetInternalUsage();
     // Resolve internal usages to regular ones
     if (actualUsage & kReadOnlyStorageTexture) {
@@ -89,13 +89,13 @@ Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descripto
         .viewFormats = viewFormats.data(),
     };
 
-    mInnerHandle = device->wgpu.deviceCreateTexture(device->GetInnerHandle(), &desc);
+    mInnerHandle = device->wgpu->deviceCreateTexture(device->GetInnerHandle(), &desc);
     DAWN_ASSERT(mInnerHandle);
 }
 
 void Texture::DestroyImpl(DestroyReason reason) {
     TextureBase::DestroyImpl(reason);
-    auto& wgpu = ToBackend(GetDevice())->wgpu;
+    auto& wgpu = ToBackend(GetDevice())->wgpu.get();
     wgpu.textureDestroy(mInnerHandle);
 }
 
@@ -113,7 +113,7 @@ ResultOrError<Ref<TextureView>> TextureView::Create(
     auto* desc = ToAPI(*descriptor);
 
     WGPUTextureView innerView =
-        device->wgpu.textureCreateView(ToBackend(texture)->GetInnerHandle(), desc);
+        device->wgpu->textureCreateView(ToBackend(texture)->GetInnerHandle(), desc);
     DAWN_ASSERT(innerView);
 
     return AcquireRef(new TextureView(texture, descriptor, innerView));
@@ -124,7 +124,7 @@ TextureView::TextureView(TextureBase* texture,
                          WGPUTextureView innerView)
     : TextureViewBase(texture, descriptor),
       RecordableObject(schema::ObjectType::TextureView),
-      ObjectWGPU(ToBackend(texture->GetDevice())->wgpu.textureViewRelease) {
+      ObjectWGPU(ToBackend(texture->GetDevice())->wgpu->textureViewRelease) {
     mInnerHandle = innerView;
 }
 
@@ -188,9 +188,9 @@ MaybeError MapBufferAndWriteTextureData(CaptureContext::ScopedContentWriter& wri
     // Read this back synchronously.
     WGPUFutureWaitInfo waitInfo = {};
     uint64_t offset = 0;
-    waitInfo.future = wgpu.bufferMapAsync(copyBuffer, WGPUMapMode_Read, offset,
-                                          CaptureContext::kCopyBufferSize, innerCallbackInfo);
-    wgpu.instanceWaitAny(device->GetInnerInstance(), 1, &waitInfo, UINT64_MAX);
+    waitInfo.future = wgpu->bufferMapAsync(copyBuffer, WGPUMapMode_Read, offset,
+                                           CaptureContext::kCopyBufferSize, innerCallbackInfo);
+    wgpu->instanceWaitAny(device->GetInnerInstance(), 1, &waitInfo, UINT64_MAX);
 
     DAWN_ASSERT(mapAsyncResult.status == WGPUMapAsyncStatus_Success);
 
@@ -200,11 +200,11 @@ MaybeError MapBufferAndWriteTextureData(CaptureContext::ScopedContentWriter& wri
 
     // We only write out the beginning of each row, the rest is padding.
     for (BlockCount blockRow{0}; blockRow < blockRows; ++blockRow) {
-        const void* data = wgpu.bufferGetConstMappedRange(
+        const void* data = wgpu->bufferGetConstMappedRange(
             copyBuffer, uint32_t(blockRow) * alignedBytesPerRow, mappableBytesPerRow);
         writer.WriteContentBytes(data, usedBytesPerRow);
     }
-    wgpu.bufferUnmap(copyBuffer);
+    wgpu->bufferUnmap(copyBuffer);
 
     return {};
 }
@@ -215,7 +215,7 @@ MaybeError CopyTextureRegionToBuffer(Device* device,
                                      const WGPUExtent3D& copySize) {
     WGPUDevice innerDevice = device->GetInnerHandle();
     WGPUQueue queue = ToBackend(device->GetQueue())->GetInnerHandle();
-    auto& wgpu = device->wgpu;
+    auto& wgpu = device->wgpu.get();
 
     WGPUCommandEncoder encoder = wgpu.deviceCreateCommandEncoder(innerDevice, nullptr);
     wgpu.commandEncoderCopyTextureToBuffer(encoder, &srcTexture, &dstBuffer, &copySize);

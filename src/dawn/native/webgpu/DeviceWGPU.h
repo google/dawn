@@ -76,7 +76,7 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
         }
     }
 
-    const DawnProcTable& wgpu;
+    const raw_ref<const DawnProcTable> wgpu;
 
   private:
     Device(AdapterBase* adapter,

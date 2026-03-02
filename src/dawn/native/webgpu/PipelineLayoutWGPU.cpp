@@ -49,7 +49,7 @@ PipelineLayout::PipelineLayout(Device* device,
                                const UnpackedPtr<PipelineLayoutDescriptor>& descriptor)
     : PipelineLayoutBase(device, descriptor),
       RecordableObject(schema::ObjectType::PipelineLayout),
-      ObjectWGPU(device->wgpu.pipelineLayoutRelease) {
+      ObjectWGPU(device->wgpu->pipelineLayoutRelease) {
     WGPUPipelineLayoutDescriptor desc;
     desc.nextInChain = nullptr;
     desc.label = ToOutputStringView(GetLabel());
@@ -68,7 +68,7 @@ PipelineLayout::PipelineLayout(Device* device,
     desc.bindGroupLayoutCount = bindGroupLayoutCount;
     desc.immediateSize = GetImmediateDataRangeByteSize();
 
-    mInnerHandle = device->wgpu.deviceCreatePipelineLayout(device->GetInnerHandle(), &desc);
+    mInnerHandle = device->wgpu->deviceCreatePipelineLayout(device->GetInnerHandle(), &desc);
     DAWN_ASSERT(mInnerHandle);
 }
 

@@ -43,20 +43,20 @@ Ref<QuerySet> QuerySet::Create(Device* device, const QuerySetDescriptor* descrip
 QuerySet::QuerySet(Device* device, const QuerySetDescriptor* descriptor)
     : QuerySetBase(device, descriptor),
       RecordableObject(schema::ObjectType::QuerySet),
-      ObjectWGPU(device->wgpu.querySetRelease) {
+      ObjectWGPU(device->wgpu->querySetRelease) {
     WGPUQuerySetDescriptor desc = WGPU_QUERY_SET_DESCRIPTOR_INIT;
     desc.label = dawn::ToOutputStringView(descriptor->label);
     desc.type = ToAPI(descriptor->type);
     desc.count = descriptor->count;
 
-    mInnerHandle = device->wgpu.deviceCreateQuerySet(device->GetInnerHandle(), &desc);
+    mInnerHandle = device->wgpu->deviceCreateQuerySet(device->GetInnerHandle(), &desc);
 }
 
 QuerySet::~QuerySet() = default;
 
 void QuerySet::DestroyImpl(DestroyReason reason) {
     Device* device = ToBackend(GetDevice());
-    device->wgpu.querySetDestroy(mInnerHandle);
+    device->wgpu->querySetDestroy(mInnerHandle);
     mInnerHandle = nullptr;
     QuerySetBase::DestroyImpl(reason);
 }

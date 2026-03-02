@@ -183,7 +183,7 @@ RenderBundle::RenderBundle(RenderBundleEncoderBase* encoder,
                        std::move(usages),
                        std::move(indirectDrawMetaData)),
       RecordableObject(schema::ObjectType::RenderBundle),
-      ObjectWGPU(ToBackend(GetDevice())->wgpu.renderBundleRelease) {
+      ObjectWGPU(ToBackend(GetDevice())->wgpu->renderBundleRelease) {
     Device* device = ToBackend(GetDevice());
 
     const AttachmentState* attachmentState = GetAttachmentState();
@@ -207,24 +207,26 @@ RenderBundle::RenderBundle(RenderBundleEncoderBase* encoder,
     bundleEncoderDescriptor.depthReadOnly = IsDepthReadOnly();
     bundleEncoderDescriptor.stencilReadOnly = IsStencilReadOnly();
 
-    WGPURenderBundleEncoder innerRenderBundleEncoder = device->wgpu.deviceCreateRenderBundleEncoder(
-        device->GetInnerHandle(), &bundleEncoderDescriptor);
+    WGPURenderBundleEncoder innerRenderBundleEncoder =
+        device->wgpu->deviceCreateRenderBundleEncoder(device->GetInnerHandle(),
+                                                      &bundleEncoderDescriptor);
 
     CommandIterator* iter = GetCommands();
     Command bundleCommandType;
     while (iter->NextCommandId(&bundleCommandType)) {
-        EncodeRenderBundleCommand(device->wgpu, innerRenderBundleEncoder, *iter, bundleCommandType);
+        EncodeRenderBundleCommand(device->wgpu.get(), innerRenderBundleEncoder, *iter,
+                                  bundleCommandType);
     }
 
-    mInnerHandle = device->wgpu.renderBundleEncoderFinish(innerRenderBundleEncoder, nullptr);
+    mInnerHandle = device->wgpu->renderBundleEncoderFinish(innerRenderBundleEncoder, nullptr);
     DAWN_ASSERT(mInnerHandle);
 
-    device->wgpu.renderBundleEncoderRelease(innerRenderBundleEncoder);
+    device->wgpu->renderBundleEncoderRelease(innerRenderBundleEncoder);
 }
 
 void RenderBundle::DestroyImpl(DestroyReason reason) {
     RenderBundleBase::DestroyImpl(reason);
-    ToBackend(GetDevice())->wgpu.renderBundleRelease(mInnerHandle);
+    ToBackend(GetDevice())->wgpu->renderBundleRelease(mInnerHandle);
     mInnerHandle = nullptr;
 }
 

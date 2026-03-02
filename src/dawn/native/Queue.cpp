@@ -413,7 +413,7 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
     return GetDevice()->GetDynamicUploader()->WithUploadReservation(
         packedDataSize, offsetAlignment, [&](UploadReservation reservation) -> MaybeError {
             const uint8_t* srcPointer = reinterpret_cast<const uint8_t*>(data) + dataLayout.offset;
-            uint8_t* dstPointer = reinterpret_cast<uint8_t*>(reservation.mappedPointer);
+            uint8_t* dstPointer = reinterpret_cast<uint8_t*>(reservation.mappedPointer.get());
             CopyTextureData(dstPointer, srcPointer, writeSizePixel.depthOrArrayLayers,
                             static_cast<uint32_t>(rowsPerImage), dataLayout.rowsPerImage,
                             bytesPerRow, alignedBytesPerRow, dataLayout.bytesPerRow);

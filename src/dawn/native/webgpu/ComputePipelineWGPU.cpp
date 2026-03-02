@@ -51,7 +51,7 @@ ComputePipeline::ComputePipeline(Device* device,
                                  const UnpackedPtr<ComputePipelineDescriptor>& descriptor)
     : ComputePipelineBase(device, descriptor),
       RecordableObject(schema::ObjectType::ComputePipeline),
-      ObjectWGPU(device->wgpu.computePipelineRelease) {}
+      ObjectWGPU(device->wgpu->computePipelineRelease) {}
 
 MaybeError ComputePipeline::InitializeImpl() {
     WGPUComputePipelineDescriptor desc;
@@ -73,7 +73,7 @@ MaybeError ComputePipeline::InitializeImpl() {
     desc.compute.constantCount = constants.size();
 
     auto device = ToBackend(GetDevice());
-    mInnerHandle = device->wgpu.deviceCreateComputePipeline(device->GetInnerHandle(), &desc);
+    mInnerHandle = device->wgpu->deviceCreateComputePipeline(device->GetInnerHandle(), &desc);
     DAWN_ASSERT(mInnerHandle);
     return {};
 }
