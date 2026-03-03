@@ -1058,6 +1058,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // chromium:387000529: Arm devices have issues passing texture handles as parameters to
         // functions for accesses without a sampler (TextureLoad).
         deviceToggles->Default(Toggle::VulkanDirectVariableAccessTransformHandle, true);
+
+        // Mali drivers incorrectly treat the stride operand to cooperative matrix load and store
+        // instructions as matrix elements instead of a source/dest pointee elements.
+        // See crbug.com/460209126
+        deviceToggles->Default(Toggle::VulkanCooperativeMatrixStrideIsMatrixElements, true);
     }
 
     if (IsAndroidSamsung() || IsAndroidQualcomm() || IsAndroidHuawei()) {

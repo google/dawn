@@ -202,7 +202,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         .version = options.spirv_version,
         .subgroup_shuffle_clamped = options.workarounds.subgroup_shuffle_clamped,
         .texture_sample_compare_depth_cube_array =
-            options.workarounds.texture_sample_compare_depth_cube_array};
+            options.workarounds.texture_sample_compare_depth_cube_array,
+        .cooperative_matrix_stride_is_matrix_elements =
+            options.workarounds.cooperative_matrix_stride_is_matrix_elements,
+    };
     TINT_CHECK_RESULT(raise::BuiltinPolyfill(module, config));
     TINT_CHECK_RESULT(raise::ExpandImplicitSplats(module));
 

@@ -757,6 +757,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"metal_replace_workgroup_bool_with_u32",
       "Replace workgroup bool with u32 for MSL due to CTS failures on Mac AMD and Intel",
       "https://crbug.com/42241269", ToggleStage::Device}},
+    {Toggle::VulkanCooperativeMatrixStrideIsMatrixElements,
+     {"vulkan_cooperative_matrix_stride_is_matrix_elements",
+      "Treat the stride operand for cooperative matrix load and store instructions as matrix "
+      "elements instead of a source/dest pointee elements.",
+      "https://crbug.com/460209126", ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

@@ -266,6 +266,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::VulkanDirectVariableAccessTransformHandle);
     req.tintOptions.workarounds.polyfill_subgroup_broadcast_f16 =
         GetDevice()->IsToggleEnabled(Toggle::EnableSubgroupsIntelGen9);
+    req.tintOptions.workarounds.cooperative_matrix_stride_is_matrix_elements =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanCooperativeMatrixStrideIsMatrixElements);
 
     // Pass matrices to user functions by pointer on Qualcomm devices to workaround a known bug.
     // See crbug.com/tint/2045.

@@ -1286,19 +1286,18 @@ struct State {
             // in WGSL they both mean the number of elements. When the subgroup matrix element type
             // is `i8` or `u8`, and the input array type is `i32` or `u32`, we need to convert the
             // `stride` and `offset` in WGSL into the ones in SPIR-V by dividing them with 4.
-            core::ir::Value* applied_stride = nullptr;
-            core::ir::Value* applied_offset = nullptr;
+            auto* applied_stride = stride;
+            auto* applied_offset = offset;
             if (result_ty->Type()->Size() == 1u && arr->ElemType()->Size() == 4u) {
-                auto* applied_stride_binary =
-                    b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));
-                applied_stride = applied_stride_binary->Result();
+                if (!config.cooperative_matrix_stride_is_matrix_elements) {
+                    auto* applied_stride_binary =
+                        b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));
+                    applied_stride = applied_stride_binary->Result();
+                }
 
                 auto* applied_offset_binary =
                     b.Binary(core::BinaryOp::kDivide, offset->Type(), offset, u32(4));
                 applied_offset = applied_offset_binary->Result();
-            } else {
-                applied_stride = stride;
-                applied_offset = offset;
             }
 
             // Make a pointer to the first element of the array that we will load from.
@@ -1332,19 +1331,18 @@ struct State {
             // in WGSL they both mean the number of elements. When the subgroup matrix element type
             // is `i8` or `u8`, and the input array type is `i32` or `u32`, we need to convert the
             // `stride` and `offset` in WGSL into the ones in SPIR-V by dividing them with 4.
-            core::ir::Value* applied_stride = nullptr;
-            core::ir::Value* applied_offset = nullptr;
+            auto* applied_stride = stride;
+            auto* applied_offset = offset;
             if (value_type->Type()->Size() == 1u && arr->ElemType()->Size() == 4u) {
-                auto* applied_stride_binary =
-                    b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));
-                applied_stride = applied_stride_binary->Result();
+                if (!config.cooperative_matrix_stride_is_matrix_elements) {
+                    auto* applied_stride_binary =
+                        b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));
+                    applied_stride = applied_stride_binary->Result();
+                }
 
                 auto* applied_offset_binary =
                     b.Binary(core::BinaryOp::kDivide, offset->Type(), offset, u32(4));
                 applied_offset = applied_offset_binary->Result();
-            } else {
-                applied_stride = stride;
-                applied_offset = offset;
             }
 
             // Make a pointer to the first element of the array that we will write to.

@@ -110,6 +110,10 @@ struct Options {
         /// Set to `true` to generate polyfill for f16 saturate.
         bool polyfill_saturate_as_min_max_f16 = false;
 
+        /// Set to `true` to treat the stride operand of cooperative matrix load and store
+        /// instructions as matrix elements instead of a source/dest pointee elements.
+        bool cooperative_matrix_stride_is_matrix_elements = false;
+
         TINT_REFLECT(Workarounds,
                      polyfill_case_switch,
                      scalarize_max_min_clamp,
@@ -121,7 +125,8 @@ struct Options {
                      pass_matrix_by_pointer,
                      polyfill_unary_f32_negation,
                      polyfill_f32_abs,
-                     polyfill_saturate_as_min_max_f16);
+                     polyfill_saturate_as_min_max_f16,
+                     cooperative_matrix_stride_is_matrix_elements);
     };
 
     /// Any options which are controlled by the presence/absence of a vulkan extension.
