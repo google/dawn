@@ -872,7 +872,10 @@ source_set("white_box_tests_sources") {
     }
 
     if (is_android) {
-      sources += [ "white_box/SharedTextureMemoryTests_android.cpp" ]
+      sources += [
+        "white_box/SharedTextureMemoryTests_android.cpp",
+        "white_box/SharedTextureMemoryYCbCrAndroidTests.cpp",
+      ]
     }
 
     if (dawn_enable_error_injection) {

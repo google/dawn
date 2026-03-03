@@ -376,6 +376,7 @@ if (DAWN_ENABLE_VULKAN)
     if (ANDROID)
         list(APPEND whitebox_sources
             "white_box/SharedTextureMemoryTests_android.cpp"
+            "white_box/SharedTextureMemoryYCbCrAndroidTests.cpp"
         )
     endif()
 
