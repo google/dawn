@@ -93,6 +93,9 @@ MaybeError ComputePipeline::InitializeImpl() {
                                                     /* usedInterstageVariables */ {}));
     d3dDesc.CS = {compiledShader.shaderBlob.Data(), compiledShader.shaderBlob.Size()};
 
+    // Initialize ComputePipelineBase members.
+    InitializeComputeBase(compiledShader.workgroupSize);
+
     StreamIn(&mCacheKey, d3dDesc, ToBackend(GetLayout())->GetRootSignatureBlob());
 
     // Try to see if we have anything in the blob cache.

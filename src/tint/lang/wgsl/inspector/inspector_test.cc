@@ -1026,6 +1026,7 @@ fn ep_func() {}
     EXPECT_FALSE(result[0].primitive_index_used);
     EXPECT_FALSE(result[0].subgroup_invocation_id_used);
     EXPECT_FALSE(result[0].subgroup_size_used);
+    EXPECT_FALSE(result[0].global_invocation_index_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
@@ -1213,6 +1214,68 @@ fn ep_func(in_var: in_struct) {}
 
     ASSERT_EQ(1u, result.size());
     EXPECT_TRUE(result[0].subgroup_size_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, GlobalInvocationIndexSimpleReferenced) {
+    auto* src = R"(
+@compute @workgroup_size(1,1,1)
+fn ep_func(@builtin(global_invocation_index) in_var: u32) {}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].global_invocation_index_used);
+    EXPECT_TRUE(result[0].num_workgroups_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, GlobalInvocationIndexStructReferenced) {
+    auto* src = R"(
+struct in_struct {
+  @builtin(global_invocation_index) inner_position: u32,
+}
+@compute @workgroup_size(1,1,1)
+fn ep_func(in_var: in_struct) {}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].global_invocation_index_used);
+    EXPECT_TRUE(result[0].num_workgroups_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, WorkgroupIndexSimpleReferenced) {
+    auto* src = R"(
+@compute @workgroup_size(1,1,1)
+fn ep_func(@builtin(workgroup_index) in_var: u32) {}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].workgroup_index_used);
+    EXPECT_TRUE(result[0].num_workgroups_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, WorkgroupIndexStructReferenced) {
+    auto* src = R"(
+struct in_struct {
+  @builtin(workgroup_index) inner_position: u32,
+}
+@compute @workgroup_size(1,1,1)
+fn ep_func(in_var: in_struct) {}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].workgroup_index_used);
+    EXPECT_TRUE(result[0].num_workgroups_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, SampleIndexSimpleReferenced) {

@@ -58,7 +58,6 @@ class ComputePipeline final : public ComputePipelineBase {
     MaybeError InitializeImpl() override;
 
     NSPRef<id<MTLComputePipelineState>> mMtlComputePipelineState;
-    MTLSize mLocalWorkgroupSize;
     bool mRequiresStorageBufferLength;
     std::vector<uint32_t> mWorkgroupAllocations;
 };

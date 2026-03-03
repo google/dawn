@@ -212,6 +212,10 @@ struct EntryPoint {
     bool subgroup_invocation_id_used = false;
     /// Does the entry point use subgroup_size
     bool subgroup_size_used = false;
+    /// Does the entry point use global_invocation_index
+    bool global_invocation_index_used = false;
+    /// Does the entry point use wokgroup_index
+    bool workgroup_index_used = false;
     /// The array length of the clip_distances builtin. Holding no value means the clip_distances
     /// is not used.
     std::optional<uint32_t> clip_distances_size;

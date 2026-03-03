@@ -79,6 +79,28 @@ void ComputePipelineBase::DestroyImpl(DestroyReason reason) {
     Uncache();
 }
 
+void ComputePipelineBase::InitializeComputeBase(Extent3D wgSize) {
+    const ProgrammableStage& stage = GetStage(SingleShaderStage::Compute);
+    auto entryPoint =
+        stage.module->ReifyEntryPointName(stage.entryPoint.c_str(), SingleShaderStage::Compute);
+    const auto& metadata = stage.module->GetEntryPoint(entryPoint.name);
+    mUsesLinearIndex = metadata.usesGlobalInvocationIndex || metadata.usesWorkgroupIndex;
+    mUsesGlobalInvocationIndex = metadata.usesGlobalInvocationIndex;
+    mWorkgroupSize = wgSize;
+}
+
+Extent3D ComputePipelineBase::GetWorkgroupSize() const {
+    return mWorkgroupSize;
+}
+
+bool ComputePipelineBase::UsesLinearIndexing() const {
+    return mUsesLinearIndex;
+}
+
+bool ComputePipelineBase::UsesGlobalInvocationIndex() const {
+    return mUsesGlobalInvocationIndex;
+}
+
 // static
 Ref<ComputePipelineBase> ComputePipelineBase::MakeError(DeviceBase* device, StringView label) {
     class ErrorComputePipeline final : public ComputePipelineBase {

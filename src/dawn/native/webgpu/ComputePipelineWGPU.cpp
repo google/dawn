@@ -31,12 +31,14 @@
 #include <vector>
 
 #include "dawn/common/StringViewUtils.h"
+#include "dawn/native/TintUtils.h"
 #include "dawn/native/webgpu/BindGroupLayoutWGPU.h"
 #include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/PipelineLayoutWGPU.h"
 #include "dawn/native/webgpu/ShaderModuleWGPU.h"
 #include "dawn/native/webgpu/ToWGPU.h"
+#include "tint/tint.h"
 
 namespace dawn::native::webgpu {
 
@@ -75,6 +77,32 @@ MaybeError ComputePipeline::InitializeImpl() {
     auto device = ToBackend(GetDevice());
     mInnerHandle = device->wgpu->deviceCreateComputePipeline(device->GetInnerHandle(), &desc);
     DAWN_ASSERT(mInnerHandle);
+
+    // Shader reflection after the application of overrides is required by the frontend for the
+    // workgroup size.
+    const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
+
+    tint::null::writer::Options tintOptions;
+    tintOptions.entry_point_name = computeStage.entryPoint;
+    tintOptions.substitute_overrides_config = {
+        .map = BuildSubstituteOverridesTransformConfig(computeStage),
+    };
+
+    // Convert the AST program to an IR module.
+    auto ir =
+        tint::wgsl::reader::ProgramToLoweredIR(computeStage.module->GetTintProgram()->program);
+    DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
+                    ir.Failure().reason);
+
+    tint::Result<tint::null::writer::Output> tintResult =
+        tint::null::writer::Generate(ir.Get(), tintOptions);
+
+    DAWN_INVALID_IF(tintResult != tint::Success, "An error occurred while running Null writer\n%s",
+                    tintResult.Failure().reason);
+
+    InitializeComputeBase(
+        {tintResult->workgroup_info.x, tintResult->workgroup_info.y, tintResult->workgroup_info.z});
+
     return {};
 }
 

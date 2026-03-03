@@ -852,6 +852,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
     if (metadata->stage == SingleShaderStage::Compute) {
         metadata->usesNumWorkgroups = entryPoint.num_workgroups_used;
+        metadata->usesGlobalInvocationIndex = entryPoint.global_invocation_index_used;
+        metadata->usesWorkgroupIndex = entryPoint.workgroup_index_used;
     }
 
     metadata->usesTextureLoadWithDepthTexture = entryPoint.has_texture_load_with_depth_texture;

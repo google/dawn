@@ -95,7 +95,8 @@ class PipelineGL {
                               const PipelineLayout* layout,
                               const PerStage<ProgrammableStage>& stages,
                               ImmediateConstantMask& pipelineImmediateMask,
-                              VertexAttributeMask bgraSwizzleAttributes);
+                              VertexAttributeMask bgraSwizzleAttributes,
+                              Extent3D* workgroupSize = nullptr);
 
   protected:
     GLuint mProgram;

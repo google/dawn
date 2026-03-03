@@ -358,6 +358,12 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             core::BuiltinValue::kSampleMask, param->Type(), param->Declaration()->attributes);
         entry_point.num_workgroups_used |= ContainsBuiltin(
             core::BuiltinValue::kNumWorkgroups, param->Type(), param->Declaration()->attributes);
+        // global_invocation_index and workgroup_index are polyfilled using num_workgroups
+        entry_point.num_workgroups_used |= ContainsBuiltin(
+            core::BuiltinValue::kWorkgroupIndex, param->Type(), param->Declaration()->attributes);
+        entry_point.num_workgroups_used |=
+            ContainsBuiltin(core::BuiltinValue::kGlobalInvocationIndex, param->Type(),
+                            param->Declaration()->attributes);
         entry_point.vertex_index_used |= ContainsBuiltin(
             core::BuiltinValue::kVertexIndex, param->Type(), param->Declaration()->attributes);
         entry_point.instance_index_used |= ContainsBuiltin(
@@ -369,6 +375,11 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
                             param->Declaration()->attributes);
         entry_point.subgroup_size_used |= ContainsBuiltin(
             core::BuiltinValue::kSubgroupSize, param->Type(), param->Declaration()->attributes);
+        entry_point.global_invocation_index_used |=
+            ContainsBuiltin(core::BuiltinValue::kGlobalInvocationIndex, param->Type(),
+                            param->Declaration()->attributes);
+        entry_point.workgroup_index_used |= ContainsBuiltin(
+            core::BuiltinValue::kWorkgroupIndex, param->Type(), param->Declaration()->attributes);
 
         if (entry_point.stage == PipelineStage::kFragment) {
             entry_point.frag_position_used = ContainsBuiltin(

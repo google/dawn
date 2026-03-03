@@ -69,9 +69,10 @@
 
 namespace dawn::native::vulkan {
 
-#define COMPILED_SPIRV_MEMBERS(X)   \
-    X(std::vector<uint32_t>, spirv) \
-    X(std::optional<uint32_t>, explicitSubgroupSize)
+#define COMPILED_SPIRV_MEMBERS(X)                    \
+    X(std::vector<uint32_t>, spirv)                  \
+    X(std::optional<uint32_t>, explicitSubgroupSize) \
+    X(Extent3D, workgroupSize)
 
 // Represents the result and metadata for a SPIR-V compilation.
 // clang-format off
@@ -342,6 +343,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                                                          r.subgroupMatrixConfig));
 
             CompiledSpirv result;
+            result.workgroupSize = {tintResult->workgroup_info.x, tintResult->workgroup_info.y,
+                                    tintResult->workgroup_info.z};
             result.explicitSubgroupSize = tintResult->workgroup_info.subgroup_size;
             result.spirv = std::move(tintResult.Get().spirv);
             return result;
@@ -388,6 +391,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     return ModuleAndSpirv{.module = newHandle,
                           .spirv = std::move(compilation->spirv),
                           .hasInputAttachment = hasInputAttachment,
+                          .workgroupSize = compilation->workgroupSize,
                           .explicitSubgroupSize = compilation->explicitSubgroupSize};
 #else
     return DAWN_INTERNAL_ERROR("TINT_BUILD_SPV_WRITER is not defined.");

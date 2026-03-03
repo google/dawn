@@ -91,6 +91,9 @@ MaybeError ComputePipeline::InitializeImpl() {
                                   /*emitPointSize=*/false, /*polyfillPixelCenter=*/false,
                                   /*needsMultisampledFramebufferFetch=*/false, GetImmediateMask()));
 
+    // Set ComputePipelineBase members.
+    InitializeComputeBase(moduleAndSpirv.workgroupSize);
+
     createInfo.stage.module = moduleAndSpirv.module;
     // string_view returned by GetIsolatedEntryPointName() points to a null-terminated string.
     createInfo.stage.pName = device->GetIsolatedEntryPointName().data();

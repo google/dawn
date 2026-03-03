@@ -91,6 +91,9 @@ MaybeError ComputePipeline::InitializeImpl() {
         DAWN_TRY_ASSIGN(mComputeShader, device->GetOrCreateComputeShader(compiledShader));
     }
 
+    // Initialize ComputePipelineBase members.
+    InitializeComputeBase(compiledShader.workgroupSize);
+
     SetLabelImpl();
 
     return {};

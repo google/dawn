@@ -56,7 +56,8 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
                                       const PipelineLayout* layout,
                                       const PerStage<ProgrammableStage>& stages,
                                       ImmediateConstantMask& pipelineImmediateMask,
-                                      VertexAttributeMask bgraSwizzleAttributes) {
+                                      VertexAttributeMask bgraSwizzleAttributes,
+                                      Extent3D* workgroupSize) {
     mProgram = DAWN_GL_TRY(gl, CreateProgram());
 
     // Compute the set of active stages.
@@ -76,11 +77,16 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
         ShaderModule* module = ToBackend(stages[stage].module.Get());
         bool needsSSBOLengthUniformBuffer = false;
         std::vector<CombinedSampler> stageCombinedSamplers;
+        Extent3D localWorkgroupSize;
         GLuint shader;
         DAWN_TRY_ASSIGN(
             shader, module->CompileShader(gl, stages[stage], stage, pipelineImmediateMask,
                                           bgraSwizzleAttributes, &stageCombinedSamplers, layout,
-                                          &emulatedTextureBuiltins, &needsSSBOLengthUniformBuffer));
+                                          &emulatedTextureBuiltins, &needsSSBOLengthUniformBuffer,
+                                          &localWorkgroupSize));
+        if (stage == SingleShaderStage::Compute) {
+            *workgroupSize = localWorkgroupSize;
+        }
 
         mNeedsSSBOLengthUniformBuffer |= needsSSBOLengthUniformBuffer;
         combinedSamplers.insert(stageCombinedSamplers.begin(), stageCombinedSamplers.end());

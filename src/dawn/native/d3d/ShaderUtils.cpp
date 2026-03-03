@@ -244,14 +244,15 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     // have been substituted.
     if (r.stage == SingleShaderStage::Compute) {
         // Validate workgroup size and workgroup storage size.
-        Extent3D _;
-        DAWN_TRY_ASSIGN(_,
+        Extent3D workgroupSize;
+        DAWN_TRY_ASSIGN(workgroupSize,
                         ValidateComputeStageWorkgroupSize(
                             result->workgroup_info, /*usesSubgroupMatrix=*/false, r.maxSubgroupSize,
                             r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
         DAWN_TRY(ValidateExplicitComputeSubgroupSize(
             result->workgroup_info, r.minExplicitComputeSubgroupSize,
             r.maxExplicitComputeSubgroupSize, r.maxComputeWorkgroupSubgroups));
+        compiledShader->workgroupSize = workgroupSize;
     }
 
     bool usesVertexIndex = false;

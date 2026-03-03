@@ -56,6 +56,7 @@ class ShaderModule final : public ShaderModuleBase {
         VkShaderModule module;
         std::vector<uint32_t> spirv;
         bool hasInputAttachment;
+        Extent3D workgroupSize;
         std::optional<uint32_t> explicitSubgroupSize;
     };
 

@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_COMPUTEPIPELINE_H_
 #define SRC_DAWN_NATIVE_COMPUTEPIPELINE_H_
 
+#include <vector>
+
 #include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/native/Forward.h"
@@ -60,11 +62,20 @@ class ComputePipelineBase : public PipelineBase,
         bool operator()(const ComputePipelineBase* a, const ComputePipelineBase* b) const;
     };
 
+    Extent3D GetWorkgroupSize() const;
+    bool UsesLinearIndexing() const;
+    bool UsesGlobalInvocationIndex() const;
+
   protected:
     void DestroyImpl(DestroyReason reason) override;
+    void InitializeComputeBase(Extent3D wgSize);
 
   private:
     ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
+
+    Extent3D mWorkgroupSize = {1, 1, 1};
+    bool mUsesLinearIndex = false;
+    bool mUsesGlobalInvocationIndex = false;
 };
 
 }  // namespace dawn::native

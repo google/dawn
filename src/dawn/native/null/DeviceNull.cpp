@@ -520,16 +520,19 @@ MaybeError ComputePipeline::InitializeImpl() {
         LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1);
     auto maxSubgroupSize = GetDevice()->GetAdapter()->GetPhysicalDevice()->GetSubgroupMaxSize();
 
-    Extent3D _;
-    DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                           tintResult->workgroup_info, computeStage.metadata->usesSubgroupMatrix,
-                           maxSubgroupSize, limits, adapterSupportedLimits));
+    Extent3D wgSize;
+    DAWN_TRY_ASSIGN(
+        wgSize, ValidateComputeStageWorkgroupSize(tintResult->workgroup_info,
+                                                  computeStage.metadata->usesSubgroupMatrix,
+                                                  maxSubgroupSize, limits, adapterSupportedLimits));
 
     DAWN_TRY(ValidateExplicitComputeSubgroupSize(
         tintResult->workgroup_info,
         GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMinExplicitComputeSubgroupSize(),
         GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMaxExplicitComputeSubgroupSize(),
         GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMaxComputeWorkgroupSubgroups()));
+
+    InitializeComputeBase(wgSize);
 
     return {};
 }
