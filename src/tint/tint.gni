@@ -207,7 +207,8 @@ template("tint_fuzzer_test") {
 
   fuzzer_test(fuzzer_name) {
     forward_variables_from(invoker, "*", [ "output_name" ])
-    exclude_main = false
+    exclude_main =
+        (defined(invoker.exclude_main) && invoker.exclude_main) || false
 
     # TODO(https://crbug.com/394563978): Remove once experiment ends.
     high_end_job_required = true
