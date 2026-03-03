@@ -60,6 +60,29 @@ BindingInfoType GetBindingInfoType(const BindingInfo& info) {
         });
 }
 
+BindingInfoType GetBindingInfoType(const BindGroupLayoutEntry* entry) {
+    if (entry->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
+        return BindingInfoType::Buffer;
+    } else if (entry->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
+        return BindingInfoType::Texture;
+    } else if (entry->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
+        return BindingInfoType::StorageTexture;
+    } else if (entry->sampler.type != wgpu::SamplerBindingType::BindingNotUsed) {
+        return BindingInfoType::Sampler;
+    }
+
+    UnpackedPtr<BindGroupLayoutEntry> unpacked = Unpack(entry);
+    if (unpacked.Has<TexelBufferBindingLayout>()) {
+        return BindingInfoType::TexelBuffer;
+    } else if (unpacked.Has<ExternalTextureBindingLayout>()) {
+        return BindingInfoType::ExternalTexture;
+    } else if (unpacked.Has<StaticSamplerBindingLayout>()) {
+        return BindingInfoType::StaticSampler;
+    }
+
+    DAWN_UNREACHABLE();
+}
+
 void IncrementBindingCounts(BindingCounts* bindingCounts,
                             const UnpackedPtr<BindGroupLayoutEntry>& entry) {
     uint32_t arraySize = std::max(1u, entry->bindingArraySize);

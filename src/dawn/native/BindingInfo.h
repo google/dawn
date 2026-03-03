@@ -169,6 +169,8 @@ struct BindingInfo {
 };
 
 BindingInfoType GetBindingInfoType(const BindingInfo& bindingInfo);
+// Returns the type of binding contained in a valid BindGroupLayoutEntry.
+BindingInfoType GetBindingInfoType(const BindGroupLayoutEntry* entry);
 
 // Match tint::BindingPoint, can convert to/from tint::BindingPoint using ToTint and FromTint.
 #define BINDING_SLOT_MEMBER(X) \

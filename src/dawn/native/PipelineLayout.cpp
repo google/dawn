@@ -245,58 +245,12 @@ namespace {
 // Merges two entries at the same location, if they are allowed to be merged.
 MaybeError MergeEntries(BindGroupLayoutEntry* modifiedEntry,
                         const BindGroupLayoutEntry& mergedEntry) {
-    // Visibility is excluded because we take the OR across stages.
-    bool compatible =
-        modifiedEntry->binding == mergedEntry.binding &&
-        modifiedEntry->buffer.type == mergedEntry.buffer.type &&
-        modifiedEntry->sampler.type == mergedEntry.sampler.type &&
-        // Compatibility between these sample types is checked below.
-        (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) ==
-            (mergedEntry.texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) &&
-        modifiedEntry->storageTexture.access == mergedEntry.storageTexture.access;
+    DAWN_ASSERT(modifiedEntry->binding == mergedEntry.binding);
 
-    // Minimum buffer binding size excluded because we take the maximum seen across stages.
-    if (modifiedEntry->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
-        compatible = compatible &&
-                     modifiedEntry->buffer.hasDynamicOffset == mergedEntry.buffer.hasDynamicOffset;
-    }
-
-    if (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
-        // Sample types are compatible if they are exactly equal,
-        // or if the |modifiedEntry| is Float and the |mergedEntry| is UnfilterableFloat.
-        // Note that the |mergedEntry| never has type Float. Texture bindings all start
-        // as UnfilterableFloat and are promoted to Float if they are statically used with
-        // a sampler.
-        DAWN_ASSERT(mergedEntry.texture.sampleType != wgpu::TextureSampleType::Float);
-        bool compatibleSampleTypes =
-            modifiedEntry->texture.sampleType == mergedEntry.texture.sampleType ||
-            (modifiedEntry->texture.sampleType == wgpu::TextureSampleType::Float &&
-             mergedEntry.texture.sampleType == wgpu::TextureSampleType::UnfilterableFloat);
-        compatible = compatible && compatibleSampleTypes &&
-                     modifiedEntry->texture.viewDimension == mergedEntry.texture.viewDimension &&
-                     modifiedEntry->texture.multisampled == mergedEntry.texture.multisampled;
-    }
-
-    if (modifiedEntry->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
-        compatible =
-            compatible &&
-            modifiedEntry->storageTexture.format == mergedEntry.storageTexture.format &&
-            modifiedEntry->storageTexture.viewDimension == mergedEntry.storageTexture.viewDimension;
-    }
-
-    // Check if any properties are incompatible with existing entry
-    // If compatible, we will merge some properties
-    // TODO(dawn:563): Improve the error message by doing early-outs when bindings aren't
-    // compatible instead of a single check at the end.
-    if (!compatible) {
-        return DAWN_VALIDATION_ERROR(
-            "Duplicate binding in default pipeline layout initialization "
-            "not compatible with previous declaration");
-    }
-
-    // Use the max |minBufferBindingSize| we find.
-    modifiedEntry->buffer.minBindingSize =
-        std::max(modifiedEntry->buffer.minBindingSize, mergedEntry.buffer.minBindingSize);
+    BindingInfoType modifiedType = GetBindingInfoType(modifiedEntry);
+    BindingInfoType mergedType = GetBindingInfoType(&mergedEntry);
+    DAWN_INVALID_IF(modifiedType != mergedType, "Binding types differ (%s vs %s).", modifiedType,
+                    mergedType);
 
     // Use the OR of all the stages at which we find this binding.
     modifiedEntry->visibility |= mergedEntry.visibility;
@@ -304,6 +258,80 @@ MaybeError MergeEntries(BindGroupLayoutEntry* modifiedEntry,
     // Size binding_arrays to be the maximum of the required array sizes.
     modifiedEntry->bindingArraySize =
         std::max(modifiedEntry->bindingArraySize, mergedEntry.bindingArraySize);
+
+    switch (mergedType) {
+        case BindingInfoType::Buffer:
+            DAWN_INVALID_IF(modifiedEntry->buffer.type != mergedEntry.buffer.type,
+                            "Buffer binding types differs (%s vs. %s).", modifiedEntry->buffer.type,
+                            mergedEntry.buffer.type);
+            DAWN_INVALID_IF(
+                modifiedEntry->buffer.hasDynamicOffset != mergedEntry.buffer.hasDynamicOffset,
+                "Buffer dynamic offsets differs (%v vs. %v).",
+                modifiedEntry->buffer.hasDynamicOffset, mergedEntry.buffer.hasDynamicOffset);
+
+            // Use the max |minBufferBindingSize| we find.
+            modifiedEntry->buffer.minBindingSize =
+                std::max(modifiedEntry->buffer.minBindingSize, mergedEntry.buffer.minBindingSize);
+            break;
+
+        case BindingInfoType::Texture: {
+            DAWN_INVALID_IF(
+                modifiedEntry->texture.viewDimension != mergedEntry.texture.viewDimension,
+                "Texture dimensions differs (%s vs. %s).", modifiedEntry->texture.viewDimension,
+                mergedEntry.texture.viewDimension);
+            DAWN_INVALID_IF(modifiedEntry->texture.multisampled != mergedEntry.texture.multisampled,
+                            "Texture multisampled differs (%v vs. %v).",
+                            modifiedEntry->texture.multisampled, mergedEntry.texture.multisampled);
+
+            // Sample types are compatible if they are exactly equal,
+            // or if the |modifiedEntry| is Float and the |mergedEntry| is UnfilterableFloat.
+            // Note that the |mergedEntry| never has type Float. Texture bindings all start
+            // as UnfilterableFloat and are promoted to Float if they are statically used with
+            // a sampler.
+            DAWN_ASSERT(mergedEntry.texture.sampleType != wgpu::TextureSampleType::Float);
+            bool compatibleSampleTypes =
+                modifiedEntry->texture.sampleType == mergedEntry.texture.sampleType ||
+                (modifiedEntry->texture.sampleType == wgpu::TextureSampleType::Float &&
+                 mergedEntry.texture.sampleType == wgpu::TextureSampleType::UnfilterableFloat);
+
+            DAWN_INVALID_IF(!compatibleSampleTypes,
+                            "Texture sample types are not compatible (%s vs %s).",
+                            modifiedEntry->texture.sampleType, mergedEntry.texture.sampleType);
+            break;
+        }
+
+        case BindingInfoType::StorageTexture:
+            DAWN_INVALID_IF(
+                modifiedEntry->storageTexture.access != mergedEntry.storageTexture.access,
+                "Storage texture accesses differs (%s vs. %s).",
+                modifiedEntry->storageTexture.access, mergedEntry.storageTexture.access);
+            DAWN_INVALID_IF(
+                modifiedEntry->storageTexture.format != mergedEntry.storageTexture.format,
+                "Storage texture formats differs (%s vs. %s).",
+                modifiedEntry->storageTexture.format, mergedEntry.storageTexture.format);
+            DAWN_INVALID_IF(modifiedEntry->storageTexture.viewDimension !=
+                                mergedEntry.storageTexture.viewDimension,
+                            "Storage texture dimensions differs (%s vs. %s).",
+                            modifiedEntry->storageTexture.viewDimension,
+                            mergedEntry.storageTexture.viewDimension);
+            break;
+
+        case BindingInfoType::Sampler:
+            DAWN_INVALID_IF(modifiedEntry->sampler.type != mergedEntry.sampler.type,
+                            "Sampler binding kind differs (%s vs. %s).",
+                            modifiedEntry->sampler.type, mergedEntry.sampler.type);
+            break;
+
+        case BindingInfoType::ExternalTexture:
+            // Nothing to check or merge.
+            break;
+
+        // Types that cannot be defaulted (yet?)
+        case BindingInfoType::StaticSampler:
+        case BindingInfoType::TexelBuffer:
+        case BindingInfoType::InputAttachment:
+            DAWN_UNREACHABLE();
+    }
 
     return {};
 }
