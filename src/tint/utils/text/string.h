@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_UTILS_TEXT_STRING_H_
 #define SRC_TINT_UTILS_TEXT_STRING_H_
 
+#include <span>
 #include <string>
 #include <variant>
 
@@ -88,7 +89,7 @@ struct SuggestAlternativeOptions {
 /// @param ss the stream to write the suggest and list of possible values to
 /// @param options options for the suggestion
 void SuggestAlternatives(std::string_view got,
-                         Slice<const std::string_view> strings,
+                         std::span<const std::string_view> strings,
                          StyledText& ss,
                          const SuggestAlternativeOptions& options = {});
 

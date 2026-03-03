@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_WGSL_RESOLVER_SEM_HELPER_H_
 #define SRC_TINT_LANG_WGSL_RESOLVER_SEM_HELPER_H_
 
+#include <span>
 #include <string>
 
 #include "src/tint/lang/core/enums.h"
@@ -286,7 +287,7 @@ class SemHelper {
     /// @param suggestions suggested valid identifiers
     void ErrorUnexpectedIdent(const ast::Identifier* ident,
                               std::string_view wanted,
-                              tint::Slice<const std::string_view> suggestions = Empty) const;
+                              std::span<const std::string_view> suggestions = {}) const;
 
     /// Raises an error diagnostic that the expression @p got was not of the kind @p wanted.
     /// @param expr the expression
@@ -294,7 +295,7 @@ class SemHelper {
     /// @param suggestions suggested valid identifiers
     void ErrorUnexpectedExprKind(const sem::Expression* expr,
                                  std::string_view wanted,
-                                 tint::Slice<const std::string_view> suggestions = Empty) const;
+                                 std::span<const std::string_view> suggestions = {}) const;
 
     /// If @p node is a module-scope type, variable or function declaration, then appends a note
     /// diagnostic where this declaration was declared, otherwise the function does nothing.

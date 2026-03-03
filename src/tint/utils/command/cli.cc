@@ -182,7 +182,7 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(VectorRef<std::string_view> argum
             tint::SuggestAlternativeOptions opts;
             opts.prefix = "--";
             opts.list_possible_values = false;
-            SuggestAlternatives(arg, alternatives.Slice(), err, opts);
+            SuggestAlternatives(arg, alternatives.AsSpan(), err, opts);
             return Failure{err.Plain()};
         }
     }

@@ -28,6 +28,7 @@
 #include "src/tint/lang/wgsl/reader/parser/parser.h"
 
 #include <limits>
+#include <span>
 #include <utility>
 
 #include "src/tint/lang/core/enums.h"
@@ -880,7 +881,7 @@ Maybe<ast::Type> Parser::type_specifier() {
 template <typename ENUM>
 Expect<ENUM> Parser::expect_enum(std::string_view name,
                                  ENUM (*parse)(std::string_view str),
-                                 Slice<const std::string_view> strings,
+                                 std::span<const std::string_view> strings,
                                  std::string_view use) {
     auto& t = peek();
     auto ident = t.to_str();
@@ -907,7 +908,8 @@ Expect<ENUM> Parser::expect_enum(std::string_view name,
     }
     err << "\n";
 
-    if (strings == wgsl::kExtensionStrings && !ident.starts_with("chromium")) {
+    if (strings.data() == std::span(wgsl::kExtensionStrings).data() &&
+        strings.size() == std::size(wgsl::kExtensionStrings) && !ident.starts_with("chromium")) {
         // Filter out 'chromium' prefixed extensions. We don't want to advertise experimental
         // extensions to end users (unless it looks like they've actually mis-typed a chromium
         // extension name)
@@ -917,7 +919,7 @@ Expect<ENUM> Parser::expect_enum(std::string_view name,
                 filtered.Push(str);
             }
         }
-        tint::SuggestAlternatives(ident, filtered.Slice(), err);
+        tint::SuggestAlternatives(ident, filtered.AsSpan(), err);
     } else {
         tint::SuggestAlternatives(ident, strings, err);
     }
