@@ -137,8 +137,6 @@ TEST_F(AsyncTaskTest, Callbacks) {
     // Use a mutex to force the task to wait on the main thread before completing
     std::mutex mutex;
     std::unique_lock lock(mutex);
-    auto waitingTaskFunction = taskManager.PostTask<AsyncTask>(
-        [&mutex]() { std::scoped_lock<std::mutex> taskLock(mutex); });
 
     // Use a completion callback that simply counts how many times it's been called
     std::atomic<uint64_t> completionCallbackCounter = 0;
