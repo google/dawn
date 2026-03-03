@@ -12,30 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-dawn_add_library(
-  dawn_test_common
-  FORCE_STATIC
-  UTILITY_TARGET dawn_internal_config
-  HEADERS
-    "AdapterTestConfig.h"
-    "DawnTest.h"
-    "ToggleParser.h"
-    "PartitionAllocSupport.h"
-    "mocks/platform/CachingInterfaceMock.cpp"
-  SOURCES
+################################################################################
+# dawn_test_infra - Code shared by all test kinds
+################################################################################
+
+add_library(dawn_test_infra OBJECT
     "AdapterTestConfig.cpp"
+    "AdapterTestConfig.h"
     "DawnTest.cpp"
+    "DawnTest.h"
     "PartitionAllocSupport.cpp"
+    "PartitionAllocSupport.h"
     "ToggleParser.cpp"
+    "ToggleParser.h"
+    "mocks/platform/CachingInterfaceMock.cpp"
     "mocks/platform/CachingInterfaceMock.h"
-  DEPENDS
+)
+common_compile_options(dawn_test_infra)
+target_link_libraries(dawn_test_infra PRIVATE
     dawn_native
     dawn_wgpu_utils
     dawncpp
     gmock
 )
 
-add_executable(dawn_end2end_tests
+################################################################################
+# dawn_end2end_test_objects - Tests that only use the public Dawn API
+################################################################################
+
+set(end2end_conditional_private_platform_depends)
+set(end2end_sources
     "end2end/AdapterCreationTests.cpp"
     "end2end/AdapterEnumerationTests.cpp"
     "end2end/AdapterFormatCapabilitiesVkTests.cpp"
@@ -156,31 +162,261 @@ add_executable(dawn_end2end_tests
     "end2end/VertexStateTests.cpp"
     "end2end/ViewportOrientationTests.cpp"
     "end2end/ViewportTests.cpp"
-
-    "End2EndTestsMain.cpp"
 )
-common_compile_options(dawn_end2end_tests)
 
-set(conditional_private_platform_depends)
-if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
-  list(APPEND conditional_private_platform_depends dxgi.lib)
+if (NOT IS_DEBUG_BUILD)
+    list(APPEND end2end_sources
+        "end2end/RuntimeTimeoutCompute.cpp"
+    )
 endif()
 
-target_link_libraries(dawn_end2end_tests PRIVATE
-  absl_strings
-  dawn_common
-  dawn_internal_config
-  dawn_native
-  dawn_native_objects
-  dawn_platform
-  dawn_proc
-  dawn_shared_utils_chromium_test_compat
-  dawn_system_utils
-  dawn_test_common
-  dawn_test_utils
-  dawn_wgpu_utils
-  dawncpp
-  gmock
+if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
+    list(APPEND end2end_conditional_private_platform_depends
+        d3d11.lib
+        d3d12.lib
+        dxgi.lib
+    )
+    list(APPEND end2end_sources
+        "end2end/VideoViewsTests_win.cpp"
+    )
+endif()
 
-  ${conditional_private_platform_depends}
+if (DAWN_ENABLE_D3D12)
+    list(APPEND end2end_sources
+        "end2end/D3D12CachingTests.cpp"
+    )
+endif()
+
+if (APPLE)
+    if (DAWN_ENABLE_METAL)
+        list(APPEND end2end_sources
+            "end2end/VideoViewsTests_mac.cpp"
+        )
+    endif()
+    list(APPEND end2end_sources
+        "end2end/BufferHostMappedPointerTests_apple.mm"
+    )
+
+    list(APPEND conditional_private_platform_depends
+        "-framework IOSurface"
+    )
+endif()
+
+if (UNIX)
+    list(APPEND end2end_sources
+        "end2end/BufferHostMappedPointerTests_posix.cpp"
+    )
+endif()
+
+if (WIN32)
+    list(APPEND end2end_sources
+        "end2end/BufferHostMappedPointerTests_win.cpp"
+    )
+endif()
+
+if (DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
+    list(APPEND end2end_conditional_private_platform_depends
+        glfw
+        dawn::dawn_glfw
+    )
+    if (DAWN_USE_X11)
+        find_package(X11 REQUIRED)
+        list(APPEND end2end_conditional_private_platform_depends
+            ${X11_LIBRARIES}
+        )
+    endif()
+
+    list(APPEND end2end_sources
+        "end2end/SurfaceConfigurationValidationTests.cpp"
+        "end2end/SurfaceTests.cpp"
+        "end2end/WindowSurfaceTests.cpp"
+    )
+endif()
+
+if (DAWN_ENABLE_VULKAN)
+    list(APPEND end2end_sources
+        "end2end/AllocatorMemoryInstrumentationTests.cpp"
+    )
+endif()
+
+if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
+    list(APPEND end2end_sources
+        "end2end/CaptureAndReplayTests.cpp"
+    )
+endif()
+
+if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12 OR DAWN_ENABLE_METAL OR (DAWN_ENABLE_VULKAN AND NOT ANDROID))
+    list(APPEND end2end_sources
+        "end2end/VideoViewsTests.cpp"
+        "end2end/VideoViewsTests.h"
+    )
+endif()
+
+if (DAWN_ENABLE_VULKAN AND (UNIX AND NOT ANDROID))
+    list(APPEND end2end_conditional_private_platform_depends
+        "gbm"
+    )
+    list(APPEND end2end_sources
+        "end2end/VideoViewsTests_gbm.cpp"
+    )
+endif()
+
+if (DAWN_ENABLE_OPENGLES)
+    list(APPEND end2end_sources
+        "end2end/GLExplicitExtensionsTests.cpp"
+    )
+endif()
+
+add_library(dawn_end2end_test_objects OBJECT ${end2end_sources})
+common_compile_options(dawn_end2end_test_objects)
+target_link_libraries(dawn_end2end_test_objects PRIVATE
+    absl_strings
+    dawn_common
+    dawn_internal_config
+    dawn_native
+    dawn_platform
+    dawn_proc
+    dawn_shared_utils_chromium_test_compat
+    dawn_system_utils
+    dawn_test_infra
+    dawn_test_utils
+    dawn_wgpu_utils
+    dawncpp
+    gmock
+
+    ${end2end_conditional_private_platform_depends}
+)
+
+################################################################################
+# dawn_whitebox_test_objects - Tests that can use dawn::native internals
+################################################################################
+
+set(whitebox_conditional_private_platform_depends)
+set(whitebox_sources
+    "white_box/ImmediateConstantOffsetTests.cpp"
+    "white_box/ShaderModuleTests.cpp"
+    "white_box/SharedBufferMemoryTests.cpp"
+    "white_box/SharedBufferMemoryTests.h"
+    "white_box/SharedTextureMemoryTests.cpp"
+    "white_box/SharedTextureMemoryTests.h"
+    "white_box/WaitListEventTests.cpp"
+)
+
+if (APPLE)
+    list(APPEND whitebox_sources
+        "white_box/SharedTextureMemoryTests_apple.mm"
+    )
+endif()
+
+if (DAWN_ENABLE_D3D11)
+    list(APPEND whitebox_sources
+        "white_box/D3D11BufferTests.cpp"
+        "white_box/D3D11MultithreadTests.cpp"
+        "white_box/D3D11ShaderCachingTests.cpp"
+        "white_box/SharedTextureMemoryTests_win.cpp"
+    )
+endif()
+
+if (DAWN_ENABLE_D3D12)
+    list(APPEND whitebox_sources
+        "white_box/D3D12DescriptorHeapTests.cpp"
+        "white_box/D3D12ResidencyTests.cpp"
+        "white_box/D3D12ResourceHeapTests.cpp"
+        "white_box/GPUTimestampCalibrationTests.cpp"
+        "white_box/GPUTimestampCalibrationTests.h"
+        "white_box/GPUTimestampCalibrationTests_D3D12.cpp"
+        "white_box/SharedBufferMemoryTests_win.cpp"
+        "white_box/SharedTextureMemoryTests_win_d3d12.cpp"
+    )
+endif()
+
+if (DAWN_ENABLE_METAL)
+    list(APPEND whitebox_sources
+      "white_box/GPUTimestampCalibrationTests.cpp"
+      "white_box/GPUTimestampCalibrationTests.h"
+      "white_box/GPUTimestampCalibrationTests_Metal.mm"
+      "white_box/MetalAutoreleasePoolTests.mm"
+      "white_box/MetalBackendTests.cpp"
+    )
+endif()
+
+if (DAWN_ENABLE_OPENGLES)
+    list(APPEND whitebox_conditional_private_platform_depends dawn_khronos_platform)
+    list(APPEND whitebox_sources
+        "white_box/EGLImageWrappingTests.cpp"
+        "white_box/GLTextureWrappingTests.cpp"
+    )
+endif()
+
+if (DAWN_ENABLE_VULKAN)
+    list(APPEND whitebox_conditional_private_platform_depends
+        Vulkan::Headers
+    )
+    list(APPEND whitebox_sources
+        "white_box/BufferAllocatedSizeTests.cpp"
+        "white_box/InternalResolveAttachmentSampleTypeTests.cpp"
+        "white_box/InternalResourceUsageTests.cpp"
+        "white_box/InternalStorageBufferBindingTests.cpp"
+        "white_box/QueryInternalShaderTests.cpp"
+    )
+
+    if (UNIX AND NOT ANDROID)
+        list(APPEND whitebox_sources
+            "white_box/SharedTextureMemoryTests_dmabuf.cpp"
+            "white_box/SharedTextureMemoryTests_opaquefd.cpp"
+            "white_box/VulkanImageWrappingTests.cpp"
+            "white_box/VulkanImageWrappingTests.h"
+            "white_box/VulkanImageWrappingTests_DmaBuf.cpp"
+            "white_box/VulkanImageWrappingTests_DmaBuf.h"
+            "white_box/VulkanImageWrappingTests_OpaqueFD.cpp"
+            "white_box/VulkanImageWrappingTests_OpaqueFD.h"
+        )
+    endif()
+
+    if (ANDROID)
+        list(APPEND whitebox_sources
+            "white_box/SharedTextureMemoryTests_android.cpp"
+        )
+    endif()
+
+    if (DAWN_ENABLE_ERROR_INJECTION)
+        list(APPEND whitebox_sources
+            "white_box/VulkanErrorInjectorTests.cpp"
+        )
+    endif()
+endif()
+
+add_library(dawn_whitebox_test_objects OBJECT ${whitebox_sources})
+common_compile_options(dawn_whitebox_test_objects)
+target_link_libraries(dawn_whitebox_test_objects PRIVATE
+    dawn_common
+    dawn_internal_config
+    dawn_native
+    dawn_native_objects
+    dawn_platform
+    dawn_proc
+    dawn_shared_utils_chromium_test_compat
+    dawn_system_utils
+    dawn_test_infra
+    dawn_test_utils
+    dawn_wgpu_utils
+    dawncpp
+    gmock
+
+    ${whitebox_conditional_private_platform_depends}
+)
+
+################################################################################
+# dawn_end2end_tests
+################################################################################
+
+add_executable(dawn_end2end_tests "End2EndTestsMain.cpp")
+common_compile_options(dawn_end2end_tests)
+target_link_libraries(dawn_end2end_tests PRIVATE
+    dawn_internal_config
+    dawn_end2end_test_objects
+    dawn_whitebox_test_objects
+    dawn_test_infra
+    gmock
+    partition_alloc
 )
