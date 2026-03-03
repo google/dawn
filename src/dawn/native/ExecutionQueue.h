@@ -167,9 +167,10 @@ class ExecutionQueueBase : public ApiObjectBase {
     virtual ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() = 0;
 
     // Backend specific wait function, returns kWaitSerialTimeout if we did not successfully wait
-    // for |waitSerial|.
+    // for |waitSerial|. The default implementations just waits on the internal condition variable
+    // protected |mCompletedSerial|.
     virtual ResultOrError<ExecutionSerial> WaitForQueueSerialImpl(ExecutionSerial waitSerial,
-                                                                  Nanoseconds timeout) = 0;
+                                                                  Nanoseconds timeout);
 
     // Backend specific wait for idle function.
     virtual MaybeError WaitForIdleForDestructionImpl() = 0;
@@ -184,13 +185,11 @@ class ExecutionQueueBase : public ApiObjectBase {
                                          ExecutionSerial completedSerial,
                                          bool forceTasks = false);
 
-    // |mCompletedSerial| tracks the last completed command serial that the fence has returned. This
-    // is currently implicitly guarded by the lock for |mWaitingTasks| since we only update this
-    // value when holding that lock.
+    // |mCompletedSerial| tracks the last completed command serial that the fence has returned.
     // |mLastSubmittedSerial| tracks the last submitted command serial.
     // During device removal, the serials could be artificially incremented to make it appear as if
     // commands have been completed.
-    std::atomic<uint64_t> mCompletedSerial = static_cast<uint64_t>(kBeginningOfGPUTime);
+    MutexCondVarProtected<uint64_t> mCompletedSerial = static_cast<uint64_t>(kBeginningOfGPUTime);
     std::atomic<uint64_t> mLastSubmittedSerial = static_cast<uint64_t>(kBeginningOfGPUTime);
 
     // Mutex, condition variable, and boolean statuses are used by the class to synchronize task

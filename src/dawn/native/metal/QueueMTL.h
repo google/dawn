@@ -59,16 +59,12 @@ class Queue final : public QueueBase {
     id<MTLSharedEvent> GetMTLSharedEvent() const;
     ResultOrError<Ref<SharedFence>> GetOrCreateSharedFence();
 
-    ResultOrError<ExecutionSerial> WaitForQueueSerialImpl(ExecutionSerial waitSerial,
-                                                          Nanoseconds timeout) override;
-
   private:
     Queue(Device* device, const QueueDescriptor* descriptor);
     ~Queue() override;
 
     MaybeError Initialize();
     void UpdateCommandsScheduledEvents(ExecutionSerial scheduledSerial);
-    void UpdateCommandsCompletedEvents(ExecutionSerial completedSerial);
 
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     bool HasPendingCommands() const override;
@@ -89,10 +85,6 @@ class Queue final : public QueueBase {
     MutexProtected<NSPRef<id<MTLCommandBuffer>>> mLastSubmittedCommands;
     MutexProtected<SerialMap<ExecutionSerial, Ref<EventManager::TrackedEvent>>>
         mCommandsScheduledEvents;
-    // TODO(crbug.com/dawn/2065): If we atomically knew a conservative lower bound on the
-    // mCommandsCompletedEvents serials, we could avoid taking this lock sometimes. Optimize if
-    // needed. See old draft code: https://dawn-review.googlesource.com/c/dawn/+/137502/29
-    MutexProtected<SerialMap<ExecutionSerial, Ref<WaitListEvent>>> mCommandsCompletedEvents;
 
     // A shared event that can be exported for synchronization with other users of Metal.
     // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.

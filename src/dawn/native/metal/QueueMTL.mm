@@ -72,7 +72,6 @@ void Queue::DestroyImpl(DestroyReason reason) {
     // Forget all pending commands.
     mCommandContext.AcquireCommands();
     UpdateCommandsScheduledEvents(kMaxExecutionSerial);
-    UpdateCommandsCompletedEvents(kMaxExecutionSerial);
     mLastSubmittedCommands->Reset();
     mCommandQueue = nullptr;
     mSharedFence = nullptr;
@@ -139,19 +138,6 @@ void Queue::UpdateCommandsScheduledEvents(ExecutionSerial scheduledSerial) {
     });
     for (auto& event : readyEvents) {
         GetDevice()->GetInstance()->GetEventManager()->SetFutureReady(event.Get());
-    }
-}
-
-void Queue::UpdateCommandsCompletedEvents(ExecutionSerial completedSerial) {
-    std::vector<Ref<WaitListEvent>> readyEvents;
-    mCommandsCompletedEvents.Use([&](auto events) {
-        for (auto& event : events->IterateUpTo(completedSerial)) {
-            readyEvents.emplace_back(std::move(event));
-        }
-        events->ClearUpTo(completedSerial);
-    });
-    for (auto& event : readyEvents) {
-        event->Signal();
     }
 }
 
@@ -252,7 +238,6 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
                                uint64_t(pendingSerial));
 
         this->UpdateCompletedSerialTo(QueuePriority::Lowest, pendingSerial);
-        this->UpdateCommandsCompletedEvents(pendingSerial);
     }];
 
     TRACE_EVENT_ASYNC_BEGIN0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
@@ -315,27 +300,6 @@ void Queue::ForceEventualFlushOfCommands() {
     if (mCommandContext.WasUsed()) {
         mCommandContext.SetNeedsSubmit();
     }
-}
-
-ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial waitSerial,
-                                                             Nanoseconds timeout) {
-    Ref<WaitListEvent> completionEvent = AcquireRef(new WaitListEvent());
-    mCommandsCompletedEvents.Use([&](auto events) {
-        // Now that we hold the lock, check against completed serial before inserting. This serial
-        // may have just completed. If it did, mark the event complete. Also check for device loss.
-        // Otherwise, we could enqueue the event after mCommandsCompletedEvents has been flushed for
-        // device loss, and it'll never get cleaned up.
-        if (GetDevice()->GetState() == DeviceBase::State::Disconnected ||
-            GetDevice()->GetState() == DeviceBase::State::Destroyed ||
-            waitSerial <= GetCompletedCommandSerial()) {
-            completionEvent->Signal();
-        } else {
-            // Insert the event into the list which will be signaled inside Metal's queue
-            // completion handler.
-            events->Enqueue(completionEvent, waitSerial);
-        }
-    });
-    return completionEvent->Wait(timeout) ? waitSerial : kWaitSerialTimeout;
 }
 
 }  // namespace dawn::native::metal
