@@ -177,6 +177,10 @@ cq_branch_verifier_chromium_trybot(base_builder_name = "dawn-win10-x64-deps-rel"
 cq_chromium_trybot(builder = "chromium:try/win11-arm64-dawn-rel")
 cq_branch_verifier_chromium_trybot(base_builder_name = "dawn-win11-arm64-deps-rel", platform = "win", min_milestone = 126)
 
+# This entry can be removed in favor of win11-arm64-dawn-rel once tests are
+# stable enough to add to that builder.
+manual_only_chromium_trybot(builder = "chromium:try/dawn-try-win11-arm64-snapdragon-x-elite-deps-rel")
+
 manual_only_chromium_trybot(builder = "chromium:try/dawn-try-win-x64-intel-exp")
 
 # No DEPS equivalent to expose for branches.
