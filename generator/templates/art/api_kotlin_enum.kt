@@ -23,20 +23,8 @@ import androidx.annotation.RestrictTo
 import kotlin.annotation.AnnotationRetention
 import kotlin.annotation.Retention
 import kotlin.annotation.Target
+import kotlin.jvm.JvmStatic
 
-@Retention(AnnotationRetention.SOURCE)
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@IntDef(
-    {% if enum.category == 'bitmask' %}
-        flag = true,
-    {% endif %}
-    value = [
-        {% for value in enum.values %}
-            {{ enum.name.CamelCase() }}.{{ as_ktName(value.name.CamelCase()) }},
-        {% endfor %}
-    ]
-)
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.PROPERTY)
 
 //* Generating KDocs
 {% set file_docs = kdocs.bitflags if enum.category == 'bitmask' else kdocs.enums %}
@@ -44,23 +32,40 @@ import kotlin.annotation.Target
 {% if docstring %}
     {{ generate_simple_kdoc(docstring) }}
 {% endif %}
-public annotation class {{ enum.name.CamelCase() }} {
-    public companion object {
-        //* Generating KDocs
-        {% set enum_doc = file_docs.get(enum.name.get(), {}) %}
-        {% for value in enum.values %}
-            {% set value_docstring = enum_doc.get('entries', {}).get(value.name.snake_case()) %}
-            {% if value_docstring %}
+public class {{ enum.name.CamelCase() }} private constructor() {
 
-                {{ generate_simple_kdoc(value_docstring, indent_prefix = "        ", line_wrap_prefix = "\n         * ") }}
-            {% endif %}
-            public const val {{ as_ktName(value.name.CamelCase()) }}: Int = {{ '{:#010x}'.format(value.value) }}
-        {% endfor %}
-        internal val names: Map<Int, String> = mapOf(
-            {% for value in enum.values %}
-                {{ '{:#010x}'.format(value.value) }} to "{{ as_ktName(value.name.CamelCase()) }}",
-            {% endfor %}
-        )
-        public fun toString(@{{ enum.name.CamelCase() }} value: Int): String = names[value] ?: value.toString()
-    }
+  public companion object {
+      //* Generating KDocs
+      {% set enum_doc = file_docs.get(enum.name.get(), {}) %}
+      {% for value in enum.values %}
+          {% set value_docstring = enum_doc.get('entries', {}).get(value.name.snake_case()) %}
+          {% if value_docstring %}
+
+              {{ generate_simple_kdoc(value_docstring, indent_prefix = "      ", line_wrap_prefix = "\n         * ") }}
+          {% endif %}
+          public const val {{ as_ktName(value.name.CamelCase()) }}: Int = {{ '{:#010x}'.format(value.value) }}
+      {% endfor %}
+      internal val names: Map<Int, String> = mapOf(
+          {% for value in enum.values %}
+              {{ '{:#010x}'.format(value.value) }} to "{{ as_ktName(value.name.CamelCase()) }}",
+          {% endfor %}
+      )
+      @JvmStatic
+      public fun toString(@{{ enum.name.CamelCase() }}.Type value: Int): String = names[value] ?: value.toString()
+  }
+
+  @Retention(AnnotationRetention.SOURCE)
+  @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+  @IntDef(
+      {% if enum.category == 'bitmask' %}
+          flag = true,
+      {% endif %}
+      value = [
+          {% for value in enum.values %}
+              {{ enum.name.CamelCase() }}.{{ as_ktName(value.name.CamelCase()) }},
+          {% endfor %}
+      ]
+  )
+  @Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.PROPERTY)
+  public annotation class Type
 }

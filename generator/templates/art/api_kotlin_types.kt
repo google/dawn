@@ -94,7 +94,7 @@
     {%- if arg != None -%}
         {% set type = arg.type %}
         {% if type.category in ['bitmask', 'enum'] -%}
-            @{{ type.name.CamelCase() -}}
+            @{{ type.name.CamelCase() -}}.Type
         {% endif -%}
     {% endif -%}
 {% endmacro %}

@@ -42,7 +42,7 @@ public class DawnException(message: String) : Exception(message)
  */
 public class DeviceLostException(
   public val device: {{kotlin_name(ns.device)}},
-  @{{kotlin_name(ns.device_lost_reason)}} public val reason: Int,
+  @{{kotlin_name(ns.device_lost_reason)}}.Type public val reason: Int,
   message: String
 ) : Exception(message)
 
@@ -57,7 +57,7 @@ public open class WebGpuRuntimeException(message: String): Exception(message) {
          * @param message A human-readable message describing the error.
          */
         @JvmStatic
-        public fun create(@{{ kotlin_name(ns.error) }} type: Int, message: String): WebGpuRuntimeException =
+        public fun create(@{{ kotlin_name(ns.error) }}.Type type: Int, message: String): WebGpuRuntimeException =
             when (type) {
                 {% for value in ns.error.values if value.name.get() != "no error" %}
                     {{ kotlin_name(ns.error) }}.{{value.name.CamelCase()}} -> {{value.name.CamelCase()}}Exception(message)
@@ -84,7 +84,7 @@ public open class WebGpuRuntimeException(message: String): Exception(message) {
     {% set exception_name = (enum.name.chunks[:-1] if len(enum.name.chunks) > 1 else ['web', 'gpu']) | map('title') | join + 'Exception' %}
     public class {{ exception_name }} (
         public val reason: String = "",
-        @{{ enum.name.CamelCase() }} public val status: Int = {{ enum.name.CamelCase() }}.{{ success.name.CamelCase() }}) : Exception(
+        @{{ enum.name.CamelCase() }}.Type public val status: Int = {{ enum.name.CamelCase() }}.{{ success.name.CamelCase() }}) : Exception(
             (if (status != {{ enum.name.CamelCase() }}.{{ success.name.CamelCase() }}) "${ {{ enum.name.CamelCase() }}.toString(status)}: " else "") + reason) {
     }
 

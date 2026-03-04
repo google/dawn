@@ -135,7 +135,7 @@ class MappedNamedConstantsTest {
 
             for ((key, constantName) in namesMap) {
                 val constantProperty = companionConstants[constantName]
-                val actual = (constantProperty as KProperty1<*, *>).getter.call()
+                val actual = (constantProperty as KProperty1<*, *>).getter.call(companionObject)
                 assertEquals(key, actual)
             }
         }
