@@ -15,15 +15,6 @@
           'isolated_scripts': 'tint_fuzzer_corpus_check_tests',
         },
       },
-      'dawn-linux-x64-fuzz-rel': {
-        'os_type': 'linux',
-        'mixins': [
-          'gpu_linux_gce_stable',
-        ],
-        'test_suites': {
-          'isolated_scripts': 'tint_fuzzer_corpus_check_tests',
-        },
-      },
       'dawn-linux-x64-sws-clusterfuzz': {
         'os_type': 'linux',
         'mixins': [
