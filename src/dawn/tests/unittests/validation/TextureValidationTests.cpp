@@ -1379,5 +1379,37 @@ TEST_F(TextureFormatsTier2TextureTest, StorageBindingSuppport) {
     }
 }
 
+// Test that Unorm16Filterable marks the formats as filterable.
+class Unorm16FilterableValidationTests : public TextureValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureFormatsTier1, wgpu::FeatureName::Unorm16Filterable};
+    }
+};
+TEST_F(Unorm16FilterableValidationTests, Unorm16IsFilterable) {
+    for (wgpu::TextureFormat format : utils::kNorm16Formats) {
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
+
+        wgpu::TextureDescriptor tDesc = {
+            .usage = wgpu::TextureUsage::TextureBinding,
+            .size = {1, 1},
+            .format = format,
+        };
+        wgpu::Texture t = device.CreateTexture(&tDesc);
+
+        wgpu::BindGroupLayout unfilterableBGL = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::UnfilterableFloat}});
+        wgpu::BindGroupLayout filterableBGL = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
+
+        // Control case: the texture can be used unfiltered.
+        utils::MakeBindGroup(device, unfilterableBGL, {{0, t.CreateView()}});
+
+        // Success case: the texture can be filtered.
+        // (this fails in TextureFormatsTier1TextureTest.Norm16IsUnfilterable)
+        utils::MakeBindGroup(device, filterableBGL, {{0, t.CreateView()}});
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn

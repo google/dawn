@@ -455,6 +455,12 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "opaque_ycbcr_android_for_external_texture.md",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::Unorm16Filterable,
+     {"Allows textures with formats \"r16unorm\" \"rg16unorm\" and \"rgba16unorm\" to be "
+      "filtered.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "unorm16_filterable.md",
+      FeatureInfo::FeatureState::Experimental}},
 
     // Comment to separate the } so it is clearer what to copy-paste to add a feature.
 };

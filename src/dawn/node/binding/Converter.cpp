@@ -1788,6 +1788,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::AtomicVec2uMinMax:
         case wgpu::FeatureName::Unorm16FormatsForExternalTexture:
         case wgpu::FeatureName::OpaqueYCbCrAndroidForExternalTexture:
+        case wgpu::FeatureName::Unorm16Filterable:
             return false;
     }
     return false;

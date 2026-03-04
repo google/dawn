@@ -2431,7 +2431,8 @@
             {"value": 59, "name": "chromium experimental subgroup size control", "tags": ["dawn"]},
             {"value": 60, "name": "atomic vec2u min max", "tags": ["dawn"]},
             {"value": 61, "name": "unorm16 formats for external texture", "tags": ["dawn"]},
-            {"value": 62, "name": "opaque y cb cr android for external texture", "tags": ["dawn"]}
+            {"value": 62, "name": "opaque y cb cr android for external texture", "tags": ["dawn"]},
+            {"value": 63, "name": "unorm16 filterable", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

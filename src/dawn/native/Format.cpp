@@ -487,9 +487,11 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     SampleTypeBit sampleTypeFor32BitFloatFormats = device->HasFeature(Feature::Float32Filterable)
                                                        ? kAnyFloat
                                                        : SampleTypeBit::UnfilterableFloat;
-    SampleTypeBit sampleTypeForNorm16Formats = device->HasFeature(Feature::Unorm16TextureFormats)
-                                                   ? kAnyFloat
-                                                   : SampleTypeBit::UnfilterableFloat;
+    SampleTypeBit sampleTypeForNorm16Formats =
+        (device->HasFeature(Feature::Unorm16TextureFormats) ||
+         device->HasFeature(Feature::Unorm16Filterable))
+            ? kAnyFloat
+            : SampleTypeBit::UnfilterableFloat;
 
     // 1 byte
     DefineColorFormat(wgpu::TextureFormat::R8Unorm, ByteSize(1), kAnyFloat, ComponentCount(1),
