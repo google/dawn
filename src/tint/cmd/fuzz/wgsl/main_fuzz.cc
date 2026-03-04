@@ -140,7 +140,7 @@ extern "C" __attribute__((visibility("default"))) int LLVMFuzzerInitialize(int* 
     if (auto res = opts.Parse(arguments, parse_opts); res != tint::Success) {
         show_help();
         std::cerr << res.Failure();
-        return 0;
+        return 1;
     }
 
     if (opt_help.value.value_or(false)) {
