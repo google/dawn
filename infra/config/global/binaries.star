@@ -66,6 +66,13 @@ targets.binaries.windowed_test_launcher(
     module_scheme = "gtest",
 )
 
+targets.binaries.script(
+    name = "fuzzer_corpus_tests",
+    label = "//src/tint:fuzzer_corpus_tests",
+    script = "//scripts/run_tint_fuzzer_corpus_tests.py",
+    module_scheme = "single",
+)
+
 targets.binaries.windowed_test_launcher(
     name = "tint_unittests",
     label = "//src/tint/cmd/test:tint_unittests",

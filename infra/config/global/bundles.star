@@ -96,6 +96,14 @@ targets.bundle(
 )
 
 targets.bundle(
+    name = "tint_fuzzer_corpus_check_tests",
+    targets = [
+        "tint_ir_fuzzer_corpus_check_tests",
+        "tint_wgsl_fuzzer_corpus_check_tests",
+    ],
+)
+
+targets.bundle(
     name = "win_software_renderer_gtests",
     targets = [
         "swiftshader_gtests",

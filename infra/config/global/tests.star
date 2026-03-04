@@ -311,6 +311,20 @@ targets.tests.isolated_script_test(
     binary = "benchmarks",
 )
 
+targets.tests.isolated_script_test(
+    name = "tint_ir_fuzzer_corpus_check_tests",
+    mixins = [
+        "result_adapter_single",
+        "true_noop_merge",
+    ],
+    args = [
+        "-check",
+        "-ir",
+        "--append-cwd-as-build",
+    ],
+    binary = "fuzzer_corpus_tests",
+)
+
 targets.tests.gtest_test(
     name = "tint_unittests",
     mixins = [
@@ -318,4 +332,24 @@ targets.tests.gtest_test(
         "true_noop_merge",
     ],
     binary = "tint_unittests",
+)
+
+targets.tests.isolated_script_test(
+    name = "tint_wgsl_fuzzer_corpus_check_tests",
+    mixins = [
+        "result_adapter_single",
+        "true_noop_merge",
+        targets.mixin(
+            swarming = targets.swarming(
+                # These tests normally take ~15 minutes, but can flakily hit the
+                # default 20 minute I/O timeout and cannot currently be sharded.
+                io_timeout_sec = 1800,
+            ),
+        ),
+    ],
+    args = [
+        "-check",
+        "--append-cwd-as-build",
+    ],
+    binary = "fuzzer_corpus_tests",
 )
