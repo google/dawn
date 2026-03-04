@@ -51,6 +51,18 @@ namespace dawn::native {
 
 namespace {
 
+// Neither 'enableValidation' nor 'duplicateNumWorkgroups' can be declared as 'bool' as
+// currently in WGSL type 'bool' cannot be used in address space 'uniform' as 'it is
+// non-host-shareable'.
+struct IndirectDispatchParams {
+    uint32_t maxComputeWorkgroupsPerDimension;
+    uint32_t clientOffsetInU32;
+    uint32_t enableValidation;
+    uint32_t duplicateNumWorkgroups;
+    uint32_t linearIndexing;
+    uint32_t overflowValue;
+};
+
 ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDispatchValidationPipeline(
     DeviceBase* device) {
     InternalPipelineStore* store = device->GetInternalPipelineStore();
@@ -59,13 +71,12 @@ ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDispatchValidationPipelin
         return store->dispatchIndirectValidationPipeline.Get();
     }
 
-    // TODO(https://crbug.com/dawn/488346117): Use immediates instead of uniform.
     // TODO(https://crbug.com/dawn/1108): Propagate validation feedback from this
     // shader in various failure modes.
     // Type 'bool' cannot be used in address space 'uniform' as it is non-host-shareable.
     Ref<ShaderModuleBase> shaderModule;
     DAWN_TRY_ASSIGN(shaderModule, utils::CreateShaderModule(device, DAWN_MULTILINE(
-        struct UniformParams {
+        struct Params {
             maxComputeWorkgroupsPerDimension: u32,
             clientOffsetInU32: u32,
             enableValidation: u32,
@@ -82,23 +93,23 @@ ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDispatchValidationPipelin
             data: array<u32>
         }
 
-        @group(0) @binding(0) var<uniform> uniformParams: UniformParams;
-        @group(0) @binding(1) var<storage, read_write> clientParams: IndirectParams;
-        @group(0) @binding(2) var<storage, read_write> validatedParams: ValidatedParams;
+        var<immediate> params: Params;
+        @group(0) @binding(0) var<storage, read_write> clientParams: IndirectParams;
+        @group(0) @binding(1) var<storage, read_write> validatedParams: ValidatedParams;
 
         @compute @workgroup_size(1, 1, 1)
         fn main() {
-            var workgroups = vec3u(clientParams.data[uniformParams.clientOffsetInU32 + 0],
-                                   clientParams.data[uniformParams.clientOffsetInU32 + 1],
-                                   clientParams.data[uniformParams.clientOffsetInU32 + 2]);
-            if (uniformParams.enableValidation > 0u) {
+            var workgroups = vec3u(clientParams.data[params.clientOffsetInU32 + 0],
+                                   clientParams.data[params.clientOffsetInU32 + 1],
+                                   clientParams.data[params.clientOffsetInU32 + 2]);
+            if (params.enableValidation > 0u) {
                 var invalid = false;
-                if (max(workgroups.x, max(workgroups.y, workgroups.z)) > uniformParams.maxComputeWorkgroupsPerDimension) {
+                if (max(workgroups.x, max(workgroups.y, workgroups.z)) > params.maxComputeWorkgroupsPerDimension) {
                     invalid = true;
-                } else if (uniformParams.linearIndexing > 0u) {
-                    invalid |= workgroups.x > (uniformParams.overflowValue / workgroups.y);
+                } else if (params.linearIndexing > 0u) {
+                    invalid |= workgroups.x > (params.overflowValue / workgroups.y);
                     let xy = workgroups.x * workgroups.y;
-                    invalid |= xy > (uniformParams.overflowValue / workgroups.z);
+                    invalid |= xy > (params.overflowValue / workgroups.z);
                 }
 
                 if (invalid) {
@@ -108,7 +119,7 @@ ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDispatchValidationPipelin
             validatedParams.data[0] = workgroups.x;
             validatedParams.data[1] = workgroups.y;
             validatedParams.data[2] = workgroups.z;
-            if (uniformParams.duplicateNumWorkgroups > 0u) {
+            if (params.duplicateNumWorkgroups > 0u) {
                 validatedParams.data[3] = workgroups.x;
                 validatedParams.data[4] = workgroups.y;
                 validatedParams.data[5] = workgroups.z;
@@ -121,14 +132,14 @@ ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDispatchValidationPipelin
                     utils::MakeBindGroupLayout(
                         device,
                         {
-                            {0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
-                            {1, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
-                            {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
+                            {0, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
+                            {1, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
                         },
                         /* allowInternalBinding */ true));
 
     Ref<PipelineLayoutBase> pipelineLayout;
-    DAWN_TRY_ASSIGN(pipelineLayout, utils::MakeBasicPipelineLayout(device, bindGroupLayout));
+    DAWN_TRY_ASSIGN(pipelineLayout, utils::MakeBasicPipelineLayout(device, bindGroupLayout,
+                                                                   sizeof(IndirectDispatchParams)));
 
     ComputePipelineDescriptor computePipelineDescriptor = {};
     computePipelineDescriptor.layout = pipelineLayout.Get();
@@ -352,33 +363,15 @@ ComputePassEncoder::TransformIndirectDispatchBuffer(Ref<BufferBase> indirectBuff
     const uint64_t clientIndirectBindingSize =
         kDispatchIndirectSize + clientOffsetFromAlignedBoundary;
 
-    // Neither 'enableValidation' nor 'duplicateNumWorkgroups' can be declared as 'bool' as
-    // currently in WGSL type 'bool' cannot be used in address space 'uniform' as 'it is
-    // non-host-shareable'.
-    struct UniformParams {
-        uint32_t maxComputeWorkgroupsPerDimension;
-        uint32_t clientOffsetInU32;
-        uint32_t enableValidation;
-        uint32_t duplicateNumWorkgroups;
-        uint32_t linearIndexing;
-        uint32_t overflowValue;
-    };
-
-    // Create a uniform buffer to hold parameters for the shader.
-    Ref<BufferBase> uniformBuffer;
-    {
-        UniformParams params;
-        params.maxComputeWorkgroupsPerDimension =
-            device->GetLimits().v1.maxComputeWorkgroupsPerDimension;
-        params.clientOffsetInU32 = clientOffsetFromAlignedBoundary / sizeof(uint32_t);
-        params.enableValidation = static_cast<uint32_t>(IsValidationEnabled());
-        params.duplicateNumWorkgroups = static_cast<uint32_t>(shouldDuplicateNumWorkgroups);
-        params.linearIndexing = static_cast<uint32_t>(usesLinearIndexing);
-        params.overflowValue = overflowValue;
-
-        DAWN_TRY_ASSIGN(uniformBuffer,
-                        utils::CreateBufferFromData(device, wgpu::BufferUsage::Uniform, {params}));
-    }
+    // Set the immediate params.
+    IndirectDispatchParams params;
+    params.maxComputeWorkgroupsPerDimension =
+        device->GetLimits().v1.maxComputeWorkgroupsPerDimension;
+    params.clientOffsetInU32 = clientOffsetFromAlignedBoundary / sizeof(uint32_t);
+    params.enableValidation = static_cast<uint32_t>(IsValidationEnabled());
+    params.duplicateNumWorkgroups = static_cast<uint32_t>(shouldDuplicateNumWorkgroups);
+    params.linearIndexing = static_cast<uint32_t>(usesLinearIndexing);
+    params.overflowValue = overflowValue;
 
     // Reserve space in the scratch buffer to hold the validated indirect params.
     ScratchBuffer& scratchBuffer = store->scratchIndirectStorage;
@@ -392,15 +385,15 @@ ComputePassEncoder::TransformIndirectDispatchBuffer(Ref<BufferBase> indirectBuff
     DAWN_TRY_ASSIGN(validationBindGroup,
                     utils::MakeBindGroup(device, layout,
                                          {
-                                             {0, uniformBuffer},
-                                             {1, indirectBuffer, clientIndirectBindingOffset,
+                                             {0, indirectBuffer, clientIndirectBindingOffset,
                                               clientIndirectBindingSize},
-                                             {2, validatedIndirectBuffer, 0, scratchBufferSize},
+                                             {1, validatedIndirectBuffer, 0, scratchBufferSize},
                                          },
                                          UsageValidationMode::Internal));
 
     // Issue commands to validate the indirect buffer.
     APISetPipeline(validationPipeline.Get());
+    APISetImmediates(0, &params, sizeof(IndirectDispatchParams));
     APISetBindGroup(0, validationBindGroup.Get());
     APIDispatchWorkgroups(1);
 

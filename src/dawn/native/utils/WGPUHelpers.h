@@ -73,7 +73,8 @@ ResultOrError<Ref<BufferBase>> CreateBufferFromData(DeviceBase* device,
 
 ResultOrError<Ref<PipelineLayoutBase>> MakeBasicPipelineLayout(
     DeviceBase* device,
-    const Ref<BindGroupLayoutBase>& bindGroupLayout);
+    const Ref<BindGroupLayoutBase>& bindGroupLayout,
+    uint32_t immediateSize = 0);
 
 // Helpers to make creating bind group layouts look nicer:
 //
