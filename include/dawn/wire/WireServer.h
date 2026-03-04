@@ -144,6 +144,7 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
         // be copied into Target in DeserializeDataUpdate if accessible, nullptr
         // otherwise.
         virtual uint8_t* GetSourceData() const { return nullptr; }
+        virtual size_t GetSourceSize() const { return 0; }
 
       private:
         WriteHandle(const WriteHandle&) = delete;
