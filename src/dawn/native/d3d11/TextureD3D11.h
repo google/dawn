@@ -147,6 +147,8 @@ class Texture final : public TextureBase {
     void SetLabelImpl() override;
     void DestroyImpl(DestroyReason reason) override;
 
+    std::optional<DeviceGuard> UseDeviceGuardForDestroy() override;
+
     MaybeError Clear(const ScopedCommandRecordingContext* commandContext,
                      const SubresourceRange& range,
                      TextureBase::ClearValue clearValue);

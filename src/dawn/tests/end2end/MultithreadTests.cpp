@@ -593,6 +593,41 @@ TEST_P(MultithreadTests, MapThenSubmitThenDestroy) {
     });
 }
 
+// Test that copying a texture to a buffer and then destroying the texture immediately doesn't race.
+TEST_P(MultithreadTests, T2BThenDestroyTexture) {
+    // TODO(crbug.com/451928481): multithread support in GL is incomplete
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+
+    constexpr uint32_t kNumThreads = 8;
+    utils::RunInParallel(kNumThreads, [&](uint32_t) {
+        wgpu::TextureDescriptor desc = {};
+        desc.size = {1, 1, 1};
+        desc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+        desc.format = wgpu::TextureFormat::RGBA8Unorm;
+        wgpu::Texture texture = device.CreateTexture(&desc);
+
+        wgpu::BufferDescriptor bufferDesc = {};
+        bufferDesc.size = 4;
+        bufferDesc.usage = wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::TexelCopyTextureInfo src = {};
+        src.texture = texture;
+        wgpu::TexelCopyBufferInfo dst = {};
+        dst.buffer = buffer;
+        dst.layout.bytesPerRow = 256;
+        wgpu::Extent3D copySize = {1, 1, 1};
+        encoder.CopyTextureToBuffer(&src, &dst, &copySize);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // This tests that texture Destroy() doesn't race with any backend operations
+        // that might be triggered by the queue submission.
+        texture.Destroy();
+    });
+}
+
 // Test that copy a texture to a buffer then map that buffer in parallel works.
 TEST_P(MultithreadTests, T2BThenMapInParallel) {
     // TODO(451928481): multithread support in GL is incomplete

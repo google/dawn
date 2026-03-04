@@ -40,6 +40,7 @@
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/BlockInfo.h"
 #include "dawn/native/ChainUtils.h"
+#include "dawn/native/DeviceGuard.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Format.h"
 #include "dawn/native/Forward.h"
@@ -290,6 +291,10 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     void WillAddFirstExternalRef() override;
     void WillDropLastExternalRef() override;
+
+    // TODO(crbug.com/481211676): Remove this once all backends' DestroyImpl methods are
+    // thread-safe.
+    virtual std::optional<DeviceGuard> UseDeviceGuardForDestroy();
 
     wgpu::TextureDimension mDimension;
     // Only used for compatibility mode

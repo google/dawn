@@ -1582,7 +1582,14 @@ ResultOrError<Ref<TextureViewBase>> TextureBase::GetOrCreateDefaultView() {
     return mDefaultView;
 }
 
+std::optional<DeviceGuard> TextureBase::UseDeviceGuardForDestroy() {
+    // Backends with thread-safe DestroyImpl() methods can override this to return nullopt.
+    return GetDevice()->GetGuard();
+}
+
 void TextureBase::APIDestroy() {
+    auto deviceGuard = UseDeviceGuardForDestroy();
+
     Destroy();
 }
 

@@ -4107,7 +4107,8 @@
                 "returns": "texture view dimension"
             },
             {
-                "name": "destroy"
+                "name": "destroy",
+                "no autolock": true
             },
             {
                 "name": "pin",

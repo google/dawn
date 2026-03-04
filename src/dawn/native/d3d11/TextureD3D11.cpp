@@ -322,6 +322,14 @@ void Texture::DestroyImpl(DestroyReason reason) {
     mTextureForStencilSampling = nullptr;
 }
 
+std::optional<DeviceGuard> Texture::UseDeviceGuardForDestroy() {
+    // TODO(crbug.com/481211676): DestroyImpl() is mostly thread-safe without the device lock.
+    // However, concurrent calls to texture.Destroy() and Queue::Submit() can still race.
+    // We rely on users to properly synchronize Destroy() with other queue operations.
+    // In the future, we should implement validation to prevent such concurrent usage.
+    return std::nullopt;
+}
+
 ID3D11Resource* Texture::GetD3D11Resource() const {
     return mD3d11Resource.Get();
 }
