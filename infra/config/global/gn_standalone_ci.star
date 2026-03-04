@@ -690,7 +690,7 @@ dawn_win_parent_builder(
 # Fuzz Builders                                                                #
 ################################################################################
 
-ci.builder(
+dawn_linux_parent_builder(
     name = "dawn-linux-x64-fuzz-dbg",
     description_html = "Compiles and runs debug Dawn binaries for 'tools/run fuzz' for Linux/x64",
     schedule = "triggered",
@@ -715,15 +715,13 @@ ci.builder(
             "x64",
         ],
     ),
-    cores = 8,
-    os = os.LINUX_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|dbg|fuzz",
         short_name = "x64",
     ),
 )
 
-ci.builder(
+dawn_linux_parent_builder(
     name = "dawn-linux-x64-fuzz-rel",
     description_html = "Compiles and runs release Dawn binaries for 'tools/run fuzz' for Linux/x64",
     schedule = "triggered",
@@ -748,15 +746,13 @@ ci.builder(
             "x64",
         ],
     ),
-    cores = 8,
-    os = os.LINUX_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|rel|fuzz",
         short_name = "x64",
     ),
 )
 
-ci.builder(
+dawn_linux_parent_builder(
     name = "dawn-linux-x86-fuzz-dbg",
     description_html = "Compiles and runs debug Dawn binaries for 'tools/run fuzz' for Linux/x86",
     schedule = "triggered",
@@ -781,15 +777,13 @@ ci.builder(
             "x86",
         ],
     ),
-    cores = 8,
-    os = os.LINUX_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|dbg|fuzz",
         short_name = "x86",
     ),
 )
 
-ci.builder(
+dawn_linux_parent_builder(
     name = "dawn-linux-x86-fuzz-rel",
     description_html = "Compiles and runs release Dawn binaries for 'tools/run fuzz' for Linux/x86",
     schedule = "triggered",
@@ -814,15 +808,13 @@ ci.builder(
             "x86",
         ],
     ),
-    cores = 8,
-    os = os.LINUX_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|rel|fuzz",
         short_name = "x86",
     ),
 )
 
-ci.builder(
+dawn_linux_parent_builder(
     name = "dawn-linux-x64-sws-clusterfuzz",
     description_html = "Generates ClusterFuzz corpora using Linux/x64 binaries and data from running with SwiftShader",
     # Run daily at 5PM Pacific.
@@ -851,8 +843,6 @@ ci.builder(
             "x64",
         ],
     ),
-    cores = 8,
-    os = os.LINUX_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|rel|cf",
         short_name = "x64",
