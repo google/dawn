@@ -142,7 +142,6 @@ struct RenderBundleData {
 // std::variant, these need to be expanded to an variant that is
 // padded to the largest type.
 #define DAWN_REPLAY_RESOURCE_DATA_MAP(X)        \
-    X(Invalid, InvalidData)                     \
     X(BindGroup, BindGroupData)                 \
     X(BindGroupLayout, BindGroupLayoutData)     \
     X(Buffer, schema::Buffer)                   \
@@ -173,23 +172,12 @@ class ResourceVisitor {
   public:
     virtual ~ResourceVisitor() = default;
 
-    virtual MaybeError operator()(const BindGroupData& data) = 0;
-    virtual MaybeError operator()(const BindGroupLayoutData& data) = 0;
-    virtual MaybeError operator()(const schema::Buffer& data) = 0;
-    virtual MaybeError operator()(const CommandBufferData& data) = 0;
-    virtual MaybeError operator()(const schema::ComputePipeline& data) = 0;
-    virtual MaybeError operator()(const schema::ExternalTexture& data) = 0;
-    virtual MaybeError operator()(const schema::PipelineLayout& data) = 0;
-    virtual MaybeError operator()(const schema::QuerySet& data) = 0;
-    virtual MaybeError operator()(const RenderBundleData& data) = 0;
-    virtual MaybeError operator()(const schema::RenderPipeline& data) = 0;
-    virtual MaybeError operator()(const schema::Sampler& data) = 0;
-    virtual MaybeError operator()(const schema::ShaderModule& data) = 0;
-    virtual MaybeError operator()(const schema::TexelBufferView& data) = 0;
-    virtual MaybeError operator()(const schema::Texture& data) = 0;
-    virtual MaybeError operator()(const schema::TextureView& data) = 0;
+#define DAWN_REPLAY_RESOURCE_VISITOR(ENUM, TYPE) \
+    virtual MaybeError operator()(const TYPE& data) = 0;
+    DAWN_REPLAY_RESOURCE_DATA_MAP(DAWN_REPLAY_RESOURCE_VISITOR)
+#undef DAWN_REPLAY_RESOURCE_VISITOR
+
     virtual MaybeError operator()(const InvalidData& data);
-    virtual MaybeError operator()(const DeviceData& data);
     virtual MaybeError operator()(const std::monostate&);
 };
 
