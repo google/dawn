@@ -1464,13 +1464,7 @@ MaybeError DawnRootCommandVisitor::SetLabel(schema::ObjectId id,
                                             const std::string& label) {
 // We update both the object's label and our own copy of the label
 // as there is no API to get an object's label from WebGPU
-#define DAWN_REPLAY_GET_X_MACRO(_1, _2, NAME, ...) NAME
-
-#define DAWN_SET_LABEL_CASE_INVALID(NAME, ...) \
-    case schema::ObjectType::NAME:             \
-        break;
-
-#define DAWN_SET_LABEL_CASE_VALID(NAME, ...)                                                \
+#define DAWN_SET_LABEL_CASE(NAME)                                                           \
     case schema::ObjectType::NAME: {                                                        \
         auto iter = mResources.find(id);                                                    \
         DAWN_ASSERT(iter != mResources.end());                                              \
@@ -1478,10 +1472,6 @@ MaybeError DawnRootCommandVisitor::SetLabel(schema::ObjectId id,
         iter->second.label = label;                                                         \
         break;                                                                              \
     }
-
-#define DAWN_SET_LABEL_CASE(...)                                                                 \
-    DAWN_REPLAY_GET_X_MACRO(__VA_ARGS__, DAWN_SET_LABEL_CASE_INVALID, DAWN_SET_LABEL_CASE_VALID) \
-    (__VA_ARGS__)
 
 #define DAWN_SET_LABEL_GEN(NAME, MEMBERS) MEMBERS(DAWN_SET_LABEL_CASE)
 
@@ -1493,9 +1483,6 @@ MaybeError DawnRootCommandVisitor::SetLabel(schema::ObjectId id,
 
 #undef DAWN_SET_LABEL_GEN
 #undef DAWN_SET_LABEL_CASE
-#undef DAWN_SET_LABEL_CASE_VALID
-#undef DAWN_SET_LABEL_CASE_INVALID
-#undef DAWN_REPLAY_GET_X_MACRO
 
     return {};
 }

@@ -43,7 +43,7 @@ namespace {
 // a switch case for each type of BindGroupLayoutEntryType that deserializes
 // a capture for that type and converts it to an std::variant entry
 // for that type.
-#define DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_CASE_VALID(NAME)    \
+#define DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_CASE(NAME)          \
     case schema::BindGroupLayoutEntryType::NAME: {                  \
         schema::BindGroupLayoutEntryType##NAME data;                \
         data.variantType = type;                                    \
@@ -51,12 +51,6 @@ namespace {
         *out = std::move(data);                                     \
         return {};                                                  \
     }
-#define DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_CASE_INVALID(NAME, VALUE)
-#define DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_GET_MACRO(_1, _2, NAME, ...) NAME
-#define DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_CASE(...)                  \
-    DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_GET_MACRO(                     \
-        __VA_ARGS__, DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_CASE_INVALID, \
-        DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_CASE_VALID)(__VA_ARGS__)
 
 MaybeError Deserialize(ReadHead& readHead, BindGroupLayoutEntryVariant* out) {
     schema::BindGroupLayoutEntryType type;
@@ -68,16 +62,13 @@ MaybeError Deserialize(ReadHead& readHead, BindGroupLayoutEntryVariant* out) {
     }
 }
 #undef DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_CASE
-#undef DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_GET_MACRO
-#undef DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_CASE_INVALID
-#undef DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_CASE_VALID
 
 // These x-macros use DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES which
 // is a list of all BindGroupLayoutEntry types to auto generate
 // a switch case for each type of BindGroupEntryType that deserializes
 // a capture for that type and converts it to an std::variant entry
 // for that type.
-#define DAWN_REPLAY_BINDGROUP_DESERIALIZE_CASE_VALID(NAME)          \
+#define DAWN_REPLAY_BINDGROUP_DESERIALIZE_CASE(NAME)                \
     case schema::BindGroupLayoutEntryType::NAME: {                  \
         schema::BindGroupEntryType##NAME data;                      \
         data.variantType = type;                                    \
@@ -85,12 +76,6 @@ MaybeError Deserialize(ReadHead& readHead, BindGroupLayoutEntryVariant* out) {
         *out = std::move(data);                                     \
         return {};                                                  \
     }
-#define DAWN_REPLAY_BINDGROUP_DESERIALIZE_CASE_INVALID(NAME, VALUE)
-#define DAWN_REPLAY_BINDGROUP_DESERIALIZE_GET_MACRO(_1, _2, NAME, ...) NAME
-#define DAWN_REPLAY_BINDGROUP_DESERIALIZE_CASE(...)                  \
-    DAWN_REPLAY_BINDGROUP_DESERIALIZE_GET_MACRO(                     \
-        __VA_ARGS__, DAWN_REPLAY_BINDGROUP_DESERIALIZE_CASE_INVALID, \
-        DAWN_REPLAY_BINDGROUP_DESERIALIZE_CASE_VALID)(__VA_ARGS__)
 
 #define DAWN_REPLAY_GEN_BINDGROUP_DESERIALIZE(ENUM_NAME, MEMBERS)              \
     MaybeError Deserialize(ReadHead& readHead, BindGroupEntryVariant* out) {   \
@@ -107,9 +92,6 @@ DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES_ENUM(DAWN_REPLAY_GEN_BINDGROUP_DESE
 
 #undef DAWN_REPLAY_GEN_BINDGROUP_DESERIALIZE
 #undef DAWN_REPLAY_BINDGROUP_DESERIALIZE_CASE
-#undef DAWN_REPLAY_BINDGROUP_DESERIALIZE_GET_MACRO
-#undef DAWN_REPLAY_BINDGROUP_DESERIALIZE_CASE_INVALID
-#undef DAWN_REPLAY_BINDGROUP_DESERIALIZE_CASE_VALID
 
 MaybeError Deserialize(ReadHead& readHead, BindGroupData* out) {
     DAWN_TRY(Deserialize(readHead, &out->bg));
@@ -179,31 +161,21 @@ struct RootCommandDataType<schema::RootCommandCreateResourceCmdData> {
     using Type = CreateResourceData;
 };
 
-#define DAWN_REPLAY_ROOT_COMMAND_VARIANT_TYPE_VALID(NAME) \
+#define DAWN_REPLAY_ROOT_COMMAND_VARIANT_TYPE(NAME) \
     RootCommandDataType<schema::RootCommand##NAME##CmdData>::Type,
-#define DAWN_REPLAY_ROOT_COMMAND_VARIANT_TYPE_INVALID(NAME, VALUE)
-#define DAWN_REPLAY_ROOT_COMMAND_VARIANT_TYPE_GET_MACRO(_1, _2, NAME, ...) NAME
-#define DAWN_REPLAY_ROOT_COMMAND_VARIANT_TYPE(...)                  \
-    DAWN_REPLAY_ROOT_COMMAND_VARIANT_TYPE_GET_MACRO(                \
-        __VA_ARGS__, DAWN_REPLAY_ROOT_COMMAND_VARIANT_TYPE_INVALID, \
-        DAWN_REPLAY_ROOT_COMMAND_VARIANT_TYPE_VALID)(__VA_ARGS__)
 
 using RootCommandVariant =
     std::variant<DAWN_REPLAY_ROOT_COMMANDS(DAWN_REPLAY_ROOT_COMMAND_VARIANT_TYPE) std::monostate>;
 
-#define DAWN_REPLAY_ROOT_COMMAND_DESERIALIZE_CASE_VALID(NAME)               \
+#undef DAWN_REPLAY_ROOT_COMMAND_VARIANT_TYPE
+
+#define DAWN_REPLAY_ROOT_COMMAND_DESERIALIZE_CASE(NAME)                     \
     case schema::RootCommand::NAME: {                                       \
         RootCommandDataType<schema::RootCommand##NAME##CmdData>::Type data; \
         DAWN_TRY(Deserialize(readHead, &data));                             \
         *out = std::move(data);                                             \
         return {};                                                          \
     }
-#define DAWN_REPLAY_ROOT_COMMAND_DESERIALIZE_CASE_INVALID(NAME, VALUE)
-#define DAWN_REPLAY_ROOT_COMMAND_DESERIALIZE_GET_MACRO(_1, _2, NAME, ...) NAME
-#define DAWN_REPLAY_ROOT_COMMAND_DESERIALIZE_CASE(...)                  \
-    DAWN_REPLAY_ROOT_COMMAND_DESERIALIZE_GET_MACRO(                     \
-        __VA_ARGS__, DAWN_REPLAY_ROOT_COMMAND_DESERIALIZE_CASE_INVALID, \
-        DAWN_REPLAY_ROOT_COMMAND_DESERIALIZE_CASE_VALID)(__VA_ARGS__)
 
 MaybeError DeserializeRootCommand(ReadHead& readHead,
                                   schema::RootCommand cmd,
@@ -214,6 +186,8 @@ MaybeError DeserializeRootCommand(ReadHead& readHead,
             return DAWN_INTERNAL_ERROR("unhandled root command");
     }
 }
+
+#undef DAWN_REPLAY_ROOT_COMMAND_DESERIALIZE_CASE
 
 }  // anonymous namespace
 
@@ -247,6 +221,7 @@ PROCESS_COMMANDS_FUNC(ComputePass, DAWN_REPLAY_COMPUTE_PASS_COMMANDS)
 PROCESS_COMMANDS_FUNC(RenderPass, DAWN_REPLAY_RENDER_PASS_COMMANDS)
 PROCESS_COMMANDS_FUNC(RenderBundle, DAWN_REPLAY_RENDER_BUNDLE_COMMANDS)
 
+#undef PASS_COMMAND_CASE
 #undef PROCESS_COMMANDS_FUNC
 
 MaybeError ProcessEncoderCommands(ReadHead* readHead, EncoderVisitor* visitor) {
@@ -293,8 +268,6 @@ MaybeError ProcessEncoderCommands(ReadHead* readHead, EncoderVisitor* visitor) {
     }
     return DAWN_INTERNAL_ERROR("Missing encoder End command");
 }
-
-#undef PASS_COMMAND_CASE
 
 MaybeError ResourceVisitor::operator()(const InvalidData& data) {
     return DAWN_INTERNAL_ERROR("Invalid resource data");

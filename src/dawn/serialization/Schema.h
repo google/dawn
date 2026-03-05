@@ -52,20 +52,14 @@ using FloatArray7 = std::array<float, 7>;
 using Mat3x3 = std::array<float, 9>;
 using Mat4x3 = std::array<float, 12>;
 
-// Helper to select the 1st or 2nd implementation
-#define DAWN_REPLAY_GET_X_MACRO(_1, _2, NAME, ...) NAME
-
-#define DAWN_REPLAY_ENUM_DEfAULT_MEMBER(NAME) NAME,
-#define DAWN_REPLAY_ENUM_VALUE_MEMBER(NAME, VALUE) NAME = VALUE,
-#define DAWN_REPLAY_ENUM_MEMBER(...)                                    \
-    DAWN_REPLAY_GET_X_MACRO(__VA_ARGS__, DAWN_REPLAY_ENUM_VALUE_MEMBER, \
-                            DAWN_REPLAY_ENUM_DEfAULT_MEMBER)(__VA_ARGS__)
-
+#define DAWN_REPLAY_ENUM_MEMBER(NAME) NAME,
 #define DAWN_REPLAY_ENUM(NAME, MEMBERS) \
     enum class NAME : uint32_t { MEMBERS(DAWN_REPLAY_ENUM_MEMBER) };
 
+#define DAWN_REPLAY_ENUM_WITH_INVALID(NAME, MEMBERS) \
+    enum class NAME : uint32_t { Invalid = 0, MEMBERS(DAWN_REPLAY_ENUM_MEMBER) };
+
 #define DAWN_REPLAY_OBJECT_TYPES(X) \
-    X(Invalid, 0)                   \
     X(BindGroup)                    \
     X(BindGroupLayout)              \
     X(Buffer)                       \
@@ -85,10 +79,9 @@ using Mat4x3 = std::array<float, 12>;
 
 #define DAWN_REPLAY_OBJECT_TYPES_ENUM(X) X(ObjectType, DAWN_REPLAY_OBJECT_TYPES)
 
-DAWN_REPLAY_OBJECT_TYPES_ENUM(DAWN_REPLAY_ENUM)
+DAWN_REPLAY_OBJECT_TYPES_ENUM(DAWN_REPLAY_ENUM_WITH_INVALID)
 
 #define DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES(X) \
-    X(Invalid, 0)                                       \
     X(BufferBinding)                                    \
     X(SamplerBinding)                                   \
     X(TextureBinding)                                   \
@@ -101,10 +94,9 @@ DAWN_REPLAY_OBJECT_TYPES_ENUM(DAWN_REPLAY_ENUM)
 #define DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES_ENUM(X) \
     X(BindGroupLayoutEntryType, DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES)
 
-DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES_ENUM(DAWN_REPLAY_ENUM)
+DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES_ENUM(DAWN_REPLAY_ENUM_WITH_INVALID)
 
 #define DAWN_REPLAY_COMMAND_BUFFER_COMMANDS(X) \
-    X(Invalid, 0)                              \
     X(BeginComputePass)                        \
     X(BeginOcclusionQuery)                     \
     X(BeginRenderPass)                         \
@@ -208,7 +200,7 @@ DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES_ENUM(DAWN_REPLAY_ENUM)
 #define DAWN_REPLAY_COMMAND_BUFFER_COMMANDS_ENUM(X) \
     X(CommandBufferCommand, DAWN_REPLAY_COMMAND_BUFFER_COMMANDS)
 
-DAWN_REPLAY_COMMAND_BUFFER_COMMANDS_ENUM(DAWN_REPLAY_ENUM)
+DAWN_REPLAY_COMMAND_BUFFER_COMMANDS_ENUM(DAWN_REPLAY_ENUM_WITH_INVALID)
 
 #define DAWN_REPLAY_EXPAND_RESOLVE_MODES(X) \
     X(Unused)                               \
@@ -221,7 +213,6 @@ DAWN_REPLAY_COMMAND_BUFFER_COMMANDS_ENUM(DAWN_REPLAY_ENUM)
 DAWN_REPLAY_EXPAND_RESOLVE_MODES_ENUM(DAWN_REPLAY_ENUM)
 
 #define DAWN_REPLAY_ROOT_COMMANDS(X) \
-    X(Invalid, 0)                    \
     X(CreateResource)                \
     X(QueueSubmit)                   \
     X(WriteBuffer)                   \
@@ -232,7 +223,7 @@ DAWN_REPLAY_EXPAND_RESOLVE_MODES_ENUM(DAWN_REPLAY_ENUM)
 
 #define DAWN_REPLAY_ROOT_COMMANDS_ENUM(X) X(RootCommand, DAWN_REPLAY_ROOT_COMMANDS)
 
-DAWN_REPLAY_ROOT_COMMANDS_ENUM(DAWN_REPLAY_ENUM)
+DAWN_REPLAY_ROOT_COMMANDS_ENUM(DAWN_REPLAY_ENUM_WITH_INVALID)
 
 #undef DAWN_REPLAY_ENUM
 #undef DAWN_REPLAY_GET_X_MACRO

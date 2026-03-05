@@ -42,33 +42,16 @@ namespace dawn::replay {
 // an std::variant that includes each type of BindGroupLayoutEntry. This
 // std::variant can then be used in CreateBindGroupLayout with
 // a visitor to separate deserialization from actual use.
-#define DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE_VALID(NAME) schema::BindGroupLayoutEntryType##NAME,
-#define DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE_INVALID(NAME, VALUE)
-#define DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE_GET_MACRO(_1, _2, NAME, ...) NAME
-#define DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE(...)                  \
-    DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE_GET_MACRO(                \
-        __VA_ARGS__, DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE_INVALID, \
-        DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE_VALID)(__VA_ARGS__)
-
+#define DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE(NAME) schema::BindGroupLayoutEntryType##NAME,
 using BindGroupLayoutEntryVariant = std::variant<DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES(
     DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE) std::monostate>;
 #undef DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE
-#undef DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE_GET_MACRO
-#undef DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE_INVALID
-#undef DAWN_REPLAY_BINDGROUPLAYOUT_VARIANT_TYPE_VALID
 
 // These x-macros use DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES to generate
 // an std::variant that includes each type of BindGroupEntry. This
 // std::variant can then be used in CreateBindGroup with
 // a visitor to separate deserialization from actual use.
-#define DAWN_REPLAY_BINDGROUP_VARIANT_TYPE_VALID(NAME) schema::BindGroupEntryType##NAME,
-#define DAWN_REPLAY_BINDGROUP_VARIANT_TYPE_INVALID(NAME, VALUE)
-#define DAWN_REPLAY_BINDGROUP_VARIANT_TYPE_GET_MACRO(_1, _2, NAME, ...) NAME
-#define DAWN_REPLAY_BINDGROUP_VARIANT_TYPE(...)                  \
-    DAWN_REPLAY_BINDGROUP_VARIANT_TYPE_GET_MACRO(                \
-        __VA_ARGS__, DAWN_REPLAY_BINDGROUP_VARIANT_TYPE_INVALID, \
-        DAWN_REPLAY_BINDGROUP_VARIANT_TYPE_VALID)(__VA_ARGS__)
-
+#define DAWN_REPLAY_BINDGROUP_VARIANT_TYPE(NAME) schema::BindGroupEntryType##NAME,
 #define DAWN_REPLAY_GEN_BINDGROUP_VARIANT(ENUM_NAME, MEMBERS) \
     using BindGroupEntryVariant =                             \
         std::variant<MEMBERS(DAWN_REPLAY_BINDGROUP_VARIANT_TYPE) std::monostate>;
@@ -77,9 +60,6 @@ DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES_ENUM(DAWN_REPLAY_GEN_BINDGROUP_VARI
 
 #undef DAWN_REPLAY_GEN_BINDGROUP_VARIANT
 #undef DAWN_REPLAY_BINDGROUP_VARIANT_TYPE
-#undef DAWN_REPLAY_BINDGROUP_VARIANT_TYPE_GET_MACRO
-#undef DAWN_REPLAY_BINDGROUP_VARIANT_TYPE_INVALID
-#undef DAWN_REPLAY_BINDGROUP_VARIANT_TYPE_VALID
 
 // These structures are used to gather data in a generic way to pass to
 // visitors for resource creation. For example, BindGroupData is used to
