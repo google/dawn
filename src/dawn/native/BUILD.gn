@@ -357,6 +357,8 @@ source_set("sources") {
     "ResourceMemoryAllocation.h",
     "ResourceTable.cpp",
     "ResourceTable.h",
+    "ResourceTableDefaultResources.cpp",
+    "ResourceTableDefaultResources.h",
     "RingBufferAllocator.cpp",
     "RingBufferAllocator.h",
     "Sampler.cpp",

@@ -45,7 +45,7 @@
 #include "dawn/native/Instance.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/RenderPipeline.h"
-#include "dawn/native/ResourceTable.h"
+#include "dawn/native/ResourceTableDefaultResources.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/utils/WGPUHelpers.h"
@@ -146,7 +146,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     if (layout->UsesResourceTable()) {
         startOfBindGroups = BindGroupIndex(1);
 
-        auto bindingTypeOrder = GetDefaultResourceOrder();
+        auto bindingTypeOrder = ResourceTableDefaultResources::GetOrder();
         resourceTableConfig = tint::ResourceTableConfig{
             .resource_table_binding = tint::BindingPoint(0, 1),
             .storage_buffer_binding = tint::BindingPoint(0, 0),

@@ -74,6 +74,7 @@
 #include "dawn/native/RenderBundleEncoder.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/ResourceTable.h"
+#include "dawn/native/ResourceTableDefaultResources.h"
 #include "dawn/native/Sampler.h"
 #include "dawn/native/ShaderModuleParseRequest.h"
 #include "dawn/native/SharedBufferMemory.h"

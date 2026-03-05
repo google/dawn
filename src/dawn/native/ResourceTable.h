@@ -30,10 +30,8 @@
 
 #include <vector>
 
-#include "dawn/common/NonMovable.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/WeakRefSupport.h"
-#include "dawn/common/ityp_span.h"
 #include "dawn/common/ityp_vector.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
@@ -48,13 +46,6 @@ enum class ResourceType : uint32_t;
 }  // namespace tint
 
 namespace dawn::native {
-
-// Returns the order in which we will put the default bindings at the end of the dynamic binding
-// array.
-// TODO(https://issues.chromium.org/463925499): Take the device in parameter to know if we have
-// sampling vs. full resource table.
-ityp::span<ResourceTableSlot, const tint::ResourceType> GetDefaultResourceOrder();
-ResourceTableSlot GetDefaultResourceCount();
 
 MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
                                            const ResourceTableDescriptor* descriptor);
@@ -104,6 +95,10 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     uint32_t APIInsertBinding(const BindingResource* resource);
     wgpu::Status APIRemoveBinding(uint32_t slot);
     uint32_t APIGetSize() const;
+
+    // Computes the tint::ResourceType that should be in the metadata buffer for the resource.
+    static tint::ResourceType ComputeTypeId(
+        const std::variant<std::monostate, Ref<TextureViewBase>, Ref<SamplerBase>>& resource);
 
   protected:
     ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor);
@@ -182,16 +177,6 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
 
     // The list of slots that need to be updated before the next use of the dynamic array.
     std::vector<ResourceTableSlot> mDirtySlots;
-};
-
-// Used to cache the default resources on the device so they can be reused between resource tables.
-class ResourceTableDefaultResources : public NonMovable {
-  public:
-    ResultOrError<ityp::span<ResourceTableSlot, Ref<TextureViewBase>>>
-    GetOrCreateSampledTextureDefaults(DeviceBase* device);
-
-  private:
-    ityp::vector<ResourceTableSlot, Ref<TextureViewBase>> mSampledTextureDefaults;
 };
 
 }  // namespace dawn::native

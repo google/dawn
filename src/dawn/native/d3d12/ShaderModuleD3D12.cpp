@@ -34,7 +34,7 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/Pipeline.h"
-#include "dawn/native/ResourceTable.h"
+#include "dawn/native/ResourceTableDefaultResources.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/d3d/D3DCompilationRequest.h"
 #include "dawn/native/d3d/D3DError.h"
@@ -169,7 +169,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     std::optional<tint::ResourceTableConfig> resourceTableConfig = std::nullopt;
     if (layout->UsesResourceTable()) {
-        auto bindingTypeOrder = GetDefaultResourceOrder();
+        auto bindingTypeOrder = ResourceTableDefaultResources::GetOrder();
         uint32_t baseGroup = layout->GetBaseResourceTableRegisterSpace();
         resourceTableConfig = tint::ResourceTableConfig{
             // For HLSL, Tint emits multiple unbounded arrays per type, each in its own group

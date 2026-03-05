@@ -32,6 +32,7 @@
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/DynamicUploader.h"
+#include "dawn/native/ResourceTableDefaultResources.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
@@ -65,7 +66,8 @@ ResultOrError<VkDescriptorSetLayout> ResourceTable::MakeDescriptorSetLayout(Devi
          {
              .binding = 1,
              .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-             .descriptorCount = kMaxResourceTableSize + uint32_t{GetDefaultResourceCount()},
+             .descriptorCount =
+                 kMaxResourceTableSize + uint32_t{ResourceTableDefaultResources::GetCount()},
              .stageFlags = VulkanShaderStages(kAllStages),
              .pImmutableSamplers = nullptr,
          }}};

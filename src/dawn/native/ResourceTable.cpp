@@ -35,6 +35,7 @@
 #include "dawn/native/Buffer.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Queue.h"
+#include "dawn/native/ResourceTableDefaultResources.h"
 #include "tint/tint.h"
 
 namespace dawn::native {
@@ -52,8 +53,245 @@ Ref<T> GetRef(Variant&& variant) {
     return *p;
 }
 
-// Compute the tint::ResourceType that should be in the metadata buffer for the resource.
-tint::ResourceType ComputeTypeId(
+MaybeError ValidateBindingResource(const DeviceBase* device, const BindingResource* resource) {
+    DAWN_INVALID_IF(resource->nextInChain != nullptr, "nextInChain is not null.");
+
+    uint32_t resourceCount = uint32_t(resource->buffer != nullptr) +
+                             uint32_t(resource->textureView != nullptr) +
+                             uint32_t(resource->sampler != nullptr);
+    DAWN_INVALID_IF(resourceCount != 1,
+                    "%i resources are specified (when there must be exactly 1).", resourceCount);
+
+    if (resource->buffer != nullptr) {
+        // TODO(https://issues.chromium.org/473444515): Support buffers in FullResourceTable.
+        return DAWN_VALIDATION_ERROR("Buffers are not supported.");
+    } else if (TextureViewBase* view = resource->textureView) {
+        // TODO(https://issues.chromium.org/473444515): Support texel buffers in FullResourceTable.
+        DAWN_TRY(device->ValidateObject(view));
+
+        Aspect aspect = view->GetAspects();
+        DAWN_INVALID_IF(!HasOneBit(aspect),
+                        "Multiple aspects (%s) selected in %s. Expected only 1.", aspect, view);
+
+        // TODO(https://issues.chromium.org/473444515): Support storage textures in
+        // FullResourceTable
+        DAWN_INVALID_IF(
+            (view->GetUsage() & kTextureViewOnlyUsages) != wgpu::TextureUsage::TextureBinding,
+            "%s's usages (%s) are not exactly %s.", view, view->GetUsage() & kTextureViewOnlyUsages,
+            wgpu::TextureUsage::TextureBinding);
+
+        DAWN_INVALID_IF(view->IsYCbCr(), "%s is YCbCr.", view);
+    } else if (SamplerBase* sampler = resource->sampler) {
+        DAWN_TRY(device->ValidateObject(sampler));
+        DAWN_INVALID_IF(sampler->IsYCbCr(), "%s is YCbCr.", sampler);
+    } else {
+        DAWN_UNREACHABLE();
+    }
+
+    return {};
+}
+
+}  // anonymous namespace
+
+MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
+                                           const ResourceTableDescriptor* descriptor) {
+    DAWN_ASSERT(descriptor);
+
+    DAWN_INVALID_IF(!device->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
+                    "Resource table used without the %s feature enabled.",
+                    wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
+
+    DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain is not nullptr.");
+
+    return {};
+}
+
+ResourceTableBase::ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor)
+    : ApiObjectBase(device, descriptor->label), mAPISize(ResourceTableSlot(descriptor->size)) {
+    mSlots.resize(mAPISize + ResourceTableDefaultResources::GetCount());
+    // This checks that the default SlotState constructor used in the resize operation will
+    // initialize with the typeId of an empty slot.
+    DAWN_ASSERT(ComputeTypeId({}) == SlotState{}.typeId);
+
+    GetObjectTrackingList()->Track(this);
+}
+
+ResourceTableBase::ResourceTableBase(DeviceBase* device,
+                                     const ResourceTableDescriptor* descriptor,
+                                     ObjectBase::ErrorTag tag)
+    : ApiObjectBase(device, tag, descriptor->label) {
+    // Create the vector of SlotState even for an error resource table because we need to do state
+    // tracking used for the validation of synchronous errors. However skip creating it for tables
+    // above the limit because that's a special error case caught on the content-timeline as well.
+    if (descriptor->size <= kMaxResourceTableSize) {
+        mAPISize = ResourceTableSlot(descriptor->size);
+        mSlots.resize(mAPISize);
+    } else {
+        mDestroyed = true;
+    }
+}
+
+// static
+Ref<ResourceTableBase> ResourceTableBase::MakeError(DeviceBase* device,
+                                                    const ResourceTableDescriptor* descriptor) {
+    return AcquireRef(new ResourceTableBase(device, descriptor, ObjectBase::kError));
+}
+
+ObjectType ResourceTableBase::GetType() const {
+    return ObjectType::ResourceTable;
+}
+
+ResourceTableSlot ResourceTableBase::GetAPISize() const {
+    return mAPISize;
+}
+
+ResourceTableSlot ResourceTableBase::GetSizeWithDefaultResources() const {
+    return mSlots.size();
+}
+
+BufferBase* ResourceTableBase::GetMetadataBuffer() const {
+    DAWN_ASSERT(!mDestroyed);
+    return mMetadataBuffer.Get();
+}
+
+bool ResourceTableBase::IsDestroyed() const {
+    return mDestroyed;
+}
+
+MaybeError ResourceTableBase::ValidateCanUseInSubmitNow() const {
+    DAWN_ASSERT(!IsError());
+    DAWN_INVALID_IF(IsDestroyed(), "%s used while destroyed.", this);
+    return {};
+}
+
+MaybeError ResourceTableBase::InitializeBase() {
+    DeviceBase* device = GetDevice();
+
+    // Create a storage buffer that will hold the shader-visible metadata for the dynamic array.
+    uint32_t metadataArrayLength = uint32_t(GetSizeWithDefaultResources());
+    BufferDescriptor metadataDesc{
+        .label = "resource table metadata",
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst,
+        .size = sizeof(uint32_t) * (metadataArrayLength + 1),
+        .mappedAtCreation = true,
+    };
+    DAWN_TRY_ASSIGN(mMetadataBuffer, device->CreateBuffer(&metadataDesc));
+
+    // Initialize the metadata buffer with the arrayLength and a bunch of zeroes that correspond to
+    // empty entries.
+    DAWN_ASSERT(uint32_t(tint::ResourceType::kEmpty) == 0);
+    // TODO(https://crbug.com/435317394): We could rely on zero initialization if it is enabled, and
+    // also apply the initial dirty slots in this mapping instead of on the first use of the
+    // resource table.
+    uint32_t* data = static_cast<uint32_t*>(mMetadataBuffer->GetMappedRange(0, metadataDesc.size));
+    *data = uint32_t(mAPISize);
+    memset(data + 1, 0, metadataDesc.size - sizeof(uint32_t));
+    DAWN_TRY(mMetadataBuffer->Unmap());
+
+    // Add the default resources at the end of the table.
+    // TODO(https://issues.chromium.org/473354063): Add default samplers
+    ityp::span<ResourceTableSlot, Ref<TextureViewBase>> defaultResources;
+    DAWN_TRY_ASSIGN(defaultResources,
+                    device->GetResourceTableDefaultResources()->GetOrCreate(device));
+
+    for (auto [i, defaultResource] : Enumerate(defaultResources)) {
+        BindingResource entryContents = {
+            .textureView = defaultResource.Get(),
+        };
+        Update(mAPISize + i, &entryContents);
+    }
+
+    return {};
+}
+
+void ResourceTableBase::DestroyImpl(DestroyReason reason) {
+    DAWN_ASSERT(!mDestroyed);
+
+    for (auto [i, slot] : Enumerate(mSlots)) {
+        if (auto view = GetRef<TextureViewBase>(slot.resource)) {
+            view->GetTexture()->RemoveResourceTableSlotUse(this, i);
+        }
+    }
+
+    mSlots.clear();
+    mDirtySlots.clear();
+
+    if (mMetadataBuffer != nullptr) {
+        mMetadataBuffer->Destroy();
+        mMetadataBuffer = nullptr;
+    }
+
+    mDestroyed = true;
+}
+
+void ResourceTableBase::APIDestroy() {
+    // Handle error objects directly because Destroy() will skip calling DestroyImpl for them.
+    if (IsError()) {
+        mSlots.clear();
+        mDirtySlots.clear();
+        mDestroyed = true;
+    } else {
+        Destroy();
+    }
+}
+
+wgpu::Status ResourceTableBase::APIUpdate(uint32_t slotIn, const BindingResource* resource) {
+    ResourceTableSlot slot = ResourceTableSlot(slotIn);
+    if (!IsValidSlot(slot)) {
+        return wgpu::Status::Error;
+    }
+
+    // Prevent replacing a slot that may be in use by the GPU.
+    if (mSlots[slot].availableAfter > GetDevice()->GetQueue()->GetCompletedCommandSerial()) {
+        return wgpu::Status::Error;
+    }
+
+    UpdateWithDeviceValidation(slot, resource, "Update");
+    return wgpu::Status::Success;
+}
+
+uint32_t ResourceTableBase::APIInsertBinding(const BindingResource* resource) {
+    if (IsDestroyed()) {
+        return wgpu::kInvalidBinding;
+    }
+
+    // TODO(https://crbug.com/435317394): This is O(n) in the number of slots. We could make it
+    // O(logN) with a heap of the free slots that's maintained over time.
+    ExecutionSerial completedSerial = GetDevice()->GetQueue()->GetCompletedCommandSerial();
+    for (ResourceTableSlot slot : Range(mAPISize)) {
+        if (mSlots[slot].availableAfter > completedSerial) {
+            continue;
+        }
+
+        UpdateWithDeviceValidation(slot, resource, "InsertBinding");
+        return uint32_t(slot);
+    }
+
+    // No slot found, return the invalid binding.
+    return wgpu::kInvalidBinding;
+}
+
+wgpu::Status ResourceTableBase::APIRemoveBinding(uint32_t slotIn) {
+    ResourceTableSlot slot = ResourceTableSlot(slotIn);
+    if (!IsValidSlot(slot)) {
+        return wgpu::Status::Error;
+    }
+
+    // Always remove the slot, even if a validation error happens, so that we match client-side
+    // validation.
+    Remove(slot);
+
+    [[maybe_unused]] bool error = GetDevice()->ConsumedError(
+        GetDevice()->ValidateObject(this), "validating %s.RemoveBinding(%u)", this, slot);
+    return wgpu::Status::Success;
+}
+
+uint32_t ResourceTableBase::APIGetSize() const {
+    return uint32_t(mAPISize);
+}
+
+// static
+tint::ResourceType ResourceTableBase::ComputeTypeId(
     const std::variant<std::monostate, Ref<TextureViewBase>, Ref<SamplerBase>>& resource) {
     return MatchVariant(
         resource, [&](std::monostate) { return tint::ResourceType::kEmpty; },
@@ -192,328 +430,6 @@ tint::ResourceType ComputeTypeId(
         });
 
     DAWN_UNREACHABLE();
-}
-
-// This helper function is used in ASSERTs to check that the default resources are compatible with
-// the typeIds that they will be used as defaults for.
-[[maybe_unused]] bool AreTypeIDCompatible(tint::ResourceType resourceTypeId,
-                                          tint::ResourceType slotTypeId) {
-    if (resourceTypeId == slotTypeId) {
-        return true;
-    }
-
-    // Cases where conversions are allowed:
-    switch (slotTypeId) {
-        case tint::ResourceType::kTexture1d_f32_unfilterable:
-            return resourceTypeId == tint::ResourceType::kTexture1d_f32_filterable;
-
-        case tint::ResourceType::kTexture2d_f32_unfilterable:
-            return resourceTypeId == tint::ResourceType::kTexture2d_f32_filterable ||
-                   resourceTypeId == tint::ResourceType::kTextureDepth2d;
-
-        case tint::ResourceType::kTexture2dArray_f32_unfilterable:
-            return resourceTypeId == tint::ResourceType::kTexture2dArray_f32_filterable ||
-                   resourceTypeId == tint::ResourceType::kTextureDepth2dArray;
-
-        case tint::ResourceType::kTextureCube_f32_unfilterable:
-            return resourceTypeId == tint::ResourceType::kTextureCube_f32_filterable ||
-                   resourceTypeId == tint::ResourceType::kTextureDepthCube;
-
-        case tint::ResourceType::kTextureCubeArray_f32_unfilterable:
-            return resourceTypeId == tint::ResourceType::kTextureCubeArray_f32_filterable ||
-                   resourceTypeId == tint::ResourceType::kTextureDepthCubeArray;
-
-        case tint::ResourceType::kTexture3d_f32_unfilterable:
-            return resourceTypeId == tint::ResourceType::kTexture3d_f32_filterable;
-
-        default:
-            return false;
-    }
-}
-
-MaybeError ValidateBindingResource(const DeviceBase* device, const BindingResource* resource) {
-    DAWN_INVALID_IF(resource->nextInChain != nullptr, "nextInChain is not null.");
-
-    uint32_t resourceCount = uint32_t(resource->buffer != nullptr) +
-                             uint32_t(resource->textureView != nullptr) +
-                             uint32_t(resource->sampler != nullptr);
-    DAWN_INVALID_IF(resourceCount != 1,
-                    "%i resources are specified (when there must be exactly 1).", resourceCount);
-
-    if (resource->buffer != nullptr) {
-        // TODO(https://issues.chromium.org/473444515): Support buffers in FullResourceTable.
-        return DAWN_VALIDATION_ERROR("Buffers are not supported.");
-    } else if (TextureViewBase* view = resource->textureView) {
-        // TODO(https://issues.chromium.org/473444515): Support texel buffers in FullResourceTable.
-        DAWN_TRY(device->ValidateObject(view));
-
-        Aspect aspect = view->GetAspects();
-        DAWN_INVALID_IF(!HasOneBit(aspect),
-                        "Multiple aspects (%s) selected in %s. Expected only 1.", aspect, view);
-
-        // TODO(https://issues.chromium.org/473444515): Support storage textures in
-        // FullResourceTable
-        DAWN_INVALID_IF(
-            (view->GetUsage() & kTextureViewOnlyUsages) != wgpu::TextureUsage::TextureBinding,
-            "%s's usages (%s) are not exactly %s.", view, view->GetUsage() & kTextureViewOnlyUsages,
-            wgpu::TextureUsage::TextureBinding);
-
-        DAWN_INVALID_IF(view->IsYCbCr(), "%s is YCbCr.", view);
-    } else if (SamplerBase* sampler = resource->sampler) {
-        DAWN_TRY(device->ValidateObject(sampler));
-        DAWN_INVALID_IF(sampler->IsYCbCr(), "%s is YCbCr.", sampler);
-    } else {
-        DAWN_UNREACHABLE();
-    }
-
-    return {};
-}
-
-}  // anonymous namespace
-
-ityp::span<ResourceTableSlot, const tint::ResourceType> GetDefaultResourceOrder() {
-    static constexpr auto kDefaults = std::array{
-        tint::ResourceType::kTexture1d_f32_filterable,
-        tint::ResourceType::kTexture2d_f32_filterable,
-        tint::ResourceType::kTexture2dArray_f32_filterable,
-        tint::ResourceType::kTextureCube_f32_filterable,
-        tint::ResourceType::kTextureCubeArray_f32_filterable,
-        tint::ResourceType::kTexture3d_f32_filterable,
-        tint::ResourceType::kTexture1d_f32_unfilterable,
-        tint::ResourceType::kTexture2d_f32_unfilterable,
-        tint::ResourceType::kTexture2dArray_f32_unfilterable,
-        tint::ResourceType::kTextureCube_f32_unfilterable,
-        tint::ResourceType::kTextureCubeArray_f32_unfilterable,
-        tint::ResourceType::kTexture3d_f32_unfilterable,
-
-        tint::ResourceType::kTexture1d_u32,
-        tint::ResourceType::kTexture2d_u32,
-        tint::ResourceType::kTexture2dArray_u32,
-        tint::ResourceType::kTextureCube_u32,
-        tint::ResourceType::kTextureCubeArray_u32,
-        tint::ResourceType::kTexture3d_u32,
-
-        tint::ResourceType::kTexture1d_i32,
-        tint::ResourceType::kTexture2d_i32,
-        tint::ResourceType::kTexture2dArray_i32,
-        tint::ResourceType::kTextureCube_i32,
-        tint::ResourceType::kTextureCubeArray_i32,
-        tint::ResourceType::kTexture3d_i32,
-
-        tint::ResourceType::kTextureMultisampled2d_f32,
-        tint::ResourceType::kTextureMultisampled2d_u32,
-        tint::ResourceType::kTextureMultisampled2d_i32,
-
-        tint::ResourceType::kTextureDepth2d,
-        tint::ResourceType::kTextureDepth2dArray,
-        tint::ResourceType::kTextureDepthCube,
-        tint::ResourceType::kTextureDepthCubeArray,
-        tint::ResourceType::kTextureDepthMultisampled2d,
-    };
-
-    return {kDefaults.data(), ResourceTableSlot(uint32_t(kDefaults.size()))};
-}
-
-ResourceTableSlot GetDefaultResourceCount() {
-    return GetDefaultResourceOrder().size();
-}
-
-MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
-                                           const ResourceTableDescriptor* descriptor) {
-    DAWN_ASSERT(descriptor);
-
-    DAWN_INVALID_IF(!device->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
-                    "Resource table used without the %s feature enabled.",
-                    wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
-
-    DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain is not nullptr.");
-
-    return {};
-}
-
-ResourceTableBase::ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor)
-    : ApiObjectBase(device, descriptor->label), mAPISize(ResourceTableSlot(descriptor->size)) {
-    mSlots.resize(mAPISize + GetDefaultResourceCount());
-    // This checks that the default SlotState constructor used in the resize operation will
-    // initialize with the typeId of an empty slot.
-    DAWN_ASSERT(ComputeTypeId({}) == SlotState{}.typeId);
-
-    GetObjectTrackingList()->Track(this);
-}
-
-ResourceTableBase::ResourceTableBase(DeviceBase* device,
-                                     const ResourceTableDescriptor* descriptor,
-                                     ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag, descriptor->label) {
-    // Create the vector of SlotState even for an error resource table because we need to do state
-    // tracking used for the validation of synchronous errors. However skip creating it for tables
-    // above the limit because that's a special error case caught on the content-timeline as well.
-    if (descriptor->size <= kMaxResourceTableSize) {
-        mAPISize = ResourceTableSlot(descriptor->size);
-        mSlots.resize(mAPISize);
-    } else {
-        mDestroyed = true;
-    }
-}
-
-// static
-Ref<ResourceTableBase> ResourceTableBase::MakeError(DeviceBase* device,
-                                                    const ResourceTableDescriptor* descriptor) {
-    return AcquireRef(new ResourceTableBase(device, descriptor, ObjectBase::kError));
-}
-
-ObjectType ResourceTableBase::GetType() const {
-    return ObjectType::ResourceTable;
-}
-
-ResourceTableSlot ResourceTableBase::GetAPISize() const {
-    return mAPISize;
-}
-
-ResourceTableSlot ResourceTableBase::GetSizeWithDefaultResources() const {
-    return mSlots.size();
-}
-
-BufferBase* ResourceTableBase::GetMetadataBuffer() const {
-    DAWN_ASSERT(!mDestroyed);
-    return mMetadataBuffer.Get();
-}
-
-bool ResourceTableBase::IsDestroyed() const {
-    return mDestroyed;
-}
-
-MaybeError ResourceTableBase::ValidateCanUseInSubmitNow() const {
-    DAWN_ASSERT(!IsError());
-    DAWN_INVALID_IF(IsDestroyed(), "%s used while destroyed.", this);
-    return {};
-}
-
-MaybeError ResourceTableBase::InitializeBase() {
-    DeviceBase* device = GetDevice();
-
-    // Create a storage buffer that will hold the shader-visible metadata for the dynamic array.
-    uint32_t metadataArrayLength = uint32_t(GetSizeWithDefaultResources());
-    BufferDescriptor metadataDesc{
-        .label = "resource table metadata",
-        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst,
-        .size = sizeof(uint32_t) * (metadataArrayLength + 1),
-        .mappedAtCreation = true,
-    };
-    DAWN_TRY_ASSIGN(mMetadataBuffer, device->CreateBuffer(&metadataDesc));
-
-    // Initialize the metadata buffer with the arrayLength and a bunch of zeroes that correspond to
-    // empty entries.
-    DAWN_ASSERT(uint32_t(tint::ResourceType::kEmpty) == 0);
-    // TODO(https://crbug.com/435317394): We could rely on zero initialization if it is enabled, and
-    // also apply the initial dirty slots in this mapping instead of on the first use of the
-    // resource table.
-    uint32_t* data = static_cast<uint32_t*>(mMetadataBuffer->GetMappedRange(0, metadataDesc.size));
-    *data = uint32_t(mAPISize);
-    memset(data + 1, 0, metadataDesc.size - sizeof(uint32_t));
-    DAWN_TRY(mMetadataBuffer->Unmap());
-
-    // Add the default resources at the end of the table.
-    // TODO(https://issues.chromium.org/473354063): Add default samplers
-    ityp::span<ResourceTableSlot, Ref<TextureViewBase>> defaultResources;
-    DAWN_TRY_ASSIGN(
-        defaultResources,
-        device->GetResourceTableDefaultResources()->GetOrCreateSampledTextureDefaults(device));
-
-    for (auto [i, defaultResource] : Enumerate(defaultResources)) {
-        BindingResource entryContents = {
-            .textureView = defaultResource.Get(),
-        };
-        Update(mAPISize + i, &entryContents);
-    }
-
-    return {};
-}
-
-void ResourceTableBase::DestroyImpl(DestroyReason reason) {
-    DAWN_ASSERT(!mDestroyed);
-
-    for (auto [i, slot] : Enumerate(mSlots)) {
-        if (auto view = GetRef<TextureViewBase>(slot.resource)) {
-            view->GetTexture()->RemoveResourceTableSlotUse(this, i);
-        }
-    }
-
-    mSlots.clear();
-    mDirtySlots.clear();
-
-    if (mMetadataBuffer != nullptr) {
-        mMetadataBuffer->Destroy();
-        mMetadataBuffer = nullptr;
-    }
-
-    mDestroyed = true;
-}
-
-void ResourceTableBase::APIDestroy() {
-    // Handle error objects directly because Destroy() will skip calling DestroyImpl for them.
-    if (IsError()) {
-        mSlots.clear();
-        mDirtySlots.clear();
-        mDestroyed = true;
-    } else {
-        Destroy();
-    }
-}
-
-wgpu::Status ResourceTableBase::APIUpdate(uint32_t slotIn, const BindingResource* resource) {
-    ResourceTableSlot slot = ResourceTableSlot(slotIn);
-    if (!IsValidSlot(slot)) {
-        return wgpu::Status::Error;
-    }
-
-    // Prevent replacing a slot that may be in use by the GPU.
-    if (mSlots[slot].availableAfter > GetDevice()->GetQueue()->GetCompletedCommandSerial()) {
-        return wgpu::Status::Error;
-    }
-
-    UpdateWithDeviceValidation(slot, resource, "Update");
-    return wgpu::Status::Success;
-}
-
-uint32_t ResourceTableBase::APIInsertBinding(const BindingResource* resource) {
-    if (IsDestroyed()) {
-        return wgpu::kInvalidBinding;
-    }
-
-    // TODO(https://crbug.com/435317394): This is O(n) in the number of slots. We could make it
-    // O(logN) with a heap of the free slots that's maintained over time.
-    ExecutionSerial completedSerial = GetDevice()->GetQueue()->GetCompletedCommandSerial();
-    for (ResourceTableSlot slot : Range(mAPISize)) {
-        if (mSlots[slot].availableAfter > completedSerial) {
-            continue;
-        }
-
-        UpdateWithDeviceValidation(slot, resource, "InsertBinding");
-        return uint32_t(slot);
-    }
-
-    // No slot found, return the invalid binding.
-    return wgpu::kInvalidBinding;
-}
-
-wgpu::Status ResourceTableBase::APIRemoveBinding(uint32_t slotIn) {
-    ResourceTableSlot slot = ResourceTableSlot(slotIn);
-    if (!IsValidSlot(slot)) {
-        return wgpu::Status::Error;
-    }
-
-    // Always remove the slot, even if a validation error happens, so that we match client-side
-    // validation.
-    Remove(slot);
-
-    [[maybe_unused]] bool error = GetDevice()->ConsumedError(
-        GetDevice()->ValidateObject(this), "validating %s.RemoveBinding(%u)", this, slot);
-    return wgpu::Status::Success;
-}
-
-uint32_t ResourceTableBase::APIGetSize() const {
-    return uint32_t(mAPISize);
 }
 
 bool ResourceTableBase::IsValidSlot(ResourceTableSlot slot) const {
@@ -668,145 +584,6 @@ void ResourceTableBase::MarkStateDirty(ResourceTableSlot slot) {
         mDirtySlots.push_back(slot);
         mSlots[slot].dirty = true;
     }
-}
-
-// ResourceTableDefaultResources
-
-ResultOrError<ityp::span<ResourceTableSlot, Ref<TextureViewBase>>>
-ResourceTableDefaultResources::GetOrCreateSampledTextureDefaults(DeviceBase* device) {
-    if (!mSampledTextureDefaults.empty()) {
-        return {{mSampledTextureDefaults.data(), mSampledTextureDefaults.size()}};
-    }
-
-    auto AddDefaultResource = [&](TextureBase* texture,
-                                  const TextureViewDescriptor* viewDesc = nullptr) -> MaybeError {
-        DAWN_TRY(texture->Pin(wgpu::TextureUsage::TextureBinding));
-
-        Ref<TextureViewBase> view;
-        DAWN_TRY_ASSIGN(view, device->CreateTextureView(texture, viewDesc));
-
-        // Check that the resource we will have will match the order of default textures that we
-        // will give to the shader compilation.
-        DAWN_ASSERT(AreTypeIDCompatible(ComputeTypeId(view.Get()),
-                                        GetDefaultResourceOrder()[mSampledTextureDefaults.size()]));
-        mSampledTextureDefaults.push_back(view);
-
-        return {};
-    };
-
-    // Create the color format single-sampled views.
-    for (auto format :
-         {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::R8Uint, wgpu::TextureFormat::R8Sint}) {
-        // Create the necessary 1/2/3D textures.
-        TextureDescriptor tDesc{
-            .label = "default SampledTexture resource",
-            .usage = wgpu::TextureUsage::TextureBinding,
-            .size = {1},
-            .format = format,
-        };
-
-        tDesc.size = {1};
-        tDesc.dimension = wgpu::TextureDimension::e1D;
-        Ref<TextureBase> t1D;
-        DAWN_TRY_ASSIGN(t1D, device->CreateTexture(&tDesc));
-
-        tDesc.size = {1, 1, 6};
-        tDesc.dimension = wgpu::TextureDimension::e2D;
-        Ref<TextureBase> t2D;
-        DAWN_TRY_ASSIGN(t2D, device->CreateTexture(&tDesc));
-
-        tDesc.size = {1, 1, 1};
-        tDesc.dimension = wgpu::TextureDimension::e3D;
-        Ref<TextureBase> t3D;
-        DAWN_TRY_ASSIGN(t3D, device->CreateTexture(&tDesc));
-
-        // There are two different sets of default resources for R8Unorm because we first add all
-        // the filterable f32 sample types, then all the unfilterable f32 sample types.
-        uint32_t timesToAdd = format == wgpu::TextureFormat::R8Unorm ? 2 : 1;
-        for (uint32_t i = 0; i < timesToAdd; i++) {
-            // Create all the default binding view, reusing the 2D texture between
-            // 2D/2DArray/Cube/CubeArray.
-            DAWN_TRY(AddDefaultResource(t1D.Get()));
-
-            TextureViewDescriptor vDesc{
-                .label = "default SampledTexture resource",
-            };
-            vDesc.arrayLayerCount = 1;
-            vDesc.dimension = wgpu::TextureViewDimension::e2D;
-            DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
-            vDesc.dimension = wgpu::TextureViewDimension::e2DArray;
-            DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
-            vDesc.arrayLayerCount = 6;
-            vDesc.dimension = wgpu::TextureViewDimension::Cube;
-            DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
-            vDesc.dimension = wgpu::TextureViewDimension::CubeArray;
-            DAWN_TRY(AddDefaultResource(t2D.Get(), &vDesc));
-
-            DAWN_TRY(AddDefaultResource(t3D.Get()));
-        }
-    }
-
-    // Create the color format multi-sampled views.
-    for (auto format :
-         {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::R8Uint, wgpu::TextureFormat::R8Sint}) {
-        TextureDescriptor tDesc{
-            .label = "default SampledTexture resource",
-            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
-            .dimension = wgpu::TextureDimension::e2D,
-            .size = {1, 1},
-            .format = format,
-            .sampleCount = 4,
-        };
-
-        Ref<TextureBase> t;
-        DAWN_TRY_ASSIGN(t, device->CreateTexture(&tDesc));
-        DAWN_TRY(AddDefaultResource(t.Get()));
-    }
-
-    // Create the single-sampled depth texture default resource.
-    {
-        TextureDescriptor tDesc{
-            .label = "default SampledTexture resource",
-            .usage = wgpu::TextureUsage::TextureBinding,
-            .dimension = wgpu::TextureDimension::e2D,
-            .size = {1, 1, 6},
-            .format = wgpu::TextureFormat::Depth16Unorm,
-        };
-        Ref<TextureBase> t;
-        DAWN_TRY_ASSIGN(t, device->CreateTexture(&tDesc));
-
-        TextureViewDescriptor vDesc{
-            .label = "default SampledTexture resource",
-        };
-        vDesc.arrayLayerCount = 1;
-        vDesc.dimension = wgpu::TextureViewDimension::e2D;
-        DAWN_TRY(AddDefaultResource(t.Get(), &vDesc));
-        vDesc.dimension = wgpu::TextureViewDimension::e2DArray;
-        DAWN_TRY(AddDefaultResource(t.Get(), &vDesc));
-        vDesc.arrayLayerCount = 6;
-        vDesc.dimension = wgpu::TextureViewDimension::Cube;
-        DAWN_TRY(AddDefaultResource(t.Get(), &vDesc));
-        vDesc.dimension = wgpu::TextureViewDimension::CubeArray;
-        DAWN_TRY(AddDefaultResource(t.Get(), &vDesc));
-    }
-
-    // Create the multi-sampled depth texture default resource.
-    {
-        TextureDescriptor tDesc{
-            .label = "default SampledTexture resource",
-            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
-            .dimension = wgpu::TextureDimension::e2D,
-            .size = {1, 1},
-            .format = wgpu::TextureFormat::Depth16Unorm,
-            .sampleCount = 4,
-        };
-
-        Ref<TextureBase> t;
-        DAWN_TRY_ASSIGN(t, device->CreateTexture(&tDesc));
-        DAWN_TRY(AddDefaultResource(t.Get()));
-    }
-
-    return {{mSampledTextureDefaults.data(), mSampledTextureDefaults.size()}};
 }
 
 }  // namespace dawn::native
