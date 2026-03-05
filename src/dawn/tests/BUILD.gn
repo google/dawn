@@ -326,6 +326,7 @@ dawn_test("dawn_unittests") {
     "${dawn_root}/src/dawn/wire/server/ServerMemoryTransferService_mock.h",
     "DawnNativeTest.cpp",
     "DawnNativeTest.h",
+    "unittests/AlgebraTests.cpp",
     "unittests/AsyncTaskTests.cpp",
     "unittests/BitSetRangeIteratorTests.cpp",
     "unittests/BuddyAllocatorTests.cpp",

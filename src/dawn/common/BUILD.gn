@@ -262,6 +262,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
     is_ios || is_wasm) {
   static_library("common") {
     sources = [
+      "Algebra.h",
       "AlignedAlloc.cpp",
       "AlignedAlloc.h",
       "Alloc.h",

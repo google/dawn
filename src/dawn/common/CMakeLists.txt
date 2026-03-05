@@ -45,6 +45,7 @@ DawnGenerator(
 set(private_headers
     "${DAWN_VERSION_AUTOGEN_HEADERS}"
     "${DAWN_GPU_INFO_AUTOGEN_HEADERS}"
+    "Algebra.h"
     "AlignedAlloc.h"
     "Alloc.h"
     "Assert.h"
