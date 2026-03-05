@@ -48,21 +48,6 @@
           'gtest_tests': 'swiftshader_gtests',
         },
       },
-      'dawn-mac-x64-builder-dbg': {
-        'additional_compile_targets': [
-          'default',
-        ],
-      },
-      'dawn-mac-x64-sws-dbg': {
-        'os_type': 'mac',
-        'mixins': [
-          'mac_mini_intel_gpu_stable',
-        ],
-        'test_suites': {
-          'gtest_tests': 'swiftshader_gtests',
-          'isolated_scripts': 'swiftshader_isolated_scripts',
-        },
-      },
       'dawn-win-x64-builder-asan': {
         'additional_compile_targets': [
           'default',
