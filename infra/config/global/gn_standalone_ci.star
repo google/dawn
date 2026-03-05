@@ -832,6 +832,18 @@ dawn_linux_parent_builder(
             "x86",
         ],
     ),
+    targets = targets.bundle(
+        targets = [
+            "tint_fuzzer_corpus_check_tests",
+        ],
+        mixins = [
+            "gpu_linux_gce_stable",
+        ],
+    ),
+    targets_settings = targets.settings(
+        browser_config = targets.browser_config.RELEASE,
+        os_type = targets.os_type.LINUX,
+    ),
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|rel|fuzz",
         short_name = "x86",
