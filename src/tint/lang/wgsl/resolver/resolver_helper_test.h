@@ -133,6 +133,12 @@ class TestHelper : public ProgramBuilder {
     /// declared in WGSL.
     std::string FriendlyName(const core::type::Type* type) { return type->FriendlyName(); }
 
+    /// Run @p wgsl through the whole WGSL frontend, and check that it fails with @p error.
+    void ExpectError(std::string_view wgsl, std::string_view error);
+
+    /// Run @p wgsl through the whole WGSL frontend, and check that does not produce an error.
+    void ExpectSuccess(std::string_view wgsl);
+
   protected:
     std::unique_ptr<Resolver> resolver_;
 };

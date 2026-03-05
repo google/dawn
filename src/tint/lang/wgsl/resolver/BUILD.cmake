@@ -84,9 +84,11 @@ tint_target_add_external_dependencies(tint_lang_wgsl_resolver lib
   "src_utils"
 )
 
+if(TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_lang_wgsl_resolver_test
 # Kind:      test
+# Condition: TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/address_space_layout_validation_test.cc
@@ -210,4 +212,6 @@ if(TINT_BUILD_WGSL_READER)
   tint_target_add_dependencies(tint_lang_wgsl_resolver_test test
     tint_lang_wgsl_reader
   )
+endif(TINT_BUILD_WGSL_READER)
+
 endif(TINT_BUILD_WGSL_READER)

@@ -66,11 +66,9 @@ cc_binary(
     "//src/tint/lang/spirv/writer/analysis:test",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast:test",
-    "//src/tint/lang/wgsl/intrinsic:test",
     "//src/tint/lang/wgsl/ir:test",
     "//src/tint/lang/wgsl/program:test",
     "//src/tint/lang/wgsl/reader/lower:test",
-    "//src/tint/lang/wgsl/resolver:test",
     "//src/tint/lang/wgsl/sem:test",
     "//src/tint/lang/wgsl/writer/common",
     "//src/tint/lang/wgsl/writer/ir_to_program:test",
@@ -157,9 +155,11 @@ cc_binary(
   }) + select({
     ":tint_build_wgsl_reader": [
       "//src/tint/lang/wgsl/inspector:test",
+      "//src/tint/lang/wgsl/intrinsic:test",
       "//src/tint/lang/wgsl/reader/parser:test",
       "//src/tint/lang/wgsl/reader/program_to_ir:test",
       "//src/tint/lang/wgsl/reader:test",
+      "//src/tint/lang/wgsl/resolver:test",
     ],
     "//conditions:default": [],
   }) + select({
