@@ -98,9 +98,13 @@ WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
 
     // Try first to use GetSourceData if the memory transfer service implements
     // it. If so, we can avoid a copy.
-    uint8_t* sourceData = writeHandle->GetSourceData();
-    if (sourceData) {
-        mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, sourceData,
+    std::span<uint8_t> source(writeHandle->GetSourceData(), writeHandle->GetSourceSize());
+    if (!source.empty()) {
+        if (source.size() < size) {
+            return WireResult::FatalError;
+        }
+
+        mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, source.data(),
                                  static_cast<size_t>(size));
         return WireResult::Success;
     }
@@ -167,9 +171,13 @@ WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
 
     // Try first to use GetSourceData if the memory transfer service implements
     // it. If so, we can avoid a copy.
-    uint8_t* sourceData = writeHandle->GetSourceData();
-    if (sourceData) {
-        mProcs->queueWriteTexture(queue->handle, destination, sourceData,
+    std::span<uint8_t> source(writeHandle->GetSourceData(), writeHandle->GetSourceSize());
+    if (!source.empty()) {
+        if (source.size() < dataSize) {
+            return WireResult::FatalError;
+        }
+
+        mProcs->queueWriteTexture(queue->handle, destination, source.data(),
                                   static_cast<size_t>(dataSize), dataLayout, writeSize);
         return WireResult::Success;
     }
