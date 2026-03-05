@@ -1640,6 +1640,11 @@ struct Decoder {
     }
 
     core::TextureFilterable TextureFilterable(pb::TextureFilterable in) {
+        if (!TextureFilterable_IsValid(in)) {
+            err_ << "invalid texture filterability, " << std::to_string(in) << "\n";
+            return core::TextureFilterable::kUndefined;
+        }
+
         switch (in) {
             case pb::TextureFilterable::filterable_undefined:
                 return core::TextureFilterable::kUndefined;
@@ -1657,6 +1662,11 @@ struct Decoder {
     }
 
     core::SamplerFiltering SamplerFiltering(pb::SamplerFiltering in) {
+        if (!SamplerFiltering_IsValid(in)) {
+            err_ << "invalid sampler filtering, " << std::to_string(in) << "\n";
+            return core::SamplerFiltering::kUndefined;
+        }
+
         switch (in) {
             case pb::SamplerFiltering::filtering_undefined:
                 return core::SamplerFiltering::kUndefined;
