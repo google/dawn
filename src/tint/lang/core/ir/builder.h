@@ -673,12 +673,13 @@ class Builder {
         return Append(ir.CreateInstruction<KLASS>(result, op, lhs_val, rhs_val));
     }
 
-    /// Creates an And operation
+    /// Creates Binary operation
+    /// @parm op the operator
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBinary* And(LHS&& lhs, RHS&& rhs) {
+    ir::CoreBinary* BinaryWithLHSType(BinaryOp op, LHS&& lhs, RHS&& rhs) {
         CheckForNonDeterministicEvaluation<LHS, RHS>();
         auto* lhs_value = Value(std::forward<LHS>(lhs));
         auto* rhs_value = Value(std::forward<RHS>(rhs));
@@ -686,8 +687,17 @@ class Builder {
         TINT_ASSERT(rhs_value);
         TINT_ASSERT(lhs_value->Type() == rhs_value->Type());
 
-        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(lhs_value->Type()),
-                                                           BinaryOp::kAnd, lhs_value, rhs_value));
+        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(lhs_value->Type()), op,
+                                                           lhs_value, rhs_value));
+    }
+
+    /// Creates an And operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    template <typename LHS, typename RHS>
+    ir::CoreBinary* And(LHS&& lhs, RHS&& rhs) {
+        return BinaryWithLHSType(BinaryOp::kAnd, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an Or operation
@@ -696,15 +706,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* Or(LHS&& lhs, RHS&& rhs) {
-        CheckForNonDeterministicEvaluation<LHS, RHS>();
-        auto* lhs_value = Value(std::forward<LHS>(lhs));
-        auto* rhs_value = Value(std::forward<RHS>(rhs));
-        TINT_ASSERT(lhs_value);
-        TINT_ASSERT(rhs_value);
-        TINT_ASSERT(lhs_value->Type() == rhs_value->Type());
-
-        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(lhs_value->Type()),
-                                                           BinaryOp::kOr, lhs_value, rhs_value));
+        return BinaryWithLHSType(BinaryOp::kOr, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an Xor operation
@@ -713,15 +715,24 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* Xor(LHS&& lhs, RHS&& rhs) {
+        return BinaryWithLHSType(BinaryOp::kXor, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+    }
+
+    /// Creates a Binary op
+    /// @param op the operator
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    template <typename LHS, typename RHS>
+    ir::CoreBinary* BinaryWithBoolType(BinaryOp op, LHS&& lhs, RHS&& rhs) {
         CheckForNonDeterministicEvaluation<LHS, RHS>();
         auto* lhs_value = Value(std::forward<LHS>(lhs));
         auto* rhs_value = Value(std::forward<RHS>(rhs));
         TINT_ASSERT(lhs_value);
         TINT_ASSERT(rhs_value);
-        TINT_ASSERT(lhs_value->Type() == rhs_value->Type());
-
-        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(lhs_value->Type()),
-                                                           BinaryOp::kXor, lhs_value, rhs_value));
+        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
+        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(type), op, lhs_value,
+                                                           rhs_value));
     }
 
     /// Creates an Equal operation
@@ -730,14 +741,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* Equal(LHS&& lhs, RHS&& rhs) {
-        CheckForNonDeterministicEvaluation<LHS, RHS>();
-        auto* lhs_value = Value(std::forward<LHS>(lhs));
-        auto* rhs_value = Value(std::forward<RHS>(rhs));
-        TINT_ASSERT(lhs_value);
-        TINT_ASSERT(rhs_value);
-        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
-        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(type),
-                                                           BinaryOp::kEqual, lhs_value, rhs_value));
+        return BinaryWithBoolType(BinaryOp::kEqual, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an NotEqual operation
@@ -746,14 +750,8 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* NotEqual(LHS&& lhs, RHS&& rhs) {
-        CheckForNonDeterministicEvaluation<LHS, RHS>();
-        auto* lhs_value = Value(std::forward<LHS>(lhs));
-        auto* rhs_value = Value(std::forward<RHS>(rhs));
-        TINT_ASSERT(lhs_value);
-        TINT_ASSERT(rhs_value);
-        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
-        return Append(ir.CreateInstruction<ir::CoreBinary>(
-            InstructionResult(type), BinaryOp::kNotEqual, lhs_value, rhs_value));
+        return BinaryWithBoolType(BinaryOp::kNotEqual, std::forward<LHS>(lhs),
+                                  std::forward<RHS>(rhs));
     }
 
     /// Creates an LessThan operation
@@ -762,14 +760,8 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* LessThan(LHS&& lhs, RHS&& rhs) {
-        CheckForNonDeterministicEvaluation<LHS, RHS>();
-        auto* lhs_value = Value(std::forward<LHS>(lhs));
-        auto* rhs_value = Value(std::forward<RHS>(rhs));
-        TINT_ASSERT(lhs_value);
-        TINT_ASSERT(rhs_value);
-        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
-        return Append(ir.CreateInstruction<ir::CoreBinary>(
-            InstructionResult(type), BinaryOp::kLessThan, lhs_value, rhs_value));
+        return BinaryWithBoolType(BinaryOp::kLessThan, std::forward<LHS>(lhs),
+                                  std::forward<RHS>(rhs));
     }
 
     /// Creates an LessThan operation
@@ -778,14 +770,8 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* GreaterThan(LHS&& lhs, RHS&& rhs) {
-        CheckForNonDeterministicEvaluation<LHS, RHS>();
-        auto* lhs_value = Value(std::forward<LHS>(lhs));
-        auto* rhs_value = Value(std::forward<RHS>(rhs));
-        TINT_ASSERT(lhs_value);
-        TINT_ASSERT(rhs_value);
-        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
-        return Append(ir.CreateInstruction<ir::CoreBinary>(
-            InstructionResult(type), BinaryOp::kGreaterThan, lhs_value, rhs_value));
+        return BinaryWithBoolType(BinaryOp::kGreaterThan, std::forward<LHS>(lhs),
+                                  std::forward<RHS>(rhs));
     }
 
     /// Creates an LessThanEqual operation
@@ -794,14 +780,8 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* LessThanEqual(LHS&& lhs, RHS&& rhs) {
-        CheckForNonDeterministicEvaluation<LHS, RHS>();
-        auto* lhs_value = Value(std::forward<LHS>(lhs));
-        auto* rhs_value = Value(std::forward<RHS>(rhs));
-        TINT_ASSERT(lhs_value);
-        TINT_ASSERT(rhs_value);
-        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
-        return Append(ir.CreateInstruction<ir::CoreBinary>(
-            InstructionResult(type), BinaryOp::kLessThanEqual, lhs_value, rhs_value));
+        return BinaryWithBoolType(BinaryOp::kLessThanEqual, std::forward<LHS>(lhs),
+                                  std::forward<RHS>(rhs));
     }
 
     /// Creates an GreaterThanEqual operation
@@ -810,14 +790,8 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* GreaterThanEqual(LHS&& lhs, RHS&& rhs) {
-        CheckForNonDeterministicEvaluation<LHS, RHS>();
-        auto* lhs_value = Value(std::forward<LHS>(lhs));
-        auto* rhs_value = Value(std::forward<RHS>(rhs));
-        TINT_ASSERT(lhs_value);
-        TINT_ASSERT(rhs_value);
-        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
-        return Append(ir.CreateInstruction<ir::CoreBinary>(
-            InstructionResult(type), BinaryOp::kGreaterThanEqual, lhs_value, rhs_value));
+        return BinaryWithBoolType(BinaryOp::kGreaterThanEqual, std::forward<LHS>(lhs),
+                                  std::forward<RHS>(rhs));
     }
 
     /// Creates an ShiftLeft operation
@@ -850,12 +824,12 @@ class Builder {
             InstructionResult(lhs_value->Type()), BinaryOp::kShiftRight, lhs_value, rhs_value));
     }
 
-    /// Creates an Add operation
+    /// Creates a binary expression with a computed type
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBinary* Add(LHS&& lhs, RHS&& rhs) {
+    ir::CoreBinary* BinaryWithComputedType(BinaryOp op, LHS&& lhs, RHS&& rhs) {
         CheckForNonDeterministicEvaluation<LHS, RHS>();
         auto* lhs_value = Value(std::forward<LHS>(lhs));
         auto* rhs_value = Value(std::forward<RHS>(rhs));
@@ -878,8 +852,18 @@ class Builder {
             result_type = lhs_type;
         }
 
-        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(result_type),
-                                                           BinaryOp::kAdd, lhs_value, rhs_value));
+        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(result_type), op,
+                                                           lhs_value, rhs_value));
+    }
+
+    /// Creates an Add operation
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    template <typename LHS, typename RHS>
+    ir::CoreBinary* Add(LHS&& lhs, RHS&& rhs) {
+        return BinaryWithComputedType(BinaryOp::kAdd, std::forward<LHS>(lhs),
+                                      std::forward<RHS>(rhs));
     }
 
     /// Creates an Add operation
@@ -899,30 +883,8 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* Subtract(LHS&& lhs, RHS&& rhs) {
-        CheckForNonDeterministicEvaluation<LHS, RHS>();
-        auto* lhs_value = Value(std::forward<LHS>(lhs));
-        auto* rhs_value = Value(std::forward<RHS>(rhs));
-        TINT_ASSERT(lhs_value);
-        TINT_ASSERT(rhs_value);
-
-        auto* lhs_type = lhs_value->Type();
-        auto* rhs_type = rhs_value->Type();
-
-        const core::type::Type* result_type = nullptr;
-        if (lhs_type->template Is<core::type::Matrix>()) {
-            result_type = lhs_type;
-        } else if (rhs_type->template Is<core::type::Matrix>()) {
-            result_type = rhs_type;
-        } else if (lhs_type->template Is<core::type::Vector>()) {
-            result_type = lhs_type;
-        } else if (rhs_type->template Is<core::type::Vector>()) {
-            result_type = rhs_type;
-        } else {
-            result_type = lhs_type;
-        }
-
-        return Append(ir.CreateInstruction<ir::CoreBinary>(
-            InstructionResult(result_type), BinaryOp::kSubtract, lhs_value, rhs_value));
+        return BinaryWithComputedType(BinaryOp::kSubtract, std::forward<LHS>(lhs),
+                                      std::forward<RHS>(rhs));
     }
 
     /// Creates an Multiply operation
@@ -977,30 +939,8 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* Divide(LHS&& lhs, RHS&& rhs) {
-        CheckForNonDeterministicEvaluation<LHS, RHS>();
-        auto* lhs_value = Value(std::forward<LHS>(lhs));
-        auto* rhs_value = Value(std::forward<RHS>(rhs));
-        TINT_ASSERT(lhs_value);
-        TINT_ASSERT(rhs_value);
-
-        auto* lhs_type = lhs_value->Type();
-        auto* rhs_type = rhs_value->Type();
-
-        const core::type::Type* result_type = nullptr;
-        if (lhs_type->template Is<core::type::Matrix>()) {
-            result_type = lhs_type;
-        } else if (rhs_type->template Is<core::type::Matrix>()) {
-            result_type = rhs_type;
-        } else if (lhs_type->template Is<core::type::Vector>()) {
-            result_type = lhs_type;
-        } else if (rhs_type->template Is<core::type::Vector>()) {
-            result_type = rhs_type;
-        } else {
-            result_type = lhs_type;
-        }
-
-        return Append(ir.CreateInstruction<ir::CoreBinary>(
-            InstructionResult(result_type), BinaryOp::kDivide, lhs_value, rhs_value));
+        return BinaryWithComputedType(BinaryOp::kDivide, std::forward<LHS>(lhs),
+                                      std::forward<RHS>(rhs));
     }
 
     /// Creates an Modulo operation
@@ -1009,30 +949,8 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* Modulo(LHS&& lhs, RHS&& rhs) {
-        CheckForNonDeterministicEvaluation<LHS, RHS>();
-        auto* lhs_value = Value(std::forward<LHS>(lhs));
-        auto* rhs_value = Value(std::forward<RHS>(rhs));
-        TINT_ASSERT(lhs_value);
-        TINT_ASSERT(rhs_value);
-
-        auto* lhs_type = lhs_value->Type();
-        auto* rhs_type = rhs_value->Type();
-
-        const core::type::Type* result_type = nullptr;
-        if (lhs_type->template Is<core::type::Matrix>()) {
-            result_type = lhs_type;
-        } else if (rhs_type->template Is<core::type::Matrix>()) {
-            result_type = rhs_type;
-        } else if (lhs_type->template Is<core::type::Vector>()) {
-            result_type = lhs_type;
-        } else if (rhs_type->template Is<core::type::Vector>()) {
-            result_type = rhs_type;
-        } else {
-            result_type = lhs_type;
-        }
-
-        return Append(ir.CreateInstruction<ir::CoreBinary>(
-            InstructionResult(result_type), BinaryOp::kModulo, lhs_value, rhs_value));
+        return BinaryWithComputedType(BinaryOp::kModulo, std::forward<LHS>(lhs),
+                                      std::forward<RHS>(rhs));
     }
 
     /// Creates a Min operation
