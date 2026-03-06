@@ -45,7 +45,23 @@ namespace utils = dawn::utils;
 using testing::_;
 using testing::HasSubstr;
 
-class SpotTests : public testing::Test {
+enum class Mode {
+    // Request Compat, and don't request any features/limits
+    MinCompat,
+    // Request Core, and request all features/limits
+    MaxCore,
+};
+
+std::ostream& operator<<(std::ostream& os, const Mode& mode) {
+    switch (mode) {
+        case Mode::MinCompat:
+            return os << "MinCompat";
+        case Mode::MaxCore:
+            return os << "MaxCore";
+    }
+}
+
+class SpotTests : public ::testing::TestWithParam<Mode> {
   public:
     void SetUp() override {
         static constexpr auto kInstanceFeatures =
@@ -57,8 +73,14 @@ class SpotTests : public testing::Test {
         wgpu::Adapter adapter;
 
         wgpu::RequestAdapterOptions options = {};
-        options.featureLevel =
-            UseCompatibilityMode() ? wgpu::FeatureLevel::Compatibility : wgpu::FeatureLevel::Core;
+        switch (GetParam()) {
+            case Mode::MinCompat:
+                options.featureLevel = wgpu::FeatureLevel::Compatibility;
+                break;
+            case Mode::MaxCore:
+                options.featureLevel = wgpu::FeatureLevel::Core;
+                break;
+        }
         EXPECT_EQ(wgpu::WaitStatus::Success,
                   mInstance.WaitAny(mInstance.RequestAdapter(
                                         &options, wgpu::CallbackMode::WaitAnyOnly,
@@ -66,24 +88,30 @@ class SpotTests : public testing::Test {
                                                    wgpu::StringView) { adapter = std::move(a); }),
                                     UINT64_MAX));
         EXPECT_TRUE(adapter);
+        // Get adapter features
         wgpu::SupportedFeatures features;
         adapter.GetFeatures(&features);
-
-        wgpu::DeviceDescriptor deviceDesc;
-        if (!UseCompatibilityMode()) {
-            // Enable all available features if not compatibility mode
-            deviceDesc.requiredFeatureCount = features.featureCount;
-            deviceDesc.requiredFeatures = features.features;
-        }
-
-        // Request max adapter limits
+        // Get adapter limits
         wgpu::Limits limits;
         wgpu::CompatibilityModeLimits compatLimits;
-        if (UseCompatibilityMode()) {
-            limits.nextInChain = &compatLimits;
-        }
+        limits.nextInChain = &compatLimits;
         adapter.GetLimits(&limits);
-        deviceDesc.requiredLimits = &limits;
+
+        wgpu::DeviceDescriptor deviceDesc;
+        switch (GetParam()) {
+            case Mode::MinCompat:
+                // Request no limits and features
+                deviceDesc.requiredLimits = nullptr;
+                deviceDesc.requiredFeatureCount = 0;
+                deviceDesc.requiredFeatures = nullptr;
+                break;
+            case Mode::MaxCore:
+                // Request max limits and features
+                deviceDesc.requiredLimits = &limits;
+                deviceDesc.requiredFeatureCount = features.featureCount;
+                deviceDesc.requiredFeatures = features.features;
+                break;
+        }
 
         wgpu::Device device;
         EXPECT_EQ(wgpu::WaitStatus::Success,
@@ -94,11 +122,13 @@ class SpotTests : public testing::Test {
                       UINT64_MAX));
         EXPECT_TRUE(device);
 
-        if (UseCompatibilityMode()) {
-            wgpu::SupportedFeatures deviceFeatures;
-            device.GetFeatures(&deviceFeatures);
-            for (uint32_t i = 0; i < deviceFeatures.featureCount; ++i) {
-                EXPECT_NE(deviceFeatures.features[i], wgpu::FeatureName::CoreFeaturesAndLimits);
+        // Check what we actually got.
+        wgpu::SupportedFeatures deviceFeatures;
+        device.GetFeatures(&deviceFeatures);
+        mGotCompatibilityMode = true;
+        for (uint32_t i = 0; i < deviceFeatures.featureCount; ++i) {
+            if (deviceFeatures.features[i] == wgpu::FeatureName::CoreFeaturesAndLimits) {
+                mGotCompatibilityMode = false;
             }
         }
 
@@ -107,22 +137,23 @@ class SpotTests : public testing::Test {
     }
 
   protected:
-    virtual bool UseCompatibilityMode() const { return false; }
-
     wgpu::Instance mInstance;
     wgpu::Adapter mAdapter;
     wgpu::Device mDevice;
+    bool mGotCompatibilityMode = false;
 };
 
-TEST_F(SpotTests, QuerySet) {
+INSTANTIATE_TEST_SUITE_P(, SpotTests, ::testing::ValuesIn({Mode::MinCompat, Mode::MaxCore}));
+
+TEST_P(SpotTests, QuerySet) {
     // Spot test wgpuQuerySetGetType which uses indexOf on an int-to-string table.
-    wgpu::QuerySetDescriptor querySetDesc{.type = wgpu::QueryType::Timestamp, .count = 1};
+    wgpu::QuerySetDescriptor querySetDesc{.type = wgpu::QueryType::Occlusion, .count = 1};
     wgpu::QuerySet querySet = mDevice.CreateQuerySet(&querySetDesc);
     EXPECT_TRUE(querySet);
     EXPECT_EQ(querySet.GetType(), querySetDesc.type);
 }
 
-TEST_F(SpotTests, BufferGetMapState) {
+TEST_P(SpotTests, BufferGetMapState) {
     // Spot test one of the string-to-int tables (Int_BufferMapState) to make sure
     // that Closure's minification didn't minify its keys.
     wgpu::BufferDescriptor bufferDesc{.usage = wgpu::BufferUsage::CopyDst, .size = 4};
@@ -130,7 +161,7 @@ TEST_F(SpotTests, BufferGetMapState) {
     EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Unmapped);
 }
 
-TEST_F(SpotTests, GetCompilationInfo) {
+TEST_P(SpotTests, GetCompilationInfo) {
     for (bool valid : {true, false}) {
         wgpu::ShaderSourceWGSL wgslDesc{};
         wgslDesc.code = valid ? "" : "some invalid code";
@@ -151,7 +182,7 @@ TEST_F(SpotTests, GetCompilationInfo) {
     }
 }
 
-TEST_F(SpotTests, ExternalRefCount) {
+TEST_P(SpotTests, ExternalRefCount) {
     wgpu::BufferDescriptor bufferDesc{
         .usage = wgpu::BufferUsage::MapRead, .size = 16, .mappedAtCreation = true};
 
@@ -168,7 +199,7 @@ TEST_F(SpotTests, ExternalRefCount) {
     EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Mapped);
 }
 
-TEST_F(SpotTests, InvalidComponentSwizzle) {
+TEST_P(SpotTests, InvalidComponentSwizzle) {
     wgpu::TextureDescriptor textureDesc = {};
     textureDesc.size = {1, 1, 0};
     textureDesc.usage = wgpu::TextureUsage::TextureBinding;
@@ -184,8 +215,30 @@ TEST_F(SpotTests, InvalidComponentSwizzle) {
     ASSERT_TRUE(view);
 }
 
-template <typename T>
-void TestGetFeatures(T o) {  // o is either wgpu::Adapter or wgpu::Device.
+TEST_P(SpotTests, GetWGSLLanguageFeatures) {
+    wgpu::SupportedWGSLLanguageFeatures f;
+    mInstance.GetWGSLLanguageFeatures(&f);
+    auto features = std::span(f.features, f.featureCount);
+    for (auto feature : features) {
+        // GetWGSLLanguageFeatures should filter out any unknown features.
+        EXPECT_NE(feature, wgpu::WGSLLanguageFeatureName{0});
+        EXPECT_TRUE(mInstance.HasWGSLLanguageFeature(feature));
+    }
+
+    // Test a specific feature to make sure minification worked.
+    // WGSL feature names are valid JS identifiers (they use underscores instead
+    // of hyphens), so they're vulnerable to Closure minification.
+    if (EM_ASM_INT({
+            return navigator.gpu.wgslLanguageFeatures.has('unrestricted_pointer_parameters');
+        })) {
+        auto feature = wgpu::WGSLLanguageFeatureName::UnrestrictedPointerParameters;
+        EXPECT_NE(std::find(features.begin(), features.end(), feature), features.end());
+        EXPECT_TRUE(mInstance.HasWGSLLanguageFeature(feature));
+    }
+}
+
+template <typename AdapterOrDevice>
+void TestGetFeatures(AdapterOrDevice o, bool shouldHaveCompressedTexture) {
     wgpu::SupportedFeatures f;
     o.GetFeatures(&f);
     auto features = std::span(f.features, f.featureCount);
@@ -211,7 +264,7 @@ void TestGetFeatures(T o) {  // o is either wgpu::Adapter or wgpu::Device.
         EXPECT_TRUE(o.HasFeature(feature));
         haveCompressedTexture = true;
     }
-    EXPECT_TRUE(haveCompressedTexture);
+    EXPECT_EQ(haveCompressedTexture, shouldHaveCompressedTexture);
 
     // "subgroups" is a valid JS identifier (no hyphens), so it's
     // vulnerable to Closure minification.
@@ -223,34 +276,113 @@ void TestGetFeatures(T o) {  // o is either wgpu::Adapter or wgpu::Device.
 }
 
 // Test GetFeatures and HasFeature enum lookups.
-TEST_F(SpotTests, GetFeatures) {
-    TestGetFeatures(mAdapter);
-    TestGetFeatures(mDevice);
+TEST_P(SpotTests, GetFeatures) {
+    TestGetFeatures(mAdapter, true);
+    TestGetFeatures(mDevice, GetParam() != Mode::MinCompat);
 }
 
-TEST_F(SpotTests, GetWGSLLanguageFeatures) {
-    wgpu::SupportedWGSLLanguageFeatures f;
-    mInstance.GetWGSLLanguageFeatures(&f);
-    auto features = std::span(f.features, f.featureCount);
-    for (auto feature : features) {
-        // GetWGSLLanguageFeatures should filter out any unknown features.
-        EXPECT_NE(feature, wgpu::WGSLLanguageFeatureName{0});
-        EXPECT_TRUE(mInstance.HasWGSLLanguageFeature(feature));
+template <typename TStruct, typename TNumber>
+void TestGetLimits(Mode mode,
+                   const TStruct& adapterLimits,
+                   const TStruct& deviceLimits,
+                   const TNumber TStruct::* const field,
+                   bool checkNonZero = true) {
+    if (mode == Mode::MaxCore) {
+        EXPECT_EQ(adapterLimits.*field, deviceLimits.*field);
     }
 
-    // Test a specific feature to make sure minification worked.
-    // WGSL feature names are valid JS identifiers (they use underscores instead
-    // of hyphens), so they're vulnerable to Closure minification.
-    if (EM_ASM_INT({
-            return navigator.gpu.wgslLanguageFeatures.has('unrestricted_pointer_parameters');
-        })) {
-        auto feature = wgpu::WGSLLanguageFeatureName::UnrestrictedPointerParameters;
-        EXPECT_NE(std::find(features.begin(), features.end(), feature), features.end());
-        EXPECT_TRUE(mInstance.HasWGSLLanguageFeature(feature));
+    // Check if left uninitialized
+    EXPECT_NE(adapterLimits.*field, wgpu::kLimitU32Undefined);
+    EXPECT_NE(deviceLimits.*field, wgpu::kLimitU32Undefined);
+
+    // Check if missing from the browser
+    if (checkNonZero) {
+        EXPECT_NE(adapterLimits.*field, 0u);
+        EXPECT_NE(deviceLimits.*field, 0u);
     }
 }
 
-TEST_F(SpotTests, ImportExternalTexture) {
+TEST_P(SpotTests, Limits) {
+    wgpu::Limits adapterLimits{};
+    wgpu::CompatibilityModeLimits adapterCompatLimits{};
+    adapterLimits.nextInChain = &adapterCompatLimits;
+
+    wgpu::Limits deviceLimits{};
+    wgpu::CompatibilityModeLimits deviceCompatLimits{};
+    deviceLimits.nextInChain = &deviceCompatLimits;
+
+    mAdapter.GetLimits(&adapterLimits);
+    mDevice.GetLimits(&deviceLimits);
+
+    // Core (1.0) limits
+    for (int i = 0;  //
+         uint32_t wgpu::Limits::* const field : {
+             // WGPULimits is stable, so this list shouldn't grow in the future.
+             // Extensions need to be tested separately.
+             &wgpu::Limits::maxTextureDimension1D,
+             &wgpu::Limits::maxTextureDimension2D,
+             &wgpu::Limits::maxTextureDimension3D,
+             &wgpu::Limits::maxTextureArrayLayers,
+             &wgpu::Limits::maxBindGroups,
+             &wgpu::Limits::maxBindGroupsPlusVertexBuffers,
+             &wgpu::Limits::maxBindingsPerBindGroup,
+             &wgpu::Limits::maxDynamicUniformBuffersPerPipelineLayout,
+             &wgpu::Limits::maxDynamicStorageBuffersPerPipelineLayout,
+             &wgpu::Limits::maxSampledTexturesPerShaderStage,
+             &wgpu::Limits::maxSamplersPerShaderStage,
+             &wgpu::Limits::maxStorageBuffersPerShaderStage,
+             &wgpu::Limits::maxStorageTexturesPerShaderStage,
+             &wgpu::Limits::maxUniformBuffersPerShaderStage,
+             &wgpu::Limits::minUniformBufferOffsetAlignment,
+             &wgpu::Limits::minStorageBufferOffsetAlignment,
+             &wgpu::Limits::maxVertexBuffers,
+             &wgpu::Limits::maxVertexAttributes,
+             &wgpu::Limits::maxVertexBufferArrayStride,
+             &wgpu::Limits::maxInterStageShaderVariables,
+             &wgpu::Limits::maxColorAttachments,
+             &wgpu::Limits::maxColorAttachmentBytesPerSample,
+             &wgpu::Limits::maxComputeWorkgroupStorageSize,
+             &wgpu::Limits::maxComputeInvocationsPerWorkgroup,
+             &wgpu::Limits::maxComputeWorkgroupSizeX,
+             &wgpu::Limits::maxComputeWorkgroupSizeY,
+             &wgpu::Limits::maxComputeWorkgroupSizeZ,
+             &wgpu::Limits::maxComputeWorkgroupsPerDimension,
+             &wgpu::Limits::maxImmediateSize,
+         }) {
+        SCOPED_TRACE(absl::StrFormat("Limits 32 case %d", i++));
+        bool checkNonZero = field != &wgpu::Limits::maxImmediateSize;
+        TestGetLimits(GetParam(), adapterLimits, deviceLimits, field, checkNonZero);
+    }
+
+    // Core 64-bit limits
+    for (int i = 0;  //
+         uint64_t wgpu::Limits::* const field : {
+             &wgpu::Limits::maxUniformBufferBindingSize,
+             &wgpu::Limits::maxStorageBufferBindingSize,
+             &wgpu::Limits::maxBufferSize,
+         }) {
+        SCOPED_TRACE(absl::StrFormat("Limits 64 case %d", i++).c_str());
+        TestGetLimits(GetParam(), adapterLimits, deviceLimits, field);
+    }
+
+    // CompatibilityModeLimits extension
+    for (int i = 0;  //
+         uint32_t wgpu::CompatibilityModeLimits::* const field : {
+             // WGPUCompatibilityModeLimits is becoming stable, so this list shouldn't grow.
+             &wgpu::CompatibilityModeLimits::maxStorageBuffersInVertexStage,
+             &wgpu::CompatibilityModeLimits::maxStorageTexturesInVertexStage,
+             &wgpu::CompatibilityModeLimits::maxStorageBuffersInFragmentStage,
+             &wgpu::CompatibilityModeLimits::maxStorageTexturesInFragmentStage,
+         }) {
+        SCOPED_TRACE(absl::StrFormat("CompatibilityModeLimits case %d", i++).c_str());
+        bool checkNonZero =
+            field != &wgpu::CompatibilityModeLimits::maxStorageBuffersInVertexStage &&
+            field != &wgpu::CompatibilityModeLimits::maxStorageTexturesInVertexStage;
+        TestGetLimits(GetParam(), adapterCompatLimits, deviceCompatLimits, field, checkNonZero);
+    }
+}
+
+TEST_P(SpotTests, ImportExternalTexture) {
     auto cExternalTexture = static_cast<WGPUExternalTexture>(EM_ASM_PTR(
         {
             const cDevice = $0;
@@ -333,7 +465,7 @@ TEST_F(SpotTests, ImportExternalTexture) {
     });
 }
 
-TEST_F(SpotTests, MapReadGetMappedRange) {
+TEST_P(SpotTests, MapReadGetMappedRange) {
     wgpu::BufferDescriptor readbackDesc{
         .usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead,
         .size = sizeof(uint32_t),
@@ -350,7 +482,12 @@ TEST_F(SpotTests, MapReadGetMappedRange) {
                       UINT64_MAX);
 }
 
-TEST_F(SpotTests, TextureBindingViewDimension) {
+// This test requires compat (chromium 146+). Other tests should be written to work without it.
+TEST_P(SpotTests, FeatureLevelHonored) {
+    EXPECT_EQ(mGotCompatibilityMode, GetParam() == Mode::MinCompat);
+}
+
+TEST_P(SpotTests, TextureBindingViewDimension) {
     wgpu::TextureDescriptor textureDesc;
     textureDesc.size = {1, 1, 1};
     textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
@@ -363,51 +500,9 @@ TEST_F(SpotTests, TextureBindingViewDimension) {
     wgpu::Texture texture = mDevice.CreateTexture(&textureDesc);
 
     ASSERT_TRUE(texture);
-    EXPECT_EQ(wgpu::TextureViewDimension::Undefined, texture.GetTextureBindingViewDimension());
-}
-
-class CompatSpotTests : public SpotTests {
-  protected:
-    bool UseCompatibilityMode() const override { return true; }
-};
-
-TEST_F(CompatSpotTests, TextureBindingViewDimension) {
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.size = {1, 1, 1};
-    textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
-    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
-
-    wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
-    textureBindingViewDimensionDesc.textureBindingViewDimension =
-        wgpu::TextureViewDimension::e2DArray;
-    textureDesc.nextInChain = &textureBindingViewDimensionDesc;
-    wgpu::Texture texture = mDevice.CreateTexture(&textureDesc);
-
-    ASSERT_TRUE(texture);
-    EXPECT_EQ(textureBindingViewDimensionDesc.textureBindingViewDimension,
-              texture.GetTextureBindingViewDimension());
-}
-
-TEST_F(CompatSpotTests, Limits) {
-    wgpu::Limits adapterLimits;
-    wgpu::CompatibilityModeLimits adapterCompatLimits;
-    adapterLimits.nextInChain = &adapterCompatLimits;
-
-    wgpu::Limits deviceLimits;
-    wgpu::CompatibilityModeLimits deviceCompatLimits;
-    deviceLimits.nextInChain = &deviceCompatLimits;
-
-    mAdapter.GetLimits(&adapterLimits);
-    mDevice.GetLimits(&deviceLimits);
-
-    EXPECT_EQ(adapterCompatLimits.maxStorageBuffersInFragmentStage,
-              deviceCompatLimits.maxStorageBuffersInFragmentStage);
-    EXPECT_EQ(adapterCompatLimits.maxStorageBuffersInVertexStage,
-              deviceCompatLimits.maxStorageBuffersInVertexStage);
-    EXPECT_EQ(adapterCompatLimits.maxStorageTexturesInFragmentStage,
-              deviceCompatLimits.maxStorageTexturesInFragmentStage);
-    EXPECT_EQ(adapterCompatLimits.maxStorageTexturesInVertexStage,
-              deviceCompatLimits.maxStorageTexturesInVertexStage);
+    EXPECT_EQ(texture.GetTextureBindingViewDimension(),
+              mGotCompatibilityMode ? textureBindingViewDimensionDesc.textureBindingViewDimension
+                                    : wgpu::TextureViewDimension::Undefined);
 }
 
 }  // namespace

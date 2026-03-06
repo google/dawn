@@ -549,49 +549,49 @@ var LibraryWebGPU = {
       {{{ gpu.makeCheck('limitsOutPtr') }}}
       var nextInChainPtr = {{{ makeGetValue('limitsOutPtr', C_STRUCTS.WGPULimits.nextInChain, '*') }}};
 
-      function setLimitValueU32(name, basePtr, limitOffset) {
-        var limitValue = limits[name];
+      function setLimitValueU32(name, basePtr, limitOffset, fallbackValue = 0) {
+        var limitValue = limits[name] ?? fallbackValue;
         {{{ makeSetValue('basePtr', 'limitOffset', 'limitValue', 'u32') }}};
       }
-      function setLimitValueU64(name, basePtr, limitOffset) {
-        var limitValue = limits[name];
-        // Limits are integer JS `Number`s, so they fit in 'i53'.
-        {{{ makeSetValue('basePtr', 'limitOffset', 'limitValue', 'i53') }}}; // 'i53' is how to makeSetValue a u53.
+      function setLimitValueU64(name, basePtr, limitOffset, fallbackValue = 0) {
+        var limitValue = limits[name] ?? fallbackValue;
+        // Limits are integer-valued JS `Number`s, so they fit in 'i53'.
+        {{{ makeSetValue('basePtr', 'limitOffset', 'limitValue', 'i53') }}};
       }
 
-      setLimitValueU32('maxTextureDimension1D', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension1D }}});
-      setLimitValueU32('maxTextureDimension2D', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension2D }}});
-      setLimitValueU32('maxTextureDimension3D', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension3D }}});
-      setLimitValueU32('maxTextureArrayLayers', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxTextureArrayLayers }}});
-      setLimitValueU32('maxBindGroups', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxBindGroups }}});
-      setLimitValueU32('maxBindGroupsPlusVertexBuffers', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxBindGroupsPlusVertexBuffers }}});
-      setLimitValueU32('maxBindingsPerBindGroup', limitsOutPtr,  {{{ C_STRUCTS.WGPULimits.maxBindingsPerBindGroup }}});
+      setLimitValueU32('maxTextureDimension1D',                     limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension1D }}});
+      setLimitValueU32('maxTextureDimension2D',                     limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension2D }}});
+      setLimitValueU32('maxTextureDimension3D',                     limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension3D }}});
+      setLimitValueU32('maxTextureArrayLayers',                     limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxTextureArrayLayers }}});
+      setLimitValueU32('maxBindGroups',                             limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxBindGroups }}});
+      setLimitValueU32('maxBindGroupsPlusVertexBuffers',            limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxBindGroupsPlusVertexBuffers }}});
+      setLimitValueU32('maxBindingsPerBindGroup',                   limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxBindingsPerBindGroup }}});
       setLimitValueU32('maxDynamicUniformBuffersPerPipelineLayout', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxDynamicUniformBuffersPerPipelineLayout }}});
       setLimitValueU32('maxDynamicStorageBuffersPerPipelineLayout', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxDynamicStorageBuffersPerPipelineLayout }}});
-      setLimitValueU32('maxSampledTexturesPerShaderStage', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxSampledTexturesPerShaderStage }}});
-      setLimitValueU32('maxSamplersPerShaderStage', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxSamplersPerShaderStage }}});
-      setLimitValueU32('maxStorageBuffersPerShaderStage', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxStorageBuffersPerShaderStage }}});
-      setLimitValueU32('maxStorageTexturesPerShaderStage', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxStorageTexturesPerShaderStage }}});
-      setLimitValueU32('maxUniformBuffersPerShaderStage', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxUniformBuffersPerShaderStage }}});
-      setLimitValueU32('minUniformBufferOffsetAlignment', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.minUniformBufferOffsetAlignment }}});
-      setLimitValueU32('minStorageBufferOffsetAlignment', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.minStorageBufferOffsetAlignment }}});
-
-      setLimitValueU64('maxUniformBufferBindingSize', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxUniformBufferBindingSize }}});
-      setLimitValueU64('maxStorageBufferBindingSize', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxStorageBufferBindingSize }}});
-
-      setLimitValueU32('maxVertexBuffers', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxVertexBuffers }}});
-      setLimitValueU64('maxBufferSize', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxBufferSize }}});
-      setLimitValueU32('maxVertexAttributes', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxVertexAttributes }}});
-      setLimitValueU32('maxVertexBufferArrayStride', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxVertexBufferArrayStride }}});
-      setLimitValueU32('maxInterStageShaderVariables', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxInterStageShaderVariables }}});
-      setLimitValueU32('maxColorAttachments', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxColorAttachments }}});
-      setLimitValueU32('maxColorAttachmentBytesPerSample', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxColorAttachmentBytesPerSample }}});
-      setLimitValueU32('maxComputeWorkgroupStorageSize', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupStorageSize }}});
-      setLimitValueU32('maxComputeInvocationsPerWorkgroup', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeInvocationsPerWorkgroup }}});
-      setLimitValueU32('maxComputeWorkgroupSizeX', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeX }}});
-      setLimitValueU32('maxComputeWorkgroupSizeY', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeY }}});
-      setLimitValueU32('maxComputeWorkgroupSizeZ', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeZ }}});
-      setLimitValueU32('maxComputeWorkgroupsPerDimension', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupsPerDimension }}});
+      setLimitValueU32('maxSampledTexturesPerShaderStage',          limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxSampledTexturesPerShaderStage }}});
+      setLimitValueU32('maxSamplersPerShaderStage',                 limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxSamplersPerShaderStage }}});
+      setLimitValueU32('maxStorageBuffersPerShaderStage',           limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxStorageBuffersPerShaderStage }}});
+      setLimitValueU32('maxStorageTexturesPerShaderStage',          limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxStorageTexturesPerShaderStage }}});
+      setLimitValueU32('maxUniformBuffersPerShaderStage',           limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxUniformBuffersPerShaderStage }}});
+      setLimitValueU32('minUniformBufferOffsetAlignment',           limitsOutPtr, {{{ C_STRUCTS.WGPULimits.minUniformBufferOffsetAlignment }}});
+      setLimitValueU32('minStorageBufferOffsetAlignment',           limitsOutPtr, {{{ C_STRUCTS.WGPULimits.minStorageBufferOffsetAlignment }}});
+      setLimitValueU64('maxUniformBufferBindingSize',               limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxUniformBufferBindingSize }}});
+      setLimitValueU64('maxStorageBufferBindingSize',               limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxStorageBufferBindingSize }}});
+      setLimitValueU32('maxVertexBuffers',                          limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxVertexBuffers }}});
+      setLimitValueU64('maxBufferSize',                             limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxBufferSize }}});
+      setLimitValueU32('maxVertexAttributes',                       limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxVertexAttributes }}});
+      setLimitValueU32('maxVertexBufferArrayStride',                limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxVertexBufferArrayStride }}});
+      setLimitValueU32('maxInterStageShaderVariables',              limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxInterStageShaderVariables }}});
+      setLimitValueU32('maxColorAttachments',                       limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxColorAttachments }}});
+      setLimitValueU32('maxColorAttachmentBytesPerSample',          limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxColorAttachmentBytesPerSample }}});
+      setLimitValueU32('maxComputeWorkgroupStorageSize',            limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupStorageSize }}});
+      setLimitValueU32('maxComputeInvocationsPerWorkgroup',         limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeInvocationsPerWorkgroup }}});
+      setLimitValueU32('maxComputeWorkgroupSizeX',                  limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeX }}});
+      setLimitValueU32('maxComputeWorkgroupSizeY',                  limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeY }}});
+      setLimitValueU32('maxComputeWorkgroupSizeZ',                  limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeZ }}});
+      setLimitValueU32('maxComputeWorkgroupsPerDimension',          limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupsPerDimension }}});
+      // Note this limit is new and won't be present in all browsers for a while. Fall back to 0.
+      setLimitValueU32('maxImmediateSize',                          limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxImmediateSize }}});
 
       if (nextInChainPtr !== 0) {
         var sType = {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.sType, 'i32') }}};
@@ -602,15 +602,11 @@ var LibraryWebGPU = {
         var compatibilityModeLimitsPtr = nextInChainPtr;
         {{{ gpu.makeCheckDescriptor('compatibilityModeLimitsPtr') }}}
 
-        setLimitValueU32('maxStorageBuffersInFragmentStage', compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageBuffersInFragmentStage }}});
-        setLimitValueU32('maxStorageTexturesInFragmentStage', compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageTexturesInFragmentStage }}});
-        setLimitValueU32('maxStorageBuffersInVertexStage', compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageBuffersInVertexStage }}});
-        setLimitValueU32('maxStorageTexturesInVertexStage', compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageTexturesInVertexStage }}});
-      }
-
-      // Non-standard. If this is undefined, it will correctly just cast to 0.
-      if (limits.maxImmediateSize !== undefined) {
-        setLimitValueU32('maxImmediateSize', limitsOutPtr, {{{ C_STRUCTS.WGPULimits.maxImmediateSize }}});
+        // Note these limits are new and won't be present in all browsers for a while. Fall back to exposing the PerShaderStage limit.
+        setLimitValueU32('maxStorageBuffersInVertexStage',    compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageBuffersInVertexStage }}},    limits.maxStorageBuffersPerShaderStage);
+        setLimitValueU32('maxStorageBuffersInFragmentStage',  compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageBuffersInFragmentStage }}},  limits.maxStorageBuffersPerShaderStage);
+        setLimitValueU32('maxStorageTexturesInVertexStage',   compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageTexturesInVertexStage }}},   limits.maxStorageTexturesPerShaderStage);
+        setLimitValueU32('maxStorageTexturesInFragmentStage', compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageTexturesInFragmentStage }}}, limits.maxStorageTexturesPerShaderStage);
       }
     },
 
@@ -813,7 +809,7 @@ var LibraryWebGPU = {
         {{{ gpu.makeCheck('limitsPtr') }}}
         var nextInChainPtr = {{{ makeGetValue('limitsPtr', C_STRUCTS.WGPULimits.nextInChain, '*') }}};
         var requiredLimits = {};
-        function setLimitU32IfDefined(name, basePtr, limitOffset, ignoreIfZero=false) {
+        function setLimitU32IfDefined(name, basePtr, limitOffset, ignoreIfZero = false) {
           var ptr = basePtr + limitOffset;
           var value = {{{ makeGetValue('ptr', 0, 'u32') }}};
           if (value != {{{ gpu.LIMIT_U32_UNDEFINED }}} && (!ignoreIfZero || value != 0)) {
@@ -826,40 +822,43 @@ var LibraryWebGPU = {
           var limitPart1 = {{{ makeGetValue('ptr', 0, 'u32') }}};
           var limitPart2 = {{{ makeGetValue('ptr', 4, 'u32') }}};
           if (limitPart1 != 0xFFFFFFFF || limitPart2 != 0xFFFFFFFF) {
-            requiredLimits[name] = {{{ makeGetValue('ptr', 0, 'i53') }}}
+            requiredLimits[name] = {{{ makeGetValue('ptr', 0, 'i53') }}};
           }
         }
 
-        setLimitU32IfDefined("maxTextureDimension1D", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension1D }}});
-        setLimitU32IfDefined("maxTextureDimension2D", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension2D }}});
-        setLimitU32IfDefined("maxTextureDimension3D", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension3D }}});
-        setLimitU32IfDefined("maxTextureArrayLayers", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxTextureArrayLayers }}});
-        setLimitU32IfDefined("maxBindGroups", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxBindGroups }}});
-        setLimitU32IfDefined('maxBindGroupsPlusVertexBuffers', limitsPtr, {{{ C_STRUCTS.WGPULimits.maxBindGroupsPlusVertexBuffers }}});
+        setLimitU32IfDefined("maxTextureDimension1D",                     limitsPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension1D }}});
+        setLimitU32IfDefined("maxTextureDimension2D",                     limitsPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension2D }}});
+        setLimitU32IfDefined("maxTextureDimension3D",                     limitsPtr, {{{ C_STRUCTS.WGPULimits.maxTextureDimension3D }}});
+        setLimitU32IfDefined("maxTextureArrayLayers",                     limitsPtr, {{{ C_STRUCTS.WGPULimits.maxTextureArrayLayers }}});
+        setLimitU32IfDefined("maxBindGroups",                             limitsPtr, {{{ C_STRUCTS.WGPULimits.maxBindGroups }}});
+        setLimitU32IfDefined('maxBindGroupsPlusVertexBuffers',            limitsPtr, {{{ C_STRUCTS.WGPULimits.maxBindGroupsPlusVertexBuffers }}});
+        setLimitU32IfDefined('maxBindingsPerBindGroup',                   limitsPtr, {{{ C_STRUCTS.WGPULimits.maxBindingsPerBindGroup }}});
         setLimitU32IfDefined("maxDynamicUniformBuffersPerPipelineLayout", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxDynamicUniformBuffersPerPipelineLayout }}});
         setLimitU32IfDefined("maxDynamicStorageBuffersPerPipelineLayout", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxDynamicStorageBuffersPerPipelineLayout }}});
-        setLimitU32IfDefined("maxSampledTexturesPerShaderStage", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxSampledTexturesPerShaderStage }}});
-        setLimitU32IfDefined("maxSamplersPerShaderStage", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxSamplersPerShaderStage }}});
-        setLimitU32IfDefined("maxStorageBuffersPerShaderStage", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxStorageBuffersPerShaderStage }}});
-        setLimitU32IfDefined("maxStorageTexturesPerShaderStage", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxStorageTexturesPerShaderStage }}});
-        setLimitU32IfDefined("maxUniformBuffersPerShaderStage", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxUniformBuffersPerShaderStage }}});
-        setLimitU32IfDefined("minUniformBufferOffsetAlignment", limitsPtr, {{{ C_STRUCTS.WGPULimits.minUniformBufferOffsetAlignment }}});
-        setLimitU32IfDefined("minStorageBufferOffsetAlignment", limitsPtr, {{{ C_STRUCTS.WGPULimits.minStorageBufferOffsetAlignment }}});
-        setLimitU64IfDefined("maxUniformBufferBindingSize", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxUniformBufferBindingSize }}});
-        setLimitU64IfDefined("maxStorageBufferBindingSize", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxStorageBufferBindingSize }}});
-        setLimitU32IfDefined("maxVertexBuffers", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxVertexBuffers }}});
-        setLimitU64IfDefined("maxBufferSize", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxBufferSize }}});
-        setLimitU32IfDefined("maxVertexAttributes", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxVertexAttributes }}});
-        setLimitU32IfDefined("maxVertexBufferArrayStride", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxVertexBufferArrayStride }}});
-        setLimitU32IfDefined("maxInterStageShaderVariables", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxInterStageShaderVariables }}});
-        setLimitU32IfDefined("maxColorAttachments", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxColorAttachments }}});
-        setLimitU32IfDefined("maxColorAttachmentBytesPerSample", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxColorAttachmentBytesPerSample }}});
-        setLimitU32IfDefined("maxComputeWorkgroupStorageSize", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupStorageSize }}});
-        setLimitU32IfDefined("maxComputeInvocationsPerWorkgroup", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeInvocationsPerWorkgroup }}});
-        setLimitU32IfDefined("maxComputeWorkgroupSizeX", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeX }}});
-        setLimitU32IfDefined("maxComputeWorkgroupSizeY", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeY }}});
-        setLimitU32IfDefined("maxComputeWorkgroupSizeZ", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeZ }}});
-        setLimitU32IfDefined("maxComputeWorkgroupsPerDimension", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupsPerDimension }}});
+        setLimitU32IfDefined("maxSampledTexturesPerShaderStage",          limitsPtr, {{{ C_STRUCTS.WGPULimits.maxSampledTexturesPerShaderStage }}});
+        setLimitU32IfDefined("maxSamplersPerShaderStage",                 limitsPtr, {{{ C_STRUCTS.WGPULimits.maxSamplersPerShaderStage }}});
+        setLimitU32IfDefined("maxStorageBuffersPerShaderStage",           limitsPtr, {{{ C_STRUCTS.WGPULimits.maxStorageBuffersPerShaderStage }}});
+        setLimitU32IfDefined("maxStorageTexturesPerShaderStage",          limitsPtr, {{{ C_STRUCTS.WGPULimits.maxStorageTexturesPerShaderStage }}});
+        setLimitU32IfDefined("maxUniformBuffersPerShaderStage",           limitsPtr, {{{ C_STRUCTS.WGPULimits.maxUniformBuffersPerShaderStage }}});
+        setLimitU32IfDefined("minUniformBufferOffsetAlignment",           limitsPtr, {{{ C_STRUCTS.WGPULimits.minUniformBufferOffsetAlignment }}});
+        setLimitU32IfDefined("minStorageBufferOffsetAlignment",           limitsPtr, {{{ C_STRUCTS.WGPULimits.minStorageBufferOffsetAlignment }}});
+        setLimitU64IfDefined("maxUniformBufferBindingSize",               limitsPtr, {{{ C_STRUCTS.WGPULimits.maxUniformBufferBindingSize }}});
+        setLimitU64IfDefined("maxStorageBufferBindingSize",               limitsPtr, {{{ C_STRUCTS.WGPULimits.maxStorageBufferBindingSize }}});
+        setLimitU32IfDefined("maxVertexBuffers",                          limitsPtr, {{{ C_STRUCTS.WGPULimits.maxVertexBuffers }}});
+        setLimitU64IfDefined("maxBufferSize",                             limitsPtr, {{{ C_STRUCTS.WGPULimits.maxBufferSize }}});
+        setLimitU32IfDefined("maxVertexAttributes",                       limitsPtr, {{{ C_STRUCTS.WGPULimits.maxVertexAttributes }}});
+        setLimitU32IfDefined("maxVertexBufferArrayStride",                limitsPtr, {{{ C_STRUCTS.WGPULimits.maxVertexBufferArrayStride }}});
+        setLimitU32IfDefined("maxInterStageShaderVariables",              limitsPtr, {{{ C_STRUCTS.WGPULimits.maxInterStageShaderVariables }}});
+        setLimitU32IfDefined("maxColorAttachments",                       limitsPtr, {{{ C_STRUCTS.WGPULimits.maxColorAttachments }}});
+        setLimitU32IfDefined("maxColorAttachmentBytesPerSample",          limitsPtr, {{{ C_STRUCTS.WGPULimits.maxColorAttachmentBytesPerSample }}});
+        setLimitU32IfDefined("maxComputeWorkgroupStorageSize",            limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupStorageSize }}});
+        setLimitU32IfDefined("maxComputeInvocationsPerWorkgroup",         limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeInvocationsPerWorkgroup }}});
+        setLimitU32IfDefined("maxComputeWorkgroupSizeX",                  limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeX }}});
+        setLimitU32IfDefined("maxComputeWorkgroupSizeY",                  limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeY }}});
+        setLimitU32IfDefined("maxComputeWorkgroupSizeZ",                  limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupSizeZ }}});
+        setLimitU32IfDefined("maxComputeWorkgroupsPerDimension",          limitsPtr, {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupsPerDimension }}});
+        // Not present in all browsers. If the app requested 0, avoid passing it through so it won't cause an error.
+        setLimitU32IfDefined("maxImmediateSize",                          limitsPtr, {{{ C_STRUCTS.WGPULimits.maxImmediateSize }}}, true);
 
         if (nextInChainPtr !== 0) {
           var sType = {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.sType, 'i32') }}};
@@ -869,14 +868,18 @@ var LibraryWebGPU = {
     #endif
           var compatibilityModeLimitsPtr = nextInChainPtr;
           {{{ gpu.makeCheckDescriptor('compatibilityModeLimitsPtr') }}}
-          setLimitU32IfDefined('maxStorageBuffersInFragmentStage', compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageBuffersInFragmentStage }}});
-          setLimitU32IfDefined('maxStorageTexturesInFragmentStage', compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageTexturesInFragmentStage }}});
-          setLimitU32IfDefined('maxStorageBuffersInVertexStage', compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageBuffersInVertexStage }}});
-          setLimitU32IfDefined('maxStorageTexturesInVertexStage', compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageTexturesInVertexStage }}});
+          // If not present in the browser, don't request these, otherwise they'll cause an error.
+          // (Technically, if any of these is higher than the PerShaderStage equivalent, we should
+          // raise the PerShaderStage limit instead, but that's complex and apps should be able to
+          // deal with that themselves.)
+          if ('maxStorageBuffersInVertexStage' in GPUSupportedLimits.prototype) {
+            setLimitU32IfDefined('maxStorageBuffersInVertexStage',    compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageBuffersInVertexStage }}});
+            setLimitU32IfDefined('maxStorageTexturesInVertexStage',   compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageTexturesInVertexStage }}});
+            setLimitU32IfDefined('maxStorageBuffersInFragmentStage',  compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageBuffersInFragmentStage }}});
+            setLimitU32IfDefined('maxStorageTexturesInFragmentStage', compatibilityModeLimitsPtr, {{{ C_STRUCTS.WGPUCompatibilityModeLimits.maxStorageTexturesInFragmentStage }}});
+          }
         }
 
-        // Non-standard. If this is 0, avoid passing it through so it won't cause an error.
-        setLimitU32IfDefined("maxImmediateSize", limitsPtr, {{{ C_STRUCTS.WGPULimits.maxImmediateSize }}}, true);
         desc["requiredLimits"] = requiredLimits;
       }
 
