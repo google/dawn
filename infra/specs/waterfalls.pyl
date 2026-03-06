@@ -30,15 +30,6 @@
           'default',
         ],
       },
-      'dawn-linux-x86-fuzz-dbg': {
-        'os_type': 'linux',
-        'mixins': [
-          'gpu_linux_gce_stable',
-        ],
-        'test_suites': {
-          'isolated_scripts': 'tint_fuzzer_corpus_check_tests',
-        },
-      },
       'dawn-linux-x86-sws-rel': {
         'os_type': 'linux',
         'mixins': [
