@@ -988,7 +988,10 @@ TEST_P(ResourceTableTests, HasResourceTextureCompatibilityAllTypes) {
     // Test hasResource returning for each of the supported WGSL types, against each texture.
     for (auto wgslType : kWgslSampledTextureTypes) {
         std::vector<bool> expected;
-        for (auto textureCase : textureCases) {
+        for (auto& textureCase : textureCases) {
+            // The reasons wgslTypes is a vector is because some textures can be
+            // both filterable and non-filterable, so hasResource will return true for both types on
+            // the one table entry with such a texture.
             expected.push_back(textureCase.wgslTypes.contains(wgslType));
         }
 
@@ -1108,7 +1111,7 @@ TEST_P(ResourceTableTests, DefaultBindingsAreZeroAndSizeOne) {
                 check(all(textureLoad(t, vec2(0), 0) == vec4(0, 0, 0, 1)));
             }
 
-                // Default texture_depth_cube
+            // Default texture_depth_cube
             {
                 check(!hasResource<texture_depth_cube>(0));
                 let t = getResource<texture_depth_cube>(0);
@@ -1117,7 +1120,7 @@ TEST_P(ResourceTableTests, DefaultBindingsAreZeroAndSizeOne) {
                 check(textureSampleLevel(t, s, vec3(0), 0) == 0);
             }
 
-                // Default texture_2d_array<i32>
+            // Default texture_2d_array<i32>
             {
                 check(!hasResource<texture_2d_array<i32>>(0));
                 let t = getResource<texture_2d_array<i32>>(0);
@@ -1160,6 +1163,206 @@ TEST_P(ResourceTableTests, DefaultBindingsAreZeroAndSizeOne) {
     device.GetQueue().Submit(1, &commands);
 
     EXPECT_BUFFER_U32_EQ(0, errorBuffer, 0);
+}
+
+// Test that a resource table texture can be sampled by a resource table sampler.
+TEST_P(ResourceTableTests, Sampler) {
+    // TODO(https://issues.chromium.org/473354063): Support samplers on D3D12
+    DAWN_SUPPRESS_TEST_IF(IsD3D12());
+
+    // TODO(https://issues.chromium.org/issues/490066027): Fails on Mali G78
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
+
+    // Create a 1x1 texture with a single red pixel.
+    wgpu::TextureDescriptor texDesc;
+    texDesc.size = {1, 1};
+    texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    texDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
+    wgpu::Texture texture = device.CreateTexture(&texDesc);
+
+    const utils::RGBA8 red = utils::RGBA8::kRed;
+    wgpu::TexelCopyTextureInfo srcInfo = utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferLayout dstInfo = {};
+    wgpu::Extent3D copySize = {1, 1, 1};
+    queue.WriteTexture(&srcInfo, &red, sizeof(red), &dstInfo, &copySize);
+
+    wgpu::Sampler sampler = device.CreateSampler();
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0.5, 0.5);
+        }
+
+        @fragment fn fs() -> @location(0) vec4f {
+            let s = getResource<sampler<non_filtering>>(0);
+            let t = getResource<texture_2d<f32, filterable>>(1);
+            return textureSample(t, s, vec2f(0.5, 0.5));
+        }
+    )");
+
+    // Create the pipeline.
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = module;
+    pDesc.cFragment.module = module;
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
+
+    texture.Pin(wgpu::TextureUsage::TextureBinding);
+    wgpu::ResourceTable table = MakeResourceTable(2, {
+                                                         {0, {.sampler = sampler}},
+                                                         {1, {.textureView = texture.CreateView()}},
+                                                     });
+
+    // Create a 1x1 render target to verify the result.
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    // Render.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetResourceTable(table);
+    pass.Draw(1);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Verify the result is red.
+    EXPECT_PIXEL_RGBA8_EQ(red, renderPass.color, 0, 0);
+}
+
+// Test that a resource table texture can be sampled by multiple resource table samplers.
+TEST_P(ResourceTableTests, MultipleSamplers) {
+    // TODO(https://issues.chromium.org/473354063): Support samplers on D3D12
+    DAWN_SUPPRESS_TEST_IF(IsD3D12());
+
+    // TODO(https://issues.chromium.org/issues/490066027): Fails on Mali G78
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
+
+    // Creates a 2x2 checkerboard texture, with red in the top left and bottom right corners, green
+    // in the other two.
+    auto CreateCheckerboardTexture = [&]() {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.size = {2, 2};
+        descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+        descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding;
+        auto texture = device.CreateTexture(&descriptor);
+
+        const uint32_t rowPixels = kTextureBytesPerRowAlignment / sizeof(utils::RGBA8);
+        std::array<utils::RGBA8, rowPixels * 2> pixels;
+        pixels[0] = pixels[rowPixels + 1] = utils::RGBA8::kRed;
+        pixels[1] = pixels[rowPixels] = utils::RGBA8::kGreen;
+
+        wgpu::TexelCopyTextureInfo srcInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout dstInfo = {};
+        dstInfo.bytesPerRow = 2 * sizeof(utils::RGBA8);
+        wgpu::Extent3D copySize = {2, 2, 1};
+        queue.WriteTexture(&srcInfo, pixels.data(), pixels.size() * sizeof(utils::RGBA8), &dstInfo,
+                           &copySize);
+
+        return texture;
+    };
+
+    auto CreateSampler = [&](wgpu::AddressMode mode) {
+        wgpu::SamplerDescriptor descriptor = {};
+        descriptor.addressModeU = mode;
+        descriptor.addressModeV = mode;
+        descriptor.addressModeW = mode;
+        return device.CreateSampler(&descriptor);
+    };
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+
+        @group(0) @binding(0) var<storage, read_write> results : array<vec4f>;
+
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0.5, 0.5);
+        }
+
+        @fragment fn fs() -> @location(0) vec4f {
+            let samplerRepeat = getResource<sampler<non_filtering>>(0);
+            let samplerMirror = getResource<sampler<non_filtering>>(1);
+            let samplerClamp = getResource<sampler<non_filtering>>(2);
+            let t = getResource<texture_2d<f32, filterable>>(3);
+
+            results[0] = textureSample(t, samplerRepeat, vec2f(1, 0));
+            results[1] = textureSample(t, samplerRepeat, vec2f(1.5, 0));
+
+            results[2] = textureSample(t, samplerMirror, vec2f(1, 0));
+            results[3] = textureSample(t, samplerMirror, vec2f(1.5, 0));
+
+            results[4] = textureSample(t, samplerClamp, vec2f(1, 0));
+            results[5] = textureSample(t, samplerClamp, vec2f(1.5, 0));
+
+            return vec4f(0);
+        }
+    )");
+
+    // Create the pipeline.
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = module;
+    pDesc.cFragment.module = module;
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
+
+    // Create the texture
+    wgpu::Texture texture = CreateCheckerboardTexture();
+
+    // Create 3 samplers
+    wgpu::Sampler samplerRepeat = CreateSampler(wgpu::AddressMode::Repeat);
+    wgpu::Sampler samplerMirror = CreateSampler(wgpu::AddressMode::MirrorRepeat);
+    wgpu::Sampler samplerClamp = CreateSampler(wgpu::AddressMode::ClampToEdge);
+
+    // Create the result buffer resource
+    wgpu::BufferDescriptor bDesc = {
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = sizeof(float) * 4 * 6,  // 6 vec4fs
+    };
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+    wgpu::BindGroup resultBG =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, resultBuffer}});
+
+    // Create resource table and add the samplers and texture view to it
+    texture.Pin(wgpu::TextureUsage::TextureBinding);
+    wgpu::ResourceTable table = MakeResourceTable(4, {
+                                                         {0, {.sampler = samplerRepeat}},
+                                                         {1, {.sampler = samplerMirror}},
+                                                         {2, {.sampler = samplerClamp}},
+                                                         {3, {.textureView = texture.CreateView()}},
+                                                     });
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, resultBG);
+    pass.SetResourceTable(table);
+    pass.Draw(1);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    float expectedGreen[4] = {0.0, 1.0, 0.0, 1.0};
+    float expectedRed[4] = {1.0, 0.0, 0.0, 1.0};
+
+    // repeat: 1,0 -> red, 1.5,0 -> green
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 0 * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 1 * 4 * sizeof(float), 4);
+
+    // mirror: 1,0 -> green, 1.5,0 -> red
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 2 * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedRed, resultBuffer, 3 * 4 * sizeof(float), 4);
+
+    // clamp: 1,0 -> green, 1.5,0 -> green
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 4 * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedGreen, resultBuffer, 5 * 4 * sizeof(float), 4);
 }
 
 // Check that Pin forces zero-initialization of the resources.

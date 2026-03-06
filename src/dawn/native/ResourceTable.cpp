@@ -189,15 +189,16 @@ MaybeError ResourceTableBase::InitializeBase() {
     DAWN_TRY(mMetadataBuffer->Unmap());
 
     // Add the default resources at the end of the table.
-    // TODO(https://issues.chromium.org/473354063): Add default samplers
-    ityp::span<ResourceTableSlot, Ref<TextureViewBase>> defaultResources;
+    ityp::span<ResourceTableSlot, ResourceTableDefaultResources::Resource> defaultResources;
     DAWN_TRY_ASSIGN(defaultResources,
                     device->GetResourceTableDefaultResources()->GetOrCreate(device));
 
     for (auto [i, defaultResource] : Enumerate(defaultResources)) {
-        BindingResource entryContents = {
-            .textureView = defaultResource.Get(),
-        };
+        BindingResource entryContents;
+        MatchVariant(
+            defaultResource,
+            [&](Ref<TextureViewBase> view) { entryContents.textureView = view.Get(); },
+            [&](Ref<SamplerBase> sampler) { entryContents.sampler = sampler.Get(); });
         Update(mAPISize + i, &entryContents);
     }
 
@@ -541,7 +542,12 @@ ResourceTableBase::Updates ResourceTableBase::AcquireDirtySlotUpdates() {
         DAWN_ASSERT(state.dirty);
         state.dirty = false;
 
-        tint::ResourceType effectiveType = state.pinned ? state.typeId : tint::ResourceType::kEmpty;
+        // Set the value in the table to the type id. If the resource requires pinning, we only set
+        // the type id if it's pinned, else we clear it.
+        tint::ResourceType effectiveType = state.typeId;
+        if (std::holds_alternative<Ref<TextureViewBase>>(state.resource)) {
+            effectiveType = state.pinned ? state.typeId : tint::ResourceType::kEmpty;
+        }
 
         // Add the update for the metadata buffer.
         size_t offset = sizeof(uint32_t) * (uint32_t(dirtyIndex) + 1);

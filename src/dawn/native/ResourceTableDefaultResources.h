@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_RESOURCETABLEDEFAULTRESOURCES_H_
 #define SRC_DAWN_NATIVE_RESOURCETABLEDEFAULTRESOURCES_H_
 
+#include <variant>
+
 #include "dawn/common/NonMovable.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/ityp_span.h"
@@ -44,6 +46,8 @@ namespace dawn::native {
 // Used to cache the default resources on the device so they can be reused between resource tables.
 class ResourceTableDefaultResources : public NonMovable {
   public:
+    using Resource = std::variant<Ref<TextureViewBase>, Ref<SamplerBase>>;
+
     // Returns the order in which we will put the default bindings at the end of the resource table
     // TODO(https://issues.chromium.org/463925499): Take the device in parameter to know if we have
     // sampling vs. full resource table.
@@ -52,12 +56,14 @@ class ResourceTableDefaultResources : public NonMovable {
     // Returns the total number of default bindings
     static ResourceTableSlot GetCount();
 
+    // Returns the index of `resourceType` in the span returned by `GetOrder()`
+    static ResourceTableSlot IndexOf(tint::ResourceType resourceType);
+
     // Lazily creates and returns the default resources
-    ResultOrError<ityp::span<ResourceTableSlot, Ref<TextureViewBase>>> GetOrCreate(
-        DeviceBase* device);
+    ResultOrError<ityp::span<ResourceTableSlot, Resource>> GetOrCreate(DeviceBase* device);
 
   private:
-    ityp::vector<ResourceTableSlot, Ref<TextureViewBase>> mSampledTextureDefaults;
+    ityp::vector<ResourceTableSlot, Resource> mDefaultResources;
 };
 
 }  // namespace dawn::native

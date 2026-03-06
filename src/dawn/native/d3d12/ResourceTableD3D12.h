@@ -79,7 +79,7 @@ class ResourceTable final : public ResourceTableBase {
     void FreeCPUHeap();
     MaybeError UpdateMetadataBuffer(CommandRecordingContext* recordingContext,
                                     const std::vector<MetadataUpdate>& updates);
-    void UpdateResourceBindings(const std::vector<ResourceUpdate>& updates);
+    MaybeError UpdateResourceBindings(const std::vector<ResourceUpdate>& updates);
 
     ComPtr<ID3D12DescriptorHeap> mCPUHeap;
     CPUDescriptorHeapAllocation mCPUViewAllocation;
