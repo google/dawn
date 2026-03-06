@@ -50,7 +50,7 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
 
 ComputePipeline::~ComputePipeline() = default;
 
-MaybeError ComputePipeline::InitializeImpl() {
+ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
     Device* device = ToBackend(GetDevice());
     uint32_t compileFlags = 0;
 
@@ -91,12 +91,9 @@ MaybeError ComputePipeline::InitializeImpl() {
         DAWN_TRY_ASSIGN(mComputeShader, device->GetOrCreateComputeShader(compiledShader));
     }
 
-    // Initialize ComputePipelineBase members.
-    InitializeComputeBase(compiledShader.workgroupSize);
-
     SetLabelImpl();
 
-    return {};
+    return {compiledShader.workgroupSize};
 }
 
 void ComputePipeline::SetLabelImpl() {

@@ -315,7 +315,8 @@ class ComputePipeline final : public ComputePipelineBase {
   public:
     using ComputePipelineBase::ComputePipelineBase;
 
-    MaybeError InitializeImpl() override;
+  private:
+    ResultOrError<Extent3D> InitializeImpl() override;
 };
 
 class RenderPipeline final : public RenderPipelineBase {

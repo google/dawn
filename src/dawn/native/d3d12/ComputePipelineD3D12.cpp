@@ -49,7 +49,7 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
     return AcquireRef(new ComputePipeline(device, descriptor));
 }
 
-MaybeError ComputePipeline::InitializeImpl() {
+ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
     Device* device = ToBackend(GetDevice());
     uint32_t compileFlags = 0;
 
@@ -93,9 +93,6 @@ MaybeError ComputePipeline::InitializeImpl() {
                                                     /* usedInterstageVariables */ {}));
     d3dDesc.CS = {compiledShader.shaderBlob.Data(), compiledShader.shaderBlob.Size()};
 
-    // Initialize ComputePipelineBase members.
-    InitializeComputeBase(compiledShader.workgroupSize);
-
     StreamIn(&mCacheKey, d3dDesc, ToBackend(GetLayout())->GetRootSignatureBlob());
 
     // Try to see if we have anything in the blob cache.
@@ -138,7 +135,7 @@ MaybeError ComputePipeline::InitializeImpl() {
 
     SetLabelImpl();
 
-    return {};
+    return {compiledShader.workgroupSize};
 }
 
 ComputePipeline::~ComputePipeline() = default;

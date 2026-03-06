@@ -442,7 +442,7 @@ MaybeError PipelineBase::Initialize(std::optional<ScopedUseShaderPrograms> scope
         GetImmediateConstantBlockBits(0, GetLayout()->GetImmediateDataRangeByteSize());
     mImmediateMask |= userConstantsBits;
 
-    DAWN_TRY_CONTEXT(InitializeImpl(), "initializing %s", this);
+    DAWN_TRY_CONTEXT(InitializeWithShaders(), "initializing %s", this);
     return {};
 }
 

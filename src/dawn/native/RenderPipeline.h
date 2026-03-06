@@ -162,6 +162,10 @@ class RenderPipelineBase : public PipelineBase,
   private:
     RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
+    MaybeError InitializeWithShaders() final;
+    // Overridden by backends to perform their initialization steps.
+    virtual MaybeError InitializeImpl() = 0;
+
     // Vertex state
     uint32_t mVertexBufferCount;
     VertexAttributeMask mAttributeLocationsUsed;

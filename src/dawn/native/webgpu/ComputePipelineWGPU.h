@@ -44,13 +44,13 @@ class ComputePipeline final : public ComputePipelineBase,
         Device* device,
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
 
-    MaybeError InitializeImpl() override;
-
     MaybeError AddReferenced(CaptureContext& captureContext) override;
     MaybeError CaptureCreationParameters(CaptureContext& context) override;
 
   protected:
     ComputePipeline(Device* device, const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
+    ResultOrError<Extent3D> InitializeImpl() override;
+
     void SetLabelImpl() override;
 };
 

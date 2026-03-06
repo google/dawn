@@ -47,7 +47,6 @@ class ComputePipeline final : public ComputePipelineBase, public PipelineVk {
 
     VkPipeline GetHandle() const;
 
-    MaybeError InitializeImpl() override;
 
     // Dawn API
     void SetLabelImpl() override;
@@ -56,6 +55,7 @@ class ComputePipeline final : public ComputePipelineBase, public PipelineVk {
     ~ComputePipeline() override;
     void DestroyImpl(DestroyReason reason) override;
     using ComputePipelineBase::ComputePipelineBase;
+    ResultOrError<Extent3D> InitializeImpl() override;
 
     VkPipeline mHandle = VK_NULL_HANDLE;
 };

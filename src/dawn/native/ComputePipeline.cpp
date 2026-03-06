@@ -61,11 +61,20 @@ ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
           descriptor->label,
           {{SingleShaderStage::Compute, descriptor->compute.module, descriptor->compute.entryPoint,
             descriptor->compute.constantCount, descriptor->compute.constants}}) {
+    const EntryPointMetadata& metadata = *GetStage(SingleShaderStage::Compute).metadata;
+    mUsesLinearIndex = metadata.usesGlobalInvocationIndex || metadata.usesWorkgroupIndex;
+    mUsesGlobalInvocationIndex = metadata.usesGlobalInvocationIndex;
+
     SetContentHash(ComputeContentHash());
     GetObjectTrackingList()->Track(this);
 
     // Initialize the cache key to include the cache type and device information.
     StreamIn(&mCacheKey, CacheKey::Type::ComputePipeline, device->GetCacheKey());
+}
+
+MaybeError ComputePipelineBase::InitializeWithShaders() {
+    DAWN_TRY_ASSIGN(mWorkgroupSize, InitializeImpl());
+    return {};
 }
 
 ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
@@ -79,25 +88,18 @@ void ComputePipelineBase::DestroyImpl(DestroyReason reason) {
     Uncache();
 }
 
-void ComputePipelineBase::InitializeComputeBase(Extent3D wgSize) {
-    const ProgrammableStage& stage = GetStage(SingleShaderStage::Compute);
-    auto entryPoint =
-        stage.module->ReifyEntryPointName(stage.entryPoint.c_str(), SingleShaderStage::Compute);
-    const auto& metadata = stage.module->GetEntryPoint(entryPoint.name);
-    mUsesLinearIndex = metadata.usesGlobalInvocationIndex || metadata.usesWorkgroupIndex;
-    mUsesGlobalInvocationIndex = metadata.usesGlobalInvocationIndex;
-    mWorkgroupSize = wgSize;
-}
-
 Extent3D ComputePipelineBase::GetWorkgroupSize() const {
+    DAWN_ASSERT(!IsError());
     return mWorkgroupSize;
 }
 
 bool ComputePipelineBase::UsesLinearIndexing() const {
+    DAWN_ASSERT(!IsError());
     return mUsesLinearIndex;
 }
 
 bool ComputePipelineBase::UsesGlobalInvocationIndex() const {
+    DAWN_ASSERT(!IsError());
     return mUsesGlobalInvocationIndex;
 }
 
@@ -108,10 +110,8 @@ Ref<ComputePipelineBase> ComputePipelineBase::MakeError(DeviceBase* device, Stri
         explicit ErrorComputePipeline(DeviceBase* device, StringView label)
             : ComputePipelineBase(device, ObjectBase::kError, label) {}
 
-        MaybeError InitializeImpl() override {
-            DAWN_UNREACHABLE();
-            return {};
-        }
+      private:
+        ResultOrError<Extent3D> InitializeImpl() override { DAWN_UNREACHABLE(); }
     };
 
     return AcquireRef(new ErrorComputePipeline(device, label));

@@ -55,7 +55,7 @@ class ComputePipeline final : public ComputePipelineBase {
 
   private:
     using ComputePipelineBase::ComputePipelineBase;
-    MaybeError InitializeImpl() override;
+    ResultOrError<Extent3D> InitializeImpl() override;
 
     NSPRef<id<MTLComputePipelineState>> mMtlComputePipelineState;
     bool mRequiresStorageBufferLength;

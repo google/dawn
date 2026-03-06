@@ -100,7 +100,7 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     using ScopedUseShaderPrograms = PerStage<ShaderModuleBase::ScopedUseTintProgram>;
     ScopedUseShaderPrograms UseShaderPrograms();
 
-    // Initialize() should only be called once by the frontend.
+    // Initialize() should only be called once by the frontend when the shaders are ready.
     MaybeError Initialize(std::optional<ScopedUseShaderPrograms> scopedUsePrograms = std::nullopt);
 
     uint32_t GetImmediateConstantSize() const;
@@ -120,7 +120,8 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
   private:
     MaybeError ValidateGetBindGroupLayout(BindGroupIndex group);
 
-    virtual MaybeError InitializeImpl() = 0;
+    // Overridden by child classes to perform their initialization when the shaders are ready.
+    virtual MaybeError InitializeWithShaders() = 0;
 
     wgpu::ShaderStage mStageMask = wgpu::ShaderStage::None;
     PerStage<ProgrammableStage> mStages;

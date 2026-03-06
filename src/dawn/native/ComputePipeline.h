@@ -68,10 +68,14 @@ class ComputePipelineBase : public PipelineBase,
 
   protected:
     void DestroyImpl(DestroyReason reason) override;
-    void InitializeComputeBase(Extent3D wgSize);
 
   private:
     ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
+
+    MaybeError InitializeWithShaders() final;
+    // Overridden by backends to perform their initialization steps. Returns the workgroup size
+    // (after overridable constants are applied).
+    virtual ResultOrError<Extent3D> InitializeImpl() = 0;
 
     Extent3D mWorkgroupSize = {1, 1, 1};
     bool mUsesLinearIndex = false;

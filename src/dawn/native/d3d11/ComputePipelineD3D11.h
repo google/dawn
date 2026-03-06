@@ -47,13 +47,13 @@ class ComputePipeline final : public ComputePipelineBase {
 
     ID3D11ComputeShader* GetD3D11ComputeShaderForTesting();
 
-    MaybeError InitializeImpl() override;
-
     bool UsesNumWorkgroups() const;
 
   private:
     using ComputePipelineBase::ComputePipelineBase;
     ~ComputePipeline() override;
+    ResultOrError<Extent3D> InitializeImpl() override;
+
     void SetLabelImpl() override;
 
     ComPtr<ID3D11ComputeShader> mComputeShader;

@@ -494,7 +494,7 @@ MaybeError Queue::WaitForIdleForDestructionImpl() {
 }
 
 // ComputePipeline
-MaybeError ComputePipeline::InitializeImpl() {
+ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
     const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
 
     tint::null::writer::Options tintOptions;
@@ -532,9 +532,7 @@ MaybeError ComputePipeline::InitializeImpl() {
         GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMaxExplicitComputeSubgroupSize(),
         GetDevice()->GetAdapter()->GetPhysicalDevice()->GetMaxComputeWorkgroupSubgroups()));
 
-    InitializeComputeBase(wgSize);
-
-    return {};
+    return wgSize;
 }
 
 // RenderPipeline

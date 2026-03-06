@@ -52,7 +52,7 @@ ComputePipeline::ComputePipeline(DeviceBase* dev,
 
 ComputePipeline::~ComputePipeline() = default;
 
-MaybeError ComputePipeline::InitializeImpl() {
+ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
     auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
 
     const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
@@ -86,14 +86,12 @@ MaybeError ComputePipeline::InitializeImpl() {
     DAWN_ASSERT(mMtlComputePipelineState != nil);
     timer.RecordMicroseconds("Metal.newComputePipelineStateWithDescriptor.CacheMiss");
 
-    // Initialize ComputePipelineBase members.
-    InitializeComputeBase({uint32_t(computeData.localWorkgroupSize.width),
-                           uint32_t(computeData.localWorkgroupSize.height),
-                           uint32_t(computeData.localWorkgroupSize.depth)});
-
     mRequiresStorageBufferLength = computeData.needsStorageBufferLength;
     mWorkgroupAllocations = std::move(computeData.workgroupAllocations);
-    return {};
+
+    return {{uint32_t(computeData.localWorkgroupSize.width),
+             uint32_t(computeData.localWorkgroupSize.height),
+             uint32_t(computeData.localWorkgroupSize.depth)}};
 }
 
 void ComputePipeline::Encode(id<MTLComputeCommandEncoder> encoder) {

@@ -44,14 +44,15 @@ class ComputePipeline final : public ComputePipelineBase, public PipelineGL {
 
     MaybeError ApplyNow(const OpenGLFunctions& gl);
 
-    MaybeError InitializeImpl() override;
-
     GLuint GetProgramHandle() const;
+
+  protected:
+    void DestroyImpl(DestroyReason reason) override;
 
   private:
     using ComputePipelineBase::ComputePipelineBase;
     ~ComputePipeline() override;
-    void DestroyImpl(DestroyReason reason) override;
+    ResultOrError<Extent3D> InitializeImpl() override;
 };
 
 }  // namespace dawn::native::opengl

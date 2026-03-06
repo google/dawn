@@ -1086,6 +1086,10 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     StreamIn(&mCacheKey, CacheKey::Type::RenderPipeline, device->GetCacheKey());
 }
 
+MaybeError RenderPipelineBase::InitializeWithShaders() {
+    return InitializeImpl();
+}
+
 RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
                                        ObjectBase::ErrorTag tag,
                                        StringView label)

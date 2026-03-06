@@ -55,7 +55,7 @@ ComputePipeline::ComputePipeline(Device* device,
       RecordableObject(schema::ObjectType::ComputePipeline),
       ObjectWGPU(device->wgpu->computePipelineRelease) {}
 
-MaybeError ComputePipeline::InitializeImpl() {
+ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
     WGPUComputePipelineDescriptor desc;
     desc.nextInChain = nullptr;
     desc.label = ToOutputStringView(GetLabel());
@@ -100,10 +100,8 @@ MaybeError ComputePipeline::InitializeImpl() {
     DAWN_INVALID_IF(tintResult != tint::Success, "An error occurred while running Null writer\n%s",
                     tintResult.Failure().reason);
 
-    InitializeComputeBase(
-        {tintResult->workgroup_info.x, tintResult->workgroup_info.y, tintResult->workgroup_info.z});
-
-    return {};
+    return {
+        {tintResult->workgroup_info.x, tintResult->workgroup_info.y, tintResult->workgroup_info.z}};
 }
 
 void ComputePipeline::SetLabelImpl() {

@@ -51,7 +51,7 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
     return AcquireRef(new ComputePipeline(device, descriptor));
 }
 
-MaybeError ComputePipeline::InitializeImpl() {
+ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
     Device* device = ToBackend(GetDevice());
     PipelineLayout* layout = ToBackend(GetLayout());
 
@@ -90,9 +90,6 @@ MaybeError ComputePipeline::InitializeImpl() {
         module->GetHandleAndSpirv(SingleShaderStage::Compute, computeStage, layout,
                                   /*emitPointSize=*/false, /*polyfillPixelCenter=*/false,
                                   /*needsMultisampledFramebufferFetch=*/false, GetImmediateMask()));
-
-    // Set ComputePipelineBase members.
-    InitializeComputeBase(moduleAndSpirv.workgroupSize);
 
     createInfo.stage.module = moduleAndSpirv.module;
     // string_view returned by GetIsolatedEntryPointName() points to a null-terminated string.
@@ -155,7 +152,7 @@ MaybeError ComputePipeline::InitializeImpl() {
 
     device->fn.DestroyShaderModule(device->GetVkDevice(), moduleAndSpirv.module, nullptr);
 
-    return {};
+    return {moduleAndSpirv.workgroupSize};
 }
 
 void ComputePipeline::SetLabelImpl() {
