@@ -92,6 +92,7 @@ enum class QualcommACPIGen {
     Unknown = 0,
     Adreno6xx = 6,
     Adreno7xx = 7,
+    Adreno8xx = 8,
 };
 
 IntelGen GetIntelGen(PCIVendorID venderId, PCIDeviceID deviceId);

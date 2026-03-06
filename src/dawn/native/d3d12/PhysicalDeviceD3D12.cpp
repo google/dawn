@@ -404,8 +404,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // TODO(crbug.com/dawn/685):
     // - maxVertexBufferArrayStride
     if (gpu_info::IsQualcommACPI(GetVendorId()) &&
-        gpu_info::GetQualcommACPIGen(GetVendorId(), GetDeviceId()) <=
-            gpu_info::QualcommACPIGen::Adreno7xx) {
+        gpu_info::GetQualcommACPIGen(GetVendorId(), GetDeviceId()) <
+            gpu_info::QualcommACPIGen::Adreno8xx) {
         // Due to hardware limitation, Raw Buffers can only address 2^28 bytes instead of the
         // guaranteed 2^31 bytes.
         limits->v1.maxStorageBufferBindingSize = 1 << 28;
