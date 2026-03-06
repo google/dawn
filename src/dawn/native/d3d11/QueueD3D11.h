@@ -39,6 +39,7 @@
 #include "dawn/native/d3d/QueueD3D.h"
 #include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
 #include "dawn/native/d3d11/Forward.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::d3d11 {
 
@@ -67,7 +68,7 @@ class Queue : public d3d::Queue {
     struct BufferMapRequest : public LinkNode<BufferMapRequest> {
         BufferMapRequest(Buffer* b, wgpu::MapMode m) : buffer(b), mode(m) {}
 
-        Buffer* buffer = nullptr;
+        raw_ptr<Buffer> buffer = nullptr;
         wgpu::MapMode mode;
     };
 

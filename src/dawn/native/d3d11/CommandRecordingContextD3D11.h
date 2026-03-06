@@ -36,6 +36,7 @@
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Ref.h"
+#include "dawn/common/StackAllocated.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/d3d/KeyedMutex.h"
 #include "dawn/native/d3d/d3d_platform.h"
@@ -195,6 +196,7 @@ class ScopedCommandRecordingContext : NonCopyable {
     }
 
   private:
+    STACK_ALLOCATED_IGNORE("TODO: avoid heap allocated class containing StackAllocated members")
     CommandRecordingContext::Guard mGuard;
     bool mLockD3D11Scope = false;
 };
