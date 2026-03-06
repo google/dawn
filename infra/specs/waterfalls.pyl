@@ -25,20 +25,6 @@
           'gtest_tests': 'dawn_end2end_sws_tsan_gtests',
         },
       },
-      'dawn-linux-x86-builder-rel': {
-        'additional_compile_targets': [
-          'default',
-        ],
-      },
-      'dawn-linux-x86-sws-rel': {
-        'os_type': 'linux',
-        'mixins': [
-          'gpu_linux_gce_stable',
-        ],
-        'test_suites': {
-          'gtest_tests': 'swiftshader_gtests',
-        },
-      },
       'dawn-win-x64-builder-asan': {
         'additional_compile_targets': [
           'default',
