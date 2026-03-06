@@ -121,39 +121,7 @@
           'default',
         ],
       },
-      'dawn-win-x86-builder-rel': {
-        'additional_compile_targets': [
-          'default',
-        ],
-      },
-      'dawn-win-x86-intel-uhd630-rel': {
-        'os_type': 'win',
-        'mixins': [
-          'win10_intel_uhd_630_stable',
-        ],
-        'test_suites': {
-          'gtest_tests': 'real_hardware_win_gtests',
-        },
-      },
-      'dawn-win-x86-nvidia-gtx1660-rel': {
-        'os_type': 'win',
-        'mixins': [
-          'win10_nvidia_gtx_1660_stable',
-        ],
-        'test_suites': {
-          'gtest_tests': 'real_hardware_win_gtests',
-        },
-      },
       'dawn-win-x86-sws-dbg': {
-        'os_type': 'win',
-        'mixins': [
-          'win10_gce_gpu_pool',
-        ],
-        'test_suites': {
-          'gtest_tests': 'win_software_renderer_gtests',
-        },
-      },
-      'dawn-win-x86-sws-rel': {
         'os_type': 'win',
         'mixins': [
           'win10_gce_gpu_pool',
