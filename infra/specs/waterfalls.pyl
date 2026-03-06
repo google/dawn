@@ -44,11 +44,6 @@
           'default',
         ],
       },
-      'dawn-win-x64-builder-dbg': {
-        'additional_compile_targets': [
-          'default',
-        ],
-      },
       'dawn-win-x64-builder-msvc-dbg': {
         'additional_compile_targets': [
           'default',
@@ -75,16 +70,6 @@
         ],
         'test_suites': {
           'gtest_tests': 'real_hardware_win_gtests',
-        },
-      },
-      'dawn-win-x64-sws-dbg': {
-        'os_type': 'win',
-        'mixins': [
-          'win10_gce_gpu_pool',
-        ],
-        'test_suites': {
-          'gtest_tests': 'win_software_renderer_gtests',
-          'isolated_scripts': 'win_software_renderer_isolated_scripts',
         },
       },
       'dawn-win-x64-sws-msvc-dbg': {
