@@ -138,7 +138,7 @@ struct VertexPullingConfig {
 };
 
 /// Reflection for VertexFormat.
-TINT_REFLECT_ENUM_RANGE(tint::VertexFormat, kUint8x2, kUnorm8x4BGRA);
+TINT_REFLECT_ENUM_RANGE(tint::VertexFormat, kUint8, kUnorm8x4BGRA);
 
 /// Reflection for VertexStepMode.
 TINT_REFLECT_ENUM_RANGE(tint::VertexStepMode, kVertex, kInstance);

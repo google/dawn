@@ -74,7 +74,7 @@ enum class ResourceType : uint32_t {
     kSampler_non_filtering,
     kSampler_comparison,
 };
-TINT_REFLECT_ENUM_RANGE(tint::ResourceType, kEmpty, kTextureDepthMultisampled2d);
+TINT_REFLECT_ENUM_RANGE(tint::ResourceType, kEmpty, kSampler_comparison);
 
 }  // namespace tint
 
