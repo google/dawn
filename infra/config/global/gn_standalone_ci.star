@@ -662,6 +662,11 @@ dawn_win_parent_builder(
             "x86",
         ],
     ),
+    targets = targets.bundle(
+        additional_compile_targets = [
+            "default",
+        ],
+    ),
     console_view_entry = consoles.console_view_entry(
         category = "win|build|clang|dbg",
         short_name = "x86",
@@ -1892,6 +1897,18 @@ ci.thin_tester(
             target_platform = builder_config.target_platform.WIN,
         ),
         run_tests_serially = True,
+    ),
+    targets = targets.bundle(
+        targets = [
+            "win_software_renderer_gtests",
+        ],
+        mixins = [
+            "win10_gce_gpu_pool",
+        ],
+    ),
+    targets_settings = targets.settings(
+        browser_config = targets.browser_config.DEBUG,
+        os_type = targets.os_type.WINDOWS,
     ),
     console_view_entry = consoles.console_view_entry(
         category = "win|test|clang|dbg|x86",
