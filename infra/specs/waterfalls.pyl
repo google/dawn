@@ -55,20 +55,6 @@
           'isolated_scripts': 'win_software_renderer_isolated_scripts',
         },
       },
-      'dawn-win-x86-builder-dbg': {
-        'additional_compile_targets': [
-          'default',
-        ],
-      },
-      'dawn-win-x86-sws-dbg': {
-        'os_type': 'win',
-        'mixins': [
-          'win10_gce_gpu_pool',
-        ],
-        'test_suites': {
-          'gtest_tests': 'win_software_renderer_gtests',
-        },
-      },
     },
   },
 ]
