@@ -475,6 +475,11 @@ dawn_win_parent_builder(
             "x64",
         ],
     ),
+    targets = targets.bundle(
+        additional_compile_targets = [
+            "default",
+        ],
+    ),
     console_view_entry = consoles.console_view_entry(
         category = "win|build|clang|asan",
         short_name = "x64",
@@ -1513,6 +1518,18 @@ ci.thin_tester(
         ),
         run_tests_serially = True,
     ),
+    targets = targets.bundle(
+        targets = [
+            "real_hardware_win_gtests",
+        ],
+        mixins = [
+            "win10_intel_uhd_630_stable",
+        ],
+    ),
+    targets_settings = targets.settings(
+        browser_config = targets.browser_config.RELEASE,
+        os_type = targets.os_type.WINDOWS,
+    ),
     console_view_entry = consoles.console_view_entry(
         category = "win|test|clang|asan|x64",
         short_name = "630",
@@ -1607,6 +1624,18 @@ ci.thin_tester(
             target_platform = builder_config.target_platform.WIN,
         ),
         run_tests_serially = True,
+    ),
+    targets = targets.bundle(
+        targets = [
+            "real_hardware_win_gtests",
+        ],
+        mixins = [
+            "win10_nvidia_gtx_1660_stable",
+        ],
+    ),
+    targets_settings = targets.settings(
+        browser_config = targets.browser_config.RELEASE,
+        os_type = targets.os_type.WINDOWS,
     ),
     console_view_entry = consoles.console_view_entry(
         category = "win|test|clang|asan|x64",
