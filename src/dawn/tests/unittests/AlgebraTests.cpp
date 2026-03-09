@@ -117,6 +117,12 @@ TEST(Algebra, VectorConstructorAndIndexing) {
     }
 }
 
+// Test casting between vectors of different scalar types.
+TEST(Algebra, VectorConstructorFromVectorWithDifferentScalarType) {
+    EXPECT_EQ(Vec2u(Vec2f(3.0, 4.0)), Vec2u(3, 4));
+    EXPECT_EQ(Vec4f(Vec4i(-1, 3, 4, -4)), Vec4f(-1.0, 3.0, 4.0, -4.0));
+}
+
 // Test the vector equality operator
 TEST(Algebra, VectorEquality) {
     EXPECT_EQ(Vec4u(1, 2, 3, 4), Vec4u(1, 2, 3, 4));
@@ -221,6 +227,26 @@ TEST(Algebra, MatrixScale) {
               Mat4x4f({6, 0, 0, 0}, {0, 7, 0, 0}, {0, 0, 8, 0}, {0, 0, 0, 9}));
 }
 
+// Test the creation of scale matrices
+TEST(Algebra, MatrixTranslation) {
+    EXPECT_EQ(Mat3x3f::Translation({3, 4}), Mat3x3f({1, 0, 0}, {0, 1, 0}, {3, 4, 1}));
+    EXPECT_EQ(Mat4x4f::Translation({6, 7, 8}),
+              Mat4x4f({1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {6, 7, 8, 1}));
+}
+
+// Test the creation of homogeneous space scale matrices
+TEST(Algebra, MatrixScaleHomogeneous) {
+    EXPECT_EQ(Mat3x3f::ScaleHomogeneous({3, 4}), Mat3x3f({3, 0, 0}, {0, 4, 0}, {0, 0, 1}));
+    EXPECT_EQ(Mat4x4f::ScaleHomogeneous({6, 7, 8}),
+              Mat4x4f({6, 0, 0, 0}, {0, 7, 0, 0}, {0, 0, 8, 0}, {0, 0, 0, 1}));
+}
+
+// Test casting between matrices of different dimension (it crops or fills with zeroes).
+TEST(Algebra, MatrixCropOrExpandFrom) {
+    EXPECT_EQ(Mat4x2f::CropOrExpandFrom(Mat2x4f({1, 2, 3, 4}, {5, 6, 7, 8})),
+              Mat4x2f({1, 2}, {5, 6}, {0, 0}, {0, 0}));
+}
+
 // Test matrix / vector multiplication.
 TEST(Algebra, MatrixVectorMul) {
     auto m = Mat3x4f({1, 2, 3, 4}, {-1, -2, -3, -4}, {10, 11, 12, 13});
@@ -246,6 +272,12 @@ TEST(Algebra, MatrixMatrixMul) {
     EXPECT_EQ(Mul(R, Vec3f(1, 0, 0)), Mul(A, Mul(B, Vec3f(1, 0, 0))));
     EXPECT_EQ(Mul(R, Vec3f(0, 1, 0)), Mul(A, Mul(B, Vec3f(0, 1, 0))));
     EXPECT_EQ(Mul(R, Vec3f(0, 0, 1)), Mul(A, Mul(B, Vec3f(0, 0, 1))));
+}
+
+// Test vector / vector max.
+TEST(Algebra, VectorVectorMax) {
+    EXPECT_EQ(Max(Vec2f(2, 7), Vec2f(6, 3)), Vec2f(6, 7));
+    EXPECT_EQ(Max(Vec4u(1, 2, 3, 4), Vec4u(4, 3, 2, 1)), Vec4u(4, 3, 3, 4));
 }
 
 }  // anonymous namespace

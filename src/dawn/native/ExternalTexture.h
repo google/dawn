@@ -30,6 +30,7 @@
 
 #include <array>
 
+#include "dawn/common/Algebra.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/ObjectBase.h"
@@ -48,17 +49,17 @@ struct ExternalTextureParams {
     std::array<float, 8> gammaDecodingParams = {};
     std::array<float, 8> gammaEncodingParams = {};
     std::array<float, 12> gamutConversionMatrix = {};
-    std::array<float, 6> sampleTransform = {};
-    std::array<float, 6> loadTransform = {};
-    std::array<float, 2> samplePlane0RectMin = {};
-    std::array<float, 2> samplePlane0RectMax = {};
-    std::array<float, 2> samplePlane1RectMin = {};
-    std::array<float, 2> samplePlane1RectMax = {};
+    math::Mat3x2f sampleTransform;
+    math::Mat3x2f loadTransform;
+    math::Vec2f samplePlane0RectMin;
+    math::Vec2f samplePlane0RectMax;
+    math::Vec2f samplePlane1RectMin;
+    math::Vec2f samplePlane1RectMax;
     // The shader-visible size of the texture for textureLoad and textureDimensions
-    std::array<uint32_t, 2> apparentSize = {};
+    math::Vec2u apparentSize;
     // textureLoad() passes coords in plane0 related size.
     // Use this Factor to calculate plane1 load coord.
-    std::array<float, 2> plane1CoordFactor = {};
+    math::Vec2f plane1CoordFactor;
 };
 
 MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,

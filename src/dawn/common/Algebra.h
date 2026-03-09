@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_COMMON_ALGEBRA_H_
 #define SRC_DAWN_COMMON_ALGEBRA_H_
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -79,6 +80,14 @@ class alignas(WGSLVectorAlignment<Scalar>(Size)) Vector {
     constexpr Vector(const Scalar& s1, const Scalar& s2, const Scalar& s3, const Scalar& s4)
         requires(Size == 4)
         : data{s1, s2, s3, s4} {}
+
+    // Constructor to explicitly cast between Vector with different Scalar types.
+    template <typename OtherScalar>
+    constexpr explicit Vector(const Vector<Size, OtherScalar>& other) {
+        for (size_t i = 0; i < Size; i++) {
+            data[i] = Scalar(other[i]);
+        }
+    }
 
     // Operator overloads. Note that arithmetic operators are only by-component. More complex
     // arithmetic operators are implemented as freestanding functions (like Mul(Matrix, Vector)).
@@ -203,6 +212,43 @@ class Matrix {
         return mat;
     }
 
+    // Returns a translation matrix when working in a homogeneous space.
+    constexpr static Self Translation(Vector<Rows - 1, Scalar> translation)
+        requires(Cols == Rows)
+    {
+        Self result = Identity();
+        Column& translationColumn = result[Cols - 1];
+        for (size_t row = 0; row < Rows - 1; row++) {
+            translationColumn[row] = translation[row];
+        }
+        return result;
+    }
+
+    // Returns a translation matrix when working in a homogeneous space.
+    constexpr static Self ScaleHomogeneous(Vector<Rows - 1, Scalar> factorsIn)
+        requires(Cols == Rows)
+    {
+        Column factors;
+        for (size_t row = 0; row < Rows - 1; row++) {
+            factors[row] = factorsIn[row];
+        }
+        factors[Rows - 1] = Scalar(1);
+        return Scale(factors);
+    }
+
+    // Conversion between Matrices with different dimensions. It either crops the data, or expands
+    // it with zeroes.
+    template <size_t OtherCols, size_t OtherRows>
+    constexpr static Self CropOrExpandFrom(const Matrix<OtherCols, OtherRows, Scalar>& other) {
+        Self result;
+        for (size_t col = 0; col < std::min(Cols, OtherCols); col++) {
+            for (size_t row = 0; row < std::min(Rows, OtherRows); row++) {
+                result[col][row] = other[col][row];
+            }
+        }
+        return result;
+    }
+
     // Operator overloads. Note that arithmetic operators are only by-component. More complex
     // arithmetic operators are implemented as freestanding functions (like Mul(Matrix, Vector)).
     constexpr Column& operator[](size_t i) { return data[i]; }
@@ -227,6 +273,16 @@ constexpr Matrix<M, N, Scalar> Mul(const Matrix<K, N, Scalar>& A, const Matrix<M
     Matrix<M, N, Scalar> result;
     for (size_t i = 0; i < M; i++) {
         result[i] = Mul(A, B[i]);
+    }
+    return result;
+}
+
+// Returns the element-wise maximum of two vectors.
+template <size_t Size, typename Scalar>
+constexpr Vector<Size, Scalar> Max(const Vector<Size, Scalar>& v1, const Vector<Size, Scalar>& v2) {
+    Vector<Size, Scalar> result;
+    for (size_t i = 0; i < Size; i++) {
+        result[i] = std::max(v1[i], v2[i]);
     }
     return result;
 }
