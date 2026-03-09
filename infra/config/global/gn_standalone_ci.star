@@ -1530,6 +1530,11 @@ ci.thin_tester(
         mixins = [
             "win10_intel_uhd_630_stable",
         ],
+        per_test_modifications = {
+            "dawn_end2end_no_dxc_validation_layers_tests": targets.remove(
+                reason = "Removed from ASan testers for capacity reasons.",
+            ),
+        },
     ),
     targets_settings = targets.settings(
         browser_config = targets.browser_config.RELEASE,
@@ -1637,6 +1642,11 @@ ci.thin_tester(
         mixins = [
             "win10_nvidia_gtx_1660_stable",
         ],
+        per_test_modifications = {
+            "dawn_end2end_no_dxc_validation_layers_tests": targets.remove(
+                reason = "Removed from ASan testers for capacity reasons.",
+            ),
+        },
     ),
     targets_settings = targets.settings(
         browser_config = targets.browser_config.RELEASE,
