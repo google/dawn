@@ -54,15 +54,16 @@
     X(v1, Maximum,                    maxComputeWorkgroupSizeZ,        64,          64,         64) \
     X(v1, Maximum,            maxComputeWorkgroupsPerDimension,     65535,       65535,      65535)
 
-// Tiers are 128MB, 256MB, 512MB, 1GB, 2GB-4, 4GB-4.
-//                                                 compat     tier0      tier1
-#define LIMITS_STORAGE_BUFFER_BINDING_SIZE(X)                                                        \
-    X(v1, Maximum, maxStorageBufferBindingSize, 134217728, 134217728, 268435456, 536870912, 1073741824, 2147483644, 4294967292)
+static constexpr uint64_t MiB = 1'048'576;
+static constexpr uint64_t GiB = 1'073'741'824;
 
-// Tiers are 256MB, 1GB, 2GB, 4GB.
-//                                    compat      tier0       tier1
-#define LIMITS_MAX_BUFFER_SIZE(X)                                                         \
-    X(v1, Maximum, maxBufferSize, 0x10000000, 0x10000000, 0x40000000, 0x80000000, 0x100000000)
+//                                                 compat      tier0      tier1      tier2    tier3        tier4        tier5
+#define LIMITS_STORAGE_BUFFER_BINDING_SIZE(X)                                                                                  \
+    X(v1, Maximum, maxStorageBufferBindingSize, 128 * MiB, 128 * MiB, 256 * MiB, 512 * MiB, 1 * GiB, 2 * GiB - 4, 4 * GiB - 4)
+
+//                                   compat      tier0    tier1    tier2        tier3
+#define LIMITS_MAX_BUFFER_SIZE(X)                                                      \
+    X(v1, Maximum, maxBufferSize, 256 * MiB, 256 * MiB, 1 * GiB, 2 * GiB, 4 * GiB - 4)
 
 // Tiers for limits related to resource bindings.
 // Note that changing these limits may require updating hard-coded constants common/Constants.h.

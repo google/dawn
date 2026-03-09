@@ -277,7 +277,7 @@ struct State {
             auto* const_idx = idx->As<ir::Constant>();
 
             // Determine the limit of the type being indexed into.
-            auto limit = tint::Switch(
+            auto maxAllowedIndex = tint::Switch(
                 type,  //
                 [&](const type::Vector* vec) -> ir::Value* {
                     return b.Constant(u32(vec->Width() - 1u));
@@ -308,13 +308,14 @@ struct State {
                     }
 
                     // Use the `arrayLength` builtin to get the limit of a runtime-sized array.
+                    // Subtract 1 to get the max allowed index. (Array size is always at least 1.)
                     auto* length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, object);
                     return b.Subtract(length, b.Constant(1_u))->Result();
                 });
 
             // If there's a dynamic limit that needs enforced, clamp the index operand.
-            if (limit) {
-                ClampOperand(access, ir::Access::kIndicesOperandOffset + i, limit);
+            if (maxAllowedIndex) {
+                ClampOperand(access, ir::Access::kIndicesOperandOffset + i, maxAllowedIndex);
             }
 
             // Get the type that this index produces.

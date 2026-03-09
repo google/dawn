@@ -53,6 +53,7 @@ set(end2end_sources
     "end2end/BindingArrayTests.cpp"
     "end2end/BufferHostMappedPointerTests.cpp"
     "end2end/BufferHostMappedPointerTests.h"
+    "end2end/BufferRobustnessTests.cpp"
     "end2end/BufferTests.cpp"
     "end2end/BufferZeroInitTests.cpp"
     "end2end/ClipDistancesTests.cpp"
