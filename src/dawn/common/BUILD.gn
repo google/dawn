@@ -270,6 +270,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "Assert.h",
       "Atomic.h",
       "BitSetRangeIterator.h",
+      "ColorSpace.h",
       "Compiler.h",
       "Constants.h",
       "ContentLessObjectCache.h",

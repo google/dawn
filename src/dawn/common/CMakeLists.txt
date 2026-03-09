@@ -51,6 +51,7 @@ set(private_headers
     "Assert.h"
     "Atomic.h"
     "BitSetRangeIterator.h"
+    "ColorSpace.h"
     "Compiler.h"
     "Constants.h"
     "ContentLessObjectCache.h"
