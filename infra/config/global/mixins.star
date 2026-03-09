@@ -45,6 +45,13 @@ targets.mixin(
 )
 
 targets.mixin(
+    name = "clusterfuzz_wire_trace_dir",
+    args = [
+        "--wire-trace-dir=${ISOLATED_OUTDIR}/clusterfuzz",
+    ],
+)
+
+targets.mixin(
     name = "dawn_end2end_real_hardware_gtests_common_args",
     args = [
         "--use-gpu-in-tests",
@@ -91,6 +98,44 @@ targets.mixin(
 )
 
 targets.mixin(
+    name = "tint_fuzzer_corpus_common_args",
+    args = [
+        "--append-cwd-as-build",
+    ],
+)
+
+targets.mixin(
+    name = "tint_fuzzer_corpus_generate_args",
+    args = [
+        "-generate",
+        "-out",
+        "${ISOLATED_OUTDIR}/clusterfuzz",
+    ],
+)
+
+targets.mixin(
+    name = "tint_ir_merge",
+    merge = targets.merge(
+        script = "//scripts/merge_scripts/generate_tint_fuzz_corpora.py",
+        args = [
+            "--fuzzer-name",
+            "tint_ir_fuzzer",
+        ],
+    ),
+)
+
+targets.mixin(
+    name = "tint_wgsl_merge",
+    merge = targets.merge(
+        script = "//scripts/merge_scripts/generate_tint_fuzz_corpora.py",
+        args = [
+            "--fuzzer-name",
+            "tint_wgsl_fuzzer",
+        ],
+    ),
+)
+
+targets.mixin(
     name = "true_noop_merge",
     merge = targets.merge(
         script = "//scripts/merge_scripts/true_noop_merge.py",
@@ -112,4 +157,19 @@ targets.mixin(
         # reported in addition to this.
         "--adapter-vendor-id=0x4D4F4351",
     ],
+)
+
+targets.mixin(
+    name = "wire_trace_merge",
+    merge = targets.merge(
+        script = "//scripts/merge_scripts/generate_wire_trace_fuzz_corpora.py",
+        args = [
+            "--fuzzer-name",
+            "dawn_wire_server_and_frontend_fuzzer",
+            "--fuzzer-name",
+            "dawn_wire_server_and_vulkan_backend_fuzzer",
+            "--fuzzer-name",
+            "dawn_wire_server_and_d3d12_backend_fuzzer",
+        ],
+    ),
 )
