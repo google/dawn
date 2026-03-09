@@ -560,33 +560,35 @@ MaybeError ValidateColorAttachmentRenderToSingleSampled(
     const DeviceBase* device,
     const RenderPassColorAttachment& colorAttachment,
     const DawnRenderPassSampleCount* renderPassSampleCount) {
+    TextureViewBase* attachment = colorAttachment.view;
+    DAWN_ASSERT(attachment);
+
     DAWN_ASSERT(renderPassSampleCount != nullptr);
     DAWN_ASSERT(device->HasFeature(Feature::MSAARenderToSingleSampled));
 
     uint32_t passSampleCount = renderPassSampleCount->sampleCount;
-    uint32_t attachmentSampleCount = colorAttachment.view->GetTexture()->GetSampleCount();
+    uint32_t attachmentSampleCount = attachment->GetTexture()->GetSampleCount();
     DAWN_INVALID_IF(attachmentSampleCount != 1 && attachmentSampleCount != passSampleCount,
                     "The color attachment %s sample count (%u) must be either 1 or %u when the "
                     "render pass is using MSAARenderToSingleSampled with a sample count of %u.",
-                    colorAttachment.view, attachmentSampleCount, passSampleCount, passSampleCount);
+                    attachment, attachmentSampleCount, passSampleCount, passSampleCount);
 
     if (attachmentSampleCount != 1) {
         // The following rules only apply to attachments that will actually be resolved.
         return {};
     }
 
-    DAWN_INVALID_IF(!colorAttachment.view->GetFormat().SupportsResolveTarget(),
+    DAWN_INVALID_IF(!attachment->GetFormat().SupportsResolveTarget(),
                     "The color attachment %s format (%s) does not support being used with a render "
                     "pass using MSAARenderToSingleSampled with a sample count of %u. The format "
                     "does not support resolve.",
-                    colorAttachment.view, colorAttachment.view->GetFormat().format,
-                    passSampleCount);
+                    attachment, attachment->GetFormat().format, passSampleCount);
 
     DAWN_INVALID_IF(colorAttachment.resolveTarget != nullptr,
                     "Cannot set %s as a resolve target. No resolve target should be specified "
                     "for the color attachment %s when the render pass is using "
                     "MSAARenderToSingleSampled with a sample count of %u.",
-                    colorAttachment.resolveTarget, colorAttachment.view, passSampleCount);
+                    colorAttachment.resolveTarget, attachment, passSampleCount);
 
     return {};
 }
@@ -892,11 +894,11 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
         DAWN_TRY_CONTEXT(ValidateRenderPassColorAttachment(device, attachment, usageValidationMode,
                                                            validationState),
                          "validating colorAttachments[%u].", i);
-        if (renderPassSampleCount) {
-            DAWN_TRY(ValidateColorAttachmentRenderToSingleSampled(device, attachment,
-                                                                  renderPassSampleCount));
-        }
         if (attachment.view) {
+            if (renderPassSampleCount) {
+                DAWN_TRY(ValidateColorAttachmentRenderToSingleSampled(device, attachment,
+                                                                      renderPassSampleCount));
+            }
             colorAttachmentFormats.push_back(&attachment.view->GetFormat());
         }
     }

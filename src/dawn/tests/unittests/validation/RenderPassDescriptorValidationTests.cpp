@@ -28,6 +28,7 @@
 #include <cmath>
 #include <limits>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "dawn/common/Constants.h"
@@ -1859,6 +1860,16 @@ class MSAARenderToSingleSampledRenderPassDescriptorValidationTest
         return renderPass;
     }
 
+    utils::ComboRenderPassDescriptor CreateMultisampledRenderToSingleSampledRenderPass(
+        std::vector<wgpu::TextureView> colorAttachments,
+        wgpu::TextureView depthStencilAttachment = nullptr) {
+        utils::ComboRenderPassDescriptor renderPass(std::move(colorAttachments),
+                                                    depthStencilAttachment);
+        renderPass.nextInChain = &mRenderPassSampleCount;
+
+        return renderPass;
+    }
+
     // Create a view for a texture that can be used with a MSAA render to single sampled render
     // pass.
     wgpu::TextureView CreateCompatibleColorTextureView(uint32_t sampleCount = 1) {
@@ -1881,6 +1892,29 @@ TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest, ColorAttachm
 
     auto renderPass = CreateMultisampledRenderToSingleSampledRenderPass(textureView);
     AssertBeginRenderPassSuccess(&renderPass);
+}
+
+TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest, ColorAttachmentNull) {
+    // Error: single attachment is nullptr
+    {
+        auto renderPass = CreateMultisampledRenderToSingleSampledRenderPass(nullptr);
+        AssertBeginRenderPassError(&renderPass,
+                                   testing::HasSubstr("Render pass has no attachments"));
+    }
+
+    // Success: one of two attachments is nullptr
+    {
+        auto renderPass = CreateMultisampledRenderToSingleSampledRenderPass(
+            {nullptr, CreateCompatibleColorTextureView()});
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Error: two of two attachments are nullptr
+    {
+        auto renderPass = CreateMultisampledRenderToSingleSampledRenderPass({nullptr, nullptr});
+        AssertBeginRenderPassError(&renderPass,
+                                   testing::HasSubstr("Render pass has no attachments"));
+    }
 }
 
 // When MSAARenderToSingleSampled is enabled for a color attachment, there must be no explicit
