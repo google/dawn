@@ -28,9 +28,11 @@
 #include <string>
 #include <unordered_set>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "dawn/common/Enumerator.h"
+#include "dawn/common/MatchVariant.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
@@ -689,36 +691,53 @@ constexpr auto kWgslSampledTextureTypes = std::array{
     "texture_depth_cube",
     "texture_depth_cube_array",
     "texture_depth_multisampled_2d",
+
+    "sampler<non_filtering>",
+    "sampler<filtering>",
+    "sampler_comparison",
 };
 
-struct TextureDescForTypeIDCase {
+struct ResourceDescForTypeIDCase {
+    // Set of all WGSL types that can be validly bound to the underlying resource described by
+    // `desc`.
     std::unordered_set<std::string_view> wgslTypes;
-    wgpu::TextureFormat format;
-    wgpu::TextureDimension dimension;
-    wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::Undefined;
-    uint32_t sampleCount = 1;
-    wgpu::TextureAspect viewAspect = wgpu::TextureAspect::All;
+
+    struct TextureDesc {
+        wgpu::TextureFormat format;
+        wgpu::TextureDimension dimension;
+        wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::Undefined;
+        uint32_t sampleCount = 1;
+        wgpu::TextureAspect viewAspect = wgpu::TextureAspect::All;
+    };
+    struct SamplerDesc {
+        bool filtering = false;
+        bool comparison = false;
+    };
+    // The descriptor used to create the resource
+    std::variant<TextureDesc, SamplerDesc> desc;
 
     // Create a view for a pinned texture for this case.
     wgpu::TextureView CreateTestView(const wgpu::Device& device) {
+        auto& d = std::get<TextureDesc>(desc);
+
         wgpu::TextureDescriptor tDesc = {
             .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc,
-            .dimension = dimension,
+            .dimension = d.dimension,
             .size = {1, 1, 1},
-            .format = format,
-            .sampleCount = sampleCount,
+            .format = d.format,
+            .sampleCount = d.sampleCount,
         };
-        if (viewDimension == wgpu::TextureViewDimension::Cube ||
-            viewDimension == wgpu::TextureViewDimension::CubeArray) {
+        if (d.viewDimension == wgpu::TextureViewDimension::Cube ||
+            d.viewDimension == wgpu::TextureViewDimension::CubeArray) {
             tDesc.size.depthOrArrayLayers = 6;
         }
-        if (sampleCount != 1) {
+        if (d.sampleCount != 1) {
             tDesc.usage |= wgpu::TextureUsage::RenderAttachment;
         }
 
         wgpu::TextureViewDescriptor vDesc{
-            .dimension = viewDimension,
-            .aspect = viewAspect,
+            .dimension = d.viewDimension,
+            .aspect = d.viewAspect,
             .usage = wgpu::TextureUsage::TextureBinding,
         };
 
@@ -726,273 +745,326 @@ struct TextureDescForTypeIDCase {
         texture.Pin(wgpu::TextureUsage::TextureBinding);
         return texture.CreateView(&vDesc);
     }
+
+    // Create a sampler for this case.
+    wgpu::Sampler CreateTestSampler(const wgpu::Device& device) {
+        auto& d = std::get<SamplerDesc>(desc);
+
+        wgpu::SamplerDescriptor desc{};
+        if (d.filtering) {
+            desc.magFilter = wgpu::FilterMode::Linear;
+            desc.minFilter = wgpu::FilterMode::Linear;
+            desc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
+        }
+        if (d.comparison) {
+            desc.compare = wgpu::CompareFunction::Less;
+        }
+        return device.CreateSampler(&desc);
+    }
 };
 
-std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
-    std::vector<TextureDescForTypeIDCase> cases;
+std::vector<ResourceDescForTypeIDCase> MakeDescForTypeIDCases() {
+    std::vector<ResourceDescForTypeIDCase> cases;
+
+    using TextureDesc = ResourceDescForTypeIDCase::TextureDesc;
+    using SamplerDesc = ResourceDescForTypeIDCase::SamplerDesc;
 
     // Regular 1D textures.
-    cases.push_back({
-        .wgslTypes = {{"texture_1d<f32, filterable>"}, {"texture_1d<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::RGBA8Unorm,
-        .dimension = wgpu::TextureDimension::e1D,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_1d<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::RGBA32Float,
-        .dimension = wgpu::TextureDimension::e1D,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_1d<i32>"}},
-        .format = wgpu::TextureFormat::RGBA32Sint,
-        .dimension = wgpu::TextureDimension::e1D,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_1d<u32>"}},
-        .format = wgpu::TextureFormat::RGBA32Uint,
-        .dimension = wgpu::TextureDimension::e1D,
-    });
+    cases.push_back(
+        {.wgslTypes = {{"texture_1d<f32, filterable>"}, {"texture_1d<f32, unfilterable>"}},
+         .desc = TextureDesc{
+             .format = wgpu::TextureFormat::RGBA8Unorm,
+             .dimension = wgpu::TextureDimension::e1D,
+         }});
+    cases.push_back({.wgslTypes = {{"texture_1d<f32, unfilterable>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Float,
+                         .dimension = wgpu::TextureDimension::e1D,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_1d<i32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Sint,
+                         .dimension = wgpu::TextureDimension::e1D,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_1d<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Uint,
+                         .dimension = wgpu::TextureDimension::e1D,
+                     }});
 
     // Regular 2D textures.
-    cases.push_back({
-        .wgslTypes = {{"texture_2d<f32, filterable>"}, {"texture_2d<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::RGBA8Unorm,
-        .dimension = wgpu::TextureDimension::e2D,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_2d<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::RGBA32Float,
-        .dimension = wgpu::TextureDimension::e2D,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_2d<i32>"}},
-        .format = wgpu::TextureFormat::RGBA32Sint,
-        .dimension = wgpu::TextureDimension::e2D,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_2d<u32>"}},
-        .format = wgpu::TextureFormat::RGBA32Uint,
-        .dimension = wgpu::TextureDimension::e2D,
-    });
+    cases.push_back(
+        {.wgslTypes = {{"texture_2d<f32, filterable>"}, {"texture_2d<f32, unfilterable>"}},
+         .desc = TextureDesc{
+             .format = wgpu::TextureFormat::RGBA8Unorm,
+             .dimension = wgpu::TextureDimension::e2D,
+         }});
+    cases.push_back({.wgslTypes = {{"texture_2d<f32, unfilterable>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Float,
+                         .dimension = wgpu::TextureDimension::e2D,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_2d<i32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Sint,
+                         .dimension = wgpu::TextureDimension::e2D,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_2d<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Uint,
+                         .dimension = wgpu::TextureDimension::e2D,
+                     }});
 
     // Regular 2D array textures.
-    cases.push_back({
-        .wgslTypes = {{"texture_2d_array<f32, filterable>"},
-                      {"texture_2d_array<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::RGBA8Unorm,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::e2DArray,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_2d_array<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::RGBA32Float,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::e2DArray,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_2d_array<i32>"}},
-        .format = wgpu::TextureFormat::RGBA32Sint,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::e2DArray,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_2d_array<u32>"}},
-        .format = wgpu::TextureFormat::RGBA32Uint,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::e2DArray,
-    });
+    cases.push_back({.wgslTypes = {{"texture_2d_array<f32, filterable>"},
+                                   {"texture_2d_array<f32, unfilterable>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA8Unorm,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::e2DArray,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_2d_array<f32, unfilterable>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Float,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::e2DArray,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_2d_array<i32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Sint,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::e2DArray,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_2d_array<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Uint,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::e2DArray,
+                     }});
 
     // Regular cube textures.
-    cases.push_back({
-        .wgslTypes = {{"texture_cube<f32, filterable>"}, {"texture_cube<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::RGBA8Unorm,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::Cube,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_cube<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::RGBA32Float,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::Cube,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_cube<i32>"}},
-        .format = wgpu::TextureFormat::RGBA32Sint,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::Cube,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_cube<u32>"}},
-        .format = wgpu::TextureFormat::RGBA32Uint,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::Cube,
-    });
+    cases.push_back(
+        {.wgslTypes = {{"texture_cube<f32, filterable>"}, {"texture_cube<f32, unfilterable>"}},
+         .desc = TextureDesc{
+             .format = wgpu::TextureFormat::RGBA8Unorm,
+             .dimension = wgpu::TextureDimension::e2D,
+             .viewDimension = wgpu::TextureViewDimension::Cube,
+         }});
+    cases.push_back({.wgslTypes = {{"texture_cube<f32, unfilterable>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Float,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::Cube,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_cube<i32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Sint,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::Cube,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_cube<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Uint,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::Cube,
+                     }});
 
     // Regular cube array textures.
-    cases.push_back({
-        .wgslTypes = {{"texture_cube_array<f32, filterable>"},
-                      {"texture_cube_array<f32, unfilterable"}},
-        .format = wgpu::TextureFormat::RGBA8Unorm,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::CubeArray,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_cube_array<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::RGBA32Float,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::CubeArray,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_cube_array<i32>"}},
-        .format = wgpu::TextureFormat::RGBA32Sint,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::CubeArray,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_cube_array<u32>"}},
-        .format = wgpu::TextureFormat::RGBA32Uint,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::CubeArray,
-    });
+    cases.push_back({.wgslTypes = {{"texture_cube_array<f32, filterable>"},
+                                   {"texture_cube_array<f32, unfilterable"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA8Unorm,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::CubeArray,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_cube_array<f32, unfilterable>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Float,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::CubeArray,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_cube_array<i32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Sint,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::CubeArray,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_cube_array<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Uint,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::CubeArray,
+                     }});
 
     // Regular 3d textures.
-    cases.push_back({
-        .wgslTypes = {{"texture_3d<f32, filterable>"}, {"texture_3d<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::RGBA8Unorm,
-        .dimension = wgpu::TextureDimension::e3D,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_3d<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::RGBA32Float,
-        .dimension = wgpu::TextureDimension::e3D,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_3d<i32>"}},
-        .format = wgpu::TextureFormat::RGBA32Sint,
-        .dimension = wgpu::TextureDimension::e3D,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_3d<u32>"}},
-        .format = wgpu::TextureFormat::RGBA32Uint,
-        .dimension = wgpu::TextureDimension::e3D,
-    });
+    cases.push_back(
+        {.wgslTypes = {{"texture_3d<f32, filterable>"}, {"texture_3d<f32, unfilterable>"}},
+         .desc = TextureDesc{
+             .format = wgpu::TextureFormat::RGBA8Unorm,
+             .dimension = wgpu::TextureDimension::e3D,
+         }});
+    cases.push_back({.wgslTypes = {{"texture_3d<f32, unfilterable>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Float,
+                         .dimension = wgpu::TextureDimension::e3D,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_3d<i32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Sint,
+                         .dimension = wgpu::TextureDimension::e3D,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_3d<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA32Uint,
+                         .dimension = wgpu::TextureDimension::e3D,
+                     }});
 
     // Color multisampled textures.
-    cases.push_back({
-        .wgslTypes = {{"texture_multisampled_2d<f32>"}},
-        .format = wgpu::TextureFormat::RGBA16Float,
-        .dimension = wgpu::TextureDimension::e2D,
-        .sampleCount = 4,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_multisampled_2d<i32>"}},
-        .format = wgpu::TextureFormat::RGBA16Sint,
-        .dimension = wgpu::TextureDimension::e2D,
-        .sampleCount = 4,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_multisampled_2d<u32>"}},
-        .format = wgpu::TextureFormat::RGBA16Uint,
-        .dimension = wgpu::TextureDimension::e2D,
-        .sampleCount = 4,
-    });
+    cases.push_back({.wgslTypes = {{"texture_multisampled_2d<f32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA16Float,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .sampleCount = 4,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_multisampled_2d<i32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA16Sint,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .sampleCount = 4,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_multisampled_2d<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::RGBA16Uint,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .sampleCount = 4,
+                     }});
 
     // Depth textures (including multisampled).
-    cases.push_back({
-        .wgslTypes = {{"texture_depth_2d"}, {"texture_2d<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::Depth32Float,
-        .dimension = wgpu::TextureDimension::e2D,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_depth_2d_array"}, {"texture_2d_array<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::Depth32Float,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::e2DArray,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_depth_cube"}, {"texture_cube<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::Depth32Float,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::Cube,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_depth_cube_array"}, {"texture_cube_array<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::Depth32Float,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::CubeArray,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_depth_multisampled_2d"}},
-        .format = wgpu::TextureFormat::Depth32Float,
-        .dimension = wgpu::TextureDimension::e2D,
-        .sampleCount = 4,
-    });
+    cases.push_back({.wgslTypes = {{"texture_depth_2d"}, {"texture_2d<f32, unfilterable>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::Depth32Float,
+                         .dimension = wgpu::TextureDimension::e2D,
+                     }});
+    cases.push_back(
+        {.wgslTypes = {{"texture_depth_2d_array"}, {"texture_2d_array<f32, unfilterable>"}},
+         .desc = TextureDesc{
+             .format = wgpu::TextureFormat::Depth32Float,
+             .dimension = wgpu::TextureDimension::e2D,
+             .viewDimension = wgpu::TextureViewDimension::e2DArray,
+         }});
+    cases.push_back({.wgslTypes = {{"texture_depth_cube"}, {"texture_cube<f32, unfilterable>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::Depth32Float,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::Cube,
+                     }});
+    cases.push_back(
+        {.wgslTypes = {{"texture_depth_cube_array"}, {"texture_cube_array<f32, unfilterable>"}},
+         .desc = TextureDesc{
+             .format = wgpu::TextureFormat::Depth32Float,
+             .dimension = wgpu::TextureDimension::e2D,
+             .viewDimension = wgpu::TextureViewDimension::CubeArray,
+         }});
+    cases.push_back({.wgslTypes = {{"texture_depth_multisampled_2d"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::Depth32Float,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .sampleCount = 4,
+                     }});
 
     // Stencil textures can be used as 2D.
-    cases.push_back({
-        .wgslTypes = {{"texture_2d<u32>"}},
-        .format = wgpu::TextureFormat::Stencil8,
-        .dimension = wgpu::TextureDimension::e2D,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_2d_array<u32>"}},
-        .format = wgpu::TextureFormat::Stencil8,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::e2DArray,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_cube<u32>"}},
-        .format = wgpu::TextureFormat::Stencil8,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::Cube,
-    });
-    cases.push_back({
-        .wgslTypes = {{"texture_cube_array<u32>"}},
-        .format = wgpu::TextureFormat::Stencil8,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewDimension = wgpu::TextureViewDimension::CubeArray,
-    });
+    cases.push_back({.wgslTypes = {{"texture_2d<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::Stencil8,
+                         .dimension = wgpu::TextureDimension::e2D,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_2d_array<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::Stencil8,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::e2DArray,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_cube<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::Stencil8,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::Cube,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_cube_array<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::Stencil8,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewDimension = wgpu::TextureViewDimension::CubeArray,
+                     }});
 
     // Depth-stencil textures with only one aspect selected.
+    cases.push_back({.wgslTypes = {{"texture_depth_2d"}, {"texture_2d<f32, unfilterable>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::Depth24PlusStencil8,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewAspect = wgpu::TextureAspect::DepthOnly,
+                     }});
+    cases.push_back({.wgslTypes = {{"texture_2d<u32>"}},
+                     .desc = TextureDesc{
+                         .format = wgpu::TextureFormat::Depth24PlusStencil8,
+                         .dimension = wgpu::TextureDimension::e2D,
+                         .viewAspect = wgpu::TextureAspect::StencilOnly,
+                     }});
+
+    // Non-filtering sampler
     cases.push_back({
-        .wgslTypes = {{"texture_depth_2d"}, {"texture_2d<f32, unfilterable>"}},
-        .format = wgpu::TextureFormat::Depth24PlusStencil8,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewAspect = wgpu::TextureAspect::DepthOnly,
+        .wgslTypes = {{"sampler<non_filtering>"}},
+        .desc = SamplerDesc{},
     });
+    // Filtering sampler
     cases.push_back({
-        .wgslTypes = {{"texture_2d<u32>"}},
-        .format = wgpu::TextureFormat::Depth24PlusStencil8,
-        .dimension = wgpu::TextureDimension::e2D,
-        .viewAspect = wgpu::TextureAspect::StencilOnly,
+        .wgslTypes = {{"sampler<non_filtering>"}, {"sampler<filtering>"}},
+        .desc =
+            SamplerDesc{
+                .filtering = true,
+            },
+    });
+    // Comparison sampler
+    cases.push_back({
+        .wgslTypes = {{"sampler_comparison"}},
+        .desc =
+            SamplerDesc{
+                .comparison = true,
+            },
     });
 
     return cases;
 }
 
-// Test that hasResource() works as expected for all supported types in WGSL.
-TEST_P(ResourceTableTests, HasResourceTextureCompatibilityAllTypes) {
+// Test that hasResource() works as expected for all supported resources in WGSL.
+TEST_P(ResourceTableTests, HasResourceCompatibilityAllTypes) {
     // We rely on RGBA32Float being unfilterable for this test so that we can test both filterable /
     // unfilterable float without needing any additional extensions.
     DAWN_ASSERT(!device.HasFeature(wgpu::FeatureName::Float32Filterable));
 
-    auto textureCases = MakeTextureDescForTypeIDCases();
+    auto cases = MakeDescForTypeIDCases();
 
     // Make a resource table with all of our test texture views.
-    wgpu::ResourceTable table = MakeResourceTable(textureCases.size());
-    for (auto [i, textureCase] : Enumerate(textureCases)) {
-        wgpu::BindingResource resource = {.textureView = textureCase.CreateTestView(device)};
-        table.Update(i, &resource);
+    wgpu::ResourceTable table = MakeResourceTable(cases.size());
+    for (auto [i, c] : Enumerate(cases)) {
+        if (std::holds_alternative<ResourceDescForTypeIDCase::TextureDesc>(c.desc)) {
+            wgpu::BindingResource resource = {.textureView = c.CreateTestView(device)};
+            table.Update(i, &resource);
+        } else if (std::holds_alternative<ResourceDescForTypeIDCase::SamplerDesc>(c.desc)) {
+            wgpu::BindingResource resource = {.sampler = c.CreateTestSampler(device)};
+            table.Update(i, &resource);
+        }
     }
 
-    // Test hasResource returning for each of the supported WGSL types, against each texture.
+    // Test hasResource returning for each of the supported WGSL types, against each resource.
     for (auto wgslType : kWgslSampledTextureTypes) {
         std::vector<bool> expected;
-        for (auto& textureCase : textureCases) {
+        expected.reserve(cases.size());
+        for (auto& c : cases) {
             // The reasons wgslTypes is a vector is because some textures can be
             // both filterable and non-filterable, so hasResource will return true for both types on
             // the one table entry with such a texture.
-            expected.push_back(textureCase.wgslTypes.contains(wgslType));
+            expected.push_back(c.wgslTypes.contains(wgslType));
         }
 
         TestHasResource(table, expected, wgslType);
