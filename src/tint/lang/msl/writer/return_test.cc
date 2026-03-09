@@ -40,7 +40,8 @@ TEST_F(MslWriterTest, Return) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
@@ -55,7 +56,8 @@ TEST_F(MslWriterTest, ReturnAtEndOfVoidDropped) {
     auto* func = b.ComputeFunction("entry");
     func->Block()->Append(b.Return(func));
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
@@ -73,7 +75,8 @@ TEST_F(MslWriterTest, ReturnWithValue) {
         b.Return(eb);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 int foo() {
   return 123;

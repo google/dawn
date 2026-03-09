@@ -32,14 +32,12 @@
 
 namespace tint::msl::validate {
 
-Result Validate(const std::string& xcrun_path, const std::string& source, MslVersion version) {
-    Result result;
-
+Result<SuccessType> Validate(const std::string& xcrun_path,
+                             const std::string& source,
+                             MslVersion version) {
     auto xcrun = tint::Command(xcrun_path);
     if (!xcrun.Found()) {
-        result.output = "xcrun not found at '" + std::string(xcrun_path) + "'";
-        result.failed = true;
-        return result;
+        return Failure{"xcrun not found at '" + std::string(xcrun_path) + "'"};
     }
 
     tint::TmpFile file(".metal");
@@ -68,21 +66,22 @@ Result Validate(const std::string& xcrun_path, const std::string& source, MslVer
                      version_str,                //
                      "-c", file.Path());
 #endif
+
+    if (res.error_code == 0) {
+        return Success;
+    }
+
+    std::string err;
     if (!res.out.empty()) {
-        if (!result.output.empty()) {
-            result.output += "\n";
-        }
-        result.output += res.out;
+        err = res.out;
     }
     if (!res.err.empty()) {
-        if (!result.output.empty()) {
-            result.output += "\n";
+        if (!err.empty()) {
+            err += "\n";
         }
-        result.output += res.err;
+        err += res.err;
     }
-    result.failed = (res.error_code != 0);
-
-    return result;
+    return Failure{err};
 }
 
 }  // namespace tint::msl::validate

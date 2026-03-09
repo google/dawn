@@ -33,16 +33,12 @@
 
 namespace tint::msl::validate {
 
-Result ValidateUsingMetal(const std::string& src_original, MslVersion version) {
-    Result result;
-
+Result<SuccessType> ValidateUsingMetal(const std::string& src_original, MslVersion version) {
     NSError* error = nil;
 
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     if (!device) {
-        result.output = "MTLCreateSystemDefaultDevice returned null";
-        result.failed = true;
-        return result;
+        return Failure{"MTLCreateSystemDefaultDevice returned null"};
     }
 
     std::string src_modified = src_original;
@@ -79,7 +75,7 @@ Result ValidateUsingMetal(const std::string& src_original, MslVersion version) {
                 // TODO(crbug.com/434149401): Instead of silently skipping validation, it'd be nice
                 // if we could produce a warning here that the requested validation is not
                 // happening, in a way that does not break the Tint E2E tests on Dawn CQ.
-                return Result{};
+                return Success;
             }
     }
 
@@ -88,11 +84,10 @@ Result ValidateUsingMetal(const std::string& src_original, MslVersion version) {
                                                     error:&error];
     if (!library) {
         NSString* output = [error localizedDescription];
-        result.output = [output UTF8String];
-        result.failed = true;
+        return Failure{[output UTF8String]};
     }
 
-    return result;
+    return Success;
 }
 
 }  // namespace tint::msl::validate

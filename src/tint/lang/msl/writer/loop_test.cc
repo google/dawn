@@ -48,7 +48,8 @@ TEST_F(MslWriterTest, Loop) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -76,7 +77,8 @@ TEST_F(MslWriterTest, Loop_WithoutRobustness) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate(NoRobustness())) << err_ << output_.msl;
+    auto result = Generate(NoRobustness());
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -100,7 +102,8 @@ TEST_F(MslWriterTest, LoopContinueAndBreakIf) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -134,7 +137,8 @@ TEST_F(MslWriterTest, LoopContinueAndBreakIf_WithoutRobustness) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate(NoRobustness())) << err_ << output_.msl;
+    auto result = Generate(NoRobustness());
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -164,7 +168,8 @@ TEST_F(MslWriterTest, LoopBodyVarInContinue) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -203,7 +208,8 @@ TEST_F(MslWriterTest, LoopBodyVarInContinue_WithoutRobustness) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate(NoRobustness())) << err_ << output_.msl;
+    auto result = Generate(NoRobustness());
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -235,7 +241,8 @@ TEST_F(MslWriterTest, LoopInitializer) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -275,7 +282,8 @@ TEST_F(MslWriterTest, LoopInitializer_WithoutRobustness) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate(NoRobustness())) << err_ << output_.msl;
+    auto result = Generate(NoRobustness());
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -320,7 +328,8 @@ TEST_F(MslWriterTest, LoopInitializer_WithRobustness_DetectedAsFinite) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate(NoRobustness())) << err_ << output_.msl;
+    auto result = Generate(NoRobustness());
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 

@@ -1153,7 +1153,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
     }
 
     if (options.validate && options.skip_hash.count(hash) == 0) {
-        tint::msl::validate::Result res;
+        tint::Result<tint::SuccessType> res;
 #if TINT_BUILD_IS_MAC
         res = tint::msl::validate::ValidateUsingMetal(result->msl, options.msl_version);
 #else
@@ -1167,12 +1167,11 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
         if (xcrun.Found()) {
             res = tint::msl::validate::Validate(xcrun.Path(), result->msl, options.msl_version);
         } else {
-            res.output = "xcrun executable not found. Cannot validate.";
-            res.failed = true;
+            res = tint::Failure{"xcrun executable not found. Cannot validate."};
         }
 #endif  // TINT_BUILD_IS_MAC
-        if (res.failed) {
-            std::cerr << res.output << "\n";
+        if (res != tint::Success) {
+            std::cerr << res.Failure() << "\n";
             return false;
         }
     }

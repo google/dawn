@@ -44,7 +44,8 @@ TEST_F(MslWriterTest, WorkgroupAllocations_NoAllocations) {
     auto* bar = b.ComputeFunction("entry");
     b.Append(bar->Block(), [&] { b.Return(bar); });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -70,7 +71,8 @@ TEST_F(MslWriterTest, WorkgroupAllocations) {
         b.Return(foo);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -119,7 +121,8 @@ TEST_F(MslWriterTest, NeedsStorageBufferSizes_False) {
     options.array_length_from_constants.bindpoint_to_size_index[{0u, 0u}] = 0u;
     options.array_length_from_constants.buffer_sizes_offset = 64u;
     options.disable_robustness = true;
-    ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -170,7 +173,8 @@ TEST_F(MslWriterTest, NeedsStorageBufferSizes_True) {
     options.array_length_from_constants.bindpoint_to_size_index[{0u, 0u}] = 0u;
     options.array_length_from_constants.buffer_sizes_offset = 64u;
     options.disable_robustness = true;
-    ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -238,7 +242,8 @@ TEST_F(MslWriterTest, StripAllNames) {
     Options options;
     options.remapped_entry_point_name = "tint_entry_point";
     options.strip_all_names = true;
-    ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 struct tint_struct {
   int tint_member;
@@ -284,7 +289,8 @@ TEST_F(MslWriterTest, VertexPulling) {
     options.immediate_binding_point = BindingPoint{0, 30};
     options.array_length_from_constants = std::move(array_length_config);
 
-    ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 

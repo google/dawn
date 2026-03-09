@@ -40,7 +40,8 @@ TEST_F(MslWriterTest, Function_EntryPoint_Compute) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 [[max_total_threads_per_threadgroup(128)]]
 kernel void entry() {
@@ -67,7 +68,8 @@ TEST_F(MslWriterTest, EntryPointParameterBufferBindingPoint) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 struct tint_module_vars_struct {
   device int* storage_var;
@@ -99,7 +101,8 @@ TEST_F(MslWriterTest, EntryPointParameterHandleBindingPoint) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
@@ -120,7 +123,8 @@ TEST_F(MslWriterTest, WorkgroupStorageSizeEmpty) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(0u, output_.workgroup_info.storage_size);
 }
 
@@ -135,7 +139,8 @@ TEST_F(MslWriterTest, WorkgroupStorageSizeSimple) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(32u, output_.workgroup_info.storage_size);
 }
 
@@ -162,7 +167,8 @@ TEST_F(MslWriterTest, WorkgroupStorageSizeCompoundTypes) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(96u, output_.workgroup_info.storage_size);
 }
 
@@ -177,7 +183,8 @@ TEST_F(MslWriterTest, WorkgroupStorageSizeAlignmentPadding) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(16u, output_.workgroup_info.storage_size);
 }
 
@@ -199,7 +206,8 @@ TEST_F(MslWriterTest, WorkgroupStorageSizeStructAlignment) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
     EXPECT_EQ(1024u, output_.workgroup_info.storage_size);
 }
 
