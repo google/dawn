@@ -1,5 +1,18 @@
 SKIP: FAILED
 
-64-bit (vec2u) atomic operations are not yet supported by the MSL backend
+$B1: {  # root
+  %a:ptr<storage, array<atomic<u64>>, read_write> = var undef @binding_point(0, 0)
+  %other:ptr<storage, u32, read> = var undef @binding_point(0, 1)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %4:ptr<storage, atomic<u64>, read_write> = access %a, 0i
+    %5:u64 = bitcast vec2<u32>(0u)
+    %6:void = atomicStoreMin %4, %5
+    ret
+  }
+}
+Failed to generate: 64-bit (vec2u) atomic operations are not yet supported by the MSL backend
 
 tint executable returned error: exit status 1

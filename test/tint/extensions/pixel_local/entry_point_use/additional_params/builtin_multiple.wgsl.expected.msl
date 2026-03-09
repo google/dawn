@@ -1,5 +1,26 @@
 SKIP: FAILED
 
-pixel_local address space is not supported by the MSL backend
+PixelLocal = struct @align(4) {
+  a:u32 @offset(0)
+  b:i32 @offset(4)
+  c:f32 @offset(8)
+}
+
+$B1: {  # root
+  %P:ptr<pixel_local, PixelLocal, read_write> = var undef
+}
+
+%f = @fragment func(%pos:vec4<f32> [@position], %ff:bool [@front_facing], %si:u32 [@sample_index]):void {
+  $B2: {
+    %6:ptr<pixel_local, u32, read_write> = access %P, 0u
+    %7:u32 = load %6
+    %8:f32 = access %pos, 0u
+    %9:u32 = convert %8
+    %10:u32 = add %7, %9
+    store %6, %10
+    ret
+  }
+}
+Failed to generate: pixel_local address space is not supported by the MSL backend
 
 tint executable returned error: exit status 1

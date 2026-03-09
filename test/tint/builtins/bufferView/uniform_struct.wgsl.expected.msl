@@ -1,5 +1,26 @@
 SKIP: FAILED
 
-buffers are not supported by the MSL backend
+S = struct @align(16) {
+  a:vec4<f32> @offset(0)
+  b:vec3<f32> @offset(16)
+  c:vec2<f32> @offset(32)
+}
+
+$B1: {  # root
+  %v:ptr<uniform, buffer<128>, read> = var undef @binding_point(0, 0)
+  %out:ptr<storage, vec2<f32>, read_write> = var undef @binding_point(0, 1)
+}
+
+%main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B2: {
+    %4:ptr<uniform, S, read> = bufferView<S> %v, 0i
+    %p:ptr<uniform, S, read> = let %4
+    %6:ptr<uniform, vec2<f32>, read> = access %p, 2u
+    %7:vec2<f32> = load %6
+    store %out, %7
+    ret
+  }
+}
+Failed to generate: buffers are not supported by the MSL backend
 
 tint executable returned error: exit status 1

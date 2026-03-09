@@ -1,5 +1,32 @@
 SKIP: FAILED
 
-resource tables not supported by the MSL backend
+$B1: {  # root
+  %o:ptr<storage, u32, read_write> = var undef @binding_point(0, 0)
+}
+
+%fs = @fragment func():void {
+  $B2: {
+    %3:bool = hasResource<sampler<non_filtering>> 0i
+    if %3 [t: $B3] {  # if_1
+      $B3: {  # true
+        %4:u32 = load %o
+        %5:u32 = add %4, 1u
+        store %o, %5
+        exit_if  # if_1
+      }
+    }
+    %6:bool = hasResource<sampler_comparison> 1i
+    if %6 [t: $B4] {  # if_2
+      $B4: {  # true
+        %7:u32 = load %o
+        %8:u32 = add %7, 1u
+        store %o, %8
+        exit_if  # if_2
+      }
+    }
+    ret
+  }
+}
+Failed to generate: resource tables not supported by the MSL backend
 
 tint executable returned error: exit status 1

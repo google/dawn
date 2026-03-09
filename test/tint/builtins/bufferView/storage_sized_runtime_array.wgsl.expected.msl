@@ -1,5 +1,18 @@
 SKIP: FAILED
 
-buffers are not supported by the MSL backend
+$B1: {  # root
+  %v:ptr<storage, buffer<128>, read_write> = var undef @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B2: {
+    %3:ptr<storage, array<u32>, read_write> = bufferView<array<u32>> %v, 0i
+    %p:ptr<storage, array<u32>, read_write> = let %3
+    %5:ptr<storage, u32, read_write> = access %p, 0i
+    store %5, 2u
+    ret
+  }
+}
+Failed to generate: buffers are not supported by the MSL backend
 
 tint executable returned error: exit status 1

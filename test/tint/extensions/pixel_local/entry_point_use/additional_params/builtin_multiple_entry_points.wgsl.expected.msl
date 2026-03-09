@@ -1,8 +1,134 @@
 SKIP: FAILED
 
-pixel_local address space is not supported by the MSL backend
-pixel_local address space is not supported by the MSL backend
-pixel_local address space is not supported by the MSL backend
+PixelLocal = struct @align(4) {
+  a:u32 @offset(0)
+  b:i32 @offset(4)
+  c:f32 @offset(8)
+}
+
+$B1: {  # root
+  %P:ptr<pixel_local, PixelLocal, read_write> = var undef
+}
+
+%f = @fragment func(%pos:vec4<f32> [@position]):void {
+  $B2: {
+    %4:ptr<pixel_local, u32, read_write> = access %P, 0u
+    %5:u32 = load %4
+    %6:f32 = access %pos, 0u
+    %7:u32 = convert %6
+    %8:u32 = add %5, %7
+    store %4, %8
+    ret
+  }
+}
+%f2 = @fragment func(%pos_1:vec4<f32> [@position]):void {  # %pos_1: 'pos'
+  $B3: {
+    %11:ptr<pixel_local, i32, read_write> = access %P, 1u
+    %12:i32 = load %11
+    %13:f32 = access %pos_1, 0u
+    %14:i32 = convert %13
+    %15:i32 = add %12, %14
+    store %11, %15
+    ret
+  }
+}
+%f3 = @fragment func(%pos_2:vec4<f32> [@position]):void {  # %pos_2: 'pos'
+  $B4: {
+    %18:ptr<pixel_local, f32, read_write> = access %P, 2u
+    %19:f32 = load %18
+    %20:f32 = access %pos_2, 0u
+    %21:f32 = add %19, %20
+    store %18, %21
+    ret
+  }
+}
+Failed to generate: pixel_local address space is not supported by the MSL backend
+PixelLocal = struct @align(4) {
+  a:u32 @offset(0)
+  b:i32 @offset(4)
+  c:f32 @offset(8)
+}
+
+$B1: {  # root
+  %P:ptr<pixel_local, PixelLocal, read_write> = var undef
+}
+
+%f = @fragment func(%pos:vec4<f32> [@position]):void {
+  $B2: {
+    %4:ptr<pixel_local, u32, read_write> = access %P, 0u
+    %5:u32 = load %4
+    %6:f32 = access %pos, 0u
+    %7:u32 = convert %6
+    %8:u32 = add %5, %7
+    store %4, %8
+    ret
+  }
+}
+%f2 = @fragment func(%pos_1:vec4<f32> [@position]):void {  # %pos_1: 'pos'
+  $B3: {
+    %11:ptr<pixel_local, i32, read_write> = access %P, 1u
+    %12:i32 = load %11
+    %13:f32 = access %pos_1, 0u
+    %14:i32 = convert %13
+    %15:i32 = add %12, %14
+    store %11, %15
+    ret
+  }
+}
+%f3 = @fragment func(%pos_2:vec4<f32> [@position]):void {  # %pos_2: 'pos'
+  $B4: {
+    %18:ptr<pixel_local, f32, read_write> = access %P, 2u
+    %19:f32 = load %18
+    %20:f32 = access %pos_2, 0u
+    %21:f32 = add %19, %20
+    store %18, %21
+    ret
+  }
+}
+Failed to generate: pixel_local address space is not supported by the MSL backend
+PixelLocal = struct @align(4) {
+  a:u32 @offset(0)
+  b:i32 @offset(4)
+  c:f32 @offset(8)
+}
+
+$B1: {  # root
+  %P:ptr<pixel_local, PixelLocal, read_write> = var undef
+}
+
+%f = @fragment func(%pos:vec4<f32> [@position]):void {
+  $B2: {
+    %4:ptr<pixel_local, u32, read_write> = access %P, 0u
+    %5:u32 = load %4
+    %6:f32 = access %pos, 0u
+    %7:u32 = convert %6
+    %8:u32 = add %5, %7
+    store %4, %8
+    ret
+  }
+}
+%f2 = @fragment func(%pos_1:vec4<f32> [@position]):void {  # %pos_1: 'pos'
+  $B3: {
+    %11:ptr<pixel_local, i32, read_write> = access %P, 1u
+    %12:i32 = load %11
+    %13:f32 = access %pos_1, 0u
+    %14:i32 = convert %13
+    %15:i32 = add %12, %14
+    store %11, %15
+    ret
+  }
+}
+%f3 = @fragment func(%pos_2:vec4<f32> [@position]):void {  # %pos_2: 'pos'
+  $B4: {
+    %18:ptr<pixel_local, f32, read_write> = access %P, 2u
+    %19:f32 = load %18
+    %20:f32 = access %pos_2, 0u
+    %21:f32 = add %19, %20
+    store %18, %21
+    ret
+  }
+}
+Failed to generate: pixel_local address space is not supported by the MSL backend
 //
 // f
 //

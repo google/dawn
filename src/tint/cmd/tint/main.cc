@@ -1129,13 +1129,6 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
     }
     gen_options.substitute_overrides_config = substitute_override_cfg.Get();
 
-    // Check that the module and options are supported by the backend.
-    auto check = tint::msl::writer::CanGenerate(ir, gen_options);
-    if (check != tint::Success) {
-        std::cerr << check.Failure() << "\n";
-        return false;
-    }
-
     auto result = tint::msl::writer::Generate(ir, gen_options);
     if (result != tint::Success) {
         options.printer->Print(tint::core::ir::Disassembler(ir).Text());

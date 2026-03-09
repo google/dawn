@@ -6,9 +6,9 @@ tint_module_vars_struct = struct @align(1) {
 
 %subgroupMatrixMultiply_5677fc = func():subgroup_matrix_result<f32, 8, 8> {
   $B1: {
-    %2:subgroup_matrix_left<f16, 8, 8> = construct
+    %2:subgroup_matrix_left<f16, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_left<f16, 8, 8>> 0.0h
     %arg_0:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var %2
-    %4:subgroup_matrix_right<f16, 8, 8> = construct
+    %4:subgroup_matrix_right<f16, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_right<f16, 8, 8>> 0.0h
     %arg_1:ptr<function, subgroup_matrix_right<f16, 8, 8>, read_write> = var %4
     %6:subgroup_matrix_left<f16, 8, 8> = load %arg_0
     %7:subgroup_matrix_right<f16, 8, 8> = load %arg_1
@@ -53,9 +53,9 @@ tint_module_vars_struct = struct @align(1) {
 
 %subgroupMatrixMultiply_5677fc = func():subgroup_matrix_result<f32, 8, 8> {
   $B1: {
-    %2:subgroup_matrix_left<f16, 8, 8> = construct
+    %2:subgroup_matrix_left<f16, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_left<f16, 8, 8>> 0.0h
     %arg_0:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var %2
-    %4:subgroup_matrix_right<f16, 8, 8> = construct
+    %4:subgroup_matrix_right<f16, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_right<f16, 8, 8>> 0.0h
     %arg_1:ptr<function, subgroup_matrix_right<f16, 8, 8>, read_write> = var %4
     %6:subgroup_matrix_left<f16, 8, 8> = load %arg_0
     %7:subgroup_matrix_right<f16, 8, 8> = load %arg_1

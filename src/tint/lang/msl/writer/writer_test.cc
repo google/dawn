@@ -350,7 +350,7 @@ TEST_F(MslWriterTest, CanGenerate_TexelBufferUnsupported) {
 
     Options options;
     options.entry_point_name = "main";
-    auto result = CanGenerate(mod, options);
+    auto result = Generate(options);
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("texel buffers are not supported by the MSL backend"));
@@ -374,7 +374,7 @@ TEST_F(MslWriterTest, CanGenerate_AtomicStoreMax_Unsupported) {
 
     Options options;
     options.entry_point_name = "main";
-    auto result = CanGenerate(mod, options);
+    auto result = Generate(options);
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr(

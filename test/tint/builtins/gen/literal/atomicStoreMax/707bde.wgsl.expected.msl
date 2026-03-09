@@ -1,7 +1,71 @@
 SKIP: FAILED
 
-64-bit (vec2u) atomic operations are not yet supported by the MSL backend
-64-bit (vec2u) atomic operations are not yet supported by the MSL backend
+SB_RW = struct @align(8) {
+  arg_0:atomic<vec2<u32>> @offset(0)
+}
+
+SB_RW_a64 = struct @align(8) {
+  arg_0:atomic<u64> @offset(0)
+}
+
+$B1: {  # root
+  %sb_rw:ptr<storage, SB_RW_a64, read_write> = var undef @binding_point(0, 0)
+}
+
+%atomicStoreMax_707bde = func():void {
+  $B2: {
+    %3:ptr<storage, atomic<u64>, read_write> = access %sb_rw, 0u
+    %4:u64 = bitcast vec2<u32>(1u)
+    %5:void = atomicStoreMax %3, %4
+    ret
+  }
+}
+%fragment_main = @fragment func():void {
+  $B3: {
+    %7:void = call %atomicStoreMax_707bde
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B4: {
+    %9:void = call %atomicStoreMax_707bde
+    ret
+  }
+}
+Failed to generate: 64-bit (vec2u) atomic operations are not yet supported by the MSL backend
+SB_RW = struct @align(8) {
+  arg_0:atomic<vec2<u32>> @offset(0)
+}
+
+SB_RW_a64 = struct @align(8) {
+  arg_0:atomic<u64> @offset(0)
+}
+
+$B1: {  # root
+  %sb_rw:ptr<storage, SB_RW_a64, read_write> = var undef @binding_point(0, 0)
+}
+
+%atomicStoreMax_707bde = func():void {
+  $B2: {
+    %3:ptr<storage, atomic<u64>, read_write> = access %sb_rw, 0u
+    %4:u64 = bitcast vec2<u32>(1u)
+    %5:void = atomicStoreMax %3, %4
+    ret
+  }
+}
+%fragment_main = @fragment func():void {
+  $B3: {
+    %7:void = call %atomicStoreMax_707bde
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B4: {
+    %9:void = call %atomicStoreMax_707bde
+    ret
+  }
+}
+Failed to generate: 64-bit (vec2u) atomic operations are not yet supported by the MSL backend
 //
 // fragment_main
 //

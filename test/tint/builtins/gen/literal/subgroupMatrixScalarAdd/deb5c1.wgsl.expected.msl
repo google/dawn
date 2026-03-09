@@ -1,5 +1,25 @@
 SKIP: FAILED
 
-non-float subgroup matrices are not supported by the MSL backend
+$B1: {  # root
+  %prevent_dce:ptr<storage, array<u32, 1024>, read_write> = var undef @binding_point(0, 0)
+}
+
+%subgroupMatrixScalarAdd_deb5c1 = func():subgroup_matrix_left<u8, 8, 8> {
+  $B2: {
+    %3:subgroup_matrix_left<u8, 8, 8> = construct
+    %4:subgroup_matrix_left<u8, 8, 8> = subgroupMatrixScalarAdd %3, 8u
+    %res:ptr<function, subgroup_matrix_left<u8, 8, 8>, read_write> = var %4
+    %6:subgroup_matrix_left<u8, 8, 8> = load %res
+    ret %6
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B3: {
+    %8:subgroup_matrix_left<u8, 8, 8> = call %subgroupMatrixScalarAdd_deb5c1
+    %9:void = subgroupMatrixStore %prevent_dce, 0u, %8, false, 64u
+    ret
+  }
+}
+Failed to generate: non-float subgroup matrices are not supported by the MSL backend
 
 tint executable returned error: exit status 1

@@ -1,5 +1,16 @@
 SKIP: FAILED
 
-subgroup_size attribute is not supported by the MSL backend
+$B1: {  # root
+  %buffer:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(32i, 1i, 1i) @subgroup_size(32i) func(%sg_id:u32 [@subgroup_invocation_id], %sg_size:u32 [@subgroup_size]):void {
+  $B2: {
+    %5:ptr<storage, u32, read_write> = access %buffer, %sg_id
+    store %5, %sg_size
+    ret
+  }
+}
+Failed to generate: subgroup_size attribute is not supported by the MSL backend
 
 tint executable returned error: exit status 1

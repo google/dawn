@@ -1,5 +1,12 @@
 SKIP: FAILED
 
-resource tables not supported by the MSL backend
+%fs = @fragment func():void {
+  $B1: {
+    %2:bool = hasResource<texture_2d<i32>> 4u
+    %t:bool = let %2
+    ret
+  }
+}
+Failed to generate: resource tables not supported by the MSL backend
 
 tint executable returned error: exit status 1

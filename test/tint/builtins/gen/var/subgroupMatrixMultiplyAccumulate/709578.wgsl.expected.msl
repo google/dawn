@@ -1,5 +1,33 @@
 SKIP: FAILED
 
-non-float subgroup matrices are not supported by the MSL backend
+$B1: {  # root
+  %prevent_dce:ptr<storage, array<i32, 1024>, read_write> = var undef @binding_point(0, 0)
+}
+
+%subgroupMatrixMultiplyAccumulate_709578 = func():subgroup_matrix_result<i32, 8, 8> {
+  $B2: {
+    %3:subgroup_matrix_left<i32, 8, 8> = construct
+    %arg_0:ptr<function, subgroup_matrix_left<i32, 8, 8>, read_write> = var %3
+    %5:subgroup_matrix_right<i32, 8, 8> = construct
+    %arg_1:ptr<function, subgroup_matrix_right<i32, 8, 8>, read_write> = var %5
+    %7:subgroup_matrix_result<i32, 8, 8> = construct
+    %arg_2:ptr<function, subgroup_matrix_result<i32, 8, 8>, read_write> = var %7
+    %9:subgroup_matrix_left<i32, 8, 8> = load %arg_0
+    %10:subgroup_matrix_right<i32, 8, 8> = load %arg_1
+    %11:subgroup_matrix_result<i32, 8, 8> = load %arg_2
+    %12:subgroup_matrix_result<i32, 8, 8> = subgroupMatrixMultiplyAccumulate %9, %10, %11
+    %res:ptr<function, subgroup_matrix_result<i32, 8, 8>, read_write> = var %12
+    %14:subgroup_matrix_result<i32, 8, 8> = load %res
+    ret %14
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B3: {
+    %16:subgroup_matrix_result<i32, 8, 8> = call %subgroupMatrixMultiplyAccumulate_709578
+    %17:void = subgroupMatrixStore %prevent_dce, 0u, %16, false, 64u
+    ret
+  }
+}
+Failed to generate: non-float subgroup matrices are not supported by the MSL backend
 
 tint executable returned error: exit status 1
