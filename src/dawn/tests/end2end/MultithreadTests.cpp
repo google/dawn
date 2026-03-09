@@ -226,8 +226,6 @@ TEST_P(MultithreadTests, Device_WaitForDroppedInAnotherThread) {
 // Test that multiple buffers being created and mapped on multiple threads won't interfere with
 // each other.
 TEST_P(MultithreadTests, Buffers_MapInParallel) {
-    // TODO(451928481): multithread support in GL is incomplete
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
     constexpr uint32_t kDataSize = 1000;
     std::vector<uint32_t> myData;
     myData.reserve(kDataSize);
@@ -263,8 +261,6 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
 
 // Test that mapping, unmapping, and destroying buffers in parallel works.
 TEST_P(MultithreadTests, MapUnmapDestroyInParallel) {
-    // TODO(451928481): multithread support in GL is incomplete
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
     constexpr uint32_t kDataSize = 1000;
     std::vector<uint32_t> myData;
     for (uint32_t i = 0; i < kDataSize; ++i) {
@@ -301,8 +297,6 @@ TEST_P(MultithreadTests, MapUnmapDestroyInParallel) {
 
 // Test that multiple map/unmap cycles with partial writes in parallel works.
 TEST_P(MultithreadTests, MapUnmapMultipleCyclesInParallel) {
-    // TODO(451928481): multithread support in GL is incomplete
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
     constexpr uint32_t kDataSize = 1000;
     std::vector<uint32_t> myData;
     for (uint32_t i = 0; i < kDataSize; ++i) {
@@ -352,8 +346,6 @@ TEST_P(MultithreadTests, MapUnmapMultipleCyclesInParallel) {
 // Test that creating buffers with mappedAtCreation in parallel works.
 // Tests both buffers with MapWrite usage and without.
 TEST_P(MultithreadTests, MapAtCreationInParallel) {
-    // TODO(451928481): multithread support in GL is incomplete
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
     constexpr uint32_t kDataSize = 1000;
     std::vector<uint32_t> myData;
     myData.reserve(kDataSize);
@@ -391,7 +383,7 @@ TEST_P(MultithreadTests, MapAtCreationInParallel) {
 // Test map at creation, copy to uniform buffer, draw, then map again, copy and draw in parallel.
 TEST_P(MultithreadTests, MapAtCreationThenMapAgainWithRenderPassInParallel) {
     // TODO(crbug.com/451928481): multithread support in GL is incomplete
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     constexpr uint32_t kNumThreads = 4;
     const float kRed[] = {1.0f, 0.0f, 0.0f, 1.0f};
@@ -515,9 +507,6 @@ TEST_P(MultithreadTests, MapAtCreationThenMapAgainWithRenderPassInParallel) {
 
 // Test MapAsync followed by Unmap without waiting for the map to complete.
 TEST_P(MultithreadTests, MapAsyncThenCancelInParallel) {
-    // TODO(crbug.com/451928481): multithread support in GL is incomplete
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
-
     constexpr uint32_t kNumThreads = 8;
     utils::RunInParallel(kNumThreads, [&](uint32_t) {
         wgpu::BufferDescriptor desc = {};
@@ -545,9 +534,6 @@ TEST_P(MultithreadTests, MapAsyncThenCancelInParallel) {
 
 // Test that Destroy() doesn't race with remap scheduling when using auto map.
 TEST_P(MultithreadTests, MapThenSubmitThenDestroy) {
-    // TODO(crbug.com/451928481): multithread support in GL is incomplete
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
-
     constexpr uint32_t kNumThreads = 8;
     utils::RunInParallel(kNumThreads, [&](uint32_t) {
         wgpu::BufferDescriptor desc = {};
@@ -630,9 +616,6 @@ TEST_P(MultithreadTests, T2BThenDestroyTexture) {
 
 // Test that copy a texture to a buffer then map that buffer in parallel works.
 TEST_P(MultithreadTests, T2BThenMapInParallel) {
-    // TODO(451928481): multithread support in GL is incomplete
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
-
     // TODO(crbug.com/459848483): Flaky on Win/Snapdragon X Elite.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
 

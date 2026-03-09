@@ -237,6 +237,8 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
         size = 4;
     }
 
+    auto deviceGuard = GetDevice()->GetGuard();
+
     DAWN_TRY(EnsureDataInitialized());
     if (GetDevice()->IsToggleEnabled(Toggle::GLDefer)) {
         TrackUsage();
