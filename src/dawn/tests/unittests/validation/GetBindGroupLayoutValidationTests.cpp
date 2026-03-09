@@ -1454,5 +1454,16 @@ TEST_F(GetBindGroupLayoutTests, NullBGLs) {
     EXPECT_THAT(pipeline.GetBindGroupLayout(3), BindGroupLayoutEq(emptyBGL));
 }
 
+// TODO(https://issues.chromium.org/487593147): Add tests for GetBindGroupLayout with explicit
+// filterability and filteringness annotations. An incomplete test plan is:
+//
+//  - Check that explicit filteringness / filterability is correctly reflected.
+//  - Check that conflicting filteringness / filterability between stages produces an error.
+//  - Check that unknowns get defaulted to the other stage's explicit value (in both orders)
+//  - Check that unknown samplers used with non-filterable textures become unfilterable, and that
+//  the others become filtering.
+//  - Check that unknown textures used with a filtering / unknown sampler become filtering.
+//  - Check what happens on unknown texture/samplers only referenced and not used.
+
 }  // anonymous namespace
 }  // namespace dawn

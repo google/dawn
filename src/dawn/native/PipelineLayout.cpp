@@ -242,6 +242,51 @@ Ref<PipelineLayoutBase> PipelineLayoutBase::MakeError(DeviceBase* device, String
 
 namespace {
 
+// Helper function used to merge multiple TextureSampleTypes for the same binding together.
+ResultOrError<wgpu::TextureSampleType> MostSpecificSampleTypeIfCompatible(
+    wgpu::TextureSampleType a,
+    wgpu::TextureSampleType b) {
+    if (a == b) {
+        return a;
+    }
+
+    // If a binding is UnknownFilterableFloat then the other one is more specific (the case where it
+    // is also UnknownFilterableFloat is handled above and it keeps the same value as it is "as
+    // specific").
+    if (a == kUnknownFilterableFloatSampleType &&
+        (b == wgpu::TextureSampleType::UnfilterableFloat || b == wgpu::TextureSampleType::Float)) {
+        return b;
+    }
+    if (b == kUnknownFilterableFloatSampleType &&
+        (a == wgpu::TextureSampleType::UnfilterableFloat || a == wgpu::TextureSampleType::Float)) {
+        return a;
+    }
+
+    return DAWN_VALIDATION_ERROR("Texture sample types are not compatible (%s vs %s).", a, b);
+}
+
+// Helper function used to merge multiple SamplerBindingType for the same binding together.
+ResultOrError<wgpu::SamplerBindingType> MostSpecificSamplerTypeIfCompatible(
+    wgpu::SamplerBindingType a,
+    wgpu::SamplerBindingType b) {
+    if (a == b) {
+        return a;
+    }
+
+    // If a binding is UnknownFiltering then the other one is more specific (the case where it is
+    // also UnknownFiltering is handled above and it keeps the same value as it is "as specific").
+    if (a == kUnknownFilteringSamplerBindingType &&
+        (b == wgpu::SamplerBindingType::Filtering || b == wgpu::SamplerBindingType::NonFiltering)) {
+        return b;
+    }
+    if (b == kUnknownFilteringSamplerBindingType &&
+        (a == wgpu::SamplerBindingType::Filtering || a == wgpu::SamplerBindingType::NonFiltering)) {
+        return b;
+    }
+
+    return DAWN_VALIDATION_ERROR("Sampler binding types are not compatible (%s vs %s).", a, b);
+}
+
 // Merges two entries at the same location, if they are allowed to be merged.
 MaybeError MergeEntries(BindGroupLayoutEntry* modifiedEntry,
                         const BindGroupLayoutEntry& mergedEntry) {
@@ -283,20 +328,9 @@ MaybeError MergeEntries(BindGroupLayoutEntry* modifiedEntry,
                             "Texture multisampled differs (%v vs. %v).",
                             modifiedEntry->texture.multisampled, mergedEntry.texture.multisampled);
 
-            // Sample types are compatible if they are exactly equal,
-            // or if the |modifiedEntry| is Float and the |mergedEntry| is UnfilterableFloat.
-            // Note that the |mergedEntry| never has type Float. Texture bindings all start
-            // as UnfilterableFloat and are promoted to Float if they are statically used with
-            // a sampler.
-            DAWN_ASSERT(mergedEntry.texture.sampleType != wgpu::TextureSampleType::Float);
-            bool compatibleSampleTypes =
-                modifiedEntry->texture.sampleType == mergedEntry.texture.sampleType ||
-                (modifiedEntry->texture.sampleType == wgpu::TextureSampleType::Float &&
-                 mergedEntry.texture.sampleType == wgpu::TextureSampleType::UnfilterableFloat);
-
-            DAWN_INVALID_IF(!compatibleSampleTypes,
-                            "Texture sample types are not compatible (%s vs %s).",
-                            modifiedEntry->texture.sampleType, mergedEntry.texture.sampleType);
+            DAWN_TRY_ASSIGN(modifiedEntry->texture.sampleType,
+                            MostSpecificSampleTypeIfCompatible(modifiedEntry->texture.sampleType,
+                                                               mergedEntry.texture.sampleType));
             break;
         }
 
@@ -317,9 +351,9 @@ MaybeError MergeEntries(BindGroupLayoutEntry* modifiedEntry,
             break;
 
         case BindingInfoType::Sampler:
-            DAWN_INVALID_IF(modifiedEntry->sampler.type != mergedEntry.sampler.type,
-                            "Sampler binding kind differs (%s vs. %s).",
-                            modifiedEntry->sampler.type, mergedEntry.sampler.type);
+            DAWN_TRY_ASSIGN(modifiedEntry->sampler.type,
+                            MostSpecificSamplerTypeIfCompatible(modifiedEntry->sampler.type,
+                                                                mergedEntry.sampler.type));
             break;
 
         case BindingInfoType::ExternalTexture:
@@ -351,24 +385,11 @@ BindGroupLayoutEntry ConvertMetadataToEntry(
         },
         [&](const SamplerBindingInfo& bindingInfo) {
             entry.sampler.type = bindingInfo.type;
-
-            // TODO(487593147): Support filiterability in default pipeline
-            if (entry.sampler.type == kUnknownFilteringSamplerBindingType) {
-                entry.sampler.type = wgpu::SamplerBindingType::Filtering;
-            }
         },
         [&](const TextureBindingInfo& bindingInfo) {
             entry.texture.sampleType = bindingInfo.sampleType;
             entry.texture.viewDimension = bindingInfo.viewDimension;
             entry.texture.multisampled = bindingInfo.multisampled;
-
-            // Default to UnfilterableFloat for texture_Nd<f32> as it will be promoted to Float
-            // if it is used with a sampler.
-            // TODO(487593147): Support filiterability in default pipeline
-            if (entry.texture.sampleType == wgpu::TextureSampleType::Float ||
-                entry.texture.sampleType == kUnknownFilterableFloatSampleType) {
-                entry.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
-            }
         },
         [&](const StorageTextureBindingInfo& bindingInfo) {
             entry.storageTexture.access = bindingInfo.access;
@@ -418,6 +439,85 @@ ResultOrError<Ref<BindGroupLayoutBase>> CreateBGL(
         unpacked = Unpack(&desc);
     }
     return device->GetOrCreateBindGroupLayout(unpacked, pipelineCompatibilityToken);
+}
+
+// Resolves all the samplers with type kUnknownFilteringSamplerBindingType and all textures with
+// sample type kUnknownFilterableFloatSampleType to concrete values.
+void ResolveUnknownTypes(
+    const std::vector<StageAndDescriptor>& stages,
+    PerBindGroup<absl::flat_hash_map<BindingNumber, BindGroupLayoutEntry>>* entryData) {
+    // Handle the constraint where an unknown sampler used with a non-filterable texture
+    // (unfilterable-float, sint or uint) must be non-filtering. Note that unknown textures used
+    // with samplers can only be changed to filterable floats in the rest of the resolving, so no
+    // new constraints on samplers will be created after this.
+    for (const StageAndDescriptor& stage : stages) {
+        for (const auto& pair :
+             stage.module->GetEntryPoint(stage.entryPoint).samplerAndNonSamplerTexturePairs) {
+            if (pair.sampler == EntryPointMetadata::nonSamplerBindingPoint) {
+                continue;
+            }
+            TextureBindingLayout* texture =
+                &entryData->at(pair.texture.group)[pair.texture.binding].texture;
+            SamplerBindingLayout* sampler =
+                &entryData->at(pair.sampler.group)[pair.sampler.binding].sampler;
+
+            if (sampler->type == kUnknownFilteringSamplerBindingType &&
+                texture->sampleType != wgpu::TextureSampleType::Float &&
+                texture->sampleType != kUnknownFilterableFloatSampleType) {
+                sampler->type = wgpu::SamplerBindingType::NonFiltering;
+            }
+        }
+    }
+    // All the other unknown samplers have no specific constraints and are made filtering as that's
+    // the least constraining for samplers that can be put in BindGroups.
+    for (const StageAndDescriptor& stage : stages) {
+        const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
+
+        for (auto [group, groupBindings] : Enumerate(metadata.bindings)) {
+            for (const auto& [bindingNumber, shaderBinding] : groupBindings) {
+                BindGroupLayoutEntry* entry = &entryData->at(group)[bindingNumber];
+                if (entry->sampler.type == kUnknownFilteringSamplerBindingType) {
+                    entry->sampler.type = wgpu::SamplerBindingType::Filtering;
+                }
+            }
+        }
+    }
+
+    // Handle the constraint where an unknown texture used with a filtering sampler must be a
+    // filterable float.
+    for (const StageAndDescriptor& stage : stages) {
+        for (const auto& pair :
+             stage.module->GetEntryPoint(stage.entryPoint).samplerAndNonSamplerTexturePairs) {
+            if (pair.sampler == EntryPointMetadata::nonSamplerBindingPoint) {
+                continue;
+            }
+            TextureBindingLayout* texture =
+                &entryData->at(pair.texture.group)[pair.texture.binding].texture;
+            SamplerBindingLayout* sampler =
+                &entryData->at(pair.sampler.group)[pair.sampler.binding].sampler;
+
+            DAWN_ASSERT(sampler->type != kUnknownFilteringSamplerBindingType);
+            if (texture->sampleType == kUnknownFilterableFloatSampleType &&
+                sampler->type == wgpu::SamplerBindingType::Filtering) {
+                texture->sampleType = wgpu::TextureSampleType::Float;
+            }
+        }
+    }
+
+    // All the other unknown textures have no specific constraints and are made unfilterable as
+    // that's the least constraining for textures that can be put in BindGroups.
+    for (const StageAndDescriptor& stage : stages) {
+        const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
+
+        for (auto [group, groupBindings] : Enumerate(metadata.bindings)) {
+            for (const auto& [bindingNumber, shaderBinding] : groupBindings) {
+                BindGroupLayoutEntry* entry = &entryData->at(group)[bindingNumber];
+                if (entry->texture.sampleType == kUnknownFilterableFloatSampleType) {
+                    entry->texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
+                }
+            }
+        }
+    }
 }
 
 }  // namespace
@@ -482,25 +582,18 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
             }
         }
 
-        // Promote any Unfilterable textures used with a sampler to Filtering.
-        for (const EntryPointMetadata::SamplerTexturePair& pair :
-             metadata.samplerAndNonSamplerTexturePairs) {
-            if (pair.sampler == EntryPointMetadata::nonSamplerBindingPoint) {
-                continue;
-            }
-            BindGroupLayoutEntry* entry = &entryData[pair.texture.group][pair.texture.binding];
-            if (entry->texture.sampleType == wgpu::TextureSampleType::UnfilterableFloat) {
-                entry->texture.sampleType = wgpu::TextureSampleType::Float;
-            }
-        }
-
-        // For render pipeline that might has vertex and
-        // fragment stages, it is possible that each stage has their own immediate data variable
-        // shares the same immediate data block. Pick the max size of immediate data variable from
-        // vertex and fragment stage as the pipelineLayout immediate data block size.
+        // For render pipeline that might has vertex and fragment stages, it is possible that each
+        // stage has their own immediate data variable shares the same immediate data block. Pick
+        // the max size of immediate data variable from vertex and fragment stage as the
+        // pipelineLayout immediate data block size.
         immediateDataRangeByteSize =
             std::max(immediateDataRangeByteSize, metadata.immediateDataRangeByteSize);
     }
+
+    // Some sampler and texture bindings are created with an unknown sampler type / texture sample
+    // type and must be resolved to concrete types based on which texture/sampler pairs are
+    // statically used.
+    ResolveUnknownTypes(stages, &entryData);
 
     // Create the bind group layouts, including the empty ones as all the bind group layouts should
     // be created with `pipelineCompatibilityToken` whether they are empty or not.
