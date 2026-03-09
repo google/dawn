@@ -150,17 +150,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
 
     // Check the vertex pulling config, if provided.
     if (options.vertex_pulling_config) {
-        // Find the vertex entry point.
-        const core::ir::Function* ep = nullptr;
-        for (auto& func : ir.functions) {
-            if (func->IsVertex()) {
-                if (ep) {
-                    return Failure("vertex pulling config provided with multiple vertex shaders");
-                }
-                ep = func;
-            }
-        }
-        if (!ep) {
+        if (!ep_func->IsVertex()) {
             return Failure("vertex pulling config provided without a vertex shader");
         }
 
@@ -179,7 +169,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
 
         // Check the parameters to make sure all vertex attributes are present in the config.
-        for (auto* param : ep->Params()) {
+        for (auto* param : ep_func->Params()) {
             if (auto* str = param->Type()->As<core::type::Struct>()) {
                 for (auto* member : str->Members()) {
                     if (auto loc = member->Attributes().location) {
