@@ -179,7 +179,7 @@ cq_branch_verifier_chromium_trybot(base_builder_name = "dawn-win11-arm64-deps-re
 
 # This entry can be removed in favor of win11-arm64-dawn-rel once tests are
 # stable enough to add to that builder.
-manual_only_chromium_trybot(builder = "chromium:try/dawn-try-win11-arm64-snapdragon-x-elite-deps-rel")
+manual_only_chromium_trybot(builder = "chromium:try/dawn-try-win11-arm64-snapdragon-x-elite-rel")
 
 manual_only_chromium_trybot(builder = "chromium:try/dawn-try-win-x64-intel-exp")
 
