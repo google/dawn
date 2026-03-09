@@ -461,6 +461,11 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "unorm16_filterable.md",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::RenderPassRenderArea,
+     {"Supports specifying render area for render pass.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "render_pass_render_area.md",
+      FeatureInfo::FeatureState::Experimental}},
 
     // Comment to separate the } so it is clearer what to copy-paste to add a feature.
 };

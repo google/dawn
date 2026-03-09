@@ -496,7 +496,18 @@ AddDevice({0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 
     }
     // clang-format on
 
-    auto supported_features = this->GetSupportedFeatures();
+    auto full_supported_features = this->GetSupportedFeatures();
+
+    // List of features that are not interesting to check, eg. they are enabled unconditionally for
+    // a backend.
+    std::set<wgpu::FeatureName> ignored_features = {
+        wgpu::FeatureName::RenderPassRenderArea,
+    };
+
+    std::set<wgpu::FeatureName> supported_features;
+    std::set_difference(full_supported_features.begin(), full_supported_features.end(),
+                        ignored_features.begin(), ignored_features.end(),
+                        std::inserter(supported_features, supported_features.begin()));
 
     // We need alternates mostly due to differences in driver versions.
     // Some devices might be on one driver that supports limit X while others might be on a driver

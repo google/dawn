@@ -457,6 +457,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::TransientAttachments);
     EnableFeature(Feature::AdapterPropertiesVk);
     EnableFeature(Feature::DawnLoadResolveTexture);
+    EnableFeature(Feature::RenderPassRenderArea);
 
     // Enable Subgroups feature if:
     // 1. Vulkan API version is 1.1 or later, and

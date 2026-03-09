@@ -1180,6 +1180,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                 BeginRenderPassCmd beginCmd{};
                 beginCmd.width = mipSize.width;
                 beginCmd.height = mipSize.height;
+                beginCmd.renderArea = {0, 0, mipSize.width, mipSize.height};
 
                 TextureViewDescriptor viewDesc = {};
                 viewDesc.label = "Dawn_ClearTexture_View";

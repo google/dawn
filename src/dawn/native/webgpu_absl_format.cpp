@@ -263,6 +263,15 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     return {true};
 }
 
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const RenderAreaRect& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    s->Append(absl::StrFormat("{x: %u, y: %u, width: %u, height: %u}", value.x, value.y,
+                              value.width, value.height));
+    return {true};
+}
+
 //
 // Objects
 //

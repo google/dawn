@@ -167,6 +167,14 @@ struct ResolveRect {
     bool HasValue() const;
 };
 
+struct RenderAreaRect {
+    // TODO(https://issues.chromium.org/424536624): Use TexelCount instead of uint32_t.
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+};
+
 struct BeginRenderPassCmd {
     BeginRenderPassCmd();
     ~BeginRenderPassCmd();
@@ -181,6 +189,9 @@ struct BeginRenderPassCmd {
     // TODO(https://issues.chromium.org/424536624): Use TexelCount instead of uint32_t.
     uint32_t width;
     uint32_t height;
+
+    RenderAreaRect renderArea;
+
     // Used for partial resolve
     ResolveRect resolveRect;
     bool msaaRenderToSingleSampled = false;

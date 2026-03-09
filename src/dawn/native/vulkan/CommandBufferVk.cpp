@@ -158,6 +158,52 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
     return region;
 }
 
+// Returns the render area from `renderPassCmd` aligned to `granularity`.
+VkRect2D GetAlignedRenderArea(VkExtent2D granularity, BeginRenderPassCmd* renderPassCmd) {
+    VkRect2D renderArea;
+
+    if (granularity.width == 0 || granularity.width == 1) {
+        renderArea.offset.x = renderPassCmd->renderArea.x;
+        renderArea.extent.width = renderPassCmd->renderArea.width;
+    } else {
+        renderArea.offset.x = AlignDown(renderPassCmd->renderArea.x, granularity.width);
+
+        uint32_t right =
+            Align(renderPassCmd->renderArea.x + renderPassCmd->renderArea.width, granularity.width);
+        if (right > renderPassCmd->width) {
+            right = renderPassCmd->width;
+        }
+        renderArea.extent.width = right - renderArea.offset.x;
+    }
+
+    if (granularity.height == 0 || granularity.height == 1) {
+        renderArea.offset.y = renderPassCmd->renderArea.y;
+        renderArea.extent.height = renderPassCmd->renderArea.height;
+    } else {
+        renderArea.offset.y = AlignDown(renderPassCmd->renderArea.y, granularity.height);
+
+        uint32_t bottom = Align(renderPassCmd->renderArea.y + renderPassCmd->renderArea.height,
+                                granularity.height);
+        if (bottom > renderPassCmd->height) {
+            bottom = renderPassCmd->height;
+        }
+        renderArea.extent.height = bottom - renderArea.offset.y;
+    }
+
+    return renderArea;
+}
+
+// Returns the render area from `renderPassCmd` aligned to render area granularity for
+// `renderPassVk`.
+VkRect2D GetAlignedRenderArea(Device* device,
+                              VkRenderPass renderPassVk,
+                              BeginRenderPassCmd* renderPassCmd) {
+    VkExtent2D granularity;
+    device->fn.GetRenderAreaGranularity(device->GetVkDevice(), renderPassVk, &granularity);
+
+    return GetAlignedRenderArea(granularity, renderPassCmd);
+}
+
 class DescriptorSetTracker : public BindGroupTrackerBase<true> {
   public:
     bool AreLayoutsCompatible() override {
@@ -500,10 +546,12 @@ MaybeError RecordBeginDynamicRenderPass(CommandRecordingContext* recordingContex
     renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
     renderInfo.pNext = nullptr;
     renderInfo.flags = 0;
-    renderInfo.renderArea.offset.x = 0;
-    renderInfo.renderArea.offset.y = 0;
-    renderInfo.renderArea.extent.width = renderPass->width;
-    renderInfo.renderArea.extent.height = renderPass->height;
+    // TODO(https://crbug.com/489152883): If VK_KHR_maintenance5 is available this should call
+    // vkGetRenderingAreaGranularity(). Otherwise a good approach might be to take a guess at the
+    // maximum granularity for the GPU. This needs some more thought and using 32x32 granularity is
+    // stop gap.
+    VkExtent2D granularity{32, 32};
+    renderInfo.renderArea = GetAlignedRenderArea(granularity, renderPass);
     renderInfo.layerCount = 1;
     renderInfo.viewMask = 0;
     renderInfo.pDepthAttachment = nullptr;
@@ -741,10 +789,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
     beginInfo.pNext = nullptr;
     beginInfo.renderPass = renderPassVK;
     beginInfo.framebuffer = framebuffer;
-    beginInfo.renderArea.offset.x = 0;
-    beginInfo.renderArea.offset.y = 0;
-    beginInfo.renderArea.extent.width = renderPass->width;
-    beginInfo.renderArea.extent.height = renderPass->height;
+    beginInfo.renderArea = GetAlignedRenderArea(device, renderPassVK, renderPass);
     beginInfo.clearValueCount = framebufferQuery.attachmentCount;
     beginInfo.pClearValues = framebufferQuery.clearValues.data();
 
@@ -1451,10 +1496,10 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
         device->fn.CmdSetViewport(commands, 0, 1, &viewport);
 
         VkRect2D scissorRect;
-        scissorRect.offset.x = 0;
-        scissorRect.offset.y = 0;
-        scissorRect.extent.width = renderPassCmd->width;
-        scissorRect.extent.height = renderPassCmd->height;
+        scissorRect.offset.x = renderPassCmd->renderArea.x;
+        scissorRect.offset.y = renderPassCmd->renderArea.y;
+        scissorRect.extent.width = renderPassCmd->renderArea.width;
+        scissorRect.extent.height = renderPassCmd->renderArea.height;
         device->fn.CmdSetScissor(commands, 0, 1, &scissorRect);
 
         // Apply default frag depth

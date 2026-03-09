@@ -1789,6 +1789,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::Unorm16FormatsForExternalTexture:
         case wgpu::FeatureName::OpaqueYCbCrAndroidForExternalTexture:
         case wgpu::FeatureName::Unorm16Filterable:
+        case wgpu::FeatureName::RenderPassRenderArea:
             return false;
     }
     return false;
