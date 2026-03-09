@@ -6,16 +6,6 @@
       'swarming_containment_auto',
     ],
     'machines': {
-      'dawn-linux-x64-sws-clusterfuzz': {
-        'os_type': 'linux',
-        'mixins': [
-          'gpu_linux_gce_stable',
-        ],
-        'test_suites': {
-          'gtest_tests': 'wire_trace_gtests',
-          'isolated_scripts': 'tint_fuzzer_corpus_generate_tests',
-        },
-      },
       'dawn-linux-x64-sws-tsan': {
         'os_type': 'linux',
         'mixins': [
