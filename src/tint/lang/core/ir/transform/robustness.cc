@@ -380,13 +380,6 @@ struct State {
                 clamp_coords(1u);  // Must run after clamp_level
                 break;
             }
-            case core::BuiltinFn::kTextureStore: {
-                clamp_coords(1u);
-                if (type::IsTextureArray(texture->Dim())) {
-                    clamp_array_index(2u);
-                }
-                break;
-            }
             default:
                 break;
         }
