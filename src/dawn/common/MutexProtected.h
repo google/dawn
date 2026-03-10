@@ -97,6 +97,20 @@ struct MutexProtectedTraits<Ref<T>> {
     static const ObjectType* GetObj(const Ref<T>* const obj) { return obj->Get(); }
 };
 
+template <typename T>
+struct MutexRefProtectedTraits {
+    using MutexType = Ref<Mutex>;
+    using LockType = Mutex::AutoLock;
+    using ObjectType = T;
+
+    static constexpr bool kSupportsTryLock = false;
+
+    static MutexType CreateMutex() { return AcquireRef(new Mutex()); }
+    static Mutex* GetMutex(MutexType& m) { return m.Get(); }
+    static ObjectType* GetObj(T* const obj) { return obj; }
+    static const ObjectType* GetObj(const T* const obj) { return obj; }
+};
+
 template <typename T, typename Traits>
 class Guard;
 template <typename T, typename Traits, NotifyType NotifyT>
@@ -267,10 +281,28 @@ class MutexProtected {
     using ConstUsage = Guard<const T, Traits>;
 
     template <typename... Args>
+        requires(sizeof...(Args) != 1 ||
+                 !(std::is_same_v<std::decay_t<Args>, MutexProtected> && ...))
     // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
     MutexProtected(Args&&... args)
         : mMutex(Traits::CreateMutex()), mObj(std::forward<Args>(args)...) {}
     virtual ~MutexProtected() = default;
+
+    MutexProtected(const MutexProtected&)
+        requires std::copy_constructible<typename Traits::MutexType> && std::copy_constructible<T>
+    = default;
+    MutexProtected& operator=(const MutexProtected&)
+        requires std::is_copy_assignable_v<typename Traits::MutexType> &&
+                     std::is_copy_assignable_v<T>
+    = default;
+
+    MutexProtected(MutexProtected&&)
+        requires std::move_constructible<typename Traits::MutexType> && std::move_constructible<T>
+    = default;
+    MutexProtected& operator=(MutexProtected&&)
+        requires std::is_move_assignable_v<typename Traits::MutexType> &&
+                     std::is_move_assignable_v<T>
+    = default;
 
     Usage operator->() { return Usage(&mObj, mMutex); }
     template <typename Fn>
@@ -309,6 +341,10 @@ class MutexProtected {
     T mObj;
 };
 
+// A moveable version of MutexProtected.
+template <typename T>
+using MutexRefProtected = MutexProtected<T, detail::Guard, detail::MutexRefProtectedTraits<T>>;
+
 // Wrapping class for object members to provide the protections with a mutex of a MutexProtected
 // with some additional helpers to allow waiting with a conditional variable as well. The general
 // usage should look the same as MutexProtected above, with additional usages like the following
@@ -338,10 +374,28 @@ class MutexCondVarProtected {
     using ConstUsage = Guard<const T, Traits, NotifyType::None>;
 
     template <typename... Args>
+        requires(sizeof...(Args) != 1 ||
+                 !(std::is_same_v<std::decay_t<Args>, MutexCondVarProtected> && ...))
     // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
     MutexCondVarProtected(Args&&... args)
         : mMutex(Traits::CreateMutex()), mObj(std::forward<Args>(args)...) {}
     virtual ~MutexCondVarProtected() = default;
+
+    MutexCondVarProtected(const MutexCondVarProtected&)
+        requires std::copy_constructible<typename Traits::MutexType> && std::copy_constructible<T>
+    = default;
+    MutexCondVarProtected& operator=(const MutexCondVarProtected&)
+        requires std::is_copy_assignable_v<typename Traits::MutexType> &&
+                     std::is_copy_assignable_v<T>
+    = default;
+
+    MutexCondVarProtected(MutexCondVarProtected&&)
+        requires std::move_constructible<typename Traits::MutexType> && std::move_constructible<T>
+    = default;
+    MutexCondVarProtected& operator=(MutexCondVarProtected&&)
+        requires std::is_move_assignable_v<typename Traits::MutexType> &&
+                     std::is_move_assignable_v<T>
+    = default;
 
     Usage operator->() { return Usage(&mObj, mMutex, &mCv); }
     template <NotifyType NotifyT = NotifyType::All, typename Fn>
