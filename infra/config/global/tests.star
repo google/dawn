@@ -38,7 +38,6 @@ load("@chromium-luci//targets.star", "targets")
 targets.tests.gtest_test(
     name = "dawn_end2end_capture_replay_tests",
     mixins = [
-        "dawn_end2end_real_hardware_gtests_common_args",
         "result_adapter_gtest_json",
         "true_noop_merge",
         targets.mixin(
@@ -57,7 +56,6 @@ targets.tests.gtest_test(
 targets.tests.gtest_test(
     name = "dawn_end2end_implicit_sync_tests",
     mixins = [
-        "dawn_end2end_real_hardware_gtests_common_args",
         "result_adapter_gtest_json",
         "true_noop_merge",
         targets.mixin(
@@ -76,7 +74,6 @@ targets.tests.gtest_test(
 targets.tests.gtest_test(
     name = "dawn_end2end_no_dxc_tests",
     mixins = [
-        "dawn_end2end_real_hardware_gtests_common_args",
         "disable_dxc",
         "result_adapter_gtest_json",
         "true_noop_merge",
@@ -92,7 +89,6 @@ targets.tests.gtest_test(
 targets.tests.gtest_test(
     name = "dawn_end2end_no_dxc_validation_layers_tests",
     mixins = [
-        "dawn_end2end_real_hardware_gtests_common_args",
         "disable_dxc",
         "enable_backend_validation",
         "result_adapter_gtest_json",
@@ -109,7 +105,6 @@ targets.tests.gtest_test(
 targets.tests.gtest_test(
     name = "dawn_end2end_skip_validation_tests",
     mixins = [
-        "dawn_end2end_real_hardware_gtests_common_args",
         "result_adapter_gtest_json",
         "true_noop_merge",
         targets.mixin(
@@ -162,7 +157,6 @@ targets.tests.gtest_test(
 targets.tests.gtest_test(
     name = "dawn_end2end_tests",
     mixins = [
-        "dawn_end2end_real_hardware_gtests_common_args",
         "result_adapter_gtest_json",
         "true_noop_merge",
         targets.mixin(
@@ -178,7 +172,6 @@ targets.tests.gtest_test(
 targets.tests.gtest_test(
     name = "dawn_end2end_validation_layers_tests",
     mixins = [
-        "dawn_end2end_real_hardware_gtests_common_args",
         "enable_backend_validation",
         "result_adapter_gtest_json",
         "true_noop_merge",
@@ -213,7 +206,6 @@ targets.tests.gtest_test(
 targets.tests.gtest_test(
     name = "dawn_end2end_wire_tests",
     mixins = [
-        "dawn_end2end_real_hardware_gtests_common_args",
         "result_adapter_gtest_json",
         "true_noop_merge",
         "use_wire",

@@ -43,6 +43,9 @@ targets.bundle(
         "dawn_end2end_validation_layers_tests",
         "dawn_end2end_wire_tests",
     ],
+    mixins = [
+        "dawn_end2end_real_hardware_gtests_common_args",
+    ],
 )
 
 targets.bundle(
@@ -50,6 +53,9 @@ targets.bundle(
     targets = [
         "dawn_end2end_no_dxc_tests",
         "dawn_end2end_no_dxc_validation_layers_tests",
+    ],
+    mixins = [
+        "dawn_end2end_real_hardware_gtests_common_args",
     ],
 )
 

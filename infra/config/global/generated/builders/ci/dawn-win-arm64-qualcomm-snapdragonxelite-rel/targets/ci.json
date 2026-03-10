@@ -73,12 +73,12 @@
       },
       {
         "args": [
+          "--disable-toggles=use_dxc",
           "--use-gpu-in-tests",
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
           "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
-          "--disable-toggles=use_dxc",
           "--adapter-vendor-id=0x4D4F4351"
         ],
         "merge": {
@@ -108,13 +108,13 @@
       },
       {
         "args": [
+          "--disable-toggles=use_dxc",
+          "--enable-backend-validation",
           "--use-gpu-in-tests",
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
           "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
-          "--disable-toggles=use_dxc",
-          "--enable-backend-validation",
           "--adapter-vendor-id=0x4D4F4351"
         ],
         "merge": {
@@ -213,12 +213,12 @@
       },
       {
         "args": [
+          "--enable-backend-validation",
           "--use-gpu-in-tests",
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
           "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
-          "--enable-backend-validation",
           "--adapter-vendor-id=0x4D4F4351"
         ],
         "merge": {
@@ -248,12 +248,12 @@
       },
       {
         "args": [
+          "--use-wire",
           "--use-gpu-in-tests",
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
           "--test-launcher-batch-limit=512",
           "--gtest_filter=-*WebGPU_WebGPU_backend_on*",
-          "--use-wire",
           "--adapter-vendor-id=0x4D4F4351"
         ],
         "merge": {
