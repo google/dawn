@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': 'cdd0b0ea31d723c7dfd55c326c24d1d186d52121',
+  'chromium_revision': '87e7333c948209767e7fdb94955139f04570036d',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -128,7 +128,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@b3aa5bb702ff9e890179fd1e7d3ba346e17ecf8e',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@c42ab4598a74eea2cf3efff9d44b22de155d41af',
     'condition': 'dawn_standalone',
   },
 
@@ -143,7 +143,7 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@97e2bd1131c90d68561f34776219613b9dfc13ba',
+  'url': '{chromium_git}/chromium/src/build@98d6658ed11a1b5abc2d29feec55c51d03861692',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
@@ -253,7 +253,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@867a91fb26b8e90951e564dead1ff59793148c55',
+    'url': '{chromium_git}/chromium/src/testing@9706e50251ae97941aa52cfa82c43c7cd4c3bcf6',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -266,7 +266,7 @@ deps = {
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@0f039f70b89605b7ee1c3d091b13c252167c61f2',
+    'url': '{chromium_git}/catapult.git@e0ebf38a01214aba11f31daa1c743782def031d5',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
@@ -608,7 +608,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@46efd4d0ef7727ead34d1ee15fb4e10eb1574a98',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@2157c84d9a0d075c1ca31cc120590a9743550647',
     'condition': 'dawn_standalone',
   },
 
