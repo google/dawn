@@ -97,5 +97,9 @@ enum class QualcommACPIGen {
 
 IntelGen GetIntelGen(PCIVendorID venderId, PCIDeviceID deviceId);
 QualcommACPIGen GetQualcommACPIGen(PCIVendorID venderId, PCIDeviceID deviceId);
+
+// ARM
+bool IsMaliG68(PCIDeviceID deviceId);
+
 }  // namespace dawn::gpu_info
 #endif  // SRC_DAWN_COMMON_GPUINFO_H_

@@ -48,6 +48,9 @@ namespace {
 // gen9
 const std::array<PCIDeviceID, 2> IrisPlus655 = {{0x3EA5, 0x3EA8}};
 
+// ARM
+const PCIDeviceID kMaliG68 = 0x92041010;
+
 }  // anonymous namespace
 
 DriverVersion::DriverVersion() = default;
@@ -148,6 +151,11 @@ QualcommACPIGen GetQualcommACPIGen(PCIVendorID venderId, PCIDeviceID deviceId) {
     } else {
         return QualcommACPIGen::Unknown;
     }
+}
+
+// ARM GPUs
+bool IsMaliG68(PCIDeviceID deviceId) {
+    return deviceId == kMaliG68;
 }
 
 }  // namespace dawn::gpu_info
