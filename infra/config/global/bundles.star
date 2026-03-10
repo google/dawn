@@ -60,6 +60,25 @@ targets.bundle(
 )
 
 targets.bundle(
+    name = "dawn_end2end_sws_tsan_gtests",
+    targets = [
+        "dawn_end2end_implicit_sync_tests",
+        "dawn_end2end_skip_validation_tests",
+        "dawn_end2end_tests",
+        "dawn_end2end_wire_tests",
+    ],
+    mixins = [
+        "dawn_end2end_sws_tsan_gtest_common_args",
+        # Increase sharding due to TSan slowness.
+        targets.mixin(
+            swarming = targets.swarming(
+                shards = 5,
+            ),
+        ),
+    ],
+)
+
+targets.bundle(
     name = "real_hardware_common_gtests",
     targets = [
         "dawn_end2end_real_hardware_common_gtests",
