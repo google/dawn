@@ -309,6 +309,7 @@ targets.tests.gtest_test(
     mixins = [
         "clusterfuzz_wire_trace_dir",
         "result_adapter_gtest_json",
+        "use_wire",
         "wire_trace_merge",
     ],
     binary = "dawn_unittests",

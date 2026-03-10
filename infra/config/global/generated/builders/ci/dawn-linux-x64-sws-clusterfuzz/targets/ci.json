@@ -39,7 +39,8 @@
       },
       {
         "args": [
-          "--wire-trace-dir=${ISOLATED_OUTDIR}/clusterfuzz"
+          "--wire-trace-dir=${ISOLATED_OUTDIR}/clusterfuzz",
+          "--use-wire"
         ],
         "merge": {
           "args": [
