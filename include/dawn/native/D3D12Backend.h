@@ -70,22 +70,6 @@ struct DAWN_NATIVE_EXPORT SharedBufferMemoryD3D12ResourceDescriptor : wgpu::Chai
     Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 };
 
-// May be chained on SharedBufferMemoryDescriptor
-struct DAWN_NATIVE_EXPORT SharedBufferMemoryD3D12SharedMemoryFileHandleDescriptor
-    : wgpu::ChainedStruct {
-    SharedBufferMemoryD3D12SharedMemoryFileHandleDescriptor() {
-        sType = static_cast<wgpu::SType>(
-            WGPUSType_SharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor);
-    }
-    // A handle to a shared memory file created with CreateFileMapping. The handle must be closed
-    // outside of Dawn with CloseHandle when it is no longer needed.
-    HANDLE handle = nullptr;
-    uint64_t size = 0u;
-
-    // The size must be a multiple of this alignment to hold a D3D12 buffer resource.
-    constexpr static uint32_t kRequiredAlignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-};
-
 // May be chained on SharedTextureMemoryDescriptor.
 struct DAWN_NATIVE_EXPORT SharedTextureMemoryD3D12ResourceDescriptor : wgpu::ChainedStruct {
     SharedTextureMemoryD3D12ResourceDescriptor() {

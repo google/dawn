@@ -1902,6 +1902,16 @@
             {"name": "label", "type": "string view", "optional": true}
         ]
     },
+    "shared buffer memory D3D12 shared memory file mapping handle descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared buffer memory descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "handle", "type": "void *"},
+            {"name": "size", "type": "uint64_t"}
+        ]
+    },
     "shared texture memory": {
         "category": "object",
         "tags": ["dawn", "native"],

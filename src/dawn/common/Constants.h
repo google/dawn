@@ -116,6 +116,10 @@ inline constexpr uint32_t kMaxResourceTableSize = 64 * 1024;
 // TODO(https://issues.chromium.org/465122000): Find if this is a reasonable amount to
 // reserve for placeholders.
 inline constexpr uint32_t kReservedResourceTableSlots = 1000;
+
+// Required D3D12 shared buffer memory file mapping handle. The size must be a multiple of
+// `D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT` (65536) to hold a D3D12 buffer resource.
+inline constexpr uint32_t kD3D12SharedBufferMemoryFileMappingHandleSizeAlignment = 65536;
 }  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_CONSTANTS_H_

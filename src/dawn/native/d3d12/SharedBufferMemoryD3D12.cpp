@@ -201,12 +201,11 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
 ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     Device* device,
     StringView label,
-    const SharedBufferMemoryD3D12SharedMemoryFileHandleDescriptor* descriptor) {
+    const SharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor* descriptor) {
     HANDLE sharedMemoryFileHandle = descriptor->handle;
     DAWN_INVALID_IF(sharedMemoryFileHandle == nullptr, "shared HANDLE is missing.");
 
-    constexpr uint32_t kAlignment =
-        SharedBufferMemoryD3D12SharedMemoryFileHandleDescriptor::kRequiredAlignment;
+    constexpr uint32_t kAlignment = kD3D12SharedBufferMemoryFileMappingHandleSizeAlignment;
     DAWN_INVALID_IF(descriptor->size % kAlignment != 0,
                     "shared buffer memory size is not a multiple of (%d).", kAlignment);
 

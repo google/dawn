@@ -465,11 +465,10 @@ ResultOrError<Ref<SharedBufferMemoryBase>> Device::ImportSharedBufferMemoryImpl(
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     wgpu::SType type;
-    DAWN_TRY_ASSIGN(
-        type,
-        (unpacked
-             .ValidateBranches<Branch<SharedBufferMemoryD3D12ResourceDescriptor>,
-                               Branch<SharedBufferMemoryD3D12SharedMemoryFileHandleDescriptor>>()));
+    DAWN_TRY_ASSIGN(type,
+                    (unpacked.ValidateBranches<
+                        Branch<SharedBufferMemoryD3D12ResourceDescriptor>,
+                        Branch<SharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor>>()));
 
     switch (type) {
         case wgpu::SType::SharedBufferMemoryD3D12ResourceDescriptor:
@@ -485,7 +484,7 @@ ResultOrError<Ref<SharedBufferMemoryBase>> Device::ImportSharedBufferMemoryImpl(
                 wgpu::FeatureName::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle);
             return SharedBufferMemory::Create(
                 this, descriptor->label,
-                unpacked.Get<SharedBufferMemoryD3D12SharedMemoryFileHandleDescriptor>());
+                unpacked.Get<SharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }

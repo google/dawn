@@ -49,7 +49,7 @@ class SharedBufferMemory final : public SharedBufferMemoryBase {
     static ResultOrError<Ref<SharedBufferMemory>> Create(
         Device* device,
         StringView label,
-        const SharedBufferMemoryD3D12SharedMemoryFileHandleDescriptor* descriptor);
+        const SharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor* descriptor);
 
     ID3D12Resource* GetD3DResource() const;
 
