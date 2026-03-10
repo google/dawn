@@ -15,21 +15,6 @@
           'gtest_tests': 'dawn_end2end_sws_tsan_gtests',
         },
       },
-      'dawn-win-x64-builder-msvc-dbg': {
-        'additional_compile_targets': [
-          'default',
-        ],
-      },
-      'dawn-win-x64-sws-msvc-dbg': {
-        'os_type': 'win',
-        'mixins': [
-          'win10_gce_gpu_pool',
-        ],
-        'test_suites': {
-          'gtest_tests': 'win_software_renderer_gtests',
-          'isolated_scripts': 'win_software_renderer_isolated_scripts',
-        },
-      },
     },
   },
 ]
