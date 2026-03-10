@@ -47,8 +47,9 @@ struct ExternalTexture {
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ExternalTexture, metadata, plane0, plane1);
 
-    TINT_REFLECT_EQUALS(ExternalTexture);
     TINT_REFLECT_HASH_CODE(ExternalTexture);
+
+    bool operator==(const ExternalTexture&) const = default;
 };
 
 using BindingMap = std::unordered_map<BindingPoint, BindingPoint>;
@@ -81,8 +82,9 @@ struct Bindings {
                  external_texture,
                  input_attachment);
 
-    TINT_REFLECT_EQUALS(Bindings);
     TINT_REFLECT_HASH_CODE(Bindings);
+
+    bool operator==(const Bindings&) const = default;
 };
 
 }  // namespace tint

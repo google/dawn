@@ -54,8 +54,9 @@ struct SubgroupMatrixMultiply {
     SubgroupMatrixType output_type;
 
     TINT_REFLECT(SubgroupMatrixMultiply, M, N, K, input_type, output_type);
-    TINT_REFLECT_EQUALS(SubgroupMatrixMultiply);
     TINT_REFLECT_HASH_CODE(SubgroupMatrixMultiply);
+
+    bool operator==(const SubgroupMatrixMultiply&) const = default;
 };
 
 enum class SubgroupMatrixDirection : uint8_t {
@@ -74,8 +75,9 @@ struct SubgroupMatrixConfig {
     SubgroupMatrixDirection direction;
 
     TINT_REFLECT(SubgroupMatrixConfig, M, N, K, type, direction);
-    TINT_REFLECT_EQUALS(SubgroupMatrixConfig);
     TINT_REFLECT_HASH_CODE(SubgroupMatrixConfig);
+
+    bool operator==(const SubgroupMatrixConfig&) const = default;
 };
 
 }  // namespace tint
@@ -103,8 +105,9 @@ struct SubgroupMatrixInfo {
     std::unordered_set<SubgroupMatrixConfig> configs;
 
     TINT_REFLECT(SubgroupMatrixInfo, multiplies, configs);
-    TINT_REFLECT_EQUALS(SubgroupMatrixInfo);
     TINT_REFLECT_HASH_CODE(SubgroupMatrixInfo);
+
+    bool operator==(const SubgroupMatrixInfo&) const = default;
 };
 
 }  // namespace tint

@@ -65,7 +65,7 @@ struct ArrayLengthFromUniformOptions {
                  ubo_binding,
                  buffer_sizes_offset,
                  bindpoint_to_size_index);
-    TINT_REFLECT_EQUALS(ArrayLengthFromUniformOptions);
+    bool operator==(const ArrayLengthFromUniformOptions&) const = default;
 };
 
 /// Options used to specify a mapping of binding points to indices into a UBO
@@ -86,7 +86,7 @@ struct ArrayOffsetFromUniformOptions {
                  ubo_binding,
                  buffer_offsets_offset,
                  bindpoint_to_offset_index);
-    TINT_REFLECT_EQUALS(ArrayOffsetFromUniformOptions);
+    bool operator==(const ArrayOffsetFromUniformOptions&) const = default;
 };
 
 /// Data for a single pixel local attachment
@@ -107,7 +107,7 @@ struct PixelLocalAttachment {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(PixelLocalAttachment, index, format);
-    TINT_REFLECT_EQUALS(PixelLocalAttachment);
+    bool operator==(const PixelLocalAttachment&) const = default;
 };
 
 /// Data used to specify pixel local mappings
@@ -120,7 +120,7 @@ struct PixelLocalOptions {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(PixelLocalOptions, attachments, group_index);
-    TINT_REFLECT_EQUALS(PixelLocalOptions);
+    bool operator==(const PixelLocalOptions&) const = default;
 };
 
 /// Configuration options used for generating HLSL.
@@ -151,7 +151,7 @@ struct Options {
                      scalarize_max_min_clamp,
                      polyfill_reflect_vec2_f32,
                      polyfill_subgroup_broadcast_f16);
-        TINT_REFLECT_EQUALS(Workarounds);
+        bool operator==(const Workarounds&) const = default;
     };
 
     /// The set of options for things which are only available in certain shader models
@@ -169,7 +169,7 @@ struct Options {
         bool polyfill_pack_unpack_4x8 = false;
 
         TINT_REFLECT(Extensions, polyfill_dot_4x8_packed, polyfill_pack_unpack_4x8);
-        TINT_REFLECT_EQUALS(Extensions);
+        bool operator==(const Extensions&) const = default;
     };
 
     /// Constructor
@@ -288,7 +288,7 @@ struct Options {
                  pixel_local,
                  resource_table,
                  substitute_overrides_config);
-    TINT_REFLECT_EQUALS(Options);
+    bool operator==(const Options&) const = default;
 };
 
 }  // namespace tint::hlsl::writer

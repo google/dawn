@@ -56,8 +56,9 @@ struct ArrayLengthOptions {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ArrayLengthOptions, ubo_binding, buffer_sizes_offset, bindpoint_to_size_index);
-    TINT_REFLECT_EQUALS(ArrayLengthOptions);
     TINT_REFLECT_HASH_CODE(ArrayLengthOptions);
+
+    bool operator==(const ArrayLengthOptions&) const = default;
 };
 
 /// Information to configure an argument buffer
@@ -72,8 +73,9 @@ struct ArgumentBufferInfo {
     std::unordered_map<uint32_t, uint32_t> binding_info_to_offset_index{};
 
     TINT_REFLECT(ArgumentBufferInfo, id, dynamic_buffer_id, binding_info_to_offset_index);
-    TINT_REFLECT_EQUALS(ArgumentBufferInfo);
     TINT_REFLECT_HASH_CODE(ArgumentBufferInfo);
+
+    bool operator==(const ArgumentBufferInfo&) const = default;
 };
 
 /// Configuration options used for generating MSL.
@@ -86,8 +88,9 @@ struct Options {
 
         /// Reflect the fields of this class so that it can be used by tint::ForeachField()
         TINT_REFLECT(RangeOffsets, min, max);
-        TINT_REFLECT_EQUALS(RangeOffsets);
         TINT_REFLECT_HASH_CODE(RangeOffsets);
+
+        bool operator==(const RangeOffsets&) const = default;
     };
 
     /// The set of options which control workarounds for driver issues.
@@ -130,8 +133,9 @@ struct Options {
                      polyfill_unpack_2x16_unorm,
                      polyfill_tanh_f16,
                      replace_workgroup_bool_with_u32);
-        TINT_REFLECT_EQUALS(Workarounds);
         TINT_REFLECT_HASH_CODE(Workarounds);
+
+        bool operator==(const Workarounds&) const = default;
     };
 
     /// Any options which are controlled by the current Metal version.
@@ -145,8 +149,9 @@ struct Options {
         bool disable_demote_to_helper = false;
 
         TINT_REFLECT(Extensions, disable_demote_to_helper);
-        TINT_REFLECT_EQUALS(Extensions);
         TINT_REFLECT_HASH_CODE(Extensions);
+
+        bool operator==(const Extensions&) const = default;
     };
 
     /// Constructor
@@ -249,8 +254,9 @@ struct Options {
                  depth_range_offsets,
                  bindings,
                  substitute_overrides_config);
-    TINT_REFLECT_EQUALS(Options);
     TINT_REFLECT_HASH_CODE(Options);
+
+    bool operator==(const Options&) const = default;
 };
 
 }  // namespace tint::msl::writer

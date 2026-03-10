@@ -92,7 +92,7 @@ struct ResourceTableConfig {
                  resource_table_binding,
                  storage_buffer_binding,
                  default_binding_type_order);
-    TINT_REFLECT_EQUALS(ResourceTableConfig);
+    bool operator==(const ResourceTableConfig&) const = default;
 };
 
 }  // namespace tint

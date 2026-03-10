@@ -55,8 +55,9 @@ struct Options {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options, entry_point_name, substitute_overrides_config);
-    TINT_REFLECT_EQUALS(Options);
     TINT_REFLECT_HASH_CODE(Options);
+
+    bool operator==(const Options&) const = default;
 };
 
 }  // namespace tint::null::writer
