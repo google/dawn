@@ -118,7 +118,8 @@ wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
                                              uint32_t immediateDataByteSize = 0);
 
 wgpu::PipelineLayout MakePipelineLayout(const wgpu::Device& device,
-                                        std::vector<wgpu::BindGroupLayout> bgls);
+                                        std::vector<wgpu::BindGroupLayout> bgls,
+                                        uint32_t immediateSize = 0);
 
 extern wgpu::ExternalTextureBindingLayout kExternalTextureBindingLayout;
 

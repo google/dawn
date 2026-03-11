@@ -226,18 +226,18 @@ wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
         descriptor.bindGroupLayouts = nullptr;
     }
 
-    if (immediateDataByteSize > 0) {
-        descriptor.immediateSize = immediateDataByteSize;
-    }
+    descriptor.immediateSize = immediateDataByteSize;
 
     return device.CreatePipelineLayout(&descriptor);
 }
 
 wgpu::PipelineLayout MakePipelineLayout(const wgpu::Device& device,
-                                        std::vector<wgpu::BindGroupLayout> bgls) {
+                                        std::vector<wgpu::BindGroupLayout> bgls,
+                                        uint32_t immediateSize) {
     wgpu::PipelineLayoutDescriptor descriptor;
     descriptor.bindGroupLayoutCount = uint32_t(bgls.size());
     descriptor.bindGroupLayouts = bgls.data();
+    descriptor.immediateSize = immediateSize;
     return device.CreatePipelineLayout(&descriptor);
 }
 

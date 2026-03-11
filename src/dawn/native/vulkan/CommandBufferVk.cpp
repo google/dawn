@@ -227,10 +227,18 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true> {
                VkPipelineBindPoint bindPoint) {
         BeforeApply();
 
-        // When the usage of the resource table changes between pipelines, or the resource table is
-        // changed, all the BindGroups are shifted by 1 (due to the resource table being in the
-        // first VkDescriptorSet) so we dirty all bind groups.
         BindGroupMask dirtyBindGroups = mDirtyBindGroupsObjectChangedOrIsDynamic;
+
+        // Changing push constant range invalidates all descriptor sets.
+        // Also clear the last resource table so it gets rebound below.
+        if (mLastAppliedImmediateConstantSize != mImmediateConstantSize) {
+            dirtyBindGroups = mBindGroupLayoutsMask;
+            mLastResourceTable = nullptr;
+        }
+
+        // When the usage of the resource table changes between pipelines, or the resource table
+        // itself is changed, dirty all bind groups because they shift by 1 (the resource table
+        // occupies VkDescriptorSet 0).
         if (mLastUsesResourceTable != mUsesResourceTable || mLastResourceTable != mResourceTable) {
             dirtyBindGroups = mBindGroupLayoutsMask;
 
