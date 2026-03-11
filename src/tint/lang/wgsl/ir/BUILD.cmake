@@ -78,6 +78,7 @@ tint_target_add_external_dependencies(tint_lang_wgsl_ir lib
 ################################################################################
 tint_add_target(tint_lang_wgsl_ir_test test
   lang/wgsl/ir/atomic_vec2u_to_from_u64_test.cc
+  lang/wgsl/ir/builtin_call_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_ir_test test
@@ -88,6 +89,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ir_test test
   tint_lang_core_ir
   tint_lang_core_ir_transform
   tint_lang_core_ir_transform_test
+  tint_lang_core_ir_test
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast

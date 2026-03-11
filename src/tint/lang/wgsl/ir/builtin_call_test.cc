@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,37 +25,45 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/ir/builtin_call.h"
+#include "src/tint/lang/wgsl/ir/builtin_call.h"
 
-#include "src/tint/lang/core/ir/clone_context.h"
-#include "src/tint/lang/core/ir/module.h"
-#include "src/tint/utils/ice/ice.h"
+#include "gmock/gmock.h"
+#include "src/tint/lang/core/ir/ir_helper_test.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::hlsl::ir::BuiltinCall);
+namespace tint::wgsl::ir {
+namespace {
 
-namespace tint::hlsl::ir {
+using namespace tint::core::number_suffixes;  // NOLINT
+using IR_WgslBuiltinCallTest = core::ir::IRTestHelper;
 
-BuiltinCall::BuiltinCall(Id id,
-                         core::ir::InstructionResult* result,
-                         BuiltinFn func,
-                         VectorRef<core::ir::Value*> arguments)
-    : Base(id, result, arguments), func_(func) {
-    flags_.Add(Flag::kSequenced);
-    TINT_ASSERT(func != BuiltinFn::kNone);
+TEST_F(IR_WgslBuiltinCallTest, Clone) {
+    auto* builtin = b.Call<BuiltinCall>(mod.Types().void_(), BuiltinFn::kAbs, 1_i);
+
+    auto* new_b = clone_ctx.Clone(builtin);
+
+    EXPECT_NE(builtin, new_b);
+    EXPECT_NE(builtin->Result(), new_b->Result());
+    EXPECT_EQ(mod.Types().void_(), new_b->Result()->Type());
+
+    EXPECT_EQ(BuiltinFn::kAbs, new_b->Func());
+
+    auto args = new_b->Args();
+    EXPECT_EQ(1u, args.size());
+    auto* val0 = args[0]->As<core::ir::Constant>()->Value();
+    EXPECT_EQ(1_i, val0->As<core::constant::Scalar<core::i32>>()->ValueAs<core::i32>());
 }
 
-BuiltinCall::~BuiltinCall() = default;
+TEST_F(IR_WgslBuiltinCallTest, CloneWithExplicitParams) {
+    auto* builtin = b.Call<BuiltinCall>(mod.Types().void_(), BuiltinFn::kAbs, 1_i);
+    builtin->SetExplicitTemplateParams(Vector{mod.Types().i32()});
 
-BuiltinCall* BuiltinCall::Clone(core::ir::CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result());
-    auto new_args = ctx.Clone<BuiltinCall::kDefaultNumOperands>(Args());
-    auto* cloned = ctx.ir.CreateInstruction<BuiltinCall>(new_result, func_, new_args);
-    cloned->SetExplicitTemplateParams(ExplicitTemplateParams());
-    return cloned;
+    auto* new_b = clone_ctx.Clone(builtin);
+    EXPECT_NE(builtin->Result(), new_b->Result());
+    EXPECT_EQ(mod.Types().void_(), new_b->Result()->Type());
+
+    EXPECT_EQ(BuiltinFn::kAbs, new_b->Func());
+    EXPECT_THAT(new_b->ExplicitTemplateParams(), testing::ElementsAre(mod.Types().i32()));
 }
 
-tint::core::ir::Instruction::Accesses BuiltinCall::GetSideEffects() const {
-    return tint::hlsl::GetSideEffects(func_);
-}
-
-}  // namespace tint::hlsl::ir
+}  // namespace
+}  // namespace tint::wgsl::ir

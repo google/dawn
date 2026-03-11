@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/msl/ir/builtin_call.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
@@ -59,6 +60,18 @@ TEST_F(IR_MslBuiltinCallTest, Clone) {
 
     auto* val0 = args[0]->As<core::ir::Constant>()->Value();
     EXPECT_EQ(0_u, val0->As<core::constant::Scalar<core::u32>>()->ValueAs<core::u32>());
+}
+
+TEST_F(IR_MslBuiltinCallTest, CloneWithExplicitParams) {
+    auto* builtin = b.Call<BuiltinCall>(mod.Types().void_(), BuiltinFn::kThreadgroupBarrier, 0_u);
+    builtin->SetExplicitTemplateParams(Vector{mod.Types().i32()});
+
+    auto* new_b = clone_ctx.Clone(builtin);
+    EXPECT_NE(builtin->Result(), new_b->Result());
+    EXPECT_EQ(mod.Types().void_(), new_b->Result()->Type());
+
+    EXPECT_EQ(BuiltinFn::kThreadgroupBarrier, new_b->Func());
+    EXPECT_THAT(new_b->ExplicitTemplateParams(), testing::ElementsAre(mod.Types().i32()));
 }
 
 TEST_F(IR_MslBuiltinCallTest, DoesNotMatchMemberFunction) {

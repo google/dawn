@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/glsl/ir/member_builtin_call.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
@@ -63,6 +64,26 @@ TEST_F(IR_GlslMemberBuiltinCallTest, Clone) {
 
     auto args = new_b->Args();
     ASSERT_EQ(0u, args.size());
+}
+
+TEST_F(IR_GlslMemberBuiltinCallTest, CloneWithExplicitParams) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.array<u32>()},
+                                                });
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* access = b.Access(ty.ptr<storage, array<u32>, read_write>(), var, 0_u);
+    auto* builtin = b.MemberCall<MemberBuiltinCall>(mod.Types().i32(), BuiltinFn::kLength, access);
+    builtin->SetExplicitTemplateParams(Vector{mod.Types().i32()});
+
+    auto* new_b = clone_ctx.Clone(builtin);
+    EXPECT_NE(builtin->Result(), new_b->Result());
+    EXPECT_EQ(mod.Types().i32(), new_b->Result()->Type());
+
+    EXPECT_EQ(BuiltinFn::kLength, new_b->Func());
+    EXPECT_THAT(new_b->ExplicitTemplateParams(), testing::ElementsAre(mod.Types().i32()));
 }
 
 TEST_F(IR_GlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {

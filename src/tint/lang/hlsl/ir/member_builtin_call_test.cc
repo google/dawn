@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/hlsl/ir/member_builtin_call.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
@@ -66,6 +67,21 @@ TEST_F(IR_HlslMemberBuiltinCallTest, Clone) {
     auto args = new_b->Args();
     ASSERT_EQ(1u, args.size());
     EXPECT_TRUE(args[0]->Type()->Is<core::type::U32>());
+}
+
+TEST_F(IR_HlslMemberBuiltinCallTest, CloneWithExplicitParams) {
+    auto* buf = ty.Get<hlsl::type::ByteAddressBuffer>(core::Access::kReadWrite);
+
+    auto* t = b.FunctionParam("t", buf);
+    auto* builtin = b.MemberCall<MemberBuiltinCall>(mod.Types().u32(), BuiltinFn::kLoad, t, 2_u);
+    builtin->SetExplicitTemplateParams(Vector{mod.Types().i32()});
+
+    auto* new_b = clone_ctx.Clone(builtin);
+    EXPECT_NE(builtin->Result(), new_b->Result());
+    EXPECT_EQ(mod.Types().u32(), new_b->Result()->Type());
+
+    EXPECT_EQ(BuiltinFn::kLoad, new_b->Func());
+    EXPECT_THAT(new_b->ExplicitTemplateParams(), testing::ElementsAre(mod.Types().i32()));
 }
 
 TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchNonMemberFunction) {

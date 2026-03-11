@@ -76,7 +76,10 @@ libtint_source_set("ir") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    sources = [ "atomic_vec2u_to_from_u64_test.cc" ]
+    sources = [
+      "atomic_vec2u_to_from_u64_test.cc",
+      "builtin_call_test.cc",
+    ]
     deps = [
       "${dawn_root}/src/utils",
       "${tint_src_dir}:gmock_and_gtest",
@@ -85,6 +88,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/intrinsic",
       "${tint_src_dir}/lang/core/ir",
+      "${tint_src_dir}/lang/core/ir:unittests",
       "${tint_src_dir}/lang/core/ir/transform",
       "${tint_src_dir}/lang/core/ir/transform:unittests",
       "${tint_src_dir}/lang/core/type",

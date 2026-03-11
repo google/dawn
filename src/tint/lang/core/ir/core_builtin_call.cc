@@ -52,7 +52,9 @@ CoreBuiltinCall::~CoreBuiltinCall() = default;
 CoreBuiltinCall* CoreBuiltinCall::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result());
     auto args = ctx.Remap<CoreBuiltinCall::kDefaultNumOperands>(Args());
-    return ctx.ir.CreateInstruction<CoreBuiltinCall>(new_result, func_, args);
+    auto* cloned = ctx.ir.CreateInstruction<CoreBuiltinCall>(new_result, func_, args);
+    cloned->SetExplicitTemplateParams(ExplicitTemplateParams());
+    return cloned;
 }
 
 tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
