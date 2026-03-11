@@ -22,7 +22,7 @@ vars = {
   'dawn_tintd': False, # Also fetches dependencies required for building tintd.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:d8c2f07d653520568da7cace755a87dad241b72d',
+  'dawn_gn_version': 'git_revision:129ce6b9af1a93143acd8f8dea6fb8c6cb65abc9',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -66,7 +66,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '87e7333c948209767e7fdb94955139f04570036d',
+  'chromium_revision': '8d43dd57d980c7540458d038c087705fba9b855f',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -128,7 +128,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@c42ab4598a74eea2cf3efff9d44b22de155d41af',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@8df8a70a8349a709b8996a11279eb226cae5aced',
     'condition': 'dawn_standalone',
   },
 
@@ -143,11 +143,11 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@98d6658ed11a1b5abc2d29feec55c51d03861692',
+  'url': '{chromium_git}/chromium/src/build@7d29c62736304aeaac07df0b75546ffd2b75917a',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@ef29ced9b02bcb9586894a7632873baa5c67c660',
+  'url': '{chromium_git}/chromium/src/tools/clang@c5563f5d680277c5e0e46daef3b7b0594f27ee94',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -253,7 +253,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@9706e50251ae97941aa52cfa82c43c7cd4c3bcf6',
+    'url': '{chromium_git}/chromium/src/testing@e7a1e88ecc35a70f3d198674042753ec9e8e3650',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
