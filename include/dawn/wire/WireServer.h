@@ -140,15 +140,19 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
                                            size_t size) = 0;
         std::span<uint8_t> GetTarget() const;
 
+        std::span<uint8_t> GetSource() const {
+            return std::span<uint8_t>(GetSourceData(), GetSourceSize());
+        }
+
+      private:
+        WriteHandle(const WriteHandle&) = delete;
+        WriteHandle& operator=(const WriteHandle&) = delete;
+
         // Returns a direct pointer to the source data that will
         // be copied into Target in DeserializeDataUpdate if accessible, nullptr
         // otherwise.
         virtual uint8_t* GetSourceData() const { return nullptr; }
         virtual size_t GetSourceSize() const { return 0; }
-
-      private:
-        WriteHandle(const WriteHandle&) = delete;
-        WriteHandle& operator=(const WriteHandle&) = delete;
 
         uint8_t* mTargetData = nullptr;
         size_t mDataLength = 0;
