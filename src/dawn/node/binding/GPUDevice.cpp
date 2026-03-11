@@ -353,7 +353,7 @@ interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
         return {};
     }
 
-    wgpu::TextureBindingViewDimensionDescriptor texture_binding_view_dimension_desc{};
+    wgpu::TextureBindingViewDimension texture_binding_view_dimension_desc{};
     wgpu::TextureViewDimension texture_binding_view_dimension;
     if (descriptor.textureBindingViewDimension.has_value() &&
         conv(texture_binding_view_dimension, descriptor.textureBindingViewDimension)) {

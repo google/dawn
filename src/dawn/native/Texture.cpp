@@ -643,7 +643,7 @@ wgpu::TextureViewDimension ResolveDefaultCompatiblityTextureBindingViewDimension
     const DeviceBase* device,
     const UnpackedPtr<TextureDescriptor>& descriptor) {
     auto textureBindingViewDimension = wgpu::TextureViewDimension::Undefined;
-    if (auto* subDesc = descriptor.Get<TextureBindingViewDimensionDescriptor>()) {
+    if (auto* subDesc = descriptor.Get<TextureBindingViewDimension>()) {
         textureBindingViewDimension = subDesc->textureBindingViewDimension;
     }
 
@@ -1067,9 +1067,9 @@ TextureBase::TextureBase(DeviceBase* device,
     auto textureBindingViewDimension = wgpu::TextureViewDimension::Undefined;
     for (const wgpu::ChainedStruct* chain = descriptor->nextInChain; chain != nullptr;
          chain = chain->nextInChain) {
-        if (chain->sType == wgpu::SType::TextureBindingViewDimensionDescriptor) {
+        if (chain->sType == wgpu::SType::TextureBindingViewDimension) {
             textureBindingViewDimension =
-                reinterpret_cast<const TextureBindingViewDimensionDescriptor*>(chain)
+                reinterpret_cast<const TextureBindingViewDimension*>(chain)
                     ->textureBindingViewDimension;
         }
     }

@@ -178,7 +178,7 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         texDescriptor.usage = usage;
         texDescriptor.mipLevelCount = mipLevelCount;
         // Test cube texture copy for compat.
-        wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+        wgpu::TextureBindingViewDimension textureBindingViewDimensionDesc;
         if (IsCompatibilityMode() &&
             bindingViewDimension != wgpu::TextureViewDimension::Undefined) {
             textureBindingViewDimensionDesc.textureBindingViewDimension = bindingViewDimension;

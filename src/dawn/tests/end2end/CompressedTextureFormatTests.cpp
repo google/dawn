@@ -765,7 +765,7 @@ TEST_P(CompressedTextureFormatTest, Cube) {
         config.copyExtent3D.width / BlockWidthInTexels() * utils::GetTexelBlockSizeInBytes(format),
         kTextureBytesPerRowAlignment);
     config.rowsPerImage = kLayers;
-    wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+    wgpu::TextureBindingViewDimension textureBindingViewDimensionDesc;
     if (IsCompatibilityMode()) {
         textureBindingViewDimensionDesc.textureBindingViewDimension =
             wgpu::TextureViewDimension::Cube;

@@ -353,7 +353,7 @@ class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParam
 
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
         wgpu::TextureDescriptor descriptor = {};
-        wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+        wgpu::TextureBindingViewDimension textureBindingViewDimensionDesc;
         if (IsCompatibilityMode() &&
             bindingViewDimension != wgpu::TextureViewDimension::Undefined) {
             textureBindingViewDimensionDesc.textureBindingViewDimension = bindingViewDimension;

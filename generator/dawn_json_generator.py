@@ -112,7 +112,6 @@ def validate_and_get_tags(json_data):
         'dawn',
         'emscripten',
         'native',
-        'compat',
         'deprecated',
         'art',
     }
@@ -162,9 +161,6 @@ class EnumType(Type):
                 tags = []
 
             prefix = 0
-            if 'compat' in tags:
-                assert prefix == 0
-                prefix = 0x0002_0000
 
             if 'dawn' in tags:
                 # Dawn-only or Dawn+Emscripten
@@ -1587,15 +1583,12 @@ class MultiGeneratorFromDawnJSON(Generator):
         renders = []
         imported_templates = []
 
-        params_dawn = parse_json(
-            loaded_json,
-            enabled_tags=['compat', 'dawn', 'native', 'deprecated'])
+        params_dawn = parse_json(loaded_json,
+                                 enabled_tags=['dawn', 'native', 'deprecated'])
 
-        params_all = parse_json(loaded_json,
-                                enabled_tags=[
-                                    'compat', 'dawn', 'emscripten', 'native',
-                                    'deprecated'
-                                ])
+        params_all = parse_json(
+            loaded_json,
+            enabled_tags=['dawn', 'emscripten', 'native', 'deprecated'])
 
         metadata = params_dawn['metadata']
         RENDER_PARAMS_BASE = make_base_render_params(metadata)
@@ -1693,8 +1686,8 @@ class MultiGeneratorFromDawnJSON(Generator):
             ]
 
             assert api == 'webgpu'
-            params_emscripten = parse_json(
-                loaded_json, enabled_tags=['compat', 'emscripten'])
+            params_emscripten = parse_json(loaded_json,
+                                           enabled_tags=['emscripten'])
             # system/include/webgpu
             imported_templates.append('BSD_LICENSE')
             renders.append(
@@ -1725,8 +1718,8 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'emdawnwebgpu_js' in targets:
             assert api == 'webgpu'
-            params_emscripten = parse_json(
-                loaded_json, enabled_tags=['compat', 'emscripten'])
+            params_emscripten = parse_json(loaded_json,
+                                           enabled_tags=['emscripten'])
             renders.append(
                 FileRender('emdawnwebgpu/struct_info_webgpu.json',
                            'src/emdawnwebgpu/struct_info_webgpu.json',
@@ -1743,8 +1736,8 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'emdawnwebgpu_link_test_cpp' in targets:
             assert api == 'webgpu'
-            params_emscripten = parse_json(
-                loaded_json, enabled_tags=['compat', 'emscripten'])
+            params_emscripten = parse_json(loaded_json,
+                                           enabled_tags=['emscripten'])
             renders.append(
                 FileRender('emdawnwebgpu/LinkTest.cpp',
                            'src/emdawnwebgpu/LinkTest.cpp',
@@ -1851,7 +1844,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             # Generate ComboLimits without any extensions so it works on
             # all targets (and doesn't chain any experimental stuff like
             # extensions that are output only and produce warnings on input).
-            params = parse_json(loaded_json, enabled_tags=['compat'])
+            params = parse_json(loaded_json, enabled_tags=[])
             renders.append(
                 FileRender('dawn/utils/ComboLimits.h',
                            'src/dawn/utils/ComboLimits.h',
@@ -1862,10 +1855,9 @@ class MultiGeneratorFromDawnJSON(Generator):
                            [RENDER_PARAMS_BASE, params]))
 
         if 'wire' in targets:
-            params_dawn_wire = parse_json(
-                loaded_json,
-                enabled_tags=['compat', 'dawn', 'deprecated'],
-                disabled_tags=['native'])
+            params_dawn_wire = parse_json(loaded_json,
+                                          enabled_tags=['dawn', 'deprecated'],
+                                          disabled_tags=['native'])
             additional_params = compute_wire_params(params_dawn_wire,
                                                     wire_json)
 

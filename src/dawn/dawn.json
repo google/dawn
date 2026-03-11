@@ -1662,7 +1662,6 @@
         "category": "structure",
         "chained": "out",
         "chain roots": ["limits"],
-        "tags": ["compat"],
         "members": [
             {"name": "max storage buffers in vertex stage", "type": "uint32_t", "default": "limit u32 undefined"},
             {"name": "max storage textures in vertex stage", "type": "uint32_t", "default": "limit u32 undefined"},
@@ -3956,9 +3955,9 @@
             {"value": 10, "name": "surface color management"},
             {"value": 11, "name": "request adapter WebXR options"},
             {"value": 12, "name": "texture component swizzle descriptor"},
-
-            {"value": 0, "name": "compatibility mode limits", "tags": ["compat"]},
-            {"value": 1, "name": "texture binding view dimension descriptor", "tags": ["compat"]},
+            {"value": 15, "name": "compatibility mode limits"},
+            {"value": 16, "name": "texture binding view dimension", "enum_value_conflict": true},
+            {"value": 16, "name": "texture binding view dimension descriptor", "tags": ["deprecated"], "enum_value_conflict": true},
 
             {"value": 0, "name": "emscripten surface source canvas HTML selector", "tags": ["emscripten"]},
 
@@ -4180,10 +4179,14 @@
         ]
     },
     "texture binding view dimension descriptor": {
+        "category": "typedef",
+        "type": "texture binding view dimension",
+        "tags": ["dawn"]
+    },
+    "texture binding view dimension": {
         "category": "structure",
         "chained": "in",
         "chain roots": ["texture descriptor"],
-        "tags": ["compat"],
         "members": [
             {"name": "texture binding view dimension", "type": "texture view dimension"}
         ]

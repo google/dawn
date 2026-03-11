@@ -493,7 +493,7 @@ TEST_P(SpotTests, TextureBindingViewDimension) {
     textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
 
-    wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+    wgpu::TextureBindingViewDimension textureBindingViewDimensionDesc;
     textureBindingViewDimensionDesc.textureBindingViewDimension =
         wgpu::TextureViewDimension::e2DArray;
     textureDesc.nextInChain = &textureBindingViewDimensionDesc;

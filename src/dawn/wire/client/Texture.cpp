@@ -81,10 +81,10 @@ Texture::Texture(const ObjectBaseParams& params,
     if (!device->APIHasFeature(WGPUFeatureName_CoreFeaturesAndLimits)) {
         for (auto* chain = descriptor->nextInChain; chain; chain = chain->next) {
             switch (chain->sType) {
-                case WGPUSType_TextureBindingViewDimensionDescriptor:
+                case WGPUSType_TextureBindingViewDimension:
                     if (!device->APIHasFeature(WGPUFeatureName_CoreFeaturesAndLimits)) {
                         WGPUTextureViewDimension viewDimension =
-                            reinterpret_cast<WGPUTextureBindingViewDimensionDescriptor*>(chain)
+                            reinterpret_cast<WGPUTextureBindingViewDimension*>(chain)
                                 ->textureBindingViewDimension;
                         mTextureBindingViewDimension = viewDimension;
                     }

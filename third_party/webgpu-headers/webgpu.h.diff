@@ -1,81 +1,34 @@
 --- webgpu_header
 +++ dawn_header
 @@
- typedef struct WGPUBufferImpl* WGPUBuffer WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUCommandBufferImpl* WGPUCommandBuffer WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUCommandEncoderImpl* WGPUCommandEncoder WGPU_OBJECT_ATTRIBUTE;
 -typedef struct WGPUComputePassEncoderImpl* WGPUComputePassEncoder WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUComputePipelineImpl* WGPUComputePipeline WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUDeviceImpl* WGPUDevice WGPU_OBJECT_ATTRIBUTE;
+@@
 -typedef struct WGPUExternalTextureImpl* WGPUExternalTexture WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUInstanceImpl* WGPUInstance WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUPipelineLayoutImpl* WGPUPipelineLayout WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUQuerySetImpl* WGPUQuerySet WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUQueueImpl* WGPUQueue WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPURenderBundleImpl* WGPURenderBundle WGPU_OBJECT_ATTRIBUTE;
+@@
 -typedef struct WGPURenderBundleEncoderImpl* WGPURenderBundleEncoder WGPU_OBJECT_ATTRIBUTE;
 -typedef struct WGPURenderPassEncoderImpl* WGPURenderPassEncoder WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPURenderPipelineImpl* WGPURenderPipeline WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUSamplerImpl* WGPUSampler WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUShaderModuleImpl* WGPUShaderModule WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUSurfaceImpl* WGPUSurface WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUTextureImpl* WGPUTexture WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUTextureViewImpl* WGPUTextureView WGPU_OBJECT_ATTRIBUTE;
+@@
 +typedef struct WGPUComputePassEncoderImpl* WGPUComputePassEncoder WGPU_OBJECT_ATTRIBUTE;
 +typedef struct WGPURenderBundleEncoderImpl* WGPURenderBundleEncoder WGPU_OBJECT_ATTRIBUTE;
 +typedef struct WGPURenderPassEncoderImpl* WGPURenderPassEncoder WGPU_OBJECT_ATTRIBUTE;
- 
- struct WGPUAdapterInfo;
-+struct WGPUBindGroupEntry;
- struct WGPUBlendComponent;
- struct WGPUBufferBindingLayout;
- struct WGPUBufferDescriptor;
 @@
- struct WGPUCompilationMessage;
- struct WGPUConstantEntry;
- struct WGPUExtent3D;
++struct WGPUBindGroupEntry;
+@@
 -struct WGPUExternalTextureBindingEntry;
 -struct WGPUExternalTextureBindingLayout;
- struct WGPUFuture;
- struct WGPUInstanceLimits;
- struct WGPULimits;
 @@
- struct WGPUTexelCopyBufferLayout;
- struct WGPUTextureBindingLayout;
- struct WGPUTextureComponentSwizzle;
 -struct WGPUTextureViewDescriptor;
- struct WGPUVertexAttribute;
+@@
 -struct WGPUBindGroupEntry;
 +struct WGPUBindGroupDescriptor;
- struct WGPUBindGroupLayoutEntry;
- struct WGPUBlendState;
- struct WGPUCompilationInfo;
 @@
- struct WGPUTextureComponentSwizzleDescriptor;
- struct WGPUTextureDescriptor;
- struct WGPUVertexBufferLayout;
 -struct WGPUBindGroupDescriptor;
- struct WGPUBindGroupLayoutDescriptor;
- struct WGPUColorTargetState;
- struct WGPUComputePipelineDescriptor;
- struct WGPURenderPassDescriptor;
-+struct WGPUTextureViewDescriptor;
- struct WGPUVertexState;
- struct WGPUFragmentState;
- struct WGPURenderPipelineDescriptor;
 @@
-     WGPUSType_SurfaceColorManagement = 0x0000000A,
-     WGPUSType_RequestAdapterWebXROptions = 0x0000000B,
-     WGPUSType_TextureComponentSwizzleDescriptor = 0x0000000C,
++struct WGPUTextureViewDescriptor;
+@@
 -    WGPUSType_ExternalTextureBindingLayout = 0x0000000D,
 -    WGPUSType_ExternalTextureBindingEntry = 0x0000000E,
-     WGPUSType_Force32 = 0x7FFFFFFF
- } WGPUSType WGPU_ENUM_ATTRIBUTE;
- 
 @@
-     /*.subgroupMaxSize=*/0 _wgpu_COMMA \
- })
- 
 +typedef struct WGPUBindGroupEntry {
 +    WGPUChainedStruct * nextInChain;
 +    uint32_t binding;
@@ -96,13 +49,7 @@
 +    /*.textureView=*/NULL _wgpu_COMMA \
 +})
 +
- typedef struct WGPUBlendComponent {
-     WGPUBlendOperation operation;
-     WGPUBlendFactor srcFactor;
 @@
-     /*.width=*/0 _wgpu_COMMA \
-     /*.height=*/1 _wgpu_COMMA \
-     /*.depthOrArrayLayers=*/1 _wgpu_COMMA \
 -})
 -
 -typedef struct WGPUExternalTextureBindingEntry {
@@ -127,13 +74,7 @@
 -        /*.next=*/NULL _wgpu_COMMA \
 -        /*.sType=*/WGPUSType_ExternalTextureBindingLayout _wgpu_COMMA \
 -    }) _wgpu_COMMA \
- })
- 
- typedef struct WGPUFuture {
 @@
-     /*.a=*/WGPUComponentSwizzle_Undefined _wgpu_COMMA \
- })
- 
 -typedef struct WGPUTextureViewDescriptor {
 -    WGPUChainedStruct * nextInChain;
 -    WGPUStringView label;
@@ -160,13 +101,7 @@
 -    /*.usage=*/WGPUTextureUsage_None _wgpu_COMMA \
 -})
 -
- typedef struct WGPUVertexAttribute {
-     WGPUChainedStruct * nextInChain;
-     WGPUVertexFormat format;
 @@
-     /*.shaderLocation=*/0 _wgpu_COMMA \
- })
- 
 -typedef struct WGPUBindGroupEntry {
 -    WGPUChainedStruct * nextInChain;
 -    uint32_t binding;
@@ -199,13 +134,7 @@
 +    /*.layout=*/NULL _wgpu_COMMA \
 +    /*.entryCount=*/0 _wgpu_COMMA \
 +    /*.entries=*/NULL _wgpu_COMMA \
- })
- 
- typedef struct WGPUBindGroupLayoutEntry {
 @@
-     /*.attributes=*/NULL _wgpu_COMMA \
- })
- 
 -typedef struct WGPUBindGroupDescriptor {
 -    WGPUChainedStruct * nextInChain;
 -    WGPUStringView label;
@@ -222,13 +151,7 @@
 -    /*.entries=*/NULL _wgpu_COMMA \
 -})
 -
- typedef struct WGPUBindGroupLayoutDescriptor {
-     WGPUChainedStruct * nextInChain;
-     WGPUStringView label;
 @@
-     /*.depthStencilAttachment=*/NULL _wgpu_COMMA \
-     /*.occlusionQuerySet=*/NULL _wgpu_COMMA \
-     /*.timestampWrites=*/NULL _wgpu_COMMA \
 +})
 +
 +typedef struct WGPUTextureViewDescriptor {
@@ -255,28 +178,13 @@
 +    /*.arrayLayerCount=*/WGPU_ARRAY_LAYER_COUNT_UNDEFINED _wgpu_COMMA \
 +    /*.aspect=*/WGPUTextureAspect_Undefined _wgpu_COMMA \
 +    /*.usage=*/WGPUTextureUsage_None _wgpu_COMMA \
- })
- 
- typedef struct WGPUVertexState {
 @@
- typedef void (*WGPUProcDeviceAddRef)(WGPUDevice device) WGPU_FUNCTION_ATTRIBUTE;
- typedef void (*WGPUProcDeviceRelease)(WGPUDevice device) WGPU_FUNCTION_ATTRIBUTE;
- 
 -typedef void (*WGPUProcExternalTextureSetLabel)(WGPUExternalTexture externalTexture, WGPUStringView label) WGPU_FUNCTION_ATTRIBUTE;
 -typedef void (*WGPUProcExternalTextureAddRef)(WGPUExternalTexture externalTexture) WGPU_FUNCTION_ATTRIBUTE;
 -typedef void (*WGPUProcExternalTextureRelease)(WGPUExternalTexture externalTexture) WGPU_FUNCTION_ATTRIBUTE;
 -
- typedef WGPUSurface (*WGPUProcInstanceCreateSurface)(WGPUInstance instance, WGPUSurfaceDescriptor const * descriptor) WGPU_FUNCTION_ATTRIBUTE;
- typedef void (*WGPUProcInstanceGetWGSLLanguageFeatures)(WGPUInstance instance, WGPUSupportedWGSLLanguageFeatures * features) WGPU_FUNCTION_ATTRIBUTE;
- typedef WGPUBool (*WGPUProcInstanceHasWGSLLanguageFeature)(WGPUInstance instance, WGPUWGSLLanguageFeatureName feature) WGPU_FUNCTION_ATTRIBUTE;
 @@
- WGPU_EXPORT void wgpuDeviceAddRef(WGPUDevice device) WGPU_FUNCTION_ATTRIBUTE;
- WGPU_EXPORT void wgpuDeviceRelease(WGPUDevice device) WGPU_FUNCTION_ATTRIBUTE;
- 
 -WGPU_EXPORT void wgpuExternalTextureSetLabel(WGPUExternalTexture externalTexture, WGPUStringView label) WGPU_FUNCTION_ATTRIBUTE;
 -WGPU_EXPORT void wgpuExternalTextureAddRef(WGPUExternalTexture externalTexture) WGPU_FUNCTION_ATTRIBUTE;
 -WGPU_EXPORT void wgpuExternalTextureRelease(WGPUExternalTexture externalTexture) WGPU_FUNCTION_ATTRIBUTE;
 -
- WGPU_EXPORT WGPUSurface wgpuInstanceCreateSurface(WGPUInstance instance, WGPUSurfaceDescriptor const * descriptor) WGPU_FUNCTION_ATTRIBUTE;
- WGPU_EXPORT void wgpuInstanceGetWGSLLanguageFeatures(WGPUInstance instance, WGPUSupportedWGSLLanguageFeatures * features) WGPU_FUNCTION_ATTRIBUTE;
- WGPU_EXPORT WGPUBool wgpuInstanceHasWGSLLanguageFeature(WGPUInstance instance, WGPUWGSLLanguageFeatureName feature) WGPU_FUNCTION_ATTRIBUTE;

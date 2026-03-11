@@ -79,7 +79,7 @@ TEST_F(CompatValidationTest, CanNotCreateCubeArrayTexture) {
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.usage = wgpu::TextureUsage::TextureBinding;
 
-    wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+    wgpu::TextureBindingViewDimension textureBindingViewDimensionDesc;
     textureBindingViewDimensionDesc.textureBindingViewDimension =
         wgpu::TextureViewDimension::CubeArray;
     descriptor.nextInChain = &textureBindingViewDimensionDesc;
@@ -1690,7 +1690,7 @@ TEST_P(CompatTextureViewValidationTests,
 
 // Regression test for crbug.com/341167195
 // Resolved default compatibility textureBindingViewDimension should be validated as it may come
-// from the TextureBindingViewDimensionDescriptor
+// from the TextureBindingViewDimension
 TEST_P(CompatTextureViewValidationTests, InvalidTextureBindingViewDimensionDescriptorDescriptor) {
     wgpu::TextureDescriptor descriptor;
     descriptor.size = {1, 1, 1};
@@ -1698,7 +1698,7 @@ TEST_P(CompatTextureViewValidationTests, InvalidTextureBindingViewDimensionDescr
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.usage = wgpu::TextureUsage::TextureBinding;
 
-    wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+    wgpu::TextureBindingViewDimension textureBindingViewDimensionDesc;
     descriptor.nextInChain = &textureBindingViewDimensionDesc;
     // Forcefully set an invalid view dimension.
     textureBindingViewDimensionDesc.textureBindingViewDimension =
@@ -1785,7 +1785,7 @@ class CompatTextureViewDimensionValidationTests : public CompatTextureViewValida
         textureDesc.viewFormatCount = 1;
         textureDesc.viewFormats = &viewFormat;
 
-        wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+        wgpu::TextureBindingViewDimension textureBindingViewDimensionDesc;
 
         if (textureBindingViewDimension != wgpu::TextureViewDimension::Undefined) {
             textureDesc.nextInChain = &textureBindingViewDimensionDesc;

@@ -1857,13 +1857,13 @@ var LibraryWebGPU = {
     if (nextInChainPtr !== 0) {
       var sType = {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.sType, 'i32') }}};
 #if ASSERTIONS
-      assert(sType === {{{ gpu.SType.TextureBindingViewDimensionDescriptor }}});
+      assert(sType === {{{ gpu.SType.TextureBindingViewDimension }}});
       assert(0 === {{{ makeGetValue('nextInChainPtr', gpu.kOffsetOfNextInChainMember, '*') }}});
 #endif
       var textureBindingViewDimensionDescriptor = nextInChainPtr;
       {{{ gpu.makeCheckDescriptor('textureBindingViewDimensionDescriptor') }}}
       textureBindingViewDimension = {{{ gpu.makeGetEnum('textureBindingViewDimensionDescriptor',
-        C_STRUCTS.WGPUTextureBindingViewDimensionDescriptor.textureBindingViewDimension, 'TextureViewDimension') }}};
+        C_STRUCTS.WGPUTextureBindingViewDimension.textureBindingViewDimension, 'TextureViewDimension') }}};
     }
 
     var desc = {

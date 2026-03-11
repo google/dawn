@@ -79,7 +79,7 @@ class TextureViewTestBase : public DawnTest {
 
         // Only set the textureBindingViewDimension in compat mode. It's not needed
         // nor used in non-compat.
-        wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+        wgpu::TextureBindingViewDimension textureBindingViewDimensionDesc;
         if (!HasFlexibleTextureViews()) {
             textureBindingViewDimensionDesc.textureBindingViewDimension =
                 textureBindingViewDimension;
