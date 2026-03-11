@@ -48,7 +48,7 @@ Result<SuccessType> ValidateUsingMetal(const std::string& src_original, MslVersi
         // See crbug.com/425650181
         // The compileOptions.mathMode member is not present on older versions
         // of OSX, and compilation is not protected by the @available check.
-        std::string("\n#pragma METAL fp math_mode(relaxed)\n") + src_original;
+        src_modified = std::string("\n#pragma METAL fp math_mode(relaxed)\n") + src_original;
     } else {
 // Silence the warning that fastMathEnabled is deprecated since we cannot remove it until the
 // minimum support macOS version is macOS 15.0.
