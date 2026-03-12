@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/utils/containers/reverse.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -608,6 +609,17 @@ struct State {
         }
     }
 
+    bool TransformHandle(const type::Type* param) const {
+        if (!param->IsHandle()) {
+            return false;
+        }
+        if (options.transform_handle == HandleTransformLevel::kFull) {
+            return true;
+        }
+        return options.transform_handle == HandleTransformLevel::kExternal &&
+               param->Is<type::ExternalTexture>();
+    }
+
     /// @return true if @p param is a parameter that requires transforming, based on the
     /// transform options.
     /// @param param the function parameter
@@ -631,12 +643,7 @@ struct State {
                     break;
             }
         }
-
-        if (param_type->IsHandle()) {
-            return options.transform_handle;
-        }
-
-        return false;
+        return TransformHandle(param_type);
     }
 
     /// Walks the instructions that built @p value, deleting those that are no longer used.
@@ -659,7 +666,7 @@ struct State {
                     return let->Value();
                 },
                 [&](Load* load) {
-                    if (options.transform_handle) {
+                    if (TransformHandle(load->From()->Type()->UnwrapPtr())) {
                         TINT_DEFER(load->Destroy());
                         return load->From();
                     }

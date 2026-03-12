@@ -152,7 +152,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     core::ir::transform::DirectVariableAccessOptions dva_options;
     dva_options.transform_function = true;
     dva_options.transform_private = true;
-    dva_options.transform_handle = options.workarounds.dva_transform_handle;
+    dva_options.transform_handle = options.workarounds.dva_transform_handle
+                                       ? core::ir::transform::HandleTransformLevel::kFull
+                                       : core::ir::transform::HandleTransformLevel::kExternal;
     TINT_CHECK_RESULT(core::ir::transform::DirectVariableAccess(module, dva_options));
 
     // Must come after DirectVariableAccess as we need all ExternalTextures to have their functions

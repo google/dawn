@@ -163,7 +163,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // texture parameters, and also after `PreservePadding` which inserts functions with storage
         // buffer parameters.
         core::ir::transform::DirectVariableAccessOptions dva_config{};
-        dva_config.transform_handle = true;
+        dva_config.transform_handle = core::ir::transform::HandleTransformLevel::kFull;
         TINT_CHECK_RESULT(core::ir::transform::DirectVariableAccess(module, dva_config));
     }
 

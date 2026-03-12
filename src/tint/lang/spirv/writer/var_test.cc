@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/tint/api/common/bindings.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/spirv/writer/common/helper_test.h"
@@ -609,6 +610,58 @@ TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_NoDva) {
 
     ASSERT_TRUE(Generate(opts)) << Error() << output_;
     EXPECT_INST("OpFunctionParameter");
+}
+
+TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_ExternalDva) {
+    auto* tex =
+        b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+              core::Access::kRead);
+    tex->SetBindingPoint(0, 0);
+    mod.root_block->Append(tex);
+
+    auto* ex_tex = b.Var("ex_tex", handle, ty.external_texture(), core::Access::kRead);
+    ex_tex->SetBindingPoint(0, 1);
+    mod.root_block->Append(ex_tex);
+
+    auto* fn = b.Function("f", ty.void_());
+    auto* t = b.FunctionParam("texparam",
+                              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
+    fn->SetParams({t});
+    b.Append(fn->Block(), [&] {
+        b.Let("p",
+              b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, t, b.Splat(ty.vec2u(), 0_u), 0_u));
+        b.Return(fn);
+    });
+
+    auto* ex_fn = b.Function("ex_f", ty.void_());
+    auto* ex_t = b.FunctionParam("external_tex", ty.external_texture());
+    ex_fn->SetParams({ex_t});
+    b.Append(ex_fn->Block(), [&] {
+        b.Let("p",
+              b.Call(ty.vec4f(), core::BuiltinFn::kTextureLoad, ex_t, b.Splat(ty.vec2u(), 0_u)));
+        b.Return(ex_fn);
+    });
+
+    auto* fn2 = b.ComputeFunction("main");
+    b.Append(fn2->Block(), [&] {
+        auto* t2 = b.Load(tex);
+        auto* t3 = b.Load(ex_tex);
+        b.Call(ty.void_(), fn, t2);
+        b.Call(ty.void_(), ex_fn, t3);
+        b.Return(fn2);
+    });
+
+    Options opts{};
+    opts.workarounds.dva_transform_handle = false;
+    opts.bindings.external_texture.emplace(
+        tint::BindingPoint{0, 1},
+        ExternalMultiplanarTexture{tint::BindingPoint{2, 0}, tint::BindingPoint{3, 0}});
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("%texparam = OpFunctionParameter");
+    // Consider a EXPECT_NOT_INST macro.
+    ASSERT_TRUE(output_.find("%external_tex_params = OpFunctionParameter") == std::string::npos)
+        << output_;
 }
 
 TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_Dva) {
