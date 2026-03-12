@@ -500,33 +500,30 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
 
     DAWN_TRY(device->ValidateObject(descriptor->layout));
     BindGroupLayoutInternalBase* layout = descriptor->layout->GetInternalBindGroupLayout();
-
     const BindGroupLayoutInternalBase::BindingMap& bindingMap = layout->GetBindingMap();
-    DAWN_ASSERT(bindingMap.size() <= kMaxBindingsPerPipelineLayout);
 
     // Validate individual entries.
     bool needsCrossBindingValidation = layout->NeedsCrossBindingValidation();
-    ityp::bitset<APIBindingIndex, kMaxBindingsPerPipelineLayout> bindingsSet;
+    // TODO(https://issues.chromium.org/448578977): Use a more optimized type as 1000 bits on the
+    // stack is a bit much.
+    ityp::bitset<BindingNumber, kMaxBindingsPerBindGroup> bindingsSet;
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
         const BindGroupEntry& entry = descriptor->entries[i];
         BindingNumber binding = BindingNumber(entry.binding);
 
-        const auto& it = bindingMap.find(binding);
-        if (it == bindingMap.end()) {
-            return DAWN_VALIDATION_ERROR(
-                "In entries[%u], binding index %u not present in the bind group layout."
-                "\nExpected layout: %s",
-                i, binding, layout->EntriesToString());
-        }
-
         // Check for redundant entries.
-        APIBindingIndex bindingIndex = it->second;
-        DAWN_INVALID_IF(bindingsSet[bindingIndex],
+        DAWN_INVALID_IF(bindingsSet[binding],
                         "In entries[%u], binding index %u already used by a previous entry", i,
                         binding);
-        bindingsSet.set(bindingIndex);
+        bindingsSet.set(binding);
 
-        const BindingInfo& bindingInfo = layout->GetAPIBindingInfo(bindingIndex);
+        // Check that the entry exists in the BGL and get its info.
+        const auto& it = bindingMap.find(binding);
+        DAWN_INVALID_IF(it == bindingMap.end(),
+                        "In entries[%u], binding index %u not present in the bind group layout."
+                        "\nExpected layout: %s",
+                        i, binding, layout->EntriesToString());
+        const BindingInfo& bindingInfo = layout->GetAPIBindingInfo(it->second);
 
         // Below this block we validate entries based on the bind group layout, in which
         // external textures have been expanded into their underlying contents. For this reason

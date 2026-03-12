@@ -64,11 +64,10 @@ DescriptorSetAllocator::DescriptorSetAllocator(
     // Always assume there is one descriptor requested to avoid a division by 0 below.
     totalDescriptorCount = std::max(1u, totalDescriptorCount);
 
-    DAWN_ASSERT(totalDescriptorCount <= kMaxBindingsPerPipelineLayout);
-    static_assert(kMaxBindingsPerPipelineLayout <= kMaxDescriptorsPerPool);
-
-    // Compute the total number of descriptors sets that fits given the max.
-    mMaxSets = kMaxDescriptorsPerPool / totalDescriptorCount;
+    // Compute the total number of descriptors sets that fits given the max but always make sure
+    // that at least one descriptor set can be made (bindings with visibility none can force giant
+    // sets to be made).
+    mMaxSets = std::max(kMaxDescriptorsPerPool / totalDescriptorCount, 1u);
     DAWN_ASSERT(mMaxSets > 0);
 
     // Grow the number of descriptors in the pool to fit the computed |mMaxSets|.

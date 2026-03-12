@@ -429,6 +429,8 @@ void NormalizeLimits(CombinedLimits* limits) {
     limits->v1.maxUniformBuffersPerShaderStage =
         std::min(limits->v1.maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
     limits->v1.maxImmediateSize = std::min(limits->v1.maxImmediateSize, kMaxImmediateDataBytes);
+    limits->v1.maxBindingsPerBindGroup =
+        std::min(limits->v1.maxBindingsPerBindGroup, kMaxBindingsPerBindGroup);
 
     if (limits->v1.maxDynamicUniformBuffersPerPipelineLayout >
         kMaxDynamicUniformBuffersPerPipelineLayout) {

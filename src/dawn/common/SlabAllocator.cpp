@@ -83,6 +83,7 @@ SlabAllocatorImpl::SlabAllocatorImpl(Index blocksPerSlab,
       mBlockStride(Align(mIndexLinkNodeOffset + u32_sizeof<IndexLinkNode>, objectAlignment)),
       mBlocksPerSlab(blocksPerSlab),
       mTotalAllocationSize(static_cast<size_t>(mSlabBlocksOffset) + mBlocksPerSlab * mBlockStride) {
+    DAWN_ASSERT(blocksPerSlab > 0);
     DAWN_ASSERT(IsPowerOfTwo(mAllocationAlignment));
 }
 
