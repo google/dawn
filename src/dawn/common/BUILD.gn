@@ -45,11 +45,64 @@ if (build_with_chromium) {
   use_fuzzing_engine = false
 }
 
+# Helper template to define clang plugins.
+#
+# Params:
+#   plugin: The name of the clang plugin to load.
+#   plugin_arguments: List of arguments to pass to the plugin.
+template("clang_plugin") {
+  config(target_name) {
+    cflags = [
+      "-Xclang",
+      "-add-plugin",
+      "-Xclang",
+      invoker.plugin,
+    ]
+
+    foreach(flag, invoker.plugin_arguments) {
+      cflags += [
+        "-Xclang",
+        "-plugin-arg-${invoker.plugin}",
+        "-Xclang",
+        flag,
+      ]
+    }
+  }
+}
+
+# Check struct/class member pointers are using raw_ptr<> where appropriate.
+clang_plugin("raw_ptr_check") {
+  # Defined in <chromium>/tools/clang/raw_ptr_plugin/RawPtrPlugin.cpp
+  plugin = "raw-ptr-plugin"
+
+  plugin_arguments = [
+    "check-raw-ptr-fields",
+    "check-raw-ptr-to-stack-allocated",
+    "check-raw-ref-fields",
+    "check-span-fields",
+  ]
+
+  _exclusions = [
+    "/include/",
+    "/src/tint/",
+    "/src/dawn/replay/",
+
+    # TODO(479743213): Enforce raw_ptr usage in dawn/node as well.
+    "/src/dawn/node/",
+  ]
+
+  foreach(dir, _exclusions) {
+    plugin_arguments += [ "raw-ptr-exclude-path=" +
+                          rebase_path("${dawn_root}/${dir}", root_build_dir) ]
+  }
+}
+
 ###############################################################################
 # Common dawn configs
 ###############################################################################
 
 config("internal_config") {
+  configs = []
   include_dirs = [
     "${target_gen_dir}/../../../src",
     "${dawn_root}/src",
@@ -179,6 +232,10 @@ config("internal_config") {
       "-Wunused-but-set-variable",
       "-Wunused-macros",
     ]
+
+    if (!is_wasm) {
+      configs += [ ":raw_ptr_check" ]
+    }
 
     if (is_win) {
       cflags += [
