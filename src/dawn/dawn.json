@@ -3956,8 +3956,7 @@
             {"value": 11, "name": "request adapter WebXR options"},
             {"value": 12, "name": "texture component swizzle descriptor"},
             {"value": 15, "name": "compatibility mode limits"},
-            {"value": 16, "name": "texture binding view dimension", "enum_value_conflict": true},
-            {"value": 16, "name": "texture binding view dimension descriptor", "tags": ["deprecated"], "enum_value_conflict": true},
+            {"value": 16, "name": "texture binding view dimension"},
 
             {"value": 0, "name": "emscripten surface source canvas HTML selector", "tags": ["emscripten"]},
 
@@ -4177,11 +4176,6 @@
             {"name": "view format count", "type": "size_t", "default": 0},
             {"name": "view formats", "type": "texture format", "annotation": "const*", "length": "view format count", "default": "nullptr"}
         ]
-    },
-    "texture binding view dimension descriptor": {
-        "category": "typedef",
-        "type": "texture binding view dimension",
-        "tags": ["dawn"]
     },
     "texture binding view dimension": {
         "category": "structure",
