@@ -123,7 +123,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     tint::transform::multiplanar::BindingsMap options{};
-    options[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    options[{1u, 2u}] = tint::transform::multiplanar::MultiplanarTexture{{1u, 3u}, {1u, 4u}};
     Run(MultiplanarExternalTexture, options);
     EXPECT_EQ(expect, str());
 }
@@ -199,7 +199,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     tint::transform::multiplanar::BindingsMap map{};
-    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    map[{1u, 2u}] = tint::transform::multiplanar::MultiplanarTexture{{1u, 3u}, {1u, 4u}};
     Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
@@ -280,7 +280,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     tint::transform::multiplanar::BindingsMap map{};
-    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    map[{1u, 2u}] = tint::transform::multiplanar::MultiplanarTexture{{1u, 3u}, {1u, 4u}};
     Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
@@ -441,7 +441,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     tint::transform::multiplanar::BindingsMap map{};
-    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    map[{1u, 2u}] = tint::transform::multiplanar::MultiplanarTexture{{1u, 3u}, {1u, 4u}};
     Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
@@ -603,7 +603,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     tint::transform::multiplanar::BindingsMap map{};
-    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    map[{1u, 2u}] = tint::transform::multiplanar::MultiplanarTexture{{1u, 3u}, {1u, 4u}};
     Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
@@ -764,7 +764,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     tint::transform::multiplanar::BindingsMap map{};
-    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    map[{1u, 2u}] = tint::transform::multiplanar::MultiplanarTexture{{1u, 3u}, {1u, 4u}};
     Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
@@ -952,7 +952,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     tint::transform::multiplanar::BindingsMap map{};
-    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    map[{1u, 2u}] = tint::transform::multiplanar::MultiplanarTexture{{1u, 3u}, {1u, 4u}};
     Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
@@ -1173,7 +1173,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     tint::transform::multiplanar::BindingsMap map{};
-    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    map[{1u, 2u}] = tint::transform::multiplanar::MultiplanarTexture{{1u, 3u}, {1u, 4u}};
     Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
@@ -1365,9 +1365,9 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     tint::transform::multiplanar::BindingsMap map{};
-    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
-    map[{2u, 2u}] = {{2u, 3u}, {2u, 4u}};
-    map[{3u, 2u}] = {{3u, 3u}, {3u, 4u}};
+    map[{1u, 2u}] = tint::transform::multiplanar::MultiplanarTexture{{1u, 3u}, {1u, 4u}};
+    map[{2u, 2u}] = tint::transform::multiplanar::MultiplanarTexture{{2u, 3u}, {2u, 4u}};
+    map[{3u, 2u}] = tint::transform::multiplanar::MultiplanarTexture{{3u, 3u}, {3u, 4u}};
     Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }

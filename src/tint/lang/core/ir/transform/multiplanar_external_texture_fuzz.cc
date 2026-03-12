@@ -32,10 +32,16 @@
 namespace tint::core::ir::transform {
 namespace {
 
-Result<SuccessType> MultiplanarExternalTextureFuzzer(
-    Module& ir,
-    const fuzz::ir::Context&,
-    const tint::transform::multiplanar::BindingsMap& multiplanar_map) {
+using BindingsMap =
+    std::unordered_map<BindingPoint, tint::transform::multiplanar::MultiplanarTexture>;
+
+Result<SuccessType> MultiplanarExternalTextureFuzzer(Module& ir,
+                                                     const fuzz::ir::Context&,
+                                                     const BindingsMap& input_map) {
+    tint::transform::multiplanar::BindingsMap multiplanar_map;
+    for (const auto& iter : input_map) {
+        multiplanar_map.emplace(iter.first, iter.second);
+    }
     return MultiplanarExternalTexture(ir, multiplanar_map);
 }
 

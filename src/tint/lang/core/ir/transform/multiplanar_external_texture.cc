@@ -42,6 +42,9 @@ namespace tint::core::ir::transform {
 
 namespace {
 
+using MultiplanarTexture = tint::transform::multiplanar::MultiplanarTexture;
+using YCBCRTexture = tint::transform::multiplanar::YCBCRTexture;
+
 /// PIMPL state for the transform.
 struct State {
     /// The external texture options.
@@ -125,7 +128,9 @@ struct State {
             err << "ExternalTextureOptions missing binding entry for " << bp.value();
             return Failure{err.str()};
         }
-        const auto& new_binding_points = itr->second;
+
+        TINT_ASSERT(std::holds_alternative<MultiplanarTexture>(itr->second));
+        const auto& new_binding_points = std::get<MultiplanarTexture>(itr->second);
 
         // Create a sampled texture for the first plane.
         auto* plane_0 = b.Var(ty.ptr(handle, SampledTexture()));

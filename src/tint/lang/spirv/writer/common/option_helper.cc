@@ -229,7 +229,7 @@ void PopulateRemapperAndMultiplanarOptions(
 
         // Use the re-bound spir-v plane0 value for the lookup key.
         multiplanar_map.emplace(plane0,
-                                tint::transform::multiplanar::BindingPoints{plane1, metadata});
+                                tint::transform::multiplanar::MultiplanarTexture{plane1, metadata});
 
         // Bindings which go to the same slot in SPIR-V do not need to be re-bound.
         if (src_binding_point == plane0) {

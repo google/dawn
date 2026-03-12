@@ -234,7 +234,7 @@ void PopulateBindingInfo(const Options& options,
 
         // Use the re-bound glsl plane0 value for the lookup key.
         multiplanar_map.emplace(plane0,
-                                tint::transform::multiplanar::BindingPoints{plane1, metadata});
+                                tint::transform::multiplanar::MultiplanarTexture{plane1, metadata});
 
         // Bindings which go to the same slot in GLSL do not need to be re-bound.
         if (src_binding_point == plane0) {
