@@ -115,25 +115,43 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
         const auto& src_binding = it.first;
 
         auto& data = it.second;
-        TINT_ASSERT(std::holds_alternative<ExternalMultiplanarTexture>(data));
+        BindingPoint src;
+        BindingPoint helper;
+        BindingPoint metadata;
+        if (std::holds_alternative<ExternalMultiplanarTexture>(data)) {
+            ExternalMultiplanarTexture et = std::get<ExternalMultiplanarTexture>(data);
+            src = et.plane0;
+            helper = et.plane1;
+            metadata = et.metadata;
 
-        ExternalMultiplanarTexture et = std::get<ExternalMultiplanarTexture>(data);
-        const auto& plane0 = et.plane0;
-        const auto& plane1 = et.plane1;
-        const auto& metadata = et.metadata;
+            // helper is [[texture()]]
+            if (msl_seen(seen_msl_texture_bindings, helper, src_binding)) {
+                diagnostics.AddNote(Source{}) << "when processing external_texture";
+                return Failure{diagnostics.Str()};
+            }
+        } else if (std::holds_alternative<ExternalYCBCRTexture>(data)) {
+            ExternalYCBCRTexture ycb = std::get<ExternalYCBCRTexture>(data);
+            src = ycb.texture;
+            helper = ycb.sampler;
+            metadata = ycb.metadata;
+
+            // helper is [[sampler()]]
+            if (msl_seen(seen_msl_sampler_bindings, helper, src_binding)) {
+                diagnostics.AddNote(Source{}) << "when processing external_texture";
+                return Failure{diagnostics.Str()};
+            }
+        } else {
+            TINT_UNREACHABLE();
+        }
 
         // Validate with the actual source regardless of what the remapper will do
-        if (wgsl_seen(src_binding, plane0)) {
+        if (wgsl_seen(src_binding, src)) {
             diagnostics.AddNote(Source{}) << "when processing external_texture";
             return Failure{diagnostics.Str()};
         }
 
-        // Plane0 & Plane1 are [[texture()]]
-        if (msl_seen(seen_msl_texture_bindings, plane0, src_binding)) {
-            diagnostics.AddNote(Source{}) << "when processing external_texture";
-            return Failure{diagnostics.Str()};
-        }
-        if (msl_seen(seen_msl_texture_bindings, plane1, src_binding)) {
+        // src is [[texture()]]
+        if (msl_seen(seen_msl_texture_bindings, src, src_binding)) {
             diagnostics.AddNote(Source{}) << "when processing external_texture";
             return Failure{diagnostics.Str()};
         }
@@ -180,26 +198,42 @@ void PopulateBindingRelatedOptions(const Options& options,
     // External textures are re-bound to their plane0 location
     for (const auto& it : options.bindings.external_texture) {
         const BindingPoint& src_binding_point = it.first;
-
         auto& data = it.second;
-        TINT_ASSERT(std::holds_alternative<ExternalMultiplanarTexture>(data));
 
-        ExternalMultiplanarTexture et = std::get<ExternalMultiplanarTexture>(data);
+        BindingPoint dest_bp;
+        if (std::holds_alternative<ExternalMultiplanarTexture>(data)) {
+            ExternalMultiplanarTexture et = std::get<ExternalMultiplanarTexture>(data);
 
-        const auto& plane0 = et.plane0;
-        const auto& plane1 = et.plane1;
-        const auto& metadata = et.metadata;
+            const auto& plane0 = et.plane0;
+            const auto& plane1 = et.plane1;
+            const auto& metadata = et.metadata;
 
-        // Use the re-bound MSL plane0 value for the lookup key.
-        multiplanar_map.emplace(plane0,
-                                tint::transform::multiplanar::MultiplanarTexture{plane1, metadata});
+            // Use the re-bound MSL plane0 value for the lookup key.
+            multiplanar_map.emplace(
+                plane0, tint::transform::multiplanar::MultiplanarTexture{plane1, metadata});
+
+            dest_bp = plane0;
+        } else if (std::holds_alternative<ExternalYCBCRTexture>(data)) {
+            ExternalYCBCRTexture ycb = std::get<ExternalYCBCRTexture>(data);
+            const auto& texture = ycb.texture;
+            const auto& sampler = ycb.sampler;
+            const auto& metadata = ycb.metadata;
+
+            // Use the re-bound MSL texture value for the lookup key.
+            multiplanar_map.emplace(texture,
+                                    tint::transform::multiplanar::YCBCRTexture{sampler, metadata});
+
+            dest_bp = texture;
+        } else {
+            TINT_UNREACHABLE();
+        }
 
         // Bindings which go to the same slot in MSL do not need to be re-bound.
-        if (src_binding_point == plane0) {
+        if (src_binding_point == dest_bp) {
             continue;
         }
 
-        remapper_data.emplace(src_binding_point, plane0);
+        remapper_data.emplace(src_binding_point, dest_bp);
     }
 
     // ArrayLengthOptions bindpoints may need to be remapped

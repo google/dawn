@@ -164,23 +164,33 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
         const auto& src_binding = it.first;
 
         auto& data = it.second;
-        TINT_ASSERT(std::holds_alternative<ExternalMultiplanarTexture>(data));
-
-        ExternalMultiplanarTexture et = std::get<ExternalMultiplanarTexture>(data);
-        const auto& plane0 = et.plane0;
-        const auto& plane1 = et.plane1;
-        const auto& metadata = et.metadata;
+        BindingPoint src;
+        BindingPoint helper;
+        BindingPoint metadata;
+        if (std::holds_alternative<ExternalMultiplanarTexture>(data)) {
+            ExternalMultiplanarTexture et = std::get<ExternalMultiplanarTexture>(data);
+            src = et.plane0;
+            helper = et.plane1;
+            metadata = et.metadata;
+        } else if (std::holds_alternative<ExternalYCBCRTexture>(data)) {
+            ExternalYCBCRTexture ycb = std::get<ExternalYCBCRTexture>(data);
+            src = ycb.texture;
+            helper = ycb.sampler;
+            metadata = ycb.metadata;
+        } else {
+            TINT_UNREACHABLE();
+        }
 
         // Validate with the actual source regardless of what the remapper will do
-        if (wgsl_seen(src_binding, plane0)) {
+        if (wgsl_seen(src_binding, src)) {
             diagnostics.AddNote(Source{}) << "when processing external_texture";
             return Failure{diagnostics.Str()};
         }
 
-        if (glsl_seen(plane0, src_binding, BindingType::kExternalTexture)) {
+        if (glsl_seen(src, src_binding, BindingType::kExternalTexture)) {
             return Failure{diagnostics.Str()};
         }
-        if (glsl_seen(plane1, src_binding, BindingType::kExternalTexture)) {
+        if (glsl_seen(helper, src_binding, BindingType::kExternalTexture)) {
             return Failure{diagnostics.Str()};
         }
         if (glsl_seen(metadata, src_binding, BindingType::kExternalTexture)) {
@@ -222,26 +232,42 @@ void PopulateBindingInfo(const Options& options,
     // External textures are re-bound to their plane0 location
     for (const auto& it : options.bindings.external_texture) {
         const BindingPoint& src_binding_point = it.first;
-
         auto& data = it.second;
-        TINT_ASSERT(std::holds_alternative<ExternalMultiplanarTexture>(data));
 
-        ExternalMultiplanarTexture et = std::get<ExternalMultiplanarTexture>(data);
+        BindingPoint dest_bp;
+        if (std::holds_alternative<ExternalMultiplanarTexture>(data)) {
+            ExternalMultiplanarTexture et = std::get<ExternalMultiplanarTexture>(data);
 
-        const BindingPoint& plane0 = et.plane0;
-        const BindingPoint& plane1 = et.plane1;
-        const BindingPoint& metadata = et.metadata;
+            const BindingPoint& plane0 = et.plane0;
+            const BindingPoint& plane1 = et.plane1;
+            const BindingPoint& metadata = et.metadata;
 
-        // Use the re-bound glsl plane0 value for the lookup key.
-        multiplanar_map.emplace(plane0,
-                                tint::transform::multiplanar::MultiplanarTexture{plane1, metadata});
+            // Use the re-bound glsl plane0 value for the lookup key.
+            multiplanar_map.emplace(
+                plane0, tint::transform::multiplanar::MultiplanarTexture{plane1, metadata});
+
+            dest_bp = plane0;
+        } else if (std::holds_alternative<ExternalYCBCRTexture>(data)) {
+            ExternalYCBCRTexture ycb = std::get<ExternalYCBCRTexture>(data);
+            const auto& texture = ycb.texture;
+            const auto& sampler = ycb.sampler;
+            const auto& metadata = ycb.metadata;
+
+            // Use the re-bound glsl texture value for the lookup key.
+            multiplanar_map.emplace(texture,
+                                    tint::transform::multiplanar::YCBCRTexture{sampler, metadata});
+
+            dest_bp = texture;
+        } else {
+            TINT_UNREACHABLE();
+        }
 
         // Bindings which go to the same slot in GLSL do not need to be re-bound.
-        if (src_binding_point == plane0) {
+        if (src_binding_point == dest_bp) {
             continue;
         }
 
-        remapper_data.emplace(src_binding_point, plane0);
+        remapper_data.emplace(src_binding_point, dest_bp);
     }
 
     // Update the non-plane1 bindings in the combined texture sampler info to be the
