@@ -33,9 +33,9 @@
 #include "src/tint/lang/core/constant/scalar.h"  // IWYU pragma: export
 #include "src/tint/lang/core/constant/splat.h"   // IWYU pragma: export
 #include "src/tint/lang/core/ir/access.h"
-#include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/break_if.h"
+#include "src/tint/lang/core/ir/builtin_call.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/construct.h"
@@ -1045,9 +1045,10 @@ class Builder {
     /// @param val the value being bitcast
     /// @returns the instruction
     template <typename VAL>
-    ir::Bitcast* Bitcast(const core::type::Type* type, VAL&& val) {
-        auto* value = Value(std::forward<VAL>(val));
-        return Append(ir.CreateInstruction<ir::Bitcast>(InstructionResult(type), value));
+    ir::CoreBuiltinCall* Bitcast(const core::type::Type* type, VAL&& val) {
+        return CallExplicit(type, core::BuiltinFn::kBitcast,
+                            Vector<const core::type::Type*, 1>{type},
+                            Vector{Value(std::forward<VAL>(val))});
     }
 
     /// Creates a bitcast instruction
@@ -1055,7 +1056,7 @@ class Builder {
     /// @param val the value being bitcast
     /// @returns the instruction
     template <typename TYPE, typename VAL>
-    ir::Bitcast* Bitcast(VAL&& val) {
+    ir::CoreBuiltinCall* Bitcast(VAL&& val) {
         auto* type = ir.Types().Get<TYPE>();
         auto* value = Value(std::forward<VAL>(val));
         return Bitcast(type, value);
@@ -1066,8 +1067,10 @@ class Builder {
     /// @param val the value being bitcast
     /// @returns the instruction
     template <typename VAL>
-    ir::Bitcast* BitcastWithResult(ir::InstructionResult* result, VAL&& val) {
-        return Append(ir.CreateInstruction<ir::Bitcast>(result, val));
+    ir::CoreBuiltinCall* BitcastWithResult(ir::InstructionResult* result, VAL&& val) {
+        return CallExplicitWithResult<ir::CoreBuiltinCall>(
+            result, core::BuiltinFn::kBitcast, Vector<const core::type::Type*, 1>{result->Type()},
+            Vector{Value(std::forward<VAL>(val))});
     }
 
     /// Creates a discard instruction

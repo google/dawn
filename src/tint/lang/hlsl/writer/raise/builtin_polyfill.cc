@@ -78,14 +78,14 @@ struct State {
     /// Process the module.
     void Process() {
         // Find the bitcasts that need replacing.
-        Vector<core::ir::Bitcast*, 4> bitcast_worklist;
+        Vector<core::ir::CoreBuiltinCall*, 4> bitcast_worklist;
         Vector<core::ir::CoreBuiltinCall*, 4> call_worklist;
         for (auto* inst : ir.Instructions()) {
-            if (auto* bitcast = inst->As<core::ir::Bitcast>()) {
-                bitcast_worklist.Push(bitcast);
-                continue;
-            }
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
+                if (call->Func() == core::BuiltinFn::kBitcast) {
+                    bitcast_worklist.Push(call);
+                    continue;
+                }
                 switch (call->Func()) {
                     case core::BuiltinFn::kAcosh:
                     case core::BuiltinFn::kAsinh:
@@ -159,7 +159,7 @@ struct State {
 
         // Replace the bitcasts that we found.
         for (auto* bitcast : bitcast_worklist) {
-            auto* src_type = bitcast->Val()->Type();
+            auto* src_type = bitcast->Args()[0]->Type();
             auto* dst_type = bitcast->Result()->Type();
             auto* dst_deepest = dst_type->DeepestElement();
 
@@ -547,12 +547,12 @@ struct State {
     }
 
     /// Replaces an identity bitcast result with the value.
-    void ReplaceBitcastWithValue(core::ir::Bitcast* bitcast) {
-        bitcast->Result()->ReplaceAllUsesWith(bitcast->Val());
+    void ReplaceBitcastWithValue(core::ir::CoreBuiltinCall* bitcast) {
+        bitcast->Result()->ReplaceAllUsesWith(bitcast->Args()[0]);
         bitcast->Destroy();
     }
 
-    void ReplaceBitcastWithAs(core::ir::Bitcast* bitcast) {
+    void ReplaceBitcastWithAs(core::ir::CoreBuiltinCall* bitcast) {
         auto* dst_type = bitcast->Result()->Type();
         auto* dst_deepest = dst_type->DeepestElement();
 
@@ -568,15 +568,15 @@ struct State {
         // splats by wrapping it with an explicit vector constructor.
         // e.g. asuint(123.xx) -> asuint(int2(123.xx)))
         bool castToSrcType = false;
-        auto* src_type = bitcast->Val()->Type();
+        auto* src_type = bitcast->Args()[0]->Type();
         if (src_type->IsIntegerVector()) {
-            if (auto* c = bitcast->Val()->As<core::ir::Constant>()) {
+            if (auto* c = bitcast->Args()[0]->As<core::ir::Constant>()) {
                 castToSrcType = c->Value()->Is<core::constant::Splat>();
             }
         }
 
         b.InsertBefore(bitcast, [&] {
-            auto* source = bitcast->Val();
+            auto* source = bitcast->Args()[0];
             if (castToSrcType) {
                 source = b.Construct(src_type, source)->Result();
             }
@@ -658,8 +658,8 @@ struct State {
     }
 
     /// Replaces a bitcast with a call to the FromF16 polyfill for the given types
-    void ReplaceBitcastWithFromF16Polyfill(core::ir::Bitcast* bitcast) {
-        auto* src_type = bitcast->Val()->Type();
+    void ReplaceBitcastWithFromF16Polyfill(core::ir::CoreBuiltinCall* bitcast) {
+        auto* src_type = bitcast->Args()[0]->Type();
         auto* dst_type = bitcast->Result()->Type();
 
         auto* f = CreateBitcastFromF16(src_type, dst_type);
@@ -779,8 +779,8 @@ struct State {
     }
 
     /// Replaces a bitcast with a call to the ToF16 polyfill for the given types
-    void ReplaceBitcastWithToF16Polyfill(core::ir::Bitcast* bitcast) {
-        auto* src_type = bitcast->Val()->Type();
+    void ReplaceBitcastWithToF16Polyfill(core::ir::CoreBuiltinCall* bitcast) {
+        auto* src_type = bitcast->Args()[0]->Type();
         auto* dst_type = bitcast->Result()->Type();
 
         auto* f = CreateBitcastToF16(src_type, dst_type);

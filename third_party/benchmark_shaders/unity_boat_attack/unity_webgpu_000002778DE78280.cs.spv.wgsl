@@ -48,11 +48,12 @@ fn main(@builtin(local_invocation_index) gl_LocalInvocationIndex : u32, @builtin
   u_xlati4 = (bitcast<i32>(gl_GlobalInvocationID.x) << bitcast<u32>(2i));
   u_xlat4 = bitcast<f32>(v._Input_buf[((u_xlati4 >> bitcast<u32>(2i)) + 0i)]);
   u_xlati4 = bitcast<i32>(select(0u, 4294967295u, (bitcast<i32>(u_xlat4) == bitcast<i32>(gl_LocalInvocationIndex))));
+  let v_2 = (bitcast<i32>(gl_LocalInvocationIndex) & 31i);
   param = 0i;
   param_1 = u_xlati4;
-  param_2 = (bitcast<i32>(gl_LocalInvocationIndex) & 31i);
+  param_2 = v_2;
   param_3 = 1i;
-  u_xlati4 = v_2(&(param), &(param_1), &(param_2), &(param_3));
+  u_xlati4 = v_3(&(param), &(param_1), &(param_2), &(param_3));
   TGSM0[gl_LocalInvocationIndex].value[0i] = bitcast<u32>(u_xlati4);
   workgroupBarrier();
   u_xlatb1 = (u_xlatu0.xxxx < vec4<u32>(16u, 8u, 4u, 2u));
@@ -102,11 +103,11 @@ fn main(@builtin(local_invocation_index) gl_LocalInvocationIndex : u32, @builtin
   u_xlatb0 = (u_xlati0 == 32i);
   u_xlati0 = select(0i, 1i, u_xlatb0);
   u_xlati2 = (bitcast<i32>(gl_LocalInvocationIndex) << bitcast<u32>(2i));
-  let v_3 = (u_xlati2 >> bitcast<u32>(2i));
-  v_1._Output_origX0X_buf[v_3] = bitcast<u32>(u_xlati0);
+  let v_4 = (u_xlati2 >> bitcast<u32>(2i));
+  v_1._Output_origX0X_buf[v_4] = bitcast<u32>(u_xlati0);
 }
 
-fn v_2(base : ptr<function, i32>, insert : ptr<function, i32>, offset : ptr<function, i32>, bits : ptr<function, i32>) -> i32 {
+fn v_3(base : ptr<function, i32>, insert : ptr<function, i32>, offset : ptr<function, i32>, bits : ptr<function, i32>) -> i32 {
   var mask : u32;
   mask = (~((4294967295u << bitcast<u32>(*(bits)))) << bitcast<u32>(*(offset)));
   return bitcast<i32>(((bitcast<u32>(*(base)) & ~(mask)) | ((bitcast<u32>(*(insert)) << bitcast<u32>(*(offset))) & mask)));

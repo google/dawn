@@ -64,66 +64,67 @@ fn main(@builtin(local_invocation_id) v_8 : vec3<u32>) {
   }
   let v_16 = v_10;
   workgroupBarrier();
-  let v_17 = v[0i].tint_symbol;
+  let v_17 = bitcast<i32>(v_16);
+  let v_18 = v[0i].tint_symbol;
   if ((v_9 == 0u)) {
-    let v_18 = bitcast<vec2<u32>>(v_17);
-    let v_19 = v_18.x;
-    atomicStore(&(v_1), v_19);
-    let v_20 = v_18.y;
-    atomicStore(&(v_2), v_20);
-    atomicStore(&(v_3), v_19);
-    atomicStore(&(v_4), v_20);
+    let v_19 = bitcast<vec2<u32>>(v_18);
+    let v_20 = v_19.x;
+    atomicStore(&(v_1), v_20);
+    let v_21 = v_19.y;
+    atomicStore(&(v_2), v_21);
+    atomicStore(&(v_3), v_20);
+    atomicStore(&(v_4), v_21);
   }
-  var v_21 : vec4<f32>;
+  var v_22 : vec4<f32>;
   {
-    var v_22 : vec4<f32>;
-    v_22 = v_17.xyxy;
-    var v_23 : u32;
-    v_23 = 1u;
+    var v_23 : vec4<f32>;
+    v_23 = v_18.xyxy;
+    var v_24 : u32;
+    v_24 = 1u;
     loop {
-      var v_24 : vec4<f32>;
-      let v_25 = v_23;
-      let v_26 = v_22;
-      let v_27 = bitcast<u32>(bitcast<i32>(v_16));
-      if ((v_25 < v_27)) {
-        let v_28 = (v_25 + v_9);
-        var v_29 : vec4<f32>;
-        if ((v_28 >= v_27)) {
-          let v_30 = v[v_28].tint_symbol;
-          let v_31 = min(v_26.xy, v_30);
-          var v_32 : vec4<f32> = v_26;
-          v_32.x = v_31.x;
-          var v_33 : vec4<f32> = v_32;
-          v_33.y = v_31.y;
-          let v_34 = v_33;
-          let v_35 = max(v_34.zw, v_30);
-          var v_36 : vec4<f32> = v_34;
-          v_36.z = v_35.x;
-          var v_37 : vec4<f32> = v_36;
-          v_37.w = v_35.y;
-          v_29 = v_37;
+      var v_25 : vec4<f32>;
+      let v_26 = v_24;
+      let v_27 = v_23;
+      let v_28 = bitcast<u32>(v_17);
+      if ((v_26 < v_28)) {
+        let v_29 = (v_26 + v_9);
+        var v_30 : vec4<f32>;
+        if ((v_29 >= v_28)) {
+          let v_31 = v[v_29].tint_symbol;
+          let v_32 = min(v_27.xy, v_31);
+          var v_33 : vec4<f32> = v_27;
+          v_33.x = v_32.x;
+          var v_34 : vec4<f32> = v_33;
+          v_34.y = v_32.y;
+          let v_35 = v_34;
+          let v_36 = max(v_35.zw, v_31);
+          var v_37 : vec4<f32> = v_35;
+          v_37.z = v_36.x;
+          var v_38 : vec4<f32> = v_37;
+          v_38.w = v_36.y;
+          v_30 = v_38;
         } else {
-          v_29 = v_26;
+          v_30 = v_27;
         }
-        v_24 = v_29;
+        v_25 = v_30;
         continue;
       } else {
-        v_21 = v_26;
+        v_22 = v_27;
         break;
       }
 
       continuing {
-        v_22 = v_24;
-        v_23 = (v_25 + 32u);
+        v_23 = v_25;
+        v_24 = (v_26 + 32u);
       }
     }
   }
-  let v_38 = v_21;
+  let v_39 = v_22;
   workgroupBarrier();
-  _ = atomicMin(&(v_1), bitcast<u32>(v_38.x));
-  _ = atomicMin(&(v_2), bitcast<u32>(v_38.y));
-  _ = atomicMax(&(v_3), bitcast<u32>(v_38.z));
-  _ = atomicMax(&(v_4), bitcast<u32>(v_38.w));
+  _ = atomicMin(&(v_1), bitcast<u32>(v_39.x));
+  _ = atomicMin(&(v_2), bitcast<u32>(v_39.y));
+  _ = atomicMax(&(v_3), bitcast<u32>(v_39.z));
+  _ = atomicMax(&(v_4), bitcast<u32>(v_39.w));
   workgroupBarrier();
   v_7.tint_symbol_9[0i] = vec4<f32>(bitcast<f32>(atomicLoad(&(v_1))), bitcast<f32>(atomicLoad(&(v_2))), bitcast<f32>(atomicLoad(&(v_3))), bitcast<f32>(atomicLoad(&(v_4))));
 }

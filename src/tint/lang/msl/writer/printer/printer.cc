@@ -38,7 +38,6 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
-#include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/construct.h"
@@ -499,7 +498,6 @@ class Printer : public tint::TextGenerator {
 
                 [&](const core::ir::LoadVectorElement*) { /* inlined */ },  //
                 [&](const core::ir::Swizzle*) { /* inlined */ },            //
-                [&](const core::ir::Bitcast*) { /* inlined */ },            //
                 [&](const core::ir::Binary*) { /* inlined */ },             //
                 [&](const core::ir::CoreUnary*) { /* inlined */ },          //
                 [&](const core::ir::Load*) { /* inlined */ },               //
@@ -523,7 +521,6 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Load* l) { EmitLoad(out, l); },                  //
                     [&](const core::ir::Construct* c) { EmitConstruct(out, c); },        //
                     [&](const core::ir::Var* var) { out << NameOf(var->Result()); },     //
-                    [&](const core::ir::Bitcast* b) { EmitBitcast(out, b); },            //
                     [&](const core::ir::Access* a) { EmitAccess(out, a); },              //
                     [&](const msl::ir::BuiltinCall* c) { EmitMslBuiltinCall(out, c); },  //
                     [&](const msl::ir::MemberBuiltinCall* c) {
@@ -894,11 +891,11 @@ class Printer : public tint::TextGenerator {
     }
 
     /// Emit a bitcast instruction
-    void EmitBitcast(StringStream& out, const core::ir::Bitcast* b) {
+    void EmitBitcast(StringStream& out, const core::ir::CoreBuiltinCall* b) {
         out << "as_type<";
         EmitType(out, b->Result()->Type());
         out << ">(";
-        EmitValue(out, b->Val());
+        EmitValue(out, b->Args()[0]);
         out << ")";
     }
 
@@ -1075,6 +1072,11 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitCoreBuiltinCall(StringStream& out, const core::ir::CoreBuiltinCall* c) {
+        if (c->Func() == core::BuiltinFn::kBitcast) {
+            EmitBitcast(out, c);
+            return;
+        }
+
         EmitCoreBuiltinName(out, c->Func());
         out << "(";
 

@@ -61,6 +61,7 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kAtan)
         CASE(kAtan2)
         CASE(kAtanh)
+        CASE(kBitcast)
         CASE(kCeil)
         CASE(kClamp)
         CASE(kCos)

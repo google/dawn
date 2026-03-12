@@ -42,7 +42,6 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/analysis/for_loop_analysis.h"
-#include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/call.h"
@@ -350,7 +349,6 @@ class Printer : public tint::TextGenerator {
                 [&](const core::ir::ExitIf*) { /* do nothing handled by transform */ },     //
                                                                                             //
                 [&](const core::ir::Access*) { /* inlined */ },                             //
-                [&](const core::ir::Bitcast*) { /* inlined */ },                            //
                 [&](const core::ir::Construct*) { /* inlined */ },                          //
                 [&](const core::ir::CoreBinary*) { /* inlined */ },                         //
                 [&](const core::ir::CoreUnary*) { /* inlined */ },                          //

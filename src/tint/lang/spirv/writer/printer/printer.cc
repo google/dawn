@@ -37,7 +37,6 @@
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
-#include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/break_if.h"
@@ -998,7 +997,6 @@ class Printer {
             Switch(
                 inst,                                                                 //
                 [&](core::ir::Access* a) { EmitAccess(a); },                          //
-                [&](core::ir::Bitcast* b) { EmitBitcast(b); },                        //
                 [&](core::ir::CoreBinary* b) { EmitBinary(b); },                      //
                 [&](spirv::ir::Binary* b) { EmitSpirvBinary(b); },                    //
                 [&](core::ir::CoreBuiltinCall* b) { EmitCoreBuiltinCall(b); },        //
@@ -1410,14 +1408,14 @@ class Printer {
 
     /// Emit a bitcast instruction.
     /// @param bitcast the bitcast instruction to emit
-    void EmitBitcast(core::ir::Bitcast* bitcast) {
+    void EmitBitcast(core::ir::CoreBuiltinCall* bitcast) {
         auto* ty = bitcast->Result()->Type();
-        if (ty == bitcast->Val()->Type()) {
-            values_.Add(bitcast->Result(), Value(bitcast->Val()));
+        if (ty == bitcast->Args()[0]->Type()) {
+            values_.Add(bitcast->Result(), Value(bitcast->Args()[0]));
             return;
         }
         current_function_.PushInst(spv::Op::OpBitcast,
-                                   {Type(ty), Value(bitcast), Value(bitcast->Val())});
+                                   {Type(ty), Value(bitcast), Value(bitcast->Args()[0])});
     }
 
     /// Emit a builtin function call instruction.
@@ -1830,6 +1828,11 @@ class Printer {
             builtin->Args()[0]->Type()->Is<core::type::Bool>()) {
             // all() and any() are passthroughs for scalar arguments.
             values_.Add(builtin->Result(), Value(builtin->Args()[0]));
+            return;
+        }
+
+        if (builtin->Func() == core::BuiltinFn::kBitcast) {
+            EmitBitcast(builtin);
             return;
         }
 

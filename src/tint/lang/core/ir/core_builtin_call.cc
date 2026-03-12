@@ -140,6 +140,7 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
         case BuiltinFn::kAtan:
         case BuiltinFn::kAtan2:
         case BuiltinFn::kAtanh:
+        case BuiltinFn::kBitcast:
         case BuiltinFn::kCeil:
         case BuiltinFn::kClamp:
         case BuiltinFn::kCos:

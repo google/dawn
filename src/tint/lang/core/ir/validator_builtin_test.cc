@@ -1319,72 +1319,6 @@ TEST_F(IR_ValidatorTest, Builtin_PointSize_WithCapability) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Bitcast_MissingArg) {
-    auto* f = b.Function("f", ty.void_());
-    b.Append(f->Block(), [&] {
-        auto* bitcast = b.Bitcast(ty.i32(), 1_u);
-        bitcast->ClearOperands();
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:14 error: bitcast: expected exactly 1 operands, got 0
-    %2:i32 = bitcast<i32>
-             ^^^^^^^
-)")) << res.Failure();
-}
-
-TEST_F(IR_ValidatorTest, Bitcast_NullArg) {
-    auto* f = b.Function("f", ty.void_());
-    b.Append(f->Block(), [&] {
-        b.Bitcast(ty.i32(), nullptr);
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:27 error: bitcast: operand is undefined
-    %2:i32 = bitcast<i32> undef
-                          ^^^^^
-)")) << res.Failure();
-}
-
-TEST_F(IR_ValidatorTest, Bitcast_MissingResult) {
-    auto* f = b.Function("f", ty.void_());
-    b.Append(f->Block(), [&] {
-        auto* bitcast = b.Bitcast(ty.i32(), 1_u);
-        bitcast->ClearResults();
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:13 error: bitcast: expected exactly 1 results, got 0
-    undef = bitcast 1u
-            ^^^^^^^
-)")) << res.Failure();
-}
-
-TEST_F(IR_ValidatorTest, Bitcast_NullResult) {
-    auto* f = b.Function("f", ty.void_());
-    b.Append(f->Block(), [&] {
-        auto* c = b.Bitcast(ty.i32(), 1_u);
-        c->SetResult(nullptr);
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: bitcast: result is undefined
-    undef = bitcast 1u
-    ^^^^^
-)")) << res.Failure();
-}
-
 TEST_F(IR_ValidatorTest, Builtin_NoStage) {
     auto* f = b.Function("f", ty.void_());
     AddBuiltinParam(f, "id", BuiltinValue::kLocalInvocationId, ty.vec3u());
@@ -1430,7 +1364,7 @@ TEST_P(BitcastTypeTest, Check) {
     } else {
         ASSERT_NE(res, Success) << "Bitcast should NOT be defined for '" << src_ty->FriendlyName()
                                 << "' -> '" << dest_ty->FriendlyName() << "'";
-        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("bitcast is not defined"));
+        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("no matching call to 'bitcast"));
     }
 }
 

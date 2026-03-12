@@ -345,7 +345,6 @@ struct State {
     bool NeedsEval(core::ir::Instruction* inst) {
         return tint::Switch(                                   //
             inst,                                              //
-            [&](core::ir::Bitcast*) { return true; },          //
             [&](core::ir::Access*) { return true; },           //
             [&](core::ir::Construct*) { return true; },        //
             [&](core::ir::Convert*) { return true; },          //

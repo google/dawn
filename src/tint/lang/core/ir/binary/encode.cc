@@ -36,7 +36,6 @@
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/access.h"
-#include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
@@ -218,7 +217,6 @@ struct Encoder {
         tint::Switch(
             inst_in,  //
             [&](const ir::Access* i) { InstructionAccess(*inst_out.mutable_access(), i); },
-            [&](const ir::Bitcast* i) { InstructionBitcast(*inst_out.mutable_bitcast(), i); },
             [&](const ir::BreakIf* i) { InstructionBreakIf(*inst_out.mutable_break_if(), i); },
             [&](const ir::CoreBinary* i) { InstructionBinary(*inst_out.mutable_binary(), i); },
             [&](const ir::CoreBuiltinCall* i) {
@@ -270,8 +268,6 @@ struct Encoder {
     void InstructionBinary(pb::InstructionBinary& binary_out, const ir::CoreBinary* binary_in) {
         binary_out.set_op(BinaryOp(binary_in->Op()));
     }
-
-    void InstructionBitcast(pb::InstructionBitcast&, const ir::Bitcast*) {}
 
     void InstructionBreakIf(pb::InstructionBreakIf& breakif_out, const ir::BreakIf* breakif_in) {
         auto num_next_iter_values = static_cast<uint32_t>(breakif_in->NextIterValues().size());
@@ -1143,6 +1139,8 @@ struct Encoder {
                 return pb::BuiltinFn::atan2;
             case core::BuiltinFn::kAtanh:
                 return pb::BuiltinFn::atanh;
+            case core::BuiltinFn::kBitcast:
+                return pb::BuiltinFn::bitcast;
             case core::BuiltinFn::kCeil:
                 return pb::BuiltinFn::ceil;
             case core::BuiltinFn::kClamp:

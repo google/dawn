@@ -36,7 +36,6 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
-#include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/call.h"
@@ -44,6 +43,7 @@
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/convert.h"
+#include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
@@ -202,10 +202,7 @@ class State {
                 [&](const core::ir::Override* override_) { Override(override_); },  //
                 [&](const core::ir::Binary* binary) { Binary(binary); },            //
                 [&](const core::ir::Unary* unary) { Unary(unary); },                //
-                [&](const core::ir::Bitcast* c) {
-                    auto ty = Type(c->Result()->Type());
-                    Bind(c->Result(), b.Bitcast(ty, Expr(c->Args()[0])));
-                },
+                [&](const wgsl::ir::BuiltinCall* c) { Call(c); },                   //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -767,10 +764,6 @@ class State {
             [&](const core::ir::Convert* c) {
                 auto ty = Type(c->Result()->Type());
                 Bind(c->Result(), b.Call(ty, std::move(args)));
-            },
-            [&](const core::ir::Bitcast* c) {
-                auto ty = Type(c->Result()->Type());
-                Bind(c->Result(), b.Bitcast(ty, args[0]));
             },
             [&](const core::ir::Discard*) { Append(b.Discard()); },  //
             TINT_ICE_ON_NO_MATCH);

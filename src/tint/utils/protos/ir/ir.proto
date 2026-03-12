@@ -315,7 +315,6 @@ message Instruction {
         InstructionDiscard discard = 6;
         InstructionLet let = 7;
         InstructionVar var = 8;
-        InstructionBitcast bitcast = 9;
         InstructionConstruct construct = 10;
         InstructionConvert convert = 11;
         InstructionAccess access = 12;
@@ -337,6 +336,8 @@ message Instruction {
         InstructionBreakIf break_if = 28;
         InstructionUnreachable unreachable = 29;
     }
+    reserved 9;
+    reserved "bitcast";
 }
 
 message InstructionReturn {}
@@ -775,4 +776,5 @@ enum BuiltinFn {
     buffer_length = 158;
     atomic_store_max = 159;
     atomic_store_min = 160;
+    bitcast = 161;
 }

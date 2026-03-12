@@ -37,7 +37,6 @@
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
-#include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/constant.h"
@@ -1375,14 +1374,6 @@ class Validator {
     /// @param call the call to validate
     void CheckCall(const Call* call);
 
-    /// Validates the given bitcast
-    /// @param bitcast the bitcast to validate
-    void CheckBitcast(const Bitcast* bitcast);
-
-    /// Validates that there exists the required bitcast override
-    /// @param bitcast the bitcast to validate types of
-    void CheckBitcastTypes(const Bitcast* bitcast);
-
     /// Validates the given builtin call
     /// @param call the call to validate
     void CheckBuiltinCall(const BuiltinCall* call);
@@ -2614,7 +2605,7 @@ void Validator::CheckRootBlock(const Block* blk) {
                 if (capabilities_.Contains(Capability::kAllowOverrides) &&
                     inst->IsAnyOf<core::ir::Unary, core::ir::Binary, core::ir::BuiltinCall,
                                   core::ir::Convert, core::ir::Swizzle, core::ir::Access,
-                                  core::ir::Bitcast, core::ir::ConstExprIf>()) {
+                                  core::ir::ConstExprIf>()) {
                     CheckInstruction(inst);
                     // If overrides are allowed we can have certain regular instructions in the root
                     // block, with the caveat that those instructions can _only_ be used in the root
@@ -3395,7 +3386,8 @@ void Validator::CheckInstruction(const Instruction* inst) {
     }
 
     Capabilities allowed_types{};
-    if (inst->Is<core::ir::Bitcast>()) {
+    if (auto* call = inst->As<core::ir::CoreBuiltinCall>();
+        call && call->Func() == core::BuiltinFn::kBitcast) {
         allowed_types.Add(Capability::kAllow64BitIntegers);
     }
 
@@ -4028,7 +4020,6 @@ void Validator::CheckLet(const Let* l) {
 void Validator::CheckCall(const Call* call) {
     tint::Switch(
         call,                                                            //
-        [&](const Bitcast* b) { CheckBitcast(b); },                      //
         [&](const BuiltinCall* c) { CheckBuiltinCall(c); },              //
         [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },  //
         [&](const Construct* c) { CheckConstruct(c); },                  //
@@ -4051,114 +4042,6 @@ void Validator::CheckCall(const Call* call) {
         [&](Default) {
             // Validation of custom IR instructions
         });
-}
-
-void Validator::CheckBitcast(const Bitcast* bitcast) {
-    if (!CheckResultsAndOperands(bitcast, Bitcast::kNumResults, Bitcast::kNumOperands)) {
-        return;
-    }
-
-    CheckBitcastTypes(bitcast);
-}
-
-void Validator::CheckBitcastTypes(const Bitcast* bitcast) {
-    // Caller is responsible for checking results and operands
-    const auto* val_type = bitcast->Operand(Bitcast::kValueOperandOffset)->Type();
-    const auto* result_type = bitcast->Result()->Type();
-
-    const auto add_error = [&]() {
-        AddError(bitcast) << "bitcast is not defined for " << NameOf(val_type) << " -> "
-                          << NameOf(result_type);
-    };
-
-    // Check that there exists an overload for the provided types
-    if (val_type->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
-        // S, where S is i32, u32, or f32
-        // S -> S, identity and reinterpretation
-        if (result_type->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
-            return;
-        }
-
-        // S -> vec2<f16 | u16>
-        if (auto* vec_type = result_type->As<core::type::Vector>()) {
-            auto elements = vec_type->Elements();
-            if (elements.count == 2 && IsAnyOf<core::type::F16, core::type::U16>(elements.type)) {
-                return;
-            }
-        }
-    } else if (val_type->IsAnyOf<core::type::F16, core::type::U16>()) {
-        // S, where S is f16 or u16
-        // S -> S, identity and reinterpretation
-        if (result_type->IsAnyOf<core::type::F16, core::type::U16>()) {
-            return;
-        }
-    } else if (val_type->Is<core::type::Vector>()) {
-        auto val_elements = val_type->Elements();
-        if (!val_elements.type) {
-            // Malformed vector
-            add_error();
-            return;
-        }
-
-        std::optional<core::type::TypeAndCount> result_elements;
-        if (result_type->As<core::type::Vector>()) {
-            result_elements = result_type->Elements();
-            if (!result_elements->type) {
-                // Malformed vector
-                add_error();
-                return;
-            }
-        }
-
-        // atomic vec2u support vec2u to u64 bitcast required
-        if (val_elements.count == 2 && val_elements.type->Is<core::type::U32>() &&
-            result_type->Is<core::type::U64>()) {
-            return;  // assume backend supported
-        }
-
-        if (val_elements.type->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
-            // vecN<S>, where S is i32, u32, or f32
-            // vecN<S> -> vecN<s>, identity and reinterpretation cases
-            if (result_elements.has_value() && val_elements.count == result_elements->count &&
-                result_elements->type
-                    ->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
-                return;
-            }
-
-            // vec2<S> -> vec4<f16|u16>
-            if (val_elements.count == 2) {
-                if (result_elements.has_value() && result_elements->count == 4 &&
-                    result_elements->type->IsAnyOf<core::type::F16, core::type::U16>()) {
-                    return;
-                }
-            }
-        } else if (val_elements.type->IsAnyOf<core::type::F16, core::type::U16>()) {
-            if (result_elements.has_value()) {
-                if (result_elements->type->IsAnyOf<core::type::F16, core::type::U16>()) {
-                    // vecN<f16|u16> -> vecN<f16|u16>, identity
-                    if (val_elements.count == result_elements->count) {
-                        return;
-                    }
-                } else {
-                    // vec4<f16|u16> -> vec2<S>, where S is i32, u32, or f32
-                    if (val_elements.count == 4 && result_elements->count == 2 &&
-                        result_elements->type
-                            ->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
-                        return;
-                    }
-                }
-            } else {
-                // vec2<f16|u16> -> i32, u32, or f32
-                if (val_elements.count == 2 &&
-                    result_type->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
-                    return;
-                }
-            }
-        }
-    }
-
-    // No matching case for val and result type combination
-    add_error();
 }
 
 void Validator::CheckBuiltinCall(const BuiltinCall* call) {
