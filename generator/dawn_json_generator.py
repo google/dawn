@@ -879,6 +879,9 @@ def analyze_converter_usage(params_kotlin):
             # Recursively mark all members of this structure.
             for member in typ.members:
                 mark_n2k(member.type)
+            # Recursively mark all potential chained children.
+            for child in chain_children.get(typ.name.get(), []):
+                mark_n2k(child)
 
     def mark_k2n(typ):
         # Only proceed if it's a structure and hasn't been marked yet to avoid infinite recursion.
