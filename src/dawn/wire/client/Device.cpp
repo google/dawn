@@ -353,11 +353,11 @@ WGPUStatus Device::APIGetAdapterInfo(WGPUAdapterInfo* adapterInfo) const {
 }
 
 void Device::SetLimits(const WGPULimits* limits) {
-    return mLimitsAndFeatures.SetLimits(limits);
+    mLimitsAndFeatures.SetLimits(limits);
 }
 
 void Device::SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount) {
-    return mLimitsAndFeatures.SetFeatures(features, featuresCount);
+    mLimitsAndFeatures.SetFeatures(features, featuresCount);
 }
 
 void Device::HandleError(WGPUErrorType errorType, WGPUStringView message) {
