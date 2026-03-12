@@ -141,8 +141,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     conversion_polyfills.ftoi = true;
     TINT_CHECK_RESULT(core::ir::transform::ConversionPolyfill(module, conversion_polyfills));
 
-    TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));
-
     if (!options.disable_workgroup_init &&
         !options.extensions.use_zero_initialize_workgroup_memory) {
         TINT_CHECK_RESULT(core::ir::transform::ZeroInitWorkgroupMemory(module));
@@ -156,6 +154,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     dva_options.transform_private = true;
     dva_options.transform_handle = options.workarounds.dva_transform_handle;
     TINT_CHECK_RESULT(core::ir::transform::DirectVariableAccess(module, dva_options));
+
+    // Must come after DirectVariableAccess as we need all ExternalTextures to have their functions
+    // flattened.
+    TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));
 
     // Fixup loads of binding_arrays of handles that may have been introduced by
     // DirectVariableAccess (DVA). Vulkan drivers that need DVA of handle expect binding_arrays to
