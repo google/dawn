@@ -29,6 +29,7 @@
 #include "dawn/native/metal/Forward.h"
 #include "dawn/native/metal/QueueMTL.h"
 #include "dawn/tests/DawnTest.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 namespace {
@@ -45,7 +46,7 @@ class MetalAutoreleasePoolTests : public DawnTest {
     }
 
   protected:
-    Queue* mMtlQueue = nullptr;
+    raw_ptr<Queue> mMtlQueue = nullptr;
 };
 
 // Test that the MTLCommandBuffer owned by the pending command context can

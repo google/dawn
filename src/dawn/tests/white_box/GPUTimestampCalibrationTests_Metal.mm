@@ -29,6 +29,7 @@
 
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/tests/white_box/GPUTimestampCalibrationTests.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 namespace {
@@ -48,7 +49,7 @@ class GPUTimestampCalibrationTestsMetal : public GPUTimestampCalibrationTestBack
     float GetTimestampPeriod() const override { return mBackendDevice->GetTimestampPeriodInNS(); }
 
   private:
-    dawn::native::metal::Device* mBackendDevice;
+    raw_ptr<dawn::native::metal::Device> mBackendDevice;
 };
 
 }  // anonymous namespace
