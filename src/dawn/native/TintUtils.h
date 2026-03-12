@@ -164,9 +164,12 @@ tint::Bindings GenerateBindingRemapping(const PipelineLayoutBase* layout,
                     DAWN_UNREACHABLE();
                 },
                 [&](const ExternalTextureBindingInfo& bindingInfo) {
+                    // TODO(491363837): Add YCBCR texture information as tint::ExternalYCBCRTexture
+                    // data
+
                     bindings.external_texture.emplace(
                         srcBindingPoint,
-                        tint::ExternalTexture{
+                        tint::ExternalMultiplanarTexture{
                             .metadata = BindingPointFor(group, bindingInfo.metadata),
                             .plane0 = BindingPointFor(group, bindingInfo.plane0),
                             .plane1 = BindingPointFor(group, bindingInfo.plane1)});

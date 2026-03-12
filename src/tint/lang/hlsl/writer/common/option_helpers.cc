@@ -28,7 +28,9 @@
 #include "src/tint/lang/hlsl/writer/common/option_helpers.h"
 
 #include <utility>
+#include <variant>
 
+#include "src/tint/api/common/bindings.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 
@@ -119,9 +121,14 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 
     for (const auto& it : options.bindings.external_texture) {
         const auto& src_binding = it.first;
-        const auto& plane0 = it.second.plane0;
-        const auto& plane1 = it.second.plane1;
-        const auto& metadata = it.second.metadata;
+
+        auto& data = it.second;
+        TINT_ASSERT(std::holds_alternative<ExternalMultiplanarTexture>(data));
+
+        ExternalMultiplanarTexture et = std::get<ExternalMultiplanarTexture>(data);
+        const auto& plane0 = et.plane0;
+        const auto& plane1 = et.plane1;
+        const auto& metadata = et.metadata;
 
         // Validate with the actual source regardless of what the remapper will do
         if (wgsl_seen(src_binding, plane0)) {
@@ -183,9 +190,14 @@ void PopulateBindingRelatedOptions(
     // External textures are re-bound to their plane0 location
     for (const auto& it : options.bindings.external_texture) {
         const BindingPoint& src_binding_point = it.first;
-        const auto& plane0 = it.second.plane0;
-        const auto& plane1 = it.second.plane1;
-        const auto& metadata = it.second.metadata;
+
+        auto& data = it.second;
+        TINT_ASSERT(std::holds_alternative<ExternalMultiplanarTexture>(data));
+
+        ExternalMultiplanarTexture et = std::get<ExternalMultiplanarTexture>(data);
+        const auto& plane0 = et.plane0;
+        const auto& plane1 = et.plane1;
+        const auto& metadata = et.metadata;
 
         // Use the re-bound HLSL plane0 value for the lookup key.
         multiplanar_map.emplace(plane0,

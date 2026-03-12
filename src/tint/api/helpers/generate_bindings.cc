@@ -154,7 +154,8 @@ Bindings GenerateBindings(const core::ir::Module& module,
             tint::BindingPoint plane0{.group = g, .binding = next_texture_idx++};
             tint::BindingPoint plane1{.group = g, .binding = next_texture_idx++};
             tint::BindingPoint metadata{.group = g, .binding = next_buffer_idx++};
-            bindings.external_texture.emplace(bp, ExternalTexture{metadata, plane0, plane1});
+            bindings.external_texture.emplace(bp,
+                                              ExternalMultiplanarTexture{metadata, plane0, plane1});
         }
     } else {
         for (auto bp : ext_tex_bps) {
@@ -164,7 +165,8 @@ Bindings GenerateBindings(const core::ir::Module& module,
             tint::BindingPoint plane0{.group = g, .binding = bp.binding};
             tint::BindingPoint plane1{.group = g, .binding = next_num++};
             tint::BindingPoint metadata{.group = g, .binding = next_num++};
-            bindings.external_texture.emplace(bp, ExternalTexture{metadata, plane0, plane1});
+            bindings.external_texture.emplace(bp,
+                                              ExternalMultiplanarTexture{metadata, plane0, plane1});
         }
     }
 

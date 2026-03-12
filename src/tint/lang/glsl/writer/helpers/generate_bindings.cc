@@ -154,7 +154,8 @@ BindingData GenerateBindings(const core::ir::Module& module, const std::string& 
         BindingPoint plane1{.group = 0, .binding = next_binding++};
         BindingPoint metadata{.group = 0, .binding = next_binding++};
 
-        data.bindings.external_texture.emplace(bp, ExternalTexture{metadata, plane0, plane1});
+        data.bindings.external_texture.emplace(
+            bp, ExternalMultiplanarTexture{metadata, plane0, plane1});
     }
 
     return data;
