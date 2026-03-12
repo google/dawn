@@ -842,9 +842,10 @@ constexpr IOAttributeChecker kColorChecker{
     .check = [](const core::type::Type*, const IOAttributes&, const Capabilities&, IOAttributeUsage)
         -> Result<SuccessType, std::string> { return Success; },
     .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
-        return ty->IsNumericScalarOrVector();
+        return ty->IsNumericScalarOrVector() &&
+               ty->DeepestElement()->IsAnyOf<core::type::I32, core::type::U32, core::type::F32>();
     },
-    .type_error = "must be a scalar or vector",
+    .type_error = "must be an i32, u32 or f32 scalar or vector",
 };
 
 constexpr IOAttributeChecker kInputAttachmentIndexChecker{
