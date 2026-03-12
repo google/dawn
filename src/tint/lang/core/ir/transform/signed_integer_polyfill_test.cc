@@ -89,10 +89,10 @@ TEST_F(IR_SignedIntegerPolyfillTest, Negation_I32_Scalar) {
     auto* expect = R"(
 %foo = func(%value:i32):i32 {
   $B1: {
-    %3:u32 = bitcast %value
+    %3:u32 = bitcast<u32> %value
     %4:u32 = complement %3
     %5:u32 = add %4, 1u
-    %6:i32 = bitcast %5
+    %6:i32 = bitcast<i32> %5
     ret %6
   }
 }
@@ -151,10 +151,10 @@ TEST_F(IR_SignedIntegerPolyfillTest, Negation_I32_Vector) {
     auto* expect = R"(
 %foo = func(%value:vec4<i32>):vec4<i32> {
   $B1: {
-    %3:vec4<u32> = bitcast %value
+    %3:vec4<u32> = bitcast<vec4<u32>> %value
     %4:vec4<u32> = complement %3
     %5:vec4<u32> = add %4, vec4<u32>(1u)
-    %6:vec4<i32> = bitcast %5
+    %6:vec4<i32> = bitcast<vec4<i32>> %5
     ret %6
   }
 }
@@ -215,10 +215,10 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntAdd_Scalar) {
     auto* expect = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 {
   $B1: {
-    %4:u32 = bitcast %lhs
-    %5:u32 = bitcast %rhs
+    %4:u32 = bitcast<u32> %lhs
+    %5:u32 = bitcast<u32> %rhs
     %6:u32 = add %4, %5
-    %7:i32 = bitcast %6
+    %7:i32 = bitcast<i32> %6
     ret %7
   }
 }
@@ -280,10 +280,10 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntMul_Scalar) {
     auto* expect = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 {
   $B1: {
-    %4:u32 = bitcast %lhs
-    %5:u32 = bitcast %rhs
+    %4:u32 = bitcast<u32> %lhs
+    %5:u32 = bitcast<u32> %rhs
     %6:u32 = mul %4, %5
-    %7:i32 = bitcast %6
+    %7:i32 = bitcast<i32> %6
     ret %7
   }
 }
@@ -345,10 +345,10 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntSub_Scalar) {
     auto* expect = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 {
   $B1: {
-    %4:u32 = bitcast %lhs
-    %5:u32 = bitcast %rhs
+    %4:u32 = bitcast<u32> %lhs
+    %5:u32 = bitcast<u32> %rhs
     %6:u32 = sub %4, %5
-    %7:i32 = bitcast %6
+    %7:i32 = bitcast<i32> %6
     ret %7
   }
 }
@@ -410,10 +410,10 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntAdd_Vector) {
     auto* expect = R"(
 %foo = func(%lhs:vec4<i32>, %rhs:vec4<i32>):vec4<i32> {
   $B1: {
-    %4:vec4<u32> = bitcast %lhs
-    %5:vec4<u32> = bitcast %rhs
+    %4:vec4<u32> = bitcast<vec4<u32>> %lhs
+    %5:vec4<u32> = bitcast<vec4<u32>> %rhs
     %6:vec4<u32> = add %4, %5
-    %7:vec4<i32> = bitcast %6
+    %7:vec4<i32> = bitcast<vec4<i32>> %6
     ret %7
   }
 }
@@ -475,10 +475,10 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntAdd_ScalarVector) {
     auto* expect = R"(
 %foo = func(%lhs:i32, %rhs:vec4<i32>):vec4<i32> {
   $B1: {
-    %4:u32 = bitcast %lhs
-    %5:vec4<u32> = bitcast %rhs
+    %4:u32 = bitcast<u32> %lhs
+    %5:vec4<u32> = bitcast<vec4<u32>> %rhs
     %6:vec4<u32> = add %4, %5
-    %7:vec4<i32> = bitcast %6
+    %7:vec4<i32> = bitcast<vec4<i32>> %6
     ret %7
   }
 }
@@ -540,10 +540,10 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntAdd_VectorScalar) {
     auto* expect = R"(
 %foo = func(%lhs:vec4<i32>, %rhs:i32):vec4<i32> {
   $B1: {
-    %4:vec4<u32> = bitcast %lhs
-    %5:u32 = bitcast %rhs
+    %4:vec4<u32> = bitcast<vec4<u32>> %lhs
+    %5:u32 = bitcast<u32> %rhs
     %6:vec4<u32> = add %4, %5
-    %7:vec4<i32> = bitcast %6
+    %7:vec4<i32> = bitcast<vec4<i32>> %6
     ret %7
   }
 }
@@ -605,9 +605,9 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntShift_Scalar) {
     auto* expect = R"(
 %foo = func(%lhs:i32, %rhs:u32):i32 {
   $B1: {
-    %4:u32 = bitcast %lhs
+    %4:u32 = bitcast<u32> %lhs
     %5:u32 = shl %4, %rhs
-    %6:i32 = bitcast %5
+    %6:i32 = bitcast<i32> %5
     ret %6
   }
 }
@@ -667,9 +667,9 @@ TEST_F(IR_SignedIntegerPolyfillTest, IntShift_Vector) {
     auto* expect = R"(
 %foo = func(%lhs:vec4<i32>, %rhs:vec4<u32>):vec4<i32> {
   $B1: {
-    %4:vec4<u32> = bitcast %lhs
+    %4:vec4<u32> = bitcast<vec4<u32>> %lhs
     %5:vec4<u32> = shl %4, %rhs
-    %6:vec4<i32> = bitcast %5
+    %6:vec4<i32> = bitcast<vec4<i32>> %5
     ret %6
   }
 }

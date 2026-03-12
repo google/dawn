@@ -137,7 +137,7 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:u32 = %v.Load 32u
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     %b:u32 = let %4
     ret
   }
@@ -222,7 +222,7 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:u32 = %v.Load 4u
-    %4:f32 = bitcast %3
+    %4:f32 = bitcast<f32> %3
     %a:f32 = let %4
     ret
   }
@@ -292,10 +292,10 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:u32 = %v.Load 0u
-    %4:i32 = bitcast %3
+    %4:i32 = bitcast<i32> %3
     %a:i32 = let %4
     %6:vec3<u32> = %v.Load3 16u
-    %7:vec3<f32> = bitcast %6
+    %7:vec3<f32> = bitcast<vec3<f32>> %6
     %b:vec3<f32> = let %7
     ret
   }
@@ -356,7 +356,7 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:u32 = %v.Load 0u
-    %4:i32 = bitcast %3
+    %4:i32 = bitcast<i32> %3
     %a:i32 = let %4
     ret
   }
@@ -417,19 +417,19 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:vec4<u32> = %v.Load4 0u
-    %4:vec4<f32> = bitcast %3
+    %4:vec4<f32> = bitcast<vec4<f32>> %3
     %a:vec4<f32> = let %4
     %6:u32 = %v.Load 0u
-    %7:f32 = bitcast %6
+    %7:f32 = bitcast<f32> %6
     %b:f32 = let %7
     %9:u32 = %v.Load 4u
-    %10:f32 = bitcast %9
+    %10:f32 = bitcast<f32> %9
     %c:f32 = let %10
     %12:u32 = %v.Load 8u
-    %13:f32 = bitcast %12
+    %13:f32 = bitcast<f32> %12
     %d:f32 = let %13
     %15:u32 = %v.Load 12u
-    %16:f32 = bitcast %15
+    %16:f32 = bitcast<f32> %15
     %e:f32 = let %16
     ret
   }
@@ -555,10 +555,10 @@ $B1: {  # root
     %3:mat4x4<f32> = call %4, 0u
     %a:mat4x4<f32> = let %3
     %6:vec4<u32> = %v.Load4 48u
-    %7:vec4<f32> = bitcast %6
+    %7:vec4<f32> = bitcast<vec4<f32>> %6
     %b:vec4<f32> = let %7
     %9:u32 = %v.Load 24u
-    %10:f32 = bitcast %9
+    %10:f32 = bitcast<f32> %9
     %c:f32 = let %10
     ret
   }
@@ -567,16 +567,16 @@ $B1: {  # root
   $B3: {
     %13:u32 = add %offset, 0u
     %14:vec4<u32> = %v.Load4 %13
-    %15:vec4<f32> = bitcast %14
+    %15:vec4<f32> = bitcast<vec4<f32>> %14
     %16:u32 = add %offset, 16u
     %17:vec4<u32> = %v.Load4 %16
-    %18:vec4<f32> = bitcast %17
+    %18:vec4<f32> = bitcast<vec4<f32>> %17
     %19:u32 = add %offset, 32u
     %20:vec4<u32> = %v.Load4 %19
-    %21:vec4<f32> = bitcast %20
+    %21:vec4<f32> = bitcast<vec4<f32>> %20
     %22:u32 = add %offset, 48u
     %23:vec4<u32> = %v.Load4 %22
-    %24:vec4<f32> = bitcast %23
+    %24:vec4<f32> = bitcast<vec4<f32>> %23
     %25:mat4x4<f32> = construct %15, %18, %21, %24
     ret %25
   }
@@ -630,7 +630,7 @@ $B1: {  # root
     %3:array<vec3<f32>, 5> = call %4, 0u
     %a:array<vec3<f32>, 5> = let %3
     %6:vec3<u32> = %v.Load3 48u
-    %7:vec3<f32> = bitcast %6
+    %7:vec3<f32> = bitcast<vec3<f32>> %6
     %b:vec3<f32> = let %7
     ret
   }
@@ -653,7 +653,7 @@ $B1: {  # root
         %14:u32 = mul %idx, 16u
         %15:u32 = add %offset, %14
         %16:vec3<u32> = %v.Load3 %15
-        %17:vec3<f32> = bitcast %16
+        %17:vec3<f32> = bitcast<vec3<f32>> %16
         store %13, %17
         continue  # -> $B6
       }
@@ -715,7 +715,7 @@ $B1: {  # root
     %3:array<vec3<f32>, 42> = call %4, 0u
     %a:array<vec3<f32>, 42> = let %3
     %6:vec3<u32> = %v.Load3 48u
-    %7:vec3<f32> = bitcast %6
+    %7:vec3<f32> = bitcast<vec3<f32>> %6
     %b:vec3<f32> = let %7
     ret
   }
@@ -738,7 +738,7 @@ $B1: {  # root
         %14:u32 = mul %idx, 16u
         %15:u32 = add %offset, %14
         %16:vec3<u32> = %v.Load3 %15
-        %17:vec3<f32> = bitcast %16
+        %17:vec3<f32> = bitcast<vec3<f32>> %16
         store %13, %17
         continue  # -> $B6
       }
@@ -815,7 +815,7 @@ $B1: {  # root
     %3:SB = call %4, 0u
     %a:SB = let %3
     %6:u32 = %v.Load 4u
-    %7:f32 = bitcast %6
+    %7:f32 = bitcast<f32> %6
     %b:f32 = let %7
     ret
   }
@@ -824,10 +824,10 @@ $B1: {  # root
   $B3: {
     %10:u32 = add %offset, 0u
     %11:u32 = %v.Load %10
-    %12:i32 = bitcast %11
+    %12:i32 = bitcast<i32> %11
     %13:u32 = add %offset, 4u
     %14:u32 = %v.Load %13
-    %15:f32 = bitcast %14
+    %15:f32 = bitcast<f32> %14
     %16:SB = construct %12, %15
     ret %16
   }
@@ -928,7 +928,7 @@ $B1: {  # root
     %3:SB = call %4, 0u
     %a:SB = let %3
     %6:u32 = %v.Load 136u
-    %7:f32 = bitcast %6
+    %7:f32 = bitcast<f32> %6
     %b:f32 = let %7
     ret
   }
@@ -937,7 +937,7 @@ $B1: {  # root
   $B3: {
     %10:u32 = add %offset, 0u
     %11:u32 = %v.Load %10
-    %12:i32 = bitcast %11
+    %12:i32 = bitcast<i32> %11
     %13:u32 = add %offset, 16u
     %14:Outer = call %15, %13
     %16:SB = construct %12, %14
@@ -948,7 +948,7 @@ $B1: {  # root
   $B4: {
     %18:u32 = add %offset_1, 0u
     %19:u32 = %v.Load %18
-    %20:f32 = bitcast %19
+    %20:f32 = bitcast<f32> %19
     %21:u32 = add %offset_1, 16u
     %22:Inner = call %23, %21
     %24:Outer = construct %20, %22
@@ -969,13 +969,13 @@ $B1: {  # root
   $B6: {
     %34:u32 = add %offset_3, 0u
     %35:vec3<u32> = %v.Load3 %34
-    %36:vec3<f32> = bitcast %35
+    %36:vec3<f32> = bitcast<vec3<f32>> %35
     %37:u32 = add %offset_3, 16u
     %38:vec3<u32> = %v.Load3 %37
-    %39:vec3<f32> = bitcast %38
+    %39:vec3<f32> = bitcast<vec3<f32>> %38
     %40:u32 = add %offset_3, 32u
     %41:vec3<u32> = %v.Load3 %40
-    %42:vec3<f32> = bitcast %41
+    %42:vec3<f32> = bitcast<vec3<f32>> %41
     %43:mat3x3<f32> = construct %36, %39, %42
     ret %43
   }
@@ -998,7 +998,7 @@ $B1: {  # root
         %49:u32 = mul %idx, 16u
         %50:u32 = add %offset_4, %49
         %51:vec3<u32> = %v.Load3 %50
-        %52:vec3<f32> = bitcast %51
+        %52:vec3<f32> = bitcast<vec3<f32>> %51
         store %48, %52
         continue  # -> $B10
       }
@@ -1116,7 +1116,7 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:u32 = %sb.Load 600u
-    %4:f32 = bitcast %3
+    %4:f32 = bitcast<f32> %3
     %x:f32 = let %4
     ret
   }
@@ -1242,7 +1242,7 @@ $B1: {  # root
     %15:u32 = add %14, %11
     %16:u32 = add %15, %13
     %17:u32 = %sb.Load %16
-    %18:f32 = bitcast %17
+    %18:f32 = bitcast<f32> %17
     %x:f32 = let %18
     ret
   }
@@ -1352,7 +1352,7 @@ $B1: {  # root
     %5:u32 = mul %4, 32u
     %6:u32 = add 568u, %5
     %7:u32 = %sb.Load %6
-    %8:f32 = bitcast %7
+    %8:f32 = bitcast<f32> %7
     %x:f32 = let %8
     ret
   }
@@ -2518,13 +2518,13 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = bitcast 2.0f
+    %3:u32 = bitcast<u32> 2.0f
     %4:void = %v.Store 0u, %3
-    %5:u32 = bitcast 4.0f
+    %5:u32 = bitcast<u32> 4.0f
     %6:void = %v.Store 4u, %5
-    %7:u32 = bitcast 8.0f
+    %7:u32 = bitcast<u32> 8.0f
     %8:void = %v.Store 8u, %7
-    %9:u32 = bitcast 16.0f
+    %9:u32 = bitcast<u32> 16.0f
     %10:void = %v.Store 12u, %9
     ret
   }
@@ -2571,7 +2571,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = bitcast 2.0f
+    %3:u32 = bitcast<u32> 2.0f
     %4:void = %v.Store 0u, %3
     ret
   }
@@ -2662,7 +2662,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = bitcast 2.0f
+    %3:u32 = bitcast<u32> 2.0f
     %4:void = %v.Store 4u, %3
     ret
   }
@@ -2753,7 +2753,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:vec3<u32> = bitcast vec3<f32>(2.0f, 3.0f, 4.0f)
+    %3:vec3<u32> = bitcast<vec3<u32>> vec3<f32>(2.0f, 3.0f, 4.0f)
     %4:void = %v.Store3 0u, %3
     ret
   }
@@ -2847,7 +2847,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = bitcast 5.0f
+    %3:u32 = bitcast<u32> 5.0f
     %4:void = %v.Store 24u, %3
     ret
   }
@@ -2942,7 +2942,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:vec3<u32> = bitcast vec3<f32>(5.0f)
+    %3:vec3<u32> = bitcast<vec3<u32>> vec3<f32>(5.0f)
     %4:void = %v.Store3 16u, %3
     ret
   }
@@ -3043,11 +3043,11 @@ $B1: {  # root
   $B3: {
     %7:vec3<f32> = access %obj, 0u
     %8:u32 = add %offset, 0u
-    %9:vec3<u32> = bitcast %7
+    %9:vec3<u32> = bitcast<vec3<u32>> %7
     %10:void = %v.Store3 %8, %9
     %11:vec3<f32> = access %obj, 1u
     %12:u32 = add %offset, 16u
-    %13:vec3<u32> = bitcast %11
+    %13:vec3<u32> = bitcast<vec3<u32>> %11
     %14:void = %v.Store3 %12, %13
     ret
   }
@@ -3150,7 +3150,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = bitcast 1.0f
+    %3:u32 = bitcast<u32> 1.0f
     %4:void = %v.Store 12u, %3
     ret
   }
@@ -3265,7 +3265,7 @@ $B1: {  # root
         %10:vec3<f32> = access %obj, %idx
         %11:u32 = mul %idx, 16u
         %12:u32 = add %offset, %11
-        %13:vec3<u32> = bitcast %10
+        %13:vec3<u32> = bitcast<vec3<u32>> %10
         %14:void = %v.Store3 %12, %13
         continue  # -> $B6
       }
@@ -3334,7 +3334,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = bitcast 3.0f
+    %3:u32 = bitcast<u32> 3.0f
     %4:void = %v.Store 4u, %3
     ret
   }
@@ -3487,7 +3487,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = bitcast 2.0f
+    %3:u32 = bitcast<u32> 2.0f
     %4:void = %v.Store 16u, %3
     ret
   }
@@ -3588,7 +3588,7 @@ $B1: {  # root
   $B3: {
     %8:i32 = access %obj, 0u
     %9:u32 = add %offset, 0u
-    %10:u32 = bitcast %8
+    %10:u32 = bitcast<u32> %8
     %11:void = %v.Store %9, %10
     %12:Outer = access %obj, 1u
     %13:u32 = add %offset, 16u
@@ -3600,7 +3600,7 @@ $B1: {  # root
   $B4: {
     %18:f32 = access %obj_1, 0u
     %19:u32 = add %offset_1, 0u
-    %20:u32 = bitcast %18
+    %20:u32 = bitcast<u32> %18
     %21:void = %v.Store %19, %20
     %22:Inner = access %obj_1, 1u
     %23:u32 = add %offset_1, 16u
@@ -3612,11 +3612,11 @@ $B1: {  # root
   $B5: {
     %28:f32 = access %obj_2, 0u
     %29:u32 = add %offset_2, 0u
-    %30:u32 = bitcast %28
+    %30:u32 = bitcast<u32> %28
     %31:void = %v.Store %29, %30
     %32:vec3<f32> = access %obj_2, 1u
     %33:u32 = add %offset_2, 16u
-    %34:vec3<u32> = bitcast %32
+    %34:vec3<u32> = bitcast<vec3<u32>> %32
     %35:void = %v.Store3 %33, %34
     ret
   }
@@ -3718,7 +3718,7 @@ $B1: {  # root
   $B3: {
     %8:i32 = access %obj, 0u
     %9:u32 = add %offset, 0u
-    %10:u32 = bitcast %8
+    %10:u32 = bitcast<u32> %8
     %11:void = %v.Store %9, %10
     %12:Outer = access %obj, 1u
     %13:u32 = add %offset, 16u
@@ -3730,7 +3730,7 @@ $B1: {  # root
   $B4: {
     %18:f32 = access %obj_1, 0u
     %19:u32 = add %offset_1, 0u
-    %20:u32 = bitcast %18
+    %20:u32 = bitcast<u32> %18
     %21:void = %v.Store %19, %20
     %22:Inner = access %obj_1, 1u
     %23:u32 = add %offset_1, 16u
@@ -3753,15 +3753,15 @@ $B1: {  # root
   $B6: {
     %38:vec3<f32> = access %obj_3, 0u
     %39:u32 = add %offset_3, 0u
-    %40:vec3<u32> = bitcast %38
+    %40:vec3<u32> = bitcast<vec3<u32>> %38
     %41:void = %v.Store3 %39, %40
     %42:vec3<f32> = access %obj_3, 1u
     %43:u32 = add %offset_3, 16u
-    %44:vec3<u32> = bitcast %42
+    %44:vec3<u32> = bitcast<vec3<u32>> %42
     %45:void = %v.Store3 %43, %44
     %46:vec3<f32> = access %obj_3, 2u
     %47:u32 = add %offset_3, 32u
-    %48:vec3<u32> = bitcast %46
+    %48:vec3<u32> = bitcast<vec3<u32>> %46
     %49:void = %v.Store3 %47, %48
     ret
   }
@@ -3782,7 +3782,7 @@ $B1: {  # root
         %54:vec3<f32> = access %obj_4, %idx
         %55:u32 = mul %idx, 16u
         %56:u32 = add %offset_4, %55
-        %57:vec3<u32> = bitcast %54
+        %57:vec3<u32> = bitcast<vec3<u32>> %54
         %58:void = %v.Store3 %56, %57
         continue  # -> $B10
       }
@@ -4279,10 +4279,10 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:u32 = %v.Load 20u
-    %4:f32 = bitcast %3
+    %4:f32 = bitcast<f32> %3
     %b:f32 = let %4
     %6:u32 = %v.Load 24u
-    %7:f32 = bitcast %6
+    %7:f32 = bitcast<f32> %6
     %c:f32 = let %7
     ret
   }
@@ -4382,7 +4382,7 @@ $B1: {  # root
         %14:u32 = mul %idx, 16u
         %15:u32 = add %offset, %14
         %16:vec4<u32> = %v.Load4 %15
-        %17:vec4<i32> = bitcast %16
+        %17:vec4<i32> = bitcast<vec4<i32>> %16
         store %13, %17
         continue  # -> $B6
       }
@@ -4413,7 +4413,7 @@ $B1: {  # root
         %25:u32 = mul %idx_1, 16u
         %26:u32 = add %offset_1, %25
         %27:vec4<u32> = %v.Load4 %26
-        %28:vec4<f32> = bitcast %27
+        %28:vec4<f32> = bitcast<vec4<f32>> %27
         store %24, %28
         continue  # -> $B11
       }
@@ -4522,7 +4522,7 @@ $B1: {  # root
         %14:u32 = mul %idx, 16u
         %15:u32 = add %offset, %14
         %16:vec4<u32> = %v.Load4 %15
-        %17:vec4<i32> = bitcast %16
+        %17:vec4<i32> = bitcast<vec4<i32>> %16
         store %13, %17
         continue  # -> $B6
       }
@@ -4553,7 +4553,7 @@ $B1: {  # root
         %25:u32 = mul %idx_1, 16u
         %26:u32 = add %offset_1, %25
         %27:vec4<u32> = %v.Load4 %26
-        %28:vec4<f32> = bitcast %27
+        %28:vec4<f32> = bitcast<vec4<f32>> %27
         store %24, %28
         continue  # -> $B11
       }
@@ -4661,7 +4661,7 @@ $B1: {  # root
         %14:u32 = mul %idx, 16u
         %15:u32 = add %offset, %14
         %16:vec4<u32> = %v.Load4 %15
-        %17:vec4<i32> = bitcast %16
+        %17:vec4<i32> = bitcast<vec4<i32>> %16
         store %13, %17
         continue  # -> $B6
       }
@@ -4692,7 +4692,7 @@ $B1: {  # root
         %25:u32 = mul %idx_1, 16u
         %26:u32 = add %offset_1, %25
         %27:vec4<u32> = %v.Load4 %26
-        %28:vec4<f32> = bitcast %27
+        %28:vec4<f32> = bitcast<vec4<f32>> %27
         store %24, %28
         continue  # -> $B11
       }

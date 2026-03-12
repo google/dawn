@@ -801,8 +801,8 @@ TEST_F(IR_LoopAnalysisTest, Finite_Bitcasts) {
       }
       $B3: {  # body
         %3:u32 = load %idx
-        %4:i32 = bitcast %3
-        %5:u32 = bitcast %4
+        %4:i32 = bitcast<i32> %3
+        %5:u32 = bitcast<u32> %4
         %6:bool = lt %5, 10u
         if %6 [t: $B5] {  # if_1
           $B5: {  # true
@@ -813,13 +813,13 @@ TEST_F(IR_LoopAnalysisTest, Finite_Bitcasts) {
       }
       $B4: {  # continuing
         %7:u32 = load %idx
-        %8:i32 = bitcast %7
-        %9:u32 = bitcast %8
-        %10:i32 = bitcast %9
-        %11:u32 = bitcast 1u
-        %12:i32 = bitcast %11
+        %8:i32 = bitcast<i32> %7
+        %9:u32 = bitcast<u32> %8
+        %10:i32 = bitcast<i32> %9
+        %11:u32 = bitcast<u32> 1u
+        %12:i32 = bitcast<i32> %11
         %13:i32 = add %10, %12
-        %14:u32 = bitcast %13
+        %14:u32 = bitcast<u32> %13
         store %idx, %14
         next_iteration  # -> $B3
       }

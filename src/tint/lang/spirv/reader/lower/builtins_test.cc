@@ -763,7 +763,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Scalar_UnsignedArg) {
     auto* expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = sign %2
     ret
   }
@@ -797,7 +797,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Scalar_UnsignedResult) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = sign 10i
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     ret
   }
 }
@@ -829,9 +829,9 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Scalar_UnsignedArgAndResult) {
     auto* expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = sign %2
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     ret
   }
 }
@@ -895,7 +895,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Vector_UnsignedArg) {
     auto* expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %3:vec2<i32> = sign %2
     ret
   }
@@ -929,7 +929,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Vector_UnsignedResult) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = sign vec2<i32>(10i)
-    %3:vec2<u32> = bitcast %2
+    %3:vec2<u32> = bitcast<vec2<u32>> %2
     ret
   }
 }
@@ -961,9 +961,9 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Vector_UnsignedArgAndResult) {
     auto* expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %3:vec2<i32> = sign %2
-    %4:vec2<u32> = bitcast %3
+    %4:vec2<u32> = bitcast<vec2<u32>> %3
     ret
   }
 }
@@ -1048,14 +1048,14 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamSigned, UnsignedToUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = )" + params.wgsl_name +
                   R"( %2
-    %4:u32 = bitcast %3
-    %5:vec2<i32> = bitcast vec2<u32>(10u)
+    %4:u32 = bitcast<u32> %3
+    %5:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %6:vec2<i32> = )" +
                   params.wgsl_name + R"( %5
-    %7:vec2<u32> = bitcast %6
+    %7:vec2<u32> = bitcast<vec2<u32>> %6
     ret
   }
 }
@@ -1095,10 +1095,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamSigned, UnsignedToSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = )" + params.wgsl_name +
                   R"( %2
-    %4:vec2<i32> = bitcast vec2<u32>(10u)
+    %4:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %5:vec2<i32> = )" +
                   params.wgsl_name + R"( %4
     ret
@@ -1185,10 +1185,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamSigned, SignedToUnsigned) {
   $B1: {
     %2:i32 = )" + params.wgsl_name +
                   R"( 10i
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     %4:vec2<i32> = )" +
                   params.wgsl_name + R"( vec2<i32>(10i)
-    %5:vec2<u32> = bitcast %4
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     ret
   }
 }
@@ -1282,10 +1282,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, UnsignedToSigned) {
   $B1: {
     %2:u32 = )" + params.wgsl_name +
                   R"( 10u
-    %3:i32 = bitcast %2
+    %3:i32 = bitcast<i32> %2
     %4:vec2<u32> = )" +
                   params.wgsl_name + R"( vec2<u32>(10u)
-    %5:vec2<i32> = bitcast %4
+    %5:vec2<i32> = bitcast<vec2<i32>> %4
     ret
   }
 }
@@ -1325,14 +1325,14 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, SignedToSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
+    %2:u32 = bitcast<u32> 10i
     %3:u32 = )" + params.wgsl_name +
                   R"( %2
-    %4:i32 = bitcast %3
-    %5:vec2<u32> = bitcast vec2<i32>(10i)
+    %4:i32 = bitcast<i32> %3
+    %5:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
     %6:vec2<u32> = )" +
                   params.wgsl_name + R"( %5
-    %7:vec2<i32> = bitcast %6
+    %7:vec2<i32> = bitcast<vec2<i32>> %6
     ret
   }
 }
@@ -1372,10 +1372,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, SignedToUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
+    %2:u32 = bitcast<u32> 10i
     %3:u32 = )" + params.wgsl_name +
                   R"( %2
-    %4:vec2<u32> = bitcast vec2<i32>(10i)
+    %4:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
     %5:vec2<u32> = )" +
                   params.wgsl_name + R"( %4
     ret
@@ -1425,16 +1425,16 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, UnsignedToUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
-    %3:i32 = bitcast 15u
+    %2:i32 = bitcast<i32> 10u
+    %3:i32 = bitcast<i32> 15u
     %4:i32 = )" + params.wgsl_name +
                   R"( %2, %3
-    %5:u32 = bitcast %4
-    %6:vec2<i32> = bitcast vec2<u32>(10u)
-    %7:vec2<i32> = bitcast vec2<u32>(15u)
+    %5:u32 = bitcast<u32> %4
+    %6:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
+    %7:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(15u)
     %8:vec2<i32> = )" +
                   params.wgsl_name + R"( %6, %7
-    %9:vec2<u32> = bitcast %8
+    %9:vec2<u32> = bitcast<vec2<u32>> %8
     ret
   }
 }
@@ -1517,14 +1517,14 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, MixedToUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = )" + params.wgsl_name +
                   R"( 10i, %2
-    %4:u32 = bitcast %3
-    %5:vec2<i32> = bitcast vec2<u32>(10u)
+    %4:u32 = bitcast<u32> %3
+    %5:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %6:vec2<i32> = )" +
                   params.wgsl_name + R"( vec2<i32>(10i), %5
-    %7:vec2<u32> = bitcast %6
+    %7:vec2<u32> = bitcast<vec2<u32>> %6
     ret
   }
 }
@@ -1564,10 +1564,10 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, MixedToSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = )" + params.wgsl_name +
                   R"( %2, 10i
-    %4:vec2<i32> = bitcast vec2<u32>(10u)
+    %4:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %5:vec2<i32> = )" +
                   params.wgsl_name + R"( %4, vec2<i32>(10i)
     ret
@@ -1661,16 +1661,16 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, SignedToSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 15i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 15i
     %4:u32 = )" + params.wgsl_name +
                   R"( %2, %3
-    %5:i32 = bitcast %4
-    %6:vec2<u32> = bitcast vec2<i32>(10i)
-    %7:vec2<u32> = bitcast vec2<i32>(15i)
+    %5:i32 = bitcast<i32> %4
+    %6:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
+    %7:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(15i)
     %8:vec2<u32> = )" +
                   params.wgsl_name + R"( %6, %7
-    %9:vec2<i32> = bitcast %8
+    %9:vec2<i32> = bitcast<vec2<i32>> %8
     ret
   }
 }
@@ -1710,10 +1710,10 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, MixedToUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
+    %2:u32 = bitcast<u32> 10i
     %3:u32 = )" + params.wgsl_name +
                   R"( %2, 10u
-    %4:vec2<u32> = bitcast vec2<i32>(10i)
+    %4:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
     %5:vec2<u32> = )" +
                   params.wgsl_name + R"( %4, vec2<u32>(10u)
     ret
@@ -1755,14 +1755,14 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, MixedToSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
+    %2:u32 = bitcast<u32> 10i
     %3:u32 = )" + params.wgsl_name +
                   R"( 10u, %2
-    %4:i32 = bitcast %3
-    %5:vec2<u32> = bitcast vec2<i32>(10i)
+    %4:i32 = bitcast<i32> %3
+    %5:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
     %6:vec2<u32> = )" +
                   params.wgsl_name + R"( vec2<u32>(10u), %5
-    %7:vec2<i32> = bitcast %6
+    %7:vec2<i32> = bitcast<vec2<i32>> %6
     ret
   }
 }
@@ -1805,16 +1805,16 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_UnsignedToUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
-    %3:i32 = bitcast 15u
-    %4:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
+    %3:i32 = bitcast<i32> 15u
+    %4:i32 = bitcast<i32> 10u
     %5:i32 = clamp %2, %3, %4
-    %6:u32 = bitcast %5
-    %7:vec2<i32> = bitcast vec2<u32>(10u)
-    %8:vec2<i32> = bitcast vec2<u32>(15u)
-    %9:vec2<i32> = bitcast vec2<u32>(10u)
+    %6:u32 = bitcast<u32> %5
+    %7:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
+    %8:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(15u)
+    %9:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %10:vec2<i32> = clamp %7, %8, %9
-    %11:vec2<u32> = bitcast %10
+    %11:vec2<u32> = bitcast<vec2<u32>> %10
     ret
   }
 }
@@ -1889,12 +1889,12 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_MixedToUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = clamp 10i, %2, 10i
-    %4:u32 = bitcast %3
-    %5:vec2<i32> = bitcast vec2<u32>(10u)
+    %4:u32 = bitcast<u32> %3
+    %5:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %6:vec2<i32> = clamp vec2<i32>(10i), %5, vec2<i32>(10i)
-    %7:vec2<u32> = bitcast %6
+    %7:vec2<u32> = bitcast<vec2<u32>> %6
     ret
   }
 }
@@ -1931,11 +1931,11 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_MixedToSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
-    %3:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
+    %3:i32 = bitcast<i32> 10u
     %4:i32 = clamp %2, 10i, %3
-    %5:vec2<i32> = bitcast vec2<u32>(10u)
-    %6:vec2<i32> = bitcast vec2<u32>(10u)
+    %5:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
+    %6:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %7:vec2<i32> = clamp %5, vec2<i32>(10i), %6
     ret
   }
@@ -2011,16 +2011,16 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_SignedToSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 15i
-    %4:u32 = bitcast 10i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 15i
+    %4:u32 = bitcast<u32> 10i
     %5:u32 = clamp %2, %3, %4
-    %6:i32 = bitcast %5
-    %7:vec2<u32> = bitcast vec2<i32>(10i)
-    %8:vec2<u32> = bitcast vec2<i32>(15i)
-    %9:vec2<u32> = bitcast vec2<i32>(10i)
+    %6:i32 = bitcast<i32> %5
+    %7:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
+    %8:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(15i)
+    %9:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
     %10:vec2<u32> = clamp %7, %8, %9
-    %11:vec2<i32> = bitcast %10
+    %11:vec2<i32> = bitcast<vec2<i32>> %10
     ret
   }
 }
@@ -2057,11 +2057,11 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_MixedToUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 10i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 10i
     %4:u32 = clamp %2, 10u, %3
-    %5:vec2<u32> = bitcast vec2<i32>(10i)
-    %6:vec2<u32> = bitcast vec2<i32>(10i)
+    %5:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
+    %6:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
     %7:vec2<u32> = clamp %5, vec2<u32>(10u), %6
     ret
   }
@@ -2099,12 +2099,12 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_MixedToSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
+    %2:u32 = bitcast<u32> 10i
     %3:u32 = clamp 10u, %2, 10u
-    %4:i32 = bitcast %3
-    %5:vec2<u32> = bitcast vec2<i32>(10i)
+    %4:i32 = bitcast<i32> %3
+    %5:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
     %6:vec2<u32> = clamp vec2<u32>(10u), %5, vec2<u32>(10u)
-    %7:vec2<i32> = bitcast %6
+    %7:vec2<i32> = bitcast<vec2<i32>> %6
     ret
   }
 }
@@ -2215,9 +2215,9 @@ TEST_F(SpirvReader_BuiltinsTest, FindILsb_SignedToUnsigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = firstTrailingBit 10i
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     %4:vec2<i32> = firstTrailingBit vec2<i32>(10i)
-    %5:vec2<u32> = bitcast %4
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     ret
   }
 }
@@ -2254,9 +2254,9 @@ TEST_F(SpirvReader_BuiltinsTest, FindILsb_UnsignedToSigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = firstTrailingBit 10u
-    %3:i32 = bitcast %2
+    %3:i32 = bitcast<i32> %2
     %4:vec2<u32> = firstTrailingBit vec2<u32>(10u)
-    %5:vec2<i32> = bitcast %4
+    %5:vec2<i32> = bitcast<vec2<i32>> %4
     ret
   }
 }
@@ -2520,7 +2520,7 @@ TEST_F(SpirvReader_BuiltinsTest, Ldexp_ScalarUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:f32 = ldexp 50.0f, %2
     ret
   }
@@ -2553,7 +2553,7 @@ TEST_F(SpirvReader_BuiltinsTest, Ldexp_VectorUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %3:vec2<f32> = ldexp vec2<f32>(50.0f), %2
     ret
   }
@@ -2771,7 +2771,7 @@ __frexp_result_f32 = struct @align(4) {
     %2:ptr<function, u32, read_write> = var undef
     %3:__frexp_result_f32 = frexp 50.0f
     %4:i32 = access %3, 1u
-    %5:u32 = bitcast %4
+    %5:u32 = bitcast<u32> %4
     store %2, %5
     %6:f32 = access %3, 0u
     %7:f32 = mul %6, %6
@@ -2868,7 +2868,7 @@ __frexp_result_vec2_f32 = struct @align(8) {
     %2:ptr<function, vec2<u32>, read_write> = var undef
     %3:__frexp_result_vec2_f32 = frexp vec2<f32>(50.0f)
     %4:vec2<i32> = access %3, 1u
-    %5:vec2<u32> = bitcast %4
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     store %2, %5
     %6:vec2<f32> = access %3, 0u
     %7:vec2<f32> = mul %6, %6
@@ -2937,7 +2937,7 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Scalar_UnsignedToSigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = countOneBits 10u
-    %3:i32 = bitcast %2
+    %3:i32 = bitcast<i32> %2
     ret
   }
 }
@@ -2970,7 +2970,7 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Scalar_SignedToUnsigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = countOneBits 10i
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     ret
   }
 }
@@ -3069,7 +3069,7 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Vector_UnsignedToSigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<u32> = countOneBits vec2<u32>(10u)
-    %3:vec2<i32> = bitcast %2
+    %3:vec2<i32> = bitcast<vec2<i32>> %2
     ret
   }
 }
@@ -3103,7 +3103,7 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Vector_SignedToUnsigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = countOneBits vec2<i32>(10i)
-    %3:vec2<u32> = bitcast %2
+    %3:vec2<u32> = bitcast<vec2<u32>> %2
     ret
   }
 }
@@ -3200,8 +3200,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_Int_SignedOffsetAndCount) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 20i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 20i
     %4:i32 = insertBits 10i, 20i, %2, %3
     ret
   }
@@ -3268,8 +3268,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_IntVector_SignedOffsetAndCount) 
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 20i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 20i
     %4:vec2<i32> = insertBits vec2<i32>(10i), vec2<i32>(20i), %2, %3
     ret
   }
@@ -3334,8 +3334,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_Uint_SignedOffsetAndCount) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 20i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 20i
     %4:u32 = insertBits 10u, 20u, %2, %3
     ret
   }
@@ -3402,8 +3402,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_UintVector_SignedOffsetAndCount)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 20i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 20i
     %4:vec2<u32> = insertBits vec2<u32>(10u), vec2<u32>(20u), %2, %3
     ret
   }
@@ -3436,7 +3436,7 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_Uint_SignedOffsetAndUnsignedCoun
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
+    %2:u32 = bitcast<u32> 10i
     %3:u32 = insertBits 10u, 20u, %2, 20u
     ret
   }
@@ -3501,8 +3501,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_Int_SignedOffsetAndCount) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 20i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 20i
     %4:i32 = extractBits 10i, %2, %3
     ret
   }
@@ -3567,8 +3567,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_IntVector_SignedOffsetAndCount
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 20i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 20i
     %4:vec2<i32> = extractBits vec2<i32>(10i), %2, %3
     ret
   }
@@ -3601,7 +3601,7 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_IntVector_SignedOffsetAndUnsig
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
+    %2:u32 = bitcast<u32> 10i
     %3:vec2<i32> = extractBits vec2<i32>(10i), %2, 20u
     ret
   }
@@ -3634,9 +3634,9 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_Uint_UnsignedOffsetAndCount) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = extractBits %2, 10u, 20u
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     ret
   }
 }
@@ -3668,11 +3668,11 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_Uint_SignedOffsetAndCount) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
-    %3:u32 = bitcast 10i
-    %4:u32 = bitcast 20i
+    %2:i32 = bitcast<i32> 10u
+    %3:u32 = bitcast<u32> 10i
+    %4:u32 = bitcast<u32> 20i
     %5:i32 = extractBits %2, %3, %4
-    %6:u32 = bitcast %5
+    %6:u32 = bitcast<u32> %5
     ret
   }
 }
@@ -3704,9 +3704,9 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_UintVector_UnsignedOffsetAndCo
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %3:vec2<i32> = extractBits %2, 10u, 20u
-    %4:vec2<u32> = bitcast %3
+    %4:vec2<u32> = bitcast<vec2<u32>> %3
     ret
   }
 }
@@ -3738,11 +3738,11 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_UintVector_SignedOffsetAndCoun
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
-    %3:u32 = bitcast 10i
-    %4:u32 = bitcast 20i
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
+    %3:u32 = bitcast<u32> 10i
+    %4:u32 = bitcast<u32> 20i
     %5:vec2<i32> = extractBits %2, %3, %4
-    %6:vec2<u32> = bitcast %5
+    %6:vec2<u32> = bitcast<vec2<u32>> %5
     ret
   }
 }
@@ -3774,10 +3774,10 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_UintVector_SignedOffsetAndUnsi
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
-    %3:u32 = bitcast 10i
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
+    %3:u32 = bitcast<u32> 10i
     %4:vec2<i32> = extractBits %2, %3, 20u
-    %5:vec2<u32> = bitcast %4
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     ret
   }
 }
@@ -3841,8 +3841,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_Uint_SignedOffsetAndCount) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 20i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 20i
     %4:u32 = extractBits 10u, %2, %3
     ret
   }
@@ -3907,8 +3907,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_UintVector_SignedOffsetAndCoun
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 20i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 20i
     %4:vec2<u32> = extractBits vec2<u32>(10u), %2, %3
     ret
   }
@@ -3941,7 +3941,7 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_UintVector_UnsignedOffsetAndSi
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 20i
+    %2:u32 = bitcast<u32> 20i
     %3:vec2<u32> = extractBits vec2<u32>(10u), 10u, %2
     ret
   }
@@ -3974,9 +3974,9 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_Int_UnsignedOffsetAndCount) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
+    %2:u32 = bitcast<u32> 10i
     %3:u32 = extractBits %2, 10u, 20u
-    %4:i32 = bitcast %3
+    %4:i32 = bitcast<i32> %3
     ret
   }
 }
@@ -4008,11 +4008,11 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_Int_SignedOffsetAndCount) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
-    %3:u32 = bitcast 10i
-    %4:u32 = bitcast 20i
+    %2:u32 = bitcast<u32> 10i
+    %3:u32 = bitcast<u32> 10i
+    %4:u32 = bitcast<u32> 20i
     %5:u32 = extractBits %2, %3, %4
-    %6:i32 = bitcast %5
+    %6:i32 = bitcast<i32> %5
     ret
   }
 }
@@ -4044,9 +4044,9 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_IntVector_UnsignedOffsetAndCou
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(10i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
     %3:vec2<u32> = extractBits %2, 10u, 20u
-    %4:vec2<i32> = bitcast %3
+    %4:vec2<i32> = bitcast<vec2<i32>> %3
     ret
   }
 }
@@ -4078,11 +4078,11 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_IntVector_SignedOffsetAndCount
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(10i)
-    %3:u32 = bitcast 10i
-    %4:u32 = bitcast 20i
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
+    %3:u32 = bitcast<u32> 10i
+    %4:u32 = bitcast<u32> 20i
     %5:vec2<u32> = extractBits %2, %3, %4
-    %6:vec2<i32> = bitcast %5
+    %6:vec2<i32> = bitcast<vec2<i32>> %5
     ret
   }
 }
@@ -4114,10 +4114,10 @@ TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_IntVector_UnsignedOffsetAndSig
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(10i)
-    %3:u32 = bitcast 20i
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
+    %3:u32 = bitcast<u32> 20i
     %4:vec2<u32> = extractBits %2, 10u, %3
-    %5:vec2<i32> = bitcast %4
+    %5:vec2<i32> = bitcast<vec2<i32>> %4
     ret
   }
 }
@@ -4159,7 +4159,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = )" + params.ir +
                   R"( 50i, %2
     ret
@@ -4196,10 +4196,10 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 50i
+    %2:u32 = bitcast<u32> 50i
     %3:u32 = )" + params.ir +
                   R"( 10u, %2
-    %4:i32 = bitcast %3
+    %4:i32 = bitcast<i32> %3
     ret
   }
 }
@@ -4236,7 +4236,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_UnsignedUnsigned) {
   $B1: {
     %2:u32 = )" + params.ir +
                   R"( 10u, 20u
-    %3:i32 = bitcast %2
+    %3:i32 = bitcast<i32> %2
     ret
   }
 }
@@ -4271,10 +4271,10 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = )" + params.ir +
                   R"( 50i, %2
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     ret
   }
 }
@@ -4309,7 +4309,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 50i
+    %2:u32 = bitcast<u32> 50i
     %3:u32 = )" + params.ir +
                   R"( 10u, %2
     ret
@@ -4348,7 +4348,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_SignedSigned) {
   $B1: {
     %2:i32 = )" + params.ir +
                   R"( 50i, 60i
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     ret
   }
 }
@@ -4384,7 +4384,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %3:vec2<i32> = )" +
                   params.ir +
                   R"( vec2<i32>(50i), %2
@@ -4423,11 +4423,11 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(50i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(50i)
     %3:vec2<u32> = )" +
                   params.ir +
                   R"( vec2<u32>(10u), %2
-    %4:vec2<i32> = bitcast %3
+    %4:vec2<i32> = bitcast<vec2<i32>> %3
     ret
   }
 }
@@ -4466,7 +4466,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_UnsignedUnsigned) {
     %2:vec2<u32> = )" +
                   params.ir +
                   R"( vec2<u32>(10u), vec2<u32>(20u)
-    %3:vec2<i32> = bitcast %2
+    %3:vec2<i32> = bitcast<vec2<i32>> %2
     ret
   }
 }
@@ -4502,11 +4502,11 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %3:vec2<i32> = )" +
                   params.ir +
                   R"( vec2<i32>(50i), %2
-    %4:vec2<u32> = bitcast %3
+    %4:vec2<u32> = bitcast<vec2<u32>> %3
     ret
   }
 }
@@ -4542,7 +4542,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(50i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(50i)
     %3:vec2<u32> = )" +
                   params.ir +
                   R"( vec2<u32>(10u), %2
@@ -4584,7 +4584,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_SignedSigned) {
     %2:vec2<i32> = )" +
                   params.ir +
                   R"( vec2<i32>(50i), vec2<i32>(60i)
-    %3:vec2<u32> = bitcast %2
+    %3:vec2<u32> = bitcast<vec2<u32>> %2
     ret
   }
 }
@@ -4634,7 +4634,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = )" + params.wgsl +
                   R"( 50i, %2
     ret
@@ -4671,7 +4671,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = )" + params.wgsl +
                   R"( %2, 50i
     ret
@@ -4708,8 +4708,8 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
-    %3:i32 = bitcast 20u
+    %2:i32 = bitcast<i32> 10u
+    %3:i32 = bitcast<i32> 20u
     %4:i32 = )" + params.wgsl +
                   R"( %2, %3
     ret
@@ -4746,10 +4746,10 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = )" + params.wgsl +
                   R"( 50i, %2
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     ret
   }
 }
@@ -4784,10 +4784,10 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:i32 = )" + params.wgsl +
                   R"( %2, 50i
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     ret
   }
 }
@@ -4824,7 +4824,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_SignedSigned) {
   $B1: {
     %2:i32 = )" + params.wgsl +
                   R"( 50i, 60i
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     ret
   }
 }
@@ -4860,7 +4860,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %3:vec2<i32> = )" +
                   params.wgsl +
                   R"( vec2<i32>(50i), %2
@@ -4899,7 +4899,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %3:vec2<i32> = )" +
                   params.wgsl +
                   R"( %2, vec2<i32>(50i)
@@ -4938,8 +4938,8 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
-    %3:vec2<i32> = bitcast vec2<u32>(20u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
+    %3:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(20u)
     %4:vec2<i32> = )" +
                   params.wgsl +
                   R"( %2, %3
@@ -4978,11 +4978,11 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %3:vec2<i32> = )" +
                   params.wgsl +
                   R"( vec2<i32>(50i), %2
-    %4:vec2<u32> = bitcast %3
+    %4:vec2<u32> = bitcast<vec2<u32>> %3
     ret
   }
 }
@@ -5018,11 +5018,11 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %3:vec2<i32> = )" +
                   params.wgsl +
                   R"( %2, vec2<i32>(50i)
-    %4:vec2<u32> = bitcast %3
+    %4:vec2<u32> = bitcast<vec2<u32>> %3
     ret
   }
 }
@@ -5061,7 +5061,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_SignedSigned) {
     %2:vec2<i32> = )" +
                   params.wgsl +
                   R"( vec2<i32>(50i), vec2<i32>(60i)
-    %3:vec2<u32> = bitcast %2
+    %3:vec2<u32> = bitcast<vec2<u32>> %2
     ret
   }
 }
@@ -5130,7 +5130,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_ScalarUnsigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = convert 10.0f
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     ret
   }
 }
@@ -5193,7 +5193,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_VectorUnsigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = convert vec2<f32>(10.0f)
-    %3:vec2<u32> = bitcast %2
+    %3:vec2<u32> = bitcast<vec2<u32>> %2
     ret
   }
 }
@@ -5255,7 +5255,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_ScalarUnsigned) {
     auto* expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 10u
+    %2:i32 = bitcast<i32> 10u
     %3:f32 = convert %2
     ret
   }
@@ -5318,7 +5318,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_VectorUnsigned) {
     auto* expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(10u)
     %3:vec2<f32> = convert %2
     ret
   }
@@ -5350,7 +5350,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_ScalarSigned) {
     auto* expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 10i
+    %2:u32 = bitcast<u32> 10i
     %3:f32 = convert %2
     ret
   }
@@ -5413,7 +5413,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_VectorSigned) {
     auto* expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(10i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(10i)
     %3:vec2<f32> = convert %2
     ret
   }
@@ -5512,7 +5512,7 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedUnsigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
+    %2:i32 = bitcast<i32> 8u
     %3:i32 = )" + params.wgsl_name +
                   R"( 1i, %2
     ret
@@ -5546,10 +5546,10 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:u32 = )" + params.wgsl_name +
                   R"( 8u, %2
-    %4:i32 = bitcast %3
+    %4:i32 = bitcast<i32> %3
     ret
   }
 }
@@ -5583,7 +5583,7 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedUnsigned_Signed) {
   $B1: {
     %2:u32 = )" + params.wgsl_name +
                   R"( 8u, 9u
-    %3:i32 = bitcast %2
+    %3:i32 = bitcast<i32> %2
     ret
   }
 }
@@ -5648,7 +5648,7 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedSigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:u32 = )" + params.wgsl_name +
                   R"( 8u, %2
     ret
@@ -5682,10 +5682,10 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedUnsigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
+    %2:i32 = bitcast<i32> 8u
     %3:i32 = )" + params.wgsl_name +
                   R"( 1i, %2
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     ret
   }
 }
@@ -5719,7 +5719,7 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedSigned_Unsigned) {
   $B1: {
     %2:i32 = )" + params.wgsl_name +
                   R"( 1i, 2i
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     ret
   }
 }
@@ -5786,7 +5786,7 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedUnsigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
     %3:vec2<i32> = )" +
                   params.wgsl_name + R"( vec2<i32>(1i), %2
     ret
@@ -5821,10 +5821,10 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %3:vec2<u32> = )" +
                   params.wgsl_name + R"( vec2<u32>(8u), %2
-    %4:vec2<i32> = bitcast %3
+    %4:vec2<i32> = bitcast<vec2<i32>> %3
     ret
   }
 }
@@ -5859,7 +5859,7 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedUnsigned_Signed) {
   $B1: {
     %2:vec2<u32> = )" +
                   params.wgsl_name + R"( vec2<u32>(8u), vec2<u32>(9u)
-    %3:vec2<i32> = bitcast %2
+    %3:vec2<i32> = bitcast<vec2<i32>> %2
     ret
   }
 }
@@ -5926,7 +5926,7 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedSigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %3:vec2<u32> = )" +
                   params.wgsl_name + R"( vec2<u32>(8u), %2
     ret
@@ -5961,10 +5961,10 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedUnsigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
     %3:vec2<i32> = )" +
                   params.wgsl_name + R"( vec2<i32>(1i), %2
-    %4:vec2<u32> = bitcast %3
+    %4:vec2<u32> = bitcast<vec2<u32>> %3
     ret
   }
 }
@@ -5999,7 +5999,7 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedSigned_Unsigned) {
   $B1: {
     %2:vec2<i32> = )" +
                   params.wgsl_name + R"( vec2<i32>(1i), vec2<i32>(2i)
-    %3:vec2<u32> = bitcast %2
+    %3:vec2<u32> = bitcast<vec2<u32>> %2
     ret
   }
 }
@@ -6071,7 +6071,7 @@ TEST_P(SpirvReader_IntegerTest, Scalar_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
+    %2:i32 = bitcast<i32> 8u
     %3:bool = )" + param.wgsl_name +
                   R"( 1i, %2
     ret
@@ -6105,7 +6105,7 @@ TEST_P(SpirvReader_IntegerTest, Scalar_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:bool = )" + param.wgsl_name +
                   R"( 8u, %2
     ret
@@ -6207,7 +6207,7 @@ TEST_P(SpirvReader_IntegerTest, Vector_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
     %3:vec2<bool> = )" +
                   param.wgsl_name + R"( vec2<i32>(1i), %2
     ret
@@ -6242,7 +6242,7 @@ TEST_P(SpirvReader_IntegerTest, Vector_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %3:vec2<bool> = )" +
                   param.wgsl_name + R"( vec2<u32>(8u), %2
     ret
@@ -6350,7 +6350,7 @@ TEST_P(SpirvReader_SignedIntegerTest, Scalar_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
+    %2:i32 = bitcast<i32> 8u
     %3:bool = )" + param.wgsl_name +
                   R"( 1i, %2
     ret
@@ -6384,7 +6384,7 @@ TEST_P(SpirvReader_SignedIntegerTest, Scalar_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
+    %2:i32 = bitcast<i32> 8u
     %3:bool = )" + param.wgsl_name +
                   R"( %2, 1i
     ret
@@ -6418,8 +6418,8 @@ TEST_P(SpirvReader_SignedIntegerTest, Scalar_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
-    %3:i32 = bitcast 9u
+    %2:i32 = bitcast<i32> 8u
+    %3:i32 = bitcast<i32> 9u
     %4:bool = )" + param.wgsl_name +
                   R"( %2, %3
     ret
@@ -6488,7 +6488,7 @@ TEST_P(SpirvReader_SignedIntegerTest, Vector_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
     %3:vec2<bool> = )" +
                   param.wgsl_name + R"( vec2<i32>(1i), %2
     ret
@@ -6523,7 +6523,7 @@ TEST_P(SpirvReader_SignedIntegerTest, Vector_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
     %3:vec2<bool> = )" +
                   param.wgsl_name + R"( %2, vec2<i32>(1i)
     ret
@@ -6558,8 +6558,8 @@ TEST_P(SpirvReader_SignedIntegerTest, Vector_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
-    %3:vec2<i32> = bitcast vec2<u32>(9u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
+    %3:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(9u)
     %4:vec2<bool> = )" +
                   param.wgsl_name + R"( %2, %3
     ret
@@ -6603,8 +6603,8 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
-    %3:u32 = bitcast 2i
+    %2:u32 = bitcast<u32> 1i
+    %3:u32 = bitcast<u32> 2i
     %4:bool = )" + param.wgsl_name +
                   R"( %2, %3
     ret
@@ -6638,7 +6638,7 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:bool = )" + param.wgsl_name +
                   R"( %2, 8u
     ret
@@ -6672,7 +6672,7 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:bool = )" + param.wgsl_name +
                   R"( 8u, %2
     ret
@@ -6740,8 +6740,8 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Vector_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
-    %3:vec2<u32> = bitcast vec2<i32>(2i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
+    %3:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
     %4:vec2<bool> = )" +
                   param.wgsl_name + R"( %2, %3
     ret
@@ -6776,7 +6776,7 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Vector_SignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %3:vec2<bool> = )" +
                   param.wgsl_name + R"( %2, vec2<u32>(8u)
     ret
@@ -6811,7 +6811,7 @@ TEST_P(SpirvReader_UnsignedIntegerTest, Vector_UnsignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %3:vec2<bool> = )" +
                   param.wgsl_name + R"( vec2<u32>(8u), %2
     ret
@@ -6918,7 +6918,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedSigned_Unsigned
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:u32 = shl 8u, %2
     ret
   }
@@ -6952,7 +6952,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedUnsigned_Unsigned
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = shl 1i, 9u
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     ret
   }
 }
@@ -6984,9 +6984,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedSigned_Unsigned) 
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 2i
+    %2:u32 = bitcast<u32> 2i
     %3:i32 = shl 1i, %2
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     ret
   }
 }
@@ -7019,7 +7019,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Signed
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = shl 8u, 9u
-    %3:i32 = bitcast %2
+    %3:i32 = bitcast<i32> %2
     ret
   }
 }
@@ -7051,9 +7051,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedSigned_Signed) 
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:u32 = shl 8u, %2
-    %4:i32 = bitcast %3
+    %4:i32 = bitcast<i32> %3
     ret
   }
 }
@@ -7117,7 +7117,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 2i
+    %2:u32 = bitcast<u32> 2i
     %3:i32 = shl 1i, %2
     ret
   }
@@ -7184,7 +7184,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedSigned_Unsigned
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %3:vec2<u32> = shl vec2<u32>(8u), %2
     ret
   }
@@ -7219,7 +7219,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedUnsigned_Unsigned
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = shl vec2<i32>(1i), vec2<u32>(9u)
-    %3:vec2<u32> = bitcast %2
+    %3:vec2<u32> = bitcast<vec2<u32>> %2
     ret
   }
 }
@@ -7252,9 +7252,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedSigned_Unsigned) 
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(2i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
     %3:vec2<i32> = shl vec2<i32>(1i), %2
-    %4:vec2<u32> = bitcast %3
+    %4:vec2<u32> = bitcast<vec2<u32>> %3
     ret
   }
 }
@@ -7288,7 +7288,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Signed
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<u32> = shl vec2<u32>(8u), vec2<u32>(9u)
-    %3:vec2<i32> = bitcast %2
+    %3:vec2<i32> = bitcast<vec2<i32>> %2
     ret
   }
 }
@@ -7321,9 +7321,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedSigned_Signed) 
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %3:vec2<u32> = shl vec2<u32>(8u), %2
-    %4:vec2<i32> = bitcast %3
+    %4:vec2<i32> = bitcast<vec2<i32>> %3
     ret
   }
 }
@@ -7389,7 +7389,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(2i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
     %3:vec2<i32> = shl vec2<i32>(1i), %2
     ret
   }
@@ -7454,7 +7454,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedSigned_Unsigne
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:u32 = shr 8u, %2
     ret
   }
@@ -7487,7 +7487,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedUnsigned_Unsigne
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:u32 = shr %2, 9u
     ret
   }
@@ -7520,8 +7520,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedSigned_Unsigned)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
-    %3:u32 = bitcast 2i
+    %2:u32 = bitcast<u32> 1i
+    %3:u32 = bitcast<u32> 2i
     %4:u32 = shr %2, %3
     ret
   }
@@ -7555,7 +7555,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedUnsigned_Signe
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = shr 8u, 9u
-    %3:i32 = bitcast %2
+    %3:i32 = bitcast<i32> %2
     ret
   }
 }
@@ -7587,9 +7587,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedSigned_Signed)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:u32 = shr 8u, %2
-    %4:i32 = bitcast %3
+    %4:i32 = bitcast<i32> %3
     ret
   }
 }
@@ -7621,9 +7621,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedUnsigned_Signed)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:u32 = shr %2, 9u
-    %4:i32 = bitcast %3
+    %4:i32 = bitcast<i32> %3
     ret
   }
 }
@@ -7655,10 +7655,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 1i
-    %3:u32 = bitcast 2i
+    %2:u32 = bitcast<u32> 1i
+    %3:u32 = bitcast<u32> 2i
     %4:u32 = shr %2, %3
-    %5:i32 = bitcast %4
+    %5:i32 = bitcast<i32> %4
     ret
   }
 }
@@ -7724,7 +7724,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedSigned_Unsigne
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %3:vec2<u32> = shr vec2<u32>(8u), %2
     ret
   }
@@ -7758,7 +7758,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedUnsigned_Unsigne
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %3:vec2<u32> = shr %2, vec2<u32>(9u)
     ret
   }
@@ -7792,8 +7792,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedSigned_Unsigned)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
-    %3:vec2<u32> = bitcast vec2<i32>(2i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
+    %3:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
     %4:vec2<u32> = shr %2, %3
     ret
   }
@@ -7828,7 +7828,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedUnsigned_Signe
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<u32> = shr vec2<u32>(8u), vec2<u32>(9u)
-    %3:vec2<i32> = bitcast %2
+    %3:vec2<i32> = bitcast<vec2<i32>> %2
     ret
   }
 }
@@ -7861,9 +7861,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedSigned_Signed)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %3:vec2<u32> = shr vec2<u32>(8u), %2
-    %4:vec2<i32> = bitcast %3
+    %4:vec2<i32> = bitcast<vec2<i32>> %3
     ret
   }
 }
@@ -7896,9 +7896,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedUnsigned_Signed)
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %3:vec2<u32> = shr %2, vec2<u32>(9u)
-    %4:vec2<i32> = bitcast %3
+    %4:vec2<i32> = bitcast<vec2<i32>> %3
     ret
   }
 }
@@ -7931,10 +7931,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedSigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(1i)
-    %3:vec2<u32> = bitcast vec2<i32>(2i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
+    %3:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
     %4:vec2<u32> = shr %2, %3
-    %5:vec2<i32> = bitcast %4
+    %5:vec2<i32> = bitcast<vec2<i32>> %4
     ret
   }
 }
@@ -7966,9 +7966,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedUnsigned_Un
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
+    %2:i32 = bitcast<i32> 8u
     %3:i32 = shr %2, 9u
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     ret
   }
 }
@@ -8000,10 +8000,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedSigned_Unsi
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
-    %3:u32 = bitcast 1i
+    %2:i32 = bitcast<i32> 8u
+    %3:u32 = bitcast<u32> 1i
     %4:i32 = shr %2, %3
-    %5:u32 = bitcast %4
+    %5:u32 = bitcast<u32> %4
     ret
   }
 }
@@ -8036,7 +8036,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedUnsigned_Unsi
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = shr 1i, 9u
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     ret
   }
 }
@@ -8068,9 +8068,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedSigned_Unsign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 2i
+    %2:u32 = bitcast<u32> 2i
     %3:i32 = shr 1i, %2
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     ret
   }
 }
@@ -8102,7 +8102,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedUnsigned_Si
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
+    %2:i32 = bitcast<i32> 8u
     %3:i32 = shr %2, 9u
     ret
   }
@@ -8135,8 +8135,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedSigned_Sign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
-    %3:u32 = bitcast 1i
+    %2:i32 = bitcast<i32> 8u
+    %3:u32 = bitcast<u32> 1i
     %4:i32 = shr %2, %3
     ret
   }
@@ -8201,7 +8201,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedSigned_Signed
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = bitcast 2i
+    %2:u32 = bitcast<u32> 2i
     %3:i32 = shr 1i, %2
     ret
   }
@@ -8235,9 +8235,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedUnsigned_Un
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
     %3:vec2<i32> = shr %2, vec2<u32>(9u)
-    %4:vec2<u32> = bitcast %3
+    %4:vec2<u32> = bitcast<vec2<u32>> %3
     ret
   }
 }
@@ -8270,10 +8270,10 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedSigned_Unsi
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
-    %3:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
+    %3:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %4:vec2<i32> = shr %2, %3
-    %5:vec2<u32> = bitcast %4
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     ret
   }
 }
@@ -8307,7 +8307,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedUnsigned_Unsi
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = shr vec2<i32>(1i), vec2<u32>(9u)
-    %3:vec2<u32> = bitcast %2
+    %3:vec2<u32> = bitcast<vec2<u32>> %2
     ret
   }
 }
@@ -8340,9 +8340,9 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedSigned_Unsign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(2i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
     %3:vec2<i32> = shr vec2<i32>(1i), %2
-    %4:vec2<u32> = bitcast %3
+    %4:vec2<u32> = bitcast<vec2<u32>> %3
     ret
   }
 }
@@ -8375,7 +8375,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedUnsigned_Si
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
     %3:vec2<i32> = shr %2, vec2<u32>(9u)
     ret
   }
@@ -8409,8 +8409,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedSigned_Sign
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
-    %3:vec2<u32> = bitcast vec2<i32>(1i)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
+    %3:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(1i)
     %4:vec2<i32> = shr %2, %3
     ret
   }
@@ -8477,7 +8477,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedSigned_Signed
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = bitcast vec2<i32>(2i)
+    %2:vec2<u32> = bitcast<vec2<u32>> vec2<i32>(2i)
     %3:vec2<i32> = shr vec2<i32>(1i), %2
     ret
   }
@@ -8590,7 +8590,7 @@ TEST_F(SpirvReader_BuiltinsTest, Not_Scalar_Signed_Unsigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = complement 1i
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     ret
   }
 }
@@ -8623,7 +8623,7 @@ TEST_F(SpirvReader_BuiltinsTest, Not_Scalar_Unsigned_Signed) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = complement 8u
-    %3:i32 = bitcast %2
+    %3:i32 = bitcast<i32> %2
     ret
   }
 }
@@ -8688,7 +8688,7 @@ TEST_F(SpirvReader_BuiltinsTest, Not_Vector_Signed_Unsigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = complement vec2<i32>(1i)
-    %3:vec2<u32> = bitcast %2
+    %3:vec2<u32> = bitcast<vec2<u32>> %2
     ret
   }
 }
@@ -8721,7 +8721,7 @@ TEST_F(SpirvReader_BuiltinsTest, Not_Vector_Unsigned_Signed) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<u32> = complement vec2<u32>(8u)
-    %3:vec2<i32> = bitcast %2
+    %3:vec2<i32> = bitcast<vec2<i32>> %2
     ret
   }
 }
@@ -8818,7 +8818,7 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Scalar_Signed_Unsigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = negation 1i
-    %3:u32 = bitcast %2
+    %3:u32 = bitcast<u32> %2
     ret
   }
 }
@@ -8850,7 +8850,7 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Scalar_Unsigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
+    %2:i32 = bitcast<i32> 8u
     %3:i32 = negation %2
     ret
   }
@@ -8883,9 +8883,9 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Scalar_Unsigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = bitcast 8u
+    %2:i32 = bitcast<i32> 8u
     %3:i32 = negation %2
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     ret
   }
 }
@@ -8950,7 +8950,7 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Vector_Signed_Unsigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = negation vec2<i32>(1i)
-    %3:vec2<u32> = bitcast %2
+    %3:vec2<u32> = bitcast<vec2<u32>> %2
     ret
   }
 }
@@ -8982,7 +8982,7 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Vector_Unsigned_Signed) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
     %3:vec2<i32> = negation %2
     ret
   }
@@ -9015,9 +9015,9 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Vector_Unsigned_Unsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(8u)
+    %2:vec2<i32> = bitcast<vec2<i32>> vec2<u32>(8u)
     %3:vec2<i32> = negation %2
-    %4:vec2<u32> = bitcast %3
+    %4:vec2<u32> = bitcast<vec2<u32>> %3
     ret
   }
 }

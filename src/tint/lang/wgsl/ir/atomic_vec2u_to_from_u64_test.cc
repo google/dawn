@@ -292,7 +292,7 @@ $B1: {  # root
 %f = func():void {
   $B2: {
     %3:vec2<u32> = construct 1u
-    %4:u64 = bitcast %3
+    %4:u64 = bitcast<u64> %3
     %5:void = atomicStoreMax %v, %4
     ret
   }
@@ -325,7 +325,7 @@ $B1: {  # root
 %f = func():void {
   $B2: {
     %3:vec2<u32> = construct 1u
-    %4:u64 = bitcast %3
+    %4:u64 = bitcast<u64> %3
     %5:void = atomicStoreMax %v, %4
     ret
   }
@@ -387,7 +387,7 @@ $B1: {  # root
 %f = func():void {
   $B2: {
     %3:vec2<u32> = construct 1u
-    %4:u64 = bitcast %3
+    %4:u64 = bitcast<u64> %3
     %5:void = atomicStoreMin %v, %4
     ret
   }
@@ -420,7 +420,7 @@ $B1: {  # root
 %f = func():void {
   $B2: {
     %3:vec2<u32> = construct 1u
-    %4:u64 = bitcast %3
+    %4:u64 = bitcast<u64> %3
     %5:void = atomicStoreMin %v, %4
     ret
   }
@@ -473,7 +473,7 @@ TEST_F(AtomicVec2uToFromU64Test, AtomicStoreMin_NoBinding) {
 %f = func(%param:ptr<storage, atomic<u64>, read_write>):void {
   $B1: {
     %3:vec2<u32> = construct 1u
-    %4:u64 = bitcast %3
+    %4:u64 = bitcast<u64> %3
     %5:void = atomicStoreMin %param, %4
     ret
   }

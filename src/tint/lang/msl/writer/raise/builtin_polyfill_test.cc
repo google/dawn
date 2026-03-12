@@ -3399,7 +3399,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Pack2x16Float) {
 %foo = func(%input:vec2<f32>):u32 {
   $B1: {
     %3:vec2<f16> = convert %input
-    %4:u32 = bitcast %3
+    %4:u32 = bitcast<u32> %3
     ret %4
   }
 }
@@ -3433,7 +3433,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Unpack2x16Float) {
     auto* expect = R"(
 %foo = func(%input:u32):vec2<f32> {
   $B1: {
-    %3:vec2<f16> = bitcast %input
+    %3:vec2<f16> = bitcast<vec2<f16>> %input
     %4:vec2<f32> = convert %3
     ret %4
   }

@@ -1331,7 +1331,7 @@ TEST_F(IR_ValidatorTest, Bitcast_MissingArg) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:3:14 error: bitcast: expected exactly 1 operands, got 0
-    %2:i32 = bitcast
+    %2:i32 = bitcast<i32>
              ^^^^^^^
 )")) << res.Failure();
 }
@@ -1346,9 +1346,9 @@ TEST_F(IR_ValidatorTest, Bitcast_NullArg) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:22 error: bitcast: operand is undefined
-    %2:i32 = bitcast undef
-                     ^^^^^
+                testing::HasSubstr(R"(:3:27 error: bitcast: operand is undefined
+    %2:i32 = bitcast<i32> undef
+                          ^^^^^
 )")) << res.Failure();
 }
 

@@ -110,7 +110,7 @@ TEST_F(IR_ValueToLetTest, NoModify_Bitcast) {
 %F = func():u32 {
   $B1: {
     %x:i32 = let 1i
-    %3:u32 = bitcast %x
+    %3:u32 = bitcast<u32> %x
     ret %3
   }
 }

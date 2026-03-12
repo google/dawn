@@ -84,7 +84,7 @@ $B1: {  # root
   $B2: {
     %3:texture_2d<f32> = load %v
     %4:vec2<i32> = glsl.textureSize %3, 0i
-    %5:vec2<u32> = bitcast %4
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     %6:u32 = swizzle %5, x
     ret %6
   }
@@ -134,7 +134,7 @@ $B1: {  # root
   $B2: {
     %3:texture_2d<f32> = load %v
     %4:vec2<i32> = glsl.textureSize %3, 0i
-    %5:vec2<u32> = bitcast %4
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     ret %5
   }
 }
@@ -182,9 +182,9 @@ $B1: {  # root
 %foo = func():vec2<u32> {
   $B2: {
     %3:texture_2d<f32> = load %v
-    %4:i32 = bitcast 3u
+    %4:i32 = bitcast<i32> 3u
     %5:vec2<i32> = glsl.textureSize %3, %4
-    %6:vec2<u32> = bitcast %5
+    %6:vec2<u32> = bitcast<vec2<u32>> %5
     ret %6
   }
 }
@@ -235,7 +235,7 @@ $B1: {  # root
     %3:texture_2d_array<f32> = load %v
     %4:vec3<i32> = glsl.textureSize %3, 0i
     %5:vec2<i32> = swizzle %4, xy
-    %6:vec2<u32> = bitcast %5
+    %6:vec2<u32> = bitcast<vec2<u32>> %5
     %x:vec2<u32> = let %6
     ret
   }
@@ -287,7 +287,7 @@ $B1: {  # root
   $B2: {
     %3:texture_storage_2d<rg32float, read> = load %v
     %4:vec2<i32> = glsl.imageSize %3
-    %5:vec2<u32> = bitcast %4
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     %x:vec2<u32> = let %5
     ret
   }
@@ -338,7 +338,7 @@ $B1: {  # root
   $B2: {
     %3:texture_depth_multisampled_2d = load %v
     %4:vec2<i32> = glsl.textureSize %3
-    %5:vec2<u32> = bitcast %4
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     %x:vec2<u32> = let %5
     ret
   }
@@ -391,7 +391,7 @@ $B1: {  # root
     %3:texture_2d_array<f32> = load %v
     %4:vec3<i32> = glsl.textureSize %3, 0i
     %5:i32 = swizzle %4, z
-    %6:u32 = bitcast %5
+    %6:u32 = bitcast<u32> %5
     %x:u32 = let %6
     ret
   }
@@ -443,7 +443,7 @@ $B1: {  # root
     %3:texture_2d_array<f32> = load %v
     %4:vec3<i32> = glsl.textureSize %3, 0i
     %5:i32 = swizzle %4, z
-    %6:u32 = bitcast %5
+    %6:u32 = bitcast<u32> %5
     %x:u32 = let %6
     ret
   }
@@ -496,7 +496,7 @@ $B1: {  # root
     %3:texture_cube_array<f32> = load %v
     %4:vec3<i32> = glsl.textureSize %3, 0i
     %5:i32 = swizzle %4, z
-    %6:u32 = bitcast %5
+    %6:u32 = bitcast<u32> %5
     %x:u32 = let %6
     ret
   }
@@ -548,7 +548,7 @@ $B1: {  # root
     %3:texture_cube_array<f32> = load %v
     %4:vec3<i32> = glsl.textureSize %3, 0i
     %5:i32 = swizzle %4, z
-    %6:u32 = bitcast %5
+    %6:u32 = bitcast<u32> %5
     %x:u32 = let %6
     ret
   }
@@ -602,7 +602,7 @@ $B1: {  # root
     %3:texture_storage_2d_array<rg32float, read> = load %v
     %4:vec3<i32> = glsl.imageSize %3
     %5:i32 = swizzle %4, z
-    %6:u32 = bitcast %5
+    %6:u32 = bitcast<u32> %5
     %x:u32 = let %6
     ret
   }
@@ -1179,7 +1179,7 @@ $B1: {  # root
   $B2: {
     %3:texture_2d<f32> = load %t
     %4:vec2<i32> = glsl.textureSize %3, 0i
-    %5:vec2<u32> = bitcast %4
+    %5:vec2<u32> = bitcast<vec2<u32>> %4
     ret %5
   }
 }

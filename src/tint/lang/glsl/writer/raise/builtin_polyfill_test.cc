@@ -243,8 +243,8 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:i32 = bitcast 123i
-    %4:i32 = bitcast 345i
+    %3:i32 = bitcast<i32> 123i
+    %4:i32 = bitcast<i32> 345i
     %5:i32 = glsl.atomicCompSwap %v, %3, %4
     %6:bool = eq %5, 123i
     %7:__atomic_compare_exchange_result_i32 = construct %5, %6

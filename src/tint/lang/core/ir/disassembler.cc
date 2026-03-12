@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/constant/string.h"
 #include "src/tint/lang/core/ir/binary.h"
+#include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/break_if.h"
@@ -636,6 +637,15 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             }
         },
         [&](const Terminator* b) { EmitTerminator(b); },
+        [&](const Bitcast* b) {
+            EmitValueWithType(b);
+            out_ << " = ";
+            EmitInstructionName(b);
+            if (b->Results().Length() == 1 && b->Result() && b->Result()->Type()) {
+                out_ << "<" << b->Result()->Type()->FriendlyName() << ">";
+            }
+            EmitOperandList(b);
+        },
         [&](Default) {
             EmitValueWithType(inst);
             out_ << " = ";

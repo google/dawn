@@ -60,9 +60,9 @@ TEST_F(SpirvWriter_UnaryPolyfillTest, Negation_Scalar) {
     auto* expect = R"(
 %foo = func(%arg:f32):f32 {
   $B1: {
-    %3:u32 = bitcast %arg
+    %3:u32 = bitcast<u32> %arg
     %4:u32 = xor %3, 2147483648u
-    %5:f32 = bitcast %4
+    %5:f32 = bitcast<f32> %4
     ret %5
   }
 }
@@ -98,9 +98,9 @@ TEST_F(SpirvWriter_UnaryPolyfillTest, Negation_Vector) {
     auto* expect = R"(
 %foo = func(%arg:vec4<f32>):vec4<f32> {
   $B1: {
-    %3:vec4<u32> = bitcast %arg
+    %3:vec4<u32> = bitcast<vec4<u32>> %arg
     %4:vec4<u32> = xor %3, vec4<u32>(2147483648u)
-    %5:vec4<f32> = bitcast %4
+    %5:vec4<f32> = bitcast<vec4<f32>> %4
     ret %5
   }
 }
@@ -136,9 +136,9 @@ TEST_F(SpirvWriter_UnaryPolyfillTest, Abs_Scalar) {
     auto* expect = R"(
 %foo = func(%arg:f32):f32 {
   $B1: {
-    %3:u32 = bitcast %arg
+    %3:u32 = bitcast<u32> %arg
     %4:u32 = and %3, 2147483647u
-    %5:f32 = bitcast %4
+    %5:f32 = bitcast<f32> %4
     ret %5
   }
 }
@@ -174,9 +174,9 @@ TEST_F(SpirvWriter_UnaryPolyfillTest, Abs_Vector) {
     auto* expect = R"(
 %foo = func(%arg:vec4<f32>):vec4<f32> {
   $B1: {
-    %3:vec4<u32> = bitcast %arg
+    %3:vec4<u32> = bitcast<vec4<u32>> %arg
     %4:vec4<u32> = and %3, vec4<u32>(2147483647u)
-    %5:vec4<f32> = bitcast %4
+    %5:vec4<f32> = bitcast<vec4<f32>> %4
     ret %5
   }
 }

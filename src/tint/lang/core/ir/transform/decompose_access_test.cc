@@ -220,7 +220,7 @@ $B1: {  # root
   $B2: {
     %3:ptr<uniform, vec4<u32>, read> = access %v, 1u
     %4:u32 = load_vector_element %3, 0u
-    %5:f32 = bitcast %4
+    %5:f32 = bitcast<f32> %4
     %a:f32 = let %5
     ret
   }
@@ -279,23 +279,23 @@ $B1: {  # root
   $B2: {
     %3:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %4:vec4<u32> = load %3
-    %5:vec4<f32> = bitcast %4
+    %5:vec4<f32> = bitcast<vec4<f32>> %4
     %a:vec4<f32> = let %5
     %7:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %8:u32 = load_vector_element %7, 0u
-    %9:f32 = bitcast %8
+    %9:f32 = bitcast<f32> %8
     %b:f32 = let %9
     %11:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %12:u32 = load_vector_element %11, 1u
-    %13:f32 = bitcast %12
+    %13:f32 = bitcast<f32> %12
     %c:f32 = let %13
     %15:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %16:u32 = load_vector_element %15, 2u
-    %17:f32 = bitcast %16
+    %17:f32 = bitcast<f32> %16
     %d:f32 = let %17
     %19:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %20:u32 = load_vector_element %19, 3u
-    %21:f32 = bitcast %20
+    %21:f32 = bitcast<f32> %20
     %e:f32 = let %21
     ret
   }
@@ -341,7 +341,7 @@ $B1: {  # root
   $B2: {
     %3:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %4:u32 = load_vector_element %3, 0u
-    %5:vec2<f16> = bitcast %4
+    %5:vec2<f16> = bitcast<vec2<f16>> %4
     %6:f16 = access %5, 0u
     %a:f16 = let %6
     ret
@@ -404,11 +404,11 @@ $B1: {  # root
     %4:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %5:vec4<u32> = load %4
     %6:vec2<u32> = swizzle %5, xy
-    %7:vec4<f16> = bitcast %6
+    %7:vec4<f16> = bitcast<vec4<f16>> %6
     %a:vec4<f16> = let %7
     %9:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %10:u32 = load_vector_element %9, 0u
-    %11:vec2<f16> = bitcast %10
+    %11:vec2<f16> = bitcast<vec2<f16>> %10
     %12:f16 = access %11, 0u
     %b:f16 = let %12
     %14:u32 = mul %x, 2u
@@ -420,17 +420,17 @@ $B1: {  # root
     %20:u32 = mod %14, 4u
     %21:bool = eq %20, 0u
     %22:u32 = select 1u, 0u, %21
-    %23:vec2<f16> = bitcast %19
+    %23:vec2<f16> = bitcast<vec2<f16>> %19
     %24:f16 = access %23, %22
     %c:f16 = let %24
     %26:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %27:u32 = load_vector_element %26, 1u
-    %28:vec2<f16> = bitcast %27
+    %28:vec2<f16> = bitcast<vec2<f16>> %27
     %29:f16 = access %28, 0u
     %d:f16 = let %29
     %31:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %32:u32 = load_vector_element %31, 1u
-    %33:vec2<f16> = bitcast %32
+    %33:vec2<f16> = bitcast<vec2<f16>> %32
     %34:f16 = access %33, 1u
     %e:f16 = let %34
     ret
@@ -488,12 +488,12 @@ $B1: {  # root
     %6:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %7:vec4<u32> = load %6
     %8:vec2<u32> = swizzle %7, zw
-    %9:vec4<f16> = bitcast %8
+    %9:vec4<f16> = bitcast<vec4<f16>> %8
     %10:vec3<f16> = swizzle %9, xyz
     %b:vec3<f16> = let %10
     %12:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %13:u32 = load_vector_element %12, 3u
-    %14:vec2<f16> = bitcast %13
+    %14:vec2<f16> = bitcast<vec2<f16>> %13
     %15:f16 = access %14, 0u
     %c:f16 = let %15
     ret
@@ -510,7 +510,7 @@ $B1: {  # root
     %24:vec2<u32> = swizzle %20, xy
     %25:bool = eq %22, 2u
     %26:vec2<u32> = select %24, %23, %25
-    %27:vec4<f16> = bitcast %26
+    %27:vec4<f16> = bitcast<vec4<f16>> %26
     %28:vec3<f16> = swizzle %27, xyz
     %29:u32 = add 8u, %start_byte_offset
     %30:u32 = div %29, 16u
@@ -522,7 +522,7 @@ $B1: {  # root
     %36:vec2<u32> = swizzle %32, xy
     %37:bool = eq %34, 2u
     %38:vec2<u32> = select %36, %35, %37
-    %39:vec4<f16> = bitcast %38
+    %39:vec4<f16> = bitcast<vec4<f16>> %38
     %40:vec3<f16> = swizzle %39, xyz
     %41:mat2x3<f16> = construct %28, %40
     ret %41
@@ -580,11 +580,11 @@ $B1: {  # root
     %a:mat4x4<f32> = let %3
     %6:ptr<uniform, vec4<u32>, read> = access %v, 3u
     %7:vec4<u32> = load %6
-    %8:vec4<f32> = bitcast %7
+    %8:vec4<f32> = bitcast<vec4<f32>> %7
     %b:vec4<f32> = let %8
     %10:ptr<uniform, vec4<u32>, read> = access %v, 1u
     %11:u32 = load_vector_element %10, 2u
-    %12:f32 = bitcast %11
+    %12:f32 = bitcast<f32> %11
     %c:f32 = let %12
     ret
   }
@@ -594,22 +594,22 @@ $B1: {  # root
     %15:u32 = div %start_byte_offset, 16u
     %16:ptr<uniform, vec4<u32>, read> = access %v, %15
     %17:vec4<u32> = load %16
-    %18:vec4<f32> = bitcast %17
+    %18:vec4<f32> = bitcast<vec4<f32>> %17
     %19:u32 = add 16u, %start_byte_offset
     %20:u32 = div %19, 16u
     %21:ptr<uniform, vec4<u32>, read> = access %v, %20
     %22:vec4<u32> = load %21
-    %23:vec4<f32> = bitcast %22
+    %23:vec4<f32> = bitcast<vec4<f32>> %22
     %24:u32 = add 32u, %start_byte_offset
     %25:u32 = div %24, 16u
     %26:ptr<uniform, vec4<u32>, read> = access %v, %25
     %27:vec4<u32> = load %26
-    %28:vec4<f32> = bitcast %27
+    %28:vec4<f32> = bitcast<vec4<f32>> %27
     %29:u32 = add 48u, %start_byte_offset
     %30:u32 = div %29, 16u
     %31:ptr<uniform, vec4<u32>, read> = access %v, %30
     %32:vec4<u32> = load %31
-    %33:vec4<f32> = bitcast %32
+    %33:vec4<f32> = bitcast<vec4<f32>> %32
     %34:mat4x4<f32> = construct %18, %23, %28, %33
     ret %34
   }
@@ -662,7 +662,7 @@ $B1: {  # root
     %6:ptr<uniform, vec4<u32>, read> = access %v, 3u
     %7:vec4<u32> = load %6
     %8:vec3<u32> = swizzle %7, xyz
-    %9:vec3<f32> = bitcast %8
+    %9:vec3<f32> = bitcast<vec3<f32>> %8
     %b:vec3<f32> = let %9
     ret
   }
@@ -688,7 +688,7 @@ $B1: {  # root
         %19:ptr<uniform, vec4<u32>, read> = access %v, %18
         %20:vec4<u32> = load %19
         %21:vec3<u32> = swizzle %20, xyz
-        %22:vec3<f32> = bitcast %21
+        %22:vec3<f32> = bitcast<vec3<f32>> %21
         store %17, %22
         continue  # -> $B6
       }
@@ -749,7 +749,7 @@ $B1: {  # root
     %6:ptr<uniform, vec4<u32>, read> = access %v, 3u
     %7:vec4<u32> = load %6
     %8:vec3<u32> = swizzle %7, xyz
-    %9:vec3<f32> = bitcast %8
+    %9:vec3<f32> = bitcast<vec3<f32>> %8
     %b:vec3<f32> = let %9
     ret
   }
@@ -775,7 +775,7 @@ $B1: {  # root
         %19:ptr<uniform, vec4<u32>, read> = access %v, %18
         %20:vec4<u32> = load %19
         %21:vec3<u32> = swizzle %20, xyz
-        %22:vec3<f32> = bitcast %21
+        %22:vec3<f32> = bitcast<vec3<f32>> %21
         store %17, %22
         continue  # -> $B6
       }
@@ -850,7 +850,7 @@ $B1: {  # root
     %a:SB = let %3
     %6:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %7:u32 = load_vector_element %6, 1u
-    %8:f32 = bitcast %7
+    %8:f32 = bitcast<f32> %7
     %b:f32 = let %8
     ret
   }
@@ -862,14 +862,14 @@ $B1: {  # root
     %13:u32 = and %start_byte_offset, 15u
     %14:u32 = shr %13, 2u
     %15:u32 = load_vector_element %12, %14
-    %16:i32 = bitcast %15
+    %16:i32 = bitcast<i32> %15
     %17:u32 = add 4u, %start_byte_offset
     %18:u32 = div %17, 16u
     %19:ptr<uniform, vec4<u32>, read> = access %v, %18
     %20:u32 = and %17, 15u
     %21:u32 = shr %20, 2u
     %22:u32 = load_vector_element %19, %21
-    %23:f32 = bitcast %22
+    %23:f32 = bitcast<f32> %22
     %24:SB = construct %16, %23
     ret %24
   }
@@ -968,7 +968,7 @@ $B1: {  # root
     %a:SB = let %3
     %6:ptr<uniform, vec4<u32>, read> = access %v, 8u
     %7:u32 = load_vector_element %6, 2u
-    %8:f32 = bitcast %7
+    %8:f32 = bitcast<f32> %7
     %b:f32 = let %8
     ret
   }
@@ -980,7 +980,7 @@ $B1: {  # root
     %13:u32 = and %start_byte_offset, 15u
     %14:u32 = shr %13, 2u
     %15:u32 = load_vector_element %12, %14
-    %16:i32 = bitcast %15
+    %16:i32 = bitcast<i32> %15
     %17:u32 = add 16u, %start_byte_offset
     %18:Outer = call %19, %17
     %20:SB = construct %16, %18
@@ -994,7 +994,7 @@ $B1: {  # root
     %24:u32 = and %start_byte_offset_1, 15u
     %25:u32 = shr %24, 2u
     %26:u32 = load_vector_element %23, %25
-    %27:f32 = bitcast %26
+    %27:f32 = bitcast<f32> %26
     %28:u32 = add 16u, %start_byte_offset_1
     %29:Inner = call %30, %28
     %31:Outer = construct %27, %29
@@ -1016,19 +1016,19 @@ $B1: {  # root
     %41:ptr<uniform, vec4<u32>, read> = access %v, %40
     %42:vec4<u32> = load %41
     %43:vec3<u32> = swizzle %42, xyz
-    %44:vec3<f32> = bitcast %43
+    %44:vec3<f32> = bitcast<vec3<f32>> %43
     %45:u32 = add 16u, %start_byte_offset_3
     %46:u32 = div %45, 16u
     %47:ptr<uniform, vec4<u32>, read> = access %v, %46
     %48:vec4<u32> = load %47
     %49:vec3<u32> = swizzle %48, xyz
-    %50:vec3<f32> = bitcast %49
+    %50:vec3<f32> = bitcast<vec3<f32>> %49
     %51:u32 = add 32u, %start_byte_offset_3
     %52:u32 = div %51, 16u
     %53:ptr<uniform, vec4<u32>, read> = access %v, %52
     %54:vec4<u32> = load %53
     %55:vec3<u32> = swizzle %54, xyz
-    %56:vec3<f32> = bitcast %55
+    %56:vec3<f32> = bitcast<vec3<f32>> %55
     %57:mat3x3<f32> = construct %44, %50, %56
     ret %57
   }
@@ -1054,7 +1054,7 @@ $B1: {  # root
         %66:ptr<uniform, vec4<u32>, read> = access %v, %65
         %67:vec4<u32> = load %66
         %68:vec3<u32> = swizzle %67, xyz
-        %69:vec3<f32> = bitcast %68
+        %69:vec3<f32> = bitcast<vec3<f32>> %68
         store %64, %69
         continue  # -> $B10
       }
@@ -1128,11 +1128,11 @@ $B1: {  # root
   $B2: {
     %3:ptr<uniform, vec4<u32>, read> = access %v, 1u
     %4:u32 = load_vector_element %3, 1u
-    %5:f32 = bitcast %4
+    %5:f32 = bitcast<f32> %4
     %b:f32 = let %5
     %7:ptr<uniform, vec4<u32>, read> = access %v, 1u
     %8:u32 = load_vector_element %7, 2u
-    %9:f32 = bitcast %8
+    %9:f32 = bitcast<f32> %8
     %c:f32 = let %9
     ret
   }
@@ -1231,7 +1231,7 @@ $B1: {  # root
         %16:u32 = div %14, 16u
         %17:ptr<uniform, vec4<u32>, read> = access %v, %16
         %18:vec4<u32> = load %17
-        %19:vec4<i32> = bitcast %18
+        %19:vec4<i32> = bitcast<vec4<i32>> %18
         store %15, %19
         continue  # -> $B6
       }
@@ -1264,7 +1264,7 @@ $B1: {  # root
         %29:u32 = div %27, 16u
         %30:ptr<uniform, vec4<u32>, read> = access %v, %29
         %31:vec4<u32> = load %30
-        %32:vec4<f32> = bitcast %31
+        %32:vec4<f32> = bitcast<vec4<f32>> %31
         store %28, %32
         continue  # -> $B11
       }
@@ -1372,7 +1372,7 @@ $B1: {  # root
         %16:u32 = div %14, 16u
         %17:ptr<uniform, vec4<u32>, read> = access %v, %16
         %18:vec4<u32> = load %17
-        %19:vec4<i32> = bitcast %18
+        %19:vec4<i32> = bitcast<vec4<i32>> %18
         store %15, %19
         continue  # -> $B6
       }
@@ -1405,7 +1405,7 @@ $B1: {  # root
         %29:u32 = div %27, 16u
         %30:ptr<uniform, vec4<u32>, read> = access %v, %29
         %31:vec4<u32> = load %30
-        %32:vec4<f32> = bitcast %31
+        %32:vec4<f32> = bitcast<vec4<f32>> %31
         store %28, %32
         continue  # -> $B11
       }
@@ -1512,7 +1512,7 @@ $B1: {  # root
         %16:u32 = div %14, 16u
         %17:ptr<uniform, vec4<u32>, read> = access %v, %16
         %18:vec4<u32> = load %17
-        %19:vec4<i32> = bitcast %18
+        %19:vec4<i32> = bitcast<vec4<i32>> %18
         store %15, %19
         continue  # -> $B6
       }
@@ -1545,7 +1545,7 @@ $B1: {  # root
         %29:u32 = div %27, 16u
         %30:ptr<uniform, vec4<u32>, read> = access %v, %29
         %31:vec4<u32> = load %30
-        %32:vec4<f32> = bitcast %31
+        %32:vec4<f32> = bitcast<vec4<f32>> %31
         store %28, %32
         continue  # -> $B11
       }
@@ -1601,7 +1601,7 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u16, read> = access %v, 0u
     %4:u16 = load %3
-    %5:f16 = bitcast %4
+    %5:f16 = bitcast<f16> %4
     %a:f16 = let %5
     ret
   }
@@ -1650,7 +1650,7 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u32, read> = access %v, 0u
     %4:u32 = load %3
-    %5:f32 = bitcast %4
+    %5:f32 = bitcast<f32> %4
     %a:f32 = let %5
     ret
   }
@@ -1776,7 +1776,7 @@ $B1: {  # root
     %8:ptr<storage, u16, read_write> = access %v, 3u
     %9:u16 = load %8
     %10:vec2<u16> = construct %7, %9
-    %11:u32 = bitcast %10
+    %11:u32 = bitcast<u32> %10
     %b:u32 = let %11
     ret
   }
@@ -1852,7 +1852,7 @@ $B1: {  # root
     %8:ptr<workgroup, u16, read_write> = access %v, 3u
     %9:u16 = load %8
     %10:vec2<u16> = construct %7, %9
-    %11:u32 = bitcast %10
+    %11:u32 = bitcast<u32> %10
     %12:bool = convert %11
     %b:bool = let %12
     ret
@@ -1931,7 +1931,7 @@ $B1: {  # root
     %8:ptr<storage, u16, read_write> = access %v, 3u
     %9:u16 = load %8
     %10:vec2<u16> = construct %7, %9
-    %11:vec2<f16> = bitcast %10
+    %11:vec2<f16> = bitcast<vec2<f16>> %10
     %b:vec2<f16> = let %11
     ret
   }
@@ -2011,7 +2011,7 @@ $B1: {  # root
     %10:ptr<storage, u16, read_write> = access %v, 6u
     %11:u16 = load %10
     %12:vec3<u16> = construct %7, %9, %11
-    %13:vec3<f16> = bitcast %12
+    %13:vec3<f16> = bitcast<vec3<f16>> %12
     %b:vec3<f16> = let %13
     ret
   }
@@ -2093,7 +2093,7 @@ $B1: {  # root
     %12:ptr<storage, u16, read_write> = access %v, 7u
     %13:u16 = load %12
     %14:vec4<u16> = construct %7, %9, %11, %13
-    %15:vec4<f16> = bitcast %14
+    %15:vec4<f16> = bitcast<vec4<f16>> %14
     %b:vec4<f16> = let %15
     ret
   }
@@ -2175,9 +2175,9 @@ $B1: {  # root
     %12:ptr<storage, u16, read_write> = access %v, 7u
     %13:u16 = load %12
     %14:vec2<u16> = construct %7, %9
-    %15:u32 = bitcast %14
+    %15:u32 = bitcast<u32> %14
     %16:vec2<u16> = construct %11, %13
-    %17:u32 = bitcast %16
+    %17:u32 = bitcast<u32> %16
     %18:vec2<u32> = construct %15, %17
     %b:vec2<u32> = let %18
     ret
@@ -2264,11 +2264,11 @@ $B1: {  # root
     %16:ptr<storage, u16, read_write> = access %v, 13u
     %17:u16 = load %16
     %18:vec2<u16> = construct %7, %9
-    %19:u32 = bitcast %18
+    %19:u32 = bitcast<u32> %18
     %20:vec2<u16> = construct %11, %13
-    %21:u32 = bitcast %20
+    %21:u32 = bitcast<u32> %20
     %22:vec2<u16> = construct %15, %17
-    %23:u32 = bitcast %22
+    %23:u32 = bitcast<u32> %22
     %24:vec3<u32> = construct %19, %21, %23
     %25:vec3<u32> = swizzle %24, xyz
     %b:vec3<u32> = let %25
@@ -2360,13 +2360,13 @@ $B1: {  # root
     %20:ptr<storage, u16, read_write> = access %v, 15u
     %21:u16 = load %20
     %22:vec2<u16> = construct %7, %9
-    %23:u32 = bitcast %22
+    %23:u32 = bitcast<u32> %22
     %24:vec2<u16> = construct %11, %13
-    %25:u32 = bitcast %24
+    %25:u32 = bitcast<u32> %24
     %26:vec2<u16> = construct %15, %17
-    %27:u32 = bitcast %26
+    %27:u32 = bitcast<u32> %26
     %28:vec2<u16> = construct %19, %21
-    %29:u32 = bitcast %28
+    %29:u32 = bitcast<u32> %28
     %30:vec4<u32> = construct %23, %25, %27, %29
     %b:vec4<u32> = let %30
     ret
@@ -2447,9 +2447,9 @@ $B1: {  # root
     %12:ptr<workgroup, u16, read_write> = access %v, 7u
     %13:u16 = load %12
     %14:vec2<u16> = construct %7, %9
-    %15:u32 = bitcast %14
+    %15:u32 = bitcast<u32> %14
     %16:vec2<u16> = construct %11, %13
-    %17:u32 = bitcast %16
+    %17:u32 = bitcast<u32> %16
     %18:vec2<u32> = construct %15, %17
     %19:vec2<bool> = convert %18
     %b:vec2<bool> = let %19
@@ -2535,11 +2535,11 @@ $B1: {  # root
     %16:ptr<workgroup, u16, read_write> = access %v, 13u
     %17:u16 = load %16
     %18:vec2<u16> = construct %7, %9
-    %19:u32 = bitcast %18
+    %19:u32 = bitcast<u32> %18
     %20:vec2<u16> = construct %11, %13
-    %21:u32 = bitcast %20
+    %21:u32 = bitcast<u32> %20
     %22:vec2<u16> = construct %15, %17
-    %23:u32 = bitcast %22
+    %23:u32 = bitcast<u32> %22
     %24:vec3<u32> = construct %19, %21, %23
     %25:vec3<u32> = swizzle %24, xyz
     %26:vec3<bool> = convert %25
@@ -2630,13 +2630,13 @@ $B1: {  # root
     %20:ptr<workgroup, u16, read_write> = access %v, 15u
     %21:u16 = load %20
     %22:vec2<u16> = construct %7, %9
-    %23:u32 = bitcast %22
+    %23:u32 = bitcast<u32> %22
     %24:vec2<u16> = construct %11, %13
-    %25:u32 = bitcast %24
+    %25:u32 = bitcast<u32> %24
     %26:vec2<u16> = construct %15, %17
-    %27:u32 = bitcast %26
+    %27:u32 = bitcast<u32> %26
     %28:vec2<u16> = construct %19, %21
-    %29:u32 = bitcast %28
+    %29:u32 = bitcast<u32> %28
     %30:vec4<u32> = construct %23, %25, %27, %29
     %31:vec4<bool> = convert %30
     %b:vec4<bool> = let %31
@@ -3675,7 +3675,7 @@ $B1: {  # root
         %25:ptr<workgroup, u16, read_write> = access %v, %24
         %26:u16 = load %25
         %27:vec2<u16> = construct %23, %26
-        %28:u32 = bitcast %27
+        %28:u32 = bitcast<u32> %27
         store %20, %28
         continue  # -> $B7
       }
@@ -3775,7 +3775,7 @@ $B1: {  # root
         %19:u32 = add %start_byte_offset_1, %18
         %20:u32 = access %object_1, %idx
         %21:u32 = div %19, 2u
-        %22:vec2<u16> = bitcast %20
+        %22:vec2<u16> = bitcast<vec2<u16>> %20
         %23:ptr<workgroup, u16, read_write> = access %v, %21
         %24:u16 = access %22, 0u
         store %23, %24
@@ -3834,7 +3834,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u16 = bitcast 0.0h
+    %3:u16 = bitcast<u16> 0.0h
     %4:ptr<storage, u16, read_write> = access %v, 0u
     store %4, %3
     ret
@@ -3881,7 +3881,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = bitcast 0.0f
+    %3:u32 = bitcast<u32> 0.0f
     %4:ptr<storage, u32, read_write> = access %v, 0u
     store %4, %3
     ret
@@ -3928,7 +3928,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:vec2<u32> = bitcast vec2<f32>(0.0f)
+    %3:vec2<u32> = bitcast<vec2<u32>> vec2<f32>(0.0f)
     %4:ptr<storage, vec2<u32>, read_write> = access %v, 0u
     store %4, %3
     ret
@@ -3975,7 +3975,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:vec4<u32> = bitcast vec4<f32>(0.0f)
+    %3:vec4<u32> = bitcast<vec4<u32>> vec4<f32>(0.0f)
     %4:ptr<storage, vec4<u32>, read_write> = access %v, 0u
     store %4, %3
     ret
@@ -4088,7 +4088,7 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u16, read_write> = access %v, 0u
     store %3, 0u16
-    %4:vec2<u16> = bitcast 0u
+    %4:vec2<u16> = bitcast<vec2<u16>> 0u
     %5:ptr<storage, u16, read_write> = access %v, 2u
     %6:u16 = access %4, 0u
     store %5, %6
@@ -4160,7 +4160,7 @@ $B1: {  # root
     %3:ptr<workgroup, u16, read_write> = access %v, 0u
     store %3, 0u16
     %4:u32 = convert false
-    %5:vec2<u16> = bitcast %4
+    %5:vec2<u16> = bitcast<vec2<u16>> %4
     %6:ptr<workgroup, u16, read_write> = access %v, 2u
     %7:u16 = access %5, 0u
     store %6, %7
@@ -4233,11 +4233,11 @@ $B1: {  # root
     %3:ptr<storage, u16, read_write> = access %v, 0u
     store %3, 0u16
     %4:f16 = access vec2<f16>(0.0h), 0u
-    %5:u16 = bitcast %4
+    %5:u16 = bitcast<u16> %4
     %6:ptr<storage, u16, read_write> = access %v, 2u
     store %6, %5
     %7:f16 = access vec2<f16>(0.0h), 1u
-    %8:u16 = bitcast %7
+    %8:u16 = bitcast<u16> %7
     %9:ptr<storage, u16, read_write> = access %v, 3u
     store %9, %8
     ret
@@ -4306,15 +4306,15 @@ $B1: {  # root
     %3:ptr<storage, u16, read_write> = access %v, 0u
     store %3, 0u16
     %4:f16 = access vec3<f16>(0.0h), 0u
-    %5:u16 = bitcast %4
+    %5:u16 = bitcast<u16> %4
     %6:ptr<storage, u16, read_write> = access %v, 4u
     store %6, %5
     %7:f16 = access vec3<f16>(0.0h), 1u
-    %8:u16 = bitcast %7
+    %8:u16 = bitcast<u16> %7
     %9:ptr<storage, u16, read_write> = access %v, 5u
     store %9, %8
     %10:f16 = access vec3<f16>(0.0h), 2u
-    %11:u16 = bitcast %10
+    %11:u16 = bitcast<u16> %10
     %12:ptr<storage, u16, read_write> = access %v, 6u
     store %12, %11
     ret
@@ -4383,19 +4383,19 @@ $B1: {  # root
     %3:ptr<storage, u16, read_write> = access %v, 0u
     store %3, 0u16
     %4:f16 = access vec4<f16>(0.0h), 0u
-    %5:u16 = bitcast %4
+    %5:u16 = bitcast<u16> %4
     %6:ptr<storage, u16, read_write> = access %v, 4u
     store %6, %5
     %7:f16 = access vec4<f16>(0.0h), 1u
-    %8:u16 = bitcast %7
+    %8:u16 = bitcast<u16> %7
     %9:ptr<storage, u16, read_write> = access %v, 5u
     store %9, %8
     %10:f16 = access vec4<f16>(0.0h), 2u
-    %11:u16 = bitcast %10
+    %11:u16 = bitcast<u16> %10
     %12:ptr<storage, u16, read_write> = access %v, 6u
     store %12, %11
     %13:f16 = access vec4<f16>(0.0h), 3u
-    %14:u16 = bitcast %13
+    %14:u16 = bitcast<u16> %13
     %15:ptr<storage, u16, read_write> = access %v, 7u
     store %15, %14
     ret
@@ -4464,22 +4464,22 @@ $B1: {  # root
     %3:ptr<storage, u16, read_write> = access %v, 0u
     store %3, 0u16
     %4:u32 = access vec2<u32>(0u), 0u
-    %5:vec2<u16> = bitcast %4
+    %5:vec2<u16> = bitcast<vec2<u16>> %4
     %6:u16 = access %5, 0u
     %7:ptr<storage, u16, read_write> = access %v, 4u
     store %7, %6
     %8:u32 = access vec2<u32>(0u), 0u
-    %9:vec2<u16> = bitcast %8
+    %9:vec2<u16> = bitcast<vec2<u16>> %8
     %10:u16 = access %9, 1u
     %11:ptr<storage, u16, read_write> = access %v, 5u
     store %11, %10
     %12:u32 = access vec2<u32>(0u), 1u
-    %13:vec2<u16> = bitcast %12
+    %13:vec2<u16> = bitcast<vec2<u16>> %12
     %14:u16 = access %13, 0u
     %15:ptr<storage, u16, read_write> = access %v, 6u
     store %15, %14
     %16:u32 = access vec2<u32>(0u), 1u
-    %17:vec2<u16> = bitcast %16
+    %17:vec2<u16> = bitcast<vec2<u16>> %16
     %18:u16 = access %17, 1u
     %19:ptr<storage, u16, read_write> = access %v, 7u
     store %19, %18
@@ -4549,32 +4549,32 @@ $B1: {  # root
     %3:ptr<storage, u16, read_write> = access %v, 0u
     store %3, 0u16
     %4:u32 = access vec3<u32>(0u), 0u
-    %5:vec2<u16> = bitcast %4
+    %5:vec2<u16> = bitcast<vec2<u16>> %4
     %6:u16 = access %5, 0u
     %7:ptr<storage, u16, read_write> = access %v, 8u
     store %7, %6
     %8:u32 = access vec3<u32>(0u), 0u
-    %9:vec2<u16> = bitcast %8
+    %9:vec2<u16> = bitcast<vec2<u16>> %8
     %10:u16 = access %9, 1u
     %11:ptr<storage, u16, read_write> = access %v, 9u
     store %11, %10
     %12:u32 = access vec3<u32>(0u), 1u
-    %13:vec2<u16> = bitcast %12
+    %13:vec2<u16> = bitcast<vec2<u16>> %12
     %14:u16 = access %13, 0u
     %15:ptr<storage, u16, read_write> = access %v, 10u
     store %15, %14
     %16:u32 = access vec3<u32>(0u), 1u
-    %17:vec2<u16> = bitcast %16
+    %17:vec2<u16> = bitcast<vec2<u16>> %16
     %18:u16 = access %17, 1u
     %19:ptr<storage, u16, read_write> = access %v, 11u
     store %19, %18
     %20:u32 = access vec3<u32>(0u), 2u
-    %21:vec2<u16> = bitcast %20
+    %21:vec2<u16> = bitcast<vec2<u16>> %20
     %22:u16 = access %21, 0u
     %23:ptr<storage, u16, read_write> = access %v, 12u
     store %23, %22
     %24:u32 = access vec3<u32>(0u), 2u
-    %25:vec2<u16> = bitcast %24
+    %25:vec2<u16> = bitcast<vec2<u16>> %24
     %26:u16 = access %25, 1u
     %27:ptr<storage, u16, read_write> = access %v, 13u
     store %27, %26
@@ -4644,42 +4644,42 @@ $B1: {  # root
     %3:ptr<storage, u16, read_write> = access %v, 0u
     store %3, 0u16
     %4:u32 = access vec4<u32>(0u), 0u
-    %5:vec2<u16> = bitcast %4
+    %5:vec2<u16> = bitcast<vec2<u16>> %4
     %6:u16 = access %5, 0u
     %7:ptr<storage, u16, read_write> = access %v, 8u
     store %7, %6
     %8:u32 = access vec4<u32>(0u), 0u
-    %9:vec2<u16> = bitcast %8
+    %9:vec2<u16> = bitcast<vec2<u16>> %8
     %10:u16 = access %9, 1u
     %11:ptr<storage, u16, read_write> = access %v, 9u
     store %11, %10
     %12:u32 = access vec4<u32>(0u), 1u
-    %13:vec2<u16> = bitcast %12
+    %13:vec2<u16> = bitcast<vec2<u16>> %12
     %14:u16 = access %13, 0u
     %15:ptr<storage, u16, read_write> = access %v, 10u
     store %15, %14
     %16:u32 = access vec4<u32>(0u), 1u
-    %17:vec2<u16> = bitcast %16
+    %17:vec2<u16> = bitcast<vec2<u16>> %16
     %18:u16 = access %17, 1u
     %19:ptr<storage, u16, read_write> = access %v, 11u
     store %19, %18
     %20:u32 = access vec4<u32>(0u), 2u
-    %21:vec2<u16> = bitcast %20
+    %21:vec2<u16> = bitcast<vec2<u16>> %20
     %22:u16 = access %21, 0u
     %23:ptr<storage, u16, read_write> = access %v, 12u
     store %23, %22
     %24:u32 = access vec4<u32>(0u), 2u
-    %25:vec2<u16> = bitcast %24
+    %25:vec2<u16> = bitcast<vec2<u16>> %24
     %26:u16 = access %25, 1u
     %27:ptr<storage, u16, read_write> = access %v, 13u
     store %27, %26
     %28:u32 = access vec4<u32>(0u), 3u
-    %29:vec2<u16> = bitcast %28
+    %29:vec2<u16> = bitcast<vec2<u16>> %28
     %30:u16 = access %29, 0u
     %31:ptr<storage, u16, read_write> = access %v, 14u
     store %31, %30
     %32:u32 = access vec4<u32>(0u), 3u
-    %33:vec2<u16> = bitcast %32
+    %33:vec2<u16> = bitcast<vec2<u16>> %32
     %34:u16 = access %33, 1u
     %35:ptr<storage, u16, read_write> = access %v, 15u
     store %35, %34
@@ -4750,25 +4750,25 @@ $B1: {  # root
     store %3, 0u16
     %4:bool = access vec2<bool>(false), 0u
     %5:u32 = convert %4
-    %6:vec2<u16> = bitcast %5
+    %6:vec2<u16> = bitcast<vec2<u16>> %5
     %7:u16 = access %6, 0u
     %8:ptr<workgroup, u16, read_write> = access %v, 4u
     store %8, %7
     %9:bool = access vec2<bool>(false), 0u
     %10:u32 = convert %9
-    %11:vec2<u16> = bitcast %10
+    %11:vec2<u16> = bitcast<vec2<u16>> %10
     %12:u16 = access %11, 1u
     %13:ptr<workgroup, u16, read_write> = access %v, 5u
     store %13, %12
     %14:bool = access vec2<bool>(false), 1u
     %15:u32 = convert %14
-    %16:vec2<u16> = bitcast %15
+    %16:vec2<u16> = bitcast<vec2<u16>> %15
     %17:u16 = access %16, 0u
     %18:ptr<workgroup, u16, read_write> = access %v, 6u
     store %18, %17
     %19:bool = access vec2<bool>(false), 1u
     %20:u32 = convert %19
-    %21:vec2<u16> = bitcast %20
+    %21:vec2<u16> = bitcast<vec2<u16>> %20
     %22:u16 = access %21, 1u
     %23:ptr<workgroup, u16, read_write> = access %v, 7u
     store %23, %22
@@ -4839,37 +4839,37 @@ $B1: {  # root
     store %3, 0u16
     %4:bool = access vec3<bool>(false), 0u
     %5:u32 = convert %4
-    %6:vec2<u16> = bitcast %5
+    %6:vec2<u16> = bitcast<vec2<u16>> %5
     %7:u16 = access %6, 0u
     %8:ptr<workgroup, u16, read_write> = access %v, 8u
     store %8, %7
     %9:bool = access vec3<bool>(false), 0u
     %10:u32 = convert %9
-    %11:vec2<u16> = bitcast %10
+    %11:vec2<u16> = bitcast<vec2<u16>> %10
     %12:u16 = access %11, 1u
     %13:ptr<workgroup, u16, read_write> = access %v, 9u
     store %13, %12
     %14:bool = access vec3<bool>(false), 1u
     %15:u32 = convert %14
-    %16:vec2<u16> = bitcast %15
+    %16:vec2<u16> = bitcast<vec2<u16>> %15
     %17:u16 = access %16, 0u
     %18:ptr<workgroup, u16, read_write> = access %v, 10u
     store %18, %17
     %19:bool = access vec3<bool>(false), 1u
     %20:u32 = convert %19
-    %21:vec2<u16> = bitcast %20
+    %21:vec2<u16> = bitcast<vec2<u16>> %20
     %22:u16 = access %21, 1u
     %23:ptr<workgroup, u16, read_write> = access %v, 11u
     store %23, %22
     %24:bool = access vec3<bool>(false), 2u
     %25:u32 = convert %24
-    %26:vec2<u16> = bitcast %25
+    %26:vec2<u16> = bitcast<vec2<u16>> %25
     %27:u16 = access %26, 0u
     %28:ptr<workgroup, u16, read_write> = access %v, 12u
     store %28, %27
     %29:bool = access vec3<bool>(false), 2u
     %30:u32 = convert %29
-    %31:vec2<u16> = bitcast %30
+    %31:vec2<u16> = bitcast<vec2<u16>> %30
     %32:u16 = access %31, 1u
     %33:ptr<workgroup, u16, read_write> = access %v, 13u
     store %33, %32
@@ -4940,49 +4940,49 @@ $B1: {  # root
     store %3, 0u16
     %4:bool = access vec4<bool>(false), 0u
     %5:u32 = convert %4
-    %6:vec2<u16> = bitcast %5
+    %6:vec2<u16> = bitcast<vec2<u16>> %5
     %7:u16 = access %6, 0u
     %8:ptr<workgroup, u16, read_write> = access %v, 8u
     store %8, %7
     %9:bool = access vec4<bool>(false), 0u
     %10:u32 = convert %9
-    %11:vec2<u16> = bitcast %10
+    %11:vec2<u16> = bitcast<vec2<u16>> %10
     %12:u16 = access %11, 1u
     %13:ptr<workgroup, u16, read_write> = access %v, 9u
     store %13, %12
     %14:bool = access vec4<bool>(false), 1u
     %15:u32 = convert %14
-    %16:vec2<u16> = bitcast %15
+    %16:vec2<u16> = bitcast<vec2<u16>> %15
     %17:u16 = access %16, 0u
     %18:ptr<workgroup, u16, read_write> = access %v, 10u
     store %18, %17
     %19:bool = access vec4<bool>(false), 1u
     %20:u32 = convert %19
-    %21:vec2<u16> = bitcast %20
+    %21:vec2<u16> = bitcast<vec2<u16>> %20
     %22:u16 = access %21, 1u
     %23:ptr<workgroup, u16, read_write> = access %v, 11u
     store %23, %22
     %24:bool = access vec4<bool>(false), 2u
     %25:u32 = convert %24
-    %26:vec2<u16> = bitcast %25
+    %26:vec2<u16> = bitcast<vec2<u16>> %25
     %27:u16 = access %26, 0u
     %28:ptr<workgroup, u16, read_write> = access %v, 12u
     store %28, %27
     %29:bool = access vec4<bool>(false), 2u
     %30:u32 = convert %29
-    %31:vec2<u16> = bitcast %30
+    %31:vec2<u16> = bitcast<vec2<u16>> %30
     %32:u16 = access %31, 1u
     %33:ptr<workgroup, u16, read_write> = access %v, 13u
     store %33, %32
     %34:bool = access vec4<bool>(false), 3u
     %35:u32 = convert %34
-    %36:vec2<u16> = bitcast %35
+    %36:vec2<u16> = bitcast<vec2<u16>> %35
     %37:u16 = access %36, 0u
     %38:ptr<workgroup, u16, read_write> = access %v, 14u
     store %38, %37
     %39:bool = access vec4<bool>(false), 3u
     %40:u32 = convert %39
-    %41:vec2<u16> = bitcast %40
+    %41:vec2<u16> = bitcast<vec2<u16>> %40
     %42:u16 = access %41, 1u
     %43:ptr<workgroup, u16, read_write> = access %v, 15u
     store %43, %42
@@ -5273,7 +5273,7 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u32, read_write> = access %v, 0u
     store %3, 0u
-    %4:u32 = bitcast vec2<f16>(0.0h)
+    %4:u32 = bitcast<u32> vec2<f16>(0.0h)
     %5:ptr<storage, u32, read_write> = access %v, 1u
     store %5, %4
     ret
@@ -5344,7 +5344,7 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, u32, read_write> = access %v, 0u
     store %3, 0u
-    %4:vec2<u32> = bitcast vec4<f16>(0.0h)
+    %4:vec2<u32> = bitcast<vec2<u32>> vec4<f16>(0.0h)
     %5:u32 = access %4, 0u
     %6:ptr<storage, u32, read_write> = access %v, 2u
     store %6, %5

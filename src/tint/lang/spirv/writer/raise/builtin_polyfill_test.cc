@@ -881,7 +881,7 @@ $B1: {  # root
 
 %foo = func(%arg1:vec2<u32>):void {
   $B2: {
-    %4:u64 = bitcast %arg1
+    %4:u64 = bitcast<u64> %arg1
     %5:void = atomicStoreMax %1, %4
     ret
   }
@@ -896,7 +896,7 @@ $B1: {  # root
 
 %foo = func(%arg1:vec2<u32>):void {
   $B2: {
-    %4:u64 = bitcast %arg1
+    %4:u64 = bitcast<u64> %arg1
     %5:u64 = spirv.atomic_u_max %1, 1u, 0u, %4
     ret
   }
@@ -928,7 +928,7 @@ $B1: {  # root
 
 %foo = func(%arg1:vec2<u32>):void {
   $B2: {
-    %4:u64 = bitcast %arg1
+    %4:u64 = bitcast<u64> %arg1
     %5:void = atomicStoreMin %1, %4
     ret
   }
@@ -943,7 +943,7 @@ $B1: {  # root
 
 %foo = func(%arg1:vec2<u32>):void {
   $B2: {
-    %4:u64 = bitcast %arg1
+    %4:u64 = bitcast<u64> %arg1
     %5:u64 = spirv.atomic_u_min %1, 1u, 0u, %4
     ret
   }
@@ -4211,7 +4211,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle) {
     auto* expect = R"(
 %foo = @fragment func():void {
   $B1: {
-    %2:u32 = bitcast 1i
+    %2:u32 = bitcast<u32> 1i
     %3:i32 = subgroupShuffle 1i, %2
     %a:i32 = let %3
     ret
@@ -5072,7 +5072,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleClamped_NoPolyfill) {
     auto* expect = R"(
 %foo = func(%arg1:i32, %arg2:i32):void {
   $B1: {
-    %4:u32 = bitcast %arg2
+    %4:u32 = bitcast<u32> %arg2
     %5:i32 = subgroupShuffle %arg1, %4
     %a:i32 = let %5
     ret
@@ -5108,7 +5108,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleClamped_I32) {
     auto* expect = R"(
 %foo = func(%arg1:i32, %arg2:i32):void {
   $B1: {
-    %4:u32 = bitcast %arg2
+    %4:u32 = bitcast<u32> %arg2
     %5:u32 = and %4, 127u
     %6:i32 = subgroupShuffle %arg1, %5
     %a:i32 = let %6

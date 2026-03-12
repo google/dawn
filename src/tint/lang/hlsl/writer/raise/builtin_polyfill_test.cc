@@ -57,7 +57,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastIdentity) {
     auto* src = R"(
 %foo = func(%a:i32):i32 {
   $B1: {
-    %3:i32 = bitcast %a
+    %3:i32 = bitcast<i32> %a
     ret %3
   }
 }
@@ -85,7 +85,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Asuint) {
     auto* src = R"(
 %foo = func(%a:i32):u32 {
   $B1: {
-    %3:u32 = bitcast %a
+    %3:u32 = bitcast<u32> %a
     ret %3
   }
 }
@@ -114,7 +114,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Asint) {
     auto* src = R"(
 %foo = func(%a:u32):i32 {
   $B1: {
-    %3:i32 = bitcast %a
+    %3:i32 = bitcast<i32> %a
     ret %3
   }
 }
@@ -143,7 +143,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Asfloat) {
     auto* src = R"(
 %foo = func(%a:i32):f32 {
   $B1: {
-    %3:f32 = bitcast %a
+    %3:f32 = bitcast<f32> %a
     ret %3
   }
 }
@@ -172,7 +172,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, AsfloatVec) {
     auto* src = R"(
 %foo = func(%a:vec3<i32>):vec3<f32> {
   $B1: {
-    %3:vec3<f32> = bitcast %a
+    %3:vec3<f32> = bitcast<vec3<f32>> %a
     ret %3
   }
 }
@@ -201,7 +201,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastFromF16) {
     auto* src = R"(
 %foo = func(%a:vec2<f16>):f32 {
   $B1: {
-    %3:f32 = bitcast %a
+    %3:f32 = bitcast<f32> %a
     ret %3
   }
 }
@@ -245,7 +245,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastToF16) {
     auto* src = R"(
 %foo = func(%a:f32):vec2<f16> {
   $B1: {
-    %3:vec2<f16> = bitcast %a
+    %3:vec2<f16> = bitcast<vec2<f16>> %a
     ret %3
   }
 }
@@ -297,7 +297,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastFromVec2F16) {
     %2:vec2<f16> = construct 1.0h, 2.0h
     %a:ptr<function, vec2<f16>, read_write> = var %2
     %4:vec2<f16> = load %a
-    %5:i32 = bitcast %4
+    %5:i32 = bitcast<i32> %4
     %b:i32 = let %5
     ret
   }
@@ -351,7 +351,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastToVec4F16) {
     %2:vec2<i32> = construct 1i, 2i
     %a:ptr<function, vec2<i32>, read_write> = var %2
     %4:vec2<i32> = load %a
-    %5:vec4<f16> = bitcast %4
+    %5:vec4<f16> = bitcast<vec4<f16>> %4
     %b:vec4<f16> = let %5
     ret
   }
