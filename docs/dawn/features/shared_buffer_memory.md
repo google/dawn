@@ -35,6 +35,15 @@ wgpu::BufferDescriptor bufferDesc = {
 wgpu::Buffer buffer = memory.CreateBuffer(&bufferDesc);
 ```
 
+A buffer can also be created from the shared buffer memory without a `wgpu::BufferDescriptor`. In this case:
+- The buffer will be created with the same size as the shared buffer memory
+- The buffer will be created with the same buffer usage as the shared buffer memory without `wgpu::BufferUsage::MapRead` and `wgpu::BufferUsage::MapWrite`, which means the buffer will only contain GPU-accessible buffer usages.
+
+```c++
+// Create a buffer from shared buffer memory without a descriptor
+wgpu::Buffer buffer = memory.CreateBuffer();
+```
+
 A buffer created from shared buffer memory is not valid to use inside a queue operation until access to the memory is explicitly started using `BeginAccess`. Access is ended using `EndAccess`. For example:
 
 ```c++

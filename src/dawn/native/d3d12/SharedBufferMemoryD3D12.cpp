@@ -115,8 +115,7 @@ ResultOrError<SharedBufferMemoryProperties> GetSharedBufferMemoryProperties(
                 usages |= wgpu::BufferUsage::Storage;
             }
 
-            if (device->GetDeviceInfo().isUMA &&
-                device->HasFeature(Feature::BufferMapExtendedUsages)) {
+            if (device->GetDeviceInfo().isUMA) {
                 // On UMA systems, buffers with WRITE_COMBINE or WRITE_BACK heaps can also be
                 // mapped.
                 if (heapProperties.CPUPageProperty == D3D12_CPU_PAGE_PROPERTY_WRITE_COMBINE) {
