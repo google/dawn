@@ -27,14 +27,43 @@
 
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
 
-#include <utility>
+#include <string>
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_options.h"
-#include "src/tint/lang/core/type/external_texture.h"
 
 namespace tint::core::ir::transform {
 namespace {
+
+constexpr std::string_view kExternalTextureParams = R"(
+tint_GammaTransferParams = struct @align(4) {
+  G:f32 @offset(0)
+  A:f32 @offset(4)
+  B:f32 @offset(8)
+  C:f32 @offset(12)
+  D:f32 @offset(16)
+  E:f32 @offset(20)
+  F:f32 @offset(24)
+  padding:u32 @offset(28)
+}
+
+tint_ExternalTextureParams = struct @align(16) {
+  numPlanes:u32 @offset(0)
+  doYuvToRgbConversionOnly:u32 @offset(4)
+  yuvToRgbConversionMatrix:mat3x4<f32> @offset(16)
+  gammaDecodeParams:tint_GammaTransferParams @offset(64)
+  gammaEncodeParams:tint_GammaTransferParams @offset(96)
+  gamutConversionMatrix:mat3x3<f32> @offset(128)
+  sampleTransform:mat3x2<f32> @offset(176)
+  loadTransform:mat3x2<f32> @offset(200)
+  samplePlane0RectMin:vec2<f32> @offset(224)
+  samplePlane0RectMax:vec2<f32> @offset(232)
+  samplePlane1RectMin:vec2<f32> @offset(240)
+  samplePlane1RectMax:vec2<f32> @offset(248)
+  apparentSize:vec2<u32> @offset(256)
+  plane1CoordFactor:vec2<f32> @offset(264)
+}
+)";
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -78,35 +107,7 @@ $B1: {  # root
   }
 }
 )";
-    auto* expect = R"(
-tint_GammaTransferParams = struct @align(4) {
-  G:f32 @offset(0)
-  A:f32 @offset(4)
-  B:f32 @offset(8)
-  C:f32 @offset(12)
-  D:f32 @offset(16)
-  E:f32 @offset(20)
-  F:f32 @offset(24)
-  padding:u32 @offset(28)
-}
-
-tint_ExternalTextureParams = struct @align(16) {
-  numPlanes:u32 @offset(0)
-  doYuvToRgbConversionOnly:u32 @offset(4)
-  yuvToRgbConversionMatrix:mat3x4<f32> @offset(16)
-  gammaDecodeParams:tint_GammaTransferParams @offset(64)
-  gammaEncodeParams:tint_GammaTransferParams @offset(96)
-  gamutConversionMatrix:mat3x3<f32> @offset(128)
-  sampleTransform:mat3x2<f32> @offset(176)
-  loadTransform:mat3x2<f32> @offset(200)
-  samplePlane0RectMin:vec2<f32> @offset(224)
-  samplePlane0RectMax:vec2<f32> @offset(232)
-  samplePlane1RectMin:vec2<f32> @offset(240)
-  samplePlane1RectMax:vec2<f32> @offset(248)
-  apparentSize:vec2<u32> @offset(256)
-  plane1CoordFactor:vec2<f32> @offset(264)
-}
-
+    auto expect = std::string(kExternalTextureParams) + R"(
 $B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
@@ -151,35 +152,7 @@ $B1: {  # root
   }
 }
 )";
-    auto* expect = R"(
-tint_GammaTransferParams = struct @align(4) {
-  G:f32 @offset(0)
-  A:f32 @offset(4)
-  B:f32 @offset(8)
-  C:f32 @offset(12)
-  D:f32 @offset(16)
-  E:f32 @offset(20)
-  F:f32 @offset(24)
-  padding:u32 @offset(28)
-}
-
-tint_ExternalTextureParams = struct @align(16) {
-  numPlanes:u32 @offset(0)
-  doYuvToRgbConversionOnly:u32 @offset(4)
-  yuvToRgbConversionMatrix:mat3x4<f32> @offset(16)
-  gammaDecodeParams:tint_GammaTransferParams @offset(64)
-  gammaEncodeParams:tint_GammaTransferParams @offset(96)
-  gamutConversionMatrix:mat3x3<f32> @offset(128)
-  sampleTransform:mat3x2<f32> @offset(176)
-  loadTransform:mat3x2<f32> @offset(200)
-  samplePlane0RectMin:vec2<f32> @offset(224)
-  samplePlane0RectMax:vec2<f32> @offset(232)
-  samplePlane1RectMin:vec2<f32> @offset(240)
-  samplePlane1RectMax:vec2<f32> @offset(248)
-  apparentSize:vec2<u32> @offset(256)
-  plane1CoordFactor:vec2<f32> @offset(264)
-}
-
+    auto expect = std::string(kExternalTextureParams) + R"(
 $B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
@@ -230,35 +203,7 @@ $B1: {  # root
   }
 }
 )";
-    auto* expect = R"(
-tint_GammaTransferParams = struct @align(4) {
-  G:f32 @offset(0)
-  A:f32 @offset(4)
-  B:f32 @offset(8)
-  C:f32 @offset(12)
-  D:f32 @offset(16)
-  E:f32 @offset(20)
-  F:f32 @offset(24)
-  padding:u32 @offset(28)
-}
-
-tint_ExternalTextureParams = struct @align(16) {
-  numPlanes:u32 @offset(0)
-  doYuvToRgbConversionOnly:u32 @offset(4)
-  yuvToRgbConversionMatrix:mat3x4<f32> @offset(16)
-  gammaDecodeParams:tint_GammaTransferParams @offset(64)
-  gammaEncodeParams:tint_GammaTransferParams @offset(96)
-  gamutConversionMatrix:mat3x3<f32> @offset(128)
-  sampleTransform:mat3x2<f32> @offset(176)
-  loadTransform:mat3x2<f32> @offset(200)
-  samplePlane0RectMin:vec2<f32> @offset(224)
-  samplePlane0RectMax:vec2<f32> @offset(232)
-  samplePlane1RectMin:vec2<f32> @offset(240)
-  samplePlane1RectMax:vec2<f32> @offset(248)
-  apparentSize:vec2<u32> @offset(256)
-  plane1CoordFactor:vec2<f32> @offset(264)
-}
-
+    auto expect = std::string(kExternalTextureParams) + R"(
 $B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
@@ -313,35 +258,7 @@ $B1: {  # root
   }
 }
 )";
-    auto* expect = R"(
-tint_GammaTransferParams = struct @align(4) {
-  G:f32 @offset(0)
-  A:f32 @offset(4)
-  B:f32 @offset(8)
-  C:f32 @offset(12)
-  D:f32 @offset(16)
-  E:f32 @offset(20)
-  F:f32 @offset(24)
-  padding:u32 @offset(28)
-}
-
-tint_ExternalTextureParams = struct @align(16) {
-  numPlanes:u32 @offset(0)
-  doYuvToRgbConversionOnly:u32 @offset(4)
-  yuvToRgbConversionMatrix:mat3x4<f32> @offset(16)
-  gammaDecodeParams:tint_GammaTransferParams @offset(64)
-  gammaEncodeParams:tint_GammaTransferParams @offset(96)
-  gamutConversionMatrix:mat3x3<f32> @offset(128)
-  sampleTransform:mat3x2<f32> @offset(176)
-  loadTransform:mat3x2<f32> @offset(200)
-  samplePlane0RectMin:vec2<f32> @offset(224)
-  samplePlane0RectMax:vec2<f32> @offset(232)
-  samplePlane1RectMin:vec2<f32> @offset(240)
-  samplePlane1RectMax:vec2<f32> @offset(248)
-  apparentSize:vec2<u32> @offset(256)
-  plane1CoordFactor:vec2<f32> @offset(264)
-}
-
+    auto expect = std::string(kExternalTextureParams) + R"(
 $B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
@@ -474,35 +391,7 @@ $B1: {  # root
   }
 }
 )";
-    auto* expect = R"(
-tint_GammaTransferParams = struct @align(4) {
-  G:f32 @offset(0)
-  A:f32 @offset(4)
-  B:f32 @offset(8)
-  C:f32 @offset(12)
-  D:f32 @offset(16)
-  E:f32 @offset(20)
-  F:f32 @offset(24)
-  padding:u32 @offset(28)
-}
-
-tint_ExternalTextureParams = struct @align(16) {
-  numPlanes:u32 @offset(0)
-  doYuvToRgbConversionOnly:u32 @offset(4)
-  yuvToRgbConversionMatrix:mat3x4<f32> @offset(16)
-  gammaDecodeParams:tint_GammaTransferParams @offset(64)
-  gammaEncodeParams:tint_GammaTransferParams @offset(96)
-  gamutConversionMatrix:mat3x3<f32> @offset(128)
-  sampleTransform:mat3x2<f32> @offset(176)
-  loadTransform:mat3x2<f32> @offset(200)
-  samplePlane0RectMin:vec2<f32> @offset(224)
-  samplePlane0RectMax:vec2<f32> @offset(232)
-  samplePlane1RectMin:vec2<f32> @offset(240)
-  samplePlane1RectMax:vec2<f32> @offset(248)
-  apparentSize:vec2<u32> @offset(256)
-  plane1CoordFactor:vec2<f32> @offset(264)
-}
-
+    auto expect = std::string(kExternalTextureParams) + R"(
 $B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
@@ -638,35 +527,7 @@ $B1: {  # root
   }
 }
 )";
-    auto* expect = R"(
-tint_GammaTransferParams = struct @align(4) {
-  G:f32 @offset(0)
-  A:f32 @offset(4)
-  B:f32 @offset(8)
-  C:f32 @offset(12)
-  D:f32 @offset(16)
-  E:f32 @offset(20)
-  F:f32 @offset(24)
-  padding:u32 @offset(28)
-}
-
-tint_ExternalTextureParams = struct @align(16) {
-  numPlanes:u32 @offset(0)
-  doYuvToRgbConversionOnly:u32 @offset(4)
-  yuvToRgbConversionMatrix:mat3x4<f32> @offset(16)
-  gammaDecodeParams:tint_GammaTransferParams @offset(64)
-  gammaEncodeParams:tint_GammaTransferParams @offset(96)
-  gamutConversionMatrix:mat3x3<f32> @offset(128)
-  sampleTransform:mat3x2<f32> @offset(176)
-  loadTransform:mat3x2<f32> @offset(200)
-  samplePlane0RectMin:vec2<f32> @offset(224)
-  samplePlane0RectMax:vec2<f32> @offset(232)
-  samplePlane1RectMin:vec2<f32> @offset(240)
-  samplePlane1RectMax:vec2<f32> @offset(248)
-  apparentSize:vec2<u32> @offset(256)
-  plane1CoordFactor:vec2<f32> @offset(264)
-}
-
+    auto expect = std::string(kExternalTextureParams) + R"(
 $B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
@@ -820,35 +681,7 @@ $B1: {  # root
   }
 }
 )";
-    auto* expect = R"(
-tint_GammaTransferParams = struct @align(4) {
-  G:f32 @offset(0)
-  A:f32 @offset(4)
-  B:f32 @offset(8)
-  C:f32 @offset(12)
-  D:f32 @offset(16)
-  E:f32 @offset(20)
-  F:f32 @offset(24)
-  padding:u32 @offset(28)
-}
-
-tint_ExternalTextureParams = struct @align(16) {
-  numPlanes:u32 @offset(0)
-  doYuvToRgbConversionOnly:u32 @offset(4)
-  yuvToRgbConversionMatrix:mat3x4<f32> @offset(16)
-  gammaDecodeParams:tint_GammaTransferParams @offset(64)
-  gammaEncodeParams:tint_GammaTransferParams @offset(96)
-  gamutConversionMatrix:mat3x3<f32> @offset(128)
-  sampleTransform:mat3x2<f32> @offset(176)
-  loadTransform:mat3x2<f32> @offset(200)
-  samplePlane0RectMin:vec2<f32> @offset(224)
-  samplePlane0RectMax:vec2<f32> @offset(232)
-  samplePlane1RectMin:vec2<f32> @offset(240)
-  samplePlane1RectMax:vec2<f32> @offset(248)
-  apparentSize:vec2<u32> @offset(256)
-  plane1CoordFactor:vec2<f32> @offset(264)
-}
-
+    auto expect = std::string(kExternalTextureParams) + R"(
 $B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
@@ -1026,35 +859,7 @@ $B1: {  # root
   }
 }
 )";
-    auto* expect = R"(
-tint_GammaTransferParams = struct @align(4) {
-  G:f32 @offset(0)
-  A:f32 @offset(4)
-  B:f32 @offset(8)
-  C:f32 @offset(12)
-  D:f32 @offset(16)
-  E:f32 @offset(20)
-  F:f32 @offset(24)
-  padding:u32 @offset(28)
-}
-
-tint_ExternalTextureParams = struct @align(16) {
-  numPlanes:u32 @offset(0)
-  doYuvToRgbConversionOnly:u32 @offset(4)
-  yuvToRgbConversionMatrix:mat3x4<f32> @offset(16)
-  gammaDecodeParams:tint_GammaTransferParams @offset(64)
-  gammaEncodeParams:tint_GammaTransferParams @offset(96)
-  gamutConversionMatrix:mat3x3<f32> @offset(128)
-  sampleTransform:mat3x2<f32> @offset(176)
-  loadTransform:mat3x2<f32> @offset(200)
-  samplePlane0RectMin:vec2<f32> @offset(224)
-  samplePlane0RectMax:vec2<f32> @offset(232)
-  samplePlane1RectMin:vec2<f32> @offset(240)
-  samplePlane1RectMax:vec2<f32> @offset(248)
-  apparentSize:vec2<u32> @offset(256)
-  plane1CoordFactor:vec2<f32> @offset(264)
-}
-
+    auto expect = std::string(kExternalTextureParams) + R"(
 $B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
@@ -1223,35 +1028,7 @@ $B1: {  # root
   }
 }
 )";
-    auto* expect = R"(
-tint_GammaTransferParams = struct @align(4) {
-  G:f32 @offset(0)
-  A:f32 @offset(4)
-  B:f32 @offset(8)
-  C:f32 @offset(12)
-  D:f32 @offset(16)
-  E:f32 @offset(20)
-  F:f32 @offset(24)
-  padding:u32 @offset(28)
-}
-
-tint_ExternalTextureParams = struct @align(16) {
-  numPlanes:u32 @offset(0)
-  doYuvToRgbConversionOnly:u32 @offset(4)
-  yuvToRgbConversionMatrix:mat3x4<f32> @offset(16)
-  gammaDecodeParams:tint_GammaTransferParams @offset(64)
-  gammaEncodeParams:tint_GammaTransferParams @offset(96)
-  gamutConversionMatrix:mat3x3<f32> @offset(128)
-  sampleTransform:mat3x2<f32> @offset(176)
-  loadTransform:mat3x2<f32> @offset(200)
-  samplePlane0RectMin:vec2<f32> @offset(224)
-  samplePlane0RectMax:vec2<f32> @offset(232)
-  samplePlane1RectMin:vec2<f32> @offset(240)
-  samplePlane1RectMax:vec2<f32> @offset(248)
-  apparentSize:vec2<u32> @offset(256)
-  plane1CoordFactor:vec2<f32> @offset(264)
-}
-
+    auto expect = std::string(kExternalTextureParams) + R"(
 $B1: {  # root
   %texture_a_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
   %texture_a_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
