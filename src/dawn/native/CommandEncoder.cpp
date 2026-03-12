@@ -2048,6 +2048,7 @@ void CommandEncoder::APICopyTextureToTexture(const TexelCopyTextureInfo* sourceO
                 (aspect & Aspect::Depth) &&
                 GetDevice()->IsToggleEnabled(
                     Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource) &&
+                copySize->depthOrArrayLayers > 0 &&
                 (dst.mipLevel > 0 || dst.origin.z > TexelCount{0} ||
                  copySize->depthOrArrayLayers > 1);
 

@@ -116,6 +116,7 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
     DAWN_ASSERT(dst.texture->GetFormat().HasDepth());
     DAWN_ASSERT(src.texture->GetSampleCount() == 1u);
     DAWN_ASSERT(dst.texture->GetSampleCount() == 1u);
+    DAWN_ASSERT(!copyExtent.IsEmpty());
 
     // Note: because depth texture subresources must be copied in full, this blit
     // does not need to handle copy subrects.
