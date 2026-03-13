@@ -1,4 +1,5 @@
 {
+  "dawn-win-x64-amd-rx5500xt-rel": {},
   "dawn-win-x64-builder-rel": {
     "additional_compile_targets": [
       "default"

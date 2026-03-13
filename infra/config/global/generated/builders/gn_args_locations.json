@@ -61,6 +61,7 @@
     "dawn-try-mac-x64-sws-dbg": "try/dawn-try-mac-x64-sws-dbg/gn-args.json",
     "dawn-try-mac-x64-sws-rel": "try/dawn-try-mac-x64-sws-rel/gn-args.json",
     "dawn-try-win-arm64-qualcomm-snapdragonxelite-rel": "try/dawn-try-win-arm64-qualcomm-snapdragonxelite-rel/gn-args.json",
+    "dawn-try-win-x64-amd-rx5500xt-rel": "try/dawn-try-win-x64-amd-rx5500xt-rel/gn-args.json",
     "dawn-try-win-x64-intel-uhd630-asan": "try/dawn-try-win-x64-intel-uhd630-asan/gn-args.json",
     "dawn-try-win-x64-intel-uhd630-rel": "try/dawn-try-win-x64-intel-uhd630-rel/gn-args.json",
     "dawn-try-win-x64-intel-uhd770-rel": "try/dawn-try-win-x64-intel-uhd770-rel/gn-args.json",

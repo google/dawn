@@ -526,6 +526,16 @@ dawn_win_manual_builder(
 )
 
 dawn_win_manual_builder(
+    name = "dawn-try-win-x64-amd-rx5500xt-rel",
+    description_html = "Tests release Dawn on Windows/x64 on AMD RX 5500 XT GPUs. Manual only.",
+    mirrors = [
+        "ci/dawn-win-x64-builder-rel",
+        "ci/dawn-win-x64-amd-rx5500xt-rel",
+    ],
+    gn_args = "ci/dawn-win-x64-builder-rel",
+)
+
+dawn_win_manual_builder(
     name = "dawn-try-win-x64-intel-uhd630-asan",
     description_html = "Tests release Dawn on Windows/x64/ASAN on Intel CPUs w/ UHD 630. Manual only.",
     mirrors = [
