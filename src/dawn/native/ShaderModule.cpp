@@ -873,14 +873,16 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         metadata->immediateDataRangeByteSize = entryPoint.immediate_data_size;
 
         // Avoid calling GetImmediateBlockInfo if the size exceeds the limit,
-        // as it might cause an assertion in Tint.
-        DAWN_INVALID_IF(
-            entryPoint.immediate_data_size > kMaxExternalImmediateConstantsPerPipeline * 4,
-            "Immediate data size (%u) exceeds the maximum allowed size (%u).",
-            entryPoint.immediate_data_size, kMaxExternalImmediateConstantsPerPipeline * 4);
-
-        auto immediateBlockInfo = inspector->GetImmediateBlockInfo(entryPoint.name);
-        metadata->immediateDataUsedSlots = ImmediateConstantMask(immediateBlockInfo.to_ullong());
+        // as it might cause an assertion in Tint. The error is recorded
+        // to be caught at pipeline creation time.
+        if (!DelayedInvalidIf(
+                entryPoint.immediate_data_size > kMaxExternalImmediateConstantsPerPipeline * 4,
+                "Immediate data size (%u) exceeds the maximum allowed size (%u).",
+                entryPoint.immediate_data_size, kMaxExternalImmediateConstantsPerPipeline * 4)) {
+            auto immediateBlockInfo = inspector->GetImmediateBlockInfo(entryPoint.name);
+            metadata->immediateDataUsedSlots =
+                ImmediateConstantMask(immediateBlockInfo.to_ullong());
+        }
     }
 
     // Vertex shader specific reflection.

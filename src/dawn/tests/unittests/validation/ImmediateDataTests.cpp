@@ -436,8 +436,9 @@ TEST_F(ImmediateDataTest, ValidateDefaultPipelineLayout) {
                 output = vec4u(computeConstants.x, computeConstants.yzw);
             })");
 
-    // Failed case with too much immediate data in shader
-    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+    // Shader module creation should succeed even with too much immediate data.
+    // The validation error should occur at pipeline creation time.
+    wgpu::ShaderModule oobShaderModule = utils::CreateShaderModule(device, R"(
             struct FragmentConstants {
                 c0: vec4f,
                 c1: vec4f,
@@ -476,7 +477,22 @@ TEST_F(ImmediateDataTest, ValidateDefaultPipelineLayout) {
             fn csMain() {
                 output = vec4u(computeConstants.c0.x + computeConstants.constantsOOB,
                                computeConstants.c0.yzw);
-            })"));
+            })");
+
+    // Failed case: too much immediate data in shader should fail at pipeline creation.
+    {
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+        pipelineDescriptor.vertex.module = oobShaderModule;
+        pipelineDescriptor.cFragment.module = oobShaderModule;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pipelineDescriptor));
+    }
+
+    {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = oobShaderModule;
+
+        ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&csDesc));
+    }
 
     // Success cases
     {
