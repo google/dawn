@@ -200,6 +200,20 @@ TEST_F(BindGroupValidationTest, BindingSetTwice) {
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, mSampler}, {0, mSampler}}));
 }
 
+// Check that a binding past kMaxBindingsPerBindGroup - 1 results in a validation error. This is a
+// regression test for https://issues.chromium.org/492390076
+TEST_F(BindGroupValidationTest, BindingPastMaxBindingsPerGroup) {
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
+
+    // Control case: check that a descriptor with one binding is ok
+    utils::MakeBindGroup(device, layout, {{0, mSampler}});
+
+    // Error case: binding is not in the layout.
+    ASSERT_DEVICE_ERROR(
+        utils::MakeBindGroup(device, layout, {{kMaxBindingsPerBindGroup, mSampler}}));
+}
+
 // Check that a sampler binding must contain exactly one sampler
 TEST_F(BindGroupValidationTest, SamplerBindingType) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(

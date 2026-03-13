@@ -511,12 +511,6 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
         const BindGroupEntry& entry = descriptor->entries[i];
         BindingNumber binding = BindingNumber(entry.binding);
 
-        // Check for redundant entries.
-        DAWN_INVALID_IF(bindingsSet[binding],
-                        "In entries[%u], binding index %u already used by a previous entry", i,
-                        binding);
-        bindingsSet.set(binding);
-
         // Check that the entry exists in the BGL and get its info.
         const auto& it = bindingMap.find(binding);
         DAWN_INVALID_IF(it == bindingMap.end(),
@@ -524,6 +518,12 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
                         "\nExpected layout: %s",
                         i, binding, layout->EntriesToString());
         const BindingInfo& bindingInfo = layout->GetAPIBindingInfo(it->second);
+
+        // Check for redundant entries.
+        DAWN_INVALID_IF(bindingsSet[binding],
+                        "In entries[%u], binding index %u already used by a previous entry", i,
+                        binding);
+        bindingsSet.set(binding);
 
         // Below this block we validate entries based on the bind group layout, in which
         // external textures have been expanded into their underlying contents. For this reason
