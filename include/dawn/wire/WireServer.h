@@ -90,6 +90,7 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
 
     // Deserialize data to create Read/Write handles. These handles are for the client
     // to Read/Write data.
+    // TODO(https://issues.chromium.org/492456046): Pass as a `span<uint8_t> deseriazlizeData`.
     virtual bool DeserializeReadHandle(const void* deserializePointer,
                                        size_t deserializeSize,
                                        ReadHandle** readHandle) = 0;
@@ -110,6 +111,9 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
         // Serialize the data update for the range (offset, offset + size) into
         // |serializePointer| to the client There could be nothing to be serialized (if
         // using shared memory)
+        // TODO(https://issues.chromium.org/492456046): Replace data+size with a `span<uint8_t>
+        // update` and pass the deserializePointer as a span with the size from
+        // SizeOfSerializeDataUpdate.
         virtual void SerializeDataUpdate(const void* data,
                                          size_t offset,
                                          size_t size,
@@ -127,6 +131,8 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
 
         // Set the target for writes from the client. DeserializeFlush should copy data
         // into the target.
+        // TODO(https://issues.chromium.org/492456046): Remove the setters / getters for data and
+        // instead pass them directly as a span in DeserializeDataUpdate.
         void SetTarget(void* data);
         // Set Staging data length for OOB check
         void SetDataLength(size_t dataLength);
@@ -151,6 +157,8 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
         // Returns a direct pointer to the source data that will
         // be copied into Target in DeserializeDataUpdate if accessible, nullptr
         // otherwise.
+        // TODO(https://issues.chromium.org/492456046): Remove in favor of making GetSourceData
+        // virtual.
         virtual uint8_t* GetSourceData() const { return nullptr; }
         virtual size_t GetSourceSize() const { return 0; }
 
