@@ -1454,5 +1454,50 @@ TEST_F(GetBindGroupLayoutTests, NullBGLs) {
     EXPECT_THAT(pipeline.GetBindGroupLayout(3), BindGroupLayoutEq(emptyBGL));
 }
 
+// Regression test for a revert where the default layout computation of a sampler used with an
+// external texture would mark it unfilterable (when it needs to be filterable).
+TEST_F(GetBindGroupLayoutTests, SamplerUsedWithExternalTexture) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0.0);
+        }
+
+        @group(0) @binding(0) var mySampler: sampler;
+        @group(0) @binding(1) var myTexture: texture_external;
+        @fragment fn main() -> @location(0) vec4f {
+          return textureSampleBaseClampToEdge(myTexture, mySampler, vec2f(0));
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor pipelineDesc;
+    pipelineDesc.vertex.module = module;
+    pipelineDesc.cFragment.module = module;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {
+                    {
+                        0,
+                        wgpu::ShaderStage::Fragment,
+                        wgpu::SamplerBindingType::Filtering,
+                    },
+                    {1, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout},
+                });
+    EXPECT_THAT(pipeline.GetBindGroupLayout(0), BindGroupLayoutCacheEq(bgl));
+}
+
+// TODO(https://issues.chromium.org/487593147): Add tests for GetBindGroupLayout with explicit
+// filterability and filteringness annotations. An incomplete test plan is:
+//
+//  - Check that explicit filteringness / filterability is correctly reflected.
+//  - Check that conflicting filteringness / filterability between stages produces an error.
+//  - Check that unknowns get defaulted to the other stage's explicit value (in both orders)
+//  - Check that unknown samplers used with non-filterable textures become unfilterable, and that
+//  the others become filtering.
+//  - Check that unknown textures used with a filtering / unknown sampler become filtering.
+//  - Check what happens on unknown texture/samplers only referenced and not used.
+
 }  // anonymous namespace
 }  // namespace dawn
