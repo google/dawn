@@ -88,8 +88,10 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
                          uint64_t readDataUpdateInfoLength = 0,
                          const uint8_t* readDataUpdateInfo = nullptr) {
         if (status != WGPUMapAsyncStatus_Success) {
-            mStatus = status;
-            mMessage = ToString(message);
+            mResponse.Use([&](auto response) {
+                response->status = status;
+                response->message = ToString(message);
+            });
             return WireResult::Success;
         }
 
@@ -100,12 +102,14 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
         }
 
         auto FailRequest = [this](const char* message) -> WireResult {
-            mStatus = static_cast<WGPUMapAsyncStatus>(0);
-            mMessage = message;
+            mResponse.Use([&](auto response) {
+                response->status = static_cast<WGPUMapAsyncStatus>(0);
+                response->message = message;
+            });
             return WireResult::FatalError;
         };
 
-        mStatus = status;
+        mResponse->status = status;
         const auto& pending = mBuffer->mPendingMapRequest.value();
         if (!pending.type) {
             return FailRequest("Invalid map call without a specified mapping type.");
@@ -140,31 +144,36 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
+        // Move the response while holding the lock so that we avoid racing against the callback
+        // firing and the server replying with a response.
+        Response response = {};
+        mResponse.Use([&](auto res) { response = std::move(*res); });
+
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPUMapAsyncStatus_CallbackCancelled;
-            mMessage = "A valid external Instance reference no longer exists.";
+            response.status = WGPUMapAsyncStatus_CallbackCancelled;
+            response.message = "A valid external Instance reference no longer exists.";
         }
 
-        auto Callback = [this]() {
+        auto Callback = [&]() {
             if (mCallback) {
-                mCallback(mStatus, ToOutputStringView(mMessage), mUserdata1.ExtractAsDangling(),
-                          mUserdata2.ExtractAsDangling());
+                mCallback(response.status, ToOutputStringView(response.message),
+                          mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
             }
         };
 
         // The request has been cancelled before completion, return that result.
         if (!IsPendingRequest(futureID)) {
-            DAWN_ASSERT(mStatus != WGPUMapAsyncStatus_Success);
+            DAWN_ASSERT(response.status != WGPUMapAsyncStatus_Success);
             return Callback();
         }
 
         // Device destruction/loss implicitly makes the map requests aborted.
         if (!mBuffer->mDevice->IsAlive()) {
-            mStatus = WGPUMapAsyncStatus_Aborted;
-            mMessage = "The Device was lost before mapping was resolved.";
+            response.status = WGPUMapAsyncStatus_Aborted;
+            response.message = "The Device was lost before mapping was resolved.";
         }
 
-        if (mStatus == WGPUMapAsyncStatus_Success) {
+        if (response.status == WGPUMapAsyncStatus_Success) {
             DAWN_ASSERT(mBuffer->mPendingMapRequest && mBuffer->mPendingMapRequest->type);
             switch (*mBuffer->mPendingMapRequest->type) {
                 case MapRequestType::Read:
@@ -183,8 +192,14 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
-    WGPUMapAsyncStatus mStatus;
-    std::string mMessage;
+    // The response for the map async callback needs to be protected with a lock since the response
+    // can be updated from the server (via a response) or from the client (via an unmap/destroy
+    // call).
+    struct Response {
+        WGPUMapAsyncStatus status;
+        std::string message;
+    };
+    MutexProtected<Response> mResponse;
 
     // Strong reference to the buffer so that when we call the callback we can pass the buffer.
     Ref<Buffer> mBuffer;

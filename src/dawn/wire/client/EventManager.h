@@ -76,6 +76,8 @@ class TrackedEvent : public RefCounted {
     virtual EventType GetType() = 0;
 
     WGPUCallbackMode GetCallbackMode() const;
+
+    // Returns true iff the event is not |Pending|.
     bool IsReady() const;
 
     void SetReady();
