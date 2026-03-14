@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+// [msl] flags: --msl-version 2.4
 
 enable atomic_vec2u_min_max;
 
@@ -33,5 +34,5 @@ var<storage, read_write> a: atomic<vec2u>;
 
 @fragment
 fn main() {
-  atomicStoreMin(&a, vec2u(0, 0));
+  atomicStoreMax(&a, vec2u(0, 0));
 }

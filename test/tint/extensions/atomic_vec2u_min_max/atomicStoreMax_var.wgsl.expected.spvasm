@@ -33,6 +33,6 @@
           %8 = OpLabel
           %9 = OpBitcast %ulong %10
          %13 = OpAccessChain %_ptr_StorageBuffer_ulong %1 %uint_0
-         %16 = OpAtomicUMin %ulong %13 %uint_1 %uint_0 %9
+         %16 = OpAtomicUMax %ulong %13 %uint_1 %uint_0 %9
                OpReturn
                OpFunctionEnd

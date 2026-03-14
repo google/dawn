@@ -54,6 +54,7 @@ match writable
   | access.read_write
 
 match function: address_space.function
+match storage: address_space.storage
 match workgroup_or_storage
   : address_space.workgroup
   | address_space.storage
@@ -195,6 +196,11 @@ match subgroup_matrix_kind_result : subgroup_matrix_kind.result
 @stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_fetch_xor_explicit(ptr<S, atomic<T>, read_write>, T, u32) -> T
 @stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_load_explicit(ptr<S, atomic<T>, read_write>, u32) -> T
 @stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_store_explicit(ptr<S, atomic<T>, read_write>, T, u32)
+
+// 64-bit only atomic functions
+@stage("fragment", "compute") fn atomic_max_explicit(ptr<storage, atomic<u64>, read_write>, u64, u32)
+@stage("fragment", "compute") fn atomic_min_explicit(ptr<storage, atomic<u64>, read_write>, u64, u32)
+
 
 @member_function implicit(F: texel_format, A: access) fn fence(texture: texture_storage_1d<F, A>)
 @member_function implicit(F: texel_format, A: access) fn fence(texture: texture_storage_2d<F, A>)

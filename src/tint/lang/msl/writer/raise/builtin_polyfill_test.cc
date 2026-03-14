@@ -4147,5 +4147,103 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Tanh_vec2_f16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, AtomicStoreMin) {
+    this->capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
+    auto* var = b.Var(ty.ptr(storage, ty.atomic(ty.u64())));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+    auto* arg1 = b.FunctionParam("arg1", ty.vec2u());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({arg1});
+
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStoreMin, var, b.Bitcast(ty.u64(), arg1));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%arg1:vec2<u32>):void {
+  $B2: {
+    %4:u64 = bitcast<u64> %arg1
+    %5:void = atomicStoreMin %1, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%arg1:vec2<u32>):void {
+  $B2: {
+    %4:u64 = bitcast<u64> %arg1
+    %5:void = msl.atomic_min_explicit %1, %4, 0u
+    ret
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, AtomicStoreMax) {
+    this->capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
+    auto* var = b.Var(ty.ptr(storage, ty.atomic(ty.u64())));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+    auto* arg1 = b.FunctionParam("arg1", ty.vec2u());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({arg1});
+
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStoreMax, var, b.Bitcast(ty.u64(), arg1));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%arg1:vec2<u32>):void {
+  $B2: {
+    %4:u64 = bitcast<u64> %arg1
+    %5:void = atomicStoreMax %1, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%arg1:vec2<u32>):void {
+  $B2: {
+    %4:u64 = bitcast<u64> %arg1
+    %5:void = msl.atomic_max_explicit %1, %4, 0u
+    ret
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

@@ -4,5 +4,5 @@ enable atomic_vec2u_min_max;
 
 @fragment
 fn main() {
-  atomicStoreMin(&(a), vec2u(0, 0));
+  atomicStoreMax(&(a), vec2u(0, 0));
 }

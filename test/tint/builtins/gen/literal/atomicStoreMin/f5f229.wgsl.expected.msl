@@ -1,76 +1,45 @@
-SKIP: FAILED
-
-SB_RW = struct @align(8) {
-  arg_0:atomic<vec2<u32>> @offset(0)
-}
-
-SB_RW_a64 = struct @align(8) {
-  arg_0:atomic<u64> @offset(0)
-}
-
-$B1: {  # root
-  %sb_rw:ptr<storage, SB_RW_a64, read_write> = var undef @binding_point(0, 0)
-}
-
-%atomicStoreMin_f5f229 = func():void {
-  $B2: {
-    %3:ptr<storage, atomic<u64>, read_write> = access %sb_rw, 0u
-    %4:u64 = bitcast vec2<u32>(1u)
-    %5:void = atomicStoreMin %3, %4
-    ret
-  }
-}
-%fragment_main = @fragment func():void {
-  $B3: {
-    %7:void = call %atomicStoreMin_f5f229
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
-  $B4: {
-    %9:void = call %atomicStoreMin_f5f229
-    ret
-  }
-}
-Failed to generate: 64-bit (vec2u) atomic operations are not yet supported by the MSL backend
-SB_RW = struct @align(8) {
-  arg_0:atomic<vec2<u32>> @offset(0)
-}
-
-SB_RW_a64 = struct @align(8) {
-  arg_0:atomic<u64> @offset(0)
-}
-
-$B1: {  # root
-  %sb_rw:ptr<storage, SB_RW_a64, read_write> = var undef @binding_point(0, 0)
-}
-
-%atomicStoreMin_f5f229 = func():void {
-  $B2: {
-    %3:ptr<storage, atomic<u64>, read_write> = access %sb_rw, 0u
-    %4:u64 = bitcast vec2<u32>(1u)
-    %5:void = atomicStoreMin %3, %4
-    ret
-  }
-}
-%fragment_main = @fragment func():void {
-  $B3: {
-    %7:void = call %atomicStoreMin_f5f229
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
-  $B4: {
-    %9:void = call %atomicStoreMin_f5f229
-    ret
-  }
-}
-Failed to generate: 64-bit (vec2u) atomic operations are not yet supported by the MSL backend
 //
 // fragment_main
 //
+#include <metal_stdlib>
+using namespace metal;
+
+struct SB_RW_a64 {
+  /* 0x0000 */ atomic_ulong arg_0;
+};
+
+struct tint_module_vars_struct {
+  device SB_RW_a64* sb_rw;
+};
+
+void atomicStoreMin_f5f229(tint_module_vars_struct tint_module_vars) {
+  atomic_min_explicit((&(*tint_module_vars.sb_rw).arg_0), as_type<ulong>(uint2(1u)), memory_order_relaxed);
+}
+
+fragment void fragment_main(device SB_RW_a64* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  atomicStoreMin_f5f229(tint_module_vars);
+}
 //
 // compute_main
 //
+#include <metal_stdlib>
+using namespace metal;
 
-tint executable returned error: exit status 1
+struct SB_RW_a64 {
+  /* 0x0000 */ atomic_ulong arg_0;
+};
+
+struct tint_module_vars_struct {
+  device SB_RW_a64* sb_rw;
+};
+
+void atomicStoreMin_f5f229(tint_module_vars_struct tint_module_vars) {
+  atomic_min_explicit((&(*tint_module_vars.sb_rw).arg_0), as_type<ulong>(uint2(1u)), memory_order_relaxed);
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void compute_main(device SB_RW_a64* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  atomicStoreMin_f5f229(tint_module_vars);
+}

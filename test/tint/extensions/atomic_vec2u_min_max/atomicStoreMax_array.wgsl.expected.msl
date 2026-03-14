@@ -1,21 +1,32 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-$B1: {  # root
-  %sb_rw0:ptr<storage, array<atomic<u64>, 4>, read_write> = var undef @binding_point(0, 0)
-  %sb_rw1:ptr<storage, array<atomic<u64>>, read_write> = var undef @binding_point(0, 1)
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_module_vars_struct {
+  device tint_array<atomic_ulong, 4>* sb_rw0;
+  device tint_array<atomic_ulong, 1>* sb_rw1;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+};
+
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_1;
+};
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void compute_main(device tint_array<atomic_ulong, 4>* sb_rw0 [[buffer(0)]], device tint_array<atomic_ulong, 1>* sb_rw1 [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw0=sb_rw0, .sb_rw1=sb_rw1, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_1=((*tint_module_vars.tint_storage_buffer_sizes)[0u].y / 8u)};
+  atomic_max_explicit((&(*tint_module_vars.sb_rw0)[0u]), as_type<ulong>(uint2(1u)), memory_order_relaxed);
+  atomic_max_explicit((&(*tint_module_vars.sb_rw1)[min(uint(0), (v.tint_array_length_0_1 - 1u))]), as_type<ulong>(uint2(1u)), memory_order_relaxed);
 }
-
-%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
-  $B2: {
-    %4:ptr<storage, atomic<u64>, read_write> = access %sb_rw0, 0i
-    %5:u64 = bitcast vec2<u32>(1u)
-    %6:void = atomicStoreMax %4, %5
-    %7:ptr<storage, atomic<u64>, read_write> = access %sb_rw1, 0i
-    %8:u64 = bitcast vec2<u32>(1u)
-    %9:void = atomicStoreMax %7, %8
-    ret
-  }
-}
-Failed to generate: 64-bit (vec2u) atomic operations are not yet supported by the MSL backend
-
-tint executable returned error: exit status 1

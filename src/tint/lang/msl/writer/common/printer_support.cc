@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -145,6 +146,7 @@ SizeAndAlign MslPackedTypeSizeAndAlign(const core::type::Type* ty) {
         // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
         // 2.1 Scalar Data Types
         [&](const core::type::U32*) { return SizeAndAlign{4, 4}; },
+        [&](const core::type::U64*) { return SizeAndAlign{8, 8}; },
         [&](const core::type::I32*) { return SizeAndAlign{4, 4}; },
         [&](const core::type::F32*) { return SizeAndAlign{4, 4}; },
         [&](const core::type::F16*) { return SizeAndAlign{2, 2}; },

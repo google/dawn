@@ -66,6 +66,10 @@ const char* str(BuiltinFn i) {
             return "atomic_load_explicit";
         case BuiltinFn::kAtomicStoreExplicit:
             return "atomic_store_explicit";
+        case BuiltinFn::kAtomicMaxExplicit:
+            return "atomic_max_explicit";
+        case BuiltinFn::kAtomicMinExplicit:
+            return "atomic_min_explicit";
         case BuiltinFn::kFence:
             return "fence";
         case BuiltinFn::kGather:
@@ -150,6 +154,8 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kThreadgroupBarrier:
         case BuiltinFn::kSimdBallot:
         case BuiltinFn::kQuadShuffleXor:
+        case BuiltinFn::kAtomicMaxExplicit:
+        case BuiltinFn::kAtomicMinExplicit:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad, core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kAtomicLoadExplicit:

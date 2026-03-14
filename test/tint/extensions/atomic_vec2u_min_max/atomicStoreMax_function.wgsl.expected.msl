@@ -1,22 +1,15 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-$B1: {  # root
-  %a:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+struct tint_module_vars_struct {
+  device atomic_ulong* a;
+};
+
+void foo(device atomic_ulong* const p) {
+  atomic_max_explicit(p, as_type<ulong>(uint2(0u)), memory_order_relaxed);
 }
 
-%foo = func(%p:ptr<storage, atomic<u64>, read_write>):void {
-  $B2: {
-    %4:u64 = bitcast vec2<u32>(0u)
-    %5:void = atomicStoreMin %p, %4
-    ret
-  }
+fragment void v(device atomic_ulong* a [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
+  foo(tint_module_vars.a);
 }
-%main = @fragment func():void {
-  $B3: {
-    %7:void = call %foo, %a
-    ret
-  }
-}
-Failed to generate: 64-bit (vec2u) atomic operations are not yet supported by the MSL backend
-
-tint executable returned error: exit status 1

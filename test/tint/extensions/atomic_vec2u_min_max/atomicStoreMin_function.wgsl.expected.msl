@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device atomic_ulong* a;
+};
+
+void foo(device atomic_ulong* const p) {
+  atomic_min_explicit(p, as_type<ulong>(uint2(0u)), memory_order_relaxed);
+}
+
+fragment void v(device atomic_ulong* a [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
+  foo(tint_module_vars.a);
+}

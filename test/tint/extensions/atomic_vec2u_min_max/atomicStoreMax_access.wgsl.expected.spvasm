@@ -44,6 +44,6 @@
          %20 = OpExtInst %uint %21 UMin %17 %15
          %22 = OpAccessChain %_ptr_StorageBuffer_ulong %1 %uint_0 %20
          %24 = OpBitcast %ulong %25
-         %27 = OpAtomicUMin %ulong %22 %uint_1 %uint_0 %24
+         %27 = OpAtomicUMax %ulong %22 %uint_1 %uint_0 %24
                OpReturn
                OpFunctionEnd

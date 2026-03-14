@@ -146,5 +146,99 @@ TEST_F(AtomicVec2uMinMaxExtensionTest, AtomicMax_WithExtension) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(AtomicVec2uMinMaxExtensionTest, AtomicVec2u_FeatureReq) {
+    ExpectError(
+        R"(
+
+@group(0) @binding(0) var<storage, read_write> a : atomic<vec2u>;
+fn f() {
+  atomicStoreMax(&a, vec2u(1u, 2u));
+}
+)",
+        R"(
+input.wgsl:3:59 error:  The type 'atomic<vec2u>' cannot be used without the extension 'atomic_vec2u_min_max'
+@group(0) @binding(0) var<storage, read_write> a : atomic<vec2u>;
+                                                          ^^^^^
+)");
+}
+
+TEST_F(AtomicVec2uMinMaxExtensionTest, AtomicVec2u_StorageBasic) {
+    ExpectSuccess(
+        R"(
+enable atomic_vec2u_min_max;
+@group(0) @binding(0) var<storage, read_write> a : atomic<vec2u>;
+fn f() {
+  atomicStoreMax(&a, vec2u(1u, 2u));
+}
+)");
+}
+
+TEST_F(AtomicVec2uMinMaxExtensionTest, AtomicVec2u_StorageArray) {
+    ExpectSuccess(
+        R"(
+enable atomic_vec2u_min_max;
+@group(0) @binding(0) var<storage, read_write> a : array<atomic<vec2u>>;
+fn f() {
+  atomicStoreMin(&a[0], vec2u(1u, 2u));
+}
+)");
+}
+
+TEST_F(AtomicVec2uMinMaxExtensionTest, AtomicVec2u_StorageStructArray) {
+    ExpectSuccess(
+        R"(
+enable atomic_vec2u_min_max;
+struct Data
+{
+   a:u32,
+   b:atomic<vec2u>
+}
+
+@group(0) @binding(0) var<storage, read_write> a : array<Data>;
+fn f() {
+  atomicStoreMin(&a[0].b, vec2u(1u, 2u));
+}
+)");
+}
+
+TEST_F(AtomicVec2uMinMaxExtensionTest, AtomicVec2u_WorkgroupBasic) {
+    ExpectError(
+        R"(
+enable atomic_vec2u_min_max;
+@group(0) @binding(0) var<workgroup, read_write> a : array<atomic<vec2u>, 10>;
+fn f() {
+  atomicStoreMax(&a[0], vec2u(1u, 2u));
+}
+)",
+        R"(
+input.wgsl:3:54 error: atomic variables of type 'vec2<u32>' can only be in 'storage' address space
+@group(0) @binding(0) var<workgroup, read_write> a : array<atomic<vec2u>, 10>;
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+input.wgsl:3:23 note: while instantiating 'var' a
+@group(0) @binding(0) var<workgroup, read_write> a : array<atomic<vec2u>, 10>;
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(AtomicVec2uMinMaxExtensionTest, AtomicVec2u_WrongParam) {
+    ExpectError(
+        R"(
+enable atomic_vec2u_min_max;
+@group(0) @binding(0) var<storage, read_write> a : array<atomic<vec2u>, 10>;
+fn f() {
+  atomicStoreMax(&a[0], 1u);
+}
+)",
+        R"(input.wgsl:5:3 error: no matching call to 'atomicStoreMax(ptr<storage, atomic<vec2<u32>>, read_write>, u32)'
+
+1 candidate function:
+ • 'atomicStoreMax(ptr<storage, atomic<vec2<u32>>, read_write>  ✓ , vec2<u32>  ✗ )'
+
+  atomicStoreMax(&a[0], 1u);
+  ^^^^^^^^^^^^^^
+)");
+}
+
 }  // namespace
 }  // namespace tint::resolver

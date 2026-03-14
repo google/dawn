@@ -35,6 +35,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// [msl] flags: --msl-version 2.4
+
 enable atomic_vec2u_min_max;
 struct SB_RW {
   arg_0: atomic<vec2<u32>>,

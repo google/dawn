@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gmock/gmock.h"
+#include "src/tint/lang/msl/validate/validate.h"
 #include "src/tint/lang/msl/writer/helper_test.h"
 
 namespace tint::msl::writer {
@@ -356,7 +357,7 @@ TEST_F(MslWriterTest, CanGenerate_TexelBufferUnsupported) {
                 testing::HasSubstr("texel buffers are not supported by the MSL backend"));
 }
 
-TEST_F(MslWriterTest, CanGenerate_AtomicStoreMax_Unsupported) {
+TEST_F(MslWriterTest, AtomicStoreMax_Supported) {
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.Register("a"), ty.atomic(ty.u64())},
@@ -368,17 +369,72 @@ TEST_F(MslWriterTest, CanGenerate_AtomicStoreMax_Unsupported) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage, read_write>(ty.atomic(ty.u64())), var, 0_u);
-        b.Call<void>(core::BuiltinFn::kAtomicStoreMax, access, 1_u);
+        b.Call<void>(core::BuiltinFn::kAtomicStoreMax, access,
+                     b.Bitcast(ty.u64(), b.Splat(ty.vec2u(), 1_u)));
         b.Return(func);
     });
 
     Options options;
     options.entry_point_name = "main";
-    auto result = Generate(options);
-    ASSERT_NE(result, Success);
-    EXPECT_THAT(result.Failure().reason,
-                testing::HasSubstr(
-                    "64-bit (vec2u) atomic operations are not yet supported by the MSL backend"));
+    auto result = Generate(options, validate::MslVersion::kMsl_2_4);
+    ASSERT_EQ(result, Success);
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+struct SB {
+  /* 0x0000 */ atomic_ulong a;
+};
+
+struct tint_module_vars_struct {
+  device SB* sb;
+};
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v(device SB* sb [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb};
+  atomic_max_explicit((&(*tint_module_vars.sb).a), as_type<ulong>(uint2(1u)), memory_order_relaxed);
+}
+)");
+}
+
+TEST_F(MslWriterTest, AtomicStoreMin_Supported) {
+    auto* sb =
+        ty.Struct(mod.symbols.New("SB"), {
+                                             {mod.symbols.Register("a"), ty.atomic(ty.u64())},
+                                         });
+    auto* var = b.Var("sb", ty.ptr<storage, read_write>(sb));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr<storage, read_write>(ty.atomic(ty.u64())), var, 0_u);
+        b.Call<void>(core::BuiltinFn::kAtomicStoreMin, access,
+                     b.Bitcast(ty.u64(), b.Splat(ty.vec2u(), 1_u)));
+        b.Return(func);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    auto result = Generate(options, validate::MslVersion::kMsl_2_4);
+    ASSERT_EQ(result, Success);
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+struct SB {
+  /* 0x0000 */ atomic_ulong a;
+};
+
+struct tint_module_vars_struct {
+  device SB* sb;
+};
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v(device SB* sb [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb};
+  atomic_min_explicit((&(*tint_module_vars.sb).a), as_type<ulong>(uint2(1u)), memory_order_relaxed);
+}
+)");
 }
 
 }  // namespace

@@ -1455,6 +1455,11 @@ class Printer : public tint::TextGenerator {
             out << "atomic_uint";
             return;
         }
+
+        if (atomic->Type()->Is<core::type::U64>()) {
+            out << "atomic_ulong";
+            return;
+        }
         TINT_IR_ICE(ir_) << "unhandled atomic type " << atomic->Type()->FriendlyName();
     }
 
