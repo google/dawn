@@ -909,7 +909,9 @@ var LibraryWebGPU = {
 #if ASSERTIONS
         assert(deviceLostFutureId);
 #endif
-        // Don't keepalive here, because this isn't guaranteed to ever happen.
+        // Keep the runtime alive until device.lost resolves, to prevent
+        // maybeExit() from triggering premature ABORT during callUserCallback.
+        {{{ runtimeKeepalivePush() }}}
         WebGPU.Internals.futureInsert(deviceLostFutureId, device.lost.then((info) => {
           // If the runtime has exited, avoid calling callUserCallback as it
           // will print an error (e.g. if the device got freed during shutdown).
@@ -925,6 +927,7 @@ var LibraryWebGPU = {
               {{{ gpu.passAsPointer('messagePtr') }}});
             stackRestore(sp);
           });
+          {{{ runtimeKeepalivePop() }}}
         }));
 
         // Set up uncaptured error handlers.
