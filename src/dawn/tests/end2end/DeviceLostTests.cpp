@@ -407,6 +407,9 @@ TEST_P(DeviceLostTest, GetMappedRange_CreateBufferMappedAtCreationAfterLoss) {
     ExpectObjectIsError(buffer);
 
     ASSERT_NE(buffer.GetMappedRange(), nullptr);
+
+    // Write to the range as it should still point to valid memory.
+    *static_cast<uint32_t*>(buffer.GetMappedRange()) = 42;
 }
 
 // Test that device loss doesn't change the result of GetMappedRange, mappedAtCreation version.
@@ -422,6 +425,9 @@ TEST_P(DeviceLostTest, GetMappedRange_CreateBufferMappedAtCreationBeforeLoss) {
 
     ASSERT_NE(buffer.GetMappedRange(), nullptr);
     ASSERT_EQ(buffer.GetMappedRange(), rangeBeforeLoss);
+
+    // Write to the range as it should still point to valid memory.
+    *static_cast<uint32_t*>(buffer.GetMappedRange()) = 42;
 }
 
 // Test that device loss doesn't change the result of GetMappedRange, mapping for reading version.
@@ -439,6 +445,14 @@ TEST_P(DeviceLostTest, GetMappedRange_MapAsyncReading) {
 
     ASSERT_NE(buffer.GetConstMappedRange(), nullptr);
     ASSERT_EQ(buffer.GetConstMappedRange(), rangeBeforeLoss);
+
+    if (!IsNull()) {
+        // Read from the range as it should still point to valid memory. Also check the value to
+        // force the compiler to keep the read. The null backend doesn't do zero init so we skip
+        // there.
+        uint32_t zero = *static_cast<const uint32_t*>(buffer.GetConstMappedRange());
+        ASSERT_EQ(zero, 0u);
+    }
 }
 
 // Test that device loss doesn't change the result of GetMappedRange, mapping for writing version.
@@ -456,6 +470,9 @@ TEST_P(DeviceLostTest, GetMappedRange_MapAsyncWriting) {
 
     ASSERT_NE(buffer.GetConstMappedRange(), nullptr);
     ASSERT_EQ(buffer.GetConstMappedRange(), rangeBeforeLoss);
+
+    // Write to the range as it should still point to valid memory.
+    *static_cast<uint32_t*>(buffer.GetMappedRange()) = 42;
 }
 
 // TODO(dawn:929): mapasync read + resolve + loss getmappedrange != nullptr.
