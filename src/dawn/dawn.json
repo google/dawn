@@ -2449,7 +2449,8 @@
             {"value": 61, "name": "unorm16 formats for external texture", "tags": ["dawn"]},
             {"value": 62, "name": "opaque y cb cr android for external texture", "tags": ["dawn"]},
             {"value": 63, "name": "unorm16 filterable", "tags": ["dawn"]},
-            {"value": 64, "name": "render pass render area", "tags": ["dawn"]}
+            {"value": 64, "name": "render pass render area", "tags": ["dawn"]},
+            {"value": 65, "name": "adapter properties drm", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {
@@ -4057,7 +4058,8 @@
             {"value": 78, "name": "shared texture memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
             {"value": 79, "name": "request adapter options angle virtualization group", "tags": ["dawn", "native"]},
             {"value": 80, "name": "pipeline layout resource table", "tags": ["dawn"]},
-            {"value": 81, "name": "adapter properties explicit compute subgroup size configs", "tags": ["dawn"]}
+            {"value": 81, "name": "adapter properties explicit compute subgroup size configs", "tags": ["dawn"]},
+            {"value": 82, "name": "adapter properties drm", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {
@@ -4729,6 +4731,20 @@
       "tags": ["dawn"],
       "members": [
           {"name": "driver version", "type": "uint32_t"}
+      ]
+    },
+    "adapter properties drm": {
+      "category": "structure",
+      "chained": "out",
+      "chain roots": ["adapter info"],
+      "tags": ["dawn", "native"],
+      "members": [
+          {"name": "has primary", "type": "bool", "default": "false"},
+          {"name": "has render", "type": "bool", "default": "false"},
+          {"name": "primary major", "type": "uint64_t", "default": "0"},
+          {"name": "primary minor", "type": "uint64_t", "default": "0"},
+          {"name": "render major", "type": "uint64_t", "default": "0"},
+          {"name": "render minor", "type": "uint64_t", "default": "0"}
       ]
     },
     "adapter properties WGPU": {

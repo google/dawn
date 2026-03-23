@@ -552,6 +552,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::SharedTextureMemoryOpaqueFD);
     }
 
+    if (mDeviceInfo.HasExt(DeviceExt::PhysicalDeviceDrm)) {
+        EnableFeature(Feature::AdapterPropertiesDrm);
+    }
+
     // Using mappable buffers on NVIDIA was found to be significantly slower in some tests. The
     // memory heap size is also small (~250MB) on many devices which leads to OOMs when allocating
     // large mappable buffers, see https://crbug.com/432044227 for details.
@@ -1579,6 +1583,14 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     }
     if (auto* vkProperties = info.Get<AdapterPropertiesVk>()) {
         vkProperties->driverVersion = mDeviceInfo.properties.driverVersion;
+    }
+    if (auto* drmProperties = info.Get<AdapterPropertiesDrm>()) {
+        drmProperties->hasPrimary = mDeviceInfo.drmProperties.hasPrimary;
+        drmProperties->hasRender = mDeviceInfo.drmProperties.hasRender;
+        drmProperties->primaryMajor = mDeviceInfo.drmProperties.primaryMajor;
+        drmProperties->primaryMinor = mDeviceInfo.drmProperties.primaryMinor;
+        drmProperties->renderMajor = mDeviceInfo.drmProperties.renderMajor;
+        drmProperties->renderMinor = mDeviceInfo.drmProperties.renderMinor;
     }
     if (auto* subgroupMatrixConfigs = info.Get<AdapterPropertiesSubgroupMatrixConfigs>()) {
         std::vector<SubgroupMatrixConfig> supportedConfigs =

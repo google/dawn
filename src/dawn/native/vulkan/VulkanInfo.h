@@ -97,6 +97,7 @@ struct VulkanDeviceInfo : VulkanDeviceKnobs {
     VkPhysicalDeviceDescriptorIndexingProperties descriptorIndexingProperties;
     VkPhysicalDevicePipelineRobustnessProperties pipelineRobustnessProperties;
     VkPhysicalDeviceMaintenance5Properties propertiesMaintenance5;
+    VkPhysicalDeviceDrmPropertiesEXT drmProperties;
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
     std::vector<VkCooperativeMatrixPropertiesKHR> cooperativeMatrixConfigs;

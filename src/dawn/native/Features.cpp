@@ -319,6 +319,11 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "adapter_properties.md",
       FeatureInfo::FeatureState::Stable}},
+    {Feature::AdapterPropertiesDrm,
+     {"Support querying DRM info from the adapter.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "adapter_properties.md",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::SharedBufferMemoryD3D12Resource,
      {"Support importing ID3D12Resource as shared buffer memory.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shared_buffer.md",

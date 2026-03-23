@@ -367,6 +367,11 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR);
     }
 
+    if (info.extensions[DeviceExt::PhysicalDeviceDrm]) {
+        propertiesChain.Add(&info.drmProperties,
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRM_PROPERTIES_EXT);
+    }
+
     if (info.extensions[DeviceExt::MultisampledRenderToSingleSampled]) {
         featuresChain.Add(
             &info.multisampledRenderToSingleSampledFeatures,
