@@ -209,7 +209,7 @@ if (UNIX)
     )
 endif()
 
-if (LINUX AND DAWN_ENABLE_VULKAN)
+if (UNIX AND NOT ANDROID)
     list(APPEND end2end_sources
         "end2end/AdapterPropertiesDrmTests.cpp"
     )
