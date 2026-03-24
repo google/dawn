@@ -806,6 +806,10 @@ source_set("end2end_tests_sources") {
   if (dawn_enable_opengles) {
     sources += [ "end2end/GLExplicitExtensionsTests.cpp" ]
   }
+
+  if (is_linux) {
+    sources += [ "end2end/AdapterPropertiesDrmTests.cpp" ]
+  }
 }
 
 source_set("white_box_tests_sources") {
