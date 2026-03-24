@@ -145,6 +145,11 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
         hadError |= mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature AdapterPropertiesVk is not available."));
     }
+    if (unpacked.Has<AdapterPropertiesDrm>() &&
+        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesDrm)) {
+        hadError |= mInstance->ConsumedError(
+            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesDrm is not available."));
+    }
     if (unpacked.Has<AdapterPropertiesSubgroupMatrixConfigs>() &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix)) {
         hadError |= mInstance->ConsumedError(
