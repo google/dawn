@@ -229,6 +229,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::ExternalSemaphoreFD:
             case DeviceExt::ExternalSemaphoreZirconHandle:
             case DeviceExt::QueueFamilyForeign:
+            case DeviceExt::PhysicalDeviceDrm:
                 hasDependencies = true;
                 break;
 
@@ -275,10 +276,6 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
 
             case DeviceExt::Maintenance5:
                 hasDependencies = HasDep(DeviceExt::DynamicRendering);
-                break;
-
-            case DeviceExt::PhysicalDeviceDrm:
-                hasDependencies = true;
                 break;
 
             case DeviceExt::EnumCount:
