@@ -213,7 +213,7 @@ if (UNIX AND NOT ANDROID)
     list(APPEND end2end_sources
         "end2end/AdapterPropertiesDrmTests.cpp"
     )
-endif ()
+endif()
 
 if (WIN32)
     list(APPEND end2end_sources
