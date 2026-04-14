@@ -46,7 +46,6 @@ list(INSERT CMAKE_MODULE_PATH 0 "${Dawn_SOURCE_DIR}/src/cmake")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_DEBUG_POSTFIX "")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -174,7 +173,7 @@ option(DAWN_BUILD_FUZZERS "Build Dawn fuzzers" OFF)
 
 option(DAWN_WERROR "Build with -Werror (or equivalent)" OFF)
 option(DAWN_WEVERYTHING "Build with -Weverything if using Clang" OFF)
-option(DAWN_ENABLE_PIC "Build with Position-Independent-Code enabled" OFF)
+option(DAWN_ENABLE_PIC "Build with Position-Independent-Code enabled" ON)
 
 option(DAWN_EMIT_COVERAGE "Emit code coverage information" OFF)
 set_if_not_defined(LLVM_SOURCE_DIR "${Dawn_LLVM_SOURCE_DIR}" "Directory to an LLVM source checkout. Required to build turbo-cov")
