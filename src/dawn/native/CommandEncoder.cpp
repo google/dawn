@@ -1278,8 +1278,16 @@ CommandIterator CommandEncoder::AcquireCommands() {
     return mEncodingContext.AcquireCommands();
 }
 
+std::vector<Ref<TextureBase>> CommandEncoder::AcquireTemporaryTexturesForEarlyDestroy() {
+    return std::move(mTemporaryTexturesForEarlyDestroy);
+}
+
 void CommandEncoder::TrackUsedQuerySet(QuerySetBase* querySet) {
     mUsedQuerySets.insert(querySet);
+}
+
+void CommandEncoder::TrackTemporaryTextureForEarlyDestroy(Ref<TextureBase> texture) {
+    mTemporaryTexturesForEarlyDestroy.push_back(std::move(texture));
 }
 
 ityp::vector<PassIndex, IndirectDrawMetadata> CommandEncoder::AcquireIndirectDrawMetadata() {

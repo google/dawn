@@ -103,13 +103,23 @@ MaybeError Queue::Initialize() {
 
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
     TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferVk::RecordCommands");
+    DAWN_ASSERT(mPendingTexturesToDestroyOnSubmit.empty());
     CommandRecordingContext* recordingContext = GetPendingRecordingContext();
     for (uint32_t i = 0; i < commandCount; ++i) {
-        DAWN_TRY(ToBackend(commands[i])->RecordCommands(recordingContext));
+        MaybeError recordResult = ToBackend(commands[i])->RecordCommands(recordingContext);
+        if (recordResult.IsError()) {
+            mPendingTexturesToDestroyOnSubmit.clear();
+            return recordResult;
+        }
+        commands[i]->ExtractTemporaryTexturesForEarlyDestroy(&mPendingTexturesToDestroyOnSubmit);
     }
     TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferVk::RecordCommands");
 
-    DAWN_TRY(SubmitPendingCommandsImpl());
+    MaybeError submitResult = SubmitPendingCommandsImpl();
+    if (submitResult.IsError()) {
+        mPendingTexturesToDestroyOnSubmit.clear();
+        return submitResult;
+    }
 
     return {};
 }
@@ -345,6 +355,13 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
             mUnusedFences->push_back(fence);
         });
     TRACE_EVENT_END0(device->GetPlatform(), Recording, "vkQueueSubmit");
+
+    // Destroy temporary resolve textures while the pending serial still refers to this submit.
+    // Otherwise command-buffer teardown schedules their Vulkan memory release on the next serial.
+    for (auto& texture : mPendingTexturesToDestroyOnSubmit) {
+        texture->Destroy();
+    }
+    mPendingTexturesToDestroyOnSubmit.clear();
 
     // Enqueue the semaphores before incrementing the serial, so that they can be deleted as
     // soon as the current submission is finished.

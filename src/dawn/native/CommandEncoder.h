@@ -62,8 +62,10 @@ class CommandEncoder final : public ApiObjectBase {
     CommandIterator AcquireCommands();
     CommandBufferResourceUsage AcquireResourceUsages();
     ityp::vector<PassIndex, IndirectDrawMetadata> AcquireIndirectDrawMetadata();
+    std::vector<Ref<TextureBase>> AcquireTemporaryTexturesForEarlyDestroy();
 
     void TrackUsedQuerySet(QuerySetBase* querySet);
+    void TrackTemporaryTextureForEarlyDestroy(Ref<TextureBase> texture);
 
     // Dawn API
     ComputePassEncoder* APIBeginComputePass(const ComputePassDescriptor* descriptor);
@@ -144,6 +146,7 @@ class CommandEncoder final : public ApiObjectBase {
     absl::flat_hash_set<BufferBase*> mTopLevelBuffers;
     absl::flat_hash_set<TextureBase*> mTopLevelTextures;
     absl::flat_hash_set<QuerySetBase*> mUsedQuerySets;
+    std::vector<Ref<TextureBase>> mTemporaryTexturesForEarlyDestroy;
 
     uint64_t mDebugGroupStackSize = 0;
 

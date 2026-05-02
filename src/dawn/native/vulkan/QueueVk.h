@@ -92,6 +92,7 @@ class Queue final : public QueueBase {
     MutexProtected<std::vector<CommandPoolAndBuffer>> mUnusedCommands;
     // There is always a valid recording context stored in mRecordingContext
     CommandRecordingContext mRecordingContext;
+    std::vector<Ref<TextureBase>> mPendingTexturesToDestroyOnSubmit;
 
     uint32_t mQueueFamily = 0;
     VkQueue mQueue = VK_NULL_HANDLE;

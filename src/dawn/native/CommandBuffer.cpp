@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <iterator>
+
 #include "dawn/native/CommandBuffer.h"
 
 #include "dawn/native/Buffer.h"
@@ -45,6 +47,7 @@ CommandBufferBase::CommandBufferBase(CommandEncoder* encoder,
       mCommands(encoder->AcquireCommands()),
       mResourceUsages(encoder->AcquireResourceUsages()),
       mIndirectDrawMetadata(encoder->AcquireIndirectDrawMetadata()),
+      mTemporaryTexturesForEarlyDestroy(encoder->AcquireTemporaryTexturesForEarlyDestroy()),
       mEncoderLabel(encoder->GetLabel()) {
     GetObjectTrackingList()->Track(this);
 }
@@ -103,6 +106,20 @@ const CommandBufferResourceUsage& CommandBufferBase::GetResourceUsages() const {
 
 const ityp::vector<PassIndex, IndirectDrawMetadata>& CommandBufferBase::GetIndirectDrawMetadata() {
     return mIndirectDrawMetadata;
+}
+
+void CommandBufferBase::ExtractTemporaryTexturesForEarlyDestroy(
+    std::vector<Ref<TextureBase>>* temporaryTexturesForEarlyDestroy) {
+    if (mTemporaryTexturesForEarlyDestroy.empty()) {
+        return;
+    }
+
+    temporaryTexturesForEarlyDestroy->insert(temporaryTexturesForEarlyDestroy->end(),
+                                             std::make_move_iterator(
+                                                 mTemporaryTexturesForEarlyDestroy.begin()),
+                                             std::make_move_iterator(
+                                                 mTemporaryTexturesForEarlyDestroy.end()));
+    mTemporaryTexturesForEarlyDestroy.clear();
 }
 
 CommandIterator* CommandBufferBase::GetCommandIteratorForTesting() {

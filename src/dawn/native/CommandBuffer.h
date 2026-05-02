@@ -68,6 +68,8 @@ class CommandBufferBase : public ApiObjectBase {
     const CommandBufferResourceUsage& GetResourceUsages() const;
 
     const ityp::vector<PassIndex, IndirectDrawMetadata>& GetIndirectDrawMetadata();
+    void ExtractTemporaryTexturesForEarlyDestroy(
+        std::vector<Ref<TextureBase>>* temporaryTexturesForEarlyDestroy);
 
     CommandIterator* GetCommandIteratorForTesting();
 
@@ -81,6 +83,7 @@ class CommandBufferBase : public ApiObjectBase {
 
     CommandBufferResourceUsage mResourceUsages;
     ityp::vector<PassIndex, IndirectDrawMetadata> mIndirectDrawMetadata;
+    std::vector<Ref<TextureBase>> mTemporaryTexturesForEarlyDestroy;
     std::string mEncoderLabel;
 };
 

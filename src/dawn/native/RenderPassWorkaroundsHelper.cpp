@@ -151,6 +151,7 @@ MaybeError RenderPassWorkaroundsHelper::Initialize(
                     DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
 
                     DAWN_TRY_ASSIGN(temporaryResolveTexture, device->CreateTexture(&descriptor));
+                    encoder->TrackTemporaryTextureForEarlyDestroy(temporaryResolveTexture);
 
                     TextureViewDescriptor viewDescriptor = {};
                     DAWN_TRY_ASSIGN(
