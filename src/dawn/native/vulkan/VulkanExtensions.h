@@ -52,6 +52,14 @@ enum class InstanceExt : uint32_t {
     DebugUtils,
     ValidationFeatures,
 
+    // VK_KHR_portability_enumeration: required for the Vulkan loader to
+    // enumerate non-conformant (portability-subset) Vulkan implementations.
+    // The canonical use case is macOS hosts running MoltenVK as the Vulkan
+    // implementation. Conformant device-side Vulkan (Adreno on Android,
+    // desktop drivers on Linux/Windows) does not require this extension —
+    // it's purely a host-loader-level opt-in.
+    PortabilityEnumeration,
+
     EnumCount,
 };
 

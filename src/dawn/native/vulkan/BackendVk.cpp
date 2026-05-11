@@ -481,6 +481,16 @@ ResultOrError<VulkanGlobalKnobs> VulkanInstance::CreateVkInstance(const Instance
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pNext = nullptr;
     createInfo.flags = 0;
+    // When the loader advertises VK_KHR_portability_enumeration (canonical
+    // case: macOS host with MoltenVK as the Vulkan implementation), the
+    // ENUMERATE_PORTABILITY bit is required for non-conformant
+    // portability-subset implementations to be visible at
+    // vkEnumeratePhysicalDevices time. Without this, the application sees
+    // an empty device list even when `vulkaninfo` finds MoltenVK through
+    // the same loader.
+    if (usedKnobs.HasExt(InstanceExt::PortabilityEnumeration)) {
+        createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+    }
     createInfo.pApplicationInfo = &appInfo;
     createInfo.enabledLayerCount = static_cast<uint32_t>(layerNames.size());
     createInfo.ppEnabledLayerNames = layerNames.data();
@@ -580,12 +590,16 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
     };
 
     for (ICD icd : kICDs) {
-#if DAWN_PLATFORM_IS(MACOS)
-        // On Mac, we don't expect non-Swiftshader Vulkan to be available.
-        if (icd == ICD::None) {
-            continue;
-        }
-#endif  // DAWN_PLATFORM_IS(MACOS)
+        // Historically Dawn skipped ICD::None on macOS because no non-
+        // SwiftShader Vulkan was expected. With Apple Silicon and a
+        // working MoltenVK installation in the Vulkan SDK, that assumption
+        // no longer holds — MoltenVK is loaded via the normal loader ICD
+        // path (ICD::None from Dawn's perspective). Skipping it means
+        // Dawn never enumerates the device, even though `vulkaninfo`
+        // sees it through the same loader. The companion changes to
+        // VulkanExtensions.{h,cpp} + the ENUMERATE_PORTABILITY flag in
+        // CreateVkInstance above let Dawn opt-in to the portability path
+        // when the loader advertises it.
         // We always search for fallback adapters first, so if we already found one, don't bother
         // looking for more.
         if (options->forceFallbackAdapter && !physicalDevices.empty()) {

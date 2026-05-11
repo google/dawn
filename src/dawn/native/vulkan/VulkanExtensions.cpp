@@ -52,6 +52,7 @@ static constexpr std::array<InstanceExtInfo, kInstanceExtCount> sInstanceExtInfo
 
     {InstanceExt::DebugUtils, "VK_EXT_debug_utils"},
     {InstanceExt::ValidationFeatures, "VK_EXT_validation_features"},
+    {InstanceExt::PortabilityEnumeration, "VK_KHR_portability_enumeration"},
     //
 }};
 
@@ -92,6 +93,7 @@ InstanceExtSet EnsureDependencies(const InstanceExtSet& advertisedExts) {
             case InstanceExt::Surface:
             case InstanceExt::DebugUtils:
             case InstanceExt::ValidationFeatures:
+            case InstanceExt::PortabilityEnumeration:
                 hasDependencies = true;
                 break;
 
