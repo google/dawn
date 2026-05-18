@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/Features.h"
 
 #include <array>
@@ -37,6 +32,7 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/ityp_array.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 namespace {
@@ -519,7 +515,7 @@ void FeaturesSet::ToSupportedFeatures(SupportedFeatures* supportedFeatures) cons
     wgpu::FeatureName* features = new wgpu::FeatureName[count];
     uint32_t index = 0;
     for (Feature f : featuresBitSet) {
-        features[index++] = ToAPI(f);
+        DAWN_UNSAFE_TODO(features[index++]) = ToAPI(f);
     }
     DAWN_ASSERT(index == count);
     supportedFeatures->features = features;

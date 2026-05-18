@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <utility>
 #include <vector>
 
@@ -38,6 +33,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -474,7 +470,8 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
             StencilData ssss = {mExpected, mExpected, mExpected, mExpected};
             StencilData s001 = {mExpected, 0, 0, 1};
 
-            if (memcmp(data, ssss.data(), size) == 0 || memcmp(data, s001.data(), size) == 0) {
+            if (DAWN_UNSAFE_TODO(memcmp(data, ssss.data(), size)) == 0 ||
+                DAWN_UNSAFE_TODO(memcmp(data, s001.data(), size)) == 0) {
                 return testing::AssertionSuccess();
             }
 
@@ -482,7 +479,8 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                    << "Expected stencil data to be " << "(" << ssss[0] << ", " << ssss[1] << ", "
                    << ssss[2] << ", " << ssss[3] << ") or " << "(" << s001[0] << ", " << s001[1]
                    << ", " << s001[2] << ", " << s001[3] << "). Got " << "(" << data[0] << ", "
-                   << data[1] << ", " << data[2] << ", " << data[3] << ").";
+                   << DAWN_UNSAFE_TODO(data[1]) << ", " << DAWN_UNSAFE_TODO(data[2]) << ", "
+                   << DAWN_UNSAFE_TODO(data[3]) << ").";
         }
 
       private:
@@ -871,14 +869,16 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         queue.Submit(1, &commands);
 
         float expectedDepth = 0.0f;
-        memcpy(&expectedDepth, &passDescriptor.cDepthStencilAttachmentInfo.depthClearValue,
-               sizeof(float));
+        DAWN_UNSAFE_TODO(memcpy(&expectedDepth,
+                                &passDescriptor.cDepthStencilAttachmentInfo.depthClearValue,
+                                sizeof(float)));
         EXPECT_BUFFER(depthOutput, 0, sizeof(float),
                       new ::dawn::detail::ExpectEq<float>(expectedDepth, tolerance));
 
         uint8_t expectedStencil = 0;
-        memcpy(&expectedStencil, &passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue,
-               sizeof(uint8_t));
+        DAWN_UNSAFE_TODO(memcpy(&expectedStencil,
+                                &passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue,
+                                sizeof(uint8_t)));
         EXPECT_BUFFER_U32_EQ(expectedStencil, stencilOutput, 0);
     }
 
@@ -921,14 +921,16 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         queue.Submit(1, &commands);
 
         float expectedDepth = 0.0f;
-        memcpy(&expectedDepth, &passDescriptor.cDepthStencilAttachmentInfo.depthClearValue,
-               sizeof(float));
+        DAWN_UNSAFE_TODO(memcpy(&expectedDepth,
+                                &passDescriptor.cDepthStencilAttachmentInfo.depthClearValue,
+                                sizeof(float)));
         EXPECT_BUFFER(depthOutput, 0, sizeof(float),
                       new ::dawn::detail::ExpectEq<float>(expectedDepth, tolerance));
 
         uint8_t expectedStencil = 0;
-        memcpy(&expectedStencil, &passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue,
-               sizeof(uint8_t));
+        DAWN_UNSAFE_TODO(memcpy(&expectedStencil,
+                                &passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue,
+                                sizeof(uint8_t)));
         EXPECT_BUFFER_U32_EQ(expectedStencil, stencilOutput, 0);
     }
 }

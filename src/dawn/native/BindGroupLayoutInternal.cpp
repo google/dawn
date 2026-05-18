@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/BindGroupLayoutInternal.h"
 
 #include <algorithm>
@@ -55,6 +50,7 @@
 #include "dawn/native/TexelBufferView.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/metrics/HistogramMacros.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -304,7 +300,7 @@ MaybeError ValidateStaticSamplersWithTextureBindings(
     std::map<BindingNumber, BindingNumber> textureToStaticSamplerBindingMap;
 
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&descriptor->entries[i]);
+        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&DAWN_UNSAFE_TODO(descriptor->entries[i]));
         auto* staticSamplerLayout = entry.Get<StaticSamplerBindingLayout>();
         if (!staticSamplerLayout ||
             staticSamplerLayout->sampledTextureBinding == WGPU_LIMIT_U32_UNDEFINED) {
@@ -327,7 +323,8 @@ MaybeError ValidateStaticSamplersWithTextureBindings(
                         "valid binding number.",
                         samplerBinding, sampledTextureBinding);
 
-        auto& textureEntry = descriptor->entries[bindingNumberToIndexMap.at(sampledTextureBinding)];
+        auto& textureEntry = DAWN_UNSAFE_TODO(
+            descriptor->entries[bindingNumberToIndexMap.at(sampledTextureBinding)]);
         DAWN_INVALID_IF(textureEntry.texture.sampleType == wgpu::TextureSampleType::BindingNotUsed,
                         "For static sampler binding (%u) the sampled texture binding (%u) is not a "
                         "texture binding.",
@@ -354,7 +351,7 @@ ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDes
 
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
         UnpackedPtr<BindGroupLayoutEntry> entry;
-        DAWN_TRY_ASSIGN(entry, ValidateAndUnpack(&descriptor->entries[i]));
+        DAWN_UNSAFE_TODO(DAWN_TRY_ASSIGN(entry, ValidateAndUnpack(&descriptor->entries[i])));
 
         BindingNumber bindingNumber = BindingNumber(entry->binding);
         DAWN_INVALID_IF(
@@ -552,7 +549,7 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
     absl::flat_hash_map<BindingNumber, BindingNumber> staticSamplerToSingleTextureBinding;
 
     for (uint32_t i = 0; i < descriptor->entryCount; i++) {
-        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&descriptor->entries[i]);
+        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&DAWN_UNSAFE_TODO(descriptor->entries[i]));
 
         // External textures are expanded with additional bindings:
         //  - Two sampled texture bindings and one uniform buffer
@@ -762,7 +759,7 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
     // Recompute the number of bindings of each type from the descriptor since that is used for
     // validation of the pipeline layout.
     for (uint32_t i = 0; i < descriptor->entryCount; i++) {
-        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&descriptor->entries[i]);
+        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&DAWN_UNSAFE_TODO(descriptor->entries[i]));
         IncrementBindingCounts(&mValidationBindingCounts, entry);
     }
 }
@@ -1041,9 +1038,9 @@ BindGroupLayoutInternalBase::ComputeBindingDataPointers(void* dataStart) const {
     const size_t bindingCount = size_t(mBindingInfo.size());
 
     BufferBindingData* bufferData = reinterpret_cast<BufferBindingData*>(dataStart);
-    auto bindings = reinterpret_cast<Ref<ObjectBase>*>(bufferData + bufferCount);
-    uint64_t* unverifiedBufferSizes =
-        AlignPtr(reinterpret_cast<uint64_t*>(bindings + bindingCount), sizeof(uint64_t));
+    auto bindings = reinterpret_cast<Ref<ObjectBase>*>(DAWN_UNSAFE_TODO(bufferData + bufferCount));
+    uint64_t* unverifiedBufferSizes = AlignPtr(
+        reinterpret_cast<uint64_t*>(DAWN_UNSAFE_TODO(bindings + bindingCount)), sizeof(uint64_t));
 
     DAWN_CHECK(IsPtrAligned(bufferData, alignof(BufferBindingData)));
     DAWN_CHECK(IsPtrAligned(bindings, alignof(Ref<ObjectBase>)));

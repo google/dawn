@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/d3d11/BufferD3D11.h"
 
 #include <algorithm>
@@ -51,6 +46,7 @@
 #include "dawn/native/d3d11/UtilsD3D11.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::d3d11 {
 
@@ -247,7 +243,7 @@ class UploadBuffer final : public Buffer {
                              uint8_t clearValue,
                              uint64_t offset,
                              uint64_t size) override {
-        memset(mUploadData.get() + offset, clearValue, size);
+        DAWN_UNSAFE_TODO(memset(mUploadData.get() + offset, clearValue, size));
         return {};
     }
 
@@ -257,7 +253,7 @@ class UploadBuffer final : public Buffer {
                               Buffer* destination,
                               uint64_t destinationOffset) override {
         return destination->WriteInternal(commandContext, destinationOffset,
-                                          mUploadData.get() + sourceOffset, size,
+                                          DAWN_UNSAFE_TODO(mUploadData.get() + sourceOffset), size,
                                           /*isInitialWrite=*/false);
     }
 
@@ -277,7 +273,7 @@ class UploadBuffer final : public Buffer {
                              size_t size,
                              bool isInitialWrite) override {
         const auto* src = static_cast<const uint8_t*>(data);
-        std::copy(src, src + size, mUploadData.get() + offset);
+        std::copy(src, DAWN_UNSAFE_TODO(src + size), DAWN_UNSAFE_TODO(mUploadData.get() + offset));
         return {};
     }
 
@@ -450,7 +446,8 @@ MaybeError Buffer::UnmapIfNeeded(const ScopedCommandRecordingContext* commandCon
         ScopedMap scopedMap;
         DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(commandContext, this, wgpu::MapMode::Write));
         DAWN_ASSERT(scopedMap.GetMappedData());
-        memcpy(scopedMap.GetMappedData(), mMapAtCreationData.get(), GetAllocatedSize());
+        DAWN_UNSAFE_TODO(
+            memcpy(scopedMap.GetMappedData(), mMapAtCreationData.get(), GetAllocatedSize()));
         mMapAtCreationData.reset();
         return {};
     }
@@ -1180,7 +1177,7 @@ MaybeError GPUUsableBuffer::SyncStorage(const ScopedCommandRecordingContext* com
                                                   /*Subresource=*/0, D3D11_MAP_WRITE_DISCARD,
                                                   /*MapFlags=*/0, &mappedDstResource),
                               "ID3D11DeviceContext::Map dst"));
-        memcpy(mappedDstResource.pData, srcData, size);
+        DAWN_UNSAFE_TODO(memcpy(mappedDstResource.pData, srcData, size));
         commandContext->Unmap(dst,
                               /*Subresource=*/0);
         return {};
@@ -1499,7 +1496,7 @@ MaybeError GPUUsableBuffer::UpdateD3D11ConstantBuffer(
         std::unique_ptr<uint8_t[]> alignedBuffer;
         if (size != alignedSize) {
             alignedBuffer.reset(new uint8_t[alignedSize]);
-            std::memcpy(alignedBuffer.get() + leftExtraBytes, data, size);
+            DAWN_UNSAFE_TODO(std::memcpy(alignedBuffer.get() + leftExtraBytes, data, size));
             data = alignedBuffer.get();
         }
 
@@ -1562,7 +1559,7 @@ MaybeError GPUUsableBuffer::WriteInternal(const ScopedCommandRecordingContext* c
         DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(commandContext, this, wgpu::MapMode::Write));
 
         DAWN_ASSERT(scopedMap.GetMappedData());
-        memcpy(scopedMap.GetMappedData() + offset, data, size);
+        DAWN_UNSAFE_TODO(memcpy(scopedMap.GetMappedData() + offset, data, size));
 
         return {};
     }

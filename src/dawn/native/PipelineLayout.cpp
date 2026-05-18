@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/PipelineLayout.h"
 
 #include <algorithm>
@@ -50,6 +45,7 @@
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/ShaderModule.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -67,7 +63,8 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
     if (auto* pls = unpacked.Get<PipelineLayoutPixelLocalStorage>()) {
         absl::InlinedVector<StorageAttachmentInfoForValidation, 4> attachments;
         for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-            const PipelineLayoutStorageAttachment& attachment = pls->storageAttachments[i];
+            const PipelineLayoutStorageAttachment& attachment =
+                DAWN_UNSAFE_TODO(pls->storageAttachments[i]);
 
             const Format* format;
             DAWN_TRY_ASSIGN_CONTEXT(format, device->GetInternalFormat(attachment.format),
@@ -119,18 +116,19 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
     }
 
     for (uint32_t i = 0; i < descriptor->bindGroupLayoutCount; ++i) {
-        if (descriptor->bindGroupLayouts[i] == nullptr) {
+        if (DAWN_UNSAFE_TODO(descriptor->bindGroupLayouts[i]) == nullptr) {
             continue;
         }
 
-        DAWN_TRY(device->ValidateObject(descriptor->bindGroupLayouts[i]));
-        DAWN_INVALID_IF(descriptor->bindGroupLayouts[i]->GetPipelineCompatibilityToken() !=
-                            pipelineCompatibilityToken,
-                        "bindGroupLayouts[%i] (%s) is used to create a pipeline layout but it was "
-                        "created as part of a pipeline's default layout.",
-                        i, descriptor->bindGroupLayouts[i]);
+        DAWN_UNSAFE_TODO(DAWN_TRY(device->ValidateObject(descriptor->bindGroupLayouts[i])));
+        DAWN_UNSAFE_TODO(DAWN_INVALID_IF(
+            descriptor->bindGroupLayouts[i]->GetPipelineCompatibilityToken() !=
+                pipelineCompatibilityToken,
+            "bindGroupLayouts[%i] (%s) is used to create a pipeline layout but it was "
+            "created as part of a pipeline's default layout.",
+            i, descriptor->bindGroupLayouts[i]));
 
-        AccumulateBindingCounts(&bindingCounts, descriptor->bindGroupLayouts[i]
+        AccumulateBindingCounts(&bindingCounts, DAWN_UNSAFE_TODO(descriptor->bindGroupLayouts[i])
                                                     ->GetInternalBindGroupLayout()
                                                     ->GetValidationBindingCounts());
     }
@@ -198,8 +196,8 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
         mStorageAttachmentSlots = std::vector<wgpu::TextureFormat>(
             pls->totalPixelLocalStorageSize / kPLSSlotByteSize, wgpu::TextureFormat::Undefined);
         for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-            size_t slot = pls->storageAttachments[i].offset / kPLSSlotByteSize;
-            mStorageAttachmentSlots[slot] = pls->storageAttachments[i].format;
+            size_t slot = DAWN_UNSAFE_TODO(pls->storageAttachments[i]).offset / kPLSSlotByteSize;
+            mStorageAttachmentSlots[slot] = DAWN_UNSAFE_TODO(pls->storageAttachments[i]).format;
         }
     }
     // Gather the resource table information.
@@ -629,7 +627,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         // make room for it. If it's not empty, this means kMaxBindGroups were referenced in the
         // shader, which will trigger a validation error in CreatePipelineLayout that too many BGLs
         // are used with the resource table.
-        if (desc.bindGroupLayouts[desc.bindGroupLayoutCount - 1]->IsEmpty()) {
+        if (DAWN_UNSAFE_TODO(desc.bindGroupLayouts[desc.bindGroupLayoutCount - 1])->IsEmpty()) {
             desc.bindGroupLayoutCount--;
         }
     }

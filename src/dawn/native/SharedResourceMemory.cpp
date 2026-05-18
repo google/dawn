@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/SharedResourceMemory.h"
 
 #include <algorithm>
@@ -40,6 +35,7 @@
 #include "dawn/native/Device.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/Texture.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -127,7 +123,7 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
 
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
-        DAWN_TRY(GetDevice()->ValidateObject(descriptor->fences[i]));
+        DAWN_UNSAFE_TODO(DAWN_TRY(GetDevice()->ValidateObject(descriptor->fences[i])));
     }
 
     DAWN_TRY(ValidateResourceCreatedFromSelf(resource));
@@ -181,14 +177,18 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
         // Add the fences to mPendingFences if they are not already contained in the list.
         // This loop is O(n*m), but there shouldn't be very many fences.
-        auto it = std::find_if(
-            mContents->mPendingFences.begin(), mContents->mPendingFences.end(),
-            [&](const auto& fence) { return fence.object.Get() == descriptor->fences[i]; });
+        auto it =
+            std::find_if(mContents->mPendingFences.begin(), mContents->mPendingFences.end(),
+                         [&](const auto& fence) {
+                             return fence.object.Get() == DAWN_UNSAFE_TODO(descriptor->fences[i]);
+                         });
         if (it != mContents->mPendingFences.end()) {
-            it->signaledValue = std::max(it->signaledValue, descriptor->signaledValues[i]);
+            it->signaledValue =
+                std::max(it->signaledValue, DAWN_UNSAFE_TODO(descriptor->signaledValues[i]));
             continue;
         }
-        mContents->mPendingFences.push_back({descriptor->fences[i], descriptor->signaledValues[i]});
+        mContents->mPendingFences.push_back({DAWN_UNSAFE_TODO(descriptor->fences[i]),
+                                             DAWN_UNSAFE_TODO(descriptor->signaledValues[i])});
     }
 
     DAWN_CHECK(!resource->IsError());
@@ -318,8 +318,8 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* s
         auto* fences = new SharedFenceBase*[fenceCount];
         uint64_t* signaledValues = new uint64_t[fenceCount];
         for (size_t i = 0; i < fenceCount; ++i) {
-            fences[i] = ReturnToAPI(std::move(fenceList[i].object));
-            signaledValues[i] = fenceList[i].signaledValue;
+            DAWN_UNSAFE_TODO(fences[i]) = ReturnToAPI(std::move(fenceList[i].object));
+            DAWN_UNSAFE_TODO(signaledValues[i]) = fenceList[i].signaledValue;
         }
 
         state->fenceCount = fenceCount;
