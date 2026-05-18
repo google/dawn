@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/webgpu/PhysicalDeviceWGPU.h"
 
 #include <string>
@@ -44,6 +39,7 @@
 #include "dawn/native/webgpu/BackendWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/SwapChainWGPU.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::webgpu {
 
@@ -125,13 +121,15 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
     PhysicalDeviceSurfaceCapabilities capabilities;
     capabilities.usages = static_cast<wgpu::TextureUsage>(innerCapabilities.usages);
     for (size_t i = 0; i < innerCapabilities.formatCount; ++i) {
-        capabilities.formats.push_back(FromAPI(innerCapabilities.formats[i]));
+        capabilities.formats.push_back(FromAPI(DAWN_UNSAFE_TODO(innerCapabilities.formats[i])));
     }
     for (size_t i = 0; i < innerCapabilities.presentModeCount; ++i) {
-        capabilities.presentModes.push_back(FromAPI(innerCapabilities.presentModes[i]));
+        capabilities.presentModes.push_back(
+            FromAPI(DAWN_UNSAFE_TODO(innerCapabilities.presentModes[i])));
     }
     for (size_t i = 0; i < innerCapabilities.alphaModeCount; ++i) {
-        capabilities.alphaModes.push_back(FromAPI(innerCapabilities.alphaModes[i]));
+        capabilities.alphaModes.push_back(
+            FromAPI(DAWN_UNSAFE_TODO(innerCapabilities.alphaModes[i])));
     }
 
     mBackend->GetFunctions().surfaceCapabilitiesFreeMembers(innerCapabilities);

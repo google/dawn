@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/wire/client/Surface.h"
 
 #include <algorithm>
@@ -41,6 +36,7 @@
 #include "dawn/wire/client/Device.h"
 #include "dawn/wire/client/Texture.h"
 #include "dawn/wire/client/webgpu.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::wire::client {
 
@@ -49,11 +45,13 @@ Surface::Surface(const ObjectBaseParams& params, const WGPUSurfaceCapabilities* 
     // Copy over the capabilities.
     mSupportedUsages = capabilities->usages;
     mSupportedFormats.assign(capabilities->formats,
-                             capabilities->formats + capabilities->formatCount);
-    mSupportedPresentModes.assign(capabilities->presentModes,
-                                  capabilities->presentModes + capabilities->presentModeCount);
-    mSupportedAlphaModes.assign(capabilities->alphaModes,
-                                capabilities->alphaModes + capabilities->alphaModeCount);
+                             DAWN_UNSAFE_TODO(capabilities->formats + capabilities->formatCount));
+    mSupportedPresentModes.assign(
+        capabilities->presentModes,
+        DAWN_UNSAFE_TODO(capabilities->presentModes + capabilities->presentModeCount));
+    mSupportedAlphaModes.assign(
+        capabilities->alphaModes,
+        DAWN_UNSAFE_TODO(capabilities->alphaModes + capabilities->alphaModeCount));
 
     DAWN_ASSERT(!mSupportedFormats.empty() && !mSupportedPresentModes.empty() &&
                 !mSupportedAlphaModes.empty());

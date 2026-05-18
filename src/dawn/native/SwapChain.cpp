@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/SwapChain.h"
 
 #include <utility>
@@ -42,6 +37,7 @@
 #include "dawn/native/Surface.h"
 #include "dawn/native/Texture.h"
 #include "dawn/native/ValidationUtils_autogen.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -71,11 +67,11 @@ SwapChainBase::SwapChainBase(DeviceBase* device,
       mAlphaMode(config->alphaMode),
       mSurface(surface) {
     for (uint32_t i = 0; i < config->viewFormatCount; ++i) {
-        if (config->viewFormats[i] == config->format) {
+        if (DAWN_UNSAFE_TODO(config->viewFormats[i]) == config->format) {
             // Skip our own format, like texture creations does.
             continue;
         }
-        mViewFormats.push_back(config->viewFormats[i]);
+        mViewFormats.push_back(DAWN_UNSAFE_TODO(config->viewFormats[i]));
     }
 }
 

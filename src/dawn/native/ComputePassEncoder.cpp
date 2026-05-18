@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/ComputePassEncoder.h"
 
 #include <algorithm>
@@ -51,6 +46,7 @@
 #include "dawn/native/PassResourceUsageTracker.h"
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -576,7 +572,7 @@ void ComputePassEncoder::APISetImmediates(uint32_t offset, const void* data, siz
             cmd->offset = offset;
             cmd->size = uint32_t(size);
             uint8_t* immediateDatas = allocator->AllocateData<uint8_t>(cmd->size);
-            memcpy(immediateDatas, data, size);
+            DAWN_UNSAFE_TODO(memcpy(immediateDatas, data, size));
 
             mCommandBufferState.SetImmediateData(offset, uint32_t(size));
 

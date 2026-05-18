@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/BlobCache.h"
 
 #include <algorithm>
@@ -43,6 +38,7 @@
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Instance.h"
 #include "dawn/platform/DawnPlatform.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -59,7 +55,7 @@ std::vector<std::byte> GenerateHashPrefixedPayload(std::span<const std::byte> va
     std::vector<std::byte> result(byteSizeWithHash);
 
     // Write the hash to the start of the buffer.
-    *reinterpret_cast<Hash*>(result.data()) = Hasher::Hash(value);
+    *DAWN_UNSAFE_TODO(reinterpret_cast<Hash*>(result.data())) = Hasher::Hash(value);
 
     // Write the payload after the hash.
     std::ranges::copy(value, result.begin() + kHashByteSize);
@@ -86,7 +82,7 @@ ResultOrError<Blob> CheckAndUnpackHashPrefixedPayload(Blob&& blobWithHash) {
         const uint8_t* hashBytes = static_cast<const uint8_t*>(hash);
         for (size_t i = 0; i < kHashByteSize; i++) {
             ss << std::uppercase << std::hex << std::setw(2) << std::setfill('0')
-               << static_cast<int>(hashBytes[i]);
+               << static_cast<int>(DAWN_UNSAFE_TODO(hashBytes[i]));
         }
         return ss.str();
     };

@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "src/utils/chromium_test_compat/chromium_test_compat.h"
 
 #include <cstdio>
@@ -38,12 +33,14 @@
 #include <string>
 #include <string_view>
 
+#include "src/utils/compiler.h"
+
 namespace dawn {
 void SubstituteChromiumArgs(int argc, char** argv) {
     std::string testSummaryOutputArg("--test-launcher-summary-output=");
 
     for (int i = 0; i < argc; i++) {
-        std::string_view argument(argv[i]);
+        std::string_view argument(DAWN_UNSAFE_TODO(argv[i]));
 
         // Look to replace "--test-launcher-summary-output=" with "--gtest_output=json:". The former
         // is a Chromium-specific flag for where to output results in a Chromium-specific format,
@@ -58,8 +55,9 @@ void SubstituteChromiumArgs(int argc, char** argv) {
             replacementArg += argValue;
             std::cout << "Replacing " << argument << " with " << replacementArg << "\n";
             size_t bufferSize = replacementArg.length() + 1;
-            argv[i] = new char[bufferSize];
-            int charsWritten = std::snprintf(argv[i], bufferSize, "%s", replacementArg.c_str());
+            DAWN_UNSAFE_TODO(argv[i]) = new char[bufferSize];
+            int charsWritten =
+                DAWN_UNSAFE_TODO(std::snprintf(argv[i], bufferSize, "%s", replacementArg.c_str()));
 
             if (size_t(charsWritten) != replacementArg.length()) {
                 abort();

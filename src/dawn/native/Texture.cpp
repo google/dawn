@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/Texture.h"
 
 #include <algorithm>
@@ -53,6 +48,7 @@
 #include "dawn/native/ResourceTable.h"
 #include "dawn/native/SharedTextureMemory.h"
 #include "dawn/native/ValidationUtils_autogen.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -795,9 +791,9 @@ MaybeError ValidateTextureDescriptor(
     }
 
     for (uint32_t i = 0; i < descriptor->viewFormatCount; ++i) {
-        DAWN_TRY_CONTEXT(
+        DAWN_UNSAFE_TODO(DAWN_TRY_CONTEXT(
             ValidateTextureViewFormatCompatibility(device, *format, descriptor->viewFormats[i]),
-            "validating viewFormats[%u]", i);
+            "validating viewFormats[%u]", i));
     }
 
     DAWN_INVALID_IF(descriptor->usage == wgpu::TextureUsage::None,
@@ -1067,12 +1063,13 @@ TextureBase::TextureBase(DeviceBase* device, const UnpackedPtr<TextureDescriptor
     mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
 
     for (uint32_t i = 0; i < descriptor->viewFormatCount; ++i) {
-        if (descriptor->viewFormats[i] == descriptor->format) {
+        if (DAWN_UNSAFE_TODO(descriptor->viewFormats[i]) == descriptor->format) {
             // Skip our own format, so the backends don't allocate the texture for
             // reinterpretation if it's not needed.
             continue;
         }
-        mViewFormats[device->GetValidInternalFormat(descriptor->viewFormats[i])] = true;
+        mViewFormats[device->GetValidInternalFormat(DAWN_UNSAFE_TODO(descriptor->viewFormats[i]))] =
+            true;
     }
 
     if (auto* internalUsageDesc = descriptor.Get<DawnTextureInternalUsageDescriptor>()) {

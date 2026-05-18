@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <vector>
 
 #include "dawn/common/Assert.h"
@@ -37,6 +32,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -242,10 +238,11 @@ class PrimitiveTopologyTest : public DawnTest {
                 // black
                 utils::RGBA8 color =
                     locationSpec.include ? utils::RGBA8::kGreen : utils::RGBA8::kZero;
-                EXPECT_PIXEL_RGBA8_EQ(color, renderPass.color, locationSpec.locations[i].x,
-                                      locationSpec.locations[i].y)
-                    << "Expected (" << locationSpec.locations[i].x << ", "
-                    << locationSpec.locations[i].y << ") to be " << color;
+                DAWN_UNSAFE_TODO(EXPECT_PIXEL_RGBA8_EQ(color, renderPass.color,
+                                                       locationSpec.locations[i].x,
+                                                       locationSpec.locations[i].y))
+                    << "Expected (" << DAWN_UNSAFE_TODO(locationSpec.locations[i]).x << ", "
+                    << DAWN_UNSAFE_TODO(locationSpec.locations[i]).y << ") to be " << color;
             }
         }
     }

@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <optional>
 #include <ostream>
 #include <string>
@@ -37,6 +32,7 @@
 
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -249,17 +245,17 @@ class ExpectOneNonZero : public detail::Expectation {
 
         std::optional<size_t> whereFound;
         for (size_t i = 0; i < size / sizeof(T); i++) {
-            if (actual[i] == mValue) {
+            if (DAWN_UNSAFE_TODO(actual[i]) == mValue) {
                 if (whereFound.has_value()) {
                     return testing::AssertionFailure()
                            << "Found value " << mValue << " at data[" << whereFound.value()
                            << "] and data[" << i << "]\n";
                 }
                 whereFound = i;
-            } else if (actual[i] != 0) {
+            } else if (DAWN_UNSAFE_TODO(actual[i]) != 0) {
                 return testing::AssertionFailure()
-                       << "Found unexpected value data[" << i << "] = " << actual[i]
-                       << " instead of " << mValue << "\n";
+                       << "Found unexpected value data[" << i
+                       << "] = " << DAWN_UNSAFE_TODO(actual[i]) << " instead of " << mValue << "\n";
             }
         }
         if (!whereFound.has_value()) {
