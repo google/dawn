@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <algorithm>
 #include <span>
 #include <utility>
@@ -38,6 +33,7 @@
 #include "dawn/native/Blob.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 namespace {
@@ -61,7 +57,7 @@ TEST(BlobTests, SizedCreation) {
     std::ranges::copy(std::as_bytes(std::span(data)), b.Data().begin());
 
     // And retrieve the exact contents back.
-    EXPECT_EQ(memcmp(b.DataPtr(), data, sizeof(data)), 0);
+    DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(b.DataPtr(), data, sizeof(data)), 0));
 }
 
 // Test that you can create a zero-sized blob.
@@ -84,7 +80,7 @@ TEST(BlobTests, UnsafeCreateWithDeleter) {
         EXPECT_FALSE(b.Empty());
         EXPECT_EQ(b.Size(), sizeof(data));
         ASSERT_EQ(b.DataPtr(), reinterpret_cast<std::byte*>(data));
-        EXPECT_EQ(memcmp(b.DataPtr(), data, sizeof(data)), 0);
+        DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(b.DataPtr(), data, sizeof(data)), 0));
 
         // |b| is deleted when this scope exits.
         EXPECT_CALL(mockDeleter, Call());
@@ -141,7 +137,7 @@ TEST(BlobTests, MoveConstruct) {
     EXPECT_FALSE(b2.Empty());
     EXPECT_EQ(b2.Size(), 10u);
     ASSERT_NE(b2.DataPtr(), nullptr);
-    EXPECT_EQ(memcmp(b2.DataPtr(), data, sizeof(data)), 0);
+    DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(b2.DataPtr(), data, sizeof(data)), 0));
 }
 
 // Test that move assignment moves the data from one blob into another.
@@ -159,7 +155,7 @@ TEST(BlobTests, MoveAssign) {
     EXPECT_FALSE(b2.Empty());
     EXPECT_EQ(b2.Size(), 10u);
     ASSERT_NE(b2.DataPtr(), nullptr);
-    EXPECT_EQ(memcmp(b2.DataPtr(), data, sizeof(data)), 0);
+    DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(b2.DataPtr(), data, sizeof(data)), 0));
 }
 
 // Test that move assignment can replace the contents of the moved-to blob.
@@ -181,7 +177,7 @@ TEST(BlobTests, MoveAssignOver) {
     EXPECT_FALSE(b2.Empty());
     EXPECT_EQ(b2.Size(), 10u);
     ASSERT_NE(b2.DataPtr(), nullptr);
-    EXPECT_EQ(memcmp(b2.DataPtr(), data, sizeof(data)), 0);
+    DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(b2.DataPtr(), data, sizeof(data)), 0));
 }
 
 // Test that the offset factory still calls the deleter, with an offsetted view of the data.
@@ -202,7 +198,7 @@ TEST(BlobTests, OffsetMoveConstructor) {
         Blob b2 = Blob::Create(std::move(b1), kOffset);
         EXPECT_EQ(b2.Size(), 13u - kOffset);
         // Data still points to the data.
-        EXPECT_EQ(b2.DataPtr(), reinterpret_cast<std::byte*>(data) + kOffset);
+        DAWN_UNSAFE_TODO(EXPECT_EQ(b2.DataPtr(), reinterpret_cast<std::byte*>(data) + kOffset));
 
         // |b| is deleted when this scope exits.
         EXPECT_CALL(mockDeleter, Call());

@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #ifndef SRC_DAWN_NATIVE_COMMANDALLOCATOR_H_
 #define SRC_DAWN_NATIVE_COMMANDALLOCATOR_H_
 
@@ -44,6 +39,7 @@
 #include "dawn/common/Math.h"
 #include "dawn/common/NonCopyable.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -130,14 +126,15 @@ class CommandIterator : public NonCopyable {
 
     DAWN_FORCE_INLINE bool NextCommandId(uint32_t* commandId) {
         char* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
-        DAWN_ASSERT(idPtr == reinterpret_cast<char*>(&mEndOfBlock) ||
-                    idPtr + sizeof(uint32_t) <=
-                        mBlocks[mCurrentBlock].block.get() + mBlocks[mCurrentBlock].size);
+        DAWN_UNSAFE_TODO(
+            DAWN_ASSERT(idPtr == reinterpret_cast<char*>(&mEndOfBlock) ||
+                        idPtr + sizeof(uint32_t) <=
+                            mBlocks[mCurrentBlock].block.get() + mBlocks[mCurrentBlock].size));
 
         uint32_t id = *reinterpret_cast<uint32_t*>(idPtr);
 
         if (id != detail::kEndOfBlock) {
-            mCurrentPtr = idPtr + sizeof(uint32_t);
+            mCurrentPtr = DAWN_UNSAFE_TODO(idPtr + sizeof(uint32_t));
             *commandId = id;
             return true;
         }
@@ -148,10 +145,11 @@ class CommandIterator : public NonCopyable {
 
     DAWN_FORCE_INLINE void* NextCommand(size_t commandSize, size_t commandAlignment) {
         char* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
-        DAWN_ASSERT(commandPtr + sizeof(commandSize) <=
-                    mBlocks[mCurrentBlock].block.get() + mBlocks[mCurrentBlock].size);
+        DAWN_UNSAFE_TODO(
+            DAWN_ASSERT(commandPtr + sizeof(commandSize) <=
+                        mBlocks[mCurrentBlock].block.get() + mBlocks[mCurrentBlock].size));
 
-        mCurrentPtr = commandPtr + commandSize;
+        mCurrentPtr = DAWN_UNSAFE_TODO(commandPtr + commandSize);
         return commandPtr;
     }
 
@@ -209,7 +207,7 @@ class CommandAllocator : public NonCopyable {
             return nullptr;
         }
         for (size_t i = 0; i < count; i++) {
-            new (result + i) T;
+            new (DAWN_UNSAFE_TODO(result + i)) T;
         }
         return result;
     }
@@ -262,8 +260,9 @@ class CommandAllocator : public NonCopyable {
             uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
             *idAlloc = commandId;
 
-            char* commandAlloc = AlignPtr(mCurrentPtr + sizeof(uint32_t), commandAlignment);
-            mCurrentPtr = AlignPtr(commandAlloc + commandSize, alignof(uint32_t));
+            char* commandAlloc =
+                AlignPtr(DAWN_UNSAFE_TODO(mCurrentPtr + sizeof(uint32_t)), commandAlignment);
+            mCurrentPtr = AlignPtr(DAWN_UNSAFE_TODO(commandAlloc + commandSize), alignof(uint32_t));
 
             return commandAlloc;
         }

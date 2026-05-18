@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <bit>
 #include <limits>
 #include <memory>
@@ -45,6 +40,7 @@
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 #if TINT_BUILD_SPV_READER && !defined(__EMSCRIPTEN__)
 #include "spirv-tools/optimizer.hpp"
@@ -404,7 +400,7 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
                 reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(message->nextInChain);
             EXPECT_EQ(0u, utf16->linePos);
 
-            message = &info->messages[1];
+            message = &DAWN_UNSAFE_TODO(info->messages[1]);
             ASSERT_EQ("Warning Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Warning, message->type);
             ASSERT_EQ(0u, message->lineNum);
@@ -415,7 +411,7 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
                 reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(message->nextInChain);
             EXPECT_EQ(0u, utf16->linePos);
 
-            message = &info->messages[2];
+            message = &DAWN_UNSAFE_TODO(info->messages[2]);
             ASSERT_EQ("Error Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Error, message->type);
             ASSERT_EQ(3u, message->lineNum);
@@ -426,7 +422,7 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
                 reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(message->nextInChain);
             EXPECT_EQ(4u, utf16->linePos);
 
-            message = &info->messages[3];
+            message = &DAWN_UNSAFE_TODO(info->messages[3]);
             ASSERT_EQ("Complete Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Info, message->type);
             ASSERT_EQ(3u, message->lineNum);
@@ -750,7 +746,7 @@ class ShaderModuleMaxInterStageShaderVariablesValidationTest : public Validation
         adapter.GetFeatures(&supportedFeatures);
         std::vector<wgpu::FeatureName> requiredFeatures(
             supportedFeatures.features,
-            supportedFeatures.features + supportedFeatures.featureCount);
+            DAWN_UNSAFE_TODO(supportedFeatures.features + supportedFeatures.featureCount));
         return requiredFeatures;
     }
 };
@@ -926,7 +922,7 @@ TEST_F(ShaderModuleMaxInterStageShaderVariablesValidationTest, Test) {
             bool canTest = true;
             for (uint8_t b = 0; b < std::size(builtins); ++b) {
                 if (mask & (1 << b)) {
-                    const Builtin& builtin = builtins[b];
+                    const Builtin& builtin = DAWN_UNSAFE_TODO(builtins[b]);
                     builtInDeclarations += "@builtin(" + std::string(builtin.name) + ") b_" +
                                            std::string(builtin.name) + ": " +
                                            std::string(builtin.type) + ",";
@@ -1005,7 +1001,7 @@ class ShaderModuleExtensionValidationTest : public ValidationTest {
         wgpu::SupportedFeatures supportedFeatures;
         adapter.GetFeatures(&supportedFeatures);
         for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
-            requiredFeatures.push_back(supportedFeatures.features[i]);
+            requiredFeatures.push_back(DAWN_UNSAFE_TODO(supportedFeatures.features[i]));
         }
         return requiredFeatures;
     }

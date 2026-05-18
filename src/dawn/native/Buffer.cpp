@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/Buffer.h"
 
 #include <atomic>
@@ -65,6 +60,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -606,11 +602,11 @@ MaybeError BufferBase::MapAtCreation() {
         // actually get initialized when the staging data is copied in. (But we mark the main buffer
         // as initialized now.)
         if (!usingStagingBuffer) {
-            memset(ptr, uint8_t(0u), size);
+            DAWN_UNSAFE_TODO(memset(ptr, uint8_t(0u), size));
             device->IncrementLazyClearCountForTesting();
         }
     } else if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-        memset(ptr, uint8_t(1u), size);
+        DAWN_UNSAFE_TODO(memset(ptr, uint8_t(1u), size));
     }
     // Mark the buffer as initialized since we don't want to later clear it using the GPU since that
     // would overwrite what the client wrote using the CPU.
@@ -793,7 +789,7 @@ wgpu::Status BufferBase::APIWriteMappedRange(size_t offset, void const* data, si
         return wgpu::Status::Error;
     }
 
-    memcpy(range, data, size);
+    DAWN_UNSAFE_TODO(memcpy(range, data, size));
     return wgpu::Status::Success;
 }
 
@@ -803,7 +799,7 @@ wgpu::Status BufferBase::APIReadMappedRange(size_t offset, void* data, size_t si
         return wgpu::Status::Error;
     }
 
-    memcpy(data, range, size);
+    DAWN_UNSAFE_TODO(memcpy(data, range, size));
     return wgpu::Status::Success;
 }
 
@@ -819,7 +815,7 @@ void* BufferBase::GetMappedRange(size_t offset, size_t size, bool writable) {
         return nullptr;
     }
     uint8_t* start = static_cast<uint8_t*>(GetMappedPointer());
-    return start == nullptr ? nullptr : start + offset;
+    return start == nullptr ? nullptr : DAWN_UNSAFE_TODO(start + offset);
 }
 
 void BufferBase::APIDestroy() {
@@ -1065,7 +1061,7 @@ MaybeError BufferBase::UploadData(uint64_t bufferOffset, const void* data, size_
 
     return GetDevice()->GetDynamicUploader()->WithUploadReservation(
         size, kCopyBufferToBufferOffsetAlignment, [&](UploadReservation reservation) -> MaybeError {
-            memcpy(reservation.mappedPointer, data, size);
+            DAWN_UNSAFE_TODO(memcpy(reservation.mappedPointer, data, size));
             return GetDevice()->CopyFromStagingToBuffer(
                 reservation.buffer.Get(), reservation.offsetInBuffer, this, bufferOffset, size);
         });
