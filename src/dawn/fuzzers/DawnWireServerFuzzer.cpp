@@ -42,11 +42,7 @@
 #include "dawn/native/DawnNative.h"
 #include "dawn/utils/SystemUtils.h"
 #include "dawn/wire/WireServer.h"
-
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
+#include "src/utils/compiler.h"
 
 namespace {
 
@@ -101,7 +97,7 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
 
     // Get and consume the injected error index.
     uint64_t injectedErrorIndex = *reinterpret_cast<const uint64_t*>(data);
-    data += sizeof(uint64_t);
+    DAWN_UNSAFE_TODO(data += sizeof(uint64_t));
     size -= sizeof(uint64_t);
 
     if (supportsErrorInjection) {

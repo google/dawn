@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/d3d12/PipelineLayoutD3D12.h"
 
 #include <limits>
@@ -43,6 +38,7 @@
 #include "dawn/native/d3d12/PlatformFunctionsD3D12.h"
 #include "dawn/native/d3d12/ResourceTableD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
+#include "src/utils/compiler.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -104,7 +100,8 @@ HRESULT SerializeRootParameter1_0(Device* device,
     std::vector<std::vector<D3D12_DESCRIPTOR_RANGE>> allDescriptorRanges1_0;
     std::vector<D3D12_ROOT_PARAMETER> rootParameters1_0(rootSignature1_1.Desc_1_1.NumParameters);
     for (size_t i = 0; i < rootParameters1_0.size(); ++i) {
-        const D3D12_ROOT_PARAMETER1& rootParameter1_1 = rootSignature1_1.Desc_1_1.pParameters[i];
+        const D3D12_ROOT_PARAMETER1& rootParameter1_1 =
+            DAWN_UNSAFE_TODO(rootSignature1_1.Desc_1_1.pParameters[i]);
 
         rootParameters1_0[i].ParameterType = rootParameter1_1.ParameterType;
         rootParameters1_0[i].ShaderVisibility = rootParameter1_1.ShaderVisibility;
@@ -131,8 +128,8 @@ HRESULT SerializeRootParameter1_0(Device* device,
                         rootParameters1_0[i].DescriptorTable.NumDescriptorRanges);
                     for (uint32_t index = 0;
                          index < rootParameter1_1.DescriptorTable.NumDescriptorRanges; ++index) {
-                        const D3D12_DESCRIPTOR_RANGE1& descriptorRange1_1 =
-                            rootParameter1_1.DescriptorTable.pDescriptorRanges[index];
+                        const D3D12_DESCRIPTOR_RANGE1& descriptorRange1_1 = DAWN_UNSAFE_TODO(
+                            rootParameter1_1.DescriptorTable.pDescriptorRanges[index]);
                         descriptorRanges1_0[index].BaseShaderRegister =
                             descriptorRange1_1.BaseShaderRegister;
                         descriptorRanges1_0[index].NumDescriptors =

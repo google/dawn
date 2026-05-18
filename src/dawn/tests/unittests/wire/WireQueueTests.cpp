@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <cstring>
 #include <memory>
 
@@ -39,6 +34,7 @@
 #include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/WireClient.h"
 #include "gmock/gmock.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::wire {
 namespace {
@@ -72,14 +68,15 @@ TEST_F(WireWriteBufferTests, WriteBufferChunkedCommands) {
     FlushClient();
 
     auto expected = std::make_unique<uint8_t[]>(kLargeAllocationSize);
-    std::memset(expected.get(), 0b10101010, kLargeAllocationSize);
+    DAWN_UNSAFE_TODO(std::memset(expected.get(), 0b10101010, kLargeAllocationSize));
     queue.WriteBuffer(buffer, 0, expected.get(), kLargeAllocationSize);
 
-    EXPECT_CALL(
-        api, QueueWriteBuffer(apiQueue, apiBuffer, 0, MatchesLambda([&](void const* actual) {
-                                  return !std::memcmp(expected.get(), actual, kLargeAllocationSize);
-                              }),
-                              kLargeAllocationSize))
+    DAWN_UNSAFE_TODO(
+        EXPECT_CALL(api, QueueWriteBuffer(
+                             apiQueue, apiBuffer, 0, MatchesLambda([&](void const* actual) {
+                                 return !std::memcmp(expected.get(), actual, kLargeAllocationSize);
+                             }),
+                             kLargeAllocationSize)))
         .Times(1);
     FlushClient();
 }

@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <string>
 #include <utility>
 #include <vector>
@@ -42,6 +37,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -145,7 +141,8 @@ class EGLImageTestBase : public DawnTest {
     }
 
     bool HasExtension(const char* string) {
-        return strstr(egl.QueryString(egl.GetCurrentDisplay(), EGL_EXTENSIONS), string) != nullptr;
+        return DAWN_UNSAFE_TODO(strstr(egl.QueryString(egl.GetCurrentDisplay(), EGL_EXTENSIONS),
+                                       string)) != nullptr;
     }
 
     void SetUp() override {
@@ -370,7 +367,7 @@ class EGLImageUsageTests : public EGLImageTestBase {
                 gl.DeleteFramebuffers(1, &fbo);
                 return {};
             });
-        ASSERT_EQ(0, memcmp(result.data(), data, dataSize));
+        DAWN_UNSAFE_TODO(ASSERT_EQ(0, memcmp(result.data(), data, dataSize)));
     }
 
     template <class T>

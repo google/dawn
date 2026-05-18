@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <array>
 #include <cstring>
 #include <limits>
@@ -40,6 +35,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -514,8 +510,9 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleCol
             static_assert(sizeof(int32_t) * expData.size() == sizeof(attachmentCase.mExpData));
             attachmentCase.mFormat = format;
             attachmentCase.mClearValue = clearValue;
-            memcpy(attachmentCase.mExpData, reinterpret_cast<const uint8_t*>(expData.data()),
-                   sizeof(attachmentCase.mExpData));
+            DAWN_UNSAFE_TODO(memcpy(attachmentCase.mExpData,
+                                    reinterpret_cast<const uint8_t*>(expData.data()),
+                                    sizeof(attachmentCase.mExpData)));
             return attachmentCase;
         }
         static AttachmentCase Uint(wgpu::TextureFormat format,
@@ -525,8 +522,9 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleCol
             static_assert(sizeof(uint32_t) * expData.size() == sizeof(attachmentCase.mExpData));
             attachmentCase.mFormat = format;
             attachmentCase.mClearValue = clearValue;
-            memcpy(attachmentCase.mExpData, reinterpret_cast<const uint8_t*>(expData.data()),
-                   sizeof(attachmentCase.mExpData));
+            DAWN_UNSAFE_TODO(memcpy(attachmentCase.mExpData,
+                                    reinterpret_cast<const uint8_t*>(expData.data()),
+                                    sizeof(attachmentCase.mExpData)));
             return attachmentCase;
         }
 

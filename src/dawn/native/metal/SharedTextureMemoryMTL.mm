@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/metal/SharedTextureMemoryMTL.h"
 
 #include <CoreVideo/CVPixelBuffer.h>
@@ -41,6 +36,7 @@
 #include "dawn/native/metal/SharedFenceMTL.h"
 #include "dawn/native/metal/TextureMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::metal {
 
@@ -207,7 +203,7 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(descriptor.ValidateSubset<>());
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
-        SharedFenceBase* fence = descriptor->fences[i];
+        SharedFenceBase* fence = DAWN_UNSAFE_TODO(descriptor->fences[i]);
 
         SharedFenceExportInfo exportInfo;
         DAWN_TRY(fence->ExportInfo(&exportInfo));

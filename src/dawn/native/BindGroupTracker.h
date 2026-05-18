@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #ifndef SRC_DAWN_NATIVE_BINDGROUPTRACKER_H_
 #define SRC_DAWN_NATIVE_BINDGROUPTRACKER_H_
 
@@ -42,6 +37,7 @@
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/PipelineLayout.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -74,7 +70,7 @@ class BindGroupTrackerBase {
 
         mBindGroups[index] = bindGroup;
         mDynamicOffsets[index].count = BindingIndex(dynamicOffsetCount);
-        std::copy(dynamicOffsets, dynamicOffsets + dynamicOffsetCount,
+        std::copy(dynamicOffsets, DAWN_UNSAFE_TODO(dynamicOffsets + dynamicOffsetCount),
                   mDynamicOffsets[index].offsets.begin());
     }
 

@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/vulkan/UtilsVulkan.h"
 
 #include "dawn/common/Assert.h"
@@ -42,6 +37,7 @@
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/native/vulkan/VulkanFunctions.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan {
 
@@ -351,11 +347,13 @@ std::string GetDeviceDebugPrefixFromDebugName(const char* debugName) {
         return {};
     }
 
-    if (strncmp(debugName, kDeviceDebugPrefix, sizeof(kDeviceDebugPrefix) - 1) != 0) {
+    if (DAWN_UNSAFE_TODO(strncmp(debugName, kDeviceDebugPrefix, sizeof(kDeviceDebugPrefix) - 1)) !=
+        0) {
         return {};
     }
 
-    const char* separator = strstr(debugName + sizeof(kDeviceDebugPrefix), kDeviceDebugSeparator);
+    const char* separator =
+        DAWN_UNSAFE_TODO(strstr(debugName + sizeof(kDeviceDebugPrefix), kDeviceDebugSeparator));
     if (separator == nullptr) {
         return {};
     }

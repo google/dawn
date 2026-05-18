@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/Toggles.h"
 
 #include <array>
@@ -38,6 +33,7 @@
 #include "dawn/common/Log.h"
 #include "dawn/native/dawn_platform.h"
 #include "dawn/native/stream/Stream.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 namespace {
@@ -917,7 +913,8 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
 
     TogglesInfo togglesInfo;
     for (uint32_t i = 0; i < togglesDesc->enabledToggleCount; ++i) {
-        Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->enabledToggles[i]);
+        Toggle toggle =
+            togglesInfo.ToggleNameToEnum(DAWN_UNSAFE_TODO(togglesDesc->enabledToggles[i]));
         if (toggle != Toggle::InvalidEnum) {
             const ToggleInfo* toggleInfo = togglesInfo.GetToggleInfo(toggle);
             // Accept the required toggles of current and earlier stage to allow override
@@ -929,7 +926,8 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
         }
     }
     for (uint32_t i = 0; i < togglesDesc->disabledToggleCount; ++i) {
-        Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->disabledToggles[i]);
+        Toggle toggle =
+            togglesInfo.ToggleNameToEnum(DAWN_UNSAFE_TODO(togglesDesc->disabledToggles[i]));
         if (toggle != Toggle::InvalidEnum) {
             const ToggleInfo* toggleInfo = togglesInfo.GetToggleInfo(toggle);
             // Accept the required toggles of current and earlier stage to allow override

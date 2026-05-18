@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/d3d11/DeviceD3D11.h"
 
 #include <algorithm>
@@ -68,6 +63,7 @@
 #include "dawn/native/d3d11/UtilsD3D11.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::d3d11 {
 
@@ -76,11 +72,12 @@ size_t Sha3CacheFuncs::operator()(const Sha3_256::Output& key) const {
     // Given that the randomness of SHA3 is very good across all bits (avalanche effect),
     // sampling from two distant parts of the hash and combining them results in a good hash value
     // suitable for hash table distribution, while being more performant than hashing all 32 bytes.
-    return absl::HashOf(absl::MakeSpan(key.data(), 8),
-                        absl::MakeSpan(key.data() + Sha3_256::kByteOutputLength - 8, 8));
+    return DAWN_UNSAFE_TODO(
+        absl::HashOf(absl::MakeSpan(key.data(), 8),
+                     absl::MakeSpan(key.data() + Sha3_256::kByteOutputLength - 8, 8)));
 }
 bool Sha3CacheFuncs::operator()(const Sha3_256::Output& a, const Sha3_256::Output& b) const {
-    return std::memcmp(a.data(), b.data(), sizeof(Sha3_256::Output)) == 0;
+    return DAWN_UNSAFE_TODO(std::memcmp(a.data(), b.data(), sizeof(Sha3_256::Output))) == 0;
 }
 
 namespace {
