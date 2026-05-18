@@ -39,18 +39,18 @@ namespace dawn::replay {
 class SurfaceDiscoveryVisitor : public RootCommandVisitor {
   public:
     using RootCommandVisitor::operator();
-    MaybeError operator()(const schema::RootCommandSurfaceConfigureCmdData& data) override;
-    MaybeError operator()(const schema::RootCommandSurfaceUnconfigureCmdData& data) override;
-    MaybeError operator()(const schema::RootCommandSurfacePresentCmdData& data) override;
-    MaybeError operator()(const schema::RootCommandSurfaceGetCurrentTextureCmdData& data) override;
-    MaybeError operator()(const schema::RootCommandSetLabelCmdData& data) override;
+    VisitResult operator()(const schema::RootCommandSurfaceConfigureCmdData& data) override;
+    VisitResult operator()(const schema::RootCommandSurfaceUnconfigureCmdData& data) override;
+    VisitResult operator()(const schema::RootCommandSurfacePresentCmdData& data) override;
+    VisitResult operator()(const schema::RootCommandSurfaceGetCurrentTextureCmdData& data) override;
+    VisitResult operator()(const schema::RootCommandSetLabelCmdData& data) override;
 
-    MaybeError operator()(const CreateResourceData& data) override;
-    MaybeError operator()(const schema::RootCommandWriteBufferCmdData& data) override;
-    MaybeError operator()(const schema::RootCommandWriteTextureCmdData& data) override;
-    MaybeError operator()(const schema::RootCommandQueueSubmitCmdData& data) override;
-    MaybeError operator()(const schema::RootCommandInitTextureCmdData& data) override;
-    MaybeError operator()(const schema::RootCommandEndCmdData& data) override;
+    VisitResult operator()(const CreateResourceData& data) override;
+    VisitResult operator()(const schema::RootCommandWriteBufferCmdData& data) override;
+    VisitResult operator()(const schema::RootCommandWriteTextureCmdData& data) override;
+    VisitResult operator()(const schema::RootCommandQueueSubmitCmdData& data) override;
+    VisitResult operator()(const schema::RootCommandInitTextureCmdData& data) override;
+    VisitResult operator()(const schema::RootCommandEndCmdData& data) override;
 
     ResourceVisitor& GetResourceVisitor() override;
     void SetContentReadHead(ReadHead* readHead) override;
@@ -63,21 +63,21 @@ class SurfaceDiscoveryVisitor : public RootCommandVisitor {
         using ResourceVisitor::operator();
 
         template <typename T>
-        MaybeError SkipResourceData(const T& data) {
+        VisitResult SkipResourceData(const T& data) {
             if constexpr (std::is_same_v<T, CommandBufferData>) {
                 return SkipEncoderCommands(data.readHead);
             } else if constexpr (std::is_same_v<T, RenderBundleData>) {
                 return SkipRenderBundleCommands(data.readHead);
             } else {
-                return {};
+                return VisitStatus::Continue;
             }
         }
 
 #define DAWN_REPLAY_RESOURCE_VISITOR_OVERRIDE(ENUM, TYPE) \
-    MaybeError operator()(const TYPE& data) override { return SkipResourceData(data); }
+    VisitResult operator()(const TYPE& data) override { return SkipResourceData(data); }
         DAWN_REPLAY_RESOURCE_DATA_MAP(DAWN_REPLAY_RESOURCE_VISITOR_OVERRIDE)
 #undef DAWN_REPLAY_RESOURCE_VISITOR_OVERRIDE
-        MaybeError operator()(const std::monostate&) override { return {}; }
+        VisitResult operator()(const std::monostate&) override { return VisitStatus::Continue; }
     };
 
     NoopResourceVisitor mResourceVisitor;

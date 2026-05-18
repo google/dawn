@@ -32,60 +32,61 @@
 
 namespace dawn::replay {
 
-MaybeError SurfaceDiscoveryVisitor::operator()(
+VisitResult SurfaceDiscoveryVisitor::operator()(
     const schema::RootCommandSurfaceConfigureCmdData& data) {
     auto& info = mSurfaceInfos[data.surfaceId];
     info.width = data.config.width;
     info.height = data.config.height;
-    return {};
+    return VisitStatus::Continue;
 }
 
-MaybeError SurfaceDiscoveryVisitor::operator()(
+VisitResult SurfaceDiscoveryVisitor::operator()(
     const schema::RootCommandSurfaceUnconfigureCmdData& data) {
     mSurfaceInfos.try_emplace(data.surfaceId);
-    return {};
+    return VisitStatus::Continue;
 }
 
-MaybeError SurfaceDiscoveryVisitor::operator()(
+VisitResult SurfaceDiscoveryVisitor::operator()(
     const schema::RootCommandSurfacePresentCmdData& data) {
     mSurfaceInfos.try_emplace(data.surfaceId);
-    return {};
+    return VisitStatus::Continue;
 }
 
-MaybeError SurfaceDiscoveryVisitor::operator()(
+VisitResult SurfaceDiscoveryVisitor::operator()(
     const schema::RootCommandSurfaceGetCurrentTextureCmdData& data) {
     mSurfaceInfos.try_emplace(data.surfaceId);
-    return {};
+    return VisitStatus::Continue;
 }
 
-MaybeError SurfaceDiscoveryVisitor::operator()(const schema::RootCommandSetLabelCmdData& data) {
+VisitResult SurfaceDiscoveryVisitor::operator()(const schema::RootCommandSetLabelCmdData& data) {
     if (data.type == schema::ObjectType::Surface) {
         mSurfaceInfos.try_emplace(data.id);
     }
-    return {};
+    return VisitStatus::Continue;
 }
 
-MaybeError SurfaceDiscoveryVisitor::operator()(const CreateResourceData& data) {
+VisitResult SurfaceDiscoveryVisitor::operator()(const CreateResourceData& data) {
     if (data.resource.type == schema::ObjectType::Surface) {
         mSurfaceInfos.try_emplace(data.resource.id);
     }
     return std::visit(mResourceVisitor, data.data);
 }
 
-MaybeError SurfaceDiscoveryVisitor::operator()(const schema::RootCommandWriteBufferCmdData& data) {
-    return {};
+VisitResult SurfaceDiscoveryVisitor::operator()(const schema::RootCommandWriteBufferCmdData& data) {
+    return VisitStatus::Continue;
 }
-MaybeError SurfaceDiscoveryVisitor::operator()(const schema::RootCommandWriteTextureCmdData& data) {
-    return {};
+VisitResult SurfaceDiscoveryVisitor::operator()(
+    const schema::RootCommandWriteTextureCmdData& data) {
+    return VisitStatus::Continue;
 }
-MaybeError SurfaceDiscoveryVisitor::operator()(const schema::RootCommandQueueSubmitCmdData& data) {
-    return {};
+VisitResult SurfaceDiscoveryVisitor::operator()(const schema::RootCommandQueueSubmitCmdData& data) {
+    return VisitStatus::Continue;
 }
-MaybeError SurfaceDiscoveryVisitor::operator()(const schema::RootCommandInitTextureCmdData& data) {
-    return {};
+VisitResult SurfaceDiscoveryVisitor::operator()(const schema::RootCommandInitTextureCmdData& data) {
+    return VisitStatus::Continue;
 }
-MaybeError SurfaceDiscoveryVisitor::operator()(const schema::RootCommandEndCmdData& data) {
-    return {};
+VisitResult SurfaceDiscoveryVisitor::operator()(const schema::RootCommandEndCmdData& data) {
+    return VisitStatus::Continue;
 }
 
 ResourceVisitor& SurfaceDiscoveryVisitor::GetResourceVisitor() {

@@ -44,51 +44,53 @@ using testing::ElementsAre;
 
 class MockResourceVisitor : public ResourceVisitor {
   public:
-    MaybeError operator()(const BindGroupData&) override { return VisitBindGroup(); }
-    MaybeError operator()(const BindGroupLayoutData&) override { return VisitBindGroupLayout(); }
-    MaybeError operator()(const schema::Buffer&) override { return VisitBuffer(); }
-    MaybeError operator()(const CommandBufferData& data) override {
+    VisitResult operator()(const BindGroupData&) override { return VisitBindGroup(); }
+    VisitResult operator()(const BindGroupLayoutData&) override { return VisitBindGroupLayout(); }
+    VisitResult operator()(const schema::Buffer&) override { return VisitBuffer(); }
+    VisitResult operator()(const CommandBufferData& data) override {
         return VisitCommandBuffer(data);
     }
-    MaybeError operator()(const schema::ComputePipeline&) override {
+    VisitResult operator()(const schema::ComputePipeline&) override {
         return VisitComputePipeline();
     }
-    MaybeError operator()(const DeviceData&) override { return VisitDevice(); }
-    MaybeError operator()(const schema::ExternalTexture&) override {
+    VisitResult operator()(const DeviceData&) override { return VisitDevice(); }
+    VisitResult operator()(const schema::ExternalTexture&) override {
         return VisitExternalTexture();
     }
-    MaybeError operator()(const schema::PipelineLayout&) override { return VisitPipelineLayout(); }
-    MaybeError operator()(const schema::QuerySet&) override { return VisitQuerySet(); }
-    MaybeError operator()(const RenderBundleData& data) override { return VisitRenderBundle(data); }
-    MaybeError operator()(const schema::RenderPipeline&) override { return VisitRenderPipeline(); }
-    MaybeError operator()(const schema::Sampler&) override { return VisitSampler(); }
-    MaybeError operator()(const schema::ShaderModule&) override { return VisitShaderModule(); }
-    MaybeError operator()(const InvalidData&) override { return VisitInvalid(); }
-    MaybeError operator()(const schema::TexelBufferView&) override {
+    VisitResult operator()(const schema::PipelineLayout&) override { return VisitPipelineLayout(); }
+    VisitResult operator()(const schema::QuerySet&) override { return VisitQuerySet(); }
+    VisitResult operator()(const RenderBundleData& data) override {
+        return VisitRenderBundle(data);
+    }
+    VisitResult operator()(const schema::RenderPipeline&) override { return VisitRenderPipeline(); }
+    VisitResult operator()(const schema::Sampler&) override { return VisitSampler(); }
+    VisitResult operator()(const schema::ShaderModule&) override { return VisitShaderModule(); }
+    VisitResult operator()(const InvalidData&) override { return VisitInvalid(); }
+    VisitResult operator()(const schema::TexelBufferView&) override {
         return VisitTexelBufferView();
     }
-    MaybeError operator()(const schema::Texture&) override { return VisitTexture(); }
-    MaybeError operator()(const schema::TextureView&) override { return VisitTextureView(); }
-    MaybeError operator()(const std::monostate&) override { return VisitMonostate(); }
+    VisitResult operator()(const schema::Texture&) override { return VisitTexture(); }
+    VisitResult operator()(const schema::TextureView&) override { return VisitTextureView(); }
+    VisitResult operator()(const std::monostate&) override { return VisitMonostate(); }
 
-    MOCK_METHOD(MaybeError, VisitBindGroup, ());
-    MOCK_METHOD(MaybeError, VisitBindGroupLayout, ());
-    MOCK_METHOD(MaybeError, VisitBuffer, ());
-    MOCK_METHOD(MaybeError, VisitCommandBuffer, (const CommandBufferData&));
-    MOCK_METHOD(MaybeError, VisitComputePipeline, ());
-    MOCK_METHOD(MaybeError, VisitDevice, ());
-    MOCK_METHOD(MaybeError, VisitExternalTexture, ());
-    MOCK_METHOD(MaybeError, VisitPipelineLayout, ());
-    MOCK_METHOD(MaybeError, VisitQuerySet, ());
-    MOCK_METHOD(MaybeError, VisitRenderBundle, (const RenderBundleData&));
-    MOCK_METHOD(MaybeError, VisitRenderPipeline, ());
-    MOCK_METHOD(MaybeError, VisitSampler, ());
-    MOCK_METHOD(MaybeError, VisitShaderModule, ());
-    MOCK_METHOD(MaybeError, VisitInvalid, ());
-    MOCK_METHOD(MaybeError, VisitTexelBufferView, ());
-    MOCK_METHOD(MaybeError, VisitTexture, ());
-    MOCK_METHOD(MaybeError, VisitTextureView, ());
-    MOCK_METHOD(MaybeError, VisitMonostate, ());
+    MOCK_METHOD(VisitResult, VisitBindGroup, ());
+    MOCK_METHOD(VisitResult, VisitBindGroupLayout, ());
+    MOCK_METHOD(VisitResult, VisitBuffer, ());
+    MOCK_METHOD(VisitResult, VisitCommandBuffer, (const CommandBufferData&));
+    MOCK_METHOD(VisitResult, VisitComputePipeline, ());
+    MOCK_METHOD(VisitResult, VisitDevice, ());
+    MOCK_METHOD(VisitResult, VisitExternalTexture, ());
+    MOCK_METHOD(VisitResult, VisitPipelineLayout, ());
+    MOCK_METHOD(VisitResult, VisitQuerySet, ());
+    MOCK_METHOD(VisitResult, VisitRenderBundle, (const RenderBundleData&));
+    MOCK_METHOD(VisitResult, VisitRenderPipeline, ());
+    MOCK_METHOD(VisitResult, VisitSampler, ());
+    MOCK_METHOD(VisitResult, VisitShaderModule, ());
+    MOCK_METHOD(VisitResult, VisitInvalid, ());
+    MOCK_METHOD(VisitResult, VisitTexelBufferView, ());
+    MOCK_METHOD(VisitResult, VisitTexture, ());
+    MOCK_METHOD(VisitResult, VisitTextureView, ());
+    MOCK_METHOD(VisitResult, VisitMonostate, ());
 };
 
 class MockRootCommandVisitor : public RootCommandVisitor {
@@ -96,63 +98,64 @@ class MockRootCommandVisitor : public RootCommandVisitor {
     MOCK_METHOD(void, SetContentReadHead, (ReadHead * readHead), (override));
     MOCK_METHOD(ResourceVisitor&, GetResourceVisitor, (), (override));
 
-    MaybeError operator()(const CreateResourceData& data) override {
+    VisitResult operator()(const CreateResourceData& data) override {
         return VisitCreateResource(data);
     }
-    MaybeError operator()(const schema::RootCommandWriteBufferCmdData& data) override {
+    VisitResult operator()(const schema::RootCommandWriteBufferCmdData& data) override {
         return VisitWriteBuffer(data);
     }
-    MaybeError operator()(const schema::RootCommandWriteTextureCmdData& data) override {
+    VisitResult operator()(const schema::RootCommandWriteTextureCmdData& data) override {
         return VisitWriteTexture(data);
     }
-    MaybeError operator()(const schema::RootCommandQueueSubmitCmdData& data) override {
+    VisitResult operator()(const schema::RootCommandQueueSubmitCmdData& data) override {
         return VisitQueueSubmit(data);
     }
-    MaybeError operator()(const schema::RootCommandSetLabelCmdData& data) override {
+    VisitResult operator()(const schema::RootCommandSetLabelCmdData& data) override {
         return VisitSetLabel(data);
     }
-    MaybeError operator()(const schema::RootCommandInitTextureCmdData& data) override {
+    VisitResult operator()(const schema::RootCommandInitTextureCmdData& data) override {
         return VisitInitTexture(data);
     }
-    MaybeError operator()(const schema::RootCommandSurfaceConfigureCmdData& data) override {
+    VisitResult operator()(const schema::RootCommandSurfaceConfigureCmdData& data) override {
         return VisitSurfaceConfigure(data);
     }
-    MaybeError operator()(const schema::RootCommandSurfaceUnconfigureCmdData& data) override {
+    VisitResult operator()(const schema::RootCommandSurfaceUnconfigureCmdData& data) override {
         return VisitSurfaceUnconfigure(data);
     }
-    MaybeError operator()(const schema::RootCommandSurfacePresentCmdData& data) override {
+    VisitResult operator()(const schema::RootCommandSurfacePresentCmdData& data) override {
         return VisitSurfacePresent(data);
     }
-    MaybeError operator()(const schema::RootCommandSurfaceGetCurrentTextureCmdData& data) override {
+    VisitResult operator()(
+        const schema::RootCommandSurfaceGetCurrentTextureCmdData& data) override {
         return VisitSurfaceGetCurrentTexture(data);
     }
-    MaybeError operator()(const schema::RootCommandEndCmdData& data) override {
+    VisitResult operator()(const schema::RootCommandEndCmdData& data) override {
         return VisitEnd(data);
     }
-    MaybeError operator()(const std::monostate& data) override { return VisitMonostate(data); }
+    VisitResult operator()(const std::monostate& data) override { return VisitMonostate(data); }
 
-    MOCK_METHOD(MaybeError, VisitCreateResource, (const CreateResourceData& data));
-    MOCK_METHOD(MaybeError, VisitWriteBuffer, (const schema::RootCommandWriteBufferCmdData& data));
-    MOCK_METHOD(MaybeError,
+    MOCK_METHOD(VisitResult, VisitCreateResource, (const CreateResourceData& data));
+    MOCK_METHOD(VisitResult, VisitWriteBuffer, (const schema::RootCommandWriteBufferCmdData& data));
+    MOCK_METHOD(VisitResult,
                 VisitWriteTexture,
                 (const schema::RootCommandWriteTextureCmdData& data));
-    MOCK_METHOD(MaybeError, VisitQueueSubmit, (const schema::RootCommandQueueSubmitCmdData& data));
-    MOCK_METHOD(MaybeError, VisitSetLabel, (const schema::RootCommandSetLabelCmdData& data));
-    MOCK_METHOD(MaybeError, VisitInitTexture, (const schema::RootCommandInitTextureCmdData& data));
-    MOCK_METHOD(MaybeError,
+    MOCK_METHOD(VisitResult, VisitQueueSubmit, (const schema::RootCommandQueueSubmitCmdData& data));
+    MOCK_METHOD(VisitResult, VisitSetLabel, (const schema::RootCommandSetLabelCmdData& data));
+    MOCK_METHOD(VisitResult, VisitInitTexture, (const schema::RootCommandInitTextureCmdData& data));
+    MOCK_METHOD(VisitResult,
                 VisitSurfaceConfigure,
                 (const schema::RootCommandSurfaceConfigureCmdData& data));
-    MOCK_METHOD(MaybeError,
+    MOCK_METHOD(VisitResult,
                 VisitSurfaceUnconfigure,
                 (const schema::RootCommandSurfaceUnconfigureCmdData& data));
-    MOCK_METHOD(MaybeError,
+    MOCK_METHOD(VisitResult,
                 VisitSurfacePresent,
                 (const schema::RootCommandSurfacePresentCmdData& data));
-    MOCK_METHOD(MaybeError,
+    MOCK_METHOD(VisitResult,
                 VisitSurfaceGetCurrentTexture,
                 (const schema::RootCommandSurfaceGetCurrentTextureCmdData& data));
-    MOCK_METHOD(MaybeError, VisitEnd, (const schema::RootCommandEndCmdData& data));
-    MOCK_METHOD(MaybeError, VisitMonostate, (const std::monostate&));
+    MOCK_METHOD(VisitResult, VisitEnd, (const schema::RootCommandEndCmdData& data));
+    MOCK_METHOD(VisitResult, VisitMonostate, (const std::monostate&));
 };
 
 class TestCaptureWalker : public CaptureWalker {

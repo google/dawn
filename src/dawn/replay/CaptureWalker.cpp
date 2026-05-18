@@ -36,6 +36,17 @@
 
 namespace dawn::replay {
 
+#define VISIT_TRY(expr)                                    \
+    {                                                      \
+        VisitStatus DAWN_LOCAL_VAR(status);                \
+        DAWN_TRY_ASSIGN(DAWN_LOCAL_VAR(status), expr);     \
+        if (DAWN_LOCAL_VAR(status) == VisitStatus::Stop) { \
+            return VisitStatus::Stop;                      \
+        }                                                  \
+    }                                                      \
+    for (;;)                                               \
+    break
+
 namespace {
 
 // These x-macros use DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES which
@@ -195,26 +206,26 @@ MaybeError DeserializeRootCommand(ReadHead& readHead,
     case schema::CommandBufferCommand::NAME: {                                    \
         schema::CommandBufferCommand##NAME##CmdData data;                         \
         DAWN_TRY(Deserialize(*readHead, &data));                                  \
-        DAWN_TRY((*visitor)(data));                                               \
+        VISIT_TRY((*visitor)(data));                                              \
         if constexpr (std::is_same_v<schema::CommandBufferCommand##NAME##CmdData, \
                                      schema::CommandBufferCommandEndCmdData>) {   \
-            return {};                                                            \
+            return VisitStatus::Continue;                                         \
         }                                                                         \
         break;                                                                    \
     }
 
-#define PROCESS_COMMANDS_FUNC(PASS_NAME, COMMANDS)                                             \
-    MaybeError Process##PASS_NAME##Commands(ReadHead* readHead, PASS_NAME##Visitor* visitor) { \
-        while (!readHead->IsDone()) {                                                          \
-            schema::CommandBufferCommand cmd;                                                  \
-            DAWN_TRY(Deserialize(*readHead, &cmd));                                            \
-            switch (cmd) {                                                                     \
-                COMMANDS(PASS_COMMAND_CASE)                                                    \
-                default:                                                                       \
-                    return DAWN_INTERNAL_ERROR("unhandled " #PASS_NAME " command");            \
-            }                                                                                  \
-        }                                                                                      \
-        return DAWN_INTERNAL_ERROR("Missing " #PASS_NAME " End command");                      \
+#define PROCESS_COMMANDS_FUNC(PASS_NAME, COMMANDS)                                              \
+    VisitResult Process##PASS_NAME##Commands(ReadHead* readHead, PASS_NAME##Visitor* visitor) { \
+        while (!readHead->IsDone()) {                                                           \
+            schema::CommandBufferCommand cmd;                                                   \
+            DAWN_TRY(Deserialize(*readHead, &cmd));                                             \
+            switch (cmd) {                                                                      \
+                COMMANDS(PASS_COMMAND_CASE)                                                     \
+                default:                                                                        \
+                    return DAWN_INTERNAL_ERROR("unhandled " #PASS_NAME " command");             \
+            }                                                                                   \
+        }                                                                                       \
+        return DAWN_INTERNAL_ERROR("Missing " #PASS_NAME " End command");                       \
     }
 
 PROCESS_COMMANDS_FUNC(ComputePass, DAWN_REPLAY_COMPUTE_PASS_COMMANDS)
@@ -227,27 +238,27 @@ PROCESS_COMMANDS_FUNC(RenderBundle, DAWN_REPLAY_RENDER_BUNDLE_COMMANDS)
 namespace {
 
 struct NoopComputePassVisitor : ComputePassVisitor {
-#define VISITOR_METHOD(NAME)                                                                  \
-    MaybeError operator()(const schema::CommandBufferCommand##NAME##CmdData& data) override { \
-        return {};                                                                            \
+#define VISITOR_METHOD(NAME)                                                                   \
+    VisitResult operator()(const schema::CommandBufferCommand##NAME##CmdData& data) override { \
+        return VisitStatus::Continue;                                                          \
     }
     DAWN_REPLAY_COMPUTE_PASS_COMMANDS(VISITOR_METHOD)
 #undef VISITOR_METHOD
 };
 
 struct NoopRenderPassVisitor : RenderPassVisitor {
-#define VISITOR_METHOD(NAME)                                                                  \
-    MaybeError operator()(const schema::CommandBufferCommand##NAME##CmdData& data) override { \
-        return {};                                                                            \
+#define VISITOR_METHOD(NAME)                                                                   \
+    VisitResult operator()(const schema::CommandBufferCommand##NAME##CmdData& data) override { \
+        return VisitStatus::Continue;                                                          \
     }
     DAWN_REPLAY_RENDER_PASS_COMMANDS(VISITOR_METHOD)
 #undef VISITOR_METHOD
 };
 
 struct NoopRenderBundleVisitor : RenderBundleVisitor {
-#define VISITOR_METHOD(NAME)                                                                  \
-    MaybeError operator()(const schema::CommandBufferCommand##NAME##CmdData& data) override { \
-        return {};                                                                            \
+#define VISITOR_METHOD(NAME)                                                                   \
+    VisitResult operator()(const schema::CommandBufferCommand##NAME##CmdData& data) override { \
+        return VisitStatus::Continue;                                                          \
     }
     DAWN_REPLAY_RENDER_BUNDLE_COMMANDS(VISITOR_METHOD)
 #undef VISITOR_METHOD
@@ -263,9 +274,9 @@ struct NoopEncoderVisitor : EncoderVisitor {
         return &mRenderPassVisitor;
     }
 
-#define VISITOR_METHOD(NAME)                                                                  \
-    MaybeError operator()(const schema::CommandBufferCommand##NAME##CmdData& data) override { \
-        return {};                                                                            \
+#define VISITOR_METHOD(NAME)                                                                   \
+    VisitResult operator()(const schema::CommandBufferCommand##NAME##CmdData& data) override { \
+        return VisitStatus::Continue;                                                          \
     }
     DAWN_REPLAY_ENCODER_NON_CREATION_COMMANDS(VISITOR_METHOD)
 #undef VISITOR_METHOD
@@ -277,17 +288,17 @@ struct NoopEncoderVisitor : EncoderVisitor {
 
 }  // anonymous namespace
 
-MaybeError SkipEncoderCommands(ReadHead* readHead) {
+VisitResult SkipEncoderCommands(ReadHead* readHead) {
     NoopEncoderVisitor visitor;
     return ProcessEncoderCommands(readHead, &visitor);
 }
 
-MaybeError SkipRenderBundleCommands(ReadHead* readHead) {
+VisitResult SkipRenderBundleCommands(ReadHead* readHead) {
     NoopRenderBundleVisitor visitor;
     return ProcessRenderBundleCommands(readHead, &visitor);
 }
 
-MaybeError ProcessEncoderCommands(ReadHead* readHead, EncoderVisitor* visitor) {
+VisitResult ProcessEncoderCommands(ReadHead* readHead, EncoderVisitor* visitor) {
     while (!readHead->IsDone()) {
         schema::CommandBufferCommand cmd;
         DAWN_TRY(Deserialize(*readHead, &cmd));
@@ -298,7 +309,7 @@ MaybeError ProcessEncoderCommands(ReadHead* readHead, EncoderVisitor* visitor) {
                 DAWN_TRY(Deserialize(*readHead, &data));
                 ComputePassVisitor* subVisitor;
                 DAWN_TRY_ASSIGN(subVisitor, visitor->BeginComputePass(data));
-                DAWN_TRY(ProcessComputePassCommands(readHead, subVisitor));
+                VISIT_TRY(ProcessComputePassCommands(readHead, subVisitor));
                 break;
             }
             case schema::CommandBufferCommand::BeginRenderPass: {
@@ -306,7 +317,7 @@ MaybeError ProcessEncoderCommands(ReadHead* readHead, EncoderVisitor* visitor) {
                 DAWN_TRY(Deserialize(*readHead, &data));
                 RenderPassVisitor* subVisitor;
                 DAWN_TRY_ASSIGN(subVisitor, visitor->BeginRenderPass(data));
-                DAWN_TRY(ProcessRenderPassCommands(readHead, subVisitor));
+                VISIT_TRY(ProcessRenderPassCommands(readHead, subVisitor));
                 break;
             }
 
@@ -314,10 +325,10 @@ MaybeError ProcessEncoderCommands(ReadHead* readHead, EncoderVisitor* visitor) {
     case schema::CommandBufferCommand::NAME: {                                    \
         schema::CommandBufferCommand##NAME##CmdData data;                         \
         DAWN_TRY(Deserialize(*readHead, &data));                                  \
-        DAWN_TRY((*visitor)(data));                                               \
+        VISIT_TRY((*visitor)(data));                                              \
         if constexpr (std::is_same_v<schema::CommandBufferCommand##NAME##CmdData, \
                                      schema::CommandBufferCommandEndCmdData>) {   \
-            return {};                                                            \
+            return VisitStatus::Continue;                                         \
         }                                                                         \
         break;                                                                    \
     }
@@ -332,34 +343,53 @@ MaybeError ProcessEncoderCommands(ReadHead* readHead, EncoderVisitor* visitor) {
     return DAWN_INTERNAL_ERROR("Missing encoder End command");
 }
 
-MaybeError ResourceVisitor::operator()(const InvalidData& data) {
-    return DAWN_INTERNAL_ERROR("Invalid resource data");
-}
+#define DAWN_REPLAY_RESOURCE_VISITOR_DEF(ENUM, TYPE)                     \
+    VisitResult ResourceVisitor::operator()(const TYPE& data) {          \
+        if constexpr (std::is_same_v<TYPE, InvalidData>) {               \
+            return DAWN_INTERNAL_ERROR("Invalid resource data");         \
+        } else if constexpr (std::is_same_v<TYPE, DeviceData>) {         \
+            return DAWN_INTERNAL_ERROR("Device data not expected here"); \
+        } else {                                                         \
+            return VisitStatus::Continue;                                \
+        }                                                                \
+    }
+DAWN_REPLAY_RESOURCE_DATA_MAP(DAWN_REPLAY_RESOURCE_VISITOR_DEF)
+#undef DAWN_REPLAY_RESOURCE_VISITOR_DEF
 
-MaybeError ResourceVisitor::operator()(const DeviceData& data) {
-    return DAWN_INTERNAL_ERROR("Device data not expected here");
-}
-
-MaybeError ResourceVisitor::operator()(const std::monostate&) {
+VisitResult ResourceVisitor::operator()(const std::monostate&) {
     return DAWN_INTERNAL_ERROR("Invalid resource data (monostate)");
 }
 
-MaybeError RootCommandVisitor::operator()(const std::monostate&) {
+VisitResult RootCommandVisitor::operator()(const CreateResourceData& data) {
+    return std::visit(GetResourceVisitor(), data.data);
+}
+
+VisitResult RootCommandVisitor::operator()(const std::monostate&) {
     return DAWN_INTERNAL_ERROR("Invalid command (monostate)");
 }
 
 MaybeError CaptureWalker::Walk(RootCommandVisitor& visitor) {
     auto readHead = GetCommandReadHead();
     auto contentReadHead = GetContentReadHead();
-    visitor.SetContentReadHead(&contentReadHead);
+    return Walk(visitor, &readHead, &contentReadHead);
+}
 
-    while (!readHead.IsDone()) {
+MaybeError CaptureWalker::Walk(RootCommandVisitor& visitor,
+                               ReadHead* readHead,
+                               ReadHead* contentReadHead) {
+    visitor.SetContentReadHead(contentReadHead);
+
+    while (!readHead->IsDone()) {
         schema::RootCommand cmd;
-        DAWN_TRY(Deserialize(readHead, &cmd));
+        DAWN_TRY(Deserialize(*readHead, &cmd));
 
         RootCommandVariant v;
-        DAWN_TRY(DeserializeRootCommand(readHead, cmd, &v));
-        DAWN_TRY(std::visit(visitor, v));
+        DAWN_TRY(DeserializeRootCommand(*readHead, cmd, &v));
+        VisitStatus status;
+        DAWN_TRY_ASSIGN(status, std::visit(visitor, v));
+        if (status == VisitStatus::Stop) {
+            break;
+        }
     }
 
     return {};

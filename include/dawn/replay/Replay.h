@@ -47,6 +47,12 @@ struct SurfaceInfo {
     uint32_t height;
 };
 
+enum class ReplayStatus {
+    Continuing,
+    Finished,
+    Error,
+};
+
 // The public API of a Capture.
 // In the future it should have calls to get information (e.g. number of commands)
 class DAWN_REPLAY_EXPORT Capture {
@@ -83,6 +89,9 @@ class DAWN_REPLAY_EXPORT Replay {
 
     // Returns if play is successful.
     bool Play();
+
+    // Replays up to the next frame boundary.
+    ReplayStatus PlayFrame();
 };
 
 }  // namespace dawn::replay

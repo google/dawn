@@ -99,6 +99,13 @@ class CaptureAndReplayTests : public DawnTest {
         }
 
         replay::Replay* Replay(wgpu::Device device) {
+            CreateReplay(device);
+            bool result = mReplay->Play();
+            EXPECT_TRUE(result);
+            return mReplay.get();
+        }
+
+        replay::Replay* CreateReplay(wgpu::Device device) {
             if (!mCapture) {
                 EndCapture();
             }
@@ -107,9 +114,6 @@ class CaptureAndReplayTests : public DawnTest {
             if (!mSurfaces.empty()) {
                 mReplay->SetSurfaces(mSurfaces);
             }
-
-            bool result = mReplay->Play();
-            EXPECT_TRUE(result);
             return mReplay.get();
         }
 
@@ -2822,6 +2826,60 @@ TEST_P(CaptureAndReplaySurfaceTests, TestSurface) {
     auto replay = recorder->Replay(device);
 
     EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Texture>("backbuffer") != nullptr);
+
+    // Explicitly reset the recorder object to release all replayed resources (like Surface)
+    // before the test ends and the device count check is performed.
+    recorder.reset();
+}
+
+TEST_P(CaptureAndReplaySurfaceTests, MultiFrame) {
+    wgpu::Surface surface = wgpu::glfw::CreateSurfaceForWindow(instance, mWindow.get());
+    surface.SetLabel("mySurface");
+
+    wgpu::SurfaceConfiguration config = {};
+    config.device = device;
+    config.format = wgpu::TextureFormat::BGRA8Unorm;
+    config.usage = wgpu::TextureUsage::RenderAttachment;
+    config.width = 1;
+    config.height = 1;
+    config.presentMode = wgpu::PresentMode::Fifo;
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+    recorder->SetSurfaces({surface});
+
+    surface.Configure(&config);
+
+    // Frame 1
+    {
+        wgpu::SurfaceTexture surfaceTexture;
+        surface.GetCurrentTexture(&surfaceTexture);
+        surfaceTexture.texture.SetLabel("backbuffer1");
+        surface.Present();
+    }
+
+    // Frame 2
+    {
+        wgpu::SurfaceTexture surfaceTexture;
+        surface.GetCurrentTexture(&surfaceTexture);
+        surfaceTexture.texture.SetLabel("backbuffer2");
+        surface.Present();
+    }
+
+    // --- replay ---
+    auto replay = recorder->CreateReplay(device);
+
+    // Replay Frame 1
+    EXPECT_EQ(replay->PlayFrame(), dawn::replay::ReplayStatus::Continuing);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Texture>("backbuffer1") != nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Texture>("backbuffer2") == nullptr);
+
+    // Replay Frame 2
+    EXPECT_EQ(replay->PlayFrame(), dawn::replay::ReplayStatus::Continuing);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Texture>("backbuffer2") != nullptr);
+
+    // No more frames
+    EXPECT_EQ(replay->PlayFrame(), dawn::replay::ReplayStatus::Finished);
 
     // Explicitly reset the recorder object to release all replayed resources (like Surface)
     // before the test ends and the device count check is performed.

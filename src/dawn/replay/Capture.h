@@ -43,6 +43,7 @@ namespace dawn::replay {
 // have to scan it once to find all the commands for a UI.
 class CaptureImpl : public Capture, public CaptureWalker {
   public:
+    using CaptureWalker::Walk;
     static std::unique_ptr<CaptureImpl> Create(CaptureStream& commandStream,
                                                size_t commandSize,
                                                CaptureStream& contentStream,
@@ -53,7 +54,6 @@ class CaptureImpl : public Capture, public CaptureWalker {
 
     std::vector<SurfaceInfo> GetSurfaceInfos() const override;
 
-  protected:
     ReadHead GetCommandReadHead() const override;
     ReadHead GetContentReadHead() const override;
 

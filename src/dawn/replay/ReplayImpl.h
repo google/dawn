@@ -50,6 +50,8 @@ class ReplayImpl : public Replay {
 
     MaybeError Play();
 
+    ResultOrError<ReplayStatus> PlayFrame();
+
     ~ReplayImpl() override;
 
     void SetSurfaces(std::vector<wgpu::Surface> surfaces) override;
@@ -75,6 +77,9 @@ class ReplayImpl : public Replay {
 
     std::unique_ptr<DawnRootCommandVisitor> mVisitor;
     std::unique_ptr<CaptureImpl> mCapture;
+
+    ReadHead mCommandReadHead;
+    ReadHead mContentReadHead;
 };
 
 }  // namespace dawn::replay
