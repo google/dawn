@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/CommandEncoder.h"
 
 #include <string_view>
@@ -70,6 +65,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -838,7 +834,8 @@ MaybeError ValidateRenderPassPLS(DeviceBase* device,
     absl::InlinedVector<StorageAttachmentInfoForValidation, 4> attachments;
 
     for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-        const RenderPassStorageAttachment& attachment = pls->storageAttachments[i];
+        const RenderPassStorageAttachment& attachment =
+            DAWN_UNSAFE_TODO(pls->storageAttachments[i]);
 
         // Validate the attachment can be used as a storage attachment.
         DAWN_TRY(device->ValidateObject(attachment.storage));
@@ -990,7 +987,8 @@ MaybeError InitializeValidationStateAttachment(DeviceBase* device,
     auto pls = descriptor.Get<RenderPassPixelLocalStorage>();
     if (pls != nullptr && pls->storageAttachmentCount > 0) {
         for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-            const RenderPassStorageAttachment& attachment = pls->storageAttachments[i];
+            const RenderPassStorageAttachment& attachment =
+                DAWN_UNSAFE_TODO(pls->storageAttachments[i]);
             DAWN_TRY(CheckAttachment(attachment.storage));
         }
     }
@@ -1000,7 +998,8 @@ MaybeError InitializeValidationStateAttachment(DeviceBase* device,
     }
 
     for (size_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
-        const RenderPassColorAttachment& colorAttachment = descriptor->colorAttachments[i];
+        const RenderPassColorAttachment& colorAttachment =
+            DAWN_UNSAFE_TODO(descriptor->colorAttachments[i]);
         if (colorAttachment.view != nullptr) {
             DAWN_TRY(CheckAttachment(colorAttachment.view));
             if (colorAttachment.resolveTarget != nullptr) {
@@ -1582,7 +1581,8 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
             if (auto* pls = descriptor.Get<RenderPassPixelLocalStorage>()) {
                 for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-                    const RenderPassStorageAttachment& apiAttachment = pls->storageAttachments[i];
+                    const RenderPassStorageAttachment& apiAttachment =
+                        DAWN_UNSAFE_TODO(pls->storageAttachments[i]);
                     RenderPassStorageAttachmentInfo* attachmentInfo =
                         &cmd->storageAttachments[apiAttachment.offset / kPLSSlotByteSize];
 
@@ -2233,7 +2233,7 @@ void CommandEncoder::APIWriteBuffer(BufferBase* buffer,
             cmd->size = size;
 
             uint8_t* inlinedData = allocator->AllocateData<uint8_t>(size);
-            memcpy(inlinedData, data, size);
+            DAWN_UNSAFE_TODO(memcpy(inlinedData, data, size));
 
             mTopLevelBuffers.insert(buffer);
 

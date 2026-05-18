@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/wire/client/Adapter.h"
 
 #include <memory>
@@ -42,6 +37,7 @@
 #include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/webgpu.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::wire::client {
 namespace {
@@ -172,9 +168,9 @@ void Adapter::SetInfo(const WGPUAdapterInfo* info) {
                 // Make a copy of the heap info in `mMemoryHeapInfo`.
                 const auto* memoryHeapProperties =
                     reinterpret_cast<const WGPUAdapterPropertiesMemoryHeaps*>(chain);
-                mMemoryHeapInfo = {
-                    memoryHeapProperties->heapInfo,
-                    memoryHeapProperties->heapInfo + memoryHeapProperties->heapCount};
+                mMemoryHeapInfo = {memoryHeapProperties->heapInfo,
+                                   DAWN_UNSAFE_TODO(memoryHeapProperties->heapInfo +
+                                                    memoryHeapProperties->heapCount)};
                 break;
             }
             case WGPUSType_AdapterPropertiesD3D: {
@@ -191,9 +187,9 @@ void Adapter::SetInfo(const WGPUAdapterInfo* info) {
                 // Make a copy of the heap info in `mSubgroupMatrixConfigs`.
                 const auto* subgroupMatrixConfigs =
                     reinterpret_cast<const WGPUAdapterPropertiesSubgroupMatrixConfigs*>(chain);
-                mSubgroupMatrixConfigs = {
-                    subgroupMatrixConfigs->configs,
-                    subgroupMatrixConfigs->configs + subgroupMatrixConfigs->configCount};
+                mSubgroupMatrixConfigs = {subgroupMatrixConfigs->configs,
+                                          DAWN_UNSAFE_TODO(subgroupMatrixConfigs->configs +
+                                                           subgroupMatrixConfigs->configCount)};
                 break;
             }
             case WGPUSType_DawnAdapterPropertiesPowerPreference: {
@@ -221,7 +217,8 @@ WGPUStatus Adapter::APIGetInfo(WGPUAdapterInfo* info) const {
                     reinterpret_cast<WGPUAdapterPropertiesMemoryHeaps*>(chain);
                 size_t heapCount = mMemoryHeapInfo.size();
                 auto* heapInfo = new WGPUMemoryHeapInfo[heapCount];
-                memcpy(heapInfo, mMemoryHeapInfo.data(), sizeof(WGPUMemoryHeapInfo) * heapCount);
+                DAWN_UNSAFE_TODO(memcpy(heapInfo, mMemoryHeapInfo.data(),
+                                        sizeof(WGPUMemoryHeapInfo) * heapCount));
                 // Write out the pointer and count to the heap properties out-struct.
                 memoryHeapProperties->heapCount = heapCount;
                 memoryHeapProperties->heapInfo = heapInfo;
@@ -247,8 +244,8 @@ WGPUStatus Adapter::APIGetInfo(WGPUAdapterInfo* info) const {
                     reinterpret_cast<WGPUAdapterPropertiesSubgroupMatrixConfigs*>(chain);
                 size_t configCount = mSubgroupMatrixConfigs.size();
                 auto* configs = new WGPUSubgroupMatrixConfig[configCount];
-                memcpy(configs, mSubgroupMatrixConfigs.data(),
-                       sizeof(WGPUSubgroupMatrixConfig) * configCount);
+                DAWN_UNSAFE_TODO(memcpy(configs, mSubgroupMatrixConfigs.data(),
+                                        sizeof(WGPUSubgroupMatrixConfig) * configCount));
                 // Write out the pointer and count to the subgroup matrix configs out-struct.
                 subgroupMatrixConfigs->configCount = configCount;
                 subgroupMatrixConfigs->configs = configs;
@@ -275,7 +272,7 @@ WGPUStatus Adapter::APIGetInfo(WGPUAdapterInfo* info) const {
 
     auto AddString = [&](const std::string& in, WGPUStringView* out) {
         DAWN_ASSERT(in.length() <= outBuffer.length());
-        memcpy(outBuffer.data(), in.data(), in.length());
+        DAWN_UNSAFE_TODO(memcpy(outBuffer.data(), in.data(), in.length()));
         *out = {outBuffer.data(), in.length()};
         outBuffer = outBuffer.subspan(in.length());
     };

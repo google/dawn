@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <cmath>
 #include <cstdint>
 #include <string>
@@ -40,6 +35,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -254,7 +250,7 @@ fn main(
             }
             // Validate that subgroup_size of all invocation are identical.
             for (uint32_t i = 1; i < mWorkgroupSize; i++) {
-                const uint32_t& outputSubgroupSize = actual[i];
+                const uint32_t& outputSubgroupSize = DAWN_UNSAFE_TODO(actual[i]);
                 if (outputSubgroupSize != outputSubgroupSizeAt0) {
                     testing::AssertionResult result = testing::AssertionFailure()
                                                       << "Got inconsistent subgroup_size output: "
@@ -658,7 +654,7 @@ fn main(
             uint32_t valueFromInvocation0Count = 0;
             uint32_t valueFromOtherInvocationCount = 0;
             for (uint32_t i = 0; i < mWorkgroupSize; i++) {
-                int32_t broadcastOutput = actual[i + 1];
+                int32_t broadcastOutput = DAWN_UNSAFE_TODO(actual[i + 1]);
                 if (broadcastOutput == valueFromInvocation0) {
                     valueFromInvocation0Count++;
                 } else if (broadcastOutput == SubgroupRegisterInitializer) {
@@ -869,18 +865,19 @@ fn main(
                                          : kValueInShader;
             float expected_value = init_value;
             for (uint32_t i = 0; i < mWorkgroupSize; i++) {
-                if (!approximate_f(actual[i], expected_value)) {
+                if (!approximate_f(DAWN_UNSAFE_TODO(actual[i]), expected_value)) {
                     // This could be the next subgroup so retest with the initial value.
                     float old_expected_value = expected_value;
                     expected_value = init_value;
-                    if (!approximate_f(actual[i], expected_value)) {
+                    if (!approximate_f(DAWN_UNSAFE_TODO(actual[i]), expected_value)) {
                         testing::AssertionResult result =
                             testing::AssertionFailure()
                             << "Unexpected result for " << GetParam().mSubgroupIntrinsicOp
                             << " for type " << GetParam().mSubgroupOpDataType << " for element "
                             << i << " of a workgroup size of " << mWorkgroupSize
-                            << ". The actual value was " << actual[i] << " and the expected was "
-                            << expected_value << " or " << old_expected_value;
+                            << ". The actual value was " << DAWN_UNSAFE_TODO(actual[i])
+                            << " and the expected was " << expected_value << " or "
+                            << old_expected_value;
 
                         return result;
                     }

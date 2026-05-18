@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/BindGroup.h"
 
 #include <algorithm>
@@ -55,6 +50,7 @@
 #include "dawn/native/TexelBufferView.h"
 #include "dawn/native/Texture.h"
 #include "dawn/native/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -426,8 +422,8 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
     // against their static sampler (if they are used with the static sampler).
     absl::flat_hash_map<BindingIndex, uint32_t> textureIndexToEntryIndex;
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        APIBindingIndex apiIndex =
-            layout->GetBindingMap().at(BindingNumber(descriptor->entries[i].binding));
+        APIBindingIndex apiIndex = layout->GetBindingMap().at(
+            BindingNumber(DAWN_UNSAFE_TODO(descriptor->entries[i]).binding));
         const auto& bindingInfo = layout->GetAPIBindingInfo(apiIndex);
         if (std::holds_alternative<TextureBindingInfo>(bindingInfo.bindingLayout)) {
             textureIndexToEntryIndex[layout->AsBindingIndex(apiIndex)] = i;
@@ -448,7 +444,8 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
             textureIndexToEntryIndex.at(staticSamplerLayout.sampledTextureIndex);
 
         const SamplerBase* sampler = staticSamplerLayout.sampler.Get();
-        const TextureViewBase* textureView = descriptor->entries[textureEntryIndex].textureView;
+        const TextureViewBase* textureView =
+            DAWN_UNSAFE_TODO(descriptor->entries[textureEntryIndex]).textureView;
 
         // Compare static sampler and sampled textures to make sure they are compatible.
         if (sampler->IsYCbCr()) {
@@ -481,7 +478,7 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
     // Validate that all YCbCr texture entries are sampled by a static sampler.
     const auto& bindingMap = layout->GetBindingMap();
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        const BindGroupEntry& entry = descriptor->entries[i];
+        const BindGroupEntry& entry = DAWN_UNSAFE_TODO(descriptor->entries[i]);
         const BindingInfo& bindingInfo =
             layout->GetAPIBindingInfo(bindingMap.at(BindingNumber(entry.binding)));
         if (std::holds_alternative<TextureBindingInfo>(bindingInfo.bindingLayout) &&
@@ -514,7 +511,7 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
     // stack is a bit much.
     ityp::bitset<BindingNumber, kMaxBindingsPerBindGroup> bindingsSet;
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        const BindGroupEntry& entry = descriptor->entries[i];
+        const BindGroupEntry& entry = DAWN_UNSAFE_TODO(descriptor->entries[i]);
         BindingNumber binding = BindingNumber(entry.binding);
 
         // Check that the entry exists in the BGL and get its info.
@@ -632,7 +629,7 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
 
     // Gather bindings.
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        UnpackedPtr<BindGroupEntry> entry = Unpack(&descriptor->entries[i]);
+        UnpackedPtr<BindGroupEntry> entry = Unpack(&DAWN_UNSAFE_TODO(descriptor->entries[i]));
         BindingNumber binding = BindingNumber(entry->binding);
         APIBindingIndex apiBindingIndex = layout->GetAPIBindingIndex(binding);
 

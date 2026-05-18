@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/vulkan/CommandBufferVk.h"
 
 #include <algorithm>
@@ -71,6 +66,7 @@
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan {
 
@@ -554,7 +550,7 @@ VkClearValue ToVkClearValue(dawn::native::Color clearColor, TextureComponentType
         case TextureComponentType::Float: {
             const std::array<float, 4> appliedClearColor = ConvertToFloatColor(clearColor);
             for (uint32_t j = 0; j < 4; ++j) {
-                clearValue.color.float32[j] = appliedClearColor[j];
+                DAWN_UNSAFE_TODO(clearValue.color.float32[j]) = appliedClearColor[j];
             }
             break;
         }
@@ -562,7 +558,7 @@ VkClearValue ToVkClearValue(dawn::native::Color clearColor, TextureComponentType
             const std::array<uint32_t, 4> appliedClearColor =
                 ConvertToUnsignedIntegerColor(clearColor);
             for (uint32_t j = 0; j < 4; ++j) {
-                clearValue.color.uint32[j] = appliedClearColor[j];
+                DAWN_UNSAFE_TODO(clearValue.color.uint32[j]) = appliedClearColor[j];
             }
             break;
         }
@@ -570,7 +566,7 @@ VkClearValue ToVkClearValue(dawn::native::Color clearColor, TextureComponentType
             const std::array<int32_t, 4> appliedClearColor =
                 ConvertToSignedIntegerColor(clearColor);
             for (uint32_t j = 0; j < 4; ++j) {
-                clearValue.color.int32[j] = appliedClearColor[j];
+                DAWN_UNSAFE_TODO(clearValue.color.int32[j]) = appliedClearColor[j];
             }
             break;
         }
@@ -1467,7 +1463,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
 
-                DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+                DAWN_UNSAFE_TODO(DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
                     size, kCopyBufferToBufferOffsetAlignment,
                     [&](UploadReservation reservation) -> MaybeError {
                         memcpy(reservation.mappedPointer, data, size);
@@ -1485,7 +1481,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                                                  ToBackend(reservation.buffer)->GetHandle(),
                                                  dstBuffer->GetHandle(), 1, &copy);
                         return {};
-                    }));
+                    })));
                 break;
             }
 
@@ -2051,7 +2047,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 auto bundles = mCommands.NextData<Ref<RenderBundleBase>>(cmd->count);
 
                 for (uint32_t i = 0; i < cmd->count; ++i) {
-                    CommandIterator* iter = bundles[i]->GetCommands();
+                    CommandIterator* iter = DAWN_UNSAFE_TODO(bundles[i])->GetCommands();
                     iter->Reset();
                     while (iter->NextCommandId(&type)) {
                         DAWN_TRY(EncodeRenderBundleCommand(iter, type));

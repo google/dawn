@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/vulkan/external_memory/MemoryServiceImplementationDmaBuf.h"
 
 #include <vector>
@@ -42,6 +37,7 @@
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/native/vulkan/external_memory/MemoryServiceImplementation.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan::external_memory {
 
@@ -355,11 +351,14 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
 
         VkSubresourceLayout planeLayouts[ExternalImageDescriptorDmaBuf::kMaxPlanes];
         for (uint32_t plane = 0u; plane < planeCount; ++plane) {
-            planeLayouts[plane].offset = dmaBufDescriptor->planeLayouts[plane].offset;
-            planeLayouts[plane].size = 0;  // VK_EXT_image_drm_format_modifier mandates size = 0.
-            planeLayouts[plane].rowPitch = dmaBufDescriptor->planeLayouts[plane].stride;
-            planeLayouts[plane].arrayPitch = 0;  // Not an array texture
-            planeLayouts[plane].depthPitch = 0;  // Not a depth texture
+            DAWN_UNSAFE_TODO(planeLayouts[plane]).offset =
+                dmaBufDescriptor->planeLayouts[plane].offset;
+            DAWN_UNSAFE_TODO(planeLayouts[plane]).size =
+                0;  // VK_EXT_image_drm_format_modifier mandates size = 0.
+            DAWN_UNSAFE_TODO(planeLayouts[plane]).rowPitch =
+                dmaBufDescriptor->planeLayouts[plane].stride;
+            DAWN_UNSAFE_TODO(planeLayouts[plane]).arrayPitch = 0;  // Not an array texture
+            DAWN_UNSAFE_TODO(planeLayouts[plane]).depthPitch = 0;  // Not a depth texture
         }
 
         VkImageDrmFormatModifierExplicitCreateInfoEXT explicitCreateInfo = {};

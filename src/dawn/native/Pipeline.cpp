@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/Pipeline.h"
 
 #include <algorithm>
@@ -47,6 +42,7 @@
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/ShaderModule.h"
+#include "src/utils/compiler.h"
 #include "src/utils/numeric.h"
 
 namespace dawn::native {
@@ -170,12 +166,12 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
     // Keep an initialized constants sets to handle duplicate initialization cases
     absl::flat_hash_set<std::string_view> stageInitializedConstantIdentifiers;
     for (uint32_t i = 0; i < constantCount; i++) {
-        absl::string_view key = {constants[i].key};
-        double value = constants[i].value;
+        absl::string_view key = {DAWN_UNSAFE_TODO(constants[i]).key};
+        double value = DAWN_UNSAFE_TODO(constants[i]).value;
 
-        DAWN_INVALID_IF(!metadata.overrides.contains(key),
-                        "Pipeline overridable constant \"%s\" not found in %s.", constants[i].key,
-                        module);
+        DAWN_UNSAFE_TODO(DAWN_INVALID_IF(!metadata.overrides.contains(key),
+                                         "Pipeline overridable constant \"%s\" not found in %s.",
+                                         constants[i].key, module));
         DAWN_INVALID_IF(!std::isfinite(value),
                         "Pipeline overridable constant \"%s\" with value (%f) is not finite in %s",
                         key, value, module);
@@ -283,7 +279,8 @@ PipelineBase::PipelineBase(DeviceBase* device,
 
         auto& constants = mStages[shaderStage].constants;
         for (uint32_t i = 0; i < stage.constantCount; i++) {
-            constants.emplace(stage.constants[i].key, stage.constants[i].value);
+            constants.emplace(DAWN_UNSAFE_TODO(stage.constants[i]).key,
+                              DAWN_UNSAFE_TODO(stage.constants[i]).value);
         }
 
         // Compute the max() of all minBufferSizes across all stages.

@@ -25,12 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/tests/unittests/wire/WireTest.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::wire {
 namespace {
@@ -59,7 +55,8 @@ TEST_F(WireExtensionTests, ChainedStruct) {
                 reinterpret_cast<const WGPUShaderSourceWGSL*>(serverDesc->nextInChain);
             EXPECT_EQ(ext->chain.sType, WGPUSType_ShaderSourceWGSL);
             EXPECT_NE(ext->code.length, WGPU_STRLEN) << "The wire should decay WGPU_STRLEN";
-            EXPECT_EQ(0, memcmp(ext->code.data, clientExt.code.data, ext->code.length));
+            DAWN_UNSAFE_TODO(
+                EXPECT_EQ(0, memcmp(ext->code.data, clientExt.code.data, ext->code.length)));
             EXPECT_EQ(ext->code.length, strlen(clientExt.code.data));
             EXPECT_EQ(ext->chain.next, nullptr);
 
@@ -88,7 +85,8 @@ TEST_F(WireExtensionTests, MultipleChainedStructs) {
                 reinterpret_cast<const WGPUShaderSourceWGSL*>(serverDesc->nextInChain);
             EXPECT_EQ(ext1->chain.sType, WGPUSType_ShaderSourceWGSL);
             EXPECT_NE(ext1->code.length, WGPU_STRLEN) << "The wire should decay WGPU_STRLEN";
-            EXPECT_EQ(0, memcmp(ext1->code.data, clientExt1.code.data, ext1->code.length));
+            DAWN_UNSAFE_TODO(
+                EXPECT_EQ(0, memcmp(ext1->code.data, clientExt1.code.data, ext1->code.length)));
             EXPECT_EQ(ext1->code.length, strlen(clientExt1.code.data));
 
             const auto* ext2 =
@@ -117,7 +115,8 @@ TEST_F(WireExtensionTests, MultipleChainedStructs) {
             const auto* ext1 = reinterpret_cast<const WGPUShaderSourceWGSL*>(ext2->chain.next);
             EXPECT_EQ(ext1->chain.sType, WGPUSType_ShaderSourceWGSL);
             EXPECT_NE(ext1->code.length, WGPU_STRLEN) << "The wire should decay WGPU_STRLEN";
-            EXPECT_EQ(0, memcmp(ext1->code.data, clientExt1.code.data, ext1->code.length));
+            DAWN_UNSAFE_TODO(
+                EXPECT_EQ(0, memcmp(ext1->code.data, clientExt1.code.data, ext1->code.length)));
             EXPECT_EQ(ext1->code.length, strlen(clientExt1.code.data));
             EXPECT_EQ(ext1->chain.next, nullptr);
 
@@ -188,7 +187,8 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
                 reinterpret_cast<const WGPUShaderSourceWGSL*>(serverDesc->nextInChain);
             EXPECT_EQ(ext1->chain.sType, WGPUSType_ShaderSourceWGSL);
             EXPECT_NE(ext1->code.length, WGPU_STRLEN) << "The wire should decay WGPU_STRLEN";
-            EXPECT_EQ(0, memcmp(ext1->code.data, clientExt1.code.data, ext1->code.length));
+            DAWN_UNSAFE_TODO(
+                EXPECT_EQ(0, memcmp(ext1->code.data, clientExt1.code.data, ext1->code.length)));
             EXPECT_EQ(ext1->code.length, strlen(clientExt1.code.data));
 
             const auto* ext2 =
@@ -218,7 +218,8 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
             EXPECT_EQ(ext1->chain.sType, WGPUSType_ShaderSourceWGSL);
             EXPECT_EQ(ext1->chain.next, nullptr);
             EXPECT_NE(ext1->code.length, WGPU_STRLEN) << "The wire should decay WGPU_STRLEN";
-            EXPECT_EQ(0, memcmp(ext1->code.data, clientExt1.code.data, ext1->code.length));
+            DAWN_UNSAFE_TODO(
+                EXPECT_EQ(0, memcmp(ext1->code.data, clientExt1.code.data, ext1->code.length)));
             EXPECT_EQ(ext1->code.length, strlen(clientExt1.code.data));
 
             return apiShaderModule;
