@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <gtest/gtest.h>
 #include <webgpu/webgpu_cpp.h>
 #include <webgpu/webgpu_enum_class_bitmasks.h>
@@ -39,6 +34,7 @@
 #include <vector>
 
 #include "dawn/common/Math.h"
+#include "src/utils/compiler.h"
 
 namespace wgpu {
 
@@ -152,7 +148,7 @@ TEST(Math, AlignPtr) {
     char buffer[kTestAlignment * 4];
 
     for (size_t i = 0; i < 2 * kTestAlignment; ++i) {
-        char* unaligned = &buffer[i];
+        char* unaligned = &DAWN_UNSAFE_TODO(buffer[i]);
         char* aligned = AlignPtr(unaligned, kTestAlignment);
 
         ASSERT_GE(aligned - unaligned, 0);
@@ -263,7 +259,7 @@ TEST(Math, IsPtrAligned) {
     char buffer[kTestAlignment * 4];
 
     for (size_t i = 0; i < 2 * kTestAlignment; ++i) {
-        char* unaligned = &buffer[i];
+        char* unaligned = &DAWN_UNSAFE_TODO(buffer[i]);
         char* aligned = AlignPtr(unaligned, kTestAlignment);
 
         ASSERT_EQ(IsPtrAligned(unaligned, kTestAlignment), unaligned == aligned);

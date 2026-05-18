@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 
 #include <algorithm>
@@ -41,6 +36,7 @@
 #include "dawn/native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
 #include "dawn/native/d3d12/QueueD3D12.h"
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::d3d12 {
 
@@ -53,7 +49,7 @@ static constexpr const uint32_t kShaderVisibleSmallHeapSizes[] = {32, 16};
 
 uint32_t GetD3D12ShaderVisibleHeapMinSize(D3D12_DESCRIPTOR_HEAP_TYPE heapType, bool useSmallSize) {
     if (useSmallSize) {
-        return kShaderVisibleSmallHeapSizes[heapType];
+        return DAWN_UNSAFE_TODO(kShaderVisibleSmallHeapSizes[heapType]);
     }
 
     // Minimum heap size must be large enough to satisfy the largest descriptor allocation
@@ -72,7 +68,7 @@ uint32_t GetD3D12ShaderVisibleHeapMinSize(D3D12_DESCRIPTOR_HEAP_TYPE heapType, b
 
 uint32_t GetD3D12ShaderVisibleHeapMaxSize(D3D12_DESCRIPTOR_HEAP_TYPE heapType, bool useSmallSize) {
     if (useSmallSize) {
-        return kShaderVisibleSmallHeapSizes[heapType];
+        return DAWN_UNSAFE_TODO(kShaderVisibleSmallHeapSizes[heapType]);
     }
 
     switch (heapType) {

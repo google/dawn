@@ -25,13 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/EnumMaskIterator.h"
 #include "gtest/gtest.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -72,7 +68,7 @@ TEST(EnumMaskIteratorTests, All) {
     uint32_t i = 0;
     TestAspect aspects = TestAspect::Color | TestAspect::Depth | TestAspect::Stencil;
     for (TestAspect aspect : IterateEnumMask(aspects)) {
-        EXPECT_EQ(aspect, expected[i++]);
+        DAWN_UNSAFE_TODO(EXPECT_EQ(aspect, expected[i++]));
     }
 }
 
@@ -81,7 +77,7 @@ TEST(EnumMaskIteratorTests, Partial) {
     uint32_t i = 0;
     TestAspect aspects = TestAspect::Stencil | TestAspect::Color;
     for (TestAspect aspect : IterateEnumMask(aspects)) {
-        EXPECT_EQ(aspect, expected[i++]);
+        DAWN_UNSAFE_TODO(EXPECT_EQ(aspect, expected[i++]));
     }
 }
 

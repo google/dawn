@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <vector>
 
 #include "dawn/common/GPUInfo.h"
@@ -37,6 +32,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -196,8 +192,8 @@ TEST_P(MultisampledInterpolationTest, SamplePositions) {
 
     wgpu::TextureView colorViews[4];
     for (int i = 0; i < 4; i++) {
-        auto& each = colorViews[i];
-        each = colorTextures[i].CreateView();
+        auto& each = DAWN_UNSAFE_TODO(colorViews[i]);
+        each = DAWN_UNSAFE_TODO(colorTextures[i]).CreateView();
     }
     static constexpr uint64_t kResultSize = 4 * sizeof(float) + 4 * sizeof(float);
     uint64_t alignedResultSize = Align(kResultSize, 256);

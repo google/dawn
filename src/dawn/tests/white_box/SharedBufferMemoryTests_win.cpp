@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <d3d12.h>
 
 #include <vector>
@@ -40,6 +35,7 @@
 #include "dawn/tests/white_box/SharedBufferMemoryTests.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -56,7 +52,7 @@ void WriteD3D12UploadBuffer(ID3D12Resource* resource, uint32_t data) {
     range.Begin = 0;
     range.End = kBufferSize;
     resource->Map(0, &range, &mappedBufferBegin);
-    memcpy(mappedBufferBegin, &data, kBufferSize);
+    DAWN_UNSAFE_TODO(memcpy(mappedBufferBegin, &data, kBufferSize));
     resource->Unmap(0, &range);
 }
 
@@ -331,7 +327,7 @@ class D3D12SharedMemoryFileHandleBackend : public SharedBufferMemoryTestBackend 
             void* ptr = MapViewOfFile(mSharedMemoryHandle, FILE_MAP_ALL_ACCESS, 0, 0, 0);
             EXPECT_NE(ptr, nullptr);
 
-            memcpy(ptr, &initializationData, sizeof(initializationData));
+            DAWN_UNSAFE_TODO(memcpy(ptr, &initializationData, sizeof(initializationData)));
 
             UnmapViewOfFile(ptr);
         }

@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/d3d12/ResourceTableD3D12.h"
 
 #include <utility>
@@ -46,6 +41,7 @@
 #include "dawn/native/d3d12/SamplerD3D12.h"
 #include "dawn/native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::d3d12 {
 
@@ -347,9 +343,9 @@ MaybeError ResourceTable::UpdateMetadataBuffer(CommandRecordingContext* recordin
                 if (SamplerIndex samplerIndex = mSlotToSamplerIndex[update.slot];
                     samplerIndex != kInvalidSamplerIndex) {
                     // Store sampler index in high 16 bits, type id in low 16 bits
-                    stagedData[i] = update.data | (uint32_t{samplerIndex} << 16);
+                    DAWN_UNSAFE_TODO(stagedData[i]) = update.data | (uint32_t{samplerIndex} << 16);
                 } else {
-                    stagedData[i] = update.data;  // Copy to staged
+                    DAWN_UNSAFE_TODO(stagedData[i]) = update.data;  // Copy to staged
                 }
 
                 // Copy staged to metadata buffer

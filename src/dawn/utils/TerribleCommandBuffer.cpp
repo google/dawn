@@ -25,14 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/utils/TerribleCommandBuffer.h"
 
 #include "dawn/common/Assert.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::utils {
 
@@ -54,7 +50,7 @@ void* TerribleCommandBuffer::GetCmdSpace(size_t size) {
     if (size > sizeof(mBuffer)) {
         return nullptr;
     }
-    char* result = &mBuffer[mOffset];
+    char* result = &DAWN_UNSAFE_TODO(mBuffer[mOffset]);
     if (sizeof(mBuffer) - size < mOffset) {
         if (!Flush()) {
             return nullptr;
@@ -67,7 +63,7 @@ void* TerribleCommandBuffer::GetCmdSpace(size_t size) {
 }
 
 bool TerribleCommandBuffer::Flush() {
-    char* start = &mBuffer[mLastFlushedOffset];
+    char* start = &DAWN_UNSAFE_TODO(mBuffer[mLastFlushedOffset]);
     size_t size = mOffset - mLastFlushedOffset;
     mLastFlushedOffset = mOffset;
 

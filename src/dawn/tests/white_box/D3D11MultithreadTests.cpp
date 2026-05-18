@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <d3d11.h>
 #include <wrl/client.h>
 
@@ -41,6 +36,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -116,7 +112,7 @@ TEST_P(D3D11MultithreadTests, DawnAndDirectD3D11) {
                 context->CopyResource(staging.Get(), buffer.Get());
                 hr = context->Map(staging.Get(), 0, D3D11_MAP_READ_WRITE, 0, &mapped);
                 EXPECT_TRUE(SUCCEEDED(hr));
-                memset(mapped.pData, 0xDA, desc.ByteWidth);
+                DAWN_UNSAFE_TODO(memset(mapped.pData, 0xDA, desc.ByteWidth));
                 context->Unmap(staging.Get(), 0);
 
                 context->CopyResource(buffer.Get(), staging.Get());
@@ -127,7 +123,7 @@ TEST_P(D3D11MultithreadTests, DawnAndDirectD3D11) {
                 EXPECT_TRUE(SUCCEEDED(hr));
                 uint8_t* data = static_cast<uint8_t*>(mapped.pData);
                 for (uint32_t j = 0; j < desc.ByteWidth; ++j) {
-                    EXPECT_EQ(data[j], 0xDA);
+                    EXPECT_EQ(DAWN_UNSAFE_TODO(data[j]), 0xDA);
                 }
                 context->Unmap(staging.Get(), 0);
             }

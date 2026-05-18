@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <limits>
 #include <tuple>
 #include <utility>
@@ -41,6 +36,7 @@
 #include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -3877,7 +3873,7 @@ class BindingsValidationTest : public BindGroupLayoutCompatibilityTest {
         PlaceholderRenderPass PlaceholderRenderPass(device);
         wgpu::RenderPassEncoder rp = encoder.BeginRenderPass(&PlaceholderRenderPass);
         for (uint32_t i = 0; i < count; ++i) {
-            rp.SetBindGroup(i, bg[i]);
+            rp.SetBindGroup(i, DAWN_UNSAFE_TODO(bg[i]));
         }
         rp.SetPipeline(pipeline);
         rp.Draw(3);
@@ -3896,7 +3892,7 @@ class BindingsValidationTest : public BindGroupLayoutCompatibilityTest {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder cp = encoder.BeginComputePass();
         for (uint32_t i = 0; i < count; ++i) {
-            cp.SetBindGroup(i, bg[i]);
+            cp.SetBindGroup(i, DAWN_UNSAFE_TODO(bg[i]));
         }
         cp.SetPipeline(pipeline);
         cp.DispatchWorkgroups(1);

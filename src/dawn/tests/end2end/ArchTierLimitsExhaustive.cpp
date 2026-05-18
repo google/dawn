@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <algorithm>
 #include <cstdint>
 #include <map>
@@ -40,6 +35,7 @@
 #include "dawn/common/LinkedList.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboLimits.h"
+#include "src/utils/compiler.h"
 #include "webgpu/webgpu_cpp.h"
 
 // The purpose of these tests is to prevent regressions of features and limits on architectures that
@@ -682,7 +678,7 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
             }
 
             for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
-                auto& config = subgroupMatrixConfigs.configs[i];
+                auto& config = DAWN_UNSAFE_TODO(subgroupMatrixConfigs.configs[i]);
                 auto& expect_config = expect_configs[i];
                 if (config.componentType != expect_config.componentType ||
                     config.resultComponentType != expect_config.resultComponentType ||
@@ -708,7 +704,7 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
             "are:\n"
             "  AddDevice({";
         for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
-            auto& config = subgroupMatrixConfigs.configs[i];
+            auto& config = DAWN_UNSAFE_TODO(subgroupMatrixConfigs.configs[i]);
             expected_str += "{";
             expected_str += SubgroupMatrixComponentTypeToString(config.componentType);
             expected_str += ", ";
