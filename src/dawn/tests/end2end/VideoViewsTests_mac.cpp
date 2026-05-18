@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <memory>
 #include <utility>
 #include <variant>
@@ -40,6 +35,7 @@
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/IOSurfaceUtils.h"
 #include "dawn/utils/TextureUtils.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -85,14 +81,14 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
                             format, plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
                             IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard,
                             /*hasAlpha=*/false);
-                    memcpy(pointer, data.data(), data.size() * 2);
+                    DAWN_UNSAFE_TODO(memcpy(pointer, data.data(), data.size() * 2));
                 } else {
                     std::vector<uint8_t> data =
                         VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint8_t>(
                             format, plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
                             IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard,
                             /*hasAlpha=*/format == wgpu::TextureFormat::R8BG8A8Triplanar420Unorm);
-                    memcpy(pointer, data.data(), data.size());
+                    DAWN_UNSAFE_TODO(memcpy(pointer, data.data(), data.size()));
                 }
             }
             IOSurfaceUnlock(surface, 0, nullptr);
