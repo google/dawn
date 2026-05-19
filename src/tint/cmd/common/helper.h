@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #ifndef SRC_TINT_CMD_COMMON_HELPER_H_
 #define SRC_TINT_CMD_COMMON_HELPER_H_
 
@@ -41,6 +36,7 @@
 
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/utils/diagnostic/source.h"
+#include "src/utils/compiler.h"
 
 #if TINT_BUILD_SPV_READER
 #include "src/tint/lang/spirv/reader/common/options.h"
@@ -172,13 +168,14 @@ void SetStdinModeBinary();
 /// @private
 template <typename ContainerT>
 bool WriteStdoutImpl(const ContainerT& buffer) {
-    size_t written =
-        fwrite(buffer.data(), sizeof(typename ContainerT::value_type), buffer.size(), stdout);
+    FILE* out_file = stdout;
+    size_t written = DAWN_UNSAFE_TODO(
+        fwrite(buffer.data(), sizeof(typename ContainerT::value_type), buffer.size(), out_file));
     if (buffer.size() != written) {
         std::cerr << "Could not write all output to standard output\n";
         return false;
     }
-    fflush(stdout);
+    fflush(out_file);
     return true;
 }
 
@@ -203,8 +200,8 @@ bool WriteFileImpl(const std::string& output_file,
         return false;
     }
 
-    size_t written =
-        fwrite(buffer.data(), sizeof(typename ContainerT::value_type), buffer.size(), file);
+    size_t written = DAWN_UNSAFE_TODO(
+        fwrite(buffer.data(), sizeof(typename ContainerT::value_type), buffer.size(), file));
     if (buffer.size() != written) {
         std::cerr << "Could not write to file " << output_file << "\n";
         fclose(file);
@@ -261,7 +258,7 @@ bool ReadFileImpl(const std::string& input_file, std::vector<T>* buffer) {
     buffer->clear();
     buffer->resize(file_size / sizeof(T));
 
-    size_t bytes_read = fread(buffer->data(), 1, file_size, file);
+    size_t bytes_read = DAWN_UNSAFE_TODO(fread(buffer->data(), 1, file_size, file));
     fclose(file);
     if (bytes_read != file_size) {
         std::cerr << "Failed to read " << input_file << "\n";
@@ -283,10 +280,11 @@ bool ReadStdinImpl(std::vector<T>* buffer) {
     constexpr size_t kItemsPerChunk = 1024;
     constexpr size_t kBytesPerChunk = sizeof(T) * kItemsPerChunk;
     std::vector<T> chunk(kItemsPerChunk);
-    while (!std::feof(stdin)) {
-        size_t bytes_read = std::fread(chunk.data(), 1, kBytesPerChunk, stdin);
+    FILE* in_file = stdin;
+    while (!std::feof(in_file)) {
+        size_t bytes_read = DAWN_UNSAFE_TODO(std::fread(chunk.data(), 1, kBytesPerChunk, in_file));
         if (bytes_read == 0) {
-            if (std::ferror(stdin)) {
+            if (std::ferror(in_file)) {
                 std::perror("Error reading from standard input");
                 return false;
             }

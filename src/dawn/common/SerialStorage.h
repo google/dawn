@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #ifndef SRC_DAWN_COMMON_SERIALSTORAGE_H_
 #define SRC_DAWN_COMMON_SERIALSTORAGE_H_
 
@@ -38,6 +33,7 @@
 
 #include "dawn/common/Assert.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 
@@ -235,12 +231,12 @@ typename SerialStorage<Derived>::Iterator& SerialStorage<Derived>::Iterator::ope
     Value* vectorData = mStorageIterator->second.data();
 
     if (mSerialIterator == nullptr) {
-        mSerialIterator = vectorData + 1;
+        mSerialIterator = DAWN_UNSAFE_TODO(vectorData + 1);
     } else {
-        mSerialIterator++;
+        DAWN_UNSAFE_TODO(mSerialIterator++);
     }
 
-    if (mSerialIterator >= vectorData + mStorageIterator->second.size()) {
+    if (mSerialIterator >= DAWN_UNSAFE_TODO(vectorData + mStorageIterator->second.size())) {
         mSerialIterator = nullptr;
         mStorageIterator++;
     }

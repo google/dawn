@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/BlitBufferToDepthStencil.h"
 
 #include <string>
@@ -46,6 +41,7 @@
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderPassEncoder.h"
 #include "dawn/native/RenderPipeline.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -316,7 +312,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
             uint32_t* params =
                 static_cast<uint32_t*>(paramsBuffer->GetMappedRange(0, bufferDesc.size));
             params[0] = static_cast<uint32_t>(dst.origin.x);
-            params[1] = static_cast<uint32_t>(dst.origin.y);
+            DAWN_UNSAFE_TODO(params[1]) = static_cast<uint32_t>(dst.origin.y);
             DAWN_TRY(paramsBuffer->Unmap());
         }
 
@@ -421,8 +417,8 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
 
         uint32_t* params = static_cast<uint32_t*>(paramsBuffer->GetMappedRange(0, bufferDesc.size));
         params[0] = static_cast<uint32_t>(dst.origin.x);
-        params[1] = static_cast<uint32_t>(dst.origin.y);
-        params[2] = 0;
+        DAWN_UNSAFE_TODO(params[1]) = static_cast<uint32_t>(dst.origin.y);
+        DAWN_UNSAFE_TODO(params[2]) = 0;
         DAWN_TRY(paramsBuffer->Unmap());
     }
 

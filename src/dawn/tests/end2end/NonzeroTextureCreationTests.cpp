@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <algorithm>
 #include <vector>
 
@@ -39,6 +34,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -76,10 +72,10 @@ class ExpectNonZero : public detail::CustomTextureExpectation {
                    << "Expected data to be non-zero, was " << value << "\n";
         }
         for (size_t i = 0; i < size / DataSize(); ++i) {
-            if (actual[i] != value) {
+            if (DAWN_UNSAFE_TODO(actual[i]) != value) {
                 return testing::AssertionFailure()
                        << "Expected data[" << i << "] to match non-zero value " << value
-                       << ", actual " << actual[i] << "\n";
+                       << ", actual " << DAWN_UNSAFE_TODO(actual[i]) << "\n";
             }
         }
 
@@ -262,7 +258,7 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
                 for (uint32_t z = 0; z < depthOrArrayLayers; ++z) {
                     for (uint32_t row = 0; row < copySize.height / blockHeight; ++row) {
                         std::fill_n(d, copiedWidthInBytes, 1);
-                        d += bytesPerRow;
+                        DAWN_UNSAFE_TODO(d += bytesPerRow);
                     }
                 }
                 EXPECT_BUFFER_U8_RANGE_EQ(data.data(), bufferDst, 0, bufferSize);

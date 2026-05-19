@@ -25,14 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <vector>
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -80,7 +76,7 @@ TEST_F(ToggleValidationTest, OverrideToggleUsage) {
         std::vector<const char*> toggleNames = native::GetTogglesUsed(deviceWithToggle.Get());
         bool validToggleExists = false;
         for (const char* toggle : toggleNames) {
-            if (strcmp(toggle, kValidToggleName) == 0) {
+            if (DAWN_UNSAFE_TODO(strcmp(toggle, kValidToggleName)) == 0) {
                 validToggleExists = true;
             }
         }
@@ -101,7 +97,7 @@ TEST_F(ToggleValidationTest, OverrideToggleUsage) {
         std::vector<const char*> toggleNames = native::GetTogglesUsed(deviceWithToggle.Get());
         bool InvalidToggleExists = false;
         for (const char* toggle : toggleNames) {
-            if (strcmp(toggle, kInvalidToggleName) == 0) {
+            if (DAWN_UNSAFE_TODO(strcmp(toggle, kInvalidToggleName)) == 0) {
                 InvalidToggleExists = true;
             }
         }
@@ -122,7 +118,7 @@ TEST_F(ToggleValidationTest, TurnOffVsyncWithToggle) {
     std::vector<const char*> toggleNames = native::GetTogglesUsed(deviceWithToggle.Get());
     bool validToggleExists = false;
     for (const char* toggle : toggleNames) {
-        if (strcmp(toggle, kValidToggleName) == 0) {
+        if (DAWN_UNSAFE_TODO(strcmp(toggle, kValidToggleName)) == 0) {
             validToggleExists = true;
         }
     }

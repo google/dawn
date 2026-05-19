@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/vulkan/BufferVk.h"
 
 #include <algorithm>
@@ -53,6 +48,7 @@
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan {
 
@@ -581,7 +577,7 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     // The real mapped pointer is never returned for zero sized buffers. MappedAtCreation buffers
     // are initialized in BufferBase already.
     if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
-        std::memset(GetMappedPointerImpl(), 0, GetAllocatedSize());
+        DAWN_UNSAFE_TODO(std::memset(GetMappedPointerImpl(), 0, GetAllocatedSize()));
         GetDevice()->IncrementLazyClearCountForTesting();
         SetInitialized(true);
 
@@ -680,7 +676,7 @@ MaybeError Buffer::UploadData(uint64_t bufferOffset, const void* data, size_t si
         SetInitialized(true);
 
         DAWN_ASSERT(mapped.size() >= dstOffset + size);
-        memcpy(mapped.data() + dstOffset, data, size);
+        DAWN_UNSAFE_TODO(memcpy(mapped.data() + dstOffset, data, size));
     });
 }
 
@@ -734,7 +730,7 @@ MaybeError Buffer::MapMemoryAndPerformOperation(uint64_t requestedOffset,
     }
 
     // Pass a span that is exactly the offset/size requested even if a larger range was mapped.
-    op(std::span(memory + realOffset, requestedSize));
+    op(std::span(DAWN_UNSAFE_TODO(memory + realOffset), requestedSize));
 
     if (!mHostCoherent) {
         // For non-coherent memory we need to explicitly flush the memory range to make the host

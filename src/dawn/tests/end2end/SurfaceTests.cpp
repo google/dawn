@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <memory>
 #include <set>
 #include <string>
@@ -43,6 +38,7 @@
 #include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 #include "webgpu/webgpu_glfw.h"
 
 namespace dawn {
@@ -206,7 +202,7 @@ class SurfaceTests : public DawnTest {
     bool SupportsPresentMode(const wgpu::SurfaceCapabilities& capabilities,
                              wgpu::PresentMode mode) {
         for (size_t i = 0; i < capabilities.presentModeCount; ++i) {
-            if (capabilities.presentModes[i] == mode) {
+            if (DAWN_UNSAFE_TODO(capabilities.presentModes[i]) == mode) {
                 return true;
             }
         }
@@ -702,8 +698,8 @@ TEST_P(SurfaceTests, Storage) {
 
     wgpu::TextureFormat storageCapableFormat = wgpu::TextureFormat::Undefined;
     for (uint32_t i = 0; i < caps.formatCount; i++) {
-        if (utils::TextureFormatSupportsStorageTexture(device, caps.formats[i])) {
-            storageCapableFormat = caps.formats[i];
+        if (utils::TextureFormatSupportsStorageTexture(device, DAWN_UNSAFE_TODO(caps.formats[i]))) {
+            storageCapableFormat = DAWN_UNSAFE_TODO(caps.formats[i]);
             break;
         }
     }

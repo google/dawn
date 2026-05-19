@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/RenderPipeline.h"
 
 #include <algorithm>
@@ -49,6 +44,7 @@
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/ValidationUtils.h"
 #include "dawn/native/ValidationUtils_autogen.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -183,9 +179,10 @@ MaybeError ValidateVertexBufferLayout(DeviceBase* device,
                     "Vertex buffer arrayStride (%u) is not a multiple of 4.", buffer->arrayStride);
 
     for (uint32_t i = 0; i < buffer->attributeCount; ++i) {
-        DAWN_TRY_CONTEXT(ValidateVertexAttribute(device, &buffer->attributes[i], metadata,
-                                                 buffer->arrayStride, attributesSetMask),
-                         "validating attributes[%u].", i);
+        DAWN_UNSAFE_TODO(
+            DAWN_TRY_CONTEXT(ValidateVertexAttribute(device, &buffer->attributes[i], metadata,
+                                                     buffer->arrayStride, attributesSetMask),
+                             "validating attributes[%u].", i));
     }
 
     return {};
@@ -229,10 +226,12 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
     VertexAttributeMask attributesSetMask;
     uint32_t totalAttributesNum = 0;
     for (uint32_t i = 0; i < descriptor->bufferCount; ++i) {
-        DAWN_TRY_CONTEXT(ValidateVertexBufferLayout(device, &descriptor->buffers[i], vertexMetadata,
-                                                    &attributesSetMask),
-                         "validating buffers[%u].", i);
-        totalAttributesNum += uint32_t(descriptor->buffers[i].attributeCount);
+        DAWN_UNSAFE_TODO(
+            DAWN_TRY_CONTEXT(ValidateVertexBufferLayout(device, &descriptor->buffers[i],
+                                                        vertexMetadata, &attributesSetMask),
+                             "validating buffers[%u].", i));
+        totalAttributesNum +=
+            static_cast<uint32_t>(DAWN_UNSAFE_TODO(descriptor->buffers[i]).attributeCount);
     }
 
     if (device->IsCompatibilityMode() &&
@@ -1058,7 +1057,8 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         // Vertex-only render pipeline have no color attachment. For a render pipeline with
         // color attachments, there must be a valid FragmentState.
         DAWN_CHECK(descriptor->fragment != nullptr);
-        const ColorTargetState* target = &descriptor->fragment->targets[static_cast<uint8_t>(i)];
+        const ColorTargetState* target =
+            &DAWN_UNSAFE_TODO(descriptor->fragment->targets[static_cast<uint8_t>(i)]);
         mTargets[i] = *target;
 
         if (target->blend != nullptr) {

@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/Commands.h"
 
 #include "dawn/native/BindGroup.h"
@@ -41,6 +36,7 @@
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/ResourceTable.h"
 #include "dawn/native/Texture.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -146,7 +142,7 @@ void FreeCommands(CommandIterator* commands) {
                 ExecuteBundlesCmd* cmd = commands->NextCommand<ExecuteBundlesCmd>();
                 auto bundles = commands->NextData<Ref<RenderBundleBase>>(cmd->count);
                 for (size_t i = 0; i < cmd->count; ++i) {
-                    (&bundles[i])->~Ref<RenderBundleBase>();
+                    (&DAWN_UNSAFE_TODO(bundles[i]))->~Ref<RenderBundleBase>();
                 }
                 cmd->~ExecuteBundlesCmd();
                 break;
@@ -446,8 +442,8 @@ const char* AddNullTerminatedString(CommandAllocator* allocator, StringView s, s
     // may already have a null-terminator inside of it, in which case adding the null-terminator is
     // unnecessary. However, this is unlikely, so always include the extra character.
     char* out = allocator->AllocateData<char>(view.length() + 1);
-    memcpy(out, view.data(), view.length());
-    out[view.length()] = '\0';
+    DAWN_UNSAFE_TODO(memcpy(out, view.data(), view.length()));
+    DAWN_UNSAFE_TODO(out[view.length()]) = '\0';
 
     return out;
 }
