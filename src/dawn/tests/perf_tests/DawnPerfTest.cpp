@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/tests/perf_tests/DawnPerfTest.h"
 
 #include <algorithm>
@@ -41,6 +36,7 @@
 #include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn/tests/perf_tests/DawnPerfTestPlatform.h"
 #include "dawn/utils/Timer.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -97,32 +93,33 @@ DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
     : DawnTestEnvironment(argc, argv) {
     size_t argLen = 0;  // Set when parsing --arg=X arguments
     for (int i = 1; i < argc; ++i) {
-        if (strcmp("--calibration", argv[i]) == 0) {
+        if (DAWN_UNSAFE_TODO(strcmp("--calibration", argv[i])) == 0) {
             mIsCalibrating = true;
             continue;
         }
 
         constexpr const char kOverrideStepsArg[] = "--override-steps=";
         argLen = sizeof(kOverrideStepsArg) - 1;
-        if (strncmp(argv[i], kOverrideStepsArg, argLen) == 0) {
-            const char* overrideSteps = argv[i] + argLen;
+        if (DAWN_UNSAFE_TODO(strncmp(argv[i], kOverrideStepsArg, argLen)) == 0) {
+            const char* overrideSteps = DAWN_UNSAFE_TODO(argv[i] + argLen);
             if (overrideSteps[0] != '\0') {
-                mOverrideStepsToRun = strtoul(overrideSteps, nullptr, 0);
+                mOverrideStepsToRun = DAWN_UNSAFE_TODO(strtoul(overrideSteps, nullptr, 0));
             }
             continue;
         }
 
         constexpr const char kTraceFileArg[] = "--trace-file=";
         argLen = sizeof(kTraceFileArg) - 1;
-        if (strncmp(argv[i], kTraceFileArg, argLen) == 0) {
-            const char* traceFile = argv[i] + argLen;
+        if (DAWN_UNSAFE_TODO(strncmp(argv[i], kTraceFileArg, argLen)) == 0) {
+            const char* traceFile = DAWN_UNSAFE_TODO(argv[i] + argLen);
             if (traceFile[0] != '\0') {
                 mTraceFile = traceFile;
             }
             continue;
         }
 
-        if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
+        if (DAWN_UNSAFE_TODO(strcmp("-h", argv[i])) == 0 ||
+            DAWN_UNSAFE_TODO(strcmp("--help", argv[i])) == 0) {
             InfoLog() << "Additional flags:"
                       << " [--calibration] [--override-steps=x] [--trace-file=file]\n"
                       << "  --calibration: Only run calibration. Calibration allows the perf test"

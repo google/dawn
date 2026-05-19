@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/tests/white_box/SharedBufferMemoryTests.h"
 
 #include <gtest/gtest.h>
@@ -39,6 +34,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 
@@ -422,7 +418,7 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, kBufferSize);
 
     uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange(0, kBufferSize));
-    memcpy(mappedData, &kBufferData, kBufferSize);
+    DAWN_UNSAFE_TODO(memcpy(mappedData, &kBufferData, kBufferSize));
     buffer.Unmap();
 
     wgpu::SharedBufferMemoryEndAccessState endState;
@@ -434,7 +430,8 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     // operations are complete.
     std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
     for (size_t j = 0; j < endState.fenceCount; ++j) {
-        sharedFences[j] = GetParam().mBackend->ImportFenceTo(device, endState.fences[j]);
+        sharedFences[j] =
+            GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();
@@ -455,7 +452,8 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     // operations are complete.
     std::vector<wgpu::SharedFence> sharedFences2(endState.fenceCount);
     for (size_t j = 0; j < endState.fenceCount; ++j) {
-        sharedFences2[j] = GetParam().mBackend->ImportFenceTo(device, endState.fences[j]);
+        sharedFences2[j] =
+            GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
     }
     beginAccessDesc.fenceCount = sharedFences2.size();
     beginAccessDesc.fences = sharedFences2.data();
@@ -514,7 +512,7 @@ TEST_P(SharedBufferMemoryTests, ReadWriteSharedMapWriteBuffer) {
     MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, kBufferSize);
 
     uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange(0, kBufferSize));
-    memcpy(mappedData, &kBufferData2, kBufferSize);
+    DAWN_UNSAFE_TODO(memcpy(mappedData, &kBufferData2, kBufferSize));
     buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(kBufferData2, buffer, 0);
@@ -622,7 +620,8 @@ TEST_P(SharedBufferMemoryTests, ImportExportSharedFences) {
         // Get any fences from the previous loop's SharedBufferMemoryEndAccessState.
         std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
         for (size_t j = 0; j < endState.fenceCount; ++j) {
-            sharedFences[j] = GetParam().mBackend->ImportFenceTo(device, endState.fences[j]);
+            sharedFences[j] =
+                GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
         }
         beginAccessDesc.fenceCount = sharedFences.size();
         beginAccessDesc.fences = sharedFences.data();
@@ -689,7 +688,8 @@ TEST_P(SharedBufferMemoryTests, UseInPassEnsureSynchronization) {
     // operations are complete.
     std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
     for (size_t j = 0; j < endState.fenceCount; ++j) {
-        sharedFences[j] = GetParam().mBackend->ImportFenceTo(device, endState.fences[j]);
+        sharedFences[j] =
+            GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();
@@ -763,7 +763,8 @@ TEST_P(SharedBufferMemoryTests, WriteBufferEnsureSynchronization) {
     // operations are complete.
     std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
     for (size_t j = 0; j < endState.fenceCount; ++j) {
-        sharedFences[j] = GetParam().mBackend->ImportFenceTo(device, endState.fences[j]);
+        sharedFences[j] =
+            GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();
@@ -815,7 +816,8 @@ TEST_P(SharedBufferMemoryTests, MapAsyncEnsureSynchronization) {
     // operations are complete.
     std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
     for (size_t j = 0; j < endState.fenceCount; ++j) {
-        sharedFences[j] = GetParam().mBackend->ImportFenceTo(device, endState.fences[j]);
+        sharedFences[j] =
+            GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();

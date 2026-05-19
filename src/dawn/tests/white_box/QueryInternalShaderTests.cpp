@@ -25,16 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <vector>
 
 #include "dawn/native/QueryHelper.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -56,7 +52,7 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
     InternalShaderExpectation(const uint64_t* values,
                               const unsigned int count,
                               const uint32_t quantizationMask) {
-        mExpected.assign(values, values + count);
+        mExpected.assign(values, DAWN_UNSAFE_TODO(values + count));
         mQuantizationMask = quantizationMask;
     }
 
@@ -76,9 +72,10 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
         const uint64_t* actual = static_cast<const uint64_t*>(data);
         for (size_t i = 0; i < mExpected.size(); ++i) {
             if (mExpected[i] == 0) {
-                if (actual[i] != 0) {
+                if (DAWN_UNSAFE_TODO(actual[i]) != 0) {
                     return testing::AssertionFailure()
-                           << "Expected data[" << i << "] to be 0, actual " << actual[i] << "\n";
+                           << "Expected data[" << i << "] to be 0, actual "
+                           << DAWN_UNSAFE_TODO(actual[i]) << "\n";
                 }
                 continue;
             }
@@ -93,18 +90,20 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
             uint64_t quantizationMask64 = ~uint64_t(invertedQuantizationMask);
             lowerLimit &= quantizationMask64;
 
-            if (actual[i] < lowerLimit || actual[i] > upperLimit) {
+            if (DAWN_UNSAFE_TODO(actual[i]) < lowerLimit ||
+                DAWN_UNSAFE_TODO(actual[i]) > upperLimit) {
                 return testing::AssertionFailure()
                        << "Expected data[" << i << "] to be " << expected << ", actual "
-                       << actual[i] << ". Error rate is larger than " << kErrorToleranceRatio
-                       << ". Upper limit is " << upperLimit << ". Lower limit is " << lowerLimit
-                       << "\n";
+                       << DAWN_UNSAFE_TODO(actual[i]) << ". Error rate is larger than "
+                       << kErrorToleranceRatio << ". Upper limit is " << upperLimit
+                       << ". Lower limit is " << lowerLimit << "\n";
             }
 
-            if ((actual[i] & ~quantizationMask64) != 0) {
-                return testing::AssertionFailure() << "Actual data 0x" << std::hex << actual[i]
-                                                   << " does not match quantization mask 0x"
-                                                   << std::hex << mQuantizationMask << "\n";
+            if ((DAWN_UNSAFE_TODO(actual[i]) & ~quantizationMask64) != 0) {
+                return testing::AssertionFailure()
+                       << "Actual data 0x" << std::hex << DAWN_UNSAFE_TODO(actual[i])
+                       << " does not match quantization mask 0x" << std::hex << mQuantizationMask
+                       << "\n";
             }
         }
 

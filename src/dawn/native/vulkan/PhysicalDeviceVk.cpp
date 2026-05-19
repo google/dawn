@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
 
 #include <algorithm>
@@ -53,6 +48,7 @@
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/platform/DawnPlatform.h"
+#include "src/utils/compiler.h"
 
 #if DAWN_PLATFORM_IS(ANDROID)
 #include "dawn/native/AHBFunctions.h"
@@ -1599,23 +1595,27 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
         memoryHeapProperties->heapInfo = heapInfo;
 
         for (size_t i = 0; i < count; ++i) {
-            heapInfo[i].size = mDeviceInfo.memoryHeaps[i].size;
-            heapInfo[i].properties = {};
+            DAWN_UNSAFE_TODO(heapInfo[i]).size = mDeviceInfo.memoryHeaps[i].size;
+            DAWN_UNSAFE_TODO(heapInfo[i]).properties = {};
             if (mDeviceInfo.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) {
-                heapInfo[i].properties |= wgpu::HeapProperty::DeviceLocal;
+                DAWN_UNSAFE_TODO(heapInfo[i]).properties |= wgpu::HeapProperty::DeviceLocal;
             }
         }
         for (const auto& memoryType : mDeviceInfo.memoryTypes) {
             if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostVisible;
+                DAWN_UNSAFE_TODO(heapInfo[memoryType.heapIndex]).properties |=
+                    wgpu::HeapProperty::HostVisible;
             }
             if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) {
-                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostCoherent;
+                DAWN_UNSAFE_TODO(heapInfo[memoryType.heapIndex]).properties |=
+                    wgpu::HeapProperty::HostCoherent;
             }
             if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) {
-                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostCached;
+                DAWN_UNSAFE_TODO(heapInfo[memoryType.heapIndex]).properties |=
+                    wgpu::HeapProperty::HostCached;
             } else {
-                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostUncached;
+                DAWN_UNSAFE_TODO(heapInfo[memoryType.heapIndex]).properties |=
+                    wgpu::HeapProperty::HostUncached;
             }
         }
     }
@@ -1637,7 +1637,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
         SubgroupMatrixConfig* configs = new SubgroupMatrixConfig[count];
         subgroupMatrixConfigs->configs = configs;
         subgroupMatrixConfigs->configCount = supportedConfigs.size();
-        memcpy(configs, supportedConfigs.data(), count * sizeof(SubgroupMatrixConfig));
+        DAWN_UNSAFE_TODO(
+            memcpy(configs, supportedConfigs.data(), count * sizeof(SubgroupMatrixConfig)));
     }
 }
 
@@ -1659,8 +1660,8 @@ void PhysicalDevice::PopulateBackendFormatCapabilities(
             drmCapabilities->propertiesCount = count;
 
             for (size_t i = 0; i < count; i++) {
-                properties[i].modifier = drmFormatModifiers[i].drmFormatModifier;
-                properties[i].modifierPlaneCount =
+                DAWN_UNSAFE_TODO(properties[i]).modifier = drmFormatModifiers[i].drmFormatModifier;
+                DAWN_UNSAFE_TODO(properties[i]).modifierPlaneCount =
                     drmFormatModifiers[i].drmFormatModifierPlaneCount;
             }
         }

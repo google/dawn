@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <algorithm>
 #include <limits>
 #include <sstream>
@@ -41,6 +36,7 @@
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -500,44 +496,50 @@ TEST_F(CompatValidationTest, CanNotUseTooManyTextureSamplerCombos) {
         for (uint32_t stage = 0; stage < 2; ++stage) {
             uint32_t count = 0;
             for (uint32_t t = 0; count < numCombos && t < maxTexturesPerShaderStage; ++t) {
-                textureDeclarations[stage].push_back(
-                    absl::StrFormat("@group(%u) @binding(%u) var t%u_%u: texture_2d<f32>;",
-                                    stage * 2, t, stage, t));
+                DAWN_UNSAFE_TODO(textureDeclarations[stage])
+                    .push_back(
+                        absl::StrFormat("@group(%u) @binding(%u) var t%u_%u: texture_2d<f32>;",
+                                        stage * 2, t, stage, t));
                 for (uint32_t s = 0; count < numCombos && t < limits.maxSamplersPerShaderStage;
                      ++s) {
                     if (t == 0) {
-                        samplerDeclarations[stage].push_back(
-                            absl::StrFormat("@group(%u) @binding(%u) var s%u_%u: sampler;",
-                                            (stage * 2) + 1, s, stage, s));
+                        DAWN_UNSAFE_TODO(samplerDeclarations[stage])
+                            .push_back(
+                                absl::StrFormat("@group(%u) @binding(%u) var s%u_%u: sampler;",
+                                                (stage * 2) + 1, s, stage, s));
                     }
-                    usages[stage].push_back(
-                        absl::StrFormat("c += textureSampleLevel(t%u_%u, s%u_%u, vec2f(0), 0);",
-                                        stage, t, stage, s));
+                    DAWN_UNSAFE_TODO(usages[stage])
+                        .push_back(
+                            absl::StrFormat("c += textureSampleLevel(t%u_%u, s%u_%u, vec2f(0), 0);",
+                                            stage, t, stage, s));
                     ++count;
                 }
             }
 
             for (uint32_t t = 0; t < test.numNonSamplerUsages; ++t) {
-                if (t >= textureDeclarations[stage].size()) {
-                    textureDeclarations[stage].push_back(
-                        absl::StrFormat("@group(%u) @binding(%u) var t%u_%u: texture_2d<f32>;",
-                                        stage * 2, t, stage, t));
+                if (t >= DAWN_UNSAFE_TODO(textureDeclarations[stage]).size()) {
+                    DAWN_UNSAFE_TODO(textureDeclarations[stage])
+                        .push_back(
+                            absl::StrFormat("@group(%u) @binding(%u) var t%u_%u: texture_2d<f32>;",
+                                            stage * 2, t, stage, t));
                 }
-                usages[stage].push_back(
-                    absl::StrFormat("c += textureLoad(t%u_%u, vec2u(0), 0);", stage, t));
+                DAWN_UNSAFE_TODO(usages[stage])
+                    .push_back(absl::StrFormat("c += textureLoad(t%u_%u, vec2u(0), 0);", stage, t));
             }
 
             for (uint32_t t = 0; t < test.numExternalTextures; ++t) {
                 if (t == 0 || !test.useSameExternalTexture) {
-                    auto et = textureDeclarations[stage].size() + t;
-                    textureDeclarations[stage].push_back(
-                        absl::StrFormat("@group(%u) @binding(%u) var e%u_%u: texture_external;",
-                                        stage * 2, et, stage, t));
+                    auto et = DAWN_UNSAFE_TODO(textureDeclarations[stage]).size() + t;
+                    DAWN_UNSAFE_TODO(textureDeclarations[stage])
+                        .push_back(
+                            absl::StrFormat("@group(%u) @binding(%u) var e%u_%u: texture_external;",
+                                            stage * 2, et, stage, t));
                 }
-                usages[stage].push_back(
-                    absl::StrFormat("c += textureSampleBaseClampToEdge(e%u_%u, s%u_%u, vec2f(0));",
-                                    stage, test.useSameExternalTexture ? 0 : t, stage,
-                                    test.useSameExternalTexture ? t : 0));
+                DAWN_UNSAFE_TODO(usages[stage])
+                    .push_back(absl::StrFormat(
+                        "c += textureSampleBaseClampToEdge(e%u_%u, s%u_%u, vec2f(0));", stage,
+                        test.useSameExternalTexture ? 0 : t, stage,
+                        test.useSameExternalTexture ? t : 0));
             }
         }
 
