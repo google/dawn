@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/webgpu/CommandBufferHelpers.h"
 
 #include <vector>
@@ -42,6 +37,7 @@
 #include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/RenderBundleWGPU.h"
 #include "dawn/native/webgpu/RenderPipelineWGPU.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::webgpu {
 
@@ -57,7 +53,8 @@ void CaptureSharedCommand(CaptureContext& captureContext, CommandIterator& comma
                     .index = uint32_t(cmd.index),
                     .bindGroupId = captureContext.GetId(cmd.group),
                     .dynamicOffsets = std::vector<uint32_t>(
-                        dynamicOffsetsData, dynamicOffsetsData + cmd.dynamicOffsetCount),
+                        dynamicOffsetsData,
+                        DAWN_UNSAFE_TODO(dynamicOffsetsData + cmd.dynamicOffsetCount)),
                 }},
             }};
             Serialize(captureContext, data);
@@ -69,7 +66,7 @@ void CaptureSharedCommand(CaptureContext& captureContext, CommandIterator& comma
             schema::CommandBufferCommandSetImmediatesCmd data{{
                 .data = {{
                     .offset = cmd.offset,
-                    .data = std::vector<uint8_t>(values, values + cmd.size),
+                    .data = std::vector<uint8_t>(values, DAWN_UNSAFE_TODO(values + cmd.size)),
                 }},
             }};
             Serialize(captureContext, data);

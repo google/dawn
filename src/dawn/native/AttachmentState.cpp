@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/AttachmentState.h"
 
 #include <bit>
@@ -42,6 +37,7 @@
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/Texture.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -176,8 +172,9 @@ AttachmentState::AttachmentState(const UnpackedPtr<RenderPassDescriptor>& descri
         mStorageAttachmentSlots = std::vector<wgpu::TextureFormat>(
             pls->totalPixelLocalStorageSize / kPLSSlotByteSize, wgpu::TextureFormat::Undefined);
         for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-            size_t slot = pls->storageAttachments[i].offset / kPLSSlotByteSize;
-            const TextureViewBase* attachment = pls->storageAttachments[i].storage;
+            size_t slot = DAWN_UNSAFE_TODO(pls->storageAttachments[i]).offset / kPLSSlotByteSize;
+            const TextureViewBase* attachment =
+                DAWN_UNSAFE_TODO(pls->storageAttachments[i]).storage;
             mStorageAttachmentSlots[slot] = attachment->GetFormat().format;
 
             if (mSampleCount == 0) {

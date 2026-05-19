@@ -25,16 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <array>
 
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/ityp_span.h"
 #include "gtest/gtest.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -86,7 +82,7 @@ TEST_F(ITypSpanTest, BeginEndFrontBackData) {
 
     // non-const versions
     ASSERT_EQ(&*span.begin(), &span[Key(0)]);
-    ASSERT_EQ(&*span.end(), &span[Key(0)] + static_cast<size_t>(span.size()));
+    DAWN_UNSAFE_TODO(ASSERT_EQ(&*span.end(), &span[Key(0)] + static_cast<size_t>(span.size())));
     ASSERT_EQ(&span.front(), &span[Key(0)]);
     ASSERT_EQ(&span.back(), &span[Key(9)]);
     ASSERT_EQ(span.data(), &span[Key(0)]);
@@ -94,7 +90,8 @@ TEST_F(ITypSpanTest, BeginEndFrontBackData) {
     // const versions
     const Span& constSpan = span;
     ASSERT_EQ(&*constSpan.begin(), &constSpan[Key(0)]);
-    ASSERT_EQ(&*constSpan.end(), &constSpan[Key(0)] + static_cast<size_t>(constSpan.size()));
+    DAWN_UNSAFE_TODO(
+        ASSERT_EQ(&*constSpan.end(), &constSpan[Key(0)] + static_cast<size_t>(constSpan.size())));
     ASSERT_EQ(&constSpan.front(), &constSpan[Key(0)]);
     ASSERT_EQ(&constSpan.back(), &constSpan[Key(9)]);
     ASSERT_EQ(constSpan.data(), &constSpan[Key(0)]);

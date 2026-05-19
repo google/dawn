@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/wire/client/Queue.h"
 
 #include <memory>
@@ -42,6 +37,7 @@
 #include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/EventManager.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::wire::client {
 namespace {
@@ -209,7 +205,7 @@ void Queue::WriteBufferXL(WGPUBuffer cBuffer,
     writeHandleCreateInfoLength = writeHandle->SerializeCreateSize();
 
     // Write the data to the allocated memory.
-    memcpy(writeHandle->GetData(), data, size);
+    DAWN_UNSAFE_TODO(memcpy(writeHandle->GetData(), data, size));
 
     // Prepare to serialize data update command.
     size_t writeDataUpdateInfoLength = writeHandle->SizeOfSerializeDataUpdate(0u, size);
@@ -280,7 +276,7 @@ void Queue::WriteTextureXL(const WGPUTexelCopyTextureInfo* destination,
     writeHandleCreateInfoLength = writeHandle->SerializeCreateSize();
 
     // Write the data to the allocated memory.
-    memcpy(writeHandle->GetData(), data, dataSize);
+    DAWN_UNSAFE_TODO(memcpy(writeHandle->GetData(), data, dataSize));
 
     // Prepare to serialize data update command.
     size_t writeDataUpdateInfoLength = writeHandle->SizeOfSerializeDataUpdate(0u, dataSize);

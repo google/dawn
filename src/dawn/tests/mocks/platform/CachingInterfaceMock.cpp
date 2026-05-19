@@ -25,12 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/tests/mocks/platform/CachingInterfaceMock.h"
+
+#include "src/utils/compiler.h"
 
 CachingInterfaceMock::CachingInterfaceMock() {
     ON_CALL(*this, LoadData).WillByDefault([this](auto&&... args) {
@@ -77,7 +74,7 @@ size_t CachingInterfaceMock::LoadDataDefault(const void* key,
     }
     if (valueSize >= entry->second.size()) {
         // Only consider a cache-hit on the memcpy, since peeks are implementation detail.
-        memcpy(value, entry->second.data(), entry->second.size());
+        DAWN_UNSAFE_TODO(memcpy(value, entry->second.data(), entry->second.size()));
         mHitCount++;
     }
     return entry->second.size();
@@ -94,7 +91,7 @@ void CachingInterfaceMock::StoreDataDefault(const void* key,
 
     const std::string keyStr(reinterpret_cast<const char*>(key), keySize);
     const uint8_t* it = reinterpret_cast<const uint8_t*>(value);
-    std::vector<uint8_t> entry(it, it + valueSize);
+    std::vector<uint8_t> entry(it, DAWN_UNSAFE_TODO(it + valueSize));
     mCache.insert_or_assign(keyStr, entry);
 }
 

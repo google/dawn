@@ -25,17 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <cstring>
 #include <memory>
 
 #include "dawn/common/Assert.h"
 #include "dawn/wire/WireServer.h"
 #include "dawn/wire/server/Server.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::wire::server {
 
@@ -54,7 +50,7 @@ class InlineMemoryTransferService : public MemoryTransferService {
             if (!data.empty()) {
                 DAWN_ASSERT(data.data() != nullptr);
                 DAWN_ASSERT(serializeData.data() != nullptr);
-                memcpy(serializeData.data(), data.data(), data.size());
+                DAWN_UNSAFE_TODO(memcpy(serializeData.data(), data.data(), data.size()));
             }
         }
     };
@@ -70,7 +66,7 @@ class InlineMemoryTransferService : public MemoryTransferService {
             if (deserializeData.size() != target.size()) {
                 return false;
             }
-            memcpy(target.data(), deserializeData.data(), deserializeData.size());
+            DAWN_UNSAFE_TODO(memcpy(target.data(), deserializeData.data(), deserializeData.size()));
             return true;
         }
     };

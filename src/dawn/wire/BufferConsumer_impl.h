@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #ifndef SRC_DAWN_WIRE_BUFFERCONSUMER_IMPL_H_
 #define SRC_DAWN_WIRE_BUFFERCONSUMER_IMPL_H_
 
@@ -37,6 +32,7 @@
 #include <type_traits>
 
 #include "dawn/wire/BufferConsumer.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::wire {
 
@@ -60,7 +56,7 @@ WireResult BufferConsumer<BufferT>::Next(T** data) {
     }
 
     *data = reinterpret_cast<T*>(mBuffer.get());
-    mBuffer += kSize;
+    DAWN_UNSAFE_TODO(mBuffer += kSize);
     mSize -= kSize;
     return WireResult::Success;
 }
@@ -77,7 +73,7 @@ WireResult BufferConsumer<BufferT>::NextN(N count, T** data) {
     }
 
     *data = reinterpret_cast<T*>(mBuffer.get());
-    mBuffer += *size;
+    DAWN_UNSAFE_TODO(mBuffer += *size);
     mSize -= *size;
     return WireResult::Success;
 }

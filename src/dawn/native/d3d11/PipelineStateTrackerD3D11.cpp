@@ -25,16 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/d3d11/PipelineStateTrackerD3D11.h"
 
 #include <cstring>
 
 #include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::d3d11 {
 
@@ -94,12 +90,13 @@ void PipelineStateTracker::OMSetBlendState(ID3D11BlendState* blendState,
                                            const FLOAT blendFactor[4],
                                            UINT sampleMask) {
     if (mBlendState == blendState && mSampleMask == sampleMask &&
-        std::memcmp(mBlendFactor.data(), blendFactor, sizeof(mBlendFactor)) == 0) {
+        DAWN_UNSAFE_TODO(std::memcmp(mBlendFactor.data(), blendFactor, sizeof(mBlendFactor))) ==
+            0) {
         return;
     }
     mBlendState = blendState;
     mSampleMask = sampleMask;
-    std::memcpy(mBlendFactor.data(), blendFactor, sizeof(mBlendFactor));
+    DAWN_UNSAFE_TODO(std::memcpy(mBlendFactor.data(), blendFactor, sizeof(mBlendFactor)));
     mCommandContext->GetD3D11DeviceContext3()->OMSetBlendState(blendState, blendFactor, sampleMask);
 }
 

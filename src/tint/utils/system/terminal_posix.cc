@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 // GEN_BUILD:CONDITION(tint_build_is_linux || tint_build_is_mac)
 
 #include <sys/select.h>
@@ -49,6 +44,7 @@
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/system/env.h"
 #include "src/tint/utils/system/terminal.h"
+#include "src/utils/compiler.h"
 
 namespace tint {
 namespace {
@@ -81,7 +77,7 @@ std::optional<bool> TerminalIsDarkImpl(FILE* out) {
 
     // Emit the device control escape sequence to query the terminal colors.
     static constexpr std::string_view kQuery = "\033]11;?\033\\";
-    fwrite(kQuery.data(), 1, kQuery.length(), out);
+    DAWN_UNSAFE_TODO(fwrite(kQuery.data(), 1, kQuery.length(), out));
     fflush(out);
 
     // Timeout for attempting to read the response.
@@ -116,13 +112,14 @@ std::optional<bool> TerminalIsDarkImpl(FILE* out) {
         if (!peek.IsEmpty()) {
             return peek.Pop();
         }
+        FILE* in_file = stdin;
         while ((std::chrono::steady_clock::now() - start) < kTimeout) {
             if (!poll_stdin()) {
                 return std::nullopt;
             }
 
             char c;
-            if (fread(&c, 1, 1, stdin) == 1) {
+            if (DAWN_UNSAFE_TODO(fread(&c, 1, 1, in_file)) == 1) {
                 return c;
             }
         }

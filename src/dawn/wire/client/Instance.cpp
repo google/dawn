@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/wire/client/Instance.h"
 
 #include <limits>
@@ -46,6 +41,7 @@
 #include "dawn/wire/client/EventManager.h"
 #include "dawn/wire/client/webgpu.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 #include "tint/tint.h"
 
 namespace dawn::wire::client {
@@ -293,7 +289,7 @@ void Instance::GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
     // Remove blocklisted features.
     if (wgslBlocklist != nullptr) {
         for (size_t i = 0; i < wgslBlocklist->blocklistedFeatureCount; i++) {
-            const char* name = wgslBlocklist->blocklistedFeatures[i];
+            const char* name = DAWN_UNSAFE_TODO(wgslBlocklist->blocklistedFeatures[i]);
             tint::wgsl::LanguageFeature tintFeature = tint::wgsl::ParseLanguageFeature(name);
             if (tintFeature == tint::wgsl::LanguageFeature::kUndefined) {
                 // Ignore unknown features in the blocklist.
@@ -314,7 +310,7 @@ void Instance::APIGetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* fea
     WGPUWGSLLanguageFeatureName* wgslFeatures = new WGPUWGSLLanguageFeatureName[featureCount];
     uint32_t index = 0;
     for (WGPUWGSLLanguageFeatureName feature : mWGSLFeatures) {
-        wgslFeatures[index++] = feature;
+        DAWN_UNSAFE_TODO(wgslFeatures[index++]) = feature;
     }
     DAWN_ASSERT(index == featureCount);
 
