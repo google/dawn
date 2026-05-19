@@ -62,9 +62,13 @@ func TestCmd_Run_FileDiscovery(t *testing.T) {
 	tmplPath2 := filepath.Join(realDawnRoot, "test", "tint", "subdir", "test2.tmpl")
 	createTemplateFile(t, osw, tmplPath2, `Test Template 2`)
 
-	c := &Cmd{}
+	c := &CmdSources{}
 	err := c.Run(ctx, cfg)
-	require.NoError(t, err, "Run failed")
+	require.NoError(t, err, "Run sources failed")
+
+	c2 := &CmdTests{}
+	err = c2.Run(ctx, cfg)
+	require.NoError(t, err, "Run tests failed")
 
 	// Verify output 1
 	outPath := filepath.Join(realDawnRoot, "src", "tint", "test")
@@ -97,7 +101,7 @@ func TestCmd_Run_ExplicitFiles(t *testing.T) {
 	err := flag.CommandLine.Parse(args)
 	require.NoError(t, err, "Failed to parse mock flags")
 
-	c := &Cmd{}
+	c := &CmdSources{}
 	err = c.Run(ctx, cfg)
 	require.NoError(t, err, "Run failed")
 
@@ -123,7 +127,7 @@ func TestCmd_Run_StaleCheck(t *testing.T) {
 	require.NoError(t, err, "Failed to write existing output file")
 
 	cfg.Flags.CheckStale = true
-	c := &Cmd{}
+	c := &CmdSources{}
 	err = c.Run(ctx, cfg)
 
 	require.Error(t, err, "Run should have returned an error for stale files")
@@ -141,7 +145,7 @@ func TestCmd_Run_StaleCheck_Clean(t *testing.T) {
 	createTemplateFile(t, osw, tmplPath, `Clean Template`)
 
 	// First run: generate the file
-	c := &Cmd{}
+	c := &CmdSources{}
 	err := c.Run(ctx, cfg)
 	require.NoError(t, err, "First run failed")
 
@@ -163,7 +167,7 @@ func TestCmd_Run_InvalidTemplateSyntax(t *testing.T) {
 	tmplPath := filepath.Join(realDawnRoot, "src", "tint", "invalid.tmpl")
 	createTemplateFile(t, osw, tmplPath, `{{ invalid syntax }}`)
 
-	c := &Cmd{}
+	c := &CmdSources{}
 	err := c.Run(ctx, cfg)
 	require.Error(t, err, "Run should fail with invalid template syntax")
 	require.ErrorContains(t, err, "function \"invalid\" not defined")
@@ -177,7 +181,7 @@ func TestCmd_Run_MissingIntrinsicDef(t *testing.T) {
 	// The template must try to use the intrinsics to trigger the load.
 	createTemplateFile(t, osw, tmplPath, `{{ (LoadIntrinsics "src/tint/missing.def").Sem }}`)
 
-	c := &Cmd{}
+	c := &CmdSources{}
 	err := c.Run(ctx, cfg)
 	require.Error(t, err, "Run should fail with missing intrinsic definition")
 	// The error comes from ReadFile failing in intrinsicCache.Sem()
@@ -203,7 +207,7 @@ func TestCmd_Run_TemplateOutsideProjectRoot(t *testing.T) {
 	err := flag.CommandLine.Parse(args)
 	require.NoError(t, err, "Failed to parse mock flags")
 
-	c := &Cmd{}
+	c := &CmdSources{}
 	err = c.Run(ctx, cfg)
 	require.Error(t, err, "Run should fail with template outside project root")
 	require.ErrorContains(t, err, "is not under project root")

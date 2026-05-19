@@ -77,8 +77,12 @@ func (c *cmdAll) RegisterFlags(ctx context.Context, cfg *common.Config) ([]strin
 }
 
 func (c *cmdAll) Run(ctx context.Context, cfg *common.Config) error {
-	templatesCmd := templates.Cmd{}
-	if err := templatesCmd.Run(ctx, cfg); err != nil {
+	sourcesCmd := templates.CmdSources{}
+	if err := sourcesCmd.Run(ctx, cfg); err != nil {
+		return err
+	}
+	testsCmd := templates.CmdTests{}
+	if err := testsCmd.Run(ctx, cfg); err != nil {
 		return err
 	}
 	buildCmd := build.Cmd{}

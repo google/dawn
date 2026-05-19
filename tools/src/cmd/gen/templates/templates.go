@@ -29,6 +29,7 @@ package templates
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"math/rand"
@@ -49,40 +50,60 @@ import (
 )
 
 func init() {
-	common.Register(&Cmd{})
+	common.Register(&CmdSources{})
+	common.Register(&CmdTests{})
 }
 
-type Cmd struct {
+// CmdSources implements the "sources" command.
+type CmdSources struct{}
+
+func (c *CmdSources) Name() string { return "sources" }
+
+func (c *CmdSources) Desc() string {
+	return `sources generates files from <file>.tmpl files found in the Tint source directory`
 }
 
-func (c *Cmd) Name() string {
-	return "templates"
-}
-
-func (c *Cmd) Desc() string {
-	return `templates generates files from <file>.tmpl files found in the Tint source and test directories`
-}
-
-func (c *Cmd) RegisterFlags(ctx context.Context, cfg *common.Config) ([]string, error) {
+func (c *CmdSources) RegisterFlags(ctx context.Context, cfg *common.Config) ([]string, error) {
 	return nil, nil
 }
 
+func (c *CmdSources) Run(ctx context.Context, cfg *common.Config) error {
+	return runTemplates(ctx, cfg, []string{"src/tint/**.tmpl"})
+}
+
+// CmdTests implements the "tests" command.
+type CmdTests struct{}
+
+func (c *CmdTests) Name() string { return "tests" }
+
+func (c *CmdTests) Desc() string {
+	return `tests generates files from <file>.tmpl files found in the Tint test directory`
+}
+
+func (c *CmdTests) RegisterFlags(ctx context.Context, cfg *common.Config) ([]string, error) {
+	return nil, nil
+}
+
+func (c *CmdTests) Run(ctx context.Context, cfg *common.Config) error {
+	return runTemplates(ctx, cfg, []string{"test/tint/**.tmpl"})
+}
+
 // TODO(crbug.com/344014313): Add unittest coverage.
-func (c *Cmd) Run(ctx context.Context, cfg *common.Config) error {
+// runTemplates executes the templates matching the defaultIncludes patterns.
+func runTemplates(ctx context.Context, cfg *common.Config, defaultIncludes []string) error {
 	staleFiles := common.StaleFiles{}
 	projectRoot := fileutils.DawnRoot(cfg.OsWrapper)
 
 	files := flag.Args()
 	if len(files) == 0 {
-		// Recursively find all the template files in the <dawn>/src/tint and
-		// <dawn>/test/tint and directories
-		var err error
-		files, err = glob.Scan(projectRoot, glob.MustParseConfig(`{
-			"paths": [{"include": [
-				"src/tint/**.tmpl",
-				"test/tint/**.tmpl"
-			]}]
-		}`), cfg.OsWrapper)
+		includesJson, err := json.Marshal(defaultIncludes)
+		if err != nil {
+			return fmt.Errorf("failed to marshal includes: %w", err)
+		}
+		configStr := fmt.Sprintf(`{
+			"paths": [{"include": %s}]
+		}`, includesJson)
+		files, err = glob.Scan(projectRoot, glob.MustParseConfig(configStr), cfg.OsWrapper)
 		if err != nil {
 			return err
 		}
