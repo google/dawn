@@ -45,6 +45,11 @@ union OverrideScalar;
 
 namespace dawn::native::vulkan {
 
+// Per Vulkan spec (vkImportSemaphoreFdKHR / vkImportFenceFdKHR), fd = -1
+// for VK_EXTERNAL_*_HANDLE_TYPE_SYNC_FD_BIT is a valid sync file descriptor
+// meaning "already signaled".
+inline constexpr int kSemaphoreFdAlreadySignaledFd = -1;
+
 class Device;
 struct VulkanFunctions;
 

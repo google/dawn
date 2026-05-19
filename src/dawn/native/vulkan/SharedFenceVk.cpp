@@ -31,6 +31,7 @@
 
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/utils/SystemHandle.h"
 
 namespace dawn::native::vulkan {
@@ -52,9 +53,12 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
 ResultOrError<Ref<SharedFence>> SharedFence::Create(Device* device,
                                                     StringView label,
                                                     const SharedFenceSyncFDDescriptor* descriptor) {
-    DAWN_INVALID_IF(descriptor->handle < 0, "File descriptor (%d) was invalid.",
-                    descriptor->handle);
-    dawn::utils::SystemHandle handle = dawn::utils::SystemHandle::Duplicate(descriptor->handle);
+    DAWN_INVALID_IF(descriptor->handle < 0 && descriptor->handle != kSemaphoreFdAlreadySignaledFd,
+                    "File descriptor (%d) was invalid.", descriptor->handle);
+    utils::SystemHandle handle;
+    if (descriptor->handle != kSemaphoreFdAlreadySignaledFd) {
+        handle = utils::SystemHandle::Duplicate(descriptor->handle);
+    }
     auto fence = AcquireRef(new SharedFence(device, label, std::move(handle)));
     fence->mType = wgpu::SharedFenceType::SyncFD;
     return fence;
@@ -77,7 +81,9 @@ SharedFence::SharedFence(Device* device, StringView label, dawn::utils::SystemHa
     : SharedFenceBase(device, label), mHandle(std::move(handle)) {}
 
 void SharedFence::DestroyImpl(DestroyReason reason) {
-    mHandle.Close();
+    if (mHandle.IsValid()) {
+        mHandle.Close();
+    }
 }
 
 const dawn::utils::SystemHandle& SharedFence::GetHandle() const {
