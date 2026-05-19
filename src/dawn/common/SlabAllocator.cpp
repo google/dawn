@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/common/SlabAllocator.h"
 
 #include <algorithm>
@@ -39,6 +34,7 @@
 #include "dawn/common/AlignedAlloc.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/Math.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 
@@ -103,21 +99,23 @@ SlabAllocatorImpl::~SlabAllocatorImpl() = default;
 SlabAllocatorImpl::IndexLinkNode* SlabAllocatorImpl::OffsetFrom(
     IndexLinkNode* node,
     std::make_signed_t<Index> offset) const {
-    return reinterpret_cast<IndexLinkNode*>(reinterpret_cast<char*>(node) +
-                                            static_cast<intptr_t>(mBlockStride) * offset);
+    return reinterpret_cast<IndexLinkNode*>(
+        DAWN_UNSAFE_TODO(reinterpret_cast<char*>(node) + static_cast<intptr_t>(mBlockStride)) *
+        offset);
 }
 
 SlabAllocatorImpl::IndexLinkNode* SlabAllocatorImpl::NodeFromObject(void* object) const {
-    return reinterpret_cast<SlabAllocatorImpl::IndexLinkNode*>(static_cast<char*>(object) +
-                                                               mIndexLinkNodeOffset);
+    return reinterpret_cast<SlabAllocatorImpl::IndexLinkNode*>(
+        DAWN_UNSAFE_TODO(static_cast<char*>(object) + mIndexLinkNodeOffset));
 }
 
 void* SlabAllocatorImpl::ObjectFromNode(IndexLinkNode* node) const {
-    return static_cast<void*>(reinterpret_cast<char*>(node) - mIndexLinkNodeOffset);
+    return static_cast<void*>(
+        DAWN_UNSAFE_TODO(reinterpret_cast<char*>(node) - mIndexLinkNodeOffset));
 }
 
 bool SlabAllocatorImpl::IsNodeInSlab(Slab* slab, IndexLinkNode* node) const {
-    char* firstObjectPtr = reinterpret_cast<char*>(slab) + mSlabBlocksOffset;
+    char* firstObjectPtr = DAWN_UNSAFE_TODO(reinterpret_cast<char*>(slab) + mSlabBlocksOffset);
     IndexLinkNode* firstNode = NodeFromObject(firstObjectPtr);
     IndexLinkNode* lastNode = OffsetFrom(firstNode, mBlocksPerSlab - 1);
     return node >= firstNode && node <= lastNode && node->index < mBlocksPerSlab;
@@ -233,7 +231,8 @@ void SlabAllocatorImpl::Deallocate(void* ptr) {
 
     DAWN_ASSERT(node->index < mBlocksPerSlab);
     void* firstAllocation = ObjectFromNode(OffsetFrom(node, -node->index));
-    Slab* slab = reinterpret_cast<Slab*>(static_cast<char*>(firstAllocation) - mSlabBlocksOffset);
+    Slab* slab = reinterpret_cast<Slab*>(
+        DAWN_UNSAFE_TODO(static_cast<char*>(firstAllocation) - mSlabBlocksOffset));
     DAWN_ASSERT(slab != nullptr);
 
     bool slabWasFull = slab->blocksInUse == mBlocksPerSlab;
@@ -265,7 +264,7 @@ void SlabAllocatorImpl::GetNewSlab() {
 
     char* alignedPtr = static_cast<char*>(AlignedAlloc(mTotalAllocationSize, mAllocationAlignment));
 
-    char* dataStart = alignedPtr + mSlabBlocksOffset;
+    char* dataStart = DAWN_UNSAFE_TODO(alignedPtr + mSlabBlocksOffset);
 
     IndexLinkNode* node = NodeFromObject(dataStart);
     for (uint32_t i = 0; i < mBlocksPerSlab; ++i) {

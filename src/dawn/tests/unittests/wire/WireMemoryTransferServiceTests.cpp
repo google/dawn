@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <memory>
 #include <tuple>
 #include <utility>
@@ -41,6 +36,7 @@
 #include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/client/ClientMemoryTransferService_mock.h"
 #include "dawn/wire/server/ServerMemoryTransferService_mock.h"
+#include "src/utils/compiler.h"
 
 namespace wgpu {
 // Define a stream operator for wgpu::MapMode so that it can be found on resolution for test name
@@ -192,7 +188,7 @@ class WireMemoryTransferServiceTestBase : public WireTest,
             }));
             EXPECT_CALL(*readHandle, SerializeCreate(_))
                 .WillOnce(WithArg<0>([&](void* serializePointer) {
-                    memcpy(serializePointer, &mSerializeCreateInfo, kDataSize);
+                    DAWN_UNSAFE_TODO(memcpy(serializePointer, &mSerializeCreateInfo, kDataSize));
                     return kDataSize;
                 }));
         }
@@ -203,7 +199,7 @@ class WireMemoryTransferServiceTestBase : public WireTest,
             }));
             EXPECT_CALL(*writeHandle, SerializeCreate(_))
                 .WillOnce(WithArg<0>([&](void* serializePointer) {
-                    memcpy(serializePointer, &mSerializeCreateInfo, kDataSize);
+                    DAWN_UNSAFE_TODO(memcpy(serializePointer, &mSerializeCreateInfo, kDataSize));
                     return kDataSize;
                 }));
         }
@@ -262,7 +258,7 @@ class WireMemoryTransferServiceTestBase : public WireTest,
         EXPECT_CALL(*clientHandle, SizeOfSerializeDataUpdate(_, _)).WillOnce(Return(kDataSize));
         EXPECT_CALL(*clientHandle, SerializeDataUpdate)
             .WillOnce(WithArg<0>([&](std::span<char> serializeSpan) {
-                memcpy(serializeSpan.data(), &mClientBufferContent, kBufferSize);
+                DAWN_UNSAFE_TODO(memcpy(serializeSpan.data(), &mClientBufferContent, kBufferSize));
             }));
     }
     void ExpectServerSerializeData(MockServerHandles& serverHandles) {
@@ -274,7 +270,7 @@ class WireMemoryTransferServiceTestBase : public WireTest,
         EXPECT_CALL(*serverHandle, SizeOfSerializeDataUpdate(_, _)).WillOnce(Return(kDataSize));
         EXPECT_CALL(*serverHandle, SerializeDataUpdate)
             .WillOnce(WithArg<2>([&](std::span<char> serializeSpan) {
-                memcpy(serializeSpan.data(), &mServerBufferContent, kBufferSize);
+                DAWN_UNSAFE_TODO(memcpy(serializeSpan.data(), &mServerBufferContent, kBufferSize));
             }));
     }
 
@@ -292,7 +288,8 @@ class WireMemoryTransferServiceTestBase : public WireTest,
                                           static_cast<size_t>(0u)))
             .WillOnce(WithArg<0>([&, success](std::span<const uint8_t> deserializeSpan) {
                 if (success) {
-                    memcpy(&mClientBufferContent, deserializeSpan.data(), kBufferSize);
+                    DAWN_UNSAFE_TODO(
+                        memcpy(&mClientBufferContent, deserializeSpan.data(), kBufferSize));
                 }
                 return success;
             }));
@@ -318,8 +315,8 @@ class WireMemoryTransferServiceTestBase : public WireTest,
             .WillOnce(WithArg<0>([&, success](std::span<const uint8_t> deserializePointer) {
                 if (success) {
                     // Copy the data manually here.
-                    memcpy(&mServerBufferContent, deserializePointer.data(),
-                           deserializePointer.size());
+                    DAWN_UNSAFE_TODO(memcpy(&mServerBufferContent, deserializePointer.data(),
+                                            deserializePointer.size()));
                 }
                 return success;
             }));

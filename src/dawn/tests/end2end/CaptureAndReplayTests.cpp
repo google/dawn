@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <memory>
 #include <ostream>
 #include <sstream>
@@ -45,6 +40,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 #ifdef DAWN_SUPPORTS_GLFW_FOR_WINDOWING
 #include "GLFW/glfw3.h"
@@ -277,7 +273,7 @@ TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationMappedAtCreation) {
     const uint8_t myData1[] = {0x55, 0x66, 0x77, 0x88};
 
     wgpu::Buffer buffer = CreateBuffer(label, 8, wgpu::BufferUsage::CopyDst, true);
-    std::memcpy(buffer.GetMappedRange(), myData0, sizeof(myData0));
+    DAWN_UNSAFE_TODO(std::memcpy(buffer.GetMappedRange(), myData0, sizeof(myData0)));
     buffer.Unmap();
 
     // --- capture ---
@@ -1600,17 +1596,18 @@ class OcclusionExpectation : public detail::Expectation {
         DAWN_ASSERT(size / sizeof(uint64_t) == mExpected.size());
         const uint64_t* actual = static_cast<const uint64_t*>(data);
         for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
-            if (actual[i] == kSentinelValue) {
+            if (DAWN_UNSAFE_TODO(actual[i]) == kSentinelValue) {
                 return testing::AssertionFailure()
                        << "Data[" << i << "] was not written (it kept the sentinel value of "
                        << kSentinelValue << ").\n";
             }
             Result expected = mExpected[i];
-            if (expected == Result::Zero && actual[i] != 0) {
+            if (expected == Result::Zero && DAWN_UNSAFE_TODO(actual[i]) != 0) {
                 return testing::AssertionFailure()
-                       << "Expected data[" << i << "] to be zero, actual: " << actual[i] << ".\n";
+                       << "Expected data[" << i
+                       << "] to be zero, actual: " << DAWN_UNSAFE_TODO(actual[i]) << ".\n";
             }
-            if (expected == Result::NonZero && actual[i] == 0) {
+            if (expected == Result::NonZero && DAWN_UNSAFE_TODO(actual[i]) == 0) {
                 return testing::AssertionFailure()
                        << "Expected data[" << i << "] to be non-zero.\n";
             }
@@ -2410,7 +2407,7 @@ TEST_P(CaptureAndReplayTests, CaptureDepth24Plus) {
 
     float expected[kNumLayers];
     for (uint32_t i = 0; i < kNumLayers; ++i) {
-        expected[i] = (i + 0.5f) / 6.f;
+        DAWN_UNSAFE_TODO(expected[i]) = (i + 0.5f) / 6.f;
     }
     EXPECT_BUFFER_FLOAT_RANGE_TOLERANCE_EQ(expected, result, 0, 6, 0.05);
 }

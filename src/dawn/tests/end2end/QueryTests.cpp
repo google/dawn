@@ -25,16 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <vector>
 
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -79,16 +75,17 @@ class OcclusionExpectation : public detail::Expectation {
         DAWN_ASSERT(size % sizeof(uint64_t) == 0);
         const uint64_t* actual = static_cast<const uint64_t*>(data);
         for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
-            if (actual[i] == kSentinelValue) {
+            if (DAWN_UNSAFE_TODO(actual[i]) == kSentinelValue) {
                 return testing::AssertionFailure()
                        << "Data[" << i << "] was not written (it kept the sentinel value of "
                        << kSentinelValue << ").\n";
             }
-            if (mExpected == Result::Zero && actual[i] != 0) {
+            if (mExpected == Result::Zero && DAWN_UNSAFE_TODO(actual[i]) != 0) {
                 return testing::AssertionFailure()
-                       << "Expected data[" << i << "] to be zero, actual: " << actual[i] << ".\n";
+                       << "Expected data[" << i
+                       << "] to be zero, actual: " << DAWN_UNSAFE_TODO(actual[i]) << ".\n";
             }
-            if (mExpected == Result::NonZero && actual[i] == 0) {
+            if (mExpected == Result::NonZero && DAWN_UNSAFE_TODO(actual[i]) == 0) {
                 return testing::AssertionFailure()
                        << "Expected data[" << i << "] to be non-zero.\n";
             }
@@ -681,7 +678,7 @@ class TimestampExpectation : public detail::Expectation {
         DAWN_ASSERT(size % sizeof(uint64_t) == 0);
         const uint64_t* timestamps = static_cast<const uint64_t*>(data);
         for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
-            if (timestamps[i] == 0) {
+            if (DAWN_UNSAFE_TODO(timestamps[i]) == 0) {
                 return testing::AssertionFailure()
                        << "Expected data[" << i << "] to be greater than 0.\n";
             }

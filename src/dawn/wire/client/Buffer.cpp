@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/wire/client/Buffer.h"
 
 #include <functional>
@@ -44,6 +39,7 @@
 #include "dawn/wire/client/Device.h"
 #include "dawn/wire/client/EventManager.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::wire::client {
 namespace {
@@ -447,7 +443,7 @@ void* Buffer::APIGetMappedRange(size_t offset, size_t size) {
     if (!CheckGetMappedRangeOffsetSize(offset, size)) {
         return nullptr;
     }
-    return static_cast<uint8_t*>(mMappedData) + offset;
+    return DAWN_UNSAFE_TODO(static_cast<uint8_t*>(mMappedData) + offset);
 }
 
 const void* Buffer::APIGetConstMappedRange(size_t offset, size_t size) {
@@ -455,7 +451,7 @@ const void* Buffer::APIGetConstMappedRange(size_t offset, size_t size) {
         !CheckGetMappedRangeOffsetSize(offset, size)) {
         return nullptr;
     }
-    return static_cast<uint8_t*>(mMappedData) + offset;
+    return DAWN_UNSAFE_TODO(static_cast<uint8_t*>(mMappedData) + offset);
 }
 
 WGPUStatus Buffer::APIWriteMappedRange(size_t offset, void const* data, size_t size) {
@@ -464,7 +460,7 @@ WGPUStatus Buffer::APIWriteMappedRange(size_t offset, void const* data, size_t s
         return WGPUStatus_Error;
     }
 
-    memcpy(range, data, size);
+    DAWN_UNSAFE_TODO(memcpy(range, data, size));
     return WGPUStatus_Success;
 }
 
@@ -474,7 +470,7 @@ WGPUStatus Buffer::APIReadMappedRange(size_t offset, void* data, size_t size) {
         return WGPUStatus_Error;
     }
 
-    memcpy(data, range, size);
+    DAWN_UNSAFE_TODO(memcpy(data, range, size));
     return WGPUStatus_Success;
 }
 
@@ -613,7 +609,8 @@ void Buffer::FreeMappedData() {
     // use-after-free of the mapped data. This is particularly useful for WebGPU test about the
     // interaction of mapping and GC.
     if (mMappedData) {
-        memset(static_cast<uint8_t*>(mMappedData) + mMappedOffset, 0xCA, mMappedSize);
+        DAWN_UNSAFE_TODO(
+            memset(static_cast<uint8_t*>(mMappedData) + mMappedOffset, 0xCA, mMappedSize));
     }
 #endif  // defined(DAWN_ENABLE_ASSERTS)
 

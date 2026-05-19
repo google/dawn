@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <array>
 #include <cstring>
 #include <iomanip>
@@ -53,6 +48,7 @@
 #include "dawn/native/stream/Stream.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "src/utils/compiler.h"
 #include "tint/tint.h"
 
 namespace dawn::native::stream {
@@ -101,7 +97,8 @@ using TypedIntegerForTest = TypedInteger<struct TypedIntegerForTestTag, uint32_t
 
 // Matcher to compare ByteVectorSinks for easier testing.
 MATCHER_P(VectorEq, key, PrintToString(key)) {
-    return arg.size() == key.size() && memcmp(arg.data(), key.data(), key.size()) == 0;
+    return arg.size() == key.size() &&
+           DAWN_UNSAFE_TODO(memcmp(arg.data(), key.data(), key.size())) == 0;
 }
 
 #define EXPECT_CACHE_KEY_EQ(lhs, rhs)       \
@@ -204,7 +201,7 @@ TEST(SerializeTests, StdWStrings) {
 
     StreamIn(&expected, size_t(str.length()));
     size_t bytes = str.length() * sizeof(wchar_t);
-    memcpy(expected.GetSpace(bytes).data(), str.data(), bytes);
+    DAWN_UNSAFE_TODO(memcpy(expected.GetSpace(bytes).data(), str.data(), bytes));
 
     EXPECT_CACHE_KEY_EQ(str, expected);
 }
@@ -228,7 +225,7 @@ TEST(SerializeTests, StdWStringViews) {
     ByteVectorSink expected;
     StreamIn(&expected, size_t(str.length()));
     size_t bytes = str.length() * sizeof(wchar_t);
-    memcpy(expected.GetSpace(bytes).data(), str.data(), bytes);
+    DAWN_UNSAFE_TODO(memcpy(expected.GetSpace(bytes).data(), str.data(), bytes));
 
     EXPECT_CACHE_KEY_EQ(str, expected);
 }
@@ -539,7 +536,7 @@ TEST(StreamTests, SerializeDeserializeBlobs) {
         auto err = StreamOut(&src, &out);
         EXPECT_FALSE(err.IsError());
         EXPECT_EQ(blob.Size(), out.Size());
-        EXPECT_EQ(memcmp(blob.DataPtr(), out.DataPtr(), blob.Size()), 0);
+        DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(blob.DataPtr(), out.DataPtr(), blob.Size()), 0));
     }
 
     // Test a blob with some data
@@ -554,7 +551,7 @@ TEST(StreamTests, SerializeDeserializeBlobs) {
         auto err = StreamOut(&src, &out);
         EXPECT_FALSE(err.IsError());
         EXPECT_EQ(blob.Size(), out.Size());
-        EXPECT_EQ(memcmp(blob.DataPtr(), out.DataPtr(), blob.Size()), 0);
+        DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(blob.DataPtr(), out.DataPtr(), blob.Size()), 0));
     }
 }
 
@@ -730,7 +727,9 @@ class StreamParameterizedTests<T[N]> : public ::testing::Test {
         return std::get<std::initializer_list<T[N]>>(kStreamValueInitListParams);
     }
 
-    void ExpectEq(const T lhs[N], const T rhs[N]) { EXPECT_EQ(memcmp(lhs, rhs, sizeof(T[N])), 0); }
+    void ExpectEq(const T lhs[N], const T rhs[N]) {
+        DAWN_UNSAFE_TODO(EXPECT_EQ(memcmp(lhs, rhs, sizeof(T[N])), 0));
+    }
 };
 
 TYPED_TEST_SUITE_P(StreamParameterizedTests);
