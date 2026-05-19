@@ -96,9 +96,8 @@ MaybeError QuerySet::Resolve(const ScopedSwapStateCommandRecordingContext* comma
 
     for (QueryIndex i : Range(firstQuery, firstQuery + queryCount)) {
         if (IsQueryAvailable(i)) {
-            auto& predicate = mPredicates[i];
-            DAWN_TRY(destination->PredicatedClear(commandContext, predicate.Get(), 1,
-                                                  offset + ToQueryStorageSize(i),
+            DAWN_TRY(destination->PredicatedClear(commandContext, mPredicates[i].Get(), 1,
+                                                  offset + ToQueryStorageSize(i - firstQuery),
                                                   kSingleQueryStorageSize));
         }
     }

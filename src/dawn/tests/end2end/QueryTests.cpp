@@ -669,6 +669,34 @@ TEST_P(OcclusionQueryTests, ResolveToBufferWithOffset) {
     }
 }
 
+// Test that resolving with firstQuery != 0 works as expected.
+TEST_P(OcclusionQueryTests, ResolveWithFirstQuery) {
+    // Create a query set for 2 queries, the second of which will be resolved in the buffer.
+    constexpr uint32_t kQueryCount = 2;
+    wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
+    wgpu::Buffer destination = CreateResolveBuffer(sizeof(uint64_t));
+
+    // Fill occlusion query 1 with some data.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+    renderPass.renderPassInfo.occlusionQuerySet = querySet;
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.BeginOcclusionQuery(1);
+    pass.Draw(3);
+    pass.EndOcclusionQuery();
+    pass.End();
+
+    // Resolve with firstQuery = 1
+    encoder.ResolveQuerySet(querySet, 1, 1, destination, 0);
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER(destination, 0, sizeof(uint64_t),
+                  new OcclusionExpectation(OcclusionExpectation::Result::NonZero));
+}
+
 class TimestampExpectation : public detail::Expectation {
   public:
     ~TimestampExpectation() override = default;
@@ -1230,6 +1258,26 @@ TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
         EXPECT_BUFFER(destination, kMinDestinationOffset, sizeof(uint64_t),
                       new TimestampExpectation);
     }
+}
+
+// Test that resolving with firstQuery != 0 works as expected.
+TEST_P(TimestampQueryTests, ResolveWithFirstQuery) {
+    // Create a query set for 2 queries, the second of which will be resolved in the buffer.
+    constexpr uint32_t kQueryCount = 2;
+    wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
+    wgpu::Buffer destination = CreateResolveBuffer(sizeof(uint64_t));
+
+    // Fill occlusion query 1 with some data.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.WriteTimestamp(querySet, 1);
+
+    // Resolve with firstQuery = 1
+    encoder.ResolveQuerySet(querySet, 1, 1, destination, 0);
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER(destination, 0, sizeof(uint64_t), new TimestampExpectation);
 }
 
 // Test resolving a query set twice into the same destination buffer with potentially overlapping
