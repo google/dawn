@@ -25,14 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/wire/WireDeserializeAllocator.h"
 
 #include <algorithm>
+
+#include "src/utils/compiler.h"
 
 namespace dawn::wire {
 WireDeserializeAllocator::WireDeserializeAllocator() {
@@ -47,7 +44,7 @@ void* WireDeserializeAllocator::GetSpace(size_t size) {
     // Return space in the current buffer if possible first.
     if (mRemainingSize >= size) {
         char* buffer = mCurrentBuffer;
-        mCurrentBuffer += size;
+        DAWN_UNSAFE_TODO(mCurrentBuffer += size);
         mRemainingSize -= size;
         return buffer;
     }

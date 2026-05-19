@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #ifndef SRC_DAWN_NATIVE_OPENGL_DEVICEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_DEVICEGL_H_
 
@@ -50,6 +45,7 @@
 #include "dawn/native/opengl/Forward.h"
 #include "dawn/native/opengl/GLFormat.h"
 #include "dawn/native/opengl/OpenGLFunctions.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 class AHBFunctions;
@@ -161,10 +157,10 @@ class Device final : public DeviceBase {
 
         // Call is deferred; must copy data.
         auto* d = static_cast<const char*>(data);
-        return EnqueueGL(
-            [data = std::vector<char>(d, d + size), work](const OpenGLFunctions& gl) -> MaybeError {
-                return work(gl, data.data(), data.size());
-            });
+        return EnqueueGL([data = std::vector<char>(d, DAWN_UNSAFE_TODO(d + size)),
+                          work](const OpenGLFunctions& gl) -> MaybeError {
+            return work(gl, data.data(), data.size());
+        });
     }
 
     // Flush any pending GL commands enqueued via EnqueueGL().

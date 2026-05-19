@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/DynamicUploader.h"
 
 #include <atomic>
@@ -39,6 +34,7 @@
 #include "dawn/native/Buffer.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Queue.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -126,8 +122,8 @@ ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSiz
 
     UploadReservation reservation;
     reservation.buffer = targetRingBuffer->mStagingBuffer;
-    reservation.mappedPointer =
-        static_cast<uint8_t*>(reservation.buffer->GetMappedPointer()) + startOffset;
+    reservation.mappedPointer = DAWN_UNSAFE_TODO(
+        static_cast<uint8_t*>(reservation.buffer->GetMappedPointer()) + startOffset);
     reservation.offsetInBuffer = startOffset;
 
     return reservation;

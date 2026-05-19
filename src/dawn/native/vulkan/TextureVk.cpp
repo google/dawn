@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/vulkan/TextureVk.h"
 
 #include <iostream>
@@ -57,6 +52,7 @@
 #include "dawn/native/vulkan/SharedFenceVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan {
 
@@ -1339,7 +1335,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
             blocksPerRow * largestMipSize.height * largestMipSize.depthOrArrayLayers;
         uint64_t uploadSize = blockInfo.ToBytes(uploadBlocks);
 
-        DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+        DAWN_UNSAFE_TODO(DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
             uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
                 memset(reservation.mappedPointer, uClearColor, uploadSize);
 
@@ -1379,7 +1375,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                                                 GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                 regions.size(), regions.data());
                 return {};
-            }));
+            })));
     }
 
     if (clearValue == TextureBase::ClearValue::Zero) {

@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <vector>
 
 #include "dawn/common/Assert.h"
@@ -40,6 +35,7 @@
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -119,8 +115,9 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
                     uint32_t uploadBufferOffset = copyConfig.bufferOffset +
                                                   copyBytesPerImage * layer + copyBytesPerRow * h +
                                                   oneBlockCompressedTextureData.size() * w;
-                    std::memcpy(&data[uploadBufferOffset], oneBlockCompressedTextureData.data(),
-                                oneBlockCompressedTextureData.size() * sizeof(uint8_t));
+                    DAWN_UNSAFE_TODO(
+                        std::memcpy(&data[uploadBufferOffset], oneBlockCompressedTextureData.data(),
+                                    oneBlockCompressedTextureData.size() * sizeof(uint8_t)));
                 }
             }
         }

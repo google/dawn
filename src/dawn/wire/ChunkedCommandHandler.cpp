@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/439062058): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/wire/ChunkedCommandHandler.h"
 
 #include <algorithm>
@@ -37,6 +32,7 @@
 #include <utility>
 
 #include "dawn/common/Alloc.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::wire {
 
@@ -71,8 +67,8 @@ WireResult ChunkedCommandHandler::HandleChunkedCommand(DeserializeBuffer* deseri
         // longer handle it, so just return a FatalError.
         return WireResult::FatalError;
     }
-    memcpy(chunkedCommand->data.get() + chunkedCommand->putOffset,
-           const_cast<const char*>(cmd.chunkData), cmd.chunkSize);
+    DAWN_UNSAFE_TODO(memcpy(chunkedCommand->data.get() + chunkedCommand->putOffset,
+                            const_cast<const char*>(cmd.chunkData), cmd.chunkSize));
     chunkedCommand->putOffset += cmd.chunkSize;
     chunkedCommand->remainingSize -= cmd.chunkSize;
 

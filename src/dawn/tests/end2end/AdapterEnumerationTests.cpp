@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <webgpu/webgpu_cpp.h>
 
 #include <memory>
@@ -39,6 +34,7 @@
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
+#include "src/utils/compiler.h"
 
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
 // This must be above VulkanBackend.h otherwise vulkan.h will be included before we can wrap it with
@@ -425,9 +421,10 @@ TEST_F(AdapterEnumerationTests, WebGPUBackendToggles) {
 
             // Validate toggles state.
             auto togglesUsed = native::GetTogglesUsed(adapter);
-            EXPECT_TRUE(std::find_if(togglesUsed.begin(), togglesUsed.end(), [](const char* name) {
-                            return strcmp(kAllowUnsafeAPIToggle, name) == 0;
-                        }) != togglesUsed.end());
+            DAWN_UNSAFE_TODO(EXPECT_TRUE(
+                std::find_if(togglesUsed.begin(), togglesUsed.end(), [](const char* name) {
+                    return strcmp(kAllowUnsafeAPIToggle, name) == 0;
+                }) != togglesUsed.end()));
         }
     };
 

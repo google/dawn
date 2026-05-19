@@ -64,6 +64,7 @@ if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [ "float_to_string_test.cc" ]
     deps = [
+      "${dawn_root}/src/utils",
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/strconv",

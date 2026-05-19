@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <string>
 #include <vector>
 
@@ -38,6 +33,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 #include "webgpu/webgpu_cpp.h"
 
 namespace dawn {
@@ -2835,9 +2831,10 @@ TEST_P(CompressedTextureZeroInitTest, Copy2DArrayCompressedB2T2B) {
     std::vector<uint8_t> expected(data.size(), 0);
     for (uint32_t z = 0; z < copyExtent3D.depthOrArrayLayers; ++z) {
         for (uint32_t y = 0; y < copyHeightInBlock; ++y) {
-            memcpy(&expected[copyBytesPerRow * y + copyBytesPerRow * copyRowsPerImage * z],
-                   &data[copyBytesPerRow * y + copyBytesPerRow * copyRowsPerImage * z],
-                   copyWidthInBlock * utils::GetTexelBlockSizeInBytes(textureDescriptor.format));
+            DAWN_UNSAFE_TODO(memcpy(
+                &expected[copyBytesPerRow * y + copyBytesPerRow * copyRowsPerImage * z],
+                &data[copyBytesPerRow * y + copyBytesPerRow * copyRowsPerImage * z],
+                copyWidthInBlock * utils::GetTexelBlockSizeInBytes(textureDescriptor.format)));
         }
     }
     // Check final contents

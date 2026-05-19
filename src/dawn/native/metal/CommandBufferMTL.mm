@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/metal/CommandBufferMTL.h"
 
 #include <tint/tint.h>
@@ -59,6 +54,7 @@
 #include "dawn/native/metal/TextureMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::metal {
 
@@ -619,7 +615,7 @@ class ImmediateConstantTracker : public T {
         DAWN_ASSERT(size <= sizeof(uint32_t) * (kMaxImmediateBlockSize - offset));
         // Copy data to all affected shader stages
         for (auto stage : IterateStages(stages)) {
-            std::memcpy(&mImmediateBlockContent[stage][offset], data, size);
+            DAWN_UNSAFE_TODO(std::memcpy(&mImmediateBlockContent[stage][offset], data, size));
         }
         dirtyStages |= stages;
     }
@@ -1535,7 +1531,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
                     size, kCopyBufferToBufferOffsetAlignment,
                     [&](UploadReservation reservation) -> MaybeError {
-                        memcpy(reservation.mappedPointer, data, size);
+                        DAWN_UNSAFE_TODO(memcpy(reservation.mappedPointer, data, size));
                         dstBuffer->EnsureDataInitializedAsDestination(commandContext, offset, size);
 
                         dstBuffer->TrackUsage();
@@ -2115,7 +2111,7 @@ MaybeError CommandBuffer::EncodeRenderPass(
                 auto bundles = mCommands.NextData<Ref<RenderBundleBase>>(cmd->count);
 
                 for (uint32_t i = 0; i < cmd->count; ++i) {
-                    CommandIterator* iter = bundles[i]->GetCommands();
+                    CommandIterator* iter = DAWN_UNSAFE_TODO(bundles[i]->GetCommands());
                     iter->Reset();
                     while (iter->NextCommandId(&type)) {
                         EncodeRenderBundleCommand(iter, type);
