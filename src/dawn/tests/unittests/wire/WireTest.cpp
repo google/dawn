@@ -77,6 +77,10 @@ wire::server::MemoryTransferService* WireTest::GetServerMemoryTransferService() 
     return nullptr;
 }
 
+utils::TerribleCommandBuffer* WireTest::GetC2SCommandBuffer() {
+    return mC2sBuf.get();
+}
+
 void WireTest::SetUp() {
     DawnProcTable mockProcs;
     api.GetProcTable(&mockProcs);

@@ -77,6 +77,8 @@ class DAWN_WIRE_EXPORT WireServer : public CommandHandler {
     // them periodically to ensure progress on asynchronous work is made.
     bool IsDeviceKnown(WGPUDevice device) const;
 
+    server::Server* GetImplForTesting();
+
   private:
     std::shared_ptr<server::Server> mImpl;
 };

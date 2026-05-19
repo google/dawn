@@ -83,4 +83,18 @@ bool TerribleCommandBuffer::Empty() {
     return mOffset == 0;
 }
 
+size_t TerribleCommandBuffer::GetOffsetForTesting() const {
+    return mOffset;
+}
+
+void TerribleCommandBuffer::SetOffsetForTesting(size_t offset) {
+    mOffset = offset;
+}
+
+std::span<const char> TerribleCommandBuffer::GetContentSubrange(size_t startOffset,
+                                                                size_t endOffset) {
+    DAWN_ASSERT(endOffset >= startOffset);
+    return DAWN_UNSAFE_TODO(std::span<const char>(&mBuffer[startOffset], endOffset - startOffset));
+}
+
 }  // namespace dawn::utils

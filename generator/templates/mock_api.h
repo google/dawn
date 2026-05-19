@@ -40,6 +40,7 @@
 #include <memory>
 
 #include "dawn/common/FutureUtils.h"
+#include "absl/container/flat_hash_map.h"
 
 // An abstract base class representing a proc table so that API calls can be mocked. Most API calls
 // are directly represented by a delete virtual method but others need minimal state tracking to be
@@ -49,6 +50,7 @@ class ProcTableAsClass {
         virtual ~ProcTableAsClass();
 
         void GetProcTable({{Prefix}}ProcTable* table);
+        WGPUFuture GetLastFuture();
 
         // Creates an object that can be returned by a mocked call as in WillOnce(Return(foo)).
         // It returns an object of the write type that isn't equal to any previously returned object.
@@ -99,6 +101,9 @@ class ProcTableAsClass {
                     {%- for arg in CallbackType.arguments -%}
                         , {{as_annotated_cType(arg)}}
                     {%- endfor -%}
+                    {%- if method.returns and method.returns.type.name.get() == "future" -%}
+                        , WGPUFuture future = {dawn::kNullFutureID}
+                    {%- endif -%}
                 );
             {% endfor %}
 
@@ -112,11 +117,21 @@ class ProcTableAsClass {
             ProcTableAsClass* procs = nullptr;
             {% for type in by_category["object"] %}
                 {% for method in type.methods if has_callbackInfoStruct(method.arguments) %}
+                    {% set Suffix = as_CppMethodSuffix(type.name, method.name) %}
                     {% set CallbackInfoType = (method.arguments|last).type %}
                     {% set CallbackType = find_by_name(CallbackInfoType.members, "callback").type %}
-                    void* m{{as_CppMethodSuffix(type.name, method.name)}}Userdata1 = 0;
-                    void* m{{as_CppMethodSuffix(type.name, method.name)}}Userdata2 = 0;
-                    {{as_cType(CallbackType.name)}} m{{as_CppMethodSuffix(type.name, method.name)}}Callback = nullptr;
+                    {% if method.returns and method.returns.type.name.get() == "future" %}
+                        struct {{Suffix}}Data {
+                            {{as_cType(CallbackType.name)}} callback = nullptr;
+                            void* userdata1 = 0;
+                            void* userdata2 = 0;
+                        };
+                        absl::flat_hash_map<dawn::FutureID, {{Suffix}}Data> m{{Suffix}}Requests;
+                    {% else %}
+                        void* m{{Suffix}}Userdata1 = 0;
+                        void* m{{Suffix}}Userdata2 = 0;
+                        {{as_cType(CallbackType.name)}} m{{Suffix}}Callback = nullptr;
+                    {% endif %}
                 {% endfor %}
             {% endfor %}
             // Manually implement some callback helpers for testing.

@@ -73,6 +73,10 @@ bool WireServer::IsDeviceKnown(WGPUDevice device) const {
     return mImpl->IsDeviceKnown(device);
 }
 
+server::Server* WireServer::GetImplForTesting() {
+    return mImpl.get();
+}
+
 namespace server {
 MemoryTransferService::MemoryTransferService() = default;
 

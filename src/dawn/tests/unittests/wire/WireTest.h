@@ -183,6 +183,8 @@ class WireTest : virtual public testing::Test {
     wire::CommandSerializer* GetC2SSerializer();
     wire::CommandSerializer* GetS2CSerializer();
 
+    utils::TerribleCommandBuffer* GetC2SCommandBuffer();
+
     size_t GetC2SMaxAllocationSize();
 
     void DeleteServer();

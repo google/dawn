@@ -40,14 +40,14 @@ WireResult Server::DoSurfaceGetCurrentTexture(Known<WGPUSurface> surface,
     mProcs->surfaceGetCurrentTexture(surface->handle, &surfaceTexture);
 
     if (surfaceTexture.texture != nullptr) {
-        return FillReservation(texture.id, surfaceTexture.texture);
+        return FillReservation(textureHandle, surfaceTexture.texture);
     } else {
         // The client always assumes that a texture will be associated with the reservation, so
         // create an error texture on the configured device.
         WGPUTextureDescriptor desc = WGPU_TEXTURE_DESCRIPTOR_INIT;
         WGPUTexture errorTexture =
             mProcs->deviceCreateErrorTexture(configuredDevice->handle, &desc);
-        return FillReservation(texture.id, errorTexture);
+        return FillReservation(textureHandle, errorTexture);
     }
 }
 
