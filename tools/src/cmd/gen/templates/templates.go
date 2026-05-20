@@ -68,7 +68,14 @@ func (c *CmdSources) RegisterFlags(ctx context.Context, cfg *common.Config) ([]s
 }
 
 func (c *CmdSources) Run(ctx context.Context, cfg *common.Config) error {
-	return runTemplates(ctx, cfg, []string{"src/tint/**.tmpl"})
+	args := flag.Args()
+	outputDir := ""
+	if len(args) == 1 {
+		outputDir = args[0]
+	} else if len(args) > 1 {
+		return fmt.Errorf("too many arguments")
+	}
+	return runTemplates(ctx, cfg, []string{"src/tint/**.tmpl"}, outputDir)
 }
 
 // CmdTests implements the "tests" command.
@@ -85,18 +92,17 @@ func (c *CmdTests) RegisterFlags(ctx context.Context, cfg *common.Config) ([]str
 }
 
 func (c *CmdTests) Run(ctx context.Context, cfg *common.Config) error {
-	return runTemplates(ctx, cfg, []string{"test/tint/**.tmpl"})
+	if len(flag.Args()) > 0 {
+		return fmt.Errorf("arguments are not supported")
+	}
+	return runTemplates(ctx, cfg, []string{"test/tint/**.tmpl"}, "")
 }
 
 // TODO(crbug.com/344014313): Add unittest coverage.
 // runTemplates executes the templates matching the defaultIncludes patterns.
-func runTemplates(ctx context.Context, cfg *common.Config, defaultIncludes []string) error {
+func runTemplates(ctx context.Context, cfg *common.Config, defaultIncludes []string, outputDir string) error {
 	staleFiles := common.StaleFiles{}
 	projectRoot := fileutils.DawnRoot(cfg.OsWrapper)
-
-	if len(flag.Args()) > 0 {
-		return fmt.Errorf("arguments are not supported")
-	}
 
 	includesJson, err := json.Marshal(defaultIncludes)
 	if err != nil {
@@ -132,7 +138,12 @@ func runTemplates(ctx context.Context, cfg *common.Config, defaultIncludes []str
 				return nil
 			}
 
-			outPath := filepath.Join(tmplDir, relPath)
+			var outPath string
+			if outputDir != "" {
+				outPath = filepath.Join(outputDir, filepath.Dir(relTmplPath), relPath)
+			} else {
+				outPath = filepath.Join(tmplDir, relPath)
+			}
 
 			// Load the old file
 			existing, err := cfg.OsWrapper.ReadFile(outPath)
