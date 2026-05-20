@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/opengl/CommandBufferGL.h"
 
 #include <algorithm>
@@ -59,6 +54,7 @@
 #include "dawn/native/opengl/TextureGL.h"
 #include "dawn/native/opengl/UtilsGL.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::opengl {
 
@@ -537,7 +533,8 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
         if (offset >= mInternalUniformBufferData.size()) {
             mInternalUniformBufferData.resize(offset + sizeof(uint32_t));
         }
-        memcpy(mInternalUniformBufferData.data() + offset, &data, sizeof(uint32_t));
+        DAWN_UNSAFE_TODO(
+            memcpy(mInternalUniformBufferData.data() + offset, &data, sizeof(uint32_t)));
 
         // Updating dirty range of the data vector
         mDirtyRange.begin = std::min(mDirtyRange.begin, offset);
@@ -570,9 +567,10 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
                     internalUniformBufferHandle));
 
         DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, internalUniformBufferHandle));
-        DAWN_GL_TRY(gl, BufferSubData(GL_UNIFORM_BUFFER, mDirtyRange.begin,
-                                      mDirtyRange.end - mDirtyRange.begin,
-                                      mInternalUniformBufferData.data() + mDirtyRange.begin));
+        DAWN_UNSAFE_TODO(DAWN_GL_TRY(
+            gl,
+            BufferSubData(GL_UNIFORM_BUFFER, mDirtyRange.begin, mDirtyRange.end - mDirtyRange.begin,
+                          mInternalUniformBufferData.data() + mDirtyRange.begin)));
         DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, 0));
 
         ResetInternalUniformDataDirtyRange();
@@ -602,11 +600,11 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
                         internalUniformBufferHandle));
 
         DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, internalUniformBufferHandle));
-        DAWN_GL_TRY(
+        DAWN_UNSAFE_TODO(DAWN_GL_TRY(
             gl, BufferSubData(
                     GL_UNIFORM_BUFFER, sizeof(uint32_t) * mDirtyRangeArrayLength.begin,
                     sizeof(uint32_t) * (mDirtyRangeArrayLength.end - mDirtyRangeArrayLength.begin),
-                    mInternalArrayLengthBufferData.data() + mDirtyRangeArrayLength.begin));
+                    mInternalArrayLengthBufferData.data() + mDirtyRangeArrayLength.begin)));
         DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, 0));
 
         ResetInternalUniformDataDirtyRangeArrayLength();
@@ -997,7 +995,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                                                            static_cast<uint32_t>(copySize.width),
                                                            static_cast<uint32_t>(copySize.height),
                                                            glFormat, glType, offset));
-                                offset += bytesPerImage;
+                                DAWN_UNSAFE_TODO(offset += bytesPerImage);
                             }
                             break;
                         }
@@ -1019,7 +1017,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                                                        static_cast<uint32_t>(copySize.height),
                                                        glFormat, glType, offset));
 
-                            offset += bytesPerImage;
+                            DAWN_UNSAFE_TODO(offset += bytesPerImage);
                         }
                         break;
                     }
@@ -1624,7 +1622,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 auto bundles = mCommands.NextData<Ref<RenderBundleBase>>(cmd->count);
 
                 for (uint32_t i = 0; i < cmd->count; ++i) {
-                    CommandIterator* iter = bundles[i]->GetCommands();
+                    CommandIterator* iter = DAWN_UNSAFE_TODO(bundles[i])->GetCommands();
                     iter->Reset();
                     while (iter->NextCommandId(&type)) {
                         DAWN_TRY(DoRenderBundleCommand(iter, type));
@@ -1670,7 +1668,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
 
     const GLFormat& format = texture->GetGLFormat();
     GLenum target = texture->GetGLTarget();
-    data = static_cast<const uint8_t*>(data) + dataLayout.offset;
+    data = DAWN_UNSAFE_TODO(static_cast<const uint8_t*>(data) + dataLayout.offset);
     DAWN_GL_TRY(gl, ActiveTexture(GL_TEXTURE0));
     DAWN_GL_TRY(gl, BindTexture(target, texture->GetHandle()));
     const TypedTexelBlockInfo& blockInfo = GetBlockInfo(destination);
@@ -1734,7 +1732,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                                         static_cast<uint32_t>(x), static_cast<uint32_t>(y),
                                         static_cast<uint32_t>(width), static_cast<uint32_t>(height),
                                         format.internalFormat, imageSize, pointer));
-                    pointer += bytesPerImage;
+                    DAWN_UNSAFE_TODO(pointer += bytesPerImage);
                 }
             } else {
                 DAWN_GL_TRY(
@@ -1765,14 +1763,15 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                                 target, destination.mipLevel, static_cast<uint32_t>(x),
                                 static_cast<uint32_t>(y), static_cast<uint32_t>(width),
                                 static_cast<uint32_t>(height), format.internalFormat, rowSize, d));
-                    d += bytesPerRow;
+                    DAWN_UNSAFE_TODO(d += bytesPerRow);
                 }
             } else if (target == GL_TEXTURE_CUBE_MAP) {
                 DAWN_ASSERT(texture->GetArrayLayers() == 6);
                 const uint8_t* pointer = static_cast<const uint8_t*>(data);
                 TexelCount baseLayer = destination.origin.z;
                 for (TexelCount l{0}; l < copySize.depthOrArrayLayers; ++l) {
-                    const uint8_t* d = pointer + static_cast<uint32_t>(l) * bytesPerImage;
+                    const uint8_t* d =
+                        DAWN_UNSAFE_TODO(pointer + static_cast<uint32_t>(l)) * bytesPerImage;
                     GLenum cubeMapTarget =
                         GL_TEXTURE_CUBE_MAP_POSITIVE_X + static_cast<uint32_t>(baseLayer + l);
                     for (y = destination.origin.y; y < destination.origin.y + copySize.height;
@@ -1784,7 +1783,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                                                                 static_cast<uint32_t>(width),
                                                                 static_cast<uint32_t>(height),
                                                                 format.internalFormat, rowSize, d));
-                        d += bytesPerRow;
+                        DAWN_UNSAFE_TODO(d += bytesPerRow);
                     }
                 }
             } else {
@@ -1804,10 +1803,10 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                                     static_cast<uint32_t>(y), static_cast<uint32_t>(z),
                                     static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1,
                                     format.internalFormat, rowSize, d));
-                        d += bytesPerRow;
+                        DAWN_UNSAFE_TODO(d += bytesPerRow);
                     }
 
-                    slice += bytesPerImage;
+                    DAWN_UNSAFE_TODO(slice += bytesPerImage);
                 }
             }
         }
@@ -1846,7 +1845,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                                         static_cast<uint32_t>(x), static_cast<uint32_t>(y),
                                         static_cast<uint32_t>(width), static_cast<uint32_t>(height),
                                         adjustedFormat, format.type, pointer));
-                    pointer += bytesPerImage;
+                    DAWN_UNSAFE_TODO(pointer += bytesPerImage);
                 }
             } else {
                 DAWN_ASSERT(target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY ||
@@ -1872,7 +1871,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                         gl, TexSubImage2D(target, destination.mipLevel, static_cast<uint32_t>(x),
                                           static_cast<uint32_t>(y), static_cast<uint32_t>(width), 1,
                                           adjustedFormat, format.type, d));
-                    d += bytesPerRow;
+                    DAWN_UNSAFE_TODO(d += bytesPerRow);
                 }
             } else if (target == GL_TEXTURE_CUBE_MAP) {
                 DAWN_ASSERT(texture->GetArrayLayers() == 6);
@@ -1888,9 +1887,9 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                                               static_cast<uint32_t>(x), static_cast<uint32_t>(y),
                                               static_cast<uint32_t>(width), 1, adjustedFormat,
                                               format.type, d));
-                        d += bytesPerRow;
+                        DAWN_UNSAFE_TODO(d += bytesPerRow);
                     }
-                    pointer += bytesPerImage;
+                    DAWN_UNSAFE_TODO(pointer += bytesPerImage);
                 }
             } else {
                 DAWN_ASSERT(target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY ||
@@ -1904,9 +1903,9 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                                             static_cast<uint32_t>(y), static_cast<uint32_t>(z),
                                             static_cast<uint32_t>(width), 1, 1, adjustedFormat,
                                             format.type, d));
-                        d += bytesPerRow;
+                        DAWN_UNSAFE_TODO(d += bytesPerRow);
                     }
-                    slice += bytesPerImage;
+                    DAWN_UNSAFE_TODO(slice += bytesPerImage);
                 }
             }
         }
