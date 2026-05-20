@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
 
 #include <limits>
@@ -50,6 +45,7 @@
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/utils/WGPUHelpers.h"
 #include "dawn/native/webgpu_absl_format.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -295,27 +291,30 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
         Color clearValue = ClampClearColorValueToLegalRange(initialClearValue, format);
         switch (baseType) {
             case TextureComponentType::Uint: {
-                uint32_t* clearValuePtr = reinterpret_cast<uint32_t*>(clearValues.data() + offset);
+                uint32_t* clearValuePtr =
+                    reinterpret_cast<uint32_t*>(DAWN_UNSAFE_TODO(clearValues.data() + offset));
                 clearValuePtr[0] = static_cast<uint32_t>(clearValue.r);
-                clearValuePtr[1] = static_cast<uint32_t>(clearValue.g);
-                clearValuePtr[2] = static_cast<uint32_t>(clearValue.b);
-                clearValuePtr[3] = static_cast<uint32_t>(clearValue.a);
+                DAWN_UNSAFE_TODO(clearValuePtr[1]) = static_cast<uint32_t>(clearValue.g);
+                DAWN_UNSAFE_TODO(clearValuePtr[2]) = static_cast<uint32_t>(clearValue.b);
+                DAWN_UNSAFE_TODO(clearValuePtr[3]) = static_cast<uint32_t>(clearValue.a);
                 break;
             }
             case TextureComponentType::Sint: {
-                int32_t* clearValuePtr = reinterpret_cast<int32_t*>(clearValues.data() + offset);
+                int32_t* clearValuePtr =
+                    reinterpret_cast<int32_t*>(DAWN_UNSAFE_TODO(clearValues.data() + offset));
                 clearValuePtr[0] = static_cast<int32_t>(clearValue.r);
-                clearValuePtr[1] = static_cast<int32_t>(clearValue.g);
-                clearValuePtr[2] = static_cast<int32_t>(clearValue.b);
-                clearValuePtr[3] = static_cast<int32_t>(clearValue.a);
+                DAWN_UNSAFE_TODO(clearValuePtr[1]) = static_cast<int32_t>(clearValue.g);
+                DAWN_UNSAFE_TODO(clearValuePtr[2]) = static_cast<int32_t>(clearValue.b);
+                DAWN_UNSAFE_TODO(clearValuePtr[3]) = static_cast<int32_t>(clearValue.a);
                 break;
             }
             case TextureComponentType::Float: {
-                float* clearValuePtr = reinterpret_cast<float*>(clearValues.data() + offset);
+                float* clearValuePtr =
+                    reinterpret_cast<float*>(DAWN_UNSAFE_TODO(clearValues.data() + offset));
                 clearValuePtr[0] = static_cast<float>(clearValue.r);
-                clearValuePtr[1] = static_cast<float>(clearValue.g);
-                clearValuePtr[2] = static_cast<float>(clearValue.b);
-                clearValuePtr[3] = static_cast<float>(clearValue.a);
+                DAWN_UNSAFE_TODO(clearValuePtr[1]) = static_cast<float>(clearValue.g);
+                DAWN_UNSAFE_TODO(clearValuePtr[2]) = static_cast<float>(clearValue.b);
+                DAWN_UNSAFE_TODO(clearValuePtr[3]) = static_cast<float>(clearValue.a);
                 break;
             }
         }
@@ -454,8 +453,9 @@ bool GetKeyOfApplyClearColorValueWithDrawPipelines(
         key->totalPixelLocalStorageSize = pls->totalPixelLocalStorageSize;
         for (size_t i = 0; i < pls->storageAttachmentCount; ++i) {
             wgpu::PipelineLayoutStorageAttachment attachment{};
-            attachment.format = pls->storageAttachments[i].storage->GetFormat().format;
-            attachment.offset = pls->storageAttachments[i].offset;
+            attachment.format =
+                DAWN_UNSAFE_TODO(pls->storageAttachments[i]).storage->GetFormat().format;
+            attachment.offset = DAWN_UNSAFE_TODO(pls->storageAttachments[i]).offset;
             key->plsAttachments.push_back(std::move(attachment));
         }
         // Sort the PLS attachments by offset to make sure the order is deterministic.
