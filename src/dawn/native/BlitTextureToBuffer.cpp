@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/BlitTextureToBuffer.h"
 
 #include <algorithm>
@@ -53,6 +48,7 @@
 #include "dawn/native/Queue.h"
 #include "dawn/native/Sampler.h"
 #include "dawn/native/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -1260,38 +1256,40 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
             static_cast<uint32_t*>(uniformBuffer->GetMappedRange(0, bufferDesc.size));
         // srcOrigin: vec3u
         params[0] = static_cast<uint32_t>(src.origin.x);
-        params[1] = static_cast<uint32_t>(src.origin.y);
-        params[2] = static_cast<uint32_t>(src.origin.z);
+        DAWN_UNSAFE_TODO(params[1]) = static_cast<uint32_t>(src.origin.y);
+        DAWN_UNSAFE_TODO(params[2]) = static_cast<uint32_t>(src.origin.z);
 
         // packTexelCount: number of texel values (1, 2, or 4) one thread packs into the dst
         // buffer
-        params[3] = std::max(1u, 4 / bytesPerTexel);
+        DAWN_UNSAFE_TODO(params[3]) = std::max(1u, 4 / bytesPerTexel);
         // srcExtent: vec3u
-        params[4] = static_cast<uint32_t>(copyExtent.width);
-        params[5] = static_cast<uint32_t>(copyExtent.height);
-        params[6] = static_cast<uint32_t>(copyExtent.depthOrArrayLayers);
+        DAWN_UNSAFE_TODO(params[4]) = static_cast<uint32_t>(copyExtent.width);
+        DAWN_UNSAFE_TODO(params[5]) = static_cast<uint32_t>(copyExtent.height);
+        DAWN_UNSAFE_TODO(params[6]) = static_cast<uint32_t>(copyExtent.depthOrArrayLayers);
 
-        params[7] = src.mipLevel;
+        DAWN_UNSAFE_TODO(params[7]) = src.mipLevel;
 
-        params[8] = static_cast<uint32_t>(blockInfo.ToBytes(dst.blocksPerRow));
-        params[9] = static_cast<uint32_t>(dst.rowsPerImage);
-        params[10] = static_cast<uint32_t>(shaderStartOffset);
+        DAWN_UNSAFE_TODO(params[8]) = static_cast<uint32_t>(blockInfo.ToBytes(dst.blocksPerRow));
+        DAWN_UNSAFE_TODO(params[9]) = static_cast<uint32_t>(dst.rowsPerImage);
+        DAWN_UNSAFE_TODO(params[10]) = static_cast<uint32_t>(shaderStartOffset);
 
         // These params are only used for formats smaller than 4 bytes
-        params[11] = (static_cast<uint32_t>(shaderStartOffset) % 4) / bytesPerTexel;  // shift
+        DAWN_UNSAFE_TODO(params[11]) =
+            (static_cast<uint32_t>(shaderStartOffset) % 4) / bytesPerTexel;  // shift
 
-        params[16] = bytesPerTexel;
-        params[17] = numU32PerRowNeedsWriting;
-        params[18] = readPreviousRow ? 1 : 0;
-        params[19] = dst.rowsPerImage == copyExtent.height ? 1 : 0;  // isCompactImage
+        DAWN_UNSAFE_TODO(params[16]) = bytesPerTexel;
+        DAWN_UNSAFE_TODO(params[17]) = numU32PerRowNeedsWriting;
+        DAWN_UNSAFE_TODO(params[18]) = readPreviousRow ? 1 : 0;
+        DAWN_UNSAFE_TODO(params[19]) =
+            dst.rowsPerImage == copyExtent.height ? 1 : 0;  // isCompactImage
 
         if (textureViewDimension == wgpu::TextureViewDimension::Cube) {
             // cube need texture size to convert texel coord to sample location
             auto levelSize =
                 src.texture->GetMipLevelSingleSubresourceVirtualSize(src.mipLevel, Aspect::Color);
-            params[12] = levelSize.width;
-            params[13] = levelSize.height;
-            params[14] = levelSize.depthOrArrayLayers;
+            DAWN_UNSAFE_TODO(params[12]) = levelSize.width;
+            DAWN_UNSAFE_TODO(params[13]) = levelSize.height;
+            DAWN_UNSAFE_TODO(params[14]) = levelSize.depthOrArrayLayers;
         }
 
         DAWN_TRY(uniformBuffer->Unmap());
