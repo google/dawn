@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/Queue.h"
 
 #include <webgpu/webgpu.h>
@@ -69,6 +64,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 
@@ -89,22 +85,22 @@ void CopyTextureData(uint8_t* dstPointer,
     if (!copyWholeLayer) {  // copy row by row
         for (uint32_t d = 0; d < depth; ++d) {
             for (uint32_t h = 0; h < dstRowsPerImage; ++h) {
-                memcpy(dstPointer, srcPointer, actualBytesPerRow);
-                dstPointer += dstBytesPerRow;
-                srcPointer += srcBytesPerRow;
+                DAWN_UNSAFE_TODO(memcpy(dstPointer, srcPointer, actualBytesPerRow));
+                DAWN_UNSAFE_TODO(dstPointer += dstBytesPerRow);
+                DAWN_UNSAFE_TODO(srcPointer += srcBytesPerRow);
             }
-            srcPointer += imageAdditionalStride;
+            DAWN_UNSAFE_TODO(srcPointer += imageAdditionalStride);
         }
     } else {
         uint64_t layerSize = uint64_t(dstRowsPerImage) * actualBytesPerRow;
         if (!copyWholeData) {  // copy layer by layer
             for (uint32_t d = 0; d < depth; ++d) {
-                memcpy(dstPointer, srcPointer, layerSize);
-                dstPointer += layerSize;
-                srcPointer += layerSize + imageAdditionalStride;
+                DAWN_UNSAFE_TODO(memcpy(dstPointer, srcPointer, layerSize));
+                DAWN_UNSAFE_TODO(dstPointer += layerSize);
+                DAWN_UNSAFE_TODO(srcPointer += layerSize + imageAdditionalStride);
             }
         } else {  // do a single copy
-            memcpy(dstPointer, srcPointer, layerSize * depth);
+            DAWN_UNSAFE_TODO(memcpy(dstPointer, srcPointer, layerSize * depth));
         }
     }
 }
@@ -177,7 +173,7 @@ void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* comma
 
     // Destroy the command buffers even if SubmitInternal failed. (crbug.com/dawn/1863)
     for (uint32_t i = 0; i < commandCount; ++i) {
-        commands[i]->Destroy();
+        DAWN_UNSAFE_TODO(commands[i])->Destroy();
     }
 
     [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
@@ -417,7 +413,8 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
 
     return GetDevice()->GetDynamicUploader()->WithUploadReservation(
         packedDataSize, offsetAlignment, [&](UploadReservation reservation) -> MaybeError {
-            const uint8_t* srcPointer = reinterpret_cast<const uint8_t*>(data) + dataLayout.offset;
+            const uint8_t* srcPointer =
+                DAWN_UNSAFE_TODO(reinterpret_cast<const uint8_t*>(data) + dataLayout.offset);
             uint8_t* dstPointer = reinterpret_cast<uint8_t*>(reservation.mappedPointer.get());
             CopyTextureData(dstPointer, srcPointer, writeSizePixel.depthOrArrayLayers,
                             static_cast<uint32_t>(rowsPerImage), dataLayout.rowsPerImage,
@@ -497,13 +494,15 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
     std::set<CommandBufferBase*> uniqueCommandBuffers;
 
     for (uint32_t i = 0; i < commandCount; ++i) {
-        DAWN_TRY(GetDevice()->ValidateObject(commands[i]));
-        DAWN_TRY(commands[i]->ValidateCanUseInSubmitNow());
+        DAWN_UNSAFE_TODO(DAWN_TRY(GetDevice()->ValidateObject(commands[i])));
+        DAWN_UNSAFE_TODO(DAWN_TRY(commands[i]->ValidateCanUseInSubmitNow()));
 
-        auto insertResult = uniqueCommandBuffers.insert(commands[i]);
-        DAWN_INVALID_IF(!insertResult.second, "Submit contains duplicates of %s.", commands[i]);
+        auto insertResult = uniqueCommandBuffers.insert(DAWN_UNSAFE_TODO(commands[i]));
+        DAWN_UNSAFE_TODO(DAWN_INVALID_IF(!insertResult.second, "Submit contains duplicates of %s.",
+                                         commands[i]));
 
-        const CommandBufferResourceUsage& usages = commands[i]->GetResourceUsages();
+        const CommandBufferResourceUsage& usages =
+            DAWN_UNSAFE_TODO(commands[i])->GetResourceUsages();
 
         auto ValidateBuffer = [&buffersFromCommands](BufferBase* buffer) -> MaybeError {
             if (auto [iter, inserted] = buffersFromCommands.insert(buffer); inserted) {
