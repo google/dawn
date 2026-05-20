@@ -311,7 +311,14 @@ TEST_P(TextureZeroInitTest, CopyMultipleTextureArrayLayersToBufferSource) {
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
 
     // Expect texture to be lazy initialized.
-    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
+    // TODO(b/513631768): SetInitialized is now skipped for use_blit_for_t2b path.
+    // If blit is used for T2B, the destination buffer is NOT marked as initialized during encoding,
+    // so it will also be lazy cleared during the first usage (which is the blit itself).
+    uint32_t expectedLazyClearCount = 1u;
+    if (HasToggleEnabled("use_blit_for_t2b")) {
+        expectedLazyClearCount++;
+    }
+    EXPECT_LAZY_CLEAR(expectedLazyClearCount, queue.Submit(1, &commandBuffer));
 
     // Expect texture subresource initialized to be true
     EXPECT_TRUE(native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, kArrayLayers));

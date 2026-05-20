@@ -4302,5 +4302,65 @@ DAWN_INSTANTIATE_TEST(CopyTests_MemoryLeak,
                           // clang-format on
                       }));
 
+class BlitTextureToBufferTest : public DawnTest {};
+
+// Test that encoding a CopyTextureToBuffer but not submitting it doesn't mark the buffer as
+// initialized.
+TEST_P(BlitTextureToBufferTest, NoSubmitDoesNotMarkInitialized) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    // Create a buffer that we will use as the destination of a CopyTextureToBuffer.
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = 256;
+    bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    // Create a source texture.
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.size = {64, 1, 1};
+    textureDesc.format = wgpu::TextureFormat::R32Float;
+    textureDesc.usage = wgpu::TextureUsage::CopySrc;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    wgpu::TexelCopyTextureInfo src = utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferInfo dst = utils::CreateTexelCopyBufferInfo(buffer, 0, 256, 1);
+    wgpu::Extent3D copySize = {64, 1, 1};
+
+    // Encode the CopyTextureToBuffer.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToBuffer(&src, &dst, &copySize);
+    // Finish the encoder, but do NOT submit the command buffer.
+    encoder.Finish();
+
+    // Now, if we use the buffer in a way that requires initialization (e.g., as a source of a
+    // copy), it should be lazy-cleared because the previous CopyTextureToBuffer was never
+    // submitted.
+    wgpu::BufferDescriptor dstBufferDesc;
+    dstBufferDesc.size = 256;
+    dstBufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer dstBuffer = device.CreateBuffer(&dstBufferDesc);
+
+    wgpu::CommandEncoder encoder2 = device.CreateCommandEncoder();
+    encoder2.CopyBufferToBuffer(buffer, 0, dstBuffer, 0, 256);
+    wgpu::CommandBuffer cb = encoder2.Finish();
+
+    size_t lazyClearsBefore = native::GetLazyClearCountForTesting(device.Get());
+    queue.Submit(1, &cb);
+    size_t lazyClearsAfter = native::GetLazyClearCountForTesting(device.Get());
+
+    // If the buffer was incorrectly marked as initialized during encoding of the first command,
+    // lazyClearsAfter - lazyClearsBefore will be 0.
+    // Otherwise, it should be 1.
+    EXPECT_EQ(lazyClearsAfter - lazyClearsBefore, 1u);
+}
+
+DAWN_INSTANTIATE_TEST(BlitTextureToBufferTest,
+                      D3D11Backend({"use_blit_for_t2b"}),
+                      D3D12Backend({"use_blit_for_t2b"}),
+                      MetalBackend({"use_blit_for_t2b"}),
+                      OpenGLBackend({"use_blit_for_t2b"}),
+                      OpenGLESBackend({"use_blit_for_t2b"}),
+                      VulkanBackend({"use_blit_for_t2b"}));
+
 }  // anonymous namespace
 }  // namespace dawn

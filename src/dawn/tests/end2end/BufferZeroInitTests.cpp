@@ -145,7 +145,14 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &spec.textureSize);
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
-        EXPECT_LAZY_CLEAR(spec.lazyClearCount, queue.Submit(1, &commandBuffer));
+
+        // TODO(b/513631768): SetInitialized is now skipped for use_blit_for_t2b path.
+        uint32_t expectedLazyClearCount = spec.lazyClearCount;
+        if (expectedLazyClearCount == 0u && (HasToggleEnabled("use_blit_for_t2b"))) {
+            expectedLazyClearCount = 1u;
+        }
+
+        EXPECT_LAZY_CLEAR(expectedLazyClearCount, queue.Submit(1, &commandBuffer));
 
         const uint64_t expectedValueCount = bufferSize / sizeof(float);
         std::vector<float> expectedValues(expectedValueCount, 0.f);
@@ -1153,6 +1160,10 @@ TEST_P(BufferZeroInitTest, PaddingInitialized) {
     // TODO(crbug.com/473593119): [Capture] size not multiple of 4.
     DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
+    // TODO(crbug.com/513631768): Skip D3D11 as they may use intermediate buffer for blit
+    // path and fail for EXPECT_LAZY_CLEAR.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
     // A small sub-4-byte format means a single vertex can fit entirely within the padded buffer,
     // touching some of the padding. Test a small format, as well as larger formats.
@@ -1222,7 +1233,13 @@ TEST_P(BufferZeroInitTest, PaddingInitialized) {
                     encoder.CopyTextureToBuffer(&zeroTextureSrc, &dst, &extent);
 
                     wgpu::CommandBuffer commandBuffer = encoder.Finish();
-                    EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commandBuffer));
+
+                    // TODO(b/513631768): SetInitialized is now skipped for use_blit_for_t2b path.
+                    uint32_t expectedLazyClearCount = 0u;
+                    if (HasToggleEnabled("use_blit_for_t2b")) {
+                        expectedLazyClearCount = 1u;
+                    }
+                    EXPECT_LAZY_CLEAR(expectedLazyClearCount, queue.Submit(1, &commandBuffer));
                 }
 
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
