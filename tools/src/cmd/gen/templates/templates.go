@@ -94,35 +94,20 @@ func runTemplates(ctx context.Context, cfg *common.Config, defaultIncludes []str
 	staleFiles := common.StaleFiles{}
 	projectRoot := fileutils.DawnRoot(cfg.OsWrapper)
 
-	files := flag.Args()
-	if len(files) == 0 {
-		includesJson, err := json.Marshal(defaultIncludes)
-		if err != nil {
-			return fmt.Errorf("failed to marshal includes: %w", err)
-		}
-		configStr := fmt.Sprintf(`{
-			"paths": [{"include": %s}]
-		}`, includesJson)
-		files, err = glob.Scan(projectRoot, glob.MustParseConfig(configStr), cfg.OsWrapper)
-		if err != nil {
-			return err
-		}
-	} else {
-		// Make all template file paths project-relative
-		for i, f := range files {
-			abs, err := filepath.Abs(f)
-			if err != nil {
-				return fmt.Errorf("failed to get absolute file path for '%v': %w", f, err)
-			}
-			if !strings.HasPrefix(abs, projectRoot) {
-				return fmt.Errorf("template '%v' is not under project root '%v'", abs, projectRoot)
-			}
-			rel, err := filepath.Rel(projectRoot, abs)
-			if err != nil {
-				return fmt.Errorf("failed to get project relative file path for '%v': %w", f, err)
-			}
-			files[i] = rel
-		}
+	if len(flag.Args()) > 0 {
+		return fmt.Errorf("arguments are not supported")
+	}
+
+	includesJson, err := json.Marshal(defaultIncludes)
+	if err != nil {
+		return fmt.Errorf("failed to marshal includes: %w", err)
+	}
+	configStr := fmt.Sprintf(`{
+		"paths": [{"include": %s}]
+	}`, includesJson)
+	files, err := glob.Scan(projectRoot, glob.MustParseConfig(configStr), cfg.OsWrapper)
+	if err != nil {
+		return err
 	}
 
 	cache := &genCache{
