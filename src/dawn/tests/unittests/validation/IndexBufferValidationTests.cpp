@@ -240,6 +240,43 @@ TEST_F(IndexBufferValidationTest, IndexBufferFormatMatchesPipelineStripFormat) {
     }
 }
 
+// Check that changing the index buffer format forces new validation against the strip pipeline.
+TEST_F(IndexBufferValidationTest, IndexFormatChangesAfterFirstValidDraw) {
+    wgpu::RenderPipeline pipeline =
+        MakeTestPipeline(wgpu::IndexFormat::Uint32, wgpu::PrimitiveTopology::TriangleStrip);
+
+    wgpu::Buffer indexBuffer =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0, 1, 2});
+
+    utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
+    renderBundleDesc.colorFormatCount = 1;
+    renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+
+    // Control case: the strip index format matches the pipeline, then set again after a draw with
+    // the same format.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetPipeline(pipeline);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        encoder.DrawIndexed(3);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        encoder.DrawIndexed(3);
+        encoder.Finish();
+    }
+
+    // Error case: the strip index format matches the pipeline, then set again after a draw with the
+    // different format this time.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetPipeline(pipeline);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        encoder.DrawIndexed(3);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16);
+        encoder.DrawIndexed(3);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
 // Check that the index buffer must have the Index usage.
 TEST_F(IndexBufferValidationTest, InvalidUsage) {
     wgpu::Buffer indexBuffer =

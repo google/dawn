@@ -811,6 +811,7 @@ void CommandBufferStateTracker::SetIndexBuffer(BufferBase* buffer,
     mIndexFormat = format;
     mIndexBufferSize = size;
     mIndexBufferOffset = offset;
+    mAspects.reset(VALIDATION_ASPECT_INDEX_BUFFER);
 }
 
 void CommandBufferStateTracker::UnsetVertexBuffer(VertexBufferSlot slot) {
