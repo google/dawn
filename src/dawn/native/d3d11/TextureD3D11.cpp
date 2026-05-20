@@ -25,11 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "dawn/native/d3d11/TextureD3D11.h"
 
 #include <algorithm>
@@ -55,6 +50,7 @@
 #include "dawn/native/d3d11/SharedFenceD3D11.h"
 #include "dawn/native/d3d11/SharedTextureMemoryD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native::d3d11 {
 namespace {
@@ -767,7 +763,7 @@ MaybeError Texture::WriteInternal(const ScopedCommandRecordingContext* commandCo
             UINT copyFlag = (writeCompleteTexture && layer == 0) ? D3D11_COPY_DISCARD : 0;
             commandContext->UpdateSubresource1(GetD3D11Resource(), subresource, pDstBox, data,
                                                bytesPerRow, 0, copyFlag);
-            data += rowsPerImage * bytesPerRow;
+            DAWN_UNSAFE_TODO(data += rowsPerImage * bytesPerRow);
         }
     }
 
@@ -835,19 +831,19 @@ MaybeError Texture::WriteDepthStencilInternal(const ScopedCommandRecordingContex
         for (uint32_t y = 0; y < size.height; ++y) {
             const uint8_t* pSrcRow = pSrcData;
             uint8_t* pDstRow = pDstData;
-            pDstRow += aspectLayout.componentOffset;
+            DAWN_UNSAFE_TODO(pDstRow += aspectLayout.componentOffset);
             for (uint32_t x = 0; x < size.width; ++x) {
-                std::memcpy(pDstRow, pSrcRow, aspectLayout.componentSize);
-                pDstRow += aspectLayout.texelSize;
-                pSrcRow += aspectLayout.componentSize;
+                DAWN_UNSAFE_TODO(std::memcpy(pDstRow, pSrcRow, aspectLayout.componentSize));
+                DAWN_UNSAFE_TODO(pDstRow += aspectLayout.texelSize);
+                DAWN_UNSAFE_TODO(pSrcRow += aspectLayout.componentSize);
             }
-            pDstData += mappedResource.RowPitch;
-            pSrcData += bytesPerRow;
+            DAWN_UNSAFE_TODO(pDstData += mappedResource.RowPitch);
+            DAWN_UNSAFE_TODO(pSrcData += bytesPerRow);
         }
         commandContext->Unmap(stagingTexture->GetD3D11Resource(), layer);
         DAWN_ASSERT(size.height <= rowsPerImage);
         // Skip the padding rows.
-        pSrcData += (rowsPerImage - size.height) * bytesPerRow;
+        DAWN_UNSAFE_TODO(pSrcData += (rowsPerImage - size.height)) * bytesPerRow;
     }
 
     // Copy to the dest texture from the staging texture.
@@ -911,22 +907,22 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
                     // Filter the depth/stencil data out.
                     uint8_t* src = pSrcData;
                     uint8_t* dst = depthOrStencilData.data();
-                    src += aspectLayout.componentOffset;
+                    DAWN_UNSAFE_TODO(src += aspectLayout.componentOffset);
                     for (uint32_t x = 0; x < size.width; ++x) {
-                        std::memcpy(dst, src, aspectLayout.componentSize);
-                        src += aspectLayout.texelSize;
-                        dst += aspectLayout.componentSize;
+                        DAWN_UNSAFE_TODO(std::memcpy(dst, src, aspectLayout.componentSize));
+                        DAWN_UNSAFE_TODO(src += aspectLayout.texelSize);
+                        DAWN_UNSAFE_TODO(dst += aspectLayout.componentSize);
                     }
                     DAWN_TRY(callback(depthOrStencilData.data(), dstOffset, bytesPerRow));
                     dstOffset += dstBytesPerRow;
-                    pSrcData += mappedResource.RowPitch;
+                    DAWN_UNSAFE_TODO(pSrcData += mappedResource.RowPitch);
                 }
             } else {
                 // Otherwise, we need to read each row separately.
                 for (uint32_t y = 0; y < rowsPerImage; ++y) {
                     DAWN_TRY(callback(pSrcData, dstOffset, bytesPerRow));
                     dstOffset += dstBytesPerRow;
-                    pSrcData += mappedResource.RowPitch;
+                    DAWN_UNSAFE_TODO(pSrcData += mappedResource.RowPitch);
                 }
             }
             commandContext->Unmap(GetD3D11Resource(), layer);
@@ -945,8 +941,8 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
 
     for (uint32_t z = 0; z < size.depthOrArrayLayers; ++z) {
         uint64_t dstOffset = dstBytesPerRow * dstRowsPerImage * z;
-        uint8_t* pSrcData =
-            static_cast<uint8_t*>(mappedResource.pData) + z * mappedResource.DepthPitch;
+        uint8_t* pSrcData = DAWN_UNSAFE_TODO(static_cast<uint8_t*>(mappedResource.pData) +
+                                             z * mappedResource.DepthPitch);
         if (dstBytesPerRow == bytesPerRow && mappedResource.RowPitch == bytesPerRow) {
             // If there is no padding in the rows, we can upload the whole image
             // in one read.
@@ -956,7 +952,7 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
             for (uint32_t y = 0; y < size.height; ++y) {
                 DAWN_TRY(callback(pSrcData, dstOffset, bytesPerRow));
                 dstOffset += dstBytesPerRow;
-                pSrcData += mappedResource.RowPitch;
+                DAWN_UNSAFE_TODO(pSrcData += mappedResource.RowPitch);
             }
         }
     }
@@ -1138,7 +1134,8 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> Texture::GetStencilSRV(
 
         Texture::ReadCallback callback = [&](const uint8_t* data, uint64_t offset,
                                              uint64_t length) -> MaybeError {
-            std::memcpy(static_cast<uint8_t*>(stagingData.data()) + offset, data, length);
+            DAWN_UNSAFE_TODO(
+                std::memcpy(static_cast<uint8_t*>(stagingData.data()) + offset, data, length));
             return {};
         };
 
