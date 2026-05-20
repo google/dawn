@@ -662,6 +662,21 @@ TEST_F(IR_ValidatorTest, Builtin_GlobalInvocationId_WrongType) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Builtin_GlobalInvocationId_WrongType_i32) {
+    auto* f = ComputeEntryPoint();
+    AddBuiltinParam(f, "invocation", BuiltinValue::kGlobalInvocationId, ty.vec3i());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:1:48 error: global_invocation_id must be an vec3<u32>
+%f = @compute @workgroup_size(1u, 1u, 1u) func(%invocation:vec3<i32> [@global_invocation_id]):void {
+                                               ^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Builtin_InstanceIndex_WrongStage) {
     auto* f = FragmentEntryPoint();
     AddBuiltinParam(f, "instance", BuiltinValue::kInstanceIndex, ty.u32());
@@ -758,6 +773,21 @@ TEST_F(IR_ValidatorTest, Builtin_LocalInvocationId_WrongType) {
                 testing::HasSubstr(R"(:1:48 error: local_invocation_id must be an vec3<u32>
 %f = @compute @workgroup_size(1u, 1u, 1u) func(%id:u32 [@local_invocation_id]):void {
                                                ^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Builtin_LocalInvocationId_WrongType_i32) {
+    auto* f = ComputeEntryPoint();
+    AddBuiltinParam(f, "id", BuiltinValue::kLocalInvocationId, ty.vec3i());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:48 error: local_invocation_id must be an vec3<u32>
+%f = @compute @workgroup_size(1u, 1u, 1u) func(%id:vec3<i32> [@local_invocation_id]):void {
+                                               ^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -858,6 +888,21 @@ TEST_F(IR_ValidatorTest, Builtin_NumWorkgroups_WrongType) {
                 testing::HasSubstr(R"(:1:48 error: num_workgroups must be an vec3<u32>
 %f = @compute @workgroup_size(1u, 1u, 1u) func(%num:u32 [@num_workgroups]):void {
                                                ^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Builtin_NumWorkgroups_WrongType_i32) {
+    auto* f = ComputeEntryPoint();
+    AddBuiltinParam(f, "num", BuiltinValue::kNumWorkgroups, ty.vec3i());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:48 error: num_workgroups must be an vec3<u32>
+%f = @compute @workgroup_size(1u, 1u, 1u) func(%num:vec3<i32> [@num_workgroups]):void {
+                                               ^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1007,6 +1052,21 @@ TEST_F(IR_ValidatorTest, Builtin_WorkgroupId_WrongType) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Builtin_WorkgroupId_WrongType_i32) {
+    auto* f = ComputeEntryPoint();
+    AddBuiltinParam(f, "id", BuiltinValue::kWorkgroupId, ty.vec3i());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:48 error: workgroup_id must be an vec3<u32>
+%f = @compute @workgroup_size(1u, 1u, 1u) func(%id:vec3<i32> [@workgroup_id]):void {
+                                               ^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Builtin_Position_WrongStage) {
     auto* f = ComputeEntryPoint();
     AddBuiltinParam(f, "pos", BuiltinValue::kPosition, ty.vec4f());
@@ -1070,6 +1130,36 @@ TEST_F(IR_ValidatorTest, Builtin_Position_WrongType) {
                 testing::HasSubstr(R"(:1:21 error: position must be an vec4<f32>
 %f = @fragment func(%pos:f32 [@position]):void {
                     ^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Builtin_Position_WrongType_f16) {
+    auto* f = FragmentEntryPoint();
+    AddBuiltinParam(f, "pos", BuiltinValue::kPosition, ty.vec4<f16>());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:21 error: position must be an vec4<f32>
+%f = @fragment func(%pos:vec4<f16> [@position]):void {
+                    ^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Builtin_BarycentricCoord_WrongType_f16) {
+    auto* f = FragmentEntryPoint();
+    AddBuiltinParam(f, "barycentric", BuiltinValue::kBarycentricCoord, ty.vec3<f16>());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:21 error: barycentric_coord must be an vec3<f32>
+%f = @fragment func(%barycentric:vec3<f16> [@barycentric_coord]):void {
+                    ^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 

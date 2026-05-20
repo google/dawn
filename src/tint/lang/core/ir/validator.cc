@@ -529,7 +529,8 @@ constexpr BuiltInChecker kFrontFacingChecker{
 constexpr BuiltInChecker kGlobalInvocationIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
     .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
-        return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
+        auto* vec = ty->As<core::type::Vector>();
+        return vec && vec->Width() == 3 && vec->Type()->Is<core::type::U32>();
     },
     .type_error = "must be an vec3<u32>",
 };
@@ -545,7 +546,8 @@ constexpr BuiltInChecker kInstanceIndexChecker{
 constexpr BuiltInChecker kLocalInvocationIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
     .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
-        return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
+        auto* vec = ty->As<core::type::Vector>();
+        return vec && vec->Width() == 3 && vec->Type()->Is<core::type::U32>();
     },
     .type_error = "must be an vec3<u32>",
 };
@@ -569,7 +571,8 @@ constexpr BuiltInChecker kNumSubgroupsChecker{
 constexpr BuiltInChecker kNumWorkgroupsChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
     .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
-        return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
+        auto* vec = ty->As<core::type::Vector>();
+        return vec && vec->Width() == 3 && vec->Type()->Is<core::type::U32>();
     },
     .type_error = "must be an vec3<u32>",
 };
@@ -578,7 +581,8 @@ constexpr BuiltInChecker kPositionChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage,
                                               IOAttributeUsage::kFragmentInputUsage},
     .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
-        return ty->IsFloatVector() && ty->Elements().count == 4;
+        auto* vec = ty->As<core::type::Vector>();
+        return vec && vec->Width() == 4 && vec->Type()->Is<core::type::F32>();
     },
     .type_error = "must be an vec4<f32>",
 };
@@ -637,7 +641,8 @@ constexpr BuiltInChecker kVertexIndexChecker{
 constexpr BuiltInChecker kWorkgroupIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
     .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
-        return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
+        auto* vec = ty->As<core::type::Vector>();
+        return vec && vec->Width() == 3 && vec->Type()->Is<core::type::U32>();
     },
     .type_error = "must be an vec3<u32>",
 };
@@ -653,7 +658,8 @@ constexpr BuiltInChecker kPrimitiveIndexChecker{
 constexpr BuiltInChecker kBarycentricCoordChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
     .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
-        return ty->IsFloatVector() && ty->Elements().count == 3;
+        auto* vec = ty->As<core::type::Vector>();
+        return vec && vec->Width() == 3 && vec->Type()->Is<core::type::F32>();
     },
     .type_error = "must be an vec3<f32>",
 };
