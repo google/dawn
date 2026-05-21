@@ -120,6 +120,7 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         wgpu::SharedTextureMemoryBeginAccessDescriptor beginAccessDesc;
         beginAccessDesc.initialized = initialized;
         beginAccessDesc.fenceCount = 0;
+        beginAccessDesc.signaledValueCount = 0;
         bool success = sharedTextureMemory.BeginAccess(texture, &beginAccessDesc);
 
         return success ? std::make_unique<PlatformTextureIOSurface>(std::move(texture),

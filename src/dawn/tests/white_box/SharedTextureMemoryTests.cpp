@@ -966,6 +966,7 @@ TEST_P(SharedTextureMemoryTests, ImportSharedFenceDeviceDestroyed) {
     }
     beginDesc.fenceCount = endState.fenceCount;
     beginDesc.fences = sharedFences.data();
+    beginDesc.signaledValueCount = endState.signaledValueCount;
     beginDesc.signaledValues = endState.signaledValues;
     beginDesc.concurrentRead = false;
     beginDesc.initialized = endState.initialized;
@@ -1669,6 +1670,7 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
             // Now, BeginAccess on the texture as uninitialized.
             beginDesc.fenceCount = endState.fenceCount;
             beginDesc.fences = endState.fences;
+            beginDesc.signaledValueCount = endState.signaledValueCount;
             beginDesc.signaledValues = endState.signaledValues;
             beginDesc.concurrentRead = false;
             beginDesc.initialized = false;
@@ -1690,6 +1692,7 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
 
                 beginDesc.fenceCount = endState.fenceCount;
                 beginDesc.fences = endState.fences;
+                beginDesc.signaledValueCount = endState.signaledValueCount;
                 beginDesc.signaledValues = endState.signaledValues;
                 beginDesc.concurrentRead = false;
                 beginDesc.initialized = endState.initialized;
@@ -1873,6 +1876,7 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample) {
         }
         beginDesc.fenceCount = endState.fenceCount;
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
         beginDesc.initialized = endState.initialized;
@@ -1915,6 +1919,7 @@ TEST_P(SharedTextureMemoryTests, EndWithoutUse) {
         memory.EndAccess(texture, &endState);
 
         EXPECT_EQ(endState.fenceCount, 0u);
+        EXPECT_EQ(endState.signaledValueCount, 0u);
     }
 }
 
@@ -1982,6 +1987,7 @@ TEST_P(SharedTextureMemoryTests, BeginEndWithoutUse) {
         }
         beginDesc.fenceCount = endState.fenceCount;
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         // Do concurrent read if the backend supports it, and not Vulkan.
         // Note that here, the "backend" means the handle type. So on Vulkan, sync fds do support
@@ -2007,6 +2013,7 @@ TEST_P(SharedTextureMemoryTests, BeginEndWithoutUse) {
             memories[1].BeginAccess(noopTexture, &beginDesc);
             memories[1].EndAccess(noopTexture, &endState);
             EXPECT_EQ(endState.fenceCount, 0u);
+            EXPECT_EQ(endState.signaledValueCount, 0u);
         }
         memories[1].EndAccess(texture, &endState);
 
@@ -2076,6 +2083,7 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample2DArray) {
         }
         beginDesc.fenceCount = endState.fenceCount;
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
         beginDesc.initialized = endState.initialized;
@@ -2134,6 +2142,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeAfterBeginAccess) {
         }
         beginDesc.fenceCount = endState.fenceCount;
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
         beginDesc.initialized = endState.initialized;
@@ -2194,6 +2203,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeBeforeBeginAccess) {
         }
         beginDesc.fenceCount = endState.fenceCount;
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
         beginDesc.initialized = endState.initialized;
@@ -2253,6 +2263,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenTextureDestroyBeforeEndAccessThenSamp
         }
         beginDesc.fenceCount = endState.fenceCount;
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
         beginDesc.initialized = endState.initialized;
@@ -2309,6 +2320,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenDropAllMemoriesThenSample) {
         }
         beginDesc.fenceCount = endState.fenceCount;
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
         beginDesc.initialized = endState.initialized;
@@ -2377,6 +2389,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
         auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
         memories[0].EndAccess(textures[0], &endState);
         EXPECT_GT(endState.fenceCount, 0u);
+        EXPECT_GT(endState.signaledValueCount, 0u);
 
         std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
         for (size_t i = 0; i < endState.fenceCount; ++i) {
@@ -2384,6 +2397,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
         }
         beginDesc.fenceCount = endState.fenceCount;
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
         beginDesc.initialized = endState.initialized;
@@ -2491,6 +2505,7 @@ TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite
         }
         beginDesc.fenceCount = sharedFences.size();
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = sharedFences.size();
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
         beginDesc.initialized = true;
@@ -2537,6 +2552,7 @@ TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite
 
         beginDesc.fenceCount = sharedFences.size();
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = sharedFences.size();
         beginDesc.signaledValues = signaledValues.data();
         beginDesc.concurrentRead = false;
         beginDesc.initialized = true;
@@ -2637,6 +2653,7 @@ TEST_P(SharedTextureMemoryTests, SameDeviceWriteThenConcurrentReadThenWrite) {
         }
         beginDesc.fenceCount = sharedFences.size();
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = true;
         beginDesc.initialized = true;
@@ -2681,6 +2698,7 @@ TEST_P(SharedTextureMemoryTests, SameDeviceWriteThenConcurrentReadThenWrite) {
 
         beginDesc.fenceCount = sharedFences.size();
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = signaledValues.size();
         beginDesc.signaledValues = signaledValues.data();
         beginDesc.concurrentRead = false;
         beginDesc.initialized = true;
@@ -2775,6 +2793,7 @@ TEST_P(SharedTextureMemoryTests, SRGBReinterpretation) {
         }
         beginDesc.fenceCount = endState.fenceCount;
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
         beginDesc.initialized = endState.initialized;
@@ -2844,6 +2863,7 @@ TEST_P(SharedTextureMemoryTests, WriteStorageThenReadSample) {
         }
         beginDesc.fenceCount = endState.fenceCount;
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
         beginDesc.initialized = endState.initialized;
@@ -2908,6 +2928,7 @@ TEST_P(SharedTextureMemoryTests, WriteTextureThenReadSample) {
         }
         beginDesc.fenceCount = endState.fenceCount;
         beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.initialized = endState.initialized;
         backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);

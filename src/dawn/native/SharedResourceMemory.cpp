@@ -324,10 +324,12 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* s
 
         state->fenceCount = fenceCount;
         state->fences = fences;
+        state->signaledValueCount = fenceCount;
         state->signaledValues = signaledValues;
     } else {
         state->fenceCount = 0;
         state->fences = nullptr;
+        state->signaledValueCount = 0;
         state->signaledValues = nullptr;
     }
     state->initialized = resource->IsInitialized();

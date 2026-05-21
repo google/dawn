@@ -153,6 +153,7 @@ TEST_P(SharedBufferMemoryTests, CheckEndAccessOnDestroyedBuffer) {
     wgpu::SharedBufferMemoryBeginAccessDescriptor desc = {};
     desc.initialized = true;
     desc.fenceCount = 0;
+    desc.signaledValueCount = 0;
 
     EXPECT_EQ(memory.BeginAccess(buffer, &desc), wgpu::Status::Success);
     buffer.Destroy();
@@ -361,6 +362,7 @@ TEST_P(SharedBufferMemoryTests, EndAccessOnDifferentBuffer) {
     // Ensure that calling EndAccess on the correct buffer still returns a fence.
     memory.EndAccess(buffer, &state);
     ASSERT_EQ(state.fenceCount, static_cast<size_t>(1));
+    ASSERT_EQ(state.signaledValueCount, static_cast<size_t>(1));
     ASSERT_NE(state.fences[0], nullptr);
 }
 
@@ -435,6 +437,7 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();
+    beginAccessDesc.signaledValueCount = endState.signaledValueCount;
     beginAccessDesc.signaledValues = endState.signaledValues;
 
     // Create a second buffer from the SharedBuffer memory, which will be marked as initialized in
@@ -447,6 +450,7 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     memory.EndAccess(buffer2, &endState);
 
     EXPECT_GE(endState.fenceCount, 1u);
+    EXPECT_GE(endState.signaledValueCount, 1u);
 
     // Pass fences from the previous operation to the next BeginAccessDescriptor to ensure
     // operations are complete.
@@ -457,6 +461,7 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     }
     beginAccessDesc.fenceCount = sharedFences2.size();
     beginAccessDesc.fences = sharedFences2.data();
+    beginAccessDesc.signaledValueCount = endState.signaledValueCount;
     beginAccessDesc.signaledValues = endState.signaledValues;
 
     // Create another buffer from the SharedBufferMemory, but mark it uninitialized in the
@@ -470,6 +475,7 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     memory.EndAccess(buffer3, &endState);
 
     EXPECT_GE(endState.fenceCount, 1u);
+    EXPECT_GE(endState.signaledValueCount, 1u);
 }
 
 // Tests that an unininitialized buffer that is not read or writt
@@ -625,6 +631,7 @@ TEST_P(SharedBufferMemoryTests, ImportExportSharedFences) {
         }
         beginAccessDesc.fenceCount = sharedFences.size();
         beginAccessDesc.fences = sharedFences.data();
+        beginAccessDesc.signaledValueCount = endState.signaledValueCount;
         beginAccessDesc.signaledValues = endState.signaledValues;
         memory.BeginAccess(buffer, &beginAccessDesc);
 
@@ -693,6 +700,7 @@ TEST_P(SharedBufferMemoryTests, UseInPassEnsureSynchronization) {
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();
+    beginAccessDesc.signaledValueCount = endState.signaledValueCount;
     beginAccessDesc.signaledValues = endState.signaledValues;
     beginAccessDesc.initialized = true;
     wgpu::Buffer buffer2 = memory.CreateBuffer();
@@ -768,6 +776,7 @@ TEST_P(SharedBufferMemoryTests, WriteBufferEnsureSynchronization) {
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();
+    beginAccessDesc.signaledValueCount = endState.signaledValueCount;
     beginAccessDesc.signaledValues = endState.signaledValues;
     beginAccessDesc.initialized = true;
     wgpu::Buffer buffer2 = memory.CreateBuffer(&bufferDesc);
@@ -821,6 +830,7 @@ TEST_P(SharedBufferMemoryTests, MapAsyncEnsureSynchronization) {
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();
+    beginAccessDesc.signaledValueCount = endState.signaledValueCount;
     beginAccessDesc.signaledValues = endState.signaledValues;
     beginAccessDesc.initialized = true;
     wgpu::Buffer buffer2 = memory.CreateBuffer(&bufferDesc);

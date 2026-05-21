@@ -225,6 +225,7 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         beginDesc.concurrentRead = false;
         beginDesc.fenceCount = 1;
         beginDesc.fences = &wgpuFence;
+        beginDesc.signaledValueCount = 1;
         beginDesc.signaledValues = &signaled_value;
 
         auto wgpuTexture = sharedTextureMemory.CreateTexture(&textureDesc);

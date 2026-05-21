@@ -468,10 +468,11 @@ class Command(Record):
         self.derived_method = None
 
 
-def linked_record_members(json_data, types):
+def linked_record_members(json_data, types, check_span_regularity=False):
     members = []
     members_by_name = {}
-    for m in json_data:
+    index_of_member = {}
+    for (i, m) in enumerate(json_data):
         member = RecordMember(Name(m['name']),
                               types[m['type']],
                               m.get('annotation', 'value'),
@@ -490,6 +491,7 @@ def linked_record_members(json_data, types):
             member.set_id_type(types[id_type])
         members.append(member)
         members_by_name[member.name.canonical_case()] = member
+        index_of_member[member.name.canonical_case()] = i
 
     for (member, m) in zip(members, json_data):
         if member.annotation != 'value':
@@ -504,6 +506,13 @@ def linked_record_members(json_data, types):
                 member.length = "constant"
                 member.constant_length = m['length']
             else:
+                # Check that the length member comes just before the `member`
+                if check_span_regularity:
+                    length_index = index_of_member[m['length']]
+                    member_index = index_of_member[
+                        member.name.canonical_case()]
+                    assert length_index == member_index - 1
+
                 member.length = members_by_name[m['length']]
 
     return members
@@ -532,7 +541,9 @@ def link_object(obj, types):
 
 
 def link_structure(struct, types):
-    struct.members = linked_record_members(struct.json_data['members'], types)
+    struct.members = linked_record_members(struct.json_data['members'],
+                                           types,
+                                           check_span_regularity=True)
     for root in struct.json_data.get('chain roots', []):
         struct.chain_roots.append(types[root])
         types[root].extensions.append(struct)

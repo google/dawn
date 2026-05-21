@@ -194,6 +194,7 @@ void Texture::SynchronizeTextureBeforeUse() {
             }
             innerDesc.fenceCount = innerFences.size();
             innerDesc.fences = innerFences.data();
+            innerDesc.signaledValueCount = signaledValues.size();
             innerDesc.signaledValues = signaledValues.data();
 
             const DawnProcTable& wgpu = ToBackend(GetDevice())->wgpu.get();
