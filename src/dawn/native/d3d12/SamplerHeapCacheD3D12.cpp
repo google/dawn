@@ -118,9 +118,9 @@ ResultOrError<Ref<SamplerHeapCacheEntry>> SamplerHeapCache::GetOrCreate(const Bi
     std::vector<Sampler*> samplers;
     samplers.reserve(samplerCount);
 
-    for (BindingIndex bindingIndex : bgl->GetSamplerIndices()) {
-        // GetSamplerIndices() returns indices for all samplers, including non-visible ones,
-        // so we must skip them.
+    for (BindingIndex bindingIndex : bgl->GetNonStaticSamplerIndices()) {
+        // GetNonStaticSamplerIndices() returns indices for all samplers, including non-visible
+        // ones, so we must skip them.
         if (bgl->GetBindingInfo(bindingIndex).visibility != wgpu::ShaderStage::None) {
             samplers.push_back(ToBackend(group->GetBindingAsSampler(bindingIndex)));
         }
