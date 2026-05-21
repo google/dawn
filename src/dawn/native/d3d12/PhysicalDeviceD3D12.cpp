@@ -825,10 +825,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
     // Workaround for the depth-stencil texture fails to be cleared if the clear value is specified
     // in the D3D12_RENDER_PASS_BEGINNING_ACCESS structure of BeginRenderPass on Intel ACM and ARL.
+    // This workaround is needed on the driver version < 32.0.101.8247.
     // See https://issues.chromium.org/issues/430338408.
     if (gpu_info::IsIntelGen12HP(vendorId, deviceId) ||
         gpu_info::IsIntelXeLPG(vendorId, deviceId)) {
-        deviceToggles->ForceSet(Toggle::UseD3D12RenderPass, false);
+        const gpu_info::IntelWindowsDriverVersion kFixedDriverVersion = {32, 0, 101, 8247};
+        if (gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) < kFixedDriverVersion) {
+            deviceToggles->ForceSet(Toggle::UseD3D12RenderPass, false);
+        }
     }
 
     // Currently these workarounds are needed on Intel Gen9.5 and Gen11 GPUs, as well as
