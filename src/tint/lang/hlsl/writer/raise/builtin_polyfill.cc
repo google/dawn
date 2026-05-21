@@ -310,6 +310,9 @@ struct State {
                     case core::BuiltinFn::kUnpack4XU8:
                         call_worklist.push_back([this, call] { Unpack4xU8(call); });
                         break;
+                    case core::BuiltinFn::kAddSat:
+                        call_worklist.push_back([this, call] { AddSat(call); });
+                        break;
                     default:
                         break;
                 }
@@ -2124,6 +2127,20 @@ struct State {
                                                       ptr, offset, stride, layout);
         });
         call->Destroy();
+    }
+
+    void AddSat(core::ir::CoreBuiltinCall* call) {
+        auto* type = call->Result()->Type();
+        core::ir::CoreBuiltinCall* select = nullptr;
+        b.InsertBefore(call, [&] {
+            auto* add = b.Add(call->Args()[0], call->Args()[1]);
+            auto* lt = b.LessThan(add, call->Args()[0]);
+            core::ir::Value* sat = (type->Is<core::type::Vector>() ? b.Splat(type, u32(0xffffffff))
+                                                                   : b.Constant(u32(0xffffffff)));
+            select = b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, add, sat, lt);
+        });
+        call->Destroy();
+        Select(select);
     }
 };
 

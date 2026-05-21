@@ -161,6 +161,7 @@ enum class BuiltinFn : uint8_t {
     kGroupNonUniformSMin,
     kGroupNonUniformSMax,
     kInterpolateAtOffset,
+    kAddCarry,
     kNone,
 };
 

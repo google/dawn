@@ -121,6 +121,9 @@ struct State {
                     case core::BuiltinFn::kWorkgroupBarrier:
                         call_worklist.push_back([this, call] { Barrier(call); });
                         break;
+                    case core::BuiltinFn::kAddSat:
+                        call_worklist.push_back([this, call] { AddSat(call); });
+                        break;
                     default:
                         break;
                 }
@@ -491,6 +494,22 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* func = CreateQuantizeToF16Polyfill(args[0]->Type());
             b.CallWithResult(call->DetachResult(), func, args[0]);
+        });
+        call->Destroy();
+    }
+
+    void AddSat(core::ir::BuiltinCall* call) {
+        auto* type = call->Result()->Type();
+        b.InsertBefore(call, [&] {
+            auto* var = b.Var(ty.ptr(function, type));
+            auto* glsl_call = b.Call<glsl::ir::BuiltinCall>(type, glsl::BuiltinFn::kUaddCarry,
+                                                            call->Args()[0], call->Args()[1], var);
+            auto* carry = b.Load(var);
+            auto* eq = b.Equal(carry, b.Zero(type));
+            core::ir::Value* sat = (type->Is<core::type::Vector>() ? b.Splat(type, u32(0xffffffff))
+                                                                   : b.Constant(u32(0xffffffff)));
+            b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), glsl::BuiltinFn::kMix,
+                                                    sat, glsl_call, eq);
         });
         call->Destroy();
     }

@@ -903,6 +903,11 @@ match workgroup_uniform_storage
 @must_use @const
   fn unpack4xU8(u32) -> vec4<u32>
 
+@must_use @const
+  fn addSat(u32, u32) -> u32
+@must_use @const implicit(N: num)
+  fn addSat(vec<N, u32>, vec<N, u32>) -> vec<N, u32>
+
 ///////////////////////////////////////////
 // Barriers
 //////////////////////////////////////////

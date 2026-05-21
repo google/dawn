@@ -1637,6 +1637,9 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "unpack4xU8") {
         return BuiltinFn::kUnpack4XU8;
     }
+    if (name == "addSat") {
+        return BuiltinFn::kAddSat;
+    }
     if (name == "storageBarrier") {
         return BuiltinFn::kStorageBarrier;
     }
@@ -2036,6 +2039,8 @@ const char* str(BuiltinFn i) {
             return "unpack4xI8";
         case BuiltinFn::kUnpack4XU8:
             return "unpack4xU8";
+        case BuiltinFn::kAddSat:
+            return "addSat";
         case BuiltinFn::kStorageBarrier:
             return "storageBarrier";
         case BuiltinFn::kWorkgroupBarrier:

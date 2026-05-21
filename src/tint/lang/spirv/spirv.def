@@ -73,6 +73,9 @@ type ptr<S: address_space, T, A: access>
 
 type struct_with_runtime_array
 
+type struct_add_carry_scalar<T>
+type struct_add_carry_vec<N: num, T>
+
 @ns("spirv::type") enum dim {
   d1
   d2
@@ -1954,4 +1957,10 @@ fn interpolate_at_offset(ptr<in, vec<N, T>, readable>, vec2<f32>) -> vec<N, T>
 
 @stage("fragment") implicit(T: f32_f16)
 fn interpolate_at_offset(ptr<in, T, readable>, vec2<f32>) -> T
+
+/// Add with carry
+@must_use implicit(T: u32)
+fn add_carry(T, T) -> struct_add_carry_scalar<T>
+@must_use implicit(T: u32, N: num)
+fn add_carry(vec<N, T>, vec<N, T>) -> struct_add_carry_vec<N, T>
 

@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/type/sampler_kind.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/glsl/ir/builtin_call.h"
 #include "src/tint/lang/glsl/writer/helper_test.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -4342,6 +4343,71 @@ uniform highp samplerCubeArrayShadow f_t_s;
 void main() {
   vec3 v = vec3(1.0f, 2.0f, 3.0f);
   float x = texture(f_t_s, vec4(v, float(4u)), 3.0f);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, AddSat) {
+    auto* foo = b.Function("foo", ty.void_());
+    auto* lhs = b.FunctionParam("a", ty.u32());
+    auto* rhs = b.FunctionParam("b", ty.u32());
+    foo->SetParams({lhs, rhs});
+    b.Append(foo->Block(), [&] {
+        auto* call = b.Call(ty.u32(), core::BuiltinFn::kAddSat, lhs, rhs);
+        b.Let("res", call);
+        b.Return(foo);
+    });
+    auto* ep = b.ComputeFunction("main");
+    b.Append(ep->Block(), [&] {
+        b.Call(ty.void_(), foo, 0_u, 1_u);
+        b.Return(ep);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+void foo(uint a, uint b) {
+  uint v = 0u;
+  uint v_1 = uaddCarry(a, b, v);
+  uint res = mix(4294967295u, v_1, (v == 0u));
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  foo(0u, 1u);
+}
+)");
+}
+TEST_F(GlslWriterTest, AddSat_SideEffects) {
+    auto* foo = b.Function("foo", ty.void_());
+    auto* lhs = b.FunctionParam("a", ty.u32());
+    auto* rhs = b.FunctionParam("b", ty.u32());
+    foo->SetParams({lhs, rhs});
+    b.Append(foo->Block(), [&] {
+        auto* out = b.Var<function, u32>();
+        auto* call =
+            b.Call<glsl::ir::BuiltinCall>(ty.u32(), glsl::BuiltinFn::kUaddCarry, lhs, rhs, out);
+        b.Let("load_out_after_call", b.Load(out));
+        b.Let("res", call);
+        b.Return(foo);
+    });
+    auto* ep = b.ComputeFunction("main");
+    b.Append(ep->Block(), [&] {
+        b.Call(ty.void_(), foo, 0_u, 1_u);
+        b.Return(ep);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+void foo(uint a, uint b) {
+  uint v = 0u;
+  uint v_1 = uaddCarry(a, b, v);
+  uint load_out_after_call = v;
+  uint res = v_1;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  foo(0u, 1u);
 }
 )");
 }

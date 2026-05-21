@@ -318,6 +318,43 @@ TEST_F(ConstEvalRuntimeSemanticsTest, ShiftRight_U32_MoreThanBitWidth) {
         R"(warning: shift right value must be less than the bit width of the lhs, which is 32)");
 }
 
+TEST_F(ConstEvalRuntimeSemanticsTest, AddSat_U32_Overflow) {
+    auto* a = constants.Get(u32(4294967280));
+    auto* b = constants.Get(u32(31));
+    auto result = eval.addSat(a->Type(), Vector{a, b}, {});
+    ASSERT_EQ(result, Success);
+    EXPECT_EQ(result.Get()->ValueAs<u32>(), 4294967295u);
+    result = eval.addSat(a->Type(), Vector{b, a}, {});
+    ASSERT_EQ(result, Success);
+    EXPECT_EQ(result.Get()->ValueAs<u32>(), 4294967295u);
+}
+
+TEST_F(ConstEvalRuntimeSemanticsTest, AddSat_Vec2u_Overflow) {
+    auto* vec2u = ty.vec(ty.u32(), 2u);
+    auto* a = eval.VecInitS(vec2u,
+                            Vector{
+                                constants.Get(u32(0)),
+                                constants.Get(u32(4294967280)),
+                            },
+                            {})
+                  .Get();
+    auto* b = eval.VecInitS(vec2u,
+                            Vector{
+                                constants.Get(u32(1)),
+                                constants.Get(u32(31)),
+                            },
+                            {})
+                  .Get();
+    auto result = eval.addSat(a->Type(), Vector{a, b}, {});
+    ASSERT_EQ(result, Success);
+    EXPECT_EQ(result.Get()->Index(0)->ValueAs<u32>(), 1u);
+    EXPECT_EQ(result.Get()->Index(1)->ValueAs<u32>(), 4294967295u);
+    result = eval.addSat(a->Type(), Vector{b, a}, {});
+    ASSERT_EQ(result, Success);
+    EXPECT_EQ(result.Get()->Index(0)->ValueAs<u32>(), 1u);
+    EXPECT_EQ(result.Get()->Index(1)->ValueAs<u32>(), 4294967295u);
+}
+
 TEST_F(ConstEvalRuntimeSemanticsTest, Acos_F32_OutOfRange) {
     auto* a = constants.Get(f32(2));
     auto result = eval.acos(a->Type(), Vector{a}, {});

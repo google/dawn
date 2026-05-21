@@ -320,6 +320,9 @@ struct State {
                             SubgroupMatrixScalar(builtin, core::BinaryOp::kMultiply);
                         });
                         break;
+                    case core::BuiltinFn::kAddSat:
+                        worklist.push_back([this, builtin] { AddSat(builtin); });
+                        break;
                     default:
                         break;
                 }
@@ -1466,6 +1469,23 @@ struct State {
 
             auto* scalar_mat = b.Construct(sm_ty, scalar);
             b.BinaryWithResult<spirv::ir::Binary>(builtin->DetachResult(), op, mat, scalar_mat);
+        });
+        builtin->Destroy();
+    }
+
+    void AddSat(core::ir::CoreBuiltinCall* builtin) {
+        auto* type = builtin->Result()->Type();
+        auto* str_ty = core::type::CreateAddCarryResult(ty, ir.symbols, type);
+        b.InsertBefore(builtin, [&] {
+            auto* call = b.Call<spirv::ir::BuiltinCall>(str_ty, BuiltinFn::kAddCarry,
+                                                        builtin->Args()[0], builtin->Args()[1]);
+            auto* res = b.Access(type, call, 0_u);
+            auto* carry = b.Access(type, call, 1_u);
+            auto* eq = b.Equal(carry, b.Zero(type));
+            core::ir::Value* sat = (type->Is<core::type::Vector>() ? b.Splat(type, u32(0xffffffff))
+                                                                   : b.Constant(u32(0xffffffff)));
+            b.CallWithResult<spirv::ir::BuiltinCall>(builtin->DetachResult(),
+                                                     spirv::BuiltinFn::kSelect, eq, res, sat);
         });
         builtin->Destroy();
     }

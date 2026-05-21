@@ -1121,6 +1121,8 @@ struct Encoder {
                 return pb::BuiltinFn::acos;
             case core::BuiltinFn::kAcosh:
                 return pb::BuiltinFn::acosh;
+            case core::BuiltinFn::kAddSat:
+                return pb::BuiltinFn::add_sat;
             case core::BuiltinFn::kAll:
                 return pb::BuiltinFn::all;
             case core::BuiltinFn::kAny:

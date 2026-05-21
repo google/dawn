@@ -609,7 +609,8 @@ struct State {
             if (!const_offset) {
                 offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
                 if (total_required_size) {
-                    total_required_size = b.Add(total_required_size, offset)->Result();
+                    total_required_size =
+                        b.Call(ty.u32(), BuiltinFn::kAddSat, total_required_size, offset)->Result();
                 } else {
                     TINT_IR_ASSERT(ir, size && !const_size);
                     total_required_size = offset;
@@ -623,7 +624,8 @@ struct State {
                 size = b.Call(ty.u32(), BuiltinFn::kMax, size, b.Constant(u32(ty_required_size)))
                            ->Result();
                 if (total_required_size) {
-                    total_required_size = b.Add(total_required_size, size)->Result();
+                    total_required_size =
+                        b.Call(ty.u32(), BuiltinFn::kAddSat, total_required_size, size)->Result();
                 } else {
                     // offset must have been 0.
                     TINT_IR_ASSERT(ir, offset && const_offset);

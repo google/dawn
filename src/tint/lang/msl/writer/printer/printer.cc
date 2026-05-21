@@ -1292,6 +1292,9 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kUnpack2X16Unorm:
                 out << "unpack_unorm2x16_to_float";
                 break;
+            case core::BuiltinFn::kAddSat:
+                out << "addsat";
+                break;
             default:
                 TINT_IR_UNREACHABLE(ir_) << "unhandled: " << func;
         }

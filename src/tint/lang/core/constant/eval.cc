@@ -73,6 +73,14 @@ T First(T&& first, ...) {
 /// Helper that calls `f` passing in the value of all `cs`.
 /// Calls `f` with all constants cast to the type of the first `cs` argument.
 template <typename F, typename... CONSTANTS>
+auto Dispatch_u32(F&& f, CONSTANTS&&... cs) {
+    return Switch(First(cs...)->Type(),  //
+                  [&](const core::type::U32*) { return f(cs->template ValueAs<u32>()...); });
+}
+
+/// Helper that calls `f` passing in the value of all `cs`.
+/// Calls `f` with all constants cast to the type of the first `cs` argument.
+template <typename F, typename... CONSTANTS>
 auto Dispatch_iu32(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
@@ -1948,6 +1956,23 @@ Eval::Result Eval::ShiftRight(const core::type::Type* ty,
     TINT_ASSERT(args[1]->Type()->DeepestElement()->Is<core::type::U32>())
         << "Element type of rhs of ShiftLeft must be a u32";
 
+    return TransformBinaryElements(mgr, ty, transform, args[0], args[1]);
+}
+
+Eval::Result Eval::addSat(const core::type::Type* ty,
+                          VectorRef<const Value*> args,
+                          const Source& source) {
+    auto transform = [&](const Value* lhs, const Value* rhs) {
+        auto create = [&](auto a, auto b) {
+            using NumberT = decltype(a);
+            NumberT result = NumberT{a + b};
+            if (result < NumberT{a}) {
+                result = NumberT::Highest();
+            }
+            return CreateScalar(source, ty->DeepestElement(), result);
+        };
+        return Dispatch_u32(create, lhs, rhs);
+    };
     return TransformBinaryElements(mgr, ty, transform, args[0], args[1]);
 }
 

@@ -1831,6 +1831,8 @@ struct Decoder {
                 return core::BuiltinFn::kAcos;
             case pb::BuiltinFn::acosh:
                 return core::BuiltinFn::kAcosh;
+            case pb::BuiltinFn::add_sat:
+                return core::BuiltinFn::kAddSat;
             case pb::BuiltinFn::all:
                 return core::BuiltinFn::kAll;
             case pb::BuiltinFn::any:

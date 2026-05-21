@@ -1040,11 +1040,12 @@ $B1: {  # root
 %foo = func(%size:i32):void {
   $B2: {
     %4:u32 = bitcast<u32> %size
-    %5:u32 = sub %4, 16u
-    %6:u32 = div %5, 16u
-    %7:u32 = mul %6, 16u
-    %8:u32 = add %7, 16u
-    %9:ptr<storage, S, read_write> = bufferArrayView<S> %v, 0u, %8
+    %5:u32 = max %4, 16u
+    %6:u32 = sub %5, 16u
+    %7:u32 = div %6, 16u
+    %8:u32 = mul %7, 16u
+    %9:u32 = add %8, 16u
+    %10:ptr<storage, S, read_write> = bufferArrayView<S> %v, 0u, %9
     ret
   }
 }

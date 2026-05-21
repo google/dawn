@@ -782,4 +782,5 @@ enum BuiltinFn {
     atomic_store_min = 160;
     bitcast = 161;
     buffer_array_view = 162;
+    add_sat = 163;
 }
