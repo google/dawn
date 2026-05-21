@@ -72,8 +72,7 @@ vars = {
   'checkout_placeholder_chromium': False,
 
   # Checkout mesa 3D graphics library and related dependencies
-  # Not used by Dawn/Tint directly, but is used as part of an
-  #  experiment in the fuzzing stack.
+  # Not used by Dawn/Tint directly, but is used as part of extended fuzzing stack.
   'checkout_mesa': False,
 
   # Checkout //tools/code_coverage from Chromium and fetches the
@@ -282,14 +281,14 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
-  # Required for fuzzer + mesa experiment
+  # Required tint fuzzer + mesa
   'third_party/mesa/src': {
     'url': '{chromium_git}/external/gitlab.freedesktop.org/mesa/mesa/@2e683eb7385c54f872acc47b371210d2282bc103',
-    'condition': 'dawn_standalone and checkout_mesa',
+    'condition': 'checkout_mesa',
   },
   'third_party/meson/src': {
     'url': '{chromium_git}/external/github.com/mesonbuild/meson@d389906a136c2aac9820ded0f38d1e25ef25fb9a',
-    'condition': 'dawn_standalone and checkout_mesa',
+    'condition': 'checkout_mesa',
   },
 
   # Jinja2 and MarkupSafe for the code generator
