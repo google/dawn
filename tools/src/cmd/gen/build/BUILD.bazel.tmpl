@@ -61,9 +61,9 @@ cc_binary(
 {{- end}}
   srcs = [
 {{-   if $.Kind.IsProto}}
-{{-     range $File := $.GeneratedFiles}}
-{{-       if HasSuffix $File.Name ".cc"}}
-    "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-     range $File := $.GeneratedProtobufSources.List}}
+{{-       if HasSuffix $File ".cc"}}
+    "{{TrimPrefix $File (printf "%s/" $.Directory.Path)}}",
 {{-       end}}
 {{-     end}}
 {{-   else}}
@@ -90,9 +90,9 @@ cc_binary(
 {{- if or $.Kind.IsLib $.Kind.IsProto}}
   hdrs = [
 {{-   if $.Kind.IsProto}}
-{{-     range $File := $.GeneratedFiles}}
-{{-       if not (HasSuffix $File.Name ".cc")}}
-    "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-     range $File := $.GeneratedProtobufSources.List}}
+{{-       if not (HasSuffix $File ".cc")}}
+    "{{TrimPrefix $File (printf "%s/" $.Directory.Path)}}",
 {{-       end}}
 {{-     end}}
 {{-   else}}

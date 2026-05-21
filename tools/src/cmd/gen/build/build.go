@@ -187,7 +187,8 @@ func populateSourceFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWr
 					"*/**.h",
 					"*/**.inl",
 					"*/**.mm",
-					"*/**.proto"
+					"*/**.proto",
+					"*/**.tmpl"
 				]
 			},
 			{
@@ -203,15 +204,25 @@ func populateSourceFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWr
 	for _, filepath := range paths {
 		filepath = CanonicalizePath(filepath)
 		dir, name := path.Split(filepath)
+
+		// Strip the .tmpl suffix if present for target kind determination.
+		name = strings.TrimSuffix(name, ".tmpl")
+
 		if kind := targetKindFromFilename(name); kind != targetInvalid {
 			directory := p.AddDirectory(dir)
 			target := p.AddTarget(directory, kind)
-			target.AddSourceFile(p.AddFile(filepath))
+
+			if strings.HasSuffix(filepath, ".tmpl") {
+				target.GeneratedSourcePaths.Add(path.Join(dir, name))
+				p.AllTemplatePaths.Add(filepath)
+			} else {
+				target.AddSourceFile(p.AddFile(filepath))
+			}
 
 			if kind == targetProto {
 				noExt, _ := fileutils.SplitExt(filepath)
-				target.AddGeneratedFile(p.AddGeneratedFile(noExt + ".pb.h"))
-				target.AddGeneratedFile(p.AddGeneratedFile(noExt + ".pb.cc"))
+				target.AddGeneratedProtobufSource(p.AddGeneratedProtobufSource(noExt + ".pb.h"))
+				target.AddGeneratedProtobufSource(p.AddGeneratedProtobufSource(noExt + ".pb.cc"))
 			}
 		}
 	}
@@ -235,7 +246,7 @@ func scanSourceFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter
 	// parseFile parses the source file at 'path' represented by 'file'
 	// As this is run concurrently, it must not modify any shared state (including file)
 	parseFile := func(path string, file *File) (string, *ParsedFile, error) {
-		if file.IsGenerated {
+		if file.IsGeneratedProtobufSource {
 			return "", nil, nil
 		}
 

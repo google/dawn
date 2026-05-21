@@ -55,6 +55,8 @@ type Project struct {
 	externals container.Map[ExternalDependencyName, ExternalDependency]
 	// Path to the 'externals.json' file
 	externalsJsonPath string
+	// All template file paths used in the project
+	AllTemplatePaths container.Set[string]
 }
 
 // NewProject returns a newly initialized Project
@@ -67,6 +69,7 @@ func NewProject(root string, cfg *common.Config) *Project {
 		Targets:           container.NewMap[TargetName, *Target](),
 		externals:         container.NewMap[ExternalDependencyName, ExternalDependency](),
 		externalsJsonPath: filepath.Join(fileutils.DawnRoot(cfg.OsWrapper), "src", "tint", "externals.json"),
+		AllTemplatePaths:  container.NewSet[string](),
 	}
 }
 
@@ -80,25 +83,25 @@ func (p *Project) AddFile(filepath string) *File {
 			TransitiveDependencies: NewDependencies(p),
 		}
 	})
-	if file.IsGenerated {
-		panic("AddFile() called with path that already exists for generated file")
+	if file.IsGeneratedProtobufSource {
+		panic("AddFile() called with path that already exists for a generated protobuf source file")
 	}
 	return file
 }
 
-// AddGeneratedFile gets or creates a generated File with the given project-relative path
-func (p *Project) AddGeneratedFile(filepath string) *File {
+// AddGeneratedProtobufSource gets or creates a generated File with the given project-relative path
+func (p *Project) AddGeneratedProtobufSource(filepath string) *File {
 	file := p.Files.GetOrCreate(filepath, func() *File {
 		dir, name := path.Split(filepath)
 		return &File{
-			IsGenerated:            true,
-			Directory:              p.Directory(dir),
-			Name:                   name,
-			TransitiveDependencies: NewDependencies(p),
+			IsGeneratedProtobufSource: true,
+			Directory:                 p.Directory(dir),
+			Name:                      name,
+			TransitiveDependencies:    NewDependencies(p),
 		}
 	})
-	if !file.IsGenerated {
-		panic("AddGeneratedFile() called with path that already exists for non-generated file")
+	if !file.IsGeneratedProtobufSource {
+		panic("AddGeneratedProtobufSource() called with path that already exists for non-generated file")
 	}
 	return file
 }
@@ -113,12 +116,13 @@ func (p *Project) AddTarget(dir *Directory, kind TargetKind) *Target {
 	name := p.TargetName(dir, kind)
 	return p.Targets.GetOrCreate(name, func() *Target {
 		t := &Target{
-			Name:             name,
-			Directory:        dir,
-			Kind:             kind,
-			SourceFileSet:    container.NewSet[string](),
-			GeneratedFileSet: container.NewSet[string](),
-			Dependencies:     NewDependencies(p),
+			Name:                     name,
+			Directory:                dir,
+			Kind:                     kind,
+			SourceFileSet:            container.NewSet[string](),
+			GeneratedProtobufSources: container.NewSet[string](),
+			GeneratedSourcePaths:     container.NewSet[string](),
+			Dependencies:             NewDependencies(p),
 		}
 		dir.TargetNames.Add(name)
 		p.Targets.Add(name, t)
