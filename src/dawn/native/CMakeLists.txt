@@ -617,6 +617,7 @@ if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
         "webgpu/ShaderModuleWGPU.h"
         "webgpu/SharedFenceWGPU.h"
         "webgpu/SharedTextureMemoryWGPU.h"
+        "webgpu/SwapChainWGPU.h"
         "webgpu/ToWGPU.h"
         "webgpu/TextureWGPU.h"
         "webgpu/WebGPUError.h"
@@ -644,6 +645,7 @@ if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
         "webgpu/ShaderModuleWGPU.cpp"
         "webgpu/SharedFenceWGPU.cpp"
         "webgpu/SharedTextureMemoryWGPU.cpp"
+        "webgpu/SwapChainWGPU.cpp"
         "webgpu/ToWGPU.cpp"
         "webgpu/TextureWGPU.cpp"
     )
