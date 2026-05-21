@@ -545,6 +545,119 @@ class BufferViewTest : public DawnTest {
 
         BaseViewTest(wgsl);
     }
+
+    void TestSharedLengthCall(uint32_t len) {
+        ASSERT_GT(len, 128u + 16u);
+
+        const std::string wgsl = R"(
+            struct S {
+              a: array<vec4u, 8>,
+              b: array<u32>,
+            }
+
+            struct T {
+              a: array<vec2u, 4>,
+              b: array<u32>,
+            }
+
+            @group(0) @binding(0) var<storage> buffer1: buffer;
+            @group(0) @binding(1) var<storage> ssbo1 : array<u32>;
+            @group(0) @binding(2) var<storage> ssbo2 : S;
+            @group(0) @binding(3) var<storage> ssbo3 : T;
+
+            @group(1) @binding(0) var<storage, read_write> out : array<u32>;
+
+            fn length(p : ptr<storage, array<u32>>) -> u32 {
+              return arrayLength(p);
+            }
+
+            fn indirectLength1(p : ptr<storage, array<u32>>) -> u32 {
+              return length(p);
+            }
+
+            fn indirectLength2(p : ptr<storage, S>) -> u32 {
+              return indirectLength1(&p.b);
+            }
+
+            @compute @workgroup_size(1) fn main() {
+              var i = 0;
+              out[i] = length(bufferView<array<u32>>(&buffer1, 0)); i++;
+              out[i] = length(&bufferView<S>(&buffer1, 0).b); i++;
+              out[i] = length(&bufferView<T>(&buffer1, 0).b); i++;
+
+              out[i] = length(bufferView<array<u32>>(&buffer1, 16)); i++;
+              out[i] = length(&bufferView<S>(&buffer1, 16).b); i++;
+              out[i] = length(&bufferView<T>(&buffer1, 16).b); i++;
+
+              out[i] = indirectLength1(&ssbo1); i++;
+              out[i] = indirectLength2(&ssbo2); i++;
+              out[i] = indirectLength1(&ssbo3.b); i++;
+            }
+        )";
+
+        const std::vector<uint32_t> expected = {
+            len / 4,               //
+            (len - 128) / 4,       //
+            (len - 32) / 4,        //
+            (len - 16) / 4,        //
+            (len - 16 - 128) / 4,  //
+            (len - 16 - 32) / 4,   //
+            len / 4,               //
+            (len - 128) / 4,       //
+            (len - 32) / 4,        //
+        };
+
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, wgsl);
+
+        wgpu::ComputePipelineDescriptor desc;
+        desc.compute.module = module;
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&desc);
+
+        wgpu::BufferDescriptor inDesc;
+        inDesc.size = len;
+        inDesc.usage =
+            wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+
+        wgpu::Buffer buffer1 = device.CreateBuffer(&inDesc);
+        wgpu::Buffer ssbo1 = device.CreateBuffer(&inDesc);
+        wgpu::Buffer ssbo2 = device.CreateBuffer(&inDesc);
+        wgpu::Buffer ssbo3 = device.CreateBuffer(&inDesc);
+
+        wgpu::BufferDescriptor outDesc;
+        outDesc.size = 9 * sizeof(uint32_t);
+        outDesc.usage =
+            wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+
+        wgpu::Buffer out = device.CreateBuffer(&outDesc);
+
+        wgpu::BindGroup bg0 = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                   {
+                                                       {0, buffer1, 0, inDesc.size},
+                                                       {1, ssbo1, 0, inDesc.size},
+                                                       {2, ssbo2, 0, inDesc.size},
+                                                       {3, ssbo3, 0, inDesc.size},
+                                                   });
+
+        wgpu::BindGroup bg1 = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(1),
+                                                   {
+                                                       {0, out, 0, outDesc.size},
+                                                   });
+
+        wgpu::CommandBuffer commands;
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bg0);
+            pass.SetBindGroup(1, bg1);
+            pass.DispatchWorkgroups(1, 1, 1);
+            pass.End();
+            commands = encoder.Finish();
+        }
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER_U32_RANGE_EQ(&expected[0], out, 0, expected.size());
+    }
 };
 
 TEST_P(BufferViewTest, BufferViewArrayLength) {
@@ -580,6 +693,13 @@ TEST_P(BufferViewTest, BufferViewBasics) {
 
 TEST_P(BufferViewTest, BufferArrayViewBasics) {
     TestBufferArrayViewBasics();
+}
+
+TEST_P(BufferViewTest, SharedBufferLengths) {
+    TestSharedLengthCall(256);
+    TestSharedLengthCall(288);
+    TestSharedLengthCall(512);
+    TestSharedLengthCall(1024);
 }
 
 DAWN_INSTANTIATE_TEST(BufferViewTest,

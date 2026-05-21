@@ -22,7 +22,8 @@ struct tint_symbol_1 {
 };
 
 void foo(threadgroup tint_array<uchar, 64>* const p) {
-  (*reinterpret_cast<threadgroup tint_array<float2, 1>*>(reinterpret_cast<threadgroup char*>(p) + 0u))[min(uint(0), ((((select(32u, 64u, (32u == 0u)) - select(0u, 0u, (32u == 0u))) - 0u) / 8u) - 1u))].x = 1.0f;
+  threadgroup tint_array<float2, 1>* const p2 = reinterpret_cast<threadgroup tint_array<float2, 1>*>(reinterpret_cast<threadgroup char*>(p) + 0u);
+  (*p2)[min(uint(0), ((32u / 8u) - 1u))].x = 1.0f;
 }
 
 void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {

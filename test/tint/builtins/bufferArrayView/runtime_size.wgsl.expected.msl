@@ -32,5 +32,6 @@ fragment void v_1(const device tint_array<uchar, 1>* v [[buffer(0)]], device uin
   tint_array_lengths_struct const v_2 = tint_array_lengths_struct{.tint_array_length_0_0=(*tint_module_vars.tint_storage_buffer_sizes)[0u].x};
   uint const size = 16u;
   uint const v_3 = max((tint_div_u32(size, 16u) * 16u), 16u);
-  (*tint_module_vars.out) = (*reinterpret_cast<const device tint_array<uint4, 1>*>(reinterpret_cast<const device char*>(tint_module_vars.v) + select(0u, 0u, (v_2.tint_array_length_0_0 < v_3))))[min(uint(0), ((((select(select(v_3, 16u, (v_2.tint_array_length_0_0 < v_3)), select(0u, v_2.tint_array_length_0_0, (0u == 0u)), (select(v_3, 16u, (v_2.tint_array_length_0_0 < v_3)) == 0u)) - select(0u, select(0u, 0u, (v_2.tint_array_length_0_0 < v_3)), (select(v_3, 16u, (v_2.tint_array_length_0_0 < v_3)) == 0u))) - 0u) / 16u) - 1u))];
+  const device tint_array<uint4, 1>* const p = reinterpret_cast<const device tint_array<uint4, 1>*>(reinterpret_cast<const device char*>(tint_module_vars.v) + select(0u, 0u, (v_2.tint_array_length_0_0 < v_3)));
+  (*tint_module_vars.out) = (*p)[min(uint(0), ((select(v_3, 16u, (v_2.tint_array_length_0_0 < v_3)) / 16u) - 1u))];
 }

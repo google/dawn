@@ -181,8 +181,6 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));
 
-    TINT_CHECK_RESULT(raise::DecomposeBuffer(module));
-
     // TODO(crbug.com/366291600): Replace ArrayLengthFromUniform with ArrayLengthFromImmediates
     if (array_length_from_constants.ubo_binding) {
         TINT_CHECK_RESULT_UNWRAP(
@@ -205,6 +203,8 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         raise_result.needs_storage_buffer_sizes =
             array_length_from_immediate_result.needs_storage_buffer_sizes;
     }
+
+    TINT_CHECK_RESULT(raise::DecomposeBuffer(module));
 
     if (!options.disable_workgroup_init) {
         TINT_CHECK_RESULT(core::ir::transform::ZeroInitWorkgroupMemory(module));

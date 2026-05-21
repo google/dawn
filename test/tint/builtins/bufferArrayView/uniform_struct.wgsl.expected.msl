@@ -29,5 +29,6 @@ struct S_packed_vec3 {
 [[max_total_threads_per_threadgroup(1)]]
 kernel void v_1(const constant tint_array<uchar, 128>* v [[buffer(0)]], device float2* out [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v, .out=out};
-  (*tint_module_vars.out) = (*reinterpret_cast<const constant tint_array<S_packed_vec3, 1>*>(reinterpret_cast<const constant char*>(tint_module_vars.v) + 0u))[min(uint(0), ((((select(96u, 128u, (96u == 0u)) - select(0u, 0u, (96u == 0u))) - 0u) / 48u) - 1u))].c;
+  const constant tint_array<S_packed_vec3, 1>* const p = reinterpret_cast<const constant tint_array<S_packed_vec3, 1>*>(reinterpret_cast<const constant char*>(tint_module_vars.v) + 0u);
+  (*tint_module_vars.out) = (*p)[min(uint(0), ((96u / 48u) - 1u))].c;
 }

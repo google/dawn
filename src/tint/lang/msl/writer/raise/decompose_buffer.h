@@ -58,12 +58,7 @@ namespace tint::msl::writer::raise {
 /// * SubstituteOverrides
 /// * PropagateBufferSizes
 /// * Robustness
-///
-/// Before:
 /// * ArrayLengthFromUniform/Immediate
-///
-/// This pass requires the following capabilities:
-/// * kMslAllowEntryPointInterface (for pointers in structs)
 ///
 /// @param module The module
 /// @returns Success or Failure

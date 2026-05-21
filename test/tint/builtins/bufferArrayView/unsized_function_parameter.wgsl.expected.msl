@@ -23,7 +23,8 @@ struct tint_array_lengths_struct {
 };
 
 void foo(device tint_array<uchar, 1>* const p, uint tint_array_length) {
-  (*reinterpret_cast<device tint_array<float2, 1>*>(reinterpret_cast<device char*>(p) + select(0u, 0u, (tint_array_length < 32u))))[min(uint(0), ((((select(select(32u, 8u, (tint_array_length < 32u)), select(0u, tint_array_length, (0u == 0u)), (select(32u, 8u, (tint_array_length < 32u)) == 0u)) - select(0u, select(0u, 0u, (tint_array_length < 32u)), (select(32u, 8u, (tint_array_length < 32u)) == 0u))) - 0u) / 8u) - 1u))].y = 3.0f;
+  device tint_array<float2, 1>* const p2 = reinterpret_cast<device tint_array<float2, 1>*>(reinterpret_cast<device char*>(p) + select(0u, 0u, (tint_array_length < 32u)));
+  (*p2)[min(uint(0), ((select(32u, 8u, (tint_array_length < 32u)) / 8u) - 1u))].y = 3.0f;
 }
 
 [[max_total_threads_per_threadgroup(1)]]
