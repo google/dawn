@@ -96,5 +96,23 @@ TEST_F(AssertDeathTest, JumpTableUnreachable) {
     g_var = g_var + 1;
 }
 
+// Volatile to make sure reads happen at runtime.
+volatile uint32_t g_var2 = 123;
+TEST_F(AssertDeathTest, AssertKills) {
+    g_var2 = g_var2 + 1;
+#ifdef DAWN_ENABLE_ASSERTS
+    EXPECT_DEATH(DAWN_ASSERT(g_var2 != 124), "g_var2 != 124");
+#endif
+}
+
+using AssertFunctionalityTest = ::testing::Test;
+
+TEST_F(AssertDeathTest, AssertUnused) {
+    // Local variable that is defined but not used in the case of release
+
+    int test_value = 1;
+    DAWN_ASSERT(test_value == 1);
+}
+
 }  // anonymous namespace
 }  // namespace dawn

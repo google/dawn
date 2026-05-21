@@ -84,17 +84,17 @@ bool IsAligned(uint32_t value, size_t alignment);
 
 template <typename T>
 T Align(T value, size_t alignment) {
-    DAWN_ASSERT(value <= std::numeric_limits<T>::max() - (alignment - 1));
-    DAWN_ASSERT(IsPowerOfTwo(alignment));
-    DAWN_ASSERT(alignment != 0);
+    DAWN_RELEASE_ASSUME(value <= std::numeric_limits<T>::max() - (alignment - 1));
+    DAWN_RELEASE_ASSUME(IsPowerOfTwo(alignment));
+    DAWN_RELEASE_ASSUME(alignment != 0);
     T alignmentT = static_cast<T>(alignment);
     return (value + (alignmentT - 1)) & ~(alignmentT - 1);
 }
 
 template <typename T>
 T AlignDown(T value, size_t alignment) {
-    DAWN_ASSERT(IsPowerOfTwo(alignment));
-    DAWN_ASSERT(alignment != 0);
+    DAWN_RELEASE_ASSUME(IsPowerOfTwo(alignment));
+    DAWN_RELEASE_ASSUME(alignment != 0);
     T alignmentT = static_cast<T>(alignment);
     return value & ~(alignmentT - 1);
 }
@@ -121,8 +121,8 @@ std::optional<size_t> AlignSizeofN(uint64_t n) {
 
 template <typename T>
 DAWN_FORCE_INLINE T* AlignPtr(T* ptr, size_t alignment) {
-    DAWN_ASSERT(IsPowerOfTwo(alignment));
-    DAWN_ASSERT(alignment != 0);
+    DAWN_RELEASE_ASSUME(IsPowerOfTwo(alignment));
+    DAWN_RELEASE_ASSUME(alignment != 0);
     return reinterpret_cast<T*>((reinterpret_cast<size_t>(ptr) + (alignment - 1)) &
                                 ~(alignment - 1));
 }
@@ -134,8 +134,8 @@ DAWN_FORCE_INLINE T* AlignPtr(raw_ptr<T, Traits> ptr, size_t alignment) {
 
 template <typename T>
 DAWN_FORCE_INLINE const T* AlignPtr(const T* ptr, size_t alignment) {
-    DAWN_ASSERT(IsPowerOfTwo(alignment));
-    DAWN_ASSERT(alignment != 0);
+    DAWN_RELEASE_ASSUME(IsPowerOfTwo(alignment));
+    DAWN_RELEASE_ASSUME(alignment != 0);
     return reinterpret_cast<const T*>((reinterpret_cast<size_t>(ptr) + (alignment - 1)) &
                                       ~(alignment - 1));
 }

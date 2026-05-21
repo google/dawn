@@ -127,10 +127,9 @@ class CommandIterator : public NonCopyable {
     DAWN_FORCE_INLINE bool NextCommandId(uint32_t* commandId) {
         char* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
         DAWN_UNSAFE_TODO(
-            DAWN_ASSERT(idPtr == reinterpret_cast<char*>(&mEndOfBlock) ||
-                        idPtr + sizeof(uint32_t) <=
-                            mBlocks[mCurrentBlock].block.get() + mBlocks[mCurrentBlock].size));
-
+            DAWN_RELEASE_ASSUME(idPtr == reinterpret_cast<char*>(&mEndOfBlock) ||
+                                idPtr + sizeof(uint32_t) <= mBlocks[mCurrentBlock].block.get() +
+                                                                mBlocks[mCurrentBlock].size));
         uint32_t id = *reinterpret_cast<uint32_t*>(idPtr);
 
         if (id != detail::kEndOfBlock) {
@@ -146,8 +145,8 @@ class CommandIterator : public NonCopyable {
     DAWN_FORCE_INLINE void* NextCommand(size_t commandSize, size_t commandAlignment) {
         char* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
         DAWN_UNSAFE_TODO(
-            DAWN_ASSERT(commandPtr + sizeof(commandSize) <=
-                        mBlocks[mCurrentBlock].block.get() + mBlocks[mCurrentBlock].size));
+            DAWN_RELEASE_ASSUME(commandPtr + sizeof(commandSize) <=
+                                mBlocks[mCurrentBlock].block.get() + mBlocks[mCurrentBlock].size));
 
         mCurrentPtr = DAWN_UNSAFE_TODO(commandPtr + commandSize);
         return commandPtr;

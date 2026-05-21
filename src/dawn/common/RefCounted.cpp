@@ -44,7 +44,7 @@ static constexpr uint64_t kRefCountIncrement = (uint64_t(1) << kPayloadBits);
 
 RefCount::RefCount(uint64_t initCount, uint64_t payload)
     : mRefCount(initCount * kRefCountIncrement + payload) {
-    DAWN_ASSERT((payload & kPayloadMask) == payload);
+    DAWN_RELEASE_ASSUME((payload & kPayloadMask) == payload);
 }
 
 RefCount::RefCount(uint64_t payload) : RefCount(1, payload) {}

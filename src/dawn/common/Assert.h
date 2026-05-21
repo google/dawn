@@ -72,6 +72,9 @@
         }                                                                 \
     } while (DAWN_ASSERT_LOOP_CONDITION)
 
+#define DAWN_RELEASE_ASSUME_CALLSITE_HELPER(file, func, line, condition) \
+    DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition)
+
 #else  // defined(DAWN_ENABLE_ASSERTS)
 
 #define DAWN_CHECK_CALLSITE_HELPER(file, func, line, condition) \
@@ -81,15 +84,19 @@
         }                                                       \
     } while (DAWN_ASSERT_LOOP_CONDITION)
 
-#if DAWN_COMPILER_IS(MSVC)
-#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) __assume(condition)
-#elif DAWN_COMPILER_IS(CLANG) && __has_builtin(__builtin_assume)
-#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) __builtin_assume(!!(condition))
-#else  // DAWN_COMPILER_IS(*)
 #define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
     do {                                                         \
-        [[maybe_unused]] auto unused = sizeof(!!(condition));    \
+        static_assert(sizeof(!!(condition)) == sizeof(bool));    \
     } while (DAWN_ASSERT_LOOP_CONDITION)
+
+#if DAWN_COMPILER_IS(MSVC)
+#define DAWN_RELEASE_ASSUME_CALLSITE_HELPER(file, func, line, condition) __assume(condition)
+#elif DAWN_COMPILER_IS(CLANG) && __has_builtin(__builtin_assume)
+#define DAWN_RELEASE_ASSUME_CALLSITE_HELPER(file, func, line, condition) \
+    __builtin_assume(!!(condition))
+#else  // DAWN_COMPILER_IS(*)
+#define DAWN_RELEASE_ASSUME_CALLSITE_HELPER(file, func, line, condition) \
+    DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition)
 #endif  // DAWN_COMPILER_IS(*)
 
 #endif  // defined(DAWN_ENABLE_ASSERTS)
@@ -97,9 +104,14 @@
 // Release-mode assert (similar to Chromium CHECK).
 // First does a debug-mode assert for a better debugging experience, then hard-aborts.
 #define DAWN_CHECK(condition) DAWN_CHECK_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
-// Debug-only assert (similar to Chromium DCHECK).
-// In release, this provides optimization hints to the compiler.
+// Asserts in debug if condition is not true (similar to Chromium DCHECK).
+// In release this is a NOOP. (No longer calls assume compiler hint)
 #define DAWN_ASSERT(condition) DAWN_ASSERT_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
+// In release, this provides powerful optimization hints to the compiler.
+// In debug, this is a DAWN_ASSERT.
+#define DAWN_RELEASE_ASSUME(condition) \
+    DAWN_RELEASE_ASSUME_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
+
 // Check-false (similar to Chromium NOTREACHED).
 // This will hard-abort in both debug and release.
 #define DAWN_UNREACHABLE()                                                \

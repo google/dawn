@@ -60,7 +60,7 @@ class Iterator64 final {
 
 template <typename Index, size_t N>
 Iterator64<Index, N>& Iterator64<Index, N>::operator++() {
-    DAWN_ASSERT(mBits != 0);
+    DAWN_RELEASE_ASSUME(mBits != 0);
     uint32_t currentBit = getNextBit();
     // Clear the previous current bit.
     mBits = mBits & ~(static_cast<uint64_t>(1) << currentBit);
@@ -71,7 +71,7 @@ template <typename Index, size_t N>
 Index Iterator64<Index, N>::operator*() const {
     using U = UnderlyingType<Index>;
     uint32_t currentBit = getNextBit();
-    DAWN_ASSERT(static_cast<U>(currentBit) <= std::numeric_limits<U>::max());
+    DAWN_RELEASE_ASSUME(static_cast<U>(currentBit) <= std::numeric_limits<U>::max());
     return static_cast<Index>(static_cast<U>(currentBit));
 }
 
@@ -117,7 +117,7 @@ IteratorArray<Index, N>::IteratorArray(const std::bitset<N>& bits) : mBits(bits)
 
 template <typename Index, size_t N>
 IteratorArray<Index, N>& IteratorArray<Index, N>::operator++() {
-    DAWN_ASSERT(mBits.any());
+    DAWN_RELEASE_ASSUME(mBits.any());
     mBits.set(mCurrentBit - mOffset, 0);
     mCurrentBit = getNextBit();
     return *this;
@@ -126,7 +126,7 @@ IteratorArray<Index, N>& IteratorArray<Index, N>::operator++() {
 template <typename Index, size_t N>
 Index IteratorArray<Index, N>::operator*() const {
     using U = UnderlyingType<Index>;
-    DAWN_ASSERT(static_cast<U>(mCurrentBit) <= std::numeric_limits<U>::max());
+    DAWN_RELEASE_ASSUME(static_cast<U>(mCurrentBit) <= std::numeric_limits<U>::max());
     return static_cast<Index>(static_cast<U>(mCurrentBit));
 }
 
@@ -187,7 +187,7 @@ class bitset : private ::std::bitset<N> {
             // NOTE: If value is a const expression, this will result in a compile-time failure
             // complaining that `HandleAssertionFailure` cannot be used in a constant expression, or
             // similar.
-            DAWN_ASSERT((value >> N) == 0);
+            DAWN_RELEASE_ASSUME((value >> N) == 0);
         }
     }
 

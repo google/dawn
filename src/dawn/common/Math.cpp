@@ -37,12 +37,12 @@
 namespace dawn {
 
 uint32_t Log2(uint32_t value) {
-    DAWN_ASSERT(value != 0);
+    DAWN_RELEASE_ASSUME(value != 0);
     return 31 - std::countl_zero(value);
 }
 
 uint32_t Log2(uint64_t value) {
-    DAWN_ASSERT(value != 0);
+    DAWN_RELEASE_ASSUME(value != 0);
     return 63 - std::countl_zero(value);
 }
 
@@ -55,20 +55,20 @@ uint64_t NextPowerOfTwo(uint64_t n) {
 }
 
 bool IsPowerOfTwo(uint64_t n) {
-    DAWN_ASSERT(n != 0);
+    DAWN_RELEASE_ASSUME(n != 0);
     return (n & (n - 1)) == 0;
 }
 
 bool IsPtrAligned(const void* ptr, size_t alignment) {
-    DAWN_ASSERT(IsPowerOfTwo(alignment));
-    DAWN_ASSERT(alignment != 0);
+    DAWN_RELEASE_ASSUME(IsPowerOfTwo(alignment));
+    DAWN_RELEASE_ASSUME(alignment != 0);
     return (reinterpret_cast<size_t>(ptr) & (alignment - 1)) == 0;
 }
 
 bool IsAligned(uint32_t value, size_t alignment) {
-    DAWN_ASSERT(alignment <= UINT32_MAX);
-    DAWN_ASSERT(IsPowerOfTwo(alignment));
-    DAWN_ASSERT(alignment != 0);
+    DAWN_RELEASE_ASSUME(alignment <= UINT32_MAX);
+    DAWN_RELEASE_ASSUME(IsPowerOfTwo(alignment));
+    DAWN_RELEASE_ASSUME(alignment != 0);
     uint32_t alignment32 = static_cast<uint32_t>(alignment);
     return (value & (alignment32 - 1)) == 0;
 }
@@ -128,8 +128,8 @@ float SRGBToLinear(float srgb) {
 }
 
 uint64_t RoundUp(uint64_t n, uint64_t m) {
-    DAWN_ASSERT(m > 0);
-    DAWN_ASSERT(m <= std::numeric_limits<uint64_t>::max() - n);
+    DAWN_RELEASE_ASSUME(m > 0);
+    DAWN_RELEASE_ASSUME(m <= std::numeric_limits<uint64_t>::max() - n);
     return ((n + m - 1) / m) * m;
 }
 

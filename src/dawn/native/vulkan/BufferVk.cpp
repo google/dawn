@@ -335,7 +335,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
                 DAWN_TRY(
                     MapMemoryAndPerformOperation(paddingClearOffset, paddingClearSize,
                                                  [&paddingClearSize](std::span<uint8_t> mapped) {
-                                                     DAWN_ASSERT(mapped.size() == paddingClearSize);
+                                                     DAWN_CHECK(mapped.size() == paddingClearSize);
                                                      std::ranges::fill(mapped, 0x0);
                                                  }));
             }
