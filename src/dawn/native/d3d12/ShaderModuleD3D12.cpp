@@ -233,6 +233,12 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         // }
         for (BindingIndex index : bgl->GetBufferIndices()) {
             const auto& bindingInfo = bgl->GetBindingInfo(index);
+
+            // Skip bindings not present for this stage.
+            if (!(bindingInfo.visibility & StageBit(stage))) {
+                continue;
+            }
+
             const auto& bufferInfo = std::get<BufferBindingInfo>(bindingInfo.bindingLayout);
             if ((bufferInfo.type == wgpu::BufferBindingType::Storage ||
                  bufferInfo.type == wgpu::BufferBindingType::ReadOnlyStorage) &&

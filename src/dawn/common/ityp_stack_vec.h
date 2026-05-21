@@ -47,6 +47,9 @@ class stack_vec : private absl::InlinedVector<Value, StaticCapacity> {
   public:
     constexpr stack_vec() : Base() {}
     constexpr explicit stack_vec(Index size) : Base() { Base::resize(checked_cast<size_t>(size)); }
+    constexpr explicit stack_vec(Index size, Value value) : Base() {
+        Base::resize(checked_cast<size_t>(size), value);
+    }
 
     using Base::data;
     using Base::empty;

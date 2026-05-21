@@ -91,6 +91,9 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
             DAWN_UNREACHABLE();
         });
 }
+
+const uint32_t kInvalidShaderRegister = 0xFFFFFFFF;
+
 }  // anonymous namespace
 
 // static
@@ -104,7 +107,7 @@ BindGroupLayout::BindGroupLayout(Device* device,
                                  const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor)
     : BindGroupLayoutInternalBase(device, descriptor),
       mDescriptorHeapOffsets(GetBindingCount()),
-      mShaderRegisters(GetBindingCount()),
+      mShaderRegisters(GetBindingCount(), kInvalidShaderRegister),
       mCbvUavSrvDescriptorCount(0),
       mSamplerDescriptorCount(0),
       mViewSizeIncrement(0),
@@ -294,6 +297,7 @@ ityp::span<BindingIndex, const uint32_t> BindGroupLayout::GetDescriptorHeapOffse
 }
 
 uint32_t BindGroupLayout::GetShaderRegister(BindingIndex bindingIndex) const {
+    DAWN_ASSERT(mShaderRegisters[bindingIndex] != kInvalidShaderRegister);
     return mShaderRegisters[bindingIndex];
 }
 
