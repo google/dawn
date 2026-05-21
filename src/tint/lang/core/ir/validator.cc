@@ -97,6 +97,7 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/subgroup_matrix.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/u16.h"
 #include "src/tint/lang/core/type/u32.h"
@@ -2050,6 +2051,12 @@ bool Validator::CheckOperand(const Instruction* inst, size_t idx) {
 
     if (DAWN_UNLIKELY(!operand->Alive())) {
         AddError(inst, idx) << "operand is not alive";
+        return false;
+    }
+
+    if (DAWN_UNLIKELY(operand->Is<Constant>() &&
+                      operand->Type()->Is<core::type::SubgroupMatrix>())) {
+        AddError(inst, idx) << "subgroup_matrix values cannot be constant";
         return false;
     }
 

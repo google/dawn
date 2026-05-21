@@ -43,6 +43,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/core/type/subgroup_matrix.h"
 
 namespace tint::core::ir {
 
@@ -1464,6 +1465,22 @@ TEST_F(IR_ValidatorTest, WorkgroupVar_RuntimeSizedArray_WithMslCapability) {
         res.Failure().reason,
         testing::HasSubstr(
             "vars not in the 'storage' or 'handle' address spaces must have a fixed footprint"));
+}
+
+TEST_F(IR_ValidatorTest, SubgroupMatrix_Constant) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* sm = ty.subgroup_matrix_result(ty.f32(), 8, 8);
+        auto* c = b.Constant(0_f);
+        c->SetType(sm);
+        b.Let("l", c);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("error: let: subgroup_matrix values cannot be constant"));
 }
 
 }  // namespace tint::core::ir

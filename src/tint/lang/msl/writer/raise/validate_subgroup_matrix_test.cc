@@ -261,7 +261,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, InvalidFunctionParam_i8) {
 TEST_F(MslWriter_ValidateSubgroupMatrixTest, FunctionReturn) {
     auto* f2 = b.Function("f", ty.subgroup_matrix_left(ty.f32(), 8u, 8u));
     b.Append(f2->Block(), [&] {  //
-        b.Return(f2, b.Composite(ty.subgroup_matrix_left(ty.f32(), 8u, 8u), 5_f));
+        b.Return(f2, b.Construct(ty.subgroup_matrix_left(ty.f32(), 8u, 8u), 5_f));
     });
 
     auto* func = b.ComputeFunction("main");
@@ -273,13 +273,14 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, FunctionReturn) {
     auto* src = R"(
 %f = func():subgroup_matrix_left<f32, 8, 8> {
   $B1: {
-    ret subgroup_matrix_left<f32, 8, 8>(5.0f)
+    %2:subgroup_matrix_left<f32, 8, 8> = construct 5.0f
+    ret %2
   }
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:subgroup_matrix_left<f32, 8, 8> = call %f
-    %v:subgroup_matrix_left<f32, 8, 8> = let %3
+    %4:subgroup_matrix_left<f32, 8, 8> = call %f
+    %v:subgroup_matrix_left<f32, 8, 8> = let %4
     ret
   }
 }
@@ -296,7 +297,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, FunctionReturn) {
 TEST_F(MslWriter_ValidateSubgroupMatrixTest, InvalidFunctionReturn_i32) {
     auto* f2 = b.Function("f", ty.subgroup_matrix_left(ty.i32(), 8u, 8u));
     b.Append(f2->Block(), [&] {  //
-        b.Return(f2, b.Composite(ty.subgroup_matrix_left(ty.i32(), 8u, 8u), 5_i));
+        b.Return(f2, b.Construct(ty.subgroup_matrix_left(ty.i32(), 8u, 8u), 5_i));
     });
 
     auto* func = b.ComputeFunction("main");
@@ -309,13 +310,14 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, InvalidFunctionReturn_i32) {
     auto* src = R"(
 %f = func():subgroup_matrix_left<i32, 8, 8> {
   $B1: {
-    ret subgroup_matrix_left<i32, 8, 8>(5i)
+    %2:subgroup_matrix_left<i32, 8, 8> = construct 5i
+    ret %2
   }
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:subgroup_matrix_left<i32, 8, 8> = call %f
-    %v:subgroup_matrix_left<i32, 8, 8> = let %3
+    %4:subgroup_matrix_left<i32, 8, 8> = call %f
+    %v:subgroup_matrix_left<i32, 8, 8> = let %4
     ret
   }
 }
