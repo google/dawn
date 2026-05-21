@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-05-05 07:59:32AM
+# Last rolled: 2026-05-21 08:22:58AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -2558,6 +2558,7 @@ crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgba8unorm-srgb";mipLevel=0;depthSlice=0 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgba8unorm-srgb";mipLevel=1;depthSlice=0 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgba8unorm-srgb";mipLevel=1;depthSlice=1 [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,operation,rendering,3d_texture_slices:one_color_attachment,mip_levels:format="rgba8unorm-srgb";mipLevel=2;depthSlice=1 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux renderer-skia-gl ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:format="astc-10x10-unorm";func="textureGather" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux renderer-skia-gl ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:format="astc-10x10-unorm";func="textureLoad" [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux renderer-skia-gl ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:format="astc-10x10-unorm";func="textureSample" [ Failure ]
@@ -3255,6 +3256,7 @@ crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,encoding,encoder_open_s
 crbug.com/0000 [ intel linux ] webgpu:api,validation,encoding,encoder_open_state:render_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,encoding,encoder_open_state:render_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,gpu_external_texture_expiration:import_and_use_in_different_microtask:sourceType="VideoElement" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_image,crossOrigin:sourceImage="offscreenCanvas";isOriginClean=true [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:depth:format="depth16unorm";aspect="all";samples=1 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:depth:format="depth16unorm";aspect="all";samples=4 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:depth:format="depth24plus";aspect="all";samples=1 [ Failure ]
