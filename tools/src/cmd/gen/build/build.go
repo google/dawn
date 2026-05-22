@@ -794,9 +794,6 @@ func emitBuildFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter)
 	if err := emitGeneratedSourceListForCMake(p, fsReaderWriter, generatedSources, depsForGeneratedSources); err != nil {
 		return err
 	}
-	if err := emitGeneratedSourceListForGN(p, fsReaderWriter, generatedSources, depsForGeneratedSources); err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -850,19 +847,6 @@ func emitGeneratedSourceListForCMake(p *Project, fsReaderWriter oswrapper.Filesy
 	emitList(sb, depsForGeneratedSources, "set(TINT_GENERATED_SOURCE_DEPS\n", ")\n", "  \"", "\"\n")
 
 	return writeFileIfStale(p, fsReaderWriter, depsPath, sb.String())
-}
-
-func emitGeneratedSourceListForGN(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter, generatedSources []string, depsForGeneratedSources []string) error {
-	gniPath := path.Join(p.Root, "generated_sources.gni")
-	sb := &strings.Builder{}
-	sb.WriteString(common.Header("", "", "#"))
-	sb.WriteString("\n")
-	sb.WriteString("import(\"tint.gni\")\n\n")
-
-	emitList(sb, generatedSources, "tint_generated_sources = [\n", "]\n\n", "  \"${root_gen_dir}/", "\",\n")
-	emitList(sb, depsForGeneratedSources, "tint_generation_dependencies = [\n", "]\n", "  \"", "\",\n")
-
-	return writeFileIfStale(p, fsReaderWriter, gniPath, sb.String())
 }
 
 func writeFileIfStale(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter, filepath string, content string) error {

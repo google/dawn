@@ -37,7 +37,6 @@ if (tint_build_unittests) {
   import("//testing/test.gni")
 }
 
-import("generated_sources.gni")
 import("tint.gni")
 
 ###############################################################################
@@ -205,20 +204,19 @@ config("tint_unittests_config") {
   ]
 
   if (is_win && is_debug) {
-    # TODO(crbug.com/tint/1749): both msvc and clang builds stack overflow on
-    # debug builds. Increase the initial stack size to 4 MB (default is 1MB).
+    # TODO(crbug.com/tint/1749): both msvc and clang builds stack overflow on debug builds.
+    # Increase the initial stack size to 4 MB (default is 1MB).
     ldflags = [ "/STACK:4194304" ]
   }
 }
 
 if (tint_build_unittests) {
-  # ###############################################################################
+  ###############################################################################
   # Gtest Gmock - Handle building inside and outside of Chromium.
-  # ###############################################################################
-  # When building outside of Chromium we need to define our own targets for
-  # GTest and GMock. However when compiling inside of Chromium we need to reuse
-  # the existing targets, both because Chromium has a special harness for
-  # swarming
+  ###############################################################################
+  # When building outside of Chromium we need to define our own targets for GTest
+  # and GMock. However when compiling inside of Chromium we need to reuse the
+  # existing targets, both because Chromium has a special harness for swarming
   # and because otherwise the "gn check" fails.
 
   if (build_with_chromium) {
@@ -271,17 +269,6 @@ if (tint_build_unittests) {
       ]
     }
   }
-}
-
-action("generate_sources") {
-  script = "${dawn_root}/tools/run.py"
-  inputs = tint_generation_dependencies
-  outputs = tint_generated_sources
-  args = [
-    "gen",
-    "sources",
-    rebase_path(root_gen_dir),
-  ]
 }
 
 if (tint_build_benchmarks) {
