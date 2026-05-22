@@ -214,6 +214,7 @@ func populateSourceFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWr
 
 			if strings.HasSuffix(filepath, ".tmpl") {
 				target.GeneratedSourcePaths.Add(path.Join(dir, name))
+				target.AddTemplateFile(p.AddFile(filepath))
 				p.AllTemplatePaths.Add(filepath)
 			} else {
 				target.AddSourceFile(p.AddFile(filepath))
@@ -335,7 +336,7 @@ func scanSourceFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter
 	// For each file, of each target, of each directory...
 	for _, dir := range p.Directories {
 		for _, target := range dir.Targets() {
-			for _, file := range target.SourceFiles() {
+			for _, file := range append(target.SourceFiles(), target.TemplateFiles()...) {
 				// Retrieve the parsed file information
 				parsed := parsedFiles[file.Path()]
 
@@ -548,7 +549,10 @@ func buildDependencies(p *Project, fsReaderWriter oswrapper.FilesystemReaderWrit
 
 					includeFile := p.File(path)
 					if includeFile == nil {
-						return fmt.Errorf(`%v:%v includes non-existent file '%v'`, file.Path(), include.Line, path)
+						includeFile = p.File(path + ".tmpl")
+						if includeFile == nil {
+							return fmt.Errorf(`%v:%v includes non-existent file '%v'`, file.Path(), include.Line, path)
+						}
 					}
 
 					if !isValidDependency(file.Target.Kind, includeFile.Target.Kind) {

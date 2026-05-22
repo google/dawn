@@ -564,6 +564,84 @@ func TestPopulateSourceFiles_TemplateDetection(t *testing.T) {
 	require.True(t, target.GeneratedSourcePaths.Contains("a/file2.cc"))
 	require.True(t, p.AllTemplatePaths.Contains("a/file2.cc.tmpl"))
 	require.False(t, target.SourceFileSet.Contains("a/file2.cc.tmpl"))
+	require.True(t, target.TemplateFileSet.Contains("a/file2.cc.tmpl"))
+}
+
+func TestBuildDependencies_TemplateIncludes(t *testing.T) {
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	cfg := &common.Config{OsWrapper: wrapper}
+	p := NewProject("/root", cfg)
+
+	wrapper.MkdirAll("/root/a", 0o700)
+	wrapper.MkdirAll("/root/b", 0o700)
+
+	wrapper.Create("/root/a/file.cc")
+	wrapper.WriteFile("/root/a/file2.cc.tmpl", []byte(`#include "src/tint/b/file.h"`), 0o600)
+	wrapper.Create("/root/b/file.h")
+
+	err := populateSourceFiles(p, wrapper)
+	require.NoError(t, err)
+
+	err = scanSourceFiles(p, wrapper)
+	require.NoError(t, err)
+
+	err = buildDependencies(p, wrapper)
+	require.NoError(t, err)
+
+	dirA := p.AddDirectory("a")
+	dirB := p.AddDirectory("b")
+	targetA := p.Target(dirA, targetLib)
+	targetB := p.Target(dirB, targetLib)
+
+	require.NotNil(t, targetA, "Target A not created")
+	require.NotNil(t, targetB, "Target B not created")
+
+	found := false
+	for _, dep := range targetA.Dependencies.Internal() {
+		if dep == targetB {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Target A should depend on Target B")
+}
+
+func TestBuildDependencies_TemplateFallback(t *testing.T) {
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	cfg := &common.Config{OsWrapper: wrapper}
+	p := NewProject("/root", cfg)
+
+	wrapper.MkdirAll("/root/a", 0o700)
+	wrapper.MkdirAll("/root/b", 0o700)
+
+	wrapper.WriteFile("/root/a/file.cc", []byte(`#include "src/tint/b/file.h"`), 0o600)
+	wrapper.Create("/root/b/file.h.tmpl")
+
+	err := populateSourceFiles(p, wrapper)
+	require.NoError(t, err)
+
+	err = scanSourceFiles(p, wrapper)
+	require.NoError(t, err)
+
+	err = buildDependencies(p, wrapper)
+	require.NoError(t, err)
+
+	dirA := p.AddDirectory("a")
+	dirB := p.AddDirectory("b")
+	targetA := p.Target(dirA, targetLib)
+	targetB := p.Target(dirB, targetLib)
+
+	require.NotNil(t, targetA, "Target A not created")
+	require.NotNil(t, targetB, "Target B not created")
+
+	found := false
+	for _, dep := range targetA.Dependencies.Internal() {
+		if dep == targetB {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Target A should depend on Target B (via template fallback)")
 }
 
 func TestCheckInclude(t *testing.T) {

@@ -120,6 +120,7 @@ func (p *Project) AddTarget(dir *Directory, kind TargetKind) *Target {
 			Directory:                dir,
 			Kind:                     kind,
 			SourceFileSet:            container.NewSet[string](),
+			TemplateFileSet:          container.NewSet[string](),
 			GeneratedProtobufSources: container.NewSet[string](),
 			GeneratedSourcePaths:     container.NewSet[string](),
 			Dependencies:             NewDependencies(p),
