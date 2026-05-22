@@ -91,11 +91,11 @@ struct SubresourceRange {
                      FirstAndCountRange<uint32_t> mipLevelParams);
     SubresourceRange();
 
-    Aspect aspects;
-    uint32_t baseArrayLayer;
-    uint32_t layerCount;
-    uint32_t baseMipLevel;
-    uint32_t levelCount;
+    Aspect aspects = Aspect::None;
+    uint32_t baseArrayLayer = 0;
+    uint32_t layerCount = 0;
+    uint32_t baseMipLevel = 0;
+    uint32_t levelCount = 0;
 
     static SubresourceRange SingleMipAndLayer(uint32_t baseMipLevel,
                                               uint32_t baseArrayLayer,

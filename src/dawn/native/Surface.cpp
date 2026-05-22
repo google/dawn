@@ -85,6 +85,9 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         case Surface::Type::XlibWindow:
             s->Append("XlibWindow");
             break;
+        case Surface::Type::Undefined:
+            DAWN_UNREACHABLE();
+            break;
     }
     return {true};
 }

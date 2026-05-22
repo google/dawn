@@ -1795,7 +1795,6 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
                                    std::vector<tint::wgsl::Extension> internalExtensions,
                                    ApiObjectBase::UntrackedByDeviceTag tag)
     : Base(device, ObjectBase::kDelayedInitialization, descriptor->label),
-      mType(Type::Undefined),
       mInternalExtensions(std::move(internalExtensions)) {
     size_t shaderCodeByteSize = 0;
     uint8_t* shaderCode = nullptr;
@@ -1856,7 +1855,7 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
                                    ObjectBase::ErrorTag tag,
                                    StringView label,
                                    ParsedCompilationMessages&& compilationMessages)
-    : Base(device, tag, label), mType(Type::Undefined) {
+    : Base(device, tag, label) {
     mCompiledState.compilationMessages =
         std::make_unique<OwnedCompilationMessages>(std::move(compilationMessages));
 }

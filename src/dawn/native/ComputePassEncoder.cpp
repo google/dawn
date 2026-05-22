@@ -368,7 +368,7 @@ ComputePassEncoder::TransformIndirectDispatchBuffer(Ref<BufferBase> indirectBuff
     // Create a uniform buffer to hold parameters for the shader.
     Ref<BufferBase> uniformBuffer;
     {
-        UniformParams params;
+        UniformParams params = {};
         params.maxComputeWorkgroupsPerDimension =
             device->GetLimits().v1.maxComputeWorkgroupsPerDimension;
         params.clientOffsetInU32 = clientOffsetFromAlignedBoundary / sizeof(uint32_t);

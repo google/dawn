@@ -121,7 +121,7 @@ std::optional<std::string> GetExecutablePath() {
 }
 #elif DAWN_PLATFORM_IS(LINUX)
 std::optional<std::string> GetExecutablePath() {
-    std::array<char, PATH_MAX> path;
+    std::array<char, PATH_MAX> path = {};
     ssize_t result = readlink("/proc/self/exe", path.data(), PATH_MAX - 1);
     if (result < 0 || static_cast<size_t>(result) >= PATH_MAX - 1) {
         return {};
@@ -176,7 +176,7 @@ std::optional<std::string> GetModulePath() {
         return {};
     }
 
-    std::array<char, PATH_MAX> absolutePath;
+    std::array<char, PATH_MAX> absolutePath = {};
     if (realpath(dlInfo.dli_fname, absolutePath.data()) == nullptr) {
         return {};
     }

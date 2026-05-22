@@ -39,11 +39,11 @@ class CommandEncoder;
 struct TimestampParams {
     TimestampParams(uint32_t count, uint32_t offset, uint32_t quantizationMask, float period);
 
-    uint32_t count;
-    uint32_t offset;
-    uint32_t quantizationMask;
-    uint32_t multiplier;
-    uint32_t rightShift;
+    uint32_t count = 0;
+    uint32_t offset = 0;
+    uint32_t quantizationMask = 0;
+    uint32_t multiplier = 0;
+    uint32_t rightShift = 0;
 };
 
 MaybeError EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,

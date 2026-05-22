@@ -206,8 +206,8 @@ enum class ScopedHistogramTiming { kMicrosecondTimes, kMediumTimes, kLongTimes }
         }                                                                                   \
                                                                                             \
       private:                                                                              \
-        raw_ptr<Platform> platform_;                                                        \
-        double constructed_;                                                                \
+        raw_ptr<Platform> platform_ = nullptr;                                              \
+        double constructed_ = 0;                                                            \
     } scoped_histogram_timer_##key(platform)
 
 namespace dawn::platform::metrics {

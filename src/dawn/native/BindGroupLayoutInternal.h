@@ -180,8 +180,8 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     bool NeedsCrossBindingValidation() const;
 
     struct BufferBindingData {
-        uint64_t offset;
-        uint64_t size;
+        uint64_t offset = 0;
+        uint64_t size = 0;
     };
 
     struct BindingDataPointers {
@@ -230,7 +230,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     // "end" of the last binding type)
     BindingIndex GetBindingTypeStart(BindingTypeOrder type) const;
     BindingIndex GetBindingTypeEnd(BindingTypeOrder type) const;
-    std::array<BindingIndex, BindingTypeOrder_Count + 1> mBindingTypeStart;
+    std::array<BindingIndex, BindingTypeOrder_Count + 1> mBindingTypeStart = {};
 
     // Additional counts for types of bindings.
     uint32_t mUnverifiedBufferCount = 0;

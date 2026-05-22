@@ -46,26 +46,26 @@ struct UserImmediateConstants {
 
 // 8 bytes of immediate data data to be used by the ClampFragDepth Tint transform.
 struct ClampFragDepthArgs {
-    float minClampFragDepth;
-    float maxClampFragDepth;
+    float minClampFragDepth = 0.0f;
+    float maxClampFragDepth = 0.0f;
 };
 
 // Define render pipeline immediate data layout. Append members to
 // expand the layout.
 struct RenderImmediateConstants {
-    UserImmediateConstants userConstants;
+    UserImmediateConstants userConstants = {};
 
-    ClampFragDepthArgs clampFragDepth;
+    ClampFragDepthArgs clampFragDepth = {};
 
     // first index offset
-    uint32_t firstVertex;
-    uint32_t firstInstance;
+    uint32_t firstVertex = 0;
+    uint32_t firstInstance = 0;
 };
 
 struct NumWorkgroupsDimensions {
-    uint32_t numWorkgroupsX;
-    uint32_t numWorkgroupsY;
-    uint32_t numWorkgroupsZ;
+    uint32_t numWorkgroupsX = 0;
+    uint32_t numWorkgroupsY = 0;
+    uint32_t numWorkgroupsZ = 0;
 };
 
 // Define compute pipeline immediate data layout. Append members to

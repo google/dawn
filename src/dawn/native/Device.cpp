@@ -786,12 +786,12 @@ void DeviceBase::APIPushErrorScope(wgpu::ErrorFilter filter) {
 
 Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo) {
     struct PopErrorScopeEvent final : public EventManager::TrackedEvent {
-        WGPUPopErrorScopeCallback mCallback;
-        raw_ptr<void> mUserdata1;
-        raw_ptr<void> mUserdata2;
+        WGPUPopErrorScopeCallback mCallback = nullptr;
+        raw_ptr<void> mUserdata1 = nullptr;
+        raw_ptr<void> mUserdata2 = nullptr;
 
-        std::optional<ErrorScope> mScope;
-        std::vector<ErrorScopePendingAsyncTask> mPendingAsyncTasks;
+        std::optional<ErrorScope> mScope = std::nullopt;
+        std::vector<ErrorScopePendingAsyncTask> mPendingAsyncTasks = {};
         std::atomic<uint64_t> mRemainingTasks = 0;
 
         explicit PopErrorScopeEvent(const WGPUPopErrorScopeCallbackInfo& callbackInfo)

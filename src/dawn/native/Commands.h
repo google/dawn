@@ -114,7 +114,7 @@ struct BeginOcclusionQueryCmd {
     ~BeginOcclusionQueryCmd();
 
     Ref<QuerySetBase> querySet;
-    QueryIndex queryIndex;
+    QueryIndex queryIndex = kQuerySetIndexUndefinedTyped;
 };
 
 struct RenderPassColorAttachmentInfo {
@@ -122,11 +122,11 @@ struct RenderPassColorAttachmentInfo {
     ~RenderPassColorAttachmentInfo();
 
     Ref<TextureViewBase> view;
-    uint32_t depthSlice;
+    uint32_t depthSlice = 0;
     Ref<TextureViewBase> resolveTarget;
-    wgpu::LoadOp loadOp;
-    wgpu::StoreOp storeOp;
-    dawn::native::Color clearColor;
+    wgpu::LoadOp loadOp = wgpu::LoadOp::Undefined;
+    wgpu::StoreOp storeOp = wgpu::StoreOp::Undefined;
+    dawn::native::Color clearColor = {};
 };
 
 struct RenderPassStorageAttachmentInfo {
@@ -134,9 +134,9 @@ struct RenderPassStorageAttachmentInfo {
     ~RenderPassStorageAttachmentInfo();
 
     Ref<TextureViewBase> storage;
-    wgpu::LoadOp loadOp;
-    wgpu::StoreOp storeOp;
-    dawn::native::Color clearColor;
+    wgpu::LoadOp loadOp = wgpu::LoadOp::Undefined;
+    wgpu::StoreOp storeOp = wgpu::StoreOp::Undefined;
+    dawn::native::Color clearColor = {};
 };
 
 struct RenderPassDepthStencilAttachmentInfo {
@@ -144,14 +144,14 @@ struct RenderPassDepthStencilAttachmentInfo {
     ~RenderPassDepthStencilAttachmentInfo();
 
     Ref<TextureViewBase> view;
-    wgpu::LoadOp depthLoadOp;
-    wgpu::StoreOp depthStoreOp;
-    wgpu::LoadOp stencilLoadOp;
-    wgpu::StoreOp stencilStoreOp;
-    float clearDepth;
-    uint32_t clearStencil;
-    bool depthReadOnly;
-    bool stencilReadOnly;
+    wgpu::LoadOp depthLoadOp = wgpu::LoadOp::Undefined;
+    wgpu::StoreOp depthStoreOp = wgpu::StoreOp::Undefined;
+    wgpu::LoadOp stencilLoadOp = wgpu::LoadOp::Undefined;
+    wgpu::StoreOp stencilStoreOp = wgpu::StoreOp::Undefined;
+    float clearDepth = 0.0f;
+    uint32_t clearStencil = 0;
+    bool depthReadOnly = false;
+    bool stencilReadOnly = false;
 };
 
 struct ResolveRect {
@@ -187,8 +187,8 @@ struct BeginRenderPassCmd {
 
     // Cache the width and height of all attachments for convenience
     // TODO(https://issues.chromium.org/424536624): Use TexelCount instead of uint32_t.
-    uint32_t width;
-    uint32_t height;
+    uint32_t width = 0;
+    uint32_t height = 0;
 
     // Use the full render pass dimensions as render area to clear attachments. `renderArea` is
     // still used to set the initial scissor rect even if this is true.
@@ -209,9 +209,9 @@ struct BufferCopy {
     ~BufferCopy();
 
     Ref<BufferBase> buffer;
-    uint64_t offset;
-    BlockCount blocksPerRow;
-    BlockCount rowsPerImage;
+    uint64_t offset = 0;
+    BlockCount blocksPerRow = BlockCount(0);
+    BlockCount rowsPerImage = BlockCount(0);
 };
 
 struct TextureCopy {
@@ -221,9 +221,9 @@ struct TextureCopy {
     ~TextureCopy();
 
     Ref<TextureBase> texture;
-    uint32_t mipLevel;
+    uint32_t mipLevel = 0;
     TexelOrigin3D origin;  // Texels / array layer
-    Aspect aspect;
+    Aspect aspect = Aspect::None;
 };
 
 // Returns the TexelBlockInfo for t's texture and aspect
@@ -234,10 +234,10 @@ struct CopyBufferToBufferCmd {
     ~CopyBufferToBufferCmd();
 
     Ref<BufferBase> source;
-    uint64_t sourceOffset;
+    uint64_t sourceOffset = 0;
     Ref<BufferBase> destination;
-    uint64_t destinationOffset;
-    uint64_t size;
+    uint64_t destinationOffset = 0;
+    uint64_t size = 0;
 };
 
 struct CopyBufferToTextureCmd {
@@ -262,9 +262,9 @@ struct CopyTextureToTextureCmd {
 };
 
 struct DispatchCmd {
-    uint32_t x;
-    uint32_t y;
-    uint32_t z;
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t z = 0;
 };
 
 struct DispatchIndirectCmd {
@@ -272,22 +272,22 @@ struct DispatchIndirectCmd {
     ~DispatchIndirectCmd();
 
     Ref<BufferBase> indirectBuffer;
-    uint64_t indirectOffset;
+    uint64_t indirectOffset = 0;
 };
 
 struct DrawCmd {
-    uint32_t vertexCount;
-    uint32_t instanceCount;
-    uint32_t firstVertex;
-    uint32_t firstInstance;
+    uint32_t vertexCount = 0;
+    uint32_t instanceCount = 0;
+    uint32_t firstVertex = 0;
+    uint32_t firstInstance = 0;
 };
 
 struct DrawIndexedCmd {
-    uint32_t indexCount;
-    uint32_t instanceCount;
-    uint32_t firstIndex;
-    int32_t baseVertex;
-    uint32_t firstInstance;
+    uint32_t indexCount = 0;
+    uint32_t instanceCount = 0;
+    uint32_t firstIndex = 0;
+    int32_t baseVertex = 0;
+    uint32_t firstInstance = 0;
 };
 
 struct DrawIndirectCmd {
@@ -295,7 +295,7 @@ struct DrawIndirectCmd {
     ~DrawIndirectCmd();
 
     Ref<BufferBase> indirectBuffer;
-    uint64_t indirectOffset;
+    uint64_t indirectOffset = 0;
 };
 
 struct DrawIndexedIndirectCmd : DrawIndirectCmd {};
@@ -305,10 +305,10 @@ struct MultiDrawIndirectCmd {
     ~MultiDrawIndirectCmd();
 
     Ref<BufferBase> indirectBuffer;
-    uint64_t indirectOffset;
-    uint32_t maxDrawCount;
+    uint64_t indirectOffset = 0;
+    uint32_t maxDrawCount = 0;
     Ref<BufferBase> drawCountBuffer;
-    uint64_t drawCountOffset;
+    uint64_t drawCountOffset = 0;
 };
 
 struct MultiDrawIndexedIndirectCmd : MultiDrawIndirectCmd {};
@@ -323,7 +323,7 @@ struct EndOcclusionQueryCmd {
     ~EndOcclusionQueryCmd();
 
     Ref<QuerySetBase> querySet;
-    QueryIndex queryIndex;
+    QueryIndex queryIndex = kQuerySetIndexUndefinedTyped;
 };
 
 struct EndRenderPassCmd {
@@ -332,7 +332,7 @@ struct EndRenderPassCmd {
 };
 
 struct ExecuteBundlesCmd {
-    uint32_t count;
+    uint32_t count = 0;
 };
 
 struct ClearBufferCmd {
@@ -340,12 +340,12 @@ struct ClearBufferCmd {
     ~ClearBufferCmd();
 
     Ref<BufferBase> buffer;
-    uint64_t offset;
-    uint64_t size;
+    uint64_t offset = 0;
+    uint64_t size = 0;
 };
 
 struct InsertDebugMarkerCmd {
-    size_t length;
+    size_t length = 0;
 };
 
 struct PixelLocalStorageBarrierCmd {};
@@ -353,7 +353,7 @@ struct PixelLocalStorageBarrierCmd {};
 struct PopDebugGroupCmd {};
 
 struct PushDebugGroupCmd {
-    size_t length;
+    size_t length = 0;
 };
 
 struct ResolveQuerySetCmd {
@@ -361,10 +361,10 @@ struct ResolveQuerySetCmd {
     ~ResolveQuerySetCmd();
 
     Ref<QuerySetBase> querySet;
-    QueryIndex firstQuery;
-    QueryIndex queryCount;
+    QueryIndex firstQuery = kQuerySetIndexUndefinedTyped;
+    QueryIndex queryCount = QueryIndex(0);
     Ref<BufferBase> destination;
-    uint64_t destinationOffset;
+    uint64_t destinationOffset = 0;
 };
 
 struct SetComputePipelineCmd {
@@ -382,36 +382,44 @@ struct SetRenderPipelineCmd {
 };
 
 struct SetStencilReferenceCmd {
-    uint32_t reference;
+    uint32_t reference = 0;
 };
 
 struct SetViewportCmd {
-    float x, y, width, height, minDepth, maxDepth;
+    float x = 0.0f;
+    float y = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    float minDepth = 0.0f;
+    float maxDepth = 0.0f;
 };
 
 struct SetScissorRectCmd {
-    uint32_t x, y, width, height;
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
 };
 
 struct SetBlendConstantCmd {
-    Color color;
+    Color color = {};
 };
 
 struct SetBindGroupCmd {
     SetBindGroupCmd();
     ~SetBindGroupCmd();
 
-    BindGroupIndex index;
+    BindGroupIndex index = BindGroupIndex(0);
     Ref<BindGroupBase> group;
-    uint32_t dynamicOffsetCount;
+    uint32_t dynamicOffsetCount = 0;
 };
 
 struct SetImmediatesCmd {
     SetImmediatesCmd();
     ~SetImmediatesCmd();
 
-    uint32_t offset;
-    uint32_t size;
+    uint32_t offset = 0;
+    uint32_t size = 0;
 };
 
 struct SetIndexBufferCmd {
@@ -419,9 +427,9 @@ struct SetIndexBufferCmd {
     ~SetIndexBufferCmd();
 
     Ref<BufferBase> buffer;
-    wgpu::IndexFormat format;
-    uint64_t offset;
-    uint64_t size;
+    wgpu::IndexFormat format = wgpu::IndexFormat::Undefined;
+    uint64_t offset = 0;
+    uint64_t size = 0;
 };
 
 struct SetVertexBufferCmd {
@@ -430,8 +438,8 @@ struct SetVertexBufferCmd {
 
     VertexBufferSlot slot;
     Ref<BufferBase> buffer;
-    uint64_t offset;
-    uint64_t size;
+    uint64_t offset = 0;
+    uint64_t size = 0;
 };
 
 struct SetResourceTableCmd {
@@ -446,8 +454,8 @@ struct WriteBufferCmd {
     ~WriteBufferCmd();
 
     Ref<BufferBase> buffer;
-    uint64_t offset;
-    uint64_t size;
+    uint64_t offset = 0;
+    uint64_t size = 0;
 };
 
 struct WriteTimestampCmd {
@@ -455,7 +463,7 @@ struct WriteTimestampCmd {
     ~WriteTimestampCmd();
 
     Ref<QuerySetBase> querySet;
-    QueryIndex queryIndex;
+    QueryIndex queryIndex = kQuerySetIndexUndefinedTyped;
 };
 
 // This needs to be called before the CommandIterator is freed so that the Ref<> present in

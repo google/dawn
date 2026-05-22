@@ -453,14 +453,14 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
     bool skipMultiDrawValidation = device->BackendWillValidateMultiDraw();
 
     struct Batch {
-        raw_ptr<const IndirectDrawMetadata::IndirectValidationBatch> metadata;
-        uint64_t dataBufferOffset;
-        uint64_t dataSize;
-        uint64_t inputIndirectOffset;
-        uint64_t inputIndirectSize;
-        uint64_t outputParamsOffset;
-        uint64_t outputParamsSize;
-        raw_ptr<BatchInfo, AllowPtrArithmetic> batchInfo;
+        raw_ptr<const IndirectDrawMetadata::IndirectValidationBatch> metadata = nullptr;
+        uint64_t dataBufferOffset = 0;
+        uint64_t dataSize = 0;
+        uint64_t inputIndirectOffset = 0;
+        uint64_t inputIndirectSize = 0;
+        uint64_t outputParamsOffset = 0;
+        uint64_t outputParamsSize = 0;
+        raw_ptr<BatchInfo, AllowPtrArithmetic> batchInfo = nullptr;
     };
 
     struct Pass {
@@ -799,7 +799,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
 
             // Align the output offset to the minStorageBufferOffsetAlignment.
 
-            MultiDrawConstants drawConstants;
+            MultiDrawConstants drawConstants = {};
             drawConstants.maxDrawCount = draw.cmd->maxDrawCount;
             // We need to pass the remaining offset in elements after aligning to the
             // minStorageBufferOffsetAlignment. See comment below.

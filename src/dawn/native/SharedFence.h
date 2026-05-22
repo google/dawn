@@ -59,8 +59,8 @@ class SharedFenceBase : public ApiObjectBase {
 };
 
 struct FenceAndSignalValue {
-    Ref<SharedFenceBase> object;
-    uint64_t signaledValue;
+    Ref<SharedFenceBase> object = nullptr;
+    uint64_t signaledValue = 0;
 };
 
 }  // namespace dawn::native

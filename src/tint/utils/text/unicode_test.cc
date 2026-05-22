@@ -296,7 +296,7 @@ TEST_P(UTF8Test, Encode) {
     for (auto codepoint : param.code_points) {
         EXPECT_EQ(utf8::Encode(codepoint.code_point, {}), codepoint.width);
 
-        std::array<uint8_t, 4> encoded;
+        std::array<uint8_t, 4> encoded{};
         size_t len = utf8::Encode(codepoint.code_point, encoded);
         ASSERT_EQ(len, codepoint.width);
         for (size_t i = 0; i < len; i++) {
@@ -609,7 +609,7 @@ TEST_P(UTF16Test, Encode) {
     for (auto codepoint : param.code_points) {
         EXPECT_EQ(utf16::Encode(codepoint.code_point, {}), codepoint.width);
 
-        std::array<uint16_t, 2> encoded;
+        std::array<uint16_t, 2> encoded{};
         size_t len = utf16::Encode(codepoint.code_point, encoded);
         ASSERT_EQ(len, codepoint.width);
         for (size_t i = 0; i < len; i++) {

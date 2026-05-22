@@ -73,7 +73,7 @@ class Serializable {
 template <typename T>
 class UnsafeUnserializedValue {
   public:
-    UnsafeUnserializedValue() = default;
+    UnsafeUnserializedValue() : mValue{} {}
     explicit UnsafeUnserializedValue(T&& value) : mValue(std::forward<T>(value)) {}
     explicit UnsafeUnserializedValue(const T& value) : mValue(value) {}
     UnsafeUnserializedValue(const UnsafeUnserializedValue<T>& other)

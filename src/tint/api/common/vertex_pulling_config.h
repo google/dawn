@@ -86,11 +86,11 @@ enum class VertexStepMode : uint8_t { kVertex, kInstance };
 /// Describes a vertex attribute within a buffer
 struct VertexAttributeDescriptor {
     /// The format of the attribute.
-    VertexFormat format;
+    VertexFormat format = VertexFormat::kUint8;
     /// The byte offset of the attribute in the buffer.
-    uint32_t offset;
+    uint32_t offset = 0;
     /// The shader location used for the attribute.
-    uint32_t shader_location;
+    uint32_t shader_location = 0;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(VertexAttributeDescriptor, format, offset, shader_location);

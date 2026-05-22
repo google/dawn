@@ -68,46 +68,46 @@ class IndirectDrawMetadata : public NonCopyable {
     };
 
     struct IndirectDraw {
-        IndirectDrawIndex validatedDrawIndex;
-        uint64_t inputBufferOffset;
-        uint64_t numIndexBufferElements;
-        uint64_t indexBufferOffsetInElements;
+        IndirectDrawIndex validatedDrawIndex = IndirectDrawIndex(0);
+        uint64_t inputBufferOffset = 0;
+        uint64_t numIndexBufferElements = 0;
+        uint64_t indexBufferOffsetInElements = 0;
         // When validation is enabled, the original indirect buffer is validated and copied to a new
         // indirect buffer containing only valid commands. The pointer to the command allocated in
         // the command allocator is used to swap the indirect buffer for the validated one before
         // the backend processes the command. Valid until the backend has processed the
         // commands.
-        raw_ptr<DrawIndirectCmd> cmd;
+        raw_ptr<DrawIndirectCmd> cmd = nullptr;
     };
 
     // Stores a side-channel of indirect draw args post-validation.
     struct ValidatedIndirectDraw {
-        Ref<BufferBase> indirectBuffer;
-        uint64_t indirectOffset;
+        Ref<BufferBase> indirectBuffer = nullptr;
+        uint64_t indirectOffset = 0;
     };
 
     struct IndirectValidationBatch {
-        uint64_t minOffset;
-        uint64_t maxOffset;
+        uint64_t minOffset = 0;
+        uint64_t maxOffset = 0;
         std::vector<IndirectDraw> draws;
     };
 
     struct IndirectMultiDraw {
-        DrawType type;
+        DrawType type = DrawType::NonIndexed;
 
         Ref<BufferBase> indexBuffer = nullptr;
         uint64_t indexBufferSize = 0;
         uint64_t indexBufferOffsetInBytes = 0;
         wgpu::IndexFormat indexFormat = wgpu::IndexFormat::Undefined;
         wgpu::PrimitiveTopology topology = wgpu::PrimitiveTopology::Undefined;
-        bool duplicateBaseVertexInstance;
+        bool duplicateBaseVertexInstance = false;
 
         // When validation is enabled, the original indirect buffer is validated and copied to a new
         // indirect buffer containing only valid commands. The pointer to the command allocated in
         // the command allocator is used to swap the indirect buffer for the validated one before
         // the backend processes the command. Valid until the backend has processed the
         // commands.
-        raw_ptr<MultiDrawIndirectCmd> cmd;
+        raw_ptr<MultiDrawIndirectCmd> cmd = nullptr;
     };
 
     // Tracks information about every draw call in this render pass which uses the same indirect
@@ -151,9 +151,9 @@ class IndirectDrawMetadata : public NonCopyable {
     };
 
     struct IndexedIndirectConfig {
-        uintptr_t inputIndirectBufferPtr;
-        bool duplicateBaseVertexInstance;
-        DrawType drawType;
+        uintptr_t inputIndirectBufferPtr = 0;
+        bool duplicateBaseVertexInstance = false;
+        DrawType drawType = DrawType::NonIndexed;
 
         bool operator<(const IndexedIndirectConfig& other) const;
         bool operator==(const IndexedIndirectConfig& other) const = default;
@@ -215,8 +215,8 @@ class IndirectDrawMetadata : public NonCopyable {
     IndirectDrawIndex mNextIndirectDrawIndex{0};
     ityp::vector<IndirectDrawIndex, ValidatedIndirectDraw> mValidatedIndirectDraws;
 
-    uint64_t mMaxBatchOffsetRange;
-    uint32_t mMaxDrawCallsPerBatch;
+    uint64_t mMaxBatchOffsetRange = 0;
+    uint32_t mMaxDrawCallsPerBatch = 0;
 };
 
 }  // namespace dawn::native

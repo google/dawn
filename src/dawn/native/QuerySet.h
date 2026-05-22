@@ -72,8 +72,8 @@ class QuerySetBase : public ApiObjectBase {
     ~QuerySetBase() override;
 
   private:
-    wgpu::QueryType mQueryType;
-    QueryIndex mQueryCount;
+    wgpu::QueryType mQueryType = static_cast<wgpu::QueryType>(0);
+    QueryIndex mQueryCount = QueryIndex(0);
 
     enum class QuerySetState { Unavailable, Available, Destroyed };
     QuerySetState mState = QuerySetState::Unavailable;

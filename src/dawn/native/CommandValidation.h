@@ -142,9 +142,9 @@ MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
                                                  const ColorAttachmentFormats& formats);
 
 struct StorageAttachmentInfoForValidation {
-    uint64_t offset;
+    uint64_t offset = 0;
     // This format is assumed to support StorageAttachment.
-    wgpu::TextureFormat format;
+    wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
 };
 MaybeError ValidatePLSInfo(
     const DeviceBase* device,

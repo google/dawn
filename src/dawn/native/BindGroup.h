@@ -60,9 +60,9 @@ struct BufferBinding {
     // This pointer is used during BindGroupTracker::Apply, which is hot code called before every
     // draw call. The underlying buffer should be kept alive by the BindGroup, it's impossible to
     // UAF.
-    RAW_PTR_EXCLUSION BufferBase* buffer;
-    uint64_t offset;
-    uint64_t size;
+    RAW_PTR_EXCLUSION BufferBase* buffer = nullptr;
+    uint64_t offset = 0;
+    uint64_t size = 0;
 };
 
 class BindGroupBase : public ApiObjectBase {

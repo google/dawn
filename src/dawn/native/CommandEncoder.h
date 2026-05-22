@@ -126,7 +126,7 @@ class CommandEncoder final : public ApiObjectBase {
         InternalUsageScope(CommandEncoder* encoder);
 
         raw_ptr<CommandEncoder> mEncoder;
-        UsageValidationMode mUsageValidationMode;
+        UsageValidationMode mUsageValidationMode = UsageValidationMode::Default;
     };
 
     [[nodiscard]] InternalUsageScope MakeInternalUsageScope();
@@ -147,7 +147,7 @@ class CommandEncoder final : public ApiObjectBase {
 
     uint64_t mDebugGroupStackSize = 0;
 
-    UsageValidationMode mUsageValidationMode;
+    UsageValidationMode mUsageValidationMode = UsageValidationMode::Default;
 };
 
 }  // namespace dawn::native

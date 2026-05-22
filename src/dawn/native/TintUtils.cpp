@@ -158,7 +158,7 @@ tint::VertexPullingConfig BuildVertexPullingTransformConfig(
 
     for (VertexAttributeLocation location : renderPipeline.GetAttributeLocationsUsed()) {
         const VertexAttributeInfo& dawnInfo = renderPipeline.GetAttribute(location);
-        tint::VertexAttributeDescriptor tintInfo;
+        tint::VertexAttributeDescriptor tintInfo = {};
         tintInfo.format = ToTintVertexFormat(dawnInfo.format);
         tintInfo.offset = uint32_t(dawnInfo.offset);
         tintInfo.shader_location = uint32_t(static_cast<uint8_t>(location));

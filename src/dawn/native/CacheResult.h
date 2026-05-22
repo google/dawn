@@ -81,8 +81,8 @@ class CacheResult {
 
     CacheKey mKey;
     T mValue;
-    bool mIsCached;
-    bool mIsValid;
+    bool mIsCached = false;
+    bool mIsValid = false;
 };
 
 }  // namespace dawn::native

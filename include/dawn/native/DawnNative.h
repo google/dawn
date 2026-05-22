@@ -117,7 +117,7 @@ enum BackendValidationLevel { Full, Partial, Disabled };
 struct DAWN_NATIVE_EXPORT DawnInstanceDescriptor : wgpu::ChainedStruct {
     DawnInstanceDescriptor();
     uint32_t additionalRuntimeSearchPathsCount = 0;
-    const char* const* additionalRuntimeSearchPaths;
+    const char* const* additionalRuntimeSearchPaths = nullptr;
     dawn::platform::Platform* platform = nullptr;
 
     BackendValidationLevel backendValidationLevel = BackendValidationLevel::Disabled;
@@ -257,8 +257,8 @@ enum ExternalImageType : uint16_t {
 // Common properties of external images
 struct DAWN_NATIVE_EXPORT ExternalImageDescriptor {
   public:
-    const WGPUTextureDescriptor* cTextureDescriptor;  // Must match image creation params
-    bool isInitialized;  // Whether the texture is initialized on import
+    const WGPUTextureDescriptor* cTextureDescriptor = nullptr;  // Must match image creation params
+    bool isInitialized = false;  // Whether the texture is initialized on import
     ExternalImageType GetType() const;
 
   protected:

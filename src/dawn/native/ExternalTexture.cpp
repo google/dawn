@@ -356,7 +356,7 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
 ResultOrError<Ref<BufferBase>> MakeParamsBufferForSimpleView(DeviceBase* device,
                                                              Ref<TextureViewBase> textureView) {
     const Extent3D textureSize = textureView->GetSingleSubresourceVirtualSize();
-    std::array<float, 12> placeholderConstantArray;
+    std::array<float, 12> placeholderConstantArray = {};
 
     // Make a fake ExternalTextureDescriptor for the view that reuses the code computing uniform
     // parameters passed to the shader.

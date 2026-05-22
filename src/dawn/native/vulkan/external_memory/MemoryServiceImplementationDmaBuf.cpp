@@ -210,7 +210,7 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
 
         // For mutable vkimage of multi-planar format, we also need to make sure the each
         // plane's view format can be supported.
-        std::array<VkFormat, 2> viewFormats;
+        std::array<VkFormat, 2> viewFormats{};
         VkImageFormatListCreateInfo imageFormatListInfo = {};
 
         if (planeCount > 1) {

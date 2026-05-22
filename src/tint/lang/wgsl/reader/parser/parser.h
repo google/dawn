@@ -263,7 +263,7 @@ class Parser {
         /// Parsed header source
         Source source;
         /// Function name
-        const ast::Identifier* name;
+        const ast::Identifier* name = nullptr;
         /// Function parameters
         Vector<const ast::Parameter*, 8> params;
         /// Function return type

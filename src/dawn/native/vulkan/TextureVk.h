@@ -251,11 +251,11 @@ class ImportedTextureBase : public Texture {
     // The layouts to use for the queue ownership transfer barrier when a texture is used the first
     // time after being imported. The layouts must match the ones from the queue ownership transfer
     // barrier done for the export operation.
-    VkImageLayout mPendingAcquireOldLayout;
-    VkImageLayout mPendingAcquireNewLayout;
+    VkImageLayout mPendingAcquireOldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    VkImageLayout mPendingAcquireNewLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
     // Which of FOREIGN or EXTERNAL queue family to use when exporting.
-    uint32_t mExportQueueFamilyIndex;
+    uint32_t mExportQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     // The layout requested for the export, or UNDEFINED if the receiver can handle whichever layout
     // was current.
     VkImageLayout mDesiredExportLayout = VK_IMAGE_LAYOUT_UNDEFINED;

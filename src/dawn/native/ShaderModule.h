@@ -150,7 +150,7 @@ DAWN_SERIALIZABLE(struct, ShaderModuleParseResult, SHADER_MODULE_PARSE_RESULT_ME
 #undef SHADER_MODULE_PARSE_RESULT_MEMBER
 
 struct ShaderModuleEntryPoint {
-    bool defaulted;
+    bool defaulted = false;
     std::string name;
 };
 
@@ -345,7 +345,7 @@ DAWN_SERIALIZABLE(struct, EntryPointMetadata, ENTRY_POINT_METADATA_MEMBER) {
 // The WebGPU override variables only support these scalar types
 union OverrideScalar {
     // Use int32_t for boolean to initialize the full 32bit
-    int32_t b;
+    int32_t b = 0;
     float f32;
     int32_t i32;
     uint32_t u32;
@@ -436,14 +436,14 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
 
     // The original data in the descriptor for caching.
     enum class Type : uint8_t { Undefined, Spirv, Wgsl };
-    Type mType;
+    Type mType = Type::Undefined;
     bool mAllowSpirvNonUniformDerivitives = false;
     std::vector<uint32_t> mOriginalSpirv;
     std::string mWgsl;
 
     // Secure hash computed from shader code and other metadata to be used as a cache key
     // representing the shader module.
-    ShaderModuleHash mHash;
+    ShaderModuleHash mHash = {};
 
     // TODO(dawn:2503): Remove the optional when Dawn can has a consistent default across backends.
     // Right now D3D uses strictness by default, and Vulkan/Metal use fast math by default.
@@ -461,7 +461,7 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     struct CompiledState {
         EntryPointMetadataTable entryPoints;
         PerStage<std::string> defaultEntryPointNames;
-        PerStage<size_t> entryPointCounts;
+        PerStage<size_t> entryPointCounts = {};
 
         MutexProtected<TintData> tintData;
 

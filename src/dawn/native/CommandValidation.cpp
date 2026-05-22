@@ -755,7 +755,7 @@ MaybeError ValidatePLSInfo(
                     "totalPixelLocalStorageSize (%i) is larger than maxPixelLocalStorageSize (%i).",
                     totalSize, kMaxPLSSize);
 
-    std::array<size_t, kMaxPLSSlots> indexForSlot;
+    std::array<size_t, kMaxPLSSlots> indexForSlot = {};
     constexpr size_t kSlotNotSet = std::numeric_limits<size_t>::max();
     indexForSlot.fill(kSlotNotSet);
     for (size_t i = 0; i < storageAttachments.size(); i++) {

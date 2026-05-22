@@ -117,12 +117,12 @@ class DeviceBase : public ErrorSink,
 
         void Complete(EventCompletionType completionType) override;
 
-        wgpu::DeviceLostReason mReason;
-        std::string mMessage;
+        wgpu::DeviceLostReason mReason = wgpu::DeviceLostReason::Unknown;
+        std::string mMessage = "";
 
         WGPUDeviceLostCallback mCallback = nullptr;
-        raw_ptr<void> mUserdata1;
-        raw_ptr<void> mUserdata2;
+        raw_ptr<void> mUserdata1 = nullptr;
+        raw_ptr<void> mUserdata2 = nullptr;
     };
 
     DeviceBase(AdapterBase* adapter,
@@ -711,8 +711,8 @@ class IgnoreLazyClearCountScope : public NonMovable, public StackAllocated {
     ~IgnoreLazyClearCountScope();
 
   private:
-    raw_ptr<DeviceBase> mDevice;
-    size_t mLazyClearCountForTesting;
+    raw_ptr<DeviceBase> mDevice = nullptr;
+    size_t mLazyClearCountForTesting = 0;
 };
 
 }  // namespace dawn::native

@@ -76,6 +76,7 @@ class Surface final : public ErrorMonad {
 
     // These are valid to call on all Surfaces.
     enum class Type {
+        Undefined,
         AndroidWindow,
         MetalLayer,
         WaylandSurface,
@@ -137,7 +138,7 @@ class Surface final : public ErrorMonad {
     MaybeError GetCurrentTexture(SurfaceTexture* surfaceTexture) const;
 
     Ref<InstanceBase> mInstance;
-    Type mType;
+    Type mType = Type::Undefined;
     std::string mLabel;
 
     // The surface has an associated device *if and only if* it is configured.

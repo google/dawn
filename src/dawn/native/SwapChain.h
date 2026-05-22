@@ -43,7 +43,7 @@ TextureDescriptor GetSwapChainBaseTextureDescriptor(SwapChainBase* swapChain);
 
 struct SwapChainTextureInfo {
     Ref<TextureBase> texture;
-    wgpu::SurfaceGetCurrentTextureStatus status;
+    wgpu::SurfaceGetCurrentTextureStatus status = wgpu::SurfaceGetCurrentTextureStatus::Error;
 };
 
 class SwapChainBase : public RefCounted {
@@ -105,15 +105,15 @@ class SwapChainBase : public RefCounted {
     Ref<DeviceBase> mDevice;
 
     bool mAttached = false;
-    uint32_t mWidth;
-    uint32_t mHeight;
-    wgpu::TextureFormat mFormat;
-    wgpu::TextureUsage mUsage;
-    wgpu::PresentMode mPresentMode;
+    uint32_t mWidth = 0;
+    uint32_t mHeight = 0;
+    wgpu::TextureFormat mFormat = wgpu::TextureFormat::Undefined;
+    wgpu::TextureUsage mUsage = wgpu::TextureUsage::None;
+    wgpu::PresentMode mPresentMode = wgpu::PresentMode::Fifo;
     // This is not stored as a FormatSet so that it can hold the data pointed to by the
     // descriptor returned by GetSwapChainBaseTextureDescriptor():
-    std::vector<wgpu::TextureFormat> mViewFormats;
-    wgpu::CompositeAlphaMode mAlphaMode;
+    std::vector<wgpu::TextureFormat> mViewFormats = {};
+    wgpu::CompositeAlphaMode mAlphaMode = wgpu::CompositeAlphaMode::Auto;
 
     // This is a weak reference to the surface. If the surface is destroyed it will call
     // DetachFromSurface and mSurface will be updated to nullptr.

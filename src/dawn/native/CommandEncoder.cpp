@@ -73,10 +73,10 @@ namespace {
 
 // Record the subresource range of a attachment used in render pass for checking overlaps.
 struct RecordedAttachment {
-    raw_ptr<const TextureBase> texture;
-    uint32_t mipLevel;
+    raw_ptr<const TextureBase> texture = nullptr;
+    uint32_t mipLevel = 0;
     // For 3d color attachment, it's the attachment's depthSlice.
-    uint32_t depthOrArrayLayer;
+    uint32_t depthOrArrayLayer = 0;
 
     bool operator==(const RecordedAttachment& other) const = default;
 };

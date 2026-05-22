@@ -92,7 +92,7 @@ struct BlockOrigin3D {
 
 // Strong type version of Extent3D.
 struct TexelExtent3D {
-    TexelCount width;
+    TexelCount width{0};
     TexelCount height{1};
     TexelCount depthOrArrayLayers{1};
 
@@ -130,7 +130,7 @@ struct TexelExtent3D {
 
 // Stores an extent in block space
 struct BlockExtent3D {
-    BlockCount width;
+    BlockCount width{0};
     BlockCount height{1};
     BlockCount depthOrArrayLayers{1};
 
@@ -157,9 +157,9 @@ struct BlockExtent3D {
 // Strong type version of TexelBlockInfo that stores the dimensions of the block
 // as TexelCounts, and provides conversion functions between texels, blocks, and bytes.
 struct TypedTexelBlockInfo {
-    uint32_t byteSize;
-    TexelCount width;
-    TexelCount height;
+    uint32_t byteSize = 0;
+    TexelCount width{0};
+    TexelCount height{0};
 
     // Default constructor
     constexpr TypedTexelBlockInfo() = default;

@@ -101,10 +101,10 @@ struct BasicRenderPass {
 
     static constexpr wgpu::TextureFormat kDefaultColorFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-    uint32_t width;
-    uint32_t height;
-    wgpu::Texture color;
-    wgpu::TextureFormat colorFormat;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    wgpu::Texture color = nullptr;
+    wgpu::TextureFormat colorFormat = kDefaultColorFormat;
     ComboRenderPassDescriptor renderPassInfo;
 };
 BasicRenderPass CreateBasicRenderPass(

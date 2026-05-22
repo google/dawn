@@ -221,7 +221,7 @@ class EncodingContext {
     // Contains pointers to strings allocated inside the command allocators.
     std::vector<std::string_view> mDebugGroupLabels;
 
-    Status mStatus;
+    Status mStatus = Status::Open;
     std::unique_ptr<ErrorData> mError;
 };
 

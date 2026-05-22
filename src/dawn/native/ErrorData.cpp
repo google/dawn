@@ -58,7 +58,7 @@ ErrorData::ErrorData(InternalErrorType type, std::string message)
     : mType(type), mMessage(std::move(message)) {}
 
 void ErrorData::AppendBacktrace(const char* file, const char* function, int line) {
-    BacktraceRecord record;
+    BacktraceRecord record = {};
     record.file = file;
     record.function = function;
     record.line = line;

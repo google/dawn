@@ -50,7 +50,7 @@ class DeviceBase;
 
 // Structure that holds surface capabilities for a (Surface, PhysicalDevice) pair.
 struct PhysicalDeviceSurfaceCapabilities {
-    wgpu::TextureUsage usages;
+    wgpu::TextureUsage usages = wgpu::TextureUsage::None;
     std::vector<wgpu::TextureFormat> formats;
     std::vector<wgpu::PresentMode> presentModes;
     std::vector<wgpu::CompositeAlphaMode> alphaModes;
@@ -62,8 +62,8 @@ struct FeatureValidationResult {
     // Constructor of failed result
     explicit FeatureValidationResult(std::string errorMsg);
 
-    bool success;
-    std::string errorMessage;
+    bool success = false;
+    std::string errorMessage = "";
 };
 
 class PhysicalDeviceBase : public RefCounted {
@@ -180,7 +180,7 @@ class PhysicalDeviceBase : public RefCounted {
         const TogglesState& toggles) const = 0;
 
     virtual MaybeError ResetInternalDeviceForTestingImpl();
-    wgpu::BackendType mBackend;
+    wgpu::BackendType mBackend = wgpu::BackendType::Undefined;
 
     // Features set that CAN be supported by devices of this adapter. Some features in this set may
     // be guarded by toggles, and creating a device with these features required may result in a

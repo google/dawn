@@ -86,16 +86,16 @@ class SamplerBase : public ApiObjectBase,
   private:
     SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
-    wgpu::AddressMode mAddressModeU;
-    wgpu::AddressMode mAddressModeV;
-    wgpu::AddressMode mAddressModeW;
-    wgpu::FilterMode mMagFilter;
-    wgpu::FilterMode mMinFilter;
-    wgpu::MipmapFilterMode mMipmapFilter;
-    float mLodMinClamp;
-    float mLodMaxClamp;
-    wgpu::CompareFunction mCompareFunction;
-    uint16_t mMaxAnisotropy;
+    wgpu::AddressMode mAddressModeU = wgpu::AddressMode::Undefined;
+    wgpu::AddressMode mAddressModeV = wgpu::AddressMode::Undefined;
+    wgpu::AddressMode mAddressModeW = wgpu::AddressMode::Undefined;
+    wgpu::FilterMode mMagFilter = wgpu::FilterMode::Undefined;
+    wgpu::FilterMode mMinFilter = wgpu::FilterMode::Undefined;
+    wgpu::MipmapFilterMode mMipmapFilter = wgpu::MipmapFilterMode::Undefined;
+    float mLodMinClamp = 0.0f;
+    float mLodMaxClamp = 0.0f;
+    wgpu::CompareFunction mCompareFunction = wgpu::CompareFunction::Undefined;
+    uint16_t mMaxAnisotropy = 1;
     bool mIsYCbCr = false;
     YCbCrVkDescriptor mYCbCrVkDescriptor = {};
 };

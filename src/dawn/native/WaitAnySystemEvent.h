@@ -102,8 +102,8 @@ template <typename It>
     for (auto it = begin; it != end; DAWN_UNSAFE_TODO(++it)) {
         pollfds.push_back(pollfd{static_cast<int>((*it).first.mPrimitive.Get()), POLLIN, 0});
     }
-    int status;
-    bool retry;
+    int status = 0;
+    bool retry = false;
     do {
         retry = false;
         status = poll(pollfds.data(), pollfds.size(), ToMilliseconds(timeout));

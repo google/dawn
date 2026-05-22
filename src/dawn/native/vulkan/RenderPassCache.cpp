@@ -75,7 +75,7 @@ class RenderPassCreateInfo {
     PerColorAttachment<VkAttachmentReference> resolveAttachmentRefs;
     PerColorAttachment<VkAttachmentReference> inputAttachmentRefs;
     PerColorAttachment<VkAttachmentReference> framebufferFetchAttachmentRefs;
-    VkAttachmentReference depthStencilAttachmentRef;
+    VkAttachmentReference depthStencilAttachmentRef = {};
 
     std::array<VkAttachmentDescription, kMaxAttachmentCount> attachmentDescs = {};
     std::array<VkSubpassDescription, 2> subpassDescs = {};
@@ -132,7 +132,7 @@ class RenderPassCreateInfo2 {
     PerColorAttachment<VkAttachmentReference2> resolveAttachmentRefs;
     PerColorAttachment<VkAttachmentReference2> inputAttachmentRefs;
     PerColorAttachment<VkAttachmentReference2> framebufferFetchAttachmentRefs;
-    VkAttachmentReference2 depthStencilAttachmentRef;
+    VkAttachmentReference2 depthStencilAttachmentRef = {};
 
     std::array<VkAttachmentDescription2, kMaxAttachmentCount> attachmentDescs = {};
     std::array<VkSubpassDescription2, 2> subpassDescs = {};

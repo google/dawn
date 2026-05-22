@@ -34,9 +34,9 @@ namespace tint {
 namespace {
 
 struct S {
-    int i;
-    unsigned u;
-    bool b;
+    int i = 0;
+    unsigned u = 0;
+    bool b = false;
     TINT_REFLECT(S, i, u, b);
 };
 
@@ -111,22 +111,30 @@ struct VirtualNonCastable {
 
 struct VirtualCastable : Castable<VirtualCastable, CastableBase> {
     ~VirtualCastable() override = default;
-    int a, b, c;
+    int a = 0;
+    int b = 0;
+    int c = 0;
     TINT_REFLECT(VirtualCastable, a, b, c);
 };
 
 struct MissingFirst {
-    int a, b, c;
+    int a = 0;
+    int b = 0;
+    int c = 0;
     TINT_REFLECT(MissingFirst, b, c);
 };
 
 struct MissingMid {
-    int a, b, c;
+    int a = 0;
+    int b = 0;
+    int c = 0;
     TINT_REFLECT(MissingMid, a, c);
 };
 
 struct MissingLast {
-    int a, b, c;
+    int a = 0;
+    int b = 0;
+    int c = 0;
     TINT_REFLECT(MissingLast, a, b);
 };
 

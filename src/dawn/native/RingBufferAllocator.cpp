@@ -137,7 +137,7 @@ uint64_t RingBufferAllocator::Allocate(uint64_t allocationSize,
     if (startOffset != kInvalidOffset) {
         mUsedEndOffset = startOffset + allocationSize;
 
-        Request request;
+        Request request = {};
         request.endOffset = mUsedEndOffset;
         request.size = currentRequestSize;
 

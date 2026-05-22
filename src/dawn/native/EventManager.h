@@ -176,7 +176,7 @@ class EventManager::TrackedEvent : public RefCounted {
     void EnsureComplete(EventCompletionType);
     virtual void Complete(EventCompletionType) = 0;
 
-    wgpu::CallbackMode mCallbackMode;
+    wgpu::CallbackMode mCallbackMode = wgpu::CallbackMode::WaitAnyOnly;
     FutureID mFutureID = kNullFutureID;
 
   private:

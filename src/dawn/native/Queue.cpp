@@ -184,10 +184,10 @@ void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* comma
 Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
     struct WorkDoneEvent final : public EventManager::TrackedEvent {
         std::optional<WGPUQueueWorkDoneStatus> mEarlyStatus;
-        WGPUQueueWorkDoneCallback mCallback;
-        std::string mMessage;
-        raw_ptr<void> mUserdata1;
-        raw_ptr<void> mUserdata2;
+        WGPUQueueWorkDoneCallback mCallback = nullptr;
+        std::string mMessage = "";
+        raw_ptr<void> mUserdata1 = nullptr;
+        raw_ptr<void> mUserdata2 = nullptr;
 
         // Create an event backed by the given queue execution serial.
         WorkDoneEvent(const WGPUQueueWorkDoneCallbackInfo& callbackInfo,

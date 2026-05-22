@@ -111,7 +111,7 @@ class ErrorBuffer final : public BufferBase {
 
     void UnmapImpl(BufferState oldState, BufferState newState) override { mFakeMappedData.reset(); }
 
-    std::unique_ptr<uint8_t[]> mFakeMappedData;
+    std::unique_ptr<uint8_t[]> mFakeMappedData = nullptr;
 };
 
 // GetMappedRange on a zero-sized buffer returns a pointer to this value.
@@ -343,11 +343,11 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
 
     // Both variables are set in error constructor or in UnmapEarly() if set.
     WGPUMapAsyncStatus mStatus = WGPUMapAsyncStatus_Success;
-    std::string mErrorMessage;
+    std::string mErrorMessage = "";
 
-    WGPUBufferMapCallback mCallback;
-    raw_ptr<void> mUserdata1;
-    raw_ptr<void> mUserdata2;
+    WGPUBufferMapCallback mCallback = nullptr;
+    raw_ptr<void> mUserdata1 = nullptr;
+    raw_ptr<void> mUserdata2 = nullptr;
 };
 
 ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(

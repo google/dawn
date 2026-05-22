@@ -105,7 +105,7 @@ class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
 
     Ref<InstanceBase> mInstance;
     Ref<PhysicalDeviceBase> mPhysicalDevice;
-    wgpu::FeatureLevel mFeatureLevel;
+    wgpu::FeatureLevel mFeatureLevel = wgpu::FeatureLevel::Undefined;
     bool mUseTieredLimits = false;
     // Limits for the adapter, tiered if mUseTieredLimits is set.
     CombinedLimits mLimits;
@@ -116,7 +116,7 @@ class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
     // Adapter toggles state.
     TogglesState mTogglesState;
 
-    wgpu::PowerPreference mPowerPreference;
+    wgpu::PowerPreference mPowerPreference = wgpu::PowerPreference::Undefined;
 
     // The adapter becomes "consumed" once it has successfully been used to
     // create a device.

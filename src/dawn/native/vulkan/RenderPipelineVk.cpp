@@ -517,7 +517,7 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
         }));
     }
 
-    PipelineVertexInputStateCreateInfoTemporaryAllocations tempAllocations;
+    PipelineVertexInputStateCreateInfoTemporaryAllocations tempAllocations{};
     VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo =
         ComputeVertexInputDesc(&tempAllocations);
 

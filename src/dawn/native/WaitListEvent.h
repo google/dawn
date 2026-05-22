@@ -90,7 +90,7 @@ bool WaitListEvent::WaitAny(It eventAndReadyStateBegin,
 
     struct EventState {
         raw_ptr<WaitListEvent> event = nullptr;
-        size_t origIndex;
+        size_t origIndex = 0;
         bool isReady = false;
     };
     std::vector<EventState> events(count);

@@ -33,7 +33,7 @@ namespace dawn::native {
 void RenderImmediateConstantsTrackerBase::SetClampFragDepth(float minClampFragDepth,
                                                             float maxClampFragDepth) {
     // Put the data in the right layout to match the RenderImmediateConstants struct
-    ClampFragDepthArgs fragDepthArgs;
+    ClampFragDepthArgs fragDepthArgs = {};
     fragDepthArgs.minClampFragDepth = minClampFragDepth;
     fragDepthArgs.maxClampFragDepth = maxClampFragDepth;
 
@@ -58,7 +58,7 @@ void ComputeImmediateConstantsTrackerBase::SetNumWorkgroups(uint32_t numWorkgrou
                                                             uint32_t numWorkgroupY,
                                                             uint32_t numWorkgroupZ) {
     // Put the data in the right layout to match the ComputeImmediateConstants struct
-    NumWorkgroupsDimensions numWorkgroupsDimensions;
+    NumWorkgroupsDimensions numWorkgroupsDimensions = {};
     numWorkgroupsDimensions.numWorkgroupsX = numWorkgroupX;
     numWorkgroupsDimensions.numWorkgroupsY = numWorkgroupY;
     numWorkgroupsDimensions.numWorkgroupsZ = numWorkgroupZ;

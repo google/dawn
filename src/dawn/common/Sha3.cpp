@@ -64,7 +64,7 @@ Sha3Lane Rotl(Sha3Lane l, size_t offset) {
 // Section 3.2.1: Specification of Theta.
 void Theta(Sha3State& a) {
     // Step 1, compute C, the parity of each column.
-    std::array<Sha3Lane, 5> c;
+    std::array<Sha3Lane, 5> c = {};
     for (size_t x = 0; x < 5; x++) {
         c[x] = a[x + 0] ^ a[x + 5] ^ a[x + 10] ^ a[x + 15] ^ a[x + 20];
     }
@@ -176,7 +176,7 @@ void Pi(Sha3State& a) {
 void Chi(Sha3State& a) {
     // Step 1, Xi mixes the bits of each row so we need to copy each plane out before mixing.
     for (uint32_t y = 0; y < 5; y++) {
-        std::array<Sha3Lane, 5> a_y;
+        std::array<Sha3Lane, 5> a_y = {};
         for (uint32_t x = 0; x < 5; x++) {
             a_y[x] = a[x + 5 * y];
         }

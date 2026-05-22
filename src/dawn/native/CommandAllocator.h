@@ -75,8 +75,8 @@ namespace dawn::native {
 // These are the lists of blocks, should not be used directly, only through CommandAllocator
 // and CommandIterator
 struct BlockDef {
-    size_t size;
-    std::unique_ptr<char[]> block;
+    size_t size = 0;
+    std::unique_ptr<char[]> block = nullptr;
 };
 using CommandBlocks = std::vector<BlockDef>;
 
@@ -153,7 +153,7 @@ class CommandIterator : public NonCopyable {
     }
 
     DAWN_FORCE_INLINE void* NextData(size_t dataSize, size_t dataAlignment) {
-        uint32_t id;
+        uint32_t id = 0;
         bool hasId = NextCommandId(&id);
         DAWN_ASSERT(hasId);
         DAWN_ASSERT(id == detail::kAdditionalData);

@@ -60,8 +60,8 @@ struct StageAndDescriptor {
                        size_t constantCount,
                        ConstantEntry const* constants);
 
-    SingleShaderStage shaderStage;
-    raw_ptr<ShaderModuleBase> module;
+    SingleShaderStage shaderStage = SingleShaderStage::Vertex;
+    raw_ptr<ShaderModuleBase> module = nullptr;
     std::string entryPoint;
     size_t constantCount = 0u;
 

@@ -106,7 +106,7 @@ class CommandBufferStateTracker {
     VertexBufferMask mVertexBuffersUsed;
     PerVertexBuffer<uint64_t> mVertexBufferSizes = {};
 
-    wgpu::IndexFormat mIndexFormat;
+    wgpu::IndexFormat mIndexFormat = wgpu::IndexFormat::Undefined;
     uint64_t mIndexBufferSize = 0;
     uint64_t mIndexBufferOffset = 0;
     RAW_PTR_EXCLUSION BufferBase* mIndexBuffer = nullptr;

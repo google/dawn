@@ -1044,7 +1044,7 @@ wgpu::TextureComponentSwizzle ComposeSwizzle(wgpu::TextureComponentSwizzle first
 
 // TextureBase
 
-TextureBase::TextureState::TextureState() : hasAccess(true), destroyed(false) {}
+TextureBase::TextureState::TextureState() = default;
 
 TextureBase::TextureBase(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor)
     : RefCountedWithExternalCount<SharedResource>(device, descriptor->label),

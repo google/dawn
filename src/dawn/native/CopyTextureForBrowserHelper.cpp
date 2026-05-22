@@ -687,7 +687,7 @@ MaybeError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
     DAWN_TRY(device->ValidateObject(source->externalTexture));
     DAWN_TRY(source->externalTexture->ValidateCanUseInSubmitNow());
 
-    Extent2D sourceSize;
+    Extent2D sourceSize = {};
     sourceSize.width = source->naturalSize.width;
     sourceSize.height = source->naturalSize.height;
 

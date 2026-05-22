@@ -228,7 +228,7 @@ InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor) {
 // InstanceBase
 
 struct InstanceBase::DeprecationWarnings {
-    absl::flat_hash_set<std::string> emitted;
+    absl::flat_hash_set<std::string> emitted = {};
     uint64_t count = 0;
 };
 

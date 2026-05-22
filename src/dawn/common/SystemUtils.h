@@ -60,8 +60,8 @@ struct WindowsVersion {
     // https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information for a
     // comprehensive list of Windows version build numbers (for example, 26200.8246 corresponds to
     // Windows 11, version 25H2).
-    uint32_t buildNumber;
-    uint32_t updateBuildRevision;
+    uint32_t buildNumber = 0;
+    uint32_t updateBuildRevision = 0;
 
     auto operator<=>(const WindowsVersion&) const = default;
 };

@@ -64,7 +64,7 @@ struct ArrayLengthOptions {
 /// Information to configure an argument buffer
 struct ArgumentBufferInfo {
     /// The buffer ID to use for this argument buffer
-    uint32_t id;
+    uint32_t id = 0;
 
     /// The buffer ID to use for the dynamic buffer if needed
     std::optional<uint32_t> dynamic_buffer_id{};

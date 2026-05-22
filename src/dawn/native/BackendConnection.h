@@ -57,7 +57,7 @@ class BackendConnection : NonMovable {
 
   private:
     raw_ptr<InstanceBase> mInstance = nullptr;
-    wgpu::BackendType mType;
+    wgpu::BackendType mType = wgpu::BackendType::Undefined;
 };
 
 }  // namespace dawn::native

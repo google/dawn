@@ -82,9 +82,9 @@ class RenderBundleBase : public ApiObjectBase {
     CommandIterator mCommands;
     IndirectDrawMetadata mIndirectDrawMetadata;
     Ref<AttachmentState> mAttachmentState;
-    bool mDepthReadOnly;
-    bool mStencilReadOnly;
-    uint64_t mDrawCount;
+    bool mDepthReadOnly = false;
+    bool mStencilReadOnly = false;
+    uint64_t mDrawCount = 0;
     RenderPassResourceUsage mResourceUsage;
     std::string mEncoderLabel;
 };

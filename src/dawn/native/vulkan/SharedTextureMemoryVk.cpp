@@ -264,7 +264,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     // perform the actual VkImage creation.
     VkPhysicalDeviceImageFormatInfo2 imageFormatInfo = {};
     // List of view formats the image can be created.
-    std::array<VkFormat, 3> viewFormats;
+    std::array<VkFormat, 3> viewFormats{};
     VkImageFormatListCreateInfo imageFormatListInfo = {};
     imageFormatListInfo.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO;
 
@@ -399,7 +399,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 
     // Create the VkImage for the import.
     {
-        std::array<VkSubresourceLayout, kMaxPlanesPerFormat> planeLayouts;
+        std::array<VkSubresourceLayout, kMaxPlanesPerFormat> planeLayouts{};
         for (uint32_t plane = 0u; plane < memoryPlaneCount; ++plane) {
             planeLayouts[plane].offset = DAWN_UNSAFE_TODO(descriptor->planes[plane]).offset;
             planeLayouts[plane].size = 0;  // VK_EXT_image_drm_format_modifier mandates size = 0.
@@ -601,7 +601,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     // perform the actual VkImage creation.
     VkPhysicalDeviceImageFormatInfo2 imageFormatInfo = {};
     // List of view formats the image can be created.
-    std::array<VkFormat, 2> viewFormats;
+    std::array<VkFormat, 2> viewFormats{};
     VkImageFormatListCreateInfo imageFormatListInfo = {};
     imageFormatListInfo.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO;
 
