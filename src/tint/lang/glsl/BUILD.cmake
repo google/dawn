@@ -44,8 +44,8 @@ include(lang/glsl/writer/BUILD.cmake)
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_glsl lib
-  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/glsl/builtin_fn.cc"
-  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/glsl/builtin_fn.h"
+  lang/glsl/builtin_fn.cc
+  lang/glsl/builtin_fn.h
 )
 
 tint_target_add_dependencies(tint_lang_glsl lib

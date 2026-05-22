@@ -46,8 +46,8 @@ include(lang/msl/writer/BUILD.cmake)
 ################################################################################
 tint_add_target(tint_lang_msl lib
   lang/msl/barrier_type.h
-  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/msl/builtin_fn.cc"
-  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/msl/builtin_fn.h"
+  lang/msl/builtin_fn.cc
+  lang/msl/builtin_fn.h
 )
 
 tint_target_add_dependencies(tint_lang_msl lib

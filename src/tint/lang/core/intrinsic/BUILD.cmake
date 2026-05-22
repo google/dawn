@@ -39,14 +39,14 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_core_intrinsic lib
+  lang/core/intrinsic/ctor_conv.cc
+  lang/core/intrinsic/ctor_conv.h
+  lang/core/intrinsic/data.cc
   lang/core/intrinsic/dialect.h
   lang/core/intrinsic/table.cc
   lang/core/intrinsic/table.h
   lang/core/intrinsic/table_data.h
   lang/core/intrinsic/type_matchers.h
-  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/core/intrinsic/ctor_conv.cc"
-  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/core/intrinsic/ctor_conv.h"
-  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/core/intrinsic/data.cc"
 )
 
 tint_target_add_dependencies(tint_lang_core_intrinsic lib

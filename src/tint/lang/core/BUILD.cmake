@@ -46,6 +46,8 @@ include(lang/core/type/BUILD.cmake)
 tint_add_target(tint_lang_core lib
   lang/core/binary_op.cc
   lang/core/binary_op.h
+  lang/core/enums.cc
+  lang/core/enums.h
   lang/core/evaluation_stage.h
   lang/core/fluent_types.h
   lang/core/interpolation.h
@@ -54,8 +56,6 @@ tint_add_target(tint_lang_core lib
   lang/core/number.h
   lang/core/unary_op.cc
   lang/core/unary_op.h
-  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/core/enums.cc"
-  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/core/enums.h"
 )
 
 tint_target_add_dependencies(tint_lang_core lib
@@ -80,8 +80,8 @@ tint_target_add_external_dependencies(tint_lang_core lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_core_test test
+  lang/core/enums_test.cc
   lang/core/number_test.cc
-  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/core/enums_test.cc"
 )
 
 tint_target_add_dependencies(tint_lang_core_test test

@@ -32,7 +32,7 @@ include({{$subdir.Path}}/BUILD.cmake)
 */ -}}
 {{- define "TargetIfNotEmpty"}}
 {{-   if $}}
-{{-     if or (len $.SourceFiles) (len $.GeneratedSourcePaths.List)}}{{Eval "Target" $}}{{end}}
+{{-     if len $.SourceFiles}}{{Eval "Target" $}}{{end}}
 {{-   end}}
 {{- end}}
 
@@ -60,13 +60,8 @@ tint_add_target({{$Name}} {{$Kind}}
 {{-   $UnconditionalSourceFiles := $.UnconditionalSourceFiles}}
 {{-   if $UnconditionalSourceFiles }}
 {{-     range $File := $UnconditionalSourceFiles}}
-{{-       if not ($.IsGeneratedSource $File.Path)}}
-  {{$File.Path -}}
-{{-       end}}
+  {{$File.Path}}
 {{-     end}}
-{{-   end}}
-{{-   range $Path := $.GeneratedSourcePaths.List}}
-  "${PROJECT_BINARY_DIR}/gen/src/tint/{{$Path}}"
 {{-   end}}
 )
 
