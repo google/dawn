@@ -193,8 +193,6 @@ TEST_F(MemoryInstrumentationTest, DumpMemoryStatistics) {
         .usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment,
         .size = {.width = 30, .height = 20},
         .format = kRGBA8UnormTextureFormat,
-        .viewFormatCount = 1,
-        .viewFormats = &kRGBA8UnormTextureFormat,
     };
     wgpu::Texture transientAttachmentTexture =
         device.CreateTexture(&kTransientAttachmentTextureDesc);

@@ -798,11 +798,14 @@ MaybeError ValidateTextureDescriptor(
     DAWN_TRY(ValidateTextureUsageConstraints(device, descriptor->dimension, usage, format,
                                              std::move(allowedSharedTextureMemoryUsage)));
 
-    DAWN_INVALID_IF(
-        usage & wgpu::TextureUsage::TransientAttachment &&
+    if (usage & wgpu::TextureUsage::TransientAttachment) {
+        DAWN_INVALID_IF(
             (descriptor->size.depthOrArrayLayers != 1 || descriptor->mipLevelCount != 1),
-        "The texture size depthOrArrayLayers (%u) and mipLevelCount (%u) must be 1.",
-        descriptor->size.depthOrArrayLayers, descriptor->mipLevelCount);
+            "Transient textures must have depthOrArrayLayers (%u) = 1 and mipLevelCount (%u) = 1.",
+            descriptor->size.depthOrArrayLayers, descriptor->mipLevelCount);
+        DAWN_INVALID_IF(descriptor->viewFormatCount > 0,
+                        "Transient textures must not have any viewFormats");
+    }
 
     DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
     if (!device->HasFlexibleTextureViews()) {
