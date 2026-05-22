@@ -29,7 +29,6 @@ package templates
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"math/rand"
@@ -75,7 +74,7 @@ func (c *CmdSources) Run(ctx context.Context, cfg *common.Config) error {
 	} else if len(args) > 1 {
 		return fmt.Errorf("too many arguments")
 	}
-	return runTemplates(ctx, cfg, []string{"src/tint/**.tmpl"}, outputDir)
+	return runTemplates(ctx, cfg, "src/tint", outputDir)
 }
 
 // CmdTests implements the "tests" command.
@@ -95,22 +94,18 @@ func (c *CmdTests) Run(ctx context.Context, cfg *common.Config) error {
 	if len(flag.Args()) > 0 {
 		return fmt.Errorf("arguments are not supported")
 	}
-	return runTemplates(ctx, cfg, []string{"test/tint/**.tmpl"}, "")
+	return runTemplates(ctx, cfg, "test/tint", "")
 }
 
 // TODO(crbug.com/344014313): Add unittest coverage.
 // runTemplates executes the templates matching the defaultIncludes patterns.
-func runTemplates(ctx context.Context, cfg *common.Config, defaultIncludes []string, outputDir string) error {
+func runTemplates(ctx context.Context, cfg *common.Config, dirPrefix string, outputDir string) error {
 	staleFiles := common.StaleFiles{}
-	projectRoot := fileutils.DawnRoot(cfg.OsWrapper)
+	projectRoot := filepath.Join(fileutils.DawnRoot(cfg.OsWrapper), dirPrefix)
 
-	includesJson, err := json.Marshal(defaultIncludes)
-	if err != nil {
-		return fmt.Errorf("failed to marshal includes: %w", err)
-	}
-	configStr := fmt.Sprintf(`{
-		"paths": [{"include": %s}]
-	}`, includesJson)
+	configStr := `{
+		"paths": [{"include": ["**.tmpl"]}]
+	}`
 	files, err := glob.Scan(projectRoot, glob.MustParseConfig(configStr), cfg.OsWrapper)
 	if err != nil {
 		return err
@@ -140,7 +135,7 @@ func runTemplates(ctx context.Context, cfg *common.Config, defaultIncludes []str
 
 			var outPath string
 			if outputDir != "" {
-				outPath = filepath.Join(outputDir, filepath.Dir(relTmplPath), relPath)
+				outPath = filepath.Join(outputDir, dirPrefix, filepath.Dir(relTmplPath), relPath)
 			} else {
 				outPath = filepath.Join(tmplDir, relPath)
 			}
@@ -156,7 +151,7 @@ func runTemplates(ctx context.Context, cfg *common.Config, defaultIncludes []str
 				fmt.Println("  writing", outPath)
 			}
 			sb := strings.Builder{}
-			sb.WriteString(common.Header(string(existing), filepath.ToSlash(relTmplPath), commentPrefix))
+			sb.WriteString(common.Header(string(existing), filepath.ToSlash(filepath.Join(dirPrefix, relTmplPath)), commentPrefix))
 			sb.WriteString("\n")
 			sb.WriteString(body)
 			oldContent, newContent := string(existing), sb.String()
