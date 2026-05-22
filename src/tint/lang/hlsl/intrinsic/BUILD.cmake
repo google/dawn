@@ -39,9 +39,9 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_hlsl_intrinsic lib
-  lang/hlsl/intrinsic/data.cc
   lang/hlsl/intrinsic/dialect.h
   lang/hlsl/intrinsic/type_matchers.h
+  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/hlsl/intrinsic/data.cc"
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_intrinsic lib

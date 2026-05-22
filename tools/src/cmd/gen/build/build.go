@@ -775,6 +775,22 @@ func emitBuildFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter)
 		}
 	}
 
+	// Generate files that contain the inputs and/or outputs of the build-time source generation.
+	generatedSources := p.AllTemplatePaths.List()
+	for i, v := range generatedSources {
+		generatedSources[i] = "src/tint/" + strings.TrimSuffix(v, ".tmpl")
+	}
+	depsForGeneratedSources, err := glob.Scan(p.Root, glob.MustParseConfig(`{
+		"paths": [{"include": ["**/*.def"]}]
+	}`), fsReaderWriter)
+	if err != nil {
+		return err
+	}
+	depsForGeneratedSources = append(depsForGeneratedSources, p.AllTemplatePaths.List()...)
+	if err := emitGeneratedSourceListForCMake(p, fsReaderWriter, generatedSources, depsForGeneratedSources); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -816,6 +832,40 @@ func emitDotFile(p *Project, kind TargetKind, fsWriter oswrapper.FilesystemWrite
 
 	g.GenerateDOT(file)
 	return nil
+}
+
+func emitGeneratedSourceListForCMake(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter, generatedSources []string, depsForGeneratedSources []string) error {
+	depsPath := path.Join(p.Root, "generated_sources.cmake")
+	sb := &strings.Builder{}
+	sb.WriteString(common.Header("", "", "#"))
+	sb.WriteString("\n")
+	emitList(sb, generatedSources, "set(TINT_GENERATED_SOURCES\n", ")\n\n", "  \"${PROJECT_BINARY_DIR}/gen/", "\"\n")
+	emitList(sb, depsForGeneratedSources, "set(TINT_GENERATED_SOURCE_DEPS\n", ")\n", "  \"", "\"\n")
+
+	return writeFileIfStale(p, fsReaderWriter, depsPath, sb.String())
+}
+
+func writeFileIfStale(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter, filepath string, content string) error {
+	existing, _ := fsReaderWriter.ReadFile(filepath)
+	if string(existing) != content {
+		if p.cfg.Flags.CheckStale {
+			return common.StaleFiles{filepath}
+		}
+		if err := fsReaderWriter.WriteFile(filepath, []byte(content), 0666); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func emitList(sb *strings.Builder, items []string, prefix, suffix, itemPrefix, itemSuffix string) {
+	sb.WriteString(prefix)
+	for _, item := range items {
+		sb.WriteString(itemPrefix)
+		sb.WriteString(item)
+		sb.WriteString(itemSuffix)
+	}
+	sb.WriteString(suffix)
 }
 
 var (

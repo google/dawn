@@ -121,9 +121,9 @@ if(TINT_BUILD_WGSL_READER)
 tint_add_target(tint_cmd_bench_bench bench
   cmd/bench/bench.cc
   cmd/bench/bench.h
-  cmd/bench/enums_core_bench.cc
-  cmd/bench/enums_wgsl_bench.cc
   cmd/bench/validator_bench.cc
+  "${PROJECT_BINARY_DIR}/gen/src/tint/cmd/bench/enums_core_bench.cc"
+  "${PROJECT_BINARY_DIR}/gen/src/tint/cmd/bench/enums_wgsl_bench.cc"
 )
 
 tint_target_add_dependencies(tint_cmd_bench_bench bench

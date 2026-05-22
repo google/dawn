@@ -59,6 +59,7 @@ endif()
 # Helper functions
 ################################################################################
 function(tint_core_compile_options TARGET)
+  target_include_directories(${TARGET} PUBLIC "${PROJECT_BINARY_DIR}/gen")
   target_include_directories(${TARGET} PUBLIC "${TINT_ROOT_SOURCE_DIR}")
   target_include_directories(${TARGET} PUBLIC "${TINT_ROOT_SOURCE_DIR}/include")
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_GLSL_VALIDATOR=$<BOOL:${TINT_BUILD_GLSL_VALIDATOR}>)
@@ -121,6 +122,9 @@ function(tint_default_compile_options TARGET)
     -Wno-c2y-extensions
     -Wno-lifetime-safety-intra-tu-suggestions
     -Wno-lifetime-safety-cross-tu-suggestions
+
+    # TODO(513255285): Remove when generated sources are removed from source tree.
+    -Wno-shadow-header
   )
 
   if(COMPILER_IS_GNU)
@@ -342,6 +346,21 @@ if(TINT_BUILD_BENCHMARKS)
 endif()
 
 ################################################################################
+# Source Generation
+################################################################################
+include("${CMAKE_CURRENT_SOURCE_DIR}/generated_sources.cmake")
+
+add_custom_command(
+  OUTPUT ${TINT_GENERATED_SOURCES}
+  COMMAND ${GO_EXECUTABLE} "run" "${TINT_ROOT_SOURCE_DIR}/tools/src/cmd/gen/main.go" sources ${PROJECT_BINARY_DIR}/gen
+  WORKING_DIRECTORY ${TINT_ROOT_SOURCE_DIR}
+  DEPENDS ${TINT_GENERATED_SOURCE_DEPS}
+  COMMENT "Generating Tint source files"
+)
+
+add_custom_target(tint_generate_sources DEPENDS ${TINT_GENERATED_SOURCES})
+
+################################################################################
 # Functions used by BUILD.cmake files
 # The CMake build handles the target kinds in different ways:
 # 'cmd'       - Translates to a CMake executable target.
@@ -409,6 +428,12 @@ function(tint_add_target TARGET KIND)
     return() # Target is disabled via build flags
   endif()
 
+  foreach(SRC ${SOURCES})
+    if(SRC MATCHES "^${PROJECT_BINARY_DIR}/gen")
+      set_source_files_properties(${SRC} PROPERTIES GENERATED TRUE)
+    endif()
+  endforeach()
+
   if(${KIND} STREQUAL lib)
     add_library(${TARGET} STATIC EXCLUDE_FROM_ALL)
     tint_lib_compile_options(${TARGET})
@@ -442,6 +467,9 @@ function(tint_add_target TARGET KIND)
   else()
     message(FATAL_ERROR "unhandled target kind ${KIND}")
   endif()
+
+  # Ensure sources are generated before building target
+  add_dependencies(${TARGET} tint_generate_sources)
 
   # Add the sources to the target
   target_sources(${TARGET} PRIVATE ${SOURCES})

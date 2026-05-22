@@ -46,8 +46,8 @@ include(lang/spirv/writer/BUILD.cmake)
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_spirv lib
-  lang/spirv/builtin_fn.cc
-  lang/spirv/builtin_fn.h
+  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/spirv/builtin_fn.cc"
+  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/spirv/builtin_fn.h"
 )
 
 tint_target_add_dependencies(tint_lang_spirv lib

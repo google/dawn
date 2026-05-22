@@ -45,8 +45,8 @@ include(lang/hlsl/writer/BUILD.cmake)
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_hlsl lib
-  lang/hlsl/builtin_fn.cc
-  lang/hlsl/builtin_fn.h
+  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/hlsl/builtin_fn.cc"
+  "${PROJECT_BINARY_DIR}/gen/src/tint/lang/hlsl/builtin_fn.h"
 )
 
 tint_target_add_dependencies(tint_lang_hlsl lib
