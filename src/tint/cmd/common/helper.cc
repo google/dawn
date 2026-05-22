@@ -156,7 +156,7 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
         input_format = InputFormatFromFilename(opts.filename);
     }
     if (input_format == InputFormat::kUnknown && IsStdin(opts.filename)) {
-        std::cerr << "No input format given for data read from stdin";
+        std::cerr << "No input format given for data read from stdin\n";
         exit(1);
     }
 

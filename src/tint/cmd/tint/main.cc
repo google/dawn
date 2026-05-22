@@ -590,12 +590,12 @@ Options:
         for (const auto& o : tint::Split(*overrides.value, ",")) {
             auto parts = tint::Split(o, "=");
             if (parts.Length() != 2) {
-                std::cerr << "override values must be of the form IDENTIFIER=VALUE";
+                std::cerr << "override values must be of the form IDENTIFIER=VALUE\n";
                 return false;
             }
             auto value = tint::strconv::ParseNumber<double>(parts[1]);
             if (value != tint::Success) {
-                std::cerr << "invalid override value: " << parts[1];
+                std::cerr << "invalid override value: " << parts[1] << "\n";
                 return false;
             }
             opts->overrides.Add(std::string(parts[0]), value.Get());
@@ -681,7 +681,8 @@ Options:
         for (auto ab : tint::Split(*arg_buffer.value, ",")) {
             auto parts = tint::Split(ab, "=");
             if (parts.Length() != 2) {
-                std::cerr << "argument-buffer values must be of the form GROUP=ARGUMENT_BUFFER_ID";
+                std::cerr
+                    << "argument-buffer values must be of the form GROUP=ARGUMENT_BUFFER_ID\n";
                 return false;
             }
 
@@ -703,7 +704,7 @@ Options:
             auto parts = tint::Split(db, "=");
             if (parts.Length() != 2) {
                 std::cerr
-                    << "dynamic-offset-buffer values must be of the form GROUP=DYNAMIC_BUFFER_ID";
+                    << "dynamic-offset-buffer values must be of the form GROUP=DYNAMIC_BUFFER_ID\n";
                 return false;
             }
 
@@ -724,13 +725,13 @@ Options:
         for (auto val : tint::Split(*dynamic_offset.value, ",")) {
             auto parts = tint::Split(val, "=");
             if (parts.Length() != 2) {
-                std::cerr << "dynamic-offset values must be of the form GROUP.BINDING=OFFSET";
+                std::cerr << "dynamic-offset values must be of the form GROUP.BINDING=OFFSET\n";
                 return false;
             }
 
             auto bind_point = tint::Split(parts[0], ".");
             if (bind_point.Length() != 2) {
-                std::cerr << "dynamic-offset values must be of the form GROUP.BINDING=OFFSET";
+                std::cerr << "dynamic-offset values must be of the form GROUP.BINDING=OFFSET\n";
                 return false;
             }
             uint32_t group = 0;
@@ -835,7 +836,7 @@ Options:
         for (auto val : tint::Split(*bgra_swizzle.value, ",")) {
             auto bgra_val = tint::strconv::ParseUint32(val);
             if (bgra_val != tint::Success) {
-                std::cerr << "invalid bgra_swizzle value: " << val;
+                std::cerr << "invalid bgra_swizzle value: " << val << "\n";
                 return false;
             }
             opts->bgra_swizzle.push_back(bgra_val.Get());
