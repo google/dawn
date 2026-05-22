@@ -2088,11 +2088,6 @@ void DoMaxBindingsPerBindGroupTest(const wgpu::Device& device,
 
 // Test with storage buffers as buffers take the most space in the frontend BindGroup.
 TEST_P(BindGroupTests, MaxBindingsPerBindGroupVisibility_StorageBuffer) {
-    // TODO(https://issues.chromium.org/491082532): Fails on OpenGL, likely because the buffers with
-    // visibility none are still being bound in the GL backend, causing a GL_INVALID_VALUE because
-    // the index is too large in glBindBufferRange.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     wgpu::BindGroupLayoutEntry bglEntry = {
         .binding = 0,
         .visibility = wgpu::ShaderStage::None,
@@ -2119,11 +2114,6 @@ TEST_P(BindGroupTests, MaxBindingsPerBindGroupVisibility_StorageBuffer) {
 }
 // Test with external textures as they expand to take multiple entries in the frontend bindgroup.
 TEST_P(BindGroupTests, MaxBindingsPerBindGroupVisibility_ExternalTexture) {
-    // TODO(https://issues.chromium.org/491082532): Fails on OpenGL, likely because the buffers with
-    // visibility none are still being bound in the GL backend, causing a GL_INVALID_VALUE because
-    // the index is too large in glBindBufferRange.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     wgpu::ExternalTextureBindingLayout etLayout = {};
     wgpu::BindGroupLayoutEntry bglEntry = {
         .nextInChain = &etLayout,
