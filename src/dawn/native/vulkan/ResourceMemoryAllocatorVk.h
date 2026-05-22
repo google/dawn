@@ -28,7 +28,6 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 
-#include <map>
 #include <memory>
 #include <vector>
 
@@ -83,24 +82,6 @@ class ResourceMemoryAllocator {
     void DeallocateResourceHeap(ResourceHeap* heap, bool isLazyMemoryType);
 
   private:
-    // Wrapper for tracking the allocation sizes to be decremented up to a completed ExecutionSerial
-    // and reporting total allocation/used sizes.
-    class AllocationSizeTracker {
-      public:
-        // Increment the total size for tracking.
-        void Increment(VkDeviceSize incrementSize);
-        // Track the size to be decremented on Tick.
-        void Decrement(ExecutionSerial currentSerial, VkDeviceSize decrementSize);
-        // Update the total size after completed serials.
-        void Tick(ExecutionSerial completedSerial);
-
-        VkDeviceSize Size() const { return mTotalSize; }
-
-      private:
-        std::map<ExecutionSerial, VkDeviceSize> mMemoryToDecrement;
-        VkDeviceSize mTotalSize = 0;
-    };
-
     raw_ptr<Device> mDevice;
     const VkDeviceSize mMaxSizeForSuballocation;
     MemoryTypeSelector mMemoryTypeSelector;

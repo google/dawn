@@ -90,6 +90,9 @@ class ResourceAllocatorManager {
 
     void Tick(ExecutionSerial lastCompletedSerial);
 
+    uint64_t GetTotalAllocatedMemory() const;
+    uint64_t GetTotalUsedMemory() const;
+
   private:
     void FreeSubAllocatedMemory(ResourceHeapAllocation& allocation);
 
@@ -121,6 +124,9 @@ class ResourceAllocatorManager {
 
     SerialQueue<ExecutionSerial, ResourceHeapAllocation> mAllocationsToDelete;
     SerialQueue<ExecutionSerial, std::unique_ptr<ResourceHeapBase>> mHeapsToDelete;
+
+    AllocationSizeTracker mAllocatedMemory;
+    AllocationSizeTracker mUsedMemory;
 };
 
 }  // namespace dawn::native::d3d12

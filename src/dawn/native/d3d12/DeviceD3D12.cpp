@@ -901,4 +901,13 @@ const PerStage<std::wstring>& Device::GetDxcShaderProfiles() const {
     return mDxcShaderProfiles;
 }
 
+AllocatorMemoryInfo Device::GetAllocatorMemoryInfo() const {
+    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
+    AllocatorMemoryInfo info = {};
+    info.totalAllocatedMemory = (*mResourceAllocatorManager)->GetTotalAllocatedMemory();
+    info.totalUsedMemory = (*mResourceAllocatorManager)->GetTotalUsedMemory();
+    // D3D12 has no lazy memory concept, leave lazy fields as zero.
+    return info;
+}
+
 }  // namespace dawn::native::d3d12

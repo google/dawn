@@ -164,6 +164,8 @@ class Device final : public d3d::Device {
 
     uint64_t GetBufferCopyOffsetAlignmentForDepthStencil() const override;
 
+    AllocatorMemoryInfo GetAllocatorMemoryInfo() const override;
+
     // Dawn APIs
     void SetLabelImpl() override;
 

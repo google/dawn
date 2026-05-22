@@ -75,4 +75,21 @@ void PooledResourceMemoryAllocator::DeallocateResourceHeap(
 uint64_t PooledResourceMemoryAllocator::GetPoolSizeForTesting() const {
     return mPool.size();
 }
+
+void AllocationSizeTracker::Increment(uint64_t incrementSize) {
+    mTotalSize += incrementSize;
+}
+
+void AllocationSizeTracker::Decrement(ExecutionSerial currentSerial, uint64_t decrementSize) {
+    DAWN_ASSERT(mTotalSize >= decrementSize);
+    mMemoryToDecrement.Enqueue(decrementSize, currentSerial);
+}
+
+void AllocationSizeTracker::Tick(ExecutionSerial completedSerial) {
+    for (uint64_t size : mMemoryToDecrement.IterateUpTo(completedSerial)) {
+        DAWN_ASSERT(mTotalSize >= size);
+        mTotalSize -= size;
+    }
+    mMemoryToDecrement.ClearUpTo(completedSerial);
+}
 }  // namespace dawn::native

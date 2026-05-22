@@ -305,7 +305,8 @@ ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(dev
         const ResourceHeapKind resourceHeapKind = static_cast<ResourceHeapKind>(i);
         D3D12_HEAP_FLAGS heapFlags = GetD3D12HeapFlags(resourceHeapKind) | createNotZeroedHeapFlag;
         mHeapAllocators[i] = std::make_unique<HeapAllocator>(
-            mDevice, resourceHeapKind, heapFlags, GetMemorySegment(mDevice, resourceHeapKind));
+            mDevice, resourceHeapKind, heapFlags, GetMemorySegment(mDevice, resourceHeapKind),
+            &mAllocatedMemory);
         mPooledHeapAllocators[i] =
             std::make_unique<PooledResourceMemoryAllocator>(mHeapAllocators[i].get());
         mSubAllocatedResourceAllocators[i] = std::make_unique<BuddyMemoryAllocator>(
@@ -403,6 +404,9 @@ void ResourceAllocatorManager::Tick(ExecutionSerial completedSerial) {
     }
     mAllocationsToDelete.ClearUpTo(completedSerial);
     mHeapsToDelete.ClearUpTo(completedSerial);
+
+    mAllocatedMemory.Tick(completedSerial);
+    mUsedMemory.Tick(completedSerial);
 }
 
 void ResourceAllocatorManager::DeallocateMemory(ResourceHeapAllocation& allocation) {
@@ -420,6 +424,14 @@ void ResourceAllocatorManager::DeallocateMemory(ResourceHeapAllocation& allocati
     if (allocation.GetInfo().mMethod == AllocationMethod::kDirect) {
         mHeapsToDelete.Enqueue(std::unique_ptr<ResourceHeapBase>(allocation.GetResourceHeap()),
                                mDevice->GetQueue()->GetPendingCommandSerial());
+
+        mUsedMemory.Decrement(mDevice->GetQueue()->GetPendingCommandSerial(),
+                              allocation.GetInfo().mRequestedSize);
+        mAllocatedMemory.Decrement(mDevice->GetQueue()->GetPendingCommandSerial(),
+                                   allocation.GetInfo().mRequestedSize);
+    } else if (allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated) {
+        mUsedMemory.Decrement(mDevice->GetQueue()->GetPendingCommandSerial(),
+                              allocation.GetInfo().mRequestedSize);
     }
 
     // Invalidate the allocation immediately in case one accidentally
@@ -502,6 +514,8 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreatePlacedReso
             optimizedClearValue, IID_PPV_ARGS(&placedResource)),
         "ID3D12Device::CreatePlacedResource"));
 
+    mUsedMemory.Increment(resourceInfo.SizeInBytes);
+
     // After CreatePlacedResource has finished, the heap can be unlocked from residency. This
     // will insert it into the residency LRU.
     mDevice->GetResidencyManager()->UnlockAllocation(heap);
@@ -556,6 +570,9 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreateCommittedR
             optimizedClearValue, IID_PPV_ARGS(&committedResource)),
         "ID3D12Device::CreateCommittedResource"));
 
+    mAllocatedMemory.Increment(resourceInfo.SizeInBytes);
+    mUsedMemory.Increment(resourceInfo.SizeInBytes);
+
     // When using CreateCommittedResource, D3D12 creates an implicit heap that contains the
     // resource allocation. Because Dawn's memory residency management occurs at the resource
     // heap granularity, every directly allocated ResourceHeapAllocation also stores a Heap
@@ -581,6 +598,14 @@ void ResourceAllocatorManager::FreeRecycledAllocations() {
     for (auto& alloc : mPooledHeapAllocators) {
         alloc->FreeRecycledAllocations();
     }
+}
+
+uint64_t ResourceAllocatorManager::GetTotalAllocatedMemory() const {
+    return mAllocatedMemory.GetSize();
+}
+
+uint64_t ResourceAllocatorManager::GetTotalUsedMemory() const {
+    return mUsedMemory.GetSize();
 }
 
 }  // namespace dawn::native::d3d12

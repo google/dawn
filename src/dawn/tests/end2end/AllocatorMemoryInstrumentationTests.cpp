@@ -42,7 +42,10 @@ class AllocatorMemoryInstrumentationTest : public DawnTest {
 };
 
 // Test the detailed memory usage reported by GetAllocatorMemoryInfo()
-TEST_P(AllocatorMemoryInstrumentationTest, GetAllocatorMemoryInfoVulkan) {
+TEST_P(AllocatorMemoryInstrumentationTest, GetAllocatorMemoryInfo) {
+    native::AllocatorMemoryInfo memInfo = native::GetAllocatorMemoryInfo(device.Get());
+    auto usedMemoryInInitialization = memInfo.totalUsedMemory;
+
     // Create a buffer with size 32.
     constexpr uint64_t kBufferSize = 32;
     constexpr wgpu::BufferDescriptor kBufferDesc = {
@@ -50,11 +53,11 @@ TEST_P(AllocatorMemoryInstrumentationTest, GetAllocatorMemoryInfoVulkan) {
         .size = kBufferSize,
     };
 
-    // Creating the buffer should allocate memory with Vulkan ResourceMemoryAllocator.
+    // Creating the buffer should allocate memory with ResourceMemoryAllocator.
     wgpu::Buffer uniformBuffer = device.CreateBuffer(&kBufferDesc);
     EXPECT_TRUE(uniformBuffer);
 
-    native::AllocatorMemoryInfo memInfo = native::GetAllocatorMemoryInfo(device.Get());
+    memInfo = native::GetAllocatorMemoryInfo(device.Get());
     EXPECT_GT(memInfo.totalAllocatedMemory, 0u);
     EXPECT_GT(memInfo.totalUsedMemory, 0u);
     EXPECT_GE(memInfo.totalAllocatedMemory, memInfo.totalUsedMemory);
@@ -81,12 +84,11 @@ TEST_P(AllocatorMemoryInstrumentationTest, GetAllocatorMemoryInfoVulkan) {
     device.Tick();
 
     memInfo = native::GetAllocatorMemoryInfo(device.Get());
-    // Vulkan used memory should be 0 now.
-    EXPECT_EQ(memInfo.totalUsedMemory, 0u);
+    EXPECT_EQ(memInfo.totalUsedMemory, usedMemoryInInitialization);
     EXPECT_LE(memInfo.totalAllocatedMemory, prevAllocatedMemory);
 }
 
-DAWN_INSTANTIATE_TEST(AllocatorMemoryInstrumentationTest, VulkanBackend());
+DAWN_INSTANTIATE_TEST(AllocatorMemoryInstrumentationTest, D3D12Backend(), VulkanBackend());
 
 }  // anonymous namespace
 }  // namespace dawn
