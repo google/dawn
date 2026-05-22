@@ -123,6 +123,7 @@ go_library(
     importpath = "dawn.googlesource.com/dawn/tools/src/tint/intrinsic/parser",
     visibility = ["//visibility:public"],
     deps = [
+        ":fileutils",
         ":oswrapper",
         ":tint_intrinsic_ast",
         ":tint_intrinsic_lexer",

@@ -31,8 +31,10 @@ package parser
 
 import (
 	"fmt"
+	"path/filepath"
 	"strconv"
 
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/ast"
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/lexer"
@@ -185,10 +187,11 @@ func (p *parser) importDecl(out *ast.AST) {
 	t := p.expect(tok.Import, "import declaration")
 	path := p.string()
 
-	content, err := p.fsReader.ReadFile(path)
+	absPath := filepath.Join(fileutils.DawnRoot(p.fsReader), path)
+	content, err := p.fsReader.ReadFile(absPath)
 	if err != nil {
 		p.err = fmt.Errorf("%v failed to load '%v': %w",
-			t.Source, path, err)
+			t.Source, absPath, err)
 		return
 	}
 
