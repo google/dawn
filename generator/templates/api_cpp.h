@@ -759,7 +759,7 @@ struct CppFTraitsImpl<CppFT, R(*)(CppArgs...), T> {
     static constexpr bool capturing = false;
 
     static constexpr size_t NumCppArgs = sizeof...(CppArgs);
-    using BaseArgsTuple = decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
+    using BaseArgsTuple = typename decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
         return std::type_identity<std::tuple<std::tuple_element_t<Is, std::tuple<CppArgs...>>...>>{};
     }(std::make_index_sequence<std::is_same_v<T, Untyped> ? NumCppArgs : NumCppArgs - 1>{})
     )::type;
@@ -771,7 +771,7 @@ struct CppFTraitsImpl<CppFT, R(C::*)(CppArgs...) const, T> {
     static constexpr bool capturing = !std::is_convertible_v<CppFT, PtrT>;
 
     static constexpr size_t NumCppArgs = sizeof...(CppArgs);
-    using BaseArgsTuple = decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
+    using BaseArgsTuple = typename decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
         return std::type_identity<std::tuple<std::tuple_element_t<Is, std::tuple<CppArgs...>>...>>{};
     }(std::make_index_sequence<std::is_same_v<T, Untyped> ? NumCppArgs : NumCppArgs - 1>{})
     )::type;
@@ -919,8 +919,11 @@ struct CallbackInfoHelper {
                 std::unique_ptr<F> alloc = std::make_unique<F>(std::move(lambda));
                 info.userdata1 = reinterpret_cast<void*>(alloc.release());
             } else {
+                // MSVC <=19.39 doesn't support static_assert(false) and this was fixed in later C++
+                // standards https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2593r1.html
+                constexpr bool kAlwaysFalse = sizeof(F) == 0;
                 static_assert(
-                    false, "capturing lambdas aren't supported for repeatable callbacks"
+                    kAlwaysFalse, "capturing lambdas aren't supported for repeatable callbacks"
                 );
             }
         } else {
