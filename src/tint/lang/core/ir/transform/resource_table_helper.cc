@@ -38,7 +38,8 @@
 
 namespace tint::core::ir::transform {
 
-std::optional<ResourceTableConfig> GenerateResourceTableConfig(Module& mod) {
+std::optional<ResourceTableConfig> GenerateResourceTableConfig(Module& mod,
+                                                               bool treat_samplers_as_filtering) {
     std::vector<ResourceType> default_binding_type_order;
 
     for (auto* inst : mod.Instructions()) {
@@ -84,6 +85,17 @@ std::optional<ResourceTableConfig> GenerateResourceTableConfig(Module& mod) {
         }
 
         BindingPoint bp = var->BindingPoint().value();
+
+        if (ty->Is<type::Sampler>() && !ty->As<type::Sampler>()->IsComparison() &&
+            treat_samplers_as_filtering) {
+            // Push both them to defaults because we need to fall back to the non-filtering version
+            default_binding_type_order.push_back(ResourceType::kSampler_filtering);
+            default_binding_type_order.push_back(ResourceType::kSampler_non_filtering);
+
+            binding_to_resource_type.emplace(bp, ResourceType::kSampler_filtering);
+            continue;
+        }
+
         binding_to_resource_type.emplace(bp, DefaultResourceTypeFor(ty));
 
         std::vector<ResourceType> converts = ConvertsFrom(ty);

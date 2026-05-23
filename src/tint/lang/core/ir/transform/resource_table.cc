@@ -301,9 +301,7 @@ struct State {
     }
 
     // We have a bind-ful texture/sampler, get the ResourceKind the API reported
-    ir::InstructionResult* HandleBindfulKind(ir::CoreBuiltinCall* call,
-                                             size_t idx,
-                                             std::string_view name) {
+    ir::Value* HandleBindfulKind(ir::CoreBuiltinCall* call, size_t idx) {
         core::ir::InstructionResult* opt_res =
             call->Operands()[idx]->As<core::ir::InstructionResult>();
         TINT_IR_ASSERT(ir, opt_res);
@@ -314,10 +312,7 @@ struct State {
         auto iter = config->binding_to_resource_type.find(var->BindingPoint().value());
         TINT_IR_ASSERT(ir, iter != config->binding_to_resource_type.end());
 
-        ir::InstructionResult* res = nullptr;
-        b.InsertBefore(call, [&] { res = b.Let(u32(iter->second))->Result(); });
-        ir.SetName(res, name);
-        return res;
+        return b.Constant(u32(iter->second));
     }
 
     ir::InstructionResult* HandleBindlessKind(ir::CoreBuiltinCall* call,
@@ -355,16 +350,16 @@ struct State {
         return resource_kind;
     }
 
-    ir::InstructionResult* GetKind(ir::CoreBuiltinCall* call,
-                                   const std::optional<Info>& opt,
-                                   bool is_sampler_comparison_call,
-                                   size_t idx,
-                                   std::string_view name) {
-        core::ir::InstructionResult* kind = nullptr;
+    ir::Value* GetKind(ir::CoreBuiltinCall* call,
+                       const std::optional<Info>& opt,
+                       bool is_sampler_comparison_call,
+                       size_t idx,
+                       std::string_view name) {
+        core::ir::Value* kind = nullptr;
         if (opt.has_value()) {
             kind = HandleBindlessKind(call, opt.value(), is_sampler_comparison_call, name);
         } else if (!is_sampler_comparison_call) {
-            kind = HandleBindfulKind(call, idx, name);
+            kind = HandleBindfulKind(call, idx);
         }
         return kind;
     }
@@ -445,10 +440,10 @@ struct State {
         size_t sampler_operand_idx =
             args.sampler.has_value() ? args.sampler->operand_idx : args.texture->operand_idx + 1;
 
-        core::ir::InstructionResult* texture_kind = GetKind(
-            call, args.texture, is_sampler_comparison_call, texture_operand_idx, "texture_kind");
-        core::ir::InstructionResult* sampler_kind = GetKind(
-            call, args.sampler, is_sampler_comparison_call, sampler_operand_idx, "sampler_kind");
+        core::ir::Value* texture_kind = GetKind(call, args.texture, is_sampler_comparison_call,
+                                                texture_operand_idx, "texture_kind");
+        core::ir::Value* sampler_kind = GetKind(call, args.sampler, is_sampler_comparison_call,
+                                                sampler_operand_idx, "sampler_kind");
 
         // Only need to validate the texture/sampler if we aren't don't a
         // comparison sampler.
@@ -456,27 +451,39 @@ struct State {
             return;
         }
 
+        // If we know the sampler type at compile time, we can skip all the if checks below if
+        // we know it isn't filtering.
+        if (sampler_kind->Is<core::ir::Constant>() &&
+            sampler_kind->As<core::ir::Constant>()->Value()->ValueAs<uint32_t>() ==
+                uint32_t(ResourceType::kSampler_non_filtering)) {
+            return;
+        }
+
         // Validate that the sampler/texture pair work together
         b.InsertBefore(call, [&] {
-            // We only care if we're using a filtering sampler with a non_filterable texture, so
-            // check if the sampler is filtering
-            core::ir::Instruction* sampler_compare =
-                b.Equal(sampler_kind, u32(ResourceType::kSampler_filtering));
+            core::ir::Value* samp_res = nullptr;
+            if (!sampler_kind->Is<core::ir::Constant>()) {
+                core::ir::Instruction* sampler_compare =
+                    b.Equal(sampler_kind, u32(ResourceType::kSampler_filtering));
 
-            // Returns `true` if we need to replace the sampler with a default non_filtering sampler
-            core::ir::If* samp_if = b.If(sampler_compare);
-            core::ir::InstructionResult* samp_res = b.InstructionResult(ty.bool_());
-            ir.SetName(samp_res, "use_sampler");
-            samp_if->SetResult(samp_res);
+                // Returns `true` if we need to replace the sampler with a default non_filtering
+                // sampler
+                core::ir::If* samp_if = b.If(sampler_compare);
+                samp_res = b.InstructionResult(ty.bool_());
+                ir.SetName(samp_res, "use_sampler");
+                samp_if->SetResult(samp_res->As<ir::InstructionResult>());
 
-            // If the sampler is filtering
-            b.Append(samp_if->True(), [&] {
-                ir::InstructionResult* tex_res = ConstructTextureFilterableCheck(texture_kind);
-                b.ExitIf(samp_if, tex_res);
-            });
+                // If the sampler is filtering
+                b.Append(samp_if->True(), [&] {
+                    ir::InstructionResult* tex_res = ConstructTextureFilterableCheck(texture_kind);
+                    b.ExitIf(samp_if, tex_res);
+                });
 
-            // Sampler != filtering, so use_sampler is true
-            b.Append(samp_if->False(), [&] { b.ExitIf(samp_if, true); });
+                // Sampler != filtering, so use_sampler is true
+                b.Append(samp_if->False(), [&] { b.ExitIf(samp_if, true); });
+            } else {
+                samp_res = ConstructTextureFilterableCheck(texture_kind);
+            }
 
             const core::type::Type* result_ty = call->Result()->Type();
 

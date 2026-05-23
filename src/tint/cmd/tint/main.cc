@@ -153,6 +153,8 @@ struct Options {
     bool enable_ir_validation_asserts = true;
     bool ir_roundtrip = false;
 
+    bool treat_samplers_as_filtering = false;
+
 #if TINT_BUILD_SPV_READER
     tint::spirv::reader::Options spirv_reader_options;
 #endif  // TINT_BUILD_SPV_READER
@@ -436,6 +438,11 @@ violations that may be produced)",
         "be separated with a space.",
         Default{""});
 #endif
+
+    auto& treat_samplers_as_filtering = options.Add<BoolOption>(
+        "treat-samplers-as-filtering", "Set the ResourceType for any bindful samplers as filtering",
+        Default{false});
+    TINT_DEFER(opts->treat_samplers_as_filtering = *treat_samplers_as_filtering.value);
 
 #if TINT_BUILD_SPV_WRITER
     auto& use_storage_input_output_16 =
@@ -985,7 +992,8 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 
     gen_options.bindings =
         tint::GenerateBindings(ir, options.ep_name, false, false, options.ycbcr_bindings);
-    gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(ir);
+    gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(
+        ir, options.treat_samplers_as_filtering);
 
     // Enable the Vulkan Memory Model if needed.
     for (auto* ty : ir.Types()) {
@@ -1250,7 +1258,8 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
     gen_options.compiler = for_fxc ? tint::hlsl::writer::Options::Compiler::kFXC
                                    : tint::hlsl::writer::Options::Compiler::kDXC_2021;
     gen_options.bindings = tint::GenerateBindings(ir, options.ep_name, false, false);
-    gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(ir);
+    gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(
+        ir, options.treat_samplers_as_filtering);
 
     // Run SubstituteOverrides to replace override instructions with constants.
     // This needs to run after SingleEntryPoint which removes unused overrides.

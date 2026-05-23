@@ -3,7 +3,7 @@ struct fs_outputs {
 };
 
 
-Texture2D<float4> t : register(t0);
+SamplerState s : register(s0);
 Texture2D<float4> tint_resource_table_array[] : register(t51, space43);
 Texture2D tint_resource_table_array_1[] : register(t51, space45);
 SamplerState tint_resource_table_array_2[] : register(s51, space46);
@@ -12,8 +12,8 @@ float4 fs_inner() {
   uint v = uint(int(0));
   bool v_1 = false;
   if ((v < tint_resource_table_metadata.Load(0u))) {
-    uint2 v_2 = uint2((tint_resource_table_metadata.Load((4u + (v * 4u)))).xx);
-    v_1 = any((v_2 == uint2(40u, 41u)));
+    uint3 v_2 = uint3((tint_resource_table_metadata.Load((4u + (v * 4u)))).xxx);
+    v_1 = any((v_2 == uint3(6u, 7u, 34u)));
   } else {
     v_1 = false;
   }
@@ -22,45 +22,41 @@ float4 fs_inner() {
   if (v_3) {
     v_4 = tint_resource_table_metadata.Load((4u + (v * 4u)));
   } else {
-    v_4 = 41u;
+    v_4 = 6u;
   }
-  uint sampler_kind = v_4;
+  uint texture_kind = v_4;
   uint v_5 = 0u;
   if (v_3) {
     v_5 = v;
   } else {
-    v_5 = (4u + tint_resource_table_metadata.Load(0u));
+    v_5 = (0u + tint_resource_table_metadata.Load(0u));
   }
   uint v_6 = v_5;
   bool v_7 = false;
-  if ((sampler_kind == 40u)) {
+  if ((texture_kind == 1u)) {
+    v_7 = true;
+  } else {
     bool v_8 = false;
-    if ((6u == 1u)) {
+    if ((texture_kind == 6u)) {
       v_8 = true;
     } else {
       bool v_9 = false;
-      if ((6u == 6u)) {
+      if ((texture_kind == 11u)) {
         v_9 = true;
       } else {
         bool v_10 = false;
-        if ((6u == 11u)) {
+        if ((texture_kind == 16u)) {
           v_10 = true;
         } else {
           bool v_11 = false;
-          if ((6u == 16u)) {
+          if ((texture_kind == 21u)) {
             v_11 = true;
           } else {
             bool v_12 = false;
-            if ((6u == 21u)) {
+            if ((texture_kind == 26u)) {
               v_12 = true;
             } else {
-              bool v_13 = false;
-              if ((6u == 26u)) {
-                v_13 = true;
-              } else {
-                v_13 = false;
-              }
-              v_12 = v_13;
+              v_12 = false;
             }
             v_11 = v_12;
           }
@@ -71,21 +67,19 @@ float4 fs_inner() {
       v_8 = v_9;
     }
     v_7 = v_8;
-  } else {
-    v_7 = true;
   }
-  float4 v_14 = (0.0f).xxxx;
+  float4 v_13 = (0.0f).xxxx;
   if (v_7) {
-    v_14 = t.Sample(tint_resource_table_array_2[v_6], (0.0f).xx);
+    v_13 = tint_resource_table_array[v_6].Sample(s, (0.0f).xx);
   } else {
-    uint v_15 = (4u + tint_resource_table_metadata.Load(0u));
-    v_14 = t.Sample(tint_resource_table_array_2[v_15], (0.0f).xx);
+    uint v_14 = (4u + tint_resource_table_metadata.Load(0u));
+    v_13 = tint_resource_table_array[v_6].Sample(tint_resource_table_array_2[v_14], (0.0f).xx);
   }
-  return v_14;
+  return v_13;
 }
 
 fs_outputs fs() {
-  fs_outputs v_16 = {fs_inner()};
-  return v_16;
+  fs_outputs v_15 = {fs_inner()};
+  return v_15;
 }
 
