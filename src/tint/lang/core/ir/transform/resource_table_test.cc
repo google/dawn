@@ -581,79 +581,26 @@ $B1: {  # root
     %45:bool = eq %sampler_kind, 40u
     %use_sampler:bool = if %45 [t: $B15, f: $B16] {  # if_7
       $B15: {  # true
-        %47:bool = eq %texture_kind, 1u
-        %48:bool = if %47 [t: $B17, f: $B18] {  # if_8
-          $B17: {  # true
-            exit_if true  # if_8
-          }
-          $B18: {  # false
-            %49:bool = eq %texture_kind, 6u
-            %50:bool = if %49 [t: $B19, f: $B20] {  # if_9
-              $B19: {  # true
-                exit_if true  # if_9
-              }
-              $B20: {  # false
-                %51:bool = eq %texture_kind, 11u
-                %52:bool = if %51 [t: $B21, f: $B22] {  # if_10
-                  $B21: {  # true
-                    exit_if true  # if_10
-                  }
-                  $B22: {  # false
-                    %53:bool = eq %texture_kind, 16u
-                    %54:bool = if %53 [t: $B23, f: $B24] {  # if_11
-                      $B23: {  # true
-                        exit_if true  # if_11
-                      }
-                      $B24: {  # false
-                        %55:bool = eq %texture_kind, 21u
-                        %56:bool = if %55 [t: $B25, f: $B26] {  # if_12
-                          $B25: {  # true
-                            exit_if true  # if_12
-                          }
-                          $B26: {  # false
-                            %57:bool = eq %texture_kind, 26u
-                            %58:bool = if %57 [t: $B27, f: $B28] {  # if_13
-                              $B27: {  # true
-                                exit_if true  # if_13
-                              }
-                              $B28: {  # false
-                                exit_if false  # if_13
-                              }
-                            }
-                            exit_if %58  # if_12
-                          }
-                        }
-                        exit_if %56  # if_11
-                      }
-                    }
-                    exit_if %54  # if_10
-                  }
-                }
-                exit_if %52  # if_9
-              }
-            }
-            exit_if %50  # if_8
-          }
-        }
-        exit_if %48  # if_7
+        %47:bool = eq %texture_kind, 6u
+        exit_if %47  # if_7
       }
       $B16: {  # false
         exit_if true  # if_7
       }
     }
-    %59:vec4<f32> = if %use_sampler [t: $B29, f: $B30] {  # if_14
-      $B29: {  # true
-        %60:vec4<f32> = textureSample %25, %44, vec2<f32>(0.0f)
-        exit_if %60  # if_14
+    %48:vec4<f32> = if %use_sampler [t: $B17, f: $B18] {  # if_8
+      $B17: {  # true
+        %49:vec4<f32> = textureSample %25, %44, vec2<f32>(0.0f)
+        exit_if %49  # if_8
       }
-      $B30: {  # false
-        %61:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
-        %62:u32 = load %61
-        %63:u32 = add 5u, %62
-        %64:ptr<handle, sampler, read> = access %4, %63
-        %65:sampler = load %64
-        %66:vec4<f32> = textureSample %25, %65, vec2<f32>(0.0f)
-        exit_if %66  # if_14
+      $B18: {  # false
+        %50:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
+        %51:u32 = load %50
+        %52:u32 = add 5u, %51
+        %53:ptr<handle, sampler, read> = access %4, %52
+        %54:sampler = load %53
+        %55:vec4<f32> = textureSample %25, %54, vec2<f32>(0.0f)
+        exit_if %55  # if_8
       }
     }
     ret
@@ -774,73 +721,20 @@ $B1: {  # root
     }
     %26:ptr<handle, texture_2d<f32>, read> = access %2, %22
     %27:texture_2d<f32> = load %26
-    %28:bool = eq %texture_kind, 1u
-    %29:bool = if %28 [t: $B9, f: $B10] {  # if_4
+    %28:bool = eq %texture_kind, 6u
+    %29:vec4<f32> = if %28 [t: $B9, f: $B10] {  # if_4
       $B9: {  # true
-        exit_if true  # if_4
+        %30:vec4<f32> = textureSample %27, %8, vec2<f32>(0.0f)
+        exit_if %30  # if_4
       }
       $B10: {  # false
-        %30:bool = eq %texture_kind, 6u
-        %31:bool = if %30 [t: $B11, f: $B12] {  # if_5
-          $B11: {  # true
-            exit_if true  # if_5
-          }
-          $B12: {  # false
-            %32:bool = eq %texture_kind, 11u
-            %33:bool = if %32 [t: $B13, f: $B14] {  # if_6
-              $B13: {  # true
-                exit_if true  # if_6
-              }
-              $B14: {  # false
-                %34:bool = eq %texture_kind, 16u
-                %35:bool = if %34 [t: $B15, f: $B16] {  # if_7
-                  $B15: {  # true
-                    exit_if true  # if_7
-                  }
-                  $B16: {  # false
-                    %36:bool = eq %texture_kind, 21u
-                    %37:bool = if %36 [t: $B17, f: $B18] {  # if_8
-                      $B17: {  # true
-                        exit_if true  # if_8
-                      }
-                      $B18: {  # false
-                        %38:bool = eq %texture_kind, 26u
-                        %39:bool = if %38 [t: $B19, f: $B20] {  # if_9
-                          $B19: {  # true
-                            exit_if true  # if_9
-                          }
-                          $B20: {  # false
-                            exit_if false  # if_9
-                          }
-                        }
-                        exit_if %39  # if_8
-                      }
-                    }
-                    exit_if %37  # if_7
-                  }
-                }
-                exit_if %35  # if_6
-              }
-            }
-            exit_if %33  # if_5
-          }
-        }
-        exit_if %31  # if_4
-      }
-    }
-    %40:vec4<f32> = if %29 [t: $B21, f: $B22] {  # if_10
-      $B21: {  # true
-        %41:vec4<f32> = textureSample %27, %8, vec2<f32>(0.0f)
-        exit_if %41  # if_10
-      }
-      $B22: {  # false
-        %42:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
-        %43:u32 = load %42
-        %44:u32 = add 5u, %43
-        %45:ptr<handle, sampler, read> = access %5, %44
-        %46:sampler = load %45
-        %47:vec4<f32> = textureSample %27, %46, vec2<f32>(0.0f)
-        exit_if %47  # if_10
+        %31:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
+        %32:u32 = load %31
+        %33:u32 = add 5u, %32
+        %34:ptr<handle, sampler, read> = access %5, %33
+        %35:sampler = load %34
+        %36:vec4<f32> = textureSample %27, %35, vec2<f32>(0.0f)
+        exit_if %36  # if_4
       }
     }
     ret
@@ -1090,79 +984,25 @@ $B1: {  # root
     %28:bool = eq %sampler_kind, 40u
     %use_sampler:bool = if %28 [t: $B9, f: $B10] {  # if_4
       $B9: {  # true
-        %30:bool = eq 6u, 1u
-        %31:bool = if %30 [t: $B11, f: $B12] {  # if_5
-          $B11: {  # true
-            exit_if true  # if_5
-          }
-          $B12: {  # false
-            %32:bool = eq 6u, 6u
-            %33:bool = if %32 [t: $B13, f: $B14] {  # if_6
-              $B13: {  # true
-                exit_if true  # if_6
-              }
-              $B14: {  # false
-                %34:bool = eq 6u, 11u
-                %35:bool = if %34 [t: $B15, f: $B16] {  # if_7
-                  $B15: {  # true
-                    exit_if true  # if_7
-                  }
-                  $B16: {  # false
-                    %36:bool = eq 6u, 16u
-                    %37:bool = if %36 [t: $B17, f: $B18] {  # if_8
-                      $B17: {  # true
-                        exit_if true  # if_8
-                      }
-                      $B18: {  # false
-                        %38:bool = eq 6u, 21u
-                        %39:bool = if %38 [t: $B19, f: $B20] {  # if_9
-                          $B19: {  # true
-                            exit_if true  # if_9
-                          }
-                          $B20: {  # false
-                            %40:bool = eq 6u, 26u
-                            %41:bool = if %40 [t: $B21, f: $B22] {  # if_10
-                              $B21: {  # true
-                                exit_if true  # if_10
-                              }
-                              $B22: {  # false
-                                exit_if false  # if_10
-                              }
-                            }
-                            exit_if %41  # if_9
-                          }
-                        }
-                        exit_if %39  # if_8
-                      }
-                    }
-                    exit_if %37  # if_7
-                  }
-                }
-                exit_if %35  # if_6
-              }
-            }
-            exit_if %33  # if_5
-          }
-        }
-        exit_if %31  # if_4
+        exit_if true  # if_4
       }
       $B10: {  # false
         exit_if true  # if_4
       }
     }
-    %42:vec4<f32> = if %use_sampler [t: $B23, f: $B24] {  # if_11
-      $B23: {  # true
-        %43:vec4<f32> = textureSample %8, %27, vec2<f32>(0.0f)
-        exit_if %43  # if_11
+    %30:vec4<f32> = if %use_sampler [t: $B11, f: $B12] {  # if_5
+      $B11: {  # true
+        %31:vec4<f32> = textureSample %8, %27, vec2<f32>(0.0f)
+        exit_if %31  # if_5
       }
-      $B24: {  # false
-        %44:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
-        %45:u32 = load %44
-        %46:u32 = add 5u, %45
-        %47:ptr<handle, sampler, read> = access %5, %46
-        %48:sampler = load %47
-        %49:vec4<f32> = textureSample %8, %48, vec2<f32>(0.0f)
-        exit_if %49  # if_11
+      $B12: {  # false
+        %32:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
+        %33:u32 = load %32
+        %34:u32 = add 5u, %33
+        %35:ptr<handle, sampler, read> = access %5, %34
+        %36:sampler = load %35
+        %37:vec4<f32> = textureSample %8, %36, vec2<f32>(0.0f)
+        exit_if %37  # if_5
       }
     }
     ret
@@ -1694,82 +1534,28 @@ $B1: {  # root
     %29:bool = eq %sampler_kind, 40u
     %use_sampler:bool = if %29 [t: $B9, f: $B10] {  # if_4
       $B9: {  # true
-        %31:bool = eq 6u, 1u
-        %32:bool = if %31 [t: $B11, f: $B12] {  # if_5
-          $B11: {  # true
-            exit_if true  # if_5
-          }
-          $B12: {  # false
-            %33:bool = eq 6u, 6u
-            %34:bool = if %33 [t: $B13, f: $B14] {  # if_6
-              $B13: {  # true
-                exit_if true  # if_6
-              }
-              $B14: {  # false
-                %35:bool = eq 6u, 11u
-                %36:bool = if %35 [t: $B15, f: $B16] {  # if_7
-                  $B15: {  # true
-                    exit_if true  # if_7
-                  }
-                  $B16: {  # false
-                    %37:bool = eq 6u, 16u
-                    %38:bool = if %37 [t: $B17, f: $B18] {  # if_8
-                      $B17: {  # true
-                        exit_if true  # if_8
-                      }
-                      $B18: {  # false
-                        %39:bool = eq 6u, 21u
-                        %40:bool = if %39 [t: $B19, f: $B20] {  # if_9
-                          $B19: {  # true
-                            exit_if true  # if_9
-                          }
-                          $B20: {  # false
-                            %41:bool = eq 6u, 26u
-                            %42:bool = if %41 [t: $B21, f: $B22] {  # if_10
-                              $B21: {  # true
-                                exit_if true  # if_10
-                              }
-                              $B22: {  # false
-                                exit_if false  # if_10
-                              }
-                            }
-                            exit_if %42  # if_9
-                          }
-                        }
-                        exit_if %40  # if_8
-                      }
-                    }
-                    exit_if %38  # if_7
-                  }
-                }
-                exit_if %36  # if_6
-              }
-            }
-            exit_if %34  # if_5
-          }
-        }
-        exit_if %32  # if_4
+        exit_if true  # if_4
       }
       $B10: {  # false
         exit_if true  # if_4
       }
     }
-    %43:vec4<f32> = if %use_sampler [t: $B23, f: $B24] {  # if_11
-      $B23: {  # true
-        %44:vec4<f32> = textureSample %5, %28, vec2<f32>(0.0f)
-        exit_if %44  # if_11
+    %31:vec4<f32> = if %use_sampler [t: $B11, f: $B12] {  # if_5
+      $B11: {  # true
+        %32:vec4<f32> = textureSample %5, %28, vec2<f32>(0.0f)
+        exit_if %32  # if_5
       }
-      $B24: {  # false
-        %45:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
-        %46:u32 = load %45
-        %47:u32 = add 0u, %46
-        %48:ptr<storage, u32, read> = access %tint_resource_table_metadata, 1u, %47
-        %49:u32 = load %48
-        %50:u32 = shr %49, 16u
-        %51:ptr<handle, sampler, read> = access %2, %50
-        %52:sampler = load %51
-        %53:vec4<f32> = textureSample %5, %52, vec2<f32>(0.0f)
-        exit_if %53  # if_11
+      $B12: {  # false
+        %33:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
+        %34:u32 = load %33
+        %35:u32 = add 0u, %34
+        %36:ptr<storage, u32, read> = access %tint_resource_table_metadata, 1u, %35
+        %37:u32 = load %36
+        %38:u32 = shr %37, 16u
+        %39:ptr<handle, sampler, read> = access %2, %38
+        %40:sampler = load %39
+        %41:vec4<f32> = textureSample %5, %40, vec2<f32>(0.0f)
+        exit_if %41  # if_5
       }
     }
     ret

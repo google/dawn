@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/resource_type.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -241,19 +242,17 @@ struct State {
                         case core::BuiltinFn::kTextureSampleGrad:
                         case core::BuiltinFn::kTextureSampleLevel:
                         case core::BuiltinFn::kTextureSampleBaseClampToEdge: {
+                            Info call_info{
+                                .binding_type = binding_type,
+                                .slot_idx = idx,
+                                .operand_idx = usage.operand_index,
+                            };
+
                             auto& info = sampled_call_replacements.GetOrAddZeroEntry(call);
                             if (binding_type->Is<core::type::Texture>()) {
-                                info.value.texture = {
-                                    .binding_type = binding_type,
-                                    .slot_idx = idx,
-                                    .operand_idx = usage.operand_index,
-                                };
+                                info.value.texture = call_info;
                             } else {
-                                info.value.sampler = {
-                                    .binding_type = binding_type,
-                                    .slot_idx = idx,
-                                    .operand_idx = usage.operand_index,
-                                };
+                                info.value.sampler = call_info;
                             }
                             break;
                         }
@@ -364,35 +363,23 @@ struct State {
         return kind;
     }
 
-    ir::InstructionResult* ConstructTextureFilterableCheck(ir::Value* texture_kind) {
-        size_t idx = 0;
-        const std::span<const ResourceType> filterable_types = core::type::FilterableResources();
-
-        ir::Binary* chk = b.Equal(texture_kind, u32(filterable_types[idx++]));
-        ir::If* t = b.If(chk);
-        ir::InstructionResult* tex_res = b.InstructionResult(ty.bool_());
-        t->SetResult(tex_res);
-
-        // The texture is filterable, so we can use the sampler
-        b.Append(t->True(), [&] { b.ExitIf(t, true); });
-
-        for (; idx < filterable_types.size(); ++idx) {
-            b.Append(t->False(), [&] {
-                core::ir::Binary* sub_chk = b.Equal(texture_kind, u32(filterable_types[idx]));
-                core::ir::If* sub_if = b.If(sub_chk);
-                core::ir::InstructionResult* r = b.InstructionResult(ty.bool_());
-                sub_if->SetResult(r);
-
-                // The texture is filterable, so we can use the sampler
-                b.Append(sub_if->True(), [&] { b.ExitIf(sub_if, true); });
-                b.ExitIf(t, r);
-
-                t = sub_if;
-            });
+    ir::Value* ConstructTextureFilterableCheck(const type::Type* tex_ty, ir::Value* texture_kind) {
+        const type::SampledTexture* samp_ty = tex_ty->As<type::SampledTexture>();
+        // Only sampled texture types can be filterable
+        if (!samp_ty) {
+            return b.Constant(false);
         }
-        // Texture is not filterable, return false
-        b.Append(t->False(), [&] { b.ExitIf(t, false); });
-        return tex_res;
+        // Only floating point sampled textures can be filterable
+        if (samp_ty->Type()->IsAnyOf<type::I32, type::U32>()) {
+            return b.Constant(false);
+        }
+
+        ResourceType res_type = core::type::DefaultResourceTypeFor(tex_ty);
+        if (texture_kind->Is<ir::Constant>()) {
+            uint32_t val = texture_kind->As<ir::Constant>()->Value()->ValueAs<uint32_t>();
+            return b.Constant(val == uint32_t(res_type));
+        }
+        return b.Equal(texture_kind, u32(res_type))->Result();
     }
 
     ir::Instruction* GetResource(ir::Value* idx, const type::Type* binding_type) {
@@ -459,6 +446,8 @@ struct State {
             return;
         }
 
+        ir::Value* tex = call->Args()[texture_operand_idx];
+
         // Validate that the sampler/texture pair work together
         b.InsertBefore(call, [&] {
             core::ir::Value* samp_res = nullptr;
@@ -475,14 +464,14 @@ struct State {
 
                 // If the sampler is filtering
                 b.Append(samp_if->True(), [&] {
-                    ir::InstructionResult* tex_res = ConstructTextureFilterableCheck(texture_kind);
+                    ir::Value* tex_res = ConstructTextureFilterableCheck(tex->Type(), texture_kind);
                     b.ExitIf(samp_if, tex_res);
                 });
 
                 // Sampler != filtering, so use_sampler is true
                 b.Append(samp_if->False(), [&] { b.ExitIf(samp_if, true); });
             } else {
-                samp_res = ConstructTextureFilterableCheck(texture_kind);
+                samp_res = ConstructTextureFilterableCheck(tex->Type(), texture_kind);
             }
 
             const core::type::Type* result_ty = call->Result()->Type();
