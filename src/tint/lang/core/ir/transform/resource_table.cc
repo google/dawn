@@ -27,9 +27,7 @@
 
 #include "src/tint/lang/core/ir/transform/resource_table.h"
 
-#include <span>
 #include <unordered_map>
-#include <utility>
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -280,48 +278,26 @@ struct State {
         auto var = var_for_type.Get(binding_type);
         TINT_IR_ASSERT(ir, var);
 
-        b.Append(get_check->True(), [&] {
-            // Table lookup succeeded, use the input index
-            b.ExitIf(get_check, idx);
-        });
+        // Table lookup succeeded, use the input index
+        b.Append(get_check->True(), [&] { b.ExitIf(get_check, idx); });
 
+        // Table lookup failed, so get default resource located at the end of the table,
+        // at API size + resource type index.
+        //
+        // This texture is not being combined with a sampler, so we just
+        // need _a_ default, this could be filterable or unfilterable it
+        // doesn't matter.
+        //
+        // This does mean for every possible filterable type, the default
+        // value must be bound (currently this is always the `filterable`
+        // variant. This is fine because Dawn binds all of the possible
+        // defaults.
         b.Append(get_check->False(), [&] {
-            // Table lookup failed, so get default resource located at the end of the table,
-            // at API size + resource type index.
-
-            // This texture is not being combined with a sampler, so we just
-            // need _a_ default, this could be filterable or unfilterable it
-            // doesn't matter.
-            //
-            // This does mean for every possible filterable type, the default
-            // value must be bound (currently this is always the `filterable`
-            // variant. This is fine because Dawn binds all of the possible
-            // defaults.
-            auto res_type = core::type::DefaultResourceTypeFor(binding_type);
-            auto idx_iter = resource_type_to_default_idx.find(res_type);
-            TINT_IR_ASSERT(ir, idx_iter != resource_type_to_default_idx.end());
-
-            // Get the table's API size, which is stored at index 0 in the metadata buffer
-            auto* len_access = b.Access(ty.ptr<storage, u32, read>(), storage_buffer, 0_u);
-            auto* num_elements = b.Load(len_access);
-
-            auto* r = b.Add(u32(idx_iter->second), num_elements);
+            ir::Value* r = GetIndex(core::type::DefaultResourceTypeFor(binding_type));
             b.ExitIf(get_check, r);
         });
 
-        ir::Value* final_index = res;
-        if (config->get_sampler_index_from_metadata && IsSampler(binding_type)) {
-            // Get the sampler index from the metadata entry (high 16 bits)
-            // TODO(crbug.com/503755700): Optimize to avoid loading twice from storage_buffer[idx].
-            auto* metadata_val = GetTypeId(res);
-            auto* sampler_index = b.ShiftRight(metadata_val, u32(16));
-            final_index = sampler_index->Result();
-        }
-
-        // TODO(439627523): Fix pointer access
-        auto* ptr_ty = ty.ptr(handle, binding_type, read);
-        auto* access = b.Access(ptr_ty, (*var)->Result(), final_index);
-        return b.Load(access)->Result();
+        return GetSampler(res, binding_type)->Result();
     }
 
     // We have a bind-ful texture/sampler, get the ResourceKind the API reported
@@ -393,6 +369,66 @@ struct State {
         return kind;
     }
 
+    ir::InstructionResult* ConstructTextureFilterableCheck(ir::Value* texture_kind) {
+        size_t idx = 0;
+        const std::span<const ResourceType> filterable_types = core::type::FilterableResources();
+
+        ir::Binary* chk = b.Equal(texture_kind, u32(filterable_types[idx++]));
+        ir::If* t = b.If(chk);
+        ir::InstructionResult* tex_res = b.InstructionResult(ty.bool_());
+        t->SetResult(tex_res);
+
+        // The texture is filterable, so we can use the sampler
+        b.Append(t->True(), [&] { b.ExitIf(t, true); });
+
+        for (; idx < filterable_types.size(); ++idx) {
+            b.Append(t->False(), [&] {
+                core::ir::Binary* sub_chk = b.Equal(texture_kind, u32(filterable_types[idx]));
+                core::ir::If* sub_if = b.If(sub_chk);
+                core::ir::InstructionResult* r = b.InstructionResult(ty.bool_());
+                sub_if->SetResult(r);
+
+                // The texture is filterable, so we can use the sampler
+                b.Append(sub_if->True(), [&] { b.ExitIf(sub_if, true); });
+                b.ExitIf(t, r);
+
+                t = sub_if;
+            });
+        }
+        // Texture is not filterable, return false
+        b.Append(t->False(), [&] { b.ExitIf(t, false); });
+        return tex_res;
+    }
+
+    ir::Instruction* GetSampler(ir::Value* idx, const type::Type* binding_type) {
+        if (config->get_sampler_index_from_metadata && IsSampler(binding_type)) {
+            // Get the sampler index from the metadata entry (high 16 bits)
+            // TODO(crbug.com/503755700): Optimize to avoid loading twice from
+            // storage_buffer[idx].
+            auto* metadata_val = GetTypeId(idx);
+            auto* sampler_index = b.ShiftRight(metadata_val, u32(16));
+            idx = sampler_index->Result();
+        }
+
+        auto var = var_for_type.Get(binding_type);
+        TINT_IR_ASSERT(ir, var);
+
+        const core::type::Pointer* ptr_ty = ty.ptr(handle, binding_type, read);
+        auto* access = b.Access(ptr_ty, (*var)->Result(), idx);
+        return b.Load(access);
+    }
+
+    ir::Value* GetIndex(ResourceType resource_type) {
+        auto idx_iter = resource_type_to_default_idx.find(resource_type);
+        TINT_IR_ASSERT(ir, idx_iter != resource_type_to_default_idx.end());
+
+        // Get the table's API size, which is stored at index 0 in the metadata buffer
+        auto* len_access = b.Access(ty.ptr<storage, u32, read>(), storage_buffer, 0_u);
+        ir::Value* num_elements = b.Load(len_access)->Result();
+
+        return b.Add(u32(idx_iter->second), num_elements)->Result();
+    }
+
     void GenSampledGetResource(ir::CoreBuiltinCall* call, const CallArgs& args) {
         // we can get the texture, or the sampler, or both.
         TINT_IR_ASSERT(ir, args.texture.has_value() || args.sampler.has_value());
@@ -427,8 +463,7 @@ struct State {
             core::ir::Instruction* sampler_compare =
                 b.Equal(sampler_kind, u32(ResourceType::kSampler_filtering));
 
-            // Returns `true` if we need to replace the sampler with a default non_filtering
-            // sampler
+            // Returns `true` if we need to replace the sampler with a default non_filtering sampler
             core::ir::If* samp_if = b.If(sampler_compare);
             core::ir::InstructionResult* samp_res = b.InstructionResult(ty.bool_());
             ir.SetName(samp_res, "use_sampler");
@@ -436,36 +471,7 @@ struct State {
 
             // If the sampler is filtering
             b.Append(samp_if->True(), [&] {
-                size_t idx = 0;
-                const std::span<const ResourceType> filterable_types =
-                    core::type::FilterableResources();
-
-                core::ir::Binary* chk = b.Equal(texture_kind, u32(filterable_types[idx++]));
-                core::ir::If* t = b.If(chk);
-                core::ir::InstructionResult* tex_res = b.InstructionResult(ty.bool_());
-                t->SetResult(tex_res);
-
-                // The texture is filterable, so we can use the sampler
-                b.Append(t->True(), [&] { b.ExitIf(t, true); });
-
-                for (; idx < filterable_types.size(); ++idx) {
-                    b.Append(t->False(), [&] {
-                        core::ir::Binary* sub_chk =
-                            b.Equal(texture_kind, u32(filterable_types[idx]));
-                        core::ir::If* sub_if = b.If(sub_chk);
-                        core::ir::InstructionResult* r = b.InstructionResult(ty.bool_());
-                        sub_if->SetResult(r);
-
-                        // The texture is filterable, so we can use the sampler
-                        b.Append(sub_if->True(), [&] { b.ExitIf(sub_if, true); });
-                        b.ExitIf(t, r);
-
-                        t = sub_if;
-                    });
-                }
-                // Texture is not filterable, return false
-                b.Append(t->False(), [&] { b.ExitIf(t, false); });
-
+                ir::InstructionResult* tex_res = ConstructTextureFilterableCheck(texture_kind);
                 b.ExitIf(samp_if, tex_res);
             });
 
@@ -479,49 +485,27 @@ struct State {
             core::ir::If* check = b.If(samp_res);
             check->SetResult(call->DetachResult());
 
-            // Sampler and texture matched, just call
-            b.Append(check->True(), [&] {
+            auto CloneCall = [&] {
                 core::ir::Call* c = b.Call(result_ty, call->Func());
                 for (ir::Value* arg : call->Args()) {
                     c->AppendArg(arg);
                 }
+                return c;
+            };
+
+            // Sampler and texture matched, just call
+            b.Append(check->True(), [&] {
+                core::ir::Call* c = CloneCall();
                 b.ExitIf(check, c);
             });
 
             // Sampler and texture mismatch, pull a default sampler and use that
             b.Append(check->False(), [&] {
-                auto idx_iter =
-                    resource_type_to_default_idx.find(ResourceType::kSampler_non_filtering);
-                TINT_IR_ASSERT(ir, idx_iter != resource_type_to_default_idx.end());
-
-                // Get the table's API size, which is stored at index 0 in the metadata buffer
-                auto* len_access = b.Access(ty.ptr<storage, u32, read>(), storage_buffer, 0_u);
-                auto* num_elements = b.Load(len_access);
-
-                ir::Value* final_index = b.Add(u32(idx_iter->second), num_elements)->Result();
-
-                if (config->get_sampler_index_from_metadata) {
-                    // Get the sampler index from the metadata entry (high 16 bits)
-                    // TODO(crbug.com/503755700): Optimize to avoid loading twice from
-                    // storage_buffer[idx].
-                    auto* metadata_val = GetTypeId(final_index);
-                    auto* sampler_index = b.ShiftRight(metadata_val, u32(16));
-                    final_index = sampler_index->Result();
-                }
-
-                const core::type::Sampler* binding_type = ty.sampler();
-                auto var = var_for_type.Get(binding_type);
-                TINT_IR_ASSERT(ir, var);
-
-                const core::type::Pointer* ptr_ty = ty.ptr(handle, binding_type, read);
-                auto* access = b.Access(ptr_ty, (*var)->Result(), final_index);
-                ir::Instruction* sampler = b.Load(access);
+                ir::Value* final_index = GetIndex(ResourceType::kSampler_non_filtering);
+                ir::Instruction* sampler = GetSampler(final_index, ty.sampler());
 
                 // Create the call and swap in the new sampler
-                core::ir::Call* c = b.Call(result_ty, call->Func());
-                for (ir::Value* arg : call->Args()) {
-                    c->AppendArg(arg);
-                }
+                core::ir::Call* c = CloneCall();
                 c->SetOperand(sampler_operand_idx, sampler->Result());
 
                 b.ExitIf(check, c);
