@@ -297,7 +297,7 @@ struct State {
             b.ExitIf(get_check, r);
         });
 
-        return GetSampler(res, binding_type)->Result();
+        return GetResource(res, binding_type)->Result();
     }
 
     // We have a bind-ful texture/sampler, get the ResourceKind the API reported
@@ -400,7 +400,7 @@ struct State {
         return tex_res;
     }
 
-    ir::Instruction* GetSampler(ir::Value* idx, const type::Type* binding_type) {
+    ir::Instruction* GetResource(ir::Value* idx, const type::Type* binding_type) {
         if (config->get_sampler_index_from_metadata && IsSampler(binding_type)) {
             // Get the sampler index from the metadata entry (high 16 bits)
             // TODO(crbug.com/503755700): Optimize to avoid loading twice from
@@ -502,7 +502,7 @@ struct State {
             // Sampler and texture mismatch, pull a default sampler and use that
             b.Append(check->False(), [&] {
                 ir::Value* final_index = GetIndex(ResourceType::kSampler_non_filtering);
-                ir::Instruction* sampler = GetSampler(final_index, ty.sampler());
+                ir::Instruction* sampler = GetResource(final_index, ty.sampler());
 
                 // Create the call and swap in the new sampler
                 core::ir::Call* c = CloneCall();
