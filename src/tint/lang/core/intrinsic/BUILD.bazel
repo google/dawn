@@ -43,16 +43,17 @@ exports_files(glob(["*.def", "*.tmpl"], allow_empty = True))
 cc_library(
   name = "intrinsic",
   srcs = [
-    "ctor_conv.cc",
-    "data.cc",
     "table.cc",
+    "//src/tint:gen/src/tint/lang/core/intrinsic/ctor_conv.cc",
+    "//src/tint:gen/src/tint/lang/core/intrinsic/ctor_conv.h",
+    "//src/tint:gen/src/tint/lang/core/intrinsic/data.cc",
   ],
   hdrs = [
-    "ctor_conv.h",
     "dialect.h",
     "table.h",
     "table_data.h",
     "type_matchers.h",
+    "//src/tint:gen/src/tint/lang/core/intrinsic/ctor_conv.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -70,6 +71,7 @@ cc_library(
     "//src/tint/utils/rtti",
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
+    "//src/tint:generated_tint_headers",
     "//src/utils",
   ],
   copts = COPTS,

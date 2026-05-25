@@ -160,7 +160,7 @@
   "moduleExtensions": {
     "//:third_party/spirv-tools/spirv_tools_repo.bzl%spirv_tools_repo": {
       "general": {
-        "bzlTransitiveDigest": "u59a3Gvm3V4q10KhU4Et5iFcV70mqDx4CRdxNHVLDrs=",
+        "bzlTransitiveDigest": "/xHogh6t+/qaQGUQYu8eJa8lKDn+CAHPvfBqqx1o8PA=",
         "usagesDigest": "rMcWrGDo4Q4DHTSsyUa+4uYCqUlk6/g1qoIjtdsCTBo=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

@@ -43,7 +43,7 @@ exports_files(glob(["*.def", "*.tmpl"], allow_empty = True))
 cc_library(
   name = "intrinsic",
   srcs = [
-    "data.cc",
+    "//src/tint:gen/src/tint/lang/glsl/intrinsic/data.cc",
   ],
   hdrs = [
     "dialect.h",
@@ -67,6 +67,7 @@ cc_library(
     "//src/tint/utils/rtti",
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
+    "//src/tint:generated_tint_headers",
     "//src/utils",
   ],
   copts = COPTS,

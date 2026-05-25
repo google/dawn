@@ -26,7 +26,7 @@ exports_files(glob(["*.def", "*.tmpl"], allow_empty = True))
 */ -}}
 {{- define "TargetIfNotEmpty"}}
 {{-   if $}}
-{{-     if len $.SourceFiles}}{{Eval "Target" $}}{{end}}
+{{-     if or (len $.SourceFiles) (len $.GeneratedSourcePaths.List)}}{{Eval "Target" $}}{{end}}
 {{-   end}}
 {{- end}}
 
@@ -72,9 +72,14 @@ cc_binary(
 {{-   else}}
 {{-     range $File := $.UnconditionalSourceFiles}}
 {{-       if or (not $.Kind.IsLib) (HasSuffix $File.Name ".cc")}}
+{{-         if not ($.IsGeneratedSource $File.Path)}}
     "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-         end}}
 {{-       end}}
 {{-     end}}
+{{-    range $Path := $.GeneratedSourcePaths.List}}
+    "//src/tint:gen/src/tint/{{$Path}}",
+{{-    end}}
 {{-   end}}
   ]
 {{-   if $Conditionals.HasSourceFiles}}
@@ -101,9 +106,16 @@ cc_binary(
 {{-   else}}
 {{-     range $File := $.UnconditionalSourceFiles}}
 {{-       if not (HasSuffix $File.Name ".cc")}}
+{{-         if not ($.IsGeneratedSource $File.Path)}}
     "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-         end}}
 {{-       end}}
 {{-     end}}
+{{-    range $Path := $.GeneratedSourcePaths.List}}
+{{-       if not (HasSuffix $Path ".cc")}}
+    "//src/tint:gen/src/tint/{{$Path}}",
+{{-         end}}
+{{-    end}}
 {{-   end}}
   ],
 {{-   end}}
@@ -112,6 +124,9 @@ cc_binary(
 {{-   range $Dep := $.UnconditionalInternalDependencies}}
     "{{Eval "Dependency" $Dep}}",
 {{-   end}}
+{{- if and (not $.Kind.IsProto) $.GeneratedSourcePaths.List}}
+    "//src/tint:generated_tint_headers",
+{{- end}}
 
 {{- /* Emit unconditional external dependencies */}}
 {{-   range $Dep := $.UnconditionalExternalDependencies}}
