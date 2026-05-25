@@ -934,6 +934,7 @@ set(dawn_native_private_depends
 # The same object files are reused to build
 # 1. dawn_native (which gets used by tests, samples, benchmarks)
 # 2. webgpu_dawn bundle (which gets installed via CMake install rules)
+# All dependencies on dawn_native_objects should be private.
 dawn_add_library(
   dawn_native_objects
   UTILITY_TARGET dawn_internal_config
@@ -946,8 +947,10 @@ dawn_add_library(
     ${sources}
   DEPENDS
     ${dawn_native_public_depends}
-  PRIVATE_DEPENDS
+
+    # These are public so that internal usages of dawn_native_objects inherit the dependencies.
     ${dawn_native_private_depends}
+  PRIVATE_DEPENDS
     ${conditional_private_platform_depends}
 )
 
@@ -957,10 +960,9 @@ dawn_add_library(
   SOURCES
     ${dawn_component_srcs}
   DEPENDS
-    dawn::dawn_native_objects
     ${dawn_native_public_depends}
   PRIVATE_DEPENDS
-    ${dawn_native_private_depends}
+    dawn::dawn_native_objects
     ${conditional_private_platform_depends}
 )
 
@@ -1027,7 +1029,6 @@ if (DAWN_BUILD_MONOLITHIC_LIBRARY)
         ${dawn_native_public_depends}
       PRIVATE_DEPENDS
         dawn::dawn_native_objects
-        ${dawn_native_private_depends}
         ${conditional_private_platform_depends}
     )
 
