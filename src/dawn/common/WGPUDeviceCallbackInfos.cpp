@@ -60,9 +60,9 @@ static constexpr WGPULoggingCallbackInfo kDefaultLoggingCallbackInfo = {
     [](WGPULoggingType, WGPUStringView, void*, void*) {
         static std::once_flag flag;
         std::call_once(flag, []() {
-            dawn::WarningLog() << "No Dawn device logging callback callback was set. This is "
-                                  "probably not intended. If you really want to ignore logs "
-                                  "and suppress this message, set the callback explicitly.";
+            dawn::WarningLog() << "No Dawn device logging callback was set. This is probably not "
+                                  "intended. If you really want to ignore logs and suppress this "
+                                  "message, set the callback explicitly.";
         });
     },
     nullptr, nullptr};
