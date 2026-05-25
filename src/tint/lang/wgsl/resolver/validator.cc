@@ -2538,14 +2538,18 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
             auto* param_store_type = param_ptr_type->StoreType();
             if (arg_store_type->Is<core::type::Buffer>() &&
                 param_store_type->Is<core::type::Buffer>()) {
-                const bool param_unsized = param_store_type->As<core::type::Buffer>()
-                                               ->Count()
-                                               ->Is<core::type::RuntimeArrayCount>();
-                auto arg_count = arg_store_type->As<core::type::Buffer>()->ConstantCount();
-                auto param_count = param_store_type->As<core::type::Buffer>()->ConstantCount();
+                auto* arg_buffer_ty = arg_store_type->As<core::type::Buffer>();
+                auto* param_buffer_ty = param_store_type->As<core::type::Buffer>();
+                const bool param_unsized =
+                    param_buffer_ty->Count()->Is<core::type::RuntimeArrayCount>();
+                const bool both_constant =
+                    arg_buffer_ty->Count()->Is<core::type::ConstantArrayCount>() &&
+                    param_buffer_ty->Count()->Is<core::type::ConstantArrayCount>();
+                auto arg_count = arg_buffer_ty->ConstantCount().value_or(0);
+                auto param_count = param_buffer_ty->ConstantCount().value_or(0);
                 if (arg_ptr_type->AddressSpace() == param_ptr_type->AddressSpace() &&
                     arg_ptr_type->Access() == param_ptr_type->Access() &&
-                    (param_unsized || arg_count.value_or(0) > param_count.value_or(0))) {
+                    (param_unsized || (both_constant && arg_count > param_count))) {
                     // Any buffer argument can match an unsized buffer parameter.
                     // A larger buffer argument can match a smaller buffer parameter.
                     allow_mismatch = true;

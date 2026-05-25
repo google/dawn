@@ -4493,11 +4493,14 @@ void Validator::CheckUserCall(const UserCall* call) {
                         param_ptr_ty->UnwrapPtrOrRef()->As<core::type::Buffer>()) {
                     allow_mismatch = arg_ptr_ty->AddressSpace() == param_ptr_ty->AddressSpace() &&
                                      arg_ptr_ty->Access() == param_ptr_ty->Access();
+                    const bool both_constant =
+                        arg_buffer_ty->Count()->Is<core::type::ConstantArrayCount>() &&
+                        param_buffer_ty->Count()->Is<core::type::ConstantArrayCount>();
                     uint32_t arg_size = arg_buffer_ty->ConstantCount().value_or(0);
                     uint32_t param_size = param_buffer_ty->ConstantCount().value_or(0);
                     allow_mismatch &=
                         param_buffer_ty->Count()->Is<core::type::RuntimeArrayCount>() ||
-                        param_size < arg_size;
+                        (both_constant && param_size < arg_size);
                 }
             }
         }

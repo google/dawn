@@ -268,6 +268,37 @@ TEST_F(ResolverBufferTest, FunctionParameter_UnsizedDoesNotMatchSized) {
         R"(error: type mismatch for argument 1 in call to 'foo', expected 'ptr<storage, buffer<16>, read>', got 'ptr<storage, buffer, read>')");
 }
 
+TEST_F(ResolverBufferTest, FunctionParameter_OverrideMatchesUnsized) {
+    EXPECT_SUCCESS(
+        R"(
+override o : u32;
+var<workgroup> b : buffer<o>;
+fn foo(p : ptr<workgroup, buffer>) {
+}
+fn bar() {
+  foo(&b);
+}
+)");
+}
+
+TEST_F(ResolverBufferTest, FunctionParameter_OverrideDoesNotMatchSized) {
+    EXPECT_ERROR(
+        R"(
+override o : u32;
+var<workgroup> b : buffer<o>;
+fn foo(p : ptr<workgroup, buffer<64>>) {
+}
+fn bar() {
+  foo(&b);
+}
+)",
+        R"(
+input.wgsl:7:7 error: type mismatch for argument 1 in call to 'foo', expected 'ptr<workgroup, buffer<64>, read_write>', got 'ptr<workgroup, buffer<o>, read_write>'
+  foo(&b);
+      ^^
+)");
+}
+
 using ResolverBufferViewTest = ResolverTest;
 
 TEST_F(ResolverBufferViewTest, Storage_Unsized) {
