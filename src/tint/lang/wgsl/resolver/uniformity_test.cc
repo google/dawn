@@ -13398,6 +13398,30 @@ test:15:11 note: reading from module-scope private variable 'non_uniform' may re
 )");
 }
 
+TEST_F(UniformityAnalysisTest, AssignmentEval_LHS_BufferView) {
+    std::string src = R"(
+var<workgroup> b : buffer<128>;
+
+fn main() {
+  *bufferView<u32>(&b, 0) = 0;
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, AssignmentEval_LHS_BufferArrayView) {
+    std::string src = R"(
+var<workgroup> b : buffer<128>;
+
+fn main() {
+  bufferArrayView<array<u32>>(&b, 0, 128)[0] = 0;
+}
+)";
+
+    RunTest(src, true);
+}
+
 class SubgroupUniformityTest : public UniformityAnalysisTestBase,
                                public ::testing::TestWithParam<int> {
   public:

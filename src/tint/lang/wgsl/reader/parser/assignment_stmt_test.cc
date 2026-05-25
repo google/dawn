@@ -404,5 +404,53 @@ TEST_F(WGSLParserTest, AssignmentStmt_InvalidCompoundOp) {
     EXPECT_EQ(p->error(), "1:3: expected '=' for assignment");
 }
 
+TEST_F(WGSLParserTest, AssignmentStmt_DerefFunctionLHS) {
+    auto p = parser("*bufferView<u32>(&b, 16u) = 123u");
+    auto e = p->variable_updating_statement();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    auto* a = e->As<ast::AssignmentStatement>();
+    ASSERT_TRUE(a->lhs->Is<ast::UnaryOpExpression>());
+}
+
+TEST_F(WGSLParserTest, AssignmentStmt_FunctionLHS) {
+    auto p = parser("bufferView<u32>(&b, 16u) = 123u");
+    auto e = p->variable_updating_statement();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    auto* a = e->As<ast::AssignmentStatement>();
+    ASSERT_TRUE(a->lhs->Is<ast::CallExpression>());
+}
+
+TEST_F(WGSLParserTest, AssignmentStmt_FunctionSwizzleLHS) {
+    auto p = parser("bufferView<vec2u>(&b, 16u).x = 123u");
+    auto e = p->variable_updating_statement();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    auto* a = e->As<ast::AssignmentStatement>();
+    ASSERT_TRUE(a->lhs->Is<ast::MemberAccessorExpression>());
+}
+
+TEST_F(WGSLParserTest, AssignmentStmt_FunctionIndexLHS) {
+    auto p = parser("bufferView<vec2u>(&b, 16u)[0] = 123u");
+    auto e = p->variable_updating_statement();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    auto* a = e->As<ast::AssignmentStatement>();
+    ASSERT_TRUE(a->lhs->Is<ast::IndexAccessorExpression>());
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader

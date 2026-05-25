@@ -1692,6 +1692,14 @@ class UniformityGraph {
                                                /* is_partial_reference */ is_partial_reference);
             },
 
+            [&](const ast::CallExpression* c) {
+                // This must be a bufferView/bufferArrayView call.
+                auto* sem = sem_.GetVal(c->args[0]);
+                auto* root_ident = sem->RootIdentifier();
+                auto [cf1, v1] = ProcessCall(cf, c);
+                return LValue{cf1, v1, root_ident};
+            },
+
             TINT_ICE_ON_NO_MATCH);
     }
 

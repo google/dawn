@@ -2725,11 +2725,35 @@ Maybe<core::BinaryOp> Parser::compound_assignment_operator() {
 
 // core_lhs_expression
 //   : ident
+//   | template_elaborated_ident argument_expression_list
 //   | PAREN_LEFT lhs_expression PAREN_RIGHT
 Maybe<const ast::Expression*> Parser::core_lhs_expression() {
     auto& t = peek();
     if (t.IsIdentifier()) {
+        MultiTokenSource source(this);
         next();
+
+        const ast::Identifier* ident = nullptr;
+        if (peek_is(Token::Type::kTemplateArgsLeft)) {
+            auto tmpl_args = expect_template_arg_block("template arguments", [&] {
+                return expect_expression_list("template argument list",
+                                              Token::Type::kTemplateArgsRight);
+            });
+            ident = builder_.Ident(source(), t.to_str(), std::move(tmpl_args.value));
+        }
+
+        if (peek_is(Token::Type::kParenLeft)) {
+            if (!ident) {
+                ident = builder_.Ident(source(), t.to_str());
+            }
+
+            auto params = expect_argument_expression_list("function call");
+            if (params.errored) {
+                return Failure::kErrored;
+            }
+
+            return builder_.Call(source(), ident, std::move(params.value));
+        }
 
         return builder_.Expr(t.source(), t.to_str());
     }
@@ -2754,15 +2778,8 @@ Maybe<const ast::Expression*> Parser::core_lhs_expression() {
 //   : core_lhs_expression component_or_swizzle_specifier ?
 //   | AND lhs_expression
 //   | STAR lhs_expression
+//   | call_expression
 Maybe<const ast::Expression*> Parser::lhs_expression() {
-    auto core_expr = core_lhs_expression();
-    if (core_expr.errored) {
-        return Failure::kErrored;
-    }
-    if (core_expr.matched) {
-        return component_or_swizzle_specifier(core_expr.value);
-    }
-
     // Gather up all the `*`, `&` and `&&` tokens into a list and create all of the unary ops at
     // once instead of recursing. This handles the case where the fuzzer decides >8k `*`s would be
     // fun.
@@ -2788,25 +2805,34 @@ Maybe<const ast::Expression*> Parser::lhs_expression() {
             ops.Push({t.source(), core::UnaryOp::kIndirection});
         }
     }
-    if (ops.IsEmpty()) {
-        return Failure::kNoMatch;
+
+    // The AND and STAR cases.
+    auto& t = peek();
+    if (!ops.IsEmpty()) {
+        auto expr = lhs_expression();
+        if (expr.errored) {
+            return Failure::kErrored;
+        }
+        if (!expr.matched) {
+            return AddError(t, "missing expression");
+        }
+        const ast::Expression* ret = expr.value;
+        // Consume the ops in reverse order so we have the correct AST ordering.
+        for (auto& info : tint::Reverse(ops)) {
+            ret = create<ast::UnaryOpExpression>(info.source, info.op, ret);
+        }
+        return ret;
     }
 
-    auto& t = peek();
-    auto expr = lhs_expression();
-    if (expr.errored) {
+    // core_lhs_expression case
+    auto core_expr = core_lhs_expression();
+    if (core_expr.errored) {
         return Failure::kErrored;
     }
-    if (!expr.matched) {
-        return AddError(t, "missing expression");
+    if (core_expr.matched) {
+        return component_or_swizzle_specifier(core_expr.value);
     }
-
-    const ast::Expression* ret = expr.value;
-    // Consume the ops in reverse order so we have the correct AST ordering.
-    for (auto& info : tint::Reverse(ops)) {
-        ret = create<ast::UnaryOpExpression>(info.source, info.op, ret);
-    }
-    return ret;
+    return Failure::kNoMatch;
 }
 
 // variable_updating_statement
