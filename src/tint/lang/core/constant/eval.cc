@@ -1845,13 +1845,17 @@ Eval::Result Eval::ShiftLeft(const core::type::Type* ty,
                     e2u = 0;
                 }
             } else {
-                if (static_cast<size_t>(e2) >= bit_width && use_runtime_semantics_) {
+                if (static_cast<size_t>(e2) >= bit_width) {
                     // At shader/pipeline-creation time, it is an error to shift by the bit width of
-                    // the lhs or greater, which should have already been caught by the validator.
+                    // the lhs or greater. The WGSL frontend validator should have already caught
+                    // this for constant expressions, but not for overrides.
                     // At runtime, we shift by e2 % (bit width of e1).
                     AddError(source)
                         << "shift left value must be less than the bit width of the lhs, which is "
                         << bit_width;
+                    if (!use_runtime_semantics_) {
+                        return Failure();
+                    }
                     e2u = e2u % bit_width;
                 }
 
@@ -1932,13 +1936,17 @@ Eval::Result Eval::ShiftRight(const core::type::Type* ty,
                     result = signed_shift_right();
                 }
             } else {
-                if (static_cast<size_t>(e2) >= bit_width && use_runtime_semantics_) {
+                if (static_cast<size_t>(e2) >= bit_width) {
                     // At shader/pipeline-creation time, it is an error to shift by the bit width of
-                    // the lhs or greater, which should have already been caught by the validator.
+                    // the lhs or greater. The WGSL frontend validator should have already caught
+                    // this for constant expressions, but not for overrides.
                     // At runtime, we shift by e2 % (bit width of e1).
                     AddError(source)
                         << "shift right value must be less than the bit width of the lhs, which is "
                         << bit_width;
+                    if (!use_runtime_semantics_) {
+                        return Failure();
+                    }
                     e2u = e2u % bit_width;
                 }
 

@@ -446,6 +446,152 @@ $B1: {  # root
     EXPECT_EQ(result.Failure().reason, R"(error: value -65505.0 cannot be represented as 'f16')");
 }
 
+TEST_F(IR_SubstituteOverridesTest, Override_ShiftLeftAmountTooLarge_ConstLHS) {
+    core::ir::Override* rhs = nullptr;
+    b.Append(mod.root_block, [&] {
+        rhs = b.Override(Source{{1, 2}}, "rhs", ty.u32());
+        rhs->SetOverrideId({1});
+    });
+
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* shift = b.ShiftLeft(1_u, rhs);
+        b.Return(func, shift->Result());
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %rhs:u32 = override undef @id(1)
+}
+
+%foo = func():u32 {
+  $B2: {
+    %3:u32 = shl 1u, %rhs
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{1}] = 125.0;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              R"(error: shift left value must be less than the bit width of the lhs, which is 32)");
+}
+
+TEST_F(IR_SubstituteOverridesTest, Override_ShiftLeftAmountTooLarge_RuntimeLHS) {
+    core::ir::Override* rhs = nullptr;
+    b.Append(mod.root_block, [&] {
+        rhs = b.Override(Source{{1, 2}}, "rhs", ty.u32());
+        rhs->SetOverrideId({1});
+    });
+
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* lhs = b.Let("lhs", 1_u);
+        auto* shift = b.ShiftLeft(lhs, rhs);
+        b.Return(func, shift->Result());
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %rhs:u32 = override undef @id(1)
+}
+
+%foo = func():u32 {
+  $B2: {
+    %lhs:u32 = let 1u
+    %4:u32 = shl %lhs, %rhs
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{1}] = 125.0;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              R"(error: shift left value must be less than the bit width of the lhs, which is 32)");
+}
+
+TEST_F(IR_SubstituteOverridesTest, Override_ShiftRightAmountTooLarge_ConstLHS) {
+    core::ir::Override* rhs = nullptr;
+    b.Append(mod.root_block, [&] {
+        rhs = b.Override(Source{{1, 2}}, "rhs", ty.u32());
+        rhs->SetOverrideId({1});
+    });
+
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* shift = b.ShiftRight(1_u, rhs);
+        b.Return(func, shift->Result());
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %rhs:u32 = override undef @id(1)
+}
+
+%foo = func():u32 {
+  $B2: {
+    %3:u32 = shr 1u, %rhs
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{1}] = 125.0;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(
+        result.Failure().reason,
+        R"(error: shift right value must be less than the bit width of the lhs, which is 32)");
+}
+
+TEST_F(IR_SubstituteOverridesTest, Override_ShiftRightAmountTooLarge_RuntimeLHS) {
+    core::ir::Override* rhs = nullptr;
+    b.Append(mod.root_block, [&] {
+        rhs = b.Override(Source{{1, 2}}, "rhs", ty.u32());
+        rhs->SetOverrideId({1});
+    });
+
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* lhs = b.Let("lhs", 1_u);
+        auto* shift = b.ShiftRight(lhs, rhs);
+        b.Return(func, shift->Result());
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %rhs:u32 = override undef @id(1)
+}
+
+%foo = func():u32 {
+  $B2: {
+    %lhs:u32 = let 1u
+    %4:u32 = shr %lhs, %rhs
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{1}] = 125.0;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(
+        result.Failure().reason,
+        R"(error: shift right value must be less than the bit width of the lhs, which is 32)");
+}
+
 TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexGenError) {
     core::ir::Override* o = nullptr;
     b.Append(mod.root_block, [&] {
