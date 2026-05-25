@@ -326,7 +326,7 @@ using OverridesMap = absl::flat_hash_map<std::string, Override>;
     /* Immediate Data block byte size */                                                          \
     X(uint32_t, immediateDataRangeByteSize)                                                       \
     /* Immediate Data block used slots */                                                         \
-    X(ImmediateConstantMask, immediateDataUsedSlots)
+    X(ImmediateMask, immediateDataUsedSlots)
 DAWN_SERIALIZABLE(struct, EntryPointMetadata, ENTRY_POINT_METADATA_MEMBER) {
     using SamplerTexturePair = detail::SamplerTexturePair;
     // TODO(crbug.com/409438000): Remove the hack of sampler placeholders for non-sampler texture.

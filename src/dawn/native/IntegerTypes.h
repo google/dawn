@@ -75,12 +75,10 @@ using PerBindGroup = ityp::array<BindGroupIndex, Value, kMaxBindGroups>;
 using ResourceTableSlot = TypedInteger<struct ResourceTableSlotT, uint32_t>;
 
 // Immediate data constant index get mapped to a packed range of indices
-using ImmediateConstantIndex = TypedInteger<struct ImmediateConstantIndexT, uint32_t>;
-constexpr ImmediateConstantIndex kMaxImmediateConstantIndexTyped =
-    ImmediateConstantIndex(kMaxImmediateConstantsPerPipeline);
+using ImmediateIndex = TypedInteger<struct ImmediateIndexT, uint32_t>;
+constexpr ImmediateIndex kMaxImmediateIndexTyped = ImmediateIndex(kMaxImmediateMaskBits);
 
-using ImmediateConstantMask =
-    ityp::bitset<ImmediateConstantIndex, kMaxImmediateConstantsPerPipeline>;
+using ImmediateMask = ityp::bitset<ImmediateIndex, kMaxImmediateMaskBits>;
 
 // Color attachment indices represent the index in the wgpu::FragmentState::targets array, the
 // wgpu::RenderPassDescriptor::colorAttachments arry and other similar arrays.

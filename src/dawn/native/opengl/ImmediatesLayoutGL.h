@@ -1,4 +1,4 @@
-// Copyright 2025 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,11 +25,35 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/ImmediateConstantsLayout.h"
+#ifndef SRC_DAWN_NATIVE_OPENGL_IMMEDIATESLAYOUTGL_H_
+#define SRC_DAWN_NATIVE_OPENGL_IMMEDIATESLAYOUTGL_H_
 
-namespace dawn::native {
-uint32_t GetImmediateIndexInPipeline(const uint32_t layoutOffset,
-                                     const ImmediateConstantMask& pipelineImmediateMask) {
-    return uint32_t((((1u << layoutOffset) - 1u) & pipelineImmediateMask).count());
-}
-}  // namespace dawn::native
+#include "dawn/native/ImmediatesLayout.h"
+
+namespace dawn::native::opengl {
+
+// Define common immediates layout. Append members to expand layouts.
+// NOTE: 'offsetof' doesn't support non-standard-layout structs. So use aggregate instead of
+// inheritance for RenderImmediates and ComputeImmediates. Wrap userImmediates to fit offsetof logic
+// in UserImmediatesTrackerBase.
+DAWN_ENABLE_STRUCT_PADDING_WARNINGS
+// Define render pipeline immediates layout. Append members to expand the layout.
+struct RenderImmediates {
+    UserImmediates userImmediates;
+
+    ClampFragDepthArgs clampFragDepth;
+
+    // first index offset
+    uint32_t firstVertex;
+    uint32_t firstInstance;
+};
+
+// Define compute pipeline immediates layout. Append members to expand the layout.
+struct ComputeImmediates {
+    UserImmediates userImmediates;
+};
+DAWN_DISABLE_STRUCT_PADDING_WARNINGS
+
+}  // namespace dawn::native::opengl
+
+#endif  // SRC_DAWN_NATIVE_OPENGL_IMMEDIATESLAYOUTGL_H_

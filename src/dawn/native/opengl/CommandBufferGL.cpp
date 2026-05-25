@@ -39,12 +39,13 @@
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ExternalTexture.h"
-#include "dawn/native/ImmediateConstantsTracker.h"
+#include "dawn/native/ImmediatesTracker.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/opengl/BufferGL.h"
 #include "dawn/native/opengl/ComputePipelineGL.h"
 #include "dawn/native/opengl/DeviceGL.h"
 #include "dawn/native/opengl/Forward.h"
+#include "dawn/native/opengl/ImmediatesLayoutGL.h"
 #include "dawn/native/opengl/PersistentPipelineStateGL.h"
 #include "dawn/native/opengl/PhysicalDeviceGL.h"
 #include "dawn/native/opengl/PipelineLayoutGL.h"
@@ -734,20 +735,43 @@ TexelExtent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy,
     return validTextureCopyExtent;
 }
 
-template <typename T>
-class ImmediateConstantTracker : public T {
+class RenderImmediatesTracker
+    : public UserImmediatesTrackerBase<RenderImmediates, RenderPipelineBase> {
   public:
-    ImmediateConstantTracker() = default;
+    RenderImmediatesTracker() = default;
+    void SetClampFragDepth(float minClampFragDepth, float maxClampFragDepth) {
+        ClampFragDepthArgs fragDepthArgs;
+        fragDepthArgs.minClampFragDepth = minClampFragDepth;
+        fragDepthArgs.maxClampFragDepth = maxClampFragDepth;
+
+        UpdateImmediates(offsetof(RenderImmediates, clampFragDepth), fragDepthArgs);
+    }
+
+    void SetFirstVertex(uint32_t firstVertex) {
+        UpdateImmediates(offsetof(RenderImmediates, firstVertex), firstVertex);
+    }
+
+    void SetFirstInstance(uint32_t firstInstance) {
+        UpdateImmediates(offsetof(RenderImmediates, firstInstance), firstInstance);
+    }
+};
+
+using ComputeImmediatesTracker = UserImmediatesTrackerBase<ComputeImmediates, ComputePipelineBase>;
+
+template <typename T>
+class ImmediateTracker : public T {
+  public:
+    ImmediateTracker() = default;
 
     MaybeError Apply(const OpenGLFunctions& gl) {
         DAWN_ASSERT(this->mLastPipeline != nullptr);
 
         auto* lastPipeline = this->mLastPipeline;
-        ImmediateConstantMask pipelineMask = lastPipeline->GetImmediateMask();
-        ImmediateConstantMask uploadBits = this->mDirty & pipelineMask;
+        ImmediateMask pipelineMask = lastPipeline->GetImmediateMask();
+        ImmediateMask uploadBits = this->mDirty & pipelineMask;
         for (auto&& [offset, size] : IterateRanges(uploadBits)) {
             uint32_t immediateContentStartOffset =
-                static_cast<uint32_t>(offset) * kImmediateConstantElementByteSize;
+                static_cast<uint32_t>(offset) * kImmediateElementByteSize;
             auto location =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
             auto count = static_cast<uint32_t>(size);
@@ -1174,7 +1198,7 @@ MaybeError CommandBuffer::ExecuteComputePass(const OpenGLFunctions& gl) {
     BindGroupTracker bindGroupTracker = {};
 
     Command type;
-    ImmediateConstantTracker<ComputeImmediateConstantsTrackerBase> immediates = {};
+    ImmediateTracker<ComputeImmediatesTracker> immediates = {};
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
             case Command::EndComputePass: {
@@ -1409,7 +1433,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
 
     VertexStateBufferBindingTracker vertexStateBufferBindingTracker;
     BindGroupTracker bindGroupTracker = {};
-    ImmediateConstantTracker<RenderImmediateConstantsTrackerBase> immediates = {};
+    ImmediateTracker<RenderImmediatesTracker> immediates = {};
 
     auto DoRenderBundleCommand = [&](CommandIterator* iter, Command type) -> MaybeError {
         switch (type) {

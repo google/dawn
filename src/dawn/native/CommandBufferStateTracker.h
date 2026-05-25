@@ -122,7 +122,7 @@ class CommandBufferStateTracker {
     RAW_PTR_EXCLUSION PipelineBase* mLastPipeline = nullptr;
     RAW_PTR_EXCLUSION const RequiredBufferSizes* mMinBufferSizes = nullptr;
 
-    ImmediateConstantMask mImmediateDataMask;
+    ImmediateMask mImmediateDataMask;
 };
 
 }  // namespace dawn::native

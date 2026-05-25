@@ -316,7 +316,7 @@ target_link_libraries(dawn_end2end_test_objects PRIVATE
 
 set(whitebox_conditional_private_platform_depends)
 set(whitebox_sources
-    "white_box/ImmediateConstantOffsetTests.cpp"
+    "white_box/ImmediateOffsetTests.cpp"
     "white_box/ShaderModuleTests.cpp"
     "white_box/SharedBufferMemoryTests.cpp"
     "white_box/SharedBufferMemoryTests.h"

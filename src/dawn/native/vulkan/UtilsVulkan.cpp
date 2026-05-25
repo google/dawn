@@ -64,8 +64,8 @@ VK_OBJECT_TYPE_GETTER(VkBufferView, VK_OBJECT_TYPE_BUFFER_VIEW)
 
 #undef VK_OBJECT_TYPE_GETTER
 
-uint32_t ToPushConstantBytes(const ImmediateConstantMask& immediates) {
-    return static_cast<uint32_t>(immediates.count()) * kImmediateConstantElementByteSize;
+uint32_t ToPushConstantBytes(const ImmediateMask& immediates) {
+    return static_cast<uint32_t>(immediates.count()) * kImmediateElementByteSize;
 }
 
 uint32_t AttachmentCount(const ColorAttachmentMask& mask) {

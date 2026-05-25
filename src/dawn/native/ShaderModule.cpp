@@ -877,12 +877,11 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         // as it might cause an assertion in Tint. The error is recorded
         // to be caught at pipeline creation time.
         if (!DelayedInvalidIf(
-                entryPoint.immediate_data_size > kMaxExternalImmediateConstantsPerPipeline * 4,
+                entryPoint.immediate_data_size > kMaxExternalImmediatesPerPipeline * 4,
                 "Immediate data size (%u) exceeds the maximum allowed size (%u).",
-                entryPoint.immediate_data_size, kMaxExternalImmediateConstantsPerPipeline * 4)) {
+                entryPoint.immediate_data_size, kMaxExternalImmediatesPerPipeline * 4)) {
             auto immediateBlockInfo = inspector->GetImmediateBlockInfo(entryPoint.name);
-            metadata->immediateDataUsedSlots =
-                ImmediateConstantMask(immediateBlockInfo.to_ullong());
+            metadata->immediateDataUsedSlots = ImmediateMask(immediateBlockInfo.to_ullong());
         }
     }
 

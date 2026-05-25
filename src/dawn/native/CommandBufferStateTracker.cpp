@@ -586,7 +586,7 @@ void CommandBufferStateTracker::RecomputeLazyAspects(ValidationAspects aspects) 
     }
 
     if (aspects[VALIDATION_ASPECT_IMMEDIATE_DATA]) {
-        ImmediateConstantMask requiredMask = mLastPipeline->GetUserImmediateSlots();
+        ImmediateMask requiredMask = mLastPipeline->GetUserImmediateSlots();
         if (IsSubset(requiredMask, mImmediateDataMask)) {
             mAspects.set(VALIDATION_ASPECT_IMMEDIATE_DATA);
         }
@@ -648,12 +648,12 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
     }
 
     if (aspects[VALIDATION_ASPECT_IMMEDIATE_DATA]) {
-        ImmediateConstantMask requiredMask = mLastPipeline->GetUserImmediateSlots();
+        ImmediateMask requiredMask = mLastPipeline->GetUserImmediateSlots();
         if (!IsSubset(requiredMask, mImmediateDataMask)) {
-            ImmediateConstantMask missing = requiredMask & ~mImmediateDataMask;
+            ImmediateMask missing = requiredMask & ~mImmediateDataMask;
             size_t firstMissing = std::countr_zero(static_cast<uint64_t>(missing.to_ullong()));
             return DAWN_VALIDATION_ERROR("Required immediate data at offset %u was not set.",
-                                         firstMissing * kImmediateConstantElementByteSize);
+                                         firstMissing * kImmediateElementByteSize);
         }
     }
 
@@ -825,11 +825,11 @@ void CommandBufferStateTracker::SetVertexBuffer(VertexBufferSlot slot, uint64_t 
 }
 
 void CommandBufferStateTracker::SetImmediateData(uint32_t offset, uint32_t size) {
-    static_assert(ImmediateConstantMask{}.size() <= 64);
-    uint64_t startSlot = offset / kImmediateConstantElementByteSize;
-    uint64_t slotCount = size / kImmediateConstantElementByteSize;
+    static_assert(ImmediateMask{}.size() <= 64);
+    uint64_t startSlot = offset / kImmediateElementByteSize;
+    uint64_t slotCount = size / kImmediateElementByteSize;
 
-    mImmediateDataMask |= ImmediateConstantMask(((1u << slotCount) - 1u) << startSlot);
+    mImmediateDataMask |= ImmediateMask(((1u << slotCount) - 1u) << startSlot);
 }
 
 void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {

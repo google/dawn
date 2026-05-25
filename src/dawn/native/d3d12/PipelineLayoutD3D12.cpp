@@ -387,15 +387,14 @@ MaybeError PipelineLayout::Initialize() {
     }
 
     if (GetImmediateDataRangeByteSize() > 0) {
-        D3D12_ROOT_PARAMETER1 immediateConstants{};
-        immediateConstants.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-        immediateConstants.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-        immediateConstants.Constants.Num32BitValues =
-            GetImmediateDataRangeByteSize() / sizeof(uint32_t);
-        immediateConstants.Constants.RegisterSpace = kImmediatesRegisterSpace;
-        immediateConstants.Constants.ShaderRegister = kImmediatesBaseRegister;
+        D3D12_ROOT_PARAMETER1 immediates{};
+        immediates.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        immediates.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+        immediates.Constants.Num32BitValues = GetImmediateDataRangeByteSize() / sizeof(uint32_t);
+        immediates.Constants.RegisterSpace = kImmediatesRegisterSpace;
+        immediates.Constants.ShaderRegister = kImmediatesBaseRegister;
         mImmediatesParameterIndex = rootParameters.size();
-        rootParameters.emplace_back(immediateConstants);
+        rootParameters.emplace_back(immediates);
     } else {
         mImmediatesParameterIndex = kInvalidImmediatesParameterIndex;
     }

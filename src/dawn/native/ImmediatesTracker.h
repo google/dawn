@@ -1,4 +1,4 @@
-// Copyright 2025 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,24 +25,22 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_IMMEDIATECONSTANTSTRACKER_H_
-#define SRC_DAWN_NATIVE_IMMEDIATECONSTANTSTRACKER_H_
+#ifndef SRC_DAWN_NATIVE_IMMEDIATESTRACKER_H_
+#define SRC_DAWN_NATIVE_IMMEDIATESTRACKER_H_
 
 #include <algorithm>
 #include <array>
 #include <bitset>
 #include <cstddef>
 
-#include "ImmediateConstantsLayout.h"
+#include "ImmediatesLayout.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/common/ityp_span.h"
-#include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Device.h"
-#include "dawn/native/ImmediateConstantsLayout.h"
+#include "dawn/native/ImmediatesLayout.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/Pipeline.h"
-#include "dawn/native/RenderPipeline.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/utils/compiler.h"
 
@@ -73,19 +71,18 @@ struct ImmediateDataContent {
 };
 
 // TODO(crbug.com/366291600): Add inheritance ability(like BindGroupTracker) so that it can inherit
-// immediate constants in native backend if supported.
+// immediates in native backend if supported.
 template <typename T, typename PipelineType>
-class UserImmediateConstantsTrackerBase {
+class UserImmediatesTrackerBase {
   public:
-    UserImmediateConstantsTrackerBase() {}
+    UserImmediatesTrackerBase() {}
 
     // Setters
     void SetImmediates(uint32_t offset, uint8_t* values, uint32_t size) {
-        uint8_t* destData = mContent.template Get<uint8_t>(offsetof(T, userConstants) + offset);
+        uint8_t* destData = mContent.template Get<uint8_t>(offsetof(T, userImmediates) + offset);
         if (DAWN_UNSAFE_TODO(memcmp(destData, values, size)) != 0) {
             DAWN_UNSAFE_TODO(memcpy(destData, values, size));
-            mDirty |= GetImmediateConstantBlockBits(offsetof(T, userConstants),
-                                                    sizeof(UserImmediateConstants));
+            mDirty |= GetImmediateBlockBits(offsetof(T, userImmediates), sizeof(UserImmediates));
         }
     }
 
@@ -100,45 +97,27 @@ class UserImmediateConstantsTrackerBase {
     }
 
     // Getters
-    const ImmediateConstantMask& GetDirtyBits() const { return mDirty; }
+    const ImmediateMask& GetDirtyBits() const { return mDirty; }
 
     const ImmediateDataContent<T>& GetContent() const { return mContent; }
 
-    void SetDirtyBitsForTesting(ImmediateConstantMask dirtyBits) { mDirty = dirtyBits; }
+    void SetDirtyBitsForTesting(ImmediateMask dirtyBits) { mDirty = dirtyBits; }
 
   protected:
     template <typename U>
-    void UpdateImmediateConstants(size_t dataOffset, const U& data) {
+    void UpdateImmediates(size_t dataOffset, const U& data) {
         constexpr size_t dataSize = sizeof(U);
         U* destData = mContent.template Get<U>(uint32_t(dataOffset));
         if (DAWN_UNSAFE_TODO(memcmp(destData, &data, dataSize)) != 0) {
             DAWN_UNSAFE_TODO(memcpy(destData, &data, dataSize));
-            mDirty |= GetImmediateConstantBlockBits(dataOffset, dataSize);
+            mDirty |= GetImmediateBlockBits(dataOffset, dataSize);
         }
     }
 
     ImmediateDataContent<T> mContent;
-    ImmediateConstantMask mDirty = ImmediateConstantMask(0);
+    ImmediateMask mDirty = ImmediateMask(0);
     RAW_PTR_EXCLUSION PipelineType* mLastPipeline = nullptr;
 };
-
-class RenderImmediateConstantsTrackerBase
-    : public UserImmediateConstantsTrackerBase<RenderImmediateConstants, RenderPipelineBase> {
-  public:
-    RenderImmediateConstantsTrackerBase() = default;
-    void SetClampFragDepth(float minClampFragDepth, float maxClampFragDepth);
-    void SetFirstIndexOffset(uint32_t firstVertex, uint32_t firstInstance);
-    void SetFirstVertex(uint32_t firstVertex);
-    void SetFirstInstance(uint32_t firstInstance);
-};
-
-class ComputeImmediateConstantsTrackerBase
-    : public UserImmediateConstantsTrackerBase<ComputeImmediateConstants, ComputePipelineBase> {
-  public:
-    ComputeImmediateConstantsTrackerBase() = default;
-    void SetNumWorkgroups(uint32_t numWorkgroupX, uint32_t numWorkgroupY, uint32_t numWorkgroupZ);
-};
-
 }  // namespace dawn::native
 
-#endif  // SRC_DAWN_NATIVE_IMMEDIATECONSTANTSTRACKER_H_
+#endif  // SRC_DAWN_NATIVE_IMMEDIATESTRACKER_H_

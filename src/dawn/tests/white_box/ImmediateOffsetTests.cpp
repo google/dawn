@@ -1,4 +1,4 @@
-// Copyright 2025 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -27,8 +27,8 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/native/ComputePipeline.h"
-#include "dawn/native/ImmediateConstantsLayout.h"
-#include "dawn/native/ImmediateConstantsTracker.h"
+#include "dawn/native/ImmediatesLayout.h"
+#include "dawn/native/ImmediatesTracker.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
@@ -36,7 +36,21 @@
 
 namespace dawn::native {
 namespace {
-class ImmediateConstantOffsetTest : public DawnTest {
+DAWN_ENABLE_STRUCT_PADDING_WARNINGS
+// Define render pipeline immediate data layout. Append members to
+// expand the layout.
+struct RenderImmediateTestConstants {
+    UserImmediates userImmediates;
+
+    ClampFragDepthArgs clampFragDepth;
+
+    // first index offset
+    uint32_t firstVertex;
+    uint32_t firstInstance;
+};
+DAWN_DISABLE_STRUCT_PADDING_WARNINGS
+
+class ImmediateOffsetTest : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
@@ -68,22 +82,22 @@ class ImmediateConstantOffsetTest : public DawnTest {
 
 // Test pipeline change reset dirty bits and update tracked pipeline constants mask.
 // Use Compute pipeline to cover this common path.
-TEST_P(ImmediateConstantOffsetTest, ClampFragDepth) {
+TEST_P(ImmediateOffsetTest, ClampFragDepth) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() || IsOpenGL() || IsMetal() || IsD3D11() || IsD3D12());
-    ImmediateConstantMask expectedImmediateConstantMask = ImmediateConstantMask(0);
+    ImmediateMask expectedImmediateMask = ImmediateMask(0);
     // Hard coded bits and index.
-    expectedImmediateConstantMask |= 1u << (offsetof(RenderImmediateConstants, clampFragDepth) /
-                                            kImmediateConstantElementByteSize);
-    expectedImmediateConstantMask |= 1u << (offsetof(RenderImmediateConstants, clampFragDepth) /
-                                                kImmediateConstantElementByteSize +
-                                            1u);
+    expectedImmediateMask |=
+        1u << (offsetof(RenderImmediateTestConstants, clampFragDepth) / kImmediateElementByteSize);
+    expectedImmediateMask |=
+        1u << (offsetof(RenderImmediateTestConstants, clampFragDepth) / kImmediateElementByteSize +
+               1u);
 
     // Check dirty bits are set correctly.
     EXPECT_TRUE(FromAPI(MakeTestRenderPipelineWithClampingFragDepth().Get())->GetImmediateMask() ==
-                expectedImmediateConstantMask);
+                expectedImmediateMask);
 }
 
-DAWN_INSTANTIATE_TEST(ImmediateConstantOffsetTest,
+DAWN_INSTANTIATE_TEST(ImmediateOffsetTest,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),

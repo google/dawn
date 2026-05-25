@@ -37,13 +37,14 @@
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/Error.h"
-#include "dawn/native/ImmediateConstantsTracker.h"
+#include "dawn/native/ImmediatesTracker.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/d3d12/BindGroupD3D12.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn/native/d3d12/ComputePipelineD3D12.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
+#include "dawn/native/d3d12/ImmediatesLayoutD3D12.h"
 #include "dawn/native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn/native/d3d12/PlatformFunctionsD3D12.h"
 #include "dawn/native/d3d12/QuerySetD3D12.h"
@@ -399,21 +400,24 @@ MaybeError TransitionAndClearForSyncScope(CommandRecordingContext* commandContex
     return {};
 }
 
+using RenderImmediatesTracker = UserImmediatesTrackerBase<RenderImmediates, RenderPipelineBase>;
+using ComputeImmediatesTracker = UserImmediatesTrackerBase<ComputeImmediates, ComputePipelineBase>;
+
 template <typename T>
-class ImmediateConstantTracker : public T {
+class ImmediateTracker : public T {
   public:
-    ImmediateConstantTracker() = default;
+    ImmediateTracker() = default;
 
     // Calling this after BindGroupTrackerBase::Apply() to update root signature.
     void Apply(CommandRecordingContext* commandContext) {
         DAWN_ASSERT(this->mLastPipeline != nullptr);
 
         auto* lastPipeline = this->mLastPipeline;
-        ImmediateConstantMask pipelineMask = lastPipeline->GetImmediateMask();
-        ImmediateConstantMask uploadBits = this->mDirty & pipelineMask;
+        ImmediateMask pipelineMask = lastPipeline->GetImmediateMask();
+        ImmediateMask uploadBits = this->mDirty & pipelineMask;
         for (auto&& [offset, size] : IterateRanges(uploadBits)) {
             uint32_t immediateContentStartOffset =
-                static_cast<uint32_t>(offset) * kImmediateConstantElementByteSize;
+                static_cast<uint32_t>(offset) * kImmediateElementByteSize;
             uint32_t immediateRangeStartOffset =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
             SetRootConstant(commandContext->GetCommandList(),
@@ -428,21 +432,19 @@ class ImmediateConstantTracker : public T {
     }
 
   private:
-    static constexpr bool kIsRenderImmediateConstants =
-        std::is_same_v<T, RenderImmediateConstantsTrackerBase>;
-    static constexpr bool kIsComputeImmediateConstants =
-        std::is_same_v<T, ComputeImmediateConstantsTrackerBase>;
+    static constexpr bool kIsRenderImmediates = std::is_same_v<T, RenderImmediatesTracker>;
+    static constexpr bool kIsComputeImmediates = std::is_same_v<T, ComputeImmediatesTracker>;
 
     void SetRootConstant(ID3D12GraphicsCommandList* commandList,
                          uint32_t parameterIndex,
                          uint32_t rootConstantsLength,
                          const void* rootConstantsData,
                          uint32_t registerOffset) const {
-        if constexpr (kIsRenderImmediateConstants) {
+        if constexpr (kIsRenderImmediates) {
             commandList->SetGraphicsRoot32BitConstants(parameterIndex, rootConstantsLength,
                                                        rootConstantsData, registerOffset);
         } else {
-            static_assert(kIsComputeImmediateConstants);
+            static_assert(kIsComputeImmediates);
             commandList->SetComputeRoot32BitConstants(parameterIndex, rootConstantsLength,
                                                       rootConstantsData, registerOffset);
         }
@@ -1420,7 +1422,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
 
     Command type;
     ComputePipeline* lastPipeline = nullptr;
-    ImmediateConstantTracker<ComputeImmediateConstantsTrackerBase> immediates = {};
+    ImmediateTracker<ComputeImmediatesTracker> immediates = {};
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
             case Command::Dispatch: {
@@ -1785,7 +1787,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
     RenderPipeline* lastPipeline = nullptr;
     VertexBufferTracker vertexBufferTracker = {};
-    ImmediateConstantTracker<RenderImmediateConstantsTrackerBase> immediates = {};
+    ImmediateTracker<RenderImmediatesTracker> immediates = {};
 
     auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) -> MaybeError {
         switch (type) {

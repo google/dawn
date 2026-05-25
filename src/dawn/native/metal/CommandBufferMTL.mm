@@ -38,7 +38,7 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/ExternalTexture.h"
-#include "dawn/native/ImmediateConstantsTracker.h"
+#include "dawn/native/ImmediatesTracker.h"
 #include "dawn/native/PassResourceUsage.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundle.h"
@@ -47,6 +47,7 @@
 #include "dawn/native/metal/BufferMTL.h"
 #include "dawn/native/metal/ComputePipelineMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
+#include "dawn/native/metal/ImmediatesLayoutMTL.h"
 #include "dawn/native/metal/PipelineLayoutMTL.h"
 #include "dawn/native/metal/QuerySetMTL.h"
 #include "dawn/native/metal/RenderPipelineMTL.h"
@@ -443,7 +444,7 @@ void EncodeEmptyBlitEncoderForWriteTimestamp(Device* device,
 // Metal uses a physical addressing mode which means buffers in the shading language are
 // just pointers to the virtual address of their start. This means there is no way to know
 // the length of a buffer to compute the arrayLength() of unsized arrays at the end of storage
-// buffers. Tint implements the arrayLength() of unsized arrays by requiring immediate constants
+// buffers. Tint implements the arrayLength() of unsized arrays by requiring immediates
 // that stores the length of other buffers. This structure that keeps track of the
 // length of storage buffers and apply them to the reserved "immediate blocks" when
 // needed for a draw or a dispatch.
@@ -468,7 +469,7 @@ struct StorageBufferLengthTracker {
     PerStage<uint32_t> dataSize;
 
     // TODO(crbug.com/366291600): Remove this logic when merging
-    // StorageBufferLengthTracker in ImmediateConstantTracker.
+    // StorageBufferLengthTracker in ImmediateTracker.
     void OnSetPipeline(RenderPipelineBase* pipeline) {
         uint32_t immediateCount = pipeline->GetImmediateMask().count();
         if (immediateCount != mLastImmediateCounts) {
@@ -526,54 +527,68 @@ struct StorageBufferLengthTracker {
     uint32_t mLastImmediateCounts;
 };
 
-// Template class that manages immediate constants for Metal backend.
-// This tracker combines immediate constant data with buffer length information,
-// uploading both to a single buffer that can be accessed by shaders.
-// Template parameter T should be either RenderImmediateConstantsTrackerBase
-// or ComputeImmediateConstantsTrackerBase.
-// TODO(crbug.com/366291600): Merge StorageBufferLength in ImmediateConstantTracker
-template <typename T, typename EncoderType>
-class ImmediateConstantTracker : public T {
+class RenderImmediatesTracker
+    : public UserImmediatesTrackerBase<RenderImmediates, RenderPipelineBase> {
   public:
-    ImmediateConstantTracker() = default;
+    RenderImmediatesTracker() = default;
 
-    // Applies immediate constants and buffer length data to the Metal command encoder.
-    // This method uploads both immediate constant values and storage buffer lengths
-    // to a single buffer, with buffer lengths appended after immediate constants.
+    void SetClampFragDepth(float minClampFragDepth, float maxClampFragDepth) {
+        ClampFragDepthArgs fragDepthArgs;
+        fragDepthArgs.minClampFragDepth = minClampFragDepth;
+        fragDepthArgs.maxClampFragDepth = maxClampFragDepth;
+
+        UpdateImmediates(offsetof(RenderImmediates, clampFragDepth), fragDepthArgs);
+    }
+};
+
+using ComputeImmediatesTracker = UserImmediatesTrackerBase<ComputeImmediates, ComputePipelineBase>;
+
+// Template class that manages immediates for Metal backend.
+// This tracker combines immediate data with buffer length information,
+// uploading both to a single buffer that can be accessed by shaders.
+// Template parameter T should be either RenderImmediatesTrackerBase
+// or ComputeImmediatesTrackerBase.
+// TODO(crbug.com/366291600): Merge StorageBufferLength in ImmediateTracker
+template <typename T, typename EncoderType>
+class ImmediateTracker : public T {
+  public:
+    ImmediateTracker() = default;
+
+    // Applies immediates and buffer length data to the Metal command encoder.
+    // This method uploads both immediate values and storage buffer lengths
+    // to a single buffer, with buffer lengths appended after immediates.
     // The data is uploaded using setVertexBytes/setFragmentBytes for render passes
     // or setBytes for compute passes.
     void Apply(EncoderType encoder, StorageBufferLengthTracker* lengthTracker) {
         DAWN_ASSERT(this->mLastPipeline != nullptr);
 
-        // Update the stored immediate constants that have changed
-        ImmediateConstantMask pipelineMask = this->mLastPipeline->GetImmediateMask();
-        ImmediateConstantMask uploadBits = this->mDirty & pipelineMask;
+        // Update the stored immediates that have changed
+        ImmediateMask pipelineMask = this->mLastPipeline->GetImmediateMask();
+        ImmediateMask uploadBits = this->mDirty & pipelineMask;
         constexpr wgpu::ShaderStage stages =
-            kIsRenderImmediateConstants ? wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment
-                                        : wgpu::ShaderStage::Compute;
+            kIsRenderImmediates ? wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment
+                                : wgpu::ShaderStage::Compute;
         for (auto [offset, size] : IterateRanges(uploadBits)) {
             uint32_t immediateContentStartOffset =
-                static_cast<uint32_t>(offset) * kImmediateConstantElementByteSize;
+                static_cast<uint32_t>(offset) * kImmediateElementByteSize;
             uint32_t immediateRangeStartOffset =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
             WriteImmediateBlocks(stages, immediateRangeStartOffset,
                                  this->mContent.template Get<uint32_t>(immediateContentStartOffset),
-                                 size * kImmediateConstantElementByteSize);
+                                 size * kImmediateElementByteSize);
         }
 
         // Calculate buffer sizes start offset based on ImmediateBlock layouts
         // describes in PipelineLayoutMTL.h
         // - must be 16-byte aligned for UBO requirements
-        uint32_t bufferSizeOffset =
-            RoundUp(pipelineMask.count() * kImmediateConstantElementByteSize, 16);
+        uint32_t bufferSizeOffset = RoundUp(pipelineMask.count() * kImmediateElementByteSize, 16);
 
         // Update storage buffer length data that are needed and changed.
         for (auto stage : IterateStages(lengthTracker->dirtyStages)) {
             // Sizes must be > 0, otherwise we'll do min(index, bufferSize - 1) and underflow.
             // TODO(crbug.com/488400770): Should be able to assert that, but Graphite violates it.
 
-            WriteImmediateBlocks(StageBit(stage),
-                                 bufferSizeOffset / kImmediateConstantElementByteSize,
+            WriteImmediateBlocks(StageBit(stage), bufferSizeOffset / kImmediateElementByteSize,
                                  lengthTracker->data[stage].data(), lengthTracker->dataSize[stage]);
         }
 
@@ -593,20 +608,19 @@ class ImmediateConstantTracker : public T {
     }
 
   private:
-    static constexpr bool kIsRenderImmediateConstants =
-        std::is_same_v<T, RenderImmediateConstantsTrackerBase>;
-    static constexpr bool kIsComputeImmediateConstants =
-        std::is_same_v<T, ComputeImmediateConstantsTrackerBase>;
+    static constexpr bool kIsRenderImmediates = std::is_same_v<T, RenderImmediatesTracker>;
+    static constexpr bool kIsComputeImmediates = std::is_same_v<T, ComputeImmediatesTracker>;
 
     // The lengths of buffers are stored as 32bit integers because that is the width the
     // MSL code generated by Tint expects.
     // UBOs require we align the max buffer count to 4 elements (16 bytes).
     static constexpr size_t MaxBufferCount = StorageBufferLengthTracker::MaxBufferCount;
     static constexpr size_t kMaxImmediateBlockSize =
-        kMaxImmediateConstantsPerPipeline + MaxBufferCount;
+        kIsRenderImmediates ? sizeof(RenderImmediates) / sizeof(uint32_t) + MaxBufferCount
+                            : sizeof(UserImmediates) / sizeof(uint32_t) + MaxBufferCount;
 
     // Writes data to the immediate block content for the specified shader stages.
-    // This is used for both immediate constants and storage buffer length data.
+    // This is used for both immediates and storage buffer length data.
     void WriteImmediateBlocks(wgpu::ShaderStage stages,
                               uint32_t offset,
                               const void* data,
@@ -654,7 +668,7 @@ class ImmediateConstantTracker : public T {
     }
 
     // Per-stage storage for the immediate block content.
-    // Each stage maintains its own copy of the data combining immediate constants
+    // Each stage maintains its own copy of the data combining immediates
     // and buffer length information in a single contiguous block.
     PerStage<std::array<uint32_t, kMaxImmediateBlockSize>> mImmediateBlockContent;
     // Size of data to upload for each shader stage (in bytes)
@@ -1597,8 +1611,7 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
     SetDebugName(GetDevice(), encoder, "Dawn_ComputePassEncoder", computePassCmd->label);
 
     Command type;
-    ImmediateConstantTracker<ComputeImmediateConstantsTrackerBase, id<MTLComputeCommandEncoder>>
-        immediates = {};
+    ImmediateTracker<ComputeImmediatesTracker, id<MTLComputeCommandEncoder>> immediates = {};
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
             case Command::EndComputePass: {
@@ -1785,8 +1798,7 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
     SetDebugName(GetDevice(), encoder, "Dawn_RenderPassEncoder", renderPassCmd->label);
 
-    ImmediateConstantTracker<RenderImmediateConstantsTrackerBase, id<MTLRenderCommandEncoder>>
-        immediates = {};
+    ImmediateTracker<RenderImmediatesTracker, id<MTLRenderCommandEncoder>> immediates = {};
 
     // Apply default frag depth
     immediates.SetClampFragDepth(0.0, 1.0);

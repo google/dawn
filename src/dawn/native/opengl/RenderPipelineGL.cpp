@@ -29,6 +29,7 @@
 
 #include "dawn/native/opengl/DeviceGL.h"
 #include "dawn/native/opengl/Forward.h"
+#include "dawn/native/opengl/ImmediatesLayoutGL.h"
 #include "dawn/native/opengl/PersistentPipelineStateGL.h"
 #include "dawn/native/opengl/UtilsGL.h"
 
@@ -223,16 +224,16 @@ RenderPipeline::RenderPipeline(Device* device,
 
 MaybeError RenderPipeline::InitializeImpl() {
     if (UsesVertexIndex()) {
-        mImmediateMask |= GetImmediateConstantBlockBits(
-            offsetof(RenderImmediateConstants, firstVertex), kImmediateConstantElementByteSize);
+        mImmediateMask |= GetImmediateBlockBits(offsetof(RenderImmediates, firstVertex),
+                                                kImmediateElementByteSize);
     }
     if (UsesInstanceIndex()) {
-        mImmediateMask |= GetImmediateConstantBlockBits(
-            offsetof(RenderImmediateConstants, firstInstance), kImmediateConstantElementByteSize);
+        mImmediateMask |= GetImmediateBlockBits(offsetof(RenderImmediates, firstInstance),
+                                                kImmediateElementByteSize);
     }
     if (UsesFragDepth()) {
-        mImmediateMask |= GetImmediateConstantBlockBits(
-            offsetof(RenderImmediateConstants, clampFragDepth), sizeof(ClampFragDepthArgs));
+        mImmediateMask |= GetImmediateBlockBits(offsetof(RenderImmediates, clampFragDepth),
+                                                sizeof(ClampFragDepthArgs));
     }
     return ToBackend(GetDevice())
         ->EnqueueGL([self = Ref<RenderPipeline>(this)](const OpenGLFunctions& gl) -> MaybeError {

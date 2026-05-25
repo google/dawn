@@ -119,7 +119,7 @@ struct PNextChainBuilder : public StackAllocated {
     raw_ptr<VkBaseOutStructure> mCurrent;
 };
 
-uint32_t ToPushConstantBytes(const ImmediateConstantMask& immediates);
+uint32_t ToPushConstantBytes(const ImmediateMask& immediates);
 uint32_t AttachmentCount(const ColorAttachmentMask& mask);
 
 VkCompareOp ToVulkanCompareOp(wgpu::CompareFunction op);

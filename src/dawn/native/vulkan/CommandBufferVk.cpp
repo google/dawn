@@ -45,7 +45,7 @@
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ExternalTexture.h"
-#include "dawn/native/ImmediateConstantsTracker.h"
+#include "dawn/native/ImmediatesTracker.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/vulkan/BindGroupVk.h"
 #include "dawn/native/vulkan/BufferVk.h"
@@ -55,6 +55,7 @@
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/FramebufferCache.h"
 #include "dawn/native/vulkan/FramebufferFetchHelper.h"
+#include "dawn/native/vulkan/ImmediatesLayoutVk.h"
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/PipelineLayoutVk.h"
 #include "dawn/native/vulkan/QuerySetVk.h"
@@ -221,7 +222,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true> {
   public:
     bool AreLayoutsCompatible() override {
         return mPipelineLayout == mLastAppliedPipelineLayout &&
-               mLastAppliedImmediateConstantSize == mImmediateConstantSize;
+               mLastAppliedImmediateSize == mImmediateSize;
     }
 
     const BindGroupBase* GetBindGroup(BindGroupIndex index) const { return mBindGroups[index]; }
@@ -237,7 +238,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true> {
         BindGroupTrackerBase::OnSetPipeline(pipeline);
 
         mVkLayout = pipeline->GetVkLayout();
-        mImmediateConstantSize = pipeline->GetImmediateConstantSize();
+        mImmediateSize = pipeline->GetImmediateSize();
         mUsesResourceTable = pipeline->GetLayout()->UsesResourceTable();
         if constexpr (std::derived_from<VkPipelineType, RenderPipelineBase>) {
             mFramebufferFetchEnabled = pipeline->UsesFramebufferFetch();
@@ -268,7 +269,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true> {
 
         // Changing push constant range invalidates all descriptor sets.
         // Also clear the last resource table so it gets rebound below.
-        if (mLastAppliedImmediateConstantSize != mImmediateConstantSize) {
+        if (mLastAppliedImmediateSize != mImmediateSize) {
             dirtyBindGroups = mBindGroupLayoutsMask;
             mLastFramebufferFetchEnabled = false;
             mLastResourceTable = nullptr;
@@ -326,7 +327,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true> {
         // Update PipelineLayout
         AfterApply();
 
-        mLastAppliedImmediateConstantSize = mImmediateConstantSize;
+        mLastAppliedImmediateSize = mImmediateSize;
         mLastUsesResourceTable = mUsesResourceTable;
         mLastResourceTable = mResourceTable;
         mLastFramebufferFetchEnabled = mFramebufferFetchEnabled;
@@ -340,14 +341,30 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true> {
     bool mFramebufferFetchEnabled = false;
     bool mLastFramebufferFetchEnabled = false;
     VkDescriptorSet mFramebufferFetchDescriptorSet = VK_NULL_HANDLE;
-    uint32_t mLastAppliedImmediateConstantSize = 0;
-    uint32_t mImmediateConstantSize = 0;
+    uint32_t mLastAppliedImmediateSize = 0;
+    uint32_t mImmediateSize = 0;
 };
 
-template <typename T>
-class ImmediateConstantTracker : public T {
+class RenderImmediatesTracker
+    : public UserImmediatesTrackerBase<RenderImmediates, RenderPipelineBase> {
   public:
-    ImmediateConstantTracker() = default;
+    RenderImmediatesTracker() = default;
+
+    void SetClampFragDepth(float minClampFragDepth, float maxClampFragDepth) {
+        ClampFragDepthArgs fragDepthArgs;
+        fragDepthArgs.minClampFragDepth = minClampFragDepth;
+        fragDepthArgs.maxClampFragDepth = maxClampFragDepth;
+
+        UpdateImmediates(offsetof(RenderImmediates, clampFragDepth), fragDepthArgs);
+    }
+};
+
+using ComputeImmediatesTracker = UserImmediatesTrackerBase<ComputeImmediates, ComputePipelineBase>;
+
+template <typename T>
+class ImmediateTracker : public T {
+  public:
+    ImmediateTracker() = default;
 
     void DirtyAll() { this->mDirty.set(); }
 
@@ -360,16 +377,15 @@ class ImmediateConstantTracker : public T {
     void Apply(const VulkanFunctions& vk,
                VkCommandBuffer commandBuffer,
                VkPipelineLayout layout,
-               ImmediateConstantMask pipelineMask) {
+               ImmediateMask pipelineMask) {
         for (auto&& [offset, size] : IterateRanges(this->mDirty & pipelineMask)) {
             uint32_t immediateContentStartOffset =
-                static_cast<uint32_t>(offset) * kImmediateConstantElementByteSize;
+                static_cast<uint32_t>(offset) * kImmediateElementByteSize;
             uint32_t pushConstantRangeStartOffset =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask) *
-                kImmediateConstantElementByteSize;
+                kImmediateElementByteSize;
             vk.CmdPushConstants(commandBuffer, layout, kImmediateShaderStages,
-                                pushConstantRangeStartOffset,
-                                size * kImmediateConstantElementByteSize,
+                                pushConstantRangeStartOffset, size * kImmediateElementByteSize,
                                 this->mContent.template Get<uint32_t>(immediateContentStartOffset));
         }
 
@@ -721,16 +737,15 @@ struct ProgrammablePassState : public StackAllocated {
     CommandRecordingContext* recordingContext;
 
     DescriptorSetTracker descriptorSets;
-    ImmediateConstantTracker<BaseImmediateTracker> immediates;
+    ImmediateTracker<BaseImmediateTracker> immediates;
 
     Pipeline* lastPipeline = nullptr;
     Pipeline* lastAppliedPipeline = nullptr;
 };
 
-using RenderPassState = ProgrammablePassState<RenderImmediateConstantsTrackerBase,
-                                              RenderPipeline,
-                                              VK_PIPELINE_BIND_POINT_GRAPHICS>;
-using ComputePassState = ProgrammablePassState<ComputeImmediateConstantsTrackerBase,
+using RenderPassState =
+    ProgrammablePassState<RenderImmediatesTracker, RenderPipeline, VK_PIPELINE_BIND_POINT_GRAPHICS>;
+using ComputePassState = ProgrammablePassState<ComputeImmediatesTracker,
                                                ComputePipeline,
                                                VK_PIPELINE_BIND_POINT_COMPUTE>;
 

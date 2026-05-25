@@ -55,7 +55,7 @@ PipelineGL::~PipelineGL() = default;
 MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
                                       const PipelineLayout* layout,
                                       const PerStage<ProgrammableStage>& stages,
-                                      ImmediateConstantMask& pipelineImmediateMask,
+                                      ImmediateMask& pipelineImmediateMask,
                                       VertexAttributeMask bgraSwizzleAttributes,
                                       Extent3D* workgroupSize) {
     mProgram = DAWN_GL_TRY(gl, CreateProgram());

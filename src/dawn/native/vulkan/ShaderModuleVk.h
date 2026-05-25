@@ -69,7 +69,7 @@ class ShaderModule final : public ShaderModuleBase {
         // Kept without defaults as they must be provided.
         raw_ptr<const ProgrammableStage> stage;
         raw_ptr<const PipelineLayout> layout;
-        ImmediateConstantMask immediateMask;
+        ImmediateMask immediateMask;
         raw_ptr<const absl::flat_hash_set<APIBindPoint>> ycbcrExternalTextures;
 
         bool emitPointSize = false;

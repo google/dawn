@@ -41,6 +41,7 @@
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/metal/BindGroupLayoutMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
+#include "dawn/native/metal/ImmediatesLayoutMTL.h"
 #include "dawn/native/metal/PipelineLayoutMTL.h"
 #include "dawn/native/metal/RenderPipelineMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
@@ -222,7 +223,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     const RenderPipeline* renderPipeline,
     const BindingInfoArray& moduleBindingInfo,
     bool useStrictMath,
-    const ImmediateConstantMask& pipelineImmediateMask) {
+    const ImmediateMask& pipelineImmediateMask) {
     std::ostringstream errorStream;
     errorStream << "Tint MSL failure:\n";
 
@@ -282,7 +283,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         // Based on Immediate block layouts describes in PipelineLayoutMTL.h, it requires
         // vec4<u32> array aligns to 16 bytes.
         arrayLengthFromConstants.buffer_sizes_offset =
-            RoundUp(pipelineImmediateMask.count() * kImmediateConstantElementByteSize, 16);
+            RoundUp(pipelineImmediateMask.count() * kImmediateElementByteSize, 16);
     }
 
     std::unordered_map<uint32_t, uint32_t> pixelLocalAttachments;
@@ -330,12 +331,12 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.bindings = std::move(bindings);
     req.tintOptions.vertex_pulling_config = std::move(vertexPullingTransformConfig);
 
-    // Set internal immediate constant offsets
-    if (HasImmediateConstants(&RenderImmediateConstants::clampFragDepth, pipelineImmediateMask)) {
+    // Set internal immediate offsets
+    if (HasImmediates(&RenderImmediates::clampFragDepth, pipelineImmediateMask)) {
         uint32_t offsetStartBytes = GetImmediateByteOffsetInPipeline(
-            &RenderImmediateConstants::clampFragDepth, pipelineImmediateMask);
-        req.tintOptions.depth_range_offsets = {
-            offsetStartBytes, offsetStartBytes + kImmediateConstantElementByteSize};
+            &RenderImmediates::clampFragDepth, pipelineImmediateMask);
+        req.tintOptions.depth_range_offsets = {offsetStartBytes,
+                                               offsetStartBytes + kImmediateElementByteSize};
     }
 
     req.tintOptions.use_argument_buffers = useArgumentBuffers;
@@ -462,7 +463,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
                                         const ProgrammableStage& programmableStage,
                                         const PipelineLayout* layout,
-                                        const ImmediateConstantMask& pipelineImmediateMask,
+                                        const ImmediateMask& pipelineImmediateMask,
                                         ShaderModule::MetalFunctionData* out,
                                         uint32_t sampleMask,
                                         const RenderPipeline* renderPipeline) {

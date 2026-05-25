@@ -87,7 +87,7 @@ class ShaderModule final : public ShaderModuleBase {
     ResultOrError<GLuint> CompileShader(const OpenGLFunctions& gl,
                                         const ProgrammableStage& programmableStage,
                                         SingleShaderStage stage,
-                                        const ImmediateConstantMask& pipelineImmediateMask,
+                                        const ImmediateMask& pipelineImmediateMask,
                                         VertexAttributeMask bgraSwizzleAttributes,
                                         std::vector<CombinedSampler>* combinedSamplers,
                                         const PipelineLayout* layout,

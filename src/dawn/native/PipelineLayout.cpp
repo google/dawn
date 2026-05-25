@@ -138,9 +138,9 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
         DAWN_INVALID_IF(!device->GetInstance()->HasFeature(
                             wgpu::WGSLLanguageFeatureName::ImmediateAddressSpace),
                         "ImmediateAddressSpace feature is not enabled");
-        DAWN_INVALID_IF(!IsAligned(descriptor->immediateSize, kImmediateConstantElementByteSize),
+        DAWN_INVALID_IF(!IsAligned(descriptor->immediateSize, kImmediateElementByteSize),
                         "immediateSize (%i) is not a multiple of %i bytes.",
-                        descriptor->immediateSize, kImmediateConstantElementByteSize);
+                        descriptor->immediateSize, kImmediateElementByteSize);
         uint32_t maxImmediateSize = device->GetLimits().v1.maxImmediateSize;
         DAWN_INVALID_IF(descriptor->immediateSize > maxImmediateSize,
                         "immediateSize (%i) is larger than the maximum allowed (%i).",

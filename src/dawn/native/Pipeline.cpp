@@ -37,7 +37,7 @@
 #include "dawn/common/Enumerator.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Device.h"
-#include "dawn/native/ImmediateConstantsLayout.h"
+#include "dawn/native/ImmediatesLayout.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/PipelineLayout.h"
@@ -250,7 +250,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
     return entryPoint;
 }
 
-uint32_t GetRawBits(ImmediateConstantMask bits) {
+uint32_t GetRawBits(ImmediateMask bits) {
     return static_cast<uint32_t>(bits.to_ulong());
 }
 
@@ -340,7 +340,7 @@ wgpu::ShaderStage PipelineBase::GetStageMask() const {
     return mStageMask;
 }
 
-const ImmediateConstantMask& PipelineBase::GetImmediateMask() const {
+const ImmediateMask& PipelineBase::GetImmediateMask() const {
     return mImmediateMask;
 }
 
@@ -438,25 +438,25 @@ MaybeError PipelineBase::Initialize(std::optional<ScopedUseShaderPrograms> scope
         scopedUsePrograms = UseShaderPrograms();
     }
 
-    // Set immediate constant status. userConstants is the first element in both
-    // RenderImmediateConstants and ComputeImmediateConstants.
-    ImmediateConstantMask userConstantsBits =
-        GetImmediateConstantBlockBits(0, GetLayout()->GetImmediateDataRangeByteSize());
-    mImmediateMask |= userConstantsBits;
+    // Set immediate status. userImmediates is the first element in both
+    // RenderImmediates and ComputeImmediates.
+    ImmediateMask userImmediatesBits =
+        GetImmediateBlockBits(0, GetLayout()->GetImmediateDataRangeByteSize());
+    mImmediateMask |= userImmediatesBits;
 
     DAWN_TRY_CONTEXT(InitializeWithShaders(), "initializing %s", this);
     return {};
 }
 
-void PipelineBase::SetImmediateMaskForTesting(ImmediateConstantMask immediateConstantMask) {
-    mImmediateMask = immediateConstantMask;
+void PipelineBase::SetImmediateMaskForTesting(ImmediateMask immediateMask) {
+    mImmediateMask = immediateMask;
 }
 
-uint32_t PipelineBase::GetImmediateConstantSize() const {
+uint32_t PipelineBase::GetImmediateSize() const {
     return static_cast<uint32_t>(mImmediateMask.count());
 }
 
-ImmediateConstantMask PipelineBase::GetUserImmediateSlots() const {
+ImmediateMask PipelineBase::GetUserImmediateSlots() const {
     return mUserImmdiateSlots;
 }
 

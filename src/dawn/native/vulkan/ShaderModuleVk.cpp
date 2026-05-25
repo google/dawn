@@ -41,7 +41,6 @@
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Device.h"
-#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/RenderPipeline.h"
@@ -53,6 +52,7 @@
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
+#include "dawn/native/vulkan/ImmediatesLayoutVk.h"
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/PipelineLayoutVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
@@ -346,12 +346,12 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         req.tintOptions.workarounds.pass_matrix_by_pointer = true;
     }
 
-    // Set internal immediate constant offsets
-    if (HasImmediateConstants(&RenderImmediateConstants::clampFragDepth, in.immediateMask)) {
-        uint32_t offsetStartBytes = GetImmediateByteOffsetInPipeline(
-            &RenderImmediateConstants::clampFragDepth, in.immediateMask);
-        req.tintOptions.depth_range_offsets = {
-            offsetStartBytes, offsetStartBytes + kImmediateConstantElementByteSize};
+    // Set internal immediate offsets
+    if (HasImmediates(&RenderImmediates::clampFragDepth, in.immediateMask)) {
+        uint32_t offsetStartBytes =
+            GetImmediateByteOffsetInPipeline(&RenderImmediates::clampFragDepth, in.immediateMask);
+        req.tintOptions.depth_range_offsets = {offsetStartBytes,
+                                               offsetStartBytes + kImmediateElementByteSize};
     }
 
     req.limits = LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1);

@@ -159,7 +159,7 @@ TEST_F(ImmediateDataTest, ValidateImmediateSize) {
     }
 }
 
-// Check that immediateSize must be aligned to kImmediateConstantElementByteSize (4 bytes).
+// Check that immediateSize must be aligned to kImmediateElementByteSize (4 bytes).
 TEST_F(ImmediateDataTest, ValidateImmediateSizeAlignment) {
     wgpu::PipelineLayoutDescriptor desc{};
 

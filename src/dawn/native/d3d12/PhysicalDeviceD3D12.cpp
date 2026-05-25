@@ -425,7 +425,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
                 // dynamic storage buffers: 1 for the size constant, 1 for the offset constant
                 2 * limits->v1.maxDynamicStorageBuffersPerPipelineLayout +
                 // immediates: 1 slot per 4 bytes
-                limits->v1.maxImmediateSize / kImmediateConstantElementByteSize +
+                limits->v1.maxImmediateSize / kImmediateElementByteSize +
                 // builtins and unused slots
                 kShaderBuiltinSlots + kUnusedSlots ==
             kMaxRootSignatureSize);

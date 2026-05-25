@@ -1,4 +1,4 @@
-// Copyright 2025 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_IMMEDIATECONSTANTSLAYOUT_H_
-#define SRC_DAWN_NATIVE_IMMEDIATECONSTANTSLAYOUT_H_
+#ifndef SRC_DAWN_NATIVE_IMMEDIATESLAYOUT_H_
+#define SRC_DAWN_NATIVE_IMMEDIATESLAYOUT_H_
 
 #include "dawn/common/Compiler.h"
 #include "dawn/common/ityp_bitset.h"
@@ -36,12 +36,11 @@
 namespace dawn::native {
 
 // Define common immediate data layout. Append members to expand layouts.
-// NOTE: 'offsetof' doesn't support non-standard-layout structs. So use
-// aggregate instead of inheritance for RenderImmediateConstants and
-// ComputeImmediateConstants.
+// NOTE: 'offsetof' doesn't support non-standard-layout structs. So use aggregate instead of
+// inheritance for RenderImmediates and ComputeImmediates.
 DAWN_ENABLE_STRUCT_PADDING_WARNINGS
-struct UserImmediateConstants {
-    uint32_t userImmediateData[kMaxExternalImmediateConstantsPerPipeline];
+struct UserImmediates {
+    uint32_t userImmediateData[kMaxExternalImmediatesPerPipeline];
 };
 
 // 8 bytes of immediate data data to be used by the ClampFragDepth Tint transform.
@@ -50,77 +49,54 @@ struct ClampFragDepthArgs {
     float maxClampFragDepth = 0.0f;
 };
 
-// Define render pipeline immediate data layout. Append members to
-// expand the layout.
-struct RenderImmediateConstants {
-    UserImmediateConstants userConstants = {};
-
-    ClampFragDepthArgs clampFragDepth = {};
-
-    // first index offset
-    uint32_t firstVertex = 0;
-    uint32_t firstInstance = 0;
-};
-
 struct NumWorkgroupsDimensions {
     uint32_t numWorkgroupsX = 0;
     uint32_t numWorkgroupsY = 0;
     uint32_t numWorkgroupsZ = 0;
 };
-
-// Define compute pipeline immediate data layout. Append members to
-// expand the layout.
-struct ComputeImmediateConstants {
-    UserImmediateConstants userConstants;
-
-    NumWorkgroupsDimensions numWorkgroups;
-};
 DAWN_DISABLE_STRUCT_PADDING_WARNINGS
 
-// Convert byte sizes and offsets into immediate constant indices and offsets
-// (dividing everything by kImmediateConstantElementByteSize)
-constexpr ImmediateConstantMask GetImmediateConstantBlockBits(size_t byteOffset, size_t byteSize) {
+// Convert byte sizes and offsets into immediate indices and offsets
+// (dividing everything by kImmediateElementByteSize)
+constexpr ImmediateMask GetImmediateBlockBits(size_t byteOffset, size_t byteSize) {
     // This bit math can be done in uint64_t because there are <= 64 bits in the mask.
-    static_assert(ImmediateConstantMask{}.size() <= 64);
-    uint64_t firstIndex = byteOffset / kImmediateConstantElementByteSize;
-    uint64_t constantCount = byteSize / kImmediateConstantElementByteSize;
+    static_assert(ImmediateMask{}.size() <= 64);
+    uint64_t firstIndex = byteOffset / kImmediateElementByteSize;
+    uint64_t constantCount = byteSize / kImmediateElementByteSize;
     return ((1u << constantCount) - 1u) << firstIndex;
 }
 
 // Returns the offset of the member in the packed immediates of the pipeline.
 // The pointer-to-member is a pointer into the structure containing all the potential immediates.
-// However pipelines don't need all of them and use a compacted layout with immediates
-// in the same order, just some of them skipped. For example the pipeline mask 11001111,
-// representing "userConstants: 4 | trivial_constants: 0 (2 at most)|clamp_frag:2",
-// maps to pipeline immediate constant layout: "userConstants:4 | clamp_frag:2
+// However pipelines don't need all of them and use a compacted layout with immediates in the same
+// order, just some of them skipped. For example the pipeline mask 11001111, representing
+// "userImmediates: 4 | trivial_constants: 0 (2 at most)|clamp_frag:2", maps to pipeline immediate
+// layout: "userImmediates:4 | clamp_frag:2
 template <typename Object, typename Member>
 uint32_t GetImmediateByteOffsetInPipeline(Member Object::* ptr,
-                                          const ImmediateConstantMask& pipelineImmediateMask) {
+                                          const ImmediateMask& pipelineImmediateMask) {
     Object obj = {};
     ptrdiff_t offset = reinterpret_cast<char*>(&(obj.*ptr)) - reinterpret_cast<char*>(&obj);
 
-    const ImmediateConstantMask prefixBits =
-        (1u << (offset / kImmediateConstantElementByteSize)) - 1u;
+    const ImmediateMask prefixBits = (1u << (offset / kImmediateElementByteSize)) - 1u;
 
-    return (prefixBits & pipelineImmediateMask).count() * kImmediateConstantElementByteSize;
+    return (prefixBits & pipelineImmediateMask).count() * kImmediateElementByteSize;
 }
 
 template <typename Object, typename Member>
-bool HasImmediateConstants(Member Object::* ptr,
-                           const ImmediateConstantMask& pipelineImmediateMask) {
+bool HasImmediates(Member Object::* ptr, const ImmediateMask& pipelineImmediateMask) {
     Object obj = {};
     ptrdiff_t offset = reinterpret_cast<char*>(&(obj.*ptr)) - reinterpret_cast<char*>(&obj);
     size_t size = sizeof(Member);
 
-    return pipelineImmediateMask.to_ulong() &
-           GetImmediateConstantBlockBits(offset, size).to_ulong();
+    return pipelineImmediateMask.to_ulong() & GetImmediateBlockBits(offset, size).to_ulong();
 }
 
 template <typename Object, typename Member>
 std::optional<uint32_t> GetImmediateByteOffsetInPipelineIfAny(
     Member Object::* ptr,
-    const ImmediateConstantMask& pipelineImmediateMask) {
-    if (!HasImmediateConstants(ptr, pipelineImmediateMask)) {
+    const ImmediateMask& pipelineImmediateMask) {
+    if (!HasImmediates(ptr, pipelineImmediateMask)) {
         return std::nullopt;
     }
 
@@ -128,8 +104,8 @@ std::optional<uint32_t> GetImmediateByteOffsetInPipelineIfAny(
 }
 
 uint32_t GetImmediateIndexInPipeline(const uint32_t layoutOffset,
-                                     const ImmediateConstantMask& pipelineImmediateMask);
+                                     const ImmediateMask& pipelineImmediateMask);
 
 }  // namespace dawn::native
 
-#endif  // SRC_DAWN_NATIVE_IMMEDIATECONSTANTSLAYOUT_H_
+#endif  // SRC_DAWN_NATIVE_IMMEDIATESLAYOUT_H_

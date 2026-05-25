@@ -130,11 +130,10 @@ struct State {
                                                           /* attributes */ IOAttributes{}));
         }
 
-        auto* immediate_constant_struct =
+        auto* immediate_struct =
             ty.Struct(ir.symbols.New("tint_immediate_data_struct"), std::move(members));
-        immediate_constant_struct->SetStructFlag(type::kBlock);
-        layout.var =
-            b.Var("tint_immediate_data", core::AddressSpace::kImmediate, immediate_constant_struct);
+        immediate_struct->SetStructFlag(type::kBlock);
+        layout.var = b.Var("tint_immediate_data", core::AddressSpace::kImmediate, immediate_struct);
         ir.root_block->Append(layout.var);
 
         // Update uses of the user defined immediate data variable.

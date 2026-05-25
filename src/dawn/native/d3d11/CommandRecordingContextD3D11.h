@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D11_COMMANDRECORDINGCONTEXT_D3D11_H_
 #define SRC_DAWN_NATIVE_D3D11_COMMANDRECORDINGCONTEXT_D3D11_H_
 
+#include <algorithm>
 #include <optional>
 #include <utility>
 
@@ -42,6 +43,7 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/d3d/KeyedMutex.h"
 #include "dawn/native/d3d/d3d_platform.h"
+#include "dawn/native/d3d11/ImmediatesLayoutD3D11.h"
 
 namespace dawn::native::d3d11 {
 
@@ -90,6 +92,8 @@ class CommandRecordingContext {
     bool IsValid() const;
 
     static ResultOrError<Ref<BufferBase>> CreateInternalUniformBuffer(DeviceBase* device);
+    static constexpr uint32_t kMaxImmediateSizeD3D11 =
+        std::max(sizeof(RenderImmediates), sizeof(ComputeImmediates));
 
     void ReleaseKeyedMutexes();
 
@@ -112,7 +116,7 @@ class CommandRecordingContext {
 
     // The uniform buffer for built-in variables.
     Ref<GPUUsableBuffer> mUniformBuffer;
-    std::array<uint32_t, kMaxImmediateConstantsPerPipeline> mUniformBufferData{};
+    std::array<uint32_t, kMaxImmediateSizeD3D11> mUniformBufferData{};
     bool mUniformBufferDirty = true;
 
     absl::flat_hash_set<Ref<d3d::KeyedMutex>> mAcquiredKeyedMutexes;

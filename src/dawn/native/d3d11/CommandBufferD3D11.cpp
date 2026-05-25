@@ -41,7 +41,7 @@
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ExternalTexture.h"
-#include "dawn/native/ImmediateConstantsTracker.h"
+#include "dawn/native/ImmediatesTracker.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/d3d/D3DError.h"
@@ -51,6 +51,7 @@
 #include "dawn/native/d3d11/ComputePipelineD3D11.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/native/d3d11/Forward.h"
+#include "dawn/native/d3d11/ImmediatesLayoutD3D11.h"
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
 #include "dawn/native/d3d11/PipelineStateTrackerD3D11.h"
 #include "dawn/native/d3d11/QuerySetD3D11.h"
@@ -221,25 +222,51 @@ HandlePixelLocalStorageAndGetPixelLocalStorageUAVs(
     return pixelLocalStorageUAVs;
 }
 
-template <typename T>
-class ImmediateConstantTracker : public T {
+class RenderImmediatesTracker
+    : public UserImmediatesTrackerBase<RenderImmediates, RenderPipelineBase> {
   public:
-    ImmediateConstantTracker() = default;
+    RenderImmediatesTracker() = default;
+
+    void SetFirstIndexOffset(uint32_t firstVertex, uint32_t firstInstance) {
+        UpdateImmediates(offsetof(RenderImmediates, firstVertex), firstVertex);
+        UpdateImmediates(offsetof(RenderImmediates, firstInstance), firstInstance);
+    }
+};
+
+class ComputeImmediatesTracker
+    : public UserImmediatesTrackerBase<ComputeImmediates, ComputePipelineBase> {
+  public:
+    ComputeImmediatesTracker() = default;
+
+    void SetNumWorkgroups(uint32_t numWorkgroupX, uint32_t numWorkgroupY, uint32_t numWorkgroupZ) {
+        NumWorkgroupsDimensions numWorkgroupsDimensions;
+        numWorkgroupsDimensions.numWorkgroupsX = numWorkgroupX;
+        numWorkgroupsDimensions.numWorkgroupsY = numWorkgroupY;
+        numWorkgroupsDimensions.numWorkgroupsZ = numWorkgroupZ;
+
+        UpdateImmediates(offsetof(ComputeImmediates, numWorkgroups), numWorkgroupsDimensions);
+    }
+};
+
+template <typename T>
+class ImmediateTracker : public T {
+  public:
+    ImmediateTracker() = default;
 
     MaybeError Apply(const ScopedSwapStateCommandRecordingContext* commandContext) {
         DAWN_ASSERT(this->mLastPipeline != nullptr);
 
-        ImmediateConstantMask pipelineMask = this->mLastPipeline->GetImmediateMask();
-        ImmediateConstantMask uploadBits = this->mDirty & pipelineMask;
+        ImmediateMask pipelineMask = this->mLastPipeline->GetImmediateMask();
+        ImmediateMask uploadBits = this->mDirty & pipelineMask;
         for (auto&& [offset, size] : IterateRanges(uploadBits)) {
             uint32_t immediateContentStartOffset =
-                static_cast<uint32_t>(offset) * kImmediateConstantElementByteSize;
+                static_cast<uint32_t>(offset) * kImmediateElementByteSize;
             uint32_t immediateRangeStartOffset =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
             commandContext->WriteUniformBufferRange(
                 immediateRangeStartOffset,
                 this->mContent.template Get<uint32_t>(immediateContentStartOffset),
-                size * kImmediateConstantElementByteSize);
+                size * kImmediateElementByteSize);
         }
 
         // Reset all dirty bits after uploading.
@@ -249,10 +276,9 @@ class ImmediateConstantTracker : public T {
     }
 
     uint32_t GetFirstIndexContentStartOffset() {
-        uint32_t startIndex =
-            offsetof(RenderImmediateConstants, firstVertex) / kImmediateConstantElementByteSize;
-        ImmediateConstantMask prefixBits = ImmediateConstantMask((1u << startIndex) - 1u);
-        return (prefixBits & this->mDirty).count() * kImmediateConstantElementByteSize;
+        uint32_t startIndex = offsetof(RenderImmediates, firstVertex) / kImmediateElementByteSize;
+        ImmediateMask prefixBits = ImmediateMask((1u << startIndex) - 1u);
+        return (prefixBits & this->mDirty).count() * kImmediateElementByteSize;
     }
 };
 
@@ -538,7 +564,7 @@ MaybeError CommandBuffer::ExecuteComputePass(
     ComputePipeline* lastPipeline = nullptr;
     ComputePassBindGroupTracker bindGroupTracker(commandContext);
 
-    ImmediateConstantTracker<ComputeImmediateConstantsTrackerBase> immediates = {};
+    ImmediateTracker<ComputeImmediatesTracker> immediates = {};
 
     Command type;
     while (mCommands.NextCommandId(&type)) {
@@ -740,7 +766,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
     std::array<float, 4> blendColor = {0.0f, 0.0f, 0.0f, 0.0f};
     uint32_t stencilReference = 0;
 
-    ImmediateConstantTracker<RenderImmediateConstantsTrackerBase> immediates = {};
+    ImmediateTracker<RenderImmediatesTracker> immediates = {};
 
     auto DoRenderBundleCommand = [&](CommandIterator* iter, Command type) -> MaybeError {
         switch (type) {
