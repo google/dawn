@@ -283,7 +283,13 @@ MaybeError SwapChain::InitializeSwapChainFromScratch() {
 MaybeError SwapChain::PresentDXGISwapChain() {
     // Do the actual present. DXGI_STATUS_OCCLUDED is a valid return value that's just a
     // message to the application that it could stop rendering.
-    HRESULT presentResult = mDXGISwapChain->Present(PresentModeToSwapInterval(GetPresentMode()), 0);
+
+    UINT presentFlags =
+        (GetPresentMode() == wgpu::PresentMode::Immediate) ? DXGI_PRESENT_ALLOW_TEARING : 0;
+
+    HRESULT presentResult =
+        mDXGISwapChain->Present(PresentModeToSwapInterval(GetPresentMode()), presentFlags);
+
     if (presentResult != DXGI_STATUS_OCCLUDED) {
         DAWN_TRY(CheckHRESULT(presentResult, "IDXGISwapChain::Present"));
     }
