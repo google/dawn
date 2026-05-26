@@ -211,66 +211,11 @@ config("tint_unittests_config") {
   }
 }
 
-if (tint_build_unittests) {
-  # ###############################################################################
-  # Gtest Gmock - Handle building inside and outside of Chromium.
-  # ###############################################################################
-  # When building outside of Chromium we need to define our own targets for
-  # GTest and GMock. However when compiling inside of Chromium we need to reuse
-  # the existing targets, both because Chromium has a special harness for
-  # swarming
-  # and because otherwise the "gn check" fails.
-
-  if (build_with_chromium) {
-    # When we are in Chromium we reuse its targets, and also add some deps that
-    # are needed to launch the test in swarming mode.
-    group("gmock_and_gtest") {
-      testonly = true
-      public_deps = [
-        "//base",
-        "//base/test:test_support",
-        "//testing/gmock",
-        "//testing/gtest",
-        "//third_party/googletest:gmock",
-      ]
-    }
-  } else {
-    # When we aren't in Chromium we define out own targets based on the location
-    # of the googletest repo.
-    config("gtest_config") {
-      include_dirs = [
-        "${tint_googletest_dir}/googletest",
-        "${tint_googletest_dir}/googletest/include",
-      ]
-    }
-    static_library("gtest") {
-      testonly = true
-      sources = [ "${tint_googletest_dir}/googletest/src/gtest-all.cc" ]
-      public_configs = [ ":gtest_config" ]
-    }
-
-    config("gmock_config") {
-      include_dirs = [
-        "${tint_googletest_dir}/googlemock",
-        "${tint_googletest_dir}/googlemock/include",
-        "${tint_googletest_dir}/googletest/include",
-      ]
-    }
-
-    static_library("gmock") {
-      testonly = true
-      sources = [ "${tint_googletest_dir}/googlemock/src/gmock-all.cc" ]
-      public_configs = [ ":gmock_config" ]
-    }
-
-    group("gmock_and_gtest") {
-      testonly = true
-      public_deps = [
-        ":gmock",
-        ":gtest",
-      ]
-    }
-  }
+# The Tint build file code generation uses the ":gmock_and_gtest" target from
+# this file, proxy it to the common definition in //src/utils.
+group("gmock_and_gtest") {
+  testonly = true
+  public_deps = [ "${dawn_root}/src/utils:gmock_and_gtest" ]
 }
 
 action("generate_sources") {
