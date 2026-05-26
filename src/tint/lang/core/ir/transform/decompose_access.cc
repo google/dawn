@@ -596,6 +596,16 @@ struct State {
     }
 
     void Load(core::ir::Load* ld, core::ir::Var* var, OffsetData offset) {
+        // Skip unused array loads from workgroup phony assignments (e.g. `_ = workgroup_var;`).
+        // Only arrays generate expensive loop helpers. The var stays in root block scope to
+        // preserve groupshared/static declarations.
+        if (!ld->Result()->IsUsed() && ld->Result()->Type()->Is<core::type::Array>()) {
+            auto* var_ty = var->Result()->Type()->As<core::type::Pointer>();
+            if (var_ty && var_ty->AddressSpace() == AddressSpace::kWorkgroup) {
+                ld->Destroy();
+                return;
+            }
+        }
         b.InsertBefore(ld, [&] {
             auto* byte_idx = OffsetToValue(offset);
             auto* result = MakeLoad(ld, var, ld->Result()->Type(), byte_idx);
