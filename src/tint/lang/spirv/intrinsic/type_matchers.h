@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/spirv/type/literal.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 
