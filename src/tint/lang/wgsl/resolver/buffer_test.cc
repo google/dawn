@@ -355,7 +355,15 @@ TEST_F(ResolverBufferViewTest, Offset_Unsigned_TooSmall) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(error: the offset argument of bufferView plus the minimum size of the return type must be smaller than the buffer size)");
+        R"(error: the offset argument of bufferView plus the minimum size of the return type must be less than or equal to the buffer size)");
+}
+
+TEST_F(ResolverBufferViewTest, Offset_Unsigned_Equal) {
+    auto* gv = GlobalVar("v", storage, ty.buffer(16_a), Group(0_a), Binding(0_a));
+    Func("foo", Empty, ty.void_(),
+         Vector{Assign(Phony(), Call(Ident("bufferView", ty.u32()), AddressOf(gv), 12_u))});
+
+    EXPECT_TRUE(r()->Resolve());
 }
 
 TEST_F(ResolverBufferViewTest, Offset_Unsigned_Unaligned) {
@@ -377,7 +385,7 @@ TEST_F(ResolverBufferViewTest, Offset_Signed_TooSmall) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(error: the offset argument of bufferView plus the minimum size of the return type must be smaller than the buffer size)");
+        R"(error: the offset argument of bufferView plus the minimum size of the return type must be less than or equal to the buffer size)");
 }
 
 TEST_F(ResolverBufferViewTest, Offset_Signed_Unaligned) {
@@ -510,7 +518,7 @@ fn foo(p : ptr<storage, buffer<20>>, offset : u32) {
 }
 )",
         R"(
-input.wgsl:7:24 error: the offset argument of bufferView plus the minimum size of the return type must be smaller than the buffer size
+input.wgsl:7:24 error: the offset argument of bufferView plus the minimum size of the return type must be less than or equal to the buffer size
   _ = bufferView<S>(p, offset);
                        ^^^^^^
 )");
@@ -528,7 +536,7 @@ fn foo(p : ptr<storage, buffer<32>>) {
 }
 )",
         R"(
-input.wgsl:7:24 error: the offset argument of bufferView plus the minimum size of the return type must be smaller than the buffer size
+input.wgsl:7:24 error: the offset argument of bufferView plus the minimum size of the return type must be less than or equal to the buffer size
   _ = bufferView<S>(p, 16);
                        ^^
 )");

@@ -2228,10 +2228,11 @@ bool Validator::BufferView(const sem::Call* call) const {
                    "integer";
             return false;
         }
-        if (count != std::nullopt && offset_value + ret_min_size >= count.value()) {
+        if (count != std::nullopt && offset_value + ret_min_size > count.value()) {
             AddError(offset->Declaration()->source)
                 << "the offset argument of " << builtin->str()
-                << " plus the minimum size of the return type must be smaller than the buffer size";
+                << " plus the minimum size of the return type must be less than or equal to the "
+                   "buffer size";
             return false;
         }
 
