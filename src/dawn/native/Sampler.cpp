@@ -77,6 +77,17 @@ MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor
 
         DAWN_INVALID_IF(ycbcr->externalFormat == 0 && ycbcr->vkFormat == 0,
                         "Both VkFormat and VkExternalFormatANDROID are undefined.");
+
+        DAWN_INVALID_IF(descriptor->addressModeU != wgpu::AddressMode::ClampToEdge,
+                        "addressModeU must be ClampToEdge for YCbCr samplers.");
+        DAWN_INVALID_IF(descriptor->addressModeV != wgpu::AddressMode::ClampToEdge,
+                        "addressModeV must be ClampToEdge for YCbCr samplers.");
+        DAWN_INVALID_IF(descriptor->addressModeW != wgpu::AddressMode::ClampToEdge,
+                        "addressModeW must be ClampToEdge for YCbCr samplers.");
+
+        DAWN_INVALID_IF(descriptor->maxAnisotropy > 1,
+                        "maxAnisotropy (%d) must be 1 for YCbCr samplers.",
+                        descriptor->maxAnisotropy);
     }
 
     return {};

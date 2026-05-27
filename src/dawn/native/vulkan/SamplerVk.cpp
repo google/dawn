@@ -144,6 +144,13 @@ MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
         samplerYCbCrInfo.conversion = mSamplerYCbCrConversion;
 
         createInfo.pNext = &samplerYCbCrInfo;
+
+        // VUID-VkSamplerCreateInfo-addressModeU-01646 requires CLAMP_TO_EDGE on every axis and
+        // anisotropy disabled when VkSamplerYcbcrConversionInfo is provided.
+        createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        createInfo.anisotropyEnable = VK_FALSE;
     }
 
     DAWN_TRY(CheckVkSuccess(
