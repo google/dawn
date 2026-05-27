@@ -37,7 +37,6 @@ if (tint_build_unittests) {
   import("//testing/test.gni")
 }
 
-import("generated_sources.gni")
 import("tint.gni")
 
 ###############################################################################
@@ -216,17 +215,6 @@ config("tint_unittests_config") {
 group("gmock_and_gtest") {
   testonly = true
   public_deps = [ "${dawn_root}/src/utils:gmock_and_gtest" ]
-}
-
-action("generate_sources") {
-  script = "${dawn_root}/tools/run.py"
-  inputs = tint_generation_dependencies
-  outputs = tint_generated_sources
-  args = [
-    "gen",
-    "sources",
-    rebase_path(root_gen_dir),
-  ]
 }
 
 if (tint_build_benchmarks) {

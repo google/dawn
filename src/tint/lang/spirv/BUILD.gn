@@ -41,12 +41,11 @@ import("${tint_src_dir}/tint.gni")
 
 libtint_source_set("spirv") {
   sources = [
-    "${root_gen_dir}/src/tint/lang/spirv/builtin_fn.cc",
-    "${root_gen_dir}/src/tint/lang/spirv/builtin_fn.h",
+    "builtin_fn.cc",
+    "builtin_fn.h",
   ]
   deps = [
     "${dawn_root}/src/utils",
-    "${tint_src_dir}:generate_sources",
     "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/utils/containers",

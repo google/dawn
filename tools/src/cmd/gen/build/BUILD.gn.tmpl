@@ -33,7 +33,7 @@ if (tint_build_unittests || tint_build_benchmarks) {
 */ -}}
 {{- define "TargetIfNotEmpty"}}
 {{-   if $}}
-{{-     if or (len $.SourceFiles) (len $.GeneratedSourcePaths.List)}}{{Eval "Target" $}}{{end}}
+{{-     if len $.SourceFiles}}{{Eval "Target" $}}{{end}}
 {{-   end}}
 {{- end}}
 
@@ -83,18 +83,10 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
 {{- end}}
   sources = [
 {{- range $File := $.UnconditionalSourceFiles}}
-{{-   if not ($.IsGeneratedSource $File.Path)}}
     "{{TrimPrefix $File.Name $.Directory.Path}}",
-{{-   end}}
-{{- end}}
-{{- range $Path := $.GeneratedSourcePaths.List}}
-    "${root_gen_dir}/src/tint/{{$Path}}",
 {{- end}}
   ]
   deps = [
-{{- if and (not $.Kind.IsProto) $.GeneratedSourcePaths.List}}
-    "${tint_src_dir}:generate_sources",
-{{- end}}
 
 {{- /* Emit unconditional internal dependencies */}}
 {{- range $Dep := $.UnconditionalInternalDependencies}}
