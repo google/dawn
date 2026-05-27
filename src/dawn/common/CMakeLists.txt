@@ -94,7 +94,6 @@ set(private_headers
     "Time.h"
     "TypedInteger.h"
     "TypeTraits.h"
-    "UnderlyingType.h"
     "vulkan_platform.h"
     "WeakRef.h"
     "WeakRefSupport.h"

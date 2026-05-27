@@ -28,8 +28,8 @@
 #include <limits>
 
 #include "dawn/common/TypedInteger.h"
-#include "dawn/common/UnderlyingType.h"
 #include "gtest/gtest.h"
+#include "utils/underlying_type.h"
 
 namespace dawn {
 namespace {
@@ -365,8 +365,13 @@ TEST_F(TypedIntegerTest, NumericLimits) {
 }
 
 TEST_F(TypedIntegerTest, UnderlyingType) {
-    static_assert(std::is_same<UnderlyingType<Unsigned>, uint32_t>::value);
-    static_assert(std::is_same<UnderlyingType<Signed>, int32_t>::value);
+    static_assert(std::is_same_v<UnderlyingType<Unsigned>, uint32_t>);
+    static_assert(std::is_same_v<UnderlyingType<Signed>, int32_t>);
+}
+
+TEST_F(TypedIntegerTest, HasUnsignedUnderlyingType) {
+    static_assert(!HasUnsignedUnderlyingType<Signed>);
+    static_assert(HasUnsignedUnderlyingType<Unsigned>);
 }
 
 TEST_F(TypedIntegerTest, PlusOne) {

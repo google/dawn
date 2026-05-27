@@ -32,7 +32,7 @@
 
 #include "absl/container/inlined_vector.h"
 #include "dawn/common/Numeric.h"
-#include "dawn/common/UnderlyingType.h"
+#include "utils/underlying_type.h"
 
 namespace dawn::ityp {
 

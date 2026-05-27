@@ -37,7 +37,7 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/UnderlyingType.h"
+#include "utils/underlying_type.h"
 
 namespace dawn {
 

@@ -235,6 +235,9 @@ dawn_test("dawn_unittests") {
     "${dawn_root}/src/utils/chromium_test_compat",
   ]
 
+  # Add the unittests for src/utils in this binary.
+  deps += [ "${dawn_root}/src/utils:unittests" ]
+
   # Add internal dawn native config for internal unittests.
   configs = [ "${dawn_root}/src/dawn/native:internal" ]
 

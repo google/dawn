@@ -377,7 +377,6 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "Time.h",
       "TypeTraits.h",
       "TypedInteger.h",
-      "UnderlyingType.h",
       "WGSLFeatureMapping.h",
       "WeakRef.h",
       "WeakRefSupport.cpp",

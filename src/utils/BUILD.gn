@@ -42,9 +42,22 @@ static_library("utils") {
     "compiler.h",
     "numeric.h",
     "placeholder.cc",
+    "underlying_type.h",
   ]
 
   public_configs = [ ":internal_config" ]
+}
+
+# Included in dawn_unittests.
+source_set("unittests") {
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":utils",
+  ]
+
+  sources = [ "underlying_type_tests.cpp" ]
 }
 
 ###############################################################################
