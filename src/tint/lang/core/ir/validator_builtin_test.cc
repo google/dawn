@@ -1487,15 +1487,6 @@ TEST_F(IR_ValidatorTest, InputAttachmentIndex_NonEntryPoint_InvalidIOKind) {
         << res.Failure();
 }
 
-namespace {
-template <typename T>
-static const core::type::Type* TypeBuilder(core::type::Manager& m) {
-    return m.Get<T>();
-}
-
-using TypeBuilderFn = decltype(&TypeBuilder<i32>);
-}  // namespace
-
 using BitcastTypeTest = IRTestParamHelper<std::tuple<
     /* bitcast allowed */ bool,
     /* src type_builder */ TypeBuilderFn,

@@ -4555,8 +4555,9 @@ void Validator::CheckAccess(const Access* a) {
         };
 
         auto* index = a->Indices()[i];
-        if (DAWN_UNLIKELY(!index->Type() || !index->Type()->IsIntegerScalar())) {
-            err() << "index type " << NameOf(index->Type()) << " must be an integer";
+        if (DAWN_UNLIKELY(
+                (!index->Type() || !index->Type()->IsAnyOf<core::type::I32, core::type::U32>()))) {
+            err() << "index type " << NameOf(index->Type()) << " must be i32 or u32";
             return;
         }
 

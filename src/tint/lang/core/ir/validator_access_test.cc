@@ -1467,4 +1467,44 @@ TEST_F(IR_ValidatorTest, Swizzle_OOBIndex) {
 )")) << res.Failure();
 }
 
+using IR_ValidatorAccessIndexTypeTest = IRTestParamHelper<std::tuple<bool, TypeBuilderFn>>;
+
+TEST_P(IR_ValidatorAccessIndexTypeTest, IndexType) {
+    auto allowed = std::get<0>(GetParam());
+    auto* index_ty = std::get<1>(GetParam())(ty);
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.ptr<private_, array<f32, 4>>());
+    auto* idx = b.FunctionParam(index_ty);
+    f->SetParams({obj, idx});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.ptr<private_, f32>(), obj, idx);
+        b.Return(f);
+    });
+
+    Capabilities caps{Capability::kAllow8BitIntegers, Capability::kAllow16BitIntegers,
+                      Capability::kAllow64BitIntegers};
+
+    auto res = ir::Validate(mod, caps);
+    if (allowed) {
+        EXPECT_EQ(res, Success) << res.Failure();
+    } else {
+        EXPECT_NE(res, Success);
+        EXPECT_THAT(
+            res.Failure().reason,
+            testing::HasSubstr("index type '" + index_ty->FriendlyName() + "' must be i32 or u32"));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
+                         IR_ValidatorAccessIndexTypeTest,
+                         testing::Values(std::make_tuple(true, TypeBuilder<i32>),
+                                         std::make_tuple(true, TypeBuilder<u32>),
+                                         std::make_tuple(false, TypeBuilder<f32>),
+                                         std::make_tuple(false, TypeBuilder<u64>),
+                                         std::make_tuple(false, TypeBuilder<f16>),
+                                         std::make_tuple(false, TypeBuilder<i8>),
+                                         std::make_tuple(false, TypeBuilder<u8>)));
+
 }  // namespace tint::core::ir

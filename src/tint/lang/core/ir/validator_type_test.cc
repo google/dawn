@@ -75,20 +75,6 @@ namespace tint::core::ir {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-namespace {
-template <typename T>
-static const core::type::Type* TypeBuilder(core::type::Manager& m) {
-    return m.Get<T>();
-}
-
-template <typename T>
-static const core::type::Type* RefTypeBuilder(core::type::Manager& m) {
-    return m.ref<AddressSpace::kFunction, T>();
-}
-
-using TypeBuilderFn = decltype(&TypeBuilder<i32>);
-}  // namespace
-
 // Note: Just parameterizing abstract int vs float doesn't significantly reduce
 // the code size of these tests, and made the code less readable.
 //
