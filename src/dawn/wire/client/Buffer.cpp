@@ -81,7 +81,7 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
     WireResult ReadyHook(FutureID futureID,
                          WGPUMapAsyncStatus status,
                          WGPUStringView message,
-                         uint64_t readDataUpdateInfoLength = 0,
+                         size_t readDataUpdateInfoLength = 0,
                          const uint8_t* readDataUpdateInfo = nullptr) {
         if (status != WGPUMapAsyncStatus_Success) {
             mResponse.Use([&](auto response) {
@@ -112,15 +112,9 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
         }
         switch (*pending.type) {
             case MapRequestType::Read: {
-                if (readDataUpdateInfoLength > std::numeric_limits<size_t>::max()) {
-                    // This is the size of data deserialized from the command stream, which must be
-                    // CPU-addressable.
-                    return FailRequest("Invalid data size returned from the server.");
-                }
-
                 // Update user map data with server returned data
-                std::span<const uint8_t> readDataUpdateInfoSpan(
-                    readDataUpdateInfo, static_cast<size_t>(readDataUpdateInfoLength));
+                std::span<const uint8_t> readDataUpdateInfoSpan(readDataUpdateInfo,
+                                                                readDataUpdateInfoLength);
                 if (!mBuffer->mReadHandle->DeserializeDataUpdate(readDataUpdateInfoSpan,
                                                                  pending.offset)) {
                     return FailRequest("Failed to deserialize data returned from the server.");
@@ -424,7 +418,7 @@ WireResult Client::DoBufferMapAsyncCallback(ObjectHandle eventManager,
                                             WGPUFuture future,
                                             WGPUMapAsyncStatus status,
                                             WGPUStringView message,
-                                            uint64_t readDataUpdateInfoLength,
+                                            size_t readDataUpdateInfoLength,
                                             const uint8_t* readDataUpdateInfo) {
     return SetFutureReady<Buffer::MapAsyncEvent>(eventManager, future.id, status, message,
                                                  readDataUpdateInfoLength, readDataUpdateInfo);

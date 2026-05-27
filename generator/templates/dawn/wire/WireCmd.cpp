@@ -111,8 +111,10 @@
         {{out}} = nullptr;
     {%- elif type.name.get() == "size_t" -%}
         //* Deserializing into size_t requires check that the uint64_t used on the wire won't narrow.
-        if ({{in}} > std::numeric_limits<size_t>::max()) return WireResult::FatalError;
-            {{out}} = checked_cast<size_t>({{in}});
+        if ({{in}} > std::numeric_limits<size_t>::max()) {
+            return WireResult::FatalError;
+        }
+        {{out}} = checked_cast<size_t>({{in}});
     {%- else -%}
         static_assert(sizeof({{out}}) >= sizeof({{in}}), "Deserialize assignment may not narrow.");
             {{out}} = {{in}};

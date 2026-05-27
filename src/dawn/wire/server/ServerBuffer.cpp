@@ -82,8 +82,8 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
                                     ObjectHandle eventManager,
                                     WGPUFuture future,
                                     WGPUMapMode mode,
-                                    uint64_t offset64,
-                                    uint64_t size64) {
+                                    size_t offset,
+                                    size_t size) {
     // These requests are just forwarded to the buffer, with userdata containing what the
     // client will require in the return command.
     std::unique_ptr<MapUserdata> userdata = MakeUserdata<MapUserdata>();
@@ -93,24 +93,12 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
     userdata->future = future;
     userdata->mode = mode;
 
-    // Make sure that the deserialized offset and size are no larger than
-    // std::numeric_limits<size_t>::max() so that they are CPU-addressable, and size is not
-    // WGPU_WHOLE_MAP_SIZE, which is by definition std::numeric_limits<size_t>::max(). Since
-    // client does the default size computation, we should always have a valid actual size here
-    // in server. All other invalid actual size can be caught by dawn native side validation.
-    if (offset64 > std::numeric_limits<size_t>::max()) {
-        static constexpr WGPUStringView kOffsetOutOfRange = {"Buffer offset was out of range.", 31};
-        OnBufferMapAsyncCallback(userdata.get(), WGPUMapAsyncStatus_Error, kOffsetOutOfRange);
-        return WireResult::Success;
+    // Make sure that the size is not WGPU_WHOLE_MAP_SIZE because we want the client to give us an
+    // explicit size (so we don't have to handle the defaulting here). The client needs to track
+    // the size of the buffer and can do the default size computation.
+    if (size >= WGPU_WHOLE_MAP_SIZE) {
+        return WireResult::FatalError;
     }
-    if (size64 >= WGPU_WHOLE_MAP_SIZE) {
-        static constexpr WGPUStringView kSizeOutOfRange = {"Buffer size was out of range.", 29};
-        OnBufferMapAsyncCallback(userdata.get(), WGPUMapAsyncStatus_Error, kSizeOutOfRange);
-        return WireResult::Success;
-    }
-
-    size_t offset = static_cast<size_t>(offset64);
-    size_t size = static_cast<size_t>(size64);
 
     userdata->offset = offset;
     userdata->size = size;
@@ -126,9 +114,9 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
 WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
                                         const WGPUBufferDescriptor* descriptor,
                                         ObjectHandle bufferHandle,
-                                        uint64_t readHandleCreateInfoLength,
+                                        size_t readHandleCreateInfoLength,
                                         const uint8_t* readHandleCreateInfo,
-                                        uint64_t writeHandleCreateInfoLength,
+                                        size_t writeHandleCreateInfoLength,
                                         const uint8_t* writeHandleCreateInfo) {
     // Create and register the buffer object.
     Reserved<WGPUBuffer> buffer;
@@ -143,15 +131,6 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
     bool isWriteMode = ((descriptor->usage & WGPUBufferUsage_MapWrite) != 0u) ||
                        (descriptor->mappedAtCreation != 0u);
 
-    // This is the size of data deserialized from the command stream to create the read/write
-    // handle, which must be CPU-addressable.
-    if (readHandleCreateInfoLength > std::numeric_limits<size_t>::max() ||
-        writeHandleCreateInfoLength > std::numeric_limits<size_t>::max() ||
-        readHandleCreateInfoLength >
-            std::numeric_limits<size_t>::max() - writeHandleCreateInfoLength) {
-        return WireResult::FatalError;
-    }
-
     return buffer->mapState.Use([&](auto mapState) {
         if (isWriteMode) {
             if (buffer->handle == nullptr) {
@@ -165,8 +144,7 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
             MemoryTransferService::WriteHandle* writeHandle = nullptr;
             // Deserialize metadata produced from the client to create a companion server handle.
             if (!mMemoryTransferService->DeserializeWriteHandle(
-                    writeHandleCreateInfo, static_cast<size_t>(writeHandleCreateInfoLength),
-                    &writeHandle)) {
+                    writeHandleCreateInfo, writeHandleCreateInfoLength, &writeHandle)) {
                 return WireResult::FatalError;
             }
             DAWN_ASSERT(writeHandle != nullptr);
@@ -177,8 +155,7 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
             MemoryTransferService::ReadHandle* readHandle = nullptr;
             // Deserialize metadata produced from the client to create a companion server handle.
             if (!mMemoryTransferService->DeserializeReadHandle(
-                    readHandleCreateInfo, static_cast<size_t>(readHandleCreateInfoLength),
-                    &readHandle)) {
+                    readHandleCreateInfo, readHandleCreateInfoLength, &readHandle)) {
                 return WireResult::FatalError;
             }
             DAWN_ASSERT(readHandle != nullptr);
@@ -190,15 +167,10 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
 }
 
 WireResult Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
-                                            uint64_t writeDataUpdateInfoLength,
+                                            size_t writeDataUpdateInfoLength,
                                             const uint8_t* writeDataUpdateInfo,
-                                            uint64_t offset,
-                                            uint64_t size) {
-    if (writeDataUpdateInfoLength > std::numeric_limits<size_t>::max() ||
-        offset > std::numeric_limits<size_t>::max() || size > std::numeric_limits<size_t>::max()) {
-        return WireResult::FatalError;
-    }
-
+                                            size_t offset,
+                                            size_t size) {
     return buffer->mapState.Use([&](auto mapState) {
         uint8_t* mappedData =
             static_cast<uint8_t*>(mProcs->bufferGetMappedRange(buffer->handle, offset, size));
@@ -213,7 +185,7 @@ WireResult Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
             return WireResult::Success;
         }
 
-        std::span<uint8_t> mappedRange = {mappedData, static_cast<size_t>(size)};
+        std::span<uint8_t> mappedRange = {mappedData, size};
 
         // However it is easy to check for misuses of the wire protocol to UpdateMappedData without
         // a WriteHandle.
@@ -225,7 +197,7 @@ WireResult Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
         std::span<const uint8_t> writeDataUpdateInfoSpan(writeDataUpdateInfo,
                                                          writeDataUpdateInfoLength);
         if (!mapState->writeHandle->DeserializeDataUpdate(writeDataUpdateInfoSpan, mappedRange,
-                                                          static_cast<size_t>(offset))) {
+                                                          offset)) {
             return WireResult::FatalError;
         }
         return WireResult::Success;

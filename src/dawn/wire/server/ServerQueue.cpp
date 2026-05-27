@@ -63,33 +63,23 @@ WireResult Server::DoQueueWriteBuffer(Known<WGPUQueue> queue,
                                       Known<WGPUBuffer> buffer,
                                       uint64_t bufferOffset,
                                       const uint8_t* data,
-                                      uint64_t size) {
-    if (size > std::numeric_limits<size_t>::max()) {
-        return WireResult::FatalError;
-    }
-
-    mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, data,
-                             static_cast<size_t>(size));
+                                      size_t size) {
+    mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, data, size);
     return WireResult::Success;
 }
 
 WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
                                         Known<WGPUBuffer> buffer,
                                         uint64_t bufferOffset,
-                                        uint64_t size,
-                                        uint64_t writeHandleCreateInfoLength,
+                                        size_t size,
+                                        size_t writeHandleCreateInfoLength,
                                         const uint8_t* writeHandleCreateInfo,
-                                        uint64_t writeDataUpdateInfoLength,
+                                        size_t writeDataUpdateInfoLength,
                                         const uint8_t* writeDataUpdateInfo) {
-    if (size > std::numeric_limits<size_t>::max()) {
-        return WireResult::FatalError;
-    }
-
-    MemoryTransferService::WriteHandle* writeHandlePtr = nullptr;
     // Deserialize metadata produced from the client to create a companion server handle.
+    MemoryTransferService::WriteHandle* writeHandlePtr = nullptr;
     if (!mMemoryTransferService->DeserializeWriteHandle(
-            writeHandleCreateInfo, static_cast<size_t>(writeHandleCreateInfoLength),
-            &writeHandlePtr)) {
+            writeHandleCreateInfo, writeHandleCreateInfoLength, &writeHandlePtr)) {
         return WireResult::FatalError;
     }
 
@@ -104,8 +94,7 @@ WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
             return WireResult::FatalError;
         }
 
-        mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, source.data(),
-                                 static_cast<size_t>(size));
+        mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, source.data(), size);
         return WireResult::Success;
     }
 
@@ -124,44 +113,33 @@ WireResult Server::DoQueueWriteBufferXl(Known<WGPUQueue> queue,
         return WireResult::FatalError;
     }
 
-    mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, backingData.get(),
-                             static_cast<size_t>(size));
+    mProcs->queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, backingData.get(), size);
     return WireResult::Success;
 }
 
 WireResult Server::DoQueueWriteTexture(Known<WGPUQueue> queue,
                                        const WGPUTexelCopyTextureInfo* destination,
                                        const uint8_t* data,
-                                       uint64_t dataSize,
+                                       size_t dataSize,
                                        const WGPUTexelCopyBufferLayout* dataLayout,
                                        const WGPUExtent3D* writeSize) {
-    if (dataSize > std::numeric_limits<size_t>::max()) {
-        return WireResult::FatalError;
-    }
-
-    mProcs->queueWriteTexture(queue->handle, destination, data, static_cast<size_t>(dataSize),
-                              dataLayout, writeSize);
+    mProcs->queueWriteTexture(queue->handle, destination, data, dataSize, dataLayout, writeSize);
     return WireResult::Success;
 }
 
 WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
                                          const WGPUTexelCopyTextureInfo* destination,
-                                         uint64_t dataSize,
+                                         size_t dataSize,
                                          const WGPUTexelCopyBufferLayout* dataLayout,
                                          const WGPUExtent3D* writeSize,
-                                         uint64_t writeHandleCreateInfoLength,
+                                         size_t writeHandleCreateInfoLength,
                                          const uint8_t* writeHandleCreateInfo,
-                                         uint64_t writeDataUpdateInfoLength,
+                                         size_t writeDataUpdateInfoLength,
                                          const uint8_t* writeDataUpdateInfo) {
-    if (dataSize > std::numeric_limits<size_t>::max()) {
-        return WireResult::FatalError;
-    }
-
-    MemoryTransferService::WriteHandle* writeHandlePtr = nullptr;
     // Deserialize metadata produced from the client to create a companion server handle.
+    MemoryTransferService::WriteHandle* writeHandlePtr = nullptr;
     if (!mMemoryTransferService->DeserializeWriteHandle(
-            writeHandleCreateInfo, static_cast<size_t>(writeHandleCreateInfoLength),
-            &writeHandlePtr)) {
+            writeHandleCreateInfo, writeHandleCreateInfoLength, &writeHandlePtr)) {
         return WireResult::FatalError;
     }
 
@@ -176,8 +154,8 @@ WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
             return WireResult::FatalError;
         }
 
-        mProcs->queueWriteTexture(queue->handle, destination, source.data(),
-                                  static_cast<size_t>(dataSize), dataLayout, writeSize);
+        mProcs->queueWriteTexture(queue->handle, destination, source.data(), dataSize, dataLayout,
+                                  writeSize);
         return WireResult::Success;
     }
 
@@ -196,8 +174,8 @@ WireResult Server::DoQueueWriteTextureXl(Known<WGPUQueue> queue,
         return WireResult::FatalError;
     }
 
-    mProcs->queueWriteTexture(queue->handle, destination, backingData.get(),
-                              static_cast<size_t>(dataSize), dataLayout, writeSize);
+    mProcs->queueWriteTexture(queue->handle, destination, backingData.get(), dataSize, dataLayout,
+                              writeSize);
     return WireResult::Success;
 }
 
