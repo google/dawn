@@ -116,6 +116,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     SingleShaderStage stage,
     const PipelineLayout* layout,
     uint32_t compileFlags,
+    bool applySampleMaskPolyfill,
     const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>&
         usedInterstageVariables) {
     Device* device = ToBackend(GetDevice());
@@ -345,6 +346,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         device->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
     req.hlsl.tintOptions.extensions.polyfill_pack_unpack_4x8 =
         device->IsToggleEnabled(Toggle::D3D12PolyFillPackUnpack4x8);
+    req.hlsl.tintOptions.polyfill_sample_mask = applySampleMaskPolyfill;
 
     req.hlsl.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
     req.hlsl.adapterSupportedLimits = UnsafeUnserializedValue(

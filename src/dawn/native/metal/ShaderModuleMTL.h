@@ -69,7 +69,8 @@ class ShaderModule final : public ShaderModuleBase {
                               const ImmediateMask& pipelineImmediateMask,
                               MetalFunctionData* out,
                               uint32_t sampleMask = 0xFFFFFFFF,
-                              const RenderPipeline* renderPipeline = nullptr);
+                              const RenderPipeline* renderPipeline = nullptr,
+                              bool applySampleMaskPolyfill = false);
 
   private:
     ShaderModule(Device* device,

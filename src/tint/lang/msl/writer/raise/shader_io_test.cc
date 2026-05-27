@@ -1620,5 +1620,150 @@ TEST_F(MslWriter_ShaderIOTest, GlobalInvocationIndex_AddMissingBuiltins) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_ShaderIOTest, SampleMaskPolyfill) {
+    auto* sample_mask = b.FunctionParam("sample_mask", ty.u32());
+    sample_mask->SetBuiltin(core::BuiltinValue::kSampleMask);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetParams({sample_mask});
+
+    b.Append(ep->Block(), [&] {
+        b.Let("mask", sample_mask);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%sample_mask:u32 [@sample_mask]):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo_inner = func(%sample_mask:u32):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    ret
+  }
+}
+%foo = @fragment func(%sample_mask_1:u32 [@sample_mask], %sample_index:u32 [@sample_index]):void {  # %sample_mask_1: 'sample_mask'
+  $B2: {
+    %7:u32 = shl 1u, %sample_index
+    %8:u32 = and %sample_mask_1, %7
+    %9:void = call %foo_inner, %8
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.polyfill_sample_mask = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ShaderIOTest, SampleMaskPolyfill_WithExistingSampleIndex) {
+    auto* sample_mask = b.FunctionParam("sample_mask", ty.u32());
+    sample_mask->SetBuiltin(core::BuiltinValue::kSampleMask);
+
+    auto* sample_index = b.FunctionParam("sample_index", ty.u32());
+    sample_index->SetBuiltin(core::BuiltinValue::kSampleIndex);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetParams({sample_mask, sample_index});
+
+    b.Append(ep->Block(), [&] {
+        b.Let("mask", sample_mask);
+        b.Let("idx", sample_index);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%sample_mask:u32 [@sample_mask], %sample_index:u32 [@sample_index]):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    %idx:u32 = let %sample_index
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo_inner = func(%sample_mask:u32, %sample_index:u32):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    %idx:u32 = let %sample_index
+    ret
+  }
+}
+%foo = @fragment func(%sample_mask_1:u32 [@sample_mask], %sample_index_1:u32 [@sample_index]):void {  # %sample_mask_1: 'sample_mask', %sample_index_1: 'sample_index'
+  $B2: {
+    %9:u32 = shl 1u, %sample_index_1
+    %10:u32 = and %sample_mask_1, %9
+    %11:void = call %foo_inner, %10, %sample_index_1
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.polyfill_sample_mask = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ShaderIOTest, SampleMaskPolyfill_Disabled) {
+    auto* sample_mask = b.FunctionParam("sample_mask", ty.u32());
+    sample_mask->SetBuiltin(core::BuiltinValue::kSampleMask);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetParams({sample_mask});
+
+    b.Append(ep->Block(), [&] {
+        b.Let("mask", sample_mask);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%sample_mask:u32 [@sample_mask]):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo_inner = func(%sample_mask:u32):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    ret
+  }
+}
+%foo = @fragment func(%sample_mask_1:u32 [@sample_mask]):void {  # %sample_mask_1: 'sample_mask'
+  $B2: {
+    %6:void = call %foo_inner, %sample_mask_1
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.polyfill_sample_mask = false;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

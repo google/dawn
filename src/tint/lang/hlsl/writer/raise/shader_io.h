@@ -77,6 +77,9 @@ struct ShaderIOConfig {
 
     /// Offsets of num_workgroups push constant.
     std::optional<uint32_t> num_workgroups_start_offset = std::nullopt;
+
+    /// Set to `true` to generate polyfill for `sample_mask` builtin
+    bool polyfill_sample_mask = false;
 };
 
 /// ShaderIO is a transform that prepares entry point inputs and outputs for HLSL codegen.

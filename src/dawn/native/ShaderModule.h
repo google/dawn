@@ -314,6 +314,7 @@ using OverridesMap = absl::flat_hash_map<std::string, Override>;
     X(bool, usesInstanceIndex)                                                                    \
     X(bool, usesNumWorkgroups)                                                                    \
     X(bool, usesSampleMaskOutput)                                                                 \
+    X(bool, usesSampleMaskInput)                                                                  \
     X(bool, usesSampleIndex)                                                                      \
     X(bool, usesVertexIndex)                                                                      \
     X(bool, usesGlobalInvocationIndex)                                                            \

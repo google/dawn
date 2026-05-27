@@ -82,10 +82,11 @@ ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
     }
 
     d3d::CompiledShader compiledShader;
-    DAWN_TRY_ASSIGN(compiledShader,
-                    ToBackend(programmableStage.module)
-                        ->Compile(programmableStage, SingleShaderStage::Compute,
-                                  ToBackend(GetLayout()), compileFlags, GetImmediateMask()));
+    const bool kApplySampleMaskPolyfill = false;
+    DAWN_TRY_ASSIGN(compiledShader, ToBackend(programmableStage.module)
+                                        ->Compile(programmableStage, SingleShaderStage::Compute,
+                                                  ToBackend(GetLayout()), compileFlags,
+                                                  GetImmediateMask(), kApplySampleMaskPolyfill));
     {
         TRACE_EVENT0(device->GetPlatform(), General, "ComputePipelineD3D11::CreateComputeShader");
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreateComputeShaderUs");

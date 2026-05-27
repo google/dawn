@@ -199,6 +199,10 @@ crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:
 crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="uniformRTArray" [ Skip ]
 crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="workgroupRTArray" [ Skip ]
 crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="privateRTArray" [ Skip ]
+# Must skip on HLSL backends while we change behavior of CTS
+crbug.com/407144390 [ win ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
+# And Must skip on MSL backends while we change behavior of CTS
+crbug.com/407144390 [ mac ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
 
 # SharedImage interop failures on Linux
 # Skipped instead of just Crash because of the number of failures

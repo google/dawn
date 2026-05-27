@@ -62,6 +62,7 @@ struct FuzzedOptions {
     SubstituteOverridesConfig substitute_overrides_config;
     bool polyfill_tanh_f16;
     bool replace_workgroup_bool_with_u32;
+    bool polyfill_sample_mask;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
@@ -83,7 +84,8 @@ struct FuzzedOptions {
                  group_to_argument_buffer_info,
                  substitute_overrides_config,
                  polyfill_tanh_f16,
-                 replace_workgroup_bool_with_u32);
+                 replace_workgroup_bool_with_u32,
+                 polyfill_sample_mask);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
 };
 
@@ -131,6 +133,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.workarounds.polyfill_tanh_f16 = fuzzed_options.polyfill_tanh_f16;
     options.workarounds.replace_workgroup_bool_with_u32 =
         fuzzed_options.replace_workgroup_bool_with_u32;
+    options.polyfill_sample_mask = fuzzed_options.polyfill_sample_mask;
     options.fixed_sample_mask = fuzzed_options.fixed_sample_mask;
     options.pixel_local_attachments = fuzzed_options.pixel_local_attachments;
     options.vertex_pulling_config = fuzzed_options.vertex_pulling_config;

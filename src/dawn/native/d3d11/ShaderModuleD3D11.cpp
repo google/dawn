@@ -73,6 +73,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     const PipelineLayout* layout,
     uint32_t compileFlags,
     const ImmediateMask& pipelineImmediateMask,
+    bool applySampleMaskPolyfill,
     const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>& usedInterstageVariables,
     const std::optional<tint::hlsl::writer::PixelLocalOptions>& pixelLocalOptions) {
     Device* device = ToBackend(GetDevice());
@@ -136,6 +137,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.disable_integer_range_analysis =
         !device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
+    req.hlsl.tintOptions.polyfill_sample_mask = applySampleMaskPolyfill;
     req.hlsl.tintOptions.immediate_binding_point =
         tint::BindingPoint{0, PipelineLayout::kReservedConstantBufferSlot};
     if (stage == SingleShaderStage::Compute) {

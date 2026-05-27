@@ -4746,6 +4746,60 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterTransformTest, SampleMaskPolyfill) {
+    auto* sample_mask = b.FunctionParam("sample_mask", ty.u32());
+    sample_mask->SetBuiltin(core::BuiltinValue::kSampleMask);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetParams({sample_mask});
+
+    b.Append(ep->Block(), [&] {
+        b.Let("mask", sample_mask);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%sample_mask:u32 [@sample_mask]):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(4) {
+  sample_index:u32 @offset(0), @builtin(sample_index)
+  sample_mask:u32 @offset(4), @builtin(sample_mask)
+}
+
+%foo_inner = func(%sample_mask:u32):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    ret
+  }
+}
+%foo = @fragment func(%inputs:foo_inputs):void {
+  $B2: {
+    %6:u32 = access %inputs, 1u
+    %7:u32 = access %inputs, 0u
+    %8:u32 = shl 1u, %7
+    %9:u32 = and %6, %8
+    %10:void = call %foo_inner, %9
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data_2;
+    ShaderIOConfig config_2{immediate_data_2};
+    config_2.polyfill_sample_mask = true;
+    Run(ShaderIO, config_2);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriterTransformTest, ShaderIOParameters_WorkgroupIndex_AddMissingBuiltins) {
     auto* workgroup_index = b.FunctionParam("wgindex", ty.u32());
     workgroup_index->SetBuiltin(core::BuiltinValue::kWorkgroupIndex);
@@ -4943,6 +4997,175 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, SampleMaskPolyfill_WithExistingSampleIndex) {
+    auto* sample_mask = b.FunctionParam("sample_mask", ty.u32());
+    sample_mask->SetBuiltin(core::BuiltinValue::kSampleMask);
+
+    auto* sample_index = b.FunctionParam("sample_index", ty.u32());
+    sample_index->SetBuiltin(core::BuiltinValue::kSampleIndex);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetParams({sample_mask, sample_index});
+
+    b.Append(ep->Block(), [&] {
+        b.Let("mask", sample_mask);
+        b.Let("idx", sample_index);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%sample_mask:u32 [@sample_mask], %sample_index:u32 [@sample_index]):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    %idx:u32 = let %sample_index
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(4) {
+  sample_index:u32 @offset(0), @builtin(sample_index)
+  sample_mask:u32 @offset(4), @builtin(sample_mask)
+}
+
+%foo_inner = func(%sample_mask:u32, %sample_index:u32):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    %idx:u32 = let %sample_index
+    ret
+  }
+}
+%foo = @fragment func(%inputs:foo_inputs):void {
+  $B2: {
+    %8:u32 = access %inputs, 1u
+    %9:u32 = access %inputs, 0u
+    %10:u32 = shl 1u, %9
+    %11:u32 = and %8, %10
+    %12:u32 = access %inputs, 0u
+    %13:void = call %foo_inner, %11, %12
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.polyfill_sample_mask = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, SampleMaskPolyfill_Disabled) {
+    auto* sample_mask = b.FunctionParam("sample_mask", ty.u32());
+    sample_mask->SetBuiltin(core::BuiltinValue::kSampleMask);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetParams({sample_mask});
+
+    b.Append(ep->Block(), [&] {
+        b.Let("mask", sample_mask);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%sample_mask:u32 [@sample_mask]):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(4) {
+  sample_mask:u32 @offset(0), @builtin(sample_mask)
+}
+
+%foo_inner = func(%sample_mask:u32):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    ret
+  }
+}
+%foo = @fragment func(%inputs:foo_inputs):void {
+  $B2: {
+    %6:u32 = access %inputs, 0u
+    %7:void = call %foo_inner, %6
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.polyfill_sample_mask = false;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, SampleMaskPolyfill_Disabled_WithExistingSampleIndex) {
+    auto* sample_mask = b.FunctionParam("sample_mask", ty.u32());
+    sample_mask->SetBuiltin(core::BuiltinValue::kSampleMask);
+
+    auto* sample_index = b.FunctionParam("sample_index", ty.u32());
+    sample_index->SetBuiltin(core::BuiltinValue::kSampleIndex);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetParams({sample_mask, sample_index});
+
+    b.Append(ep->Block(), [&] {
+        b.Let("mask", sample_mask);
+        b.Let("idx", sample_index);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%sample_mask:u32 [@sample_mask], %sample_index:u32 [@sample_index]):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    %idx:u32 = let %sample_index
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(4) {
+  sample_index:u32 @offset(0), @builtin(sample_index)
+  sample_mask:u32 @offset(4), @builtin(sample_mask)
+}
+
+%foo_inner = func(%sample_mask:u32, %sample_index:u32):void {
+  $B1: {
+    %mask:u32 = let %sample_mask
+    %idx:u32 = let %sample_index
+    ret
+  }
+}
+%foo = @fragment func(%inputs:foo_inputs):void {
+  $B2: {
+    %8:u32 = access %inputs, 1u
+    %9:u32 = access %inputs, 0u
+    %10:void = call %foo_inner, %8, %9
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.polyfill_sample_mask = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());

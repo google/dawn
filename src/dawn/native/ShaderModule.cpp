@@ -1008,6 +1008,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
         // Other fragment metadata
         metadata->usesSampleMaskOutput = entryPoint.output_sample_mask_used;
+        metadata->usesSampleMaskInput = entryPoint.input_sample_mask_used;
         metadata->usesSampleIndex = entryPoint.sample_index_used;
 
         struct BoolName {

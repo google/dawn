@@ -61,6 +61,7 @@ class ShaderModule final : public ShaderModuleBase {
         const PipelineLayout* layout,
         uint32_t compileFlags,
         const ImmediateMask& pipelineImmediateMask,
+        bool applySampleMaskPolyfill,
         const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>&
             usedInterstageVariables = {},
         const std::optional<tint::hlsl::writer::PixelLocalOptions>& pixelLocalOptions = {});
