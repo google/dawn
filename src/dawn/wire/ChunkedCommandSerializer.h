@@ -135,10 +135,8 @@ class ChunkedCommandSerializer {
             return;
         }
 
-        auto cmdSpace = std::unique_ptr<char[]>(AllocNoThrow<char>(requiredSize));
-        if (!cmdSpace) {
-            return;
-        }
+        auto cmdSpace = std::unique_ptr<char[]>(new char[requiredSize]);
+
         SerializeBuffer serializeBuffer(cmdSpace.get(), requiredSize);
         WireResult rCmd = SerializeCmd(cmd, requiredSize, &serializeBuffer);
         WireResult rExts = detail::SerializeCommandExtension(&serializeBuffer, extensions...);

@@ -274,7 +274,7 @@ class CommandAllocator : public NonCopyable {
         return Allocate(detail::kAdditionalData, commandSize, commandAlignment);
     }
 
-    bool GetNewBlock(size_t minimumSize);
+    void AppendNewBlock(size_t minimumSize);
 
     void ResetPointers();
 
@@ -282,7 +282,7 @@ class CommandAllocator : public NonCopyable {
     size_t mLastAllocationSize = kDefaultBaseAllocationSize;
 
     // Data used for the block range at initialization so that the first call to Allocate sees
-    // there is not enough space and calls GetNewBlock. This avoids having to special case the
+    // there is not enough space and calls AppendNewBlock. This avoids having to special case the
     // initialization in Allocate.
     uint32_t mPlaceholderSpace[1] = {0};
 
