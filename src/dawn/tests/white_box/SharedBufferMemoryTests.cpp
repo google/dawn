@@ -237,6 +237,27 @@ TEST_P(SharedBufferMemoryTests, UniformUsageValidation) {
     ASSERT_DEVICE_ERROR_MSG(memory.CreateBuffer(&bufferDesc), HasSubstr("Uniform"));
 }
 
+// Test that it is an error to call BeginAccess with fenceCount != signaledValueCount
+TEST_P(SharedBufferMemoryTests, FenceCountMatchesSignaledValueCount) {
+    wgpu::SharedBufferMemory memory =
+        GetParam().mBackend->CreateSharedBufferMemory(device, kMapWriteUsages, kBufferSize);
+    wgpu::Buffer buffer = memory.CreateBuffer();
+
+    uint64_t signalValue = 0;
+    wgpu::SharedBufferMemoryBeginAccessDescriptor beginDesc = {};
+    beginDesc.initialized = true;
+    beginDesc.fenceCount = 0;
+
+    // Error case, fenceCount != signaledValueCount
+    beginDesc.signaledValueCount = 1;
+    beginDesc.signaledValues = &signalValue;
+    ASSERT_DEVICE_ERROR(EXPECT_FALSE(memory.BeginAccess(buffer, &beginDesc)));
+
+    // Success case, fenceCount == signaledValueCount
+    beginDesc.signaledValueCount = 0;
+    EXPECT_TRUE(memory.BeginAccess(buffer, &beginDesc));
+}
+
 // Ensure that EndAccess cannot be called on a mapped or pending mapped buffer.
 TEST_P(SharedBufferMemoryTests, CallEndAccessOnMappedBuffer) {
     wgpu::SharedBufferMemory memory =

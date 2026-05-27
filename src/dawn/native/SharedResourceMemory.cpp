@@ -122,6 +122,12 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
     UnpackedPtr<BeginAccessDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
 
+    // TODO(https://crbug.com/515272361): Introduce a wgpu::SharedFenceAndSignalValue struct instead
+    // of having two arrays that need to have the same size.
+    DAWN_INVALID_IF(descriptor->fenceCount != descriptor->signaledValueCount,
+                    "fenceCount (%i) doesn't match signaledValueCount (%i).",
+                    descriptor->fenceCount, descriptor->signaledValueCount);
+
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
         DAWN_UNSAFE_TODO(DAWN_TRY(GetDevice()->ValidateObject(descriptor->fences[i])));
     }

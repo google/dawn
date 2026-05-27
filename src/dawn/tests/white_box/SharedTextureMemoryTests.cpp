@@ -1288,6 +1288,29 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccess) {
                             HasSubstr("is already used to access"));
 }
 
+// Test that it is an error to call BeginAccess with fenceCount != signaledValueCount
+TEST_P(SharedTextureMemoryTests, FenceCountMatchesSignaledValueCount) {
+    wgpu::SharedTextureMemory memory =
+        GetParam().mBackend->CreateSharedTextureMemory(device, GetParam().mLayerCount);
+    wgpu::Texture texture = memory.CreateTexture();
+
+    uint64_t signalValue = 0;
+    wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+    beginDesc.concurrentRead = false;
+    beginDesc.initialized = true;
+    beginDesc.fenceCount = 0;
+    auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+
+    // Error case, fenceCount != signaledValueCount
+    beginDesc.signaledValueCount = 1;
+    beginDesc.signaledValues = &signalValue;
+    ASSERT_DEVICE_ERROR(EXPECT_FALSE(memory.BeginAccess(texture, &beginDesc)));
+
+    // Success case, fenceCount == signaledValueCount
+    beginDesc.signaledValueCount = 0;
+    EXPECT_TRUE(memory.BeginAccess(texture, &beginDesc));
+}
+
 // Test that it is an error to call BeginAccess concurrently on a write texture
 // followed by a read texture on a single SharedTextureMemory.
 TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesWriteRead) {
