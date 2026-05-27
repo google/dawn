@@ -28,7 +28,6 @@
 #include "dawn/native/metal/DeviceMTL.h"
 
 #include "dawn/common/GPUInfo.h"
-#include "dawn/common/Platform.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BackendConnection.h"
 #include "dawn/native/ChainUtils.h"
@@ -55,6 +54,7 @@
 #include "dawn/native/metal/UtilsMetal.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
+#include "utils/platform.h"
 
 namespace dawn::native::metal {
 

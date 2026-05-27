@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_COMMON_PLATFORM_H_
-#define SRC_DAWN_COMMON_PLATFORM_H_
+#ifndef SRC_UTILS_PLATFORM_H_
+#define SRC_UTILS_PLATFORM_H_
 
 // Use #if DAWN_PLATFORM_IS(X) for platform specific code.
 // Do not use #ifdef or the naked macro DAWN_PLATFORM_IS_X.
@@ -320,4 +320,4 @@ static_assert(sizeof(sizeof(char)) == 4, "Expect sizeof(size_t) == 4");
 #define DAWN_PLATFORM_IS_32_BIT 0
 #endif
 
-#endif  // SRC_DAWN_COMMON_PLATFORM_H_
+#endif  // SRC_UTILS_PLATFORM_H_

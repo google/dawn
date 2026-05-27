@@ -31,8 +31,8 @@
 #include <string>
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/Platform.h"
 #include "src/utils/compiler.h"
+#include "utils/platform.h"
 
 #if DAWN_PLATFORM_IS(ANDROID)
 #include <android/log.h>

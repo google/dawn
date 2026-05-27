@@ -33,7 +33,7 @@
 #include <type_traits>
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/Platform.h"
+#include "utils/platform.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
 #include "partition_alloc/pointers/raw_ptr.h"

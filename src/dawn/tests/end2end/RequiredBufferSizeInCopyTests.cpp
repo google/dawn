@@ -27,10 +27,10 @@
 
 #include <vector>
 
-#include "dawn/common/Platform.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "utils/platform.h"
 
 namespace dawn {
 namespace {

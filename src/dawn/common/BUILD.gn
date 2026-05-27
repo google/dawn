@@ -349,7 +349,6 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "NonMovable.h",
       "Numeric.h",
       "PlacementAllocated.h",
-      "Platform.h",
       "Preprocessor.h",
       "Range.h",
       "Ref.h",

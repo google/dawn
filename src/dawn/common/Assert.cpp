@@ -30,7 +30,7 @@
 #include <cstdlib>
 
 #include "dawn/common/Log.h"
-#include "dawn/common/Platform.h"
+#include "utils/platform.h"
 
 #if DAWN_COMPILER_IS(MSVC)
 extern void __cdecl __debugbreak(void);

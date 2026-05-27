@@ -42,6 +42,7 @@ static_library("utils") {
     "compiler.h",
     "numeric.h",
     "placeholder.cc",
+    "platform.h",
     "underlying_type.h",
   ]
 

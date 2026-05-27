@@ -33,7 +33,7 @@
 #include <utility>
 
 #include "dawn/common/NonCopyable.h"
-#include "dawn/common/Platform.h"
+#include "utils/platform.h"
 
 namespace dawn::utils {
 

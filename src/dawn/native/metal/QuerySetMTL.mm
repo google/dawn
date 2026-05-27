@@ -28,9 +28,9 @@
 #include "dawn/native/metal/QuerySetMTL.h"
 
 #include "dawn/common/Math.h"
-#include "dawn/common/Platform.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
+#include "utils/platform.h"
 
 namespace dawn::native::metal {
 

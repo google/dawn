@@ -29,10 +29,10 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/common/Platform.h"
 #include "dawn/tests/MockCallback.h"
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "gmock/gmock.h"
+#include "utils/platform.h"
 
 using testing::_;
 using testing::HasSubstr;

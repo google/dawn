@@ -38,12 +38,12 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
-#include "dawn/common/Platform.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/utils/CommandLineParser.h"
 #include "dawn/utils/SystemUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "dawn/webgpu_cpp_print.h"
+#include "utils/platform.h"
 
 #ifndef __EMSCRIPTEN__
 #include "GLFW/glfw3.h"

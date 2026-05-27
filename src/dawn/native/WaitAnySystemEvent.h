@@ -31,8 +31,8 @@
 #include <limits>
 #include <utility>
 
-#include "dawn/common/Platform.h"
 #include "src/utils/compiler.h"
+#include "utils/platform.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
 #include "dawn/common/windows_with_undefs.h"

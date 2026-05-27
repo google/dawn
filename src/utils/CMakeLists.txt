@@ -28,6 +28,7 @@
 set(private_headers
     "compiler.h"
     "numeric.h"
+    "platform.h"
     "underlying_type.h"
 )
 

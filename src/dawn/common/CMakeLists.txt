@@ -73,7 +73,6 @@ set(private_headers
     "NSRef.h"
     "Numeric.h"
     "PlacementAllocated.h"
-    "Platform.h"
     "Preprocessor.h"
     "Range.h"
     "Ref.h"

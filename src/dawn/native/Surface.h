@@ -31,12 +31,12 @@
 #include <memory>
 #include <string>
 
-#include "dawn/common/Platform.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/dawn_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "utils/platform.h"
 
 #if defined(DAWN_USE_WINDOWS_UI)
 #include "dawn/native/d3d/d3d_platform.h"

@@ -29,11 +29,11 @@
 #include <memory>
 
 #include "dawn/common/Log.h"
-#include "dawn/common/Platform.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/tests/DawnTest.h"
 #include "gtest/gtest.h"
+#include "utils/platform.h"
 #include "webgpu/webgpu_glfw.h"
 
 // Include windows.h before GLFW so GLFW's APIENTRY macro doesn't conflict with windows.h's.

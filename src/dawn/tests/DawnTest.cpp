@@ -61,7 +61,6 @@
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/Math.h"
-#include "dawn/common/Platform.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
@@ -78,6 +77,7 @@
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "utils/platform.h"
 
 #ifdef DAWN_SUPPORTS_GLFW_FOR_WINDOWING
 #include "GLFW/glfw3.h"

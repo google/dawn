@@ -27,9 +27,9 @@
 
 #include "dawn/native/metal/SharedFenceMTL.h"
 
-#include "dawn/common/Platform.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/metal/DeviceMTL.h"
+#include "utils/platform.h"
 
 namespace dawn::native::metal {
 

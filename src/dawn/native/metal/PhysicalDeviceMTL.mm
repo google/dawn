@@ -31,7 +31,6 @@
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/NSRef.h"
-#include "dawn/common/Platform.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Instance.h"
@@ -41,6 +40,7 @@
 #include "dawn/native/metal/UtilsMetal.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "src/utils/compiler.h"
+#include "utils/platform.h"
 
 #if DAWN_PLATFORM_IS(MACOS)
 #import <IOKit/IOKitLib.h>

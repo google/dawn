@@ -33,10 +33,10 @@
 
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/NonCopyable.h"
-#include "dawn/common/Platform.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/Time.h"
 #include "dawn/utils/SystemHandle.h"
+#include "utils/platform.h"
 
 namespace dawn::native {
 

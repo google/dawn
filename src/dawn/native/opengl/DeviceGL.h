@@ -35,7 +35,6 @@
 #include <vector>
 
 #include "dawn/common/MutexProtected.h"
-#include "dawn/common/Platform.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ExecutionQueue.h"
 #include "dawn/native/QuerySet.h"
@@ -46,6 +45,7 @@
 #include "dawn/native/opengl/GLFormat.h"
 #include "dawn/native/opengl/OpenGLFunctions.h"
 #include "src/utils/compiler.h"
+#include "utils/platform.h"
 
 namespace dawn::native {
 class AHBFunctions;
