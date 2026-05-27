@@ -13,6 +13,7 @@
 /buildtools
 /testing
 /third_party/abseil-cpp/
+/third_party/agility-sdk/src
 /third_party/angle
 /third_party/binutils
 /third_party/catapult

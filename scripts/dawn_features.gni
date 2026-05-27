@@ -65,6 +65,9 @@ declare_args() {
 
   # Whether to build Dawn's NodeJS bindings
   dawn_build_node_bindings = false
+
+  # Whether Dawn uses the Agility SDK.
+  dawn_use_agility_sdk = false
 }
 
 declare_args() {

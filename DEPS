@@ -28,6 +28,7 @@ vars = {
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
   'dawn_go_version': 'version:2@1.21.3',
   'dawn_node_version': 'version:2@20.11.0',
+  'agility_sdk_version': 'version:2@1.720.0-preview',
 
   # GN variable required by //testing that will be output in the gclient_args.gni
   'generate_location_tags': False,
@@ -384,6 +385,17 @@ deps = {
     # The non-Windows build of DXC depends on DirectX-Headers, and at a specific commit (not ToT)
     'url': '{chromium_git}/external/github.com/microsoft/DirectX-Headers@980971e835876dc0cde415e8f9bc646e64667bf7',
     'condition': 'host_os != "win"',
+  },
+
+  'third_party/agility-sdk/src': {
+    'packages': [
+      {
+        'package': 'chromium/third_party/agility-sdk',
+        'version': Var('agility_sdk_version'),
+      },
+    ],
+    'condition': 'dawn_standalone and host_os == "win"',
+    'dep_type': 'cipd',
   },
 
   'third_party/OpenGL-Registry/src': {
