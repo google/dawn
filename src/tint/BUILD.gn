@@ -37,6 +37,7 @@ if (tint_build_unittests) {
   import("//testing/test.gni")
 }
 
+import("generated_sources.gni")
 import("tint.gni")
 
 ###############################################################################
@@ -215,6 +216,25 @@ config("tint_unittests_config") {
 group("gmock_and_gtest") {
   testonly = true
   public_deps = [ "${dawn_root}/src/utils:gmock_and_gtest" ]
+}
+
+# Source generation should only be performed using the host toolchain.
+if (current_toolchain == host_toolchain) {
+  action("generate_sources") {
+    script = "${dawn_root}/tools/run.py"
+    inputs = tint_generation_dependencies
+    outputs = tint_generated_sources
+    args = [
+      "gen",
+      "sources",
+      rebase_path(host_root_gen_dir, dawn_root),
+    ]
+  }
+} else {
+  # Forward the request to the host toolchain.
+  group("generate_sources") {
+    public_deps = [ ":generate_sources($host_toolchain)" ]
+  }
 }
 
 if (tint_build_benchmarks) {

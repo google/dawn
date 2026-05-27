@@ -41,11 +41,12 @@ import("${tint_src_dir}/tint.gni")
 
 libtint_source_set("hlsl") {
   sources = [
-    "builtin_fn.cc",
-    "builtin_fn.h",
+    "${host_root_gen_dir}/src/tint/lang/hlsl/builtin_fn.cc",
+    "${host_root_gen_dir}/src/tint/lang/hlsl/builtin_fn.h",
   ]
   deps = [
     "${dawn_root}/src/utils",
+    "${tint_src_dir}:generate_sources",
     "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/utils/containers",
