@@ -40,6 +40,7 @@ config("internal_config") {
 static_library("utils") {
   sources = [
     "compiler.h",
+    "force_crash.h",
     "numeric.h",
     "placeholder.cc",
     "platform.h",

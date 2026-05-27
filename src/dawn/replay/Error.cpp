@@ -29,6 +29,7 @@
 
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
+#include "utils/force_crash.h"
 
 namespace dawn::replay {
 
@@ -42,7 +43,7 @@ std::unique_ptr<ErrorData> ErrorData::Create(InternalErrorType type,
     auto [var, present] = GetEnvironmentVar("DAWN_DEBUG_BREAK_ON_ERROR");
     if (present && !var.empty() && var != "0") {
         ErrorLog() << error->GetMessage();
-        BreakPoint();
+        DAWN_FORCE_CRASH();
     }
     return error;
 }

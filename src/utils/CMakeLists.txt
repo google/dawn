@@ -27,6 +27,7 @@
 
 set(private_headers
     "compiler.h"
+    "force_crash.h"
     "numeric.h"
     "platform.h"
     "underlying_type.h"

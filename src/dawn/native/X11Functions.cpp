@@ -30,6 +30,7 @@
 #include <memory>
 
 #include "dawn/common/Log.h"
+#include "utils/force_crash.h"
 
 namespace dawn::native {
 
@@ -75,7 +76,7 @@ struct DebugX11 {
     static int HandleError(Display* d, XErrorEvent* e) {
         dawn::ErrorLog()
             << "An X11 error happened, triggering a breakpoint, the culprit will be in the stack.";
-        dawn::BreakPoint();
+        DAWN_FORCE_CRASH();
 
         int result = sDebug->previousHandler(d, e);
         return result;

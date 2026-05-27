@@ -130,7 +130,6 @@
 
 namespace dawn {
 
-void BreakPoint();
 void HandleAssertionFailure(const char* file,
                             const char* function,
                             int line,

@@ -30,47 +30,9 @@
 #include <cstdlib>
 
 #include "dawn/common/Log.h"
-#include "utils/platform.h"
-
-#if DAWN_COMPILER_IS(MSVC)
-extern void __cdecl __debugbreak(void);
-#endif
+#include "utils/force_crash.h"
 
 namespace dawn {
-
-#if DAWN_COMPILER_IS(CLANG) || DAWN_COMPILER_IS(GCC)
-void BreakPoint() {
-#if DAWN_PLATFORM_IS(X86)
-    __asm__ __volatile__("int $3\n\t");
-#elif DAWN_PLATFORM_IS(ARM32)
-    __asm__ __volatile__("bkpt 0");
-#elif DAWN_PLATFORM_IS(ARM64)
-    __asm__ __volatile__("brk 0xf000");
-#elif DAWN_PLATFORM_IS(LOONGARCH)
-    __asm__ __volatile__("break 0");
-#elif DAWN_PLATFORM_IS(RISCV)
-    __asm__ __volatile__("ebreak");
-#elif DAWN_PLATFORM_IS(MIPS)
-    __asm__ __volatile__("break");
-#elif DAWN_PLATFORM_IS(S390) || DAWN_PLATFORM_IS(S390X)
-    __asm__ __volatile__(".word 0x0001");
-#elif DAWN_PLATFORM_IS(PPC) || DAWN_PLATFORM_IS(PPC64)
-    __asm__ __volatile__("twge 2,2");
-#elif DAWN_PLATFORM_IS(WASM32) || DAWN_PLATFORM_IS(WASM64)
-    EM_ASM(debugger;);
-#else
-#error "Unsupported platform"
-#endif
-}
-
-#elif DAWN_COMPILER_IS(MSVC)
-void BreakPoint() {
-    __debugbreak();
-}
-
-#else
-#error "Unsupported compiler"
-#endif
 
 void HandleAssertionFailure(const char* file,
                             const char* function,
@@ -81,7 +43,7 @@ void HandleAssertionFailure(const char* file,
 #if defined(DAWN_ABORT_ON_ASSERT)
     abort();
 #else
-    BreakPoint();
+    DAWN_FORCE_CRASH();
 #endif
 }
 
