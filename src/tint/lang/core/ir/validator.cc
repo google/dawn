@@ -3427,7 +3427,9 @@ void Validator::CheckInstruction(const Instruction* inst) {
     }
 
     if (auto* call = inst->As<core::ir::Convert>()) {
-        if (call->Result(0) && call->Result()->Type()->Is<core::type::U64>()) {
+        // This will miss u64 being used if it isn't on the first result, but convert having
+        // multiple results is illegal anyway, so will be rejected later in the validator
+        if (call->Result(0) && call->Result(0)->Type()->Is<core::type::U64>()) {
             allowed_types.Add(Capability::kAllow64BitIntegers);
         }
     }

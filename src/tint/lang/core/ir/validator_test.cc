@@ -730,6 +730,23 @@ TEST_F(IR_ValidatorTest, Convert_NullResult) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Convert_MultipleResults) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Convert(ty.i32(), 1_f);
+        c->SetResults(Vector{b.InstructionResult(ty.i32()), b.InstructionResult(ty.i32())});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:22 error: convert: expected exactly 1 results, got 2
+    %2:i32, %3:i32 = convert 1.0f
+                     ^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Convert_ScalarToScalar) {
     auto* f = b.Function("f", ty.void_());
     auto* p = b.FunctionParam("p", ty.f32());
