@@ -29,6 +29,7 @@
 #define SRC_DAWN_COMMON_ASSERT_H_
 
 #include <cstdlib>
+#include <type_traits>
 
 #include "dawn/common/Compiler.h"
 
@@ -57,19 +58,27 @@
 // code.
 #if defined(DAWN_ENABLE_ASSERTS)
 
-#define DAWN_CHECK_CALLSITE_HELPER(file, func, line, condition)           \
-    do {                                                                  \
-        if (!(condition)) [[unlikely]] {                                  \
-            ::dawn::HandleAssertionFailure(file, func, line, #condition); \
-            abort();                                                      \
-        }                                                                 \
+#define DAWN_CHECK_CALLSITE_HELPER(file, func, line, condition)               \
+    do {                                                                      \
+        if (!(condition)) [[unlikely]] {                                      \
+            if (std::is_constant_evaluated()) {                               \
+                ::dawn::XXXXXXXXXX_CheckFailedInConsteval_XXXXXXXXXX();       \
+            } else {                                                          \
+                ::dawn::HandleAssertionFailure(file, func, line, #condition); \
+                abort();                                                      \
+            }                                                                 \
+        }                                                                     \
     } while (DAWN_ASSERT_LOOP_CONDITION)
 
-#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition)          \
-    do {                                                                  \
-        if (!(condition)) [[unlikely]] {                                  \
-            ::dawn::HandleAssertionFailure(file, func, line, #condition); \
-        }                                                                 \
+#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition)              \
+    do {                                                                      \
+        if (!(condition)) [[unlikely]] {                                      \
+            if (std::is_constant_evaluated()) {                               \
+                ::dawn::XXXXXXXXXX_CheckFailedInConsteval_XXXXXXXXXX();       \
+            } else {                                                          \
+                ::dawn::HandleAssertionFailure(file, func, line, #condition); \
+            }                                                                 \
+        }                                                                     \
     } while (DAWN_ASSERT_LOOP_CONDITION)
 
 #define DAWN_RELEASE_ASSUME_CALLSITE_HELPER(file, func, line, condition) \
@@ -126,6 +135,10 @@ void HandleAssertionFailure(const char* file,
                             const char* function,
                             int line,
                             const char* condition);
+
+// This non-consteval function is invalid to call in consteval. If it's called, the compiler will
+// print "note: declared here" pointing to this function so the reader knows what's going on.
+inline void XXXXXXXXXX_CheckFailedInConsteval_XXXXXXXXXX() {}
 
 }  // namespace dawn
 
