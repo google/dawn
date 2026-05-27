@@ -479,6 +479,57 @@ TEST_F(IR_ValidatorTest, Loop_VoidResult) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Loop_PtrResult) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->SetResults(b.InstructionResult(ty.ptr(function, ty.f32())));
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: loop: result type cannot be a pointer
+    %2:ptr<function, f32, read_write> = loop [b: $B2] {  # loop_1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Loop_ContinuingEmptyWithParams) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* loop = b.Loop();
+    loop->Body()->Append(b.Continue(loop));
+    loop->Continuing()->SetParams({b.BlockParam<i32>()});
+
+    f->Block()->Append(loop);
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(error: loop: loop continuing block has parameters but is empty)"));
+}
+
+TEST_F(IR_ValidatorTest, Loop_BodyEmptyWithParams) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* loop = b.Loop();
+    loop->Body()->SetParams({b.BlockParam<i32>()});
+    // Body is empty.
+    b.Append(loop->Initializer(), [&] { b.NextIteration(loop, 1_i); });
+
+    f->Block()->Append(loop);
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    // Empty blocks are not allowed for the loop body, so the IR is rejected before the params check
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(error: block does not end in a terminator instruction)"));
+}
+
 TEST_F(IR_ValidatorTest, Loop_TooManyOperands) {
     auto* f = b.Function("my_func", ty.void_());
 
@@ -2461,24 +2512,6 @@ TEST_F(IR_ValidatorTest, Switch_CaseNoSelectors) {
                 testing::HasSubstr(R"(:3:5 error: switch: case does not have any selectors
     switch 1i [c: (default, $B2), c: (, $B3)] {  # switch_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure();
-}
-
-TEST_F(IR_ValidatorTest, Loop_PtrResult) {
-    auto* f = b.Function("my_func", ty.void_());
-    b.Append(f->Block(), [&] {
-        auto* loop = b.Loop();
-        loop->SetResults(b.InstructionResult(ty.ptr(function, ty.f32())));
-        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:5 error: loop: result type cannot be a pointer
-    %2:ptr<function, f32, read_write> = loop [b: $B2] {  # loop_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 

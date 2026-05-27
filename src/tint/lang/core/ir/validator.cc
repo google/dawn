@@ -4714,6 +4714,10 @@ void Validator::CheckLoop(const Loop* l) {
     CheckResults(l);
     CheckOperands(l, 0);
 
+    if (l->Initializer()->Is<core::ir::MultiInBlock>()) {
+        AddError(l->Initializer()) << "loop initializer must be a block";
+    }
+
     if (!l->Initializer()->IsEmpty()) {
         if (!l->Initializer()->Terminator() ||
             !l->Initializer()->Terminator()->Is<core::ir::NextIteration>()) {
@@ -4743,6 +4747,8 @@ void Validator::CheckLoop(const Loop* l) {
             CheckLoopContinuing(l);
             BeginBlock(l->Continuing());
         });
+    } else if (!l->Continuing()->Params().IsEmpty()) {
+        AddError(l) << "loop continuing block has parameters but is empty";
     }
 
     tasks_.Push([this, l] {
