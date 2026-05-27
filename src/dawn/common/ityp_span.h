@@ -44,7 +44,7 @@ class span : private ::std::span<Value> {
     using I = UnderlyingType<Index>;
     using Base = ::std::span<Value>;
 
-    static_assert(UnsignedUnderlyingType<Index>, "Index type must be unsigned");
+    static_assert(HasUnsignedUnderlyingType<Index>, "Index type must be unsigned");
 
   public:
     constexpr span() = default;

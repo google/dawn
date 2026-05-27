@@ -44,7 +44,7 @@ class vector : private std::vector<Value> {
     using I = UnderlyingType<Index>;
     using Base = std::vector<Value>;
 
-    static_assert(UnsignedUnderlyingType<Index>, "Index type must be unsigned");
+    static_assert(HasUnsignedUnderlyingType<Index>, "Index type must be unsigned");
 
   public:
     constexpr vector() : Base() {}

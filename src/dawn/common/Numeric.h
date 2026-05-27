@@ -63,7 +63,7 @@ inline constexpr uint32_t u32_alignof = detail::u32_alignof<T>();
 // because that is all that is needed at the time of writing, however eventually we will want to use
 // this more widely, and we'll need to upgrade it (and the tests) to allow signed types.
 template <typename Dst, typename Src>
-    requires UnsignedUnderlyingType<Src> && UnsignedUnderlyingType<Dst>
+    requires HasUnsignedUnderlyingType<Src> && HasUnsignedUnderlyingType<Dst>
 constexpr inline Dst checked_cast(const Src& value) {
     using ISrc = UnderlyingType<Src>;
     using IDst = UnderlyingType<Dst>;

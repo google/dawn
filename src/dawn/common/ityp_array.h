@@ -47,7 +47,7 @@ class array : private ::std::array<Value, Size> {
     using I = UnderlyingType<Index>;
     using Base = ::std::array<Value, Size>;
 
-    static_assert(UnsignedUnderlyingType<Index>, "Index type must be unsigned");
+    static_assert(HasUnsignedUnderlyingType<Index>, "Index type must be unsigned");
     static_assert(Size <= std::numeric_limits<I>::max());
     static_assert(Size <= std::numeric_limits<size_t>::max());
 
