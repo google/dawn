@@ -28,6 +28,7 @@
 #include "dawn/native/vulkan/DeviceVk.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "dawn/common/Log.h"
 #include "dawn/common/Math.h"
@@ -978,19 +979,23 @@ std::optional<uint32_t> Device::GetComputeSubgroupSize() const {
 }
 
 void Device::OnDebugMessage(std::string message) {
-    mDebugMessages.push_back(std::move(message));
+    mDebugMessages->push_back(std::move(message));
+}
+
+std::vector<std::string> Device::AcquireDebugLayerMessages() {
+    std::vector<std::string> messagesOut;
+    mDebugMessages.Use([&](auto messages) { messagesOut = std::move(*messages); });
+    return messagesOut;
 }
 
 MaybeError Device::CheckDebugLayerAndGenerateErrors() {
-    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled() || mDebugMessages.empty()) {
+    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled() || mDebugMessages->empty()) {
         return {};
     }
 
-    auto error = DAWN_INTERNAL_ERROR("The Vulkan validation layer reported uncaught errors.");
-
-    AppendDebugLayerMessages(error.get());
-
-    return std::move(error);
+    // The debug layer messages will be appended later when DeviceBase::HandleError calls
+    // AppendDebugLayerMessages.
+    return DAWN_INTERNAL_ERROR("The Vulkan validation layer reported uncaught errors.");
 }
 
 void Device::AppendDebugLayerMessages(ErrorData* error) {
@@ -998,20 +1003,29 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
         return;
     }
 
-    while (!mDebugMessages.empty()) {
-        error->AppendBackendMessage(std::move(mDebugMessages.back()));
-        mDebugMessages.pop_back();
+    std::vector<std::string> messages = AcquireDebugLayerMessages();
+    if (messages.empty()) {
+        return;
+    }
+
+    for (std::string& message : messages) {
+        error->AppendBackendMessage(std::move(message));
     }
 }
 
-void Device::CheckDebugMessagesAfterDestruction() const {
-    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled() || mDebugMessages.empty()) {
+void Device::CheckDebugMessagesAfterDestruction() {
+    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled()) {
+        return;
+    }
+
+    std::vector<std::string> messages = AcquireDebugLayerMessages();
+    if (messages.empty()) {
         return;
     }
 
     dawn::ErrorLog()
         << "Some VVL messages were not handled before dawn::native::vulkan::Device destruction:";
-    for (const auto& message : mDebugMessages) {
+    for (const auto& message : messages) {
         dawn::ErrorLog() << " - " << message;
     }
 
