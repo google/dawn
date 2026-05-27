@@ -252,6 +252,22 @@ class DawnRootCommandVisitor : public RootCommandVisitor {
         mResourceToIdMap.emplace(resource.Get(), id);
     }
 
+    template <typename T>
+    void OverwriteResource(schema::ObjectId id, const std::string& label, T resource) {
+        auto iter = mResources.find(id);
+        if (iter != mResources.end()) {
+            std::visit(
+                [&](auto& r) {
+                    if constexpr (!std::is_same_v<std::decay_t<decltype(r)>, std::monostate>) {
+                        mResourceToIdMap.erase(r.Get());
+                    }
+                },
+                iter->second.resource);
+            mResources.erase(iter);
+        }
+        AddResource(id, label, resource);
+    }
+
     void AddResource(schema::ObjectId id, const std::string& label, Resource resource) {
         std::visit(
             [&](auto& r) {
@@ -1503,7 +1519,8 @@ VisitResult DawnRootCommandVisitor::operator()(
 
     if (surfaceTexture.status == wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal ||
         surfaceTexture.status == wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal) {
-        AddResource(data.textureId, "", surfaceTexture.texture);
+        std::string label = GetLabel(data.textureId);
+        OverwriteResource(data.textureId, label, surfaceTexture.texture);
     }
     return VisitStatus::Continue;
 }

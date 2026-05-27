@@ -2787,6 +2787,8 @@ class CaptureAndReplaySurfaceTests : public CaptureAndReplayTests {
 };
 
 TEST_P(CaptureAndReplaySurfaceTests, TestSurface) {
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     wgpu::Surface surface = wgpu::glfw::CreateSurfaceForWindow(instance, mWindow.get());
     surface.SetLabel("mySurface");
 
@@ -2800,7 +2802,6 @@ TEST_P(CaptureAndReplaySurfaceTests, TestSurface) {
 
     // --- capture ---
     auto recorder = Recorder::CreateAndStart(device);
-    recorder->SetSurfaces({surface});
 
     surface.Configure(&config);
 
@@ -2820,6 +2821,10 @@ TEST_P(CaptureAndReplaySurfaceTests, TestSurface) {
     EXPECT_EQ(surfaceInfos[0].width, 1u);
     EXPECT_EQ(surfaceInfos[0].height, 1u);
 
+    wgpu::Surface replaySurface = wgpu::glfw::CreateSurfaceForWindow(instance, mWindow.get());
+
+    recorder->SetSurfaces({replaySurface});
+
     auto replay = recorder->Replay(device);
 
     EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Texture>("backbuffer") != nullptr);
@@ -2830,6 +2835,8 @@ TEST_P(CaptureAndReplaySurfaceTests, TestSurface) {
 }
 
 TEST_P(CaptureAndReplaySurfaceTests, MultiFrame) {
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     wgpu::Surface surface = wgpu::glfw::CreateSurfaceForWindow(instance, mWindow.get());
     surface.SetLabel("mySurface");
 
@@ -2843,7 +2850,6 @@ TEST_P(CaptureAndReplaySurfaceTests, MultiFrame) {
 
     // --- capture ---
     auto recorder = Recorder::CreateAndStart(device);
-    recorder->SetSurfaces({surface});
 
     surface.Configure(&config);
 
@@ -2864,6 +2870,11 @@ TEST_P(CaptureAndReplaySurfaceTests, MultiFrame) {
     }
 
     // --- replay ---
+    recorder->EndCapture();
+
+    wgpu::Surface replaySurface = wgpu::glfw::CreateSurfaceForWindow(instance, mWindow.get());
+
+    recorder->SetSurfaces({replaySurface});
     auto replay = recorder->CreateReplay(device);
 
     // Replay Frame 1
