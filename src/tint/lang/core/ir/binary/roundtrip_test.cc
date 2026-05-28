@@ -793,7 +793,7 @@ TEST_F(IRBinaryRoundtripTest, Override_WorkgroupSize) {
     RUN_TEST();
 }
 
-TEST_F(IRBinaryRoundtripTest, DISABLED_Override_WorkgroupArraySize) {
+TEST_F(IRBinaryRoundtripTest, Override_WorkgroupArraySize) {
     b.Append(b.ir.root_block, [&] {
         auto* o = b.Override(ty.u32());
 

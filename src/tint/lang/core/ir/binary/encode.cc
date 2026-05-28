@@ -62,6 +62,7 @@
 #include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
+#include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -512,12 +513,20 @@ struct Encoder {
             array_in->Count(),  //
             [&](const core::type::ConstantArrayCount* c) {
                 array_out.set_count(c->value);
+                array_out.set_count_kind(pb::ArrayCountKind::Constant);
                 if (c->value >= internal_limits::kMaxArrayElementCount) {
                     err_ << "array count (" << c->value << ") must be less than "
                          << internal_limits::kMaxArrayElementCount << "\n";
                 }
             },
-            [&](const core::type::RuntimeArrayCount*) { array_out.set_count(0); },
+            [&](const core::type::RuntimeArrayCount*) {
+                array_out.set_count(0);
+                array_out.set_count_kind(pb::ArrayCountKind::Runtime);
+            },
+            [&](const core::ir::type::ValueArrayCount* c) {
+                array_out.set_count(Value(c->value));
+                array_out.set_count_kind(pb::ArrayCountKind::Override);
+            },
             TINT_ICE_ON_NO_MATCH);
     }
 

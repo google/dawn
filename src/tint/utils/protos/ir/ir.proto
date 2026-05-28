@@ -94,11 +94,18 @@ message TypeMatrix {
     uint32 element_type = 3;  // Module.types
 }
 
+enum ArrayCountKind {
+    Runtime = 0;
+    Constant = 1;
+    Override = 2;
+}
+
 message TypeArray {
     reserved 2;          // TODO(422199551): Remove in v2
     reserved "stride";   // TODO(422199551): Remove in v2
     uint32 element = 1;  // Module.types
     uint32 count = 3;
+    optional ArrayCountKind count_kind = 4;  // TODO(422199551): Make required in v2.
 }
 
 message TypeBindingArray {
