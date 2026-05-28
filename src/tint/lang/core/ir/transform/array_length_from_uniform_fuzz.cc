@@ -34,11 +34,6 @@
 namespace tint::core::ir::transform {
 namespace {
 
-// The list of properties that are not supported.
-const core::ir::Properties kUnsupportedProperties{
-    core::ir::Property::kAllowMultipleEntryPoints,
-};
-
 // Note: ArrayLengthFromUniform uses a different success type than the default SuccessType, so the
 // impl function cannot be passed in directly to fuzzing infra
 Result<SuccessType> ArrayLengthFromUniformFuzzer(
@@ -46,13 +41,6 @@ Result<SuccessType> ArrayLengthFromUniformFuzzer(
     const fuzz::ir::Context&,
     BindingPoint ubo_binding,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
-    // Check for unsupported properties.
-    for (auto prop : kUnsupportedProperties) {
-        if (module.properties.Contains(prop)) {
-            return Failure{"unsupported property " + tint::ToString(prop)};
-        }
-    }
-
     TINT_CHECK_RESULT(ArrayLengthFromUniform(module, ubo_binding, bindpoint_to_size_index));
 
     return Success;
@@ -61,5 +49,9 @@ Result<SuccessType> ArrayLengthFromUniformFuzzer(
 }  // namespace
 }  // namespace tint::core::ir::transform
 
+constexpr auto kUnsupportedProperties = tint::core::ir::Properties{
+    tint::core::ir::Property::kAllowMultipleEntryPoints,
+};
 TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ArrayLengthFromUniformFuzzer,
-                      tint::core::ir::transform::kArrayLengthCapabilities);
+                      tint::core::ir::transform::kArrayLengthCapabilities,
+                      kUnsupportedProperties);
