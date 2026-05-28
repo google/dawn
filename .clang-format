@@ -13,6 +13,8 @@ IncludeCategories:
   # windows_with_undefs should appear before any dawn header
   - Regex:           '^"dawn/common/windows_with_undefs\.h"'
     Priority:        1
+  - Regex:           '^"src/dawn/common/windows_with_undefs\.h"'
+    Priority:        1
   # vk_struct_helper should appear last. Note the low priority number.
   - Regex:           '^<vulkan/utility/vk_struct_helper\.hpp>'
     Priority:        9
