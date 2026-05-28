@@ -30,10 +30,10 @@
 
 #import <Metal/Metal.h>
 
-#include "dawn/common/ityp_stack_vec.h"
-#include "dawn/native/BindingInfo.h"
-#include "dawn/native/PerStage.h"
-#include "dawn/native/PipelineLayout.h"
+#include "src/dawn/common/ityp_stack_vec.h"
+#include "src/dawn/native/BindingInfo.h"
+#include "src/dawn/native/PerStage.h"
+#include "src/dawn/native/PipelineLayout.h"
 
 namespace dawn::native::metal {
 

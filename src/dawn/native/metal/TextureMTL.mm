@@ -25,25 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/metal/TextureMTL.h"
+#include "src/dawn/native/metal/TextureMTL.h"
 
 #include <CoreVideo/CVPixelBuffer.h>
 
 #include "absl/strings/str_format.h"
-#include "dawn/common/Constants.h"
-#include "dawn/common/IOSurfaceUtils.h"
-#include "dawn/common/Math.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/DynamicUploader.h"
-#include "dawn/native/EnumMaskIterator.h"
-#include "dawn/native/Queue.h"
-#include "dawn/native/metal/BufferMTL.h"
-#include "dawn/native/metal/DeviceMTL.h"
-#include "dawn/native/metal/QueueMTL.h"
-#include "dawn/native/metal/SharedFenceMTL.h"
-#include "dawn/native/metal/SharedTextureMemoryMTL.h"
-#include "dawn/native/metal/UtilsMetal.h"
-#include "utils/platform.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/IOSurfaceUtils.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/DynamicUploader.h"
+#include "src/dawn/native/EnumMaskIterator.h"
+#include "src/dawn/native/Queue.h"
+#include "src/dawn/native/metal/BufferMTL.h"
+#include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/dawn/native/metal/QueueMTL.h"
+#include "src/dawn/native/metal/SharedFenceMTL.h"
+#include "src/dawn/native/metal/SharedTextureMemoryMTL.h"
+#include "src/dawn/native/metal/UtilsMetal.h"
+#include "src/utils/platform.h"
 
 namespace dawn::native::metal {
 

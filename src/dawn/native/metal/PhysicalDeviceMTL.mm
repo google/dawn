@@ -25,27 +25,27 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/metal/PhysicalDeviceMTL.h"
+#include "src/dawn/native/metal/PhysicalDeviceMTL.h"
 
-#include "dawn/common/CoreFoundationRef.h"
-#include "dawn/common/GPUInfo.h"
-#include "dawn/common/Log.h"
-#include "dawn/common/NSRef.h"
-#include "dawn/common/SystemUtils.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/Instance.h"
 #include "dawn/native/MetalBackend.h"
-#include "dawn/native/metal/BufferMTL.h"
-#include "dawn/native/metal/DeviceMTL.h"
-#include "dawn/native/metal/UtilsMetal.h"
 #include "dawn/platform/DawnPlatform.h"
+#include "src/dawn/common/CoreFoundationRef.h"
+#include "src/dawn/common/GPUInfo.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/NSRef.h"
+#include "src/dawn/common/SystemUtils.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/Instance.h"
+#include "src/dawn/native/metal/BufferMTL.h"
+#include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/dawn/native/metal/UtilsMetal.h"
 #include "src/utils/compiler.h"
-#include "utils/platform.h"
+#include "src/utils/platform.h"
 
 #if DAWN_PLATFORM_IS(MACOS)
 #import <IOKit/IOKitLib.h>
 
-#include "dawn/common/IOKitRef.h"
+#include "src/dawn/common/IOKitRef.h"
 #endif
 
 #include <string>

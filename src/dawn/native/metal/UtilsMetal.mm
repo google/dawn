@@ -25,20 +25,20 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/metal/UtilsMetal.h"
+#include "src/dawn/native/metal/UtilsMetal.h"
 
 #include <Metal/Metal.h>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Math.h"
-#include "dawn/common/Range.h"
-#include "dawn/native/Buffer.h"
-#include "dawn/native/CommandBuffer.h"
-#include "dawn/native/EnumMaskIterator.h"
-#include "dawn/native/Pipeline.h"
-#include "dawn/native/ShaderModule.h"
-#include "dawn/native/dawn_platform.h"
-#include "dawn/native/metal/BufferMTL.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/common/Range.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/CommandBuffer.h"
+#include "src/dawn/native/EnumMaskIterator.h"
+#include "src/dawn/native/Pipeline.h"
+#include "src/dawn/native/ShaderModule.h"
+#include "src/dawn/native/dawn_platform.h"
+#include "src/dawn/native/metal/BufferMTL.h"
 
 namespace dawn::native::metal {
 

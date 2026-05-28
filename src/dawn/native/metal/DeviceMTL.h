@@ -37,11 +37,11 @@
 #include <mutex>
 #include <vector>
 
-#include "dawn/native/Commands.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/dawn_platform.h"
-#include "dawn/native/metal/CommandRecordingContext.h"
-#include "dawn/native/metal/Forward.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/dawn_platform.h"
+#include "src/dawn/native/metal/CommandRecordingContext.h"
+#include "src/dawn/native/metal/Forward.h"
 
 namespace dawn::native::metal {
 

@@ -25,20 +25,20 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/metal/BufferMTL.h"
+#include "src/dawn/native/metal/BufferMTL.h"
 
 #include <limits>
 
-#include "dawn/common/Math.h"
-#include "dawn/native/CallbackTaskManager.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/CommandBuffer.h"
-#include "dawn/native/metal/CommandRecordingContext.h"
-#include "dawn/native/metal/DeviceMTL.h"
-#include "dawn/native/metal/QueueMTL.h"
-#include "dawn/native/metal/UtilsMetal.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/CallbackTaskManager.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/CommandBuffer.h"
+#include "src/dawn/native/metal/CommandRecordingContext.h"
+#include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/dawn/native/metal/QueueMTL.h"
+#include "src/dawn/native/metal/UtilsMetal.h"
 #include "src/utils/compiler.h"
-#include "utils/platform.h"
+#include "src/utils/platform.h"
 
 namespace dawn::native::metal {
 // The size of uniform buffer and storage buffer need to be aligned to 16 bytes which is the

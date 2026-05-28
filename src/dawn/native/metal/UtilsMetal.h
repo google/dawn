@@ -33,12 +33,12 @@
 #include <string>
 
 #include "absl/container/inlined_vector.h"
-#include "dawn/common/NSRef.h"
-#include "dawn/native/PassResourceUsage.h"
-#include "dawn/native/dawn_platform.h"
-#include "dawn/native/metal/DeviceMTL.h"
-#include "dawn/native/metal/ShaderModuleMTL.h"
-#include "dawn/native/metal/TextureMTL.h"
+#include "src/dawn/common/NSRef.h"
+#include "src/dawn/native/PassResourceUsage.h"
+#include "src/dawn/native/dawn_platform.h"
+#include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/dawn/native/metal/ShaderModuleMTL.h"
+#include "src/dawn/native/metal/TextureMTL.h"
 
 namespace dawn::native {
 struct BeginRenderPassCmd;

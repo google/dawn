@@ -30,8 +30,8 @@
 
 #import <Metal/Metal.h>
 
-#include "dawn/common/NSRef.h"
-#include "dawn/native/QuerySet.h"
+#include "src/dawn/common/NSRef.h"
+#include "src/dawn/native/QuerySet.h"
 
 namespace dawn::native::metal {
 

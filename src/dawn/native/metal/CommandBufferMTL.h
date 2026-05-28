@@ -34,10 +34,10 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/native/CommandBuffer.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/metal/MultiDrawEncoder.h"
+#include "src/dawn/native/CommandBuffer.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/metal/MultiDrawEncoder.h"
 
 namespace dawn::native {
 class CommandEncoder;

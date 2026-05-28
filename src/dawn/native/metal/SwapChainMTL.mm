@@ -25,16 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/metal/SwapChainMTL.h"
+#include "src/dawn/native/metal/SwapChainMTL.h"
 
 #import <QuartzCore/CAMetalLayer.h>
 
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/Surface.h"
-#include "dawn/native/metal/DeviceMTL.h"
-#include "dawn/native/metal/QueueMTL.h"
-#include "dawn/native/metal/TextureMTL.h"
-#include "dawn/native/metal/UtilsMetal.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/Surface.h"
+#include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/dawn/native/metal/QueueMTL.h"
+#include "src/dawn/native/metal/TextureMTL.h"
+#include "src/dawn/native/metal/UtilsMetal.h"
 
 namespace dawn::native::metal {
 

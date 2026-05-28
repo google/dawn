@@ -25,32 +25,32 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/metal/ShaderModuleMTL.h"
+#include "src/dawn/native/metal/ShaderModuleMTL.h"
 
 #include <tint/tint.h>
 
 #include <sstream>
 
-#include "dawn/common/MatchVariant.h"
-#include "dawn/common/Math.h"
-#include "dawn/common/Range.h"
-#include "dawn/native/Adapter.h"
-#include "dawn/native/BindGroupLayout.h"
-#include "dawn/native/CacheRequest.h"
-#include "dawn/native/Serializable.h"
-#include "dawn/native/TintUtils.h"
-#include "dawn/native/metal/BindGroupLayoutMTL.h"
-#include "dawn/native/metal/DeviceMTL.h"
-#include "dawn/native/metal/ImmediatesLayoutMTL.h"
-#include "dawn/native/metal/PipelineLayoutMTL.h"
-#include "dawn/native/metal/RenderPipelineMTL.h"
-#include "dawn/native/metal/UtilsMetal.h"
-#include "dawn/native/stream/BlobSource.h"
-#include "dawn/native/stream/ByteVectorSink.h"
-#include "dawn/native/utils/WGPUHelpers.h"
 #include "dawn/platform/DawnPlatform.h"
-#include "dawn/platform/metrics/HistogramMacros.h"
-#include "dawn/platform/tracing/TraceEvent.h"
+#include "src/dawn/common/MatchVariant.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/common/Range.h"
+#include "src/dawn/native/Adapter.h"
+#include "src/dawn/native/BindGroupLayout.h"
+#include "src/dawn/native/CacheRequest.h"
+#include "src/dawn/native/Serializable.h"
+#include "src/dawn/native/TintUtils.h"
+#include "src/dawn/native/metal/BindGroupLayoutMTL.h"
+#include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/dawn/native/metal/ImmediatesLayoutMTL.h"
+#include "src/dawn/native/metal/PipelineLayoutMTL.h"
+#include "src/dawn/native/metal/RenderPipelineMTL.h"
+#include "src/dawn/native/metal/UtilsMetal.h"
+#include "src/dawn/native/stream/BlobSource.h"
+#include "src/dawn/native/stream/ByteVectorSink.h"
+#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/platform/metrics/HistogramMacros.h"
+#include "src/dawn/platform/tracing/TraceEvent.h"
 
 namespace dawn::native::metal {
 namespace {

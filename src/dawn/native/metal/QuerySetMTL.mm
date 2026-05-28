@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/metal/QuerySetMTL.h"
+#include "src/dawn/native/metal/QuerySetMTL.h"
 
-#include "dawn/common/Math.h"
-#include "dawn/native/metal/DeviceMTL.h"
-#include "dawn/native/metal/UtilsMetal.h"
-#include "utils/platform.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/dawn/native/metal/UtilsMetal.h"
+#include "src/utils/platform.h"
 
 namespace dawn::native::metal {
 

@@ -32,13 +32,13 @@
 
 #include <map>
 
-#include "dawn/common/MutexProtected.h"
-#include "dawn/common/SerialMap.h"
-#include "dawn/native/EventManager.h"
-#include "dawn/native/Queue.h"
-#include "dawn/native/WaitListEvent.h"
-#include "dawn/native/metal/CommandRecordingContext.h"
-#include "dawn/native/metal/SharedFenceMTL.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/common/SerialMap.h"
+#include "src/dawn/native/EventManager.h"
+#include "src/dawn/native/Queue.h"
+#include "src/dawn/native/WaitListEvent.h"
+#include "src/dawn/native/metal/CommandRecordingContext.h"
+#include "src/dawn/native/metal/SharedFenceMTL.h"
 
 namespace dawn::native::metal {
 

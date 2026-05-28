@@ -30,9 +30,9 @@
 
 #import <Metal/Metal.h>
 
-#include "dawn/common/NSRef.h"
-#include "dawn/common/SerialQueue.h"
-#include "dawn/native/Buffer.h"
+#include "src/dawn/common/NSRef.h"
+#include "src/dawn/common/SerialQueue.h"
+#include "src/dawn/native/Buffer.h"
 
 namespace dawn::native::metal {
 

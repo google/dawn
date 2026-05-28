@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/metal/MultiDrawEncoder.h"
+#include "src/dawn/native/metal/MultiDrawEncoder.h"
 
-#include "dawn/common/Strings.h"
-#include "dawn/native/RenderPipeline.h"
-#include "dawn/native/ToBackend.h"
-#include "dawn/native/metal/BufferMTL.h"
+#include "src/dawn/common/Strings.h"
+#include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/ToBackend.h"
+#include "src/dawn/native/metal/BufferMTL.h"
 
 const char* kShaderSource = "#include <metal_stdlib>\n" DAWN_MULTILINE(
     using namespace metal;

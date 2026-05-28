@@ -25,21 +25,21 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/metal/QueueMTL.h"
+#include "src/dawn/native/metal/QueueMTL.h"
 
-#include "dawn/common/FutureUtils.h"
-#include "dawn/common/Math.h"
-#include "dawn/native/Buffer.h"
-#include "dawn/native/CommandValidation.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/DynamicUploader.h"
-#include "dawn/native/Instance.h"
 #include "dawn/native/MetalBackend.h"
-#include "dawn/native/PhysicalDevice.h"
-#include "dawn/native/metal/CommandBufferMTL.h"
-#include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/platform/DawnPlatform.h"
-#include "dawn/platform/tracing/TraceEvent.h"
+#include "src/dawn/common/FutureUtils.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/CommandValidation.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/DynamicUploader.h"
+#include "src/dawn/native/Instance.h"
+#include "src/dawn/native/PhysicalDevice.h"
+#include "src/dawn/native/metal/CommandBufferMTL.h"
+#include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::metal {

@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/metal/BindGroupLayoutMTL.h"
+#include "src/dawn/native/metal/BindGroupLayoutMTL.h"
 
 #include <vector>
 
-#include "dawn/common/MatchVariant.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/metal/BindGroupMTL.h"
-#include "dawn/native/metal/DeviceMTL.h"
-#include "dawn/native/metal/UtilsMetal.h"
+#include "src/dawn/common/MatchVariant.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/metal/BindGroupMTL.h"
+#include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/dawn/native/metal/UtilsMetal.h"
 
 namespace dawn::native::metal {
 
