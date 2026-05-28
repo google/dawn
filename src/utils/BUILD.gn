@@ -32,6 +32,7 @@
 import("../../scripts/dawn_overrides_with_defaults.gni")
 
 import("//build_overrides/build.gni")
+import("${dawn_root}/scripts/dawn_nocompile.gni")
 
 config("internal_config") {
   include_dirs = [ "${dawn_root}" ]
@@ -50,12 +51,18 @@ static_library("utils") {
   public_configs = [ ":internal_config" ]
 }
 
+dawn_nocompile_source_set("nocompile_sources") {
+  deps = [ ":utils" ]
+  sources = [ "numeric_nocompile.nc" ]
+}
+
 # Included in dawn_unittests.
 source_set("unittests") {
   testonly = true
 
   deps = [
     ":gmock_and_gtest",
+    ":nocompile_sources",
     ":utils",
   ]
 
