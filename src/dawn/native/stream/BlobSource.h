@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_STREAM_BLOBSOURCE_H_
 #define SRC_DAWN_NATIVE_STREAM_BLOBSOURCE_H_
 
-#include "dawn/native/Blob.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/stream/Source.h"
+#include "src/dawn/native/Blob.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/stream/Source.h"
 
 namespace dawn::native::stream {
 

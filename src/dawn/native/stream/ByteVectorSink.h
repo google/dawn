@@ -33,7 +33,7 @@
 #include <span>
 #include <vector>
 
-#include "dawn/native/stream/Sink.h"
+#include "src/dawn/native/stream/Sink.h"
 
 namespace dawn::native::stream {
 

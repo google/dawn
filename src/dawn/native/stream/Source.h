@@ -31,7 +31,7 @@
 #include <cstddef>
 #include <span>
 
-#include "dawn/native/Error.h"
+#include "src/dawn/native/Error.h"
 
 namespace dawn::native::stream {
 

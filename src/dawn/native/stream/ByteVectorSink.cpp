@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/stream/ByteVectorSink.h"
+#include "src/dawn/native/stream/ByteVectorSink.h"
 
 #include <algorithm>
 #include <iomanip>
 
-#include "dawn/native/stream/Stream.h"
+#include "src/dawn/native/stream/Stream.h"
 
 namespace dawn::native::stream {
 
