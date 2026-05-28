@@ -192,6 +192,163 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverViewHeap) {
     EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + HeapVersionID(1));
 }
 
+// Tests that a descriptor heap switch, which changes the current descriptor tables, in one type of
+// pass (render) is also applied to another pass (compute) if it is reused in the same command
+// buffer. This is tested by dispatching on simple compute pipeline, then drawing on a render
+// pipeline multiple times so as to overflow the descriptor heap and cause a switch, and then
+// finally issuing one more dispatch on the original compute pipeline, all on the same command
+// encoder.
+TEST_P(D3D12DescriptorHeapTests, CrossPassStaleRootDescriptorTable) {
+    Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
+    auto* allocator = d3dDevice->GetViewShaderVisibleDescriptorAllocator();
+    const uint64_t heapSize = allocator->GetShaderVisibleHeapSizeForTesting();
+
+    // Compute pass
+    wgpu::ComputePipeline cp;
+    wgpu::BindGroup cpBindGroup0;
+    wgpu::Buffer cpOutBuf;
+    constexpr uint32_t kNumOut = 256;
+    constexpr uint32_t kMagic = 0xCAFEBABE;
+    {
+        // Simple compute shader that copies src[0] to dst[gid.x]
+        wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var<storage, read> src : array<u32>;
+            @group(0) @binding(1) var<storage, read_write> dst : array<u32>;
+
+            @compute @workgroup_size(1)
+            fn main(@builtin(global_invocation_id) gid : vec3<u32>) {
+                dst[gid.x] = src[0];
+            }
+        )");
+
+        wgpu::ComputePipelineDescriptor cpDesc;
+        cpDesc.compute.module = csModule;
+        cp = device.CreateComputePipeline(&cpDesc);
+
+        wgpu::Buffer inBuf = utils::CreateBufferFromData(device, &kMagic, sizeof(kMagic),
+                                                         wgpu::BufferUsage::Storage);
+
+        wgpu::BufferDescriptor outBufDesc;
+        outBufDesc.size = kNumOut * sizeof(uint32_t);
+        outBufDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+        cpOutBuf = device.CreateBuffer(&outBufDesc);
+
+        cpBindGroup0 = utils::MakeBindGroup(device, cp.GetBindGroupLayout(0),
+                                            {
+                                                {0, inBuf},
+                                                {1, cpOutBuf},
+                                            });
+    }
+
+    // Render pass
+    wgpu::RenderPipeline rp;
+    wgpu::Texture rtTex;
+    // To overflow the view heap, we need to create more than 'heapSize' descriptors. We'll create
+    // kNumBindGroups, each with kBindingsPerGroup UBOs.
+    constexpr int kBindingsPerGroup = 8;
+    const int kNumBindGroups = (heapSize / kBindingsPerGroup) + 1;
+    std::vector<wgpu::BindGroup> rpBGs(kNumBindGroups);
+    {
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+            @vertex fn main(@builtin(vertex_index) vi : u32) -> @builtin(position) vec4f {
+                var p = array<vec2f, 3>(
+                    vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+                return vec4f(p[vi], 0.0, 1.0);
+            }
+        )");
+
+        // The fragment shader has kBindingsPerGroup bindings
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var<uniform> u0 : vec4f;
+            @group(0) @binding(1) var<uniform> u1 : vec4f;
+            @group(0) @binding(2) var<uniform> u2 : vec4f;
+            @group(0) @binding(3) var<uniform> u3 : vec4f;
+            @group(0) @binding(4) var<uniform> u4 : vec4f;
+            @group(0) @binding(5) var<uniform> u5 : vec4f;
+            @group(0) @binding(6) var<uniform> u6 : vec4f;
+            @group(0) @binding(7) var<uniform> u7 : vec4f;
+
+            @fragment fn main() -> @location(0) vec4f {
+                return u0 + u1 + u2 + u3 + u4 + u5 + u6 + u7;
+            }
+        )");
+
+        utils::ComboRenderPipelineDescriptor rpDesc;
+        rpDesc.vertex.module = vsModule;
+        rpDesc.cFragment.module = fsModule;
+        rpDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        rp = device.CreateRenderPipeline(&rpDesc);
+
+        wgpu::BindGroupLayout rpBGL = rp.GetBindGroupLayout(0);
+
+        wgpu::TextureDescriptor texDesc;
+        texDesc.size = {4, 4, 1};
+        texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+        texDesc.usage = wgpu::TextureUsage::RenderAttachment;
+        rtTex = device.CreateTexture(&texDesc);
+
+        wgpu::BufferDescriptor uboDesc;
+        uboDesc.size = 256;
+        uboDesc.usage = wgpu::BufferUsage::Uniform;
+        wgpu::Buffer ubo = device.CreateBuffer(&uboDesc);
+
+        for (int i = 0; i < kNumBindGroups; ++i) {
+            std::vector<wgpu::BindGroupEntry> entries(kBindingsPerGroup);
+            for (int j = 0; j < kBindingsPerGroup; ++j) {
+                wgpu::BindGroupEntry entry;
+                entry.binding = uint32_t(j);
+                entry.buffer = ubo;
+                entries[j] = entry;
+            }
+            wgpu::BindGroupDescriptor bgDesc;
+            bgDesc.layout = rpBGL;
+            bgDesc.entryCount = entries.size();
+            bgDesc.entries = entries.data();
+            rpBGs[i] = device.CreateBindGroup(&bgDesc);
+        }
+    }
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    // Pass A: Compute
+    {
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(cp);
+        pass.SetBindGroup(0, cpBindGroup0);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+    }
+
+    // Pass B: Render (Overflow heap)
+    {
+        utils::ComboRenderPassDescriptor rpDesc({rtTex.CreateView()});
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rpDesc);
+        pass.SetPipeline(rp);
+        for (int i = 0; i < kNumBindGroups; ++i) {
+            pass.SetBindGroup(0, rpBGs[i]);
+            pass.Draw(3);
+        }
+        pass.End();
+    }
+
+    // Pass C: Compute (Same pipeline, same bind group)
+    {
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(cp);
+        pass.SetBindGroup(0, cpBindGroup0);
+        pass.DispatchWorkgroups(kNumOut);
+        pass.End();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Verify results
+    std::vector<uint32_t> expected(kNumOut, kMagic);
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), cpOutBuf, 0, kNumOut);
+}
+
 // Verify the shader visible view heap switches over within a single submit because bind group 0
 // requires more descriptors than available in the heap, while there's still enough for group 1.
 TEST_P(D3D12DescriptorHeapTests, SwitchOverViewHeapBecauseOfBindingGroup0) {
