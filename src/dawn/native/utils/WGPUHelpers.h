@@ -33,11 +33,11 @@
 #include <string>
 #include <vector>
 
-#include "dawn/common/NonCopyable.h"
-#include "dawn/common/Ref.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/UsageValidationMode.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/NonCopyable.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/UsageValidationMode.h"
+#include "src/dawn/native/dawn_platform.h"
 #include "src/utils/compiler.h"
 
 namespace tint::wgsl {

@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/WGPUHelpers.h"
 
 #include <cstring>
 #include <iomanip>
@@ -34,17 +34,17 @@
 #include <mutex>
 #include <sstream>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Constants.h"
-#include "dawn/native/BindGroup.h"
-#include "dawn/native/BindGroupLayout.h"
-#include "dawn/native/Buffer.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/ExternalTexture.h"
-#include "dawn/native/PipelineLayout.h"
-#include "dawn/native/Queue.h"
-#include "dawn/native/Sampler.h"
-#include "dawn/native/ShaderModule.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/native/BindGroup.h"
+#include "src/dawn/native/BindGroupLayout.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/ExternalTexture.h"
+#include "src/dawn/native/PipelineLayout.h"
+#include "src/dawn/native/Queue.h"
+#include "src/dawn/native/Sampler.h"
+#include "src/dawn/native/ShaderModule.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::utils {
