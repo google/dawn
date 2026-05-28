@@ -168,9 +168,9 @@
 #include <atomic>
 #include <string>
 
-#include "dawn/platform/tracing/EventTracer.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
+#include "src/dawn/platform/tracing/EventTracer.h"
 
 // Records a pair of begin and end events called "name" for the current
 // scope, with 0, 1 or 2 associated arguments. If the category is not

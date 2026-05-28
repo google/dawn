@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/platform/WorkerThread.h"
+#include "src/dawn/platform/WorkerThread.h"
 
 #include <functional>
 #include <iterator>
 #include <utility>
 
-#include "dawn/common/Assert.h"
+#include "src/dawn/common/Assert.h"
 
 namespace dawn::platform {
 
