@@ -31,7 +31,7 @@
 #include <string>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/ityp_bitset.h"
+#include "src/dawn/common/ityp_bitset.h"
 
 namespace dawn::native::vulkan {
 

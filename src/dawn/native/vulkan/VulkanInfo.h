@@ -30,10 +30,10 @@
 
 #include <vector>
 
-#include "dawn/common/ityp_array.h"
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/vulkan/VulkanExtensions.h"
+#include "src/dawn/common/ityp_array.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/vulkan/VulkanExtensions.h"
 
 namespace dawn::native::vulkan {
 

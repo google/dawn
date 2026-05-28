@@ -30,9 +30,9 @@
 
 #include <vector>
 
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/ResourceTable.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/ResourceTable.h"
 
 namespace dawn::native::vulkan {
 

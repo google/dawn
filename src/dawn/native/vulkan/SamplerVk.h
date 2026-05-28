@@ -30,9 +30,9 @@
 
 #include <utility>
 
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Sampler.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Sampler.h"
 
 namespace dawn::native::vulkan {
 

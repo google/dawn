@@ -25,18 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/vulkan/UtilsVulkan.h"
+#include "src/dawn/native/vulkan/UtilsVulkan.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/native/EnumMaskIterator.h"
-#include "dawn/native/Format.h"
-#include "dawn/native/Pipeline.h"
-#include "dawn/native/ShaderModule.h"
-#include "dawn/native/vulkan/DeviceVk.h"
-#include "dawn/native/vulkan/Forward.h"
-#include "dawn/native/vulkan/TextureVk.h"
-#include "dawn/native/vulkan/VulkanError.h"
-#include "dawn/native/vulkan/VulkanFunctions.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/native/EnumMaskIterator.h"
+#include "src/dawn/native/Format.h"
+#include "src/dawn/native/Pipeline.h"
+#include "src/dawn/native/ShaderModule.h"
+#include "src/dawn/native/vulkan/DeviceVk.h"
+#include "src/dawn/native/vulkan/Forward.h"
+#include "src/dawn/native/vulkan/TextureVk.h"
+#include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/dawn/native/vulkan/VulkanFunctions.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan {

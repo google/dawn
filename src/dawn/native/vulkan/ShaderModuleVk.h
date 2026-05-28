@@ -35,11 +35,11 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/HashUtils.h"
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/ShaderModule.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/HashUtils.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/ShaderModule.h"
 
 namespace dawn::native {
 

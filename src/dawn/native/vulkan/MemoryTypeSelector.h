@@ -30,9 +30,9 @@
 
 #include <vector>
 
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/EnumClassBitmasks.h"
-#include "dawn/native/vulkan/VulkanInfo.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/EnumClassBitmasks.h"
+#include "src/dawn/native/vulkan/VulkanInfo.h"
 
 namespace dawn::native::vulkan {
 

@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/vulkan/VulkanFunctions.h"
+#include "src/dawn/native/vulkan/VulkanFunctions.h"
 
 #include <string>
 #include <utility>
 
-#include "dawn/common/DynamicLib.h"
-#include "dawn/native/vulkan/VulkanInfo.h"
+#include "src/dawn/common/DynamicLib.h"
+#include "src/dawn/native/vulkan/VulkanInfo.h"
 
 namespace dawn::native::vulkan {
 

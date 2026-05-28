@@ -32,14 +32,14 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/Mutex.h"
-#include "dawn/common/RefCounted.h"
-#include "dawn/common/SerialQueue.h"
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/vulkan/DescriptorSetAllocation.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Mutex.h"
+#include "src/dawn/common/RefCounted.h"
+#include "src/dawn/common/SerialQueue.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/vulkan/DescriptorSetAllocation.h"
 
 namespace dawn::native::vulkan {
 

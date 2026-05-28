@@ -32,11 +32,11 @@
 #include <string_view>
 #include <vector>
 
-#include "dawn/common/StackAllocated.h"
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/StackAllocated.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 struct ProgrammableStage;

@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/vulkan/VulkanExtensions.h"
+#include "src/dawn/native/vulkan/VulkanExtensions.h"
 
 #include <array>
 #include <limits>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/vulkan_platform.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/vulkan_platform.h"
 
 namespace dawn::native::vulkan {
 

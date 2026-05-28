@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/vulkan/ShaderModuleVk.h"
+#include "src/dawn/native/vulkan/ShaderModuleVk.h"
 
 #include <cstdint>
 #include <string>
@@ -34,38 +34,38 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/HashUtils.h"
-#include "dawn/common/MatchVariant.h"
-#include "dawn/common/Ref.h"
-#include "dawn/native/Adapter.h"
-#include "dawn/native/CacheRequest.h"
-#include "dawn/native/ComputePipeline.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/Instance.h"
-#include "dawn/native/PhysicalDevice.h"
-#include "dawn/native/RenderPipeline.h"
-#include "dawn/native/ResourceTable.h"
-#include "dawn/native/ResourceTableDefaultResources.h"
-#include "dawn/native/Serializable.h"
-#include "dawn/native/TintUtils.h"
-#include "dawn/native/utils/WGPUHelpers.h"
-#include "dawn/native/vulkan/BindGroupLayoutVk.h"
-#include "dawn/native/vulkan/DeviceVk.h"
-#include "dawn/native/vulkan/FencedDeleter.h"
-#include "dawn/native/vulkan/ImmediatesLayoutVk.h"
-#include "dawn/native/vulkan/PhysicalDeviceVk.h"
-#include "dawn/native/vulkan/PipelineLayoutVk.h"
-#include "dawn/native/vulkan/UtilsVulkan.h"
-#include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/native/wgpu_structs_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
-#include "dawn/platform/metrics/HistogramMacros.h"
-#include "dawn/platform/tracing/TraceEvent.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/HashUtils.h"
+#include "src/dawn/common/MatchVariant.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/native/Adapter.h"
+#include "src/dawn/native/CacheRequest.h"
+#include "src/dawn/native/ComputePipeline.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Instance.h"
+#include "src/dawn/native/PhysicalDevice.h"
+#include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/ResourceTable.h"
+#include "src/dawn/native/ResourceTableDefaultResources.h"
+#include "src/dawn/native/Serializable.h"
+#include "src/dawn/native/TintUtils.h"
+#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/vulkan/BindGroupLayoutVk.h"
+#include "src/dawn/native/vulkan/DeviceVk.h"
+#include "src/dawn/native/vulkan/FencedDeleter.h"
+#include "src/dawn/native/vulkan/ImmediatesLayoutVk.h"
+#include "src/dawn/native/vulkan/PhysicalDeviceVk.h"
+#include "src/dawn/native/vulkan/PipelineLayoutVk.h"
+#include "src/dawn/native/vulkan/UtilsVulkan.h"
+#include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/dawn/platform/metrics/HistogramMacros.h"
+#include "src/dawn/platform/tracing/TraceEvent.h"
 #include "tint/tint.h"
 
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
-#include "dawn/native/SpirvValidation.h"
+#include "src/dawn/native/SpirvValidation.h"
 #endif
 
 namespace dawn::native::vulkan {

@@ -25,20 +25,20 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
+#include "src/dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 
 #include <algorithm>
 #include <utility>
 
-#include "dawn/common/Math.h"
-#include "dawn/native/BuddyMemoryAllocator.h"
-#include "dawn/native/Queue.h"
-#include "dawn/native/ResourceHeapAllocator.h"
-#include "dawn/native/vulkan/DeviceVk.h"
-#include "dawn/native/vulkan/FencedDeleter.h"
-#include "dawn/native/vulkan/ResourceHeapVk.h"
-#include "dawn/native/vulkan/VulkanError.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/BuddyMemoryAllocator.h"
+#include "src/dawn/native/Queue.h"
+#include "src/dawn/native/ResourceHeapAllocator.h"
+#include "src/dawn/native/vulkan/DeviceVk.h"
+#include "src/dawn/native/vulkan/FencedDeleter.h"
+#include "src/dawn/native/vulkan/ResourceHeapVk.h"
+#include "src/dawn/native/vulkan/VulkanError.h"
 
 namespace dawn::native::vulkan {
 

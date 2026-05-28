@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_VULKANFUNCTIONS_H_
 #define SRC_DAWN_NATIVE_VULKAN_VULKANFUNCTIONS_H_
 
-#include "dawn/common/Compiler.h"
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/Error.h"
+#include "src/dawn/common/Compiler.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/Error.h"
 
 namespace dawn {
 class DynamicLib;

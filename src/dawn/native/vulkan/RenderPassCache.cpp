@@ -25,21 +25,21 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/vulkan/RenderPassCache.h"
+#include "src/dawn/native/vulkan/RenderPassCache.h"
 
 #include <concepts>
 #include <vector>
 
 #include "absl/container/inlined_vector.h"
-#include "dawn/common/Assert.h"
-#include "dawn/common/Enumerator.h"
-#include "dawn/common/HashUtils.h"
-#include "dawn/common/Log.h"
-#include "dawn/common/Range.h"
-#include "dawn/native/vulkan/DeviceVk.h"
-#include "dawn/native/vulkan/TextureVk.h"
-#include "dawn/native/vulkan/UtilsVulkan.h"
-#include "dawn/native/vulkan/VulkanError.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Enumerator.h"
+#include "src/dawn/common/HashUtils.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/Range.h"
+#include "src/dawn/native/vulkan/DeviceVk.h"
+#include "src/dawn/native/vulkan/TextureVk.h"
+#include "src/dawn/native/vulkan/UtilsVulkan.h"
+#include "src/dawn/native/vulkan/VulkanError.h"
 
 namespace dawn::native::vulkan {
 

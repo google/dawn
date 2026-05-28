@@ -31,14 +31,14 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/PassResourceUsage.h"
-#include "dawn/native/ResourceMemoryAllocation.h"
-#include "dawn/native/Texture.h"
-#include "dawn/native/vulkan/ExternalHandle.h"
-#include "dawn/native/vulkan/SharedTextureMemoryVk.h"
-#include "dawn/native/vulkan/external_memory/MemoryService.h"
-#include "dawn/native/vulkan/external_semaphore/SemaphoreService.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/PassResourceUsage.h"
+#include "src/dawn/native/ResourceMemoryAllocation.h"
+#include "src/dawn/native/Texture.h"
+#include "src/dawn/native/vulkan/ExternalHandle.h"
+#include "src/dawn/native/vulkan/SharedTextureMemoryVk.h"
+#include "src/dawn/native/vulkan/external_memory/MemoryService.h"
+#include "src/dawn/native/vulkan/external_semaphore/SemaphoreService.h"
 
 namespace dawn::native::vulkan {
 

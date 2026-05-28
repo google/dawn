@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_IMMEDIATESLAYOUTVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_IMMEDIATESLAYOUTVK_H_
 
-#include "dawn/native/ImmediatesLayout.h"
+#include "src/dawn/native/ImmediatesLayout.h"
 
 namespace dawn::native::vulkan {
 

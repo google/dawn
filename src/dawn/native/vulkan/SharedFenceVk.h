@@ -28,10 +28,10 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_SHAREDTEXTUREFENCEVk_H_
 #define SRC_DAWN_NATIVE_VULKAN_SHAREDTEXTUREFENCEVk_H_
 
-#include "dawn/native/Error.h"
-#include "dawn/native/SharedFence.h"
-#include "dawn/utils/SystemHandle.h"
-#include "utils/platform.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/SharedFence.h"
+#include "src/dawn/utils/SystemHandle.h"
+#include "src/utils/platform.h"
 
 namespace dawn::native::vulkan {
 

@@ -28,12 +28,12 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_FRAMEBUFFER_FETCH_H_
 #define SRC_DAWN_NATIVE_VULKAN_FRAMEBUFFER_FETCH_H_
 
-#include "dawn/common/Ref.h"
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/vulkan/DescriptorSetAllocator.h"
-#include "dawn/native/vulkan/ResourceTableVk.h"
-#include "dawn/native/vulkan/VulkanInfo.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/vulkan/DescriptorSetAllocator.h"
+#include "src/dawn/native/vulkan/ResourceTableVk.h"
+#include "src/dawn/native/vulkan/VulkanInfo.h"
 
 namespace dawn::native::vulkan {
 

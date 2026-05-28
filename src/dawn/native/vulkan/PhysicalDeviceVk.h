@@ -31,10 +31,10 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/common/Ref.h"
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/PhysicalDevice.h"
-#include "dawn/native/vulkan/VulkanInfo.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/PhysicalDevice.h"
+#include "src/dawn/native/vulkan/VulkanInfo.h"
 
 namespace dawn::native {
 class AHBFunctions;

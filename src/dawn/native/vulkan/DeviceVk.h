@@ -33,17 +33,17 @@
 #include <string>
 #include <vector>
 
-#include "dawn/common/MutexProtected.h"
-#include "dawn/common/SerialQueue.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/dawn_platform.h"
-#include "dawn/native/vulkan/CommandRecordingContextVk.h"
-#include "dawn/native/vulkan/DescriptorSetAllocator.h"
-#include "dawn/native/vulkan/Forward.h"
-#include "dawn/native/vulkan/VulkanFunctions.h"
-#include "dawn/native/vulkan/VulkanInfo.h"
-#include "dawn/native/vulkan/external_memory/MemoryService.h"
-#include "dawn/native/vulkan/external_semaphore/SemaphoreService.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/common/SerialQueue.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/dawn_platform.h"
+#include "src/dawn/native/vulkan/CommandRecordingContextVk.h"
+#include "src/dawn/native/vulkan/DescriptorSetAllocator.h"
+#include "src/dawn/native/vulkan/Forward.h"
+#include "src/dawn/native/vulkan/VulkanFunctions.h"
+#include "src/dawn/native/vulkan/VulkanInfo.h"
+#include "src/dawn/native/vulkan/external_memory/MemoryService.h"
+#include "src/dawn/native/vulkan/external_semaphore/SemaphoreService.h"
 
 namespace dawn::native::vulkan {
 

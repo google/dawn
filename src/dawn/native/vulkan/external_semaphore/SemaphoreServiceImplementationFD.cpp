@@ -25,19 +25,19 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementationFD.h"
+#include "src/dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementationFD.h"
 
 #include <unistd.h>
 
 #include <utility>
 
-#include "dawn/native/vulkan/BackendVk.h"
-#include "dawn/native/vulkan/DeviceVk.h"
-#include "dawn/native/vulkan/PhysicalDeviceVk.h"
-#include "dawn/native/vulkan/UtilsVulkan.h"
-#include "dawn/native/vulkan/VulkanError.h"
-#include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementation.h"
-#include "dawn/utils/SystemHandle.h"
+#include "src/dawn/native/vulkan/BackendVk.h"
+#include "src/dawn/native/vulkan/DeviceVk.h"
+#include "src/dawn/native/vulkan/PhysicalDeviceVk.h"
+#include "src/dawn/native/vulkan/UtilsVulkan.h"
+#include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementation.h"
+#include "src/dawn/utils/SystemHandle.h"
 
 static constexpr VkExternalSemaphoreHandleTypeFlagBits kDefaultHandleType =
 #if DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(CHROMEOS)

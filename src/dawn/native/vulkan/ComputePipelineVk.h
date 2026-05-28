@@ -28,13 +28,13 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_COMPUTEPIPELINEVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_COMPUTEPIPELINEVK_H_
 
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/ComputePipeline.h"
-#include "dawn/native/CreatePipelineAsyncEvent.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/vulkan/PipelineLayoutVk.h"
-#include "dawn/native/vulkan/PipelineVk.h"
-#include "dawn/native/vulkan/RefCountedVkHandle.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/ComputePipeline.h"
+#include "src/dawn/native/CreatePipelineAsyncEvent.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/vulkan/PipelineLayoutVk.h"
+#include "src/dawn/native/vulkan/PipelineVk.h"
+#include "src/dawn/native/vulkan/RefCountedVkHandle.h"
 
 namespace dawn::native::vulkan {
 

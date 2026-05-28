@@ -32,13 +32,13 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/MutexProtected.h"
-#include "dawn/common/NonCopyable.h"
-#include "dawn/common/SlabAllocator.h"
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/BindGroupLayoutInternal.h"
-#include "dawn/native/vulkan/BindGroupVk.h"
-#include "dawn/native/vulkan/SamplerVk.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/common/NonCopyable.h"
+#include "src/dawn/common/SlabAllocator.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/BindGroupLayoutInternal.h"
+#include "src/dawn/native/vulkan/BindGroupVk.h"
+#include "src/dawn/native/vulkan/SamplerVk.h"
 
 namespace dawn::native {
 class CacheKey;
