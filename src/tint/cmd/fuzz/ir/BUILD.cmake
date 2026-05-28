@@ -36,7 +36,6 @@
 
 include(cmd/fuzz/ir/as/BUILD.cmake)
 include(cmd/fuzz/ir/dis/BUILD.cmake)
-include(cmd/fuzz/ir/helpers/BUILD.cmake)
 
 if(TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER)
 ################################################################################
@@ -51,7 +50,6 @@ tint_add_target(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
 tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
   tint_api_common
   tint_cmd_fuzz_common
-  tint_cmd_fuzz_ir_helpers
   tint_cmd_fuzz_ir_fuzz
   tint_cmd_fuzz_wgsl_fuzz
   tint_lang_core

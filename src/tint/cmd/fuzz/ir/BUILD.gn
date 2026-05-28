@@ -88,7 +88,6 @@ if (tint_build_ir_binary && tint_build_wgsl_reader) {
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/cmd/fuzz/common",
       "${tint_src_dir}/cmd/fuzz/ir:fuzz",
-      "${tint_src_dir}/cmd/fuzz/ir/helpers",
       "${tint_src_dir}/cmd/fuzz/wgsl:fuzz",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
