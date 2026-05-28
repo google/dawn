@@ -137,6 +137,16 @@ TEST_F(IR_FromProgramTest, EntryPoint) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kFragment);
+    EXPECT_FALSE(m->properties.Contains(core::ir::Property::kAllowMultipleEntryPoints));
+}
+
+TEST_F(IR_FromProgramTest, MultipleEntryPoints) {
+    Func("ep1", tint::Empty, ty.void_(), tint::Empty, Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("ep2", tint::Empty, ty.void_(), tint::Empty, Vector{Stage(ast::PipelineStage::kFragment)});
+
+    auto m = Build();
+    ASSERT_EQ(m, Success);
+    EXPECT_TRUE(m->properties.Contains(core::ir::Property::kAllowMultipleEntryPoints));
 }
 
 TEST_F(IR_FromProgramTest, IfStatement) {

@@ -364,7 +364,6 @@ struct State {
 Result<SuccessType> DecomposeStridedMatrix(core::ir::Module& ir) {
     AssertValid(ir,
                 core::ir::Capabilities{
-                    core::ir::Capability::kAllowMultipleEntryPoints,
                     core::ir::Capability::kAllowStructMatrixDecorations,
                     core::ir::Capability::kAllowNonCoreTypes,
                     core::ir::Capability::kAllowOverrides,

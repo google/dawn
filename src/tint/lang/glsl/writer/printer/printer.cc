@@ -114,6 +114,11 @@ enum class LayoutFormat : uint8_t {
 /// @returns true if @p ident is a GLSL keyword that needs to be avoided
 bool IsKeyword(std::string_view ident);
 
+// The list of properties that are not supported.
+const core::ir::Properties kUnsupportedProperties{
+    core::ir::Property::kAllowMultipleEntryPoints,
+};
+
 /// PIMPL class for the MSL generator
 class Printer : public tint::TextGenerator {
   public:
@@ -125,6 +130,7 @@ class Printer : public tint::TextGenerator {
     /// @returns the generated GLSL shader
     tint::Result<Output> Generate() {
         AssertValid(ir_, kPrinterCapabilities, "before glsl.Printer");
+        AssertNoUnsupportedProperties(ir_, kUnsupportedProperties);
 
         {
             TINT_SCOPED_ASSIGNMENT(current_buffer_, &header_buffer_);

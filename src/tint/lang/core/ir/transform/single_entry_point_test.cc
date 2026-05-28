@@ -41,6 +41,11 @@ namespace {
 
 class IR_SingleEntryPointTest : public TransformTest {
   protected:
+    void SetUp() override {
+        TransformTest::SetUp();
+        mod.properties.Add(core::ir::Property::kAllowMultipleEntryPoints);
+    }
+
     /// @returns a new entry point called @p name that references @p refs
     Function* EntryPoint(const char* name, std::initializer_list<Value*> refs = {}) {
         auto* func = Func(name, std::move(refs));
@@ -100,6 +105,12 @@ TEST_F(IR_SingleEntryPointTest, EntryPointNotFound) {
     auto result = SingleEntryPoint(mod, "foo");
     ASSERT_TRUE(result != Success);
     EXPECT_EQ(result.Failure().reason, "entry point 'foo' not found");
+}
+
+TEST_F(IR_SingleEntryPointTest, MultipleEntryPointPropertyRemoved) {
+    EntryPoint("main");
+    Run(SingleEntryPoint, "main");
+    EXPECT_FALSE(mod.properties.Contains(Property::kAllowMultipleEntryPoints));
 }
 
 TEST_F(IR_SingleEntryPointTest, NoChangesNeeded) {

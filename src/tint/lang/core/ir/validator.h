@@ -28,15 +28,9 @@
 #ifndef SRC_TINT_LANG_CORE_IR_VALIDATOR_H_
 #define SRC_TINT_LANG_CORE_IR_VALIDATOR_H_
 
-#include <vector>
-
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/containers/enum_set.h"
 #include "src/tint/utils/result.h"
-
-// Forward declarations
-namespace tint::core::ir {
-class Module;
-}  // namespace tint::core::ir
 
 namespace tint::core::ir {
 
@@ -55,8 +49,6 @@ enum class Capability : uint8_t {
     kAllowHandleVarsWithoutBindings,
     /// Allows module scoped lets
     kAllowModuleScopeLets,
-    /// Allows multiple entry points in the module.
-    kAllowMultipleEntryPoints,
     /// Allow overrides
     kAllowOverrides,
     /// Allows ref types
@@ -106,14 +98,29 @@ using Capabilities = EnumSet<Capability>;
 /// @param msg the msg to accompany the output
 /// @returns success or failure
 Result<SuccessType> Validate(const Module& mod,
-                             Capabilities capabilities = {},
+                             Capabilities capabilities,
                              std::string_view msg = "");
+
+/// Validates the module @p ir is correctly formed
+/// @param mod the module to validate
+/// @param msg the msg to accompany the output
+/// @returns success or failure
+Result<SuccessType> Validate(const Module& mod, std::string_view msg = "");
 
 /// Validates the module @p ir is correctly formed, iff required by the build configuration.
 /// @param mod the module to transform
 /// @param capabilities the optional capabilities that are allowed
 /// @param msg the msg to accompany the output
-void AssertValid(const Module& mod, Capabilities capabilities = {}, std::string_view msg = "");
+void AssertValid(const Module& mod, Capabilities capabilities, std::string_view msg = "");
+
+/// Validates the module @p ir is correctly formed, iff required by the build configuration.
+/// @param mod the module to transform
+/// @param msg the msg to accompany the output
+void AssertValid(const Module& mod, std::string_view msg = "");
+
+/// Check if @p mod contains any of the properties in @p unsupported_properties.
+/// Raises a Tint ICE with the name of first unsupported property that was found.
+void AssertNoUnsupportedProperties(const Module& mod, Properties unsupported_properties);
 
 }  // namespace tint::core::ir
 

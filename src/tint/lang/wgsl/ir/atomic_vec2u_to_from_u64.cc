@@ -250,7 +250,6 @@ struct State {
 Result<SuccessType> AtomicVec2uToFromU64(core::ir::Module& ir, AtomicVec2uU64Direction direction) {
     core::ir::AssertValid(ir,
                           core::ir::Capabilities{
-                              core::ir::Capability::kAllowMultipleEntryPoints,
                               core::ir::Capability::kAllowOverrides,
                           },
                           "before transform::AtomicVec2uToFromU64");

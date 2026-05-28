@@ -239,5 +239,20 @@ INSTANTIATE_TEST_SUITE_P(FrexpModfResultStructName,
                                          "__modf_result_vec4_f16",
                                          "__modf_result_vec4_f32"));
 
+TEST_F(IRBinaryDecodeTest, MultipleEntryPoints) {
+    b.ComputeFunction("ep1");
+    b.ComputeFunction("ep1");
+
+    auto res = EncodeToProto(mod);
+    ASSERT_EQ(res, Success);
+
+    auto pb_mod = std::move(res.Get());
+
+    auto decoded = Decode(*pb_mod);
+    EXPECT_EQ(decoded, Success);
+
+    EXPECT_TRUE(decoded.Get().properties.Contains(core::ir::Property::kAllowMultipleEntryPoints));
+}
+
 }  // namespace
 }  // namespace tint::core::ir::binary

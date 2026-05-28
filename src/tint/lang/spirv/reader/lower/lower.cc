@@ -67,7 +67,6 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
 
     core::ir::AssertValid(mod,
                           core::ir::Capabilities{
-                              core::ir::Capability::kAllowMultipleEntryPoints,
                               core::ir::Capability::kAllowOverrides,
                           },
                           "after spirv.Lower");

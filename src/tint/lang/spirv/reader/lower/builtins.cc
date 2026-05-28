@@ -1311,7 +1311,6 @@ struct State {
 Result<SuccessType> Builtins(core::ir::Module& ir) {
     AssertValid(ir,
                 core::ir::Capabilities{
-                    core::ir::Capability::kAllowMultipleEntryPoints,
                     core::ir::Capability::kAllowOverrides,
                     core::ir::Capability::kAllowNonCoreTypes,
                     core::ir::Capability::kAllowStructMatrixDecorations,

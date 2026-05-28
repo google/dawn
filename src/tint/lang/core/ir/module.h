@@ -55,10 +55,30 @@ namespace tint::core::ir {
 /// Enumerator of IR properties which can either add or subtract functionality from the core IR.
 /// The IR validator will reject use of any non-core IR functionality when the module does not
 /// contain the corresponding property.
-enum class Property : uint8_t {};
+enum class Property : uint8_t {
+    /// Allows multiple entry points in the module.
+    kAllowMultipleEntryPoints,
+};
 
 /// Properties is a set of Property values.
 using Properties = EnumSet<Property>;
+
+/// Prints the Property @p p to @p o
+/// @param o the stream to write to
+/// @param p the Property
+/// @return the stream so calls can be chained
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
+auto& operator<<(STREAM& out, Property p) {
+#define CASE(p)          \
+    case Property::k##p: \
+        return out << #p
+    switch (p) {  //
+        CASE(AllowMultipleEntryPoints);
+    }
+#undef CASE
+    return out << "<unknown>";
+}
 
 /// Main module class for the IR.
 class Module {

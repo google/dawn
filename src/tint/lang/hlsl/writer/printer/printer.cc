@@ -154,6 +154,11 @@ StringStream& operator<<(StringStream& s, const RegisterAndSpace& rs) {
     return s;
 }
 
+// The list of properties that are not supported.
+const core::ir::Properties kUnsupportedProperties{
+    core::ir::Property::kAllowMultipleEntryPoints,
+};
+
 /// PIMPL class for the HLSL generator
 class Printer : public tint::TextGenerator {
   public:
@@ -164,7 +169,8 @@ class Printer : public tint::TextGenerator {
 
     /// @returns the generated HLSL shader
     tint::Result<Output> Generate() {
-        core::ir::AssertValid(ir_, kPrinterCapabilities, "before hlsl.Printer");
+        AssertValid(ir_, kPrinterCapabilities, "before hlsl.Printer");
+        AssertNoUnsupportedProperties(ir_, kUnsupportedProperties);
 
         // Emit module-scope declarations.
         EmitRootBlock(ir_.root_block);

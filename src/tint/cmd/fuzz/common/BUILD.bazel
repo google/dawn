@@ -66,6 +66,7 @@ cc_library(
     "//src/tint/utils/bytes",
     "//src/tint/utils/command",
     "//src/tint/utils/containers",
+    "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
@@ -73,6 +74,7 @@ cc_library(
     "//src/tint/utils/reflection",
     "//src/tint/utils/rtti",
     "//src/tint/utils/strconv",
+    "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/utils",
   ] + select({

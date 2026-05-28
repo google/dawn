@@ -181,6 +181,11 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
         [&](Default) { return ty; });
 }
 
+// The list of properties that are not supported.
+const core::ir::Properties kUnsupportedProperties{
+    core::ir::Property::kAllowMultipleEntryPoints,
+};
+
 /// PIMPL class for SPIR-V writer
 class Printer {
   public:
@@ -295,6 +300,7 @@ class Printer {
     /// Builds the SPIR-V from the IR
     Result<SuccessType> Generate() {
         AssertValid(ir_, kPrinterCapabilities, "before spirv.Printer");
+        AssertNoUnsupportedProperties(ir_, kUnsupportedProperties);
 
         module_.PushCapability(SpvCapabilityShader);
 

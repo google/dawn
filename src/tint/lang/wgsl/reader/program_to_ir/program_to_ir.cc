@@ -176,6 +176,9 @@ class Impl {
     /// The current stack of scopes being processed.
     ScopeStack<Symbol, core::ir::Value*> scopes_;
 
+    /// The number of entry points that have been emitted.
+    uint32_t entry_point_count = 0;
+
     /// The diagnostic that have been raised.
     diag::List diagnostics_;
 
@@ -263,6 +266,11 @@ class Impl {
                 TINT_ICE_ON_NO_MATCH);
         }
 
+        // Set properties that are used by the generated module.
+        if (entry_point_count > 1) {
+            mod.properties.Add(core::ir::Property::kAllowMultipleEntryPoints);
+        }
+
         if (diagnostics_.ContainsErrors()) {
             return diag::Failure{std::move(diagnostics_)};
         }
@@ -282,6 +290,7 @@ class Impl {
         scopes_.Set(ast_func->name->symbol, ir_func);
 
         if (ast_func->IsEntryPoint()) {
+            entry_point_count++;
             switch (ast_func->PipelineStage()) {
                 case ast::PipelineStage::kVertex:
                     ir_func->SetStage(core::ir::Function::PipelineStage::kVertex);

@@ -178,6 +178,9 @@ class Parser {
             }
         }
 
+        // Set properties that are supported by the SPIR-V parser.
+        ir_.properties.Add(core::ir::Property::kAllowMultipleEntryPoints);
+
         RegisterNames();
 
         id_stack_.emplace_back();

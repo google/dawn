@@ -601,6 +601,8 @@ TEST_F(IR_ValidatorTest, Var_Immediate_Multiple_SameEntryPoint) {
 }
 
 TEST_F(IR_ValidatorTest, Var_Immediate_Multiple_DifferentEntryPoints) {
+    mod.properties.Add(Property::kAllowMultipleEntryPoints);
+
     auto* v1 = b.Var<immediate, u32>();
     auto* v2 = b.Var<immediate, u32>();
     mod.root_block->Append(v1);
@@ -618,7 +620,7 @@ TEST_F(IR_ValidatorTest, Var_Immediate_Multiple_DifferentEntryPoints) {
         b.Return(f2);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowMultipleEntryPoints});
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -686,6 +688,8 @@ TEST_F(IR_ValidatorTest, Var_DuplicateBindingPoints_OnlyOneReferenced) {
 }
 
 TEST_F(IR_ValidatorTest, Var_DuplicateBindingPoints_ReferencedInDifferentFunctions) {
+    mod.properties.Add(Property::kAllowMultipleEntryPoints);
+
     auto* var_a = b.Var<uniform, f32>();
     var_a->SetBindingPoint(1, 2);
     mod.root_block->Append(var_a);
@@ -706,7 +710,7 @@ TEST_F(IR_ValidatorTest, Var_DuplicateBindingPoints_ReferencedInDifferentFunctio
         b.Return(func_b);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowMultipleEntryPoints});
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success);
 }
 

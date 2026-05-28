@@ -61,6 +61,7 @@ tint_target_add_dependencies(tint_cmd_fuzz_common lib
   tint_utils_bytes
   tint_utils_command
   tint_utils_containers
+  tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
   tint_utils_math
@@ -68,6 +69,7 @@ tint_target_add_dependencies(tint_cmd_fuzz_common lib
   tint_utils_reflection
   tint_utils_rtti
   tint_utils_strconv
+  tint_utils_symbol
   tint_utils_text
 )
 

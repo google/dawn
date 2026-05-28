@@ -998,7 +998,7 @@ class Validator {
     /// Create a core validator
     /// @param mod the module to be validated
     /// @param capabilities the optional capabilities that are allowed
-    explicit Validator(const Module& mod, Capabilities capabilities);
+    explicit Validator(const Module& mod, Capabilities capabilities = {});
 
     /// Destructor
     ~Validator();
@@ -2653,10 +2653,10 @@ void Validator::CheckFunction(const Function* func) {
 
     if (func->IsEntryPoint()) {
         // Check that there is at most one entry point unless we allow multiple entry points.
-        if (!capabilities_.Contains(Capability::kAllowMultipleEntryPoints)) {
+        if (!mod_.properties.Contains(Property::kAllowMultipleEntryPoints)) {
             if (!entry_point_names_.IsEmpty()) {
                 AddError(func) << "a module with multiple entry points requires the "
-                                  "AllowMultipleEntryPoints capability";
+                                  "AllowMultipleEntryPoints property";
                 return;
             }
         }
@@ -5360,12 +5360,20 @@ const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* in
 
 }  // namespace
 
+/// TODO(crbug.com/512904070): Remove this when transition to properties is complete.
 Result<SuccessType> Validate(const Module& mod, Capabilities capabilities, std::string_view msg) {
     DumpIRIfEnabled(mod, msg);
     Validator v(mod, capabilities);
     return v.Run();
 }
 
+Result<SuccessType> Validate(const Module& mod, std::string_view msg) {
+    DumpIRIfEnabled(mod, msg);
+    Validator v(mod);
+    return v.Run();
+}
+
+/// TODO(crbug.com/512904070): Remove this when transition to properties is complete.
 void AssertValid(const Module& mod,
                  [[maybe_unused]] Capabilities capabilities,
                  std::string_view msg) {
@@ -5383,6 +5391,28 @@ void AssertValid(const Module& mod,
         }
     }
 #endif
+}
+
+void AssertValid(const Module& mod, std::string_view msg) {
+    DumpIRIfEnabled(mod, msg);
+
+#if TINT_ENABLE_IR_VALIDATION_ASSERTS
+    if (mod.enable_validation_asserts) {
+        Validator v(mod);
+        auto result = v.Run();
+        if (result != Success) {
+            TINT_ICE() << "\n========================================================="
+                       << "\n== IR validation failed " << msg << ":"
+                       << "\n=========================================================\n"
+                       << result.Failure().reason;
+        }
+    }
+#endif
+}
+
+void AssertNoUnsupportedProperties(const Module& mod, Properties unsupported_properties) {
+    auto check = mod.properties & unsupported_properties;
+    TINT_IR_ASSERT(mod, check.Empty()) << "unsupported property '" << *check.begin() << "'";
 }
 
 }  // namespace tint::core::ir

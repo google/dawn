@@ -43,7 +43,6 @@ const core::ir::Capabilities kRemoveTerminatorArgsCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow16BitIntegers,
     core::ir::Capability::kAllow64BitIntegers,
-    core::ir::Capability::kAllowMultipleEntryPoints,
     core::ir::Capability::kAllowOverrides,
     core::ir::Capability::kAllowPointSizeBuiltin,
     core::ir::Capability::kAllowVectorElementPointer,
