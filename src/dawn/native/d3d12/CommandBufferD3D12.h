@@ -28,8 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_COMMANDBUFFERD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_COMMANDBUFFERD3D12_H_
 
-#include "dawn/native/CommandBuffer.h"
-#include "dawn/native/Error.h"
+#include "src/dawn/native/CommandBuffer.h"
+#include "src/dawn/native/Error.h"
 
 namespace dawn::native {
 struct BeginComputePassCmd;

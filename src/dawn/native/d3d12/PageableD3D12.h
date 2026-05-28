@@ -28,10 +28,10 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_PAGEABLED3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_PAGEABLED3D12_H_
 
-#include "dawn/common/LinkedList.h"
 #include "dawn/native/D3D12Backend.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "src/dawn/common/LinkedList.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
 // This class is used to represent ID3D12Pageable allocations, and also serves as a node within

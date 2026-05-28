@@ -30,7 +30,7 @@
 
 #include <cstdint>
 
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
 

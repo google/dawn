@@ -31,11 +31,11 @@
 #include <memory>
 
 #include "dawn/native/D3D12Backend.h"
-#include "dawn/native/PooledResourceMemoryAllocator.h"
-#include "dawn/native/ResourceHeapAllocator.h"
-#include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/native/PooledResourceMemoryAllocator.h"
+#include "src/dawn/native/ResourceHeapAllocator.h"
+#include "src/dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
+#include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
 

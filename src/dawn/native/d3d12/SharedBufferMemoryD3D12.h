@@ -31,10 +31,10 @@
 #include <memory>
 
 #include "dawn/native/D3D12Backend.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/SharedBufferMemory.h"
-#include "dawn/native/d3d12/HeapD3D12.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/SharedBufferMemory.h"
+#include "src/dawn/native/d3d12/HeapD3D12.h"
+#include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
 class Device;

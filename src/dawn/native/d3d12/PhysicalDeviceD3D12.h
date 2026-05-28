@@ -28,10 +28,10 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_PHYSICALDEVICED3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_PHYSICALDEVICED3D12_H_
 
-#include "dawn/native/PhysicalDevice.h"
-#include "dawn/native/d3d/PhysicalDeviceD3D.h"
-#include "dawn/native/d3d12/D3D12Info.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "src/dawn/native/PhysicalDevice.h"
+#include "src/dawn/native/d3d/PhysicalDeviceD3D.h"
+#include "src/dawn/native/d3d12/D3D12Info.h"
+#include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
 

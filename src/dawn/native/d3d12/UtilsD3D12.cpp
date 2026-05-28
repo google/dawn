@@ -25,21 +25,21 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/d3d12/UtilsD3D12.h"
+#include "src/dawn/native/d3d12/UtilsD3D12.h"
 
 #include <stringapiset.h>
 
 #include <utility>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Range.h"
-#include "dawn/native/CommandValidation.h"
-#include "dawn/native/Format.h"
-#include "dawn/native/d3d/D3DError.h"
-#include "dawn/native/d3d12/BufferD3D12.h"
-#include "dawn/native/d3d12/CommandRecordingContext.h"
-#include "dawn/native/d3d12/DeviceD3D12.h"
-#include "dawn/native/d3d12/TextureCopySplitter.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Range.h"
+#include "src/dawn/native/CommandValidation.h"
+#include "src/dawn/native/Format.h"
+#include "src/dawn/native/d3d/D3DError.h"
+#include "src/dawn/native/d3d12/BufferD3D12.h"
+#include "src/dawn/native/d3d12/CommandRecordingContext.h"
+#include "src/dawn/native/d3d12/DeviceD3D12.h"
+#include "src/dawn/native/d3d12/TextureCopySplitter.h"
 
 namespace dawn::native::d3d12 {
 

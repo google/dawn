@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/d3d12/RenderPassBuilderD3D12.h"
+#include "src/dawn/native/d3d12/RenderPassBuilderD3D12.h"
 
 #include <algorithm>
 
-#include "dawn/native/Format.h"
-#include "dawn/native/d3d12/CommandBufferD3D12.h"
-#include "dawn/native/d3d12/Forward.h"
-#include "dawn/native/d3d12/TextureD3D12.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/native/Format.h"
+#include "src/dawn/native/d3d12/CommandBufferD3D12.h"
+#include "src/dawn/native/d3d12/Forward.h"
+#include "src/dawn/native/d3d12/TextureD3D12.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native::d3d12 {
 

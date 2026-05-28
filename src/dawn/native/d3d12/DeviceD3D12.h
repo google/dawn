@@ -31,14 +31,14 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/common/MutexProtected.h"
-#include "dawn/common/SerialQueue.h"
-#include "dawn/native/d3d/DeviceD3D.h"
-#include "dawn/native/d3d12/CommandRecordingContext.h"
-#include "dawn/native/d3d12/D3D12Info.h"
-#include "dawn/native/d3d12/Forward.h"
-#include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
-#include "dawn/native/d3d12/TextureD3D12.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/common/SerialQueue.h"
+#include "src/dawn/native/d3d/DeviceD3D.h"
+#include "src/dawn/native/d3d12/CommandRecordingContext.h"
+#include "src/dawn/native/d3d12/D3D12Info.h"
+#include "src/dawn/native/d3d12/Forward.h"
+#include "src/dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
+#include "src/dawn/native/d3d12/TextureD3D12.h"
 
 namespace dawn::native::d3d12 {
 

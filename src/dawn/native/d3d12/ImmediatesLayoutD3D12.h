@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_IMMEDIATESLAYOUTD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_IMMEDIATESLAYOUTD3D12_H_
 
-#include "dawn/native/ImmediatesLayout.h"
+#include "src/dawn/native/ImmediatesLayout.h"
 
 namespace dawn::native::d3d12 {
 

@@ -25,11 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/d3d12/TextureCopySplitter.h"
+#include "src/dawn/native/d3d12/TextureCopySplitter.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/native/Format.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/native/Format.h"
+#include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
 

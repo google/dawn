@@ -30,12 +30,12 @@
 
 #include <vector>
 
-#include "dawn/common/Constants.h"
-#include "dawn/common/ityp_array.h"
-#include "dawn/common/ityp_vector.h"
-#include "dawn/native/BindingInfo.h"
-#include "dawn/native/PipelineLayout.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/ityp_array.h"
+#include "src/dawn/common/ityp_vector.h"
+#include "src/dawn/native/BindingInfo.h"
+#include "src/dawn/native/PipelineLayout.h"
+#include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
 

@@ -33,11 +33,11 @@
 #include <string>
 #include <vector>
 
-#include "dawn/native/Blob.h"
-#include "dawn/native/Serializable.h"
-#include "dawn/native/ShaderModule.h"
-#include "dawn/native/d3d/ShaderUtils.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "src/dawn/native/Blob.h"
+#include "src/dawn/native/Serializable.h"
+#include "src/dawn/native/ShaderModule.h"
+#include "src/dawn/native/d3d/ShaderUtils.h"
+#include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native {
 struct ProgrammableStage;

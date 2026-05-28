@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_D3D12INFO_H_
 #define SRC_DAWN_NATIVE_D3D12_D3D12INFO_H_
 
-#include "dawn/native/Error.h"
-#include "dawn/native/PerStage.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/PerStage.h"
+#include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
 

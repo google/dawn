@@ -32,13 +32,13 @@
 #include <vector>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/PassResourceUsage.h"
-#include "dawn/native/Texture.h"
-#include "dawn/native/d3d12/IntegerTypes.h"
-#include "dawn/native/d3d12/ResourceHeapAllocationD3D12.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/PassResourceUsage.h"
+#include "src/dawn/native/Texture.h"
+#include "src/dawn/native/d3d12/IntegerTypes.h"
+#include "src/dawn/native/d3d12/ResourceHeapAllocationD3D12.h"
+#include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native {
 namespace d3d {

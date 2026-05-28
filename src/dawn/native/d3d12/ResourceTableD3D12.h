@@ -31,10 +31,10 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/native/Error.h"
-#include "dawn/native/ResourceTable.h"
-#include "dawn/native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
-#include "dawn/native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/ResourceTable.h"
+#include "src/dawn/native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
+#include "src/dawn/native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
 
 namespace dawn::native::d3d12 {
 
