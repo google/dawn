@@ -34,12 +34,12 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/hash/hash.h"
-#include "dawn/common/LinkedList.h"
-#include "dawn/common/MutexProtected.h"
-#include "dawn/native/d3d/QueueD3D.h"
-#include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
-#include "dawn/native/d3d11/Forward.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/LinkedList.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/native/d3d/QueueD3D.h"
+#include "src/dawn/native/d3d11/CommandRecordingContextD3D11.h"
+#include "src/dawn/native/d3d11/Forward.h"
 
 namespace dawn::native::d3d11 {
 

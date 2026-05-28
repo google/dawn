@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D11_COMMANDBUFFERD3D11_H_
 #define SRC_DAWN_NATIVE_D3D11_COMMANDBUFFERD3D11_H_
 
-#include "dawn/native/CommandBuffer.h"
+#include "src/dawn/native/CommandBuffer.h"
 
 namespace dawn::native {
 enum class Command;

@@ -30,8 +30,8 @@
 
 #include <vector>
 
-#include "dawn/native/QuerySet.h"
-#include "dawn/native/d3d/d3d_platform.h"
+#include "src/dawn/native/QuerySet.h"
+#include "src/dawn/native/d3d/d3d_platform.h"
 
 namespace dawn::native::d3d11 {
 

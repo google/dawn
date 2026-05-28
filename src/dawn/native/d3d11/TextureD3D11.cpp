@@ -25,31 +25,31 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/d3d11/TextureD3D11.h"
+#include "src/dawn/native/d3d11/TextureD3D11.h"
 
 #include <algorithm>
 #include <string>
 #include <utility>
 
-#include "dawn/common/Constants.h"
-#include "dawn/common/Math.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/CommandBuffer.h"
-#include "dawn/native/CommandValidation.h"
-#include "dawn/native/DynamicUploader.h"
-#include "dawn/native/EnumMaskIterator.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/Queue.h"
-#include "dawn/native/ToBackend.h"
-#include "dawn/native/d3d/D3DError.h"
-#include "dawn/native/d3d/UtilsD3D.h"
-#include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
-#include "dawn/native/d3d11/DeviceD3D11.h"
-#include "dawn/native/d3d11/Forward.h"
-#include "dawn/native/d3d11/QueueD3D11.h"
-#include "dawn/native/d3d11/SharedFenceD3D11.h"
-#include "dawn/native/d3d11/SharedTextureMemoryD3D11.h"
-#include "dawn/native/d3d11/UtilsD3D11.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/CommandBuffer.h"
+#include "src/dawn/native/CommandValidation.h"
+#include "src/dawn/native/DynamicUploader.h"
+#include "src/dawn/native/EnumMaskIterator.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/Queue.h"
+#include "src/dawn/native/ToBackend.h"
+#include "src/dawn/native/d3d/D3DError.h"
+#include "src/dawn/native/d3d/UtilsD3D.h"
+#include "src/dawn/native/d3d11/CommandRecordingContextD3D11.h"
+#include "src/dawn/native/d3d11/DeviceD3D11.h"
+#include "src/dawn/native/d3d11/Forward.h"
+#include "src/dawn/native/d3d11/QueueD3D11.h"
+#include "src/dawn/native/d3d11/SharedFenceD3D11.h"
+#include "src/dawn/native/d3d11/SharedTextureMemoryD3D11.h"
+#include "src/dawn/native/d3d11/UtilsD3D11.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::d3d11 {

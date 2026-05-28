@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/d3d11/CommandBufferD3D11.h"
+#include "src/dawn/native/d3d11/CommandBufferD3D11.h"
 
 #include <algorithm>
 #include <array>
@@ -33,32 +33,32 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/BitSetRangeIterator.h"
-#include "dawn/common/WindowsUtils.h"
-#include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/CommandEncoder.h"
-#include "dawn/native/CommandValidation.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/ExternalTexture.h"
-#include "dawn/native/ImmediatesTracker.h"
-#include "dawn/native/Queue.h"
-#include "dawn/native/RenderBundle.h"
-#include "dawn/native/d3d/D3DError.h"
-#include "dawn/native/d3d11/BindGroupTrackerD3D11.h"
-#include "dawn/native/d3d11/BufferD3D11.h"
-#include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
-#include "dawn/native/d3d11/ComputePipelineD3D11.h"
-#include "dawn/native/d3d11/DeviceD3D11.h"
-#include "dawn/native/d3d11/Forward.h"
-#include "dawn/native/d3d11/ImmediatesLayoutD3D11.h"
-#include "dawn/native/d3d11/PipelineLayoutD3D11.h"
-#include "dawn/native/d3d11/PipelineStateTrackerD3D11.h"
-#include "dawn/native/d3d11/QuerySetD3D11.h"
-#include "dawn/native/d3d11/RenderPipelineD3D11.h"
-#include "dawn/native/d3d11/TextureD3D11.h"
-#include "dawn/native/d3d11/UtilsD3D11.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/BitSetRangeIterator.h"
+#include "src/dawn/common/WindowsUtils.h"
+#include "src/dawn/native/ApplyClearColorValueWithDrawHelper.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/CommandEncoder.h"
+#include "src/dawn/native/CommandValidation.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/ExternalTexture.h"
+#include "src/dawn/native/ImmediatesTracker.h"
+#include "src/dawn/native/Queue.h"
+#include "src/dawn/native/RenderBundle.h"
+#include "src/dawn/native/d3d/D3DError.h"
+#include "src/dawn/native/d3d11/BindGroupTrackerD3D11.h"
+#include "src/dawn/native/d3d11/BufferD3D11.h"
+#include "src/dawn/native/d3d11/CommandRecordingContextD3D11.h"
+#include "src/dawn/native/d3d11/ComputePipelineD3D11.h"
+#include "src/dawn/native/d3d11/DeviceD3D11.h"
+#include "src/dawn/native/d3d11/Forward.h"
+#include "src/dawn/native/d3d11/ImmediatesLayoutD3D11.h"
+#include "src/dawn/native/d3d11/PipelineLayoutD3D11.h"
+#include "src/dawn/native/d3d11/PipelineStateTrackerD3D11.h"
+#include "src/dawn/native/d3d11/QuerySetD3D11.h"
+#include "src/dawn/native/d3d11/RenderPipelineD3D11.h"
+#include "src/dawn/native/d3d11/TextureD3D11.h"
+#include "src/dawn/native/d3d11/UtilsD3D11.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::d3d11 {

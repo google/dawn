@@ -33,11 +33,11 @@
 
 #include "absl/container/inlined_vector.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/PassResourceUsage.h"
-#include "dawn/native/Texture.h"
-#include "dawn/native/d3d/d3d_platform.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/PassResourceUsage.h"
+#include "src/dawn/native/Texture.h"
+#include "src/dawn/native/d3d/d3d_platform.h"
 
 namespace dawn::native {
 struct CopyTextureToTextureCmd;

@@ -34,13 +34,13 @@
 #include <utility>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/Atomic.h"
-#include "dawn/common/ityp_array.h"
-#include "dawn/native/Buffer.h"
-#include "dawn/native/d3d/d3d_platform.h"
-#include "dawn/native/d3d11/Forward.h"
-#include "dawn/native/d3d11/QueueD3D11.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Atomic.h"
+#include "src/dawn/common/ityp_array.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/d3d/d3d_platform.h"
+#include "src/dawn/native/d3d11/Forward.h"
+#include "src/dawn/native/d3d11/QueueD3D11.h"
 
 namespace dawn::native::d3d11 {
 

@@ -31,9 +31,9 @@
 #include <vector>
 
 #include "absl/container/inlined_vector.h"
-#include "dawn/native/BindGroupTracker.h"
-#include "dawn/native/d3d/d3d_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/native/BindGroupTracker.h"
+#include "src/dawn/native/d3d/d3d_platform.h"
 
 namespace dawn::native::d3d11 {
 
