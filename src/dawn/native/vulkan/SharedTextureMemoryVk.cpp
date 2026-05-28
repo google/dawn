@@ -226,6 +226,15 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     const VkExternalMemoryHandleTypeFlagBits handleType =
         VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT;
 
+    const CombinedLimits& limits = device->GetLimits();
+    DAWN_INVALID_IF(
+        descriptor->size.width == 0 || descriptor->size.width > limits.v1.maxTextureDimension2D,
+        "Resource width (%u) is zero or exceeds maxTextureDimension2D (%u).",
+        descriptor->size.width, limits.v1.maxTextureDimension2D);
+    DAWN_INVALID_IF(
+        descriptor->size.height == 0 || descriptor->size.height > limits.v1.maxTextureDimension2D,
+        "Resource height (%u) is zero or exceeds maxTextureDimension2D (%u).",
+        descriptor->size.height, limits.v1.maxTextureDimension2D);
     DAWN_INVALID_IF(descriptor->size.depthOrArrayLayers != 1, "depthOrArrayLayers was not 1.");
 
     SharedTextureMemoryProperties properties;
