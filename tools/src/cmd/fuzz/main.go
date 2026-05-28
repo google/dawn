@@ -459,6 +459,10 @@ func runCorpusGeneratorIr(t *taskConfig) error {
 	defer cancel()
 
 	args := []string{tmp, t.out}
+	if t.verbose {
+		args = append(args, "--verbose")
+	}
+
 	cmdStr := fmt.Sprintf("%s %s", t.assembler, strings.Join(args, " "))
 
 	if t.verbose {
