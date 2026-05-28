@@ -88,15 +88,15 @@
 #include <vector>
 
 #include "GLFW/glfw3.h"
-#include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
 #include "dawn/dawn_proc.h"  // nogncheck
 #include "dawn/native/DawnNative.h"
-#include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/CommandLineParser.h"
-#include "dawn/utils/WGPUHelpers.h"
 #include "dawn/webgpu_cpp_print.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "src/dawn/utils/CommandLineParser.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 #include "webgpu/webgpu_glfw.h"
 

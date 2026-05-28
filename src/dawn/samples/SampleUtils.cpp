@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/samples/SampleUtils.h"
+#include "src/dawn/samples/SampleUtils.h"
 
 #include <algorithm>
 #include <cstring>
@@ -36,14 +36,14 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
-#include "dawn/common/SystemUtils.h"
-#include "dawn/utils/CommandLineParser.h"
-#include "dawn/utils/SystemUtils.h"
-#include "dawn/utils/WGPUHelpers.h"
 #include "dawn/webgpu_cpp_print.h"
-#include "utils/platform.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/SystemUtils.h"
+#include "src/dawn/utils/CommandLineParser.h"
+#include "src/dawn/utils/SystemUtils.h"
+#include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/platform.h"
 
 #ifndef __EMSCRIPTEN__
 #include "GLFW/glfw3.h"
