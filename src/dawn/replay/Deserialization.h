@@ -36,7 +36,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "dawn/replay/Error.h"
+#include "src/dawn/replay/Error.h"
 
 namespace dawn::replay {
 
@@ -232,7 +232,7 @@ constexpr int kInternalVisitableUnusedForComma = 0;
 #define DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(CmdName, CMD_MEMBERS) \
     DAWN_REPLAY_MAKE_CMD_AND_CMD_DATA(RootCommand, CmdName, CMD_MEMBERS)
 
-#include "dawn/serialization/Schema.h"
+#include "src/dawn/serialization/Schema.h"
 
 }  // namespace dawn::replay
 

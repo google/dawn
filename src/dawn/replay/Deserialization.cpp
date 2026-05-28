@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/replay/Deserialization.h"
+#include "src/dawn/replay/Deserialization.h"
 
 #include <cstdint>
 #include <span>
 #include <string>
 
-#include "dawn/replay/ReadHead.h"
+#include "src/dawn/replay/ReadHead.h"
 
 namespace dawn::replay {
 

@@ -25,11 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/replay/Error.h"
+#include "src/dawn/replay/Error.h"
 
-#include "dawn/common/Log.h"
-#include "dawn/common/SystemUtils.h"
-#include "utils/force_crash.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/SystemUtils.h"
+#include "src/utils/force_crash.h"
 
 namespace dawn::replay {
 

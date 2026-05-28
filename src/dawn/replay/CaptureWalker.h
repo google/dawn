@@ -33,8 +33,8 @@
 #include <variant>
 #include <vector>
 
-#include "dawn/replay/Deserialization.h"
-#include "dawn/replay/ReadHead.h"
+#include "src/dawn/replay/Deserialization.h"
+#include "src/dawn/replay/ReadHead.h"
 
 namespace dawn::replay {
 

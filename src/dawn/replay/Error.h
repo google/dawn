@@ -34,7 +34,7 @@
 #include <utility>
 
 #include "absl/strings/str_format.h"
-#include "dawn/common/Result.h"
+#include "src/dawn/common/Result.h"
 
 namespace dawn::replay {
 

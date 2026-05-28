@@ -41,13 +41,13 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/Constants.h"
-#include "dawn/replay/BlitBufferToDepthTexture.h"
-#include "dawn/replay/Capture.h"
-#include "dawn/replay/Deserialization.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/replay/BlitBufferToDepthTexture.h"
+#include "src/dawn/replay/Capture.h"
+#include "src/dawn/replay/Deserialization.h"
 #include "src/dawn/replay/ReplayImpl.h"
 #include "src/dawn/replay/SurfaceDiscovery.h"
-#include "utils/platform.h"
+#include "src/utils/platform.h"
 
 namespace dawn::replay {
 

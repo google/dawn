@@ -32,7 +32,7 @@
 #include <variant>
 #include <vector>
 
-#include "dawn/replay/Deserialization.h"
+#include "src/dawn/replay/Deserialization.h"
 
 namespace dawn::replay {
 
