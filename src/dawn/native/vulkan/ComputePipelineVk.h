@@ -83,7 +83,7 @@ class ComputePipeline final : public ComputePipelineBase {
     // specialization has mHandle cached directly but mHandle is also kept separately for
     // efficiency.
     bool mRequiresSpecialization = false;
-    absl::flat_hash_map<Specialization, SpecializationResult> mSpecializations;
+    MutexProtected<absl::flat_hash_map<Specialization, SpecializationResult>> mSpecializations;
 };
 
 }  // namespace dawn::native::vulkan

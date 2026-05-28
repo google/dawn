@@ -420,7 +420,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     DAWN_TRY_ASSIGN(r, InitializeSpecialization(specialization, buildCacheKey));
     mHandles = {.pipeline = r.pipeline->Get(), .layout = r.layout->Get()};
 
-    mSpecializations.emplace(std::move(specialization), std::move(r));
+    mSpecializations->emplace(std::move(specialization), std::move(r));
 
     return {};
 }
@@ -434,9 +434,16 @@ ResultOrError<PipelineHandles> RenderPipeline::GetOrCreateSpecializedHandle(
             AttachmentCount(GetColorAttachmentsMask());
     }
 
-    if (auto it = mSpecializations.find(specialization); it != mSpecializations.end()) {
-        return PipelineHandles{.pipeline = it->second.pipeline->Get(),
-                               .layout = it->second.layout->Get()};
+    if (auto specialized =
+            mSpecializations.ConstUse([&](auto specializations) -> std::optional<PipelineHandles> {
+                if (auto it = specializations->find(specialization); it != specializations->end()) {
+                    return PipelineHandles{.pipeline = it->second.pipeline->Get(),
+                                           .layout = it->second.layout->Get()};
+                }
+                return std::nullopt;
+            });
+        specialized) {
+        return *specialized;
     }
 
     // Do no make a new cache key, so that the VkPipelineCache from InitializeImpl is used for all
@@ -444,10 +451,16 @@ ResultOrError<PipelineHandles> RenderPipeline::GetOrCreateSpecializedHandle(
     SpecializationResult r;
     DAWN_TRY_ASSIGN(r, InitializeSpecialization(specialization, /*buildCacheKey=*/false));
 
-    auto handles = PipelineHandles{.pipeline = r.pipeline->Get(), .layout = r.layout->Get()};
+    return mSpecializations.Use([&](auto specializations) -> ResultOrError<PipelineHandles> {
+        auto handles = PipelineHandles{.pipeline = r.pipeline->Get(), .layout = r.layout->Get()};
 
-    mSpecializations.emplace(std::move(specialization), std::move(r));
-    return handles;
+        auto [it, inserted] = specializations->insert({specialization, r});
+        if (!inserted) {
+            return PipelineHandles{.pipeline = it->second.pipeline->Get(),
+                                   .layout = it->second.layout->Get()};
+        }
+        return handles;
+    });
 }
 
 ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSpecialization(
@@ -1017,7 +1030,7 @@ RenderPipeline::~RenderPipeline() = default;
 void RenderPipeline::DestroyImpl(DestroyReason reason) {
     RenderPipelineBase::DestroyImpl(reason);
 
-    mSpecializations.clear();
+    mSpecializations->clear();
 
     // Handles were owned by refs in mSpecializations that were just deleted.
     mHandles = {};
