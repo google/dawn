@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/fuzzers/DawnWireServerFuzzer.h"
+#include "src/dawn/fuzzers/DawnWireServerFuzzer.h"
 
 #include <webgpu/webgpu_cpp.h>
 
@@ -33,15 +33,15 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/DynamicLib.h"
-#include "dawn/common/Log.h"
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/utils/SystemUtils.h"
 #include "dawn/wire/WireServer.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/DynamicLib.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/common/SystemUtils.h"
+#include "src/dawn/utils/SystemUtils.h"
 #include "src/utils/compiler.h"
 
 namespace {
