@@ -33,13 +33,13 @@
 #include <string>
 #include <vector>
 
-#include "dawn/common/Constants.h"
-#include "dawn/common/Ref.h"
-#include "dawn/native/AttachmentState.h"
-#include "dawn/native/BindingInfo.h"
-#include "dawn/native/BlockInfo.h"
-#include "dawn/native/Texture.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/native/AttachmentState.h"
+#include "src/dawn/native/BindingInfo.h"
+#include "src/dawn/native/BlockInfo.h"
+#include "src/dawn/native/Texture.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

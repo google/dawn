@@ -31,12 +31,12 @@
 #include <memory>
 #include <variant>
 
-#include "dawn/common/NonMovable.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/ityp_span.h"
-#include "dawn/common/ityp_vector.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/Sampler.h"
+#include "src/dawn/common/NonMovable.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/ityp_span.h"
+#include "src/dawn/common/ityp_vector.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/Sampler.h"
 
 namespace tint {
 enum class ResourceType : uint32_t;

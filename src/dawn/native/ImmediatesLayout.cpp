@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/ImmediatesLayout.h"
+#include "src/dawn/native/ImmediatesLayout.h"
 
 namespace dawn::native {
 uint32_t GetImmediateIndexInPipeline(const uint32_t layoutOffset,

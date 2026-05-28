@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/RenderPassEncoder.h"
+#include "src/dawn/native/RenderPassEncoder.h"
 
 #include <math.h>
 
@@ -33,17 +33,17 @@
 #include <cstring>
 #include <utility>
 
-#include "dawn/native/Adapter.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/CommandEncoder.h"
-#include "dawn/native/CommandValidation.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/Device.h"
 #include "dawn/native/ObjectType_autogen.h"
-#include "dawn/native/QuerySet.h"
-#include "dawn/native/RenderBundle.h"
-#include "dawn/native/RenderPipeline.h"
-#include "dawn/native/ValidationUtils.h"
+#include "src/dawn/native/Adapter.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/CommandEncoder.h"
+#include "src/dawn/native/CommandValidation.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/QuerySet.h"
+#include "src/dawn/native/RenderBundle.h"
+#include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/ValidationUtils.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

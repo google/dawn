@@ -33,7 +33,7 @@
 
 #import <QuartzCore/CAMetalLayer.h>
 
-#include "utils/platform.h"
+#include "src/utils/platform.h"
 
 namespace dawn::native {
 

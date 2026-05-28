@@ -30,10 +30,10 @@
 
 #include <utility>
 
-#include "dawn/native/VisitableMembers.h"
-#include "dawn/native/stream/BlobSource.h"
-#include "dawn/native/stream/ByteVectorSink.h"
-#include "dawn/native/stream/Stream.h"
+#include "src/dawn/native/VisitableMembers.h"
+#include "src/dawn/native/stream/BlobSource.h"
+#include "src/dawn/native/stream/ByteVectorSink.h"
+#include "src/dawn/native/stream/Stream.h"
 
 namespace dawn::native {
 

@@ -33,9 +33,9 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/ityp_bitset.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/native/Serializable.h"
+#include "src/dawn/common/ityp_bitset.h"
+#include "src/dawn/native/Serializable.h"
 
 namespace dawn::native {
 

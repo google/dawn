@@ -28,8 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_SUBRESOURCE_H_
 #define SRC_DAWN_NATIVE_SUBRESOURCE_H_
 
-#include "dawn/native/EnumClassBitmasks.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/native/EnumClassBitmasks.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

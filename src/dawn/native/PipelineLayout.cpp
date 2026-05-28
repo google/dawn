@@ -25,26 +25,26 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/PipelineLayout.h"
+#include "src/dawn/native/PipelineLayout.h"
 
 #include <algorithm>
 #include <memory>
 #include <utility>
 
 #include "absl/container/inlined_vector.h"
-#include "dawn/common/Assert.h"
-#include "dawn/common/Enumerator.h"
-#include "dawn/common/MatchVariant.h"
-#include "dawn/common/Math.h"
-#include "dawn/common/Range.h"
-#include "dawn/native/BindGroupLayout.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/CommandValidation.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/Instance.h"
-#include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/ObjectType_autogen.h"
-#include "dawn/native/ShaderModule.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Enumerator.h"
+#include "src/dawn/common/MatchVariant.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/common/Range.h"
+#include "src/dawn/native/BindGroupLayout.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/CommandValidation.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Instance.h"
+#include "src/dawn/native/ObjectContentHasher.h"
+#include "src/dawn/native/ShaderModule.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {
@@ -371,9 +371,7 @@ BindGroupLayoutEntry ConvertMetadataToEntry(
             entry.buffer.type = bindingInfo.type;
             entry.buffer.minBindingSize = bindingInfo.minBindingSize;
         },
-        [&](const SamplerBindingInfo& bindingInfo) {
-            entry.sampler.type = bindingInfo.type;
-        },
+        [&](const SamplerBindingInfo& bindingInfo) { entry.sampler.type = bindingInfo.type; },
         [&](const TextureBindingInfo& bindingInfo) {
             entry.texture.sampleType = bindingInfo.sampleType;
             entry.texture.viewDimension = bindingInfo.viewDimension;

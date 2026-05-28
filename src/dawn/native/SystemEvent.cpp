@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/SystemEvent.h"
+#include "src/dawn/native/SystemEvent.h"
 
 #include <limits>
 
-#include "dawn/common/Assert.h"
-#include "dawn/utils/SystemHandle.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/utils/SystemHandle.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include "dawn/common/windows_with_undefs.h"
+#include "src/dawn/common/windows_with_undefs.h"
 #elif DAWN_PLATFORM_IS(FUCHSIA)
 #include <poll.h>
 #include <unistd.h>
@@ -46,7 +46,7 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/native/EventManager.h"
+#include "src/dawn/native/EventManager.h"
 
 namespace dawn::native {
 

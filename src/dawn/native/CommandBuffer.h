@@ -32,14 +32,14 @@
 #include <type_traits>
 #include <vector>
 
-#include "dawn/native/CommandAllocator.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/IndirectDrawMetadata.h"
-#include "dawn/native/ObjectBase.h"
-#include "dawn/native/PassResourceUsage.h"
-#include "dawn/native/Texture.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/native/CommandAllocator.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/IndirectDrawMetadata.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/PassResourceUsage.h"
+#include "src/dawn/native/Texture.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

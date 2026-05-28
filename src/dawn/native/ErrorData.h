@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "absl/strings/str_format.h"
-#include "dawn/common/Compiler.h"
+#include "src/dawn/common/Compiler.h"
 
 namespace wgpu {
 enum class ErrorType : uint32_t;

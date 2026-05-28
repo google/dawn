@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/ResourceTableDefaultResources.h"
+#include "src/dawn/native/ResourceTableDefaultResources.h"
 
-#include "dawn/common/ityp_array.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/ResourceTable.h"
-#include "dawn/native/Texture.h"
+#include "src/dawn/common/ityp_array.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/ResourceTable.h"
+#include "src/dawn/native/Texture.h"
 #include "tint/tint.h"
 
 namespace dawn::native {

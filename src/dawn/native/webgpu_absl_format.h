@@ -31,8 +31,8 @@
 #include <optional>
 
 #include "absl/strings/str_format.h"
-#include "dawn/native/dawn_platform.h"
 #include "dawn/native/webgpu_absl_format_autogen.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::detail {
 template <typename Tag, typename T>

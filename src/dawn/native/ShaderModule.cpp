@@ -25,33 +25,33 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/ShaderModule.h"
+#include "src/dawn/native/ShaderModule.h"
 
 #include <algorithm>
 #include <limits>
 #include <sstream>
 #include <utility>
 
-#include "dawn/common/Constants.h"
-#include "dawn/common/MatchVariant.h"
-#include "dawn/common/Sha3.h"
-#include "dawn/native/BindGroupLayoutInternal.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/CompilationMessages.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Instance.h"
-#include "dawn/native/ObjectContentHasher.h"
-#include "dawn/native/Pipeline.h"
-#include "dawn/native/PipelineLayout.h"
-#include "dawn/native/RenderPipeline.h"
-#include "dawn/native/Sampler.h"
-#include "dawn/native/ShaderModuleParseRequest.h"
-#include "dawn/native/TintUtils.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/MatchVariant.h"
+#include "src/dawn/common/Sha3.h"
+#include "src/dawn/native/BindGroupLayoutInternal.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/CompilationMessages.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Instance.h"
+#include "src/dawn/native/ObjectContentHasher.h"
+#include "src/dawn/native/Pipeline.h"
+#include "src/dawn/native/PipelineLayout.h"
+#include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/Sampler.h"
+#include "src/dawn/native/ShaderModuleParseRequest.h"
+#include "src/dawn/native/TintUtils.h"
 #include "src/utils/compiler.h"
 
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
-#include "dawn/native/SpirvValidation.h"
+#include "src/dawn/native/SpirvValidation.h"
 #endif
 
 #include "tint/tint.h"

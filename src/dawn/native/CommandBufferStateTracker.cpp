@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/CommandBufferStateTracker.h"
+#include "src/dawn/native/CommandBufferStateTracker.h"
 
 #include <bit>
 #include <limits>
@@ -36,14 +36,14 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/inlined_vector.h"
-#include "dawn/common/Assert.h"
-#include "dawn/common/Math.h"
-#include "dawn/native/BindGroup.h"
-#include "dawn/native/ComputePassEncoder.h"
-#include "dawn/native/ComputePipeline.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/PipelineLayout.h"
-#include "dawn/native/RenderPipeline.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/BindGroup.h"
+#include "src/dawn/native/ComputePassEncoder.h"
+#include "src/dawn/native/ComputePipeline.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/PipelineLayout.h"
+#include "src/dawn/native/RenderPipeline.h"
 #include "src/utils/compiler.h"
 
 // TODO(dawn:563): None of the error messages in this file include the buffer objects they are

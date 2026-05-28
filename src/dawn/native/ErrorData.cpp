@@ -25,16 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/ErrorData.h"
+#include "src/dawn/native/ErrorData.h"
 
 #include <utility>
 
-#include "dawn/common/Log.h"
-#include "dawn/common/SystemUtils.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/ObjectBase.h"
-#include "dawn/native/dawn_platform.h"
-#include "utils/force_crash.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/SystemUtils.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/dawn_platform.h"
+#include "src/utils/force_crash.h"
 
 namespace dawn::native {
 

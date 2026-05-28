@@ -32,8 +32,8 @@
 #include <string>
 #include <vector>
 
-#include "dawn/native/AsyncTask.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/native/AsyncTask.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

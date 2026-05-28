@@ -36,10 +36,10 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/RefCounted.h"
-#include "dawn/common/Time.h"
-#include "dawn/native/SystemEvent.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/RefCounted.h"
+#include "src/dawn/common/Time.h"
+#include "src/dawn/native/SystemEvent.h"
 
 namespace dawn::native {
 

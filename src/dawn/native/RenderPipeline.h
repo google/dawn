@@ -32,13 +32,13 @@
 #include <bitset>
 #include <vector>
 
-#include "dawn/common/ContentLessObjectCacheable.h"
-#include "dawn/native/AttachmentState.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/ImmediatesLayout.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/Pipeline.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/ContentLessObjectCacheable.h"
+#include "src/dawn/native/AttachmentState.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/ImmediatesLayout.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/Pipeline.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

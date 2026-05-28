@@ -34,9 +34,9 @@
 #include <type_traits>
 
 #include "absl/strings/str_format.h"
-#include "dawn/common/Math.h"
 #include "dawn/native/ChainUtils_autogen.h"
-#include "dawn/native/Error.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/Error.h"
 
 namespace dawn::native {
 namespace detail {

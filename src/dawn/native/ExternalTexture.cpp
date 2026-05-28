@@ -25,18 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/ExternalTexture.h"
+#include "src/dawn/native/ExternalTexture.h"
 
 #include <algorithm>
 #include <utility>
 
-#include "dawn/native/Buffer.h"
-#include "dawn/native/Device.h"
 #include "dawn/native/ObjectType_autogen.h"
-#include "dawn/native/Queue.h"
-#include "dawn/native/Texture.h"
-#include "dawn/native/dawn_platform.h"
-#include "dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Queue.h"
+#include "src/dawn/native/Texture.h"
+#include "src/dawn/native/dawn_platform.h"
+#include "src/dawn/native/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

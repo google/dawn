@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/Pipeline.h"
+#include "src/dawn/native/Pipeline.h"
 
 #include <algorithm>
 #include <set>
@@ -33,15 +33,15 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/string_view.h"
-#include "dawn/common/Constants.h"
-#include "dawn/common/Enumerator.h"
-#include "dawn/native/BindGroupLayout.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/ImmediatesLayout.h"
-#include "dawn/native/ObjectBase.h"
-#include "dawn/native/ObjectContentHasher.h"
-#include "dawn/native/PipelineLayout.h"
-#include "dawn/native/ShaderModule.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Enumerator.h"
+#include "src/dawn/native/BindGroupLayout.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/ImmediatesLayout.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/ObjectContentHasher.h"
+#include "src/dawn/native/PipelineLayout.h"
+#include "src/dawn/native/ShaderModule.h"
 #include "src/utils/compiler.h"
 #include "src/utils/numeric.h"
 

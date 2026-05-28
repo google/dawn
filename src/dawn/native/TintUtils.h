@@ -31,14 +31,14 @@
 #include <functional>
 #include <unordered_map>
 
-#include "dawn/common/MatchVariant.h"
-#include "dawn/common/NonCopyable.h"
-#include "dawn/native/BindGroupLayoutInternal.h"
-#include "dawn/native/BindingInfo.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/PipelineLayout.h"
-#include "dawn/native/ShaderModule.h"
-#include "dawn/native/stream/Stream.h"
+#include "src/dawn/common/MatchVariant.h"
+#include "src/dawn/common/NonCopyable.h"
+#include "src/dawn/native/BindGroupLayoutInternal.h"
+#include "src/dawn/native/BindingInfo.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/PipelineLayout.h"
+#include "src/dawn/native/ShaderModule.h"
+#include "src/dawn/native/stream/Stream.h"
 #include "tint/tint.h"
 
 namespace dawn::native {

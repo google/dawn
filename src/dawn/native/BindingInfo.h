@@ -33,15 +33,15 @@
 #include <variant>
 #include <vector>
 
-#include "dawn/common/Constants.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/ityp_array.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Format.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/PerStage.h"
-#include "dawn/native/Serializable.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/ityp_array.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Format.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/PerStage.h"
+#include "src/dawn/native/Serializable.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

@@ -25,19 +25,19 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/BlobCache.h"
+#include "src/dawn/native/BlobCache.h"
 
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include <utility>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/StringViewUtils.h"
 #include "dawn/dawn_version.h"
-#include "dawn/native/CacheKey.h"
-#include "dawn/native/Instance.h"
 #include "dawn/platform/DawnPlatform.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/native/CacheKey.h"
+#include "src/dawn/native/Instance.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

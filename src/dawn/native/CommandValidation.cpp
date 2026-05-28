@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/CommandValidation.h"
+#include "src/dawn/native/CommandValidation.h"
 
 #include <algorithm>
 #include <array>
@@ -34,21 +34,21 @@
 #include <string>
 #include <utility>
 
-#include "dawn/common/Numeric.h"
-#include "dawn/native/BindGroup.h"
-#include "dawn/native/Buffer.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/CommandBufferStateTracker.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/Instance.h"
-#include "dawn/native/PassResourceUsage.h"
-#include "dawn/native/PhysicalDevice.h"
-#include "dawn/native/QuerySet.h"
-#include "dawn/native/RenderBundle.h"
-#include "dawn/native/RenderPipeline.h"
 #include "dawn/native/ValidationUtils_autogen.h"
-#include "dawn/native/webgpu_absl_format.h"
+#include "src/dawn/common/Numeric.h"
+#include "src/dawn/native/BindGroup.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/CommandBufferStateTracker.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Instance.h"
+#include "src/dawn/native/PassResourceUsage.h"
+#include "src/dawn/native/PhysicalDevice.h"
+#include "src/dawn/native/QuerySet.h"
+#include "src/dawn/native/RenderBundle.h"
+#include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/webgpu_absl_format.h"
 
 namespace dawn::native {
 

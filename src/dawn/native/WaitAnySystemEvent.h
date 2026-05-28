@@ -32,10 +32,10 @@
 #include <utility>
 
 #include "src/utils/compiler.h"
-#include "utils/platform.h"
+#include "src/utils/platform.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include "dawn/common/windows_with_undefs.h"
+#include "src/dawn/common/windows_with_undefs.h"
 #elif DAWN_PLATFORM_IS(FUCHSIA)
 #include <poll.h>
 #include <unistd.h>
@@ -45,8 +45,8 @@
 #endif
 
 #include "absl/container/inlined_vector.h"
-#include "dawn/common/Log.h"
-#include "dawn/native/SystemEvent.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/native/SystemEvent.h"
 
 namespace dawn::native {
 

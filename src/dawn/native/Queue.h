@@ -31,19 +31,19 @@
 #include <memory>
 
 #include "absl/container/flat_hash_set.h"
-#include "dawn/common/MutexProtected.h"
-#include "dawn/common/SerialMap.h"
-#include "dawn/common/WeakRefSupport.h"
-#include "dawn/native/CallbackTaskManager.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/ExecutionQueue.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/ObjectBase.h"
-#include "dawn/native/dawn_platform.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/common/SerialMap.h"
+#include "src/dawn/common/WeakRefSupport.h"
+#include "src/dawn/native/CallbackTaskManager.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/ExecutionQueue.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

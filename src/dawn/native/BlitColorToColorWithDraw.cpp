@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/BlitColorToColorWithDraw.h"
+#include "src/dawn/native/BlitColorToColorWithDraw.h"
 
 #include <limits>
 #include <sstream>
@@ -33,19 +33,19 @@
 #include <utility>
 
 #include "absl/container/inlined_vector.h"
-#include "dawn/common/Assert.h"
-#include "dawn/common/Enumerator.h"
-#include "dawn/common/HashUtils.h"
-#include "dawn/common/Strings.h"
-#include "dawn/native/BindGroup.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/CommandEncoder.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/InternalPipelineStore.h"
-#include "dawn/native/RenderPassEncoder.h"
-#include "dawn/native/RenderPipeline.h"
-#include "dawn/native/utils/WGPUHelpers.h"
-#include "dawn/native/webgpu_absl_format.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Enumerator.h"
+#include "src/dawn/common/HashUtils.h"
+#include "src/dawn/common/Strings.h"
+#include "src/dawn/native/BindGroup.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/CommandEncoder.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/InternalPipelineStore.h"
+#include "src/dawn/native/RenderPassEncoder.h"
+#include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/webgpu_absl_format.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

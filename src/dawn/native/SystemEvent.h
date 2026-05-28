@@ -31,12 +31,12 @@
 #include <optional>
 #include <utility>
 
-#include "dawn/common/MutexProtected.h"
-#include "dawn/common/NonCopyable.h"
-#include "dawn/common/RefCounted.h"
-#include "dawn/common/Time.h"
-#include "dawn/utils/SystemHandle.h"
-#include "utils/platform.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/common/NonCopyable.h"
+#include "src/dawn/common/RefCounted.h"
+#include "src/dawn/common/Time.h"
+#include "src/dawn/utils/SystemHandle.h"
+#include "src/utils/platform.h"
 
 namespace dawn::native {
 

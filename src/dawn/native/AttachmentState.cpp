@@ -25,18 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/AttachmentState.h"
+#include "src/dawn/native/AttachmentState.h"
 
 #include <bit>
 
-#include "dawn/common/Enumerator.h"
-#include "dawn/common/Log.h"
-#include "dawn/common/ityp_span.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/ObjectContentHasher.h"
-#include "dawn/native/PipelineLayout.h"
-#include "dawn/native/Texture.h"
+#include "src/dawn/common/Enumerator.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/ityp_span.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/ObjectContentHasher.h"
+#include "src/dawn/native/PipelineLayout.h"
+#include "src/dawn/native/Texture.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

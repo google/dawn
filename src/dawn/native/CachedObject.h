@@ -31,8 +31,8 @@
 #include <cstddef>
 #include <string>
 
-#include "dawn/native/CacheKey.h"
-#include "dawn/native/Forward.h"
+#include "src/dawn/native/CacheKey.h"
+#include "src/dawn/native/Forward.h"
 
 namespace dawn::native {
 

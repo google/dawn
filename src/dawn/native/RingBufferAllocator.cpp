@@ -25,11 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/RingBufferAllocator.h"
+#include "src/dawn/native/RingBufferAllocator.h"
 
 #include <utility>
 
-#include "dawn/common/Math.h"
+#include "src/dawn/common/Math.h"
 
 // Note: Current RingBufferAllocator implementation uses two indices (start and end) to implement a
 // circular queue. However, this approach defines a full queue when one element is still unused.

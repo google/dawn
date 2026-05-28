@@ -32,11 +32,11 @@
 #include <string>
 #include <vector>
 
-#include "dawn/common/MutexProtected.h"
-#include "dawn/common/NonCopyable.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Serializable.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/common/NonCopyable.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Serializable.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace tint::diag {
 class Diagnostic;

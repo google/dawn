@@ -34,12 +34,12 @@
 #include <string>
 #include <type_traits>
 
-#include "dawn/common/Ref.h"
-#include "dawn/native/CallbackTaskManager.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/EventManager.h"
-#include "dawn/native/Pipeline.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/native/CallbackTaskManager.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/EventManager.h"
+#include "src/dawn/native/Pipeline.h"
 
 namespace dawn::native {
 

@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/Features.h"
+#include "src/dawn/native/Features.h"
 
 #include <array>
 #include <utility>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/ityp_array.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/ityp_array.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

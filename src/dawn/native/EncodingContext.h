@@ -33,14 +33,14 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/native/CommandAllocator.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/ErrorData.h"
-#include "dawn/native/IndirectDrawMetadata.h"
 #include "dawn/native/ObjectType_autogen.h"
-#include "dawn/native/PassResourceUsageTracker.h"
-#include "dawn/native/dawn_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/native/CommandAllocator.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/ErrorData.h"
+#include "src/dawn/native/IndirectDrawMetadata.h"
+#include "src/dawn/native/PassResourceUsageTracker.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

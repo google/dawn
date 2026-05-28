@@ -25,16 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/ExecutionQueue.h"
+#include "src/dawn/native/ExecutionQueue.h"
 
 #include <algorithm>
 #include <atomic>
 #include <utility>
 #include <vector>
 
-#include "dawn/common/Atomic.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/Error.h"
+#include "src/dawn/common/Atomic.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Error.h"
 
 namespace dawn::native {
 namespace {

@@ -25,26 +25,26 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/Instance.h"
+#include "src/dawn/native/Instance.h"
 
 #include <utility>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/FutureUtils.h"
-#include "dawn/common/GPUInfo.h"
-#include "dawn/common/Log.h"
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/common/SystemUtils.h"
-#include "dawn/common/WGSLFeatureMapping.h"
-#include "dawn/native/CallbackTaskManager.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/ErrorData.h"
-#include "dawn/native/Surface.h"
-#include "dawn/native/Toggles.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/FutureUtils.h"
+#include "src/dawn/common/GPUInfo.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/common/SystemUtils.h"
+#include "src/dawn/common/WGSLFeatureMapping.h"
+#include "src/dawn/native/CallbackTaskManager.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/ErrorData.h"
+#include "src/dawn/native/Surface.h"
+#include "src/dawn/native/Toggles.h"
 #include "src/utils/compiler.h"
 
 // For SwiftShader fallback
@@ -54,8 +54,8 @@
 
 #if defined(DAWN_ENABLE_BACKEND_D3D11) || defined(DAWN_ENABLE_BACKEND_D3D12)
 #include "dawn/native/D3DBackend.h"
-#include "dawn/native/d3d/BackendD3D.h"
-#include "dawn/native/d3d/D3DError.h"
+#include "src/dawn/native/d3d/BackendD3D.h"
+#include "src/dawn/native/d3d/D3DError.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_D3D11) || defined(DAWN_ENABLE_BACKEND_D3D12)
 
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
@@ -63,7 +63,7 @@
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 
 #if defined(DAWN_USE_X11)
-#include "dawn/native/X11Functions.h"
+#include "src/dawn/native/X11Functions.h"
 #endif  // defined(DAWN_USE_X11)
 
 namespace dawn::native {

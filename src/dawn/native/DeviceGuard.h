@@ -31,10 +31,10 @@
 #include <mutex>
 #include <optional>
 
-#include "dawn/common/Compiler.h"
-#include "dawn/common/Defer.h"
-#include "dawn/common/MutexProtected.h"
-#include "dawn/common/Ref.h"
+#include "src/dawn/common/Compiler.h"
+#include "src/dawn/common/Defer.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/common/Ref.h"
 
 namespace dawn::native {
 

@@ -25,17 +25,17 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/IndirectDrawMetadata.h"
+#include "src/dawn/native/IndirectDrawMetadata.h"
 
 #include <algorithm>
 #include <cstdint>
 #include <tuple>
 #include <utility>
 
-#include "dawn/common/Constants.h"
-#include "dawn/native/IndirectDrawValidationEncoder.h"
-#include "dawn/native/Limits.h"
-#include "dawn/native/RenderBundle.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/native/IndirectDrawValidationEncoder.h"
+#include "src/dawn/native/Limits.h"
+#include "src/dawn/native/RenderBundle.h"
 
 namespace dawn::native {
 

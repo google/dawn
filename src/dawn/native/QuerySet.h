@@ -28,11 +28,11 @@
 #ifndef SRC_DAWN_NATIVE_QUERYSET_H_
 #define SRC_DAWN_NATIVE_QUERYSET_H_
 
-#include "dawn/common/ityp_vector.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/ObjectBase.h"
+#include "src/dawn/common/ityp_vector.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/ObjectBase.h"
 
 namespace dawn::native {
 

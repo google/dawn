@@ -30,8 +30,8 @@
 
 #include <android/hardware_buffer.h>
 
-#include "dawn/common/DynamicLib.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/DynamicLib.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

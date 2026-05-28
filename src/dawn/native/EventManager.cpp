@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/EventManager.h"
+#include "src/dawn/native/EventManager.h"
 
 #include <algorithm>
 #include <functional>
@@ -34,16 +34,16 @@
 #include <vector>
 
 #include "absl/strings/str_format.h"
-#include "dawn/common/Assert.h"
-#include "dawn/common/Atomic.h"
-#include "dawn/common/FutureUtils.h"
-#include "dawn/common/Log.h"
-#include "dawn/common/NonMovable.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/Instance.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/Queue.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Atomic.h"
+#include "src/dawn/common/FutureUtils.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/NonMovable.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Instance.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/Queue.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

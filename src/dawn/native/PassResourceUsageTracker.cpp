@@ -25,19 +25,19 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/PassResourceUsageTracker.h"
+#include "src/dawn/native/PassResourceUsageTracker.h"
 
 #include <utility>
 
-#include "dawn/common/MatchVariant.h"
-#include "dawn/native/BindGroup.h"
-#include "dawn/native/Buffer.h"
-#include "dawn/native/EnumMaskIterator.h"
-#include "dawn/native/ExternalTexture.h"
-#include "dawn/native/Format.h"
-#include "dawn/native/QuerySet.h"
-#include "dawn/native/TexelBufferView.h"
-#include "dawn/native/Texture.h"
+#include "src/dawn/common/MatchVariant.h"
+#include "src/dawn/native/BindGroup.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/EnumMaskIterator.h"
+#include "src/dawn/native/ExternalTexture.h"
+#include "src/dawn/native/Format.h"
+#include "src/dawn/native/QuerySet.h"
+#include "src/dawn/native/TexelBufferView.h"
+#include "src/dawn/native/Texture.h"
 
 namespace dawn::native {
 

@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/DynamicUploader.h"
+#include "src/dawn/native/DynamicUploader.h"
 
 #include <atomic>
 #include <utility>
 
-#include "dawn/common/Math.h"
-#include "dawn/native/Buffer.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/Queue.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Queue.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

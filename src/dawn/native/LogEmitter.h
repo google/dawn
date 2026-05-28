@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/native/dawn_platform.h"
 
 // LogEmitter is an abstract class that only expose log emitting ability.
 class LogEmitter {

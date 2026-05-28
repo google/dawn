@@ -31,8 +31,8 @@
 #include <limits>
 #include <memory>
 
-#include "dawn/common/SerialQueue.h"
-#include "dawn/native/IntegerTypes.h"
+#include "src/dawn/common/SerialQueue.h"
+#include "src/dawn/native/IntegerTypes.h"
 
 // RingBufferAllocator is the front-end implementation used to manage a ring buffer in GPU memory.
 namespace dawn::native {

@@ -31,15 +31,15 @@
 #include <memory>
 #include <string>
 
-#include "dawn/native/Error.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/ObjectBase.h"
-#include "dawn/native/dawn_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "utils/platform.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/dawn_platform.h"
+#include "src/utils/platform.h"
 
 #if defined(DAWN_USE_WINDOWS_UI)
-#include "dawn/native/d3d/d3d_platform.h"
+#include "src/dawn/native/d3d/d3d_platform.h"
 #endif  // defined(DAWN_USE_WINDOWS_UI)
 
 // Forward declare IUnknown

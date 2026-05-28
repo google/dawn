@@ -34,19 +34,19 @@
 #include <string>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/Constants.h"
-#include "dawn/common/ContentLessObjectCacheable.h"
-#include "dawn/common/Range.h"
-#include "dawn/common/SlabAllocator.h"
-#include "dawn/common/ityp_span.h"
-#include "dawn/common/ityp_vector.h"
-#include "dawn/native/BindingInfo.h"
-#include "dawn/native/CachedObject.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/ObjectBase.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/ContentLessObjectCacheable.h"
+#include "src/dawn/common/Range.h"
+#include "src/dawn/common/SlabAllocator.h"
+#include "src/dawn/common/ityp_span.h"
+#include "src/dawn/common/ityp_vector.h"
+#include "src/dawn/native/BindingInfo.h"
+#include "src/dawn/native/CachedObject.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

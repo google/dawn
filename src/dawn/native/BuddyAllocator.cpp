@@ -25,10 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/BuddyAllocator.h"
+#include "src/dawn/native/BuddyAllocator.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Math.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Math.h"
 
 namespace dawn::native {
 

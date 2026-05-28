@@ -31,10 +31,10 @@
 #include <deque>
 #include <memory>
 
-#include "dawn/common/SerialQueue.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/ResourceHeapAllocator.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/SerialQueue.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/ResourceHeapAllocator.h"
 
 namespace dawn::native {
 

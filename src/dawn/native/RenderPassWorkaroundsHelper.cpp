@@ -25,20 +25,20 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/RenderPassWorkaroundsHelper.h"
+#include "src/dawn/native/RenderPassWorkaroundsHelper.h"
 
 #include <utility>
 #include <vector>
 
 #include "absl/container/inlined_vector.h"
-#include "dawn/common/Assert.h"
-#include "dawn/native/AttachmentState.h"
-#include "dawn/native/BlitColorToColorWithDraw.h"
-#include "dawn/native/CommandEncoder.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/PhysicalDevice.h"
-#include "dawn/native/Texture.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/native/AttachmentState.h"
+#include "src/dawn/native/BlitColorToColorWithDraw.h"
+#include "src/dawn/native/CommandEncoder.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/PhysicalDevice.h"
+#include "src/dawn/native/Texture.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

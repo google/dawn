@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/TintUtils.h"
+#include "src/dawn/native/TintUtils.h"
 
-#include "dawn/native/BindGroupLayoutInternal.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/Pipeline.h"
-#include "dawn/native/PipelineLayout.h"
-#include "dawn/native/RenderPipeline.h"
+#include "src/dawn/native/BindGroupLayoutInternal.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Pipeline.h"
+#include "src/dawn/native/PipelineLayout.h"
+#include "src/dawn/native/RenderPipeline.h"
 #include "tint/tint.h"
 
 namespace dawn::native {

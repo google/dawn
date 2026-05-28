@@ -32,14 +32,14 @@
 #include <bitset>
 #include <vector>
 
-#include "dawn/common/Constants.h"
-#include "dawn/common/ContentLessObjectCacheable.h"
-#include "dawn/common/RefCounted.h"
-#include "dawn/common/ityp_array.h"
-#include "dawn/common/ityp_bitset.h"
-#include "dawn/native/CachedObject.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/ContentLessObjectCacheable.h"
+#include "src/dawn/common/RefCounted.h"
+#include "src/dawn/common/ityp_array.h"
+#include "src/dawn/common/ityp_bitset.h"
+#include "src/dawn/native/CachedObject.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

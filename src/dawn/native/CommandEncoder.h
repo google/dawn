@@ -32,14 +32,14 @@
 #include <vector>
 
 #include "absl/container/flat_hash_set.h"
-#include "dawn/common/NonMovable.h"
-#include "dawn/common/StackAllocated.h"
-#include "dawn/native/EncodingContext.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/ObjectBase.h"
-#include "dawn/native/PassResourceUsage.h"
-#include "dawn/native/dawn_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/NonMovable.h"
+#include "src/dawn/common/StackAllocated.h"
+#include "src/dawn/native/EncodingContext.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/PassResourceUsage.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

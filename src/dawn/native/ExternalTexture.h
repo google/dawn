@@ -30,11 +30,11 @@
 
 #include <array>
 
-#include "dawn/common/Algebra.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/ObjectBase.h"
-#include "dawn/native/Subresource.h"
+#include "src/dawn/common/Algebra.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/Subresource.h"
 
 namespace dawn::native {
 

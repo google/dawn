@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/RenderBundle.h"
+#include "src/dawn/native/RenderBundle.h"
 
 #include <utility>
 
 #include "absl/strings/str_format.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/Device.h"
 #include "dawn/native/ObjectType_autogen.h"
-#include "dawn/native/RenderBundleEncoder.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/RenderBundleEncoder.h"
 
 namespace dawn::native {
 

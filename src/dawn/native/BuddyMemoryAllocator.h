@@ -31,10 +31,10 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/native/BuddyAllocator.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/ResourceMemoryAllocation.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/native/BuddyAllocator.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/ResourceMemoryAllocation.h"
 
 namespace dawn::native {
 

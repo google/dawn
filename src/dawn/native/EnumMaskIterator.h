@@ -28,8 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_ENUMMASKITERATOR_H_
 #define SRC_DAWN_NATIVE_ENUMMASKITERATOR_H_
 
-#include "dawn/common/ityp_bitset.h"
-#include "dawn/native/EnumClassBitmasks.h"
+#include "src/dawn/common/ityp_bitset.h"
+#include "src/dawn/native/EnumClassBitmasks.h"
 
 namespace dawn::native {
 

@@ -30,9 +30,9 @@
 
 #include <cstdint>
 
-#include "dawn/common/Constants.h"
-#include "dawn/common/TypedInteger.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/TypedInteger.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::ityp {
 template <typename Index, typename Value, size_t Size>

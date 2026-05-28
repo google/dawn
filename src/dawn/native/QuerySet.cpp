@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/QuerySet.h"
+#include "src/dawn/native/QuerySet.h"
 
-#include "dawn/common/Range.h"
-#include "dawn/native/Device.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/ValidationUtils_autogen.h"
+#include "src/dawn/common/Range.h"
+#include "src/dawn/native/Device.h"
 
 namespace dawn::native {
 

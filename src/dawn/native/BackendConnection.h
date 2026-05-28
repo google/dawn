@@ -31,11 +31,11 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/common/NonMovable.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/native/PhysicalDevice.h"
-#include "dawn/native/Toggles.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/NonMovable.h"
+#include "src/dawn/native/PhysicalDevice.h"
+#include "src/dawn/native/Toggles.h"
 
 namespace dawn::native {
 

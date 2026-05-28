@@ -31,11 +31,11 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/native/CommandBufferStateTracker.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/PassResourceUsageTracker.h"
-#include "dawn/native/ProgrammableEncoder.h"
+#include "src/dawn/native/CommandBufferStateTracker.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/PassResourceUsageTracker.h"
+#include "src/dawn/native/ProgrammableEncoder.h"
 
 namespace dawn::native {
 

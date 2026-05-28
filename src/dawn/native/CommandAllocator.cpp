@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/CommandAllocator.h"
+#include "src/dawn/native/CommandAllocator.h"
 
 #include <algorithm>
 #include <climits>
@@ -33,8 +33,8 @@
 #include <new>
 #include <utility>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Math.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Math.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

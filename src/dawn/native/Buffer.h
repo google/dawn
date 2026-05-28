@@ -33,17 +33,17 @@
 #include <memory>
 #include <utility>
 
-#include "dawn/common/FutureUtils.h"
-#include "dawn/common/NonCopyable.h"
-#include "dawn/native/DeviceGuard.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/ObjectBase.h"
-#include "dawn/native/SharedBufferMemory.h"
-#include "dawn/native/UsageValidationMode.h"
-#include "dawn/native/dawn_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/FutureUtils.h"
+#include "src/dawn/common/NonCopyable.h"
+#include "src/dawn/native/DeviceGuard.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/SharedBufferMemory.h"
+#include "src/dawn/native/UsageValidationMode.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

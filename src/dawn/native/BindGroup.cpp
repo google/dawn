@@ -25,31 +25,31 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/BindGroup.h"
+#include "src/dawn/native/BindGroup.h"
 
 #include <algorithm>
 #include <limits>
 #include <variant>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/Assert.h"
-#include "dawn/common/MatchVariant.h"
-#include "dawn/common/Math.h"
-#include "dawn/common/ityp_bitset.h"
-#include "dawn/native/Adapter.h"
-#include "dawn/native/BindGroupLayout.h"
-#include "dawn/native/BindGroupLayoutInternal.h"
-#include "dawn/native/BindingInfo.h"
-#include "dawn/native/Buffer.h"
-#include "dawn/native/CommandValidation.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/ExternalTexture.h"
-#include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectType_autogen.h"
-#include "dawn/native/Sampler.h"
-#include "dawn/native/TexelBufferView.h"
-#include "dawn/native/Texture.h"
-#include "dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/MatchVariant.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/common/ityp_bitset.h"
+#include "src/dawn/native/Adapter.h"
+#include "src/dawn/native/BindGroupLayout.h"
+#include "src/dawn/native/BindGroupLayoutInternal.h"
+#include "src/dawn/native/BindingInfo.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/CommandValidation.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/ExternalTexture.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/Sampler.h"
+#include "src/dawn/native/TexelBufferView.h"
+#include "src/dawn/native/Texture.h"
+#include "src/dawn/native/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

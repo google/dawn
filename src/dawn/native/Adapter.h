@@ -32,13 +32,13 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/Ref.h"
-#include "dawn/common/RefCounted.h"
-#include "dawn/common/WeakRefSupport.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/PhysicalDevice.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/RefCounted.h"
+#include "src/dawn/common/WeakRefSupport.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/PhysicalDevice.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

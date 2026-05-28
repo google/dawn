@@ -34,14 +34,14 @@
 #include <cstddef>
 
 #include "ImmediatesLayout.h"
-#include "dawn/common/Constants.h"
-#include "dawn/common/ityp_bitset.h"
-#include "dawn/common/ityp_span.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/ImmediatesLayout.h"
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/Pipeline.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/ityp_bitset.h"
+#include "src/dawn/common/ityp_span.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/ImmediatesLayout.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/Pipeline.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

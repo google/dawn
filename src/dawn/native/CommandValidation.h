@@ -31,14 +31,14 @@
 #include <vector>
 
 #include "absl/container/inlined_vector.h"
-#include "dawn/common/Constants.h"
-#include "dawn/common/Numeric.h"
-#include "dawn/native/BlockInfo.h"
-#include "dawn/native/CommandAllocator.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Features.h"
-#include "dawn/native/Texture.h"
-#include "dawn/native/UsageValidationMode.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Numeric.h"
+#include "src/dawn/native/BlockInfo.h"
+#include "src/dawn/native/CommandAllocator.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Features.h"
+#include "src/dawn/native/Texture.h"
+#include "src/dawn/native/UsageValidationMode.h"
 
 namespace dawn::native {
 

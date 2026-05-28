@@ -28,12 +28,12 @@
 #ifndef SRC_DAWN_NATIVE_SAMPLER_H_
 #define SRC_DAWN_NATIVE_SAMPLER_H_
 
-#include "dawn/common/ContentLessObjectCacheable.h"
-#include "dawn/native/CachedObject.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/ObjectBase.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/ContentLessObjectCacheable.h"
+#include "src/dawn/native/CachedObject.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

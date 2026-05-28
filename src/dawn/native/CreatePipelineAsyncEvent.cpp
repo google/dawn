@@ -25,28 +25,28 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "src/dawn/native/CreatePipelineAsyncEvent.h"
 
 #include <webgpu/webgpu.h>
 
 #include <utility>
 
-#include "dawn/common/FutureUtils.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/native/AsyncTask.h"
-#include "dawn/native/ComputePipeline.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/ErrorData.h"
-#include "dawn/native/EventManager.h"
-#include "dawn/native/Instance.h"
-#include "dawn/native/RenderPipeline.h"
 #include "dawn/native/dawn_platform_autogen.h"
-#include "dawn/native/utils/WGPUHelpers.h"
 #include "dawn/native/wgpu_structs_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
-#include "dawn/platform/metrics/HistogramMacros.h"
-#include "dawn/platform/tracing/TraceEvent.h"
+#include "src/dawn/common/FutureUtils.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/native/AsyncTask.h"
+#include "src/dawn/native/ComputePipeline.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/ErrorData.h"
+#include "src/dawn/native/EventManager.h"
+#include "src/dawn/native/Instance.h"
+#include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/platform/metrics/HistogramMacros.h"
+#include "src/dawn/platform/tracing/TraceEvent.h"
 
 namespace dawn::native {
 

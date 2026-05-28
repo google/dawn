@@ -25,14 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/Toggles.h"
+#include "src/dawn/native/Toggles.h"
 
 #include <array>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
-#include "dawn/native/dawn_platform.h"
-#include "dawn/native/stream/Stream.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/native/dawn_platform.h"
+#include "src/dawn/native/stream/Stream.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

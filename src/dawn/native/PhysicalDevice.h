@@ -31,18 +31,18 @@
 #include <string>
 #include <vector>
 
-#include "dawn/common/GPUInfo.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/RefCounted.h"
-#include "dawn/common/ityp_span.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Features.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/Limits.h"
-#include "dawn/native/Toggles.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/GPUInfo.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/RefCounted.h"
+#include "src/dawn/common/ityp_span.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Features.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/Limits.h"
+#include "src/dawn/native/Toggles.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

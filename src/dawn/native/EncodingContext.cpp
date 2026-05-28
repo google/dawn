@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/EncodingContext.h"
+#include "src/dawn/native/EncodingContext.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/native/CommandEncoder.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/ErrorData.h"
-#include "dawn/native/IndirectDrawValidationEncoder.h"
-#include "dawn/native/RenderBundleEncoder.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/native/CommandEncoder.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/ErrorData.h"
+#include "src/dawn/native/IndirectDrawValidationEncoder.h"
+#include "src/dawn/native/RenderBundleEncoder.h"
 
 namespace dawn::native {
 

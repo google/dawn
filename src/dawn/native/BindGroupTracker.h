@@ -32,11 +32,11 @@
 #include <array>
 #include <bitset>
 
-#include "dawn/common/Constants.h"
-#include "dawn/native/BindGroup.h"
-#include "dawn/native/Pipeline.h"
-#include "dawn/native/PipelineLayout.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/native/BindGroup.h"
+#include "src/dawn/native/Pipeline.h"
+#include "src/dawn/native/PipelineLayout.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

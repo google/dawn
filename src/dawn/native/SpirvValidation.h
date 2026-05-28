@@ -28,8 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_SPIRVVALIDATION_H_
 #define SRC_DAWN_NATIVE_SPIRVVALIDATION_H_
 
-#include "dawn/native/Error.h"
-#include "dawn/native/LogEmitter.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/LogEmitter.h"
 
 namespace spvtools {
 class SpirvTools;

@@ -25,16 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/Limits.h"
+#include "src/dawn/native/Limits.h"
 
 #include <algorithm>
 #include <array>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Constants.h"
-#include "dawn/common/Log.h"
-#include "dawn/common/Math.h"
-#include "dawn/native/Instance.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/Instance.h"
 
 // clang-format off
 // TODO(crbug.com/dawn/685):

@@ -33,12 +33,12 @@
 #include <span>
 #include <vector>
 
-#include "dawn/common/Sha3.h"
-#include "dawn/native/Blob.h"
-#include "dawn/native/CacheResult.h"
-#include "dawn/native/Error.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
-#include "utils/platform.h"
+#include "src/dawn/common/Sha3.h"
+#include "src/dawn/native/Blob.h"
+#include "src/dawn/native/CacheResult.h"
+#include "src/dawn/native/Error.h"
+#include "src/utils/platform.h"
 
 namespace dawn::platform {
 class CachingInterface;

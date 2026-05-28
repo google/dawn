@@ -34,13 +34,13 @@
 #include <vector>
 
 #include "absl/container/flat_hash_set.h"
-#include "dawn/common/NonCopyable.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/ityp_vector.h"
-#include "dawn/native/Buffer.h"
-#include "dawn/native/CommandBufferStateTracker.h"
-#include "dawn/native/Commands.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/NonCopyable.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/ityp_vector.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/CommandBufferStateTracker.h"
+#include "src/dawn/native/Commands.h"
 
 namespace dawn::native {
 

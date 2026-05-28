@@ -28,11 +28,11 @@
 #ifndef SRC_DAWN_NATIVE_RENDERBUNDLEENCODER_H_
 #define SRC_DAWN_NATIVE_RENDERBUNDLEENCODER_H_
 
-#include "dawn/native/EncodingContext.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/Forward.h"
-#include "dawn/native/RenderBundle.h"
-#include "dawn/native/RenderEncoderBase.h"
+#include "src/dawn/native/EncodingContext.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Forward.h"
+#include "src/dawn/native/RenderBundle.h"
+#include "src/dawn/native/RenderEncoderBase.h"
 
 namespace dawn::native {
 
