@@ -36,7 +36,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "dawn/native/Error.h"
+#include "src/dawn/native/Error.h"
 
 namespace dawn::native::webgpu {
 
@@ -222,7 +222,7 @@ constexpr int kInternalVisitableUnusedForComma = 0;
 #define DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(CmdName, CMD_MEMBERS) \
     DAWN_REPLAY_MAKE_CMD_AND_CMD_DATA(RootCommand, CmdName, CMD_MEMBERS)
 
-#include "dawn/serialization/Schema.h"
+#include "src/dawn/serialization/Schema.h"
 
 }  // namespace dawn::native::webgpu
 

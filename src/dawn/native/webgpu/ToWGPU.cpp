@@ -25,17 +25,17 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/webgpu/ToWGPU.h"
+#include "src/dawn/native/webgpu/ToWGPU.h"
 
-#include "dawn/common/Math.h"
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/native/BlockInfo.h"
-#include "dawn/native/Commands.h"
 #include "dawn/native/dawn_platform_autogen.h"
-#include "dawn/native/webgpu/BufferWGPU.h"
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/QuerySetWGPU.h"
-#include "dawn/native/webgpu/TextureWGPU.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/native/BlockInfo.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/webgpu/BufferWGPU.h"
+#include "src/dawn/native/webgpu/Forward.h"
+#include "src/dawn/native/webgpu/QuerySetWGPU.h"
+#include "src/dawn/native/webgpu/TextureWGPU.h"
 
 namespace dawn::native::webgpu {
 

@@ -29,10 +29,10 @@
 #define SRC_DAWN_NATIVE_WEBGPU_SWAPCHAINWGPU_H_
 
 #include "dawn/dawn_proc_table.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/SwapChain.h"
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/SwapChain.h"
+#include "src/dawn/native/webgpu/Forward.h"
+#include "src/dawn/native/webgpu/ObjectWGPU.h"
 
 namespace dawn::native {
 class Surface;

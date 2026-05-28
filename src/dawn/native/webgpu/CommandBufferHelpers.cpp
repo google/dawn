@@ -25,18 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/webgpu/CommandBufferHelpers.h"
+#include "src/dawn/native/webgpu/CommandBufferHelpers.h"
 
 #include <vector>
 
-#include "dawn/native/CommandAllocator.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/webgpu/BindGroupWGPU.h"
-#include "dawn/native/webgpu/BufferWGPU.h"
-#include "dawn/native/webgpu/CaptureContext.h"
-#include "dawn/native/webgpu/ComputePipelineWGPU.h"
-#include "dawn/native/webgpu/RenderBundleWGPU.h"
-#include "dawn/native/webgpu/RenderPipelineWGPU.h"
+#include "src/dawn/native/CommandAllocator.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/webgpu/BindGroupWGPU.h"
+#include "src/dawn/native/webgpu/BufferWGPU.h"
+#include "src/dawn/native/webgpu/CaptureContext.h"
+#include "src/dawn/native/webgpu/ComputePipelineWGPU.h"
+#include "src/dawn/native/webgpu/RenderBundleWGPU.h"
+#include "src/dawn/native/webgpu/RenderPipelineWGPU.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::webgpu {

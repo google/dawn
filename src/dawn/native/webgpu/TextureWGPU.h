@@ -28,12 +28,12 @@
 #ifndef SRC_DAWN_NATIVE_WEBGPU_TEXTUREWGPU_H_
 #define SRC_DAWN_NATIVE_WEBGPU_TEXTUREWGPU_H_
 
-#include "dawn/native/Error.h"
-#include "dawn/native/Texture.h"
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
-#include "dawn/native/webgpu/RecordableObject.h"
 #include "dawn/webgpu.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/Texture.h"
+#include "src/dawn/native/webgpu/Forward.h"
+#include "src/dawn/native/webgpu/ObjectWGPU.h"
+#include "src/dawn/native/webgpu/RecordableObject.h"
 
 namespace dawn::native::webgpu {
 

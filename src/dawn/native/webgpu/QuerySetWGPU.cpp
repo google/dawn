@@ -29,7 +29,7 @@
 
 #include <webgpu/webgpu.h>
 
-#include "dawn/common/StringViewUtils.h"
+#include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/native/webgpu/DeviceWGPU.h"
 #include "src/dawn/native/webgpu/ToWGPU.h"
 

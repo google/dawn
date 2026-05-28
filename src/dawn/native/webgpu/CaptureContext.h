@@ -36,12 +36,12 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/hash/hash.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/ObjectBase.h"
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/Serialization.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "partition_alloc/pointers/raw_ref.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/native/ObjectBase.h"
+#include "src/dawn/native/webgpu/Forward.h"
+#include "src/dawn/native/webgpu/Serialization.h"
 
 namespace dawn::native {
 

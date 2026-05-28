@@ -32,10 +32,10 @@
 #include <memory>
 #include <utility>
 
-#include "dawn/common/MutexProtected.h"
-#include "dawn/native/Queue.h"
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/native/Queue.h"
+#include "src/dawn/native/webgpu/Forward.h"
+#include "src/dawn/native/webgpu/ObjectWGPU.h"
 
 namespace dawn::native::webgpu {
 
