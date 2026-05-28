@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <memory>
 #include <string>
 #include <thread>
 #include <type_traits>
@@ -32,6 +33,7 @@
 #include <vector>
 
 #include "dawn/common/MutexProtected.h"
+#include "dawn/common/Range.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/Time.h"
@@ -260,6 +262,33 @@ TEST(MutexCondVarProtectedTest, WaitDeadlock) {
     std::thread thread2(t2);
     thread1.join();
     thread2.join();
+}
+
+// Regression test for https://crbug.com/517303276 where the condition variable is signaled after
+// the mutex is unlocked, which could lead to issues because work on other threads could happen in
+// between the two (including destruction of the cond var itself).
+TEST(MutexCondVarProtectedTest, NotifyIsInLock) {
+    std::vector<std::unique_ptr<MutexCondVarProtected<bool>>> condVars;
+    for (size_t _ : Range(100)) {
+        condVars.push_back(std::make_unique<MutexCondVarProtected<bool>>(false));
+    }
+
+    std::thread doDestruction([&] {
+        for (size_t i : Range(condVars.size())) {
+            condVars[i]->Use(
+                [&](auto c) { c.Wait([](bool readyToDestroy) { return readyToDestroy; }); });
+            condVars[i] = nullptr;
+        }
+    });
+
+    std::thread markForDestruction([&] {
+        for (size_t i : Range(condVars.size())) {
+            condVars[i]->Use([&](auto c) { *c = true; });
+        }
+    });
+
+    markForDestruction.join();
+    doDestruction.join();
 }
 
 // Test that if we specifically ask for only one thread to be notified, then only one thread should
