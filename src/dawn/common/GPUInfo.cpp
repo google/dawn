@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/common/GPUInfo.h"
+#include "src/dawn/common/GPUInfo.h"
 
 #include <algorithm>
 #include <array>
 #include <iterator>
 #include <sstream>
 
-#include "dawn/common/Assert.h"
 #include "dawn/common/GPUInfo_autogen.h"
+#include "src/dawn/common/Assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::gpu_info {

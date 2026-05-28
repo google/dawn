@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/common/IOSurfaceUtils.h"
+#include "src/dawn/common/IOSurfaceUtils.h"
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreVideo/CVPixelBuffer.h>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/CoreFoundationRef.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/CoreFoundationRef.h"
 
 namespace dawn {
 

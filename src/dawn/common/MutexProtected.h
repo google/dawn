@@ -36,13 +36,13 @@
 #include <type_traits>
 #include <utility>
 
-#include "dawn/common/Compiler.h"
-#include "dawn/common/Defer.h"
-#include "dawn/common/Mutex.h"
-#include "dawn/common/NonMovable.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/StackAllocated.h"
-#include "dawn/common/Time.h"
+#include "src/dawn/common/Compiler.h"
+#include "src/dawn/common/Defer.h"
+#include "src/dawn/common/Mutex.h"
+#include "src/dawn/common/NonMovable.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/StackAllocated.h"
+#include "src/dawn/common/Time.h"
 
 namespace dawn {
 

@@ -25,14 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/common/SystemUtils.h"
+#include "src/dawn/common/SystemUtils.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Log.h"
 #include "src/utils/compiler.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include "dawn/common/windows_with_undefs.h"
+#include "src/dawn/common/windows_with_undefs.h"
 
 #include <vector>
 #elif DAWN_PLATFORM_IS(LINUX)

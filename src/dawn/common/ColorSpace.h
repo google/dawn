@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_COMMON_COLORSPACE_H_
 #define SRC_DAWN_COMMON_COLORSPACE_H_
 
-#include "dawn/common/Algebra.h"
+#include "src/dawn/common/Algebra.h"
 
 namespace dawn {
 

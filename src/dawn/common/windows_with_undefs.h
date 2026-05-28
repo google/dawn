@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_COMMON_WINDOWS_WITH_UNDEFS_H_
 #define SRC_DAWN_COMMON_WINDOWS_WITH_UNDEFS_H_
 
-#include "utils/platform.h"
+#include "src/utils/platform.h"
 
 #if !DAWN_PLATFORM_IS(WINDOWS)
 #error "windows_with_undefs.h included on non-Windows"

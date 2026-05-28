@@ -30,7 +30,7 @@
 
 #include <chrono>
 
-#include "dawn/common/TypedInteger.h"
+#include "src/dawn/common/TypedInteger.h"
 
 namespace dawn {
 

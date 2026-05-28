@@ -32,8 +32,8 @@
 #include <string>
 #include <type_traits>
 
-#include "dawn/common/Assert.h"
-#include "utils/platform.h"
+#include "src/dawn/common/Assert.h"
+#include "src/utils/platform.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
 #include "partition_alloc/pointers/raw_ptr.h"

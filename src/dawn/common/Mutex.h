@@ -33,12 +33,12 @@
 #include <thread>
 #include <utility>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Compiler.h"
-#include "dawn/common/NonCopyable.h"
-#include "dawn/common/NonMovable.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/RefCounted.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Compiler.h"
+#include "src/dawn/common/NonCopyable.h"
+#include "src/dawn/common/NonMovable.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/RefCounted.h"
 
 namespace dawn {
 

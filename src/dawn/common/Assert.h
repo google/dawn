@@ -31,7 +31,7 @@
 #include <cstdlib>
 #include <type_traits>
 
-#include "dawn/common/Compiler.h"
+#include "src/dawn/common/Compiler.h"
 
 // Dawn asserts to be used instead of the regular C stdlib assert function (if you don't use assert
 // yet, you should start now!). In debug DAWN_ASSERT(condition) will trigger an error, otherwise in

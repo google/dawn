@@ -30,7 +30,7 @@
 
 #import <Foundation/NSObject.h>
 
-#include "dawn/common/RefBase.h"
+#include "src/dawn/common/RefBase.h"
 
 #if !defined(__OBJC__)
 #error "NSRef can only be used in Objective C/C++ code."

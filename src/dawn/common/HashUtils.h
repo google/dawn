@@ -31,10 +31,10 @@
 #include <bitset>
 #include <functional>
 
-#include "dawn/common/TypedInteger.h"
-#include "dawn/common/ityp_bitset.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "utils/platform.h"
+#include "src/dawn/common/TypedInteger.h"
+#include "src/dawn/common/ityp_bitset.h"
+#include "src/utils/platform.h"
 
 namespace dawn {
 

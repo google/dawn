@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_COMMON_REFCOUNTEDWITHEXTERNALCOUNT_H_
 #define SRC_DAWN_COMMON_REFCOUNTEDWITHEXTERNALCOUNT_H_
 
-#include "dawn/common/RefCounted.h"
+#include "src/dawn/common/RefCounted.h"
 
 namespace dawn {
 

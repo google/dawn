@@ -33,9 +33,9 @@
 #include <limits>
 #include <utility>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Math.h"
-#include "utils/underlying_type.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Math.h"
+#include "src/utils/underlying_type.h"
 
 namespace dawn {
 

@@ -34,11 +34,11 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "absl/container/inlined_vector.h"
-#include "dawn/common/ContentLessObjectCacheable.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/RefCounted.h"
-#include "dawn/common/WeakRef.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/ContentLessObjectCacheable.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/RefCounted.h"
+#include "src/dawn/common/WeakRef.h"
 
 namespace dawn {
 

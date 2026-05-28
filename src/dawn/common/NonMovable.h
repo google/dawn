@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_COMMON_NONMOVABLE_H_
 #define SRC_DAWN_COMMON_NONMOVABLE_H_
 
-#include "dawn/common/NonCopyable.h"
+#include "src/dawn/common/NonCopyable.h"
 
 namespace dawn {
 

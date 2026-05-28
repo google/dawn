@@ -30,8 +30,8 @@
 
 #include <utility>
 
-#include "dawn/common/Ref.h"
-#include "dawn/common/WeakRefSupport.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/WeakRefSupport.h"
 
 namespace dawn {
 

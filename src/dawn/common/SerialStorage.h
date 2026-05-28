@@ -31,8 +31,8 @@
 #include <cstdint>
 #include <utility>
 
-#include "dawn/common/Assert.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

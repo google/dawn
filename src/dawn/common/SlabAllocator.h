@@ -34,9 +34,9 @@
 #include <type_traits>
 #include <utility>
 
-#include "dawn/common/Numeric.h"
-#include "dawn/common/PlacementAllocated.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Numeric.h"
+#include "src/dawn/common/PlacementAllocated.h"
 
 namespace dawn {
 

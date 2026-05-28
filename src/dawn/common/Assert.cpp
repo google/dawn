@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/common/Assert.h"
+#include "src/dawn/common/Assert.h"
 
 #include <cstdlib>
 
-#include "dawn/common/Log.h"
-#include "utils/force_crash.h"
+#include "src/dawn/common/Log.h"
+#include "src/utils/force_crash.h"
 
 namespace dawn {
 
