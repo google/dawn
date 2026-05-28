@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/manager.h"
+#include "src/tint/utils/containers/enum_set.h"
 #include "src/tint/utils/containers/filtered_iterator.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/source.h"
@@ -50,6 +51,14 @@ namespace tint::core::ir {
 #define TINT_IR_UNREACHABLE(module) TINT_UNREACHABLE(module.ice_callback)
 #define TINT_IR_UNIMPLEMENTED(module) TINT_UNIMPLEMENTED(module.ice_callback)
 #define TINT_IR_ASSERT(module, condition) TINT_ASSERT((condition), module.ice_callback)
+
+/// Enumerator of IR properties which can either add or subtract functionality from the core IR.
+/// The IR validator will reject use of any non-core IR functionality when the module does not
+/// contain the corresponding property.
+enum class Property : uint8_t {};
+
+/// Properties is a set of Property values.
+using Properties = EnumSet<Property>;
 
 /// Main module class for the IR.
 class Module {
@@ -182,6 +191,9 @@ class Module {
     /// Removes `func` from the module and destroys it.
     /// @param func the function to destroy
     void Destroy(Function* func);
+
+    /// The set of properties used by the module.
+    Properties properties;
 
     /// The block allocator
     BlockAllocator<Block> blocks;
