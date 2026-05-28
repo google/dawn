@@ -41,8 +41,8 @@
 #include <type_traits>
 #include <utility>
 
-#include "dawn/common/Compiler.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
+#include "src/dawn/common/Compiler.h"  // nogncheck
 
 namespace partition_alloc::internal {
 using RawPtrTraits = int;
