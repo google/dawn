@@ -56,6 +56,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
+#include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/store_vector_element.h"
@@ -242,6 +243,7 @@ struct Encoder {
             [&](const ir::NextIteration* i) {
                 InstructionNextIteration(*inst_out.mutable_next_iteration(), i);
             },
+            [&](const ir::Override* i) { InstructionOverride(*inst_out.mutable_override(), i); },
             [&](const ir::Return* i) { InstructionReturn(*inst_out.mutable_return_(), i); },
             [&](const ir::Store* i) { InstructionStore(*inst_out.mutable_store(), i); },
             [&](const ir::StoreVectorElement* i) {
@@ -323,6 +325,13 @@ struct Encoder {
     }
 
     void InstructionNextIteration(pb::InstructionNextIteration&, const ir::NextIteration*) {}
+
+    void InstructionOverride(pb::InstructionOverride& override_out,
+                             const ir::Override* override_in) {
+        if (auto id_in = override_in->OverrideId()) {
+            override_out.set_override_id(id_in.value().value);
+        }
+    }
 
     void InstructionReturn(pb::InstructionReturn&, const ir::Return*) {}
 

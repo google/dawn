@@ -30,6 +30,7 @@
 #include "src/tint/lang/core/ir/binary/encode.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
+#include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
@@ -747,6 +748,58 @@ TEST_F(IRBinaryRoundtripTest, InputAttachment) {
         auto* fn = b.Function("Function", ty.vec4i());
         b.Append(fn->Block(),
                  [&] { b.Return(fn, b.Call<i32>(core::BuiltinFn::kInputAttachmentLoad, v)); });
+    });
+    RUN_TEST();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Overrides
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_F(IRBinaryRoundtripTest, Override_NoId) {
+    b.Append(b.ir.root_block, [&] { b.Override(ty.u32()); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Override_Id) {
+    b.Append(b.ir.root_block, [&] {
+        auto* o = b.Override(ty.u32());
+        o->SetOverrideId(OverrideId{42u});
+    });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Override_Initializer) {
+    b.Append(b.ir.root_block, [&] { b.Override("o", 42_u); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Override_RootBlockExpressions) {
+    b.Append(b.ir.root_block, [&] {
+        auto* o1 = b.Override(ty.u32());
+        auto* o2 = b.Override(ty.u32());
+        b.Override("o3", b.Multiply(b.Add(o1, o2), 2_u));
+    });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Override_WorkgroupSize) {
+    b.Append(b.ir.root_block, [&] {
+        auto* o = b.Override(ty.u32());
+
+        auto* fn = b.ComputeFunction("main", o->Result(), 1_u, 1_u);
+        b.Append(fn->Block(), [&] { b.Return(fn); });
+    });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, DISABLED_Override_WorkgroupArraySize) {
+    b.Append(b.ir.root_block, [&] {
+        auto* o = b.Override(ty.u32());
+
+        auto* count = ty.Get<core::ir::type::ValueArrayCount>(o->Result());
+        auto* arr = ty.Get<core::type::Array>(ty.u32(), count, 0u);
+        b.Var("arr", ty.ptr<workgroup>(arr));
     });
     RUN_TEST();
 }

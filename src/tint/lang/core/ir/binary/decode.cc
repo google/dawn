@@ -486,6 +486,9 @@ struct Decoder {
             case pb::Instruction::KindCase::kNextIteration:
                 inst_out = CreateInstructionNextIteration(inst_in.next_iteration());
                 break;
+            case pb::Instruction::KindCase::kOverride:
+                inst_out = CreateInstructionOverride(inst_in.override());
+                break;
             case pb::Instruction::KindCase::kReturn:
                 inst_out = CreateInstructionReturn(inst_in.return_());
                 break;
@@ -665,6 +668,15 @@ struct Decoder {
         auto* next_it_out = mod_out_.CreateInstruction<ir::NextIteration>();
         next_iterations_.Push(next_it_out);
         return next_it_out;
+    }
+
+    ir::Override* CreateInstructionOverride(const pb::InstructionOverride& override_in) {
+        auto* override_out = mod_out_.CreateInstruction<ir::Override>();
+        if (override_in.has_override_id()) {
+            override_out->SetOverrideId(
+                OverrideId{static_cast<uint16_t>(override_in.override_id())});
+        }
+        return override_out;
     }
 
     ir::Return* CreateInstructionReturn(const pb::InstructionReturn&) {

@@ -88,6 +88,7 @@ cc_library(
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/ir/binary",
+    "//src/tint/lang/core/ir/type",
     "//src/tint/lang/core/ir:test",
     "//src/tint/lang/core/type",
     "//src/tint/utils",

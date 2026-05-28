@@ -337,6 +337,7 @@ message Instruction {
         InstructionContinue continue = 27;
         InstructionBreakIf break_if = 28;
         InstructionUnreachable unreachable = 29;
+        InstructionOverride override = 30;
     }
     reserved 9;
     reserved "bitcast";
@@ -429,6 +430,10 @@ message InstructionBreakIf {
 }
 
 message InstructionUnreachable {}
+
+message InstructionOverride {
+    optional uint32 override_id = 1;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Attributes
