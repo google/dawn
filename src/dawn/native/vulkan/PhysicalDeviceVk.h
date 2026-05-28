@@ -65,11 +65,18 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsAndroidARM() const;
     bool IsAndroidSamsung() const;
     bool IsAndroidImgTec() const;
+    bool IsAndroidHuawei() const;
     bool IsPixel10() const;
+    bool IsSwiftshader() const;
+
+    // Check using VkDriverId, which is available in Vk 1.2 or an extension.
     bool IsIntelMesa() const;
     bool IsAmdMesa() const;
-    bool IsAndroidHuawei() const;
-    bool IsSwiftshader() const;
+
+    // Assumes that we might be on the proprietary driver if VkDriverId is not available.
+    bool MayBeArmProprietary() const;
+    bool MayBeQualcommProprietary() const;
+    bool MayBeImaginationProprietary() const;
 
     std::optional<uint32_t> GetDefaultComputeSubgroupSize() const;
     std::vector<SubgroupMatrixConfig> EnumerateSubgroupMatrixConfigs(
