@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/RenderPipelineGL.h"
+#include "src/dawn/native/opengl/RenderPipelineGL.h"
 
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/Forward.h"
-#include "dawn/native/opengl/ImmediatesLayoutGL.h"
-#include "dawn/native/opengl/PersistentPipelineStateGL.h"
-#include "dawn/native/opengl/UtilsGL.h"
+#include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/native/opengl/Forward.h"
+#include "src/dawn/native/opengl/ImmediatesLayoutGL.h"
+#include "src/dawn/native/opengl/PersistentPipelineStateGL.h"
+#include "src/dawn/native/opengl/UtilsGL.h"
 
 namespace dawn::native::opengl {
 

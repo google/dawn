@@ -30,8 +30,8 @@
 
 #include <vector>
 
-#include "dawn/native/QuerySet.h"
-#include "dawn/native/opengl/opengl_platform.h"
+#include "src/dawn/native/QuerySet.h"
+#include "src/dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native::opengl {
 

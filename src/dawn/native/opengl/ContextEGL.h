@@ -33,12 +33,12 @@
 #include <thread>
 #include <utility>
 
-#include "dawn/common/NonMovable.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/egl_platform.h"
-#include "dawn/native/opengl/EGLFunctions.h"
-#include "dawn/native/opengl/opengl_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/NonMovable.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/egl_platform.h"
+#include "src/dawn/native/opengl/EGLFunctions.h"
+#include "src/dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native::opengl {
 

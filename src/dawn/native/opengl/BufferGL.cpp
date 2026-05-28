@@ -25,16 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/BufferGL.h"
+#include "src/dawn/native/opengl/BufferGL.h"
 
 #include <algorithm>
 #include <utility>
 #include <vector>
 
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/CommandBuffer.h"
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/UtilsGL.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/CommandBuffer.h"
+#include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/native/opengl/UtilsGL.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::opengl {

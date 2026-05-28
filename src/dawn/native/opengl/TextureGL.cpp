@@ -25,25 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/TextureGL.h"
+#include "src/dawn/native/opengl/TextureGL.h"
 
 #include <algorithm>
 #include <limits>
 #include <utility>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Constants.h"
-#include "dawn/common/Math.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/EnumMaskIterator.h"
-#include "dawn/native/Queue.h"
-#include "dawn/native/opengl/BufferGL.h"
-#include "dawn/native/opengl/CommandBufferGL.h"
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/SharedFenceGL.h"
-#include "dawn/native/opengl/SharedTextureMemoryGL.h"
-#include "dawn/native/opengl/UtilsGL.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/EnumMaskIterator.h"
+#include "src/dawn/native/Queue.h"
+#include "src/dawn/native/opengl/BufferGL.h"
+#include "src/dawn/native/opengl/CommandBufferGL.h"
+#include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/native/opengl/SharedFenceGL.h"
+#include "src/dawn/native/opengl/SharedTextureMemoryGL.h"
+#include "src/dawn/native/opengl/UtilsGL.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::opengl {

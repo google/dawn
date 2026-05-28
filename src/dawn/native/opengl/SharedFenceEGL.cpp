@@ -25,16 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/SharedFenceEGL.h"
+#include "src/dawn/native/opengl/SharedFenceEGL.h"
 
 #include <utility>
 
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/DisplayEGL.h"
-#include "dawn/native/opengl/EGLFunctions.h"
-#include "dawn/native/opengl/PhysicalDeviceGL.h"
-#include "dawn/utils/SystemHandle.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/native/opengl/DisplayEGL.h"
+#include "src/dawn/native/opengl/EGLFunctions.h"
+#include "src/dawn/native/opengl/PhysicalDeviceGL.h"
+#include "src/dawn/utils/SystemHandle.h"
 
 namespace dawn::native::opengl {
 ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(

@@ -25,28 +25,28 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/ShaderModuleGL.h"
+#include "src/dawn/native/opengl/ShaderModuleGL.h"
 
 #include <sstream>
 #include <unordered_map>
 #include <utility>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/Enumerator.h"
-#include "dawn/common/MatchVariant.h"
-#include "dawn/native/Adapter.h"
-#include "dawn/native/BindGroupLayoutInternal.h"
-#include "dawn/native/CacheRequest.h"
-#include "dawn/native/Pipeline.h"
-#include "dawn/native/TintUtils.h"
-#include "dawn/native/opengl/BindGroupLayoutGL.h"
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/ImmediatesLayoutGL.h"
-#include "dawn/native/opengl/PipelineGL.h"
-#include "dawn/native/opengl/PipelineLayoutGL.h"
-#include "dawn/native/opengl/UtilsGL.h"
 #include "dawn/platform/DawnPlatform.h"
-#include "dawn/platform/tracing/TraceEvent.h"
+#include "src/dawn/common/Enumerator.h"
+#include "src/dawn/common/MatchVariant.h"
+#include "src/dawn/native/Adapter.h"
+#include "src/dawn/native/BindGroupLayoutInternal.h"
+#include "src/dawn/native/CacheRequest.h"
+#include "src/dawn/native/Pipeline.h"
+#include "src/dawn/native/TintUtils.h"
+#include "src/dawn/native/opengl/BindGroupLayoutGL.h"
+#include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/native/opengl/ImmediatesLayoutGL.h"
+#include "src/dawn/native/opengl/PipelineGL.h"
+#include "src/dawn/native/opengl/PipelineLayoutGL.h"
+#include "src/dawn/native/opengl/UtilsGL.h"
+#include "src/dawn/platform/tracing/TraceEvent.h"
 #include "tint/tint.h"
 
 namespace dawn::native::opengl {

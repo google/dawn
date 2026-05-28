@@ -25,14 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/UtilsGL.h"
+#include "src/dawn/native/opengl/UtilsGL.h"
 
 #include <string>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
-#include "dawn/native/EnumMaskIterator.h"
-#include "dawn/native/opengl/OpenGLFunctions.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/native/EnumMaskIterator.h"
+#include "src/dawn/native/opengl/OpenGLFunctions.h"
 
 namespace dawn::native::opengl {
 

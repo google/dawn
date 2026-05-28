@@ -25,36 +25,36 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/CommandBufferGL.h"
+#include "src/dawn/native/opengl/CommandBufferGL.h"
 
 #include <algorithm>
 #include <cstring>
 #include <utility>
 #include <vector>
 
-#include "dawn/common/MatchVariant.h"
-#include "dawn/common/Range.h"
-#include "dawn/native/BindGroup.h"
-#include "dawn/native/BindGroupTracker.h"
-#include "dawn/native/CommandEncoder.h"
-#include "dawn/native/Commands.h"
-#include "dawn/native/ExternalTexture.h"
-#include "dawn/native/ImmediatesTracker.h"
-#include "dawn/native/RenderBundle.h"
-#include "dawn/native/opengl/BufferGL.h"
-#include "dawn/native/opengl/ComputePipelineGL.h"
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/Forward.h"
-#include "dawn/native/opengl/ImmediatesLayoutGL.h"
-#include "dawn/native/opengl/PersistentPipelineStateGL.h"
-#include "dawn/native/opengl/PhysicalDeviceGL.h"
-#include "dawn/native/opengl/PipelineLayoutGL.h"
-#include "dawn/native/opengl/QuerySetGL.h"
-#include "dawn/native/opengl/RenderPipelineGL.h"
-#include "dawn/native/opengl/SamplerGL.h"
-#include "dawn/native/opengl/TextureGL.h"
-#include "dawn/native/opengl/UtilsGL.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/MatchVariant.h"
+#include "src/dawn/common/Range.h"
+#include "src/dawn/native/BindGroup.h"
+#include "src/dawn/native/BindGroupTracker.h"
+#include "src/dawn/native/CommandEncoder.h"
+#include "src/dawn/native/Commands.h"
+#include "src/dawn/native/ExternalTexture.h"
+#include "src/dawn/native/ImmediatesTracker.h"
+#include "src/dawn/native/RenderBundle.h"
+#include "src/dawn/native/opengl/BufferGL.h"
+#include "src/dawn/native/opengl/ComputePipelineGL.h"
+#include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/native/opengl/Forward.h"
+#include "src/dawn/native/opengl/ImmediatesLayoutGL.h"
+#include "src/dawn/native/opengl/PersistentPipelineStateGL.h"
+#include "src/dawn/native/opengl/PhysicalDeviceGL.h"
+#include "src/dawn/native/opengl/PipelineLayoutGL.h"
+#include "src/dawn/native/opengl/QuerySetGL.h"
+#include "src/dawn/native/opengl/RenderPipelineGL.h"
+#include "src/dawn/native/opengl/SamplerGL.h"
+#include "src/dawn/native/opengl/TextureGL.h"
+#include "src/dawn/native/opengl/UtilsGL.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::opengl {

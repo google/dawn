@@ -30,9 +30,9 @@
 
 #include <vector>
 
-#include "dawn/native/Buffer.h"
-#include "dawn/native/opengl/opengl_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native::opengl {
 

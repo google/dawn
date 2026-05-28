@@ -25,18 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/SharedTextureMemoryEGL.h"
+#include "src/dawn/native/opengl/SharedTextureMemoryEGL.h"
 
 #include <utility>
 
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/TextureGL.h"
-#include "dawn/native/opengl/UtilsGL.h"
+#include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/native/opengl/TextureGL.h"
+#include "src/dawn/native/opengl/UtilsGL.h"
 
 #if DAWN_PLATFORM_IS(ANDROID)
 #include <android/hardware_buffer.h>
 
-#include "dawn/native/AHBFunctions.h"
+#include "src/dawn/native/AHBFunctions.h"
 #endif  // DAWN_PLATFORM_IS(ANDROID)
 
 namespace dawn::native::opengl {

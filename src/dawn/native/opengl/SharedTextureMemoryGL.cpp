@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/SharedTextureMemoryGL.h"
+#include "src/dawn/native/opengl/SharedTextureMemoryGL.h"
 
 #include <utility>
 
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/QueueGL.h"
-#include "dawn/native/opengl/SharedFenceGL.h"
-#include "dawn/native/opengl/TextureGL.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/native/opengl/QueueGL.h"
+#include "src/dawn/native/opengl/SharedFenceGL.h"
+#include "src/dawn/native/opengl/TextureGL.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::opengl {

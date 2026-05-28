@@ -32,10 +32,10 @@
 #include <string>
 #include <vector>
 
-#include "dawn/native/IntegerTypes.h"
-#include "dawn/native/Serializable.h"
-#include "dawn/native/ShaderModule.h"
-#include "dawn/native/opengl/opengl_platform.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/dawn/native/Serializable.h"
+#include "src/dawn/native/ShaderModule.h"
+#include "src/dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native {
 

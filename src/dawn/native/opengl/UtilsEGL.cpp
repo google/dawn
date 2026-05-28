@@ -25,14 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/UtilsEGL.h"
+#include "src/dawn/native/opengl/UtilsEGL.h"
 
 #include <string>
 #include <vector>
 
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/EGLFunctions.h"
-#include "dawn/native/opengl/PhysicalDeviceGL.h"
+#include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/native/opengl/EGLFunctions.h"
+#include "src/dawn/native/opengl/PhysicalDeviceGL.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::opengl {

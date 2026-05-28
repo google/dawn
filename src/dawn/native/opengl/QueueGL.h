@@ -31,9 +31,9 @@
 #include <deque>
 #include <utility>
 
-#include "dawn/native/Queue.h"
-#include "dawn/native/opengl/UtilsEGL.h"
-#include "dawn/native/opengl/opengl_platform.h"
+#include "src/dawn/native/Queue.h"
+#include "src/dawn/native/opengl/UtilsEGL.h"
+#include "src/dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native::opengl {
 

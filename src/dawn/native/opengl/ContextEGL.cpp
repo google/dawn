@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/ContextEGL.h"
+#include "src/dawn/native/opengl/ContextEGL.h"
 
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "dawn/native/opengl/DisplayEGL.h"
-#include "dawn/native/opengl/UtilsEGL.h"
+#include "src/dawn/native/opengl/DisplayEGL.h"
+#include "src/dawn/native/opengl/UtilsEGL.h"
 
 #ifndef EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE
 #define EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE 0x33AF

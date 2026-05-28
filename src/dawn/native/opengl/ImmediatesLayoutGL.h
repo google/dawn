@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_IMMEDIATESLAYOUTGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_IMMEDIATESLAYOUTGL_H_
 
-#include "dawn/native/ImmediatesLayout.h"
+#include "src/dawn/native/ImmediatesLayout.h"
 
 namespace dawn::native::opengl {
 

@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_EGLFUNCTIONS_H_
 #define SRC_DAWN_NATIVE_OPENGL_EGLFUNCTIONS_H_
 
-#include "dawn/common/egl_platform.h"
-#include "dawn/common/ityp_bitset.h"
-#include "dawn/native/Error.h"
+#include "src/dawn/common/egl_platform.h"
+#include "src/dawn/common/ityp_bitset.h"
+#include "src/dawn/native/Error.h"
 
 namespace dawn::native::opengl {
 

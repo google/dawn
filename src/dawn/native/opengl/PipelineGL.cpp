@@ -25,26 +25,26 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/opengl/PipelineGL.h"
+#include "src/dawn/native/opengl/PipelineGL.h"
 
 #include <algorithm>
 #include <set>
 #include <sstream>
 #include <string>
 
-#include "dawn/common/Range.h"
-#include "dawn/native/BindGroupLayoutInternal.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/Pipeline.h"
-#include "dawn/native/opengl/BufferGL.h"
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/Forward.h"
-#include "dawn/native/opengl/OpenGLFunctions.h"
-#include "dawn/native/opengl/PipelineLayoutGL.h"
-#include "dawn/native/opengl/SamplerGL.h"
-#include "dawn/native/opengl/ShaderModuleGL.h"
-#include "dawn/native/opengl/TextureGL.h"
-#include "dawn/native/opengl/UtilsGL.h"
+#include "src/dawn/common/Range.h"
+#include "src/dawn/native/BindGroupLayoutInternal.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Pipeline.h"
+#include "src/dawn/native/opengl/BufferGL.h"
+#include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/native/opengl/Forward.h"
+#include "src/dawn/native/opengl/OpenGLFunctions.h"
+#include "src/dawn/native/opengl/PipelineLayoutGL.h"
+#include "src/dawn/native/opengl/SamplerGL.h"
+#include "src/dawn/native/opengl/ShaderModuleGL.h"
+#include "src/dawn/native/opengl/TextureGL.h"
+#include "src/dawn/native/opengl/UtilsGL.h"
 
 namespace dawn::native::opengl {
 
