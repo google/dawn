@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/d3d/PhysicalDeviceD3D.h"
+#include "src/dawn/native/d3d/PhysicalDeviceD3D.h"
 
 #include <string>
 #include <utility>
 
-#include "dawn/common/WindowsUtils.h"
-#include "dawn/native/d3d/BackendD3D.h"
+#include "src/dawn/common/WindowsUtils.h"
+#include "src/dawn/native/d3d/BackendD3D.h"
 
 namespace dawn::native::d3d {
 

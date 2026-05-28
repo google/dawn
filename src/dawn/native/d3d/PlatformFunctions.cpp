@@ -25,14 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/d3d/PlatformFunctions.h"
+#include "src/dawn/native/d3d/PlatformFunctions.h"
 
 #include <comdef.h>
 #include <versionhelpers.h>
 
 #include <vector>
 
-#include "dawn/common/SystemUtils.h"
+#include "src/dawn/common/SystemUtils.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::d3d {

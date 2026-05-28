@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/d3d/SwapChainD3D.h"
+#include "src/dawn/native/d3d/SwapChainD3D.h"
 
 #if defined(DAWN_USE_WINDOWS_UI)
 #include <windows.ui.xaml.media.dxinterop.h>
@@ -33,12 +33,12 @@
 
 #include <utility>
 
-#include "dawn/native/BlitTextureToBuffer.h"
-#include "dawn/native/Surface.h"
-#include "dawn/native/d3d/D3DError.h"
-#include "dawn/native/d3d/DeviceD3D.h"
-#include "dawn/native/d3d/Forward.h"
-#include "dawn/native/d3d/UtilsD3D.h"
+#include "src/dawn/native/BlitTextureToBuffer.h"
+#include "src/dawn/native/Surface.h"
+#include "src/dawn/native/d3d/D3DError.h"
+#include "src/dawn/native/d3d/DeviceD3D.h"
+#include "src/dawn/native/d3d/Forward.h"
+#include "src/dawn/native/d3d/UtilsD3D.h"
 
 namespace dawn::native::d3d {
 namespace {

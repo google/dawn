@@ -25,21 +25,21 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/d3d/ShaderUtils.h"
+#include "src/dawn/native/d3d/ShaderUtils.h"
 
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "dawn/native/d3d/BlobD3D.h"
-#include "dawn/native/d3d/D3DCompilationRequest.h"
-#include "dawn/native/d3d/D3DError.h"
-#include "dawn/native/d3d/DeviceD3D.h"
-#include "dawn/native/d3d/PlatformFunctions.h"
-#include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/platform/DawnPlatform.h"
-#include "dawn/platform/tracing/TraceEvent.h"
+#include "src/dawn/native/d3d/BlobD3D.h"
+#include "src/dawn/native/d3d/D3DCompilationRequest.h"
+#include "src/dawn/native/d3d/D3DError.h"
+#include "src/dawn/native/d3d/DeviceD3D.h"
+#include "src/dawn/native/d3d/PlatformFunctions.h"
+#include "src/dawn/native/d3d/UtilsD3D.h"
+#include "src/dawn/platform/tracing/TraceEvent.h"
 #include "tint/tint.h"
 
 namespace dawn::native::d3d {

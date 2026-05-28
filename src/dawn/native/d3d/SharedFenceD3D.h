@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_D3D_SHARED_FENCE_D3D_H_
 #define SRC_DAWN_NATIVE_D3D_SHARED_FENCE_D3D_H_
 
-#include "dawn/native/SharedFence.h"
-#include "dawn/native/d3d/d3d_platform.h"
-#include "dawn/utils/SystemHandle.h"
+#include "src/dawn/native/SharedFence.h"
+#include "src/dawn/native/d3d/d3d_platform.h"
+#include "src/dawn/utils/SystemHandle.h"
 
 namespace dawn::native::d3d {
 

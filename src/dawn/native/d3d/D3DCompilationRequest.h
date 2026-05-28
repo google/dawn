@@ -33,10 +33,10 @@
 #include <string_view>
 #include <unordered_map>
 
-#include "dawn/native/Adapter.h"
-#include "dawn/native/CacheRequest.h"
-#include "dawn/native/Serializable.h"
-#include "dawn/native/d3d/d3d_platform.h"
+#include "src/dawn/native/Adapter.h"
+#include "src/dawn/native/CacheRequest.h"
+#include "src/dawn/native/Serializable.h"
+#include "src/dawn/native/d3d/d3d_platform.h"
 #include "tint/tint.h"
 
 namespace dawn::native::stream {

@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/d3d/QueueD3D.h"
+#include "src/dawn/native/d3d/QueueD3D.h"
 
 #include <algorithm>
 #include <array>
 #include <utility>
 
-#include "dawn/native/WaitAnySystemEvent.h"
+#include "src/dawn/native/WaitAnySystemEvent.h"
 
 namespace dawn::native::d3d {
 

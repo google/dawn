@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/d3d/DeviceD3D.h"
+#include "src/dawn/native/d3d/DeviceD3D.h"
 
 #include <utility>
 
-#include "dawn/native/d3d/BackendD3D.h"
-#include "dawn/native/d3d/Forward.h"
-#include "dawn/native/d3d/PhysicalDeviceD3D.h"
-#include "dawn/native/d3d/SharedFenceD3D.h"
-#include "dawn/platform/metrics/HistogramMacros.h"
+#include "src/dawn/native/d3d/BackendD3D.h"
+#include "src/dawn/native/d3d/Forward.h"
+#include "src/dawn/native/d3d/PhysicalDeviceD3D.h"
+#include "src/dawn/native/d3d/SharedFenceD3D.h"
+#include "src/dawn/platform/metrics/HistogramMacros.h"
 
 namespace dawn::native::d3d {
 
