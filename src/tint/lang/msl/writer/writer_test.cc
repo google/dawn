@@ -637,5 +637,94 @@ kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadg
 )");
 }
 
+TEST_F(MslWriterTest, BufferView_HostStruct_SubFunction) {
+    Vector<const core::type::StructMember*, 8> members{
+        ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.u32(), 0u, 0u, 4u, 4u,
+                                         core::IOAttributes{}),
+        ty.Get<core::type::StructMember>(mod.symbols.New("b"), ty.u32(), 1u, 32u, 32u, 4u,
+                                         core::IOAttributes{}),
+    };
+    auto* S = ty.Get<core::type::Struct>(mod.symbols.New("S"), std::move(members), 64u);
+
+    auto* var = b.Var("v", ty.ptr(workgroup, ty.buffer(128)));
+    mod.root_block->Append(var);
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* view =
+            b.CallExplicit(ty.ptr(workgroup, S), core::BuiltinFn::kBufferView, Vector{S}, var, 0_u);
+        b.Let("p", view);
+        b.Return(foo);
+    });
+
+    auto* entry = b.ComputeFunction("entry");
+    b.Append(entry->Block(), [&] {
+        b.Call(ty.void_(), foo);
+        b.Return(entry);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success);
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_module_vars_struct {
+  threadgroup tint_array<uchar, 128>* v;
+};
+
+struct S {
+  /* 0x0000 */ uint a;
+  /* 0x0004 */ tint_array<int8_t, 28> tint_pad;
+  /* 0x0020 */ uint b;
+  /* 0x0024 */ tint_array<int8_t, 28> tint_pad_1;
+};
+
+struct tint_symbol_1 {
+  tint_array<uchar, 128> tint_symbol;
+};
+
+void foo(tint_module_vars_struct tint_module_vars) {
+  threadgroup S* const p = reinterpret_cast<threadgroup S*>(reinterpret_cast<threadgroup char*>(tint_module_vars.v) + 0u);
+}
+
+void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  {
+    uint v_1 = 0u;
+    v_1 = tint_local_index;
+    while(true) {
+      uint const v_2 = v_1;
+      if ((v_2 >= 128u)) {
+        break;
+      }
+      (*tint_module_vars.v)[v_2] = 0u;
+      {
+        v_1 = (v_2 + 1u);
+      }
+    }
+  }
+  (threadgroup_barrier(mem_flags::mem_threadgroup));
+  (foo(tint_module_vars));
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_3).tint_symbol)};
+  (entry_inner(tint_local_index, tint_module_vars));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer

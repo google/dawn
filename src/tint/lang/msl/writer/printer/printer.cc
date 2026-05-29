@@ -249,8 +249,7 @@ class Printer : public tint::TextGenerator {
             }
         };
 
-        // We need to look at function parameters of the entry point and the results of
-        // msl.pointer_offset calls.
+        // We need to look at function parameters of the entry point.
         for (auto func : ir_.functions) {
             if (!func->IsEntryPoint()) {
                 continue;
@@ -261,13 +260,18 @@ class Printer : public tint::TextGenerator {
                     RecordSubTypes(ptr);
                 }
             }
+        }
+        // For buffer_view we need to look at the results of pointer offset calls in any function
+        // (and workgroup storage class).
+        for (auto func : ir_.functions) {
             Traverse(func->Block(), [&](msl::ir::BuiltinCall* call) {
                 if (call->Func() != msl::BuiltinFn::kPointerOffset) {
                     return;
                 }
                 auto* ptr = call->Result()->Type()->As<core::type::Pointer>();
                 TINT_IR_ASSERT(ir_, ptr);
-                if (core::IsHostShareable(ptr->AddressSpace())) {
+                if (core::IsHostShareable(ptr->AddressSpace()) ||
+                    ptr->AddressSpace() == core::AddressSpace::kWorkgroup) {
                     RecordSubTypes(ptr);
                 }
             });
