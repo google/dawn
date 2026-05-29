@@ -2393,6 +2393,12 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,context_depend
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,const:type:case="f16" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Skip ]
 
+# Pixel 10 failures that have been triaged and can be marked as expected to fail
+# due to enough other failures being skipped.
+crbug.com/517803869 [ android-pixel-10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,reuse:*;noop="before" [ Failure ]
+crbug.com/517909702 [ android-pixel-10 ] webgpu:api,validation,createView:texture_view_usage_of_multiple_usages:usage1=16;usage2=32 [ Failure ]
+crbug.com/517909703 [ android-pixel-10 ] webgpu:shader,validation,decl,override:initializer:case="init_mismatch_type" [ Failure ]
+
 # Known bug in immediates implementation
 crbug.com/479563279 webgpu:api,validation,encoding,programmable,pipeline_immediate:required_slots_set:encoderType="*";scenario="struct_padding";* [ Failure ]
 

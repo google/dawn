@@ -452,6 +452,16 @@ crbug.com/507502289 [ android android-pixel-10 ] webgpu:web_platform,copyToTextu
 crbug.com/507502289 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:* [ Skip ]
 crbug.com/507502289 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,ImageData:from_ImageData:* [ Skip ]
 crbug.com/507502289 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Skip ]
+crbug.com/517909702 [ android android-pixel-10 ] webgpu:api,validation,createView:texture_view_usage_of_multiple_usages:usage1=16;usage2=32 [ Failure ]
+crbug.com/517847441 [ android android-pixel-10 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:* [ Failure ]
+crbug.com/517847442 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:*display-p3* [ Failure ]
+crbug.com/517847442 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:*srgb* [ Failure ]
+crbug.com/517847443 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:canvasType="onscreen";* [ Failure ]
+crbug.com/517909704 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:canvasType="onscreen";* [ Failure ]
+crbug.com/517961537 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";* [ Failure ]
+crbug.com/517972790 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,image:copy_subrect_from_2D_Canvas:* [ Failure ]
+crbug.com/517972791 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,image:from_fully_transparent_image:dstPremultiplied=false [ Failure ]
+crbug.com/517972792 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,image:from_image:* [ Failure ]
 
 ################################################################################
 # Triaged or Manually-Added Flakes and Failures
