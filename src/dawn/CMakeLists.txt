@@ -40,6 +40,7 @@ DawnGenerator(
 dawn_add_library(
     dawn_version
     HEADER_ONLY
+    ENABLE_EMSCRIPTEN
     UTILITY_TARGET dawn_internal_config
     HEADERS
         ${DAWN_VERSION_AUTOGEN_HEADERS}
