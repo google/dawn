@@ -33,7 +33,7 @@
 #include "src/dawn/utils/SystemHandle.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include "src/dawn/common/windows_with_undefs.h"
+#include "src/utils/windows_with_undefs.h"
 #elif DAWN_PLATFORM_IS(FUCHSIA)
 #include <poll.h>
 #include <unistd.h>

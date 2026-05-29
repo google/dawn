@@ -33,7 +33,7 @@
 #include "src/utils/platform.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include "src/dawn/common/windows_with_undefs.h"
+#include "src/utils/windows_with_undefs.h"
 #if DAWN_PLATFORM_IS(WINUWP)
 #include "src/dawn/common/WindowsUtils.h"
 #endif

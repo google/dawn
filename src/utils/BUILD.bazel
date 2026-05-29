@@ -38,7 +38,12 @@ cc_library(
     "numeric.h",
     "platform.h",
     "underlying_type.h",
-  ],
+  ] + select({
+    ":tint_build_is_win": [
+      "windows_with_undefs.h",
+    ],
+    "//conditions:default": [],
+  }),
   srcs = [
     "placeholder.cc",
   ],

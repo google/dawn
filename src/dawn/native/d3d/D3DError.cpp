@@ -27,7 +27,7 @@
 
 #include "src/dawn/native/d3d/D3DError.h"
 
-#include "src/dawn/common/windows_with_undefs.h"
+#include "src/utils/windows_with_undefs.h"
 
 #include <iomanip>
 #include <sstream>

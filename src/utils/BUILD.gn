@@ -50,6 +50,10 @@ static_library("utils") {
     "underlying_type.h",
   ]
 
+  if (is_win) {
+    sources += [ "windows_with_undefs.h" ]
+  }
+
   public_configs = [ ":internal_config" ]
 }
 

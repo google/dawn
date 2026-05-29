@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D_QUEUED3D_H_
 #define SRC_DAWN_NATIVE_D3D_QUEUED3D_H_
 
-#include "src/dawn/common/windows_with_undefs.h"
+#include "src/utils/windows_with_undefs.h"
 
 #include <span>
 #include <vector>

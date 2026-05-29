@@ -31,7 +31,7 @@
 // Pre-emptively include windows.h but remove its macros so that they aren't set when declaring the
 // COM interfaces. Otherwise ID3D12InfoQueue::GetMessage would be either GetMessageA or GetMessageW
 // which causes compilation errors.
-#include "src/dawn/common/windows_with_undefs.h"
+#include "src/utils/windows_with_undefs.h"
 
 // Must be after windows_with_undefs
 #include <d3d11_4.h>

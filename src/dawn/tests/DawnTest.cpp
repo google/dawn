@@ -51,7 +51,7 @@
 // Need to be included before GLFW/glfw3.h to avoid MSVC warning C4005: 'APIENTRY': macro
 // redefinition
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include "src/dawn/common/windows_with_undefs.h"
+#include "src/utils/windows_with_undefs.h"
 
 // Must come after windows_with_undefs
 #include <comdef.h>

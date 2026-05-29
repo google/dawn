@@ -38,7 +38,7 @@
 
 // Include windows.h before GLFW so GLFW's APIENTRY macro doesn't conflict with windows.h's.
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include "src/dawn/common/windows_with_undefs.h"
+#include "src/utils/windows_with_undefs.h"
 #endif  // DAWN_PLATFORM_IS(WINDOWS)
 
 #include "GLFW/glfw3.h"

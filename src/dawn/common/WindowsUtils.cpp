@@ -27,7 +27,7 @@
 
 #include "src/dawn/common/WindowsUtils.h"
 
-#include "src/dawn/common/windows_with_undefs.h"
+#include "src/utils/windows_with_undefs.h"
 
 #include <memory>
 

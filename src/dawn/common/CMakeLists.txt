@@ -122,7 +122,6 @@ set(conditional_private_depends)
 
 if (WIN32)
     list(APPEND private_headers
-        "windows_with_undefs.h"
         "WindowsUtils.h"
     )
     list(APPEND sources
