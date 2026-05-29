@@ -72,7 +72,7 @@ source_set("cpp_headers") {
   if (is_wasm) {
     all_dependent_configs +=
         [ "${dawn_root}/src/emdawnwebgpu:emdawnwebgpu_config" ]
-    public_deps = [ "${dawn_root}/src/emdawnwebgpu:emdawnwebgpu" ]
+    public_deps = [ "${dawn_root}/src/emdawnwebgpu" ]
   } else {
     public_deps = [
       ":cpp_headers_gen",

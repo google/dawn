@@ -93,7 +93,8 @@ template("dawn_component") {
   }
 
   shared_library("${prefix}shared") {
-    # The "tool" for creating shared libraries will automatically add the "lib" prefix
+    # The "tool" for creating shared libraries will automatically add the "lib"
+    # prefix
     output_name = "dawn_${name}"
 
     # Copy all variables except "configs", which has a default value

@@ -50,7 +50,8 @@ declare_args() {
 }
 
 # Native ARCH values can be found in LLVM's llvm/cmake/config-ix.cmake
-# Components of the triple can be found in LLVM's llvm/TargetParser/Triple.h and it's .cpp
+# Components of the triple can be found in LLVM's llvm/TargetParser/Triple.h and
+# it's .cpp
 if (target_cpu == "x86") {
   native_target = "X86"
   llvm_triple_arch = "x86"
@@ -94,8 +95,8 @@ cmake_configure_file("config-header") {
   input = "$dawn_dxc_dir/include/llvm/Config/config.h.cmake"
   output = "$target_gen_dir/include/llvm/Config/config.h"
   values = [
-    # TODO(amaiorano): Many of the flags set here are duplicated for the "llvm-config-header" target below.
-    # Factor this out somehow (template?).
+    # TODO(amaiorano): Many of the flags set here are duplicated for the
+    # "llvm-config-header" target below. Factor this out somehow (template?).
     "LLVM_ENABLE_THREADS=1",
     "LLVM_HAS_ATOMICS=1",
     "HAVE_INTTYPES_H=1",
@@ -567,17 +568,17 @@ config("common_config") {
 
   if (is_win) {
     include_dirs += [
-      # $dawn_dxc_dir/lib/Support/assert.cpp depends on a "assert.h" include for the windows path,
-      # but the other architectures include <assert.h>. The system include would be shadowed if this
-      # include directory is added.
+      # $dawn_dxc_dir/lib/Support/assert.cpp depends on a "assert.h" include for
+      # the windows path, but the other architectures include <assert.h>. The
+      # system include would be shadowed if this include directory is added.
       "$dawn_dxc_dir/include/llvm/llvm_assert",
     ]
   }
 }
 
-# Template with common configs and defines used by all static_library and source_set targets.
-# Do not use this for the top-level targets (executable, loadable_module) to avoid exposing
-# includes and defines.
+# Template with common configs and defines used by all static_library and
+# source_set targets. Do not use this for the top-level targets (executable,
+# loadable_module) to avoid exposing includes and defines.
 template("dxc_module") {
   assert(defined(invoker.target_type), "must set target_type")
   assert(invoker.target_type == "static_library" ||
@@ -597,11 +598,13 @@ template("dxc_module") {
     use_libcxx_modules = use_libcxx_modules
 
     if (is_win) {
-      # DXC is built with multibyte character set, so it expects Win32 functions to map the ANSI ones, not the UNICODE ones.
+      # DXC is built with multibyte character set, so it expects Win32 functions
+      # to map the ANSI ones, not the UNICODE ones.
       configs -= [ "//build/config/win:unicode" ]
     }
     if (dawn_dxc_enable_asserts_in_ndebug && !is_debug) {
-      # Do as CMake option "LLVM_ENABLE_ASSERTIONS" does: undef NDEBUG and define _DEBUG
+      # Do as CMake option "LLVM_ENABLE_ASSERTIONS" does: undef NDEBUG and
+      # define _DEBUG
       configs -= [ "//build/config:release" ]
       if (!is_win) {
         defines += [ "_DEBUG" ]
@@ -2315,13 +2318,14 @@ source_set("windows_version_resource") {
     # Include version.inc
     "INCLUDE_HLSL_VERSION_FILE",
 
-    # TODO(crbug.com/1473311): For now, GN's rc.exe doesn't handle empty string macros
-    # the same way as MS's rc.exe, so we make these single space strings.
+    # TODO(crbug.com/1473311): For now, GN's rc.exe doesn't handle empty string
+    # macros the same way as MS's rc.exe, so we make these single space strings.
     "RC_INTERNAL_NAME=\" \"",
     "RC_ORIGINAL_FILENAME=\" \"",
   ]
   include_dirs = [
-    # Use our custom "version.inc" that includes DXC's version.inc and overrides fields
+    # Use our custom "version.inc" that includes DXC's version.inc and overrides
+    # fields
     "build/",
   ]
   sources = [ "$dawn_dxc_dir/resources/windows_version_resource.rc" ]
@@ -2386,7 +2390,8 @@ executable("dxc") {
   use_libcxx_modules = use_libcxx_modules
 
   if (is_win) {
-    # DXC is built with multibyte character set, so it expects Win32 functions to map the ANSI ones, not the UNICODE ones.
+    # DXC is built with multibyte character set, so it expects Win32 functions
+    # to map the ANSI ones, not the UNICODE ones.
     configs -= [ "//build/config/win:unicode" ]
   }
 
@@ -2413,7 +2418,8 @@ executable("dxc") {
   ]
 }
 
-# Define a target to copy the DXIL signing library, dxil.dll, to the output directory
+# Define a target to copy the DXIL signing library, dxil.dll, to the output
+# directory
 if (is_win) {
   import("//build/config/win/visual_studio_version.gni")
   copy("copy_dxil_dll") {
