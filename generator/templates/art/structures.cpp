@@ -34,8 +34,8 @@
 #include <jni.h>
 #include <webgpu/webgpu.h>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Log.h"
 #include "JNIClasses.h"
 #include "JNIContext.h"
 

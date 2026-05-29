@@ -30,12 +30,12 @@
 #pragma allow_unsafe_buffers
 #endif
 
-#include "dawn/tests/DawnNativeTest.h"
 #include "src/dawn/common/Assert.h"
 #include "src/dawn/native/ComputePipeline.h"
 #include "src/dawn/native/ImmediatesLayout.h"
 #include "src/dawn/native/ImmediatesTracker.h"
 #include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/tests/DawnNativeTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 

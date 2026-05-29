@@ -30,9 +30,9 @@
 
 #include <algorithm>
 
-#include "dawn/common/Log.h"
-#include "dawn/common/Assert.h"
 #include "dawn/dawn_version.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/Assert.h"
 
 using namespace testing;
 

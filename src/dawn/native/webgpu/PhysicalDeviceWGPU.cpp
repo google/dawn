@@ -30,9 +30,9 @@
 #include <string>
 #include <utility>
 
+#include "dawn/native/Features_autogen.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/native/ChainUtils.h"
-#include "src/dawn/native/Features_autogen.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/Surface.h"
 #include "src/dawn/native/Toggles.h"

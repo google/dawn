@@ -37,7 +37,7 @@
 #include <string>
 #include <utility>
 
-#include "dawn/utils/WGPUHelpers.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 
 namespace {
 

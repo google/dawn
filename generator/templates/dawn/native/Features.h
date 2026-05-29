@@ -30,8 +30,8 @@
 #ifndef {{DIR}}_FEATURES_AUTOGEN_H_
 #define {{DIR}}_FEATURES_AUTOGEN_H_
 
-#include "dawn/common/ityp_array.h"
-#include "dawn/native/dawn_platform.h"
+#include "src/dawn/common/ityp_array.h"
+#include "src/dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

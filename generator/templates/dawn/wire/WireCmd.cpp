@@ -27,11 +27,11 @@
 
 #include "dawn/wire/WireCmd_autogen.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
-#include "dawn/common/Numeric.h"
-#include "dawn/wire/BufferConsumer_impl.h"
 #include "dawn/wire/Wire.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/Numeric.h"
+#include "src/dawn/wire/BufferConsumer_impl.h"
 
 #include <algorithm>
 #include <cstring>

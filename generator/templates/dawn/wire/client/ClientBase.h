@@ -28,9 +28,9 @@
 #ifndef DAWNWIRE_CLIENT_CLIENTBASE_AUTOGEN_H_
 #define DAWNWIRE_CLIENT_CLIENTBASE_AUTOGEN_H_
 
-#include "dawn/wire/ChunkedCommandHandler.h"
 #include "dawn/wire/WireCmd_autogen.h"
-#include "dawn/wire/client/ApiObjects.h"
+#include "src/dawn/wire/ChunkedCommandHandler.h"
+#include "src/dawn/wire/client/ApiObjects.h"
 
 namespace dawn::wire::client {
 

@@ -1807,66 +1807,63 @@ class MultiGeneratorFromDawnJSON(Generator):
             namespace = metadata.namespace
             renders.append(
                 FileRender('dawn/native/ValidationUtils.h',
-                           'src/' + native_dir + '/ValidationUtils_autogen.h',
+                           native_dir + '/ValidationUtils_autogen.h',
+                           frontend_params))
+            renders.append(
+                FileRender('dawn/native/ValidationUtils.cpp',
+                           native_dir + '/ValidationUtils_autogen.cpp',
+                           frontend_params))
+            renders.append(
+                FileRender('dawn/native/dawn_platform.h',
+                           native_dir + '/' + prefix + '_platform_autogen.h',
+                           frontend_params))
+            renders.append(
+                FileRender('dawn/native/api_structs.h',
+                           native_dir + '/' + namespace + '_structs_autogen.h',
                            frontend_params))
             renders.append(
                 FileRender(
-                    'dawn/native/ValidationUtils.cpp',
-                    'src/' + native_dir + '/ValidationUtils_autogen.cpp',
+                    'dawn/native/api_structs.cpp',
+                    native_dir + '/' + namespace + '_structs_autogen.cpp',
                     frontend_params))
-            renders.append(
-                FileRender(
-                    'dawn/native/dawn_platform.h',
-                    'src/' + native_dir + '/' + prefix + '_platform_autogen.h',
-                    frontend_params))
-            renders.append(
-                FileRender(
-                    'dawn/native/api_structs.h', 'src/' + native_dir + '/' +
-                    namespace + '_structs_autogen.h', frontend_params))
-            renders.append(
-                FileRender(
-                    'dawn/native/api_structs.cpp', 'src/' + native_dir + '/' +
-                    namespace + '_structs_autogen.cpp', frontend_params))
             renders.append(
                 FileRender('dawn/native/ProcTable.cpp',
-                           'src/' + native_dir + '/ProcTable.cpp',
-                           frontend_params))
+                           native_dir + '/ProcTable.cpp', frontend_params))
             renders.append(
                 FileRender('dawn/native/ChainUtils.h',
-                           'src/' + native_dir + '/ChainUtils_autogen.h',
+                           native_dir + '/ChainUtils_autogen.h',
                            frontend_params))
             renders.append(
                 FileRender('dawn/native/ChainUtils.cpp',
-                           'src/' + native_dir + '/ChainUtils_autogen.cpp',
+                           native_dir + '/ChainUtils_autogen.cpp',
                            frontend_params))
             renders.append(
                 FileRender('dawn/native/Features.h',
-                           'src/' + native_dir + '/Features_autogen.h',
+                           native_dir + '/Features_autogen.h',
                            frontend_params))
             renders.append(
                 FileRender('dawn/native/Features.inl',
-                           'src/' + native_dir + '/Features_autogen.inl',
+                           native_dir + '/Features_autogen.inl',
                            frontend_params))
             renders.append(
-                FileRender(
-                    'dawn/native/api_absl_format.h',
-                    'src/' + native_dir + '/' + api + '_absl_format_autogen.h',
-                    frontend_params))
+                FileRender('dawn/native/api_absl_format.h',
+                           native_dir + '/' + api + '_absl_format_autogen.h',
+                           frontend_params))
             renders.append(
-                FileRender(
-                    'dawn/native/api_absl_format.cpp', 'src/' + native_dir +
-                    '/' + api + '_absl_format_autogen.cpp', frontend_params))
+                FileRender('dawn/native/api_absl_format.cpp',
+                           native_dir + '/' + api + '_absl_format_autogen.cpp',
+                           frontend_params))
             renders.append(
-                FileRender(
-                    'dawn/native/api_StreamImpl.cpp', 'src/' + native_dir +
-                    '/' + api + '_StreamImpl_autogen.cpp', frontend_params))
+                FileRender('dawn/native/api_StreamImpl.cpp',
+                           native_dir + '/' + api + '_StreamImpl_autogen.cpp',
+                           frontend_params))
             renders.append(
                 FileRender('dawn/native/ObjectType.h',
-                           'src/' + native_dir + '/ObjectType_autogen.h',
+                           native_dir + '/ObjectType_autogen.h',
                            frontend_params))
             renders.append(
                 FileRender('dawn/native/ObjectType.cpp',
-                           'src/' + native_dir + '/ObjectType_autogen.cpp',
+                           native_dir + '/ObjectType_autogen.cpp',
                            frontend_params))
 
         if 'dawn_utils' in targets:

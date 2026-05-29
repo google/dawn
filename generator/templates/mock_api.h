@@ -39,8 +39,8 @@
 #include <atomic>
 #include <memory>
 
-#include "dawn/common/FutureUtils.h"
 #include "absl/container/flat_hash_map.h"
+#include "src/dawn/common/FutureUtils.h"
 
 // An abstract base class representing a proc table so that API calls can be mocked. Most API calls
 // are directly represented by a delete virtual method but others need minimal state tracking to be

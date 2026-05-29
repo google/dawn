@@ -29,7 +29,8 @@
 {% set namespace_name = Name(metadata.native_namespace) %}
 {% set native_namespace = namespace_name.namespace_case() %}
 {% set native_dir = impl_dir + namespace_name.Dirs() %}
-#include "{{native_dir}}/ValidationUtils_autogen.h"
+{% set include_dir = namespace_name.Dirs() %}
+#include "{{include_dir}}/ValidationUtils_autogen.h"
 
 namespace {{native_namespace}} {
 

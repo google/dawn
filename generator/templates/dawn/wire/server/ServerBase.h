@@ -31,14 +31,14 @@
 #include <memory>
 #include <tuple>
 
-#include "dawn/common/Mutex.h"
 #include "dawn/dawn_proc_table.h"
-#include "dawn/wire/ChunkedCommandHandler.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireCmd_autogen.h"
-#include "dawn/wire/WireDeserializeAllocator.h"
-#include "dawn/wire/server/ObjectStorage.h"
 #include "dawn/wire/server/WGPUTraits_autogen.h"
+#include "src/dawn/common/Mutex.h"
+#include "src/dawn/wire/ChunkedCommandHandler.h"
+#include "src/dawn/wire/WireDeserializeAllocator.h"
+#include "src/dawn/wire/server/ObjectStorage.h"
 
 namespace dawn::wire::server {
 

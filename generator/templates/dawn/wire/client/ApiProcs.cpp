@@ -32,9 +32,9 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/webgpu.h"
 #include "dawn/dawn_version.h"
+#include "src/dawn/wire/client/Client.h"
 
 namespace dawn::wire::client {
 

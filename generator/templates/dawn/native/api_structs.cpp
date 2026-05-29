@@ -29,13 +29,14 @@
 {% set namespace_name = Name(metadata.native_namespace) %}
 {% set native_namespace = namespace_name.namespace_case() %}
 {% set native_dir = impl_dir + namespace_name.Dirs() %}
+{% set include_dir = namespace_name.Dirs() %}
 {% set namespace = metadata.namespace %}
-#include "{{native_dir}}/{{namespace}}_structs_autogen.h"
+#include "{{include_dir}}/{{namespace}}_structs_autogen.h"
 
 #include <cstring>
 #include <tuple>
 
-#include "dawn/common/Assert.h"
+#include "src/dawn/common/Assert.h"
 
 #if defined(__GNUC__) || defined(__clang__)
 // error: 'offsetof' within non-standard-layout type '{{namespace}}::XXX' is conditionally-supported

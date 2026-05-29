@@ -28,10 +28,10 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/tests/DawnNativeTest.h"
 #include "src/dawn/native/CommandBuffer.h"
 #include "src/dawn/native/Commands.h"
 #include "src/dawn/native/ComputePassEncoder.h"
+#include "src/dawn/tests/DawnNativeTest.h"
 #include "src/dawn/utils/TestUtils.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"

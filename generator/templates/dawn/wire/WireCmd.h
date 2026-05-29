@@ -30,10 +30,10 @@
 
 #include <webgpu/webgpu.h>
 
-#include "dawn/wire/BufferConsumer.h"
 #include "dawn/wire/ObjectType_autogen.h"
-#include "dawn/wire/ObjectHandle.h"
-#include "dawn/wire/WireResult.h"
+#include "src/dawn/wire/BufferConsumer.h"
+#include "src/dawn/wire/ObjectHandle.h"
+#include "src/dawn/wire/WireResult.h"
 
 namespace dawn::wire {
 

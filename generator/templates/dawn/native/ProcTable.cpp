@@ -31,11 +31,12 @@
 {% set namespace_name = Name(metadata.native_namespace) %}
 {% set native_namespace = namespace_name.namespace_case() %}
 {% set native_dir = impl_dir + namespace_name.Dirs() %}
+{% set include_dir = namespace_name.Dirs() %}
 #include <algorithm>
 #include <vector>
 
 #include "{{native_dir}}/{{prefix}}_platform.h"
-#include "{{native_dir}}/{{Prefix}}Native.h"
+#include "{{include_dir}}/{{Prefix}}Native.h"
 #include "dawn/dawn_version.h"
 
 {% for type in by_category["object"] %}

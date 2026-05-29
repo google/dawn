@@ -31,11 +31,11 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/tests/DawnNativeTest.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Toggles.h"
 #include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/tests/DawnNativeTest.h"
 #include "src/dawn/tests/MockCallback.h"
 #include "src/dawn/tests/unittests/native/mocks/BindGroupLayoutMock.h"
 #include "src/dawn/tests/unittests/native/mocks/BindGroupMock.h"
