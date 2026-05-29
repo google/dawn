@@ -128,11 +128,14 @@ void BlobCache::StoreInternal(const CacheKey& cacheKey, std::span<const std::byt
     DAWN_CHECK(value.data() != nullptr);
     DAWN_CHECK(value.size() > 0);
 
+    // Make sure we early out if we are not using storing functionality. Otherwise, computing the
+    // hash may add unnecessary overhead.
+    if (mStoreFunction == nullptr) {
+        return;
+    }
     auto store = [&](std::span<const std::byte> actualValue) {
-        if (mStoreFunction != nullptr) {
-            mStoreFunction(cacheKey.data(), cacheKey.size(), actualValue.data(), actualValue.size(),
-                           mFunctionUserdata);
-        }
+        mStoreFunction(cacheKey.data(), cacheKey.size(), actualValue.data(), actualValue.size(),
+                       mFunctionUserdata);
     };
 
     // Call the actual store function for actual stored bytes.
