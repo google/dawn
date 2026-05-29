@@ -33,10 +33,6 @@ if (tint_has_protobuf) {
   import("//third_party/protobuf/proto_library.gni")
 }
 
-# The root directory of generated files in the host toolchain.
-host_root_gen_dir =
-    get_label_info(":any_target($host_toolchain)", "root_gen_dir")
-
 ###############################################################################
 # OS defines
 ###############################################################################

@@ -45,15 +45,14 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("intrinsic") {
   sources = [
-    "${host_root_gen_dir}/src/tint/lang/wgsl/intrinsic/ctor_conv.cc",
-    "${host_root_gen_dir}/src/tint/lang/wgsl/intrinsic/ctor_conv.h",
-    "${host_root_gen_dir}/src/tint/lang/wgsl/intrinsic/data.cc",
+    "ctor_conv.cc",
+    "ctor_conv.h",
+    "data.cc",
     "dialect.h",
     "type_matchers.h",
   ]
   deps = [
     "${dawn_root}/src/utils",
-    "${tint_src_dir}:generate_sources",
     "${tint_src_dir}/api/common",
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/constant",

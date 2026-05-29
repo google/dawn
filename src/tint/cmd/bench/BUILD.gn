@@ -46,15 +46,14 @@ if (tint_build_benchmarks) {
   if (tint_build_wgsl_reader) {
     tint_benchmarks_source_set("bench") {
       sources = [
-        "${host_root_gen_dir}/src/tint/cmd/bench/enums_core_bench.cc",
-        "${host_root_gen_dir}/src/tint/cmd/bench/enums_wgsl_bench.cc",
         "bench.cc",
         "bench.h",
+        "enums_core_bench.cc",
+        "enums_wgsl_bench.cc",
         "validator_bench.cc",
       ]
       deps = [
         "${dawn_root}/src/utils",
-        "${tint_src_dir}:generate_sources",
         "${tint_src_dir}:google_benchmark",
         "${tint_src_dir}/api/common",
         "${tint_src_dir}/lang/core",
