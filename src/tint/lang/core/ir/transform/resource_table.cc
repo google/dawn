@@ -43,6 +43,57 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
+/// Th resource_table transform handles the removal of the `getResource` and `hasResource` calls and
+/// replaces them with accesses into backend specific arrays. The backend specific parts are handled
+/// by the `ResourceTableHelper` which is attached to the transform.
+///
+/// There are a number of cases this transform handles, and it makes assumptions based on the
+/// information provided to it from the API. There is a bi-directional relationship in the
+/// validation for the combined texture/sampler calls with the API.
+///
+/// We have to handle several cases in here:
+///
+/// 1. `hasResource` -- this is just changed to a validation check that the type in the WGSL
+///    template (e.g. `hasResource<texture_2d<f32>>(n)`) matches the ResourceType that Dawn has
+///    stored into the metadata table for the slot `n`.
+///
+/// 2. `getResource` with no usages -- this just gets removed, we don't use the value returned so we
+///    don't actually need to do anything.
+///
+/// 3. `getResource<texture_*>` used without an associated sampler -- In this case we just need to
+///    check that the type in `getResource<texture_*>` matches the type in slot `n` of the metadata
+///    table. If the ResourceType does not match then we will use the default resource provided by
+///    Dawn for the `texture_*` type.
+///
+/// 4. `getResource<texture_*>` used with a `getResource<sampler>` -- In this case we need to
+///    validate that the `getResource<texture_*>(t)` is correct against metadata slot `t`, and the
+///    `getResource<sampler>(s)` is correct against the metadata slot `s`. Additionally we need to
+///    validate if the `sampler` is `filtering` then the `texture` is a `filterable` texture. If
+///    the texture/sampler pair are incompatible (an unfilterable texture paired with a filtering
+///    sampler) then we will return a `0` value result.
+///
+///    ```
+///    if (sampler.kind == Filtering && IsUnFilterable(texture.kind)) {
+///      value = vec4(0)
+///    } else {
+///      value = textureSample(t, s)
+///    }
+///    ```
+///
+///    Note, this means there is no substitution of default texture or sampler.
+///
+/// 5. `getResource<texture_*>` used with a bindful sampler -- In this case we need to check that
+///    the type in `getResource<texture_*>(t)` matches the type in the slot `t` of the metadata
+///    table. The API will provide information to Tint on the ResourceKind of the sampler, which is
+///    known at pipeline creation time. We will then validate that the texture/sampler pair are
+///    compatible (same as #4). If the are not compatible we will return a 0 value.
+///
+///    Note, this means there is no substitution of default texture or sampler.
+///
+/// 6. `getResource<sampler>` used with a bindful texture -- In this case we will validate that the
+///    ResourceType of the element at slot `n` is a sampler. We then get the `ResourceType` for the
+///    bindful texture as reported by the API side. At this point we do the same validation as #5.
+
 struct State {
     /// The configuration.
     const std::optional<ResourceTableConfig>& config;
