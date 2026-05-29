@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "dawn/utils/Timer.h"
+#include "src/dawn/utils/Timer.h"
 
 namespace dawn::utils {
 

@@ -32,7 +32,7 @@
 
 #include <array>
 
-#include "dawn/common/Constants.h"
+#include "src/dawn/common/Constants.h"
 
 namespace dawn::utils {
 

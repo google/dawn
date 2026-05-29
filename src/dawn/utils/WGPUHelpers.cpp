@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/utils/WGPUHelpers.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 
 #include <algorithm>
 #include <cstring>
@@ -35,12 +35,12 @@
 #include <sstream>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/Constants.h"
-#include "dawn/common/Log.h"
-#include "dawn/common/Numeric.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/Numeric.h"
 
 #ifndef __EMSCRIPTEN__
-#include "dawn/common/ExternalTextureParams.h"
+#include "src/dawn/common/ExternalTextureParams.h"
 #endif  // __EMSCRIPTEN__
 //
 namespace dawn::utils {

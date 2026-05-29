@@ -29,7 +29,7 @@
 #include <mach/mach.h>
 #include <mach/mach_time.h>
 
-#include "dawn/utils/Timer.h"
+#include "src/dawn/utils/Timer.h"
 
 namespace dawn::utils {
 

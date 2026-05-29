@@ -32,8 +32,8 @@
 #include <type_traits>
 #include <utility>
 
-#include "dawn/common/NonCopyable.h"
-#include "utils/platform.h"
+#include "src/dawn/common/NonCopyable.h"
+#include "src/utils/platform.h"
 
 namespace dawn::utils {
 
