@@ -345,6 +345,7 @@ message Instruction {
         InstructionBreakIf break_if = 28;
         InstructionUnreachable unreachable = 29;
         InstructionOverride override = 30;
+        InstructionConstExprIf const_expr_if = 31;
     }
     reserved 9;
     reserved "bitcast";
@@ -397,6 +398,11 @@ message InstructionSwizzle {
 }
 
 message InstructionIf {
+    optional uint32 true = 1;   // Module.blocks
+    optional uint32 false = 2;  // Module.blocks
+}
+
+message InstructionConstExprIf {
     optional uint32 true = 1;   // Module.blocks
     optional uint32 false = 2;  // Module.blocks
 }

@@ -783,6 +783,24 @@ TEST_F(IRBinaryRoundtripTest, Override_RootBlockExpressions) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, Override_ConstExprIf) {
+    b.Append(b.ir.root_block, [&] {
+        auto* o1 = b.Override(ty.u32());
+        auto* o2 = b.Override(ty.u32());
+        auto* if_ = b.ConstExprIf(b.Equal(o2, 0_u));
+        auto* result = b.InstructionResult<u32>();
+        if_->SetResult(result);
+        b.Append(if_->True(), [&] {  //
+            b.ExitIf(if_, o1);
+        });
+        b.Append(if_->False(), [&] {  //
+            b.ExitIf(if_, b.Divide(o1, o2));
+        });
+        b.Override("o3", result);
+    });
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, Override_WorkgroupSize) {
     b.Append(b.ir.root_block, [&] {
         auto* o = b.Override(ty.u32());

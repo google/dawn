@@ -453,6 +453,9 @@ struct Decoder {
             case pb::Instruction::KindCase::kBuiltinCall:
                 inst_out = CreateInstructionBuiltinCall(inst_in.builtin_call());
                 break;
+            case pb::Instruction::KindCase::kConstExprIf:
+                inst_out = CreateInstructionConstExprIf(inst_in.const_expr_if());
+                break;
             case pb::Instruction::KindCase::kConstruct:
                 inst_out = CreateInstructionConstruct(inst_in.construct());
                 break;
@@ -629,6 +632,13 @@ struct Decoder {
 
     ir::If* CreateInstructionIf(const pb::InstructionIf& if_in) {
         auto* if_out = mod_out_.CreateInstruction<ir::If>();
+        if_out->SetTrue(if_in.has_true_() ? Block(if_in.true_()) : b.Block());
+        if_out->SetFalse(if_in.has_false_() ? Block(if_in.false_()) : b.Block());
+        return if_out;
+    }
+
+    ir::If* CreateInstructionConstExprIf(const pb::InstructionConstExprIf& if_in) {
+        auto* if_out = mod_out_.CreateInstruction<ir::ConstExprIf>();
         if_out->SetTrue(if_in.has_true_() ? Block(if_in.true_()) : b.Block());
         if_out->SetFalse(if_in.has_false_() ? Block(if_in.false_()) : b.Block());
         return if_out;

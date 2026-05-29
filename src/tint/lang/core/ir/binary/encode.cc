@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/break_if.h"
+#include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/convert.h"
@@ -225,6 +226,9 @@ struct Encoder {
                 InstructionBuiltinCall(*inst_out.mutable_builtin_call(), i);
             },
             [&](const ir::CoreUnary* i) { InstructionUnary(*inst_out.mutable_unary(), i); },
+            [&](const ir::ConstExprIf* i) {
+                InstructionConstExprIf(*inst_out.mutable_const_expr_if(), i);
+            },
             [&](const ir::Construct* i) { InstructionConstruct(*inst_out.mutable_construct(), i); },
             [&](const ir::Continue* i) { InstructionContinue(*inst_out.mutable_continue_(), i); },
             [&](const ir::Convert* i) { InstructionConvert(*inst_out.mutable_convert(), i); },
@@ -297,6 +301,16 @@ struct Encoder {
         }
         if (auto* block = if_in->False()) {
             if_out.set_false_(Block(block));
+        }
+    }
+
+    void InstructionConstExprIf(pb::InstructionConstExprIf& const_expr_if_out,
+                                const ir::ConstExprIf* const_expr_if_in) {
+        if (auto* block = const_expr_if_in->True()) {
+            const_expr_if_out.set_true_(Block(block));
+        }
+        if (auto* block = const_expr_if_in->False()) {
+            const_expr_if_out.set_false_(Block(block));
         }
     }
 
