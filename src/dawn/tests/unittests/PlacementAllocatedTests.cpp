@@ -27,9 +27,9 @@
 
 #include <memory>
 
-#include "dawn/common/PlacementAllocated.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/PlacementAllocated.h"
 
 namespace dawn {
 namespace {

@@ -28,9 +28,9 @@
 #include <array>
 #include <utility>
 
-#include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
+#include "src/dawn/tests/unittests/wire/WireTest.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::wire {

@@ -25,17 +25,17 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/tests/perf_tests/DawnPerfTest.h"
+#include "src/dawn/tests/perf_tests/DawnPerfTest.h"
 
 #include <algorithm>
 #include <fstream>
 #include <limits>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
-#include "dawn/platform/tracing/TraceEvent.h"
-#include "dawn/tests/perf_tests/DawnPerfTestPlatform.h"
-#include "dawn/utils/Timer.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/platform/tracing/TraceEvent.h"
+#include "src/dawn/tests/perf_tests/DawnPerfTestPlatform.h"
+#include "src/dawn/utils/Timer.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

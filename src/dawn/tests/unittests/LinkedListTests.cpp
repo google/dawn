@@ -8,9 +8,9 @@
 #include <mutex>
 #include <utility>
 
-#include "dawn/common/LinkedList.h"
-#include "dawn/utils/TestUtils.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/LinkedList.h"
+#include "src/dawn/utils/TestUtils.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

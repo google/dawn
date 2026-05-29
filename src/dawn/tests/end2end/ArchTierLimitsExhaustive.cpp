@@ -32,9 +32,9 @@
 #include <string>
 #include <vector>
 
-#include "dawn/common/LinkedList.h"
-#include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboLimits.h"
+#include "src/dawn/common/LinkedList.h"
+#include "src/dawn/tests/DawnTest.h"
 #include "src/utils/compiler.h"
 #include "webgpu/webgpu_cpp.h"
 

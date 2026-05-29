@@ -34,11 +34,11 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/native/Blob.h"
-#include "dawn/native/CacheRequest.h"
 #include "dawn/tests/DawnNativeTest.h"
-#include "dawn/tests/mocks/platform/CachingInterfaceMock.h"
 #include "dawn/webgpu_cpp_print.h"
+#include "src/dawn/native/Blob.h"
+#include "src/dawn/native/CacheRequest.h"
+#include "src/dawn/tests/mocks/platform/CachingInterfaceMock.h"
 
 namespace dawn::native {
 namespace {

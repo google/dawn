@@ -38,16 +38,16 @@
 #include <variant>
 #include <vector>
 
-#include "dawn/common/TypedInteger.h"
-#include "dawn/native/Blob.h"
-#include "dawn/native/Serializable.h"
-#include "dawn/native/ShaderModule.h"
-#include "dawn/native/TintUtils.h"
-#include "dawn/native/stream/BlobSource.h"
-#include "dawn/native/stream/ByteVectorSink.h"
-#include "dawn/native/stream/Stream.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/TypedInteger.h"
+#include "src/dawn/native/Blob.h"
+#include "src/dawn/native/Serializable.h"
+#include "src/dawn/native/ShaderModule.h"
+#include "src/dawn/native/TintUtils.h"
+#include "src/dawn/native/stream/BlobSource.h"
+#include "src/dawn/native/stream/ByteVectorSink.h"
+#include "src/dawn/native/stream/Stream.h"
 #include "src/utils/compiler.h"
 #include "tint/tint.h"
 

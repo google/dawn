@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/tests/white_box/VulkanImageWrappingTests_DmaBuf.h"
+#include "src/dawn/tests/white_box/VulkanImageWrappingTests_DmaBuf.h"
 
 #include <fcntl.h>
 #include <gbm.h>
@@ -37,8 +37,8 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/native/vulkan/DeviceVk.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/native/vulkan/DeviceVk.h"
 
 namespace dawn::native::vulkan {
 

@@ -27,7 +27,7 @@
 
 #include <vector>
 
-#include "dawn/tests/unittests/validation/ValidationTest.h"
+#include "src/dawn/tests/unittests/validation/ValidationTest.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

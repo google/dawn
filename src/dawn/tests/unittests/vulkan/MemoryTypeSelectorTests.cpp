@@ -27,11 +27,11 @@
 
 #include <vector>
 
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/vulkan/MemoryTypeSelector.h"
-#include "dawn/utils/TestUtils.h"
 #include "dawn/webgpu_cpp_print.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/native/vulkan/MemoryTypeSelector.h"
+#include "src/dawn/utils/TestUtils.h"
 
 namespace dawn::native::vulkan {
 

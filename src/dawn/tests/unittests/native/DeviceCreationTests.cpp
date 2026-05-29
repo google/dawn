@@ -31,16 +31,16 @@
 #include <vector>
 
 #include "dawn/dawn_proc.h"
-#include "dawn/native/Adapter.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/native/Device.h"
-#include "dawn/native/Toggles.h"
-#include "dawn/native/dawn_platform.h"
-#include "dawn/tests/MockCallback.h"
-#include "dawn/tests/StringViewMatchers.h"
-#include "dawn/utils/SystemUtils.h"
-#include "dawn/utils/WGPUHelpers.h"
 #include "gtest/gtest.h"
+#include "src/dawn/native/Adapter.h"
+#include "src/dawn/native/Device.h"
+#include "src/dawn/native/Toggles.h"
+#include "src/dawn/native/dawn_platform.h"
+#include "src/dawn/tests/MockCallback.h"
+#include "src/dawn/tests/StringViewMatchers.h"
+#include "src/dawn/utils/SystemUtils.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

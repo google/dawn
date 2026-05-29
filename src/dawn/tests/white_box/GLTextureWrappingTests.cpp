@@ -28,13 +28,13 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/DynamicLib.h"
 #include "dawn/native/OpenGLBackend.h"
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/tests/DawnTest.h"
-#include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/WGPUHelpers.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/DynamicLib.h"
+#include "src/dawn/native/opengl/DeviceGL.h"
+#include "src/dawn/tests/DawnTest.h"
+#include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

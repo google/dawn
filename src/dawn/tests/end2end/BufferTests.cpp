@@ -39,12 +39,12 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/tests/DawnTest.h"
-#include "dawn/tests/MockCallback.h"
-#include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/TestUtils.h"
-#include "dawn/utils/WGPUHelpers.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/tests/DawnTest.h"
+#include "src/dawn/tests/MockCallback.h"
+#include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "src/dawn/utils/TestUtils.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
 namespace {

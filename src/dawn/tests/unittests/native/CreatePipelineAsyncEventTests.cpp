@@ -35,12 +35,12 @@
 #include <utility>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/native/Error.h"
-#include "dawn/tests/MockCallback.h"
-#include "dawn/utils/WGPUHelpers.h"
-#include "mocks/ComputePipelineMock.h"
-#include "mocks/DawnMockTest.h"
-#include "mocks/RenderPipelineMock.h"
+#include "src/dawn/native/Error.h"
+#include "src/dawn/tests/MockCallback.h"
+#include "src/dawn/tests/unittests/native/mocks/ComputePipelineMock.h"
+#include "src/dawn/tests/unittests/native/mocks/DawnMockTest.h"
+#include "src/dawn/tests/unittests/native/mocks/RenderPipelineMock.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 
 namespace dawn::native {
 namespace {

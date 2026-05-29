@@ -30,9 +30,9 @@
 
 #include <memory>
 
-#include "dawn/native/Buffer.h"
-#include "dawn/tests/unittests/native/mocks/DeviceMock.h"
 #include "gmock/gmock.h"
+#include "src/dawn/native/Buffer.h"
+#include "src/dawn/tests/unittests/native/mocks/DeviceMock.h"
 
 namespace dawn::native {
 

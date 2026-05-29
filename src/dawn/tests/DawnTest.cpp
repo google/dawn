@@ -30,7 +30,7 @@
 #pragma allow_unsafe_buffers
 #endif
 
-#include "dawn/tests/DawnTest.h"
+#include "src/dawn/tests/DawnTest.h"
 
 #include <algorithm>
 #include <atomic>
@@ -51,33 +51,34 @@
 // Need to be included before GLFW/glfw3.h to avoid MSVC warning C4005: 'APIENTRY': macro
 // redefinition
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include "dawn/common/windows_with_undefs.h"
+#include "src/dawn/common/windows_with_undefs.h"
 
+// Must come after windows_with_undefs
 #include <comdef.h>
 #include <versionhelpers.h>
 #endif
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/GPUInfo.h"
-#include "dawn/common/Log.h"
-#include "dawn/common/Math.h"
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
-#include "dawn/tests/MockCallback.h"
-#include "dawn/tests/PartitionAllocSupport.h"
-#include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/PlatformDebugLogger.h"
-#include "dawn/utils/SystemUtils.h"
-#include "dawn/utils/TerribleCommandBuffer.h"
-#include "dawn/utils/TestUtils.h"
-#include "dawn/utils/Timer.h"
-#include "dawn/utils/WGPUHelpers.h"
-#include "dawn/utils/WireHelper.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "utils/platform.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/GPUInfo.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/common/SystemUtils.h"
+#include "src/dawn/tests/MockCallback.h"
+#include "src/dawn/tests/PartitionAllocSupport.h"
+#include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "src/dawn/utils/PlatformDebugLogger.h"
+#include "src/dawn/utils/SystemUtils.h"
+#include "src/dawn/utils/TerribleCommandBuffer.h"
+#include "src/dawn/utils/TestUtils.h"
+#include "src/dawn/utils/Timer.h"
+#include "src/dawn/utils/WGPUHelpers.h"
+#include "src/dawn/utils/WireHelper.h"
+#include "src/utils/platform.h"
 
 #ifdef DAWN_SUPPORTS_GLFW_FOR_WINDOWING
 #include "GLFW/glfw3.h"

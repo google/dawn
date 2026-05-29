@@ -27,9 +27,9 @@
 
 #include <array>
 
-#include "dawn/common/TypedInteger.h"
-#include "dawn/common/ityp_span.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/TypedInteger.h"
+#include "src/dawn/common/ityp_span.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

@@ -29,13 +29,13 @@
 #include <tuple>
 #include <utility>
 
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/tests/MockCallback.h"
-#include "dawn/tests/ParamGenerator.h"
-#include "dawn/tests/StringViewMatchers.h"
-#include "dawn/tests/unittests/wire/WireTest.h"
-#include "dawn/wire/client/ClientMemoryTransferService_mock.h"
-#include "dawn/wire/server/ServerMemoryTransferService_mock.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/tests/MockCallback.h"
+#include "src/dawn/tests/ParamGenerator.h"
+#include "src/dawn/tests/StringViewMatchers.h"
+#include "src/dawn/tests/unittests/wire/WireTest.h"
+#include "src/dawn/wire/client/ClientMemoryTransferService_mock.h"
+#include "src/dawn/wire/server/ServerMemoryTransferService_mock.h"
 #include "src/utils/compiler.h"
 
 namespace wgpu {

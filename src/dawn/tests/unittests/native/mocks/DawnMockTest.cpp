@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/tests/unittests/native/mocks/DawnMockTest.h"
+#include "src/dawn/tests/unittests/native/mocks/DawnMockTest.h"
 
 #include <utility>
 
 #include "dawn/dawn_proc.h"
-#include "dawn/native/ChainUtils.h"
+#include "src/dawn/native/ChainUtils.h"
 
 using testing::_;
 using testing::AtMost;

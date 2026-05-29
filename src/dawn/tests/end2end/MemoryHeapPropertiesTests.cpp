@@ -27,7 +27,7 @@
 
 #include <vector>
 
-#include "dawn/tests/DawnTest.h"
+#include "src/dawn/tests/DawnTest.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

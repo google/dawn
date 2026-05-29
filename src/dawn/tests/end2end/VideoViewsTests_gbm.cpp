@@ -34,9 +34,9 @@
 #include <utility>
 #include <vector>
 
-#include "VideoViewsTests.h"
-#include "dawn/common/Assert.h"
 #include "dawn/native/VulkanBackend.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/tests/end2end/VideoViewsTests.h"
 
 namespace dawn {
 namespace {

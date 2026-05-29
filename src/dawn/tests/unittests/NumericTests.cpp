@@ -27,9 +27,9 @@
 
 #include <limits>
 
-#include "dawn/common/Numeric.h"
-#include "dawn/common/TypedInteger.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/Numeric.h"
+#include "src/dawn/common/TypedInteger.h"
 
 namespace dawn {
 namespace {

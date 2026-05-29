@@ -28,9 +28,9 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/RefBase.h"
 #include "gmock/gmock.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/RefBase.h"
 
 namespace dawn {
 namespace {

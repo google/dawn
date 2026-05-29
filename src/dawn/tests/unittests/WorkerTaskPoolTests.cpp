@@ -28,8 +28,8 @@
 #include <memory>
 
 #include "dawn/platform/DawnPlatform.h"
-#include "dawn/tests/MockCallback.h"
 #include "gtest/gtest.h"
+#include "src/dawn/tests/MockCallback.h"
 
 namespace dawn {
 namespace {

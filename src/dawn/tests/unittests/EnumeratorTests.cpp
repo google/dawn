@@ -28,13 +28,13 @@
 #include <array>
 #include <vector>
 
-#include "dawn/common/Compiler.h"
-#include "dawn/common/Enumerator.h"
-#include "dawn/common/TypedInteger.h"
-#include "dawn/common/ityp_array.h"
-#include "dawn/common/ityp_span.h"
-#include "dawn/common/ityp_vector.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/Compiler.h"
+#include "src/dawn/common/Enumerator.h"
+#include "src/dawn/common/TypedInteger.h"
+#include "src/dawn/common/ityp_array.h"
+#include "src/dawn/common/ityp_span.h"
+#include "src/dawn/common/ityp_vector.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

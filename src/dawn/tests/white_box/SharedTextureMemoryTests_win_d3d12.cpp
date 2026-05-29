@@ -38,8 +38,8 @@
 
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/tests/white_box/SharedTextureMemoryTests.h"
-#include "dawn/utils/SystemHandle.h"
+#include "src/dawn/tests/white_box/SharedTextureMemoryTests.h"
+#include "src/dawn/utils/SystemHandle.h"
 
 namespace dawn {
 namespace {

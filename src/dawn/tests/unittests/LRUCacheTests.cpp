@@ -25,11 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/common/HashUtils.h"
-#include "dawn/common/LRUCache.h"
-#include "dawn/native/Error.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/HashUtils.h"
+#include "src/dawn/common/LRUCache.h"
+#include "src/dawn/native/Error.h"
 
 namespace dawn::native {
 namespace {

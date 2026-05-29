@@ -28,9 +28,9 @@
 #include <algorithm>
 #include <vector>
 
-#include "dawn/tests/unittests/validation/ValidationTest.h"
-#include "dawn/utils/WGPUHelpers.h"
-#include "dawn/utils/WireHelper.h"
+#include "src/dawn/tests/unittests/validation/ValidationTest.h"
+#include "src/dawn/utils/WGPUHelpers.h"
+#include "src/dawn/utils/WireHelper.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

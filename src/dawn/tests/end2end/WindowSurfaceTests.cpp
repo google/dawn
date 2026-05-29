@@ -28,27 +28,27 @@
 #include <cstdlib>
 #include <memory>
 
-#include "dawn/common/Log.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/tests/DawnTest.h"
 #include "gtest/gtest.h"
-#include "utils/platform.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/tests/DawnTest.h"
+#include "src/utils/platform.h"
 #include "webgpu/webgpu_glfw.h"
 
 // Include windows.h before GLFW so GLFW's APIENTRY macro doesn't conflict with windows.h's.
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include "dawn/common/windows_with_undefs.h"
+#include "src/dawn/common/windows_with_undefs.h"
 #endif  // DAWN_PLATFORM_IS(WINDOWS)
 
 #include "GLFW/glfw3.h"
 
 #if defined(DAWN_USE_X11)
-#include "dawn/common/xlib_with_undefs.h"
+#include "src/dawn/common/xlib_with_undefs.h"
 #endif  // defined(DAWN_USE_X11)
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-#include "dawn/utils/ObjCUtils.h"
+#include "src/dawn/utils/ObjCUtils.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
 #include "GLFW/glfw3native.h"

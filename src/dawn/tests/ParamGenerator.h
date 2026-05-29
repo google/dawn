@@ -36,8 +36,8 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/Preprocessor.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/Preprocessor.h"
 
 namespace dawn {
 namespace detail {

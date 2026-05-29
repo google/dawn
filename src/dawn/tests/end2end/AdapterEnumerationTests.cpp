@@ -30,16 +30,18 @@
 #include <memory>
 #include <utility>
 
-#include "dawn/common/GPUInfo.h"
-#include "dawn/common/StringViewUtils.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
+#include "src/dawn/common/GPUInfo.h"
+#include "src/dawn/common/StringViewUtils.h"
 #include "src/utils/compiler.h"
 
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
 // This must be above VulkanBackend.h otherwise vulkan.h will be included before we can wrap it with
 // vulkan_platform.h.
-#include "dawn/common/vulkan_platform.h"
+#include "src/dawn/common/vulkan_platform.h"
+
+// After vulkan_platform
 #include "dawn/native/VulkanBackend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 

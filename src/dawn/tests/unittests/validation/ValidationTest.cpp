@@ -30,7 +30,7 @@
 #pragma allow_unsafe_buffers
 #endif
 
-#include "dawn/tests/unittests/validation/ValidationTest.h"
+#include "src/dawn/tests/unittests/validation/ValidationTest.h"
 
 #include <webgpu/webgpu.h>
 
@@ -39,16 +39,16 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
-#include "dawn/native/Adapter.h"
 #include "dawn/native/NullBackend.h"
-#include "dawn/tests/PartitionAllocSupport.h"
-#include "dawn/tests/StringViewMatchers.h"
-#include "dawn/tests/ToggleParser.h"
-#include "dawn/utils/WireHelper.h"
 #include "dawn/webgpu_cpp_print.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/SystemUtils.h"
+#include "src/dawn/native/Adapter.h"
+#include "src/dawn/tests/PartitionAllocSupport.h"
+#include "src/dawn/tests/StringViewMatchers.h"
+#include "src/dawn/tests/ToggleParser.h"
+#include "src/dawn/utils/WireHelper.h"
 
 namespace {
 

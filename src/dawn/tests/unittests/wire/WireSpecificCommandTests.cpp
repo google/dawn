@@ -27,19 +27,19 @@
 
 #include <span>
 
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/tests/MockCallback.h"
-#include "dawn/tests/StringViewMatchers.h"
-#include "dawn/tests/unittests/wire/WireTest.h"
-#include "dawn/utils/TerribleCommandBuffer.h"
-#include "dawn/wire/BufferConsumer.h"
-#include "dawn/wire/ChunkedCommandSerializer.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/WireServer.h"
-#include "dawn/wire/client/Client.h"
-#include "dawn/wire/server/Server.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/tests/MockCallback.h"
+#include "src/dawn/tests/StringViewMatchers.h"
+#include "src/dawn/tests/unittests/wire/WireTest.h"
+#include "src/dawn/utils/TerribleCommandBuffer.h"
+#include "src/dawn/wire/BufferConsumer.h"
+#include "src/dawn/wire/ChunkedCommandSerializer.h"
+#include "src/dawn/wire/client/Client.h"
+#include "src/dawn/wire/server/Server.h"
 
 namespace dawn::wire {
 namespace {

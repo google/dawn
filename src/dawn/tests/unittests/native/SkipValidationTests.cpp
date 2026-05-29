@@ -31,9 +31,9 @@
 #include <functional>
 #include <utility>
 
-#include "dawn/tests/StringViewMatchers.h"
-#include "mocks/BufferMock.h"
-#include "mocks/DawnMockTest.h"
+#include "src/dawn/tests/StringViewMatchers.h"
+#include "src/dawn/tests/unittests/native/mocks/BufferMock.h"
+#include "src/dawn/tests/unittests/native/mocks/DawnMockTest.h"
 
 namespace dawn::native {
 namespace {

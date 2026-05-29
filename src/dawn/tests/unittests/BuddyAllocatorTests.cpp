@@ -27,8 +27,8 @@
 
 #include <vector>
 
-#include "dawn/native/BuddyAllocator.h"
 #include "gtest/gtest.h"
+#include "src/dawn/native/BuddyAllocator.h"
 
 namespace dawn::native {
 

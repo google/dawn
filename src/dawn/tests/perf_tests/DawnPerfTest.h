@@ -33,8 +33,8 @@
 #include <string>
 #include <vector>
 
-#include "dawn/tests/DawnTest.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/tests/DawnTest.h"
 #include "src/utils/compiler.h"
 
 void InitDawnPerfTestEnvironment(int argc, char** argv);

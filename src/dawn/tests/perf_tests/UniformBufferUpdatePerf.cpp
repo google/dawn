@@ -28,10 +28,10 @@
 #include <queue>
 #include <vector>
 
-#include "dawn/common/MutexProtected.h"
-#include "dawn/tests/perf_tests/DawnPerfTest.h"
-#include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/WGPUHelpers.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/tests/perf_tests/DawnPerfTest.h"
+#include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
 // This is for developers only to ensure the triangle color drawn is as expected.

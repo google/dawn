@@ -29,9 +29,9 @@
 
 #include <unordered_set>
 
-#include "dawn/common/Constants.h"
-#include "dawn/native/ChainUtils.h"
-#include "dawn/native/Limits.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/Limits.h"
 
 namespace dawn {
 namespace native {

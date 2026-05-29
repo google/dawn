@@ -28,10 +28,10 @@
 #include <thread>
 #include <utility>
 
-#include "dawn/common/Ref.h"
-#include "dawn/common/RefCounted.h"
 #include "gtest/gtest.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/RefCounted.h"
 
 namespace dawn {
 namespace {

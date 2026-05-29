@@ -28,8 +28,8 @@
 #include <variant>
 #include <vector>
 
-#include "dawn/common/Sha3.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/Sha3.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

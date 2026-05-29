@@ -31,10 +31,10 @@
 #include <vector>
 
 #include "VideoViewsTests.h"
-#include "dawn/common/Assert.h"
-#include "dawn/common/CoreFoundationRef.h"
-#include "dawn/common/IOSurfaceUtils.h"
-#include "dawn/utils/TextureUtils.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/CoreFoundationRef.h"
+#include "src/dawn/common/IOSurfaceUtils.h"
+#include "src/dawn/utils/TextureUtils.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

@@ -27,10 +27,10 @@
 
 #include <string>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/SystemUtils.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/SystemUtils.h"
 
 namespace dawn {
 namespace {

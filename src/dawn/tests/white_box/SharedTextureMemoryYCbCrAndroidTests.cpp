@@ -32,16 +32,16 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/Algebra.h"
-#include "dawn/common/Assert.h"
-#include "dawn/common/ColorSpace.h"
-#include "dawn/common/Range.h"
-#include "dawn/native/vulkan/DeviceVk.h"
-#include "dawn/native/vulkan/UtilsVulkan.h"
-#include "dawn/native/vulkan/VulkanError.h"
-#include "dawn/tests/DawnTest.h"
-#include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/WGPUHelpers.h"
+#include "src/dawn/common/Algebra.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/ColorSpace.h"
+#include "src/dawn/common/Range.h"
+#include "src/dawn/native/vulkan/DeviceVk.h"
+#include "src/dawn/native/vulkan/UtilsVulkan.h"
+#include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/dawn/tests/DawnTest.h"
+#include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "vulkan/vulkan_core.h"
 
 namespace dawn {

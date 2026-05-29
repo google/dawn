@@ -28,9 +28,9 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/SerialMap.h"
-#include "dawn/common/TypedInteger.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/SerialMap.h"
+#include "src/dawn/common/TypedInteger.h"
 
 namespace dawn {
 namespace {

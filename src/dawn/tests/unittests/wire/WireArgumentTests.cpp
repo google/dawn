@@ -28,8 +28,8 @@
 #include <array>
 #include <string>
 
-#include "dawn/common/Constants.h"
-#include "dawn/tests/unittests/wire/WireTest.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/tests/unittests/wire/WireTest.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::wire {

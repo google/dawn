@@ -27,12 +27,12 @@
 
 #include <vector>
 
-#include "dawn/native/Features.h"
-#include "dawn/native/Instance.h"
-#include "dawn/native/Toggles.h"
-#include "dawn/native/null/DeviceNull.h"
-#include "dawn/utils/WGPUHelpers.h"
 #include "gtest/gtest.h"
+#include "src/dawn/native/Features.h"
+#include "src/dawn/native/Instance.h"
+#include "src/dawn/native/Toggles.h"
+#include "src/dawn/native/null/DeviceNull.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

@@ -28,9 +28,9 @@
 #include <set>
 #include <vector>
 
-#include "dawn/common/Math.h"
-#include "dawn/common/SlabAllocator.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/common/SlabAllocator.h"
 
 namespace dawn {
 namespace {

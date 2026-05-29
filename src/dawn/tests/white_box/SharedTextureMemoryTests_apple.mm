@@ -33,12 +33,12 @@
 
 #include <thread>
 
-#include "dawn/common/CoreFoundationRef.h"
-#include "dawn/common/NSRef.h"
 #include "dawn/native/MetalBackend.h"
-#include "dawn/native/metal/Forward.h"
-#include "dawn/native/metal/SharedTextureMemoryMTL.h"
-#include "dawn/tests/white_box/SharedTextureMemoryTests.h"
+#include "src/dawn/common/CoreFoundationRef.h"
+#include "src/dawn/common/NSRef.h"
+#include "src/dawn/native/metal/Forward.h"
+#include "src/dawn/native/metal/SharedTextureMemoryMTL.h"
+#include "src/dawn/tests/white_box/SharedTextureMemoryTests.h"
 
 namespace dawn {
 namespace {

@@ -33,7 +33,7 @@
 #include <limits>
 #include <vector>
 
-#include "dawn/common/Math.h"
+#include "src/dawn/common/Math.h"
 #include "src/utils/compiler.h"
 
 namespace wgpu {

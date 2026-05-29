@@ -32,10 +32,10 @@
 #include <string>
 #include <vector>
 
-#include "dawn/common/GPUInfo.h"
-#include "dawn/tests/DawnTest.h"
-#include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/WGPUHelpers.h"
+#include "src/dawn/common/GPUInfo.h"
+#include "src/dawn/tests/DawnTest.h"
+#include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 
 // The motivation behind these tests is to investigate the failures in
 // webgpu:shader,execution,expression,call,builtin,atomics,atomic* CTS for mobile gpus.

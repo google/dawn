@@ -38,9 +38,9 @@
 #include "src/utils/compiler.h"
 
 // This must be included instead of vulkan.h so that we can wrap it with vulkan_platform.h.
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/tests/white_box/SharedTextureMemoryTests.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/tests/white_box/SharedTextureMemoryTests.h"
 
 namespace dawn {
 namespace {

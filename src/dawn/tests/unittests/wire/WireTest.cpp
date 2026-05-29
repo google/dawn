@@ -25,14 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/tests/unittests/wire/WireTest.h"
+#include "src/dawn/tests/unittests/wire/WireTest.h"
 
-#include "dawn/common/StringViewUtils.h"
 #include "dawn/dawn_proc.h"
-#include "dawn/tests/MockCallback.h"
-#include "dawn/utils/TerribleCommandBuffer.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/tests/MockCallback.h"
+#include "src/dawn/utils/TerribleCommandBuffer.h"
 
 using testing::_;
 using testing::AtMost;

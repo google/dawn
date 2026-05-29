@@ -28,9 +28,9 @@
 #include <limits>
 #include <unordered_set>
 
-#include "dawn/common/FutureUtils.h"
-#include "dawn/tests/DawnTest.h"
-#include "dawn/utils/WGPUHelpers.h"
+#include "src/dawn/common/FutureUtils.h"
+#include "src/dawn/tests/DawnTest.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

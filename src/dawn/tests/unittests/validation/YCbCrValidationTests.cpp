@@ -28,9 +28,9 @@
 #include <vector>
 
 // This must be included instead of vulkan.h so that we can wrap it with vulkan_platform.h.
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/tests/unittests/validation/ValidationTest.h"
-#include "dawn/utils/WGPUHelpers.h"
+#include "src/dawn/common/vulkan_platform.h"
+#include "src/dawn/tests/unittests/validation/ValidationTest.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
 namespace {

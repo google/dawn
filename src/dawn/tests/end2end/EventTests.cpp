@@ -35,11 +35,11 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/FutureUtils.h"
-#include "dawn/tests/DawnTest.h"
-#include "dawn/utils/SystemUtils.h"
-#include "dawn/utils/WGPUHelpers.h"
-#include "dawn/utils/WireHelper.h"
+#include "src/dawn/common/FutureUtils.h"
+#include "src/dawn/tests/DawnTest.h"
+#include "src/dawn/utils/SystemUtils.h"
+#include "src/dawn/utils/WGPUHelpers.h"
+#include "src/dawn/utils/WireHelper.h"
 
 namespace dawn {
 namespace {

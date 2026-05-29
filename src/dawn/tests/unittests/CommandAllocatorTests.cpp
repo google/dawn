@@ -34,8 +34,8 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/native/CommandAllocator.h"
 #include "gtest/gtest.h"
+#include "src/dawn/native/CommandAllocator.h"
 
 namespace dawn::native {
 

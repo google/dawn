@@ -36,8 +36,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "dawn/common/TypedInteger.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/TypedInteger.h"
 
 #define EXPECT_CACHE_HIT(cache, N, statement) \
     do {                                      \

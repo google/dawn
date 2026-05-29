@@ -29,10 +29,10 @@
 #include <span>
 #include <utility>
 
-#include "dawn/common/Math.h"
-#include "dawn/native/Blob.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/native/Blob.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

@@ -24,10 +24,10 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#include "dawn/tests/PartitionAllocSupport.h"
+#include "src/dawn/tests/PartitionAllocSupport.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/Log.h"
 
 #if defined(DAWN_ENABLE_PARTITION_ALLOC)
 #include "partition_alloc/dangling_raw_ptr_checks.h"

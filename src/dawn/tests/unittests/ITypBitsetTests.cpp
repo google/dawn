@@ -27,10 +27,10 @@
 
 #include <set>
 
-#include "dawn/common/TypedInteger.h"
-#include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Features_autogen.h"
 #include "gtest/gtest.h"
+#include "src/dawn/common/TypedInteger.h"
+#include "src/dawn/common/ityp_bitset.h"
 
 namespace dawn {
 namespace {
