@@ -27,7 +27,7 @@
 
 import("../../../scripts/dawn_overrides_with_defaults.gni")
 
-if (is_win) {
+if (host_os == "win") {
   _exe = ".exe"
 } else {
   _exe = ""

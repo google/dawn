@@ -150,6 +150,29 @@ and use `find_package(Dawn)` in your CMake project to discover Dawn and link wit
 the `dawn::webgpu_dawn` target. Please see [Quickstart with CMake](./quickstart-cmake.md)
 for step-by-step instructions.
 
+### Cross-compiling for Android targets (Linux hosts)
+
+Compiling Dawn binaries for Android is not supported in a Dawn standalone
+checkout; it must be checked out as a submodule of `chromium/src` (on a Linux
+host). If Chromium is configured to build for Android, then Dawn targets (like
+`dawn_unittests` will also be buildable.
+
+### Cross-compiling for Windows targets (Linux/Mac hosts)
+
+Cross-compilation for Windows targets on Mac/Linux hosts is provided on a
+best-effort basis, primarily for the purpose of compilation checks during local
+Dawn development.
+
+Following [this guide](https://chromium.googlesource.com/chromium/src/+/main/docs/win_cross.md):
+
+- Add `target_os = ['win']` to the top level of `.gclient`
+- `gclient sync`
+- Create a new `out/` directory with GN args:
+  ```
+  target_os = "win"
+  target_cpu = "x64"
+  ```
+
 ### Using ccache for CMake builds
 There is a substantial number of source files that are needed to be
 built for Dawn and its dependencies (~thousands), which can lead to
