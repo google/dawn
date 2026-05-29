@@ -668,24 +668,24 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
         AppendDeviceLostMessage(error.get());
     }
 
-    InternalErrorType allowedErrors =
-        InternalErrorType::Validation | InternalErrorType::DeviceLost | additionalAllowedErrors;
-
-    if (type == InternalErrorType::DeviceLost) {
+    // If ErrorInjectorEnabled() then this may be an injected DeviceLost, not a real one.
+    bool deviceDefinitelyStopped = type == InternalErrorType::DeviceLost && !ErrorInjectorEnabled();
+    if (deviceDefinitelyStopped) {
+        // If the device was lost naturally, the backend device has already stopped.
         mState = State::Disconnected;
-    } else if (!(allowedErrors & type)) {
+    }
+
+    InternalErrorType allowedErrors = InternalErrorType::Validation | additionalAllowedErrors;
+    if (!(allowedErrors & type)) {
         // If we receive an error which we did not explicitly allow, assume the backend can't
         // recover and lose the device now. Cleanup for the device will be deferred until the last
         // external reference of the device is dropped, or an explicit call to Destroy.
         error->AppendContext("handling unexpected error type %s when allowed errors are %s.", type,
                              allowedErrors);
 
-        // Transition to a non-alive state if we are currently alive so that the application can no
-        // longer use the device.
+        // Handle the remainder of this error as if it caused a device lost.
         State prev = State::Alive;
         mState.compare_exchange_strong(prev, State::BeingDisconnected, std::memory_order::acq_rel);
-
-        // Handle the remainder of this error as if it caused a device lost.
         type = InternalErrorType::DeviceLost;
     }
 
