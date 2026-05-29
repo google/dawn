@@ -120,7 +120,8 @@ template("dawn_test") {
 
     configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
 
-    if (dawn_tests_use_angle && defined(dawn_angle_dir)) {
+    if (dawn_tests_use_angle && defined(dawn_angle_dir) &&
+        !dawn_use_static_angle) {
       if (!defined(data_deps)) {
         data_deps = []
       }
