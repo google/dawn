@@ -25,14 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/wire/client/ShaderModule.h"
+#include "src/dawn/wire/client/ShaderModule.h"
 
 #include <memory>
 #include <utility>
 
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/wire/client/Client.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/wire/client/Client.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::wire::client {

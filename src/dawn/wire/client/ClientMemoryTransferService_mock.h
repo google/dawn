@@ -33,8 +33,8 @@
 #include <span>
 
 #include "dawn/wire/WireClient.h"
-#include "dawn/wire/client/Client.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/wire/client/Client.h"
 
 namespace dawn::wire::client {
 

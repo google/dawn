@@ -33,8 +33,8 @@
 #include <span>
 
 #include "dawn/wire/WireServer.h"
-#include "dawn/wire/server/Server.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/wire/server/Server.h"
 
 namespace dawn::wire::server {
 

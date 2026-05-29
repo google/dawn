@@ -29,12 +29,12 @@
 #include <memory>
 #include <span>
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/wire/BufferConsumer_impl.h"
 #include "dawn/wire/WireCmd_autogen.h"
-#include "dawn/wire/WireResult.h"
-#include "dawn/wire/server/Server.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/wire/BufferConsumer_impl.h"
+#include "src/dawn/wire/WireResult.h"
+#include "src/dawn/wire/server/Server.h"
 
 namespace dawn::wire::server {
 

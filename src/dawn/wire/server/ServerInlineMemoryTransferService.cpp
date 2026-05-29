@@ -28,9 +28,9 @@
 #include <cstring>
 #include <memory>
 
-#include "dawn/common/Assert.h"
 #include "dawn/wire/WireServer.h"
-#include "dawn/wire/server/Server.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/wire/server/Server.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::wire::server {

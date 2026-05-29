@@ -33,14 +33,14 @@
 #include <memory>
 #include <optional>
 
-#include "dawn/common/LinkedList.h"
-#include "dawn/common/RefCountedWithExternalCount.h"
-#include "dawn/common/WGPUDeviceCallbackInfos.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/client/ApiObjects_autogen.h"
-#include "dawn/wire/client/LimitsAndFeatures.h"
-#include "dawn/wire/client/ObjectBase.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/LinkedList.h"
+#include "src/dawn/common/RefCountedWithExternalCount.h"
+#include "src/dawn/common/WGPUDeviceCallbackInfos.h"
+#include "src/dawn/wire/client/LimitsAndFeatures.h"
+#include "src/dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
 

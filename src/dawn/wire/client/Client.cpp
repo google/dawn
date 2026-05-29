@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/wire/client/Client.h"
+#include "src/dawn/wire/client/Client.h"
 
 #include <algorithm>
 
-#include "dawn/common/Compiler.h"
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/wire/client/Device.h"
+#include "src/dawn/common/Compiler.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/wire/client/Device.h"
 
 namespace dawn::wire::client {
 

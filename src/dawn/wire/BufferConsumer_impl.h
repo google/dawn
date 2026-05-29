@@ -31,7 +31,7 @@
 #include <limits>
 #include <type_traits>
 
-#include "dawn/wire/BufferConsumer.h"
+#include "src/dawn/wire/BufferConsumer.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::wire {

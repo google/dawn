@@ -25,18 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/wire/client/Adapter.h"
+#include "src/dawn/wire/client/Adapter.h"
 
 #include <memory>
 #include <string>
 #include <utility>
 
 #include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
-#include "dawn/common/Log.h"
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/webgpu.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/wire/client/Client.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::wire::client {

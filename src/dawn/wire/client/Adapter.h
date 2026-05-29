@@ -33,9 +33,9 @@
 
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireCmd_autogen.h"
-#include "dawn/wire/client/LimitsAndFeatures.h"
-#include "dawn/wire/client/ObjectBase.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/wire/client/LimitsAndFeatures.h"
+#include "src/dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
 

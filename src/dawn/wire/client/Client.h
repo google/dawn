@@ -34,19 +34,19 @@
 #include <utility>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/FutureUtils.h"
-#include "dawn/common/LinkedList.h"
-#include "dawn/common/NonCopyable.h"
-#include "dawn/wire/ChunkedCommandSerializer.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireCmd_autogen.h"
-#include "dawn/wire/WireDeserializeAllocator.h"
-#include "dawn/wire/WireResult.h"
 #include "dawn/wire/client/ClientBase_autogen.h"
-#include "dawn/wire/client/EventManager.h"
-#include "dawn/wire/client/ObjectStore.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/FutureUtils.h"
+#include "src/dawn/common/LinkedList.h"
+#include "src/dawn/common/NonCopyable.h"
+#include "src/dawn/wire/ChunkedCommandSerializer.h"
+#include "src/dawn/wire/WireDeserializeAllocator.h"
+#include "src/dawn/wire/WireResult.h"
+#include "src/dawn/wire/client/EventManager.h"
+#include "src/dawn/wire/client/ObjectStore.h"
 
 namespace dawn::wire::client {
 

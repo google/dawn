@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/wire/client/Instance.h"
+#include "src/dawn/wire/client/Instance.h"
 
 #include <limits>
 #include <memory>
@@ -33,14 +33,14 @@
 #include <string>
 #include <utility>
 
-#include "dawn/common/Log.h"
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/common/WGSLFeatureMapping.h"
 #include "dawn/wire/client/ApiObjects_autogen.h"
-#include "dawn/wire/client/Client.h"
-#include "dawn/wire/client/EventManager.h"
 #include "dawn/wire/client/webgpu.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/common/WGSLFeatureMapping.h"
+#include "src/dawn/wire/client/Client.h"
+#include "src/dawn/wire/client/EventManager.h"
 #include "src/utils/compiler.h"
 #include "tint/tint.h"
 

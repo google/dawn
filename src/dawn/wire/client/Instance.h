@@ -29,10 +29,10 @@
 #define SRC_DAWN_WIRE_CLIENT_INSTANCE_H_
 
 #include "absl/container/flat_hash_set.h"
-#include "dawn/common/RefCountedWithExternalCount.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireCmd_autogen.h"
-#include "dawn/wire/client/ObjectBase.h"
+#include "src/dawn/common/RefCountedWithExternalCount.h"
+#include "src/dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
 

@@ -30,10 +30,10 @@
 
 #include <cstddef>
 
-#include "dawn/common/Constants.h"
-#include "dawn/common/Math.h"
-#include "dawn/wire/WireResult.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Math.h"
+#include "src/dawn/wire/WireResult.h"
 
 namespace dawn::wire {
 

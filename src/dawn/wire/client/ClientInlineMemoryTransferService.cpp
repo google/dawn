@@ -29,10 +29,10 @@
 #include <memory>
 #include <utility>
 
-#include "dawn/common/Alloc.h"
-#include "dawn/common/Assert.h"
 #include "dawn/wire/WireClient.h"
-#include "dawn/wire/client/Client.h"
+#include "src/dawn/common/Alloc.h"
+#include "src/dawn/common/Assert.h"
+#include "src/dawn/wire/client/Client.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::wire::client {

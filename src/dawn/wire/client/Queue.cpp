@@ -25,18 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/wire/client/Queue.h"
+#include "src/dawn/wire/client/Queue.h"
 
 #include <memory>
 #include <string>
 #include <utility>
 
-#include "dawn/common/Atomic.h"
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/wire/BufferConsumer_impl.h"
-#include "dawn/wire/client/Client.h"
-#include "dawn/wire/client/EventManager.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Atomic.h"
+#include "src/dawn/common/StringViewUtils.h"
+#include "src/dawn/wire/BufferConsumer_impl.h"
+#include "src/dawn/wire/client/Client.h"
+#include "src/dawn/wire/client/EventManager.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::wire::client {

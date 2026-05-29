@@ -35,13 +35,13 @@
 #include <memory>
 #include <utility>
 
-#include "dawn/common/Alloc.h"
-#include "dawn/common/Compiler.h"
-#include "dawn/common/Constants.h"
-#include "dawn/common/Math.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/Alloc.h"
+#include "src/dawn/common/Compiler.h"
+#include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Math.h"
 
 namespace dawn::wire {
 

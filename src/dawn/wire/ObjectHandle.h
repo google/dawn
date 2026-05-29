@@ -31,8 +31,8 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "dawn/common/HashUtils.h"
 #include "dawn/wire/Wire.h"
+#include "src/dawn/common/HashUtils.h"
 
 namespace dawn::wire {
 

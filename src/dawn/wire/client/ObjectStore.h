@@ -31,8 +31,8 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/common/MutexProtected.h"
-#include "dawn/wire/client/ObjectBase.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
 

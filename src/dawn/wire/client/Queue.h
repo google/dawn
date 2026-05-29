@@ -33,7 +33,7 @@
 #include <atomic>
 
 #include "dawn/wire/WireClient.h"
-#include "dawn/wire/client/ObjectBase.h"
+#include "src/dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
 

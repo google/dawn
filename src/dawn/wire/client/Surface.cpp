@@ -25,18 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/wire/client/Surface.h"
+#include "src/dawn/wire/client/Surface.h"
 
 #include <algorithm>
 #include <utility>
 
-#include "dawn/common/Log.h"
-#include "dawn/wire/client/Client.h"
-#include "dawn/wire/client/Device.h"
-#include "dawn/wire/client/Texture.h"
 #include "dawn/wire/client/webgpu.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/wire/client/Client.h"
+#include "src/dawn/wire/client/Device.h"
+#include "src/dawn/wire/client/Texture.h"
 #include "src/utils/compiler.h"
-#include "utils/platform.h"
+#include "src/utils/platform.h"
 
 namespace dawn::wire::client {
 

@@ -25,10 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/wire/client/ComputePassEncoder.h"
+#include "src/dawn/wire/client/ComputePassEncoder.h"
 
 #include "dawn/wire/WireCmd_autogen.h"
-#include "dawn/wire/client/Client.h"
+#include "src/dawn/wire/client/Client.h"
 
 namespace dawn::wire::client {
 ComputePassEncoder::~ComputePassEncoder() = default;

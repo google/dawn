@@ -38,13 +38,13 @@
 #include <mutex>
 #include <utility>
 
-#include "dawn/common/FutureUtils.h"
-#include "dawn/common/MutexProtected.h"
-#include "dawn/common/NonMovable.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/RefCounted.h"
-#include "dawn/wire/WireResult.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/FutureUtils.h"
+#include "src/dawn/common/MutexProtected.h"
+#include "src/dawn/common/NonMovable.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/RefCounted.h"
+#include "src/dawn/wire/WireResult.h"
 
 namespace dawn::wire::client {
 

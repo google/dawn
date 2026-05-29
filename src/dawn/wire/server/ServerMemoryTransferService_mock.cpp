@@ -25,9 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/wire/server/ServerMemoryTransferService_mock.h"
+#include "src/dawn/wire/server/ServerMemoryTransferService_mock.h"
 
-#include "dawn/common/Assert.h"
+#include "src/dawn/common/Assert.h"
 
 namespace dawn::wire::server {
 

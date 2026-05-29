@@ -33,12 +33,12 @@
 #include <memory>
 #include <optional>
 
-#include "dawn/common/FutureUtils.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/RefCountedWithExternalCount.h"
 #include "dawn/wire/WireClient.h"
-#include "dawn/wire/client/ObjectBase.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/FutureUtils.h"
+#include "src/dawn/common/Ref.h"
+#include "src/dawn/common/RefCountedWithExternalCount.h"
+#include "src/dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
 

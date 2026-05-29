@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/wire/client/EventManager.h"
+#include "src/dawn/wire/client/EventManager.h"
 
 #include <map>
 #include <optional>
@@ -33,9 +33,9 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/Log.h"
-#include "dawn/common/Time.h"
-#include "dawn/wire/client/Client.h"
+#include "src/dawn/common/Log.h"
+#include "src/dawn/common/Time.h"
+#include "src/dawn/wire/client/Client.h"
 
 namespace dawn::wire::client {
 

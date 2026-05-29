@@ -35,10 +35,10 @@
 #include <vector>
 
 #include "absl/container/flat_hash_set.h"
-#include "dawn/common/MutexProtected.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/WireServer.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/MutexProtected.h"
 
 namespace dawn::wire::server {
 

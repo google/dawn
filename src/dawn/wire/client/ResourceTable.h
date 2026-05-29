@@ -32,7 +32,7 @@
 
 #include <vector>
 
-#include "dawn/wire/client/ObjectBase.h"
+#include "src/dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
 
