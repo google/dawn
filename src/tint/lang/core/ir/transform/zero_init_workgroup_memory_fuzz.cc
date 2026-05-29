@@ -39,5 +39,9 @@ Result<SuccessType> ZeroInitWorkgroupMemoryFuzzer(Module& ir, const fuzz::ir::Co
 }  // namespace
 }  // namespace tint::core::ir::transform
 
+constexpr auto kUnsupportedProperties = tint::core::ir::Properties{
+    tint::core::ir::Property::kAllowOverrides,
+};
 TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ZeroInitWorkgroupMemoryFuzzer,
-                      tint::core::ir::transform::kZeroInitWorkgroupMemoryCapabilities);
+                      tint::core::ir::transform::kZeroInitWorkgroupMemoryCapabilities,
+                      kUnsupportedProperties);

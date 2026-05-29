@@ -476,6 +476,8 @@ TEST_F(IR_ValidatorTest, Var_NonResourceWithBindingPoint) {
 }
 
 TEST_F(IR_ValidatorTest, Var_Uniform_NotConstructible) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     b.Append(mod.root_block, [&] {
         auto* count = b.Override("count", ty.u32());
         count->SetOverrideId({2});
@@ -486,7 +488,7 @@ TEST_F(IR_ValidatorTest, Var_Uniform_NotConstructible) {
         v->SetBindingPoint(0, 0);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,

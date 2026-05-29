@@ -254,5 +254,21 @@ TEST_F(IRBinaryDecodeTest, MultipleEntryPoints) {
     EXPECT_TRUE(decoded.Get().properties.Contains(core::ir::Property::kAllowMultipleEntryPoints));
 }
 
+TEST_F(IRBinaryDecodeTest, Overrides) {
+    b.Append(mod.root_block, [&] {  //
+        b.Override(ty.u32());
+    });
+
+    auto res = EncodeToProto(mod);
+    ASSERT_EQ(res, Success);
+
+    auto pb_mod = std::move(res.Get());
+
+    auto decoded = Decode(*pb_mod);
+    EXPECT_EQ(decoded, Success);
+
+    EXPECT_TRUE(decoded.Get().properties.Contains(core::ir::Property::kAllowOverrides));
+}
+
 }  // namespace
 }  // namespace tint::core::ir::binary

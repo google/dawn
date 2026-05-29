@@ -1203,6 +1203,8 @@ TEST_F(IR_FromProgramTest, OverrideNoInitializer) {
 }
 
 )");
+
+    EXPECT_TRUE(m.properties.Contains(core::ir::Property::kAllowOverrides));
 }
 
 TEST_F(IR_FromProgramTest, OverrideWithConstantInitializer) {

@@ -169,6 +169,10 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
 }  // namespace
 }  // namespace tint::msl::writer
 
+constexpr auto kUnsupportedProperties = tint::core::ir::Properties{
+    tint::core::ir::Property::kAllowOverrides,
+};
 TINT_IR_MODULE_FUZZER(tint::msl::writer::IRFuzzer,
                       tint::core::ir::Capabilities{},
-                      tint::msl::writer::kPrinterCapabilities);
+                      tint::msl::writer::kPrinterCapabilities,
+                      kUnsupportedProperties);

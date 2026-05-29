@@ -41,5 +41,9 @@ Result<SuccessType> RobustnessFuzzer(Module& module,
 }  // namespace
 }  // namespace tint::core::ir::transform
 
+constexpr auto kUnsupportedProperties = tint::core::ir::Properties{
+    tint::core::ir::Property::kAllowOverrides,
+};
 TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RobustnessFuzzer,
-                      tint::core::ir::transform::kRobustnessCapabilities);
+                      tint::core::ir::transform::kRobustnessCapabilities,
+                      kUnsupportedProperties);

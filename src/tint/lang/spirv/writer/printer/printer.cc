@@ -184,6 +184,7 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
 // The list of properties that are not supported.
 const core::ir::Properties kUnsupportedProperties{
     core::ir::Property::kAllowMultipleEntryPoints,
+    core::ir::Property::kAllowOverrides,
 };
 
 /// PIMPL class for SPIR-V writer

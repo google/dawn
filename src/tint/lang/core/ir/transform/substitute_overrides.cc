@@ -449,7 +449,11 @@ Result<SuccessType> SubstituteOverrides(Module& ir, const SubstituteOverridesCon
 
     // TODO(crbug.com/382300469): This function should take in a constant module but it does not due
     // to missing constant functions.
-    return tint::core::ir::ValidateConstParam(ir);
+    TINT_CHECK_RESULT(tint::core::ir::ValidateConstParam(ir));
+
+    ir.properties.Remove(Property::kAllowOverrides);
+
+    return Success;
 }
 
 }  // namespace tint::core::ir::transform

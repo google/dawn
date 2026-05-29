@@ -193,13 +193,15 @@ TEST_F(IR_ValidatorTest, RootBlock_VarBlockMismatch) {
 }
 
 TEST_F(IR_ValidatorTest, RootBlock_ModuleScopeRuntimeExpression) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* v = b.Var("v", ty.ptr(workgroup, ty.atomic(ty.u32())));
     mod.root_block->Append(v);
 
     auto* load = b.Call(ty.u32(), core::BuiltinFn::kAtomicLoad, v->Result(0));
     mod.root_block->Append(load);
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -211,6 +213,8 @@ TEST_F(IR_ValidatorTest, RootBlock_ModuleScopeRuntimeExpression) {
 }
 
 TEST_F(IR_ValidatorTest, RootBlock_VarWithRuntimeInitializer) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* v = b.Var("v", ty.ptr(workgroup, ty.atomic(ty.u32())));
     mod.root_block->Append(v);
 
@@ -220,7 +224,7 @@ TEST_F(IR_ValidatorTest, RootBlock_VarWithRuntimeInitializer) {
     mod.root_block->Append(init);
     mod.root_block->Append(b.Var("a", init));
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
@@ -1827,16 +1831,20 @@ TEST_F(IR_ValidatorTest, InstructionInRootBlockWithoutOverrideCap) {
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithCapability) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     b.Append(mod.root_block, [&] {
         auto* o = b.Override(ty.u32());
         o->SetOverrideId(OverrideId{1});
     });
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithValue) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     b.Append(mod.root_block, [&] {
         auto* z = b.Override(ty.u32());
         z->SetOverrideId(OverrideId{2});
@@ -1845,14 +1853,16 @@ TEST_F(IR_ValidatorTest, OverrideWithValue) {
         b.Override("a", init);
     });
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithInvalidType) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     b.Append(mod.root_block, [&] { b.Override(ty.vec3u()); });
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -1863,13 +1873,15 @@ TEST_F(IR_ValidatorTest, OverrideWithInvalidType) {
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithMismatchedInitializerType) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     b.Append(mod.root_block, [&] {
         auto* init = b.Constant(1_i);
         auto* o = b.Override(ty.u32());
         o->SetInitializer(init);
     });
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -1881,6 +1893,8 @@ TEST_F(IR_ValidatorTest, OverrideWithMismatchedInitializerType) {
 }
 
 TEST_F(IR_ValidatorTest, OverrideDuplicateId) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     b.Append(mod.root_block, [&] {
         auto* o = b.Override(ty.u32());
         o->SetOverrideId(OverrideId{2});
@@ -1889,7 +1903,7 @@ TEST_F(IR_ValidatorTest, OverrideDuplicateId) {
         o2->SetOverrideId(OverrideId{2});
     });
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:3:12 error: override: duplicate override id encountered: 2
@@ -1899,6 +1913,8 @@ TEST_F(IR_ValidatorTest, OverrideDuplicateId) {
 }
 
 TEST_F(IR_ValidatorTest, InstructionInRootBlockOnlyUsedInRootBlock) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     core::ir::Value* init = nullptr;
     b.Append(mod.root_block, [&] {
         auto* z = b.Override(ty.u32());
@@ -1913,7 +1929,7 @@ TEST_F(IR_ValidatorTest, InstructionInRootBlockOnlyUsedInRootBlock) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -1925,6 +1941,8 @@ TEST_F(IR_ValidatorTest, InstructionInRootBlockOnlyUsedInRootBlock) {
 }
 
 TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     core::ir::Override* o = nullptr;
     b.Append(mod.root_block, [&] {
         o = b.Override(ty.u32());
@@ -1936,7 +1954,7 @@ TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
     });
     o->Destroy();
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:2:51 error: var: %2 is not in scope
   %a:ptr<workgroup, array<i32, %2>, read_write> = var undef
@@ -1945,9 +1963,11 @@ TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithoutIdOrInitializer) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     b.Append(mod.root_block, [&] { b.Override(ty.u32()); });
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:2:12 error: override: must have an id or an initializer

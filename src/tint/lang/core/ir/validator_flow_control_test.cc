@@ -240,11 +240,13 @@ TEST_F(IR_ValidatorTest, Block_TerminatorInMiddle) {
 }
 
 TEST_F(IR_ValidatorTest, If_RootBlock) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* if_ = b.If(true);
     if_->True()->Append(b.Unreachable());
     mod.root_block->Append(if_);
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -381,11 +383,13 @@ TEST_F(IR_ValidatorTest, If_NullResult) {
 }
 
 TEST_F(IR_ValidatorTest, Loop_RootBlock) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* l = b.Loop();
     l->Body()->Append(b.ExitLoop(l));
     mod.root_block->Append(l);
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
@@ -552,12 +556,14 @@ TEST_F(IR_ValidatorTest, Loop_TooManyOperands) {
 }
 
 TEST_F(IR_ValidatorTest, Switch_RootBlock) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* switch_ = b.Switch(1_i);
     auto* def = b.DefaultCase(switch_);
     def->Append(b.ExitSwitch(switch_));
     mod.root_block->Append(switch_);
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(

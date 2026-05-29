@@ -103,7 +103,6 @@ class State {
 
     Program Run(const Options& options) {
         core::ir::Capabilities caps{
-            core::ir::Capability::kAllowOverrides,
             core::ir::Capability::kAllowPhonyInstructions,
             core::ir::Capability::kAllowRefTypes,
         };

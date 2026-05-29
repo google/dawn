@@ -49,8 +49,6 @@ enum class Capability : uint8_t {
     kAllowHandleVarsWithoutBindings,
     /// Allows module scoped lets
     kAllowModuleScopeLets,
-    /// Allow overrides
-    kAllowOverrides,
     /// Allows ref types
     kAllowRefTypes,
     /// Allows access instructions to create pointers to vector elements.

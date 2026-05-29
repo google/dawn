@@ -1439,6 +1439,8 @@ class Impl {
                 // Record the original name and source of the var
                 builder_.ir.SetName(override, o->name->symbol.Name());
                 builder_.ir.SetSource(override, o->source);
+
+                mod.properties.Add(core::ir::Property::kAllowOverrides);
             },
             [&](const ast::Const*) {
                 // Skip. This should be handled by const-eval already, so the const will be a

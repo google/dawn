@@ -248,11 +248,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> AtomicVec2uToFromU64(core::ir::Module& ir, AtomicVec2uU64Direction direction) {
-    core::ir::AssertValid(ir,
-                          core::ir::Capabilities{
-                              core::ir::Capability::kAllowOverrides,
-                          },
-                          "before transform::AtomicVec2uToFromU64");
+    core::ir::AssertValid(ir, "before transform::AtomicVec2uToFromU64");
 
     State{ir, direction}.Process();
 

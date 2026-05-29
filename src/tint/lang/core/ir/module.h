@@ -58,6 +58,8 @@ namespace tint::core::ir {
 enum class Property : uint8_t {
     /// Allows multiple entry points in the module.
     kAllowMultipleEntryPoints,
+    /// Allow overrides
+    kAllowOverrides,
 };
 
 /// Properties is a set of Property values.
@@ -75,6 +77,7 @@ auto& operator<<(STREAM& out, Property p) {
         return out << #p
     switch (p) {  //
         CASE(AllowMultipleEntryPoints);
+        CASE(AllowOverrides);
     }
 #undef CASE
     return out << "<unknown>";

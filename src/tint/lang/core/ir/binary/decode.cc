@@ -335,8 +335,6 @@ struct Decoder {
         }
         if (fn_in.has_workgroup_size()) {
             auto& wg_size_in = fn_in.workgroup_size();
-            // TODO(dsinclair): When overrides are supported we should add support for generating
-            // override expressions here.
             fn_out->SetWorkgroupSize(Value(wg_size_in.x()), Value(wg_size_in.y()),
                                      Value(wg_size_in.z()));
         }
@@ -692,6 +690,7 @@ struct Decoder {
             override_out->SetOverrideId(
                 OverrideId{static_cast<uint16_t>(override_in.override_id())});
         }
+        mod_out_.properties.Add(core::ir::Property::kAllowOverrides);
         return override_out;
     }
 

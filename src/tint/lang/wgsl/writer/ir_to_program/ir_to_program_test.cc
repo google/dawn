@@ -53,6 +53,8 @@ IRToProgramTest::Result IRToProgramTest::Run() {
 
     result.ir = str();
 
+    mod.properties.Add(core::ir::Property::kAllowOverrides);
+
     auto output_program = IRToProgram(mod, options);
     if (!output_program.IsValid()) {
         result.err = output_program.Diagnostics().Str();

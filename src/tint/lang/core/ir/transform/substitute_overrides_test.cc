@@ -44,7 +44,19 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using IR_SubstituteOverridesTest = TransformTest;
+class IR_SubstituteOverridesTest : public TransformTest {
+  protected:
+    void SetUp() override {
+        TransformTest::SetUp();
+        mod.properties.Add(core::ir::Property::kAllowOverrides);
+    }
+};
+
+TEST_F(IR_SubstituteOverridesTest, OverridePropertyRemoved) {
+    SubstituteOverridesConfig cfg{};
+    Run(SubstituteOverrides, cfg);
+    EXPECT_FALSE(mod.properties.Contains(Property::kAllowOverrides));
+}
 
 TEST_F(IR_SubstituteOverridesTest, NoOverridesNoChange) {
     auto* func = b.Function("foo", ty.void_());

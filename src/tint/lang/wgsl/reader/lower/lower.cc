@@ -221,7 +221,6 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
 Result<SuccessType> Lower(core::ir::Module& mod) {
     core::ir::AssertValid(mod,
                           core::ir::Capabilities{
-                              core::ir::Capability::kAllowOverrides,
                               core::ir::Capability::kAllow8BitIntegers,
                           },
                           "before wgsl.Lower");

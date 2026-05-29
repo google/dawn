@@ -40,7 +40,6 @@ namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
 const Capabilities kSingleEntryPointCapabilities{
-    Capability::kAllowOverrides,
     Capability::kAllow8BitIntegers,
     Capability::kAllow16BitIntegers,
 };

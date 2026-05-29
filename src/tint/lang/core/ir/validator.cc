@@ -2582,7 +2582,7 @@ void Validator::CheckRootBlock(const Block* blk) {
         tint::Switch(
             inst,  //
             [&](const core::ir::Override* o) {
-                if (capabilities_.Contains(Capability::kAllowOverrides)) {
+                if (mod_.properties.Contains(Property::kAllowOverrides)) {
                     CheckInstruction(o);
                     add_evaluatable(o, is_pipeline_creatable);
                 } else {
@@ -2600,7 +2600,7 @@ void Validator::CheckRootBlock(const Block* blk) {
             },
             [&](const core::ir::Construct* c) {
                 if (capabilities_.Contains(Capability::kAllowModuleScopeLets) ||
-                    capabilities_.Contains(Capability::kAllowOverrides)) {
+                    mod_.properties.Contains(Property::kAllowOverrides)) {
                     CheckInstruction(c);
                     CheckOnlyUsedInRootBlock(inst);
                     add_evaluatable(c, is_pipeline_creatable);
@@ -2612,7 +2612,7 @@ void Validator::CheckRootBlock(const Block* blk) {
                 // Note, this validation around kAllowOverrides is looser than it could be. There
                 // are only certain expressions and builtins which can be used in an override, which
                 // currently isn't checked.
-                if (capabilities_.Contains(Capability::kAllowOverrides) &&
+                if (mod_.properties.Contains(Property::kAllowOverrides) &&
                     inst->IsAnyOf<core::ir::Unary, core::ir::Binary, core::ir::BuiltinCall,
                                   core::ir::Convert, core::ir::Swizzle, core::ir::Access,
                                   core::ir::ConstExprIf>()) {
@@ -3210,9 +3210,9 @@ void Validator::CheckWorkgroupSize(const Function* func) {
             continue;
         }
 
-        if (!capabilities_.Contains(Capability::kAllowOverrides)) {
-            AddError(func) << "@workgroup_size param is not a constant value, and IR capability "
-                              "'kAllowOverrides' is not set";
+        if (!mod_.properties.Contains(Property::kAllowOverrides)) {
+            AddError(func) << "@workgroup_size param is not a constant value, and IR property "
+                              "'AllowOverrides' is not enabled";
             return;
         }
 
@@ -3281,9 +3281,9 @@ void Validator::CheckSubgroupSize(const Function* func) {
         return;
     }
 
-    if (!capabilities_.Contains(Capability::kAllowOverrides)) {
-        AddError(func) << "@subgroup_size param is not a constant value, and IR capability "
-                          "'kAllowOverrides' is not set";
+    if (!mod_.properties.Contains(Property::kAllowOverrides)) {
+        AddError(func) << "@subgroup_size param is not a constant value, and IR property "
+                          "'AllowOverrides' is not enabled";
         return;
     }
 

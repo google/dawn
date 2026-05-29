@@ -2832,12 +2832,14 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamUndefined) {
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_InstructionNotDefined) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* ep = b.ComputeFunction("ep");
     auto* res_val = mod.CreateValue<ir::InstructionResult>(ty.u32());
     ep->SetWorkgroupSize({res_val, b.Constant(1_u), b.Constant(1_u)});
     b.Append(ep->Block(), [&] { b.Return(ep); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr("error: instruction for @workgroup_size param is not defined"))
@@ -2877,11 +2879,13 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsSameType) {
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_InvalidValue) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* ep = b.ComputeFunction("ep");
     ep->SetWorkgroupSize({b.FunctionParam(ty.u32()), b.Constant(1_u), b.Constant(1_u)});
     b.Append(ep->Block(), [&] { b.Return(ep); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -2890,12 +2894,14 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_InvalidValue) {
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_InvalidValueKind) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* f = ComputeEntryPoint();
     f->SetWorkgroupSize({b.Constant(1_u), b.FunctionParam("p", ty.u32()), b.Constant(3_u)});
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -2980,13 +2986,15 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_OverrideWithoutAllowOverrides) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:1:1 error: @workgroup_size param is not a constant value, and IR capability 'kAllowOverrides' is not set
+            R"(:1:1 error: @workgroup_size param is not a constant value, and IR property 'AllowOverrides' is not enabled
 %f = @compute @workgroup_size(%2, %2, %2) func():void {
 ^^
 )")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonRootBlockOverride) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* f = ComputeEntryPoint();
     Override* o;
     b.Append(f->Block(), [&] {
@@ -2995,7 +3003,7 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonRootBlockOverride) {
     });
     f->SetWorkgroupSize({o->Result(), o->Result(), o->Result()});
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -3006,6 +3014,8 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonRootBlockOverride) {
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ModuleScopeRuntimeExpression) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* f = ComputeEntryPoint();
 
     auto* v = b.Var("v", ty.ptr(workgroup, ty.atomic(ty.u32())));
@@ -3018,7 +3028,7 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ModuleScopeRuntimeExpression) {
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -3075,12 +3085,14 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_MissingType) {
 }
 
 TEST_F(IR_ValidatorTest, Function_SubgroupSize_InstructionNotDefined) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* ep = b.ComputeFunction("ep");
     auto* res_val = mod.CreateValue<ir::InstructionResult>(ty.u32());
     ep->SetSubgroupSize(res_val);
     b.Append(ep->Block(), [&] { b.Return(ep); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr("error: instruction for @subgroup_size param is not defined"))
@@ -3137,11 +3149,13 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_ParamZero) {
 }
 
 TEST_F(IR_ValidatorTest, Function_SubgroupSize_InvalidValue) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* ep = b.ComputeFunction("ep");
     ep->SetSubgroupSize(b.FunctionParam(ty.u32()));
     b.Append(ep->Block(), [&] { b.Return(ep); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -3190,13 +3204,15 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_OverrideWithoutAllowOverrides) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:1:1 error: @subgroup_size param is not a constant value, and IR capability 'kAllowOverrides' is not set
+            R"(:1:1 error: @subgroup_size param is not a constant value, and IR property 'AllowOverrides' is not enabled
 %f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(%2) func():void {
 ^^
 )")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_SubgroupSize_NonRootBlockOverride) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* f = ComputeEntryPoint();
     f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
 
@@ -3209,7 +3225,7 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_NonRootBlockOverride) {
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -3220,6 +3236,8 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_NonRootBlockOverride) {
 }
 
 TEST_F(IR_ValidatorTest, Function_SubgroupSize_RootBlockOverride) {
+    mod.properties.Add(Property::kAllowOverrides);
+
     auto* f = ComputeEntryPoint();
     f->SetWorkgroupSize({b.Constant(1_u), b.Constant(2_u), b.Constant(3_u)});
 
@@ -3230,7 +3248,7 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_RootBlockOverride) {
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success);
 }
 

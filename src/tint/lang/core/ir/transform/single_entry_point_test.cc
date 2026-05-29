@@ -43,7 +43,7 @@ class IR_SingleEntryPointTest : public TransformTest {
   protected:
     void SetUp() override {
         TransformTest::SetUp();
-        mod.properties.Add(core::ir::Property::kAllowMultipleEntryPoints);
+        mod.properties.Add(Property::kAllowMultipleEntryPoints, Property::kAllowOverrides);
     }
 
     /// @returns a new entry point called @p name that references @p refs
@@ -330,7 +330,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -403,7 +402,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -598,7 +596,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -825,7 +822,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -876,7 +872,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -949,7 +944,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -1011,7 +1005,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -1063,7 +1056,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -1121,7 +1113,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -1165,7 +1156,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -1257,7 +1247,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -1306,7 +1295,6 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "ep");
 
     EXPECT_EQ(src, str());

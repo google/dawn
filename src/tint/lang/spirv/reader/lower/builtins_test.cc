@@ -8490,7 +8490,7 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedSigned_Signed
 TEST_F(SpirvReader_BuiltinsTest, SpecConstantOp_Not) {
     auto* ep = b.ComputeFunction("foo");
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
+    mod.properties.Add(core::ir::Property::kAllowOverrides);
 
     b.Append(b.ir.root_block, [&] {
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot, Vector{ty.i32()},
