@@ -58,17 +58,11 @@ const Capabilities kBuiltinScalarizeCapabilities{
 
 /// The scalarizer configuration options
 struct BuiltinScalarizeConfig {
-    // Set to true to scalarize clamp builtin
-    bool scalarize_clamp = false;
-
-    // Set to true to scalarize max builtin
-    bool scalarize_max = false;
-
-    // Set to true to scalarize min builtin
-    bool scalarize_min = false;
+    // Set to true to scalarize min/max/clamp builtins.
+    bool scalarize_min_max_clamp = false;
 
     /// Reflection for this class
-    TINT_REFLECT(BuiltinScalarizeConfig, scalarize_clamp, scalarize_max, scalarize_min);
+    TINT_REFLECT(BuiltinScalarizeConfig, scalarize_min_max_clamp);
 };
 
 /// BuiltinScalarize is a transform that replaces calls to builtin vector functions with scalar
