@@ -32,13 +32,13 @@
 #include <unordered_map>
 
 #include "src/dawn/common/MatchVariant.h"
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/native/BindGroupLayoutInternal.h"
 #include "src/dawn/native/BindingInfo.h"
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/PipelineLayout.h"
 #include "src/dawn/native/ShaderModule.h"
 #include "src/dawn/native/stream/Stream.h"
+#include "src/utils/non_copyable.h"
 #include "tint/tint.h"
 
 namespace dawn::native {

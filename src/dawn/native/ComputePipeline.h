@@ -31,9 +31,9 @@
 #include <vector>
 
 #include "src/dawn/common/ContentLessObjectCacheable.h"
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/native/Forward.h"
 #include "src/dawn/native/Pipeline.h"
+#include "src/utils/non_copyable.h"
 
 namespace dawn::native {
 

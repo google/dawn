@@ -33,12 +33,12 @@
 #include <string>
 #include <vector>
 
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/UsageValidationMode.h"
 #include "src/dawn/native/dawn_platform.h"
 #include "src/utils/compiler.h"
+#include "src/utils/non_copyable.h"
 
 namespace tint::wgsl {
 enum class Extension : uint8_t;

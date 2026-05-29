@@ -39,10 +39,10 @@
 #include "src/dawn/common/Compiler.h"
 #include "src/dawn/common/Defer.h"
 #include "src/dawn/common/Mutex.h"
-#include "src/dawn/common/NonMovable.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/StackAllocated.h"
 #include "src/dawn/common/Time.h"
+#include "src/utils/non_movable.h"
 
 namespace dawn {
 

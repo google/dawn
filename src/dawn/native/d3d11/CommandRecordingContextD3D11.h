@@ -36,7 +36,6 @@
 #include "absl/container/inlined_vector.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/MutexProtected.h"
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/StackAllocated.h"
 #include "src/dawn/native/Buffer.h"
@@ -44,6 +43,7 @@
 #include "src/dawn/native/d3d/KeyedMutex.h"
 #include "src/dawn/native/d3d/d3d_platform.h"
 #include "src/dawn/native/d3d11/ImmediatesLayoutD3D11.h"
+#include "src/utils/non_copyable.h"
 
 namespace dawn::native::d3d11 {
 

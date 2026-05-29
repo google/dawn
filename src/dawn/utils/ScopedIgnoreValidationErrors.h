@@ -30,7 +30,7 @@
 
 #include <webgpu/webgpu_cpp.h>
 
-#include "src/dawn/common/NonCopyable.h"
+#include "src/utils/non_copyable.h"
 
 namespace dawn::utils {
 

@@ -43,13 +43,13 @@
 #include "src/dawn/common/Atomic.h"
 #include "src/dawn/common/FutureUtils.h"
 #include "src/dawn/common/MutexProtected.h"
-#include "src/dawn/common/NonMovable.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/Time.h"
 #include "src/dawn/common/WeakRef.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Forward.h"
 #include "src/dawn/native/IntegerTypes.h"
+#include "src/utils/non_movable.h"
 
 namespace dawn::native {
 

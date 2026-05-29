@@ -32,11 +32,11 @@
 
 #include <vector>
 
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/native/Commands.h"
 #include "src/dawn/native/IndirectDrawMetadata.h"
 #include "src/dawn/native/InternalPipelineStore.h"
 #include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/utils/non_copyable.h"
 
 namespace dawn::native::metal {
 

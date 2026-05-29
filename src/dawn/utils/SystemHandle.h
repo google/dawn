@@ -32,7 +32,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "src/dawn/common/NonCopyable.h"
+#include "src/utils/non_copyable.h"
 #include "src/utils/platform.h"
 
 namespace dawn::utils {

@@ -42,6 +42,8 @@ static_library("utils") {
   sources = [
     "compiler.h",
     "force_crash.h",
+    "non_copyable.h",
+    "non_movable.h",
     "numeric.h",
     "placeholder.cc",
     "platform.h",

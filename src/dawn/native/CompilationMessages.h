@@ -33,10 +33,10 @@
 #include <vector>
 
 #include "src/dawn/common/MutexProtected.h"
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Serializable.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/non_copyable.h"
 
 namespace tint::diag {
 class Diagnostic;

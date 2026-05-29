@@ -68,8 +68,6 @@ set(private_headers
     "Math.h"
     "Mutex.h"
     "MutexProtected.h"
-    "NonCopyable.h"
-    "NonMovable.h"
     "NSRef.h"
     "Numeric.h"
     "PlacementAllocated.h"

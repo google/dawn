@@ -33,7 +33,7 @@
 #include <memory>
 #include <vector>
 
-#include "src/dawn/common/NonCopyable.h"
+#include "src/utils/non_copyable.h"
 // This must be above all other includes otherwise VulkanBackend.h includes vulkan.h before we had
 // time to wrap it with vulkan_platform.h
 #include "src/dawn/common/vulkan_platform.h"

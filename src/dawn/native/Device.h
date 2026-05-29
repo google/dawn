@@ -45,7 +45,6 @@
 #include "src/dawn/common/Defer.h"
 #include "src/dawn/common/Mutex.h"
 #include "src/dawn/common/MutexProtected.h"
-#include "src/dawn/common/NonMovable.h"
 #include "src/dawn/common/RefCountedWithExternalCount.h"
 #include "src/dawn/common/StackAllocated.h"
 #include "src/dawn/common/ThreadLocal.h"
@@ -68,6 +67,7 @@
 #include "src/dawn/native/Toggles.h"
 #include "src/dawn/native/UsageValidationMode.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/non_movable.h"
 
 namespace dawn::platform {
 class WorkerTaskPool;

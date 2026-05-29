@@ -35,12 +35,12 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/ityp_vector.h"
 #include "src/dawn/native/Buffer.h"
 #include "src/dawn/native/CommandBufferStateTracker.h"
 #include "src/dawn/native/Commands.h"
+#include "src/utils/non_copyable.h"
 
 namespace dawn::native {
 

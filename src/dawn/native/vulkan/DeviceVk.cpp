@@ -34,7 +34,6 @@
 #include "dawn/native/VulkanBackend.h"
 #include "src/dawn/common/Log.h"
 #include "src/dawn/common/Math.h"
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/native/BackendConnection.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/CreatePipelineAsyncEvent.h"
@@ -69,6 +68,7 @@
 #include "src/dawn/native/vulkan/TextureVk.h"
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/utils/non_copyable.h"
 #include "src/utils/platform.h"
 
 namespace dawn::native::vulkan {

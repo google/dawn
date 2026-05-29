@@ -41,12 +41,12 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/FutureUtils.h"
 #include "src/dawn/common/LinkedList.h"
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/wire/ChunkedCommandSerializer.h"
 #include "src/dawn/wire/WireDeserializeAllocator.h"
 #include "src/dawn/wire/WireResult.h"
 #include "src/dawn/wire/client/EventManager.h"
 #include "src/dawn/wire/client/ObjectStore.h"
+#include "src/utils/non_copyable.h"
 
 namespace dawn::wire::client {
 

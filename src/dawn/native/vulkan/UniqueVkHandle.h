@@ -30,9 +30,9 @@
 
 #include <utility>
 
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
 #include "src/dawn/native/vulkan/FencedDeleter.h"
+#include "src/utils/non_copyable.h"
 
 namespace dawn::native::vulkan {
 

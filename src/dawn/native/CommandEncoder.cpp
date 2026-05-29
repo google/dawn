@@ -38,7 +38,6 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/Math.h"
-#include "src/dawn/common/NonMovable.h"
 #include "src/dawn/native/Adapter.h"
 #include "src/dawn/native/ApplyClearColorValueWithDrawHelper.h"
 #include "src/dawn/native/BindGroup.h"
@@ -66,6 +65,7 @@
 #include "src/dawn/native/utils/WGPUHelpers.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
+#include "src/utils/non_movable.h"
 
 namespace dawn::native {
 

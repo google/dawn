@@ -28,10 +28,10 @@
 #include <string>
 #include <vector>
 
-#include "src/dawn/common/NonMovable.h"
 #include "src/dawn/tests/unittests/validation/ValidationTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/non_movable.h"
 
 namespace dawn {
 namespace {

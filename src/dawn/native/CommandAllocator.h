@@ -38,8 +38,8 @@
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Math.h"
-#include "src/dawn/common/NonCopyable.h"
 #include "src/utils/compiler.h"
+#include "src/utils/non_copyable.h"
 
 namespace dawn::native {
 

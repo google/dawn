@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,26 +25,24 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_COMMON_NONCOPYABLE_H_
-#define SRC_DAWN_COMMON_NONCOPYABLE_H_
+#ifndef SRC_UTILS_NON_MOVABLE_H_
+#define SRC_UTILS_NON_MOVABLE_H_
+
+#include "src/utils/non_copyable.h"
 
 namespace dawn {
 
-// A base class to make a class non-copyable.
-class NonCopyable {
-  public:
-    constexpr NonCopyable() = default;
-    ~NonCopyable() = default;
-
+// A base class to make a class non-movable.
+class NonMovable : NonCopyable {
   protected:
-    NonCopyable(NonCopyable&&) = default;
-    NonCopyable& operator=(NonCopyable&&) = default;
+    constexpr NonMovable() = default;
+    ~NonMovable() = default;
 
   private:
-    NonCopyable(const NonCopyable&) = delete;
-    void operator=(const NonCopyable&) = delete;
+    NonMovable(NonMovable&&) = delete;
+    void operator=(NonMovable&&) = delete;
 };
 
 }  // namespace dawn
 
-#endif  // SRC_DAWN_COMMON_NONCOPYABLE_H_
+#endif  // SRC_UTILS_NON_MOVABLE_H_

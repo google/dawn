@@ -35,7 +35,6 @@
 
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/FutureUtils.h"
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/native/DeviceGuard.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Forward.h"
@@ -44,6 +43,7 @@
 #include "src/dawn/native/SharedBufferMemory.h"
 #include "src/dawn/native/UsageValidationMode.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/non_copyable.h"
 
 namespace dawn::native {
 

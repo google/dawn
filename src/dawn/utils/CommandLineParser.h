@@ -37,7 +37,7 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
 #include "src/dawn/common/Assert.h"
-#include "src/dawn/common/NonMovable.h"
+#include "src/utils/non_movable.h"
 
 namespace dawn::utils {
 

@@ -345,8 +345,6 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "Mutex.h",
       "MutexProtected.h",
       "NSRef.h",
-      "NonCopyable.h",
-      "NonMovable.h",
       "Numeric.h",
       "PlacementAllocated.h",
       "Preprocessor.h",

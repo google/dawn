@@ -37,10 +37,10 @@
 #include "absl/container/flat_hash_set.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/MutexProtected.h"
-#include "src/dawn/common/NonCopyable.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/RefCounted.h"
 #include "src/dawn/native/Error.h"
+#include "src/utils/non_copyable.h"
 
 namespace dawn::platform {
 class WaitableEvent;

@@ -33,12 +33,12 @@
 #include <vector>
 
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/NonMovable.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Forward.h"
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/RingBufferAllocator.h"
+#include "src/utils/non_movable.h"
 
 // DynamicUploader is the front-end implementation used to manage multiple ring buffers for upload
 // usage.

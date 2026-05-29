@@ -35,10 +35,10 @@
 
 #include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Compiler.h"
-#include "src/dawn/common/NonCopyable.h"
-#include "src/dawn/common/NonMovable.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/RefCounted.h"
+#include "src/utils/non_copyable.h"
+#include "src/utils/non_movable.h"
 
 namespace dawn {
 
