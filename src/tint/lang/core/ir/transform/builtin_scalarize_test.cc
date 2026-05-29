@@ -85,6 +85,7 @@ TEST_F(IR_BuiltinScalarizeTest, Clamp_VectorOperands_Scalarize) {
     Run(BuiltinScalarize, config);
 
     EXPECT_EQ(expect, str());
+    EXPECT_TRUE(mod.properties.Contains(Property::kDisallowVectorMinMaxClamp));
 }
 
 TEST_F(IR_BuiltinScalarizeTest, Clamp_VectorOperands_AlreadyScalarize) {
@@ -122,6 +123,7 @@ TEST_F(IR_BuiltinScalarizeTest, Clamp_VectorOperands_AlreadyScalarize) {
     Run(BuiltinScalarize, config);
 
     EXPECT_EQ(expect, str());
+    EXPECT_TRUE(mod.properties.Contains(Property::kDisallowVectorMinMaxClamp));
 }
 
 TEST_F(IR_BuiltinScalarizeTest, Clamp_VectorOperands_LeaveVectorized) {
@@ -159,6 +161,7 @@ TEST_F(IR_BuiltinScalarizeTest, Clamp_VectorOperands_LeaveVectorized) {
     Run(BuiltinScalarize, config);
 
     EXPECT_EQ(expect, str());
+    EXPECT_FALSE(mod.properties.Contains(Property::kDisallowVectorMinMaxClamp));
 }
 
 TEST_F(IR_BuiltinScalarizeTest, Max_VectorOperands_Scalarize) {
@@ -204,6 +207,7 @@ TEST_F(IR_BuiltinScalarizeTest, Max_VectorOperands_Scalarize) {
     Run(BuiltinScalarize, config);
 
     EXPECT_EQ(expect, str());
+    EXPECT_TRUE(mod.properties.Contains(Property::kDisallowVectorMinMaxClamp));
 }
 
 TEST_F(IR_BuiltinScalarizeTest, Max_VectorOperands_LeaveVectorized) {
@@ -240,6 +244,7 @@ TEST_F(IR_BuiltinScalarizeTest, Max_VectorOperands_LeaveVectorized) {
     Run(BuiltinScalarize, config);
 
     EXPECT_EQ(expect, str());
+    EXPECT_FALSE(mod.properties.Contains(Property::kDisallowVectorMinMaxClamp));
 }
 
 TEST_F(IR_BuiltinScalarizeTest, Min_VectorOperands_Scalarize) {
@@ -288,6 +293,7 @@ TEST_F(IR_BuiltinScalarizeTest, Min_VectorOperands_Scalarize) {
     Run(BuiltinScalarize, config);
 
     EXPECT_EQ(expect, str());
+    EXPECT_TRUE(mod.properties.Contains(Property::kDisallowVectorMinMaxClamp));
 }
 
 TEST_F(IR_BuiltinScalarizeTest, Min_VectorOperands_LeaveVectorized) {
@@ -324,6 +330,7 @@ TEST_F(IR_BuiltinScalarizeTest, Min_VectorOperands_LeaveVectorized) {
     Run(BuiltinScalarize, config);
 
     EXPECT_EQ(expect, str());
+    EXPECT_FALSE(mod.properties.Contains(Property::kDisallowVectorMinMaxClamp));
 }
 
 }  // namespace

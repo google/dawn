@@ -4267,6 +4267,21 @@ void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
         check_arg_in_range(core::ParameterUsage::kComponent, 0, 3);
         check_arg_in_range(core::ParameterUsage::kOffset, -8, 7);
     }
+
+    if (mod_.properties.Contains(Property::kDisallowVectorMinMaxClamp)) {
+        switch (call->Func()) {
+            case core::BuiltinFn::kClamp:
+            case core::BuiltinFn::kMax:
+            case core::BuiltinFn::kMin:
+                if (call->Result()->Type()->Is<core::type::Vector>()) {
+                    AddError(call) << "vector " << call->FriendlyName()
+                                   << " disallowed by the DisallowVectorMinMaxClamp property";
+                }
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {

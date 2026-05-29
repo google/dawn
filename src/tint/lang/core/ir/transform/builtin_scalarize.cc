@@ -137,6 +137,10 @@ Result<SuccessType> BuiltinScalarize(Module& ir, const BuiltinScalarizeConfig& c
 
     State{config, ir}.Process();
 
+    if (config.scalarize_min_max_clamp) {
+        ir.properties.Add(Property::kDisallowVectorMinMaxClamp);
+    }
+
     return Success;
 }
 

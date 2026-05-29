@@ -60,6 +60,9 @@ enum class Property : uint8_t {
     kAllowMultipleEntryPoints,
     /// Allow overrides
     kAllowOverrides,
+
+    /// Disallow use of the min/max/clamp builtins with vector types.
+    kDisallowVectorMinMaxClamp,
 };
 
 /// Properties is a set of Property values.
@@ -78,6 +81,7 @@ auto& operator<<(STREAM& out, Property p) {
     switch (p) {  //
         CASE(AllowMultipleEntryPoints);
         CASE(AllowOverrides);
+        CASE(DisallowVectorMinMaxClamp);
     }
 #undef CASE
     return out << "<unknown>";
