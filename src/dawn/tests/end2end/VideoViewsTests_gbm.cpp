@@ -34,6 +34,10 @@
 #include <utility>
 #include <vector>
 
+// TODO(518013184): Fix include ordering bug
+#include "src/dawn/common/xlib_with_undefs.h"
+// Comment to prevent reordering.
+
 #include "dawn/native/VulkanBackend.h"
 #include "src/dawn/common/Assert.h"
 #include "src/dawn/tests/end2end/VideoViewsTests.h"
