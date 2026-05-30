@@ -528,9 +528,10 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
 
             Pass* currentPass = passes.empty() ? nullptr : &passes.back();
             if (currentPass &&
-                reinterpret_cast<uintptr_t>(currentPass->inputIndirectBuffer.get()) ==
-                    config.inputIndirectBufferPtr &&
-                currentPass->drawType == config.drawType) {
+                IndirectDrawMetadata::IndexedIndirectConfig{
+                    reinterpret_cast<uintptr_t>(currentPass->inputIndirectBuffer.get()),
+                    bool(currentPass->flags & kDuplicateBaseVertexInstance),
+                    currentPass->drawType} == config) {
                 uint64_t nextBatchDataOffset =
                     Align(currentPass->batchDataSize, minStorageBufferOffsetAlignment);
                 uint64_t newPassBatchDataSize = nextBatchDataOffset + newBatch.dataSize;
