@@ -1124,6 +1124,74 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
     }
 }
 
+// Test that a dispatch of size 0 does not cause a desync in state tracking,
+// bypassing lazy clearing of buffers used in subsequent dispatches in the same pass.
+// This was happening in D3D12's command buffer processing because we'd early return
+// when one of the dispatch args was 0 without incrementing the currentDispatch counter.
+TEST_P(BufferZeroInitTest, DispatchZeroDesync) {
+    // Create a shader that reads from a storage buffer.
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var<storage, read> ssbo : array<u32>;
+        @group(0) @binding(1) var<storage, read_write> outbuf : array<u32>;
+
+        @compute @workgroup_size(1)
+        fn main(@builtin(global_invocation_id) gid : vec3u) {
+            let i = gid.x;
+            if (i < arrayLength(&outbuf)) {
+                outbuf[i] = ssbo[i];
+            }
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.layout = nullptr;
+    pipelineDescriptor.compute.module = module;
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
+
+    constexpr uint64_t kBufferSize = 256u;
+
+    // noop buffer for the 0 dispatch. Initialize it so it doesn't need lazy clear.
+    std::vector<uint32_t> noopData(kBufferSize / sizeof(uint32_t), 0u);
+    wgpu::Buffer noopBuffer =
+        utils::CreateBufferFromData(device, noopData.data(), kBufferSize,
+                                    wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
+
+    // victimBuf: not initialized so it stays in NeedsInitialization state.
+    wgpu::Buffer victimBuf =
+        CreateBuffer(kBufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
+
+    // outBuf: pre-initialize so its own lazy-clear doesn't hide the leak
+    wgpu::Buffer outBuf = utils::CreateBufferFromData(
+        device, noopData.data(), kBufferSize,
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
+
+    wgpu::BindGroup noopBindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {{0, noopBuffer}, {1, outBuf}});
+    wgpu::BindGroup victimBG =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, victimBuf}, {1, outBuf}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+
+    pass.SetBindGroup(0, noopBindGroup);
+    pass.DispatchWorkgroups(0, 1, 1);
+
+    pass.SetBindGroup(0, victimBG);
+    // This dispatch should lazy-clear victimBuf
+    pass.DispatchWorkgroups(1, 1, 1);
+
+    pass.End();
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+
+    // Expect one lazy clear for victimBuf.
+    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
+
+    // Also verify that outBuf contains zeros.
+    std::vector<uint32_t> expected(kBufferSize / sizeof(uint32_t), 0u);
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), outBuf, 0, expected.size());
+}
+
 // Test the buffer will be lazily initialized correctly when its first use is in SetVertexBuffer.
 TEST_P(BufferZeroInitTest, SetVertexBuffer) {
     // Bind the whole buffer as a vertex buffer.
