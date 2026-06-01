@@ -315,7 +315,6 @@ struct State {
 Result<SuccessType> BitcastPolyfill(core::ir::Module& ir) {
     AssertValid(ir,
                 core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings,
-                                       core::ir::Capability::kAllowDuplicateBindings,
                                        core::ir::Capability::kLoosenValidationForShaderIO,
                                        core::ir::Capability::kAllow16BitIntegers},
                 "before glsl.BitcastPolyfill");

@@ -6003,8 +6003,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowDuplicateBindings};
-
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {4, 0};
     Run(TexturePolyfill, cfg);

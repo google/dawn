@@ -2841,7 +2841,7 @@ void Validator::CheckFunction(const Function* func) {
         const Var* user_declared_immediate = nullptr;
 
         for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
-            if (!capabilities_.Contains(Capability::kAllowDuplicateBindings) &&
+            if (!mod_.properties.Contains(Property::kAllowDuplicateBindings) &&
                 var->BindingPoint().has_value()) {
                 auto bp = var->BindingPoint().value();
                 if (!binding_points.Add(bp)) {

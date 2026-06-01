@@ -41,7 +41,7 @@ namespace tint::glsl::writer::raise {
 
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kTextureBuiltinFromUniformCapabilities{
-    core::ir::Capability::kAllowDuplicateBindings, core::ir::Capability::kAllow16BitIntegers};
+    core::ir::Capability::kAllow16BitIntegers};
 
 /// TextureBuiltinsFromUniform is a transform that replaces texture builtin function
 /// `textureNumLevels` and `textureNumSamples` which do not have GLSL equivalents with

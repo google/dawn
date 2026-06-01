@@ -76,6 +76,8 @@ Result<SuccessType> BindingRemapper(
 
     Run(ir, binding_points);
 
+    ir.properties.Add(Property::kAllowDuplicateBindings);
+
     return Success;
 }
 

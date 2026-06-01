@@ -1039,7 +1039,6 @@ Result<SuccessType> DecomposeStorageAccess(core::ir::Module& ir) {
                               core::ir::Capability::kAllow8BitIntegers,
                               core::ir::Capability::kAllow16BitIntegers,
                               core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
-                              core::ir::Capability::kAllowDuplicateBindings,
                           },
                           "before hlsl.DecomposeStorageAccess");
 

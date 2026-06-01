@@ -395,7 +395,6 @@ Result<SuccessType> ArgumentBuffers(core::ir::Module& ir, const ArgumentBuffersC
     AssertValid(ir,
                 tint::core::ir::Capabilities{
                     tint::core::ir::Capability::kAllowPointSizeBuiltin,
-                    tint::core::ir::Capability::kAllowDuplicateBindings,
                 },
                 "before msl.ArgumentBuffers");
 

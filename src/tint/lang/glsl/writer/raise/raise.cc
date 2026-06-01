@@ -115,7 +115,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RemapperData remapper_data{};
     PopulateBindingInfo(options, remapper_data, multiplanar_map);
     TINT_CHECK_RESULT(core::ir::transform::BindingRemapper(module, remapper_data));
-    // Capability::kAllowDuplicateBindings needed after BindingRemapper
+
     {
         core::ir::transform::BinaryPolyfillConfig binary_polyfills{};
         binary_polyfills.int_div_mod = !options.disable_polyfill_integer_div_mod;

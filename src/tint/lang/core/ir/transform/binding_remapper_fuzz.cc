@@ -44,5 +44,7 @@ Result<SuccessType> BindingRemapperFuzzer(
 
 TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BindingRemapperFuzzer,
                       tint::core::ir::transform::kBindingRemapperCapabilities,
-                      tint::core::ir::transform::kBindingRemapperCapabilities +
-                          tint::core::ir::Capability::kAllowDuplicateBindings);
+                      tint::core::ir::transform::kBindingRemapperCapabilities,
+                      tint::core::ir::Properties{
+                          tint::core::ir::Property::kAllowDuplicateBindings,
+                      });

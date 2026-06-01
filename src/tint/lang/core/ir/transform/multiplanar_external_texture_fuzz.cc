@@ -28,6 +28,7 @@
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/var.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -38,10 +39,25 @@ using BindingsMap =
 Result<SuccessType> MultiplanarExternalTextureFuzzer(Module& ir,
                                                      const fuzz::ir::Context&,
                                                      const BindingsMap& input_map) {
+    Hashset<BindingPoint, 16> existing_bindings;
+    for (auto* inst : *ir.root_block) {
+        if (auto* var = inst->As<core::ir::Var>()) {
+            if (auto bp = var->BindingPoint()) {
+                existing_bindings.Add(*bp);
+            }
+        }
+    }
+
     tint::transform::multiplanar::BindingsMap multiplanar_map;
     for (const auto& iter : input_map) {
+        if (existing_bindings.Contains(iter.second.params) ||
+            existing_bindings.Contains(iter.second.plane_1)) {
+            return Failure{"new bindings conflict with existing bindings"};
+        }
+
         multiplanar_map.emplace(iter.first, iter.second);
     }
+
     return MultiplanarExternalTexture(ir, multiplanar_map);
 }
 

@@ -743,7 +743,9 @@ TEST_F(IR_ValidatorTest, Var_DuplicateBindingPoints_BothReferenced) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Var_DuplicateBindingPoints_CapabilityOverride) {
+TEST_F(IR_ValidatorTest, Var_DuplicateBindingPoints_WithProperty) {
+    mod.properties.Add(Property::kAllowDuplicateBindings);
+
     auto* var_a = b.Var<uniform, f32>();
     var_a->SetBindingPoint(1, 2);
     mod.root_block->Append(var_a);
@@ -759,7 +761,7 @@ TEST_F(IR_ValidatorTest, Var_DuplicateBindingPoints_CapabilityOverride) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowDuplicateBindings});
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success);
 }
 

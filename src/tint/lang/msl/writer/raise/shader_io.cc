@@ -344,7 +344,6 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config)
     AssertValid(ir,
                 tint::core::ir::Capabilities{
                     core::ir::Capability::kAllow8BitIntegers,
-                    core::ir::Capability::kAllowDuplicateBindings,
                     core::ir::Capability::kAllowNonCoreTypes,
                 },
                 "before msl.ShaderIO");

@@ -1497,7 +1497,6 @@ Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, PolyfillConfig config)
     AssertValid(ir,
                 core::ir::Capabilities{
                     core::ir::Capability::kAllow8BitIntegers,
-                    core::ir::Capability::kAllowDuplicateBindings,
                     core::ir::Capability::kAllowNonCoreTypes,
                 },
                 "before spirv.BuiltinPolyfill");

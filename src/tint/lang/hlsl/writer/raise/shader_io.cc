@@ -763,8 +763,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
 Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
     core::ir::AssertValid(ir,
-                          core::ir::Capabilities{core::ir::Capability::kAllowDuplicateBindings,
-                                                 core::ir::Capability::kAllow8BitIntegers,
+                          core::ir::Capabilities{core::ir::Capability::kAllow8BitIntegers,
                                                  core::ir::Capability::kAllow16BitIntegers},
                           "before hlsl.ShaderIO");
 

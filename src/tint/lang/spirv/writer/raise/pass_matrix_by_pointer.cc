@@ -130,7 +130,6 @@ struct State {
 Result<SuccessType> PassMatrixByPointer(core::ir::Module& ir) {
     core::ir::AssertValid(ir,
                           core::ir::Capabilities{
-                              core::ir::Capability::kAllowDuplicateBindings,
                               core::ir::Capability::kAllowNonCoreTypes,
                           },
                           "before spirv.PassMatrixByPointer");

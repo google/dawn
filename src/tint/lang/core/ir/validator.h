@@ -60,9 +60,6 @@ enum class Capability : uint8_t {
     /// Allows input_attachment_index to be associated with any type, used by
     /// SPIRV backend for spirv.image.
     kAllowAnyInputAttachmentIndexType,
-    /// Allows binding points to be non-unique. Used after BindingRemapper is
-    /// invoked by MSL & GLSL backends.
-    kAllowDuplicateBindings,
     /// Allows module scope `var`s to exist without an IO annotation
     kAllowUnannotatedModuleIOVariables,
     /// Allows non-core types in the IR module

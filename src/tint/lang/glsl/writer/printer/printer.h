@@ -45,7 +45,6 @@ namespace tint::glsl::writer {
 // The capabilities that might be needed due to raising.
 const core::ir::Capabilities kPrinterCapabilities{
     core::ir::Capability::kAllowHandleVarsWithoutBindings,
-    core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kLoosenValidationForShaderIO,
     core::ir::Capability::kAllow16BitIntegers,
 };

@@ -52,7 +52,6 @@ const core::ir::Capabilities kValueToLetCapabilities{
     core::ir::Capability::kAllowAnyLetType,
     core::ir::Capability::kMslAllowEntryPointInterface,
     core::ir::Capability::kAllowModuleScopeLets,
-    core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kAllowNonCoreTypes,
     core::ir::Capability::kLoosenValidationForShaderIO,
 };

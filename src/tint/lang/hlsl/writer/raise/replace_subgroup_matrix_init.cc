@@ -179,7 +179,6 @@ Result<SuccessType> ReplaceSubgroupMatrixInit(core::ir::Module& ir) {
                     core::ir::Capability::kAllowVectorElementPointer,
                     core::ir::Capability::kAllowHandleVarsWithoutBindings,
                     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
-                    core::ir::Capability::kAllowDuplicateBindings,
                     core::ir::Capability::kAllowNonCoreTypes,
                 },
                 "before hlsl.ReplaceSubgroupMatrixInit");

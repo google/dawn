@@ -41,7 +41,6 @@ namespace tint::spirv::writer::raise {
 
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kExpandImplicitSplatsCapabilities{
-    core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
     core::ir::Capability::kAllowNonCoreTypes,
     core::ir::Capability::kAllow8BitIntegers,

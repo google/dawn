@@ -42,7 +42,6 @@ namespace tint::core::ir::transform {
 const core::ir::Capabilities kStd140Capabilities{
     core::ir::Capability::kAllowHandleVarsWithoutBindings,
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
-    core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kAllowNonCoreTypes,
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kLoosenValidationForShaderIO,

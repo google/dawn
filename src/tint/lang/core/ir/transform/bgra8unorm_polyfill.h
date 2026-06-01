@@ -40,7 +40,6 @@ namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
 const Capabilities kBgra8UnormPolyfillCapabilities{
-    Capability::kAllowDuplicateBindings,
     Capability::kAllowNonCoreTypes,
     Capability::kAllow8BitIntegers,
 };

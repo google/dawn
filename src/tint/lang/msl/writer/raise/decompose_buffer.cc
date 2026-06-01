@@ -228,7 +228,6 @@ Result<SuccessType> DecomposeBuffer(core::ir::Module& ir) {
     AssertValid(ir,
                 tint::core::ir::Capabilities{
                     tint::core::ir::Capability::kAllowPointSizeBuiltin,
-                    tint::core::ir::Capability::kAllowDuplicateBindings,
                 },
                 "before msl.DecomposeBuffer");
 

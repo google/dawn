@@ -47,7 +47,6 @@ namespace tint::spirv::writer::raise {
 namespace {
 
 const core::ir::Capabilities kCaseSwitchToIfElseCapabilities{
-    core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
     core::ir::Capability::kAllowNonCoreTypes,
 };

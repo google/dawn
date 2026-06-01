@@ -142,7 +142,6 @@ Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
                     core::ir::Capability::kAllow8BitIntegers,
                     core::ir::Capability::kAllow16BitIntegers,
                     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
-                    core::ir::Capability::kAllowDuplicateBindings,
                     core::ir::Capability::kAllowNonCoreTypes,
                 },
                 "before hlsl.BinaryPolyfill");
