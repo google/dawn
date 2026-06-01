@@ -349,6 +349,9 @@ class BlendableFormatsTest : public TextureFormatsTier1Test {
                       const std::vector<float>& clearColorFloats) {
         DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::TextureFormatsTier1));
 
+        // TODO(crbug.com/518759194): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
         wgpu::Extent3D textureSize = {16, 16, 1};
         wgpu::TextureDescriptor textureDesc;
         textureDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;

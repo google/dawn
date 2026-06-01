@@ -81,6 +81,9 @@ class ClipSpaceTest : public DawnTest {
 
 // Test that the clip space is correctly configured.
 TEST_P(ClipSpaceTest, ClipSpace) {
+    // TODO(crbug.com/518857261): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::Texture colorTexture = Create2DTextureForTest(wgpu::TextureFormat::RGBA8Unorm);
     wgpu::Texture depthStencilTexture =
         Create2DTextureForTest(wgpu::TextureFormat::Depth24PlusStencil8);
