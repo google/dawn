@@ -98,6 +98,8 @@ class BlobCache {
     RAW_PTR_EXCLUSION const WGPUDawnLoadCacheDataFunction mLoadFunction;
     RAW_PTR_EXCLUSION const WGPUDawnStoreCacheDataFunction mStoreFunction;
     RAW_PTR_EXCLUSION void* const mFunctionUserdata;
+    const WGPUDawnLoadCacheDataCallbackInfo mLoadCallbackInfo;
+    const WGPUDawnStoreCacheDataCallbackInfo mStoreCallbackInfo;
 };
 
 }  // namespace dawn::native

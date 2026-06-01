@@ -47,6 +47,7 @@
 #include <memory>
 #include <optional>
 #include <functional>
+#include <span>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -484,19 +485,19 @@ namespace detail {
 // For callbacks, we support two modes:
 //   1) No userdata where we allow a std::function type that can include argument captures.
 //   2) Explicit typed userdata where we only allow non-capturing lambdas or function pointers.
-template <typename... Args>
+template <typename R, typename... Args>
 struct CallbackTypeBase;
-template <typename... Args>
-struct CallbackTypeBase<std::tuple<Args...>> {
-    using Callback = std::function<void(Args...)>;
+template <typename R, typename... Args>
+struct CallbackTypeBase<R, std::tuple<Args...>> {
+    using Callback = std::function<R(Args...)>;
 };
-template <typename... Args>
-struct CallbackTypeBase<std::tuple<Args...>, void> {
-    using Callback = void (Args...);
+template <typename R, typename... Args>
+struct CallbackTypeBase<R, std::tuple<Args...>, void> {
+    using Callback = R (Args...);
 };
-template <typename... Args, typename T>
-struct CallbackTypeBase<std::tuple<Args...>, T> {
-    using Callback = void (Args..., T);
+template <typename R, typename... Args, typename T>
+struct CallbackTypeBase<R, std::tuple<Args...>, T> {
+    using Callback = R (Args..., T);
 };
 }  // namespace detail
 
@@ -505,7 +506,9 @@ struct CallbackTypeBase<std::tuple<Args...>, T> {
 
 {% for type in by_category["callback function"] if type.name.get() not in SpecialCallbacks %}
     template <typename... T>
-    using {{as_cppType(type.name)}} = typename detail::CallbackTypeBase<std::tuple<
+    using {{as_cppType(type.name)}} = typename detail::CallbackTypeBase<
+        {{as_cppType(type.returns.type.name) if type.returns else "void"}},
+        std::tuple<
         {%- for arg in type.arguments -%}
             {%- if not loop.first %}, {% endif -%}
             {{decorate(as_cppType(arg.type.name), arg)}}
@@ -513,9 +516,9 @@ struct CallbackTypeBase<std::tuple<Args...>, T> {
     >, T...>::Callback;
 {% endfor %}
 template <typename... T>
-using DeviceLostCallback = typename detail::CallbackTypeBase<std::tuple<const Device&, DeviceLostReason, StringView>, T...>::Callback;
+using DeviceLostCallback = typename detail::CallbackTypeBase<void, std::tuple<const Device&, DeviceLostReason, StringView>, T...>::Callback;
 template <typename... T>
-using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<const Device&, ErrorType, StringView>, T...>::Callback;
+using UncapturedErrorCallback = typename detail::CallbackTypeBase<void, std::tuple<const Device&, ErrorType, StringView>, T...>::Callback;
 
 {%- macro render_cpp_callback_info_method_impl(type, method, typed, const) %}
     {{render_cpp_callback_info_method_declaration(type, method, typed=typed, const=const, dfn=True)}} {
@@ -743,6 +746,7 @@ struct Untyped {};
 //   - CppFTraits::capturing: true if the callback is a capturing callback (i.e. a lambda that
 //     captures its environment).
 //   - CppFTraits::PtrT: The C++ callback function pointer type.
+//   - CppFTraits::ReturnT: The return type of the C++ callback function pointer.
 //   - CppFTraits::BaseArgsTuple: A tuple of the C++ arguments minus the user specified typed
 //     parameter.
 //
@@ -756,6 +760,7 @@ struct CppFTraitsImpl;
 template <typename CppFT, typename R, typename... CppArgs, typename T>
 struct CppFTraitsImpl<CppFT, R(*)(CppArgs...), T> {
     using PtrT = R(*)(CppArgs...);
+    using ReturnT = R;
     static constexpr bool capturing = false;
 
     static constexpr size_t NumCppArgs = sizeof...(CppArgs);
@@ -768,6 +773,7 @@ struct CppFTraitsImpl<CppFT, R(*)(CppArgs...), T> {
 template <typename CppFT, typename R, typename C, typename... CppArgs, typename T>
 struct CppFTraitsImpl<CppFT, R(C::*)(CppArgs...) const, T> {
     using PtrT = R(*)(CppArgs...);
+    using ReturnT = R;
     static constexpr bool capturing = !std::is_convertible_v<CppFT, PtrT>;
 
     static constexpr size_t NumCppArgs = sizeof...(CppArgs);
@@ -788,7 +794,9 @@ struct CppFTraits<R(*)(CppArgs...), T> :
 // structures when applicable.
 template <typename CInfoT, typename CppArgs>
 struct CArgConverter;
-{% set SpecialCallbackInfos = ["device lost callback info", "uncaptured error callback info"] %}
+{% set SpecialCallbackInfos = [
+           "device lost callback info", "uncaptured error callback info",
+           "dawn load cache data callback info", "dawn store cache data callback info" ] %}
 {% for type in by_category["callback info"] if type.name.get() not in SpecialCallbackInfos %}
     {% set CallbackType = find_by_name(type.members, "callback").type %}
     template <>
@@ -839,28 +847,54 @@ struct CArgConverter<WGPUUncapturedErrorCallbackInfo,
                                static_cast<ErrorType>(type), message);
     }
 };
+{% if find_by_name(by_category["callback info"], "dawn load cache data callback info") %}
+    template <>
+    struct CArgConverter<WGPUDawnLoadCacheDataCallbackInfo,
+                         std::tuple<std::span<const std::byte>, std::span<std::byte>>> {
+        using Result = std::tuple<std::span<const std::byte>, std::span<std::byte>>;
+        static Result Convert(size_t keySize, uint8_t const* key, size_t valueSize, uint8_t* value) {
+            return std::make_tuple(
+                std::span<const std::byte>(reinterpret_cast<const std::byte*>(key), keySize),
+                std::span<std::byte>(reinterpret_cast<std::byte*>(value), valueSize)
+            );
+        }
+    };
+{% endif %}
+{% if find_by_name(by_category["callback info"], "dawn store cache data callback info") %}
+    template <>
+    struct CArgConverter<WGPUDawnStoreCacheDataCallbackInfo,
+                         std::tuple<std::span<const std::byte>, std::span<const std::byte>>> {
+        using Result = std::tuple<std::span<const std::byte>, std::span<const std::byte>>;
+        static Result Convert(size_t keySize, uint8_t const* key, size_t valueSize, uint8_t const* value) {
+            return std::make_tuple(
+                std::span<const std::byte>(reinterpret_cast<const std::byte*>(key), keySize),
+                std::span<const std::byte>(reinterpret_cast<const std::byte*>(value), valueSize)
+            );
+        }
+    };
+{% endif %}
 
 // The CallbackHelper struct implements the static functions needed to convert the base C callbacks
 // into the user provided C++ callbacks. More than anything, it handles converting the real C
 // callback arguments (i.e. not the userdata pointers we use internally) to C++ arguments, and
 // casts the userdata pointers appropriately to ensure that everything is typed.
-template <typename CInfoT, typename CppF, typename CArgsTuple, typename Indices>
+template <typename R, typename CInfoT, typename CppF, typename CArgsTuple, typename Indices>
 struct CallbackHelperImpl;
-template <typename CInfoT, typename CppF, typename... CArgs, std::size_t... Is>
-struct CallbackHelperImpl<CInfoT, CppF, std::tuple<CArgs...>, std::index_sequence<Is...>> {
+template <typename R, typename CInfoT, typename CppF, typename... CArgs, std::size_t... Is>
+struct CallbackHelperImpl<R, CInfoT, CppF, std::tuple<CArgs...>, std::index_sequence<Is...>> {
     // Implementation for callbacks without an additional typed argument. We support capturing
     // lambdas if users can specify a callback mode in this case and make an allocation.
-    static void Call(std::tuple_element_t<Is, std::tuple<CArgs...>>... cArgs,
+    static R Call(std::tuple_element_t<Is, std::tuple<CArgs...>>... cArgs,
                      void* callbackParam, void*) {
         using CppFTraits = CppFTraits<CppF>;
         using Converter = CArgConverter<CInfoT, typename CppFTraits::BaseArgsTuple>;
 
         if constexpr (CppFTraits::capturing) {
             std::unique_ptr<CppF> callback(reinterpret_cast<CppF*>(callbackParam));
-            std::apply(*callback, Converter::Convert(cArgs...));
+            return std::apply(*callback, Converter::Convert(cArgs...));
         } else {
             auto callback = reinterpret_cast<typename CppFTraits::PtrT>(callbackParam);
-            std::apply(callback, Converter::Convert(cArgs...));
+            return std::apply(callback, Converter::Convert(cArgs...));
         }
     }
 
@@ -869,20 +903,20 @@ struct CallbackHelperImpl<CInfoT, CppF, std::tuple<CArgs...>, std::index_sequenc
     // argument and would make more sense for any other state to be capturing by that argument
     // instead.
     template <typename T>
-    static void Call(std::tuple_element_t<Is, std::tuple<CArgs...>>... cArgs,
+    static R Call(std::tuple_element_t<Is, std::tuple<CArgs...>>... cArgs,
                      void* callbackParam, void* userdataParam) {
         using CppFTraits = CppFTraits<CppF, T>;
         using Converter = CArgConverter<CInfoT, typename CppFTraits::BaseArgsTuple>;
 
         auto callback = reinterpret_cast<typename CppFTraits::PtrT>(callbackParam);
         auto param = std::make_tuple(static_cast<T>(userdataParam));
-        std::apply(callback, std::tuple_cat(Converter::Convert(cArgs...), param));
+        return std::apply(callback, std::tuple_cat(Converter::Convert(cArgs...), param));
     }
 };
 template <typename CInfoT, typename F, typename CbT>
 struct CallbackHelper;
-template <typename CInfoT, typename F, typename... CArgs>
-struct CallbackHelper<CInfoT, F, void(*)(CArgs...)> {
+template <typename CInfoT, typename F, typename R, typename... CArgs>
+struct CallbackHelper<CInfoT, F, R(*)(CArgs...)> {
     static constexpr size_t NumCArgs = sizeof...(CArgs);
     using CArgsTuple = std::tuple<CArgs...>;
     static_assert(NumCArgs >= 2, "C Function pointers must have two void* trailing arguments.");
@@ -895,13 +929,13 @@ struct CallbackHelper<CInfoT, F, void(*)(CArgs...)> {
         "C Function pointer's second to last argument must be void*."
     );
 
-    using Impl = CallbackHelperImpl<CInfoT, F, CArgsTuple, std::make_index_sequence<NumCArgs - 2>>;
-    static void Call(CArgs... args) {
-        Impl::Call(std::forward<CArgs>(args)...);
+    using Impl = CallbackHelperImpl<R, CInfoT, F, CArgsTuple, std::make_index_sequence<NumCArgs - 2>>;
+    static R Call(CArgs... args) {
+        return Impl::Call(std::forward<CArgs>(args)...);
     }
     template <typename T>
-    static void Call(CArgs... args) {
-        Impl::template Call<T>(std::forward<CArgs>(args)...);
+    static R Call(CArgs... args) {
+        return Impl::template Call<T>(std::forward<CArgs>(args)...);
     }
 };
 

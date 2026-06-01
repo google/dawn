@@ -266,6 +266,41 @@
             {"name": "userdata", "type": "void *"}
         ]
     },
+    "dawn load cache data callback": {
+        "tags": ["dawn", "native"],
+        "category": "callback function",
+        "returns": "size_t",
+        "args": [
+            {"name": "key size", "type": "size_t"},
+            {"name": "key", "type": "uint8_t", "annotation": "const*", "length": "key size"},
+            {"name": "value size", "type": "size_t"},
+            {"name": "value", "type": "uint8_t", "annotation": "*", "length": "value size"}
+        ]
+    },
+    "dawn load cache data callback info": {
+        "tags": ["dawn", "native"],
+        "category": "callback info",
+        "members": [
+            {"name": "callback", "type": "dawn load cache data callback", "default": "nullptr"}
+        ]
+    },
+    "dawn store cache data callback": {
+        "tags": ["dawn", "native"],
+        "category": "callback function",
+        "args": [
+            {"name": "key size", "type": "size_t"},
+            {"name": "key", "type": "uint8_t", "annotation": "const*", "length": "key size"},
+            {"name": "value size", "type": "size_t"},
+            {"name": "value", "type": "uint8_t", "annotation": "const*", "length": "value size"}
+        ]
+    },
+    "dawn store cache data callback info": {
+        "tags": ["dawn", "native"],
+        "category": "callback info",
+        "members": [
+            {"name": "callback", "type": "dawn store cache data callback", "default": "nullptr"}
+        ]
+    },
     "dawn cache device descriptor" : {
         "tags": ["dawn", "native"],
         "category": "structure",
@@ -275,7 +310,9 @@
             {"name": "isolation key", "type": "string view"},
             {"name": "load data function", "type": "dawn load cache data function", "default": "nullptr"},
             {"name": "store data function", "type": "dawn store cache data function", "default": "nullptr"},
-            {"name": "function userdata", "type": "void *", "default": "nullptr"}
+            {"name": "function userdata", "type": "void *", "default": "nullptr"},
+            {"name": "dawn load cache data callback info", "type": "dawn load cache data callback info"},
+            {"name": "dawn store cache data callback info", "type": "dawn store cache data callback info"}
         ]
     },
     "dawn device allocator control": {
