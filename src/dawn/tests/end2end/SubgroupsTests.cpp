@@ -280,6 +280,53 @@ TEST_P(SubgroupsShaderTests, ReadSubgroupSize) {
     }
 }
 
+// Regression test for a crash in the AMD driver when using nested subgroupMin/Max operations.
+// See crbug.com/508265321.
+TEST_P(SubgroupsShaderTests, NestedSubgroupMinMax) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable subgroups;
+
+        @group(0) @binding(0) var<storage, read> in: i32;
+        @group(0) @binding(1) var<storage, read_write> out: i32;
+
+        @compute @workgroup_size(1)
+        fn main() {
+            let t = subgroupMax(in);
+            let r = t;
+            out = subgroupMin(r);
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor descriptor;
+    descriptor.layout = nullptr;
+    descriptor.compute.module = module;
+    descriptor.compute.entryPoint = "main";
+
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
+
+    wgpu::Buffer inputBuffer =
+        utils::CreateBufferFromData(device, wgpu::BufferUsage::Storage, {42});
+    wgpu::Buffer outputBuffer = utils::CreateBufferFromData(
+        device, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc, {0});
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {{0, inputBuffer}, {1, outputBuffer}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bindGroup);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(42u, outputBuffer, 0);
+}
+
 // DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
 DAWN_INSTANTIATE_TEST(SubgroupsShaderTests,
                       D3D12Backend(),

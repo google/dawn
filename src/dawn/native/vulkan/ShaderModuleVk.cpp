@@ -337,6 +337,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::VulkanDirectVariableAccessTransformHandle);
     req.tintOptions.workarounds.polyfill_subgroup_broadcast_f16 =
         GetDevice()->IsToggleEnabled(Toggle::EnableSubgroupsIntelGen9);
+    req.tintOptions.workarounds.collapse_subgroup_min_max =
+        GetDevice()->IsToggleEnabled(Toggle::CollapseSubgroupMinMax);
     req.tintOptions.workarounds.cooperative_matrix_stride_is_matrix_elements =
         GetDevice()->IsToggleEnabled(Toggle::VulkanCooperativeMatrixStrideIsMatrixElements);
 

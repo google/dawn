@@ -151,11 +151,15 @@ struct Options {
         /// Set to `true` to decompose workgroup accesses via DecomposeAccess.
         bool d3d12_decompose_workgroup_access = false;
 
+        /// Set to `true` to collapse redundant subgroup min and max operations
+        bool collapse_subgroup_min_max = false;
+
         TINT_REFLECT(Workarounds,
                      scalarize_max_min_clamp,
                      polyfill_reflect_vec2_f32,
                      polyfill_subgroup_broadcast_f16,
-                     d3d12_decompose_workgroup_access);
+                     d3d12_decompose_workgroup_access,
+                     collapse_subgroup_min_max);
         bool operator==(const Workarounds&) const = default;
     };
 

@@ -124,6 +124,9 @@ struct Options {
         /// Set to `true` to replace bool types in workgroup storage with u32.
         bool replace_workgroup_bool_with_u32 = false;
 
+        /// Set to `true` to collapse nested subgroupMin and subgroupMax operations.
+        bool collapse_subgroup_min_max = false;
+
         TINT_REFLECT(Workarounds,
                      scalarize_max_min_clamp,
                      disable_module_constant_f16,
@@ -132,7 +135,8 @@ struct Options {
                      polyfill_unpack_2x16_snorm,
                      polyfill_unpack_2x16_unorm,
                      polyfill_tanh_f16,
-                     replace_workgroup_bool_with_u32);
+                     replace_workgroup_bool_with_u32,
+                     collapse_subgroup_min_max);
         TINT_REFLECT_HASH_CODE(Workarounds);
 
         bool operator==(const Workarounds&) const = default;

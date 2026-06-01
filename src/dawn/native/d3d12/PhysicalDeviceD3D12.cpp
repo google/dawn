@@ -849,6 +849,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::D3D12ForceClearCopyableDepthStencilTextureOnCreation, false);
     }
 
+    // Collapse redundant subgroup min and max operations to workaround a driver crash on older AMD
+    // GPUs. Should only affect AMD Windows Driver versions < 31.0.22000.0, but because this is a
+    // harmless "optimizing" workaround go ahead enable for all versions. See:
+    // https://crbug.com/508265321.
+    if (gpu_info::IsAMD(vendorId)) {
+        deviceToggles->Default(Toggle::CollapseSubgroupMinMax, true);
+    }
+
     // Currently this toggle is only needed on Intel Gen9 and Gen9.5 GPUs.
     // See http://crbug.com/dawn/1579 for more information.
     if (gpu_info::IsIntelGen9(vendorId, deviceId)) {

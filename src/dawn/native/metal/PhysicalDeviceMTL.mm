@@ -478,6 +478,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::MetalPolyfillTanhF16, true);
         // chromium:407109056: Floating point clamp is slightly inaccurate for subnormal values.
         deviceToggles->Default(Toggle::MetalPolyfillClampFloat, true);
+        // crbug.com/508265321: Nested subgroupMin/Max operations cause a crash in the AMD driver.
+        deviceToggles->Default(Toggle::CollapseSubgroupMinMax, true);
     }
 
     // On some Intel GPUs vertex only render pipeline get wrong depth result if no fragment

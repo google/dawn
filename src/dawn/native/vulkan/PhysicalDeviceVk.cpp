@@ -1087,6 +1087,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::IgnoreImportedAHardwareBufferVulkanImageSize, true);
     }
 
+    // Collapse redundant subgroup min and max operations to workaround a driver crash on some AMD
+    // GPUs.  Should only affect AMD Windows Driver versions < 31.0.22000.0, but because this is a
+    // harmless "optimizing" workaround go ahead enable for all versions. See:
+    // https://crbug.com/508265321.
+    if (IsWindowsAMD()) {
+        deviceToggles->Default(Toggle::CollapseSubgroupMinMax, true);
+    }
+
     if (IsSwiftshader()) {
         // Swiftshader doesn't handle propagating decorations for descriptors through
         // OpCompositeExtract which happens when a binding_array is indexed "by value" instead of
@@ -1409,6 +1417,14 @@ bool PhysicalDevice::IsAmdMesa() const {
 
 bool PhysicalDevice::IsSwiftshader() const {
     return gpu_info::IsGoogleSwiftshader(GetVendorId(), GetDeviceId());
+}
+
+bool PhysicalDevice::IsWindowsAMD() const {
+#if DAWN_PLATFORM_IS(WINDOWS)
+    return gpu_info::IsAMD(GetVendorId());
+#else
+    return false;
+#endif
 }
 
 bool PhysicalDevice::MayBeArmProprietary() const {

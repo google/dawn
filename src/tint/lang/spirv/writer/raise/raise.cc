@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/builtin_scalarize.h"
+#include "src/tint/lang/core/ir/transform/collapse_subgroup_min_max.h"
 #include "src/tint/lang/core/ir/transform/combine_access_instructions.h"
 #include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
 #include "src/tint/lang/core/ir/transform/decompose_access.h"
@@ -204,6 +205,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     if (!options.extensions.use_demote_to_helper_invocation) {
         // DemoteToHelper must come before any transform that introduces non-core instructions.
         TINT_CHECK_RESULT(core::ir::transform::DemoteToHelper(module));
+    }
+
+    if (options.workarounds.collapse_subgroup_min_max) {
+        TINT_CHECK_RESULT(core::ir::transform::CollapseSubgroupMinMax(module));
     }
 
     raise::PolyfillConfig config = {

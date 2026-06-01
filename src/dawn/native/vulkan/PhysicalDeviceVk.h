@@ -68,6 +68,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsAndroidHuawei() const;
     bool IsPixel10() const;
     bool IsSwiftshader() const;
+    bool IsWindowsAMD() const;
 
     // Check using VkDriverId, which is available in Vk 1.2 or an extension.
     bool IsIntelMesa() const;

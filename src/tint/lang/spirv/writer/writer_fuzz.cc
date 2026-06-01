@@ -86,6 +86,7 @@ struct FuzzedOptions {
     bool cooperative_matrix_stride_is_matrix_elements;
     bool polyfill_length_scalar_float;
     bool polyfill_distance_scalar_float;
+    bool collapse_subgroup_min_max;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
@@ -121,7 +122,8 @@ struct FuzzedOptions {
                  multisampled_framebuffer_fetch,
                  cooperative_matrix_stride_is_matrix_elements,
                  polyfill_length_scalar_float,
-                 polyfill_distance_scalar_float);
+                 polyfill_distance_scalar_float,
+                 collapse_subgroup_min_max);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
 };
 
@@ -340,6 +342,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         fuzzed_options.polyfill_distance_scalar_float;
     options.workarounds.cooperative_matrix_stride_is_matrix_elements =
         fuzzed_options.cooperative_matrix_stride_is_matrix_elements;
+    options.workarounds.collapse_subgroup_min_max = fuzzed_options.collapse_subgroup_min_max;
     options.multisampled_framebuffer_fetch = fuzzed_options.multisampled_framebuffer_fetch;
 
     TINT_CHECK_RESULT_UNWRAP(output, Generate(module, options));

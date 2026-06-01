@@ -360,6 +360,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         device->IsToggleEnabled(Toggle::MetalPolyfillTanhF16);
     req.tintOptions.workarounds.replace_workgroup_bool_with_u32 =
         device->IsToggleEnabled(Toggle::MetalReplaceWorkgroupBoolWithU32);
+    req.tintOptions.workarounds.collapse_subgroup_min_max =
+        device->IsToggleEnabled(Toggle::CollapseSubgroupMinMax);
 
     req.tintOptions.extensions.disable_demote_to_helper =
         device->IsToggleEnabled(Toggle::DisableDemoteToHelper);
