@@ -158,7 +158,6 @@ Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
                           core::ir::Capabilities{
                               core::ir::Capability::kAllowPhonyInstructions,
                               core::ir::Capability::kAllowNonCoreTypes,
-                              core::ir::Capability::kAllowStructMatrixDecorations,
                               core::ir::Capability::kAllowLocationForNumericElements,
                               core::ir::Capability::kAllowPointerToHandle,
                               core::ir::Capability::kLoosenValidationForShaderIO,

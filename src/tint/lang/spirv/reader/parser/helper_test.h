@@ -75,7 +75,6 @@ class SpirvParserTestHelperBase : public BASE {
                               core::ir::Capabilities{
                                   core::ir::Capability::kAllowPhonyInstructions,
                                   core::ir::Capability::kAllowNonCoreTypes,
-                                  core::ir::Capability::kAllowStructMatrixDecorations,
                               },
                               "after spirv.test");
 

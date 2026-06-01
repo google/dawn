@@ -62,6 +62,8 @@ enum class Property : uint8_t {
     kAllowMultipleEntryPoints,
     /// Allow overrides
     kAllowOverrides,
+    /// Allows matrix annotations on structure members.
+    kAllowStructMatrixDecorations,
     /// Allows access instructions to create pointers to vector elements.
     kAllowVectorElementPointer,
 
@@ -86,6 +88,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(AllowDuplicateBindings);
         CASE(AllowMultipleEntryPoints);
         CASE(AllowOverrides);
+        CASE(AllowStructMatrixDecorations);
         CASE(AllowVectorElementPointer);
         CASE(DisallowVectorMinMaxClamp);
     }

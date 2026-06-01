@@ -43,7 +43,6 @@ const core::ir::Capabilities kDeadCodeEliminationCapabilities{
     core::ir::Capability::kAllowPhonyInstructions,
     core::ir::Capability::kAllowUnannotatedModuleIOVariables,
     core::ir::Capability::kAllowNonCoreTypes,
-    core::ir::Capability::kAllowStructMatrixDecorations,
     core::ir::Capability::kAllowLocationForNumericElements,
     core::ir::Capability::kAllowPointerToHandle,
     core::ir::Capability::kLoosenValidationForShaderIO,

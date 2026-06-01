@@ -2237,7 +2237,7 @@ void Validator::CheckType(const core::type::Type* root,
                         diag() << "struct member type alignment must be a power of 2";
                         return false;
                     }
-                    if (!capabilities_.Contains(Capability::kAllowStructMatrixDecorations)) {
+                    if (!mod_.properties.Contains(Property::kAllowStructMatrixDecorations)) {
                         if (member->RowMajor()) {
                             diag() << "Row major annotation not allowed on structures";
                             return false;

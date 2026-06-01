@@ -1312,7 +1312,6 @@ Result<SuccessType> Builtins(core::ir::Module& ir) {
     AssertValid(ir,
                 core::ir::Capabilities{
                     core::ir::Capability::kAllowNonCoreTypes,
-                    core::ir::Capability::kAllowStructMatrixDecorations,
                     core::ir::Capability::kAllowPointerToHandle,
                 },
                 "before spirv.Builtins");

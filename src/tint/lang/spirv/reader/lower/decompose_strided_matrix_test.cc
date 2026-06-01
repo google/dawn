@@ -38,7 +38,11 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 class SpirvReader_DecomposeStridedMatrixTest : public core::ir::transform::TransformTest {
   protected:
-    void SetUp() override { capabilities.Add(core::ir::Capability::kAllowNonCoreTypes); }
+    void SetUp() override {
+        core::ir::transform::TransformTest::SetUp();
+        capabilities.Add(core::ir::Capability::kAllowNonCoreTypes);
+        mod.properties.Add(core::ir::Property::kAllowStructMatrixDecorations);
+    }
 
     /// Create a struct that has a matrix member sandwiched between two u32 members, optionally
     /// nested inside one or more arrays.

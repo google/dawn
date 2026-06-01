@@ -626,7 +626,8 @@ TEST_F(IR_ValidatorTest, StructMember_RowMajor_WithCapability) {
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowStructMatrixDecorations});
+    mod.properties.Add(Property::kAllowStructMatrixDecorations);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -661,7 +662,8 @@ TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithCapability) {
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowStructMatrixDecorations});
+    mod.properties.Add(Property::kAllowStructMatrixDecorations);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

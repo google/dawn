@@ -36,7 +36,12 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 class SpirvReader_TransposeRowMajorTest : public core::ir::transform::TransformTest {
-    void SetUp() override { capabilities.Add(core::ir::Capability::kAllowNonCoreTypes); }
+  protected:
+    void SetUp() override {
+        core::ir::transform::TransformTest::SetUp();
+        capabilities.Add(core::ir::Capability::kAllowNonCoreTypes);
+        mod.properties.Add(core::ir::Property::kAllowStructMatrixDecorations);
+    }
 };
 
 TEST_F(SpirvReader_TransposeRowMajorTest, ReadUniformMatrix) {
@@ -1292,8 +1297,6 @@ $B1: {  # root
 }
 
 TEST_F(SpirvReader_TransposeRowMajorTest, PreserveMatrixStride) {
-    capabilities.Add(core::ir::Capability::kAllowStructMatrixDecorations);
-
     // struct S {
     //   @offset(0)
     //   @stride(32)

@@ -758,7 +758,6 @@ struct State {
 Result<SuccessType> TransposeRowMajor(core::ir::Module& ir) {
     AssertValid(ir,
                 core::ir::Capabilities{
-                    core::ir::Capability::kAllowStructMatrixDecorations,
                     core::ir::Capability::kAllowNonCoreTypes,
                     core::ir::Capability::kAllowPointerToHandle,
                 },
