@@ -668,7 +668,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumLevels) {
 }
 )";
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
     Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
     EXPECT_EQ(expect, str());
 }
@@ -708,7 +707,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumLayers) {
 }
 )";
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
     Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
 
     EXPECT_EQ(expect, str());
@@ -749,7 +747,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumSamples) {
 }
 )";
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
     Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
 
     EXPECT_EQ(expect, str());
@@ -785,7 +782,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d_WithoutLod) {
 }
 )";
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
     Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
 
     EXPECT_EQ(expect, str());
@@ -825,7 +821,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d_WithI32Lod) {
 }
 )";
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
     Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
 
     EXPECT_EQ(expect, str());
@@ -864,7 +859,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d_WithU32Lod) {
 }
 )";
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
     Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
 
     EXPECT_EQ(expect, str());
@@ -902,7 +896,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithoutLod) {
 }
 )";
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
     Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
 
     EXPECT_EQ(expect, str());
@@ -943,7 +936,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithI32Lod) {
 }
 )";
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
     Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
 
     EXPECT_EQ(expect, str());
@@ -982,7 +974,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_3d) {
 }
 )";
 
-    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
     Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
 
     EXPECT_EQ(expect, str());

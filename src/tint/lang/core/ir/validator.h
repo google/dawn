@@ -51,8 +51,6 @@ enum class Capability : uint8_t {
     kAllowModuleScopeLets,
     /// Allows ref types
     kAllowRefTypes,
-    /// Allows access instructions to create pointers to vector elements.
-    kAllowVectorElementPointer,
     /// Allows phony assignment instructions to be used.
     kAllowPhonyInstructions,
     /// Allows lets to have any type, used by MSL backend for module scoped vars

@@ -156,7 +156,6 @@ struct State {
 Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
     core::ir::AssertValid(ir,
                           core::ir::Capabilities{
-                              core::ir::Capability::kAllowVectorElementPointer,
                               core::ir::Capability::kAllowPhonyInstructions,
                               core::ir::Capability::kAllowNonCoreTypes,
                               core::ir::Capability::kAllowStructMatrixDecorations,
@@ -168,6 +167,8 @@ Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
                           "before spirv.VectorElementPointer");
 
     State{ir}.Process();
+
+    ir.properties.Remove(core::ir::Property::kAllowVectorElementPointer);
 
     return Success;
 }

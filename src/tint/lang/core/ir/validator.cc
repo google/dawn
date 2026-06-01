@@ -4578,7 +4578,7 @@ void Validator::CheckAccess(const Access* a) {
             return;
         }
 
-        if (!capabilities_.Contains(Capability::kAllowVectorElementPointer)) {
+        if (!mod_.properties.Contains(Property::kAllowVectorElementPointer)) {
             if (in_kind != kValue && ty->Is<core::type::Vector>()) {
                 err() << "cannot obtain address of vector element";
                 return;

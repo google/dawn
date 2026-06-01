@@ -2157,6 +2157,9 @@ Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, const BuiltinPolyfillC
                 "before hlsl.BuiltinPolyfill");
 
     State{ir, config}.Process();
+
+    ir.properties.Add(core::ir::Property::kAllowVectorElementPointer);
+
     return Success;
 }
 

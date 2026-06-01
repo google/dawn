@@ -44,7 +44,6 @@ const core::ir::Capabilities kRemoveTerminatorArgsCapabilities{
     core::ir::Capability::kAllow16BitIntegers,
     core::ir::Capability::kAllow64BitIntegers,
     core::ir::Capability::kAllowPointSizeBuiltin,
-    core::ir::Capability::kAllowVectorElementPointer,
     core::ir::Capability::kAllowHandleVarsWithoutBindings,
     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
     core::ir::Capability::kAllowAnyLetType,

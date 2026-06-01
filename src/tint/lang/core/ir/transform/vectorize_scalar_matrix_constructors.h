@@ -40,7 +40,6 @@ namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kVectorizeScalarMatrixConstructorsCapabilities{
-    core::ir::Capability::kAllowVectorElementPointer,
     core::ir::Capability::kAllowHandleVarsWithoutBindings,
     core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
     core::ir::Capability::kAllowNonCoreTypes,

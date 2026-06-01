@@ -74,7 +74,6 @@ class SpirvParserTestHelperBase : public BASE {
         core::ir::AssertValid(parsed,
                               core::ir::Capabilities{
                                   core::ir::Capability::kAllowPhonyInstructions,
-                                  core::ir::Capability::kAllowVectorElementPointer,
                                   core::ir::Capability::kAllowNonCoreTypes,
                                   core::ir::Capability::kAllowStructMatrixDecorations,
                               },

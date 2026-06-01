@@ -382,7 +382,7 @@ TEST_F(IR_ValidatorTest, Access_IndexVectorPtr) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_WithCapability) {
+TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_WithProperty) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.ptr<private_, vec3f>());
     f->SetParams({obj});
@@ -392,7 +392,8 @@ TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_WithCapability) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowVectorElementPointer});
+    mod.properties.Add(Property::kAllowVectorElementPointer);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -415,7 +416,7 @@ TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_ViaMatrixPtr) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_ViaMatrixPtr_WithCapability) {
+TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_ViaMatrixPtr_WithProperty) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.ptr<private_, mat3x2f>());
     f->SetParams({obj});
@@ -425,7 +426,8 @@ TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_ViaMatrixPtr_WithCapability) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowVectorElementPointer});
+    mod.properties.Add(Property::kAllowVectorElementPointer);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

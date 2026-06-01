@@ -456,7 +456,6 @@ bool Run(const Options& options) {
                     tint::core::ir::Capability::kAllowHandleVarsWithoutBindings,
                     tint::core::ir::Capability::kAllowModuleScopeLets,
                     tint::core::ir::Capability::kAllowRefTypes,
-                    tint::core::ir::Capability::kAllowVectorElementPointer,
                     tint::core::ir::Capability::kMslAllowEntryPointInterface,
                     tint::core::ir::Capability::kAllowPhonyInstructions,
                     tint::core::ir::Capability::kAllowAnyLetType,

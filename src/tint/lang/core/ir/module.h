@@ -62,6 +62,8 @@ enum class Property : uint8_t {
     kAllowMultipleEntryPoints,
     /// Allow overrides
     kAllowOverrides,
+    /// Allows access instructions to create pointers to vector elements.
+    kAllowVectorElementPointer,
 
     /// Disallow use of the min/max/clamp builtins with vector types.
     kDisallowVectorMinMaxClamp,
@@ -84,6 +86,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(AllowDuplicateBindings);
         CASE(AllowMultipleEntryPoints);
         CASE(AllowOverrides);
+        CASE(AllowVectorElementPointer);
         CASE(DisallowVectorMinMaxClamp);
     }
 #undef CASE
