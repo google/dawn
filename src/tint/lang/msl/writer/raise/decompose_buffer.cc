@@ -225,11 +225,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> DecomposeBuffer(core::ir::Module& ir) {
-    AssertValid(ir,
-                tint::core::ir::Capabilities{
-                    tint::core::ir::Capability::kAllowPointSizeBuiltin,
-                },
-                "before msl.DecomposeBuffer");
+    AssertValid(ir, "before msl.DecomposeBuffer");
 
     State{ir}.Process();
 

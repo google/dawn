@@ -45,7 +45,6 @@ const core::ir::Capabilities kPrinterCapabilities{
     core::ir::Capability::kAllow8BitIntegers,            //
     core::ir::Capability::kAllow64BitIntegers,           //
     core::ir::Capability::kAllowAnyLetType,              //
-    core::ir::Capability::kAllowPointSizeBuiltin,        //
     core::ir::Capability::kAllowModuleScopeLets,         //
     core::ir::Capability::kMslAllowEntryPointInterface,  //
     core::ir::Capability::kAllowNonCoreTypes,            //

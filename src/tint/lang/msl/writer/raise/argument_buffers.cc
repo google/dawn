@@ -392,11 +392,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ArgumentBuffers(core::ir::Module& ir, const ArgumentBuffersConfig& config) {
-    AssertValid(ir,
-                tint::core::ir::Capabilities{
-                    tint::core::ir::Capability::kAllowPointSizeBuiltin,
-                },
-                "before msl.ArgumentBuffers");
+    AssertValid(ir, "before msl.ArgumentBuffers");
 
     return State{config, ir}.Process();
 }

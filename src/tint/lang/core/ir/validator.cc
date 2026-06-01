@@ -736,6 +736,7 @@ struct IOAttributeChecker {
     using CheckFn = Result<SuccessType, std::string>(const core::type::Type* ty,
                                                      const IOAttributes& attr,
                                                      const Capabilities& cap,
+                                                     const Properties& prop,
                                                      IOAttributeUsage usage);
 
     /// The validation function.
@@ -762,6 +763,7 @@ constexpr IOAttributeChecker kInvariantChecker{
     .check = [](const core::type::Type*,
                 const IOAttributes& attr,
                 const Capabilities&,
+                const Properties&,
                 IOAttributeUsage) -> Result<SuccessType, std::string> {
         if (attr.builtin != BuiltinValue::kPosition) {
             return {"invariant can only decorate a value if it is also decorated with position"};
@@ -788,6 +790,7 @@ constexpr IOAttributeChecker kBuiltinChecker{
     .check = [](const core::type::Type* ty,
                 const IOAttributes& attr,
                 const Capabilities& cap,
+                const Properties& prop,
                 IOAttributeUsage usage) -> Result<SuccessType, std::string> {
         if (!attr.builtin.has_value()) {
             return Success;
@@ -828,7 +831,7 @@ constexpr IOAttributeChecker kBuiltinChecker{
         }
 
         if (builtin == BuiltinValue::kPointSize &&
-            !cap.Contains(Capability::kAllowPointSizeBuiltin)) {
+            !prop.Contains(Property::kAllowPointSizeBuiltin)) {
             return std::string{"use of point_size builtin requires kAllowPointSizeBuiltin"};
         }
 
@@ -843,8 +846,11 @@ constexpr IOAttributeChecker kColorChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
     .valid_io_kinds =
         EnumSet<ShaderIOKind>{ShaderIOKind::kInputParam, ShaderIOKind::kModuleScopeVar},
-    .check = [](const core::type::Type*, const IOAttributes&, const Capabilities&, IOAttributeUsage)
-        -> Result<SuccessType, std::string> { return Success; },
+    .check = [](const core::type::Type*,
+                const IOAttributes&,
+                const Capabilities&,
+                const Properties&,
+                IOAttributeUsage) -> Result<SuccessType, std::string> { return Success; },
     .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
         return ty->IsNumericScalarOrVector();
     },
@@ -855,8 +861,11 @@ constexpr IOAttributeChecker kInputAttachmentIndexChecker{
     .kind = IOAttributeKind::kInputAttachmentIndex,
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentResourceUsage},
     .valid_io_kinds = EnumSet<ShaderIOKind>{ShaderIOKind::kModuleScopeVar},
-    .check = [](const core::type::Type*, const IOAttributes&, const Capabilities&, IOAttributeUsage)
-        -> Result<SuccessType, std::string> { return Success; },
+    .check = [](const core::type::Type*,
+                const IOAttributes&,
+                const Capabilities&,
+                const Properties&,
+                IOAttributeUsage) -> Result<SuccessType, std::string> { return Success; },
     .type_check = [](const core::type::Type* ty, const Capabilities& cap) -> bool {
         return cap.Contains(Capability::kAllowAnyInputAttachmentIndexType) ||
                ty->Is<core::type::InputAttachment>();
@@ -872,6 +881,7 @@ constexpr IOAttributeChecker kDepthModeChecker{
     .check = [](const core::type::Type*,
                 const IOAttributes& attr,
                 const Capabilities&,
+                const Properties&,
                 IOAttributeUsage) -> Result<SuccessType, std::string> {
         if (!attr.builtin.has_value()) {
             return {"cannot have a depth_mode without a builtin"};
@@ -3127,7 +3137,8 @@ void Validator::ValidateIOAttributesImpl(IOAttributeContext& ctx,
                     continue;
                 }
 
-                if (auto res = checker->check(t, a, v.capabilities_, usage); res != Success) {
+                if (auto res = checker->check(t, a, v.capabilities_, v.mod_.properties, usage);
+                    res != Success) {
                     failed.Add(checker);
                     v.AddError(msg_anchor) << res.Failure();
                 }
@@ -4063,7 +4074,7 @@ bool Validator::CheckStructMemberAttributes(const core::type::StructMember* memb
     const auto checkers = IOAttributeCheckersFor(member->Attributes(), /*skip_builtins*/ false);
     for (const auto* checker : checkers) {
         auto res = checker->check(member->Type(), member->Attributes(), capabilities_,
-                                  IOAttributeUsage::kUndefinedUsage);
+                                  mod_.properties, IOAttributeUsage::kUndefinedUsage);
         if (res != Success) {
             make_diag() << res.Failure();
             return false;

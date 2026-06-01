@@ -745,13 +745,16 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir) {
                     core::ir::Capability::kAllowPhonyInstructions,
                     core::ir::Capability::kAllowNonCoreTypes,
                     core::ir::Capability::kAllowLocationForNumericElements,
-                    core::ir::Capability::kAllowPointSizeBuiltin,
                     core::ir::Capability::kAllowPointerToHandle,
                     core::ir::Capability::kLoosenValidationForShaderIO,
                 },
                 "before spirv.ShaderIO");
 
-    return State{ir}.Process();
+    TINT_CHECK_RESULT(State{ir}.Process());
+
+    ir.properties.Remove(core::ir::Property::kAllowPointSizeBuiltin);
+
+    return Success;
 }
 
 }  // namespace tint::spirv::reader::lower

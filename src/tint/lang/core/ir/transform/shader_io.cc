@@ -111,6 +111,7 @@ struct State {
         // Add an output for the vertex point size if needed.
         std::optional<uint32_t> vertex_point_size_index;
         if (ep->IsVertex() && backend->NeedsVertexPointSize()) {
+            ir.properties.Add(core::ir::Property::kAllowPointSizeBuiltin);
             vertex_point_size_index =
                 backend->AddOutput(ir.symbols.New("vertex_point_size"), ty.f32(),
                                    core::IOAttributes{

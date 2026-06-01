@@ -1322,7 +1322,6 @@ Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, const BuiltinPolyfillC
     AssertValid(ir,
                 core::ir::Capabilities{
                     core::ir::Capability::kAllow8BitIntegers,
-                    core::ir::Capability::kAllowPointSizeBuiltin,
                     core::ir::Capability::kAllowAnyLetType,
                     core::ir::Capability::kAllowNonCoreTypes,
                     core::ir::Capability::kMslAllowEntryPointInterface,

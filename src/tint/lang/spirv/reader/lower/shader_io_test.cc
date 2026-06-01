@@ -41,9 +41,9 @@ class SpirvReader_ShaderIOTest : public core::ir::transform::TransformTest {
   public:
     void SetUp() override {
         mod.properties.Add(core::ir::Property::kAllowMultipleEntryPoints);
+        mod.properties.Add(core::ir::Property::kAllowPointSizeBuiltin);
 
         capabilities.Add(core::ir::Capability::kAllowLocationForNumericElements);
-        capabilities.Add(core::ir::Capability::kAllowPointSizeBuiltin);
     }
 
   protected:

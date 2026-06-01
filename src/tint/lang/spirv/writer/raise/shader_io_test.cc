@@ -1185,7 +1185,6 @@ $B1: {  # root
     ShaderIOConfig config{immediate_data};
     config.emit_vertex_point_size = true;
 
-    capabilities.Set(core::ir::Capability::kAllowPointSizeBuiltin, true);
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());

@@ -151,7 +151,6 @@ Result<SuccessType> ChangeImmediateToUniform(core::ir::Module& ir,
                           core::ir::Capabilities{
                               core::ir::Capability::kAllow8BitIntegers,
                               core::ir::Capability::kAllow16BitIntegers,
-                              core::ir::Capability::kAllowPointSizeBuiltin,
                               core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
                               core::ir::Capability::kAllowNonCoreTypes,
                               core::ir::Capability::kMslAllowEntryPointInterface,

@@ -1436,7 +1436,7 @@ TEST_F(IR_ValidatorTest, Builtin_PointSize_WithoutCapability) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Builtin_PointSize_WithCapability) {
+TEST_F(IR_ValidatorTest, Builtin_PointSize_WithProperty) {
     const auto position_attr = IOAttributes{.builtin = core::BuiltinValue::kPosition};
     const auto point_size_attr = IOAttributes{.builtin = core::BuiltinValue::kPointSize};
     auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"),
@@ -1453,7 +1453,8 @@ TEST_F(IR_ValidatorTest, Builtin_PointSize_WithCapability) {
         b.Return(f, b.Zero(str_ty));
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointSizeBuiltin});
+    mod.properties.Add(Property::kAllowPointSizeBuiltin);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
