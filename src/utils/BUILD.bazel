@@ -39,7 +39,7 @@ cc_library(
     "platform.h",
     "underlying_type.h",
   ] + select({
-    ":tint_build_is_win": [
+    "//src/tint:tint_build_is_win_true": [
       "windows_with_undefs.h",
     ],
     "//conditions:default": [],
