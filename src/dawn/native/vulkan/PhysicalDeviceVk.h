@@ -61,6 +61,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsDepthStencilFormatSupported(VkFormat format) const;
     bool IsTextureCompressionASTCSliced3DSupported(VkFormat format) const;
 
+    static bool IsAndroid();
     bool IsAndroidQualcomm() const;
     bool IsAndroidARM() const;
     bool IsAndroidSamsung() const;
@@ -68,6 +69,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsAndroidHuawei() const;
     bool IsPixel10() const;
     bool IsSwiftshader() const;
+    static bool IsWindows();
     bool IsWindowsAMD() const;
 
     // Check using VkDriverId, which is available in Vk 1.2 or an extension.

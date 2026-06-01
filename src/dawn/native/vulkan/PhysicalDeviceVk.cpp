@@ -68,13 +68,14 @@ gpu_info::DriverVersion DecodeVulkanDriverVersion(uint32_t vendorID, uint32_t ve
                              static_cast<uint16_t>(versionRaw & 0x003F)};
             break;
         case gpu_info::kVendorID_Intel:
-#if DAWN_PLATFORM_IS(WINDOWS)
-            // Windows Vulkan driver releases together with D3D driver, so they share the same
-            // version. But only CCC.DDDD is encoded in 32-bit driverVersion.
-            driverVersion = {static_cast<uint16_t>(versionRaw >> 14),
-                             static_cast<uint16_t>(versionRaw & 0x3FFF)};
-            break;
-#endif
+            if (PhysicalDevice::IsWindows()) {
+                // Windows Vulkan driver releases together with D3D driver, so they share the same
+                // version. But only CCC.DDDD is encoded in 32-bit driverVersion.
+                driverVersion = {static_cast<uint16_t>(versionRaw >> 14),
+                                 static_cast<uint16_t>(versionRaw & 0x3FFF)};
+                break;
+            }
+            [[fallthrough]];
         default:
             // Use Vulkan driver conversions for other vendors
             driverVersion = {static_cast<uint16_t>(versionRaw >> 22),
@@ -162,18 +163,16 @@ MaybeError PhysicalDevice::InitializeImpl() {
                                                mDeviceInfo.properties.driverVersion);
     const std::string driverVersionStr = mDriverVersion.ToString();
 
-#if DAWN_PLATFORM_IS(WINDOWS)
     // Disable Vulkan adapter on Windows Intel driver < 30.0.101.2111 due to flaky
     // issues.
     const gpu_info::IntelWindowsDriverVersion kDriverVersion({30, 0, 101, 2111});
-    if (gpu_info::IsIntel(mDeviceInfo.properties.vendorID) &&
+    if (IsWindows() && gpu_info::IsIntel(mDeviceInfo.properties.vendorID) &&
         gpu_info::IntelWindowsDriverVersion(mDriverVersion) < kDriverVersion) {
         return DAWN_FORMAT_INTERNAL_ERROR(
             "Disable Intel Vulkan adapter on Windows driver version %s. See "
             "https://crbug.com/1338622.",
             driverVersionStr);
     }
-#endif
 
     if (mDeviceInfo.HasExt(DeviceExt::DriverProperties)) {
         mDriverDescription = mDeviceInfo.driverProperties.driverName;
@@ -1354,46 +1353,34 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     return {};
 }
 
-// Android devices with Qualcomm GPUs have a myriad of known issues. (dawn:1549)
-bool PhysicalDevice::IsAndroidQualcomm() const {
+bool PhysicalDevice::IsAndroid() {
 #if DAWN_PLATFORM_IS(ANDROID)
-    return gpu_info::IsQualcommPCI(GetVendorId());
+    return true;
 #else
     return false;
 #endif
+}
+
+// Android devices with Qualcomm GPUs have a myriad of known issues. (dawn:1549)
+bool PhysicalDevice::IsAndroidQualcomm() const {
+    return IsAndroid() && gpu_info::IsQualcommPCI(GetVendorId());
 }
 
 // Android devices with ARM GPUs have known issues. (dawn:1550)
 bool PhysicalDevice::IsAndroidARM() const {
-#if DAWN_PLATFORM_IS(ANDROID)
-    return gpu_info::IsARM(GetVendorId());
-#else
-    return false;
-#endif
+    return IsAndroid() && gpu_info::IsARM(GetVendorId());
 }
 
 bool PhysicalDevice::IsAndroidSamsung() const {
-#if DAWN_PLATFORM_IS(ANDROID)
-    return gpu_info::IsSamsung(GetVendorId());
-#else
-    return false;
-#endif
+    return IsAndroid() && gpu_info::IsSamsung(GetVendorId());
 }
 
 bool PhysicalDevice::IsAndroidHuawei() const {
-#if DAWN_PLATFORM_IS(ANDROID)
-    return gpu_info::IsHuawei(GetVendorId());
-#else
-    return false;
-#endif
+    return IsAndroid() && gpu_info::IsHuawei(GetVendorId());
 }
 
 bool PhysicalDevice::IsAndroidImgTec() const {
-#if DAWN_PLATFORM_IS(ANDROID)
-    return gpu_info::IsImgTec(GetVendorId());
-#else
-    return false;
-#endif
+    return IsAndroid() && gpu_info::IsImgTec(GetVendorId());
 }
 
 bool PhysicalDevice::IsPixel10() const {
@@ -1419,12 +1406,16 @@ bool PhysicalDevice::IsSwiftshader() const {
     return gpu_info::IsGoogleSwiftshader(GetVendorId(), GetDeviceId());
 }
 
-bool PhysicalDevice::IsWindowsAMD() const {
+bool PhysicalDevice::IsWindows() {
 #if DAWN_PLATFORM_IS(WINDOWS)
-    return gpu_info::IsAMD(GetVendorId());
+    return true;
 #else
     return false;
 #endif
+}
+
+bool PhysicalDevice::IsWindowsAMD() const {
+    return IsWindows() && gpu_info::IsAMD(GetVendorId());
 }
 
 bool PhysicalDevice::MayBeArmProprietary() const {
