@@ -114,6 +114,7 @@ elseif(UNIX)
   set(ENABLE_OPENGLES ON)
   set(ENABLE_DESKTOP_GL ON)
   set(ENABLE_VULKAN ON)
+  set(USE_WAYLAND ON)
   set(USE_X11 ON)
 endif()
 
