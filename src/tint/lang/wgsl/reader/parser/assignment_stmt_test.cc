@@ -452,5 +452,14 @@ TEST_F(WGSLParserTest, AssignmentStmt_FunctionIndexLHS) {
     ASSERT_TRUE(a->lhs->Is<ast::IndexAccessorExpression>());
 }
 
+TEST_F(WGSLParserTest, AssignmentStmt_FunctionLHS_MissingArgsAfterTemplate) {
+    auto p = parser("foo<vec2u> = 123u");
+    auto e = p->variable_updating_statement();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:12: expected '(' for function call");
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader
