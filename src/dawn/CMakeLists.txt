@@ -108,6 +108,38 @@ else()
   add_library(webgpu_cpp ALIAS dawncpp_headers)
 endif()
 
+# Dawn c++20 Module Interface
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
+  DawnJSONGenerator(
+      TARGET "cpp_modules"
+      PRINT_NAME "Dawn C++ module interface"
+      OUTPUT_SOURCES DAWNCPP_MODULE_INTERFACE
+  )
+
+  add_library(dawncpp_miu OBJECT)
+  add_library(dawn::cpp_module ALIAS dawncpp_miu)
+  target_sources(dawncpp_miu PUBLIC
+    FILE_SET  dawncpp_miu
+    TYPE      CXX_MODULES
+    BASE_DIRS "${DAWN_BUILD_GEN_DIR}"
+    FILES     "${DAWNCPP_MODULE_INTERFACE}"
+  )
+  target_include_directories(dawncpp_miu PRIVATE
+    "${DAWN_INCLUDE_DIR}"
+    "${DAWN_BUILD_GEN_DIR}/include"
+  )
+  get_target_property(dawncpp_miu_dep webgpu_cpp ALIASED_TARGET)
+  target_link_libraries(${dawncpp_miu_dep} INTERFACE dawncpp_miu)
+
+  # Use toplevel compile configuration for the interface
+  # to avoid -Wmodule-file-config-mismatch
+  # See https://gitlab.kitware.com/cmake/cmake/-/work_items/27597
+  set_target_properties(dawncpp_miu PROPERTIES
+    CXX_STANDARD    ${DAWN_TOPLEVEL_CXX_STANDARD}
+    CXX_EXTENSIONS  ${DAWN_TOPLEVEL_CXX_EXTENSIONS}
+  )
+endif()
+
 ###############################################################################
 # Dawn projects
 ###############################################################################

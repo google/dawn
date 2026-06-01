@@ -25,6 +25,20 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# Preserved for the c++ module interface to match the compile config
+# of the consuming project
+if (DEFINED CMAKE_CXX_STANDARD)
+  set(DAWN_TOPLEVEL_CXX_STANDARD ${CMAKE_CXX_STANDARD})
+else ()
+  set(DAWN_TOPLEVEL_CXX_STANDARD 20)
+endif ()
+if (DEFINED CMAKE_CXX_EXTENSIONS)
+  set(DAWN_TOPLEVEL_CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS})
+else ()
+  set(DAWN_TOPLEVEL_CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS_DEFAULT})
+endif ()
+
+
 # Make sure we have C++20 enabled.
 # Needed to make sure libraries and executables not built by the
 # dawn_add_library still have the C++20 compiler flags enabled
