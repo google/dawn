@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-05-21 08:22:58AM
+# Last rolled: 2026-06-01 07:53:45AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -635,7 +635,6 @@ crbug.com/42241359 [ android-14 arm ] webgpu:shader,execution,expression,call,bu
 
 # image_copy of depth/stencil flaky on Pixel 6
 crbug.com/384676198 [ android-pixel-6 android-t ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:* [ RetryOnFailure ]
-
 
 # Flaky due to OS upgrade from `android-t`
 crbug.com/467430936 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:*;format="stencil8";filt="nearest";*;offset=false [ RetryOnFailure ]
@@ -2396,7 +2395,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,error_scope:current_sc
 crbug.com/517803869 [ android-pixel-10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,reuse:*;noop="before" [ Failure ]
 crbug.com/517909702 [ android-pixel-10 ] webgpu:api,validation,createView:texture_view_usage_of_multiple_usages:usage1=16;usage2=32 [ Failure ]
 crbug.com/517909703 [ android-pixel-10 ] webgpu:shader,validation,decl,override:initializer:case="init_mismatch_type" [ Failure ]
-
 
 # mapAsync early rejection cases
 crbug.com/487349982 webgpu:api,validation,buffer,mapping:getMappedRange,state,mapped: [ Failure ]
