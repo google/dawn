@@ -33,7 +33,6 @@
 #include <limits>
 
 #include "src/utils/assert.h"
-#include "src/utils/underlying_type.h"
 
 namespace dawn {
 namespace detail {
@@ -57,22 +56,6 @@ inline constexpr uint32_t u32_sizeof = detail::u32_sizeof<T>();
 
 template <typename T>
 inline constexpr uint32_t u32_alignof = detail::u32_alignof<T>();
-
-// Checked conversion between differently sized integer-likes (i.e. all the types that can be used
-// by ityp: integers, TypedIntegers, and enum classes). This is only defined for unsigned types
-// because that is all that is needed at the time of writing, however eventually we will want to use
-// this more widely, and we'll need to upgrade it (and the tests) to allow signed types.
-template <typename Dst, typename Src>
-    requires HasUnsignedUnderlyingType<Src> && HasUnsignedUnderlyingType<Dst>
-constexpr inline Dst checked_cast(const Src& value) {
-    using ISrc = UnderlyingType<Src>;
-    using IDst = UnderlyingType<Dst>;
-    // The compiler seems to be able to optimize away this CHECK, for Src/Dst pairs that can never
-    // fail (verified in Compiler Explorer with plain integers and enum classes).
-    ISrc valueISrc = static_cast<ISrc>(value);
-    DAWN_CHECK(valueISrc <= std::numeric_limits<IDst>::max());
-    return Dst{static_cast<IDst>(valueISrc)};
-}
 
 // Returns if two inclusive integral ranges [x0, x1] and [y0, y1] have overlap.
 template <typename T>

@@ -79,6 +79,7 @@ source_set("unittests") {
 
   sources = [
     "assert_test.cc",
+    "numeric_test.cc",
     "typed_integer_tests.cc",
     "underlying_type_tests.cc",
   ]

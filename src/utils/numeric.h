@@ -31,7 +31,27 @@
 #include <limits>
 #include <type_traits>
 
+#include "src/utils/assert.h"
+#include "src/utils/underlying_type.h"
+
 namespace dawn {
+
+// Checked conversion between differently sized integer-likes (i.e. all the types that can be used
+// by ityp: integers, TypedIntegers, and enum classes). This is only defined for unsigned types
+// because that is all that is needed at the time of writing, however eventually we will want to use
+// this more widely, and we'll need to upgrade it (and the tests) to allow signed types.
+template <typename Dst, typename Src>
+    requires HasUnsignedUnderlyingType<Src> && HasUnsignedUnderlyingType<Dst>
+constexpr inline Dst checked_cast(const Src& value) {
+    using ISrc = UnderlyingType<Src>;
+    using IDst = UnderlyingType<Dst>;
+    // The compiler seems to be able to optimize away this CHECK, for Src/Dst pairs that can never
+    // fail (verified in Compiler Explorer with plain integers and enum classes).
+    ISrc valueISrc = static_cast<ISrc>(value);
+    DAWN_CHECK(valueISrc <= std::numeric_limits<IDst>::max());
+    return Dst{static_cast<IDst>(valueISrc)};
+}
+
 template <typename T>
 bool inline IsDoubleValueRepresentable(double value) {
     if constexpr (std::is_same_v<T, float> || std::is_integral_v<T>) {
@@ -51,6 +71,7 @@ inline bool IsDoubleValueRepresentableAsF16(double value) {
     constexpr double kMaxF16 = 65504.0;
     return kLowestF16 <= value && value <= kMaxF16;
 }
+
 }  // namespace dawn
 
 #endif  // SRC_UTILS_NUMERIC_H_
