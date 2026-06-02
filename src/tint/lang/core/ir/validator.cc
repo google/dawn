@@ -125,11 +125,6 @@ using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::core::ir {
 
-struct ValidatedType {
-    const core::type::Type* ty;
-    Capabilities caps;
-};
-
 namespace {
 
 /// Prints out the current IR state, iff ir.dump_ir_when_validating is set.
@@ -186,8 +181,7 @@ bool TransitivelyHolds(const Block* block, const Instruction* inst) {
 /// @returns true if @p ty meets the basic function parameter rules (i.e. one of constructible,
 ///          pointer, handle).
 ///
-/// Note: Does not handle corner cases like if certain capabilities are
-/// enabled.
+/// Note: Does not handle corner cases like if certain properties are present.
 bool IsValidFunctionParamType(const core::type::Type* ty) {
     if (ty->IsConstructible() || ty->IsHandle()) {
         return true;
@@ -1218,13 +1212,11 @@ class Validator {
                                  size_t num_operands);
 
     /// Checks that @p type is allowed by the spec, and does not use any types that are prohibited
-    /// by the target capabilities.
+    /// by the target properties.
     /// @param type the type
     /// @param diag a function that creates an error diagnostic for the source of the type
-    /// @param ignore_caps a set of capabilities to ignore for this check
     void CheckType(const core::type::Type* type,
                    std::function<diag::Diagnostic&()> diag,
-                   Capabilities ignore_caps = {},
                    Capabilities allow_caps = {});
 
     /// Validates the root block
@@ -1643,7 +1635,7 @@ class Validator {
     core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
     Hashset<OverrideId, 8> seen_override_ids_;
     Hashset<std::string, 4> entry_point_names_;
-    Hashset<ValidatedType, 16> validated_types_{};
+    Hashset<const core::type::Type*, 16> validated_types_{};
 };
 
 Validator::Validator(const Module& mod, Capabilities capabilities)
@@ -2148,7 +2140,6 @@ bool Validator::CheckResultsAndOperands(const ir::Instruction* inst,
 
 void Validator::CheckType(const core::type::Type* root,
                           std::function<diag::Diagnostic&()> diag,
-                          Capabilities ignore_caps,
                           Capabilities allow_caps) {
     if (root == nullptr) {
         return;
@@ -2162,7 +2153,7 @@ void Validator::CheckType(const core::type::Type* root,
         }
     }
 
-    if (!validated_types_.Add(ValidatedType{root, ignore_caps})) {
+    if (!validated_types_.Add(root)) {
         return;
     }
 
@@ -2282,9 +2273,8 @@ void Validator::CheckType(const core::type::Type* root,
                     return false;
                 }
 
-                // Reference types are guarded by the AllowRefTypes capability.
-                if (!capabilities_.Contains(Capability::kAllowRefTypes) ||
-                    ignore_caps.Contains(Capability::kAllowRefTypes)) {
+                // Reference types are guarded by the AllowRefTypes property.
+                if (!mod_.properties.Contains(Property::kAllowRefTypes)) {
                     diag() << "reference types are not permitted here";
                     return false;
                 } else if (type != root) {
@@ -2708,10 +2698,7 @@ void Validator::CheckFunction(const Function* func) {
             continue;
         }
 
-        // References not allowed on function signatures even with Capability::kAllowRefTypes.
-        CheckType(
-            param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); },
-            Capabilities{Capability::kAllowRefTypes});
+        CheckType(param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); });
 
         if (!IsValidFunctionParamType(param->Type())) {
             auto ptr_ty = param->Type()->As<core::type::Pointer>();
@@ -2796,10 +2783,7 @@ void Validator::CheckFunction(const Function* func) {
         scope_stack_.Add(param);
     }
 
-    // References not allowed on function signatures even with Capability::kAllowRefTypes.
-    CheckType(
-        func->ReturnType(), [&]() -> diag::Diagnostic& { return AddError(func); },
-        Capabilities{Capability::kAllowRefTypes});
+    CheckType(func->ReturnType(), [&]() -> diag::Diagnostic& { return AddError(func); });
 
     // void needs to be filtered out, since it isn't constructible, but used in the IR when no
     // return is specified.
@@ -3355,13 +3339,13 @@ void Validator::BeginBlock(const Block* blk) {
                 return;
             }
 
-            // References not allowed on block parameters even with Capability::kAllowRefTypes.
-            CheckType(
-                param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); },
-                Capabilities{Capability::kAllowRefTypes});
+            CheckType(param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); });
 
             if (param->Type()->Is<core::type::Void>()) {
                 AddError(param) << "block parameter type cannot be void";
+            }
+            if (param->Type()->Is<core::type::Reference>()) {
+                AddError(param) << "block parameter type cannot be a reference";
             }
 
             scope_stack_.Add(param);
@@ -3442,7 +3426,7 @@ void Validator::CheckInstruction(const Instruction* inst) {
         }
 
         CheckType(
-            res->Type(), [&]() -> diag::Diagnostic& { return AddResultError(inst, i); }, {},
+            res->Type(), [&]() -> diag::Diagnostic& { return AddResultError(inst, i); },
             allowed_types);
     }
 
@@ -3454,8 +3438,7 @@ void Validator::CheckInstruction(const Instruction* inst) {
         }
 
         CheckType(
-            op->Type(), [&]() -> diag::Diagnostic& { return AddError(inst, i); }, {},
-            allowed_types);
+            op->Type(), [&]() -> diag::Diagnostic& { return AddError(inst, i); }, allowed_types);
     }
 
     // Push a task to add the results to the scope.
@@ -5429,20 +5412,3 @@ void AssertNoUnsupportedProperties(const Module& mod, Properties unsupported_pro
 }
 
 }  // namespace tint::core::ir
-
-namespace std {
-
-template <>
-struct hash<tint::core::ir::ValidatedType> {
-    size_t operator()(const tint::core::ir::ValidatedType& v) const { return Hash(v.ty, v.caps); }
-};
-
-template <>
-struct equal_to<tint::core::ir::ValidatedType> {
-    bool operator()(const tint::core::ir::ValidatedType& a,
-                    const tint::core::ir::ValidatedType& b) const {
-        return a.ty->Equals(*(b.ty)) && a.caps == b.caps;
-    }
-};
-
-}  // namespace std

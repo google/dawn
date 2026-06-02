@@ -39,6 +39,4 @@ Result<SuccessType> RaiseFuzzer(core::ir::Module& ir, const fuzz::ir::Context&) 
 }  // namespace
 }  // namespace tint::wgsl::writer::raise
 
-TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::RaiseFuzzer,
-                      tint::core::ir::Capabilities{},
-                      tint::core::ir::Capabilities{tint::core::ir::Capability::kAllowRefTypes});
+TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::RaiseFuzzer, tint::core::ir::Capabilities{});

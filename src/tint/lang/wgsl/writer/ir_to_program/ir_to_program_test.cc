@@ -55,6 +55,7 @@ IRToProgramTest::Result IRToProgramTest::Run() {
 
     mod.properties.Add(core::ir::Property::kAllowOverrides);
     mod.properties.Add(core::ir::Property::kAllowPhonyInstructions);
+    mod.properties.Add(core::ir::Property::kAllowRefTypes);
 
     auto output_program = IRToProgram(mod, options);
     if (!output_program.IsValid()) {

@@ -102,10 +102,7 @@ class State {
     explicit State(const core::ir::Module& m) : mod(m) {}
 
     Program Run(const Options& options) {
-        core::ir::Capabilities caps{
-            core::ir::Capability::kAllowRefTypes,
-        };
-        if (auto res = Validate(mod, caps, "before wgsl.to_program"); res != Success) {
+        if (auto res = Validate(mod, "before wgsl.to_program"); res != Success) {
             // IR module failed validation.
             b.Diagnostics().AddError(Source{}) << res.Failure();
             return Program{resolver::Resolve(b)};

@@ -78,6 +78,8 @@ enum class Property : uint8_t {
     kAllowPointSizeBuiltin,
     /// Allows a pointer to a handle type
     kAllowPointerToHandle,
+    /// Allows reference types in the IR
+    kAllowRefTypes,
     /// Allows matrix annotations on structure members.
     kAllowStructMatrixDecorations,
     /// Allows access instructions to create pointers to vector elements.
@@ -112,6 +114,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(AllowPhonyInstructions);
         CASE(AllowPointSizeBuiltin);
         CASE(AllowPointerToHandle);
+        CASE(AllowRefTypes);
         CASE(AllowStructMatrixDecorations);
         CASE(AllowVectorElementPointer);
         CASE(DisallowVectorMinMaxClamp);

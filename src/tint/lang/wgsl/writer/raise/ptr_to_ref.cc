@@ -143,6 +143,8 @@ Result<SuccessType> PtrToRef(core::ir::Module& mod) {
 
     Impl{mod}.Run();
 
+    mod.properties.Add(core::ir::Property::kAllowRefTypes);
+
     return Success;
 }
 

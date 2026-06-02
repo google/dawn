@@ -45,8 +45,6 @@ enum class Capability : uint8_t {
     kAllow64BitIntegers,
     /// Allows module scoped lets
     kAllowModuleScopeLets,
-    /// Allows ref types
-    kAllowRefTypes,
     /// Allows module scope `var`s to exist without an IO annotation
     kAllowUnannotatedModuleIOVariables,
     /// Allows non-core types in the IR module

@@ -452,7 +452,6 @@ bool Run(const Options& options) {
                                   tint::core::ir::Capability::kAllow8BitIntegers,
                                   tint::core::ir::Capability::kAllow64BitIntegers,
                                   tint::core::ir::Capability::kAllowModuleScopeLets,
-                                  tint::core::ir::Capability::kAllowRefTypes,
                               });
             if (res == tint::Success) {
                 std::cout << "IR module is valid.\n";

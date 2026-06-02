@@ -1290,11 +1290,10 @@ TEST_P(IR_ValidatorRefTypeTest, Var) {
         b.Return(fn);
     });
 
-    Capabilities caps;
     if (refs_allowed) {
-        caps.Add(Capability::kAllowRefTypes);
+        mod.properties.Add(ir::Property::kAllowRefTypes);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (!holds_ref || refs_allowed) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
@@ -1314,16 +1313,17 @@ TEST_P(IR_ValidatorRefTypeTest, FnParam) {
     fn->SetParams(Vector{b.FunctionParam(type)});
     b.Append(fn->Block(), [&] { b.Return(fn); });
 
-    Capabilities caps;
     if (refs_allowed) {
-        caps.Add(Capability::kAllowRefTypes);
+        mod.properties.Add(ir::Property::kAllowRefTypes);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (!holds_ref) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
         ASSERT_NE(res, Success);
-        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("reference types are not permitted"))
+        EXPECT_THAT(res.Failure().reason,
+                    testing::HasSubstr("function parameter type, '" + type->FriendlyName() +
+                                       "', must be constructible, a pointer, or a handle"))
             << res.Failure();
     }
 }
@@ -1336,16 +1336,16 @@ TEST_P(IR_ValidatorRefTypeTest, FnRet) {
     auto* fn = b.Function("my_func", type);
     b.Append(fn->Block(), [&] { b.Unreachable(); });
 
-    Capabilities caps;
     if (refs_allowed) {
-        caps.Add(Capability::kAllowRefTypes);
+        mod.properties.Add(ir::Property::kAllowRefTypes);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (!holds_ref) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
         ASSERT_NE(res, Success);
-        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("reference types are not permitted"))
+        EXPECT_THAT(res.Failure().reason,
+                    testing::HasSubstr("function return type must be constructible"))
             << res.Failure();
     }
 }
@@ -1368,16 +1368,16 @@ TEST_P(IR_ValidatorRefTypeTest, BlockParam) {
         b.Unreachable();
     });
 
-    Capabilities caps;
     if (refs_allowed) {
-        caps.Add(Capability::kAllowRefTypes);
+        mod.properties.Add(ir::Property::kAllowRefTypes);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (!holds_ref) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
         ASSERT_NE(res, Success);
-        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("reference types are not permitted"))
+        EXPECT_THAT(res.Failure().reason,
+                    testing::HasSubstr("block parameter type cannot be a reference"))
             << res.Failure();
     }
 }
@@ -1437,10 +1437,9 @@ TEST_F(IR_ValidatorTest, ReferenceToReference) {
         b.Return(fn);
     });
 
-    Capabilities caps;
-    caps.Add(Capability::kAllowRefTypes);
+    mod.properties.Add(ir::Property::kAllowRefTypes);
 
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr("nested reference types are not permitted"))
@@ -1455,10 +1454,9 @@ TEST_F(IR_ValidatorTest, ReferenceToVoid) {
         b.Return(fn);
     });
 
-    Capabilities caps;
-    caps.Add(Capability::kAllowRefTypes);
+    mod.properties.Add(ir::Property::kAllowRefTypes);
 
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr("references to void are not permitted"))
         << res.Failure();
