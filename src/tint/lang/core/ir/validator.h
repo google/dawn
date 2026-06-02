@@ -47,8 +47,6 @@ enum class Capability : uint8_t {
     kAllowModuleScopeLets,
     /// Allows ref types
     kAllowRefTypes,
-    /// Allows lets to have any type, used by MSL backend for module scoped vars
-    kAllowAnyLetType,
     /// Allows module scope `var`s to exist without an IO annotation
     kAllowUnannotatedModuleIOVariables,
     /// Allows non-core types in the IR module

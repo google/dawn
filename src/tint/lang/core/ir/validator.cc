@@ -4098,7 +4098,7 @@ void Validator::CheckLet(const Let* l) {
     }
 
     auto* value_ty = l->Value()->Type();
-    if (capabilities_.Contains(Capability::kAllowAnyLetType)) {
+    if (mod_.properties.Contains(Property::kAllowAnyLetType)) {
         if (value_ty->Is<core::type::Void>()) {
             AddError(l) << "value type cannot be void";
         }
@@ -4110,7 +4110,7 @@ void Validator::CheckLet(const Let* l) {
     }
 
     auto* result_ty = l->Result()->Type();
-    if (!capabilities_.Contains(Capability::kAllowAnyLetType)) {
+    if (!mod_.properties.Contains(Property::kAllowAnyLetType)) {
         if (auto* ptr = result_ty->As<core::type::Pointer>()) {
             if (ptr->AddressSpace() == AddressSpace::kHandle &&
                 !mod_.properties.Contains(Property::kAllowPointerToHandle)) {

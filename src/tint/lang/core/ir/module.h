@@ -58,6 +58,8 @@ namespace tint::core::ir {
 enum class Property : uint8_t {
     /// Allows input_attachment_index to be associated with any type
     kAllowAnyInputAttachmentIndexType,
+    /// Allows lets to have any type.
+    kAllowAnyLetType,
     /// Allows ClipDistances on f32 and vecN<f32> parameters
     kAllowClipDistancesOnF32ScalarAndVector,
     /// Allows binding points to be non-unique.
@@ -100,6 +102,7 @@ auto& operator<<(STREAM& out, Property p) {
         return out << #p
     switch (p) {  //
         CASE(AllowAnyInputAttachmentIndexType);
+        CASE(AllowAnyLetType);
         CASE(AllowClipDistancesOnF32ScalarAndVector);
         CASE(AllowDuplicateBindings);
         CASE(AllowLocationForNumericComposites);

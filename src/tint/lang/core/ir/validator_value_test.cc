@@ -1140,7 +1140,8 @@ TEST_F(IR_ValidatorTest, Let_VoidResultWithCapability) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{ir::Capability::kAllowAnyLetType});
+    mod.properties.Add(ir::Property::kAllowAnyLetType);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
                                           R"(:3:5 error: let: result type cannot be void
@@ -1177,7 +1178,8 @@ TEST_F(IR_ValidatorTest, Let_VoidValueWithCapability) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{ir::Capability::kAllowAnyLetType});
+    mod.properties.Add(ir::Property::kAllowAnyLetType);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:9:14 error: let: value type cannot be void
@@ -1262,7 +1264,8 @@ TEST_F(IR_ValidatorTest, Let_CapabilityBypass) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{ir::Capability::kAllowAnyLetType});
+    mod.properties.Add(ir::Property::kAllowAnyLetType);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

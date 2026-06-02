@@ -350,6 +350,7 @@ Result<SuccessType> ModuleScopeVars(core::ir::Module& ir) {
 
     State{ir}.Process();
 
+    ir.properties.Add(core::ir::Property::kAllowAnyLetType);
     ir.properties.Add(core::ir::Property::kAllowMslEntryPointInterface);
 
     return Success;
