@@ -464,6 +464,7 @@ crbug.com/517961537 [ android android-pixel-10 ] webgpu:web_platform,copyToTextu
 crbug.com/517972790 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,image:copy_subrect_from_2D_Canvas:* [ Failure ]
 crbug.com/517972791 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,image:from_fully_transparent_image:dstPremultiplied=false [ Failure ]
 crbug.com/517972792 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,image:from_image:* [ Failure ]
+crbug.com/518872395 [ android android-pixel-10 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:canvasType="onscreen";* [ Failure ]
 
 ################################################################################
 # Triaged or Manually-Added Flakes and Failures
