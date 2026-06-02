@@ -42,5 +42,4 @@ Result<SuccessType> PromoteInitializersFuzzer(core::ir::Module& ir, const fuzz::
 
 TINT_IR_MODULE_FUZZER(tint::hlsl::writer::raise::PromoteInitializersFuzzer,
                       tint::hlsl::writer::raise::kPromoteInitializersCapabilities,
-                      tint::hlsl::writer::raise::kPromoteInitializersCapabilities +
-                          tint::core::ir::Capability::kAllowModuleScopeLets);
+                      tint::hlsl::writer::raise::kPromoteInitializersCapabilities);

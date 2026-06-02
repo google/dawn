@@ -44,7 +44,6 @@ namespace tint::hlsl::writer {
 const core::ir::Capabilities kPrinterCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow16BitIntegers,
-    core::ir::Capability::kAllowModuleScopeLets,
     core::ir::Capability::kAllowNonCoreTypes,
 };
 

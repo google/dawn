@@ -2581,7 +2581,7 @@ void Validator::CheckRootBlock(const Block* blk) {
             },
             [&](const core::ir::Var* var) { CheckInstruction(var); },
             [&](const core::ir::Let* let) {
-                if (capabilities_.Contains(Capability::kAllowModuleScopeLets)) {
+                if (mod_.properties.Contains(Property::kAllowModuleScopeLets)) {
                     CheckInstruction(let);
                     add_evaluatable(let, is_pipeline_creatable);
                 } else {
@@ -2589,7 +2589,7 @@ void Validator::CheckRootBlock(const Block* blk) {
                 }
             },
             [&](const core::ir::Construct* c) {
-                if (capabilities_.Contains(Capability::kAllowModuleScopeLets) ||
+                if (mod_.properties.Contains(Property::kAllowModuleScopeLets) ||
                     mod_.properties.Contains(Property::kAllowOverrides)) {
                     CheckInstruction(c);
                     CheckOnlyUsedInRootBlock(inst);

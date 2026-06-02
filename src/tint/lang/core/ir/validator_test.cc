@@ -148,7 +148,8 @@ TEST_F(IR_ValidatorTest, RootBlock_Let) {
 TEST_F(IR_ValidatorTest, RootBlock_LetWithAllowModuleScopeLets) {
     mod.root_block->Append(b.Let("a", 1_f));
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowModuleScopeLets});
+    mod.properties.Add(ir::Property::kAllowModuleScopeLets);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -169,7 +170,8 @@ TEST_F(IR_ValidatorTest, RootBlock_Construct) {
 TEST_F(IR_ValidatorTest, RootBlock_ConstructWithAllowModuleScopeLets) {
     mod.root_block->Append(b.Construct(ty.vec2f(), 1_f, 2_f));
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowModuleScopeLets});
+    mod.properties.Add(ir::Property::kAllowModuleScopeLets);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

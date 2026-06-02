@@ -43,7 +43,6 @@ const core::ir::Capabilities kModuleConstantCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow64BitIntegers,
     core::ir::Capability::kAllowNonCoreTypes,
-    core::ir::Capability::kAllowModuleScopeLets,
 };
 
 /// The set of polyfills that should be applied.

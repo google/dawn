@@ -110,6 +110,8 @@ Result<SuccessType> ModuleConstant(core::ir::Module& ir, const ModuleConstantCon
 
     State{ir, config}.Process();
 
+    ir.properties.Add(core::ir::Property::kAllowModuleScopeLets);
+
     return Success;
 }
 

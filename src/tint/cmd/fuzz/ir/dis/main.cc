@@ -447,12 +447,11 @@ bool Run(const Options& options) {
         EmitIR(options, module.Get());
 
         if (options.validate) {
-            auto res = tint::core::ir::Validate(
-                module.Get(), tint::core::ir::Capabilities{
-                                  tint::core::ir::Capability::kAllow8BitIntegers,
-                                  tint::core::ir::Capability::kAllow64BitIntegers,
-                                  tint::core::ir::Capability::kAllowModuleScopeLets,
-                              });
+            auto res = tint::core::ir::Validate(module.Get(),
+                                                tint::core::ir::Capabilities{
+                                                    tint::core::ir::Capability::kAllow8BitIntegers,
+                                                    tint::core::ir::Capability::kAllow64BitIntegers,
+                                                });
             if (res == tint::Success) {
                 std::cout << "IR module is valid.\n";
             } else {

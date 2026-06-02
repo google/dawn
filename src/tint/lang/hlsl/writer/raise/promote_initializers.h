@@ -50,7 +50,7 @@ const core::ir::Capabilities kPromoteInitializersCapabilities{
 /// will recursively break any array or struct initializers out of the constant into their own
 /// `let`.
 ///
-/// After this transform the `Capability::kAllowModuleScopeLets` must be enabled and any downstream
+/// After this transform the `Property::kAllowModuleScopeLets` must be enabled and any downstream
 /// transform/printer must under stand `let` and `construct` instructions at the module scope.
 /// (`construct` can just be skipped as they will be inlined, but the instruction still has to be
 /// handled.)

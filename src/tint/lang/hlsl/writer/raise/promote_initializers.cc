@@ -252,6 +252,8 @@ Result<SuccessType> PromoteInitializers(core::ir::Module& ir) {
 
     State{ir}.Process();
 
+    ir.properties.Add(core::ir::Property::kAllowModuleScopeLets);
+
     return Success;
 }
 
