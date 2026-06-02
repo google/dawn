@@ -34,7 +34,6 @@
 #include <cstdint>
 #include <memory>
 #include <span>
-#include <string_view>
 
 #include "dawn/platform/dawn_platform_export.h"
 
@@ -54,14 +53,14 @@ class DAWN_PLATFORM_EXPORT CachingInterface {
 
     // Returns zero if there does not exist a cached entry for |key|, otherwise returns a non-zero
     // size indicating the size of cached data
-    virtual size_t FindKey(std::string_view key) { return 0; }
+    virtual size_t FindKey(std::span<const std::byte> key) { return 0; }
 
     // Returns zero if unable to load cached entry for |key| into |dest|, otherwise returns number
     // of bytes written to |dest|.
-    virtual size_t LoadData(std::string_view key, std::span<uint8_t> dest) { return 0; }
+    virtual size_t LoadData(std::span<const std::byte> key, std::span<std::byte> dest) { return 0; }
 
     // Stores the data in |src| at the entry specified by |key|.
-    virtual void StoreData(std::string_view key, std::span<const uint8_t> src) {}
+    virtual void StoreData(std::span<const std::byte> key, std::span<const std::byte> src) {}
 
     // TODO(503801946): Remove these outdated default implementations and make the newer API above
     // fully virtual once users are updated.
