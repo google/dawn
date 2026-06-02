@@ -42,13 +42,13 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
-#include "src/dawn/common/TypedInteger.h"
 #include "src/dawn/common/ityp_array.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/stream/Sink.h"
 #include "src/dawn/native/stream/Source.h"
 #include "src/utils/compiler.h"
 #include "src/utils/platform.h"
+#include "src/utils/typed_integer.h"
 
 namespace dawn::ityp {
 template <typename Index, size_t N>

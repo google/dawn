@@ -32,11 +32,11 @@
 #include <utility>
 
 #include "src/dawn/common/MatchVariant.h"
-#include "src/dawn/common/TypedInteger.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/EnumMaskIterator.h"
 #include "src/dawn/native/Features.h"
 #include "src/dawn/native/Texture.h"
+#include "src/utils/typed_integer.h"
 
 namespace dawn::native {
 

@@ -41,6 +41,7 @@ cc_library(
     "non_movable.h",
     "numeric.h",
     "platform.h",
+    "typed_integer.h",
     "underlying_type.h",
   ] + select({
     "//src/utils:dawn_build_is_win_true": [

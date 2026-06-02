@@ -30,7 +30,7 @@
 
 #include "gtest/gtest.h"
 #include "src/dawn/common/SerialQueue.h"
-#include "src/dawn/common/TypedInteger.h"
+#include "src/utils/typed_integer.h"
 
 namespace dawn {
 namespace {

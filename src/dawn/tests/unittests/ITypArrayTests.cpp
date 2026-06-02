@@ -27,8 +27,8 @@
 
 #include <gtest/gtest.h>
 
-#include "src/dawn/common/TypedInteger.h"
 #include "src/dawn/common/ityp_array.h"
+#include "src/utils/typed_integer.h"
 
 namespace dawn {
 namespace {

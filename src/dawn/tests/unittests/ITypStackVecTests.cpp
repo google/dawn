@@ -28,8 +28,8 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/dawn/common/TypedInteger.h"
 #include "src/dawn/common/ityp_stack_vec.h"
+#include "src/utils/typed_integer.h"
 
 namespace dawn {
 namespace {

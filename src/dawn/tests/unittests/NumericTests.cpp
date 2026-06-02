@@ -29,7 +29,7 @@
 
 #include "gtest/gtest.h"
 #include "src/dawn/common/Numeric.h"
-#include "src/dawn/common/TypedInteger.h"
+#include "src/utils/typed_integer.h"
 
 namespace dawn {
 namespace {

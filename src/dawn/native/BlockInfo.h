@@ -28,8 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_BLOCK_INFO_H_
 #define SRC_DAWN_NATIVE_BLOCK_INFO_H_
 
-#include "src/dawn/common/TypedInteger.h"
 #include "src/dawn/native/Format.h"
+#include "src/utils/typed_integer.h"
 
 namespace dawn::native {
 

@@ -32,9 +32,9 @@
 #include <functional>
 
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/TypedInteger.h"
 #include "src/dawn/common/ityp_bitset.h"
 #include "src/utils/platform.h"
+#include "src/utils/typed_integer.h"
 
 namespace dawn {
 

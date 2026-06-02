@@ -28,8 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_INTEGERTYPES_H_
 #define SRC_DAWN_NATIVE_OPENGL_INTEGERTYPES_H_
 
-#include "src/dawn/common/TypedInteger.h"
 #include "src/dawn/native/opengl/opengl_platform.h"
+#include "src/utils/typed_integer.h"
 
 namespace dawn::native::opengl {
 

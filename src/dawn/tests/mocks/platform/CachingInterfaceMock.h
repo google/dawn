@@ -37,7 +37,7 @@
 #include <vector>
 
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/TypedInteger.h"
+#include "src/utils/typed_integer.h"
 
 #define EXPECT_CACHE_HIT(cache, N, statement) \
     do {                                      \

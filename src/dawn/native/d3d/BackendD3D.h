@@ -33,9 +33,9 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
-#include "src/dawn/common/TypedInteger.h"
 #include "src/dawn/native/BackendConnection.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
+#include "src/utils/typed_integer.h"
 
 namespace dawn::native::d3d {
 

@@ -40,7 +40,6 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "src/dawn/common/TypedInteger.h"
 #include "src/dawn/native/Blob.h"
 #include "src/dawn/native/Serializable.h"
 #include "src/dawn/native/ShaderModule.h"
@@ -49,6 +48,7 @@
 #include "src/dawn/native/stream/ByteVectorSink.h"
 #include "src/dawn/native/stream/Stream.h"
 #include "src/utils/compiler.h"
+#include "src/utils/typed_integer.h"
 #include "tint/tint.h"
 
 namespace dawn::native::stream {

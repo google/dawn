@@ -51,6 +51,7 @@ static_library("utils") {
     "numeric.h",
     "placeholder.cc",
     "platform.h",
+    "typed_integer.h",
     "underlying_type.h",
   ]
 
@@ -78,6 +79,7 @@ source_set("unittests") {
 
   sources = [
     "assert_test.cc",
+    "typed_integer_tests.cc",
     "underlying_type_tests.cc",
   ]
 }
