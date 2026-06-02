@@ -347,23 +347,23 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
 
     TINT_CHECK_RESULT_UNWRAP(output, Generate(module, options));
 
-    spv_target_env target_env = SPV_ENV_VULKAN_1_1;
+    validate::Options validation_options;
     switch (options.spirv_version) {
         case SpvVersion::kSpv13:
-            target_env = SPV_ENV_VULKAN_1_1;
+            validation_options.target_env = SPV_ENV_VULKAN_1_1;
             break;
         case SpvVersion::kSpv14:
-            target_env = SPV_ENV_VULKAN_1_1_SPIRV_1_4;
+            validation_options.target_env = SPV_ENV_VULKAN_1_1_SPIRV_1_4;
             break;
         case SpvVersion::kSpv15:
-            target_env = SPV_ENV_VULKAN_1_2;
+            validation_options.target_env = SPV_ENV_VULKAN_1_2;
             break;
         default:
             TINT_ICE() << "unsupported SPIR-V version";
     }
 
     auto& spirv = output.spirv;
-    auto res = validate::Validate(spirv, target_env);
+    auto res = validate::Validate(spirv, validation_options);
     TINT_ASSERT(res == Success) << "output of SPIR-V writer failed to validate with SPIR-V Tools\n"
                                 << res.Failure() << "\n\n"
                                 << "IR:\n"
