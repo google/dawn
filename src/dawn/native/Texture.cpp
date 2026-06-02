@@ -759,6 +759,19 @@ MaybeError ValidateTextureDescriptor(
             !device->HasFeature(Feature::DawnInternalUsages),
             "The internalUsageDesc is not empty while the dawn-internal-usages feature is not "
             "enabled");
+
+        // Disallow TransientAttachment because it is not an expansion of usages but instead an
+        // additional constraint and would need to have visible effects (for users of the API that
+        // don't have access to the internal usages). Use an allow-list to explicitly opt-in usages
+        // to be allowed as internal usages in the future.
+        constexpr wgpu::TextureUsage kAllowedInternalUsages =
+            wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+            wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding |
+            wgpu::TextureUsage::RenderAttachment;
+        DAWN_INVALID_IF(!IsSubset(internalUsageDesc->internalUsage, kAllowedInternalUsages),
+                        "internalUsage contains %s which are not allowed as internal usages.",
+                        internalUsageDesc->internalUsage & ~kAllowedInternalUsages);
+
         usage |= internalUsageDesc->internalUsage;
     }
 
