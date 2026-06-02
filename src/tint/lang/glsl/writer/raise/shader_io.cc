@@ -311,9 +311,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 }  // namespace
 
 Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
-    AssertValid(ir,
-                core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings,
-                                       core::ir::Capability::kAllow16BitIntegers},
+    AssertValid(ir, core::ir::Capabilities{core::ir::Capability::kAllow16BitIntegers},
                 "before glsl.ShaderIO");
 
     TINT_CHECK_RESULT(core::ir::transform::RunShaderIOBase(

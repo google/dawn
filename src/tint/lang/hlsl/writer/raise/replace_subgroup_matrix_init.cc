@@ -176,7 +176,6 @@ Result<SuccessType> ReplaceSubgroupMatrixInit(core::ir::Module& ir) {
                 core::ir::Capabilities{
                     core::ir::Capability::kAllow8BitIntegers,
                     core::ir::Capability::kAllow16BitIntegers,
-                    core::ir::Capability::kAllowHandleVarsWithoutBindings,
                     core::ir::Capability::kAllowNonCoreTypes,
                 },
                 "before hlsl.ReplaceSubgroupMatrixInit");

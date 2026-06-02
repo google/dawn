@@ -3926,11 +3926,9 @@ void Validator::CheckBindingPoint(const CastableBase* anchor,
 
     switch (address_space) {
         case AddressSpace::kHandle:
-            if (!capabilities_.Contains(Capability::kAllowHandleVarsWithoutBindings)) {
-                if (!binding_point.has_value()) {
-                    AddError(anchor)
-                        << "a " << ToString(address_space) << " resource requires a binding point";
-                }
+            if (!binding_point.has_value()) {
+                AddError(anchor) << "a " << ToString(address_space)
+                                 << " resource requires a binding point";
             }
             break;
         case AddressSpace::kStorage:

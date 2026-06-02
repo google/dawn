@@ -114,7 +114,6 @@ struct State {
 Result<SuccessType> OffsetFirstIndex(core::ir::Module& ir, const OffsetFirstIndexConfig& config) {
     AssertValid(ir,
                 core::ir::Capabilities{
-                    core::ir::Capability::kAllowHandleVarsWithoutBindings,
                     core::ir::Capability::kLoosenValidationForShaderIO,
                     core::ir::Capability::kAllow16BitIntegers,
                 },

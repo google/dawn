@@ -43,8 +43,6 @@ enum class Capability : uint8_t {
     kAllow16BitIntegers,
     /// Allows 64-bit integer types.
     kAllow64BitIntegers,
-    /// Allows handle vars to not have binding points
-    kAllowHandleVarsWithoutBindings,
     /// Allows module scoped lets
     kAllowModuleScopeLets,
     /// Allows ref types

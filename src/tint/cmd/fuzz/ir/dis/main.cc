@@ -451,7 +451,6 @@ bool Run(const Options& options) {
                 module.Get(), tint::core::ir::Capabilities{
                                   tint::core::ir::Capability::kAllow8BitIntegers,
                                   tint::core::ir::Capability::kAllow64BitIntegers,
-                                  tint::core::ir::Capability::kAllowHandleVarsWithoutBindings,
                                   tint::core::ir::Capability::kAllowModuleScopeLets,
                                   tint::core::ir::Capability::kAllowRefTypes,
                                   tint::core::ir::Capability::kMslAllowEntryPointInterface,
