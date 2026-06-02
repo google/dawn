@@ -1414,6 +1414,10 @@ crbug.com/487752270 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffe
 crbug.com/487752270 [ android-14 android-pixel-6 ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 crbug.com/487752270 [ android-pixel-4 ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 crbug.com/487752270 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
+crbug.com/519287657 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,max:values:stage="override";* [ Failure ]
+crbug.com/519287657 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,insertBits:values:stage="override";* [ Failure ]
+crbug.com/519287657 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,reflect:values:stage="override";* [ Failure ]
+crbug.com/519287657 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,quantizeToF16:values:stage="override";* [ Failure ]
 
 # Dawn validation error on all platforms
 crbug.com/487756197 webgpu:api,validation,encoding,encoder_state:pass_end_invalid_order:* [ Failure ]
