@@ -58,8 +58,6 @@ enum class Capability : uint8_t {
     kAllowUnannotatedModuleIOVariables,
     /// Allows non-core types in the IR module
     kAllowNonCoreTypes,
-    /// Allows a pointer to a handle type
-    kAllowPointerToHandle,
     /// Allows ShaderIO specific features, like blend_src on non-struct members.
     /// These are not separate capabilities, because they are enabled/disabled in lockstep with each
     /// other.

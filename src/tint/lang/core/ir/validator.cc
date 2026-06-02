@@ -2726,7 +2726,7 @@ void Validator::CheckFunction(const Function* func) {
         if (!IsValidFunctionParamType(param->Type())) {
             auto ptr_ty = param->Type()->As<core::type::Pointer>();
             bool allowed_ptr_to_handle =
-                capabilities_.Contains(Capability::kAllowPointerToHandle) && ptr_ty != nullptr &&
+                mod_.properties.Contains(Property::kAllowPointerToHandle) && ptr_ty != nullptr &&
                 ptr_ty->StoreType()->IsHandle();
 
             auto struct_ty = param->Type()->As<core::type::Struct>();
@@ -4126,7 +4126,7 @@ void Validator::CheckLet(const Let* l) {
     if (!capabilities_.Contains(Capability::kAllowAnyLetType)) {
         if (auto* ptr = result_ty->As<core::type::Pointer>()) {
             if (ptr->AddressSpace() == AddressSpace::kHandle &&
-                !capabilities_.Contains(Capability::kAllowPointerToHandle)) {
+                !mod_.properties.Contains(Property::kAllowPointerToHandle)) {
                 AddError(l) << "handle pointer cannot be captured in a let";
             }
         } else if (!result_ty->IsConstructible()) {

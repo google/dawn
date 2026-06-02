@@ -184,6 +184,7 @@ class Parser {
         ir_.properties.Add(core::ir::Property::kAllowOverrides);
         ir_.properties.Add(core::ir::Property::kAllowPhonyInstructions);
         ir_.properties.Add(core::ir::Property::kAllowPointSizeBuiltin);
+        ir_.properties.Add(core::ir::Property::kAllowPointerToHandle);
         ir_.properties.Add(core::ir::Property::kAllowStructMatrixDecorations);
         ir_.properties.Add(core::ir::Property::kAllowVectorElementPointer);
 

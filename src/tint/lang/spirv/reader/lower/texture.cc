@@ -1090,11 +1090,12 @@ Result<SuccessType> Texture(core::ir::Module& ir) {
     AssertValid(ir,
                 core::ir::Capabilities{
                     core::ir::Capability::kAllowNonCoreTypes,
-                    core::ir::Capability::kAllowPointerToHandle,
                 },
                 "before spirv.Texture");
 
     State{ir}.Process();
+
+    ir.properties.Remove(core::ir::Property::kAllowPointerToHandle);
 
     return Success;
 }
