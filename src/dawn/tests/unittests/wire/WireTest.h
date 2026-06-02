@@ -32,9 +32,9 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "gtest/gtest.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/mock_webgpu.h"
 #include "src/dawn/tests/MockCallback.h"
+#include "src/utils/log.h"
 #include "webgpu/webgpu_cpp.h"
 
 namespace dawn {

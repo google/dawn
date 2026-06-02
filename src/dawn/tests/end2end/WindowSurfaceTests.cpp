@@ -31,8 +31,8 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "gtest/gtest.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/tests/DawnTest.h"
+#include "src/utils/log.h"
 #include "src/utils/platform.h"
 #include "webgpu/webgpu_glfw.h"
 

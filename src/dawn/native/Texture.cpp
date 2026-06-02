@@ -32,7 +32,6 @@
 
 #include "absl/strings/str_format.h"
 #include "dawn/native/ValidationUtils_autogen.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/HashUtils.h"
 #include "src/dawn/common/Math.h"
@@ -45,6 +44,7 @@
 #include "src/dawn/native/EnumMaskIterator.h"
 #include "src/dawn/native/ResourceTable.h"
 #include "src/dawn/native/SharedTextureMemory.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

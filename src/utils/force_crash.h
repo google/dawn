@@ -59,10 +59,10 @@
 #endif
 
 #define DAWN_FORCE_CRASH()       \
-    ({                           \
+    do {                         \
         DAWN_DETAIL_TRAP();      \
         __builtin_unreachable(); \
-    })
+    } while (false)
 
 #elif DAWN_COMPILER_IS(MSVC)
 #define DAWN_FORCE_CRASH() __debugbreak()

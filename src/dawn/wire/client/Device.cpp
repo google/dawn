@@ -34,11 +34,11 @@
 
 #include "dawn/wire/client/ApiObjects_autogen.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Assert.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/wire/client/Client.h"
 #include "src/dawn/wire/client/EventManager.h"
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 
 namespace dawn::wire::client {
 namespace {

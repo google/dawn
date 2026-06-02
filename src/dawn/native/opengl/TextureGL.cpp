@@ -31,7 +31,6 @@
 #include <limits>
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/ChainUtils.h"
@@ -44,6 +43,7 @@
 #include "src/dawn/native/opengl/SharedFenceGL.h"
 #include "src/dawn/native/opengl/SharedTextureMemoryGL.h"
 #include "src/dawn/native/opengl/UtilsGL.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::opengl {

@@ -34,9 +34,9 @@
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/GPUInfo.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Instance.h"
+#include "src/utils/log.h"
 
 namespace dawn::native {
 

@@ -36,8 +36,8 @@
 #include <vector>
 
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Math.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 #include "src/utils/non_copyable.h"
 

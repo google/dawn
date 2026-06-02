@@ -41,9 +41,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Alloc.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Constants.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/native/Adapter.h"
 #include "src/dawn/native/CallbackTaskManager.h"
@@ -60,7 +58,9 @@
 #include "src/dawn/native/SystemEvent.h"
 #include "src/dawn/native/TexelBufferView.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 
 namespace dawn::native {
 

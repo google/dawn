@@ -38,9 +38,9 @@
 
 #include "VideoViewsTests.h"
 #include "dawn/native/D3DBackend.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/utils/SystemHandle.h"
 #include "src/dawn/utils/TextureUtils.h"
+#include "src/utils/assert.h"
 
 namespace dawn {
 namespace {

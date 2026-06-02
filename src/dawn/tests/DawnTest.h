@@ -47,7 +47,6 @@
 #include "dawn/utils/ComboLimits.h"
 #include "dawn/webgpu_cpp_print.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/Mutex.h"
 #include "src/dawn/common/Preprocessor.h"
 #include "src/dawn/tests/AdapterTestConfig.h"
@@ -57,6 +56,7 @@
 #include "src/dawn/utils/TestUtils.h"
 #include "src/dawn/utils/TextureUtils.h"
 #include "src/dawn/utils/Timer.h"
+#include "src/utils/log.h"
 #include "src/utils/platform.h"
 
 // Getting data back from Dawn is done in an async manners so all expectations are "deferred"

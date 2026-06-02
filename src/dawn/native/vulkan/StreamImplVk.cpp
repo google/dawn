@@ -28,10 +28,10 @@
 #include <cstring>
 #include <map>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/vulkan_platform.h"
 #include "src/dawn/native/stream/Stream.h"
 #include "src/dawn/native/vulkan/RenderPassCache.h"
+#include "src/utils/assert.h"
 
 #include <vulkan/utility/vk_struct_helper.hpp>
 

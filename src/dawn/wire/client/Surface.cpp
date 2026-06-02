@@ -31,11 +31,11 @@
 #include <utility>
 
 #include "dawn/wire/client/webgpu.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/wire/client/Client.h"
 #include "src/dawn/wire/client/Device.h"
 #include "src/dawn/wire/client/Texture.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 #include "src/utils/platform.h"
 
 namespace dawn::wire::client {

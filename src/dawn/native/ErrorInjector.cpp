@@ -28,7 +28,7 @@
 #include "src/dawn/native/ErrorInjector.h"
 
 #include "dawn/native/DawnNative.h"
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native {
 

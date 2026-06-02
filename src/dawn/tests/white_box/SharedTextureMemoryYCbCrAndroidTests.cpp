@@ -33,7 +33,6 @@
 #include <vector>
 
 #include "src/dawn/common/Algebra.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/ColorSpace.h"
 #include "src/dawn/common/Range.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
@@ -42,6 +41,7 @@
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/assert.h"
 #include "vulkan/vulkan_core.h"
 
 namespace dawn {

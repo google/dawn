@@ -29,13 +29,13 @@
 
 #include <utility>
 
-#include "src/dawn/common/Log.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
 #include "src/dawn/native/vulkan/ShaderModuleVk.h"
 #include "src/dawn/native/vulkan/TextureVk.h"
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/utils/log.h"
 #include "vulkan/vulkan_core.h"
 
 namespace dawn::native::vulkan {

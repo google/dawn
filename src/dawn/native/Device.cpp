@@ -43,7 +43,6 @@
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/Sha3.h"
 #include "src/dawn/common/StringViewUtils.h"
@@ -91,6 +90,7 @@
 #include "src/dawn/platform/metrics/HistogramMacros.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 
 namespace dawn::native {
 

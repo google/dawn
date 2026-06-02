@@ -30,11 +30,11 @@
 #include <algorithm>
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/HashUtils.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/dawn/tests/perf_tests/DawnPerfTest.h"
 #include "src/dawn/utils/Timer.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

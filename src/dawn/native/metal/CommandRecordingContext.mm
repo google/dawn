@@ -27,11 +27,11 @@
 
 #include "src/dawn/native/metal/CommandRecordingContext.h"
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/metal/DeviceMTL.h"
 #include "src/dawn/native/metal/Forward.h"
 #include "src/dawn/native/metal/QueueMTL.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native::metal {
 

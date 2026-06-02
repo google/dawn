@@ -30,8 +30,8 @@
 #include <array>
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/ityp_array.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

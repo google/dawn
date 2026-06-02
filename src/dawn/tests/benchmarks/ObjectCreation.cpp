@@ -31,10 +31,10 @@
 #include <array>
 #include <vector>
 
-#include "src/dawn/common/Log.h"
 #include "src/dawn/tests/benchmarks/NullDeviceSetup.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/log.h"
 
 namespace dawn {
 namespace {

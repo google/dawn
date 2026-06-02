@@ -30,7 +30,6 @@
 #include <bit>
 
 #include "src/dawn/common/Enumerator.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Device.h"
@@ -38,6 +37,7 @@
 #include "src/dawn/native/PipelineLayout.h"
 #include "src/dawn/native/Texture.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 
 namespace dawn::native {
 

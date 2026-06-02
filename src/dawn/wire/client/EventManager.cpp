@@ -33,9 +33,9 @@
 #include <utility>
 #include <vector>
 
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/Time.h"
 #include "src/dawn/wire/client/Client.h"
+#include "src/utils/log.h"
 
 namespace dawn::wire::client {
 

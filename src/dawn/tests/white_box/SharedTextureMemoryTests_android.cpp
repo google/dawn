@@ -33,12 +33,12 @@
 #include <utility>
 #include <vector>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/dawn/tests/white_box/SharedTextureMemoryTests.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/assert.h"
 
 namespace dawn {
 namespace {

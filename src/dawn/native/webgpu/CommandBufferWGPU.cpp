@@ -29,7 +29,6 @@
 
 #include <vector>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/native/CommandBuffer.h"
 #include "src/dawn/native/RenderBundle.h"
@@ -45,6 +44,7 @@
 #include "src/dawn/native/webgpu/Serialization.h"
 #include "src/dawn/native/webgpu/TextureWGPU.h"
 #include "src/dawn/native/webgpu/ToWGPU.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::webgpu {

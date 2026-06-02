@@ -31,7 +31,6 @@
 #include <string_view>
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Strings.h"
 #include "src/dawn/native/BindGroup.h"
 #include "src/dawn/native/CommandBuffer.h"
@@ -41,6 +40,7 @@
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/RenderPassEncoder.h"
 #include "src/dawn/native/RenderPipeline.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

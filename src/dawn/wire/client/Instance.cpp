@@ -36,12 +36,12 @@
 #include "dawn/wire/client/ApiObjects_autogen.h"
 #include "dawn/wire/client/webgpu.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/common/WGSLFeatureMapping.h"
 #include "src/dawn/wire/client/Client.h"
 #include "src/dawn/wire/client/EventManager.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 #include "tint/tint.h"
 
 namespace dawn::wire::client {

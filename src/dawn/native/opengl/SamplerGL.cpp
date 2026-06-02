@@ -30,9 +30,9 @@
 #include <algorithm>
 #include <cstdint>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/opengl/DeviceGL.h"
 #include "src/dawn/native/opengl/UtilsGL.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native::opengl {
 

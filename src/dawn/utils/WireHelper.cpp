@@ -42,10 +42,10 @@
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Assert.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/utils/TerribleCommandBuffer.h"
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 
 namespace dawn::utils {
 

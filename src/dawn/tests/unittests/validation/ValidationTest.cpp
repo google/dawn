@@ -42,13 +42,13 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/NullBackend.h"
 #include "dawn/webgpu_cpp_print.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/native/Adapter.h"
 #include "src/dawn/tests/PartitionAllocSupport.h"
 #include "src/dawn/tests/StringViewMatchers.h"
 #include "src/dawn/tests/ToggleParser.h"
 #include "src/dawn/utils/WireHelper.h"
+#include "src/utils/assert.h"
 
 namespace {
 

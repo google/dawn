@@ -31,8 +31,8 @@
 #include <memory>
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/CacheKey.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native {
 

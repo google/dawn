@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_COMMON_LOG_H_
-#define SRC_DAWN_COMMON_LOG_H_
+#ifndef SRC_UTILS_LOG_H_
+#define SRC_UTILS_LOG_H_
 
 // Dawn targets shouldn't use iostream or printf directly for several reasons:
 //  - iostream adds static initializers which we want to avoid.
@@ -105,4 +105,4 @@ LogMessage DebugLog(const char* file, const char* function, int line);
 
 }  // namespace dawn
 
-#endif  // SRC_DAWN_COMMON_LOG_H_
+#endif  // SRC_UTILS_LOG_H_

@@ -34,7 +34,6 @@
 
 #include "dawn/platform/DawnPlatform.h"
 #include "src/dawn/common/Alloc.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/ChainUtils.h"
@@ -46,6 +45,7 @@
 #include "src/dawn/native/d3d11/QueueD3D11.h"
 #include "src/dawn/native/d3d11/UtilsD3D11.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::d3d11 {

@@ -32,7 +32,7 @@
 #include <string>
 
 #include "src/dawn/common/DynamicLib.h"
-#include "src/dawn/common/Log.h"
+#include "src/utils/log.h"
 
 namespace dawn::native::utils {
 

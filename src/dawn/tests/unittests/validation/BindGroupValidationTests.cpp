@@ -30,12 +30,12 @@
 #include <utility>
 #include <vector>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/tests/unittests/validation/ValidationTest.h"
 #include "src/dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

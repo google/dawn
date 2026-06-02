@@ -29,7 +29,6 @@
 
 #include <vector>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/vulkan/BackendVk.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
 #include "src/dawn/native/vulkan/PhysicalDeviceVk.h"
@@ -37,6 +36,7 @@
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/dawn/native/vulkan/external_memory/MemoryServiceImplementation.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan::external_memory {

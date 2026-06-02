@@ -34,7 +34,6 @@
 #include <mutex>
 #include <sstream>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/native/BindGroup.h"
 #include "src/dawn/native/BindGroupLayout.h"
@@ -45,6 +44,7 @@
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/Sampler.h"
 #include "src/dawn/native/ShaderModule.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::utils {

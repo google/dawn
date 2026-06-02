@@ -29,8 +29,8 @@
 
 #include <limits>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/utils/SystemHandle.h"
+#include "src/utils/assert.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
 #include "src/utils/windows_with_undefs.h"

@@ -31,12 +31,12 @@
 #include <fstream>
 #include <limits>
 
-#include "src/dawn/common/Assert.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/dawn/tests/perf_tests/DawnPerfTestPlatform.h"
 #include "src/dawn/utils/Timer.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 
 namespace dawn {
 namespace {

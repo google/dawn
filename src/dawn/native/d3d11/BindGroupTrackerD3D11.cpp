@@ -33,7 +33,6 @@
 #include <utility>
 #include <vector>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/common/Range.h"
 #include "src/dawn/native/Format.h"
@@ -45,6 +44,7 @@
 #include "src/dawn/native/d3d11/PipelineLayoutD3D11.h"
 #include "src/dawn/native/d3d11/SamplerD3D11.h"
 #include "src/dawn/native/d3d11/TextureD3D11.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native::d3d11 {
 namespace {

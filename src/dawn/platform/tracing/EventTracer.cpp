@@ -28,7 +28,7 @@
 #include "src/dawn/platform/tracing/EventTracer.h"
 
 #include "dawn/platform/DawnPlatform.h"
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 
 namespace dawn::platform::tracing {
 

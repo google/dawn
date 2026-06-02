@@ -31,13 +31,13 @@
 #include <vector>
 
 #include "dawn/platform/DawnPlatform.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/native/Adapter.h"
 #include "src/dawn/native/BindGroupLayout.h"
 #include "src/dawn/native/Buffer.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/Texture.h"
+#include "src/utils/log.h"
 #include "tint/tint.h"
 
 // Contains the entry-points into dawn_native

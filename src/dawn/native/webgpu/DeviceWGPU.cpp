@@ -31,7 +31,6 @@
 #include <utility>
 
 #include "src/dawn/common/Constants.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/native/BackendConnection.h"
 #include "src/dawn/native/BindGroupLayoutInternal.h"
@@ -68,6 +67,7 @@
 #include "src/dawn/native/webgpu/SwapChainWGPU.h"
 #include "src/dawn/native/webgpu/TextureWGPU.h"
 #include "src/dawn/native/webgpu/ToWGPU.h"
+#include "src/utils/log.h"
 #include "tint/tint.h"
 
 namespace dawn::native::webgpu {

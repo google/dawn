@@ -29,7 +29,6 @@
 
 #include <Metal/Metal.h>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/common/Range.h"
 #include "src/dawn/native/Buffer.h"
@@ -39,6 +38,7 @@
 #include "src/dawn/native/ShaderModule.h"
 #include "src/dawn/native/dawn_platform.h"
 #include "src/dawn/native/metal/BufferMTL.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native::metal {
 

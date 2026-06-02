@@ -26,8 +26,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(private_headers
+    "assert.h"
     "compiler.h"
     "force_crash.h"
+    "log.h"
     "non_copyable.h"
     "non_movable.h"
     "numeric.h"
@@ -42,6 +44,8 @@ if (WIN32)
 endif()
 
 set(sources
+    "assert.cc"
+    "log.cc"
     "placeholder.cc"
 )
 
@@ -52,7 +56,6 @@ add_subdirectory(chromium_test_compat)
 dawn_add_library(
     dawn_shared_utils
     ENABLE_EMSCRIPTEN
-    HEADER_ONLY
     UTILITY_TARGET dawn_internal_config
     HEADERS
         ${private_headers}

@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_COMMON_ASSERT_H_
-#define SRC_DAWN_COMMON_ASSERT_H_
+#ifndef SRC_UTILS_ASSERT_H_
+#define SRC_UTILS_ASSERT_H_
 
 #include <cstdlib>
 #include <type_traits>
 
-#include "src/dawn/common/Compiler.h"
+#include "src/utils/compiler.h"
 
 // Dawn asserts to be used instead of the regular C stdlib assert function (if you don't use assert
 // yet, you should start now!). In debug DAWN_ASSERT(condition) will trigger an error, otherwise in
@@ -130,10 +130,10 @@
 
 namespace dawn {
 
-void HandleAssertionFailure(const char* file,
-                            const char* function,
-                            int line,
-                            const char* condition);
+[[noreturn]] void HandleAssertionFailure(const char* file,
+                                         const char* function,
+                                         int line,
+                                         const char* condition);
 
 // This non-consteval function is invalid to call in consteval. If it's called, the compiler will
 // print "note: declared here" pointing to this function so the reader knows what's going on.
@@ -141,4 +141,4 @@ inline void XXXXXXXXXX_CheckFailedInConsteval_XXXXXXXXXX() {}
 
 }  // namespace dawn
 
-#endif  // SRC_DAWN_COMMON_ASSERT_H_
+#endif  // SRC_UTILS_ASSERT_H_

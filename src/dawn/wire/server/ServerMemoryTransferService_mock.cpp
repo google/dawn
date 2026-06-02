@@ -27,7 +27,7 @@
 
 #include "src/dawn/wire/server/ServerMemoryTransferService_mock.h"
 
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 
 namespace dawn::wire::server {
 

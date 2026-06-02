@@ -32,10 +32,8 @@
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/FutureUtils.h"
 #include "src/dawn/common/GPUInfo.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/common/WGSLFeatureMapping.h"
@@ -45,7 +43,9 @@
 #include "src/dawn/native/ErrorData.h"
 #include "src/dawn/native/Surface.h"
 #include "src/dawn/native/Toggles.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 
 // For SwiftShader fallback
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)

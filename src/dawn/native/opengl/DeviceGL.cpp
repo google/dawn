@@ -29,7 +29,6 @@
 
 #include <utility>
 
-#include "src/dawn/common/Log.h"
 #include "src/dawn/native/BackendConnection.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/ErrorData.h"
@@ -54,6 +53,7 @@
 #include "src/dawn/native/opengl/TextureGL.h"
 #include "src/dawn/native/opengl/UtilsGL.h"
 #include "src/dawn/native/opengl/opengl_platform.h"
+#include "src/utils/log.h"
 
 #if DAWN_PLATFORM_IS(ANDROID)
 #include "src/dawn/native/AHBFunctions.h"

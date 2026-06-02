@@ -27,9 +27,9 @@
 
 #include "src/dawn/native/d3d12/TextureCopySplitter.h"
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/Format.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native::d3d12 {
 

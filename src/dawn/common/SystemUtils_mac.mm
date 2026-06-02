@@ -27,8 +27,8 @@
 
 #import <Foundation/NSProcessInfo.h>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/SystemUtils.h"
+#include "src/utils/assert.h"
 
 namespace dawn {
 

@@ -34,11 +34,11 @@
 #include <type_traits>
 #include <vector>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/TypeTraits.h"
 #include "src/dawn/native/EnumMaskIterator.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Subresource.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native {
 

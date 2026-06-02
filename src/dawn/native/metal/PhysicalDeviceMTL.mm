@@ -31,7 +31,6 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "src/dawn/common/CoreFoundationRef.h"
 #include "src/dawn/common/GPUInfo.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/NSRef.h"
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/native/ChainUtils.h"
@@ -40,6 +39,7 @@
 #include "src/dawn/native/metal/DeviceMTL.h"
 #include "src/dawn/native/metal/UtilsMetal.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 #include "src/utils/platform.h"
 
 #if DAWN_PLATFORM_IS(MACOS)

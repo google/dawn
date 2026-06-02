@@ -31,7 +31,6 @@
 #include <vector>
 
 #include "absl/container/inlined_vector.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/AttachmentState.h"
 #include "src/dawn/native/BlitColorToColorWithDraw.h"
 #include "src/dawn/native/CommandEncoder.h"
@@ -39,6 +38,7 @@
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/PhysicalDevice.h"
 #include "src/dawn/native/Texture.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

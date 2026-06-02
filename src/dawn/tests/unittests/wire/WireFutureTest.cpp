@@ -27,7 +27,7 @@
 
 #include "src/dawn/tests/unittests/wire/WireFutureTest.h"
 
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 
 namespace dawn::wire {
 

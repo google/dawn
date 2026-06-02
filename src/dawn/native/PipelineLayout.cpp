@@ -33,7 +33,6 @@
 
 #include "absl/container/inlined_vector.h"
 #include "dawn/native/ObjectType_autogen.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/common/Math.h"
@@ -45,6 +44,7 @@
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/ObjectContentHasher.h"
 #include "src/dawn/native/ShaderModule.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

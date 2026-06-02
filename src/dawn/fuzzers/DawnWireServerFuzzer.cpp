@@ -36,13 +36,13 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/wire/WireServer.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/DynamicLib.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/utils/SystemUtils.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 
 namespace {
 

@@ -29,10 +29,10 @@
 
 #include <utility>
 
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/tests/MockCallback.h"
 #include "src/dawn/tests/end2end/BufferHostMappedPointerTests.h"
+#include "src/utils/log.h"
 
 namespace dawn {
 namespace {

@@ -32,7 +32,6 @@
 #include <memory>
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/CreatePipelineAsyncEvent.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/d3d/BlobD3D.h"
@@ -44,6 +43,7 @@
 #include "src/dawn/native/d3d12/TextureD3D12.h"
 #include "src/dawn/native/d3d12/UtilsD3D12.h"
 #include "src/dawn/platform/metrics/HistogramMacros.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::d3d12 {

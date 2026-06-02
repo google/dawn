@@ -30,8 +30,8 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreVideo/CVPixelBuffer.h>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/CoreFoundationRef.h"
+#include "src/utils/assert.h"
 
 namespace dawn {
 

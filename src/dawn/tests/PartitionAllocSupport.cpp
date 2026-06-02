@@ -26,8 +26,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "src/dawn/tests/PartitionAllocSupport.h"
 
-#include "src/dawn/common/Assert.h"
-#include "src/dawn/common/Log.h"
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 
 #if defined(DAWN_ENABLE_PARTITION_ALLOC)
 #include "partition_alloc/dangling_raw_ptr_checks.h"

@@ -27,7 +27,7 @@
 
 #include "src/dawn/utils/TerribleCommandBuffer.h"
 
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::utils {

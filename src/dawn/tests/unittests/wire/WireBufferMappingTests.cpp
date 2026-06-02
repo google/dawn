@@ -29,11 +29,11 @@
 #include <memory>
 
 #include "dawn/wire/WireClient.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/tests/StringViewMatchers.h"
 #include "src/dawn/tests/unittests/wire/WireFutureTest.h"
 #include "src/dawn/tests/unittests/wire/WireTest.h"
+#include "src/utils/assert.h"
 
 namespace wgpu {
 // Define a stream operator for wgpu::MapMode so that it can be found on resolution for test name

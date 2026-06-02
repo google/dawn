@@ -38,7 +38,6 @@
 
 #include "absl/container/inlined_vector.h"
 #include "dawn/platform/DawnPlatform.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/native/WaitAnySystemEvent.h"
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d11/BufferD3D11.h"
@@ -50,6 +49,7 @@
 #include "src/dawn/native/d3d11/TextureD3D11.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 
 namespace dawn::native::d3d11 {
 namespace {

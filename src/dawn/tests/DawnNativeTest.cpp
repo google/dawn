@@ -33,10 +33,10 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/webgpu_cpp_print.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/ErrorData.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native {
 

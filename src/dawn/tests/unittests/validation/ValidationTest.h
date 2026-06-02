@@ -39,8 +39,8 @@
 
 #include "dawn/native/DawnNative.h"
 #include "dawn/utils/ComboLimits.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/native/BindGroupLayout.h"
+#include "src/utils/log.h"
 
 // Argument helpers to allow macro overriding.
 #define UNIMPLEMENTED_MACRO(...) DAWN_UNREACHABLE()

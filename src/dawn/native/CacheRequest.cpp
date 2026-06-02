@@ -27,7 +27,7 @@
 
 #include "src/dawn/native/CacheRequest.h"
 
-#include "src/dawn/common/Log.h"
+#include "src/utils/log.h"
 
 namespace dawn::native::detail {
 

@@ -32,8 +32,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/native/SubresourceStorage.h"
+#include "src/utils/log.h"
 
 namespace dawn::native {
 

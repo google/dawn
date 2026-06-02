@@ -62,9 +62,7 @@
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/GPUInfo.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/common/SystemUtils.h"
@@ -78,6 +76,8 @@
 #include "src/dawn/utils/Timer.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/dawn/utils/WireHelper.h"
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 #include "src/utils/platform.h"
 
 #ifdef DAWN_SUPPORTS_GLFW_FOR_WINDOWING

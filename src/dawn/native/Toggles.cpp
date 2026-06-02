@@ -29,11 +29,11 @@
 
 #include <array>
 
-#include "src/dawn/common/Assert.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/native/dawn_platform.h"
 #include "src/dawn/native/stream/Stream.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 
 namespace dawn::native {
 namespace {

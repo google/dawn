@@ -29,7 +29,6 @@
 
 #include "dawn/webgpu_cpp_print.h"
 #include "gtest/gtest.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/common/Range.h"
@@ -38,6 +37,7 @@
 #include "src/dawn/native/d3d12/UtilsD3D12.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
 #include "src/dawn/utils/TestUtils.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native::d3d12 {
 namespace {

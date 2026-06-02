@@ -42,8 +42,8 @@
 // Comment to prevent reordering.
 
 #include "dawn/native/VulkanBackend.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/tests/end2end/VideoViewsTests.h"
+#include "src/utils/assert.h"
 
 namespace dawn {
 namespace {

@@ -45,8 +45,9 @@ Toggles may be enabled/disabled in different ways.
 
     Errors in WebGPU are reported asynchronously which may make debugging difficult because at the time an error is reported, you can't easily create a breakpoint to inspect the callstack in your application.
 
-    Setting `DAWN_DEBUG_BREAK_ON_ERROR` to a non-empty, non-zero value will execute a debug breakpoint
-    instruction ([`dawn::Breakpoint()`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/dawn/src/dawn/common/Assert.cpp?q=dawn::Breakpoint)) as soon as any type of error is generated.
+    Setting `DAWN_DEBUG_BREAK_ON_ERROR` to a non-empty, non-zero value will immediately causes the
+    program to terminate as fast as possible, at an address that's inside the function that used the
+    macro, and with a signal that's different from a segfault. See ([`DAWN_DETAIL_TRAP`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/dawn/src/utils/force_crash.h?q=DAWN_DETAIL_TRAP))
 
 ## Tracing Native GPU API usage
 

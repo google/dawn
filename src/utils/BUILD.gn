@@ -40,8 +40,12 @@ config("internal_config") {
 
 static_library("utils") {
   sources = [
+    "assert.cc",
+    "assert.h",
     "compiler.h",
     "force_crash.h",
+    "log.cc",
+    "log.h",
     "non_copyable.h",
     "non_movable.h",
     "numeric.h",
@@ -72,7 +76,10 @@ source_set("unittests") {
     ":utils",
   ]
 
-  sources = [ "underlying_type_tests.cpp" ]
+  sources = [
+    "assert_test.cc",
+    "underlying_type_tests.cpp",
+  ]
 }
 
 ###############################################################################

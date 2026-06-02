@@ -34,10 +34,10 @@
 
 #include "dawn/dawn_version.h"
 #include "dawn/platform/DawnPlatform.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/native/CacheKey.h"
 #include "src/dawn/native/Instance.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

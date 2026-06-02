@@ -32,7 +32,7 @@
 
 #include <array>
 
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 
 namespace dawn::utils {
 

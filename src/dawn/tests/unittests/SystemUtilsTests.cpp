@@ -29,8 +29,8 @@
 
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/SystemUtils.h"
+#include "src/utils/assert.h"
 
 namespace dawn {
 namespace {

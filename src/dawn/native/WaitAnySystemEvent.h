@@ -45,8 +45,8 @@
 #endif
 
 #include "absl/container/inlined_vector.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/native/SystemEvent.h"
+#include "src/utils/log.h"
 
 namespace dawn::native {
 

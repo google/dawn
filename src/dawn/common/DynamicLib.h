@@ -32,7 +32,7 @@
 #include <string>
 #include <type_traits>
 
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 #include "src/utils/platform.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)

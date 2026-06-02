@@ -92,12 +92,12 @@
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp_print.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Assert.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/CommandLineParser.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 #include "webgpu/webgpu_glfw.h"
 
 template <typename T>

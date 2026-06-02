@@ -29,9 +29,9 @@
 
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 #include "tint/tint.h"
 

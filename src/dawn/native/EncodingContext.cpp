@@ -27,13 +27,13 @@
 
 #include "src/dawn/native/EncodingContext.h"
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/CommandEncoder.h"
 #include "src/dawn/native/Commands.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/ErrorData.h"
 #include "src/dawn/native/IndirectDrawValidationEncoder.h"
 #include "src/dawn/native/RenderBundleEncoder.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native {
 

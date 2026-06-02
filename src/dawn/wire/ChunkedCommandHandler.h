@@ -35,8 +35,8 @@
 #include "absl/container/flat_hash_map.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireCmd_autogen.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/wire/WireDeserializeAllocator.h"
+#include "src/utils/assert.h"
 
 namespace dawn::wire {
 

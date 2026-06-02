@@ -35,7 +35,6 @@
 #include <vector>
 
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/GPUInfo.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/CommandBuffer.h"
@@ -48,6 +47,7 @@
 #include "src/dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan {

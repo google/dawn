@@ -31,15 +31,15 @@
 #include <vector>
 
 #include "absl/container/inlined_vector.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/HashUtils.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/Range.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
 #include "src/dawn/native/vulkan/TextureVk.h"
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 
 namespace dawn::native::vulkan {
 

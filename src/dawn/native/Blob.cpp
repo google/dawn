@@ -31,9 +31,9 @@
 #include <span>
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/stream/Stream.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native {
 

@@ -32,9 +32,7 @@
 #include <utility>
 
 #include "dawn/native/VulkanBackend.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/GPUInfo.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Instance.h"
@@ -42,7 +40,9 @@
 #include "src/dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 
 // TODO(crbug.com/dawn/283): Link against the Vulkan Loader and remove this.
 #if defined(DAWN_ENABLE_SWIFTSHADER)

@@ -34,7 +34,7 @@
 #include <string>
 #include <vector>
 
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 
 BackendTestConfig::BackendTestConfig(wgpu::BackendType backendType,
                                      std::initializer_list<const char*> forceEnabledWorkarounds,

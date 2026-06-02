@@ -30,10 +30,10 @@
 #include <vector>
 
 #include "dawn/native/DawnNative.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/assert.h"
 
 namespace dawn {
 namespace {

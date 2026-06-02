@@ -29,10 +29,10 @@
 
 #include <sstream>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/Format.h"
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d11/DeviceD3D11.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native::d3d11 {
 

@@ -29,8 +29,8 @@
 
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/Device.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native {
 

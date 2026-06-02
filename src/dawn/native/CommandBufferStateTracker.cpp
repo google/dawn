@@ -36,7 +36,6 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/inlined_vector.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/BindGroup.h"
 #include "src/dawn/native/ComputePassEncoder.h"
@@ -44,6 +43,7 @@
 #include "src/dawn/native/Forward.h"
 #include "src/dawn/native/PipelineLayout.h"
 #include "src/dawn/native/RenderPipeline.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 // TODO(dawn:563): None of the error messages in this file include the buffer objects they are

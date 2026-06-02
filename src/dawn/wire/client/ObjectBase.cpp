@@ -27,8 +27,8 @@
 
 #include "src/dawn/wire/client/ObjectBase.h"
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/wire/client/Client.h"
+#include "src/utils/assert.h"
 
 namespace dawn::wire::client {
 

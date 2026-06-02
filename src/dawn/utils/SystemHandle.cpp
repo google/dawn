@@ -29,8 +29,8 @@
 
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
-#include "src/dawn/common/Log.h"
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
 #include "src/utils/windows_with_undefs.h"

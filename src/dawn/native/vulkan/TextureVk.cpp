@@ -31,7 +31,6 @@
 #include <utility>
 
 #include "dawn/native/VulkanBackend.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/DynamicLib.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/ChainUtils.h"
@@ -52,6 +51,7 @@
 #include "src/dawn/native/vulkan/SharedFenceVk.h"
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan {

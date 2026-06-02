@@ -31,13 +31,13 @@
 
 #include "dawn/native/D3DBackend.h"
 #include "src/dawn/common/HashUtils.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d/PhysicalDeviceD3D.h"
 #include "src/dawn/native/d3d/PlatformFunctions.h"
 #include "src/dawn/native/d3d/UtilsD3D.h"
+#include "src/utils/log.h"
 
 namespace dawn::native::d3d {
 

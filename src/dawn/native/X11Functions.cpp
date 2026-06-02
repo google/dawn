@@ -29,8 +29,8 @@
 
 #include <memory>
 
-#include "src/dawn/common/Log.h"
 #include "src/utils/force_crash.h"
+#include "src/utils/log.h"
 
 namespace dawn::native {
 

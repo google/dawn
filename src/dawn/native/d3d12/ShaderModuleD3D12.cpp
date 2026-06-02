@@ -32,7 +32,6 @@
 #include <utility>
 
 #include "dawn/platform/DawnPlatform.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/native/Pipeline.h"
 #include "src/dawn/native/ResourceTableDefaultResources.h"
@@ -48,6 +47,7 @@
 #include "src/dawn/native/d3d12/UtilsD3D12.h"
 #include "src/dawn/platform/metrics/HistogramMacros.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
+#include "src/utils/assert.h"
 #include "tint/tint.h"
 
 namespace dawn::native::d3d12 {

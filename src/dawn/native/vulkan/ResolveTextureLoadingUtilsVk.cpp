@@ -32,7 +32,6 @@
 #include <utility>
 
 #include "absl/container/inlined_vector.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/Strings.h"
 #include "src/dawn/native/BindGroup.h"
@@ -49,6 +48,7 @@
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/dawn/native/webgpu_absl_format.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native::vulkan {
 

@@ -35,9 +35,9 @@
 
 // The sanitizer is disabled for calls to procs.* since those functions may be
 // dynamically loaded.
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Compiler.h"
-#include "src/dawn/common/Log.h"
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 
 // A fake wgpuCreateInstance that prints a warning so folks know that they are using dawn_procs and
 // should either use a different target to link against, or call dawnProcSetProcs.

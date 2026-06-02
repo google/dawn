@@ -27,8 +27,8 @@
 
 #include "src/dawn/wire/client/LimitsAndFeatures.h"
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/wire/SupportedFeatures.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::wire::client {

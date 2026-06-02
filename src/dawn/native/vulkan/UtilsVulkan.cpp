@@ -27,7 +27,6 @@
 
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/native/EnumMaskIterator.h"
 #include "src/dawn/native/Format.h"
 #include "src/dawn/native/Pipeline.h"
@@ -37,6 +36,7 @@
 #include "src/dawn/native/vulkan/TextureVk.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/dawn/native/vulkan/VulkanFunctions.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan {

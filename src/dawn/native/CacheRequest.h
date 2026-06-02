@@ -32,7 +32,6 @@
 #include <string>
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Compiler.h"
 #include "src/dawn/native/Blob.h"
 #include "src/dawn/native/BlobCache.h"
@@ -42,6 +41,7 @@
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/VisitableMembers.h"
 #include "src/dawn/platform/metrics/HistogramMacros.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native {
 

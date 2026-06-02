@@ -36,8 +36,8 @@
 
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
-#include "src/dawn/common/Assert.h"
-#include "src/dawn/common/Log.h"
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 
 namespace dawn {
 

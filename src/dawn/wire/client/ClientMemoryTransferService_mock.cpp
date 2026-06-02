@@ -29,7 +29,7 @@
 
 #include <cstdio>
 
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 
 namespace dawn::wire::client {
 

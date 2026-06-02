@@ -30,11 +30,11 @@
 
 #include <array>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/ityp_bitset.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native {
 

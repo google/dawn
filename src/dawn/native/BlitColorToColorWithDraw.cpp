@@ -33,7 +33,6 @@
 #include <utility>
 
 #include "absl/container/inlined_vector.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/HashUtils.h"
 #include "src/dawn/common/Strings.h"
@@ -46,6 +45,7 @@
 #include "src/dawn/native/RenderPipeline.h"
 #include "src/dawn/native/utils/WGPUHelpers.h"
 #include "src/dawn/native/webgpu_absl_format.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {

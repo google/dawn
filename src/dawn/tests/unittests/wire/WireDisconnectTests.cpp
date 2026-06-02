@@ -26,11 +26,11 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/wire/WireClient.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/tests/MockCallback.h"
 #include "src/dawn/tests/StringViewMatchers.h"
 #include "src/dawn/tests/unittests/wire/WireTest.h"
+#include "src/utils/assert.h"
 
 namespace dawn::wire {
 namespace {

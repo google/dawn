@@ -31,7 +31,6 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/common/Range.h"
 #include "src/dawn/native/BindGroupTracker.h"
@@ -55,6 +54,7 @@
 #include "src/dawn/native/metal/SamplerMTL.h"
 #include "src/dawn/native/metal/TextureMTL.h"
 #include "src/dawn/native/metal/UtilsMetal.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::metal {

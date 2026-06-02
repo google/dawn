@@ -27,9 +27,9 @@
 
 #include "src/dawn/replay/Error.h"
 
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/SystemUtils.h"
 #include "src/utils/force_crash.h"
+#include "src/utils/log.h"
 
 namespace dawn::replay {
 

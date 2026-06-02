@@ -29,7 +29,6 @@
 
 #include <utility>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/HashUtils.h"
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/d3d12/BindGroupD3D12.h"
@@ -39,6 +38,7 @@
 #include "src/dawn/native/d3d12/SamplerD3D12.h"
 #include "src/dawn/native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "src/dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native::d3d12 {
 

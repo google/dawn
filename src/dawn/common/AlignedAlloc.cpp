@@ -29,8 +29,8 @@
 
 #include <cstdlib>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Math.h"
+#include "src/utils/assert.h"
 #include "src/utils/platform.h"
 
 namespace dawn {

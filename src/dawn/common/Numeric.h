@@ -32,7 +32,7 @@
 #include <cstdint>
 #include <limits>
 
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 #include "src/utils/underlying_type.h"
 
 namespace dawn {

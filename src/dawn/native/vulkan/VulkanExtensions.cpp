@@ -30,8 +30,8 @@
 #include <array>
 #include <limits>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/vulkan_platform.h"
+#include "src/utils/assert.h"
 
 namespace dawn::native::vulkan {
 

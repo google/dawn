@@ -27,7 +27,7 @@
 
 #include "src/dawn/common/WGPUDeviceCallbackInfos.h"
 
-#include "src/dawn/common/Log.h"
+#include "src/utils/log.h"
 
 namespace dawn {
 namespace {

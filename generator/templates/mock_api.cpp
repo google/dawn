@@ -31,8 +31,8 @@
 #include <algorithm>
 
 #include "dawn/dawn_version.h"
-#include "src/dawn/common/Log.h"
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 
 using namespace testing;
 

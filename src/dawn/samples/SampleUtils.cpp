@@ -37,12 +37,12 @@
 #include <vector>
 
 #include "dawn/webgpu_cpp_print.h"
-#include "src/dawn/common/Assert.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/utils/CommandLineParser.h"
 #include "src/dawn/utils/SystemUtils.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 #include "src/utils/platform.h"
 
 #ifndef __EMSCRIPTEN__

@@ -29,10 +29,10 @@
 #include <vector>
 
 #include "absl/strings/str_format.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
 namespace dawn {

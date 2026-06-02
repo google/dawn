@@ -34,7 +34,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 
 // Use a nested namespace so that we can fill it with shorthand functions like `Mul` and shorthand
 // type aliases.

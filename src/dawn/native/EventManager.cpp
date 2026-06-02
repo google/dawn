@@ -34,16 +34,16 @@
 #include <vector>
 
 #include "absl/strings/str_format.h"
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Atomic.h"
 #include "src/dawn/common/FutureUtils.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/Queue.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 #include "src/utils/non_movable.h"
 
 namespace dawn::native {

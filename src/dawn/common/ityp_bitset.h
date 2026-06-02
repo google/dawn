@@ -32,9 +32,9 @@
 #include <bitset>
 #include <limits>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/BitSetRangeIterator.h"
 #include "src/dawn/common/Math.h"
+#include "src/utils/assert.h"
 #include "src/utils/underlying_type.h"
 
 namespace dawn {

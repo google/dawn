@@ -29,12 +29,12 @@
 
 #include <utility>
 
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/ObjectBase.h"
 #include "src/dawn/native/dawn_platform.h"
 #include "src/utils/force_crash.h"
+#include "src/utils/log.h"
 
 namespace dawn::native {
 

@@ -32,7 +32,7 @@
 {% set include_dir = namespace_name.Dirs() %}
 #include "{{include_dir}}/ObjectType_autogen.h"
 
-#include "src/dawn/common/Assert.h"
+#include "src/utils/assert.h"
 
 namespace {{native_namespace}} {
 

@@ -28,13 +28,13 @@
 #include <tuple>
 #include <vector>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/tests/unittests/validation/ValidationTest.h"
 #include "src/dawn/utils/TestUtils.h"
 #include "src/dawn/utils/TextureUtils.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/assert.h"
 
 namespace dawn {
 namespace {

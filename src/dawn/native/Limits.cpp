@@ -30,11 +30,11 @@
 #include <algorithm>
 #include <array>
 
-#include "src/dawn/common/Assert.h"
 #include "src/dawn/common/Constants.h"
-#include "src/dawn/common/Log.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/Instance.h"
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 
 // clang-format off
 // TODO(crbug.com/dawn/685):
