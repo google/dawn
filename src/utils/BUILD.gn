@@ -78,7 +78,7 @@ source_set("unittests") {
 
   sources = [
     "assert_test.cc",
-    "underlying_type_tests.cpp",
+    "underlying_type_tests.cc",
   ]
 }
 
