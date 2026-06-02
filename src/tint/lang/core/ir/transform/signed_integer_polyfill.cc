@@ -153,7 +153,6 @@ Result<SuccessType> SignedIntegerPolyfill(core::ir::Module& ir,
                     core::ir::Capability::kAllowAnyLetType,
                     core::ir::Capability::kMslAllowEntryPointInterface,
                     core::ir::Capability::kAllowModuleScopeLets,
-                    core::ir::Capability::kAllowAnyInputAttachmentIndexType,
                     core::ir::Capability::kAllowNonCoreTypes,
                 },
                 "before ir.SignedIntegerPolyfill");

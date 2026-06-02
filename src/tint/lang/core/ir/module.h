@@ -56,6 +56,8 @@ namespace tint::core::ir {
 /// The IR validator will reject use of any non-core IR functionality when the module does not
 /// contain the corresponding property.
 enum class Property : uint8_t {
+    /// Allows input_attachment_index to be associated with any type
+    kAllowAnyInputAttachmentIndexType,
     /// Allows ClipDistances on f32 and vecN<f32> parameters
     kAllowClipDistancesOnF32ScalarAndVector,
     /// Allows binding points to be non-unique.
@@ -95,6 +97,7 @@ auto& operator<<(STREAM& out, Property p) {
     case Property::k##p: \
         return out << #p
     switch (p) {  //
+        CASE(AllowAnyInputAttachmentIndexType);
         CASE(AllowClipDistancesOnF32ScalarAndVector);
         CASE(AllowDuplicateBindings);
         CASE(AllowLocationForNumericComposites);

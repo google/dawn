@@ -49,9 +49,6 @@ enum class Capability : uint8_t {
     kAllowRefTypes,
     /// Allows lets to have any type, used by MSL backend for module scoped vars
     kAllowAnyLetType,
-    /// Allows input_attachment_index to be associated with any type, used by
-    /// SPIRV backend for spirv.image.
-    kAllowAnyInputAttachmentIndexType,
     /// Allows module scope `var`s to exist without an IO annotation
     kAllowUnannotatedModuleIOVariables,
     /// Allows non-core types in the IR module

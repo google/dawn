@@ -41,13 +41,9 @@ namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
 const Capabilities kBuiltinScalarizeCapabilities{
-    core::ir::Capability::kAllow8BitIntegers,
-    core::ir::Capability::kAllow16BitIntegers,
-    core::ir::Capability::kAllow64BitIntegers,
-    core::ir::Capability::kAllowAnyLetType,
-    core::ir::Capability::kMslAllowEntryPointInterface,
-    core::ir::Capability::kAllowModuleScopeLets,
-    core::ir::Capability::kAllowAnyInputAttachmentIndexType,
+    core::ir::Capability::kAllow8BitIntegers,           core::ir::Capability::kAllow16BitIntegers,
+    core::ir::Capability::kAllow64BitIntegers,          core::ir::Capability::kAllowAnyLetType,
+    core::ir::Capability::kMslAllowEntryPointInterface, core::ir::Capability::kAllowModuleScopeLets,
     core::ir::Capability::kAllowNonCoreTypes,
 };
 

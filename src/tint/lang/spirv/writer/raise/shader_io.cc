@@ -239,6 +239,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
                 io.attributes.input_attachment_index = io.attributes.color;
                 io.attributes.color = std::nullopt;
+
+                ir.properties.Add(core::ir::Property::kAllowAnyInputAttachmentIndexType);
             }
 
             // Create an IO variable and add it to the root block.

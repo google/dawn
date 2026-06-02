@@ -457,7 +457,7 @@ struct BuiltInChecker {
 
     /// Implements logic for checking if the given type is valid or not. Is not a data entry (i.e. a
     /// type or set of types), because types are part of the IR module and created at runtime.
-    using TypeCheckFn = bool(const core::type::Type* type, const Capabilities& cap);
+    using TypeCheckFn = bool(const core::type::Type* type, const Properties& props);
 
     /// @see #TypeCheckFn
     TypeCheckFn* const type_check;
@@ -469,7 +469,7 @@ struct BuiltInChecker {
 
 constexpr BuiltInChecker kPointSizeChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::F32>();
     },
     .type_error = "must be a f32",
@@ -484,7 +484,7 @@ constexpr auto ClipDistancesElementsCheck = [](const core::type::Type* ty) -> bo
 
 constexpr BuiltInChecker kClipDistancesChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::Array>() && ClipDistancesElementsCheck(ty);
     },
     .type_error = "must be an array<f32, N>, where N <= 8",
@@ -492,7 +492,7 @@ constexpr BuiltInChecker kClipDistancesChecker{
 
 constexpr BuiltInChecker kClipDistancesAllowF32ScalarAndVectorChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ((ty->Is<core::type::Array>() || ty->Is<core::type::Vector>()) &&
                 ClipDistancesElementsCheck(ty)) ||
                ty->Is<core::type::F32>();
@@ -502,7 +502,7 @@ constexpr BuiltInChecker kClipDistancesAllowF32ScalarAndVectorChecker{
 
 constexpr BuiltInChecker kCullDistanceChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::Array>() && ty->DeepestElement()->Is<core::type::F32>();
     },
     .type_error = "must be an array of f32",
@@ -513,7 +513,7 @@ constexpr BuiltInChecker kFragDepthChecker{
     .valid_depth_modes =
         EnumSet<BuiltinDepthMode>{BuiltinDepthMode::kUndefined, BuiltinDepthMode::kAny,
                                   BuiltinDepthMode::kGreater, BuiltinDepthMode::kLess},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::F32>();
     },
     .type_error = "must be a f32",
@@ -521,7 +521,7 @@ constexpr BuiltInChecker kFragDepthChecker{
 
 constexpr BuiltInChecker kFrontFacingChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::Bool>();
     },
     .type_error = "must be a bool",
@@ -529,7 +529,7 @@ constexpr BuiltInChecker kFrontFacingChecker{
 
 constexpr BuiltInChecker kGlobalInvocationIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         auto* vec = ty->As<core::type::Vector>();
         return vec && vec->Width() == 3 && vec->Type()->Is<core::type::U32>();
     },
@@ -538,7 +538,7 @@ constexpr BuiltInChecker kGlobalInvocationIdChecker{
 
 constexpr BuiltInChecker kInstanceIndexChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::U32>();
     },
     .type_error = "must be an u32",
@@ -546,7 +546,7 @@ constexpr BuiltInChecker kInstanceIndexChecker{
 
 constexpr BuiltInChecker kLocalInvocationIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         auto* vec = ty->As<core::type::Vector>();
         return vec && vec->Width() == 3 && vec->Type()->Is<core::type::U32>();
     },
@@ -555,7 +555,7 @@ constexpr BuiltInChecker kLocalInvocationIdChecker{
 
 constexpr BuiltInChecker kLocalInvocationIndexChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::U32>();
     },
     .type_error = "must be an u32",
@@ -563,7 +563,7 @@ constexpr BuiltInChecker kLocalInvocationIndexChecker{
 
 constexpr BuiltInChecker kNumSubgroupsChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::U32>();
     },
     .type_error = "must be an u32",
@@ -571,7 +571,7 @@ constexpr BuiltInChecker kNumSubgroupsChecker{
 
 constexpr BuiltInChecker kNumWorkgroupsChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         auto* vec = ty->As<core::type::Vector>();
         return vec && vec->Width() == 3 && vec->Type()->Is<core::type::U32>();
     },
@@ -581,7 +581,7 @@ constexpr BuiltInChecker kNumWorkgroupsChecker{
 constexpr BuiltInChecker kPositionChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage,
                                               IOAttributeUsage::kFragmentInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         auto* vec = ty->As<core::type::Vector>();
         return vec && vec->Width() == 4 && vec->Type()->Is<core::type::F32>();
     },
@@ -590,7 +590,7 @@ constexpr BuiltInChecker kPositionChecker{
 
 constexpr BuiltInChecker kSampleIndexChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::U32>();
     },
     .type_error = "must be an u32",
@@ -599,7 +599,7 @@ constexpr BuiltInChecker kSampleIndexChecker{
 constexpr BuiltInChecker kSampleMaskChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage,
                                               IOAttributeUsage::kFragmentOutputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::U32>();
     },
     .type_error = "must be an u32",
@@ -607,7 +607,7 @@ constexpr BuiltInChecker kSampleMaskChecker{
 
 constexpr BuiltInChecker kSubgroupIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::U32>();
     },
     .type_error = "must be an u32",
@@ -616,7 +616,7 @@ constexpr BuiltInChecker kSubgroupIdChecker{
 constexpr BuiltInChecker kSubgroupInvocationIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage,
                                               IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::U32>();
     },
     .type_error = "must be an u32",
@@ -625,7 +625,7 @@ constexpr BuiltInChecker kSubgroupInvocationIdChecker{
 constexpr BuiltInChecker kSubgroupSizeChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage,
                                               IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::U32>();
     },
     .type_error = "must be an u32",
@@ -633,7 +633,7 @@ constexpr BuiltInChecker kSubgroupSizeChecker{
 
 constexpr BuiltInChecker kVertexIndexChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::U32>();
     },
     .type_error = "must be an u32",
@@ -641,7 +641,7 @@ constexpr BuiltInChecker kVertexIndexChecker{
 
 constexpr BuiltInChecker kWorkgroupIdChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         auto* vec = ty->As<core::type::Vector>();
         return vec && vec->Width() == 3 && vec->Type()->Is<core::type::U32>();
     },
@@ -650,7 +650,7 @@ constexpr BuiltInChecker kWorkgroupIdChecker{
 
 constexpr BuiltInChecker kPrimitiveIndexChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::U32>();
     },
     .type_error = "must be an u32",
@@ -658,7 +658,7 @@ constexpr BuiltInChecker kPrimitiveIndexChecker{
 
 constexpr BuiltInChecker kBarycentricCoordChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         auto* vec = ty->As<core::type::Vector>();
         return vec && vec->Width() == 3 && vec->Type()->Is<core::type::F32>();
     },
@@ -735,7 +735,6 @@ struct IOAttributeChecker {
     /// Implements the validation logic for a specific attribute.
     using CheckFn = Result<SuccessType, std::string>(const core::type::Type* ty,
                                                      const IOAttributes& attr,
-                                                     const Capabilities& cap,
                                                      const Properties& prop,
                                                      IOAttributeUsage usage);
 
@@ -744,7 +743,7 @@ struct IOAttributeChecker {
 
     /// Implements logic for checking if the given type is valid or not. Is not a data entry (i.e. a
     /// type or set of types), because types are part of the IR module and created at runtime.
-    using TypeCheckFn = bool(const core::type::Type* type, const Capabilities& cap);
+    using TypeCheckFn = bool(const core::type::Type* type, const Properties& props);
 
     /// @see #TypeCheckFn
     TypeCheckFn* const type_check;
@@ -762,7 +761,6 @@ constexpr IOAttributeChecker kInvariantChecker{
                                             ShaderIOKind::kModuleScopeVar},
     .check = [](const core::type::Type*,
                 const IOAttributes& attr,
-                const Capabilities&,
                 const Properties&,
                 IOAttributeUsage) -> Result<SuccessType, std::string> {
         if (attr.builtin != BuiltinValue::kPosition) {
@@ -789,7 +787,6 @@ constexpr IOAttributeChecker kBuiltinChecker{
                                             ShaderIOKind::kModuleScopeVar},
     .check = [](const core::type::Type* ty,
                 const IOAttributes& attr,
-                const Capabilities& cap,
                 const Properties& prop,
                 IOAttributeUsage usage) -> Result<SuccessType, std::string> {
         if (!attr.builtin.has_value()) {
@@ -810,7 +807,7 @@ constexpr IOAttributeChecker kBuiltinChecker{
             return msg.str();
         }
 
-        if (!checker.type_check(ty, cap)) {
+        if (!checker.type_check(ty, prop)) {
             std::stringstream msg;
             msg << ToString(builtin) << " " << checker.type_error;
             return msg.str();
@@ -837,7 +834,7 @@ constexpr IOAttributeChecker kBuiltinChecker{
 
         return Success;
     },
-    .type_check = [](const core::type::Type*, const Capabilities&) -> bool { return true; },
+    .type_check = [](const core::type::Type*, const Properties&) -> bool { return true; },
     .type_error = nullptr,
 };
 
@@ -846,12 +843,9 @@ constexpr IOAttributeChecker kColorChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
     .valid_io_kinds =
         EnumSet<ShaderIOKind>{ShaderIOKind::kInputParam, ShaderIOKind::kModuleScopeVar},
-    .check = [](const core::type::Type*,
-                const IOAttributes&,
-                const Capabilities&,
-                const Properties&,
-                IOAttributeUsage) -> Result<SuccessType, std::string> { return Success; },
-    .type_check = [](const core::type::Type* ty, const Capabilities&) -> bool {
+    .check = [](const core::type::Type*, const IOAttributes&, const Properties&, IOAttributeUsage)
+        -> Result<SuccessType, std::string> { return Success; },
+    .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->IsNumericScalarOrVector();
     },
     .type_error = "must be a numeric scalar or vector",
@@ -861,13 +855,10 @@ constexpr IOAttributeChecker kInputAttachmentIndexChecker{
     .kind = IOAttributeKind::kInputAttachmentIndex,
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentResourceUsage},
     .valid_io_kinds = EnumSet<ShaderIOKind>{ShaderIOKind::kModuleScopeVar},
-    .check = [](const core::type::Type*,
-                const IOAttributes&,
-                const Capabilities&,
-                const Properties&,
-                IOAttributeUsage) -> Result<SuccessType, std::string> { return Success; },
-    .type_check = [](const core::type::Type* ty, const Capabilities& cap) -> bool {
-        return cap.Contains(Capability::kAllowAnyInputAttachmentIndexType) ||
+    .check = [](const core::type::Type*, const IOAttributes&, const Properties&, IOAttributeUsage)
+        -> Result<SuccessType, std::string> { return Success; },
+    .type_check = [](const core::type::Type* ty, const Properties& props) -> bool {
+        return props.Contains(Property::kAllowAnyInputAttachmentIndexType) ||
                ty->Is<core::type::InputAttachment>();
     },
     .type_error = "must be an input_attachment",
@@ -880,7 +871,6 @@ constexpr IOAttributeChecker kDepthModeChecker{
     // kBuiltInChecker does the checking of the depth_mode value for the specific builtin.
     .check = [](const core::type::Type*,
                 const IOAttributes& attr,
-                const Capabilities&,
                 const Properties&,
                 IOAttributeUsage) -> Result<SuccessType, std::string> {
         if (!attr.builtin.has_value()) {
@@ -888,7 +878,7 @@ constexpr IOAttributeChecker kDepthModeChecker{
         }
         return Success;
     },
-    .type_check = [](const core::type::Type*, const Capabilities&) -> bool { return true; },
+    .type_check = [](const core::type::Type*, const Properties&) -> bool { return true; },
     .type_error = nullptr,
 };
 
@@ -3126,7 +3116,7 @@ void Validator::ValidateIOAttributesImpl(IOAttributeContext& ctx,
                     continue;
                 }
 
-                if (!checker->type_check(t, v.capabilities_)) {
+                if (!checker->type_check(t, v.mod_.properties)) {
                     failed.Add(checker);
                     v.AddError(msg_anchor) << ToString(checker->kind) << " " << checker->type_error;
                 }
@@ -3137,8 +3127,7 @@ void Validator::ValidateIOAttributesImpl(IOAttributeContext& ctx,
                     continue;
                 }
 
-                if (auto res = checker->check(t, a, v.capabilities_, v.mod_.properties, usage);
-                    res != Success) {
+                if (auto res = checker->check(t, a, v.mod_.properties, usage); res != Success) {
                     failed.Add(checker);
                     v.AddError(msg_anchor) << res.Failure();
                 }
@@ -3658,7 +3647,7 @@ void Validator::CheckVar(const Var* var) {
             AddError(var) << "'@input_attachment_index' is not valid for non-handle var";
             return;
         }
-        if (!capabilities_.Contains(Capability::kAllowAnyInputAttachmentIndexType) &&
+        if (!mod_.properties.Contains(Property::kAllowAnyInputAttachmentIndexType) &&
             !mv->UnwrapPtrOrRef()->Is<core::type::InputAttachment>()) {
             AddError(var)
                 << "'@input_attachment_index' is only valid for 'input_attachment' type var";
@@ -4071,13 +4060,13 @@ bool Validator::CheckStructMemberAttributes(const core::type::StructMember* memb
                                             std::function<diag::Diagnostic&()> make_diag) {
     const auto checkers = IOAttributeCheckersFor(member->Attributes(), /*skip_builtins*/ false);
     for (const auto* checker : checkers) {
-        auto res = checker->check(member->Type(), member->Attributes(), capabilities_,
-                                  mod_.properties, IOAttributeUsage::kUndefinedUsage);
+        auto res = checker->check(member->Type(), member->Attributes(), mod_.properties,
+                                  IOAttributeUsage::kUndefinedUsage);
         if (res != Success) {
             make_diag() << res.Failure();
             return false;
         }
-        if (!checker->type_check(member->Type(), capabilities_)) {
+        if (!checker->type_check(member->Type(), mod_.properties)) {
             make_diag() << ToString(checker->kind) << " " << checker->type_error;
             return false;
         }

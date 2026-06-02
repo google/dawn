@@ -1241,6 +1241,8 @@ struct State {
 
         result->SetResult(builtin->DetachResult());
         builtin->Destroy();
+
+        ir.properties.Add(core::ir::Property::kAllowAnyInputAttachmentIndexType);
     }
 
     /// Handles SubgroupShuffle(), SubgroupShuffleDown(), SubgroupShuffleUp(), SubgroupShuffleXor()
