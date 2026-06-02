@@ -103,7 +103,6 @@ class State {
 
     Program Run(const Options& options) {
         core::ir::Capabilities caps{
-            core::ir::Capability::kAllowPhonyInstructions,
             core::ir::Capability::kAllowRefTypes,
         };
         if (auto res = Validate(mod, caps, "before wgsl.to_program"); res != Success) {

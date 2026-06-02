@@ -1272,7 +1272,8 @@ TEST_F(IR_ValidatorTest, Phony_NullValue) {
     sb.Append(v);
     sb.Return(f);
 
-    auto res = ir::Validate(mod, Capabilities{ir::Capability::kAllowPhonyInstructions});
+    mod.properties.Add(Property::kAllowPhonyInstructions);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:19 error: phony: operand is undefined
     undef = phony undef
@@ -1290,7 +1291,8 @@ TEST_F(IR_ValidatorTest, Phony_EmptyValue) {
     sb.Append(v);
     sb.Return(f);
 
-    auto res = ir::Validate(mod, Capabilities{ir::Capability::kAllowPhonyInstructions});
+    mod.properties.Add(Property::kAllowPhonyInstructions);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:3:13 error: phony: expected exactly 1 operands, got 0
@@ -1310,9 +1312,8 @@ TEST_F(IR_ValidatorTest, Phony_MissingCapability) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(R"(:3:13 error: phony: missing capability 'kAllowPhonyInstructions'
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:13 error: phony: missing property 'kAllowPhonyInstructions'
     undef = phony 1i
             ^^^^^
 )")) << res.Failure();

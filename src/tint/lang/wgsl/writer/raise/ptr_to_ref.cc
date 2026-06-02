@@ -139,11 +139,7 @@ struct Impl {
 }  // namespace
 
 Result<SuccessType> PtrToRef(core::ir::Module& mod) {
-    core::ir::AssertValid(mod,
-                          core::ir::Capabilities{
-                              core::ir::Capability::kAllowPhonyInstructions,
-                          },
-                          "before wgsl.PtrToRef");
+    core::ir::AssertValid(mod, "before wgsl.PtrToRef");
 
     Impl{mod}.Run();
 

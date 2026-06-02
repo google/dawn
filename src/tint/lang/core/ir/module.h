@@ -64,6 +64,8 @@ enum class Property : uint8_t {
     kAllowMultipleEntryPoints,
     /// Allow overrides
     kAllowOverrides,
+    /// Allows phony assignment instructions to be used.
+    kAllowPhonyInstructions,
     /// Allows the PointSize builtin to be used.
     kAllowPointSizeBuiltin,
     /// Allows matrix annotations on structure members.
@@ -93,6 +95,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(AllowDuplicateBindings);
         CASE(AllowMultipleEntryPoints);
         CASE(AllowOverrides);
+        CASE(AllowPhonyInstructions);
         CASE(AllowPointSizeBuiltin);
         CASE(AllowStructMatrixDecorations);
         CASE(AllowVectorElementPointer);

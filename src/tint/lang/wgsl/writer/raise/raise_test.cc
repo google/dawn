@@ -41,10 +41,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 class WgslWriter_RaiseTest : public core::ir::transform::TransformTest {
   public:
-    WgslWriter_RaiseTest() {
-        capabilities.Add(core::ir::Capability::kAllowRefTypes);
-        capabilities.Add(core::ir::Capability::kAllowPhonyInstructions);
-    }
+    WgslWriter_RaiseTest() { capabilities.Add(core::ir::Capability::kAllowRefTypes); }
 };
 
 TEST_F(WgslWriter_RaiseTest, BuiltinConversion) {

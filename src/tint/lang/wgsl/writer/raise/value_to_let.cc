@@ -178,6 +178,7 @@ struct State {
         }
 
         if (!value->IsUsed() && !ir.NameOf(value).IsValid()) {
+            ir.properties.Add(core::ir::Property::kAllowPhonyInstructions);
             auto* phony = b.Phony(value);
             phony->InsertAfter(inst);
             return;

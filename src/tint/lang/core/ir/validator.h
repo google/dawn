@@ -49,8 +49,6 @@ enum class Capability : uint8_t {
     kAllowModuleScopeLets,
     /// Allows ref types
     kAllowRefTypes,
-    /// Allows phony assignment instructions to be used.
-    kAllowPhonyInstructions,
     /// Allows lets to have any type, used by MSL backend for module scoped vars
     kAllowAnyLetType,
     /// Allows input_attachment_index to be associated with any type, used by

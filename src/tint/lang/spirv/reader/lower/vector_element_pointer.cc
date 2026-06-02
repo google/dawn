@@ -156,7 +156,6 @@ struct State {
 Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
     core::ir::AssertValid(ir,
                           core::ir::Capabilities{
-                              core::ir::Capability::kAllowPhonyInstructions,
                               core::ir::Capability::kAllowNonCoreTypes,
                               core::ir::Capability::kAllowLocationForNumericElements,
                               core::ir::Capability::kAllowPointerToHandle,

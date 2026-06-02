@@ -84,10 +84,8 @@ $B1: {  # root
 }
 
 TEST_F(IR_DeadCodeEliminationTest, RemoveFunction) {
-    capabilities = Capabilities{
-        Capability::kAllowUnannotatedModuleIOVariables,
-        Capability::kAllowPhonyInstructions,
-    };
+    capabilities = Capability::kAllowUnannotatedModuleIOVariables;
+    mod.properties.Add(Property::kAllowPhonyInstructions);
 
     auto* buffer = b.Var("buffer", ty.ptr(core::AddressSpace::kIn, ty.i32()));
     mod.root_block->Append(buffer);
@@ -204,6 +202,8 @@ $B1: {  # root
 }
 
 TEST_F(IR_DeadCodeEliminationTest, RemoveVarIn_Nested) {
+    mod.properties.Add(Property::kAllowPhonyInstructions);
+
     auto* buffer = b.Var("buffer", ty.ptr(core::AddressSpace::kIn, ty.i32()));
     mod.root_block->Append(buffer);
 

@@ -5323,8 +5323,8 @@ void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
 }
 
 void Validator::CheckPhony(const Phony* p) {
-    if (!capabilities_.Contains(Capability::kAllowPhonyInstructions)) {
-        AddError(p) << "missing capability 'kAllowPhonyInstructions'";
+    if (!mod_.properties.Contains(Property::kAllowPhonyInstructions)) {
+        AddError(p) << "missing property 'kAllowPhonyInstructions'";
         return;
     }
 

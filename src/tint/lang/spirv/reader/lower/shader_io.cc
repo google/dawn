@@ -742,7 +742,6 @@ struct State {
 Result<SuccessType> ShaderIO(core::ir::Module& ir) {
     AssertValid(ir,
                 core::ir::Capabilities{
-                    core::ir::Capability::kAllowPhonyInstructions,
                     core::ir::Capability::kAllowNonCoreTypes,
                     core::ir::Capability::kAllowLocationForNumericElements,
                     core::ir::Capability::kAllowPointerToHandle,
