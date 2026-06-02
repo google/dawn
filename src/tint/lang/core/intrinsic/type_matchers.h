@@ -156,7 +156,7 @@ inline bool MatchVec(intrinsic::MatchState&,
 }
 
 template <uint32_t N>
-inline bool MatchVec(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
+inline constexpr bool MatchVec(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
     if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
@@ -235,7 +235,7 @@ inline bool MatchMat(intrinsic::MatchState&,
 }
 
 template <uint32_t C, uint32_t R>
-inline bool MatchMat(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
+inline constexpr bool MatchMat(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
     if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
