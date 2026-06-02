@@ -182,6 +182,7 @@ ResourceType DefaultResourceTypeFor(const core::type::Type* in_type) {
                 case core::type::TextureDimension::kNone:
                     TINT_UNREACHABLE();
             }
+            TINT_UNREACHABLE();
         },
         [&](const core::type::MultisampledTexture* ms) {
             return tint::Switch(
@@ -279,6 +280,7 @@ ResourceType TypeToResourceType(const core::type::Type* in_type) {
                 case core::type::TextureDimension::kNone:
                     TINT_UNREACHABLE();
             }
+            TINT_UNREACHABLE();
         },
         [&](const core::type::MultisampledTexture* ms) {
             return tint::Switch(

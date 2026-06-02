@@ -413,6 +413,7 @@ VkComponentSwizzle VulkanComponentSwizzle(wgpu::ComponentSwizzle swizzle) {
         case wgpu::ComponentSwizzle::Undefined:
             DAWN_UNREACHABLE();
     }
+    DAWN_UNREACHABLE();
 }
 
 void MaybeConvertDepthStencilSwizzleOneToAlpha(bool isDepthOrStencilFormat,
