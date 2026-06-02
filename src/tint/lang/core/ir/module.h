@@ -60,6 +60,8 @@ enum class Property : uint8_t {
     kAllowClipDistancesOnF32ScalarAndVector,
     /// Allows binding points to be non-unique.
     kAllowDuplicateBindings,
+    /// Allows @location on structs, matrices, and arrays that have numeric elements
+    kAllowLocationForNumericComposites,
     /// Allows multiple entry points in the module.
     kAllowMultipleEntryPoints,
     /// Allow overrides
@@ -93,6 +95,7 @@ auto& operator<<(STREAM& out, Property p) {
     switch (p) {  //
         CASE(AllowClipDistancesOnF32ScalarAndVector);
         CASE(AllowDuplicateBindings);
+        CASE(AllowLocationForNumericComposites);
         CASE(AllowMultipleEntryPoints);
         CASE(AllowOverrides);
         CASE(AllowPhonyInstructions);

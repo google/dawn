@@ -884,7 +884,8 @@ TEST_F(IR_ValidatorTest, Var_Location_Struct_WithCapability) {
     v->SetLocation(0);
     mod.root_block->Append(v);
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowLocationForNumericElements});
+    mod.properties.Add(Property::kAllowLocationForNumericComposites);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

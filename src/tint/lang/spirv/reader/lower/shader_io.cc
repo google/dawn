@@ -743,7 +743,6 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir) {
     AssertValid(ir,
                 core::ir::Capabilities{
                     core::ir::Capability::kAllowNonCoreTypes,
-                    core::ir::Capability::kAllowLocationForNumericElements,
                     core::ir::Capability::kAllowPointerToHandle,
                     core::ir::Capability::kLoosenValidationForShaderIO,
                 },
@@ -751,6 +750,7 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir) {
 
     TINT_CHECK_RESULT(State{ir}.Process());
 
+    ir.properties.Remove(core::ir::Property::kAllowLocationForNumericComposites);
     ir.properties.Remove(core::ir::Property::kAllowPointSizeBuiltin);
 
     return Success;

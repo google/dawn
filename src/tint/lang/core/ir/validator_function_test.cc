@@ -455,7 +455,8 @@ TEST_F(IR_ValidatorTest, Function_Param_Location_Struct_WithCapability) {
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowLocationForNumericElements});
+    mod.properties.Add(Property::kAllowLocationForNumericComposites);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -1502,7 +1503,8 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnStruct_WithCapabi
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowLocationForNumericElements});
+    mod.properties.Add(Property::kAllowLocationForNumericComposites);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -1549,7 +1551,7 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_WithoutCapability) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:27 error: interpolation cannot be applied to a struct without 'kAllowLocationForNumericElements' capability
+            R"(:5:27 error: interpolation cannot be applied to a struct without 'kAllowLocationForNumericComposites' property
 %my_func = @fragment func(%p:S):void {
                           ^^^^
 )")) << res.Failure();
@@ -1572,7 +1574,8 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnAllMembers_WithCa
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowLocationForNumericElements});
+    mod.properties.Add(Property::kAllowLocationForNumericComposites);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -1598,7 +1601,7 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnAllMembers_Withou
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:6:27 error: interpolation cannot be applied to a struct without 'kAllowLocationForNumericElements' capability
+            R"(:6:27 error: interpolation cannot be applied to a struct without 'kAllowLocationForNumericComposites' property
 %my_func = @fragment func(%p:S):void {
                           ^^^^
 
@@ -1620,7 +1623,8 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnSomeMembers_WithC
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowLocationForNumericElements});
+    mod.properties.Add(Property::kAllowLocationForNumericComposites);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(

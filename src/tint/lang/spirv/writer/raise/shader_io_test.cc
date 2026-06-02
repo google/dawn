@@ -41,9 +41,8 @@ using namespace tint::core::number_suffixes;  // NOLINT
 class SpirvWriter_ShaderIOTest : public core::ir::transform::TransformTest {
   public:
     SpirvWriter_ShaderIOTest() {
-        capabilities.Add(
-            core::ir::Capabilities{core::ir::Capability::kLoosenValidationForShaderIO,
-                                   core::ir::Capability::kAllowLocationForNumericElements});
+        capabilities.Add(core::ir::Capability::kLoosenValidationForShaderIO);
+        mod.properties.Add(core::ir::Property::kAllowLocationForNumericComposites);
     }
 };
 

@@ -3836,10 +3836,10 @@ void Validator::CheckInterpolation(const CastableBase* anchor,
                 has_location |= (capabilities_.Contains(Capability::kLoosenValidationForShaderIO) &&
                                  a.builtin.has_value());
 
-                if (!capabilities_.Contains(Capability::kAllowLocationForNumericElements) &&
+                if (!mod_.properties.Contains(Property::kAllowLocationForNumericComposites) &&
                     t->As<core::type::Struct>()) {
                     AddError(anchor) << "interpolation cannot be applied to a struct without "
-                                        "'kAllowLocationForNumericElements' capability";
+                                        "'kAllowLocationForNumericComposites' property";
                 }
 
                 if (t->IsIntegerScalarOrVector()) {
@@ -3977,7 +3977,7 @@ void Validator::ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
     }
 
     if (attr.location.has_value()) {
-        if (capabilities_.Contains(Capability::kAllowLocationForNumericElements)) {
+        if (mod_.properties.Contains(Property::kAllowLocationForNumericComposites)) {
             std::function<bool(const core::type::Type*)> is_numeric =
                 [&is_numeric](const core::type::Type* t) -> bool {
                 t = t->UnwrapPtrOrRef();
@@ -4086,7 +4086,7 @@ bool Validator::CheckStructMemberAttributes(const core::type::StructMember* memb
     }
 
     if (member->Attributes().location.has_value()) {
-        if (capabilities_.Contains(Capability::kAllowLocationForNumericElements)) {
+        if (mod_.properties.Contains(Property::kAllowLocationForNumericComposites)) {
             if (!member->Type()->UnwrapPtrOrRef()->IsNumericScalarOrVector() &&
                 !member->Type()->UnwrapPtrOrRef()->Is<core::type::Struct>()) {
                 make_diag() << "struct member with a location attribute must be a numeric scalar, "

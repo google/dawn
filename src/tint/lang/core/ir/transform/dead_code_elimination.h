@@ -42,7 +42,6 @@ namespace tint::core::ir::transform {
 const core::ir::Capabilities kDeadCodeEliminationCapabilities{
     core::ir::Capability::kAllowUnannotatedModuleIOVariables,
     core::ir::Capability::kAllowNonCoreTypes,
-    core::ir::Capability::kAllowLocationForNumericElements,
     core::ir::Capability::kAllowPointerToHandle,
     core::ir::Capability::kLoosenValidationForShaderIO,
 };
