@@ -75,7 +75,9 @@ class array : private ::std::array<Value, Size> {
 
     constexpr Index size() const { return Index(static_cast<I>(Base::size())); }
 
-    constexpr bool operator==(const array<Index, Value, Size>& other) const = default;
+    constexpr bool operator==(const array<Index, Value, Size>& other) const {
+        return static_cast<const Base&>(*this) == static_cast<const Base&>(other);
+    }
 };
 
 }  // namespace dawn::ityp
