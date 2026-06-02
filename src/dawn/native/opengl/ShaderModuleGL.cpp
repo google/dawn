@@ -273,6 +273,7 @@ void GenerateTextureBuiltinFromUniformData(
 bool GenerateArrayLengthFromuniformData(
     const BindingInfoArray& moduleBindingInfo,
     const PipelineLayout* layout,
+    SingleShaderStage stage,
     tint::glsl::writer::ArrayLengthFromUniformOptions& options) {
     const PipelineLayout::BindingIndexInfo& indexInfo = layout->GetBindingIndexInfo();
 
@@ -281,6 +282,11 @@ bool GenerateArrayLengthFromuniformData(
 
         for (BindingIndex binding : bgl->GetBufferIndices()) {
             const BindingInfo& bindingInfo = bgl->GetBindingInfo(binding);
+
+            // Skip bindings that aren't visible to this stage.
+            if (!(bindingInfo.visibility & StageBit(stage))) {
+                continue;
+            }
 
             switch (std::get<BufferBindingInfo>(bindingInfo.bindingLayout).type) {
                 case wgpu::BufferBindingType::Storage:
@@ -409,7 +415,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     if (GetDevice()->IsToggleEnabled(Toggle::GLUseArrayLengthFromUniform)) {
         *needsSSBOLengthUniformBuffer = GenerateArrayLengthFromuniformData(
-            moduleBindingInfo, layout, req.tintOptions.array_length_from_uniform);
+            moduleBindingInfo, layout, stage, req.tintOptions.array_length_from_uniform);
         if (*needsSSBOLengthUniformBuffer) {
             req.tintOptions.use_array_length_from_uniform = true;
             req.tintOptions.array_length_from_uniform.ubo_binding = {
