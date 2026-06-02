@@ -539,6 +539,91 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_u8) {
     EXPECT_TRUE(target->IsSubgroupMatrix());
 }
 
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_OOBOffset) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* buffer = GlobalVar("buffer", storage, ty.array(ty.f32(), Expr(8_a)),
+                             Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(Ident(wgsl::BuiltinFn::kSubgroupMatrixLoad,
+                            ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u)),
+                      AddressOf(buffer), 8_u, false, 32_u);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(),
+                testing::HasSubstr("error: the offset argument of subgroupMatrixLoad (8) is out of "
+                                   "bounds of the array type of size 8"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_OOBOffset) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* buffer = GlobalVar("buffer", storage, read_write, ty.array(ty.f32(), Expr(8_a)),
+                             Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixStore, AddressOf(buffer), 12_u,
+                      Call(ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u)),
+                      false, 32_u);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             CallStmt(call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(),
+                testing::HasSubstr("error: the offset argument of subgroupMatrixStore (12) is out "
+                                   "of bounds of the array type of size 8"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_NegativeOffset) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* buffer = GlobalVar("buffer", storage, read_write, ty.array(ty.f32(), Expr(8_a)),
+                             Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixStore, AddressOf(buffer), -1_i,
+                      Call(ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u)),
+                      false, 32_u);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             CallStmt(call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(), testing::HasSubstr("no matching call to 'subgroupMatrixStore"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_i8_i32_InBoundsOffset) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* buffer = GlobalVar("buffer", storage, read_write, ty.array(ty.i32(), Expr(8_a)),
+                             Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixStore, AddressOf(buffer), 12_u,
+                      Call(ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.i8(), 8u, 8u)),
+                      false, 32_u);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             CallStmt(call),
+         });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_i8_i32_OOBOffset) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* buffer = GlobalVar("buffer", storage, read_write, ty.array(ty.i32(), Expr(8_a)),
+                             Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixStore, AddressOf(buffer), 32_u,
+                      Call(ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.i8(), 8u, 8u)),
+                      false, 32_u);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             CallStmt(call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(),
+                testing::HasSubstr("error: the offset argument of subgroupMatrixStore (32) is out "
+                                   "of bounds of the array type of size 32"));
+}
+
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
     auto* left = Var("left", function, ty.subgroup_matrix_left(ty.f32(), 2_u, 4_u));

@@ -1387,6 +1387,10 @@ class Validator {
     void CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                               const core::intrinsic::Overload& overload);
 
+    /// Validates the offset argument of a subgroupMatrixLoad or subgroupMatrixStore call.
+    /// @param call the core builtin call
+    void CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call);
+
     /// Validates the given member builtin call
     /// @param call the member call to validate
     void CheckMemberBuiltinCall(const MemberBuiltinCall* call);
@@ -4261,6 +4265,62 @@ void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                 break;
             default:
                 break;
+        }
+    }
+
+    if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
+        call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+        CheckSubgroupMatrixOpOffset(call);
+    }
+}
+
+void Validator::CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call) {
+    auto* p_arg = call->Args()[0];
+    auto* offset_arg = call->Args()[1];
+
+    auto* ptr_ty = p_arg->Type()->As<core::type::Pointer>();
+    TINT_ASSERT(ptr_ty);
+
+    auto* arr_ty = ptr_ty->StoreType()->As<core::type::Array>();
+    TINT_ASSERT(arr_ty);
+
+    auto const_count = arr_ty->ConstantCount();
+    if (!const_count.has_value()) {
+        return;
+    }
+
+    const core::type::SubgroupMatrix* mat_ty = nullptr;
+    if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad) {
+        mat_ty = call->Result()->Type()->As<core::type::SubgroupMatrix>();
+    } else if (call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+        mat_ty = call->Args()[2]->Type()->As<core::type::SubgroupMatrix>();
+    }
+    TINT_ASSERT(mat_ty);
+
+    auto arr_elem_size = arr_ty->ElemType()->Size();
+    auto mat_comp_size = mat_ty->Type()->Size();
+    TINT_ASSERT(mat_comp_size > 0);
+
+    auto limit = (const_count.value() * arr_elem_size) / mat_comp_size;
+
+    if (auto* offset_const = offset_arg->As<ir::Constant>()) {
+        auto* offset_val = offset_const->Value();
+        uint32_t offset = 0;
+        if (offset_arg->Type()->IsUnsignedIntegerScalar()) {
+            offset = offset_val->ValueAs<u32>();
+        } else if (offset_arg->Type()->IsSignedIntegerScalar()) {
+            auto ival = offset_val->ValueAs<i32>();
+            if (ival < 0) {
+                AddError(call, 1) << "the offset argument of " << call->Func()
+                                  << " must be non-negative";
+                return;
+            }
+            offset = static_cast<uint32_t>(ival);
+        }
+
+        if (offset >= limit) {
+            AddError(call, 1) << "the offset argument of " << call->Func() << " (" << offset
+                              << ") is out of bounds of the array type of size " << limit;
         }
     }
 }

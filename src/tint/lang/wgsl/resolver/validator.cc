@@ -2066,6 +2066,12 @@ bool Validator::BuiltinCall(const sem::Call* call) const {
                 return false;
             }
         }
+        if (fn->Fn() == wgsl::BuiltinFn::kSubgroupMatrixLoad ||
+            fn->Fn() == wgsl::BuiltinFn::kSubgroupMatrixStore) {
+            if (!CheckSubgroupMatrixOpOffset(fn, call->Arguments()[0], call->Arguments()[1])) {
+                return false;
+            }
+        }
     }
 
     return true;
@@ -3651,6 +3657,67 @@ bool Validator::CheckNoMultipleModuleScopeVarsOfAddressSpace(sem::Function* entr
             return false;
         }
     }
+    return true;
+}
+
+bool Validator::CheckSubgroupMatrixOpOffset(const sem::BuiltinFn* fn,
+                                            const sem::ValueExpression* p_arg,
+                                            const sem::ValueExpression* offset_arg) const {
+    auto* ptr_ty = p_arg->Type()->As<core::type::Pointer>();
+    if (!ptr_ty) {
+        return true;
+    }
+    auto* arr_ty = ptr_ty->StoreType()->As<core::type::Array>();
+    if (!arr_ty) {
+        return true;
+    }
+    auto const_count = arr_ty->ConstantCount();
+    if (!const_count) {
+        return true;
+    }
+    auto* offset_val = offset_arg->ConstantValue();
+    if (!offset_val) {
+        return true;
+    }
+
+    const core::type::SubgroupMatrix* mat_ty = nullptr;
+    if (fn->Fn() == wgsl::BuiltinFn::kSubgroupMatrixLoad) {
+        mat_ty = fn->ReturnType()->As<core::type::SubgroupMatrix>();
+    } else if (fn->Fn() == wgsl::BuiltinFn::kSubgroupMatrixStore) {
+        mat_ty = fn->Parameters()[2]->Type()->As<core::type::SubgroupMatrix>();
+    }
+    if (!mat_ty) {
+        return true;
+    }
+
+    auto arr_elem_size = arr_ty->ElemType()->Size();
+    auto mat_comp_size = mat_ty->Type()->Size();
+    if (mat_comp_size == 0) {
+        return true;
+    }
+
+    auto limit = (const_count.value() * arr_elem_size) / mat_comp_size;
+
+    uint32_t offset = 0;
+    if (offset_arg->Type()->IsUnsignedIntegerScalar()) {
+        offset = offset_val->ValueAs<u32>();
+    } else if (offset_arg->Type()->IsSignedIntegerScalar()) {
+        int32_t ival = offset_val->ValueAs<i32>();
+        if (ival < 0) {
+            AddError(offset_arg->Declaration()->source)
+                << "the offset argument of " << fn->str() << " must be non-negative";
+            return false;
+        }
+        offset = static_cast<uint32_t>(ival);
+    }
+
+    if (offset >= limit) {
+        AddError(offset_arg->Declaration()->source)
+            << "the offset argument of " << fn->str() << " (" << offset
+            << ") is out of bounds of the array type of size " << limit;
+        return false;
+    }
+
     return true;
 }
 

@@ -1576,4 +1576,108 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<f32>),
         std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<vec2h>)));
 
+TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_OOBOffset) {
+    auto* mat_ty = ty.subgroup_matrix_left(ty.u32(), 8u, 8u);
+    auto* arr_ptr_ty = ty.ptr<workgroup, array<u32, 8>>();
+
+    auto* f = b.Function("foo", ty.void_());
+    auto* arr_param = b.FunctionParam(arr_ptr_ty);
+    auto* mat_param = b.FunctionParam(mat_ty);
+    f->SetParams({arr_param, mat_param});
+
+    b.Append(f->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, arr_param, 12_u, mat_param, true,
+               8_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("the offset argument of subgroupMatrixStore (12) is out of "
+                                   "bounds of the array type of size 8"));
+}
+
+TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixLoad_OOBOffset) {
+    auto* mat_ty = ty.subgroup_matrix_left(ty.u32(), 8u, 8u);
+    auto* arr_ptr_ty = ty.ptr<workgroup, array<u32, 8>>();
+
+    auto* f = b.Function("foo", ty.void_());
+    auto* arr_param = b.FunctionParam(arr_ptr_ty);
+    f->SetParams({arr_param});
+
+    b.Append(f->Block(), [&] {
+        b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat_ty}, arr_param, 8_u,
+                       true, 8_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("the offset argument of subgroupMatrixLoad (8) is out of bounds "
+                                   "of the array type of size 8"));
+}
+
+TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixLoad_NegativeOffset) {
+    auto* mat_ty = ty.subgroup_matrix_left(ty.u32(), 8u, 8u);
+    auto* arr_ptr_ty = ty.ptr<workgroup, array<u32, 8>>();
+
+    auto* f = b.Function("foo", ty.void_());
+    auto* arr_param = b.FunctionParam(arr_ptr_ty);
+    f->SetParams({arr_param});
+
+    b.Append(f->Block(), [&] {
+        b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat_ty}, arr_param,
+                       -1_i, true, 8_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("no matching call to 'subgroupMatrixLoad"));
+}
+
+TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_i8_i32_InBoundsOffset) {
+    auto* mat_ty = ty.subgroup_matrix_left(ty.i8(), 8u, 8u);
+    auto* arr_ptr_ty = ty.ptr<workgroup, array<i32, 8>>();
+
+    auto* f = b.Function("foo", ty.void_());
+    auto* arr_param = b.FunctionParam(arr_ptr_ty);
+    auto* mat_param = b.FunctionParam(mat_ty);
+    f->SetParams({arr_param, mat_param});
+
+    b.Append(f->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, arr_param, 12_u, mat_param, true,
+               8_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllow8BitIntegers});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_i8_i32_OOBOffset) {
+    auto* mat_ty = ty.subgroup_matrix_left(ty.i8(), 8u, 8u);
+    auto* arr_ptr_ty = ty.ptr<workgroup, array<i32, 8>>();
+
+    auto* f = b.Function("foo", ty.void_());
+    auto* arr_param = b.FunctionParam(arr_ptr_ty);
+    auto* mat_param = b.FunctionParam(mat_ty);
+    f->SetParams({arr_param, mat_param});
+
+    b.Append(f->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, arr_param, 32_u, mat_param, true,
+               8_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllow8BitIntegers});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("the offset argument of subgroupMatrixStore (32) is out of "
+                                   "bounds of the array type of size 32"));
+}
+
 }  // namespace tint::core::ir
