@@ -152,7 +152,6 @@ Result<SuccessType> ChangeImmediateToUniform(core::ir::Module& ir,
                               core::ir::Capability::kAllow8BitIntegers,
                               core::ir::Capability::kAllow16BitIntegers,
                               core::ir::Capability::kAllowNonCoreTypes,
-                              core::ir::Capability::kMslAllowEntryPointInterface,
                           },
                           "before core.ChangeImmediateToUniform");
 

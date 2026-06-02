@@ -2184,7 +2184,7 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(core::ir::Capability::kMslAllowEntryPointInterface);
+    mod.properties.Add(core::ir::Property::kAllowMslEntryPointInterface);
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_index;
     bindpoint_to_index[{0, 0}] = 0;
 

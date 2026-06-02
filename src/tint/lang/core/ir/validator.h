@@ -58,11 +58,6 @@ enum class Capability : uint8_t {
     /// other.
     /// TODO(448417342): Validate in/out address space usage based on this capability
     kLoosenValidationForShaderIO,
-    /// Allows MSL specific entry point variance.
-    /// Specifically pointers and handle address space variables inside structures, private address
-    /// space variables in function scopes, workgroup address space pointers as entry point inputs,
-    /// binding point on non-module scope variables in entry point interface.
-    kMslAllowEntryPointInterface,
 };
 
 /// Capabilities is a set of Capability

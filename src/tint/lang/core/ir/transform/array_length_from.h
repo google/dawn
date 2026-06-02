@@ -46,7 +46,6 @@ struct ImmediateDataLayout;
 const Capabilities kArrayLengthCapabilities{
     Capability::kAllow8BitIntegers,
     Capability::kAllow16BitIntegers,
-    Capability::kMslAllowEntryPointInterface,
     Capability::kAllowNonCoreTypes,
 };
 

@@ -108,7 +108,6 @@ Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
                     core::ir::Capability::kAllow8BitIntegers,
                     core::ir::Capability::kAllowAnyLetType,
                     core::ir::Capability::kAllowNonCoreTypes,
-                    core::ir::Capability::kMslAllowEntryPointInterface,
                 },
                 "before msl.BinaryPolyfill");
 

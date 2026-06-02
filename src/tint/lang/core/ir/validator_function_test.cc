@@ -363,7 +363,8 @@ TEST_F(IR_ValidatorTest, Function_Param_WorkgroupPlusOtherIOAnnotation) {
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
+    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -387,7 +388,8 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_WorkgroupPlusOtherIOAnnotations) 
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
+    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -2111,7 +2113,7 @@ TEST_F(IR_ValidatorTest, Function_EntryPointParam_BindingPointWithoutCapability)
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_EntryPointParam_BindingPointWithCapability) {
+TEST_F(IR_ValidatorTest, Function_EntryPointParam_BindingPointWithProperty) {
     auto* f = ComputeEntryPoint("my_func");
     auto* p = b.FunctionParam("my_param", ty.ptr<uniform, i32>());
     p->SetBindingPoint(0, 0);
@@ -2119,7 +2121,8 @@ TEST_F(IR_ValidatorTest, Function_EntryPointParam_BindingPointWithCapability) {
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
+    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

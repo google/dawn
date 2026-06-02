@@ -241,7 +241,7 @@ TEST_F(IR_ValidatorTest, Var_NonFunction_InsideFunctionScope) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Var_Private_InsideFunctionScopeWithCapability) {
+TEST_F(IR_ValidatorTest, Var_Private_InsideFunctionScopeWithProperty) {
     auto* f = b.Function("my_func", ty.void_());
 
     b.Append(f->Block(), [&] {
@@ -249,7 +249,8 @@ TEST_F(IR_ValidatorTest, Var_Private_InsideFunctionScopeWithCapability) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
+    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -1465,11 +1466,12 @@ TEST_F(IR_ValidatorTest, Var_Atomic_NestedArray_Private) {
 )"));
 }
 
-TEST_F(IR_ValidatorTest, WorkgroupVar_RuntimeSizedArray_WithMslCapability) {
+TEST_F(IR_ValidatorTest, WorkgroupVar_RuntimeSizedArray_WithMslProperty) {
     auto* v = b.Var("v", ty.ptr<workgroup, array<i32>>());
     mod.root_block->Append(v);
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
+    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,

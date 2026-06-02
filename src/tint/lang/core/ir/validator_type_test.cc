@@ -516,7 +516,7 @@ TEST_F(IR_ValidatorTest, StructMember_Pointer) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, StructMember_Pointer_WithCapability) {
+TEST_F(IR_ValidatorTest, StructMember_Pointer_WithProperty) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
                              {
                                  {mod.symbols.New("p"), ty.ptr<function, i32>(), {}},
@@ -524,10 +524,9 @@ TEST_F(IR_ValidatorTest, StructMember_Pointer_WithCapability) {
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
-    Capabilities caps;
-    caps.Add(Capability::kMslAllowEntryPointInterface);
+    mod.properties.Add(Property::kAllowMslEntryPointInterface);
 
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success);
 }
 
@@ -549,7 +548,7 @@ TEST_F(IR_ValidatorTest, StructMember_Texture) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, StructMember_Texture_WithCapability) {
+TEST_F(IR_ValidatorTest, StructMember_Texture_WithProperty) {
     auto* str_ty = ty.Struct(
         mod.symbols.New("MyStruct"),
         {
@@ -558,10 +557,9 @@ TEST_F(IR_ValidatorTest, StructMember_Texture_WithCapability) {
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
-    Capabilities caps;
-    caps.Add(Capability::kMslAllowEntryPointInterface);
+    mod.properties.Add(Property::kAllowMslEntryPointInterface);
 
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success);
 }
 
@@ -600,7 +598,7 @@ TEST_F(IR_ValidatorTest, StructMember_InvalidBuiltinType_Unused) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr("primitive_index must be an u32"));
 }
 
-TEST_F(IR_ValidatorTest, StructMember_Sampler_WithCapability) {
+TEST_F(IR_ValidatorTest, StructMember_Sampler_WithProperty) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
                                                    {mod.symbols.New("s"), ty.sampler(), {}},
@@ -608,10 +606,9 @@ TEST_F(IR_ValidatorTest, StructMember_Sampler_WithCapability) {
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
-    Capabilities caps;
-    caps.Add(Capability::kMslAllowEntryPointInterface);
+    mod.properties.Add(Property::kAllowMslEntryPointInterface);
 
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success);
 }
 
@@ -1128,8 +1125,8 @@ TEST_P(Type_BindingArrayInvalidAddressSpace, AllowedWithCapability) {
         b.Append(mod.root_block, [&] { b.Var("m", addr, ty.binding_array(ty.u32(), 4)); });
     }
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface,
-                                              Capability::kAllowNonCoreTypes});
+    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowNonCoreTypes});
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

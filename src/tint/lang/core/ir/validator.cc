@@ -2191,7 +2191,7 @@ void Validator::CheckType(const core::type::Type* root,
                         return false;
                     }
 
-                    if (!capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
+                    if (!mod_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
                         if (member->Type()->Is<core::type::Pointer>()) {
                             diag() << "struct member " << member->Index()
                                    << " cannot be a pointer type";
@@ -2490,7 +2490,7 @@ void Validator::CheckType(const core::type::Type* root,
 
                 if (!(addrspace == AddressSpace::kUndefined ||
                       addrspace == AddressSpace::kHandle) &&
-                    !capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
+                    !mod_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
                     diag() << "invalid address space for binding_array : " << addrspace;
                     return false;
                 }
@@ -2721,7 +2721,7 @@ void Validator::CheckFunction(const Function* func) {
 
             auto struct_ty = param->Type()->As<core::type::Struct>();
             if (!allowed_ptr_to_handle &&
-                (!capabilities_.Contains(Capability::kMslAllowEntryPointInterface) ||
+                (!mod_.properties.Contains(Property::kAllowMslEntryPointInterface) ||
                  (struct_ty == nullptr) ||
                  struct_ty->Members().Any([](const core::type::StructMember* m) {
                      return !IsValidFunctionParamType(m->Type());
@@ -2731,7 +2731,7 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
         if (func->IsEntryPoint() &&
-            !capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
+            !mod_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
             if (param->Type()->Is<core::type::Pointer>()) {
                 AddError(param) << "entry point parameters cannot be pointers";
             }
@@ -2785,7 +2785,7 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
-        if (!capabilities_.Contains(Capability::kMslAllowEntryPointInterface) &&
+        if (!mod_.properties.Contains(Property::kAllowMslEntryPointInterface) &&
             func->IsEntryPoint()) {
             if (mv && mv->Is<core::type::Pointer>() && address_space == AddressSpace::kWorkgroup) {
                 AddError(param) << "input param to entry point cannot be a ptr in the 'workgroup' "
@@ -3540,7 +3540,7 @@ void Validator::CheckVar(const Var* var) {
     }
 
     if (var->Block() != mod_.root_block && mv->AddressSpace() != AddressSpace::kFunction) {
-        if (!capabilities_.Contains(Capability::kMslAllowEntryPointInterface) ||
+        if (!mod_.properties.Contains(Property::kAllowMslEntryPointInterface) ||
             mv->AddressSpace() != AddressSpace::kPrivate) {
             AddError(var) << "vars in a function scope must be in the 'function' address space";
             return;
@@ -3550,7 +3550,7 @@ void Validator::CheckVar(const Var* var) {
     if (mv->AddressSpace() != AddressSpace::kStorage &&
         mv->AddressSpace() != AddressSpace::kHandle) {
         if (mv->AddressSpace() == AddressSpace::kWorkgroup ||
-            !capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
+            !mod_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
             if (!mv->StoreType()->HasFixedFootprint()) {
                 AddResultError(var, 0) << "vars not in the 'storage' or 'handle' address spaces "
                                           "must have a fixed footprint";
@@ -3909,7 +3909,7 @@ void Validator::CheckBindingPoint(const CastableBase* anchor,
     }
 
     if (binding_point.has_value() && io_kind != ShaderIOKind::kModuleScopeVar &&
-        !capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
+        !mod_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
         AddError(anchor) << "binding_points are only valid on resource variables";
     }
 
@@ -4023,7 +4023,7 @@ void Validator::ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
                 return;
             }
 
-            if (capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
+            if (mod_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
                 if (auto* mv = mem->Type()->As<core::type::MemoryView>()) {
                     if (mv->AddressSpace() == AddressSpace::kWorkgroup) {
                         mem_annotations.Add(IOAnnotation::kWorkgroup);
@@ -4328,7 +4328,7 @@ void Validator::CheckConstruct(const Construct* construct) {
         // We only allow `construct` to create non-constructible types when they are structures that
         // contain pointers and handle types, with the corresponding capability enabled.
         if (!(result_type->Is<core::type::Struct>() &&
-              capabilities_.Contains(Capability::kMslAllowEntryPointInterface))) {
+              mod_.properties.Contains(Property::kAllowMslEntryPointInterface))) {
             AddError(construct) << "type is not constructible";
             return;
         }
@@ -5143,7 +5143,7 @@ bool Validator::CanLoad(const core::type::Type* ty) {
         [&](const core::type::Struct* str) {
             for (auto* member : str->Members()) {
                 if (member->Type()->Is<core::type::Pointer>() &&
-                    capabilities_.Contains(Capability::kMslAllowEntryPointInterface)) {
+                    mod_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
                     continue;
                 }
                 if (!CanLoad(member->Type())) {

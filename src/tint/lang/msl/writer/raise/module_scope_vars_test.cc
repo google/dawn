@@ -43,8 +43,8 @@ namespace {
 class MslWriter_ModuleScopeVarsTest : public core::ir::transform::TransformTest {
   public:
     void SetUp() override {
-        capabilities.Add(core::ir::Capability::kAllowAnyLetType,
-                         core::ir::Capability::kMslAllowEntryPointInterface);
+        capabilities.Add(core::ir::Capability::kAllowAnyLetType);
+        mod.properties.Add(core::ir::Property::kAllowMslEntryPointInterface);
     }
 };
 

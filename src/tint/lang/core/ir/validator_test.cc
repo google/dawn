@@ -636,7 +636,7 @@ TEST_F(IR_ValidatorTest, Construct_Texture) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Construct_TextureInStruct_WithCapability) {
+TEST_F(IR_ValidatorTest, Construct_TextureInStruct_WithProperty) {
     auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), tex_ty},
@@ -648,18 +648,20 @@ TEST_F(IR_ValidatorTest, Construct_TextureInStruct_WithCapability) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
+    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Construct_NonConstructible_WithStructCapability) {
+TEST_F(IR_ValidatorTest, Construct_NonConstructible_WithStructProperty) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         b.Construct(ty.void_());
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kMslAllowEntryPointInterface});
+    mod.properties.Add(Property::kAllowMslEntryPointInterface);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
                                           R"(:3:15 error: construct: type is not constructible
