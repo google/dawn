@@ -68,40 +68,20 @@ import("//build/config/coverage/coverage.gni")
 template("_meson_setup") {
   assert(defined(invoker.source_dir), "source_dir must be defined")
 
-  _meson_args = [
-    "setup",
-    rebase_path("${target_gen_dir}/${target_name}", root_build_dir),
-    rebase_path(invoker.source_dir, root_build_dir),
-    "--prefix=" + rebase_path("${target_gen_dir}/install"),
-  ]
-
-  if (defined(invoker.options)) {
-    _meson_args += invoker.options
-  }
+  _native_file_path = "${target_gen_dir}/${target_name}_native.ini"
+  _setup_dir = "${target_gen_dir}/${target_name}"
 
   # Use the hermetic clang toolchain
   if (is_clang) {
     _cc_path = rebase_path("$clang_base_path/bin/clang")
     _cxx_path = rebase_path("$clang_base_path/bin/clang++")
 
-    _c_link_args = "-fuse-ld=lld"
-    _cpp_link_args = "-fuse-ld=lld"
-    if (use_clang_coverage) {
-      _c_args = "-fprofile-instr-generate -fcoverage-mapping"
-      _cpp_args = "-fprofile-instr-generate -fcoverage-mapping"
-      _c_link_args += " -fprofile-instr-generate -fcoverage-mapping"
-      _cpp_link_args += " -fprofile-instr-generate -fcoverage-mapping"
-
-      _meson_args += [
-        "-Dc_args=${_c_args}",
-        "-Dcpp_args=${_cpp_args}",
-      ]
+    # Use the glslang_validator target built from source.
+    if (host_os == "win") {
+      _glslang_path = rebase_path("$root_out_dir/glslang_validator.exe")
+    } else {
+      _glslang_path = rebase_path("$root_out_dir/glslang_validator")
     }
-
-    _meson_args += [
-      "-Dc_link_args=${_c_link_args}",
-      "-Dcpp_link_args=${_cpp_link_args}",
-    ]
 
     # Used by meson to allow specifying the toolchain elements to use
     _native_file_content = [
@@ -113,20 +93,16 @@ template("_meson_setup") {
       "pkg-config = 'pkg-config'",
       "python = ['vpython3', '-vpython-spec', '" + rebase_path("//.vpython3") +
           "']",
+      "glslang = '${_glslang_path}'",
+      "glslangValidator = '${_glslang_path}'",
     ]
 
-    _native_file_path = "${target_gen_dir}/${target_name}_native.ini"
     write_file(_native_file_path, _native_file_content)
-
-    _meson_args += [
-      "--native-file",
-      rebase_path(_native_file_path, root_build_dir),
-    ]
   }
 
-  exec_script("${meson_src_dir}/src/meson.py", _meson_args)
+  action(target_name) {
+    script = "${meson_src_dir}/src/meson.py"
 
-  group(target_name) {
     forward_variables_from(invoker,
                            [
                              "deps",
@@ -134,6 +110,49 @@ template("_meson_setup") {
                              "testonly",
                              "visibility",
                            ])
+
+    if (!defined(deps)) {
+      deps = []
+    }
+
+    # Depend on the glslang_validator binary built from source
+    deps += [ "//third_party/glslang/src:glslang_validator" ]
+
+    outputs = [ "${_setup_dir}/build.ninja" ]
+
+    args = [
+      "setup",
+      rebase_path(_setup_dir, root_build_dir),
+      rebase_path(invoker.source_dir, root_build_dir),
+      "--prefix=" + rebase_path("${target_gen_dir}/install"),
+    ]
+
+    if (defined(invoker.options)) {
+      args += invoker.options
+    }
+
+    if (is_clang) {
+      _c_link_args = "-fuse-ld=lld"
+      _cpp_link_args = "-fuse-ld=lld"
+      if (use_clang_coverage) {
+        _c_args = "-fprofile-instr-generate -fcoverage-mapping"
+        _cpp_args = "-fprofile-instr-generate -fcoverage-mapping"
+        _c_link_args += " -fprofile-instr-generate -fcoverage-mapping"
+        _cpp_link_args += " -fprofile-instr-generate -fcoverage-mapping"
+
+        args += [
+          "-Dc_args=${_c_args}",
+          "-Dcpp_args=${_cpp_args}",
+        ]
+      }
+
+      args += [
+        "-Dc_link_args=${_c_link_args}",
+        "-Dcpp_link_args=${_cpp_link_args}",
+        "--native-file",
+        rebase_path(_native_file_path, root_build_dir),
+      ]
+    }
   }
 }
 
