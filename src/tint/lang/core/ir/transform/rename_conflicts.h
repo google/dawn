@@ -44,7 +44,6 @@ const core::ir::Capabilities kRenameConflictsCapabilities{
     core::ir::Capability::kAllow16BitIntegers,
     core::ir::Capability::kAllow64BitIntegers,
     core::ir::Capability::kAllowHandleVarsWithoutBindings,
-    core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
     core::ir::Capability::kAllowAnyLetType,
     core::ir::Capability::kAllowModuleScopeLets,
     core::ir::Capability::kMslAllowEntryPointInterface,

@@ -43,8 +43,6 @@ enum class Capability : uint8_t {
     kAllow16BitIntegers,
     /// Allows 64-bit integer types.
     kAllow64BitIntegers,
-    /// Allows ClipDistances on f32 and vecN<f32> parameters
-    kAllowClipDistancesOnF32ScalarAndVector,
     /// Allows handle vars to not have binding points
     kAllowHandleVarsWithoutBindings,
     /// Allows module scoped lets

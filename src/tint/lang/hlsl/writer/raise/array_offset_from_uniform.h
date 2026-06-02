@@ -45,7 +45,6 @@ namespace tint::hlsl::writer::raise {
 const core::ir::Capabilities kArrayOffsetFromUniformCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow16BitIntegers,
-    core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
     core::ir::Capability::kAllowNonCoreTypes,
 };
 

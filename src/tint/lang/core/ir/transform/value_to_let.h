@@ -46,7 +46,6 @@ const core::ir::Capabilities kValueToLetCapabilities{
     core::ir::Capability::kAllow64BitIntegers,
 
     core::ir::Capability::kAllowHandleVarsWithoutBindings,
-    core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
     core::ir::Capability::kAllowAnyLetType,
     core::ir::Capability::kMslAllowEntryPointInterface,
     core::ir::Capability::kAllowModuleScopeLets,

@@ -387,6 +387,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // is translated to SV_ClipDistanceN in the printer.
         for (uint32_t i = 0; i < outputs.Length(); ++i) {
             if (outputs[i].attributes.builtin == core::BuiltinValue::kClipDistances) {
+                ir.properties.Add(core::ir::Property::kAllowClipDistancesOnF32ScalarAndVector);
                 auto* const type = outputs[i].type;
                 auto const name = outputs[i].name;
                 auto const attributes = outputs[i].attributes;

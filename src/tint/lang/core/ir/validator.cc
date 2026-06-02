@@ -666,12 +666,12 @@ constexpr BuiltInChecker kBarycentricCoordChecker{
 };
 
 /// @returns an appropriate BuiltInCheck for @p builtin, ICEs when one isn't defined
-const BuiltInChecker& BuiltinCheckerFor(BuiltinValue builtin, const Capabilities& capabilities) {
+const BuiltInChecker& BuiltinCheckerFor(BuiltinValue builtin, const Properties& properties) {
     switch (builtin) {
         case BuiltinValue::kPointSize:
             return kPointSizeChecker;
         case BuiltinValue::kClipDistances:
-            if (capabilities.Contains(Capability::kAllowClipDistancesOnF32ScalarAndVector)) {
+            if (properties.Contains(Property::kAllowClipDistancesOnF32ScalarAndVector)) {
                 return kClipDistancesAllowF32ScalarAndVectorChecker;
             }
             return kClipDistancesChecker;
@@ -797,7 +797,7 @@ constexpr IOAttributeChecker kBuiltinChecker{
         }
 
         const auto builtin = attr.builtin.value();
-        const auto& checker = BuiltinCheckerFor(builtin, cap);
+        const auto& checker = BuiltinCheckerFor(builtin, prop);
         if (usage != IOAttributeUsage::kUndefinedUsage && !checker.valid_usages.Contains(usage)) {
             std::stringstream msg;
             msg << ToString(builtin) << " cannot be used on a " << ToString(usage) << ". ";
@@ -3060,14 +3060,14 @@ void Validator::ValidateIOAttributesImpl(IOAttributeContext& ctx,
                         // checker, so just ignoring
                         break;
                 }
-                if (v.capabilities_.Contains(Capability::kAllowClipDistancesOnF32ScalarAndVector) &&
+                if (v.mod_.properties.Contains(Property::kAllowClipDistancesOnF32ScalarAndVector) &&
                     builtin == BuiltinValue::kClipDistances) {
                     if (count > 2) {
                         v.AddError(msg_anchor)
                             << "too many instances of builtin 'clip_distances' on entry point "
                             << ToString(dir)
                             << ", only two allowed with 'kAllowClipDistancesOnF32ScalarAndVector' "
-                               "capability enabled";
+                               "property enabled";
                     }
                 } else {
                     if (count > 1) {

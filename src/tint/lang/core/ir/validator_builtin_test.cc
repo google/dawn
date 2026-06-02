@@ -182,7 +182,7 @@ TEST_F(IR_ValidatorTest, Builtin_ClipDistance_Duplicate) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Builtin_ClipDistance_Duplicate_WithCapability) {
+TEST_F(IR_ValidatorTest, Builtin_ClipDistance_Duplicate_WithProperty) {
     const auto attr = IOAttributes{.builtin = BuiltinValue::kClipDistances};
     auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"),
                              {{mod.symbols.New("cd1"), ty.array<f32, 2>(), attr},
@@ -200,11 +200,12 @@ TEST_F(IR_ValidatorTest, Builtin_ClipDistance_Duplicate_WithCapability) {
         b.Unreachable();
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowClipDistancesOnF32ScalarAndVector});
+    mod.properties.Add(Property::kAllowClipDistancesOnF32ScalarAndVector);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Builtin_ClipDistance_Triple_WithCapability) {
+TEST_F(IR_ValidatorTest, Builtin_ClipDistance_Triple_WithProperty) {
     const auto attr = IOAttributes{.builtin = BuiltinValue::kClipDistances};
     auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"),
                              {{mod.symbols.New("cd1"), ty.array<f32, 2>(), attr},
@@ -225,12 +226,13 @@ TEST_F(IR_ValidatorTest, Builtin_ClipDistance_Triple_WithCapability) {
         b.Unreachable();
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowClipDistancesOnF32ScalarAndVector});
+    mod.properties.Add(Property::kAllowClipDistancesOnF32ScalarAndVector);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:8:48 error: var: too many instances of builtin 'clip_distances' on entry point output, only two allowed with 'kAllowClipDistancesOnF32ScalarAndVector' capability enabled
+            R"(:8:48 error: var: too many instances of builtin 'clip_distances' on entry point output, only two allowed with 'kAllowClipDistancesOnF32ScalarAndVector' property enabled
   %outs:ptr<__out, OutputStruct, read_write> = var undef
                                                ^^^
 )")) << res.Failure();
