@@ -62,10 +62,10 @@ namespace {{metadata.namespace}} {
 {% for constant in by_category["constant"] %}
     {% set type = as_cppType(constant.type.name) %}
     {% if constant.cpp_value %}
-        inline constexpr {{type}} k{{constant.name.CamelCase()}} = {{ constant.cpp_value }};
+        static constexpr {{type}} k{{constant.name.CamelCase()}} = {{ constant.cpp_value }};
     {% else %}
         {% set value = c_prefix + "_" +  constant.name.SNAKE_CASE() %}
-        inline constexpr {{type}} k{{constant.name.CamelCase()}} = {{ value }};
+        static constexpr {{type}} k{{constant.name.CamelCase()}} = {{ value }};
     {% endif %}
 {% endfor %}
 
@@ -451,7 +451,7 @@ constexpr size_t ConstexprMax(size_t a, size_t b) {
 }
 
 template <typename T>
-inline T& AsNonConstReference(const T& value) {
+static T& AsNonConstReference(const T& value) {
     return const_cast<T&>(value);
 }
 
@@ -1205,7 +1205,7 @@ struct CallbackInfoHelper {
 // Free Functions
 {% for function in by_category["function"] if not function.no_cpp %}
     {% set FunctionName = as_cppType(function.name) %}
-    inline {{as_annotated_cppType(function.returns)}} {{FunctionName}}(
+    static inline {{as_annotated_cppType(function.returns)}} {{FunctionName}}(
         {%- for arg in function.arguments -%}
             {%- if not loop.first %}, {% endif -%}
             {{as_annotated_cppType(arg)}}{{render_cpp_default_value(arg, False)}}

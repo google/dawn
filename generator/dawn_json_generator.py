@@ -1685,14 +1685,6 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'include/webgpu/' + api + '_cpp_chained_struct.h',
                            [RENDER_PARAMS_BASE, params_dawn]))
 
-        if 'cpp_modules' in targets:
-            renders.append(
-                FileRender('api_cpp.ixx', 'include/dawn/' + api + '.ixx', [
-                    RENDER_PARAMS_BASE, params_all, {
-                        'cpp_header': api + '/' + api + '_cpp.h',
-                    }
-                ]))
-
         if 'proc' in targets:
             renders.append(
                 FileRender('dawn_proc.cpp', 'src/dawn/' + prefix + '_proc.cpp',
