@@ -20,3 +20,4 @@
 *.inl       eol=lf
 *.txt       eol=lf
 *.bat       eol=crlf
+*_nocompile.nc eol=lf linguist-language=C++

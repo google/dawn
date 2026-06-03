@@ -33,4 +33,23 @@ void TestIsDoubleValueRepresentable() {
     (void) IsDoubleValueRepresentable<double>(0.0);  // expected-error-re@numeric.h:* {{static assertion failed due to requirement '{{.*}}': Unsupported type}}
 }
 
+// Tests for checked_cast
+void TestCheckedCast() {
+    { [[maybe_unused]] constexpr uint32_t x = checked_cast<uint32_t>(uint64_t{0x0'FFFF'FFFF}); }
+    { [[maybe_unused]] constexpr uint32_t x = checked_cast<uint32_t>(uint64_t{0x1'0000'0000}); }  // expected-error {{must be initialized by a constant expression}}
+    { [[maybe_unused]] constexpr uint32_t x = checked_cast<uint32_t>(int16_t{-1}); }  // expected-error {{must be initialized by a constant expression}}
+
+    { [[maybe_unused]] constexpr uint32_t x = checked_cast<uint32_t>(int64_t{0x0'FFFF'FFFF}); }
+    { [[maybe_unused]] constexpr uint32_t x = checked_cast<uint32_t>(int64_t{0x1'0000'0000}); }  // expected-error {{must be initialized by a constant expression}}
+}
+
+// Basic test for dchecked_cast
+void TestDcheckedCast() {
+#ifdef DAWN_ENABLE_ASSERTS
+    { [[maybe_unused]] constexpr uint32_t x = dchecked_cast<uint32_t>(int32_t{-1}); }  // expected-error {{must be initialized by a constant expression}}
+#else
+    { [[maybe_unused]] constexpr uint32_t x = dchecked_cast<uint32_t>(int32_t{-1}); }
+#endif
+}
+
 }

@@ -96,7 +96,10 @@ static_library("utils") {
 
 dawn_nocompile_source_set("nocompile_sources") {
   deps = [ ":utils" ]
-  sources = [ "numeric_nocompile.nc" ]
+  sources = [
+    "numeric_nocompile.nc",
+    "typed_integer_nocompile.nc",
+  ]
 }
 
 # Included in dawn_unittests.
