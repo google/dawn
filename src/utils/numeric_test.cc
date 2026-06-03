@@ -41,6 +41,8 @@ TEST(NumericTest, IsCastAlwaysInRange) {
     static_assert(!kIsCastAlwaysInRange<uint64_t, uint32_t>);
 }
 
+#if GTEST_HAS_DEATH_TEST
+
 // Death tests
 // Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
 
@@ -110,6 +112,8 @@ TEST(NumericDeathTest, CheckedCast) {
     EXPECT_DCHECK(dchecked_cast<uint32_t>(uint64_t{std::numeric_limits<uint32_t>::max()} + 1), "");
     EXPECT_DCHECK(dchecked_cast<int32_t>(uint32_t{std::numeric_limits<int32_t>::max()} + 1), "");
 }
+
+#endif  // GTEST_HAS_DEATH_TEST
 
 }  // anonymous namespace
 }  // namespace dawn

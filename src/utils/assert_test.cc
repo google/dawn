@@ -38,6 +38,7 @@ namespace {
 // DAWN_UNREACHABLE should cause a crash in both Debug and Release.
 // Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
 
+#if GTEST_HAS_DEATH_TEST
 using AssertDeathTest = ::testing::Test;
 
 TEST_F(AssertDeathTest, SimpleUnreachable) {
@@ -47,7 +48,9 @@ TEST_F(AssertDeathTest, SimpleUnreachable) {
     EXPECT_DEATH(DAWN_UNREACHABLE(), "");
 #endif
 }
+#endif
 
+#if GTEST_HAS_DEATH_TEST
 enum class TestEnum : uint32_t {
     A = 0,
     B,
@@ -104,10 +107,11 @@ TEST_F(AssertDeathTest, AssertKills) {
     EXPECT_DEATH(DAWN_ASSERT(g_var2 != 124), "g_var2 != 124");
 #endif
 }
+#endif
 
 using AssertFunctionalityTest = ::testing::Test;
 
-TEST_F(AssertDeathTest, AssertUnused) {
+TEST_F(AssertFunctionalityTest, AssertUnused) {
     // Local variable that is defined but not used in the case of release
 
     int test_value = 1;

@@ -399,7 +399,7 @@ using TypedIntegerDeathTest = TypedIntegerTest;
 
 // Tests for bounds assertions on arithmetic overflow and underflow.
 // Note (d)checked_cast tests are in NumericDeathTest.
-#if defined(DAWN_ENABLE_ASSERTS)
+#if defined(DAWN_ENABLE_ASSERTS) && GTEST_HAS_DEATH_TEST
 
 TEST_F(TypedIntegerDeathTest, IncrementUnsignedOverflow) {
     Unsigned value(std::numeric_limits<uint32_t>::max() - 1);
@@ -563,7 +563,7 @@ TEST_F(TypedIntegerDeathTest, NegationOverflow) {
     EXPECT_DEATH(-minValue, "");  // Overflows.
 }
 
-#endif  // defined(DAWN_ENABLE_ASSERTS)
+#endif  // defined(DAWN_ENABLE_ASSERTS) && GTEST_HAS_DEATH_TEST
 
 }  // anonymous namespace
 }  // namespace dawn
