@@ -30,6 +30,7 @@
 
 #include <limits>
 #include <type_traits>
+#include <utility>
 
 #include "src/utils/assert.h"
 #include "src/utils/underlying_type.h"
@@ -40,15 +41,18 @@ namespace dawn {
 // by ityp: integers, TypedIntegers, and enum classes). This is only defined for unsigned types
 // because that is all that is needed at the time of writing, however eventually we will want to use
 // this more widely, and we'll need to upgrade it (and the tests) to allow signed types.
-template <typename Dst, typename Src>
-    requires HasUnsignedUnderlyingType<Src> && HasUnsignedUnderlyingType<Dst>
+template <HasUnderlyingType Dst, HasUnderlyingType Src>
 constexpr inline Dst checked_cast(const Src& value) {
     using ISrc = UnderlyingType<Src>;
     using IDst = UnderlyingType<Dst>;
     // The compiler seems to be able to optimize away this CHECK, for Src/Dst pairs that can never
     // fail (verified in Compiler Explorer with plain integers and enum classes).
+    //
+    // Note, we choose not to disallow checked_cast for casts that are always safe, even though that
+    // would guide authors toward static_casts that are statically-guaranteed safe. This is because
+    // when used with things like size_t, which one you would need to use could differ by bitness.
     ISrc valueISrc = static_cast<ISrc>(value);
-    DAWN_CHECK(valueISrc <= std::numeric_limits<IDst>::max());
+    DAWN_CHECK(std::in_range<IDst>(valueISrc));
     return Dst{static_cast<IDst>(valueISrc)};
 }
 

@@ -67,6 +67,9 @@ template <typename T>
 using UnderlyingType = typename detail::UnderlyingTypeImpl<T>::type;
 
 template <typename T>
+concept HasUnderlyingType = std::integral<UnderlyingType<T>>;
+
+template <typename T>
 concept HasUnsignedUnderlyingType = std::unsigned_integral<UnderlyingType<T>>;
 
 }  // namespace dawn

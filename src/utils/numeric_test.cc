@@ -39,39 +39,58 @@ namespace {
 
 // Test for checked cast between various types.
 template <typename T32, typename T64>
-void CheckedCastTest() {
-    using I32 = UnderlyingType<T32>;
-    using I64 = UnderlyingType<T64>;
-    static_assert(std::is_same_v<I32, uint32_t>);
-    static_assert(std::is_same_v<I64, uint64_t>);
+void CheckedCastTestPair() {
+    using Prim32 = UnderlyingType<T32>;
+    using Prim64 = UnderlyingType<T64>;
 
     // No-ops
-    checked_cast<T32>(T32{std::numeric_limits<I32>::max()});
-    checked_cast<T64>(T64{std::numeric_limits<I64>::max()});
+    checked_cast<T32>(T32{std::numeric_limits<Prim32>::max()});
+    checked_cast<T64>(T64{std::numeric_limits<Prim64>::max()});
 
     // Widening
-    checked_cast<T64>(T32{std::numeric_limits<I32>::max()});
+    checked_cast<T64>(T32{std::numeric_limits<Prim32>::max()});
 
     // Narrowing
-    EXPECT_DEATH(checked_cast<T32>(T64{uint64_t{std::numeric_limits<I32>::max()} + 1}), "");
-    EXPECT_DEATH(checked_cast<T32>(T64{uint64_t{std::numeric_limits<I32>::max()} * 2}), "");
-    EXPECT_DEATH(checked_cast<T32>(T64{std::numeric_limits<uint64_t>::max()}), "");
+    EXPECT_DEATH(checked_cast<T32>(T64{Prim64{std::numeric_limits<Prim32>::max()} + 1}), "");
+    EXPECT_DEATH(checked_cast<T32>(T64{Prim64{std::numeric_limits<Prim32>::max()} * 2}), "");
+    EXPECT_DEATH(checked_cast<T32>(T64{std::numeric_limits<Prim64>::max()}), "");
 }
-
+template <typename U32, typename I32, typename U64, typename I64>
+void CheckedCastTest() {
+    static_assert(std::is_same_v<UnderlyingType<U32>, uint32_t>);
+    static_assert(std::is_same_v<UnderlyingType<U64>, uint64_t>);
+    static_assert(std::is_same_v<UnderlyingType<I32>, int32_t>);
+    static_assert(std::is_same_v<UnderlyingType<I64>, int64_t>);
+    CheckedCastTestPair<U32, U64>();
+    CheckedCastTestPair<U32, I64>();
+    CheckedCastTestPair<I32, U64>();
+    CheckedCastTestPair<I32, I64>();
+}
 TEST(NumericDeathTest, CheckedCast) {
-    CheckedCastTest<uint32_t, uint64_t>();
-
     using TypedU32 = TypedInteger<struct TypedU32T, uint32_t>;
     using TypedU64 = TypedInteger<struct TypedU64T, uint64_t>;
-    CheckedCastTest<uint32_t, TypedU64>();
-    CheckedCastTest<TypedU32, uint64_t>();
-    CheckedCastTest<TypedU32, TypedU64>();
-
+    using TypedI32 = TypedInteger<struct TypedI32T, int32_t>;
+    using TypedI64 = TypedInteger<struct TypedI64T, int64_t>;
     enum class EnumU32 : uint32_t {};
     enum class EnumU64 : uint64_t {};
-    CheckedCastTest<uint32_t, EnumU64>();
-    CheckedCastTest<EnumU32, uint64_t>();
-    CheckedCastTest<EnumU32, EnumU64>();
+    enum class EnumI32 : int32_t {};
+    enum class EnumI64 : int64_t {};
+
+    // primitive <-> primitive
+    CheckedCastTest<uint32_t, int32_t, uint64_t, int64_t>();
+    // primitive <-> TypedInteger
+    CheckedCastTest<uint32_t, int32_t, TypedU64, TypedI64>();
+    CheckedCastTest<TypedU32, TypedI32, uint64_t, int64_t>();
+    // TypedInteger <-> TypedInteger
+    CheckedCastTest<TypedU32, TypedI32, TypedU64, TypedI64>();
+    // primitive <-> enum class
+    CheckedCastTest<uint32_t, int32_t, EnumU64, EnumI64>();
+    CheckedCastTest<EnumU32, EnumI32, uint64_t, int64_t>();
+    // enum class <-> enum class
+    CheckedCastTest<EnumU32, EnumI32, EnumU64, EnumI64>();
+    // TypedInteger <-> enum class
+    CheckedCastTest<TypedU32, TypedI32, EnumU64, EnumI64>();
+    CheckedCastTest<EnumU32, EnumI32, EnumU64, EnumI64>();
 }
 
 }  // anonymous namespace
