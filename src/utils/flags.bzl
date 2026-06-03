@@ -38,4 +38,3 @@ COPTS = [
     "-fno-exceptions",
     "--std=c++20",
 ]
-
