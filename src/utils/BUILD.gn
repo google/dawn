@@ -34,8 +34,40 @@ import("../../scripts/dawn_overrides_with_defaults.gni")
 import("//build_overrides/build.gni")
 import("${dawn_root}/scripts/dawn_nocompile.gni")
 
+# Use Chromium's dcheck_always_on when available so that we respect it when
+# running tests on the GPU builders
+if (build_with_chromium) {
+  import("//build/config/dcheck_always_on.gni")
+} else {
+  dcheck_always_on = false
+}
+
+if (build_with_chromium) {
+  import("//build/config/sanitizers/sanitizers.gni")
+} else {
+  use_fuzzing_engine = false
+}
+
 config("internal_config") {
   include_dirs = [ "${dawn_root}" ]
+
+  defines = []
+
+  if (dawn_always_assert || dcheck_always_on || is_debug ||
+      use_fuzzing_engine) {
+    defines += [ "DAWN_ENABLE_ASSERTS" ]
+  }
+
+  if (build_with_chromium || use_fuzzing_engine) {
+    # Does a hard abort when an assertion fails so that fuzzers catch and parse
+    # the failure. Also call abort() so chrome can dump crash stack in console.
+    defines += [ "DAWN_ABORT_ON_ASSERT" ]
+  }
+
+  if (use_fuzzing_engine) {
+    # Disable logging to make fuzzing more efficient.
+    defines += [ "DAWN_DISABLE_LOGGING" ]
+  }
 }
 
 static_library("utils") {
