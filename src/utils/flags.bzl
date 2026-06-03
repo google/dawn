@@ -1,5 +1,5 @@
-load("@bazel_skylib//rules:common_settings.bzl", "string_flag", "bool_flag")
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 
 def declare_os_flag():
     """Creates the 'os' string flag that specifies the OS to target, and a pair of
@@ -12,7 +12,7 @@ def declare_os_flag():
         "win",
         "linux",
         "mac",
-        "other"
+        "other",
     ]
 
     string_flag(
@@ -24,12 +24,12 @@ def declare_os_flag():
     for os in OSes:
         native.config_setting(
             name = "dawn_build_is_{}_true".format(os),
-            flag_values = { ":os": os },
+            flag_values = {":os": os},
             visibility = ["//visibility:public"],
         )
         selects.config_setting_group(
             name = "dawn_build_is_{}_false".format(os),
-            match_any = [ "dawn_build_is_{}_true".format(other) for other in OSes if other != os],
+            match_any = ["dawn_build_is_{}_true".format(other) for other in OSes if other != os],
             visibility = ["//visibility:public"],
         )
 
@@ -38,3 +38,4 @@ COPTS = [
     "-fno-exceptions",
     "--std=c++20",
 ]
+
