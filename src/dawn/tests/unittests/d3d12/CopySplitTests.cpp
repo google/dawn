@@ -210,7 +210,7 @@ void ValidateTextureBounds(const TextureSpec& textureSpec,
 void ValidatePixelCount(const TextureSpec& textureSpec,
                         const TextureCopySubresource& copySubresource) {
     const TypedTexelBlockInfo& blockInfo = textureSpec.blockInfo;
-    TexelCount totalCopiedTexels{0};
+    TexelCount totalCopiedTexels{0u};
     for (uint32_t i = 0; i < copySubresource.count; ++i) {
         const auto& copy = copySubresource.copies[i];
         // TODO(425944899): Rework this function to work in blocks, not texels
@@ -247,7 +247,7 @@ void ValidateBufferOffset(const TextureSpec& textureSpec,
         // a 3D texture copy region when we are copying the last row of each slice. We may
         // need to offset a lot rows and copy.bufferOffset.y may be big.
         if (dimension == wgpu::TextureDimension::e2D) {
-            ASSERT_LE(bufferOffset.y, BlockCount{1});
+            ASSERT_LE(bufferOffset.y, BlockCount{1u});
         }
         ASSERT_EQ(bufferOffset.z, 0_bc);
 

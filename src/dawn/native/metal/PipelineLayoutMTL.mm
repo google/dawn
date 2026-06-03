@@ -53,7 +53,7 @@ PipelineLayout::PipelineLayout(Device* device,
         for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
             mIndexInfo[stage][group].resize(GetBindGroupLayout(group)->GetBindingCount());
 
-            for (BindingIndex bindingIndex{0};
+            for (BindingIndex bindingIndex{0u};
                  bindingIndex < GetBindGroupLayout(group)->GetBindingCount(); ++bindingIndex) {
                 const BindingInfo& bindingInfo =
                     GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);

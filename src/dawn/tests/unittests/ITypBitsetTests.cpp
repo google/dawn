@@ -45,15 +45,15 @@ class ITypBitsetTest : public testing::Test {
     struct ConstexprTest {
         static constexpr Bitset kBitset = {1 << 0 | 1 << 3 | 1 << 7 | 1 << 8};
 
-        static_assert(kBitset[Key(0)] == true);
-        static_assert(kBitset[Key(1)] == false);
-        static_assert(kBitset[Key(2)] == false);
-        static_assert(kBitset[Key(3)] == true);
-        static_assert(kBitset[Key(4)] == false);
-        static_assert(kBitset[Key(5)] == false);
-        static_assert(kBitset[Key(6)] == false);
-        static_assert(kBitset[Key(7)] == true);
-        static_assert(kBitset[Key(8)] == true);
+        static_assert(kBitset[Key(0u)] == true);
+        static_assert(kBitset[Key(1u)] == false);
+        static_assert(kBitset[Key(2u)] == false);
+        static_assert(kBitset[Key(3u)] == true);
+        static_assert(kBitset[Key(4u)] == false);
+        static_assert(kBitset[Key(5u)] == false);
+        static_assert(kBitset[Key(6u)] == false);
+        static_assert(kBitset[Key(7u)] == true);
+        static_assert(kBitset[Key(8u)] == true);
 
         static_assert(kBitset.size() == 9);
     };
@@ -98,16 +98,16 @@ TEST_F(ITypBitsetTest, Indexing) {
     Bitset bits;
     ExpectBits(bits, {});
 
-    bits[Key(2)] = true;
-    bits[Key(4)] = false;
-    bits.set(Key(1));
-    bits.set(Key(7), true);
-    bits.set(Key(8), false);
+    bits[Key(2u)] = true;
+    bits[Key(4u)] = false;
+    bits.set(Key(1u));
+    bits.set(Key(7u), true);
+    bits.set(Key(8u), false);
 
     ExpectBits(bits, {1, 2, 7});
 
-    bits.reset(Key(2));
-    bits.reset(Key(7));
+    bits.reset(Key(2u));
+    bits.reset(Key(7u));
     ExpectBits(bits, {1});
 }
 
@@ -116,10 +116,10 @@ TEST_F(ITypBitsetTest, Flip) {
     Bitset bits = {1 << 1 | 1 << 2 | 1 << 7};
     ExpectBits(bits, {1, 2, 7});
 
-    bits.flip(Key(4));
-    bits.flip(Key(1));  // false
-    bits.flip(Key(6));
-    bits.flip(Key(5));
+    bits.flip(Key(4u));
+    bits.flip(Key(1u));  // false
+    bits.flip(Key(6u));
+    bits.flip(Key(5u));
     ExpectBits(bits, {2, 4, 5, 6, 7});
 
     bits.flip();
@@ -139,7 +139,7 @@ TEST_F(ITypBitsetTest, SetResetAll) {
     ASSERT_TRUE(bits.any());
     ASSERT_FALSE(bits.none());
 
-    for (Key i(0); i < Key(9); ++i) {
+    for (Key i(0u); i < Key(9u); ++i) {
         ASSERT_TRUE(bits[i]);
     }
 
@@ -150,7 +150,7 @@ TEST_F(ITypBitsetTest, SetResetAll) {
     ASSERT_FALSE(bits.any());
     ASSERT_TRUE(bits.none());
 
-    for (Key i(0); i < Key(9); ++i) {
+    for (Key i(0u); i < Key(9u); ++i) {
         ASSERT_FALSE(bits[i]);
     }
 }
@@ -263,10 +263,10 @@ class ITypBitsetIteratorTest : public testing::Test {
 // Simple iterator test.
 TEST_F(ITypBitsetIteratorTest, Iterator) {
     std::set<IntegerT> originalValues;
-    originalValues.insert(IntegerT(2));
-    originalValues.insert(IntegerT(6));
-    originalValues.insert(IntegerT(8));
-    originalValues.insert(IntegerT(35));
+    originalValues.insert(IntegerT(2u));
+    originalValues.insert(IntegerT(6u));
+    originalValues.insert(IntegerT(8u));
+    originalValues.insert(IntegerT(35u));
 
     for (IntegerT value : originalValues) {
         mStateBits.set(value);
@@ -297,15 +297,15 @@ TEST_F(ITypBitsetIteratorTest, EmptySet) {
 TEST_F(ITypBitsetIteratorTest, NonLValueBitset) {
     ityp::bitset<IntegerT, 40> otherBits;
 
-    mStateBits.set(IntegerT(1));
-    mStateBits.set(IntegerT(2));
-    mStateBits.set(IntegerT(3));
-    mStateBits.set(IntegerT(4));
+    mStateBits.set(IntegerT(1u));
+    mStateBits.set(IntegerT(2u));
+    mStateBits.set(IntegerT(3u));
+    mStateBits.set(IntegerT(4u));
 
-    otherBits.set(IntegerT(0));
-    otherBits.set(IntegerT(1));
-    otherBits.set(IntegerT(3));
-    otherBits.set(IntegerT(5));
+    otherBits.set(IntegerT(0u));
+    otherBits.set(IntegerT(1u));
+    otherBits.set(IntegerT(3u));
+    otherBits.set(IntegerT(5u));
 
     std::set<IntegerT> seenBits;
 

@@ -66,12 +66,12 @@ uint64_t RequiredCopySizeByD3D12(const BlockCount blocksPerRow,
 
     // Compute (block) size for the first images except the last.
     BlockCount allButLastImage =
-        blocksPerRow * rowsPerImage * (copySize.depthOrArrayLayers - BlockCount{1});
+        blocksPerRow * rowsPerImage * (copySize.depthOrArrayLayers - BlockCount{1u});
     // Compute (block) size of the last image as D3D12 does, which includes the size of whole last
     // row
     BlockCount lastRow = copySize.width;
     DAWN_ASSERT(rowsPerImage > copySize.height);
-    BlockCount lastImageByD3D12 = blocksPerRow * (rowsPerImage - BlockCount{1}) + lastRow;
+    BlockCount lastImageByD3D12 = blocksPerRow * (rowsPerImage - BlockCount{1u}) + lastRow;
     // Compute total (block) size as D3D12 does
     BlockCount requiredCopySizeByD3D12 = allButLastImage + lastImageByD3D12;
     return blockInfo.ToBytes(requiredCopySizeByD3D12);
@@ -88,7 +88,7 @@ bool NeedBufferSizeWorkaroundForBufferTextureCopyOnD3D12(const BufferCopy& buffe
                                                          const BlockExtent3D& copySize) {
     TextureBase* texture = textureCopy.texture.Get();
     if (texture->GetDimension() != wgpu::TextureDimension::e3D ||
-        copySize.depthOrArrayLayers <= BlockCount{1} ||
+        copySize.depthOrArrayLayers <= BlockCount{1u} ||
         bufferCopy.rowsPerImage <= copySize.height) {
         return false;
     }
@@ -329,7 +329,7 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
                 origin, copySize, blockInfo, offset, blocksPerRow, useRelaxedRowPitchAndOffset);
             RecordBufferTextureCopyFromSplits(
                 direction, commandList, copySubresource, bufferResource, 0, blocksPerRow, blockInfo,
-                texture, textureCopy.mipLevel, BlockCount{0}, textureCopy.aspect);
+                texture, textureCopy.mipLevel, BlockCount{0u}, textureCopy.aspect);
             break;
         }
 
@@ -355,7 +355,7 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
                                                 rowsPerImage, useRelaxedRowPitchAndOffset);
             RecordBufferTextureCopyFromSplits(
                 direction, commandList, copySubresource, bufferResource, 0, blocksPerRow, blockInfo,
-                texture, textureCopy.mipLevel, BlockCount{0}, textureCopy.aspect);
+                texture, textureCopy.mipLevel, BlockCount{0u}, textureCopy.aspect);
             break;
         }
     }
@@ -377,22 +377,22 @@ void RecordBufferTextureCopy(BufferTextureCopyDirection direction,
         //   - The second copy will copy the last depth image, skipping the padding rows between
         //     the second-to-last and last image.
         BlockExtent3D extentForAllButTheLastImage = copySize;
-        extentForAllButTheLastImage.depthOrArrayLayers -= BlockCount{1};
+        extentForAllButTheLastImage.depthOrArrayLayers -= BlockCount{1u};
         RecordBufferTextureCopyWithBufferHandle(
             direction, commandList, bufferResource, bufferCopy.offset, bufferCopy.blocksPerRow,
             bufferCopy.rowsPerImage, textureCopy, extentForAllButTheLastImage);
 
         BlockExtent3D extentForTheLastImage = copySize;
-        extentForTheLastImage.depthOrArrayLayers = BlockCount{1};
+        extentForTheLastImage.depthOrArrayLayers = BlockCount{1u};
 
         TextureCopy textureCopyForTheLastImage = textureCopy;
         textureCopyForTheLastImage.origin.z +=
-            blockInfo.ToTexelDepth(copySize.depthOrArrayLayers) - TexelCount{1};
+            blockInfo.ToTexelDepth(copySize.depthOrArrayLayers) - TexelCount{1u};
 
         // We offset the copy so that we skip the padding rows. This way the footprint Height
         // will be computed without this padding.
         uint64_t copiedBytes = blockInfo.ToBytes(bufferCopy.blocksPerRow * bufferCopy.rowsPerImage *
-                                                 (copySize.depthOrArrayLayers - BlockCount{1}));
+                                                 (copySize.depthOrArrayLayers - BlockCount{1u}));
         RecordBufferTextureCopyWithBufferHandle(direction, commandList, bufferResource,
                                                 bufferCopy.offset + copiedBytes,
                                                 bufferCopy.blocksPerRow, bufferCopy.rowsPerImage,

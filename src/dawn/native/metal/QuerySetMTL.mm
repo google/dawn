@@ -57,7 +57,7 @@ ResultOrError<id<MTLCounterSampleBuffer>> CreateCounterSampleBuffer(Device* devi
     }
     DAWN_ASSERT(descriptor.counterSet != nullptr);
 
-    descriptor.sampleCount = NSUInteger{std::max(count, QueryIndex(1))};
+    descriptor.sampleCount = NSUInteger{std::max(count, QueryIndex(1u))};
     descriptor.storageMode = MTLStorageModePrivate;
     if (device->IsToggleEnabled(Toggle::MetalUseSharedModeForCounterSampleBuffer)) {
         descriptor.storageMode = MTLStorageModeShared;

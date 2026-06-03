@@ -256,7 +256,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     const bool mIsHostMapped = false;
     bool mIsDataInitialized = false;
 
-    Atomic<ExecutionSerial, std::memory_order_relaxed> mLastUsageSerial{ExecutionSerial(0)};
+    Atomic<ExecutionSerial, std::memory_order_relaxed> mLastUsageSerial{ExecutionSerial(0u)};
 
     // Once MapAsync() returns a future there is a possible race between MapAsyncEvent completing
     // and the buffer being unmapped as they can happen on different threads. `mPendingMapMutex`

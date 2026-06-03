@@ -55,7 +55,7 @@ BindGroupLayout::BindGroupLayout(DeviceBase* device,
     // Pool to free MTLArgumentDescriptor and NSArray.
     @autoreleasepool {
         std::vector<MTLArgumentDescriptor*> descriptors;
-        for (BindingIndex bindingIndex{0}; bindingIndex < GetBindingCount(); ++bindingIndex) {
+        for (BindingIndex bindingIndex{0u}; bindingIndex < GetBindingCount(); ++bindingIndex) {
             auto& bindingInfo = GetBindingInfo(bindingIndex);
 
             MTLArgumentDescriptor* desc = [MTLArgumentDescriptor argumentDescriptor];

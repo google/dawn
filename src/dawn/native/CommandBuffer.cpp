@@ -143,8 +143,8 @@ SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy,
                                                const TexelExtent3D& copySize) {
     switch (copy.texture->GetDimension()) {
         case wgpu::TextureDimension::e1D:
-            DAWN_CHECK(copy.origin.z == TexelCount{0} &&
-                       copySize.depthOrArrayLayers == TexelCount{1});
+            DAWN_CHECK(copy.origin.z == TexelCount{0u} &&
+                       copySize.depthOrArrayLayers == TexelCount{1u});
             DAWN_CHECK(copy.mipLevel == 0);
             return {copy.aspect, {0, 1}, {0, 1}};
         case wgpu::TextureDimension::e2D:
@@ -337,8 +337,8 @@ bool IsFullBufferOverwrittenInTextureToBufferCopy(const TextureCopy& source,
 
     const TypedTexelBlockInfo& blockInfo = GetBlockInfo(source);
     BlockExtent3D copySize = blockInfo.ToBlock(copySize_in);
-    const bool multiSlice = copySize.depthOrArrayLayers > BlockCount{1};
-    const bool multiRow = multiSlice || copySize.height > BlockCount{1};
+    const bool multiSlice = copySize.depthOrArrayLayers > BlockCount{1u};
+    const bool multiRow = multiSlice || copySize.height > BlockCount{1u};
 
     if (multiSlice && destination.rowsPerImage > copySize.height) {
         // There are gaps between slices that aren't overwritten

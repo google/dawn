@@ -236,7 +236,7 @@ TEST(MutexCondVarProtectedTest, Nominal) {
 TEST(MutexCondVarProtectedTest, WaitForTimeout) {
     auto counter = MutexCondVarProtected<CounterT>();
     counter.Use([](auto c) {
-        EXPECT_FALSE(c.WaitFor(Nanoseconds(5), [](auto& x) { return x.Get() == 1; }));
+        EXPECT_FALSE(c.WaitFor(Nanoseconds(5u), [](auto& x) { return x.Get() == 1; }));
     });
 }
 

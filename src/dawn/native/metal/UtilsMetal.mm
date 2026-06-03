@@ -727,7 +727,7 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
         const uint32_t localBytesPerRow = maxBytesPerRow;
         const uint32_t localBytesPerImage = 0;  // workaround case 3
         const TexelExtent3D localCopySize = {clampedCopyExtent.width, blockInfo.height,
-                                             TexelCount(1)};
+                                             TexelCount(1u)};
 
         for (BlockCount slice : Range(copyExtent.depthOrArrayLayers)) {
             for (BlockCount row : Range(copyExtent.height)) {
@@ -753,7 +753,7 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     const bool needCopyLastImageAndLastRowSeparately =
         bufferSize - bufferOffset < sizeRequiredByValidation;
     if (!needCopyLastImageAndLastRowSeparately) {
-        const uint32_t localBytesPerImage = copyExtent.depthOrArrayLayers == BlockCount(1)
+        const uint32_t localBytesPerImage = copyExtent.depthOrArrayLayers == BlockCount(1u)
                                                 ? 0
                                                 : bytesPerImage;  // workaround case 3
         copy.push_back(
@@ -766,10 +766,10 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     uint64_t currentOffset = bufferOffset;
 
     // Doing all the copy except the last image.
-    if (copyExtent.depthOrArrayLayers > BlockCount(1)) {
-        const BlockCount localDepthOrArrayLayers = copyExtent.depthOrArrayLayers - BlockCount(1);
+    if (copyExtent.depthOrArrayLayers > BlockCount(1u)) {
+        const BlockCount localDepthOrArrayLayers = copyExtent.depthOrArrayLayers - BlockCount(1u);
         const uint32_t localBytesPerImage =
-            localDepthOrArrayLayers == BlockCount(1) ? 0 : bytesPerImage;  // workaround case 3
+            localDepthOrArrayLayers == BlockCount(1u) ? 0 : bytesPerImage;  // workaround case 3
         const TexelExtent3D localSize = {clampedCopyExtent.width, clampedCopyExtent.height,
                                          blockInfo.ToTexelDepth(localDepthOrArrayLayers)};
         copy.push_back(TextureBufferCopySplit::CopyInfo(
@@ -777,24 +777,24 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
 
         // Update offset to copy to the last image.
         const BlockCount copiedBlocks =
-            (copyExtent.depthOrArrayLayers - BlockCount(1)) * blocksPerImage;
+            (copyExtent.depthOrArrayLayers - BlockCount(1u)) * blocksPerImage;
         currentOffset += blockInfo.ToBytes(copiedBlocks);
     }
 
     // Doing all the copy in last image except the last row.
-    if (copyExtent.height > BlockCount(1)) {
+    if (copyExtent.height > BlockCount(1u)) {
         const uint32_t localBytesPerImage = 0;  // workaround case 3
         const BlockOrigin3D localOrigin = {
-            origin.x, origin.y, origin.z + copyExtent.depthOrArrayLayers - BlockCount(1)};
-        const TexelExtent3D localSize = {clampedCopyExtent.width,
-                                         blockInfo.ToTexelHeight(copyExtent.height - BlockCount(1)),
-                                         TexelCount(1)};
+            origin.x, origin.y, origin.z + copyExtent.depthOrArrayLayers - BlockCount(1u)};
+        const TexelExtent3D localSize = {
+            clampedCopyExtent.width, blockInfo.ToTexelHeight(copyExtent.height - BlockCount(1u)),
+            TexelCount(1u)};
         copy.push_back(TextureBufferCopySplit::CopyInfo(currentOffset, bytesPerRow,
                                                         localBytesPerImage,
                                                         blockInfo.ToTexel(localOrigin), localSize));
 
         // Update offset to copy to the last row.
-        const BlockCount copiedBlocks = (copyExtent.height - BlockCount(1)) * blocksPerRow;
+        const BlockCount copiedBlocks = (copyExtent.height - BlockCount(1u)) * blocksPerRow;
         currentOffset += blockInfo.ToBytes(copiedBlocks);
     }
 
@@ -803,14 +803,14 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     const uint32_t lastRowDataSize = blockInfo.ToBytes(copyExtent.width);
     const uint32_t lastImageDataSize = 0;  // workaround case 3
     const TexelCount lastRowCopyExtentHeight =
-        clampedCopyExtent.height - blockInfo.ToTexelHeight(copyExtent.height - BlockCount(1));
+        clampedCopyExtent.height - blockInfo.ToTexelHeight(copyExtent.height - BlockCount(1u));
     DAWN_ASSERT(lastRowCopyExtentHeight <= blockInfo.height);
 
-    const BlockOrigin3D localOrigin = {origin.x, origin.y + copyExtent.height - BlockCount(1),
-                                       origin.z + copyExtent.depthOrArrayLayers - BlockCount(1)};
+    const BlockOrigin3D localOrigin = {origin.x, origin.y + copyExtent.height - BlockCount(1u),
+                                       origin.z + copyExtent.depthOrArrayLayers - BlockCount(1u)};
     copy.push_back(TextureBufferCopySplit::CopyInfo(
         currentOffset, lastRowDataSize, lastImageDataSize, blockInfo.ToTexel(localOrigin),
-        {clampedCopyExtent.width, lastRowCopyExtentHeight, TexelCount(1)}));
+        {clampedCopyExtent.width, lastRowCopyExtentHeight, TexelCount(1u)}));
 
     return copy;
 }

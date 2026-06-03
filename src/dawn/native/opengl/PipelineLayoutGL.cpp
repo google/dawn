@@ -36,17 +36,17 @@ namespace dawn::native::opengl {
 PipelineLayout::PipelineLayout(Device* device,
                                const UnpackedPtr<PipelineLayoutDescriptor>& descriptor)
     : PipelineLayoutBase(device, descriptor) {
-    FlatBindingIndex uboIndex{0};
-    FlatBindingIndex samplerIndex{0};
-    FlatBindingIndex sampledTextureIndex{0};
-    FlatBindingIndex ssboIndex{0};
-    FlatBindingIndex storageTextureIndex{0};
+    FlatBindingIndex uboIndex{0u};
+    FlatBindingIndex samplerIndex{0u};
+    FlatBindingIndex sampledTextureIndex{0u};
+    FlatBindingIndex ssboIndex{0u};
+    FlatBindingIndex storageTextureIndex{0u};
 
     for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
         const BindGroupLayoutInternalBase* bgl = GetBindGroupLayout(group);
         mIndexInfo[group].resize(bgl->GetBindingCount());
 
-        for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
+        for (BindingIndex bindingIndex{0u}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
             const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
             if (bindingInfo.visibility == wgpu::ShaderStage::None) {
                 continue;

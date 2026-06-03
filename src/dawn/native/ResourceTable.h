@@ -124,13 +124,13 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     // of the ResourceTable (since the last call to AcquireDirtySlotUpdates or creation of the
     // ResourceTable).
     struct MetadataUpdate {
-        ResourceTableSlot slot{0};  // Slot index to update
+        ResourceTableSlot slot{0u};  // Slot index to update
         uint32_t offset = 0;        // Byte offset resource array
         uint32_t data = 0;          // tint::ResourceType in the low 16 bits
     };
     struct ResourceDiff {
         using Resource = std::variant<std::monostate, Ref<TextureViewBase>, Ref<SamplerBase>>;
-        ResourceTableSlot slot = ResourceTableSlot(0);
+        ResourceTableSlot slot = ResourceTableSlot(0u);
         Resource removed;  // Resource removed from 'slot', if any
         Resource added;    // Resource added to 'slot', if any
     };
@@ -154,7 +154,7 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     // `availableAfter`), so that the slot updates are included in the next batch of updates.
     void MarkStateDirty(ResourceTableSlot slot);
 
-    ResourceTableSlot mAPISize = ResourceTableSlot(0);
+    ResourceTableSlot mAPISize = ResourceTableSlot(0u);
     bool mDestroyed = false;
 
     // Buffer that contains a WGSL metadata struct of the following shape:

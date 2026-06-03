@@ -47,16 +47,16 @@ TEST_F(ITypStackVecTest, Creation) {
     // Default constructor initializes to 0
     {
         StackVec vec;
-        ASSERT_EQ(vec.size(), Key(0));
+        ASSERT_EQ(vec.size(), Key(0u));
     }
 
     // Size constructor initializes contents to 0
     {
-        StackVec vec(Key(10));
-        ASSERT_EQ(vec.size(), Key(10));
+        StackVec vec(Key(10u));
+        ASSERT_EQ(vec.size(), Key(10u));
 
-        for (Key i(0); i < Key(10); ++i) {
-            ASSERT_EQ(vec[i], Val(0));
+        for (Key i(0u); i < Key(10u); ++i) {
+            ASSERT_EQ(vec[i], Val(0u));
         }
     }
 }
@@ -72,11 +72,11 @@ TEST_F(ITypStackVecDeathTest, OutOfBounds) {
         GTEST_SKIP();
     }
 
-    StackVec vec(Key(10));
-    EXPECT_DEATH(vec[Key(10)], "");
+    StackVec vec(Key(10u));
+    EXPECT_DEATH(vec[Key(10u)], "");
 
     const StackVec& constVec = vec;
-    EXPECT_DEATH(constVec[Key(10)], "");
+    EXPECT_DEATH(constVec[Key(10u)], "");
 }
 
 // If the index/size is 64-bit, it needs to be narrowed to size_t. Verify that's checked correctly.
@@ -87,18 +87,18 @@ TEST_F(ITypStackVecDeathTest, OversizedIndex) {
     }
 
     using Key64 = TypedInteger<struct Key64T, uint64_t>;
-    static constexpr Key64 kHugeKey64{0x1000'0000'0000'0000};
+    static constexpr Key64 kHugeKey64{0x1000'0000'0000'0000u};
 
     // Crash either due to OOM (on 64-bit) or due to narrowing (on 32-bit).
     EXPECT_DEATH((ityp::stack_vec<Key64, Val, 20>(kHugeKey64)), "");
 
-    ityp::stack_vec<Key64, Val, 20> vec(Key64(10));
+    ityp::stack_vec<Key64, Val, 20> vec(Key64(10u));
 
-    vec[Key64(9)];
+    vec[Key64(9u)];
     // Regular out-of-bounds.
-    EXPECT_DEATH(vec[Key64(10)], "");
+    EXPECT_DEATH(vec[Key64(10u)], "");
 
-    vec[Key64(0)];
+    vec[Key64(0u)];
     // If this were cast to a 32-bit size_t without a check, it would be in-bounds.
     EXPECT_DEATH(vec[kHugeKey64], "");
 

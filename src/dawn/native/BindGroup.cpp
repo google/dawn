@@ -617,7 +617,7 @@ BindGroupBase::BindGroupBase(DeviceBase* device,
 MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& descriptor) {
     BindGroupLayoutInternalBase* layout = GetLayout();
 
-    for (BindingIndex i{0}; i < layout->GetBindingCount(); ++i) {
+    for (BindingIndex i{0u}; i < layout->GetBindingCount(); ++i) {
         // TODO(enga): Shouldn't be needed when bindings are tightly packed.
         // This is to fill Ref<ObjectBase> holes with nullptrs.
         new (&mBindingData.bindings[i]) Ref<ObjectBase>();
@@ -746,7 +746,7 @@ BindGroupBase::~BindGroupBase() = default;
 void BindGroupBase::DestroyImpl(DestroyReason reason) {
     if (mLayout != nullptr) {
         DAWN_CHECK(!IsError());
-        for (BindingIndex i{0}; i < GetLayout()->GetBindingCount(); ++i) {
+        for (BindingIndex i{0u}; i < GetLayout()->GetBindingCount(); ++i) {
             mBindingData.bindings[i].~Ref<ObjectBase>();
         }
     }

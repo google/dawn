@@ -810,7 +810,7 @@ MaybeError Texture::WriteDepthStencilInternal(const ScopedCommandRecordingContex
         copyCmd.source.mipLevel = subresources.baseMipLevel;
         copyCmd.source.aspect = otherAspects;
         copyCmd.destination.texture = stagingTexture.Get();
-        copyCmd.destination.origin = {TexelCount{0}, TexelCount{0}, TexelCount{0}};
+        copyCmd.destination.origin = {TexelCount{0u}, TexelCount{0u}, TexelCount{0u}};
         copyCmd.destination.mipLevel = 0;
         copyCmd.destination.aspect = otherAspects;
         copyCmd.copySize = size;
@@ -849,7 +849,7 @@ MaybeError Texture::WriteDepthStencilInternal(const ScopedCommandRecordingContex
     // Copy to the dest texture from the staging texture.
     CopyTextureToTextureCmd copyCmd;
     copyCmd.source.texture = stagingTexture.Get();
-    copyCmd.source.origin = {TexelCount{0}, TexelCount{0}, TexelCount{0}};
+    copyCmd.source.origin = {TexelCount{0u}, TexelCount{0u}, TexelCount{0u}};
     copyCmd.source.mipLevel = 0;
     copyCmd.source.aspect = GetFormat().aspects;
     copyCmd.destination.texture = this;
@@ -990,7 +990,7 @@ MaybeError Texture::Read(const ScopedCommandRecordingContext* commandContext,
     copyCmd.source.mipLevel = subresources.baseMipLevel;
     copyCmd.source.aspect = subresources.aspects;
     copyCmd.destination.texture = stagingTexture.Get();
-    copyCmd.destination.origin = {TexelCount{0}, TexelCount{0}, TexelCount{0}};
+    copyCmd.destination.origin = {TexelCount{0u}, TexelCount{0u}, TexelCount{0u}};
     copyCmd.destination.mipLevel = 0;
     copyCmd.destination.aspect = subresources.aspects;
     copyCmd.copySize = size;

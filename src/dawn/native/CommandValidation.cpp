@@ -296,7 +296,7 @@ uint64_t ComputeRequiredBytesInCopy(const TypedTexelBlockInfo& blockInfo,
                                     BlockCount blocksPerRow,
                                     BlockCount rowsPerImage) {
     // See ComputeRequiredBytesInCopy overload as this is mostly the same modulo some validation.
-    if (copySize.depthOrArrayLayers == BlockCount{0}) {
+    if (copySize.depthOrArrayLayers == BlockCount{0u}) {
         return 0;
     }
     BlockCount widthInBlocks = copySize.width;
@@ -307,11 +307,11 @@ uint64_t ComputeRequiredBytesInCopy(const TypedTexelBlockInfo& blockInfo,
     uint64_t maxBytesPerImage =
         std::numeric_limits<uint64_t>::max() / static_cast<uint64_t>(copySize.depthOrArrayLayers);
     DAWN_CHECK(bytesPerImage <= maxBytesPerImage);
-    BlockCount blocksToCopy = blocksPerImage * (copySize.depthOrArrayLayers - BlockCount{1});
+    BlockCount blocksToCopy = blocksPerImage * (copySize.depthOrArrayLayers - BlockCount{1u});
     uint64_t requiredBytesInCopy = blockInfo.ToBytes(blocksToCopy);
-    if (heightInBlocks > BlockCount{0}) {
+    if (heightInBlocks > BlockCount{0u}) {
         BlockCount blocksInLastImage =
-            blocksPerRow * (heightInBlocks - BlockCount{1}) + blocksInLastRow;
+            blocksPerRow * (heightInBlocks - BlockCount{1u}) + blocksInLastRow;
         uint64_t bytesInLastImage = blockInfo.ToBytes(blocksInLastImage);
         requiredBytesInCopy += bytesInLastImage;
     }

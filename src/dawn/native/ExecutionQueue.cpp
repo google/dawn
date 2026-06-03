@@ -107,7 +107,7 @@ MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Na
             }
         }
 
-        if (timeout > Nanoseconds(0)) {
+        if (timeout > Nanoseconds(0u)) {
             // We should never need to wait for queue serials after the device has been
             // Disconnected.
             DAWN_ASSERT(GetDevice()->GetState() != DeviceBase::State::Disconnected);
@@ -127,7 +127,7 @@ MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Na
             DAWN_TRY(EnsureCommandsFlushed(waitSerial));
         }
 
-        if (timeout > Nanoseconds(0)) {
+        if (timeout > Nanoseconds(0u)) {
             // We should never need to wait for queue serials after the device has been
             // Disconnected.
             DAWN_ASSERT(GetDevice()->GetState() != DeviceBase::State::Disconnected);

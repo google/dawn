@@ -802,7 +802,7 @@ ResultOrError<ExecutionSerial> DelayFlushQueue::WaitForQueueSerialImpl(Execution
 
     bool done;
     DAWN_TRY_ASSIGN(done, IsQueryCompleted(&commandContext, /*requireFlush=*/false, &(*it)));
-    if (timeout == Nanoseconds(0)) {
+    if (timeout == Nanoseconds(0u)) {
         if (!done) {
             // Return timed-out immediately without using a timer.
             return kWaitSerialTimeout;

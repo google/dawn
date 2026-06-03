@@ -169,7 +169,7 @@ std::unique_ptr<JobHandle> AsyncWorkerThreadPool::PostWorkerJob(PostWorkerJobCal
 
 JobStatus AsyncWorkerThreadPool::TaskHandlingJobLoop() {
     // By default, wait for 100ms between yielding.
-    static constexpr Nanoseconds kWaitDuration = Nanoseconds(100000000);
+    static constexpr Nanoseconds kWaitDuration = Nanoseconds(100000000u);
 
     Ref<AsyncTaskHandleImpl> task = nullptr;
     mTaskTracking.Use<NotifyType::None>([&](auto taskTracking) {

@@ -139,10 +139,10 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
     // sampled as the source instead.
     ityp::vector<TexelCount, Ref<TextureViewBase>> srcViews;
     srcViews.reserve(copyExtent.depthOrArrayLayers);
-    for (TexelCount z = TexelCount{0}; z < copyExtent.depthOrArrayLayers; ++z) {
+    for (TexelCount z = TexelCount{0u}; z < copyExtent.depthOrArrayLayers; ++z) {
         TexelCount layer = src.origin.z + z;
         Ref<TextureViewBase> srcView;
-        if (layer == TexelCount{0}) {
+        if (layer == TexelCount{0u}) {
             // The zero'th slice. We can use the original texture.
             TextureViewDescriptor viewDesc = {};
             viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
@@ -192,7 +192,7 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
     }
 
     // For each copied layer, blit from the source into the destination.
-    for (TexelCount z = TexelCount{0}; z < copyExtent.depthOrArrayLayers; ++z) {
+    for (TexelCount z = TexelCount{0u}; z < copyExtent.depthOrArrayLayers; ++z) {
         Ref<BindGroupBase> bindGroup;
         {
             BindGroupEntry bgEntry = {};

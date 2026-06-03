@@ -112,7 +112,7 @@ class RenderPassEncoder final : public RenderEncoderBase {
 
     // The resources for occlusion query
     Ref<QuerySetBase> mOcclusionQuerySet;
-    QueryIndex mCurrentOcclusionQueryIndex = QueryIndex(0);
+    QueryIndex mCurrentOcclusionQueryIndex = QueryIndex(0u);
     bool mOcclusionQueryActive = false;
 
     // This is the hardcoded value in the WebGPU spec.

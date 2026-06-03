@@ -350,7 +350,7 @@ MaybeError PipelineBase::ValidateGetBindGroupLayout(BindGroupIndex groupIndex) {
     DAWN_TRY(GetDevice()->ValidateObject(mLayout.Get()));
 
     if (mLayout->UsesResourceTable()) {
-        DAWN_INVALID_IF(groupIndex >= kMaxBindGroupsTyped - BindGroupIndex(1),
+        DAWN_INVALID_IF(groupIndex >= kMaxBindGroupsTyped - BindGroupIndex(1u),
                         "Bind group layout index (%u) exceeds or equals the maximum number of bind "
                         "groups (%u) - 1 (one slot reserved for the resource table).",
                         groupIndex, kMaxBindGroups);

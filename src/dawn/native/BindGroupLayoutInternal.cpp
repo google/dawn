@@ -359,7 +359,7 @@ ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDes
             "On entries[%u]: binding number (%u) exceeds the maxBindingsPerBindGroup limit (%u).",
             i, bindingNumber, kMaxBindingsPerBindGroup);
 
-        BindingNumber arraySize{1};
+        BindingNumber arraySize{1u};
         if (entry->bindingArraySize > 1) {
             arraySize = BindingNumber(entry->bindingArraySize);
 
@@ -668,7 +668,7 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
 // This is a utility function to help DAWN_ASSERT that the BGL-binding comparator places buffers
 // first.
 bool CheckBufferBindingsFirst(ityp::span<BindingIndex, const BindingInfo> bindings) {
-    BindingIndex lastBufferIndex{0};
+    BindingIndex lastBufferIndex{0u};
     BindingIndex firstNonBufferIndex = std::numeric_limits<BindingIndex>::max();
     for (auto [i, binding] : Enumerate(bindings)) {
         if (std::holds_alternative<BufferBindingInfo>(binding.bindingLayout)) {
@@ -750,7 +750,7 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
     }
 
     // Do a prefix sum to store the start offset of each binding type.
-    BindingIndex sum{0};
+    BindingIndex sum{0u};
     for (auto [type, count] : Enumerate(counts)) {
         mBindingTypeStart[type] = sum;
         sum += count;
@@ -888,7 +888,7 @@ bool BindGroupLayoutInternalBase::EqualityFunc::operator()(
     if (a->GetBindingCount() != b->GetBindingCount()) {
         return false;
     }
-    for (BindingIndex i{0}; i < a->GetBindingCount(); ++i) {
+    for (BindingIndex i{0u}; i < a->GetBindingCount(); ++i) {
         if (a->mBindingInfo[i] != b->mBindingInfo[i]) {
             return false;
         }

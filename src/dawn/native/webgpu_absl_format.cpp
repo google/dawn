@@ -97,7 +97,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
     s->Append(absl::StrFormat("{ binding: %u, visibility: %s, ", value.binding, value.visibility));
-    if (value.arraySize != BindingIndex(1)) {
+    if (value.arraySize != BindingIndex(1u)) {
         s->Append(absl::StrFormat("arraySize: %u, indexInArray: %u, ", value.arraySize,
                                   value.indexInArray));
     }

@@ -153,7 +153,7 @@ struct StaticSamplerBindingInfo {
     Ref<SamplerBase> sampler;
     // Holds the BindingIndex of the single texture with which this sampler is statically paired, if
     // any.
-    BindingIndex sampledTextureIndex = BindingIndex(0);
+    BindingIndex sampledTextureIndex = BindingIndex(0u);
     // What this sampler will be used for.
     StaticSamplerUse use = StaticSamplerUse::Freestanding;
 

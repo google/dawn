@@ -1011,8 +1011,8 @@ ResultOrError<WGPUCommandBuffer> CommandBuffer::Encode() {
     WGPUCommandEncoder innerEncoder =
         wgpu.deviceCreateCommandEncoder(ToBackend(GetDevice())->GetInnerHandle(), nullptr);
 
-    PassIndex nextComputePassNumber{0};
-    PassIndex nextRenderPassNumber{0};
+    PassIndex nextComputePassNumber{0u};
+    PassIndex nextRenderPassNumber{0u};
 
     Command type;
     while (mCommands.NextCommandId(&type)) {

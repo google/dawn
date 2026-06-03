@@ -117,7 +117,7 @@ class ShaderVisibleDescriptorAllocator {
     // The serial value of 0 means the shader-visible heaps have not been allocated.
     // This value is never returned in the GPUDescriptorHeapAllocation after
     // AllocateGPUDescriptors() is called.
-    HeapVersionID mHeapSerial = HeapVersionID(0);
+    HeapVersionID mHeapSerial = HeapVersionID(0u);
 
     uint32_t mSizeIncrement;
 

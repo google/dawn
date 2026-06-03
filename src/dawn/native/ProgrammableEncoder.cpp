@@ -171,7 +171,7 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
         "in %s.",
         dynamicOffsets.size(), layout->GetDynamicBufferCount(), layout);
 
-    for (BindingIndex i{0}; i < dynamicOffsets.size(); ++i) {
+    for (BindingIndex i{0u}; i < dynamicOffsets.size(); ++i) {
         const BindingInfo& bindingInfo = layout->GetBindingInfo(i);
 
         // BGL creation sorts bindings such that the dynamic buffer bindings are first.

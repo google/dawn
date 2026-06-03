@@ -132,7 +132,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
 
     Device* device = ToBackend(GetDevice());
     return mFencesInFlight.Use([&](auto fencesInFlight) -> ResultOrError<ExecutionSerial> {
-        ExecutionSerial fenceSerial(0);
+        ExecutionSerial fenceSerial(0u);
         while (!fencesInFlight->empty()) {
             VkFence fence = fencesInFlight->front().first;
             ExecutionSerial tentativeSerial = fencesInFlight->front().second;

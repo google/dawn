@@ -99,7 +99,7 @@ class DescriptorSetAllocator : public RefCounted {
         SetIndex setIndex;
     };
     SerialQueue<ExecutionSerial, Deallocation> mPendingDeallocations;
-    ExecutionSerial mLastDeallocationSerial = ExecutionSerial(0);
+    ExecutionSerial mLastDeallocationSerial = ExecutionSerial(0u);
 
     // Used to guard all public member functions.
     Mutex mMutex;

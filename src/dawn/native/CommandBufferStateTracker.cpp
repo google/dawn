@@ -373,7 +373,7 @@ MaybeError CommandBufferStateTracker::ValidateNoDifferentTextureViewsOnSameTextu
         BindGroupBase* bindGroup = mBindgroups[groupIndex];
         BindGroupLayoutInternalBase* bgl = bindGroup->GetLayout();
 
-        for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
+        for (BindingIndex bindingIndex{0u}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
             const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
             if (!std::holds_alternative<TextureBindingInfo>(bindingInfo.bindingLayout) &&
                 !std::holds_alternative<StorageTextureBindingInfo>(bindingInfo.bindingLayout)) {

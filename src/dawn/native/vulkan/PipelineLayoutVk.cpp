@@ -57,7 +57,7 @@ ResultOrError<Ref<RefCountedVkHandle<VkPipelineLayout>>> PipelineLayout::CreateV
 
     // The first VkDescriptorSetLayouts are the for framebuffer fetch and/or the resource table if
     // needed.
-    BindGroupIndex startOfBindGroups{0};
+    BindGroupIndex startOfBindGroups{0u};
     if (specialization.framebufferFetchAttachmentCount > 0) {
         DAWN_TRY_ASSIGN(setLayouts[startOfBindGroups],
                         ToBackend(GetDevice())

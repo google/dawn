@@ -100,26 +100,12 @@ class alignas(T) TypedIntegerImpl {
         requires kIsCastAlwaysInRange<Src, T>
     explicit constexpr TypedIntegerImpl(Src src) : mValue(static_cast<T>(src)) {}
 
-    // In consteval, we can allow narrowing casts because we can check the actual value at compile.
-    // TODO(crbug.com/515794394): Remove this due to issues with lambda type inference.
-    template <std::integral Src>
-        requires(!kIsCastAlwaysInRange<Src, T>)
-    explicit consteval TypedIntegerImpl(Src src) : mValue(checked_cast<T>(src)) {}
-
     // Lossless conversion: TypedInteger -> primitive (cast)
     // If you need a lossy (narrowing) conversion, use (d)checked_cast.
     template <std::integral Dst>
         requires kIsCastAlwaysInRange<T, Dst>
     explicit constexpr operator Dst() const {
         return static_cast<Dst>(this->mValue);
-    }
-
-    // In consteval, we can allow narrowing casts because we can check the actual value at compile.
-    // TODO(crbug.com/515794394): Remove this due to issues with lambda type inference.
-    template <std::integral Dst>
-        requires(!kIsCastAlwaysInRange<T, Dst>)
-    explicit consteval operator Dst() const {
-        return checked_cast<Dst>(this->mValue);
     }
 
     // Same-tag TypedInteger comparison operators

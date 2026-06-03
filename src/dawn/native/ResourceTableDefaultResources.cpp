@@ -79,7 +79,7 @@ constexpr auto kDefaults = ityp::array<ResourceTableSlot, tint::ResourceType, 35
     tint::ResourceType::kSampler_non_filtering,
     tint::ResourceType::kSampler_comparison,
 };
-constexpr auto kNumDefaultSamplers = ResourceTableSlot{3};
+constexpr auto kNumDefaultSamplers = ResourceTableSlot{3u};
 
 // This helper function is used in ASSERTs to check that the default resources are compatible with
 // the typeIds that they will be used as defaults for.

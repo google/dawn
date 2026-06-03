@@ -186,8 +186,8 @@ TEST(SerialMap, TypedInteger) {
     using MySerialMap = SerialMap<MySerial, int>;
 
     MySerialMap map;
-    map.Enqueue(1, MySerial(0));
-    map.Enqueue(2, MySerial(0));
+    map.Enqueue(1, MySerial(0u));
+    map.Enqueue(2, MySerial(0u));
 
     std::vector<int> expectedValues = {1, 2};
     for (int value : map.IterateAll()) {

@@ -2021,7 +2021,7 @@ void CommandEncoder::APICopyTextureToTexture(const TexelCopyTextureInfo* sourceO
                 GetDevice()->IsToggleEnabled(
                     Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource) &&
                 copySize->depthOrArrayLayers > 0 &&
-                (dst.mipLevel > 0 || dst.origin.z > TexelCount{0} ||
+                (dst.mipLevel > 0 || dst.origin.z > TexelCount{0u} ||
                  copySize->depthOrArrayLayers > 1);
 
             // If we're not using a blit, or there are aspects other than depth,

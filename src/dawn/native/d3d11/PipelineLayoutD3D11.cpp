@@ -82,7 +82,7 @@ MaybeError PipelineLayout::Initialize(Device* device) {
         const BindGroupLayoutInternalBase* bgl = GetBindGroupLayout(group);
         mBindingTableIndexMap[group].resize(bgl->GetBindingCount());
 
-        for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
+        for (BindingIndex bindingIndex{0u}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
             const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
 
             mBindingTableIndexMap[group][bindingIndex] = MatchVariant(

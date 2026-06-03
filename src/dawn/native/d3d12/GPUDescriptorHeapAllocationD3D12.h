@@ -48,8 +48,8 @@ class GPUDescriptorHeapAllocation {
 
   private:
     D3D12_GPU_DESCRIPTOR_HANDLE mBaseDescriptor = {0};
-    ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
-    HeapVersionID mHeapSerial = HeapVersionID(0);
+    ExecutionSerial mLastUsageSerial = ExecutionSerial(0u);
+    HeapVersionID mHeapSerial = HeapVersionID(0u);
 };
 
 }  // namespace dawn::native::d3d12

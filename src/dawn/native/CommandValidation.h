@@ -110,7 +110,7 @@ MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
 // Returns true if [startA, startA + length[ overlaps [startB, startB + length[
 template <typename T>
 bool IsRangeOverlapped(T startA, T startB, T length) {
-    if (length < T{1}) {
+    if (length < T{}) {
         return false;
     }
     return RangesOverlap(static_cast<uint64_t>(startA),

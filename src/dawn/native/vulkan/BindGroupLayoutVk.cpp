@@ -97,7 +97,7 @@ ResultOrError<VulkanStaticBindings> ComputeVulkanStaticBindings(
         // Vulkan descriptor set layouts have one entry for binding_array. Only handle their first
         // element as subsequent ones will be part of the already added
         // VkDescriptorSetLayoutBinding.
-        if (bindingInfo.indexInArray != BindingIndex(0)) {
+        if (bindingInfo.indexInArray != BindingIndex(0u)) {
             continue;
         }
 
@@ -138,7 +138,7 @@ ResultOrError<VulkanStaticBindings> ComputeVulkanStaticBindings(
                 // the maximum number of planes that an external format can have here. The number
                 // of overall YCbCr descriptors will be relatively small and these pools are not an
                 // overall bottleneck on memory usage.
-                DAWN_CHECK(bindingInfo.arraySize == BindingIndex(1));
+                DAWN_CHECK(bindingInfo.arraySize == BindingIndex(1u));
                 descriptorCount = 3;
             }
         }

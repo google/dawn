@@ -279,7 +279,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
     Ref<BindGroupLayoutBase> bgl;
     DAWN_TRY_ASSIGN(bgl, pipeline->GetBindGroupLayout(0));
 
-    for (TexelCount z{0}; z < copyExtent.depthOrArrayLayers; ++z) {
+    for (TexelCount z{0u}; z < copyExtent.depthOrArrayLayers; ++z) {
         Ref<TextureViewBase> srcView;
         {
             TextureViewDescriptor viewDesc = {};

@@ -68,7 +68,7 @@ class IndirectDrawMetadata : public NonCopyable {
     };
 
     struct IndirectDraw {
-        IndirectDrawIndex validatedDrawIndex = IndirectDrawIndex(0);
+        IndirectDrawIndex validatedDrawIndex = IndirectDrawIndex(0u);
         uint64_t inputBufferOffset = 0;
         uint64_t numIndexBufferElements = 0;
         uint64_t indexBufferOffsetInElements = 0;
@@ -219,7 +219,7 @@ class IndirectDrawMetadata : public NonCopyable {
 
     std::vector<IndirectMultiDraw> mMultiDraws;
 
-    IndirectDrawIndex mNextIndirectDrawIndex{0};
+    IndirectDrawIndex mNextIndirectDrawIndex{0u};
     ityp::vector<IndirectDrawIndex, ValidatedIndirectDraw> mValidatedIndirectDraws;
 
     uint64_t mMaxBatchOffsetRange = 0;

@@ -210,8 +210,8 @@ struct BufferCopy {
 
     Ref<BufferBase> buffer;
     uint64_t offset = 0;
-    BlockCount blocksPerRow = BlockCount(0);
-    BlockCount rowsPerImage = BlockCount(0);
+    BlockCount blocksPerRow = BlockCount(0u);
+    BlockCount rowsPerImage = BlockCount(0u);
 };
 
 struct TextureCopy {
@@ -362,7 +362,7 @@ struct ResolveQuerySetCmd {
 
     Ref<QuerySetBase> querySet;
     QueryIndex firstQuery = kQuerySetIndexUndefinedTyped;
-    QueryIndex queryCount = QueryIndex(0);
+    QueryIndex queryCount = QueryIndex(0u);
     Ref<BufferBase> destination;
     uint64_t destinationOffset = 0;
 };
@@ -409,7 +409,7 @@ struct SetBindGroupCmd {
     SetBindGroupCmd();
     ~SetBindGroupCmd();
 
-    BindGroupIndex index = BindGroupIndex(0);
+    BindGroupIndex index = BindGroupIndex(0u);
     Ref<BindGroupBase> group;
     uint32_t dynamicOffsetCount = 0;
 };

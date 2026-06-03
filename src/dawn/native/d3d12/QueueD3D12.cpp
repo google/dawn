@@ -186,7 +186,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
     }
 
     if (completedSerial <= GetCompletedCommandSerial()) {
-        return ExecutionSerial(0);
+        return ExecutionSerial(0u);
     }
 
     DAWN_TRY(RecycleSystemEventReceivers(completedSerial));

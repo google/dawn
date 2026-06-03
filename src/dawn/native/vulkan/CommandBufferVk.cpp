@@ -512,7 +512,7 @@ void ResetUsedQuerySetsOnRenderPass(Device* device,
     DAWN_ASSERT(availability.size() == querySet->GetQueryCount());
 
     ForEachAvailableQueryRange(
-        QueryIndex(0), availability.size(), [&](QueryIndex i) { return availability[i]; },
+        QueryIndex(0u), availability.size(), [&](QueryIndex i) { return availability[i]; },
         [&](QueryIndex start, QueryIndex count) {
             device->fn.CmdResetQueryPool(commands, ToBackend(querySet)->GetHandle(),
                                          uint32_t{start}, uint32_t{count});
@@ -1121,8 +1121,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
         return {};
     };
 
-    PassIndex nextComputePassNumber{0};
-    PassIndex nextRenderPassNumber{0};
+    PassIndex nextComputePassNumber{0u};
+    PassIndex nextRenderPassNumber{0u};
 
     Command type;
     while (mCommands.NextCommandId(&type)) {
@@ -1685,7 +1685,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
     VkCommandBuffer commands = recordingContext->commandBuffer;
 
     const IndirectDrawMetadata& metadata = GetIndirectDrawMetadata()[renderPassIndex];
-    IndirectDrawIndex indirectDrawIndex{0};
+    IndirectDrawIndex indirectDrawIndex{0u};
 
     // Write timestamp at the beginning of render pass if it's set.
     // We've observed that this must be called before the render pass or the timestamps produced

@@ -410,7 +410,7 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
 
     // Check the heap serial to ensure the heap has switched.
     EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(),
-              heapSerial + native::d3d12::HeapVersionID(1));
+              heapSerial + native::d3d12::HeapVersionID(1u));
 
     // Check that currrently bound ShaderVisibleHeap is locked resident.
     EXPECT_TRUE(allocator->IsShaderVisibleHeapLockedResidentForTesting());

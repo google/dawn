@@ -391,7 +391,7 @@ bool IsBufferToTextureBlitSupported(BufferBase* buffer,
     }
 
     // Must have non-zero copy size.
-    return copyExtent.width * copyExtent.height * copyExtent.depthOrArrayLayers > TexelCount{0};
+    return copyExtent.width * copyExtent.height * copyExtent.depthOrArrayLayers > TexelCount{0u};
 }
 
 MaybeError BlitBufferToTexture(DeviceBase* device,
@@ -447,7 +447,7 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
             break;
     }
 
-    for (TexelCount z{0}; z < copyExtent.depthOrArrayLayers; ++z) {
+    for (TexelCount z{0u}; z < copyExtent.depthOrArrayLayers; ++z) {
         Ref<TextureViewBase> dstView;
         {
             TextureViewDescriptor viewDesc = {};

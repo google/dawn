@@ -124,10 +124,10 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
     // Expect restored state.
     EXPECT_EQ(ToAPI(stateTracker->GetComputePipeline()), pipeline0.Get());
     EXPECT_EQ(ToAPI(stateTracker->GetPipelineLayout()), pl0.Get());
-    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(0))), staticBG.Get());
-    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(0)), emptyDynamicOffsets);
-    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(1))), dynamicBG.Get());
-    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(1)), singleDynamicOffset);
+    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(0u))), staticBG.Get());
+    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(0u)), emptyDynamicOffsets);
+    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(1u))), dynamicBG.Get());
+    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(1u)), singleDynamicOffset);
 
     // Dispatch again to check that the restored state can be used.
     // Also pass an indirect offset which should get replaced with the offset
@@ -137,10 +137,10 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
     // Expect restored state.
     EXPECT_EQ(ToAPI(stateTracker->GetComputePipeline()), pipeline0.Get());
     EXPECT_EQ(ToAPI(stateTracker->GetPipelineLayout()), pl0.Get());
-    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(0))), staticBG.Get());
-    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(0)), emptyDynamicOffsets);
-    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(1))), dynamicBG.Get());
-    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(1)), singleDynamicOffset);
+    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(0u))), staticBG.Get());
+    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(0u)), emptyDynamicOffsets);
+    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(1u))), dynamicBG.Get());
+    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(1u)), singleDynamicOffset);
 
     // Change the pipeline
     pass.SetPipeline(pipeline1);
@@ -154,10 +154,10 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
     // Expect restored state.
     EXPECT_EQ(ToAPI(stateTracker->GetComputePipeline()), pipeline1.Get());
     EXPECT_EQ(ToAPI(stateTracker->GetPipelineLayout()), pl1.Get());
-    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(0))), dynamicBG.Get());
-    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(0)), singleDynamicOffset);
-    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(1))), staticBG.Get());
-    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(1)), emptyDynamicOffsets);
+    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(0u))), dynamicBG.Get());
+    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(0u)), singleDynamicOffset);
+    EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(1u))), staticBG.Get());
+    EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(1u)), emptyDynamicOffsets);
 
     pass.End();
 
@@ -216,7 +216,7 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
 
     auto ExpectSetValidationBindGroup = [&](CommandIterator* commands) {
         auto* cmd = commands->NextCommand<SetBindGroupCmd>();
-        ASSERT_EQ(cmd->index, BindGroupIndex(0));
+        ASSERT_EQ(cmd->index, BindGroupIndex(0u));
         ASSERT_NE(cmd->group.Get(), nullptr);
         ASSERT_EQ(cmd->dynamicOffsetCount, 0u);
     };

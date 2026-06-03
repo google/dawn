@@ -255,8 +255,8 @@ VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D:
-            DAWN_ASSERT(textureCopy.origin.z == TexelCount{0} &&
-                        copySizeTexels.depthOrArrayLayers == TexelCount{1});
+            DAWN_ASSERT(textureCopy.origin.z == TexelCount{0u} &&
+                        copySizeTexels.depthOrArrayLayers == TexelCount{1u});
             region.imageOffset.x = dchecked_cast<uint32_t>(textureCopy.origin.x);
             region.imageOffset.y = 0;
             region.imageOffset.z = 0;

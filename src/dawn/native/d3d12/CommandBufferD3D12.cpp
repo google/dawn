@@ -696,7 +696,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
         // so always try to apply dynamic offsets even if the offsets stay the same.
         BindGroupLayout* bgl = ToBackend(group->GetLayout());
         std::vector<uint32_t> storageBufferDynamicOffsets;
-        for (BindingIndex bindingIndex{0}; bindingIndex < dynamicOffsets.size(); ++bindingIndex) {
+        for (BindingIndex bindingIndex{0u}; bindingIndex < dynamicOffsets.size(); ++bindingIndex) {
             // Note that the order of indices in dynamicOffsets corresponds to the order of
             // dynamic resource bindings in the BGL by binding number. Because the BGL packs
             // (uniform and storage) dynamic buffers at the front, and are sorted by binding
@@ -994,8 +994,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
     ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
     descriptorHeapState.SetID3D12DescriptorHeaps(commandList);
 
-    PassIndex nextComputePassNumber{0};
-    PassIndex nextRenderPassNumber{0};
+    PassIndex nextComputePassNumber{0u};
+    PassIndex nextRenderPassNumber{0u};
 
     Command type;
     while (mCommands.NextCommandId(&type)) {
@@ -1211,18 +1211,18 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                             &sourceRegion);
                     }
                 } else {
-                    const TexelExtent3D copyExtentOneSlice = {copy->copySize.width,
-                                                              copy->copySize.height, TexelCount{1}};
+                    const TexelExtent3D copyExtentOneSlice = {
+                        copy->copySize.width, copy->copySize.height, TexelCount{1u}};
 
                     for (Aspect aspect : IterateEnumMask(srcRange.aspects)) {
-                        for (TexelCount z{0}; z < copy->copySize.depthOrArrayLayers; ++z) {
+                        for (TexelCount z{0u}; z < copy->copySize.depthOrArrayLayers; ++z) {
                             uint32_t sourceLayer = 0;
-                            TexelCount sourceZ{0};
+                            TexelCount sourceZ{0u};
                             switch (source->GetDimension()) {
                                 case wgpu::TextureDimension::Undefined:
                                     DAWN_UNREACHABLE();
                                 case wgpu::TextureDimension::e1D:
-                                    DAWN_ASSERT(copy->source.origin.z == TexelCount{0});
+                                    DAWN_ASSERT(copy->source.origin.z == TexelCount{0u});
                                     break;
                                 case wgpu::TextureDimension::e2D:
                                     sourceLayer =
@@ -1234,12 +1234,12 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                             }
 
                             uint32_t destinationLayer = 0;
-                            TexelCount destinationZ{0};
+                            TexelCount destinationZ{0u};
                             switch (destination->GetDimension()) {
                                 case wgpu::TextureDimension::Undefined:
                                     DAWN_UNREACHABLE();
                                 case wgpu::TextureDimension::e1D:
-                                    DAWN_ASSERT(copy->destination.origin.z == TexelCount{0});
+                                    DAWN_ASSERT(copy->destination.origin.z == TexelCount{0u});
                                     break;
                                 case wgpu::TextureDimension::e2D:
                                     destinationLayer =
@@ -1748,7 +1748,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
     const bool useRenderPass = device->IsToggleEnabled(Toggle::UseD3D12RenderPass);
 
     const IndirectDrawMetadata& metadata = GetIndirectDrawMetadata()[renderPassIndex];
-    IndirectDrawIndex indirectDrawIndex{0};
+    IndirectDrawIndex indirectDrawIndex{0u};
 
     // renderPassBuilder must be scoped to RecordRenderPass because any underlying
     // D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_SUBRESOURCE_PARAMETERS structs must remain

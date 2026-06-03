@@ -732,7 +732,7 @@ BindGroupMask PipelineLayoutBase::InheritedGroupsMask(const PipelineLayoutBase* 
 BindGroupIndex PipelineLayoutBase::GroupsInheritUpTo(const PipelineLayoutBase* other) const {
     DAWN_CHECK(!IsError());
 
-    for (BindGroupIndex i(0); i < kMaxBindGroupsTyped; ++i) {
+    for (BindGroupIndex i(0u); i < kMaxBindGroupsTyped; ++i) {
         if (!mMask[i] || mBindGroupLayouts[i].Get() != other->mBindGroupLayouts[i].Get()) {
             return i;
         }

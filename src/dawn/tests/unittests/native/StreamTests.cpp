@@ -392,13 +392,13 @@ TEST(SerializeTests, StdUnorderedSet) {
 // Test that ByteVectorSink serializes ityp::array as expected.
 TEST(SerializeTests, ItypArray) {
     const ityp::array<TypedIntegerForTest, TypedIntegerForTest, 4> input = {
-        TypedIntegerForTest(99), TypedIntegerForTest(4), TypedIntegerForTest(6),
-        TypedIntegerForTest(1)};
+        TypedIntegerForTest(99u), TypedIntegerForTest(4u), TypedIntegerForTest(6u),
+        TypedIntegerForTest(1u)};
 
     // Expect all values.
     ByteVectorSink expected;
-    StreamIn(&expected, TypedIntegerForTest(99), TypedIntegerForTest(4), TypedIntegerForTest(6),
-             TypedIntegerForTest(1));
+    StreamIn(&expected, TypedIntegerForTest(99u), TypedIntegerForTest(4u), TypedIntegerForTest(6u),
+             TypedIntegerForTest(1u));
 
     EXPECT_CACHE_KEY_EQ(input, expected);
 }

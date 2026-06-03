@@ -1363,7 +1363,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                         TextureCopy textureCopy;
                         textureCopy.aspect = range.aspects;
                         textureCopy.mipLevel = level;
-                        textureCopy.origin = {TexelCount{0}, TexelCount{0}, TexelCount{layer}};
+                        textureCopy.origin = {TexelCount{0u}, TexelCount{0u}, TexelCount{layer}};
                         textureCopy.texture = this;
 
                         regions.push_back(

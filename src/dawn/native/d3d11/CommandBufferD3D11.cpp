@@ -323,8 +323,8 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
     };
 
     PipelineStateTracker pipelineStateTracker(commandContext);
-    PassIndex nextComputePassNumber{0};
-    PassIndex nextRenderPassNumber{0};
+    PassIndex nextComputePassNumber{0u};
+    PassIndex nextRenderPassNumber{0u};
 
     Command type;
     while (mCommands.NextCommandId(&type)) {
@@ -666,7 +666,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
     PipelineStateTracker* pipelineStateTracker,
     PassIndex renderPassIndex) {
     const IndirectDrawMetadata& metadata = GetIndirectDrawMetadata()[renderPassIndex];
-    IndirectDrawIndex indirectDrawIndex{0};
+    IndirectDrawIndex indirectDrawIndex{0u};
 
     // For the color attachments that the clear_color_with_draw workaround has applied, we can skip
     // the clear for them.

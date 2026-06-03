@@ -125,7 +125,7 @@ void GenerateCombinedSamplerInfo(
         // Dawn takes BindGroupIndex + BindingIndex.
         BindGroupIndex group;
         BindingIndex index;
-        BindingIndex shaderArraySize = BindingIndex(1);
+        BindingIndex shaderArraySize = BindingIndex(1u);
 
         // Tint takes the post-remapping binding point.
         tint::BindingPoint remappedBinding;

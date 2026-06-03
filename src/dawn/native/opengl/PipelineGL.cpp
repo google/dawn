@@ -121,7 +121,7 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
     mUnitsForTextures.resize(layout->GetNumSampledTextures());
 
     // Assign combined texture/samplers to GL texture units.
-    TextureUnit textureUnit{0};
+    TextureUnit textureUnit{0u};
     for (const auto& combined : combinedSamplers) {
         // All the texture/samplers of a binding_array are set in a single glUniform1iv, gather them
         // all in this vector.

@@ -319,7 +319,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
     // Queue::SubmitImpl(), it's safe to use ExecuteGL().
     return device->ExecuteGL(SubmitMode::Passive, [&](const OpenGLFunctions& gl) -> auto {
         return mFencesInFlight.Use([&](auto fencesInFlight) -> ResultOrError<ExecutionSerial> {
-            ExecutionSerial fenceSerial{0};
+            ExecutionSerial fenceSerial{0u};
             while (!fencesInFlight->empty()) {
                 auto [sync, tentativeSerial] = fencesInFlight->front();
 
@@ -327,7 +327,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
                 // as we see one that's not ready.
                 GLenum result;
                 DAWN_TRY_ASSIGN(result,
-                                sync->ClientWait(gl, EGL_SYNC_FLUSH_COMMANDS_BIT, Nanoseconds(0)));
+                                sync->ClientWait(gl, EGL_SYNC_FLUSH_COMMANDS_BIT, Nanoseconds(0u)));
                 if (result == EGL_TIMEOUT_EXPIRED) {
                     return fenceSerial;
                 }

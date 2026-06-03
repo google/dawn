@@ -234,7 +234,7 @@ bool EventManager::ProcessPollEvents() {
 
     // This call is a no-op if `queueLowestWaitSerials` is empty, otherwise, it ensures that the
     // lowest serial work is submitted on each queue.
-    WaitQueueSerials(queueLowestWaitSerials, Nanoseconds(0));
+    WaitQueueSerials(queueLowestWaitSerials, Nanoseconds(0u));
 
     // Complete the events that are completable.
     for (auto& [_, event] : readyEvents) {
@@ -330,7 +330,7 @@ wgpu::WaitStatus EventManager::WaitAny(std::span<FutureWaitInfo> infos, Nanoseco
         });
     };
 
-    if (timeout == Nanoseconds(0)) {
+    if (timeout == Nanoseconds(0u)) {
         PreProcessWaits(/*waiter=*/nullptr);
         WaitQueueSerials(queueLowestWaitSerials, timeout);
         PostProcessWaits(/*shouldComplete=*/true, /*waiter=*/nullptr);

@@ -76,14 +76,14 @@ class Pageable : public LinkNode<Pageable> {
 
   private:
     // mLastUsage denotes the last time this pageable was recorded for use.
-    ExecutionSerial mLastUsage = ExecutionSerial(0);
+    ExecutionSerial mLastUsage = ExecutionSerial(0u);
     // mLastSubmission denotes the last time this pageable was submitted to the GPU. Note that
     // although this variable often contains the same value as mLastUsage, it can differ in some
     // situations. When some asynchronous APIs (like WriteBuffer) are called, mLastUsage is
     // updated upon the call, but the backend operation is deferred until the next submission
     // to the GPU. This makes mLastSubmission unique from mLastUsage, and allows us to
     // accurately identify when a pageable can be evicted.
-    ExecutionSerial mLastSubmission = ExecutionSerial(0);
+    ExecutionSerial mLastSubmission = ExecutionSerial(0u);
     MemorySegment mMemorySegment;
     uint32_t mResidencyLockRefCount = 0;
     uint64_t mSize = 0;

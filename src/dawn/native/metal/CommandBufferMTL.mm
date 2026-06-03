@@ -1043,9 +1043,9 @@ void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
             }
             case wgpu::TextureDimension::e2D: {
                 const MTLOrigin textureOrigin = ToMTLOrigin(
-                    {copyInfo.textureOrigin.x, copyInfo.textureOrigin.y, TexelCount(0)});
+                    {copyInfo.textureOrigin.x, copyInfo.textureOrigin.y, TexelCount(0u)});
                 const MTLSize copyExtent = ToMTLSize(
-                    {copyInfo.copyExtent.width, copyInfo.copyExtent.height, TexelCount(1)});
+                    {copyInfo.copyExtent.width, copyInfo.copyExtent.height, TexelCount(1u)});
 
                 for (TexelCount z = copyInfo.textureOrigin.z;
                      z < copyInfo.textureOrigin.z + copyInfo.copyExtent.depthOrArrayLayers; ++z) {
@@ -1092,8 +1092,8 @@ CommandBuffer::CommandBuffer(CommandEncoder* enc, const CommandBufferDescriptor*
 CommandBuffer::~CommandBuffer() = default;
 
 MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) {
-    PassIndex nextComputePassNumber{0};
-    PassIndex nextRenderPassNumber{0};
+    PassIndex nextComputePassNumber{0u};
+    PassIndex nextRenderPassNumber{0u};
 
     auto LazyClearSyncScope = [](const SyncScopeResourceUsage& scope,
                                  CommandRecordingContext* commandContext) -> MaybeError {
@@ -1321,10 +1321,10 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                         case wgpu::TextureDimension::e2D: {
                             const MTLOrigin textureOrigin =
                                 ToMTLOrigin({copyInfo.textureOrigin.x, copyInfo.textureOrigin.y,
-                                             TexelCount(0)});
+                                             TexelCount(0u)});
                             const MTLSize copyExtent =
                                 ToMTLSize({copyInfo.copyExtent.width, copyInfo.copyExtent.height,
-                                           TexelCount(1)});
+                                           TexelCount(1u)});
 
                             for (TexelCount z = copyInfo.textureOrigin.z;
                                  z <
@@ -1405,7 +1405,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 }
 
                 // TODO(crbug.com/dawn/782): Do a single T2T copy if both are 1D or 3D.
-                for (TexelCount z{0}; z < copy->copySize.depthOrArrayLayers; ++z) {
+                for (TexelCount z{0u}; z < copy->copySize.depthOrArrayLayers; ++z) {
                     *sourceZPtr = dchecked_cast<uint32_t>(copy->source.origin.z + z);
                     *destinationZPtr = dchecked_cast<uint32_t>(copy->destination.origin.z + z);
 
@@ -1775,7 +1775,7 @@ MaybeError CommandBuffer::EncodeRenderPass(
     bool didDrawInCurrentOcclusionQuery = false;
 
     const IndirectDrawMetadata& metadata = GetIndirectDrawMetadata()[renderPassIndex];
-    IndirectDrawIndex indirectDrawIndex{0};
+    IndirectDrawIndex indirectDrawIndex{0u};
 
     StorageBufferLengthTracker storageBufferLengths{GetDevice()};
     VertexBufferTracker vertexBuffers(&storageBufferLengths);

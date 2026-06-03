@@ -135,7 +135,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
     // The first VkDescriptorSetLayout is the one for the framebuffer fetch and/or resource table if
     // needed and pushes the bindings for all other bindgroups.
-    BindGroupIndex startOfBindGroups{0};
+    BindGroupIndex startOfBindGroups{0u};
 
     std::unordered_map<uint32_t, tint::BindingPoint> framebuffer_fetch_bindings;
     if (in.pipelineUsesFramebufferFetch) {
@@ -144,11 +144,11 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 framebuffer_fetch_bindings[i] = {static_cast<uint32_t>(startOfBindGroups), i};
             }
         }
-        startOfBindGroups = startOfBindGroups + BindGroupIndex(1);
+        startOfBindGroups = startOfBindGroups + BindGroupIndex(1u);
     }
 
     if (in.layout->UsesResourceTable()) {
-        startOfBindGroups = BindGroupIndex(1);
+        startOfBindGroups = BindGroupIndex(1u);
     }
 
     auto ToWGSLBindPoint = [](BindGroupIndex group, BindingNumber binding) -> tint::BindingPoint {

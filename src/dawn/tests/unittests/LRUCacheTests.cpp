@@ -93,7 +93,7 @@ class TestCache final : public LRUCache<CacheKey, CacheValue, CacheFuncs> {
 TEST(LRUCache, ZeroSizedCache) {
     TestCache cache(0);
 
-    CacheKey key(1);
+    CacheKey key(1u);
     uint32_t cacheId;
     {
         // The constructed values should be evicted immediately.
@@ -117,13 +117,13 @@ TEST(LRUCache, Basic) {
 
     uint32_t cacheId;
     {
-        CacheKey key(1);
+        CacheKey key(1u);
         CacheValue value = cache.GetOrCreateNoError(key);
         cacheId = value.mId;
     }
 
     {
-        CacheKey key(1);
+        CacheKey key(1u);
         CacheValue value = cache.GetOrCreateNoError(key);
 
         // A new CacheValue should be returned.
@@ -145,7 +145,7 @@ TEST(LRUCache, CacheEviction) {
 
     // Calling GetOrCreate with an existing key won't cause a cache eviction
     {
-        CacheKey key(1);
+        CacheKey key(1u);
         EXPECT_CALL(cache, EvictedFromCache(testing::_)).Times(0);
         cache.GetOrCreateNoError(key);
     }
@@ -160,7 +160,7 @@ TEST(LRUCache, CacheEviction) {
     // The oldest value in the cache (key 0) should have been the one evicted,
     // as evidenced by us receiving a new value when querying it again.
     {
-        CacheKey key(0);
+        CacheKey key(0u);
         EXPECT_CALL(cache, EvictedFromCache(testing::_));
         auto value = cache.GetOrCreateNoError(key);
         EXPECT_NE(value.mId, keyIds[0]);
@@ -169,7 +169,7 @@ TEST(LRUCache, CacheEviction) {
     // The value for key 1 should not have been the one evicted after the last
     // call, because it was queried more recently than the other keys.
     {
-        CacheKey key(1);
+        CacheKey key(1u);
         EXPECT_CALL(cache, EvictedFromCache(testing::_)).Times(0);
         auto value = cache.GetOrCreateNoError(key);
         EXPECT_EQ(value.mId, keyIds[1]);
@@ -197,7 +197,7 @@ TEST(LRUCache, CacheClear) {
     // Calling GetOrCreate with a previously created key should return a new
     // value and cause no evictions
     {
-        CacheKey key(0);
+        CacheKey key(0u);
         EXPECT_CALL(cache, EvictedFromCache(testing::_)).Times(0);
         auto value = cache.GetOrCreateNoError(key);
         EXPECT_NE(value.mId, keyIds[0]);

@@ -112,7 +112,7 @@ BindGroupLayout::BindGroupLayout(Device* device,
       mSamplerDescriptorCount(0),
       mViewSizeIncrement(0),
       mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
-    for (BindingIndex bindingIndex{0}; bindingIndex < GetBindingCount(); ++bindingIndex) {
+    for (BindingIndex bindingIndex{0u}; bindingIndex < GetBindingCount(); ++bindingIndex) {
         const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
 
         // Skip over bindings that cannot be seen by any shaders as they could cause us to create

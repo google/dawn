@@ -613,7 +613,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                     "Binding type in the shader is a binding_array with %u elements but the "
                     "layout only provides %u elements",
                     shaderInfo.arraySize, layoutInfo.arraySize);
-    DAWN_INVALID_IF(layoutInfo.indexInArray != BindingIndex(0),
+    DAWN_INVALID_IF(layoutInfo.indexInArray != BindingIndex(0u),
                     "@binding(%u) in the shader is element %u of the layout's binding which is an "
                     "array starting at binding %u.",
                     shaderInfo.binding, layoutInfo.indexInArray,
@@ -1153,7 +1153,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         DAWN_INVALID_IF(
             resource.array_size.has_value() && !deviceInfo.toggles.Has(Toggle::AllowUnsafeAPIs),
             "Use of binding_array is disabled as an unsafe API.");
-        DAWN_INVALID_IF(info.arraySize == BindingIndex(0), "binding_array size is 0.");
+        DAWN_INVALID_IF(info.arraySize == BindingIndex(0u), "binding_array size is 0.");
         if (DelayedInvalidIf(
                 info.arraySize >= BindingIndex(kMaxBindingsPerBindGroup),
                 "binding_array size (%u) exceeds the maxBindingsPerBindGroup (%u) - 1.",

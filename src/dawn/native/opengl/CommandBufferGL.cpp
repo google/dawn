@@ -628,7 +628,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
         FlatBindingIndex ssboIndex = bindingIndexInfo[groupIndex][bindingIndex];
 
         if (ssboIndex >= mInternalArrayLengthBufferData.size()) {
-            mInternalArrayLengthBufferData.resize(ssboIndex + FlatBindingIndex(4));
+            mInternalArrayLengthBufferData.resize(ssboIndex + FlatBindingIndex(4u));
         }
         mInternalArrayLengthBufferData[ssboIndex] = static_cast<uint32_t>(size);
 
@@ -813,8 +813,8 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
         return {};
     };
 
-    PassIndex nextComputePassNumber{0};
-    PassIndex nextRenderPassNumber{0};
+    PassIndex nextComputePassNumber{0u};
+    PassIndex nextRenderPassNumber{0u};
 
     Command type;
     while (mCommands.NextCommandId(&type)) {
@@ -1010,7 +1010,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                             DAWN_ASSERT(texture->GetArrayLayers() == 6);
                             const uint64_t bytesPerImage =
                                 blockInfo.ToBytes(dst.blocksPerRow * dst.rowsPerImage);
-                            for (TexelCount z{0}; z < copySize.depthOrArrayLayers; ++z) {
+                            for (TexelCount z{0u}; z < copySize.depthOrArrayLayers; ++z) {
                                 GLenum cubeMapTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X +
                                                        dchecked_cast<uint32_t>(z + src.origin.z);
                                 DAWN_GL_TRY(
@@ -1033,7 +1033,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                     case wgpu::TextureDimension::e3D: {
                         const uint64_t bytesPerImage =
                             blockInfo.ToBytes(dst.blocksPerRow * dst.rowsPerImage);
-                        for (TexelCount z{0}; z < copySize.depthOrArrayLayers; ++z) {
+                        for (TexelCount z{0u}; z < copySize.depthOrArrayLayers; ++z) {
                             DAWN_GL_TRY(
                                 gl, FramebufferTextureLayer(
                                         GL_READ_FRAMEBUFFER, glAttachment, texture->GetHandle(),
@@ -1290,7 +1290,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
     GLuint fbo = 0;
 
     const IndirectDrawMetadata& metadata = GetIndirectDrawMetadata()[renderPassIndex];
-    IndirectDrawIndex indirectDrawIndex{0};
+    IndirectDrawIndex indirectDrawIndex{0u};
 
     // Create the framebuffer used for this render pass and calls the correct glDrawBuffers
     {
@@ -1751,7 +1751,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                 DAWN_ASSERT(texture->GetArrayLayers() == 6);
                 const uint8_t* pointer = static_cast<const uint8_t*>(data);
                 TexelCount baseLayer = destination.origin.z;
-                for (TexelCount l{0}; l < copySize.depthOrArrayLayers; ++l) {
+                for (TexelCount l{0u}; l < copySize.depthOrArrayLayers; ++l) {
                     GLenum cubeMapTarget =
                         GL_TEXTURE_CUBE_MAP_POSITIVE_X + dchecked_cast<uint32_t>(baseLayer + l);
                     DAWN_GL_TRY(
@@ -1798,7 +1798,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                 DAWN_ASSERT(texture->GetArrayLayers() == 6);
                 const uint8_t* pointer = static_cast<const uint8_t*>(data);
                 TexelCount baseLayer = destination.origin.z;
-                for (TexelCount l{0}; l < copySize.depthOrArrayLayers; ++l) {
+                for (TexelCount l{0u}; l < copySize.depthOrArrayLayers; ++l) {
                     const uint8_t* d =
                         DAWN_UNSAFE_TODO(pointer + dchecked_cast<uint32_t>(l)) * bytesPerImage;
                     GLenum cubeMapTarget =
@@ -1866,7 +1866,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                 DAWN_ASSERT(texture->GetArrayLayers() == 6);
                 const uint8_t* pointer = static_cast<const uint8_t*>(data);
                 TexelCount baseLayer = destination.origin.z;
-                for (TexelCount l{0}; l < copySize.depthOrArrayLayers; ++l) {
+                for (TexelCount l{0u}; l < copySize.depthOrArrayLayers; ++l) {
                     GLenum cubeMapTarget =
                         GL_TEXTURE_CUBE_MAP_POSITIVE_X + dchecked_cast<uint32_t>(baseLayer + l);
                     DAWN_GL_TRY(
@@ -1908,7 +1908,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                 DAWN_ASSERT(texture->GetArrayLayers() == 6);
                 const uint8_t* pointer = static_cast<const uint8_t*>(data);
                 TexelCount baseLayer = destination.origin.z;
-                for (TexelCount l{0}; l < copySize.depthOrArrayLayers; ++l) {
+                for (TexelCount l{0u}; l < copySize.depthOrArrayLayers; ++l) {
                     const uint8_t* d = pointer;
                     GLenum cubeMapTarget =
                         GL_TEXTURE_CUBE_MAP_POSITIVE_X + dchecked_cast<uint32_t>(baseLayer + l);

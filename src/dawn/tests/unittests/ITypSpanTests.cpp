@@ -47,13 +47,13 @@ TEST_F(ITypSpanTest, Indexing) {
     std::array<Val, 10> arr;
     Span span(arr.data(), Key(arr.size()));
     {
-        span[Key(2)] = Val(5);
-        span[Key(1)] = Val(9);
-        span[Key(9)] = Val(2);
+        span[Key(2u)] = Val(5u);
+        span[Key(1u)] = Val(9u);
+        span[Key(9u)] = Val(2u);
 
-        ASSERT_EQ(span[Key(2)], Val(5));
-        ASSERT_EQ(span[Key(1)], Val(9));
-        ASSERT_EQ(span[Key(9)], Val(2));
+        ASSERT_EQ(span[Key(2u)], Val(5u));
+        ASSERT_EQ(span[Key(1u)], Val(9u));
+        ASSERT_EQ(span[Key(9u)], Val(2u));
     }
 }
 
@@ -81,20 +81,20 @@ TEST_F(ITypSpanTest, BeginEndFrontBackData) {
     Span span(arr.data(), Key(arr.size()));
 
     // non-const versions
-    ASSERT_EQ(&*span.begin(), &span[Key(0)]);
-    DAWN_UNSAFE_TODO(ASSERT_EQ(&*span.end(), &span[Key(0)] + static_cast<size_t>(span.size())));
-    ASSERT_EQ(&span.front(), &span[Key(0)]);
-    ASSERT_EQ(&span.back(), &span[Key(9)]);
-    ASSERT_EQ(span.data(), &span[Key(0)]);
+    ASSERT_EQ(&*span.begin(), &span[Key(0u)]);
+    DAWN_UNSAFE_TODO(ASSERT_EQ(&*span.end(), &span[Key(0u)] + static_cast<size_t>(span.size())));
+    ASSERT_EQ(&span.front(), &span[Key(0u)]);
+    ASSERT_EQ(&span.back(), &span[Key(9u)]);
+    ASSERT_EQ(span.data(), &span[Key(0u)]);
 
     // const versions
     const Span& constSpan = span;
-    ASSERT_EQ(&*constSpan.begin(), &constSpan[Key(0)]);
+    ASSERT_EQ(&*constSpan.begin(), &constSpan[Key(0u)]);
     DAWN_UNSAFE_TODO(
-        ASSERT_EQ(&*constSpan.end(), &constSpan[Key(0)] + static_cast<size_t>(constSpan.size())));
-    ASSERT_EQ(&constSpan.front(), &constSpan[Key(0)]);
-    ASSERT_EQ(&constSpan.back(), &constSpan[Key(9)]);
-    ASSERT_EQ(constSpan.data(), &constSpan[Key(0)]);
+        ASSERT_EQ(&*constSpan.end(), &constSpan[Key(0u)] + static_cast<size_t>(constSpan.size())));
+    ASSERT_EQ(&constSpan.front(), &constSpan[Key(0u)]);
+    ASSERT_EQ(&constSpan.back(), &constSpan[Key(9u)]);
+    ASSERT_EQ(constSpan.data(), &constSpan[Key(0u)]);
 }
 
 // Test the utility SpanFromUntyped
@@ -104,15 +104,15 @@ TEST_F(ITypSpanTest, SpanFromUntyped) {
         Val* values = nullptr;
         Span span = ityp::SpanFromUntyped<Key>(values, 0);
         ASSERT_EQ(nullptr, span.data());
-        ASSERT_EQ(Key(0), span.size());
+        ASSERT_EQ(Key(0u), span.size());
     }
     // Test creating a one element span.
     {
-        Val value = Val(25);
+        Val value = Val(25u);
         Span span = ityp::SpanFromUntyped<Key>(&value, 1);
         ASSERT_EQ(&value, span.data());
-        ASSERT_EQ(Key(1), span.size());
-        ASSERT_EQ(value, span[Key(0)]);
+        ASSERT_EQ(Key(1u), span.size());
+        ASSERT_EQ(value, span[Key(0u)]);
     }
     // Test creating a multi-element span.
     {
@@ -137,10 +137,10 @@ TEST_F(ITypSpanDeathTest, OutOfBounds) {
     std::array<Val, 10> arr;
 
     Span span(arr.data(), Key(arr.size()));
-    EXPECT_DEATH(span[Key(10)], "");
+    EXPECT_DEATH(span[Key(10u)], "");
 
     const Span& constSpan = span;
-    EXPECT_DEATH(constSpan[Key(10)], "");
+    EXPECT_DEATH(constSpan[Key(10u)], "");
 }
 
 // If the index/size is 64-bit, it needs to be narrowed to size_t. Verify that's checked correctly.
@@ -156,11 +156,11 @@ TEST_F(ITypSpanDeathTest, OversizedIndex) {
     std::array<Val, 10> arr;
     ityp::span<Key64, Val> span(arr.data(), Key64(arr.size()));
 
-    span[Key64(9)];
+    span[Key64(9u)];
     // Regular out-of-bounds.
-    EXPECT_DEATH(span[Key64(10)], "");
+    EXPECT_DEATH(span[Key64(10u)], "");
 
-    span[Key64(0)];
+    span[Key64(0u)];
     // If this were cast to a 32-bit size_t without a check, it would be in-bounds.
     EXPECT_DEATH(span[kHugeKey64], "");
 }

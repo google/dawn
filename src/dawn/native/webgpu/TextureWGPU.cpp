@@ -313,7 +313,7 @@ MaybeError MapBufferAndWriteTextureData(CaptureContext::ScopedContentWriter& wri
     }
 
     // We only write out the beginning of each row, the rest is padding.
-    for (BlockCount blockRow{0}; blockRow < blockRows; ++blockRow) {
+    for (BlockCount blockRow{0u}; blockRow < blockRows; ++blockRow) {
         const void* data = wgpu->bufferGetConstMappedRange(
             copyBuffer, dchecked_cast<uint32_t>(blockRow) * alignedBytesPerRow,
             mappableBytesPerRow);
@@ -404,10 +404,10 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
 
             uint32_t alignedBytesPerRow = Align(usedBytesPerRow, 256);
             BlockCount maxBlockRowsPerRead{CaptureContext::kCopyBufferSize / alignedBytesPerRow};
-            DAWN_ASSERT(maxBlockRowsPerRead > BlockCount{0});
+            DAWN_ASSERT(maxBlockRowsPerRead > BlockCount{0u});
 
-            for (BlockCount z{0}; z < blockSize.depthOrArrayLayers; ++z) {
-                for (BlockCount y{0}; y < blockSize.height; y += maxBlockRowsPerRead) {
+            for (BlockCount z{0u}; z < blockSize.depthOrArrayLayers; ++z) {
+                for (BlockCount y{0u}; y < blockSize.height; y += maxBlockRowsPerRead) {
                     BlockCount blockRows = std::min(maxBlockRowsPerRead, blockSize.height - y);
 
                     // Copy Data from Texture to Buffer. Then map and write buffer.

@@ -47,36 +47,36 @@ TEST_F(ITypVectorTest, Creation) {
     // Default constructor initializes to 0
     {
         Vector vec;
-        ASSERT_EQ(vec.size(), Key(0));
+        ASSERT_EQ(vec.size(), Key(0u));
     }
 
     // Size constructor initializes contents to 0
     {
-        Vector vec(Key(10));
-        ASSERT_EQ(vec.size(), Key(10));
+        Vector vec(Key(10u));
+        ASSERT_EQ(vec.size(), Key(10u));
 
-        for (Key i(0); i < Key(10); ++i) {
-            ASSERT_EQ(vec[i], Val(0));
+        for (Key i(0u); i < Key(10u); ++i) {
+            ASSERT_EQ(vec[i], Val(0u));
         }
     }
 
     // Size and initial value constructor initializes contents to the inital value
     {
-        Vector vec(Key(10), Val(7));
-        ASSERT_EQ(vec.size(), Key(10));
+        Vector vec(Key(10u), Val(7u));
+        ASSERT_EQ(vec.size(), Key(10u));
 
-        for (Key i(0); i < Key(10); ++i) {
-            ASSERT_EQ(vec[i], Val(7));
+        for (Key i(0u); i < Key(10u); ++i) {
+            ASSERT_EQ(vec[i], Val(7u));
         }
     }
 
     // Initializer list constructor
     {
         Vector vec = {Val(2u), Val(8u), Val(1u)};
-        ASSERT_EQ(vec.size(), Key(3));
-        ASSERT_EQ(vec[Key(0)], Val(2));
-        ASSERT_EQ(vec[Key(1)], Val(8));
-        ASSERT_EQ(vec[Key(2)], Val(1));
+        ASSERT_EQ(vec.size(), Key(3u));
+        ASSERT_EQ(vec[Key(0u)], Val(2u));
+        ASSERT_EQ(vec[Key(1u)], Val(8u));
+        ASSERT_EQ(vec[Key(2u)], Val(1u));
     }
 }
 
@@ -87,15 +87,15 @@ TEST_F(ITypVectorTest, CopyConstructAssign) {
         Vector rhs = {Val(2u), Val(8u), Val(1u)};
 
         Vector vec(rhs);
-        ASSERT_EQ(vec.size(), Key(3));
-        ASSERT_EQ(vec[Key(0)], Val(2));
-        ASSERT_EQ(vec[Key(1)], Val(8));
-        ASSERT_EQ(vec[Key(2)], Val(1));
+        ASSERT_EQ(vec.size(), Key(3u));
+        ASSERT_EQ(vec[Key(0u)], Val(2u));
+        ASSERT_EQ(vec[Key(1u)], Val(8u));
+        ASSERT_EQ(vec[Key(2u)], Val(1u));
 
-        ASSERT_EQ(rhs.size(), Key(3));
-        ASSERT_EQ(rhs[Key(0)], Val(2));
-        ASSERT_EQ(rhs[Key(1)], Val(8));
-        ASSERT_EQ(rhs[Key(2)], Val(1));
+        ASSERT_EQ(rhs.size(), Key(3u));
+        ASSERT_EQ(rhs[Key(0u)], Val(2u));
+        ASSERT_EQ(rhs[Key(1u)], Val(8u));
+        ASSERT_EQ(rhs[Key(2u)], Val(1u));
     }
 
     // Test the copy assignment
@@ -103,15 +103,15 @@ TEST_F(ITypVectorTest, CopyConstructAssign) {
         Vector rhs = {Val(2u), Val(8u), Val(1u)};
 
         Vector vec = rhs;
-        ASSERT_EQ(vec.size(), Key(3));
-        ASSERT_EQ(vec[Key(0)], Val(2));
-        ASSERT_EQ(vec[Key(1)], Val(8));
-        ASSERT_EQ(vec[Key(2)], Val(1));
+        ASSERT_EQ(vec.size(), Key(3u));
+        ASSERT_EQ(vec[Key(0u)], Val(2u));
+        ASSERT_EQ(vec[Key(1u)], Val(8u));
+        ASSERT_EQ(vec[Key(2u)], Val(1u));
 
-        ASSERT_EQ(rhs.size(), Key(3));
-        ASSERT_EQ(rhs[Key(0)], Val(2));
-        ASSERT_EQ(rhs[Key(1)], Val(8));
-        ASSERT_EQ(rhs[Key(2)], Val(1));
+        ASSERT_EQ(rhs.size(), Key(3u));
+        ASSERT_EQ(rhs[Key(0u)], Val(2u));
+        ASSERT_EQ(rhs[Key(1u)], Val(8u));
+        ASSERT_EQ(rhs[Key(2u)], Val(1u));
     }
 }
 
@@ -122,10 +122,10 @@ TEST_F(ITypVectorTest, MoveConstructAssign) {
         Vector rhs = {Val(2u), Val(8u), Val(1u)};
 
         Vector vec(std::move(rhs));
-        ASSERT_EQ(vec.size(), Key(3));
-        ASSERT_EQ(vec[Key(0)], Val(2));
-        ASSERT_EQ(vec[Key(1)], Val(8));
-        ASSERT_EQ(vec[Key(2)], Val(1));
+        ASSERT_EQ(vec.size(), Key(3u));
+        ASSERT_EQ(vec[Key(0u)], Val(2u));
+        ASSERT_EQ(vec[Key(1u)], Val(8u));
+        ASSERT_EQ(vec[Key(2u)], Val(1u));
     }
 
     // Test the move assignment
@@ -133,39 +133,39 @@ TEST_F(ITypVectorTest, MoveConstructAssign) {
         Vector rhs = {Val(2u), Val(8u), Val(1u)};
 
         Vector vec = std::move(rhs);
-        ASSERT_EQ(vec.size(), Key(3));
-        ASSERT_EQ(vec[Key(0)], Val(2));
-        ASSERT_EQ(vec[Key(1)], Val(8));
-        ASSERT_EQ(vec[Key(2)], Val(1));
+        ASSERT_EQ(vec.size(), Key(3u));
+        ASSERT_EQ(vec[Key(0u)], Val(2u));
+        ASSERT_EQ(vec[Key(1u)], Val(8u));
+        ASSERT_EQ(vec[Key(2u)], Val(1u));
     }
 }
 
 // Test that values can be set at an index and retrieved from the same index.
 TEST_F(ITypVectorTest, Indexing) {
-    Vector vec(Key(10));
+    Vector vec(Key(10u));
     {
-        vec[Key(2)] = Val(5);
-        vec[Key(1)] = Val(9);
-        vec[Key(9)] = Val(2);
+        vec[Key(2u)] = Val(5u);
+        vec[Key(1u)] = Val(9u);
+        vec[Key(9u)] = Val(2u);
 
-        ASSERT_EQ(vec[Key(2)], Val(5));
-        ASSERT_EQ(vec[Key(1)], Val(9));
-        ASSERT_EQ(vec[Key(9)], Val(2));
+        ASSERT_EQ(vec[Key(2u)], Val(5u));
+        ASSERT_EQ(vec[Key(1u)], Val(9u));
+        ASSERT_EQ(vec[Key(9u)], Val(2u));
     }
     {
-        vec.at(Key(4)) = Val(5);
-        vec.at(Key(3)) = Val(8);
-        vec.at(Key(1)) = Val(7);
+        vec.at(Key(4u)) = Val(5u);
+        vec.at(Key(3u)) = Val(8u);
+        vec.at(Key(1u)) = Val(7u);
 
-        ASSERT_EQ(vec.at(Key(4)), Val(5));
-        ASSERT_EQ(vec.at(Key(3)), Val(8));
-        ASSERT_EQ(vec.at(Key(1)), Val(7));
+        ASSERT_EQ(vec.at(Key(4u)), Val(5u));
+        ASSERT_EQ(vec.at(Key(3u)), Val(8u));
+        ASSERT_EQ(vec.at(Key(1u)), Val(7u));
     }
 }
 
 // Test that the vector can be iterated in order with a range-based for loop
 TEST_F(ITypVectorTest, RangeBasedIteration) {
-    Vector vec(Key(10));
+    Vector vec(Key(10u));
 
     // Assign in a non-const range-based for loop
     uint32_t i = 0;
@@ -182,51 +182,51 @@ TEST_F(ITypVectorTest, RangeBasedIteration) {
 
 // Test that begin/end/front/back/data return pointers/references to the correct elements.
 TEST_F(ITypVectorTest, BeginEndFrontBackData) {
-    Vector vec(Key(10));
+    Vector vec(Key(10u));
 
     // non-const versions
-    ASSERT_EQ(&vec.front(), &vec[Key(0)]);
-    ASSERT_EQ(&vec.back(), &vec[Key(9)]);
-    ASSERT_EQ(vec.data(), &vec[Key(0)]);
+    ASSERT_EQ(&vec.front(), &vec[Key(0u)]);
+    ASSERT_EQ(&vec.back(), &vec[Key(9u)]);
+    ASSERT_EQ(vec.data(), &vec[Key(0u)]);
 
     // const versions
     const Vector& constVec = vec;
-    ASSERT_EQ(&constVec.front(), &constVec[Key(0)]);
-    ASSERT_EQ(&constVec.back(), &constVec[Key(9)]);
-    ASSERT_EQ(constVec.data(), &constVec[Key(0)]);
+    ASSERT_EQ(&constVec.front(), &constVec[Key(0u)]);
+    ASSERT_EQ(&constVec.back(), &constVec[Key(9u)]);
+    ASSERT_EQ(constVec.data(), &constVec[Key(0u)]);
 }
 
 // Special case to make sure that operator[] works for ityp::vector<I, bool> as vector<bool> doesn't
 // return a bool& for these (so that vector<bool> may use a bitfield internally).
 TEST_F(ITypVectorTest, BoolVectorIndexing) {
     {
-        ityp::vector<Key, bool> vec(Key(5));
+        ityp::vector<Key, bool> vec(Key(5u));
         const auto& const_vec = vec;
 
-        vec[Key(2)] = true;
-        vec[Key(1)] = true;
-        vec[Key(4)] = true;
+        vec[Key(2u)] = true;
+        vec[Key(1u)] = true;
+        vec[Key(4u)] = true;
 
-        ASSERT_EQ(const_vec[Key(0)], false);
-        ASSERT_EQ(const_vec[Key(1)], true);
-        ASSERT_EQ(const_vec[Key(2)], true);
-        ASSERT_EQ(const_vec[Key(3)], false);
-        ASSERT_EQ(const_vec[Key(4)], true);
+        ASSERT_EQ(const_vec[Key(0u)], false);
+        ASSERT_EQ(const_vec[Key(1u)], true);
+        ASSERT_EQ(const_vec[Key(2u)], true);
+        ASSERT_EQ(const_vec[Key(3u)], false);
+        ASSERT_EQ(const_vec[Key(4u)], true);
     }
 
     {
-        ityp::vector<Key, bool> vec(Key(5));
+        ityp::vector<Key, bool> vec(Key(5u));
         const auto& const_vec = vec;
 
-        vec.at(Key(2)) = true;
-        vec.at(Key(1)) = true;
-        vec.at(Key(4)) = true;
+        vec.at(Key(2u)) = true;
+        vec.at(Key(1u)) = true;
+        vec.at(Key(4u)) = true;
 
-        ASSERT_EQ(const_vec.at(Key(0)), false);
-        ASSERT_EQ(const_vec.at(Key(1)), true);
-        ASSERT_EQ(const_vec.at(Key(2)), true);
-        ASSERT_EQ(const_vec.at(Key(3)), false);
-        ASSERT_EQ(const_vec.at(Key(4)), true);
+        ASSERT_EQ(const_vec.at(Key(0u)), false);
+        ASSERT_EQ(const_vec.at(Key(1u)), true);
+        ASSERT_EQ(const_vec.at(Key(2u)), true);
+        ASSERT_EQ(const_vec.at(Key(3u)), false);
+        ASSERT_EQ(const_vec.at(Key(4u)), true);
     }
 }
 
@@ -241,15 +241,15 @@ TEST_F(ITypVectorDeathTest, OutOfBounds) {
         GTEST_SKIP();
     }
 
-    Vector vec(Key(10), Val(7));
-    vec[Key(9)];
-    EXPECT_DEATH(vec[Key(10)], "");
-    EXPECT_DEATH(vec.at(Key(10)), "");
+    Vector vec(Key(10u), Val(7u));
+    vec[Key(9u)];
+    EXPECT_DEATH(vec[Key(10u)], "");
+    EXPECT_DEATH(vec.at(Key(10u)), "");
 
     const Vector& constVec = vec;
-    constVec[Key(9)];
-    EXPECT_DEATH(constVec[Key(10)], "");
-    EXPECT_DEATH(constVec.at(Key(10)), "");
+    constVec[Key(9u)];
+    EXPECT_DEATH(constVec[Key(10u)], "");
+    EXPECT_DEATH(constVec.at(Key(10u)), "");
 }
 
 // If the index/size is 64-bit, it needs to be narrowed to size_t. Verify that's checked correctly.
@@ -260,24 +260,24 @@ TEST_F(ITypVectorDeathTest, OversizedIndex) {
     }
 
     using Key64 = TypedInteger<struct Key64T, uint64_t>;
-    static constexpr Key64 kHugeKey64{0x1000'0000'0000'0000};
+    static constexpr Key64 kHugeKey64{0x1000'0000'0000'0000u};
 
     // Crash either due to OOM (on 64-bit) or due to narrowing (on 32-bit).
     EXPECT_DEATH((ityp::vector<Key64, Val>(kHugeKey64)), "");
-    EXPECT_DEATH((ityp::vector<Key64, Val>(kHugeKey64, Val(7))), "");
+    EXPECT_DEATH((ityp::vector<Key64, Val>(kHugeKey64, Val(7u))), "");
 
-    ityp::vector<Key64, Val> vec(Key64(10), Val(7));
+    ityp::vector<Key64, Val> vec(Key64(10u), Val(7u));
 
-    vec[Key64(9)];
+    vec[Key64(9u)];
     // Regular out-of-bounds.
-    EXPECT_DEATH(vec[Key64(10)], "");
+    EXPECT_DEATH(vec[Key64(10u)], "");
 
-    vec[Key64(0)];
+    vec[Key64(0u)];
     // If this were cast to a 32-bit size_t without a check, it would be in-bounds.
     EXPECT_DEATH(vec[kHugeKey64], "");
 
     EXPECT_DEATH(vec.resize(kHugeKey64), "");
-    EXPECT_DEATH(vec.resize(kHugeKey64, Val(7)), "");
+    EXPECT_DEATH(vec.resize(kHugeKey64, Val(7u)), "");
     EXPECT_DEATH(vec.reserve(kHugeKey64), "");
 }
 

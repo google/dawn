@@ -178,8 +178,8 @@ TEST(SerialQueue, TypedInteger) {
     using MySerialQueue = SerialQueue<MySerial, int>;
 
     MySerialQueue queue;
-    queue.Enqueue(1, MySerial(0));
-    queue.Enqueue(2, MySerial(0));
+    queue.Enqueue(1, MySerial(0u));
+    queue.Enqueue(2, MySerial(0u));
 
     std::vector<int> expectedValues = {1, 2};
     for (int value : queue.IterateAll()) {
