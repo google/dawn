@@ -44,10 +44,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::hlsl::writer::raise {
 namespace {
 
-class HlslWriterDecomposeStorageAccessTest : public core::ir::transform::TransformTest {
-  public:
-    void SetUp() override { capabilities.Add(core::ir::Capability::kAllowNonCoreTypes); }
-};
+using HlslWriterDecomposeStorageAccessTest = core::ir::transform::TransformTest;
 
 TEST_F(HlslWriterDecomposeStorageAccessTest, NoBufferAccess) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -1693,10 +1690,6 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoad) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
-    };
-
     auto* var = b.Var("v", storage, ty.array<f32>(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -1746,10 +1739,6 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadColMajor) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
-    };
-
     auto* var = b.Var("v", storage, ty.array<f32>(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -1799,10 +1788,6 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadDynamicStride) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
-    };
-
     auto* var = b.Var("v", storage, ty.array<f32>(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -1856,10 +1841,6 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStore) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
-    };
-
     auto* var = b.Var("v", storage, ty.array<f32, 100>(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -1909,10 +1890,6 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStoreColMajor) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
-    };
-
     auto* var = b.Var("v", storage, ty.array<f32, 100>(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -1962,10 +1939,6 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStoreDynamicStride) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
-    };
-
     auto* var = b.Var("v", storage, ty.array<f32, 100>(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -2458,10 +2431,8 @@ struct AtomicData {
     out << data.interlock;
     return out;
 }
-class DecomposeBuiltinAtomic : public core::ir::transform::TransformTestWithParam<AtomicData> {
-  public:
-    void SetUp() override { capabilities.Add(core::ir::Capability::kAllowNonCoreTypes); }
-};
+using DecomposeBuiltinAtomic = core::ir::transform::TransformTestWithParam<AtomicData>;
+
 TEST_P(DecomposeBuiltinAtomic, IndirectAccess) {
     auto params = GetParam();
 

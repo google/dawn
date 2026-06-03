@@ -178,6 +178,11 @@ bool TransitivelyHolds(const Block* block, const Instruction* inst) {
     return false;
 }
 
+/// @returns true if @p type is in the core namespace
+bool IsCoreType(const core::type::Type* type) {
+    return std::string_view(type->TypeInfo().name).starts_with("tint::core");
+}
+
 /// @returns true if @p ty meets the basic function parameter rules (i.e. one of constructible,
 ///          pointer, handle).
 ///
@@ -2149,9 +2154,8 @@ void Validator::CheckType(const core::type::Type* root,
         return;
     }
 
-    if (!capabilities_.Contains(Capability::kAllowNonCoreTypes)) {
-        // Check for core types, which are the only types declared in the `tint::core` namespace.
-        if (!std::string_view(root->TypeInfo().name).starts_with("tint::core")) {
+    if (!mod_.properties.Contains(Property::kAllowNonCoreTypes)) {
+        if (!IsCoreType(root)) {
             diag() << "non-core types not allowed in core IR";
             return;
         }
@@ -2489,7 +2493,7 @@ void Validator::CheckType(const core::type::Type* root,
                     return false;
                 }
 
-                if (!capabilities_.Contains(Capability::kAllowNonCoreTypes)) {
+                if (!mod_.properties.Contains(Property::kAllowNonCoreTypes)) {
                     if (!t->ElemType()->Is<core::type::SampledTexture>()) {
                         diag() << "binding_array element type must be a sampled texture type";
                         return false;

@@ -2134,7 +2134,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Color_F16) {
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowNonCoreTypes});
+    auto res = ir::Validate(mod);
     EXPECT_EQ(res, Success);
 }
 

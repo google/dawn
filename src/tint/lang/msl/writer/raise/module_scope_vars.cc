@@ -344,7 +344,6 @@ Result<SuccessType> ModuleScopeVars(core::ir::Module& ir) {
     AssertValid(ir,
                 core::ir::Capabilities{
                     core::ir::Capability::kAllow8BitIntegers,
-                    core::ir::Capability::kAllowNonCoreTypes,
                 },
                 "before msl.ModuleScopeVars");
 

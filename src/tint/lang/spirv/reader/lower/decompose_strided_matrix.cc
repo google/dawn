@@ -362,11 +362,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> DecomposeStridedMatrix(core::ir::Module& ir) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kAllowNonCoreTypes,
-                },
-                "before spirv.DecomposeStridedMatrix");
+    AssertValid(ir, "before spirv.DecomposeStridedMatrix");
 
     State{ir}.Process();
 

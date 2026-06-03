@@ -82,7 +82,6 @@ struct State {
 Result<SuccessType> CombineAccessInstructions(Module& ir) {
     core::ir::AssertValid(ir,
                           core::ir::Capabilities{
-                              core::ir::Capability::kAllowNonCoreTypes,
                               core::ir::Capability::kAllow8BitIntegers,
                           },
                           "before core.CombineAccessInstructions");

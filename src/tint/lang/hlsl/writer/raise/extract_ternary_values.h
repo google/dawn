@@ -42,7 +42,6 @@ namespace tint::hlsl::writer::raise {
 const core::ir::Capabilities kExtractTernaryValuesCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow16BitIntegers,
-    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// ExtractTernaryValues is a transform used to extract the true and false values of an HLSL ternary

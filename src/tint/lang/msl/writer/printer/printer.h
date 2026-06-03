@@ -44,7 +44,6 @@ namespace tint::msl::writer {
 const core::ir::Capabilities kPrinterCapabilities{
     core::ir::Capability::kAllow8BitIntegers,   //
     core::ir::Capability::kAllow64BitIntegers,  //
-    core::ir::Capability::kAllowNonCoreTypes,   //
 };
 
 /// @param module the Tint IR module to generate

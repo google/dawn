@@ -1087,11 +1087,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> Texture(core::ir::Module& ir) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kAllowNonCoreTypes,
-                },
-                "before spirv.Texture");
+    AssertValid(ir, "before spirv.Texture");
 
     State{ir}.Process();
 

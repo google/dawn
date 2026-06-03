@@ -45,7 +45,6 @@ namespace tint::hlsl::writer::raise {
 const core::ir::Capabilities kArrayOffsetFromUniformCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow16BitIntegers,
-    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// ArrayOffsetFromUniform is a transform that adds an offset to storage buffer loads and stores

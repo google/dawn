@@ -80,7 +80,6 @@ struct State {
 Result<SuccessType> RemoveUniformVectorComponentLoads(core::ir::Module& ir) {
     core::ir::AssertValid(ir,
                           core::ir::Capabilities{
-                              core::ir::Capability::kAllowNonCoreTypes,
                               core::ir::Capability::kAllow8BitIntegers,
                               core::ir::Capability::kAllow16BitIntegers,
                           },

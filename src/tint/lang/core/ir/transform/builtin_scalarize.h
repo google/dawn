@@ -44,7 +44,6 @@ const Capabilities kBuiltinScalarizeCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow16BitIntegers,
     core::ir::Capability::kAllow64BitIntegers,
-    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// The scalarizer configuration options

@@ -50,7 +50,8 @@ namespace tint::mock {
 /// A mock non-core type used for testing the non-core type validation rule.
 class NonCoreType final : public Castable<NonCoreType, core::type::Type> {
   public:
-    explicit NonCoreType(uint32_t align = 0u) : Base(0u, core::type::Flags{}), align_(align) {}
+    explicit NonCoreType(uint32_t align, bool is_handle = false)
+        : Base(0u, core::type::Flags{}), align_(align), is_handle_(is_handle) {}
     bool Equals(const UniqueNode& other) const override {
         if (auto* other_nc = other.As<NonCoreType>()) {
             return other_nc->align_ == align_;
@@ -59,12 +60,14 @@ class NonCoreType final : public Castable<NonCoreType, core::type::Type> {
     }
     std::string FriendlyName() const override { return "NonCoreType"; }
     uint32_t Align() const override { return align_ == 0u ? Base::Align() : align_; }
+    bool IsHandle() const override { return is_handle_; }
     core::type::Type* Clone(core::type::CloneContext& ctx) const override {
         return ctx.dst.mgr->Get<NonCoreType>(align_);
     }
 
   private:
     uint32_t align_;
+    bool is_handle_;
 };
 }  // namespace tint::mock
 
@@ -329,16 +332,17 @@ TEST_F(IR_ValidatorTest, StructMember_AlignNotDivisibleByTypeAlignment) {
 TEST_F(IR_ValidatorTest, StructMember_TypeAlignZero) {
     core::IOAttributes attrs = {};
     tint::Vector<const core::type::StructMember*, 4> members;
-    members.Push(ty.Get<core::type::StructMember>(mod.symbols.New("v"),
-                                                  ty.Get<tint::mock::NonCoreType>(), 0u, 0u,
-                                                  /* align */ 4u, 4u, std::move(attrs)));
+    members.Push(ty.Get<core::type::StructMember>(
+        mod.symbols.New("v"), ty.Get<tint::mock::NonCoreType>(/* align */ 0u), 0u, 0u,
+        /* align */ 4u, 4u, std::move(attrs)));
     auto* str_ty = ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), std::move(members),
                                               tint::RoundUp(0u, 16u));
 
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowNonCoreTypes});
+    mod.properties.Add(Property::kAllowNonCoreTypes);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -360,7 +364,8 @@ TEST_F(IR_ValidatorTest, StructMember_TypeAlignNotPowerOfTwo) {
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowNonCoreTypes});
+    mod.properties.Add(Property::kAllowNonCoreTypes);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -714,7 +719,7 @@ TEST_F(IR_ValidatorTest, FunctionParam_InvalidHandlePointer) {
 
 TEST_F(IR_ValidatorTest, NonCoreType) {
     auto* fn = b.Function("my_func", ty.void_());
-    fn->AppendParam(b.FunctionParam(ty.Get<tint::mock::NonCoreType>()));
+    fn->AppendParam(b.FunctionParam(ty.Get<tint::mock::NonCoreType>(/* align*/ 4u)));
     b.Append(fn->Block(), [&] {  //
         b.Return(fn);
     });
@@ -1056,13 +1061,17 @@ TEST_F(IR_ValidatorTest, BindingArrayNonSampledTexture) {
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"));
 }
 
-TEST_F(IR_ValidatorTest, BindingArray_AllowedNonSampledTextureWithCapability) {
+TEST_F(IR_ValidatorTest, BindingArray_AllowedNonSampledTextureWithNonCoreType) {
     b.Append(mod.root_block, [&] {
-        auto* var = b.Var("m", AddressSpace::kHandle, ty.binding_array(ty.external_texture(), 5));
+        auto* var =
+            b.Var("m", AddressSpace::kHandle,
+                  ty.binding_array(
+                      ty.Get<tint::mock::NonCoreType>(/*align */ 4u, /*is_handle*/ true), 5));
         var->SetBindingPoint(0, 0);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowNonCoreTypes});
+    mod.properties.Add(Property::kAllowNonCoreTypes);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -1097,7 +1106,7 @@ TEST_P(Type_BindingArrayInvalidAddressSpace, Test) {
         b.Append(mod.root_block, [&] { b.Var("m", addr, ty.binding_array(ty.u32(), 4)); });
     }
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowNonCoreTypes});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     if (addr == AddressSpace::kFunction) {
         EXPECT_THAT(res.Failure().reason,
@@ -1111,23 +1120,6 @@ TEST_P(Type_BindingArrayInvalidAddressSpace, Test) {
                                std::string(ToString(addr))))
             << res.Failure();
     }
-}
-
-TEST_P(Type_BindingArrayInvalidAddressSpace, AllowedWithCapability) {
-    auto addr = GetParam();
-    if (addr == AddressSpace::kFunction) {
-        auto* fn = b.Function("my_func", ty.void_());
-        b.Append(fn->Block(), [&] {
-            b.Var("m", addr, ty.binding_array(ty.u32(), 4));
-            b.Return(fn);
-        });
-    } else {
-        b.Append(mod.root_block, [&] { b.Var("m", addr, ty.binding_array(ty.u32(), 4)); });
-    }
-
-    mod.properties.Add(Property::kAllowMslEntryPointInterface);
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowNonCoreTypes});
-    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 // Note: kUniform, kStorage, and kImmediate are not tested here because they will still trigger a

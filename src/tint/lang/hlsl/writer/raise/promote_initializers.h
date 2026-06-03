@@ -42,7 +42,6 @@ namespace tint::hlsl::writer::raise {
 const core::ir::Capabilities kPromoteInitializersCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow16BitIntegers,
-    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// PromoteInitializers is a transform that moves inline struct and array initializers to a `let`

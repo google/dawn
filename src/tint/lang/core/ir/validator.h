@@ -45,8 +45,6 @@ enum class Capability : uint8_t {
     kAllow64BitIntegers,
     /// Allows module scope `var`s to exist without an IO annotation
     kAllowUnannotatedModuleIOVariables,
-    /// Allows non-core types in the IR module
-    kAllowNonCoreTypes,
     /// Allows ShaderIO specific features, like blend_src on non-struct members.
     /// These are not separate capabilities, because they are enabled/disabled in lockstep with each
     /// other.

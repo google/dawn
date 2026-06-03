@@ -48,7 +48,6 @@ using ImmediateDataLayout = core::ir::transform::ImmediateDataLayout;
 const core::ir::Capabilities kArrayOffsetFromImmediateCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow16BitIntegers,
-    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// ArrayOffsetFromImmediates is a transform that adds an offset to storage buffer loads and stores

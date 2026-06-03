@@ -2151,12 +2151,12 @@ Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, const BuiltinPolyfillC
                 core::ir::Capabilities{
                     core::ir::Capability::kAllow8BitIntegers,
                     core::ir::Capability::kAllow16BitIntegers,
-                    core::ir::Capability::kAllowNonCoreTypes,
                 },
                 "before hlsl.BuiltinPolyfill");
 
     State{ir, config}.Process();
 
+    ir.properties.Add(core::ir::Property::kAllowNonCoreTypes);
     ir.properties.Add(core::ir::Property::kAllowVectorElementPointer);
 
     return Success;

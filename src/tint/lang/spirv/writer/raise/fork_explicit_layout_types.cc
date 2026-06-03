@@ -374,6 +374,8 @@ Result<SuccessType> ForkExplicitLayoutTypes(core::ir::Module& ir, SpvVersion ver
 
     State{ir, version}.Process();
 
+    ir.properties.Add(core::ir::Property::kAllowNonCoreTypes);
+
     return Success;
 }
 

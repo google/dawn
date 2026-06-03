@@ -51,7 +51,6 @@ class SpirvWriter_BuiltinPolyfillTest : public core::ir::transform::TransformTes
     void SetUp() override {
         capabilities.Add(core::ir::Capability::kAllow8BitIntegers);
         capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
-        capabilities.Add(core::ir::Capability::kAllowNonCoreTypes);
     }
 };
 

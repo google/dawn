@@ -39,10 +39,7 @@ namespace tint::msl::writer::raise {
 namespace {
 
 class MslWriter_ConvertPrintToLogTest : public core::ir::transform::TransformTest {
-    void SetUp() override {
-        capabilities.Add(core::ir::Capability::kAllow8BitIntegers);
-        capabilities.Add(core::ir::Capability::kAllowNonCoreTypes);
-    }
+    void SetUp() override { capabilities.Add(core::ir::Capability::kAllow8BitIntegers); }
 };
 
 TEST_F(MslWriter_ConvertPrintToLogTest, NoPrint) {

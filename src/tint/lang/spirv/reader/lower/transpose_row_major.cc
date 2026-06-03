@@ -756,11 +756,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> TransposeRowMajor(core::ir::Module& ir) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kAllowNonCoreTypes,
-                },
-                "before spirv.TransposeRowMajor");
+    AssertValid(ir, "before spirv.TransposeRowMajor");
 
     State{ir}.Process();
 

@@ -1309,11 +1309,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> Builtins(core::ir::Module& ir) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kAllowNonCoreTypes,
-                },
-                "before spirv.Builtins");
+    AssertValid(ir, "before spirv.Builtins");
 
     State{ir}.Process();
 

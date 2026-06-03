@@ -40,7 +40,7 @@ class SpirvReader_DecomposeStridedMatrixTest : public core::ir::transform::Trans
   protected:
     void SetUp() override {
         core::ir::transform::TransformTest::SetUp();
-        capabilities.Add(core::ir::Capability::kAllowNonCoreTypes);
+        mod.properties.Add(core::ir::Property::kAllowNonCoreTypes);
         mod.properties.Add(core::ir::Property::kAllowStructMatrixDecorations);
     }
 

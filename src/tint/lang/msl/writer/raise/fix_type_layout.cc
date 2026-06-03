@@ -761,7 +761,6 @@ Result<SuccessType> FixTypeLayout(core::ir::Module& ir, const FixTypeLayoutOptio
     AssertValid(ir,
                 tint::core::ir::Capabilities{
                     core::ir::Capability::kAllow8BitIntegers,
-                    core::ir::Capability::kAllowNonCoreTypes,
                 },
                 "before msl.FixTypeLayout");
 

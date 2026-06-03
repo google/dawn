@@ -72,6 +72,8 @@ enum class Property : uint8_t {
     kAllowMslEntryPointInterface,
     /// Allows multiple entry points in the module.
     kAllowMultipleEntryPoints,
+    /// Allows non-core types to be used.
+    kAllowNonCoreTypes,
     /// Allow overrides
     kAllowOverrides,
     /// Allows phony assignment instructions to be used.
@@ -113,6 +115,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(AllowModuleScopeLets);
         CASE(AllowMslEntryPointInterface);
         CASE(AllowMultipleEntryPoints);
+        CASE(AllowNonCoreTypes);
         CASE(AllowOverrides);
         CASE(AllowPhonyInstructions);
         CASE(AllowPointSizeBuiltin);

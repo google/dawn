@@ -6643,10 +6643,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4x8Unorm) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xI8) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
-    };
-
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* u = b.Var("u", b.Splat(ty.vec4i(), 2_i));
@@ -6685,10 +6681,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xI8) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xI8) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
-    };
-
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* u = b.Var("u", 2_u);
@@ -6727,10 +6719,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xI8) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xU8) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
-    };
-
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* u = b.Var("u", b.Splat(ty.vec4u(), 2_u));
@@ -6769,10 +6757,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xU8) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xU8) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
-    };
-
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* u = b.Var("u", 2_u);
@@ -6886,10 +6870,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Dot4I8Packed) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xI8Clamp) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
-    };
-
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* u = b.Var("u", b.Splat(ty.vec4i(), 2_i));
@@ -7883,7 +7863,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_Deduplication) {
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_I8) {
     capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllowNonCoreTypes,
         core::ir::Capability::kAllow8BitIntegers,
     };
 
@@ -8177,8 +8156,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiplyAccumulate_Deduplic
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup) {
-    capabilities.Add(core::ir::Capability::kAllowNonCoreTypes);
-
     auto* mat_ty = ty.subgroup_matrix_left(ty.f32(), 4, 4);
     auto* wg_var = b.Var("wg", workgroup, ty.array<f32, 256>(), core::Access::kReadWrite);
     b.ir.root_block->Append(wg_var);
@@ -8221,8 +8198,6 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup) {
-    capabilities.Add(core::ir::Capability::kAllowNonCoreTypes);
-
     auto* mat_ty = ty.subgroup_matrix_left(ty.f32(), 4, 4);
     auto* wg_var = b.Var("wg", workgroup, ty.array<f32, 256>(), core::Access::kReadWrite);
     b.ir.root_block->Append(wg_var);

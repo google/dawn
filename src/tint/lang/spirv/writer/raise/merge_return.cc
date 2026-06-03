@@ -42,7 +42,6 @@ namespace {
 
 // The capabilities that the transform can support.
 const core::ir::Capabilities kMergeReturnCapabilities{
-    core::ir::Capability::kAllowNonCoreTypes,
     core::ir::Capability::kAllow8BitIntegers,
 };
 

@@ -141,7 +141,6 @@ Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
                 core::ir::Capabilities{
                     core::ir::Capability::kAllow8BitIntegers,
                     core::ir::Capability::kAllow16BitIntegers,
-                    core::ir::Capability::kAllowNonCoreTypes,
                 },
                 "before hlsl.BinaryPolyfill");
 

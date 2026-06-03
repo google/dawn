@@ -39,7 +39,6 @@ class SpirvReader_TransposeRowMajorTest : public core::ir::transform::TransformT
   protected:
     void SetUp() override {
         core::ir::transform::TransformTest::SetUp();
-        capabilities.Add(core::ir::Capability::kAllowNonCoreTypes);
         mod.properties.Add(core::ir::Property::kAllowStructMatrixDecorations);
     }
 };

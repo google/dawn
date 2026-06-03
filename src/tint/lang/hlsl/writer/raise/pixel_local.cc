@@ -245,11 +245,12 @@ Result<SuccessType> PixelLocal(core::ir::Module& ir, const PixelLocalConfig& con
     core::ir::AssertValid(ir,
                           core::ir::Capabilities{
                               core::ir::Capability::kAllow16BitIntegers,
-                              core::ir::Capability::kAllowNonCoreTypes,
                           },
                           "before hlsl.PixelLocal");
 
     State{config.options, ir}.Process();
+
+    ir.properties.Add(core::ir::Property::kAllowNonCoreTypes);
 
     return Success;
 }

@@ -554,11 +554,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> Atomics(core::ir::Module& ir) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kAllowNonCoreTypes,
-                },
-                "before spirv.Atomics");
+    AssertValid(ir, "before spirv.Atomics");
 
     State{ir}.Process();
 

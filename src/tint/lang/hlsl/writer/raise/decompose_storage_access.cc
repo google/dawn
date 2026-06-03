@@ -1043,6 +1043,8 @@ Result<SuccessType> DecomposeStorageAccess(core::ir::Module& ir) {
 
     State{ir}.Process();
 
+    ir.properties.Add(core::ir::Property::kAllowNonCoreTypes);
+
     return Success;
 }
 

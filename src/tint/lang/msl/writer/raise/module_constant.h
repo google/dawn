@@ -42,7 +42,6 @@ namespace tint::msl::writer::raise {
 const core::ir::Capabilities kModuleConstantCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow64BitIntegers,
-    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// The set of polyfills that should be applied.

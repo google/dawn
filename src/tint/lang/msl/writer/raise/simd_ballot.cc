@@ -159,7 +159,6 @@ Result<SuccessType> SimdBallot(core::ir::Module& ir) {
     AssertValid(ir,
                 tint::core::ir::Capabilities{
                     core::ir::Capability::kAllow8BitIntegers,
-                    core::ir::Capability::kAllowNonCoreTypes,
                 },
                 "before msl.SimdBallot");
 

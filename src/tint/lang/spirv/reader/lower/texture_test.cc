@@ -42,6 +42,7 @@ class SpirvReader_TextureTest : public core::ir::transform::TransformTest {
   protected:
     void SetUp() override {
         core::ir::transform::TransformTest::SetUp();
+        mod.properties.Add(core::ir::Property::kAllowNonCoreTypes);
         mod.properties.Add(core::ir::Property::kAllowPointerToHandle);
     }
 };
