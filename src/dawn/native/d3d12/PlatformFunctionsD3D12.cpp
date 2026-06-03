@@ -33,6 +33,7 @@
 #include <utility>
 
 #include "src/dawn/common/SystemUtils.h"
+#include "src/utils/log.h"
 
 namespace dawn::native::d3d12 {
 
@@ -45,6 +46,9 @@ MaybeError PlatformFunctions::Initialize(std::span<const std::string> searchPath
     DAWN_TRY(LoadD3D12());
     DAWN_TRY(LoadD3D11());
     LoadPIXRuntime(searchPaths);
+#ifdef DAWN_USE_AGILITY_SDK
+    EnsureAgilitySDKDeviceFactory();
+#endif
     return {};
 }
 
@@ -70,6 +74,8 @@ MaybeError PlatformFunctions::LoadD3D12() {
                            "D3D12CreateVersionedRootSignatureDeserializer", &error)) {
         return DAWN_INTERNAL_ERROR(error.c_str());
     }
+    // Optional: only present in Agility SDK / newer d3d12.dll. Absence is not an error.
+    mD3D12Lib.GetProc(&d3d12GetInterface, "D3D12GetInterface", &error);
 #endif
 
     return {};
@@ -92,6 +98,69 @@ MaybeError PlatformFunctions::LoadD3D11() {
 bool PlatformFunctions::IsPIXEventRuntimeLoaded() const {
     return mPIXEventRuntimeLib.Valid();
 }
+
+HRESULT PlatformFunctions::CreateDevice(IUnknown* adapter,
+                                        D3D_FEATURE_LEVEL featureLevel,
+                                        REFIID riid,
+                                        void** ppDevice) const {
+#ifdef DAWN_USE_AGILITY_SDK
+    return mDeviceFactory->CreateDevice(adapter, featureLevel, riid, ppDevice);
+#else
+    return d3d12CreateDevice(adapter, featureLevel, riid, ppDevice);
+#endif
+}
+
+HRESULT PlatformFunctions::SerializeVersionedRootSignature(
+    const D3D12_VERSIONED_ROOT_SIGNATURE_DESC* pDesc,
+    ID3DBlob** ppResult,
+    ID3DBlob** ppError) const {
+#ifdef DAWN_USE_AGILITY_SDK
+    return mDeviceConfiguration->SerializeVersionedRootSignature(pDesc, ppResult, ppError);
+#else
+    return d3d12SerializeVersionedRootSignature(pDesc, ppResult, ppError);
+#endif
+}
+
+HRESULT PlatformFunctions::CreateVersionedRootSignatureDeserializer(const void* pBlob,
+                                                                    SIZE_T size,
+                                                                    REFIID riid,
+                                                                    void** ppDeserializer) const {
+#ifdef DAWN_USE_AGILITY_SDK
+    return mDeviceConfiguration->CreateVersionedRootSignatureDeserializer(pBlob, size, riid,
+                                                                          ppDeserializer);
+#else
+    return d3d12CreateVersionedRootSignatureDeserializer(pBlob, size, riid, ppDeserializer);
+#endif
+}
+
+#ifdef DAWN_USE_AGILITY_SDK
+void PlatformFunctions::EnsureAgilitySDKDeviceFactory() {
+    // This helper is invoked exactly once by Initialize().
+    DAWN_CHECK(!mDeviceFactory);
+
+    // d3d12GetInterface must be available when building with Agility SDK.
+    // TODO(crbug.com/517940507): Gracefully handle when D3D12GetInterface is not available.
+    DAWN_CHECK(d3d12GetInterface != nullptr);
+
+    ComPtr<ID3D12SDKConfiguration1> sdkConfig1;
+    DAWN_CHECK(
+        SUCCEEDED(d3d12GetInterface(CLSID_D3D12SDKConfiguration, IID_PPV_ARGS(&sdkConfig1))));
+
+    DAWN_CHECK(SUCCEEDED(sdkConfig1->CreateDeviceFactory(D3D12_PREVIEW_SDK_VERSION, ".\\D3D12\\",
+                                                         IID_PPV_ARGS(&mDeviceFactory))));
+
+    // Allow the factory to return an existing compatible device rather than
+    // always creating a new one. Without this flag, Dawn and the Chromium media
+    // engine would each load a separate UMD instance, wasting memory.
+    DAWN_CHECK(SUCCEEDED(
+        mDeviceFactory->SetFlags(D3D12_DEVICE_FACTORY_FLAG_ALLOW_RETURNING_EXISTING_DEVICE)));
+
+    // Obtain the device configuration interface for root signature operations.
+    DAWN_CHECK(SUCCEEDED(mDeviceFactory.As(&mDeviceConfiguration)));
+
+    dawn::InfoLog() << "[AgilitySDK] active: SDK version = " << D3D12_PREVIEW_SDK_VERSION;
+}
+#endif  // DAWN_USE_AGILITY_SDK
 
 void PlatformFunctions::LoadPIXRuntime(std::span<const std::string> searchPaths) {
     // TODO(dawn:766):

@@ -28,7 +28,7 @@ vars = {
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
   'dawn_go_version': 'version:3@1.25.0',
   'dawn_node_version': 'version:2@20.11.0',
-  'agility_sdk_version': 'version:2@1.720.0-preview',
+  'agility_sdk_version': 'version:2@1.721.0-preview',
 
   # GN variable required by //testing that will be output in the gclient_args.gni
   'generate_location_tags': False,

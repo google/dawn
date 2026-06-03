@@ -151,19 +151,6 @@ if (dawn_standalone && (dawn_enable_d3d11 || dawn_enable_d3d12)) {
 }
 
 if (dawn_enable_d3d12 && dawn_use_agility_sdk) {
-  # Config for D3D12 headers from the Agility SDK.
-  # Applied as a public_config so it propagates to all targets (including tests)
-  # that include d3d12_platform.h.
-  config("d3d12_headers_config") {
-    _dx_include = "$dawn_agility_sdk_dir/src/build/native/include"
-    include_dirs = [ _dx_include ]
-    if (is_clang) {
-      # Using -imsvc tells clang-cl to treat the directory as a system-header
-      # directory, suppressing Microsoft-extension warnings in d3d12.h.
-      cflags = [ "-imsvc" + rebase_path(_dx_include, root_build_dir) ]
-    }
-  }
-
   # Copy DLLs to out dir in D3D12 directory
   if (target_cpu == "x64") {
     _bin_dir = "$dawn_agility_sdk_dir/src/build/native/bin/x64"
@@ -585,7 +572,7 @@ source_set("sources") {
 
   if (dawn_enable_d3d12) {
     if (dawn_use_agility_sdk) {
-      public_configs += [ ":d3d12_headers_config" ]
+      include_dirs = [ "$dawn_agility_sdk_dir/src/build/native/include" ]
       defines += [ "DAWN_USE_AGILITY_SDK" ]
       data_deps += [ ":copy_agility_sdk_dlls" ]
     }

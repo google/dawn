@@ -413,7 +413,7 @@ MaybeError PipelineLayout::Initialize() {
     DAWN_TRY([&]() -> MaybeError {
         ComPtr<ID3DBlob> error;
         if (device->IsToggleEnabled(Toggle::D3D12UseRootSignatureVersion1_1) &&
-            SUCCEEDED(device->GetFunctions()->d3d12SerializeVersionedRootSignature(
+            SUCCEEDED(device->GetFunctions()->SerializeVersionedRootSignature(
                 &versionedRootSignatureDescriptor, &mRootSignatureBlob, &error))) [[likely]] {
             return {};
         }

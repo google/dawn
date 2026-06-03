@@ -101,11 +101,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
     // D3D12 cannot check for feature support without a device.
     // Create the device to populate the adapter properties then reuse it when needed for actual
     // rendering.
-    const PlatformFunctions* functions = GetBackend()->GetFunctions();
-    if (FAILED(functions->d3d12CreateDevice(GetHardwareAdapter(), D3D_FEATURE_LEVEL_11_0,
-                                            __uuidof(ID3D12Device), &mD3d12Device))) {
-        return DAWN_INTERNAL_ERROR("D3D12CreateDevice failed");
-    }
+    DAWN_TRY_ASSIGN(mD3d12Device, GetBackend()->CreateD3DDevice(GetHardwareAdapter()));
 
     // Check if we should block the use of D3D12 on the current device.
     DAWN_TRY(ValidateUseOfD3D12());
