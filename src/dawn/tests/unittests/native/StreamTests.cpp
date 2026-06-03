@@ -657,7 +657,7 @@ static auto kStreamValueVectorParams = std::make_tuple(
     // Test pairs.
     std::vector<std::pair<int, float>>{{1, 3.}, {6, 4.}},
     // Test TypedIntegers
-    std::vector<TypedIntegerForTest>{TypedIntegerForTest(42), TypedIntegerForTest(13)},
+    std::vector<TypedIntegerForTest>{TypedIntegerForTest(42u), TypedIntegerForTest(13u)},
     // Test enums
     std::vector<wgpu::TextureUsage>{wgpu::TextureUsage::CopyDst,
                                     wgpu::TextureUsage::RenderAttachment},

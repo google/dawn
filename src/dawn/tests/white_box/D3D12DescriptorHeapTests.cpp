@@ -1684,7 +1684,7 @@ TEST_P(D3D12ResourceTableDescriptorHeapTests, SwitchOverViewHeapGradually) {
     const HeapVersionID heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
 
     uint32_t tableSize = heapSize;
-    for (int i = 0;; ++i) {
+    for (HeapVersionID i{0u};; ++i) {
         wgpu::ResourceTable table = MakeResourceTable(tableSize - mImplicitDescriptorCount);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -1696,7 +1696,7 @@ TEST_P(D3D12ResourceTableDescriptorHeapTests, SwitchOverViewHeapGradually) {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + HeapVersionID(i));
+        EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + i);
 
         // Make the table grow so that each iteration is double the previous heap size
         // to force the allocator to grow by double its current size.
@@ -1728,7 +1728,7 @@ TEST_P(D3D12ResourceTableDescriptorHeapTests, SwitchOverViewHeapLargeJumps) {
     const HeapVersionID heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
 
     uint32_t tableSize = heapSize;
-    for (int i = 0;; ++i) {
+    for (HeapVersionID i{0u};; ++i) {
         wgpu::ResourceTable table = MakeResourceTable(tableSize - mImplicitDescriptorCount);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -1740,7 +1740,7 @@ TEST_P(D3D12ResourceTableDescriptorHeapTests, SwitchOverViewHeapLargeJumps) {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + HeapVersionID(i));
+        EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + i);
 
         // Make the table grow so that each iteration is quadruple the previous heap size
         // to force the allocator to grow by quadruple its current size.

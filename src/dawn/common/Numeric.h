@@ -58,8 +58,7 @@ template <typename T>
 inline constexpr uint32_t u32_alignof = detail::u32_alignof<T>();
 
 // Returns if two inclusive integral ranges [x0, x1] and [y0, y1] have overlap.
-template <typename T>
-    requires std::integral<T>
+template <std::integral T>
 bool RangesOverlap(T x0, T x1, T y0, T y1) {
     DAWN_ASSERT(x0 <= x1 && y0 <= y1);
     // Two ranges DON'T have overlap if and only if:

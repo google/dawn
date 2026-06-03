@@ -911,7 +911,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                 TexelCopyBufferLayout dataLayout;
                 dataLayout.offset = 0;
                 dataLayout.bytesPerRow = blockInfo.ToBytes(src.blocksPerRow);
-                dataLayout.rowsPerImage = static_cast<uint32_t>(src.rowsPerImage);
+                dataLayout.rowsPerImage = dchecked_cast<uint32_t>(src.rowsPerImage);
 
                 DAWN_TRY(DoTexSubImage(gl, dst, reinterpret_cast<void*>(src.offset), dataLayout,
                                        copy->copySize.ToExtent3D()));
@@ -959,7 +959,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                 DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle()));
                 DAWN_GL_TRY(gl, PixelStorei(GL_PACK_ALIGNMENT, std::min(8u, blockInfo.byteSize)));
                 DAWN_GL_TRY(
-                    gl, PixelStorei(GL_PACK_ROW_LENGTH, static_cast<uint32_t>(dst.blocksPerRow)));
+                    gl, PixelStorei(GL_PACK_ROW_LENGTH, dchecked_cast<uint32_t>(dst.blocksPerRow)));
 
                 GLenum glAttachment;
                 GLenum glFormat;
@@ -1000,10 +1000,10 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                             DAWN_GL_TRY(
                                 gl, FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment, target,
                                                          texture->GetHandle(), src.mipLevel));
-                            DAWN_GL_TRY(gl, ReadPixels(static_cast<uint32_t>(src.origin.x),
-                                                       static_cast<uint32_t>(src.origin.y),
-                                                       static_cast<uint32_t>(copySize.width),
-                                                       static_cast<uint32_t>(copySize.height),
+                            DAWN_GL_TRY(gl, ReadPixels(dchecked_cast<uint32_t>(src.origin.x),
+                                                       dchecked_cast<uint32_t>(src.origin.y),
+                                                       dchecked_cast<uint32_t>(copySize.width),
+                                                       dchecked_cast<uint32_t>(copySize.height),
                                                        glFormat, glType, offset));
                             break;
                         } else if (target == GL_TEXTURE_CUBE_MAP) {
@@ -1012,15 +1012,15 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                                 blockInfo.ToBytes(dst.blocksPerRow * dst.rowsPerImage);
                             for (TexelCount z{0}; z < copySize.depthOrArrayLayers; ++z) {
                                 GLenum cubeMapTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X +
-                                                       static_cast<uint32_t>(z + src.origin.z);
+                                                       dchecked_cast<uint32_t>(z + src.origin.z);
                                 DAWN_GL_TRY(
                                     gl, FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment,
                                                              cubeMapTarget, texture->GetHandle(),
                                                              src.mipLevel));
-                                DAWN_GL_TRY(gl, ReadPixels(static_cast<uint32_t>(src.origin.x),
-                                                           static_cast<uint32_t>(src.origin.y),
-                                                           static_cast<uint32_t>(copySize.width),
-                                                           static_cast<uint32_t>(copySize.height),
+                                DAWN_GL_TRY(gl, ReadPixels(dchecked_cast<uint32_t>(src.origin.x),
+                                                           dchecked_cast<uint32_t>(src.origin.y),
+                                                           dchecked_cast<uint32_t>(copySize.width),
+                                                           dchecked_cast<uint32_t>(copySize.height),
                                                            glFormat, glType, offset));
                                 DAWN_UNSAFE_TODO(offset += bytesPerImage);
                             }
@@ -1034,14 +1034,14 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                         const uint64_t bytesPerImage =
                             blockInfo.ToBytes(dst.blocksPerRow * dst.rowsPerImage);
                         for (TexelCount z{0}; z < copySize.depthOrArrayLayers; ++z) {
-                            DAWN_GL_TRY(gl,
-                                        FramebufferTextureLayer(
-                                            GL_READ_FRAMEBUFFER, glAttachment, texture->GetHandle(),
-                                            src.mipLevel, static_cast<uint32_t>(src.origin.z + z)));
-                            DAWN_GL_TRY(gl, ReadPixels(static_cast<uint32_t>(src.origin.x),
-                                                       static_cast<uint32_t>(src.origin.y),
-                                                       static_cast<uint32_t>(copySize.width),
-                                                       static_cast<uint32_t>(copySize.height),
+                            DAWN_GL_TRY(
+                                gl, FramebufferTextureLayer(
+                                        GL_READ_FRAMEBUFFER, glAttachment, texture->GetHandle(),
+                                        src.mipLevel, dchecked_cast<uint32_t>(src.origin.z + z)));
+                            DAWN_GL_TRY(gl, ReadPixels(dchecked_cast<uint32_t>(src.origin.x),
+                                                       dchecked_cast<uint32_t>(src.origin.y),
+                                                       dchecked_cast<uint32_t>(copySize.width),
+                                                       dchecked_cast<uint32_t>(copySize.height),
                                                        glFormat, glType, offset));
 
                             DAWN_UNSAFE_TODO(offset += bytesPerImage);
@@ -1733,43 +1733,45 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
 
             DAWN_GL_TRY(gl,
                         PixelStorei(GL_UNPACK_ROW_LENGTH,
-                                    static_cast<uint32_t>(blockInfo.ToTexelWidth(blocksPerRow))));
+                                    dchecked_cast<uint32_t>(blockInfo.ToTexelWidth(blocksPerRow))));
             DAWN_GL_TRY(gl, PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, blockInfo.byteSize));
             DAWN_GL_TRY(gl, PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH,
-                                        static_cast<uint32_t>(blockInfo.width)));
+                                        dchecked_cast<uint32_t>(blockInfo.width)));
             DAWN_GL_TRY(gl, PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT,
-                                        static_cast<uint32_t>(blockInfo.height)));
+                                        dchecked_cast<uint32_t>(blockInfo.height)));
             DAWN_GL_TRY(gl, PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_DEPTH, 1));
 
             if (target == GL_TEXTURE_2D) {
-                DAWN_GL_TRY(
-                    gl, CompressedTexSubImage2D(
-                            target, destination.mipLevel, static_cast<uint32_t>(x),
-                            static_cast<uint32_t>(y), static_cast<uint32_t>(width),
-                            static_cast<uint32_t>(height), format.internalFormat, imageSize, data));
+                DAWN_GL_TRY(gl, CompressedTexSubImage2D(
+                                    target, destination.mipLevel, dchecked_cast<uint32_t>(x),
+                                    dchecked_cast<uint32_t>(y), dchecked_cast<uint32_t>(width),
+                                    dchecked_cast<uint32_t>(height), format.internalFormat,
+                                    imageSize, data));
             } else if (target == GL_TEXTURE_CUBE_MAP) {
                 DAWN_ASSERT(texture->GetArrayLayers() == 6);
                 const uint8_t* pointer = static_cast<const uint8_t*>(data);
                 TexelCount baseLayer = destination.origin.z;
                 for (TexelCount l{0}; l < copySize.depthOrArrayLayers; ++l) {
                     GLenum cubeMapTarget =
-                        GL_TEXTURE_CUBE_MAP_POSITIVE_X + static_cast<uint32_t>(baseLayer + l);
-                    DAWN_GL_TRY(gl, CompressedTexSubImage2D(
-                                        cubeMapTarget, destination.mipLevel,
-                                        static_cast<uint32_t>(x), static_cast<uint32_t>(y),
-                                        static_cast<uint32_t>(width), static_cast<uint32_t>(height),
-                                        format.internalFormat, imageSize, pointer));
+                        GL_TEXTURE_CUBE_MAP_POSITIVE_X + dchecked_cast<uint32_t>(baseLayer + l);
+                    DAWN_GL_TRY(
+                        gl, CompressedTexSubImage2D(
+                                cubeMapTarget, destination.mipLevel, dchecked_cast<uint32_t>(x),
+                                dchecked_cast<uint32_t>(y), dchecked_cast<uint32_t>(width),
+                                dchecked_cast<uint32_t>(height), format.internalFormat, imageSize,
+                                pointer));
                     DAWN_UNSAFE_TODO(pointer += bytesPerImage);
                 }
             } else {
                 DAWN_GL_TRY(
-                    gl, PixelStorei(GL_UNPACK_IMAGE_HEIGHT,
-                                    static_cast<uint32_t>(blockInfo.ToTexelHeight(rowsPerImage))));
+                    gl,
+                    PixelStorei(GL_UNPACK_IMAGE_HEIGHT,
+                                dchecked_cast<uint32_t>(blockInfo.ToTexelHeight(rowsPerImage))));
                 DAWN_GL_TRY(gl, CompressedTexSubImage3D(
-                                    target, destination.mipLevel, static_cast<uint32_t>(x),
-                                    static_cast<uint32_t>(y), static_cast<uint32_t>(z),
-                                    static_cast<uint32_t>(width), static_cast<uint32_t>(height),
-                                    static_cast<uint32_t>(copySize.depthOrArrayLayers),
+                                    target, destination.mipLevel, dchecked_cast<uint32_t>(x),
+                                    dchecked_cast<uint32_t>(y), dchecked_cast<uint32_t>(z),
+                                    dchecked_cast<uint32_t>(width), dchecked_cast<uint32_t>(height),
+                                    dchecked_cast<uint32_t>(copySize.depthOrArrayLayers),
                                     format.internalFormat, imageSize, data));
                 DAWN_GL_TRY(gl, PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0));
             }
@@ -1785,11 +1787,11 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
 
                 for (; y < destination.origin.y + copySize.height; y += blockInfo.height) {
                     TexelCount height = std::min(blockInfo.height, virtSize.height - y);
-                    DAWN_GL_TRY(
-                        gl, CompressedTexSubImage2D(
-                                target, destination.mipLevel, static_cast<uint32_t>(x),
-                                static_cast<uint32_t>(y), static_cast<uint32_t>(width),
-                                static_cast<uint32_t>(height), format.internalFormat, rowSize, d));
+                    DAWN_GL_TRY(gl, CompressedTexSubImage2D(
+                                        target, destination.mipLevel, dchecked_cast<uint32_t>(x),
+                                        dchecked_cast<uint32_t>(y), dchecked_cast<uint32_t>(width),
+                                        dchecked_cast<uint32_t>(height), format.internalFormat,
+                                        rowSize, d));
                     DAWN_UNSAFE_TODO(d += bytesPerRow);
                 }
             } else if (target == GL_TEXTURE_CUBE_MAP) {
@@ -1798,17 +1800,17 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                 TexelCount baseLayer = destination.origin.z;
                 for (TexelCount l{0}; l < copySize.depthOrArrayLayers; ++l) {
                     const uint8_t* d =
-                        DAWN_UNSAFE_TODO(pointer + static_cast<uint32_t>(l)) * bytesPerImage;
+                        DAWN_UNSAFE_TODO(pointer + dchecked_cast<uint32_t>(l)) * bytesPerImage;
                     GLenum cubeMapTarget =
-                        GL_TEXTURE_CUBE_MAP_POSITIVE_X + static_cast<uint32_t>(baseLayer + l);
+                        GL_TEXTURE_CUBE_MAP_POSITIVE_X + dchecked_cast<uint32_t>(baseLayer + l);
                     for (y = destination.origin.y; y < destination.origin.y + copySize.height;
                          y += blockInfo.height) {
                         TexelCount height = std::min(blockInfo.height, virtSize.height - y);
                         DAWN_GL_TRY(gl, CompressedTexSubImage2D(cubeMapTarget, destination.mipLevel,
-                                                                static_cast<uint32_t>(x),
-                                                                static_cast<uint32_t>(y),
-                                                                static_cast<uint32_t>(width),
-                                                                static_cast<uint32_t>(height),
+                                                                dchecked_cast<uint32_t>(x),
+                                                                dchecked_cast<uint32_t>(y),
+                                                                dchecked_cast<uint32_t>(width),
+                                                                dchecked_cast<uint32_t>(height),
                                                                 format.internalFormat, rowSize, d));
                         DAWN_UNSAFE_TODO(d += bytesPerRow);
                     }
@@ -1826,10 +1828,10 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                         TexelCount height = std::min(blockInfo.height, virtSize.height - y);
                         DAWN_GL_TRY(
                             gl, CompressedTexSubImage3D(
-                                    target, destination.mipLevel, static_cast<uint32_t>(x),
-                                    static_cast<uint32_t>(y), static_cast<uint32_t>(z),
-                                    static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1,
-                                    format.internalFormat, rowSize, d));
+                                    target, destination.mipLevel, dchecked_cast<uint32_t>(x),
+                                    dchecked_cast<uint32_t>(y), dchecked_cast<uint32_t>(z),
+                                    dchecked_cast<uint32_t>(width), dchecked_cast<uint32_t>(height),
+                                    1, format.internalFormat, rowSize, d));
                         DAWN_UNSAFE_TODO(d += bytesPerRow);
                     }
 
@@ -1853,12 +1855,12 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
             DAWN_GL_TRY(gl, PixelStorei(GL_UNPACK_ALIGNMENT, std::min(8u, blockInfo.byteSize)));
             DAWN_GL_TRY(gl,
                         PixelStorei(GL_UNPACK_ROW_LENGTH,
-                                    static_cast<uint32_t>(blockInfo.ToTexelWidth(blocksPerRow))));
+                                    dchecked_cast<uint32_t>(blockInfo.ToTexelWidth(blocksPerRow))));
             if (target == GL_TEXTURE_2D) {
                 DAWN_GL_TRY(
-                    gl, TexSubImage2D(target, destination.mipLevel, static_cast<uint32_t>(x),
-                                      static_cast<uint32_t>(y), static_cast<uint32_t>(width),
-                                      static_cast<uint32_t>(height), adjustedFormat, format.type,
+                    gl, TexSubImage2D(target, destination.mipLevel, dchecked_cast<uint32_t>(x),
+                                      dchecked_cast<uint32_t>(y), dchecked_cast<uint32_t>(width),
+                                      dchecked_cast<uint32_t>(height), adjustedFormat, format.type,
                                       data));
             } else if (target == GL_TEXTURE_CUBE_MAP) {
                 DAWN_ASSERT(texture->GetArrayLayers() == 6);
@@ -1866,26 +1868,28 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                 TexelCount baseLayer = destination.origin.z;
                 for (TexelCount l{0}; l < copySize.depthOrArrayLayers; ++l) {
                     GLenum cubeMapTarget =
-                        GL_TEXTURE_CUBE_MAP_POSITIVE_X + static_cast<uint32_t>(baseLayer + l);
-                    DAWN_GL_TRY(gl, TexSubImage2D(
-                                        cubeMapTarget, destination.mipLevel,
-                                        static_cast<uint32_t>(x), static_cast<uint32_t>(y),
-                                        static_cast<uint32_t>(width), static_cast<uint32_t>(height),
-                                        adjustedFormat, format.type, pointer));
+                        GL_TEXTURE_CUBE_MAP_POSITIVE_X + dchecked_cast<uint32_t>(baseLayer + l);
+                    DAWN_GL_TRY(
+                        gl, TexSubImage2D(cubeMapTarget, destination.mipLevel,
+                                          dchecked_cast<uint32_t>(x), dchecked_cast<uint32_t>(y),
+                                          dchecked_cast<uint32_t>(width),
+                                          dchecked_cast<uint32_t>(height), adjustedFormat,
+                                          format.type, pointer));
                     DAWN_UNSAFE_TODO(pointer += bytesPerImage);
                 }
             } else {
                 DAWN_ASSERT(target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY ||
                             target == GL_TEXTURE_CUBE_MAP_ARRAY);
                 DAWN_GL_TRY(
-                    gl, PixelStorei(GL_UNPACK_IMAGE_HEIGHT,
-                                    static_cast<uint32_t>(blockInfo.ToTexelHeight(rowsPerImage))));
-                DAWN_GL_TRY(
-                    gl, TexSubImage3D(target, destination.mipLevel, static_cast<uint32_t>(x),
-                                      static_cast<uint32_t>(y), static_cast<uint32_t>(z),
-                                      static_cast<uint32_t>(width), static_cast<uint32_t>(height),
-                                      static_cast<uint32_t>(copySize.depthOrArrayLayers),
-                                      adjustedFormat, format.type, data));
+                    gl,
+                    PixelStorei(GL_UNPACK_IMAGE_HEIGHT,
+                                dchecked_cast<uint32_t>(blockInfo.ToTexelHeight(rowsPerImage))));
+                DAWN_GL_TRY(gl, TexSubImage3D(
+                                    target, destination.mipLevel, dchecked_cast<uint32_t>(x),
+                                    dchecked_cast<uint32_t>(y), dchecked_cast<uint32_t>(z),
+                                    dchecked_cast<uint32_t>(width), dchecked_cast<uint32_t>(height),
+                                    dchecked_cast<uint32_t>(copySize.depthOrArrayLayers),
+                                    adjustedFormat, format.type, data));
                 DAWN_GL_TRY(gl, PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0));
             }
             DAWN_GL_TRY(gl, PixelStorei(GL_UNPACK_ROW_LENGTH, 0));
@@ -1894,10 +1898,10 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
             if (target == GL_TEXTURE_2D) {
                 const uint8_t* d = static_cast<const uint8_t*>(data);
                 for (; y < destination.origin.y + height; ++y) {
-                    DAWN_GL_TRY(
-                        gl, TexSubImage2D(target, destination.mipLevel, static_cast<uint32_t>(x),
-                                          static_cast<uint32_t>(y), static_cast<uint32_t>(width), 1,
-                                          adjustedFormat, format.type, d));
+                    DAWN_GL_TRY(gl, TexSubImage2D(
+                                        target, destination.mipLevel, dchecked_cast<uint32_t>(x),
+                                        dchecked_cast<uint32_t>(y), dchecked_cast<uint32_t>(width),
+                                        1, adjustedFormat, format.type, d));
                     DAWN_UNSAFE_TODO(d += bytesPerRow);
                 }
             } else if (target == GL_TEXTURE_CUBE_MAP) {
@@ -1907,13 +1911,13 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                 for (TexelCount l{0}; l < copySize.depthOrArrayLayers; ++l) {
                     const uint8_t* d = pointer;
                     GLenum cubeMapTarget =
-                        GL_TEXTURE_CUBE_MAP_POSITIVE_X + static_cast<uint32_t>(baseLayer + l);
+                        GL_TEXTURE_CUBE_MAP_POSITIVE_X + dchecked_cast<uint32_t>(baseLayer + l);
                     for (y = destination.origin.y; y < destination.origin.y + height; ++y) {
-                        DAWN_GL_TRY(
-                            gl, TexSubImage2D(cubeMapTarget, destination.mipLevel,
-                                              static_cast<uint32_t>(x), static_cast<uint32_t>(y),
-                                              static_cast<uint32_t>(width), 1, adjustedFormat,
-                                              format.type, d));
+                        DAWN_GL_TRY(gl, TexSubImage2D(cubeMapTarget, destination.mipLevel,
+                                                      dchecked_cast<uint32_t>(x),
+                                                      dchecked_cast<uint32_t>(y),
+                                                      dchecked_cast<uint32_t>(width), 1,
+                                                      adjustedFormat, format.type, d));
                         DAWN_UNSAFE_TODO(d += bytesPerRow);
                     }
                     DAWN_UNSAFE_TODO(pointer += bytesPerImage);
@@ -1925,11 +1929,12 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
                 for (; z < destination.origin.z + copySize.depthOrArrayLayers; ++z) {
                     const uint8_t* d = slice;
                     for (y = destination.origin.y; y < destination.origin.y + height; ++y) {
-                        DAWN_GL_TRY(gl, TexSubImage3D(
-                                            target, destination.mipLevel, static_cast<uint32_t>(x),
-                                            static_cast<uint32_t>(y), static_cast<uint32_t>(z),
-                                            static_cast<uint32_t>(width), 1, 1, adjustedFormat,
-                                            format.type, d));
+                        DAWN_GL_TRY(
+                            gl,
+                            TexSubImage3D(target, destination.mipLevel, dchecked_cast<uint32_t>(x),
+                                          dchecked_cast<uint32_t>(y), dchecked_cast<uint32_t>(z),
+                                          dchecked_cast<uint32_t>(width), 1, 1, adjustedFormat,
+                                          format.type, d));
                         DAWN_UNSAFE_TODO(d += bytesPerRow);
                     }
                     DAWN_UNSAFE_TODO(slice += bytesPerImage);

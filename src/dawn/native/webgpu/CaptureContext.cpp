@@ -311,9 +311,9 @@ wgpu::TextureAspect ToDawn(const Aspect aspect) {
 
 schema::Origin3D ToSchema(const TexelOrigin3D& origin) {
     return {{
-        .x = static_cast<uint32_t>(origin.x),
-        .y = static_cast<uint32_t>(origin.y),
-        .z = static_cast<uint32_t>(origin.z),
+        .x = dchecked_cast<uint32_t>(origin.x),
+        .y = dchecked_cast<uint32_t>(origin.y),
+        .z = dchecked_cast<uint32_t>(origin.z),
     }};
 }
 
@@ -326,9 +326,9 @@ schema::Origin2D ToSchema(const Origin2D& origin) {
 
 schema::Extent3D ToSchema(const TexelExtent3D& extent) {
     return {{
-        .width = static_cast<uint32_t>(extent.width),
-        .height = static_cast<uint32_t>(extent.height),
-        .depthOrArrayLayers = static_cast<uint32_t>(extent.depthOrArrayLayers),
+        .width = dchecked_cast<uint32_t>(extent.width),
+        .height = dchecked_cast<uint32_t>(extent.height),
+        .depthOrArrayLayers = dchecked_cast<uint32_t>(extent.depthOrArrayLayers),
     }};
 }
 
@@ -353,7 +353,7 @@ schema::TexelCopyBufferLayout ToSchema(const BufferCopy& bufferCopy,
     return {{
         .offset = bufferCopy.offset,
         .bytesPerRow = static_cast<uint32_t>(blockInfo.ToBytes(bufferCopy.blocksPerRow)),
-        .rowsPerImage = static_cast<uint32_t>(bufferCopy.rowsPerImage),
+        .rowsPerImage = dchecked_cast<uint32_t>(bufferCopy.rowsPerImage),
     }};
 }
 

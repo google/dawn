@@ -497,7 +497,7 @@ TextureCopySubresource Compute3DTextureCopySubresourceAligned(BlockOrigin3D orig
             DAWN_ASSERT(copySize.height == rowsPerImage);
 
             const BlockCount copyHeight = copySize.height;
-            if (static_cast<uint32_t>(copyHeight) % 2 == 0) {
+            if (dchecked_cast<uint32_t>(copyHeight) % 2 == 0) {
                 // If copyHeight is even and there is an empty row at the beginning of the
                 // first slice of the copy region, the offset of all depth slices will never be
                 // aligned to D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT (512) and there is always

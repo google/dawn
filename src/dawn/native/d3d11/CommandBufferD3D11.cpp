@@ -438,8 +438,8 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                 uint64_t bytesPerRow = blockInfo.ToBytes(src.blocksPerRow);
                 DAWN_TRY(texture->Write(commandContext, subresources, dst.origin.ToOrigin3D(),
                                         copy->copySize.ToExtent3D(), data,
-                                        static_cast<uint32_t>(bytesPerRow),
-                                        static_cast<uint32_t>(src.rowsPerImage)));
+                                        dchecked_cast<uint32_t>(bytesPerRow),
+                                        dchecked_cast<uint32_t>(src.rowsPerImage)));
                 break;
             }
 
@@ -480,8 +480,9 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 
                 DAWN_TRY(ToBackend(src.texture)
                              ->Read(commandContext, subresources, src.origin.ToOrigin3D(),
-                                    copy->copySize.ToExtent3D(), static_cast<uint32_t>(bytesPerRow),
-                                    static_cast<uint32_t>(dst.rowsPerImage), callback));
+                                    copy->copySize.ToExtent3D(),
+                                    dchecked_cast<uint32_t>(bytesPerRow),
+                                    dchecked_cast<uint32_t>(dst.rowsPerImage), callback));
                 break;
             }
 

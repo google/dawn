@@ -417,13 +417,13 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
                 DAWN_UNSAFE_TODO(reinterpret_cast<const uint8_t*>(data) + dataLayout.offset);
             uint8_t* dstPointer = reinterpret_cast<uint8_t*>(reservation.mappedPointer.get());
             CopyTextureData(dstPointer, srcPointer, writeSizePixel.depthOrArrayLayers,
-                            static_cast<uint32_t>(rowsPerImage), dataLayout.rowsPerImage,
+                            dchecked_cast<uint32_t>(rowsPerImage), dataLayout.rowsPerImage,
                             bytesPerRow, alignedBytesPerRow, dataLayout.bytesPerRow);
 
             TexelCopyBufferLayout passDataLayout = dataLayout;
             passDataLayout.offset = reservation.offsetInBuffer;
             passDataLayout.bytesPerRow = alignedBytesPerRow;
-            passDataLayout.rowsPerImage = static_cast<uint32_t>(rowsPerImage);
+            passDataLayout.rowsPerImage = dchecked_cast<uint32_t>(rowsPerImage);
 
             TextureCopy textureCopy;
             textureCopy.texture = destination.texture;

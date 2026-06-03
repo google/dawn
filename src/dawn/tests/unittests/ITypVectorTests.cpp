@@ -72,7 +72,7 @@ TEST_F(ITypVectorTest, Creation) {
 
     // Initializer list constructor
     {
-        Vector vec = {Val(2), Val(8), Val(1)};
+        Vector vec = {Val(2u), Val(8u), Val(1u)};
         ASSERT_EQ(vec.size(), Key(3));
         ASSERT_EQ(vec[Key(0)], Val(2));
         ASSERT_EQ(vec[Key(1)], Val(8));
@@ -84,7 +84,7 @@ TEST_F(ITypVectorTest, Creation) {
 TEST_F(ITypVectorTest, CopyConstructAssign) {
     // Test the copy constructor
     {
-        Vector rhs = {Val(2), Val(8), Val(1)};
+        Vector rhs = {Val(2u), Val(8u), Val(1u)};
 
         Vector vec(rhs);
         ASSERT_EQ(vec.size(), Key(3));
@@ -100,7 +100,7 @@ TEST_F(ITypVectorTest, CopyConstructAssign) {
 
     // Test the copy assignment
     {
-        Vector rhs = {Val(2), Val(8), Val(1)};
+        Vector rhs = {Val(2u), Val(8u), Val(1u)};
 
         Vector vec = rhs;
         ASSERT_EQ(vec.size(), Key(3));
@@ -119,7 +119,7 @@ TEST_F(ITypVectorTest, CopyConstructAssign) {
 TEST_F(ITypVectorTest, MoveConstructAssign) {
     // Test the move constructor
     {
-        Vector rhs = {Val(2), Val(8), Val(1)};
+        Vector rhs = {Val(2u), Val(8u), Val(1u)};
 
         Vector vec(std::move(rhs));
         ASSERT_EQ(vec.size(), Key(3));
@@ -130,7 +130,7 @@ TEST_F(ITypVectorTest, MoveConstructAssign) {
 
     // Test the move assignment
     {
-        Vector rhs = {Val(2), Val(8), Val(1)};
+        Vector rhs = {Val(2u), Val(8u), Val(1u)};
 
         Vector vec = std::move(rhs);
         ASSERT_EQ(vec.size(), Key(3));

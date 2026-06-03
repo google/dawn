@@ -1098,9 +1098,9 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     // As the texture is uncompressed, texel and block space extents are the same, but we still use
     // texel space here because the compute shader works on texels.
     const TexelExtent3D texCopyExtent = blockInfo.ToTexel(copyExtent);
-    const uint32_t texelCopyWidth = static_cast<uint32_t>(texCopyExtent.width);
-    const uint32_t texelCopyHeight = static_cast<uint32_t>(texCopyExtent.height);
-    const uint32_t texelCopyDepth = static_cast<uint32_t>(texCopyExtent.depthOrArrayLayers);
+    const uint32_t texelCopyWidth = dchecked_cast<uint32_t>(texCopyExtent.width);
+    const uint32_t texelCopyHeight = dchecked_cast<uint32_t>(texCopyExtent.height);
+    const uint32_t texelCopyDepth = dchecked_cast<uint32_t>(texCopyExtent.depthOrArrayLayers);
 
     const uint32_t bytesPerTexel = blockInfo.byteSize;
     uint32_t workgroupCountX = 1;
@@ -1255,22 +1255,22 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
         uint32_t* params =
             static_cast<uint32_t*>(uniformBuffer->GetMappedRange(0, bufferDesc.size));
         // srcOrigin: vec3u
-        params[0] = static_cast<uint32_t>(src.origin.x);
-        DAWN_UNSAFE_TODO(params[1]) = static_cast<uint32_t>(src.origin.y);
-        DAWN_UNSAFE_TODO(params[2]) = static_cast<uint32_t>(src.origin.z);
+        params[0] = dchecked_cast<uint32_t>(src.origin.x);
+        DAWN_UNSAFE_TODO(params[1]) = dchecked_cast<uint32_t>(src.origin.y);
+        DAWN_UNSAFE_TODO(params[2]) = dchecked_cast<uint32_t>(src.origin.z);
 
         // packTexelCount: number of texel values (1, 2, or 4) one thread packs into the dst
         // buffer
         DAWN_UNSAFE_TODO(params[3]) = std::max(1u, 4 / bytesPerTexel);
         // srcExtent: vec3u
-        DAWN_UNSAFE_TODO(params[4]) = static_cast<uint32_t>(copyExtent.width);
-        DAWN_UNSAFE_TODO(params[5]) = static_cast<uint32_t>(copyExtent.height);
-        DAWN_UNSAFE_TODO(params[6]) = static_cast<uint32_t>(copyExtent.depthOrArrayLayers);
+        DAWN_UNSAFE_TODO(params[4]) = dchecked_cast<uint32_t>(copyExtent.width);
+        DAWN_UNSAFE_TODO(params[5]) = dchecked_cast<uint32_t>(copyExtent.height);
+        DAWN_UNSAFE_TODO(params[6]) = dchecked_cast<uint32_t>(copyExtent.depthOrArrayLayers);
 
         DAWN_UNSAFE_TODO(params[7]) = src.mipLevel;
 
         DAWN_UNSAFE_TODO(params[8]) = static_cast<uint32_t>(blockInfo.ToBytes(dst.blocksPerRow));
-        DAWN_UNSAFE_TODO(params[9]) = static_cast<uint32_t>(dst.rowsPerImage);
+        DAWN_UNSAFE_TODO(params[9]) = dchecked_cast<uint32_t>(dst.rowsPerImage);
         DAWN_UNSAFE_TODO(params[10]) = static_cast<uint32_t>(shaderStartOffset);
 
         // These params are only used for formats smaller than 4 bytes

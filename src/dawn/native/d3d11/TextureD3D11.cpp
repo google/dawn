@@ -1048,10 +1048,10 @@ MaybeError Texture::CopyInternal(const ScopedCommandRecordingContext* commandCon
     SubresourceRange dstSubresources = GetSubresourcesAffectedByCopy(dst, copy->copySize);
 
     D3D11_BOX srcBox;
-    srcBox.left = static_cast<uint32_t>(src.origin.x);
-    srcBox.right = static_cast<uint32_t>(src.origin.x + copy->copySize.width);
-    srcBox.top = static_cast<uint32_t>(src.origin.y);
-    srcBox.bottom = static_cast<uint32_t>(src.origin.y + copy->copySize.height);
+    srcBox.left = dchecked_cast<uint32_t>(src.origin.x);
+    srcBox.right = dchecked_cast<uint32_t>(src.origin.x + copy->copySize.width);
+    srcBox.top = dchecked_cast<uint32_t>(src.origin.y);
+    srcBox.bottom = dchecked_cast<uint32_t>(src.origin.y + copy->copySize.height);
     switch (src.texture->GetDimension()) {
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();
@@ -1061,8 +1061,8 @@ MaybeError Texture::CopyInternal(const ScopedCommandRecordingContext* commandCon
             srcBox.back = 1;
             break;
         case wgpu::TextureDimension::e3D:
-            srcBox.front = static_cast<uint32_t>(src.origin.z);
-            srcBox.back = static_cast<uint32_t>(src.origin.z + copy->copySize.depthOrArrayLayers);
+            srcBox.front = dchecked_cast<uint32_t>(src.origin.z);
+            srcBox.back = dchecked_cast<uint32_t>(src.origin.z + copy->copySize.depthOrArrayLayers);
             break;
     }
 
@@ -1081,9 +1081,9 @@ MaybeError Texture::CopyInternal(const ScopedCommandRecordingContext* commandCon
                                              D3D11Aspect(dstSubresources.aspects));
         commandContext->CopySubresourceRegion(
             ToBackend(dst.texture)->GetD3D11Resource(), dstSubresource,
-            static_cast<uint32_t>(dst.origin.x), static_cast<uint32_t>(dst.origin.y),
+            dchecked_cast<uint32_t>(dst.origin.x), dchecked_cast<uint32_t>(dst.origin.y),
             dst.texture->GetDimension() == wgpu::TextureDimension::e3D
-                ? static_cast<uint32_t>(dst.origin.z)
+                ? dchecked_cast<uint32_t>(dst.origin.z)
                 : 0,
             ToBackend(src.texture)->GetD3D11Resource(), srcSubresource,
             isWholeSubresource ? nullptr : &srcBox);

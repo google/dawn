@@ -56,6 +56,20 @@ constexpr inline Dst checked_cast(const Src& value) {
     return Dst{static_cast<IDst>(valueISrc)};
 }
 
+template <HasUnderlyingType Dst, HasUnderlyingType Src>
+constexpr inline Dst dchecked_cast(const Src& value) {
+    using ISrc = UnderlyingType<Src>;
+    using IDst = UnderlyingType<Dst>;
+    ISrc valueISrc = static_cast<ISrc>(value);
+    DAWN_ASSERT(std::in_range<IDst>(valueISrc));
+    return Dst{static_cast<IDst>(valueISrc)};
+}
+
+template <std::integral From, std::integral To>
+constexpr inline bool kIsCastAlwaysInRange =
+    std::in_range<To>(std::numeric_limits<From>::lowest()) &&
+    std::in_range<To>(std::numeric_limits<From>::max());
+
 template <typename T>
 bool inline IsDoubleValueRepresentable(double value) {
     if constexpr (std::is_same_v<T, float> || std::is_integral_v<T>) {

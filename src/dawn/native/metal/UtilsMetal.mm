@@ -635,12 +635,14 @@ MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction)
 }
 
 MTLSize ToMTLSize(const TexelExtent3D& extent) {
-    return MTLSizeMake(uint32_t(extent.width), uint32_t(extent.height),
-                       uint32_t(extent.depthOrArrayLayers));
+    return MTLSizeMake(dchecked_cast<uint32_t>(extent.width),
+                       dchecked_cast<uint32_t>(extent.height),
+                       dchecked_cast<uint32_t>(extent.depthOrArrayLayers));
 }
 
 MTLOrigin ToMTLOrigin(const TexelOrigin3D& origin) {
-    return MTLOriginMake(uint32_t(origin.x), uint32_t(origin.y), uint32_t(origin.z));
+    return MTLOriginMake(dchecked_cast<uint32_t>(origin.x), dchecked_cast<uint32_t>(origin.y),
+                         dchecked_cast<uint32_t>(origin.z));
 }
 
 TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,

@@ -145,7 +145,7 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
                 mUnitsForSamplers[samplerGLIndex].push_back(textureUnit);
             }
 
-            uniformsToSet.push_back(GLint(textureUnit));
+            uniformsToSet.push_back(dchecked_cast<GLint>(textureUnit));
             textureUnit++;
         }
 

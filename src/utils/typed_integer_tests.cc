@@ -53,6 +53,7 @@ TEST_F(TypedIntegerTest, ConstructionAndCast) {
 }
 
 // Test that typed integers can be explicitly cast to other integral types
+// (either using a static_cast or a checked_cast depending on the type pair).
 TEST_F(TypedIntegerTest, CastToOther) {
     using Unsigned64 = TypedInteger<struct Unsigned64T, uint64_t>;
     using Signed64 = TypedInteger<struct Signed64T, int64_t>;
@@ -70,35 +71,35 @@ TEST_F(TypedIntegerTest, CastToOther) {
 
     {
         Signed64 svalue64(maxI32);
-        EXPECT_EQ(static_cast<int32_t>(svalue64), maxI32);
+        EXPECT_EQ(checked_cast<int32_t>(svalue64), maxI32);
 
         Signed32 svalue32(maxI16);
         EXPECT_EQ(static_cast<int16_t>(svalue32), maxI16);
 
         Signed16 svalue16(maxI8);
-        EXPECT_EQ(static_cast<int8_t>(svalue16), maxI8);
+        EXPECT_EQ(checked_cast<int8_t>(svalue16), maxI8);
     }
     {
         Unsigned64 uvalue64(maxU32);
-        EXPECT_EQ(static_cast<uint32_t>(uvalue64), maxU32);
+        EXPECT_EQ(checked_cast<uint32_t>(uvalue64), maxU32);
 
         Unsigned32 uvalue32(maxU16);
         EXPECT_EQ(static_cast<uint16_t>(uvalue32), maxU16);
 
         Unsigned16 uvalue16(maxU8);
-        EXPECT_EQ(static_cast<uint8_t>(uvalue16), maxU8);
+        EXPECT_EQ(checked_cast<uint8_t>(uvalue16), maxU8);
     }
     {
         Signed64 svalue64(maxI8);
-        EXPECT_EQ(static_cast<int32_t>(svalue64), maxI8);
-        EXPECT_EQ(static_cast<int16_t>(svalue64), maxI8);
-        EXPECT_EQ(static_cast<int8_t>(svalue64), maxI8);
+        EXPECT_EQ(checked_cast<int32_t>(svalue64), maxI8);
+        EXPECT_EQ(checked_cast<int16_t>(svalue64), maxI8);
+        EXPECT_EQ(checked_cast<int8_t>(svalue64), maxI8);
     }
     {
         Unsigned64 uvalue64(maxU8);
-        EXPECT_EQ(static_cast<uint32_t>(uvalue64), maxU8);
-        EXPECT_EQ(static_cast<uint16_t>(uvalue64), maxU8);
-        EXPECT_EQ(static_cast<uint8_t>(uvalue64), maxU8);
+        EXPECT_EQ(checked_cast<uint32_t>(uvalue64), maxU8);
+        EXPECT_EQ(checked_cast<uint16_t>(uvalue64), maxU8);
+        EXPECT_EQ(checked_cast<uint8_t>(uvalue64), maxU8);
     }
 }
 
@@ -380,28 +381,12 @@ TEST_F(TypedIntegerTest, PlusOne) {
     EXPECT_EQ(Signed(9), ityp::PlusOne(ityp::PlusOne(seven)));
 }
 
-// Tests for bounds assertions on arithmetic overflow and underflow.
-#if defined(DAWN_ENABLE_ASSERTS)
-
 // Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
 using TypedIntegerDeathTest = TypedIntegerTest;
 
-TEST_F(TypedIntegerDeathTest, CastToOtherTruncation) {
-    using Unsigned64 = TypedInteger<struct Unsigned64T, uint64_t>;
-    using Signed64 = TypedInteger<struct Signed64T, int64_t>;
-
-    constexpr int32_t maxI32 = std::numeric_limits<int32_t>::max();
-    constexpr uint32_t maxU32 = std::numeric_limits<uint32_t>::max();
-    constexpr int32_t minI32 = std::numeric_limits<int32_t>::min();
-
-    Signed64 too_large_for_i32(static_cast<int64_t>(maxI32) + 1);
-    Signed64 too_small_for_i32(static_cast<int64_t>(minI32) - 1);
-    Unsigned64 too_large_for_u32(static_cast<uint64_t>(maxU32) + 1);
-
-    EXPECT_DEATH({ [[maybe_unused]] auto result = static_cast<int32_t>(too_large_for_i32); }, "");
-    EXPECT_DEATH({ [[maybe_unused]] auto result = static_cast<int32_t>(too_small_for_i32); }, "");
-    EXPECT_DEATH({ [[maybe_unused]] auto result = static_cast<uint32_t>(too_large_for_u32); }, "");
-}
+// Tests for bounds assertions on arithmetic overflow and underflow.
+// Note (d)checked_cast tests are in NumericDeathTest.
+#if defined(DAWN_ENABLE_ASSERTS)
 
 TEST_F(TypedIntegerDeathTest, IncrementUnsignedOverflow) {
     Unsigned value(std::numeric_limits<uint32_t>::max() - 1);

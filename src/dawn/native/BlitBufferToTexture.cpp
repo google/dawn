@@ -437,12 +437,12 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
             break;
         case wgpu::TextureDimension::e3D:
             viewDimension = wgpu::TextureViewDimension::e3D;
-            baseDepth = static_cast<uint32_t>(dst.origin.z);
+            baseDepth = dchecked_cast<uint32_t>(dst.origin.z);
             depthStep = 1;
             break;
         default:
             viewDimension = wgpu::TextureViewDimension::e2D;
-            baseArray = static_cast<uint32_t>(dst.origin.z);
+            baseArray = dchecked_cast<uint32_t>(dst.origin.z);
             arrayStep = 1;
             break;
     }
@@ -452,7 +452,7 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
         {
             TextureViewDescriptor viewDesc = {};
             viewDesc.dimension = viewDimension;
-            viewDesc.baseArrayLayer = baseArray + arrayStep * static_cast<uint32_t>(z);
+            viewDesc.baseArrayLayer = baseArray + arrayStep * dchecked_cast<uint32_t>(z);
             viewDesc.arrayLayerCount = 1;
             viewDesc.baseMipLevel = dst.mipLevel;
             viewDesc.mipLevelCount = 1;
@@ -460,7 +460,7 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
         }
 
         const uint64_t srcOffset =
-            src.offset + static_cast<uint32_t>(z) * src.rowsPerImage * src.bytesPerRow;
+            src.offset + dchecked_cast<uint32_t>(z) * src.rowsPerImage * src.bytesPerRow;
         const uint64_t srcBufferBindingOffset = AlignDown(srcOffset, ssboAlignment);
         const uint32_t shaderReadOffset = static_cast<uint32_t>(srcOffset & (ssboAlignment - 1));
         Ref<BufferBase> paramsBuffer;
@@ -471,8 +471,8 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
             uint32_t params[4];
             params[0] = shaderReadOffset;
             params[1] = src.bytesPerRow;
-            params[2] = static_cast<uint32_t>(dst.origin.x);
-            params[3] = static_cast<uint32_t>(dst.origin.y);
+            params[2] = dchecked_cast<uint32_t>(dst.origin.x);
+            params[3] = dchecked_cast<uint32_t>(dst.origin.y);
             commandEncoder->APIWriteBuffer(paramsBuffer.Get(), 0,
                                            reinterpret_cast<const uint8_t*>(&params[0]),
                                            sizeof(params));
@@ -489,7 +489,7 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
         RenderPassColorAttachment colorAttachment;
         colorAttachment.view = dstView.Get();
         if (depthStep) {
-            colorAttachment.depthSlice = baseDepth + depthStep * static_cast<uint32_t>(z);
+            colorAttachment.depthSlice = baseDepth + depthStep * dchecked_cast<uint32_t>(z);
         }
         colorAttachment.loadOp = wgpu::LoadOp::Load;
         colorAttachment.storeOp = wgpu::StoreOp::Store;
@@ -501,10 +501,10 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
         Ref<RenderPassEncoder> pass = commandEncoder->BeginRenderPass(&rpDesc);
         // Bind the resources.
         pass->APISetBindGroup(0, bindGroup.Get());
-        pass->APISetViewport(static_cast<float>(static_cast<uint32_t>(dst.origin.x)),
-                             static_cast<float>(static_cast<uint32_t>(dst.origin.y)),
-                             static_cast<float>(static_cast<uint32_t>(copyExtent.width)),
-                             static_cast<float>(static_cast<uint32_t>(copyExtent.height)), 0.f,
+        pass->APISetViewport(static_cast<float>(dchecked_cast<uint32_t>(dst.origin.x)),
+                             static_cast<float>(dchecked_cast<uint32_t>(dst.origin.y)),
+                             static_cast<float>(dchecked_cast<uint32_t>(copyExtent.width)),
+                             static_cast<float>(dchecked_cast<uint32_t>(copyExtent.height)), 0.f,
                              1.f);
 
         // Draw to perform the blit.

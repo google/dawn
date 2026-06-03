@@ -41,17 +41,17 @@ namespace dawn::native::webgpu {
 
 WGPUExtent3D ToWGPU(const TexelExtent3D& extent) {
     return {
-        .width = static_cast<uint32_t>(extent.width),
-        .height = static_cast<uint32_t>(extent.height),
-        .depthOrArrayLayers = static_cast<uint32_t>(extent.depthOrArrayLayers),
+        .width = dchecked_cast<uint32_t>(extent.width),
+        .height = dchecked_cast<uint32_t>(extent.height),
+        .depthOrArrayLayers = dchecked_cast<uint32_t>(extent.depthOrArrayLayers),
     };
 }
 
 WGPUOrigin3D ToWGPU(const TexelOrigin3D& origin) {
     return {
-        .x = static_cast<uint32_t>(origin.x),
-        .y = static_cast<uint32_t>(origin.y),
-        .z = static_cast<uint32_t>(origin.z),
+        .x = dchecked_cast<uint32_t>(origin.x),
+        .y = dchecked_cast<uint32_t>(origin.y),
+        .z = dchecked_cast<uint32_t>(origin.z),
     };
 }
 
@@ -92,7 +92,7 @@ WGPUTexelCopyBufferInfo ToWGPU(const BufferCopy& copy, const TypedTexelBlockInfo
             {
                 .offset = copy.offset,
                 .bytesPerRow = static_cast<uint32_t>(blockInfo.ToBytes(copy.blocksPerRow)),
-                .rowsPerImage = static_cast<uint32_t>(copy.rowsPerImage),
+                .rowsPerImage = dchecked_cast<uint32_t>(copy.rowsPerImage),
             },
         .buffer = ToBackend(copy.buffer)->GetInnerHandle(),
     };

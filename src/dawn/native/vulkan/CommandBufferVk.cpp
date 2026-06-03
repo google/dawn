@@ -110,8 +110,8 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
 
     bool has3DTextureInCopy = false;
 
-    region.srcOffset.x = static_cast<uint32_t>(srcCopy.origin.x);
-    region.srcOffset.y = static_cast<uint32_t>(srcCopy.origin.y);
+    region.srcOffset.x = dchecked_cast<uint32_t>(srcCopy.origin.x);
+    region.srcOffset.y = dchecked_cast<uint32_t>(srcCopy.origin.y);
     switch (srcTexture->GetDimension()) {
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();
@@ -121,20 +121,20 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
             region.srcOffset.z = 0;
             break;
         case wgpu::TextureDimension::e2D:
-            region.srcSubresource.baseArrayLayer = static_cast<uint32_t>(srcCopy.origin.z);
-            region.srcSubresource.layerCount = static_cast<uint32_t>(copySize.depthOrArrayLayers);
+            region.srcSubresource.baseArrayLayer = dchecked_cast<uint32_t>(srcCopy.origin.z);
+            region.srcSubresource.layerCount = dchecked_cast<uint32_t>(copySize.depthOrArrayLayers);
             region.srcOffset.z = 0;
             break;
         case wgpu::TextureDimension::e3D:
             has3DTextureInCopy = true;
             region.srcSubresource.baseArrayLayer = 0;
             region.srcSubresource.layerCount = 1;
-            region.srcOffset.z = static_cast<uint32_t>(srcCopy.origin.z);
+            region.srcOffset.z = dchecked_cast<uint32_t>(srcCopy.origin.z);
             break;
     }
 
-    region.dstOffset.x = static_cast<uint32_t>(dstCopy.origin.x);
-    region.dstOffset.y = static_cast<uint32_t>(dstCopy.origin.y);
+    region.dstOffset.x = dchecked_cast<uint32_t>(dstCopy.origin.x);
+    region.dstOffset.y = dchecked_cast<uint32_t>(dstCopy.origin.y);
     switch (dstTexture->GetDimension()) {
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();
@@ -144,24 +144,24 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
             region.dstOffset.z = 0;
             break;
         case wgpu::TextureDimension::e2D:
-            region.dstSubresource.baseArrayLayer = static_cast<uint32_t>(dstCopy.origin.z);
-            region.dstSubresource.layerCount = static_cast<uint32_t>(copySize.depthOrArrayLayers);
+            region.dstSubresource.baseArrayLayer = dchecked_cast<uint32_t>(dstCopy.origin.z);
+            region.dstSubresource.layerCount = dchecked_cast<uint32_t>(copySize.depthOrArrayLayers);
             region.dstOffset.z = 0;
             break;
         case wgpu::TextureDimension::e3D:
             has3DTextureInCopy = true;
             region.dstSubresource.baseArrayLayer = 0;
             region.dstSubresource.layerCount = 1;
-            region.dstOffset.z = static_cast<uint32_t>(dstCopy.origin.z);
+            region.dstOffset.z = dchecked_cast<uint32_t>(dstCopy.origin.z);
             break;
     }
 
     DAWN_ASSERT(HasSameTextureCopyExtent(srcCopy, dstCopy, copySize));
     TexelExtent3D imageExtent = ComputeTextureCopyExtent(dstCopy, copySize);
-    region.extent.width = static_cast<uint32_t>(imageExtent.width);
-    region.extent.height = static_cast<uint32_t>(imageExtent.height);
+    region.extent.width = dchecked_cast<uint32_t>(imageExtent.width);
+    region.extent.height = dchecked_cast<uint32_t>(imageExtent.height);
     region.extent.depth =
-        has3DTextureInCopy ? static_cast<uint32_t>(copySize.depthOrArrayLayers) : 1;
+        has3DTextureInCopy ? dchecked_cast<uint32_t>(copySize.depthOrArrayLayers) : 1;
 
     return region;
 }

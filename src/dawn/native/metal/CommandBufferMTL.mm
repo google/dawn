@@ -1055,7 +1055,7 @@ void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
                                              sourceBytesPerImage:copyInfo.bytesPerImage
                                                       sourceSize:copyExtent
                                                        toTexture:texture->GetMTLTexture(aspect)
-                                                destinationSlice:uint32_t(z)
+                                                destinationSlice:dchecked_cast<uint32_t>(z)
                                                 destinationLevel:mipLevel
                                                destinationOrigin:textureOrigin
                                                          options:blitOption];
@@ -1332,7 +1332,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                                  ++z) {
                                 [commandContext->EnsureBlit()
                                              copyFromTexture:texture->GetMTLTexture(src.aspect)
-                                                 sourceSlice:uint32_t(z)
+                                                 sourceSlice:dchecked_cast<uint32_t>(z)
                                                  sourceLevel:src.mipLevel
                                                 sourceOrigin:textureOrigin
                                                   sourceSize:copyExtent
@@ -1381,8 +1381,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                     commandContext, dstTexture, copy->destination, copy->copySize.ToExtent3D()));
 
                 const MTLSize sizeOneSlice =
-                    MTLSizeMake(static_cast<uint32_t>(copy->copySize.width),
-                                static_cast<uint32_t>(copy->copySize.height), 1);
+                    MTLSizeMake(dchecked_cast<uint32_t>(copy->copySize.width),
+                                dchecked_cast<uint32_t>(copy->copySize.height), 1);
 
                 uint32_t sourceLayer = 0;
                 uint32_t sourceOriginZ = 0;
@@ -1406,8 +1406,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
 
                 // TODO(crbug.com/dawn/782): Do a single T2T copy if both are 1D or 3D.
                 for (TexelCount z{0}; z < copy->copySize.depthOrArrayLayers; ++z) {
-                    *sourceZPtr = static_cast<uint32_t>(copy->source.origin.z + z);
-                    *destinationZPtr = static_cast<uint32_t>(copy->destination.origin.z + z);
+                    *sourceZPtr = dchecked_cast<uint32_t>(copy->source.origin.z + z);
+                    *destinationZPtr = dchecked_cast<uint32_t>(copy->destination.origin.z + z);
 
                     // Hold the ref until out of scope
                     NSPRef<id<MTLTexture>> dstTextureView =
@@ -1418,16 +1418,16 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                               sourceSlice:sourceLayer
                               sourceLevel:copy->source.mipLevel
                              sourceOrigin:MTLOriginMake(
-                                              static_cast<uint32_t>(copy->source.origin.x),
-                                              static_cast<uint32_t>(copy->source.origin.y),
+                                              dchecked_cast<uint32_t>(copy->source.origin.x),
+                                              dchecked_cast<uint32_t>(copy->source.origin.y),
                                               sourceOriginZ)
                                sourceSize:sizeOneSlice
                                 toTexture:dstTextureView.Get()
                          destinationSlice:destinationLayer
                          destinationLevel:copy->destination.mipLevel
                         destinationOrigin:MTLOriginMake(
-                                              static_cast<uint32_t>(copy->destination.origin.x),
-                                              static_cast<uint32_t>(copy->destination.origin.y),
+                                              dchecked_cast<uint32_t>(copy->destination.origin.x),
+                                              dchecked_cast<uint32_t>(copy->destination.origin.y),
                                               destinationOriginZ)];
                 }
                 break;

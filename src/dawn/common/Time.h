@@ -35,7 +35,8 @@
 namespace dawn {
 
 using Nanoseconds = TypedInteger<struct NanosecondsT, uint64_t>;
-constexpr Nanoseconds kMaxDurationNanos = Nanoseconds(std::chrono::nanoseconds::max().count());
+constexpr Nanoseconds kMaxDurationNanos =
+    checked_cast<Nanoseconds>(std::chrono::nanoseconds::max().count());
 
 }  // namespace dawn
 

@@ -37,6 +37,7 @@
 #include <utility>
 
 #include "src/utils/assert.h"
+#include "src/utils/numeric.h"
 #include "src/utils/underlying_type.h"
 
 namespace dawn {
@@ -74,8 +75,7 @@ template <typename Tag, typename T>
 class TypedIntegerImpl;
 }  // namespace detail
 
-template <typename Tag, typename T>
-    requires std::integral<T>
+template <typename Tag, std::integral T>
 #if defined(DAWN_ENABLE_ASSERTS)
 using TypedInteger = detail::TypedIntegerImpl<Tag, T>;
 #else
@@ -85,7 +85,7 @@ using TypedInteger = T;
 namespace detail {
 template <typename Tag, typename T>
 class alignas(T) TypedIntegerImpl {
-    static_assert(std::is_integral<T>::value, "TypedInteger must be integral");
+    static_assert(std::is_integral_v<T>, "TypedInteger must be integral");
     T mValue;
 
   public:
@@ -94,33 +94,32 @@ class alignas(T) TypedIntegerImpl {
         static_assert(sizeof(TypedIntegerImpl) == sizeof(T));
     }
 
-    // Construction from non-narrowing integral types.
-    // TODO(425911085): Consider allowing construction from narrowing types, but assert
-    // that it doesn't truncate.
-    template <typename I>
-        requires std::integral<I> && std::unsigned_integral<T>
-    explicit constexpr TypedIntegerImpl(I rhs) : mValue(static_cast<T>(rhs)) {
-        DAWN_ASSERT(rhs >= 0);
-        static_assert(static_cast<uint64_t>(std::numeric_limits<I>::max()) <=
-                      static_cast<uint64_t>(std::numeric_limits<T>::max()));
-    }
-    template <typename I>
-        requires std::integral<I> && std::signed_integral<T>
-    explicit constexpr TypedIntegerImpl(I rhs) : mValue(static_cast<T>(rhs)) {
-        static_assert(std::numeric_limits<I>::max() <= std::numeric_limits<T>::max());
-        static_assert(std::numeric_limits<I>::min() >= std::numeric_limits<T>::min());
+    // Lossless conversion: primitive -> TypedInteger (constructor).
+    // If you need a lossy (narrowing) conversion, use (d)checked_cast.
+    template <std::integral Src>
+        requires kIsCastAlwaysInRange<Src, T>
+    explicit constexpr TypedIntegerImpl(Src src) : mValue(static_cast<T>(src)) {}
+
+    // In consteval, we can allow narrowing casts because we can check the actual value at compile.
+    // TODO(crbug.com/515794394): Remove this due to issues with lambda type inference.
+    template <std::integral Src>
+        requires(!kIsCastAlwaysInRange<Src, T>)
+    explicit consteval TypedIntegerImpl(Src src) : mValue(checked_cast<T>(src)) {}
+
+    // Lossless conversion: TypedInteger -> primitive (cast)
+    // If you need a lossy (narrowing) conversion, use (d)checked_cast.
+    template <std::integral Dst>
+        requires kIsCastAlwaysInRange<T, Dst>
+    explicit constexpr operator Dst() const {
+        return static_cast<Dst>(this->mValue);
     }
 
-    // Allow explicit casts to any integral type. If the type is smaller than T,
-    // we assert that no truncation occurs.
-    template <typename I>
-        requires std::integral<I>
-    explicit constexpr operator I() const {
-        if constexpr (sizeof(I) < sizeof(T)) {
-            // If downcasting, assert that the value is not truncated
-            DAWN_ASSERT(static_cast<I>(this->mValue) == this->mValue);
-        }
-        return static_cast<I>(this->mValue);
+    // In consteval, we can allow narrowing casts because we can check the actual value at compile.
+    // TODO(crbug.com/515794394): Remove this due to issues with lambda type inference.
+    template <std::integral Dst>
+        requires(!kIsCastAlwaysInRange<T, Dst>)
+    explicit consteval operator Dst() const {
+        return checked_cast<Dst>(this->mValue);
     }
 
     // Same-tag TypedInteger comparison operators

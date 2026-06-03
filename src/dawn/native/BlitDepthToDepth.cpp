@@ -156,8 +156,8 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
             intermediateTexDesc.format = src.texture->GetFormat().format;
             intermediateTexDesc.usage =
                 wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
-            intermediateTexDesc.size = {static_cast<uint32_t>(copyExtent.width),
-                                        static_cast<uint32_t>(copyExtent.height)};
+            intermediateTexDesc.size = {dchecked_cast<uint32_t>(copyExtent.width),
+                                        dchecked_cast<uint32_t>(copyExtent.height)};
 
             Ref<TextureBase> intermediateTexture;
             DAWN_TRY_ASSIGN(intermediateTexture, device->CreateTexture(&intermediateTexDesc));
@@ -167,7 +167,7 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
                 TexelCopyTextureInfo intermediateSrc;
                 intermediateSrc.texture = src.texture.Get();
                 intermediateSrc.mipLevel = src.mipLevel;
-                intermediateSrc.origin = {0, 0, static_cast<uint32_t>(layer)};
+                intermediateSrc.origin = {0, 0, dchecked_cast<uint32_t>(layer)};
                 intermediateSrc.aspect = wgpu::TextureAspect::All;
 
                 TexelCopyTextureInfo intermediateDst;
@@ -211,7 +211,7 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
         {
             TextureViewDescriptor viewDesc = {};
             viewDesc.dimension = wgpu::TextureViewDimension::e2D;
-            viewDesc.baseArrayLayer = static_cast<uint32_t>(dst.origin.z + z);
+            viewDesc.baseArrayLayer = dchecked_cast<uint32_t>(dst.origin.z + z);
             viewDesc.arrayLayerCount = 1;
             viewDesc.baseMipLevel = dst.mipLevel;
             viewDesc.mipLevelCount = 1;

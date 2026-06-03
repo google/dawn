@@ -112,10 +112,10 @@ D3D12_TEXTURE_COPY_LOCATION ComputeBufferLocationForCopyTextureRegion(
     bufferLocation.PlacedFootprint.Offset = offset;
     bufferLocation.PlacedFootprint.Footprint.Format =
         texture->GetD3D12CopyableSubresourceFormat(aspect);
-    bufferLocation.PlacedFootprint.Footprint.Width = static_cast<uint32_t>(bufferSize.width);
-    bufferLocation.PlacedFootprint.Footprint.Height = static_cast<uint32_t>(bufferSize.height);
+    bufferLocation.PlacedFootprint.Footprint.Width = dchecked_cast<uint32_t>(bufferSize.width);
+    bufferLocation.PlacedFootprint.Footprint.Height = dchecked_cast<uint32_t>(bufferSize.height);
     bufferLocation.PlacedFootprint.Footprint.Depth =
-        static_cast<uint32_t>(bufferSize.depthOrArrayLayers);
+        dchecked_cast<uint32_t>(bufferSize.depthOrArrayLayers);
     bufferLocation.PlacedFootprint.Footprint.RowPitch = rowPitch;
     return bufferLocation;
 }
@@ -177,12 +177,12 @@ D3D12_TEXTURE_COPY_LOCATION ComputeTextureCopyLocationForTexture(const Texture* 
 D3D12_BOX ComputeD3D12BoxFromOffsetAndSize(const TexelOrigin3D& offset,
                                            const TexelExtent3D& copySize) {
     D3D12_BOX sourceRegion;
-    sourceRegion.left = static_cast<UINT>(offset.x);
-    sourceRegion.top = static_cast<UINT>(offset.y);
-    sourceRegion.front = static_cast<UINT>(offset.z);
-    sourceRegion.right = static_cast<UINT>(offset.x + copySize.width);
-    sourceRegion.bottom = static_cast<UINT>(offset.y + copySize.height);
-    sourceRegion.back = static_cast<UINT>(offset.z + copySize.depthOrArrayLayers);
+    sourceRegion.left = dchecked_cast<UINT>(offset.x);
+    sourceRegion.top = dchecked_cast<UINT>(offset.y);
+    sourceRegion.front = dchecked_cast<UINT>(offset.z);
+    sourceRegion.right = dchecked_cast<UINT>(offset.x + copySize.width);
+    sourceRegion.bottom = dchecked_cast<UINT>(offset.y + copySize.height);
+    sourceRegion.back = dchecked_cast<UINT>(offset.z + copySize.depthOrArrayLayers);
     return sourceRegion;
 }
 
@@ -199,7 +199,7 @@ void RecordBufferTextureCopyFromSplits(BufferTextureCopyDirection direction,
                                        Aspect aspect) {
     Texture* texture = ToBackend(textureBase);
     const D3D12_TEXTURE_COPY_LOCATION textureLocation = ComputeTextureCopyLocationForTexture(
-        texture, textureMiplevel, static_cast<uint32_t>(textureLayer), aspect);
+        texture, textureMiplevel, dchecked_cast<uint32_t>(textureLayer), aspect);
     uint64_t bufferBytesPerRow = blockInfo.ToBytes(bufferBlocksPerRow);
 
     for (uint32_t i = 0; i < baseCopySplit.count; ++i) {
@@ -214,7 +214,7 @@ void RecordBufferTextureCopyFromSplits(BufferTextureCopyDirection direction,
         const D3D12_TEXTURE_COPY_LOCATION bufferLocation =
             ComputeBufferLocationForCopyTextureRegion(
                 texture, bufferResource, bufferSize, offsetBytes,
-                static_cast<uint32_t>(bufferBytesPerRow), aspect);
+                dchecked_cast<uint32_t>(bufferBytesPerRow), aspect);
 
         if (direction == BufferTextureCopyDirection::B2T) {
             const D3D12_BOX sourceRegion = ComputeD3D12BoxFromOffsetAndSize(bufferOffset, copySize);
@@ -260,7 +260,7 @@ void Record2DBufferTextureCopyWithSplit(BufferTextureCopyDirection direction,
 
     for (BlockCount copyLayer : Range(copySize.depthOrArrayLayers)) {
         const uint32_t splitIndex =
-            static_cast<uint32_t>(copyLayer) % copySplits.copySubresources.size();
+            dchecked_cast<uint32_t>(copyLayer) % copySplits.copySubresources.size();
 
         const TextureCopySubresource& copyResourcePerLayer =
             copySplits.copySubresources[splitIndex];

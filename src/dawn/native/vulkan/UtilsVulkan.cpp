@@ -243,9 +243,10 @@ VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
     TexelExtent3D copySizeTexels = blockInfo.ToTexel(copySize);
 
     // In Vulkan the row length is in texels while it is in blocks for Dawn
-    region.bufferRowLength = static_cast<uint32_t>(blockInfo.ToTexelWidth(bufferCopy.blocksPerRow));
+    region.bufferRowLength =
+        dchecked_cast<uint32_t>(blockInfo.ToTexelWidth(bufferCopy.blocksPerRow));
     region.bufferImageHeight =
-        static_cast<uint32_t>(blockInfo.ToTexelHeight(bufferCopy.rowsPerImage));
+        dchecked_cast<uint32_t>(blockInfo.ToTexelHeight(bufferCopy.rowsPerImage));
 
     region.imageSubresource.aspectMask = VulkanAspectMask(textureCopy.aspect);
     region.imageSubresource.mipLevel = textureCopy.mipLevel;
@@ -256,46 +257,46 @@ VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
         case wgpu::TextureDimension::e1D:
             DAWN_ASSERT(textureCopy.origin.z == TexelCount{0} &&
                         copySizeTexels.depthOrArrayLayers == TexelCount{1});
-            region.imageOffset.x = static_cast<uint32_t>(textureCopy.origin.x);
+            region.imageOffset.x = dchecked_cast<uint32_t>(textureCopy.origin.x);
             region.imageOffset.y = 0;
             region.imageOffset.z = 0;
             region.imageSubresource.baseArrayLayer = 0;
             region.imageSubresource.layerCount = 1;
 
             DAWN_ASSERT(!textureCopy.texture->GetFormat().isCompressed);
-            region.imageExtent.width = static_cast<uint32_t>(copySizeTexels.width);
+            region.imageExtent.width = dchecked_cast<uint32_t>(copySizeTexels.width);
             region.imageExtent.height = 1;
             region.imageExtent.depth = 1;
             break;
 
         case wgpu::TextureDimension::e2D: {
-            region.imageOffset.x = static_cast<uint32_t>(textureCopy.origin.x);
-            region.imageOffset.y = static_cast<uint32_t>(textureCopy.origin.y);
+            region.imageOffset.x = dchecked_cast<uint32_t>(textureCopy.origin.x);
+            region.imageOffset.y = dchecked_cast<uint32_t>(textureCopy.origin.y);
             region.imageOffset.z = 0;
-            region.imageSubresource.baseArrayLayer = static_cast<uint32_t>(textureCopy.origin.z);
+            region.imageSubresource.baseArrayLayer = dchecked_cast<uint32_t>(textureCopy.origin.z);
             region.imageSubresource.layerCount =
-                static_cast<uint32_t>(copySizeTexels.depthOrArrayLayers);
+                dchecked_cast<uint32_t>(copySizeTexels.depthOrArrayLayers);
 
             TexelExtent3D imageExtent =
                 ComputeTextureCopyExtent(textureCopy, copySizeTexels.ToExtent3D());
-            region.imageExtent.width = static_cast<uint32_t>(imageExtent.width);
-            region.imageExtent.height = static_cast<uint32_t>(imageExtent.height);
+            region.imageExtent.width = dchecked_cast<uint32_t>(imageExtent.width);
+            region.imageExtent.height = dchecked_cast<uint32_t>(imageExtent.height);
             region.imageExtent.depth = 1;
             break;
         }
 
         case wgpu::TextureDimension::e3D: {
-            region.imageOffset.x = static_cast<uint32_t>(textureCopy.origin.x);
-            region.imageOffset.y = static_cast<uint32_t>(textureCopy.origin.y);
-            region.imageOffset.z = static_cast<uint32_t>(textureCopy.origin.z);
+            region.imageOffset.x = dchecked_cast<uint32_t>(textureCopy.origin.x);
+            region.imageOffset.y = dchecked_cast<uint32_t>(textureCopy.origin.y);
+            region.imageOffset.z = dchecked_cast<uint32_t>(textureCopy.origin.z);
             region.imageSubresource.baseArrayLayer = 0;
             region.imageSubresource.layerCount = 1;
 
             TexelExtent3D imageExtent =
                 ComputeTextureCopyExtent(textureCopy, copySizeTexels.ToExtent3D());
-            region.imageExtent.width = static_cast<uint32_t>(imageExtent.width);
-            region.imageExtent.height = static_cast<uint32_t>(imageExtent.height);
-            region.imageExtent.depth = static_cast<uint32_t>(copySizeTexels.depthOrArrayLayers);
+            region.imageExtent.width = dchecked_cast<uint32_t>(imageExtent.width);
+            region.imageExtent.height = dchecked_cast<uint32_t>(imageExtent.height);
+            region.imageExtent.depth = dchecked_cast<uint32_t>(copySizeTexels.depthOrArrayLayers);
             break;
         }
     }

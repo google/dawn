@@ -149,8 +149,8 @@ SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy,
             return {copy.aspect, {0, 1}, {0, 1}};
         case wgpu::TextureDimension::e2D:
             return {copy.aspect,
-                    {static_cast<uint32_t>(copy.origin.z),
-                     static_cast<uint32_t>(copySize.depthOrArrayLayers)},
+                    {dchecked_cast<uint32_t>(copy.origin.z),
+                     dchecked_cast<uint32_t>(copySize.depthOrArrayLayers)},
                     {copy.mipLevel, 1}};
         case wgpu::TextureDimension::e3D:
             return {copy.aspect, {0, 1}, {copy.mipLevel, 1}};

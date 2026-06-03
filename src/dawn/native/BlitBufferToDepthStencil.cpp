@@ -284,7 +284,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
         {
             TextureViewDescriptor viewDesc = {};
             viewDesc.dimension = wgpu::TextureViewDimension::e2D;
-            viewDesc.baseArrayLayer = static_cast<uint32_t>(z);
+            viewDesc.baseArrayLayer = dchecked_cast<uint32_t>(z);
             viewDesc.arrayLayerCount = 1;
             viewDesc.mipLevelCount = 1;
             DAWN_TRY_ASSIGN(srcView, dataTexture->CreateView(&viewDesc));
@@ -294,7 +294,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
         {
             TextureViewDescriptor viewDesc = {};
             viewDesc.dimension = wgpu::TextureViewDimension::e2D;
-            viewDesc.baseArrayLayer = static_cast<uint32_t>(dst.origin.z + z);
+            viewDesc.baseArrayLayer = dchecked_cast<uint32_t>(dst.origin.z + z);
             viewDesc.arrayLayerCount = 1;
             viewDesc.baseMipLevel = dst.mipLevel;
             viewDesc.mipLevelCount = 1;
@@ -311,8 +311,8 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
 
             uint32_t* params =
                 static_cast<uint32_t*>(paramsBuffer->GetMappedRange(0, bufferDesc.size));
-            params[0] = static_cast<uint32_t>(dst.origin.x);
-            DAWN_UNSAFE_TODO(params[1]) = static_cast<uint32_t>(dst.origin.y);
+            params[0] = dchecked_cast<uint32_t>(dst.origin.x);
+            DAWN_UNSAFE_TODO(params[1]) = dchecked_cast<uint32_t>(dst.origin.y);
             DAWN_TRY(paramsBuffer->Unmap());
         }
 
@@ -345,8 +345,8 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
         pass->APISetBindGroup(0, bindGroup.Get());
         // Discard all fragments outside the copy region.
         pass->APISetScissorRect(
-            static_cast<uint32_t>(dst.origin.x), static_cast<uint32_t>(dst.origin.y),
-            static_cast<uint32_t>(copyExtent.width), static_cast<uint32_t>(copyExtent.height));
+            dchecked_cast<uint32_t>(dst.origin.x), dchecked_cast<uint32_t>(dst.origin.y),
+            dchecked_cast<uint32_t>(copyExtent.width), dchecked_cast<uint32_t>(copyExtent.height));
 
         // Draw to perform the blit.
         pass->APISetPipeline(pipeline.Get());
@@ -416,8 +416,8 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         DAWN_TRY_ASSIGN(paramsBuffer, device->CreateBuffer(&bufferDesc));
 
         uint32_t* params = static_cast<uint32_t*>(paramsBuffer->GetMappedRange(0, bufferDesc.size));
-        params[0] = static_cast<uint32_t>(dst.origin.x);
-        DAWN_UNSAFE_TODO(params[1]) = static_cast<uint32_t>(dst.origin.y);
+        params[0] = dchecked_cast<uint32_t>(dst.origin.x);
+        DAWN_UNSAFE_TODO(params[1]) = dchecked_cast<uint32_t>(dst.origin.y);
         DAWN_UNSAFE_TODO(params[2]) = 0;
         DAWN_TRY(paramsBuffer->Unmap());
     }
@@ -445,7 +445,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         {
             TextureViewDescriptor viewDesc = {};
             viewDesc.dimension = textureViewDimension;
-            viewDesc.baseArrayLayer = static_cast<uint32_t>(dst.origin.z) + z;
+            viewDesc.baseArrayLayer = dchecked_cast<uint32_t>(dst.origin.z) + z;
             viewDesc.arrayLayerCount = 1;
             viewDesc.baseMipLevel = dst.mipLevel;
             viewDesc.mipLevelCount = 1;
@@ -485,8 +485,8 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         // Bind the resources.
         pass->APISetBindGroup(0, bindGroup.Get());
         // Discard all fragments outside the copy region.
-        pass->APISetScissorRect(static_cast<uint32_t>(dst.origin.x),
-                                static_cast<uint32_t>(dst.origin.y), copyExtent.width,
+        pass->APISetScissorRect(dchecked_cast<uint32_t>(dst.origin.x),
+                                dchecked_cast<uint32_t>(dst.origin.y), copyExtent.width,
                                 copyExtent.height);
 
         // Clear the copy region to 0.

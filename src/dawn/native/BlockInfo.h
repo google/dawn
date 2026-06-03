@@ -66,7 +66,7 @@ struct TexelOrigin3D {
     // Convert to Origin3D
     // TODO(crbug.com/424536624): Remove once strong types are used everywhere.
     constexpr Origin3D ToOrigin3D() const {
-        return {static_cast<uint32_t>(x), static_cast<uint32_t>(y), static_cast<uint32_t>(z)};
+        return {dchecked_cast<uint32_t>(x), dchecked_cast<uint32_t>(y), dchecked_cast<uint32_t>(z)};
     }
 
     // Comparison operator
@@ -114,8 +114,8 @@ struct TexelExtent3D {
     // Convert to Extent3D
     // TODO(crbug.com/424536624): Remove once strong types are used everywhere.
     constexpr Extent3D ToExtent3D() const {
-        return {static_cast<uint32_t>(width), static_cast<uint32_t>(height),
-                static_cast<uint32_t>(depthOrArrayLayers)};
+        return {dchecked_cast<uint32_t>(width), dchecked_cast<uint32_t>(height),
+                dchecked_cast<uint32_t>(depthOrArrayLayers)};
     }
 
     // Comparison operator
@@ -177,7 +177,7 @@ struct TypedTexelBlockInfo {
     // Convert to TexelBlockInfo
     // TODO(crbug.com/424536624): Remove once strong types are used everywhere.
     constexpr TexelBlockInfo ToTexelBlockInfo() const {
-        return {byteSize, static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+        return {byteSize, dchecked_cast<uint32_t>(width), dchecked_cast<uint32_t>(height)};
     }
 
     // Convert blocks to bytes

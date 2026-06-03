@@ -85,9 +85,10 @@ void ValidateFootprints(const TextureSpec& textureSpec,
             bufferSpec.offset +
             // TOOD(425944899): add overload of RequiredBytesInCopy that accepts strong types
             utils::RequiredBytesInCopy(
-                bufferSpec.bytesPerRow, static_cast<uint32_t>(bufferSpec.rowsPerImage),
-                static_cast<uint32_t>(widthInBlocks), static_cast<uint32_t>(heightInBlocks),
-                static_cast<uint32_t>(textureSpec.copySize.depthOrArrayLayers), blockInfo.byteSize);
+                bufferSpec.bytesPerRow, dchecked_cast<uint32_t>(bufferSpec.rowsPerImage),
+                dchecked_cast<uint32_t>(widthInBlocks), dchecked_cast<uint32_t>(heightInBlocks),
+                dchecked_cast<uint32_t>(textureSpec.copySize.depthOrArrayLayers),
+                blockInfo.byteSize);
 
         // The last pixel (buffer footprint) of each copy region depends on its
         // bufferOffset and copySize. It is not the last pixel where the bufferSize
@@ -108,10 +109,10 @@ void ValidateFootprints(const TextureSpec& textureSpec,
             copy.alignedOffset +
             utils::RequiredBytesInCopy(
                 bufferSpec.bytesPerRow,
-                static_cast<uint32_t>(blockInfo.ToBlockHeight(bufferSize.height)),
-                static_cast<uint32_t>(footprintWidthInBlocks),
-                static_cast<uint32_t>(footprintHeightInBlocks),
-                static_cast<uint32_t>(blockInfo.ToBlockDepth(bufferSize.depthOrArrayLayers)),
+                dchecked_cast<uint32_t>(blockInfo.ToBlockHeight(bufferSize.height)),
+                dchecked_cast<uint32_t>(footprintWidthInBlocks),
+                dchecked_cast<uint32_t>(footprintHeightInBlocks),
+                dchecked_cast<uint32_t>(blockInfo.ToBlockDepth(bufferSize.depthOrArrayLayers)),
                 blockInfo.byteSize);
 
         // The buffer footprint of each copy region should not exceed the minimum
@@ -493,7 +494,7 @@ class CopySplitTest : public testing::TestWithParam<CopySplitTestParam> {
                     const uint64_t bytesPerLayer = blockInfo.ToBytes(blocksPerRow * rowsPerImage);
                     for (BlockCount copyLayer : Range(copySize.depthOrArrayLayers)) {
                         const uint32_t splitIndex =
-                            static_cast<uint32_t>(copyLayer) % copySplits.copySubresources.size();
+                            dchecked_cast<uint32_t>(copyLayer) % copySplits.copySubresources.size();
                         const TextureCopySubresource& copySubresourcePerLayer =
                             copySplits.copySubresources[splitIndex];
 
@@ -508,7 +509,7 @@ class CopySplitTest : public testing::TestWithParam<CopySplitTestParam> {
                         // computed assuming an offset of bytesPerLayer from the previous (1st)
                         // copy, and ValidateFootprints will check for that.
                         const uint64_t bufferOffsetForNextLayer =
-                            bytesPerLayer * static_cast<uint32_t>(splitIndex);
+                            bytesPerLayer * dchecked_cast<uint32_t>(splitIndex);
                         bufferSpecCopy.offset += bufferOffsetForNextLayer;
 
                         // Modify texture spec for a single layer

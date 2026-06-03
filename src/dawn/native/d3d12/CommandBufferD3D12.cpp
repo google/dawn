@@ -1205,9 +1205,9 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                             ComputeD3D12BoxFromOffsetAndSize(copy->source.origin, copy->copySize);
 
                         commandList->CopyTextureRegion(
-                            &dstLocation, static_cast<uint32_t>(copy->destination.origin.x),
-                            static_cast<uint32_t>(copy->destination.origin.y),
-                            static_cast<uint32_t>(copy->destination.origin.z), &srcLocation,
+                            &dstLocation, dchecked_cast<uint32_t>(copy->destination.origin.x),
+                            dchecked_cast<uint32_t>(copy->destination.origin.y),
+                            dchecked_cast<uint32_t>(copy->destination.origin.z), &srcLocation,
                             &sourceRegion);
                     }
                 } else {
@@ -1225,7 +1225,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                                     DAWN_ASSERT(copy->source.origin.z == TexelCount{0});
                                     break;
                                 case wgpu::TextureDimension::e2D:
-                                    sourceLayer = static_cast<uint32_t>(copy->source.origin.z + z);
+                                    sourceLayer =
+                                        dchecked_cast<uint32_t>(copy->source.origin.z + z);
                                     break;
                                 case wgpu::TextureDimension::e3D:
                                     sourceZ = copy->source.origin.z + z;
@@ -1242,7 +1243,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                                     break;
                                 case wgpu::TextureDimension::e2D:
                                     destinationLayer =
-                                        static_cast<uint32_t>(copy->destination.origin.z + z);
+                                        dchecked_cast<uint32_t>(copy->destination.origin.z + z);
                                     break;
                                 case wgpu::TextureDimension::e3D:
                                     destinationZ = copy->destination.origin.z + z;
@@ -1263,9 +1264,9 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                                 sourceOriginInSubresource, copyExtentOneSlice);
 
                             commandList->CopyTextureRegion(
-                                &dstLocation, static_cast<uint32_t>(copy->destination.origin.x),
-                                static_cast<uint32_t>(copy->destination.origin.y),
-                                static_cast<uint32_t>(destinationZ), &srcLocation, &sourceRegion);
+                                &dstLocation, dchecked_cast<uint32_t>(copy->destination.origin.x),
+                                dchecked_cast<uint32_t>(copy->destination.origin.y),
+                                dchecked_cast<uint32_t>(destinationZ), &srcLocation, &sourceRegion);
                         }
                     }
                 }

@@ -34,8 +34,21 @@
 namespace dawn {
 namespace {
 
+TEST(NumericTest, IsCastAlwaysInRange) {
+    static_assert(kIsCastAlwaysInRange<uint32_t, uint64_t>);
+    static_assert(!kIsCastAlwaysInRange<int32_t, uint32_t>);
+    static_assert(!kIsCastAlwaysInRange<uint32_t, int32_t>);
+    static_assert(!kIsCastAlwaysInRange<uint64_t, uint32_t>);
+}
+
 // Death tests
 // Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
+
+#ifdef DAWN_ENABLE_ASSERTS
+#define EXPECT_DCHECK(statement, matcher) EXPECT_DEATH(statement, matcher)
+#else
+#define EXPECT_DCHECK(statement, matcher) statement
+#endif
 
 // Test for checked cast between various types.
 template <typename T32, typename T64>
@@ -91,6 +104,11 @@ TEST(NumericDeathTest, CheckedCast) {
     // TypedInteger <-> enum class
     CheckedCastTest<TypedU32, TypedI32, EnumU64, EnumI64>();
     CheckedCastTest<EnumU32, EnumI32, EnumU64, EnumI64>();
+
+    // Basic test that dchecked_cast is checked in debug but not release.
+    // Not exhaustive like the cases above because those are very slow.
+    EXPECT_DCHECK(dchecked_cast<uint32_t>(uint64_t{std::numeric_limits<uint32_t>::max()} + 1), "");
+    EXPECT_DCHECK(dchecked_cast<int32_t>(uint32_t{std::numeric_limits<int32_t>::max()} + 1), "");
 }
 
 }  // anonymous namespace
