@@ -303,11 +303,12 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
         //    but otherwise this finishes on the same path as #2.
         // 4. Event was created for an error and `mBuffer` was always null. This uses
         //    `mErrorMessage`` and `mStatus` as set in the constructor when running the callback.
+        RecursiveMutex::AutoLock lock;
         Ref<BufferBase> buffer = mBuffer.Promote();
         if (buffer) {
             // Locking the mutex provides synchronization so that either path #1 or #2 is taken if
             // Complete() and Unmap() race on different threads.
-            Mutex::AutoLock lock(&buffer->mPendingMapMutex);
+            lock = RecursiveMutex::AutoLock(&buffer->mPendingMapMutex);
             if (mStatus == WGPUMapAsyncStatus_Success) {
                 // Complete() happened before Unmap().
                 DAWN_CHECK(buffer->mPendingMapEvent);
@@ -904,7 +905,7 @@ MaybeError BufferBase::UnmapInternal(bool forDestroy) {
     if (state == BufferState::PendingMap) {
         Ref<MapAsyncEvent> event;
         {
-            Mutex::AutoLock lock(&mPendingMapMutex);
+            RecursiveMutex::AutoLock lock(&mPendingMapMutex);
             // `mPendingMapEvent` is always reset while holding the mutex. If Complete() ran and
             // already reset the event then map is about to complete. If not, reset here and do an
             // early unmap.
@@ -933,6 +934,14 @@ MaybeError BufferBase::UnmapInternal(bool forDestroy) {
 
         // Wait until FinalizeMap() finishes before falling through to a regular unmap.
         mState.wait(BufferState::PendingMap, std::memory_order::acquire);
+    }
+
+    // Wait for any active MapAsyncEvent callback to finish. Just acquiring and releasing the lock
+    // is sufficient because MapAsyncEvent::Complete transitions the state and holds the lock
+    // throughout the state transition and the callback exactly once, therefore if we can acquire
+    // the lock, the callback must have completed.
+    {
+        RecursiveMutex::AutoLock lock(&mPendingMapMutex);
     }
 
     DAWN_TRY(Unmap(forDestroy));

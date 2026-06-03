@@ -265,7 +265,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // until after `mPendingMapEvent` is reset and potential race is averted.
     // Note: MutexProtected isn't used here due to Use() providing MapAsyncEvent* instead of
     // Ref<MapAsyncEvent> which doesn't allow resetting the Ref.
-    Mutex mPendingMapMutex;
+    RecursiveMutex mPendingMapMutex;
     Ref<MapAsyncEvent> mPendingMapEvent;
 
     // Track texel buffer views created from this buffer so they can be destroyed when the buffer is
