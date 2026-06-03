@@ -1,10 +1,10 @@
 Name: WebGPU-Headers
 Short Name: webgpu-headers
 URL: https://github.com/webgpu-native/webgpu-headers
-Update Mechanism: Manual
+Update Mechanism: Autoroll
 Security Critical: no
 Version: N/A
-Revision: DEPS
+Revision: bf8ddb91dc38ea11ec1b727dae1fa965c4207d22
 License: BSD-3-Clause
 License File: LICENSE
 Shipped: no
