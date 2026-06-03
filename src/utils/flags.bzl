@@ -1,5 +1,5 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 
 def declare_os_flag():
     """Creates the 'os' string flag that specifies the OS to target, and a pair of
