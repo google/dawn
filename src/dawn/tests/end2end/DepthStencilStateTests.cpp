@@ -391,6 +391,9 @@ class DepthStencilStateTest : public DawnTest {
 
 // Test compilation and usage of the fixture
 TEST_P(DepthStencilStateTest, Basic) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::StencilFaceState stencilFace;
     // Spot-test for defaulting of these four fields.
     stencilFace.compare = wgpu::CompareFunction::Undefined;
@@ -415,6 +418,9 @@ TEST_P(DepthStencilStateTest, Basic) {
 
 // Test defaults: depth and stencil tests disabled
 TEST_P(DepthStencilStateTest, DepthStencilDisabled) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::StencilFaceState stencilFace;
     stencilFace.compare = wgpu::CompareFunction::Always;
     stencilFace.failOp = wgpu::StencilOperation::Keep;
@@ -451,6 +457,9 @@ TEST_P(DepthStencilStateTest, DepthStencilDisabled) {
 
 // The following tests check that each depth comparison function works
 TEST_P(DepthStencilStateTest, DepthAlways) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     CheckDepthCompareFunction(wgpu::CompareFunction::Always, true, true, true);
 }
 
@@ -485,6 +494,9 @@ TEST_P(DepthStencilStateTest, DepthLessEqual) {
 }
 
 TEST_P(DepthStencilStateTest, DepthNever) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     CheckDepthCompareFunction(wgpu::CompareFunction::Never, false, false, false);
 }
 
@@ -496,6 +508,9 @@ TEST_P(DepthStencilStateTest, DepthNotEqual) {
 
 // Test that disabling depth writes works and leaves the depth buffer unchanged
 TEST_P(DepthStencilStateTest, DepthWriteDisabled) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::StencilFaceState stencilFace;
     stencilFace.compare = wgpu::CompareFunction::Always;
     stencilFace.failOp = wgpu::StencilOperation::Keep;
@@ -540,6 +555,9 @@ TEST_P(DepthStencilStateTest, DepthWriteDisabled) {
 
 // The following tests check that each stencil comparison function works
 TEST_P(DepthStencilStateTest, StencilAlways) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     CheckStencilCompareFunction(wgpu::CompareFunction::Always, true, true, true);
 }
 
@@ -587,37 +605,61 @@ TEST_P(DepthStencilStateTest, StencilNotEqual) {
 
 // The following tests check that each stencil operation works
 TEST_P(DepthStencilStateTest, StencilKeep) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     CheckStencilOperation(wgpu::StencilOperation::Keep, 1, 3, 1);
 }
 
 TEST_P(DepthStencilStateTest, StencilZero) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     CheckStencilOperation(wgpu::StencilOperation::Zero, 1, 3, 0);
 }
 
 TEST_P(DepthStencilStateTest, StencilReplace) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     CheckStencilOperation(wgpu::StencilOperation::Replace, 1, 3, 3);
 }
 
 TEST_P(DepthStencilStateTest, StencilInvert) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     CheckStencilOperation(wgpu::StencilOperation::Invert, 0xf0, 3, 0x0f);
 }
 
 TEST_P(DepthStencilStateTest, StencilIncrementClamp) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     CheckStencilOperation(wgpu::StencilOperation::IncrementClamp, 1, 3, 2);
     CheckStencilOperation(wgpu::StencilOperation::IncrementClamp, 0xff, 3, 0xff);
 }
 
 TEST_P(DepthStencilStateTest, StencilIncrementWrap) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     CheckStencilOperation(wgpu::StencilOperation::IncrementWrap, 1, 3, 2);
     CheckStencilOperation(wgpu::StencilOperation::IncrementWrap, 0xff, 3, 0);
 }
 
 TEST_P(DepthStencilStateTest, StencilDecrementClamp) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     CheckStencilOperation(wgpu::StencilOperation::DecrementClamp, 1, 3, 0);
     CheckStencilOperation(wgpu::StencilOperation::DecrementClamp, 0, 3, 0);
 }
 
 TEST_P(DepthStencilStateTest, StencilDecrementWrap) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     CheckStencilOperation(wgpu::StencilOperation::DecrementWrap, 1, 3, 0);
     CheckStencilOperation(wgpu::StencilOperation::DecrementWrap, 0, 3, 0xff);
 }
@@ -724,6 +766,9 @@ TEST_P(DepthStencilStateTest, StencilWriteMask) {
 
 // Test that the stencil operation is executed on stencil fail
 TEST_P(DepthStencilStateTest, StencilFail) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::StencilFaceState baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
     baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
@@ -762,6 +807,9 @@ TEST_P(DepthStencilStateTest, StencilFail) {
 
 // Test that the stencil operation is executed on stencil pass, depth fail
 TEST_P(DepthStencilStateTest, StencilDepthFail) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::StencilFaceState baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
     baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
@@ -802,6 +850,9 @@ TEST_P(DepthStencilStateTest, StencilDepthFail) {
 
 // Test that the stencil operation is executed on stencil pass, depth pass
 TEST_P(DepthStencilStateTest, StencilDepthPass) {
+    // TODO(crbug.com/519610993): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::StencilFaceState baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
     baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;

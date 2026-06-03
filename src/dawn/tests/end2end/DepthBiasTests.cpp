@@ -194,6 +194,9 @@ TEST_P(DepthBiasTests, PositiveBiasOnFloatWithClamp) {
     // https://github.com/gpuweb/gpuweb/blob/main/proposals/compatibility-mode.md#9-depth-bias-clamp-must-be-zero
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
+    // TODO(crbug.com/519266536): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // Draw quad flat on z = 0.25 with 0.25 bias clamped at 0.125.
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0, QuadAngle::Flat,
                      kPointTwoFiveBiasForPointTwoFiveZOnFloat, 0, 0.125);
@@ -233,6 +236,9 @@ TEST_P(DepthBiasTests, NegativeBiasOnFloatWithClamp) {
     // Depth bias clamp is not supported in compat mode.
     // https://github.com/gpuweb/gpuweb/blob/main/proposals/compatibility-mode.md#9-depth-bias-clamp-must-be-zero
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
+    // TODO(crbug.com/519266536): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
     // Draw quad flat on z = 0.25 with -0.25 bias clamped at -0.125.
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0, QuadAngle::Flat,
@@ -301,6 +307,9 @@ TEST_P(DepthBiasTests, NegativeHalfSlopeBiasOnFloat) {
 
 // Test adding positive bias to output
 TEST_P(DepthBiasTests, PositiveBiasOn24bit) {
+    // TODO(crbug.com/519266536): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // Draw quad flat on z = 0.25 with 0.25 bias
     RunDepthBiasTest(wgpu::TextureFormat::Depth24PlusStencil8, 0.4f, QuadAngle::Flat,
                      0.25f * (1 << 25), 0, 0);
@@ -338,6 +347,9 @@ TEST_P(DepthBiasTests, PositiveBiasOn24bitWithClamp) {
 
 // Test adding positive bias to output
 TEST_P(DepthBiasTests, PositiveSlopeBiasOn24bit) {
+    // TODO(crbug.com/519266536): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // Draw quad with z from 0 to 0.5 with a slope bias of 1
     RunDepthBiasTest(wgpu::TextureFormat::Depth24PlusStencil8, 0.4f, QuadAngle::TiltedX, 0, 1, 0);
 

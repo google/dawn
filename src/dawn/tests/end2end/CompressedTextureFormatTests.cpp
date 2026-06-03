@@ -56,6 +56,12 @@ DAWN_TEST_PARAM_STRUCT(CompressedTextureFormatTestParams, TextureFormat);
 
 class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureFormatTestParams> {
   protected:
+    void SetUp() override {
+        DawnTestWithParams<CompressedTextureFormatTestParams>::SetUp();
+        // TODO(crbug.com/518857263): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+    }
+
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         const wgpu::TextureFormat format = GetParam().mTextureFormat;
         if (utils::IsBCTextureFormat(format) &&
@@ -743,9 +749,6 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
 TEST_P(CompressedTextureFormatTest, Basic) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    // TODO(crbug.com/518857263): Produces incorrect result on Pixel 10.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
     CopyConfig config = GetDefaultSmallConfig();
     config.copyExtent3D = config.textureDescriptor.size;
 
@@ -866,9 +869,6 @@ TEST_P(CompressedTextureFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
 
     // TODO(crbug.com/dawn/0000): diagnose this failure on QualComm OpenGL ES.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsOpenGLES() && IsQualcomm());
-
-    // TODO(crbug.com/518857263): Produces incorrect result on Pixel 10.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
     CopyConfig config = GetDefaultFullConfig();
     // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
@@ -1136,9 +1136,6 @@ TEST_P(CompressedTextureFormatTest, CopyWithMultipleLayerAndPhysicalSizeNotEqual
 TEST_P(CompressedTextureFormatTest, BufferOffsetAndExtentFitRowPitch) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    // TODO(crbug.com/518857263): Produces incorrect result on Pixel 10.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
     CopyConfig config = GetDefaultSmallConfig();
     config.copyExtent3D = config.textureDescriptor.size;
 
@@ -1157,9 +1154,6 @@ TEST_P(CompressedTextureFormatTest, BufferOffsetAndExtentFitRowPitch) {
 // ComputeTexelOffsets().
 TEST_P(CompressedTextureFormatTest, BufferOffsetExceedsSlicePitch) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
-
-    // TODO(crbug.com/518857263): Produces incorrect result on Pixel 10.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
     CopyConfig config = GetDefaultSmallConfig();
     config.copyExtent3D = config.textureDescriptor.size;
