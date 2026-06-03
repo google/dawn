@@ -503,6 +503,41 @@ def CheckPresubmitTests(input_api, output_api):
             files_to_check=[r'^PRESUBMIT_test\.py$']))
 
 
+def CheckChangeTodoHasOwner(input_api, output_api):
+    """
+    Checks that TODO comments have the issue number.
+
+    This is similar to the canned check in
+    depot_tools/presubmit_canned_checks.py but with Dawn-specific exclusions:
+    - Excludes DAWN_UNSAFE_TODO macros.
+    - Excludes PRESUBMIT.py and PRESUBMIT_test.py to avoid false positives.
+    """
+    legacyTODO = '\\s*\\(.+\\)\\s*:'  # TODO(owner/bug):
+    modernTODO = ':\\s*[^\\s]+\\s*\\-'  # TODO: owner - description
+    unowned_todo = input_api.re.compile('\\bTODO(?!(%s|%s))' %
+                                        (legacyTODO, modernTODO))
+
+    # Skip PRESUBMIT files to avoid false positives from regexes and tests.
+    def FileFilter(affected_file):
+        filename = affected_file.LocalPath().replace('\\', '/')
+        if filename in ('PRESUBMIT.py', 'PRESUBMIT_test.py'):
+            return False
+        return input_api.FilterSourceFile(affected_file)
+
+    errors = []
+    for f in input_api.AffectedFiles(include_deletes=False,
+                                     file_filter=FileFilter):
+        for line_num, line in f.ChangedContents():
+            if unowned_todo.search(line):
+                errors.append(
+                    f'Found TODO with no issue number in {f.LocalPath()}:{line_num}'
+                )
+
+    if errors:
+        return [output_api.PresubmitPromptWarning('\n'.join(errors))]
+    return []
+
+
 def CheckChange(input_api, output_api):
     results = []
     results.extend(
@@ -524,13 +559,10 @@ def CheckChange(input_api, output_api):
     results.extend(
         input_api.canned_checks.CheckChangeHasNoTabs(input_api, output_api))
     results.extend(
-        input_api.canned_checks.CheckChangeTodoHasOwner(input_api, output_api))
-    results.extend(
         input_api.canned_checks.CheckChangeHasNoStrayWhitespace(
             input_api,
             output_api,
             source_file_filter=_HasNoStrayWhitespaceFilter))
-
     results.extend(
         input_api.canned_checks.CheckChangeHasDescription(
             input_api, output_api))

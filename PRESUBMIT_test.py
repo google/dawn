@@ -26,13 +26,126 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import os
+import sys
 import unittest
 
+# Import PRESUBMIT first before depot_tools modifies sys.path
+import PRESUBMIT
 
-class DummyTest(unittest.TestCase):
+# Add depot_tools to path to import mocks
+sys.path.append(
+    os.path.join(os.path.dirname(__file__), 'third_party', 'depot_tools'))
 
-    def testDummy(self):
-        self.assertTrue(True)
+from testing_support.presubmit_canned_checks_test_mocks import (
+    MockAffectedFile, MockInputApi, MockOutputApi)
+
+
+class CheckChangeTodoHasOwnerTest(unittest.TestCase):
+
+    def _create_mock_input_api(self):
+        mock_input_api = MockInputApi()
+
+        # Mock AffectedFiles to support file_filter
+        def mock_affected_files(include_dirs=False,
+                                include_deletes=True,
+                                file_filter=None):
+            if file_filter:
+                return [f for f in mock_input_api.files if file_filter(f)]
+            return mock_input_api.files
+
+        mock_input_api.change.AffectedFiles = mock_affected_files
+        return mock_input_api
+
+    def testNoTodo(self):
+        mock_input_api = self._create_mock_input_api()
+        mock_input_api.files = [
+            MockAffectedFile('src/dawn/Foo.cpp', [
+                'void Foo() {',
+                '    int x = 0;',
+                '}',
+            ])
+        ]
+        errors = PRESUBMIT.CheckChangeTodoHasOwner(mock_input_api,
+                                                   MockOutputApi())
+        self.assertEqual(0, len(errors))
+
+    def testValidTodo(self):
+        mock_input_api = self._create_mock_input_api()
+        mock_input_api.files = [
+            MockAffectedFile('src/dawn/Foo.cpp', [
+                '// TODO(crbug.com/123): fix this',
+                '// TODO: owner - fix this',
+            ])
+        ]
+        errors = PRESUBMIT.CheckChangeTodoHasOwner(mock_input_api,
+                                                   MockOutputApi())
+        self.assertEqual(0, len(errors))
+
+    def testInvalidTodo(self):
+        mock_input_api = self._create_mock_input_api()
+        mock_input_api.files = [
+            MockAffectedFile('src/dawn/Foo.cpp', [
+                '// TODO: fix this',
+            ])
+        ]
+        errors = PRESUBMIT.CheckChangeTodoHasOwner(mock_input_api,
+                                                   MockOutputApi())
+        self.assertEqual(1, len(errors))
+        self.assertIn('Found TODO with no issue number', errors[0].message)
+
+    def testDawnUnsafeTodoIgnored(self):
+        mock_input_api = self._create_mock_input_api()
+        mock_input_api.files = [
+            MockAffectedFile('src/dawn/Foo.cpp', [
+                'DAWN_UNSAFE_TODO(ptr[0] = 0);',
+            ])
+        ]
+        errors = PRESUBMIT.CheckChangeTodoHasOwner(mock_input_api,
+                                                   MockOutputApi())
+        self.assertEqual(0, len(errors))
+
+    def testTodoAndDawnUnsafeTodo(self):
+        mock_input_api = self._create_mock_input_api()
+        mock_input_api.files = [
+            MockAffectedFile('src/dawn/Foo.cpp', [
+                'DAWN_UNSAFE_TODO(ptr[0] = 0); // TODO: fix this',
+            ])
+        ]
+        errors = PRESUBMIT.CheckChangeTodoHasOwner(mock_input_api,
+                                                   MockOutputApi())
+        self.assertEqual(1, len(errors))
+        self.assertIn('Found TODO with no issue number', errors[0].message)
+
+    def testMixedTodos(self):
+        mock_input_api = self._create_mock_input_api()
+        mock_input_api.files = [
+            MockAffectedFile('src/dawn/Foo.cpp', [
+                '// TODO: fix this',
+                'DAWN_UNSAFE_TODO(ptr[0] = 0);',
+            ])
+        ]
+        errors = PRESUBMIT.CheckChangeTodoHasOwner(mock_input_api,
+                                                   MockOutputApi())
+        self.assertEqual(1, len(errors))
+        self.assertIn('src/dawn/Foo.cpp:1', errors[0].message)
+        self.assertNotIn('src/dawn/Foo.cpp:2', errors[0].message)
+
+    def testPresubmitFilesIgnored(self):
+        mock_input_api = self._create_mock_input_api()
+        mock_input_api.files = [
+            MockAffectedFile('PRESUBMIT.py', [
+                '// TODO: fix this',
+                'DAWN_UNSAFE_TODO(ptr[0] = 0);',
+            ]),
+            MockAffectedFile('PRESUBMIT_test.py', [
+                '// TODO: fix this',
+                'DAWN_UNSAFE_TODO(ptr[0] = 0);',
+            ])
+        ]
+        errors = PRESUBMIT.CheckChangeTodoHasOwner(mock_input_api,
+                                                   MockOutputApi())
+        self.assertEqual(0, len(errors))
 
 
 if __name__ == '__main__':
