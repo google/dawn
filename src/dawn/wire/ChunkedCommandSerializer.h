@@ -135,7 +135,9 @@ class ChunkedCommandSerializer {
             return;
         }
 
-        auto cmdSpace = std::unique_ptr<char[]>(new char[requiredSize]);
+        // Allocate as zero-initialized because padding won't get initialized during command
+        // serialization (and this whole buffer is sent raw to the other end of the wire).
+        auto cmdSpace = std::unique_ptr<char[]>(new char[requiredSize]{});
 
         SerializeBuffer serializeBuffer(cmdSpace.get(), requiredSize);
         WireResult rCmd = SerializeCmd(cmd, requiredSize, &serializeBuffer);
