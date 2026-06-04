@@ -103,7 +103,7 @@ func TestGenerateTriageReport(t *testing.T) {
 
 	tc := &triageConfig{
 		taskConfig: &taskConfig{
-			cmdConfig: cmdConfig{
+			mainConfig: mainConfig{
 				osWrapper:  wrapper,
 				triageFile: "some-crash-file",
 				fuzzMode:   FuzzModeIr,

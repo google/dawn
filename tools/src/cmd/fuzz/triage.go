@@ -82,20 +82,6 @@ type triageConfig struct {
 	filterArg     string
 }
 
-// runCmd is a helper that executes a command for a triage subtask with standardized output capturing and logging
-// behaviour
-func (tc *triageConfig) runCmd(name string, args ...string) ([]byte, error) {
-	if tc.verbose {
-		fmt.Printf("executing: %s %s\n", name, strings.Join(args, " "))
-	}
-	cmd := tc.execWrapper.Command(name, args...)
-	out, err := cmd.RunWithCombinedOutput()
-	if tc.verbose {
-		fmt.Printf("output:\n%s\n", string(out))
-	}
-	return out, err
-}
-
 // runTriage performs an automated triage of a fuzzer crash.
 // It verifies the reproduction, extracts human-readable IR and WGSL, identifies the failing transformation pass, and
 // generates a detailed Markdown report. Returns an error if a subtask fails unexpectedly.
