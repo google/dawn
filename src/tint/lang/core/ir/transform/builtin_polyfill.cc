@@ -643,7 +643,7 @@ struct State {
         b.InsertBefore(call, [&] {
             // %x = %input;
             // if (%x is signed) {
-            //   %x = select(u32(%x), ~u32(%x), x > 0x80000000);
+            //   %x = select(~u32(%x), u32(%x), u32(x) < 0x80000000);
             // }
             // %b16 = select(16, 0, (%x & 0xffff0000) == 0);
             // %x >>= %b16;

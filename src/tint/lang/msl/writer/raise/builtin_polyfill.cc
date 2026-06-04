@@ -169,6 +169,12 @@ struct State {
                     case core::BuiltinFn::kDot:
                         call_worklist.push_back([this, builtin] { Dot(builtin); });
                         break;
+                    case core::BuiltinFn::kFirstLeadingBit:
+                        call_worklist.push_back([this, builtin] { FirstLeadingBit(builtin); });
+                        break;
+                    case core::BuiltinFn::kFirstTrailingBit:
+                        call_worklist.push_back([this, builtin] { FirstTrailingBit(builtin); });
+                        break;
                     case core::BuiltinFn::kFrexp:
                         call_worklist.push_back([this, builtin] { Frexp(builtin); });
                         break;
@@ -1311,6 +1317,58 @@ struct State {
 
             b.CallExplicitWithResult<msl::ir::BuiltinCall>(
                 builtin->DetachResult(), msl::BuiltinFn::kConvert, Vector{sm_ty}, ld);
+        });
+        builtin->Destroy();
+    }
+
+    // Replace firstLeadingBit builtin
+    // @param builtin the builtin call instruction
+    void FirstLeadingBit(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            // %x = %input;
+            // if (%input is signed) {
+            //   %x = select(~u32(%x), u32(%x), u32(%x) , 0x80000000);
+            // }
+            // %clz = countLeadingZeros(%x)
+            // %result = 31 - %clz
+
+            auto* arg = builtin->Args()[0];
+            auto* u32_ty = ty.MatchWidth(ty.u32(), arg->Type());
+            core::ir::Constant* c31 = b.MatchWidth(u32(31), arg->Type());
+            auto* use_arg = b.InsertBitcastIfNeeded(u32_ty, arg);
+            if (arg->Type()->IsSignedIntegerScalarOrVector()) {
+                auto* flip = b.Complement(use_arg);
+                use_arg = b.Call(u32_ty, core::BuiltinFn::kSelect, flip, use_arg,
+                                 b.LessThan(use_arg, b.MatchWidth(u32(0x80000000), arg->Type())))
+                              ->Result();
+            }
+            auto* clz = b.Call(u32_ty, core::BuiltinFn::kCountLeadingZeros, use_arg);
+            core::ir::Instruction* result = b.Subtract(c31, clz);
+            if (arg->Type()->IsSignedIntegerScalarOrVector()) {
+                result = b.Bitcast(arg->Type(), result);
+            }
+            result->SetResult(builtin->DetachResult());
+        });
+        builtin->Destroy();
+    }
+
+    // Replace firstTrailingBit builtin
+    // @param builtin the builtin call instruction
+    void FirstTrailingBit(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            // %ctz = countTrailingZeros(%input)
+            // %result = select(%ctz, -1, %input == 0)
+            auto* arg = builtin->Args()[0];
+            auto* ctz =
+                b.Call(builtin->Result()->Type(), core::BuiltinFn::kCountTrailingZeros, arg);
+            core::ir::Constant* n1 = nullptr;
+            if (arg->Type()->IsUnsignedIntegerScalarOrVector()) {
+                n1 = b.MatchWidth(u32(-1), arg->Type());
+            } else {
+                n1 = b.MatchWidth(i32(-1), arg->Type());
+            }
+            auto* eq = b.Equal(arg, b.Zero(arg->Type()));
+            b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kSelect, ctz, n1, eq);
         });
         builtin->Destroy();
     }

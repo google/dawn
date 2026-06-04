@@ -164,8 +164,6 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
             .abs_signed_int = true,
             .degrees = true,
             .extract_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck,
-            .first_leading_bit = true,
-            .first_trailing_bit = true,
             .fwidth_fine = true,
             .insert_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck,
             .radians = true,
