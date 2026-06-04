@@ -248,9 +248,9 @@ func (bc *bisectConfig) performBisect() error {
 		return fmt.Errorf("git bisect run failed: %w", err)
 	}
 
-	// Git bisect leaves the repo checked out at the identified commit.
-	// Query HEAD to fetch the exact found commit hash.
-	if foundHashBytes, err := bc.runCmd("git", "rev-parse", "HEAD"); err == nil {
+	// Git bisect leaves refs/bisect/bad pointing to the identified commit.
+	// Query refs/bisect/bad to fetch the exact found commit hash.
+	if foundHashBytes, err := bc.runCmd("git", "rev-parse", "refs/bisect/bad"); err == nil {
 		foundHash := strings.TrimSpace(string(foundHashBytes))
 		bannerText := "FOUND BREAKAGE"
 		if bc.isFix {
