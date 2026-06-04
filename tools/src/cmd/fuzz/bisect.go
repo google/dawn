@@ -82,16 +82,23 @@ func runBisect(t *taskConfig) error {
 	fmt.Printf("Resolved known-failing to commit: %s\n", bc.failingHash)
 	fmt.Printf("Resolved known-passing to commit: %s\n", bc.passingHash)
 
-	origHeadBytes, err := bc.runCmd("git", "rev-parse", "HEAD")
+	origRefBytes, err := bc.runCmd("git", "rev-parse", "--abbrev-ref", "HEAD")
 	if err != nil {
-		return fmt.Errorf("failed to get original HEAD commit: %w", err)
+		return fmt.Errorf("failed to get original HEAD reference: %w", err)
 	}
-	origHead := strings.TrimSpace(string(origHeadBytes))
+	origRef := strings.TrimSpace(string(origRefBytes))
+	if origRef == "HEAD" {
+		origHeadBytes, err := bc.runCmd("git", "rev-parse", "HEAD")
+		if err != nil {
+			return fmt.Errorf("failed to get original HEAD commit: %w", err)
+		}
+		origRef = strings.TrimSpace(string(origHeadBytes))
+	}
 
 	// Ensure repository state restore upon completion
 	defer func() {
-		fmt.Printf("Restoring repository to original HEAD (%s)...\n", origHead)
-		_, _ = bc.runCmd("git", "checkout", origHead)
+		fmt.Printf("Restoring repository to original state (%s)...\n", origRef)
+		_, _ = bc.runCmd("git", "checkout", origRef)
 		_, _ = bc.runCmd("gclient", "sync")
 	}()
 
