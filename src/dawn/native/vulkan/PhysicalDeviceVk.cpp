@@ -1109,10 +1109,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // chromium:448873316: Non-scalar (vector) saturate from uniform fails.
         deviceToggles->Default(Toggle::SaturateAsMinMaxF16, true);
 
-        // Polyfill a clamp of `id` param in subgroupShuffle to follow spec limitations.
-        // See crbug.com/435246627
-        deviceToggles->Default(Toggle::SubgroupShuffleClamped, true);
-
         if (gpu_info::IsIntelGen12LP(GetVendorId(), GetDeviceId())) {
             // dawn:1688: Intel Mesa driver has a bug about reusing the VkDeviceMemory that was
             // previously bound to a 2D VkImage. To work around that bug we have to disable the

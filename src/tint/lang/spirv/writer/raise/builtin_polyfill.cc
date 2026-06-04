@@ -184,6 +184,9 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
+    /// Module-scoped variable for subgroup size mask.
+    core::ir::Var* subgroup_size_mask_ = nullptr;
+
     /// Process the module.
     void Process() {
         // Find the builtins that need replacing.
@@ -249,9 +252,7 @@ struct State {
                     case core::BuiltinFn::kSubgroupShuffleDown:
                     case core::BuiltinFn::kSubgroupShuffleUp:
                     case core::BuiltinFn::kSubgroupShuffleXor: {
-                        bool clamped = config.subgroup_shuffle_clamped;
-                        worklist.push_back(
-                            [this, builtin, clamped] { SubgroupShuffle(builtin, clamped); });
+                        worklist.push_back([this, builtin] { SubgroupShuffle(builtin); });
                         break;
                     }
                     case core::BuiltinFn::kTextureDimensions:
@@ -364,6 +365,48 @@ struct State {
             });
             construct->SetArg(0, value);
         }
+
+        if (subgroup_size_mask_) {
+            for (auto func : ir.functions) {
+                if (func->IsEntryPoint()) {
+                    SetSubgroupSizeMaskForEntryPoint(func);
+                }
+            }
+        }
+    }
+
+    /// Set the subgroup_size_mask variable from an entry point.
+    void SetSubgroupSizeMaskForEntryPoint(core::ir::Function* ep) {
+        b.InsertBefore(ep->Block()->Front(), [&] {
+            core::ir::Value* subgroup_size = nullptr;
+            for (auto* param : ep->Params()) {
+                if (param->Attributes().builtin == core::BuiltinValue::kSubgroupSize) {
+                    subgroup_size = param;
+                    break;
+                }
+                if (auto* str = param->Type()->As<core::type::Struct>()) {
+                    for (auto* member : str->Members()) {
+                        if (member->Attributes().builtin == core::BuiltinValue::kSubgroupSize) {
+                            subgroup_size =
+                                b.Access(ty.u32(), param, u32(member->Index()))->Result();
+                            break;
+                        }
+                    }
+                    if (subgroup_size) {
+                        break;
+                    }
+                }
+            }
+            if (!subgroup_size) {
+                auto* param = b.FunctionParam("tint_subgroup_size", ty.u32());
+                param->SetBuiltin(core::BuiltinValue::kSubgroupSize);
+                ep->AppendParam(param);
+                subgroup_size = param;
+            }
+
+            auto* mask = b.Subtract(subgroup_size, 1_u);
+            b.Store(subgroup_size_mask_, mask);
+        });
     }
 
     /// Create a literal operand.
@@ -1248,10 +1291,10 @@ struct State {
     /// Handles SubgroupShuffle(), SubgroupShuffleDown(), SubgroupShuffleUp(), SubgroupShuffleXor()
     /// builtins.
     /// @param builtin the builtin call instruction
-    void SubgroupShuffle(core::ir::CoreBuiltinCall* builtin, bool clamp_subgroup_shuffle) {
+    void SubgroupShuffle(core::ir::CoreBuiltinCall* builtin) {
         TINT_IR_ASSERT(ir, builtin->Args().size() == 2);
         // The second argument is either 'id' , 'delta', or 'mask'.
-        // All must be bound by [0, 128)
+        // All must be bound by [0, subgroup_size)
         auto* arg2 = builtin->Args()[1];
         // arg2 must be an unsigned integer scalar, so bitcast if necessary.
         if (arg2->Type()->IsSignedIntegerScalar()) {
@@ -1261,15 +1304,18 @@ struct State {
         }
 
         /// Polyfill a `subgroupShuffleX` builtin call with one that has clamped the arg2 param
-        if (clamp_subgroup_shuffle) {
-            auto* shuffle_id = builtin->Args()[1];
-            auto* mask_max_subgroup_size =
-                b.Constant(core::u32(tint::internal_limits::kMaxSubgroupSize - 1));
-            b.InsertBefore(builtin, [&] {
-                auto* clamp_via_masking_and = b.And(shuffle_id, mask_max_subgroup_size);
-                builtin->SetArg(1, clamp_via_masking_and->Result());
+        auto* shuffle_id = builtin->Args()[1];
+        if (!subgroup_size_mask_) {
+            b.Append(ir.root_block, [&] {
+                subgroup_size_mask_ =
+                    b.Var<core::AddressSpace::kPrivate, u32>("tint_subgroup_size_mask");
             });
         }
+        b.InsertBefore(builtin, [&] {
+            auto* subgroup_size_mask = b.Load(subgroup_size_mask_);
+            auto* clamp_via_masking_and = b.And(shuffle_id, subgroup_size_mask);
+            builtin->SetArg(1, clamp_via_masking_and->Result());
+        });
     }
 
     /// Handle a SubgroupBroadcast() builtin.

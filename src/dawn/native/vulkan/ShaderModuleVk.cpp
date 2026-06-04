@@ -317,8 +317,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.tintOptions.extensions.use_uniform_buffers =
         !GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
 
-    req.tintOptions.workarounds.subgroup_shuffle_clamped =
-        GetDevice()->IsToggleEnabled(Toggle::SubgroupShuffleClamped);
     req.tintOptions.workarounds.texture_sample_compare_depth_cube_array =
         GetDevice()->IsToggleEnabled(Toggle::VulkanSampleCompareDepthCubeArrayWorkaround);
     req.tintOptions.workarounds.texture_sample_compare_2d_polyfill =

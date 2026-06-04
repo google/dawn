@@ -214,7 +214,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     raise::PolyfillConfig config = {
         .use_vulkan_memory_model = options.extensions.use_vulkan_memory_model,
         .version = options.spirv_version,
-        .subgroup_shuffle_clamped = options.workarounds.subgroup_shuffle_clamped,
         .texture_sample_compare_depth_cube_array =
             options.workarounds.texture_sample_compare_depth_cube_array,
         .texture_sample_compare_2d_polyfill =

@@ -312,7 +312,6 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.workarounds.dva_transform_handle = fuzzed_options.dva_transform_handle;
     options.workarounds.polyfill_pack_unpack_4x8_norm =
         fuzzed_options.polyfill_pack_unpack_4x8_norm;
-    options.workarounds.subgroup_shuffle_clamped = fuzzed_options.subgroup_shuffle_clamped;
     options.workarounds.polyfill_subgroup_broadcast_f16 =
         fuzzed_options.polyfill_subgroup_broadcast_f16;
     options.workarounds.pass_matrix_by_pointer = fuzzed_options.pass_matrix_by_pointer;

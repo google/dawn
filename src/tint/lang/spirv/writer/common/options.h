@@ -87,10 +87,6 @@ struct Options {
         /// and `unpack4x8unorm` builtins
         bool polyfill_pack_unpack_4x8_norm = false;
 
-        /// Set to `true` to generate a polyfill clamp of `id` param of subgroupShuffle to within
-        /// the spec max subgroup size.
-        bool subgroup_shuffle_clamped = false;
-
         /// Set to 'true' to force workaround for 'textureSampleCompare(Level)' for texture arrays
         /// of cube depth.
         bool texture_sample_compare_depth_cube_array = false;
@@ -132,7 +128,6 @@ struct Options {
                      scalarize_max_min_clamp,
                      dva_transform_handle,
                      polyfill_pack_unpack_4x8_norm,
-                     subgroup_shuffle_clamped,
                      texture_sample_compare_depth_cube_array,
                      texture_sample_compare_2d_polyfill,
                      polyfill_subgroup_broadcast_f16,

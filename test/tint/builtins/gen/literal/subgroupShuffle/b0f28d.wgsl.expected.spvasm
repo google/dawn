@@ -4,54 +4,79 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 26
+; Bound: 41
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
                OpCapability StorageBuffer16BitAccess
+               OpCapability GroupNonUniform
                OpCapability GroupNonUniformShuffle
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint Fragment %fragment_main "fragment_main" %fragment_main_subgroup_size_Input
                OpExecutionMode %fragment_main OriginUpperLeft
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce_block "prevent_dce_block"
+               OpName %tint_subgroup_size_mask "tint_subgroup_size_mask"
+               OpName %fragment_main_subgroup_size_Input "fragment_main_subgroup_size_Input"
                OpName %subgroupShuffle_b0f28d "subgroupShuffle_b0f28d"
                OpName %res "res"
+               OpName %fragment_main_inner "fragment_main_inner"
+               OpName %tint_subgroup_size "tint_subgroup_size"
                OpName %fragment_main "fragment_main"
                OpMemberDecorate %prevent_dce_block 0 Offset 0
                OpDecorate %prevent_dce_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
+               OpDecorate %fragment_main_subgroup_size_Input Flat
+               OpDecorate %fragment_main_subgroup_size_Input BuiltIn SubgroupSize
        %half = OpTypeFloat 16
 %prevent_dce_block = OpTypeStruct %half
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
           %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
-          %6 = OpTypeFunction %half
        %uint = OpTypeInt 32 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+          %8 = OpConstantNull %uint
+%tint_subgroup_size_mask = OpVariable %_ptr_Private_uint Private %8
+%_ptr_Input_uint = OpTypePointer Input %uint
+%fragment_main_subgroup_size_Input = OpVariable %_ptr_Input_uint Input
+         %12 = OpTypeFunction %half
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
      %uint_3 = OpConstant %uint 3
 %half_0x1p_0 = OpConstant %half 0x1p+0
 %_ptr_Function_half = OpTypePointer Function %half
        %void = OpTypeVoid
-         %20 = OpTypeFunction %void
+         %28 = OpTypeFunction %void %uint
+     %uint_1 = OpConstant %uint 1
 %_ptr_StorageBuffer_half = OpTypePointer StorageBuffer %half
      %uint_0 = OpConstant %uint 0
-%subgroupShuffle_b0f28d = OpFunction %half None %6
-          %7 = OpLabel
+         %37 = OpTypeFunction %void
+%subgroupShuffle_b0f28d = OpFunction %half None %12
+         %13 = OpLabel
         %res = OpVariable %_ptr_Function_half Function
-          %9 = OpBitcast %uint %int_1
-         %12 = OpGroupNonUniformShuffle %half %uint_3 %half_0x1p_0 %9
-               OpStore %res %12
-         %17 = OpLoad %half %res None
-               OpReturnValue %17
+         %14 = OpBitcast %uint %int_1
+         %17 = OpLoad %uint %tint_subgroup_size_mask None
+         %18 = OpBitwiseAnd %uint %14 %17
+         %19 = OpGroupNonUniformShuffle %half %uint_3 %half_0x1p_0 %18
+               OpStore %res %19
+         %24 = OpLoad %half %res None
+               OpReturnValue %24
                OpFunctionEnd
-%fragment_main = OpFunction %void None %20
-         %21 = OpLabel
-         %22 = OpFunctionCall %half %subgroupShuffle_b0f28d
-         %23 = OpAccessChain %_ptr_StorageBuffer_half %1 %uint_0
-               OpStore %23 %22 None
+%fragment_main_inner = OpFunction %void None %28
+%tint_subgroup_size = OpFunctionParameter %uint
+         %29 = OpLabel
+         %30 = OpISub %uint %tint_subgroup_size %uint_1
+               OpStore %tint_subgroup_size_mask %30 None
+         %32 = OpFunctionCall %half %subgroupShuffle_b0f28d
+         %33 = OpAccessChain %_ptr_StorageBuffer_half %1 %uint_0
+               OpStore %33 %32 None
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %37
+         %38 = OpLabel
+         %39 = OpLoad %uint %fragment_main_subgroup_size_Input None
+         %40 = OpFunctionCall %void %fragment_main_inner %39
                OpReturn
                OpFunctionEnd
 ;
@@ -60,53 +85,77 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 26
+; Bound: 41
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
                OpCapability StorageBuffer16BitAccess
+               OpCapability GroupNonUniform
                OpCapability GroupNonUniformShuffle
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpEntryPoint GLCompute %compute_main "compute_main" %compute_main_subgroup_size_Input
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce_block "prevent_dce_block"
+               OpName %tint_subgroup_size_mask "tint_subgroup_size_mask"
+               OpName %compute_main_subgroup_size_Input "compute_main_subgroup_size_Input"
                OpName %subgroupShuffle_b0f28d "subgroupShuffle_b0f28d"
                OpName %res "res"
+               OpName %compute_main_inner "compute_main_inner"
+               OpName %tint_subgroup_size "tint_subgroup_size"
                OpName %compute_main "compute_main"
                OpMemberDecorate %prevent_dce_block 0 Offset 0
                OpDecorate %prevent_dce_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
+               OpDecorate %compute_main_subgroup_size_Input BuiltIn SubgroupSize
        %half = OpTypeFloat 16
 %prevent_dce_block = OpTypeStruct %half
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
           %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
-          %6 = OpTypeFunction %half
        %uint = OpTypeInt 32 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+          %8 = OpConstantNull %uint
+%tint_subgroup_size_mask = OpVariable %_ptr_Private_uint Private %8
+%_ptr_Input_uint = OpTypePointer Input %uint
+%compute_main_subgroup_size_Input = OpVariable %_ptr_Input_uint Input
+         %12 = OpTypeFunction %half
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
      %uint_3 = OpConstant %uint 3
 %half_0x1p_0 = OpConstant %half 0x1p+0
 %_ptr_Function_half = OpTypePointer Function %half
        %void = OpTypeVoid
-         %20 = OpTypeFunction %void
+         %28 = OpTypeFunction %void %uint
+     %uint_1 = OpConstant %uint 1
 %_ptr_StorageBuffer_half = OpTypePointer StorageBuffer %half
      %uint_0 = OpConstant %uint 0
-%subgroupShuffle_b0f28d = OpFunction %half None %6
-          %7 = OpLabel
+         %37 = OpTypeFunction %void
+%subgroupShuffle_b0f28d = OpFunction %half None %12
+         %13 = OpLabel
         %res = OpVariable %_ptr_Function_half Function
-          %9 = OpBitcast %uint %int_1
-         %12 = OpGroupNonUniformShuffle %half %uint_3 %half_0x1p_0 %9
-               OpStore %res %12
-         %17 = OpLoad %half %res None
-               OpReturnValue %17
+         %14 = OpBitcast %uint %int_1
+         %17 = OpLoad %uint %tint_subgroup_size_mask None
+         %18 = OpBitwiseAnd %uint %14 %17
+         %19 = OpGroupNonUniformShuffle %half %uint_3 %half_0x1p_0 %18
+               OpStore %res %19
+         %24 = OpLoad %half %res None
+               OpReturnValue %24
                OpFunctionEnd
-%compute_main = OpFunction %void None %20
-         %21 = OpLabel
-         %22 = OpFunctionCall %half %subgroupShuffle_b0f28d
-         %23 = OpAccessChain %_ptr_StorageBuffer_half %1 %uint_0
-               OpStore %23 %22 None
+%compute_main_inner = OpFunction %void None %28
+%tint_subgroup_size = OpFunctionParameter %uint
+         %29 = OpLabel
+         %30 = OpISub %uint %tint_subgroup_size %uint_1
+               OpStore %tint_subgroup_size_mask %30 None
+         %32 = OpFunctionCall %half %subgroupShuffle_b0f28d
+         %33 = OpAccessChain %_ptr_StorageBuffer_half %1 %uint_0
+               OpStore %33 %32 None
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %37
+         %38 = OpLabel
+         %39 = OpLoad %uint %compute_main_subgroup_size_Input None
+         %40 = OpFunctionCall %void %compute_main_inner %39
                OpReturn
                OpFunctionEnd
