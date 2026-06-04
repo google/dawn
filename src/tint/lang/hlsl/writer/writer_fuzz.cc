@@ -31,6 +31,7 @@
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/hlsl/validate/validate.h"
 #include "src/tint/lang/hlsl/writer/printer/printer.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
@@ -150,6 +151,14 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     std::unordered_set<tint::BindingPoint> storage_bindings;
     for (auto* inst : *module.root_block) {
         auto* var = inst->As<core::ir::Var>();
+        if (!var) {
+            continue;
+        }
+        if (auto* ptr_ty = var->Result()->Type()->As<core::type::Pointer>()) {
+            if (ptr_ty->AddressSpace() != core::AddressSpace::kStorage) {
+                continue;
+            }
+        }
         if (!var->Result()->Type()->UnwrapPtr()->HasFixedFootprint()) {
             if (auto bp = var->BindingPoint()) {
                 if (storage_bindings.insert(bp.value()).second) {
