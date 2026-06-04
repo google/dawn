@@ -1266,7 +1266,7 @@ TEST_F(IR_ValidatorTest, NextIteration_InLoopBody) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:9 error: next_iteration: must only be called from loop initializer or continuing
+            R"(:5:9 error: next_iteration: must only be called directly from loop initializer or continuing
         next_iteration  # -> $B2
         ^^^^^^^^^^^^^^
 )")) << res.Failure();
@@ -1283,6 +1283,30 @@ TEST_F(IR_ValidatorTest, NextIteration_InLoopContinuing) {
 
     auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, NextIteration_NestedInLoopContinuing) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Append(loop->Continuing(), [&] {
+            auto* if_ = b.If(true);
+            b.Append(if_->True(), [&] { b.NextIteration(loop); });
+            b.NextIteration(loop);
+        });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(error: next_iteration: must only be called directly from loop initializer or continuing
+            next_iteration  # -> $B2
+            ^^^^^^^^^^^^^^
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_UnexpectedValues) {

@@ -5072,9 +5072,9 @@ void Validator::CheckNextIteration(const NextIteration* n) {
         AddError(n) << "has no associated loop";
         return;
     }
-    if (!TransitivelyHolds(loop->Initializer(), n) && !TransitivelyHolds(loop->Continuing(), n)) {
+    if (loop->Initializer() != n->Block() && loop->Continuing() != n->Block()) {
         if (control_stack_.Any(Eq<const ControlInstruction*>(loop))) {
-            AddError(n) << "must only be called from loop initializer or continuing";
+            AddError(n) << "must only be called directly from loop initializer or continuing";
         } else {
             AddError(n) << "called outside of associated loop";
         }
