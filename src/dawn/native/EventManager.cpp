@@ -33,6 +33,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/cleanup/cleanup.h"
 #include "absl/strings/str_format.h"
 #include "src/dawn/common/Atomic.h"
 #include "src/dawn/common/FutureUtils.h"
@@ -54,29 +55,47 @@ namespace {
 // actually means the keys are not based on the QueueBase pointer, but a pointer to metadata that is
 // guaranteed to be unique and alive. This ensures that each queue will be represented for multi
 // source validation.
-using QueueWaitSerialsMap = absl::flat_hash_map<WeakRef<QueueBase>, ExecutionSerial>;
+struct QueueWaitSerialsMaps {
+    // A map from the queue to strong ref of the queue if possible. This avoids promoting
+    // (acquire/releasing locks) for the same queue multiple times.
+    absl::flat_hash_map<WeakRef<QueueBase>, Ref<QueueBase>> strongRefs;
+    absl::flat_hash_map<Ref<QueueBase>, ExecutionSerial> minWaitSerials;
+};
 
-void UpdateQueueWaitSerialsMap(QueueWaitSerialsMap& queueWaitSerials,
+// Helper that updates the serial maps with the new `queueAndSerial`.
+void UpdateQueueWaitSerialsMap(QueueWaitSerialsMaps& queueWaitSerialMaps,
                                const QueueAndSerial* queueAndSerial) {
     DAWN_ASSERT(queueAndSerial);
-    auto completionSerial = queueAndSerial->completionSerial.load(std::memory_order_acquire);
-    auto [queueIt, inserted] = queueWaitSerials.insert({queueAndSerial->queue, completionSerial});
-    if (!inserted) {
-        queueIt->second = std::min(queueIt->second, completionSerial);
+
+    auto refIt = queueWaitSerialMaps.strongRefs.find(queueAndSerial->queue);
+    bool refInserted = false;
+    if (refIt == queueWaitSerialMaps.strongRefs.end()) {
+        std::tie(refIt, refInserted) = queueWaitSerialMaps.strongRefs.insert(
+            {queueAndSerial->queue, queueAndSerial->queue.Promote()});
+        DAWN_ASSERT(refInserted);
+    }
+    auto queue = refIt->second;
+
+    // If the queue failed promotion, then it means that the work is all already done, so we don't
+    // need to do anything here.
+    if (queue == nullptr) {
+        return;
+    }
+
+    // Otherwise, track the queue and the minimum wait serial to satisfy the wait condition.
+    ExecutionSerial completionSerial =
+        queueAndSerial->completionSerial.load(std::memory_order_acquire);
+    auto [serialIt, serialInserted] =
+        queueWaitSerialMaps.minWaitSerials.insert({queue, completionSerial});
+    if (!serialInserted) {
+        serialIt->second = std::min(serialIt->second, completionSerial);
     }
 }
 
-void WaitQueueSerials(const QueueWaitSerialsMap& queueWaitSerials, Nanoseconds timeout) {
+void WaitQueueSerials(const QueueWaitSerialsMaps& queueWaitSerialMaps, Nanoseconds timeout) {
     // Poll/wait on queues up to the lowest wait serial, but do this once per queue instead of
     // per event so that events with same serial complete at the same time instead of racing.
-    for (const auto& queueAndSerial : queueWaitSerials) {
-        auto queue = queueAndSerial.first.Promote();
-        if (queue == nullptr) {
-            // If we can't promote the queue, then all the work is already done.
-            continue;
-        }
-        auto waitSerial = queueAndSerial.second;
-
+    for (const auto& [queue, waitSerial] : queueWaitSerialMaps.minWaitSerials) {
         [[maybe_unused]] bool hadError = queue->GetDevice()->ConsumedError(
             queue->WaitForQueueSerial(waitSerial, timeout), "waiting for work in %s.", queue.Get());
     }
@@ -202,7 +221,7 @@ void EventManager::SetFutureReady(Ref<TrackedEvent> event) {
 }
 
 bool EventManager::ProcessPollEvents() {
-    QueueWaitSerialsMap queueLowestWaitSerials;
+    QueueWaitSerialsMaps queueWaitSerialMaps;
     SortedEventMap readyEvents;
     bool hasProgressingEvents = false;
     FutureID lastProcessEventID;
@@ -227,14 +246,14 @@ bool EventManager::ProcessPollEvents() {
 
             // Record queue's and their min serial to force a submit if applicable.
             if (const auto* queueAndSerial = event->GetIfQueueAndSerial()) {
-                UpdateQueueWaitSerialsMap(queueLowestWaitSerials, queueAndSerial);
+                UpdateQueueWaitSerialsMap(queueWaitSerialMaps, queueAndSerial);
             }
         }
     });
 
-    // This call is a no-op if `queueLowestWaitSerials` is empty, otherwise, it ensures that the
+    // This call is a no-op if `queueWaitSerialMaps` is empty, otherwise, it ensures that the
     // lowest serial work is submitted on each queue.
-    WaitQueueSerials(queueLowestWaitSerials, Nanoseconds(0u));
+    WaitQueueSerials(queueWaitSerialMaps, Nanoseconds(0u));
 
     // Complete the events that are completable.
     for (auto& [_, event] : readyEvents) {
@@ -260,7 +279,7 @@ bool EventManager::ProcessPollEvents() {
 
 wgpu::WaitStatus EventManager::WaitAny(std::span<FutureWaitInfo> infos, Nanoseconds timeout) {
     bool foundNonQueueEvent = false;
-    QueueWaitSerialsMap queueLowestWaitSerials;
+    QueueWaitSerialsMaps queueWaitSerialMaps;
     SortedEventMap readyEvents;
 
     auto PreProcessWaits = [&](Waiter* waiter) {
@@ -296,7 +315,7 @@ wgpu::WaitStatus EventManager::WaitAny(std::span<FutureWaitInfo> infos, Nanoseco
                     waiter->Signal();
                 }
                 if (const auto* queueAndSerial = event->GetIfQueueAndSerial()) {
-                    UpdateQueueWaitSerialsMap(queueLowestWaitSerials, queueAndSerial);
+                    UpdateQueueWaitSerialsMap(queueWaitSerialMaps, queueAndSerial);
                 } else {
                     foundNonQueueEvent = true;
                 }
@@ -332,34 +351,49 @@ wgpu::WaitStatus EventManager::WaitAny(std::span<FutureWaitInfo> infos, Nanoseco
 
     if (timeout == Nanoseconds(0u)) {
         PreProcessWaits(/*waiter=*/nullptr);
-        WaitQueueSerials(queueLowestWaitSerials, timeout);
+        WaitQueueSerials(queueWaitSerialMaps, Nanoseconds(0u));
         PostProcessWaits(/*shouldComplete=*/true, /*waiter=*/nullptr);
     } else {
+        // Add the waiter to each of the events and initialize a cleanup routine to ensure that we
+        // always remove the waiter at the end of this scope, optionally completing events if
+        // `shouldComplete` is set to true.
         Waiter waiter;
         PreProcessWaits(&waiter);
+        bool shouldComplete = true;
+        absl::Cleanup removeWaiter = [&]() { PostProcessWaits(shouldComplete, &waiter); };
 
-        // Currently we can't have a mix of non-queue events and queue events or queue events
-        // from multiple queues with a non-zero timeout.
-        if (queueLowestWaitSerials.size() > 1 ||
-            (!queueLowestWaitSerials.empty() && foundNonQueueEvent)) {
-            // Multi-source wait is unsupported.
-            // TODO(dawn:2062): Implement support for this when the device supports it.
-            // It should eventually gather the lowest serial from the queue(s), transform them
-            // into completion events, and wait on all of the events. Then for any queues that
-            // saw a completion, poll all futures related to that queue for completion.
-            mInstance->EmitLog(WGPULoggingType_Error,
-                               "Mixed source waits with timeouts are not currently supported.");
-            PostProcessWaits(/*shouldComplete=*/false, &waiter);
-            return wgpu::WaitStatus::Error;
-        }
-
-        if (foundNonQueueEvent) {
-            waiter.Wait(timeout);
+        // There's currently a couple of different cases to handle here depending on the
+        // capabilities of the backends. Each case is documented in their respective clause below.
+        if (queueWaitSerialMaps.minWaitSerials.empty()) {
+            // When `queueWaitSerialMaps` is empty there are no queue events so all events are
+            // waitable via the waiter.
+            shouldComplete = waiter.Wait(timeout);
+        } else if (queueWaitSerialMaps.minWaitSerials.size() == 1 && !foundNonQueueEvent) {
+            // When there is exactly 1 queue in `queueWaitSerialMaps` and there are no other
+            // non-queue events, we can just rely on `WaitQueueSerials` to handle a timed wait on
+            // that queue.
+            WaitQueueSerials(queueWaitSerialMaps, timeout);
         } else {
-            // This is a no-op if `queueLowestWaitSerials` is empty.
-            WaitQueueSerials(queueLowestWaitSerials, timeout);
+            // Otherwise, we either have multiple queues and/or a mix of queue and non-queue events.
+            // We first verify the device capabilities across all the events before trying to
+            // process them.
+            for (const auto& [queue, waitSerial] : queueWaitSerialMaps.minWaitSerials) {
+                if (!queue->GetDevice()->IsToggleEnabled(Toggle::SpontaneousQueueEvents)) {
+                    mInstance->EmitLog(
+                        WGPULoggingType_Error,
+                        "Mixed source waits with timeouts is not supported for the set of events.");
+                    shouldComplete = false;
+                    return wgpu::WaitStatus::Error;
+                }
+            }
+
+            // For queue events, we still need to ensure that the `waitSerial` has been
+            // submitted via a call to `WaitForQueueSerial` with a timeout=0.
+            WaitQueueSerials(queueWaitSerialMaps, Nanoseconds(0u));
+
+            // Now that we've handled the queue events, we can wait on the events via the waiter.
+            shouldComplete = waiter.Wait(timeout);
         }
-        PostProcessWaits(/*shouldComplete=*/true, &waiter);
     }
 
     // Complete the events that are completable.

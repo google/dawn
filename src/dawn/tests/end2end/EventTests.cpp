@@ -563,6 +563,12 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
             // Wire supports mixed source waiting.
             ASSERT_TRUE(status == wgpu::WaitStatus::Success ||
                         status == wgpu::WaitStatus::TimedOut);
+        } else if (HasToggleEnabled("spontaneous_queue_events", device1) &&
+                   HasToggleEnabled("spontaneous_queue_events", device2)) {
+            // Mixed sources across different devices are supported if spontaneous queue events is
+            // enabled on both devices.
+            ASSERT_TRUE(status == wgpu::WaitStatus::Success ||
+                        status == wgpu::WaitStatus::TimedOut);
         } else {
             ASSERT_EQ(status, wgpu::WaitStatus::Error);
         }
