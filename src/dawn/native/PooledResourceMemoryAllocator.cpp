@@ -77,19 +77,30 @@ uint64_t PooledResourceMemoryAllocator::GetPoolSizeForTesting() const {
 }
 
 void AllocationSizeTracker::Increment(uint64_t incrementSize) {
+    Mutex::AutoLock lock(&mMutex);
     mTotalSize += incrementSize;
 }
 
 void AllocationSizeTracker::Decrement(ExecutionSerial currentSerial, uint64_t decrementSize) {
+    Mutex::AutoLock lock(&mMutex);
     DAWN_ASSERT(mTotalSize >= decrementSize);
     mMemoryToDecrement.Enqueue(decrementSize, currentSerial);
 }
 
-void AllocationSizeTracker::Tick(ExecutionSerial completedSerial) {
-    for (uint64_t size : mMemoryToDecrement.IterateUpTo(completedSerial)) {
-        DAWN_ASSERT(mTotalSize >= size);
+void AllocationSizeTracker::UpdateCompletedSerialTo(ExecutionSerial completedSerial) {
+    Mutex::AutoLock lock(&mMutex);
+    for (auto& size : mMemoryToDecrement.IterateUpTo(completedSerial)) {
         mTotalSize -= size;
     }
     mMemoryToDecrement.ClearUpTo(completedSerial);
 }
+
+void AllocationSizeTracker::AssumeCommandsComplete() {
+    Mutex::AutoLock lock(&mMutex);
+    for (auto& size : mMemoryToDecrement.IterateAll()) {
+        mTotalSize -= size;
+    }
+    mMemoryToDecrement.Clear();
+}
+
 }  // namespace dawn::native

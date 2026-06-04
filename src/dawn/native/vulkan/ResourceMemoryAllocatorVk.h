@@ -52,7 +52,7 @@ class ResourceMemoryAllocator {
     static VkDeviceSize GetHeapBlockSize(const DawnDeviceAllocatorControl* control);
 
     // `heapBlockSize` must be a power of two.
-    ResourceMemoryAllocator(Device* device, VkDeviceSize heapBlockSize);
+    ResourceMemoryAllocator(Device* device, VkDeviceSize heapBlockSize, QueueBase* queue);
     ~ResourceMemoryAllocator();
 
     ResultOrError<ResourceMemoryAllocation> Allocate(const VkMemoryRequirements& requirements,
@@ -90,10 +90,10 @@ class ResourceMemoryAllocator {
     std::vector<std::unique_ptr<SingleTypeAllocator>> mAllocatorsPerType;
 
     SerialQueue<ExecutionSerial, ResourceMemoryAllocation> mSubAllocationsToDelete;
-    AllocationSizeTracker mAllocatedMemory;
-    AllocationSizeTracker mUsedMemory;
-    AllocationSizeTracker mLazyAllocatedMemory;
-    AllocationSizeTracker mLazyUsedMemory;
+    Ref<AllocationSizeTracker> mAllocatedMemoryTracker;
+    Ref<AllocationSizeTracker> mUsedMemoryTracker;
+    Ref<AllocationSizeTracker> mLazyAllocatedMemoryTracker;
+    Ref<AllocationSizeTracker> mLazyUsedMemoryTracker;
 };
 
 }  // namespace dawn::native::vulkan

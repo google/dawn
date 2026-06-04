@@ -146,10 +146,14 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     mFramebufferCache = std::make_unique<FramebufferCache>(this);
     mRenderPassCache = std::make_unique<RenderPassCache>(this);
 
+    Ref<Queue> queue;
+    DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue, mMainQueueFamily));
+    queue->RegisterSerialProcessor(QueuePriority::BestEffort, mDeleter);
+
     VkDeviceSize heapBlockSize =
         ResourceMemoryAllocator::GetHeapBlockSize(descriptor.Get<DawnDeviceAllocatorControl>());
     mResourceMemoryAllocator =
-        std::make_unique<MutexProtected<ResourceMemoryAllocator>>(this, heapBlockSize);
+        std::make_unique<MutexProtected<ResourceMemoryAllocator>>(this, heapBlockSize, queue.Get());
 
     mExternalMemoryService = std::make_unique<external_memory::Service>(this);
 
@@ -187,10 +191,6 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     SetLabelImpl();
 
     ToBackend(GetPhysicalDevice())->GetVulkanInstance()->StartListeningForDeviceMessages(this);
-
-    Ref<Queue> queue;
-    DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue, mMainQueueFamily));
-    queue->RegisterSerialProcessor(QueuePriority::BestEffort, mDeleter);
 
     if (HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
         DAWN_TRY_ASSIGN(mResourceTableLayout, ResourceTable::MakeDescriptorSetLayout(this));
