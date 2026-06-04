@@ -219,14 +219,10 @@ group("gmock_and_gtest") {
 }
 
 action("generate_sources") {
-  script = "${dawn_root}/tools/run.py"
+  script = "${dawn_root}/tools/generate-sources-gn.py"
   inputs = tint_generation_dependencies
   outputs = tint_generated_sources
-  args = [
-    "gen",
-    "sources",
-    rebase_path(root_gen_dir, dawn_root),
-  ]
+  args = [ rebase_path(root_gen_dir, root_build_dir) ]
 }
 
 if (tint_build_benchmarks) {
