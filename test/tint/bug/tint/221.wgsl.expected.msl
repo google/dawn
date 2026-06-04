@@ -23,11 +23,12 @@ struct tint_module_vars_struct {
 };
 
 uint tint_mod_u32(uint lhs, uint rhs) {
-  return (lhs - ((lhs / select(rhs, 1u, (rhs == 0u))) * select(rhs, 1u, (rhs == 0u))));
+  uint const v = select(rhs, 1u, (rhs == 0u));
+  return (lhs - ((lhs / v) * v));
 }
 
 [[max_total_threads_per_threadgroup(1)]]
-kernel void v(device Buf* b [[buffer(0)]]) {
+kernel void v_1(device Buf* b [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=b};
   uint i = 0u;
   {

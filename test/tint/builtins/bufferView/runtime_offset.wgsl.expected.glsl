@@ -12,9 +12,10 @@ buffer f_out_block_ssbo {
 } v_2;
 void main() {
   uint offset = 16u;
-  uint v_3 = (uint(v_1.inner.length()) * 16u);
-  uint v_4 = 0u;
-  uint v_5 = uaddCarry(16u, (offset & 4294967280u), v_4);
-  uint v_6 = ((mix((offset & 4294967280u), 0u, (v_3 < mix(4294967295u, v_5, (v_4 == 0u)))) * 1u) / 16u);
-  v_2.inner = v_1.inner[v_6];
+  uint v_3 = (offset & 4294967280u);
+  uint v_4 = (uint(v_1.inner.length()) * 16u);
+  uint v_5 = 0u;
+  uint v_6 = uaddCarry(16u, v_3, v_5);
+  uint v_7 = ((mix(v_3, 0u, (v_4 < mix(4294967295u, v_6, (v_5 == 0u)))) * 1u) / 16u);
+  v_2.inner = v_1.inner[v_7];
 }

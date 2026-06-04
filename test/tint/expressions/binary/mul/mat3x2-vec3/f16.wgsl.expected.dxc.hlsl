@@ -17,12 +17,14 @@ vector<float16_t, 2> tint_bitcast_to_f16_1(uint src) {
 
 matrix<float16_t, 3, 2> v_2(uint start_byte_offset) {
   vector<float16_t, 2> v_3 = tint_bitcast_to_f16_1(data[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
-  vector<float16_t, 2> v_4 = tint_bitcast_to_f16_1(data[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) & 15u) >> 2u)]);
-  return matrix<float16_t, 3, 2>(v_3, v_4, tint_bitcast_to_f16_1(data[((8u + start_byte_offset) / 16u)][(((8u + start_byte_offset) & 15u) >> 2u)]));
+  uint v_4 = (4u + start_byte_offset);
+  vector<float16_t, 2> v_5 = tint_bitcast_to_f16_1(data[(v_4 / 16u)][((v_4 & 15u) >> 2u)]);
+  uint v_6 = (8u + start_byte_offset);
+  return matrix<float16_t, 3, 2>(v_3, v_5, tint_bitcast_to_f16_1(data[(v_6 / 16u)][((v_6 & 15u) >> 2u)]));
 }
 
 void main() {
-  matrix<float16_t, 3, 2> v_5 = v_2(0u);
-  vector<float16_t, 2> x = mul(tint_bitcast_to_f16(data[1u].xy).xyz, v_5);
+  matrix<float16_t, 3, 2> v_7 = v_2(0u);
+  vector<float16_t, 2> x = mul(tint_bitcast_to_f16(data[1u].xy).xyz, v_7);
 }
 

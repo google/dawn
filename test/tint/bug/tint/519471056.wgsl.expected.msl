@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device uint2* value;
+};
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v(device uint2* value [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.value=value};
+  (*tint_module_vars.value) = (uint2(31u) - clz((uint2(31u) - clz((uint2(31u) - clz((uint2(31u) - clz((*tint_module_vars.value)))))))));
+}

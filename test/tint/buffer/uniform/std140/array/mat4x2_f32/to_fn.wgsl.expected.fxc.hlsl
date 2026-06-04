@@ -22,41 +22,44 @@ float d(float f_1) {
 float4x2 v_1(uint start_byte_offset) {
   uint4 v_2 = u[(start_byte_offset / 16u)];
   float2 v_3 = asfloat((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_2.zw) : (v_2.xy)));
-  uint4 v_4 = u[((8u + start_byte_offset) / 16u)];
-  float2 v_5 = asfloat(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_4.zw) : (v_4.xy)));
-  uint4 v_6 = u[((16u + start_byte_offset) / 16u)];
-  float2 v_7 = asfloat(((((((16u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_6.zw) : (v_6.xy)));
-  uint4 v_8 = u[((24u + start_byte_offset) / 16u)];
-  return float4x2(v_3, v_5, v_7, asfloat(((((((24u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_8.zw) : (v_8.xy))));
+  uint v_4 = (8u + start_byte_offset);
+  uint4 v_5 = u[(v_4 / 16u)];
+  float2 v_6 = asfloat((((((v_4 & 15u) >> 2u) == 2u)) ? (v_5.zw) : (v_5.xy)));
+  uint v_7 = (16u + start_byte_offset);
+  uint4 v_8 = u[(v_7 / 16u)];
+  float2 v_9 = asfloat((((((v_7 & 15u) >> 2u) == 2u)) ? (v_8.zw) : (v_8.xy)));
+  uint v_10 = (24u + start_byte_offset);
+  uint4 v_11 = u[(v_10 / 16u)];
+  return float4x2(v_3, v_6, v_9, asfloat((((((v_10 & 15u) >> 2u) == 2u)) ? (v_11.zw) : (v_11.xy))));
 }
 
 typedef float4x2 ary_ret[4];
-ary_ret v_9(uint start_byte_offset) {
+ary_ret v_12(uint start_byte_offset) {
   float4x2 a_2[4] = (float4x2[4])0;
   {
-    uint v_10 = 0u;
-    v_10 = 0u;
+    uint v_13 = 0u;
+    v_13 = 0u;
     while(true) {
-      uint v_11 = v_10;
-      if ((v_11 >= 4u)) {
+      uint v_14 = v_13;
+      if ((v_14 >= 4u)) {
         break;
       }
-      a_2[v_11] = v_1((start_byte_offset + (v_11 * 32u)));
+      a_2[v_14] = v_1((start_byte_offset + (v_14 * 32u)));
       {
-        v_10 = (v_11 + 1u);
+        v_13 = (v_14 + 1u);
       }
     }
   }
-  float4x2 v_12[4] = a_2;
-  return v_12;
+  float4x2 v_15[4] = a_2;
+  return v_15;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  float4x2 v_13[4] = v_9(0u);
-  float v_14 = a(v_13);
-  float v_15 = (v_14 + b(v_1(32u)));
-  float v_16 = (v_15 + c(asfloat(u[2u].xy).yx));
-  s.Store(0u, asuint((v_16 + d(asfloat(u[2u].xy).yx.x))));
+  float4x2 v_16[4] = v_12(0u);
+  float v_17 = a(v_16);
+  float v_18 = (v_17 + b(v_1(32u)));
+  float v_19 = (v_18 + c(asfloat(u[2u].xy).yx));
+  s.Store(0u, asuint((v_19 + d(asfloat(u[2u].xy).yx.x))));
 }
 

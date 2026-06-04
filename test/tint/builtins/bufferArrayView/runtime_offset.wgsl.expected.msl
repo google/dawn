@@ -26,7 +26,8 @@ struct tint_array_lengths_struct {
 fragment void v_1(const device tint_array<uchar, 1>* v [[buffer(0)]], device uint4* out [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v, .out=out, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   uint const offset = 16u;
-  bool const v_2 = (tint_array_lengths_struct{.tint_array_length_0_0=(*tint_module_vars.tint_storage_buffer_sizes)[0u].x}.tint_array_length_0_0 < addsat(16u, (offset & 4294967280u)));
-  const device tint_array<uint4, 1>* const p = reinterpret_cast<const device tint_array<uint4, 1>*>(reinterpret_cast<const device char*>(tint_module_vars.v) + select((offset & 4294967280u), 0u, v_2));
-  (*tint_module_vars.out) = (*p)[min(uint(0), ((select(16u, 16u, v_2) / 16u) - 1u))];
+  uint const v_2 = (offset & 4294967280u);
+  bool const v_3 = (tint_array_lengths_struct{.tint_array_length_0_0=(*tint_module_vars.tint_storage_buffer_sizes)[0u].x}.tint_array_length_0_0 < addsat(16u, v_2));
+  const device tint_array<uint4, 1>* const p = reinterpret_cast<const device tint_array<uint4, 1>*>(reinterpret_cast<const device char*>(tint_module_vars.v) + select(v_2, 0u, v_3));
+  (*tint_module_vars.out) = (*p)[min(uint(0), ((select(16u, 16u, v_3) / 16u) - 1u))];
 }

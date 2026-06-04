@@ -15,10 +15,12 @@ f16vec4 tint_bitcast_to_16bit_1(uvec2 src) {
 f16mat3 v_1(uint start_byte_offset) {
   uvec4 v_2 = v.inner[(start_byte_offset / 16u)];
   f16vec3 v_3 = tint_bitcast_to_16bit_1(mix(v_2.xy, v_2.zw, bvec2((((start_byte_offset & 15u) >> 2u) == 2u)))).xyz;
-  uvec4 v_4 = v.inner[((8u + start_byte_offset) / 16u)];
-  f16vec3 v_5 = tint_bitcast_to_16bit_1(mix(v_4.xy, v_4.zw, bvec2(((((8u + start_byte_offset) & 15u) >> 2u) == 2u)))).xyz;
-  uvec4 v_6 = v.inner[((16u + start_byte_offset) / 16u)];
-  return f16mat3(v_3, v_5, tint_bitcast_to_16bit_1(mix(v_6.xy, v_6.zw, bvec2(((((16u + start_byte_offset) & 15u) >> 2u) == 2u)))).xyz);
+  uint v_4 = (8u + start_byte_offset);
+  uvec4 v_5 = v.inner[(v_4 / 16u)];
+  f16vec3 v_6 = tint_bitcast_to_16bit_1(mix(v_5.xy, v_5.zw, bvec2((((v_4 & 15u) >> 2u) == 2u)))).xyz;
+  uint v_7 = (16u + start_byte_offset);
+  uvec4 v_8 = v.inner[(v_7 / 16u)];
+  return f16mat3(v_3, v_6, tint_bitcast_to_16bit_1(mix(v_8.xy, v_8.zw, bvec2((((v_7 & 15u) >> 2u) == 2u)))).xyz);
 }
 void f_inner(uint tint_local_index) {
   if ((tint_local_index < 1u)) {
@@ -28,8 +30,8 @@ void f_inner(uint tint_local_index) {
   w = v_1(0u);
   w[1u] = tint_bitcast_to_16bit_1(v.inner[0u].xy).xyz;
   w[1u] = tint_bitcast_to_16bit_1(v.inner[0u].xy).xyz.zxy;
-  uvec4 v_7 = v.inner[0u];
-  w[0u].y = tint_bitcast_to_16bit(v_7.z).x;
+  uvec4 v_9 = v.inner[0u];
+  w[0u].y = tint_bitcast_to_16bit(v_9.z).x;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

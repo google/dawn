@@ -11,47 +11,51 @@ cbuffer cbuffer_u : register(b0) {
 static S p[4] = (S[4])0;
 float4x2 v(uint start_byte_offset) {
   uint4 v_1 = u[(start_byte_offset / 16u)];
-  uint4 v_2 = u[((8u + start_byte_offset) / 16u)];
-  uint4 v_3 = u[((16u + start_byte_offset) / 16u)];
-  uint4 v_4 = u[((24u + start_byte_offset) / 16u)];
-  return float4x2(asfloat(select((((start_byte_offset & 15u) >> 2u) == 2u), v_1.zw, v_1.xy)), asfloat(select(((((8u + start_byte_offset) & 15u) >> 2u) == 2u), v_2.zw, v_2.xy)), asfloat(select(((((16u + start_byte_offset) & 15u) >> 2u) == 2u), v_3.zw, v_3.xy)), asfloat(select(((((24u + start_byte_offset) & 15u) >> 2u) == 2u), v_4.zw, v_4.xy)));
+  uint v_2 = (8u + start_byte_offset);
+  uint4 v_3 = u[(v_2 / 16u)];
+  uint v_4 = (16u + start_byte_offset);
+  uint4 v_5 = u[(v_4 / 16u)];
+  uint v_6 = (24u + start_byte_offset);
+  uint4 v_7 = u[(v_6 / 16u)];
+  return float4x2(asfloat(select((((start_byte_offset & 15u) >> 2u) == 2u), v_1.zw, v_1.xy)), asfloat(select((((v_2 & 15u) >> 2u) == 2u), v_3.zw, v_3.xy)), asfloat(select((((v_4 & 15u) >> 2u) == 2u), v_5.zw, v_5.xy)), asfloat(select((((v_6 & 15u) >> 2u) == 2u), v_7.zw, v_7.xy)));
 }
 
-S v_5(uint start_byte_offset) {
-  int v_6 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
-  float4x2 v_7 = v((8u + start_byte_offset));
-  S v_8 = {v_6, v_7, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) & 15u) >> 2u)])};
-  return v_8;
+S v_8(uint start_byte_offset) {
+  int v_9 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
+  float4x2 v_10 = v((8u + start_byte_offset));
+  uint v_11 = (64u + start_byte_offset);
+  S v_12 = {v_9, v_10, asint(u[(v_11 / 16u)][((v_11 & 15u) >> 2u)])};
+  return v_12;
 }
 
 typedef S ary_ret[4];
-ary_ret v_9(uint start_byte_offset) {
+ary_ret v_13(uint start_byte_offset) {
   S a[4] = (S[4])0;
   {
-    uint v_10 = 0u;
-    v_10 = 0u;
+    uint v_14 = 0u;
+    v_14 = 0u;
     while(true) {
-      uint v_11 = v_10;
-      if ((v_11 >= 4u)) {
+      uint v_15 = v_14;
+      if ((v_15 >= 4u)) {
         break;
       }
-      S v_12 = v_5((start_byte_offset + (v_11 * 128u)));
-      a[v_11] = v_12;
+      S v_16 = v_8((start_byte_offset + (v_15 * 128u)));
+      a[v_15] = v_16;
       {
-        v_10 = (v_11 + 1u);
+        v_14 = (v_15 + 1u);
       }
     }
   }
-  S v_13[4] = a;
-  return v_13;
+  S v_17[4] = a;
+  return v_17;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  S v_14[4] = v_9(0u);
-  p = v_14;
-  S v_15 = v_5(256u);
-  p[1u] = v_15;
+  S v_18[4] = v_13(0u);
+  p = v_18;
+  S v_19 = v_8(256u);
+  p[1u] = v_19;
   p[3u].m = v(264u);
   p[1u].m[0u] = asfloat(u[1u].xy).yx;
 }

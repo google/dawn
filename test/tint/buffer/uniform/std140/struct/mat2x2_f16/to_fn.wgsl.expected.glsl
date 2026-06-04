@@ -27,28 +27,30 @@ f16vec2 tint_bitcast_to_16bit(uint src) {
 }
 f16mat2 v_2(uint start_byte_offset) {
   f16vec2 v_3 = tint_bitcast_to_16bit(v_1.inner[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
-  return f16mat2(v_3, tint_bitcast_to_16bit(v_1.inner[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) & 15u) >> 2u)]));
+  uint v_4 = (4u + start_byte_offset);
+  return f16mat2(v_3, tint_bitcast_to_16bit(v_1.inner[(v_4 / 16u)][((v_4 & 15u) >> 2u)]));
 }
-S v_4(uint start_byte_offset) {
-  uvec4 v_5 = v_1.inner[(start_byte_offset / 16u)];
-  int v_6 = int(v_5[((start_byte_offset & 15u) >> 2u)]);
-  f16mat2 v_7 = v_2((4u + start_byte_offset));
-  uvec4 v_8 = v_1.inner[((64u + start_byte_offset) / 16u)];
-  return S(v_6, v_7, int(v_8[(((64u + start_byte_offset) & 15u) >> 2u)]));
+S v_5(uint start_byte_offset) {
+  uvec4 v_6 = v_1.inner[(start_byte_offset / 16u)];
+  int v_7 = int(v_6[((start_byte_offset & 15u) >> 2u)]);
+  f16mat2 v_8 = v_2((4u + start_byte_offset));
+  uint v_9 = (64u + start_byte_offset);
+  uvec4 v_10 = v_1.inner[(v_9 / 16u)];
+  return S(v_7, v_8, int(v_10[((v_9 & 15u) >> 2u)]));
 }
-S[4] v_9(uint start_byte_offset) {
+S[4] v_11(uint start_byte_offset) {
   S a_2[4] = S[4](S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0));
   {
-    uint v_10 = 0u;
-    v_10 = 0u;
+    uint v_12 = 0u;
+    v_12 = 0u;
     while(true) {
-      uint v_11 = v_10;
-      if ((v_11 >= 4u)) {
+      uint v_13 = v_12;
+      if ((v_13 >= 4u)) {
         break;
       }
-      a_2[v_11] = v_4((start_byte_offset + (v_11 * 128u)));
+      a_2[v_13] = v_5((start_byte_offset + (v_13 * 128u)));
       {
-        v_10 = (v_11 + 1u);
+        v_12 = (v_13 + 1u);
       }
     }
   }
@@ -56,8 +58,8 @@ S[4] v_9(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  a(v_9(0u));
-  b(v_4(256u));
+  a(v_11(0u));
+  b(v_5(256u));
   c(v_2(260u));
   d(tint_bitcast_to_16bit(v_1.inner[0u].z).yx);
   e(tint_bitcast_to_16bit(v_1.inner[0u].z).yx.x);

@@ -19,22 +19,23 @@ S v_2(uint start_byte_offset) {
   uvec4 v_3 = v.inner[(start_byte_offset / 16u)];
   int v_4 = int(v_3[((start_byte_offset & 15u) >> 2u)]);
   mat4 v_5 = v_1((16u + start_byte_offset));
-  uvec4 v_6 = v.inner[((128u + start_byte_offset) / 16u)];
-  return S(v_4, v_5, int(v_6[(((128u + start_byte_offset) & 15u) >> 2u)]));
+  uint v_6 = (128u + start_byte_offset);
+  uvec4 v_7 = v.inner[(v_6 / 16u)];
+  return S(v_4, v_5, int(v_7[((v_6 & 15u) >> 2u)]));
 }
-S[4] v_7(uint start_byte_offset) {
+S[4] v_8(uint start_byte_offset) {
   S a[4] = S[4](S(0, mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0), S(0, mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0), S(0, mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0), S(0, mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0));
   {
-    uint v_8 = 0u;
-    v_8 = 0u;
+    uint v_9 = 0u;
+    v_9 = 0u;
     while(true) {
-      uint v_9 = v_8;
-      if ((v_9 >= 4u)) {
+      uint v_10 = v_9;
+      if ((v_10 >= 4u)) {
         break;
       }
-      a[v_9] = v_2((start_byte_offset + (v_9 * 192u)));
+      a[v_10] = v_2((start_byte_offset + (v_10 * 192u)));
       {
-        v_8 = (v_9 + 1u);
+        v_9 = (v_10 + 1u);
       }
     }
   }
@@ -42,21 +43,21 @@ S[4] v_7(uint start_byte_offset) {
 }
 void f_inner(uint tint_local_index) {
   {
-    uint v_10 = 0u;
-    v_10 = tint_local_index;
+    uint v_11 = 0u;
+    v_11 = tint_local_index;
     while(true) {
-      uint v_11 = v_10;
-      if ((v_11 >= 4u)) {
+      uint v_12 = v_11;
+      if ((v_12 >= 4u)) {
         break;
       }
-      w[v_11] = S(0, mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0);
+      w[v_12] = S(0, mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0);
       {
-        v_10 = (v_11 + 1u);
+        v_11 = (v_12 + 1u);
       }
     }
   }
   barrier();
-  w = v_7(0u);
+  w = v_8(0u);
   w[1u] = v_2(384u);
   w[3u].m = v_1(400u);
   w[1u].m[0u] = uintBitsToFloat(v.inner[2u]).ywxz;

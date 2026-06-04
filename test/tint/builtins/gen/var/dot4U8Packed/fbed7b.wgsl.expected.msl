@@ -9,20 +9,21 @@ struct tint_module_vars_struct {
 };
 
 uint tint_dot(uint4 lhs, uint4 rhs) {
-  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
+  uint4 const v = (lhs * rhs);
+  return (((v.x + v.y) + v.z) + v.w);
 }
 
 uint dot4U8Packed_fbed7b() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  uint const v = arg_0;
-  uint const v_1 = arg_1;
-  uint4 const v_2 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_3 = (uint4(v) >> v_2);
-  uint4 const v_4 = (v_3 & uint4(255u));
-  uint4 const v_5 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_6 = (uint4(v_1) >> v_5);
-  uint res = tint_dot(v_4, (v_6 & uint4(255u)));
+  uint const v_1 = arg_0;
+  uint const v_2 = arg_1;
+  uint4 const v_3 = uint4(0u, 8u, 16u, 24u);
+  uint4 const v_4 = (uint4(v_1) >> v_3);
+  uint4 const v_5 = (v_4 & uint4(255u));
+  uint4 const v_6 = uint4(0u, 8u, 16u, 24u);
+  uint4 const v_7 = (uint4(v_2) >> v_6);
+  uint res = tint_dot(v_5, (v_7 & uint4(255u)));
   return res;
 }
 
@@ -41,20 +42,21 @@ struct tint_module_vars_struct {
 };
 
 uint tint_dot(uint4 lhs, uint4 rhs) {
-  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
+  uint4 const v = (lhs * rhs);
+  return (((v.x + v.y) + v.z) + v.w);
 }
 
 uint dot4U8Packed_fbed7b() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  uint const v = arg_0;
-  uint const v_1 = arg_1;
-  uint4 const v_2 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_3 = (uint4(v) >> v_2);
-  uint4 const v_4 = (v_3 & uint4(255u));
-  uint4 const v_5 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_6 = (uint4(v_1) >> v_5);
-  uint res = tint_dot(v_4, (v_6 & uint4(255u)));
+  uint const v_1 = arg_0;
+  uint const v_2 = arg_1;
+  uint4 const v_3 = uint4(0u, 8u, 16u, 24u);
+  uint4 const v_4 = (uint4(v_1) >> v_3);
+  uint4 const v_5 = (v_4 & uint4(255u));
+  uint4 const v_6 = uint4(0u, 8u, 16u, 24u);
+  uint4 const v_7 = (uint4(v_2) >> v_6);
+  uint res = tint_dot(v_5, (v_7 & uint4(255u)));
   return res;
 }
 
@@ -80,20 +82,21 @@ struct vertex_main_outputs {
 };
 
 uint tint_dot(uint4 lhs, uint4 rhs) {
-  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
+  uint4 const v = (lhs * rhs);
+  return (((v.x + v.y) + v.z) + v.w);
 }
 
 uint dot4U8Packed_fbed7b() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  uint const v = arg_0;
-  uint const v_1 = arg_1;
-  uint4 const v_2 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_3 = (uint4(v) >> v_2);
-  uint4 const v_4 = (v_3 & uint4(255u));
-  uint4 const v_5 = uint4(0u, 8u, 16u, 24u);
-  uint4 const v_6 = (uint4(v_1) >> v_5);
-  uint res = tint_dot(v_4, (v_6 & uint4(255u)));
+  uint const v_1 = arg_0;
+  uint const v_2 = arg_1;
+  uint4 const v_3 = uint4(0u, 8u, 16u, 24u);
+  uint4 const v_4 = (uint4(v_1) >> v_3);
+  uint4 const v_5 = (v_4 & uint4(255u));
+  uint4 const v_6 = uint4(0u, 8u, 16u, 24u);
+  uint4 const v_7 = (uint4(v_2) >> v_6);
+  uint res = tint_dot(v_5, (v_7 & uint4(255u)));
   return res;
 }
 
@@ -105,9 +108,9 @@ VertexOutput vertex_main_inner() {
 }
 
 vertex vertex_main_outputs vertex_main() {
-  VertexOutput const v_7 = vertex_main_inner();
+  VertexOutput const v_8 = vertex_main_inner();
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v_7.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v_7.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v_8.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_8.prevent_dce;
   return tint_wrapper_result;
 }

@@ -63,38 +63,39 @@ S v_3(uint start_byte_offset) {
   uvec4 v_4 = v.inner[(start_byte_offset / 16u)];
   int v_5 = int(v_4[((start_byte_offset & 15u) >> 2u)]);
   mat4x3 v_6 = v_2((16u + start_byte_offset));
-  uvec4 v_7 = v.inner[((128u + start_byte_offset) / 16u)];
-  return S(v_5, 0u, 0u, 0u, v_6, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, int(v_7[(((128u + start_byte_offset) & 15u) >> 2u)]), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
+  uint v_7 = (128u + start_byte_offset);
+  uvec4 v_8 = v.inner[(v_7 / 16u)];
+  return S(v_5, 0u, 0u, 0u, v_6, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, int(v_8[((v_7 & 15u) >> 2u)]), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
 }
 void tint_store_and_preserve_padding(S value_param[4]) {
   {
-    uint v_8 = 0u;
-    v_8 = 0u;
+    uint v_9 = 0u;
+    v_9 = 0u;
     while(true) {
-      uint v_9 = v_8;
-      if ((v_9 >= 4u)) {
+      uint v_10 = v_9;
+      if ((v_10 >= 4u)) {
         break;
       }
-      tint_store_and_preserve_padding_1(uint[1](v_9), value_param[v_9]);
+      tint_store_and_preserve_padding_1(uint[1](v_10), value_param[v_10]);
       {
-        v_8 = (v_9 + 1u);
+        v_9 = (v_10 + 1u);
       }
     }
   }
 }
-S[4] v_10(uint start_byte_offset) {
+S[4] v_11(uint start_byte_offset) {
   S a[4] = S[4](S(0, 0u, 0u, 0u, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), S(0, 0u, 0u, 0u, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), S(0, 0u, 0u, 0u, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), S(0, 0u, 0u, 0u, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
   {
-    uint v_11 = 0u;
-    v_11 = 0u;
+    uint v_12 = 0u;
+    v_12 = 0u;
     while(true) {
-      uint v_12 = v_11;
-      if ((v_12 >= 4u)) {
+      uint v_13 = v_12;
+      if ((v_13 >= 4u)) {
         break;
       }
-      a[v_12] = v_3((start_byte_offset + (v_12 * 192u)));
+      a[v_13] = v_3((start_byte_offset + (v_13 * 192u)));
       {
-        v_11 = (v_12 + 1u);
+        v_12 = (v_13 + 1u);
       }
     }
   }
@@ -102,10 +103,10 @@ S[4] v_10(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_store_and_preserve_padding(v_10(0u));
-  S v_13 = v_3(384u);
-  tint_store_and_preserve_padding_1(uint[1](1u), v_13);
-  mat4x3 v_14 = v_2(400u);
-  tint_store_and_preserve_padding_2(uint[1](3u), v_14);
+  tint_store_and_preserve_padding(v_11(0u));
+  S v_14 = v_3(384u);
+  tint_store_and_preserve_padding_1(uint[1](1u), v_14);
+  mat4x3 v_15 = v_2(400u);
+  tint_store_and_preserve_padding_2(uint[1](3u), v_15);
   v_1.inner[1u].m[0u] = uintBitsToFloat(v.inner[2u].xyz).zxy;
 }

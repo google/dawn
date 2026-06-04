@@ -7,10 +7,14 @@ int firstTrailingBit_3a2acc() {
   int arg_0 = int(1);
   uint v = asuint(arg_0);
   uint v_1 = ((((v & 65535u) == 0u)) ? (16u) : (0u));
-  uint v_2 = (((((v >> v_1) & 255u) == 0u)) ? (8u) : (0u));
-  uint v_3 = ((((((v >> v_1) >> v_2) & 15u) == 0u)) ? (4u) : (0u));
-  uint v_4 = (((((((v >> v_1) >> v_2) >> v_3) & 3u) == 0u)) ? (2u) : (0u));
-  int res = asint((((((((v >> v_1) >> v_2) >> v_3) >> v_4) == 0u)) ? (4294967295u) : ((v_1 | (v_2 | (v_3 | (v_4 | ((((((((v >> v_1) >> v_2) >> v_3) >> v_4) & 1u) == 0u)) ? (1u) : (0u)))))))));
+  uint v_2 = (v >> v_1);
+  uint v_3 = ((((v_2 & 255u) == 0u)) ? (8u) : (0u));
+  uint v_4 = (v_2 >> v_3);
+  uint v_5 = ((((v_4 & 15u) == 0u)) ? (4u) : (0u));
+  uint v_6 = (v_4 >> v_5);
+  uint v_7 = ((((v_6 & 3u) == 0u)) ? (2u) : (0u));
+  uint v_8 = (v_6 >> v_7);
+  int res = asint((((v_8 == 0u)) ? (4294967295u) : ((v_1 | (v_3 | (v_5 | (v_7 | ((((v_8 & 1u) == 0u)) ? (1u) : (0u)))))))));
   return res;
 }
 
@@ -27,10 +31,14 @@ int firstTrailingBit_3a2acc() {
   int arg_0 = int(1);
   uint v = asuint(arg_0);
   uint v_1 = ((((v & 65535u) == 0u)) ? (16u) : (0u));
-  uint v_2 = (((((v >> v_1) & 255u) == 0u)) ? (8u) : (0u));
-  uint v_3 = ((((((v >> v_1) >> v_2) & 15u) == 0u)) ? (4u) : (0u));
-  uint v_4 = (((((((v >> v_1) >> v_2) >> v_3) & 3u) == 0u)) ? (2u) : (0u));
-  int res = asint((((((((v >> v_1) >> v_2) >> v_3) >> v_4) == 0u)) ? (4294967295u) : ((v_1 | (v_2 | (v_3 | (v_4 | ((((((((v >> v_1) >> v_2) >> v_3) >> v_4) & 1u) == 0u)) ? (1u) : (0u)))))))));
+  uint v_2 = (v >> v_1);
+  uint v_3 = ((((v_2 & 255u) == 0u)) ? (8u) : (0u));
+  uint v_4 = (v_2 >> v_3);
+  uint v_5 = ((((v_4 & 15u) == 0u)) ? (4u) : (0u));
+  uint v_6 = (v_4 >> v_5);
+  uint v_7 = ((((v_6 & 3u) == 0u)) ? (2u) : (0u));
+  uint v_8 = (v_6 >> v_7);
+  int res = asint((((v_8 == 0u)) ? (4294967295u) : ((v_1 | (v_3 | (v_5 | (v_7 | ((((v_8 & 1u) == 0u)) ? (1u) : (0u)))))))));
   return res;
 }
 
@@ -57,24 +65,28 @@ int firstTrailingBit_3a2acc() {
   int arg_0 = int(1);
   uint v = asuint(arg_0);
   uint v_1 = ((((v & 65535u) == 0u)) ? (16u) : (0u));
-  uint v_2 = (((((v >> v_1) & 255u) == 0u)) ? (8u) : (0u));
-  uint v_3 = ((((((v >> v_1) >> v_2) & 15u) == 0u)) ? (4u) : (0u));
-  uint v_4 = (((((((v >> v_1) >> v_2) >> v_3) & 3u) == 0u)) ? (2u) : (0u));
-  int res = asint((((((((v >> v_1) >> v_2) >> v_3) >> v_4) == 0u)) ? (4294967295u) : ((v_1 | (v_2 | (v_3 | (v_4 | ((((((((v >> v_1) >> v_2) >> v_3) >> v_4) & 1u) == 0u)) ? (1u) : (0u)))))))));
+  uint v_2 = (v >> v_1);
+  uint v_3 = ((((v_2 & 255u) == 0u)) ? (8u) : (0u));
+  uint v_4 = (v_2 >> v_3);
+  uint v_5 = ((((v_4 & 15u) == 0u)) ? (4u) : (0u));
+  uint v_6 = (v_4 >> v_5);
+  uint v_7 = ((((v_6 & 3u) == 0u)) ? (2u) : (0u));
+  uint v_8 = (v_6 >> v_7);
+  int res = asint((((v_8 == 0u)) ? (4294967295u) : ((v_1 | (v_3 | (v_5 | (v_7 | ((((v_8 & 1u) == 0u)) ? (1u) : (0u)))))))));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_5 = (VertexOutput)0;
-  v_5.pos = (0.0f).xxxx;
-  v_5.prevent_dce = firstTrailingBit_3a2acc();
-  VertexOutput v_6 = v_5;
-  return v_6;
+  VertexOutput v_9 = (VertexOutput)0;
+  v_9.pos = (0.0f).xxxx;
+  v_9.prevent_dce = firstTrailingBit_3a2acc();
+  VertexOutput v_10 = v_9;
+  return v_10;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_7 = vertex_main_inner();
-  vertex_main_outputs v_8 = {v_7.prevent_dce, v_7.pos};
-  return v_8;
+  VertexOutput v_11 = vertex_main_inner();
+  vertex_main_outputs v_12 = {v_11.prevent_dce, v_11.pos};
+  return v_12;
 }
 

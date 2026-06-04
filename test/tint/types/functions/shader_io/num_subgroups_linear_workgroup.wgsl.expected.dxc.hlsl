@@ -8,6 +8,7 @@ void main_inner(uint num_subgroups) {
 
 [numthreads(64, 1, 1)]
 void main() {
-  main_inner(((63u + WaveGetLaneCount()) / WaveGetLaneCount()));
+  uint v_1 = WaveGetLaneCount();
+  main_inner(((63u + v_1) / v_1));
 }
 

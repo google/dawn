@@ -6,7 +6,15 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int firstTrailingBit_3a2acc() {
   int arg_0 = int(1);
   uint v = asuint(arg_0);
-  int res = asint(select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) >> select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) & 3u) == 0u), 2u, 0u)) == 0u), 4294967295u, (select(((v & 65535u) == 0u), 16u, 0u) | (select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u) | (select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u) | (select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) & 3u) == 0u), 2u, 0u) | select(((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) >> select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) & 3u) == 0u), 2u, 0u)) & 1u) == 0u), 1u, 0u)))))));
+  uint v_1 = select(((v & 65535u) == 0u), 16u, 0u);
+  uint v_2 = (v >> v_1);
+  uint v_3 = select(((v_2 & 255u) == 0u), 8u, 0u);
+  uint v_4 = (v_2 >> v_3);
+  uint v_5 = select(((v_4 & 15u) == 0u), 4u, 0u);
+  uint v_6 = (v_4 >> v_5);
+  uint v_7 = select(((v_6 & 3u) == 0u), 2u, 0u);
+  uint v_8 = (v_6 >> v_7);
+  int res = asint(select((v_8 == 0u), 4294967295u, (v_1 | (v_3 | (v_5 | (v_7 | select(((v_8 & 1u) == 0u), 1u, 0u)))))));
   return res;
 }
 
@@ -22,7 +30,15 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int firstTrailingBit_3a2acc() {
   int arg_0 = int(1);
   uint v = asuint(arg_0);
-  int res = asint(select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) >> select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) & 3u) == 0u), 2u, 0u)) == 0u), 4294967295u, (select(((v & 65535u) == 0u), 16u, 0u) | (select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u) | (select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u) | (select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) & 3u) == 0u), 2u, 0u) | select(((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) >> select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) & 3u) == 0u), 2u, 0u)) & 1u) == 0u), 1u, 0u)))))));
+  uint v_1 = select(((v & 65535u) == 0u), 16u, 0u);
+  uint v_2 = (v >> v_1);
+  uint v_3 = select(((v_2 & 255u) == 0u), 8u, 0u);
+  uint v_4 = (v_2 >> v_3);
+  uint v_5 = select(((v_4 & 15u) == 0u), 4u, 0u);
+  uint v_6 = (v_4 >> v_5);
+  uint v_7 = select(((v_6 & 3u) == 0u), 2u, 0u);
+  uint v_8 = (v_6 >> v_7);
+  int res = asint(select((v_8 == 0u), 4294967295u, (v_1 | (v_3 | (v_5 | (v_7 | select(((v_8 & 1u) == 0u), 1u, 0u)))))));
   return res;
 }
 
@@ -48,21 +64,29 @@ struct vertex_main_outputs {
 int firstTrailingBit_3a2acc() {
   int arg_0 = int(1);
   uint v = asuint(arg_0);
-  int res = asint(select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) >> select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) & 3u) == 0u), 2u, 0u)) == 0u), 4294967295u, (select(((v & 65535u) == 0u), 16u, 0u) | (select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u) | (select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u) | (select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) & 3u) == 0u), 2u, 0u) | select(((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) >> select((((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) >> select(((((v >> select(((v & 65535u) == 0u), 16u, 0u)) >> select((((v >> select(((v & 65535u) == 0u), 16u, 0u)) & 255u) == 0u), 8u, 0u)) & 15u) == 0u), 4u, 0u)) & 3u) == 0u), 2u, 0u)) & 1u) == 0u), 1u, 0u)))))));
+  uint v_1 = select(((v & 65535u) == 0u), 16u, 0u);
+  uint v_2 = (v >> v_1);
+  uint v_3 = select(((v_2 & 255u) == 0u), 8u, 0u);
+  uint v_4 = (v_2 >> v_3);
+  uint v_5 = select(((v_4 & 15u) == 0u), 4u, 0u);
+  uint v_6 = (v_4 >> v_5);
+  uint v_7 = select(((v_6 & 3u) == 0u), 2u, 0u);
+  uint v_8 = (v_6 >> v_7);
+  int res = asint(select((v_8 == 0u), 4294967295u, (v_1 | (v_3 | (v_5 | (v_7 | select(((v_8 & 1u) == 0u), 1u, 0u)))))));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_1 = (VertexOutput)0;
-  v_1.pos = (0.0f).xxxx;
-  v_1.prevent_dce = firstTrailingBit_3a2acc();
-  VertexOutput v_2 = v_1;
-  return v_2;
+  VertexOutput v_9 = (VertexOutput)0;
+  v_9.pos = (0.0f).xxxx;
+  v_9.prevent_dce = firstTrailingBit_3a2acc();
+  VertexOutput v_10 = v_9;
+  return v_10;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
-  return v_4;
+  VertexOutput v_11 = vertex_main_inner();
+  vertex_main_outputs v_12 = {v_11.prevent_dce, v_11.pos};
+  return v_12;
 }
 

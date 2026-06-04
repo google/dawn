@@ -12,9 +12,10 @@ uint4 insertBits_51ede1() {
   uint4 v_1 = arg_1;
   uint v_2 = arg_2;
   uint v_3 = (min(v_2, 32u) + min(arg_3, 32u));
-  uint4 v_4 = select((v_2 < 32u), (v_1 << uint4((v_2).xxxx)), (0u).xxxx);
-  uint4 v_5 = (v_4 & uint4((((select((v_2 < 32u), (1u << v_2), 0u) - 1u) ^ (select((v_3 < 32u), (1u << v_3), 0u) - 1u))).xxxx));
-  uint4 res = (v_5 | (v & uint4((~(((select((v_2 < 32u), (1u << v_2), 0u) - 1u) ^ (select((v_3 < 32u), (1u << v_3), 0u) - 1u)))).xxxx)));
+  uint v_4 = ((select((v_2 < 32u), (1u << v_2), 0u) - 1u) ^ (select((v_3 < 32u), (1u << v_3), 0u) - 1u));
+  uint4 v_5 = select((v_2 < 32u), (v_1 << uint4((v_2).xxxx)), (0u).xxxx);
+  uint4 v_6 = (v_5 & uint4((v_4).xxxx));
+  uint4 res = (v_6 | (v & uint4((~(v_4)).xxxx)));
   return res;
 }
 
@@ -36,9 +37,10 @@ uint4 insertBits_51ede1() {
   uint4 v_1 = arg_1;
   uint v_2 = arg_2;
   uint v_3 = (min(v_2, 32u) + min(arg_3, 32u));
-  uint4 v_4 = select((v_2 < 32u), (v_1 << uint4((v_2).xxxx)), (0u).xxxx);
-  uint4 v_5 = (v_4 & uint4((((select((v_2 < 32u), (1u << v_2), 0u) - 1u) ^ (select((v_3 < 32u), (1u << v_3), 0u) - 1u))).xxxx));
-  uint4 res = (v_5 | (v & uint4((~(((select((v_2 < 32u), (1u << v_2), 0u) - 1u) ^ (select((v_3 < 32u), (1u << v_3), 0u) - 1u)))).xxxx)));
+  uint v_4 = ((select((v_2 < 32u), (1u << v_2), 0u) - 1u) ^ (select((v_3 < 32u), (1u << v_3), 0u) - 1u));
+  uint4 v_5 = select((v_2 < 32u), (v_1 << uint4((v_2).xxxx)), (0u).xxxx);
+  uint4 v_6 = (v_5 & uint4((v_4).xxxx));
+  uint4 res = (v_6 | (v & uint4((~(v_4)).xxxx)));
   return res;
 }
 
@@ -70,23 +72,24 @@ uint4 insertBits_51ede1() {
   uint4 v_1 = arg_1;
   uint v_2 = arg_2;
   uint v_3 = (min(v_2, 32u) + min(arg_3, 32u));
-  uint4 v_4 = select((v_2 < 32u), (v_1 << uint4((v_2).xxxx)), (0u).xxxx);
-  uint4 v_5 = (v_4 & uint4((((select((v_2 < 32u), (1u << v_2), 0u) - 1u) ^ (select((v_3 < 32u), (1u << v_3), 0u) - 1u))).xxxx));
-  uint4 res = (v_5 | (v & uint4((~(((select((v_2 < 32u), (1u << v_2), 0u) - 1u) ^ (select((v_3 < 32u), (1u << v_3), 0u) - 1u)))).xxxx)));
+  uint v_4 = ((select((v_2 < 32u), (1u << v_2), 0u) - 1u) ^ (select((v_3 < 32u), (1u << v_3), 0u) - 1u));
+  uint4 v_5 = select((v_2 < 32u), (v_1 << uint4((v_2).xxxx)), (0u).xxxx);
+  uint4 v_6 = (v_5 & uint4((v_4).xxxx));
+  uint4 res = (v_6 | (v & uint4((~(v_4)).xxxx)));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_6 = (VertexOutput)0;
-  v_6.pos = (0.0f).xxxx;
-  v_6.prevent_dce = insertBits_51ede1();
-  VertexOutput v_7 = v_6;
-  return v_7;
+  VertexOutput v_7 = (VertexOutput)0;
+  v_7.pos = (0.0f).xxxx;
+  v_7.prevent_dce = insertBits_51ede1();
+  VertexOutput v_8 = v_7;
+  return v_8;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_8 = vertex_main_inner();
-  vertex_main_outputs v_9 = {v_8.prevent_dce, v_8.pos};
-  return v_9;
+  VertexOutput v_9 = vertex_main_inner();
+  vertex_main_outputs v_10 = {v_9.prevent_dce, v_9.pos};
+  return v_10;
 }
 

@@ -8,10 +8,14 @@ int2 firstLeadingBit_a622c2() {
   uint2 v = asuint(arg_0);
   uint2 v_1 = (((v < (2147483648u).xx)) ? (v) : (~(v)));
   uint2 v_2 = ((((v_1 & (4294901760u).xx) == (0u).xx)) ? ((0u).xx) : ((16u).xx));
-  uint2 v_3 = (((((v_1 >> v_2) & (65280u).xx) == (0u).xx)) ? ((0u).xx) : ((8u).xx));
-  uint2 v_4 = ((((((v_1 >> v_2) >> v_3) & (240u).xx) == (0u).xx)) ? ((0u).xx) : ((4u).xx));
-  uint2 v_5 = (((((((v_1 >> v_2) >> v_3) >> v_4) & (12u).xx) == (0u).xx)) ? ((0u).xx) : ((2u).xx));
-  int2 res = asint((((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) == (0u).xx)) ? ((4294967295u).xx) : ((v_2 | (v_3 | (v_4 | (v_5 | ((((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) & (2u).xx) == (0u).xx)) ? ((0u).xx) : ((1u).xx)))))))));
+  uint2 v_3 = (v_1 >> v_2);
+  uint2 v_4 = ((((v_3 & (65280u).xx) == (0u).xx)) ? ((0u).xx) : ((8u).xx));
+  uint2 v_5 = (v_3 >> v_4);
+  uint2 v_6 = ((((v_5 & (240u).xx) == (0u).xx)) ? ((0u).xx) : ((4u).xx));
+  uint2 v_7 = (v_5 >> v_6);
+  uint2 v_8 = ((((v_7 & (12u).xx) == (0u).xx)) ? ((0u).xx) : ((2u).xx));
+  uint2 v_9 = (v_7 >> v_8);
+  int2 res = asint((((v_9 == (0u).xx)) ? ((4294967295u).xx) : ((v_2 | (v_4 | (v_6 | (v_8 | ((((v_9 & (2u).xx) == (0u).xx)) ? ((0u).xx) : ((1u).xx)))))))));
   return res;
 }
 
@@ -29,10 +33,14 @@ int2 firstLeadingBit_a622c2() {
   uint2 v = asuint(arg_0);
   uint2 v_1 = (((v < (2147483648u).xx)) ? (v) : (~(v)));
   uint2 v_2 = ((((v_1 & (4294901760u).xx) == (0u).xx)) ? ((0u).xx) : ((16u).xx));
-  uint2 v_3 = (((((v_1 >> v_2) & (65280u).xx) == (0u).xx)) ? ((0u).xx) : ((8u).xx));
-  uint2 v_4 = ((((((v_1 >> v_2) >> v_3) & (240u).xx) == (0u).xx)) ? ((0u).xx) : ((4u).xx));
-  uint2 v_5 = (((((((v_1 >> v_2) >> v_3) >> v_4) & (12u).xx) == (0u).xx)) ? ((0u).xx) : ((2u).xx));
-  int2 res = asint((((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) == (0u).xx)) ? ((4294967295u).xx) : ((v_2 | (v_3 | (v_4 | (v_5 | ((((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) & (2u).xx) == (0u).xx)) ? ((0u).xx) : ((1u).xx)))))))));
+  uint2 v_3 = (v_1 >> v_2);
+  uint2 v_4 = ((((v_3 & (65280u).xx) == (0u).xx)) ? ((0u).xx) : ((8u).xx));
+  uint2 v_5 = (v_3 >> v_4);
+  uint2 v_6 = ((((v_5 & (240u).xx) == (0u).xx)) ? ((0u).xx) : ((4u).xx));
+  uint2 v_7 = (v_5 >> v_6);
+  uint2 v_8 = ((((v_7 & (12u).xx) == (0u).xx)) ? ((0u).xx) : ((2u).xx));
+  uint2 v_9 = (v_7 >> v_8);
+  int2 res = asint((((v_9 == (0u).xx)) ? ((4294967295u).xx) : ((v_2 | (v_4 | (v_6 | (v_8 | ((((v_9 & (2u).xx) == (0u).xx)) ? ((0u).xx) : ((1u).xx)))))))));
   return res;
 }
 
@@ -60,24 +68,28 @@ int2 firstLeadingBit_a622c2() {
   uint2 v = asuint(arg_0);
   uint2 v_1 = (((v < (2147483648u).xx)) ? (v) : (~(v)));
   uint2 v_2 = ((((v_1 & (4294901760u).xx) == (0u).xx)) ? ((0u).xx) : ((16u).xx));
-  uint2 v_3 = (((((v_1 >> v_2) & (65280u).xx) == (0u).xx)) ? ((0u).xx) : ((8u).xx));
-  uint2 v_4 = ((((((v_1 >> v_2) >> v_3) & (240u).xx) == (0u).xx)) ? ((0u).xx) : ((4u).xx));
-  uint2 v_5 = (((((((v_1 >> v_2) >> v_3) >> v_4) & (12u).xx) == (0u).xx)) ? ((0u).xx) : ((2u).xx));
-  int2 res = asint((((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) == (0u).xx)) ? ((4294967295u).xx) : ((v_2 | (v_3 | (v_4 | (v_5 | ((((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) & (2u).xx) == (0u).xx)) ? ((0u).xx) : ((1u).xx)))))))));
+  uint2 v_3 = (v_1 >> v_2);
+  uint2 v_4 = ((((v_3 & (65280u).xx) == (0u).xx)) ? ((0u).xx) : ((8u).xx));
+  uint2 v_5 = (v_3 >> v_4);
+  uint2 v_6 = ((((v_5 & (240u).xx) == (0u).xx)) ? ((0u).xx) : ((4u).xx));
+  uint2 v_7 = (v_5 >> v_6);
+  uint2 v_8 = ((((v_7 & (12u).xx) == (0u).xx)) ? ((0u).xx) : ((2u).xx));
+  uint2 v_9 = (v_7 >> v_8);
+  int2 res = asint((((v_9 == (0u).xx)) ? ((4294967295u).xx) : ((v_2 | (v_4 | (v_6 | (v_8 | ((((v_9 & (2u).xx) == (0u).xx)) ? ((0u).xx) : ((1u).xx)))))))));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_6 = (VertexOutput)0;
-  v_6.pos = (0.0f).xxxx;
-  v_6.prevent_dce = firstLeadingBit_a622c2();
-  VertexOutput v_7 = v_6;
-  return v_7;
+  VertexOutput v_10 = (VertexOutput)0;
+  v_10.pos = (0.0f).xxxx;
+  v_10.prevent_dce = firstLeadingBit_a622c2();
+  VertexOutput v_11 = v_10;
+  return v_11;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_8 = vertex_main_inner();
-  vertex_main_outputs v_9 = {v_8.prevent_dce, v_8.pos};
-  return v_9;
+  VertexOutput v_12 = vertex_main_inner();
+  vertex_main_outputs v_13 = {v_12.prevent_dce, v_12.pos};
+  return v_13;
 }
 

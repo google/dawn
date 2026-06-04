@@ -9,7 +9,8 @@ struct tint_module_vars_struct {
 };
 
 int tint_dot(int2 lhs, int2 rhs) {
-  return as_type<int>((as_type<uint>(as_type<int2>((as_type<uint2>(lhs) * as_type<uint2>(rhs))).x) + as_type<uint>(as_type<int2>((as_type<uint2>(lhs) * as_type<uint2>(rhs))).y)));
+  int2 const v = as_type<int2>((as_type<uint2>(lhs) * as_type<uint2>(rhs)));
+  return as_type<int>((as_type<uint>(v.x) + as_type<uint>(v.y)));
 }
 
 int dot_fc5f7c() {
@@ -34,7 +35,8 @@ struct tint_module_vars_struct {
 };
 
 int tint_dot(int2 lhs, int2 rhs) {
-  return as_type<int>((as_type<uint>(as_type<int2>((as_type<uint2>(lhs) * as_type<uint2>(rhs))).x) + as_type<uint>(as_type<int2>((as_type<uint2>(lhs) * as_type<uint2>(rhs))).y)));
+  int2 const v = as_type<int2>((as_type<uint2>(lhs) * as_type<uint2>(rhs)));
+  return as_type<int>((as_type<uint>(v.x) + as_type<uint>(v.y)));
 }
 
 int dot_fc5f7c() {
@@ -66,7 +68,8 @@ struct vertex_main_outputs {
 };
 
 int tint_dot(int2 lhs, int2 rhs) {
-  return as_type<int>((as_type<uint>(as_type<int2>((as_type<uint2>(lhs) * as_type<uint2>(rhs))).x) + as_type<uint>(as_type<int2>((as_type<uint2>(lhs) * as_type<uint2>(rhs))).y)));
+  int2 const v = as_type<int2>((as_type<uint2>(lhs) * as_type<uint2>(rhs)));
+  return as_type<int>((as_type<uint>(v.x) + as_type<uint>(v.y)));
 }
 
 int dot_fc5f7c() {
@@ -84,9 +87,9 @@ VertexOutput vertex_main_inner() {
 }
 
 vertex vertex_main_outputs vertex_main() {
-  VertexOutput const v = vertex_main_inner();
+  VertexOutput const v_1 = vertex_main_inner();
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v_1.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_1.prevent_dce;
   return tint_wrapper_result;
 }

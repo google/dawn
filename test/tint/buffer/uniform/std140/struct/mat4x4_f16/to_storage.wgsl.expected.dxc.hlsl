@@ -25,48 +25,32 @@ void v_1(uint offset, matrix<float16_t, 4, 4> obj) {
 matrix<float16_t, 4, 4> v_2(uint start_byte_offset) {
   uint4 v_3 = u[(start_byte_offset / 16u)];
   vector<float16_t, 4> v_4 = tint_bitcast_to_f16(select((((start_byte_offset & 15u) >> 2u) == 2u), v_3.zw, v_3.xy));
-  uint4 v_5 = u[((8u + start_byte_offset) / 16u)];
-  vector<float16_t, 4> v_6 = tint_bitcast_to_f16(select(((((8u + start_byte_offset) & 15u) >> 2u) == 2u), v_5.zw, v_5.xy));
-  uint4 v_7 = u[((16u + start_byte_offset) / 16u)];
-  vector<float16_t, 4> v_8 = tint_bitcast_to_f16(select(((((16u + start_byte_offset) & 15u) >> 2u) == 2u), v_7.zw, v_7.xy));
-  uint4 v_9 = u[((24u + start_byte_offset) / 16u)];
-  return matrix<float16_t, 4, 4>(v_4, v_6, v_8, tint_bitcast_to_f16(select(((((24u + start_byte_offset) & 15u) >> 2u) == 2u), v_9.zw, v_9.xy)));
+  uint v_5 = (8u + start_byte_offset);
+  uint4 v_6 = u[(v_5 / 16u)];
+  vector<float16_t, 4> v_7 = tint_bitcast_to_f16(select((((v_5 & 15u) >> 2u) == 2u), v_6.zw, v_6.xy));
+  uint v_8 = (16u + start_byte_offset);
+  uint4 v_9 = u[(v_8 / 16u)];
+  vector<float16_t, 4> v_10 = tint_bitcast_to_f16(select((((v_8 & 15u) >> 2u) == 2u), v_9.zw, v_9.xy));
+  uint v_11 = (24u + start_byte_offset);
+  uint4 v_12 = u[(v_11 / 16u)];
+  return matrix<float16_t, 4, 4>(v_4, v_7, v_10, tint_bitcast_to_f16(select((((v_11 & 15u) >> 2u) == 2u), v_12.zw, v_12.xy)));
 }
 
-void v_10(uint offset, S obj) {
+void v_13(uint offset, S obj) {
   s.Store((offset + 0u), asuint(obj.before));
   v_1((offset + 8u), obj.m);
   s.Store((offset + 64u), asuint(obj.after));
 }
 
-S v_11(uint start_byte_offset) {
-  int v_12 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
-  matrix<float16_t, 4, 4> v_13 = v_2((8u + start_byte_offset));
-  S v_14 = {v_12, v_13, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) & 15u) >> 2u)])};
-  return v_14;
+S v_14(uint start_byte_offset) {
+  int v_15 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
+  matrix<float16_t, 4, 4> v_16 = v_2((8u + start_byte_offset));
+  uint v_17 = (64u + start_byte_offset);
+  S v_18 = {v_15, v_16, asint(u[(v_17 / 16u)][((v_17 & 15u) >> 2u)])};
+  return v_18;
 }
 
-void v_15(uint offset, S obj[4]) {
-  {
-    uint v_16 = 0u;
-    v_16 = 0u;
-    while(true) {
-      uint v_17 = v_16;
-      if ((v_17 >= 4u)) {
-        break;
-      }
-      S v_18 = obj[v_17];
-      v_10((offset + (v_17 * 128u)), v_18);
-      {
-        v_16 = (v_17 + 1u);
-      }
-    }
-  }
-}
-
-typedef S ary_ret[4];
-ary_ret v_19(uint start_byte_offset) {
-  S a[4] = (S[4])0;
+void v_19(uint offset, S obj[4]) {
   {
     uint v_20 = 0u;
     v_20 = 0u;
@@ -75,23 +59,43 @@ ary_ret v_19(uint start_byte_offset) {
       if ((v_21 >= 4u)) {
         break;
       }
-      S v_22 = v_11((start_byte_offset + (v_21 * 128u)));
-      a[v_21] = v_22;
+      S v_22 = obj[v_21];
+      v_13((offset + (v_21 * 128u)), v_22);
       {
         v_20 = (v_21 + 1u);
       }
     }
   }
-  S v_23[4] = a;
-  return v_23;
+}
+
+typedef S ary_ret[4];
+ary_ret v_23(uint start_byte_offset) {
+  S a[4] = (S[4])0;
+  {
+    uint v_24 = 0u;
+    v_24 = 0u;
+    while(true) {
+      uint v_25 = v_24;
+      if ((v_25 >= 4u)) {
+        break;
+      }
+      S v_26 = v_14((start_byte_offset + (v_25 * 128u)));
+      a[v_25] = v_26;
+      {
+        v_24 = (v_25 + 1u);
+      }
+    }
+  }
+  S v_27[4] = a;
+  return v_27;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  S v_24[4] = v_19(0u);
-  v_15(0u, v_24);
-  S v_25 = v_11(256u);
-  v_10(128u, v_25);
+  S v_28[4] = v_23(0u);
+  v_19(0u, v_28);
+  S v_29 = v_14(256u);
+  v_13(128u, v_29);
   v_1(392u, v_2(264u));
   s.Store<vector<float16_t, 4> >(136u, tint_bitcast_to_f16(u[1u].xy).ywxz);
 }

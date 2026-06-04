@@ -9,7 +9,8 @@ struct tint_module_vars_struct {
 };
 
 uint tint_dot(uint4 lhs, uint4 rhs) {
-  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
+  uint4 const v = (lhs * rhs);
+  return (((v.x + v.y) + v.z) + v.w);
 }
 
 uint dot_e994c7() {
@@ -34,7 +35,8 @@ struct tint_module_vars_struct {
 };
 
 uint tint_dot(uint4 lhs, uint4 rhs) {
-  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
+  uint4 const v = (lhs * rhs);
+  return (((v.x + v.y) + v.z) + v.w);
 }
 
 uint dot_e994c7() {
@@ -66,7 +68,8 @@ struct vertex_main_outputs {
 };
 
 uint tint_dot(uint4 lhs, uint4 rhs) {
-  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
+  uint4 const v = (lhs * rhs);
+  return (((v.x + v.y) + v.z) + v.w);
 }
 
 uint dot_e994c7() {
@@ -84,9 +87,9 @@ VertexOutput vertex_main_inner() {
 }
 
 vertex vertex_main_outputs vertex_main() {
-  VertexOutput const v = vertex_main_inner();
+  VertexOutput const v_1 = vertex_main_inner();
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v_1.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_1.prevent_dce;
   return tint_wrapper_result;
 }

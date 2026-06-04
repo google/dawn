@@ -18,47 +18,50 @@ vector<float16_t, 4> tint_bitcast_to_f16(uint2 src) {
 matrix<float16_t, 3, 3> v_1(uint start_byte_offset) {
   uint4 v_2 = u[(start_byte_offset / 16u)];
   vector<float16_t, 3> v_3 = tint_bitcast_to_f16(select((((start_byte_offset & 15u) >> 2u) == 2u), v_2.zw, v_2.xy)).xyz;
-  uint4 v_4 = u[((8u + start_byte_offset) / 16u)];
-  vector<float16_t, 3> v_5 = tint_bitcast_to_f16(select(((((8u + start_byte_offset) & 15u) >> 2u) == 2u), v_4.zw, v_4.xy)).xyz;
-  uint4 v_6 = u[((16u + start_byte_offset) / 16u)];
-  return matrix<float16_t, 3, 3>(v_3, v_5, tint_bitcast_to_f16(select(((((16u + start_byte_offset) & 15u) >> 2u) == 2u), v_6.zw, v_6.xy)).xyz);
+  uint v_4 = (8u + start_byte_offset);
+  uint4 v_5 = u[(v_4 / 16u)];
+  vector<float16_t, 3> v_6 = tint_bitcast_to_f16(select((((v_4 & 15u) >> 2u) == 2u), v_5.zw, v_5.xy)).xyz;
+  uint v_7 = (16u + start_byte_offset);
+  uint4 v_8 = u[(v_7 / 16u)];
+  return matrix<float16_t, 3, 3>(v_3, v_6, tint_bitcast_to_f16(select((((v_7 & 15u) >> 2u) == 2u), v_8.zw, v_8.xy)).xyz);
 }
 
-S v_7(uint start_byte_offset) {
-  int v_8 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
-  matrix<float16_t, 3, 3> v_9 = v_1((8u + start_byte_offset));
-  S v_10 = {v_8, v_9, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) & 15u) >> 2u)])};
-  return v_10;
+S v_9(uint start_byte_offset) {
+  int v_10 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
+  matrix<float16_t, 3, 3> v_11 = v_1((8u + start_byte_offset));
+  uint v_12 = (64u + start_byte_offset);
+  S v_13 = {v_10, v_11, asint(u[(v_12 / 16u)][((v_12 & 15u) >> 2u)])};
+  return v_13;
 }
 
 typedef S ary_ret[4];
-ary_ret v_11(uint start_byte_offset) {
+ary_ret v_14(uint start_byte_offset) {
   S a[4] = (S[4])0;
   {
-    uint v_12 = 0u;
-    v_12 = 0u;
+    uint v_15 = 0u;
+    v_15 = 0u;
     while(true) {
-      uint v_13 = v_12;
-      if ((v_13 >= 4u)) {
+      uint v_16 = v_15;
+      if ((v_16 >= 4u)) {
         break;
       }
-      S v_14 = v_7((start_byte_offset + (v_13 * 128u)));
-      a[v_13] = v_14;
+      S v_17 = v_9((start_byte_offset + (v_16 * 128u)));
+      a[v_16] = v_17;
       {
-        v_12 = (v_13 + 1u);
+        v_15 = (v_16 + 1u);
       }
     }
   }
-  S v_15[4] = a;
-  return v_15;
+  S v_18[4] = a;
+  return v_18;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  S v_16[4] = v_11(0u);
-  p = v_16;
-  S v_17 = v_7(256u);
-  p[1u] = v_17;
+  S v_19[4] = v_14(0u);
+  p = v_19;
+  S v_20 = v_9(256u);
+  p[1u] = v_20;
   p[3u].m = v_1(264u);
   p[1u].m[0u] = tint_bitcast_to_f16(u[1u].xy).xyz.zxy;
 }

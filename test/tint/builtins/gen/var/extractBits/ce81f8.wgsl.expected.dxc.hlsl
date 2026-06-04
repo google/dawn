@@ -10,8 +10,9 @@ uint extractBits_ce81f8() {
   uint v = arg_0;
   uint v_1 = min(arg_1, 32u);
   uint v_2 = (32u - min(32u, (v_1 + min(arg_2, 32u))));
-  uint v_3 = select((v_2 < 32u), (v << uint(v_2)), 0u);
-  uint res = select(((v_2 + v_1) < 32u), (v_3 >> uint((v_2 + v_1))), ((v_3 >> 31u) >> 1u));
+  uint v_3 = (v_2 + v_1);
+  uint v_4 = select((v_2 < 32u), (v << uint(v_2)), 0u);
+  uint res = select((v_3 < 32u), (v_4 >> uint(v_3)), ((v_4 >> 31u) >> 1u));
   return res;
 }
 
@@ -31,8 +32,9 @@ uint extractBits_ce81f8() {
   uint v = arg_0;
   uint v_1 = min(arg_1, 32u);
   uint v_2 = (32u - min(32u, (v_1 + min(arg_2, 32u))));
-  uint v_3 = select((v_2 < 32u), (v << uint(v_2)), 0u);
-  uint res = select(((v_2 + v_1) < 32u), (v_3 >> uint((v_2 + v_1))), ((v_3 >> 31u) >> 1u));
+  uint v_3 = (v_2 + v_1);
+  uint v_4 = select((v_2 < 32u), (v << uint(v_2)), 0u);
+  uint res = select((v_3 < 32u), (v_4 >> uint(v_3)), ((v_4 >> 31u) >> 1u));
   return res;
 }
 
@@ -62,22 +64,23 @@ uint extractBits_ce81f8() {
   uint v = arg_0;
   uint v_1 = min(arg_1, 32u);
   uint v_2 = (32u - min(32u, (v_1 + min(arg_2, 32u))));
-  uint v_3 = select((v_2 < 32u), (v << uint(v_2)), 0u);
-  uint res = select(((v_2 + v_1) < 32u), (v_3 >> uint((v_2 + v_1))), ((v_3 >> 31u) >> 1u));
+  uint v_3 = (v_2 + v_1);
+  uint v_4 = select((v_2 < 32u), (v << uint(v_2)), 0u);
+  uint res = select((v_3 < 32u), (v_4 >> uint(v_3)), ((v_4 >> 31u) >> 1u));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_4 = (VertexOutput)0;
-  v_4.pos = (0.0f).xxxx;
-  v_4.prevent_dce = extractBits_ce81f8();
-  VertexOutput v_5 = v_4;
-  return v_5;
+  VertexOutput v_5 = (VertexOutput)0;
+  v_5.pos = (0.0f).xxxx;
+  v_5.prevent_dce = extractBits_ce81f8();
+  VertexOutput v_6 = v_5;
+  return v_6;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_6 = vertex_main_inner();
-  vertex_main_outputs v_7 = {v_6.prevent_dce, v_6.pos};
-  return v_7;
+  VertexOutput v_7 = vertex_main_inner();
+  vertex_main_outputs v_8 = {v_7.prevent_dce, v_7.pos};
+  return v_8;
 }
 

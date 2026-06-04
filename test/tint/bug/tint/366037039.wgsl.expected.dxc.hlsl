@@ -90,10 +90,11 @@ ary_ret_1 v_14(uint start_byte_offset) {
 
 S v_18(uint start_byte_offset) {
   uint3 v_19 = ubuffer[(start_byte_offset / 16u)].xyz;
-  uint v_20 = ubuffer[((12u + start_byte_offset) / 16u)][(((12u + start_byte_offset) & 15u) >> 2u)];
-  uint3 v_21[4] = v_14((16u + start_byte_offset));
-  S v_22 = {v_19, v_20, v_21};
-  return v_22;
+  uint v_20 = (12u + start_byte_offset);
+  uint v_21 = ubuffer[(v_20 / 16u)][((v_20 & 15u) >> 2u)];
+  uint3 v_22[4] = v_14((16u + start_byte_offset));
+  S v_23 = {v_19, v_21, v_22};
+  return v_23;
 }
 
 void foo_inner(uint tint_local_index) {
@@ -102,16 +103,16 @@ void foo_inner(uint tint_local_index) {
     wbuffer.b = 0u;
   }
   {
-    uint v_23 = 0u;
-    v_23 = tint_local_index;
+    uint v_24 = 0u;
+    v_24 = tint_local_index;
     while(true) {
-      uint v_24 = v_23;
-      if ((v_24 >= 4u)) {
+      uint v_25 = v_24;
+      if ((v_25 >= 4u)) {
         break;
       }
-      wbuffer.c[v_24] = (0u).xxx;
+      wbuffer.c[v_25] = (0u).xxx;
       {
-        v_23 = (v_24 + 1u);
+        v_24 = (v_25 + 1u);
       }
     }
   }
@@ -119,9 +120,9 @@ void foo_inner(uint tint_local_index) {
   S u = v_18(0u);
   S s = v_9(0u);
   S w = v_9(0u);
-  S v_25 = (S)0;
-  v_3(0u, v_25);
-  wbuffer = v_25;
+  S v_26 = (S)0;
+  v_3(0u, v_26);
+  wbuffer = v_26;
 }
 
 [numthreads(1, 1, 1)]

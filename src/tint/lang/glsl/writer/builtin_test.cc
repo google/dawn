@@ -813,7 +813,8 @@ precision highp float;
 precision highp int;
 
 f16vec4 tint_bitcast_to_16bit(vec2 src) {
-  return f16vec4(unpackFloat2x16(floatBitsToUint(src).x), unpackFloat2x16(floatBitsToUint(src).y));
+  uvec2 v = floatBitsToUint(src);
+  return f16vec4(unpackFloat2x16(v.x), unpackFloat2x16(v.y));
 }
 void main() {
   vec2 a = vec2(1.0f, 2.0f);
@@ -1035,8 +1036,9 @@ TEST_F(GlslWriterTest, ExtractBits) {
 precision highp int;
 
 void main() {
-  int v = int(min(2u, 32u));
-  uint x = bitfieldExtract(1u, v, int(min(3u, (32u - min(2u, 32u)))));
+  uint v = min(2u, 32u);
+  int v_1 = int(v);
+  uint x = bitfieldExtract(1u, v_1, int(min(3u, (32u - v))));
 }
 )");
 }
@@ -1054,8 +1056,9 @@ TEST_F(GlslWriterTest, InsertBits) {
 precision highp int;
 
 void main() {
-  int v = int(min(3u, 32u));
-  uint x = bitfieldInsert(1u, 2u, v, int(min(4u, (32u - min(3u, 32u)))));
+  uint v = min(3u, 32u);
+  int v_1 = int(v);
+  uint x = bitfieldInsert(1u, 2u, v_1, int(min(4u, (32u - v))));
 }
 )");
 }

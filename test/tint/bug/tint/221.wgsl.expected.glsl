@@ -11,7 +11,8 @@ buffer b_block_1_ssbo {
   Buf inner;
 } v;
 uint tint_mod_u32(uint lhs, uint rhs) {
-  return (lhs - ((lhs / mix(rhs, 1u, (rhs == 0u))) * mix(rhs, 1u, (rhs == 0u))));
+  uint v_1 = mix(rhs, 1u, (rhs == 0u));
+  return (lhs - ((lhs / v_1) * v_1));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -25,25 +26,25 @@ void main() {
       if ((i >= v.inner.count)) {
         break;
       }
-      uint v_1 = min(i, 49u);
+      uint v_2 = min(i, 49u);
       if ((tint_mod_u32(i, 2u) == 0u)) {
         {
           uint tint_low_inc = (tint_loop_idx.x - 1u);
           tint_loop_idx.x = tint_low_inc;
           uint tint_carry = uint((tint_low_inc == 4294967295u));
           tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-          v.inner.data[v_1] = (v.inner.data[v_1] * 2u);
+          v.inner.data[v_2] = (v.inner.data[v_2] * 2u);
           i = (i + 1u);
         }
         continue;
       }
-      v.inner.data[v_1] = 0u;
+      v.inner.data[v_2] = 0u;
       {
         uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        v.inner.data[v_1] = (v.inner.data[v_1] * 2u);
+        v.inner.data[v_2] = (v.inner.data[v_2] * 2u);
         i = (i + 1u);
       }
     }

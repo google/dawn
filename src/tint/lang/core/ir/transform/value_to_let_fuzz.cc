@@ -57,5 +57,9 @@ Result<SuccessType> ValueToLetFuzzer(Module& module,
 }  // namespace
 }  // namespace tint::core::ir::transform
 
+constexpr auto kUnsupportedProperties = tint::core::ir::Properties{
+    tint::core::ir::Property::kAllowOverrides,
+};
 TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ValueToLetFuzzer,
-                      tint::core::ir::transform::kValueToLetCapabilities);
+                      tint::core::ir::transform::kValueToLetCapabilities,
+                      kUnsupportedProperties);

@@ -41,10 +41,11 @@ void main() {
     buffer.GetDimensions(v_3);
     uint v_4 = ((v_3 / 64u) - 1u);
     uint v_5 = min(uint(v_1), v_4);
-    uint v_6 = (min(uint(v_2), 3u) * 16u);
-    int v_7 = idx3();
-    int v_8 = asint((asuint(asint(buffer.Load((((0u + (v_5 * 64u)) + v_6) + (min(uint(v_7), 3u) * 4u))))) - asuint(int(1))));
-    buffer.Store((((0u + (v_5 * 64u)) + v_6) + (min(uint(v_7), 3u) * 4u)), asuint(v_8));
+    uint v_6 = (v_5 * 64u);
+    uint v_7 = (min(uint(v_2), 3u) * 16u);
+    int v_8 = idx3();
+    int v_9 = asint((asuint(asint(buffer.Load((((0u + v_6) + v_7) + (min(uint(v_8), 3u) * 4u))))) - asuint(int(1))));
+    buffer.Store((((0u + v_6) + v_7) + (min(uint(v_8), 3u) * 4u)), asuint(v_9));
     while(true) {
       if (all((tint_loop_idx == (0u).xx))) {
         break;
@@ -58,16 +59,17 @@ void main() {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        int v_9 = idx4();
-        int v_10 = idx5();
-        uint v_11 = 0u;
-        buffer.GetDimensions(v_11);
-        uint v_12 = ((v_11 / 64u) - 1u);
-        uint v_13 = min(uint(v_9), v_12);
-        uint v_14 = (min(uint(v_10), 3u) * 16u);
-        int v_15 = idx6();
-        int v_16 = asint((asuint(asint(buffer.Load((((0u + (v_13 * 64u)) + v_14) + (min(uint(v_15), 3u) * 4u))))) - asuint(int(1))));
-        buffer.Store((((0u + (v_13 * 64u)) + v_14) + (min(uint(v_15), 3u) * 4u)), asuint(v_16));
+        int v_10 = idx4();
+        int v_11 = idx5();
+        uint v_12 = 0u;
+        buffer.GetDimensions(v_12);
+        uint v_13 = ((v_12 / 64u) - 1u);
+        uint v_14 = min(uint(v_10), v_13);
+        uint v_15 = (v_14 * 64u);
+        uint v_16 = (min(uint(v_11), 3u) * 16u);
+        int v_17 = idx6();
+        int v_18 = asint((asuint(asint(buffer.Load((((0u + v_15) + v_16) + (min(uint(v_17), 3u) * 4u))))) - asuint(int(1))));
+        buffer.Store((((0u + v_15) + v_16) + (min(uint(v_17), 3u) * 4u)), asuint(v_18));
       }
     }
   }

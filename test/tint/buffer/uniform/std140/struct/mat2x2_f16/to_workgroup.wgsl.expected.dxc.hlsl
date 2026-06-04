@@ -22,59 +22,61 @@ vector<float16_t, 2> tint_bitcast_to_f16(uint src) {
 
 matrix<float16_t, 2, 2> v_2(uint start_byte_offset) {
   vector<float16_t, 2> v_3 = tint_bitcast_to_f16(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
-  return matrix<float16_t, 2, 2>(v_3, tint_bitcast_to_f16(u[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) & 15u) >> 2u)]));
+  uint v_4 = (4u + start_byte_offset);
+  return matrix<float16_t, 2, 2>(v_3, tint_bitcast_to_f16(u[(v_4 / 16u)][((v_4 & 15u) >> 2u)]));
 }
 
-S v_4(uint start_byte_offset) {
-  int v_5 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
-  matrix<float16_t, 2, 2> v_6 = v_2((4u + start_byte_offset));
-  S v_7 = {v_5, v_6, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) & 15u) >> 2u)])};
-  return v_7;
+S v_5(uint start_byte_offset) {
+  int v_6 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
+  matrix<float16_t, 2, 2> v_7 = v_2((4u + start_byte_offset));
+  uint v_8 = (64u + start_byte_offset);
+  S v_9 = {v_6, v_7, asint(u[(v_8 / 16u)][((v_8 & 15u) >> 2u)])};
+  return v_9;
 }
 
 typedef S ary_ret[4];
-ary_ret v_8(uint start_byte_offset) {
+ary_ret v_10(uint start_byte_offset) {
   S a[4] = (S[4])0;
   {
-    uint v_9 = 0u;
-    v_9 = 0u;
+    uint v_11 = 0u;
+    v_11 = 0u;
     while(true) {
-      uint v_10 = v_9;
-      if ((v_10 >= 4u)) {
+      uint v_12 = v_11;
+      if ((v_12 >= 4u)) {
         break;
       }
-      S v_11 = v_4((start_byte_offset + (v_10 * 128u)));
-      a[v_10] = v_11;
+      S v_13 = v_5((start_byte_offset + (v_12 * 128u)));
+      a[v_12] = v_13;
       {
-        v_9 = (v_10 + 1u);
+        v_11 = (v_12 + 1u);
       }
     }
   }
-  S v_12[4] = a;
-  return v_12;
+  S v_14[4] = a;
+  return v_14;
 }
 
 void f_inner(uint tint_local_index) {
   {
-    uint v_13 = 0u;
-    v_13 = tint_local_index;
+    uint v_15 = 0u;
+    v_15 = tint_local_index;
     while(true) {
-      uint v_14 = v_13;
-      if ((v_14 >= 4u)) {
+      uint v_16 = v_15;
+      if ((v_16 >= 4u)) {
         break;
       }
-      S v_15 = (S)0;
-      w[v_14] = v_15;
+      S v_17 = (S)0;
+      w[v_16] = v_17;
       {
-        v_13 = (v_14 + 1u);
+        v_15 = (v_16 + 1u);
       }
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  S v_16[4] = v_8(0u);
-  w = v_16;
-  S v_17 = v_4(256u);
-  w[1u] = v_17;
+  S v_18[4] = v_10(0u);
+  w = v_18;
+  S v_19 = v_5(256u);
+  w[1u] = v_19;
   w[3u].m = v_2(260u);
   w[1u].m[0u] = tint_bitcast_to_f16(u[0u].z).yx;
 }

@@ -9,8 +9,9 @@ cbuffer cbuffer_u : register(b0) {
 groupshared float2x2 w;
 float2x2 v(uint start_byte_offset) {
   uint4 v_1 = u[(start_byte_offset / 16u)];
-  uint4 v_2 = u[((8u + start_byte_offset) / 16u)];
-  return float2x2(asfloat(select((((start_byte_offset & 15u) >> 2u) == 2u), v_1.zw, v_1.xy)), asfloat(select(((((8u + start_byte_offset) & 15u) >> 2u) == 2u), v_2.zw, v_2.xy)));
+  uint v_2 = (8u + start_byte_offset);
+  uint4 v_3 = u[(v_2 / 16u)];
+  return float2x2(asfloat(select((((start_byte_offset & 15u) >> 2u) == 2u), v_1.zw, v_1.xy)), asfloat(select((((v_2 & 15u) >> 2u) == 2u), v_3.zw, v_3.xy)));
 }
 
 void f_inner(uint tint_local_index) {

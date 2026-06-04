@@ -10,15 +10,16 @@ int i() {
 
 float2x2 v(uint start_byte_offset) {
   uint4 v_1 = m[(start_byte_offset / 16u)];
-  uint4 v_2 = m[((8u + start_byte_offset) / 16u)];
-  return float2x2(asfloat(select((((start_byte_offset & 15u) >> 2u) == 2u), v_1.zw, v_1.xy)), asfloat(select(((((8u + start_byte_offset) & 15u) >> 2u) == 2u), v_2.zw, v_2.xy)));
+  uint v_2 = (8u + start_byte_offset);
+  uint4 v_3 = m[(v_2 / 16u)];
+  return float2x2(asfloat(select((((start_byte_offset & 15u) >> 2u) == 2u), v_1.zw, v_1.xy)), asfloat(select((((v_2 & 15u) >> 2u) == 2u), v_3.zw, v_3.xy)));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  uint v_3 = (min(uint(i()), 1u) * 8u);
+  uint v_4 = (min(uint(i()), 1u) * 8u);
   float2x2 l_m = v(0u);
-  uint4 v_4 = m[(v_3 / 16u)];
-  float2 l_m_i = asfloat(select((((v_3 & 15u) >> 2u) == 2u), v_4.zw, v_4.xy));
+  uint4 v_5 = m[(v_4 / 16u)];
+  float2 l_m_i = asfloat(select((((v_4 & 15u) >> 2u) == 2u), v_5.zw, v_5.xy));
 }
 

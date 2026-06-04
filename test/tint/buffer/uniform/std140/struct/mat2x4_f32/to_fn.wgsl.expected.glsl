@@ -28,22 +28,23 @@ S v_3(uint start_byte_offset) {
   uvec4 v_4 = v_1.inner[(start_byte_offset / 16u)];
   int v_5 = int(v_4[((start_byte_offset & 15u) >> 2u)]);
   mat2x4 v_6 = v_2((16u + start_byte_offset));
-  uvec4 v_7 = v_1.inner[((64u + start_byte_offset) / 16u)];
-  return S(v_5, v_6, int(v_7[(((64u + start_byte_offset) & 15u) >> 2u)]));
+  uint v_7 = (64u + start_byte_offset);
+  uvec4 v_8 = v_1.inner[(v_7 / 16u)];
+  return S(v_5, v_6, int(v_8[((v_7 & 15u) >> 2u)]));
 }
-S[4] v_8(uint start_byte_offset) {
+S[4] v_9(uint start_byte_offset) {
   S a_2[4] = S[4](S(0, mat2x4(vec4(0.0f), vec4(0.0f)), 0), S(0, mat2x4(vec4(0.0f), vec4(0.0f)), 0), S(0, mat2x4(vec4(0.0f), vec4(0.0f)), 0), S(0, mat2x4(vec4(0.0f), vec4(0.0f)), 0));
   {
-    uint v_9 = 0u;
-    v_9 = 0u;
+    uint v_10 = 0u;
+    v_10 = 0u;
     while(true) {
-      uint v_10 = v_9;
-      if ((v_10 >= 4u)) {
+      uint v_11 = v_10;
+      if ((v_11 >= 4u)) {
         break;
       }
-      a_2[v_10] = v_3((start_byte_offset + (v_10 * 128u)));
+      a_2[v_11] = v_3((start_byte_offset + (v_11 * 128u)));
       {
-        v_9 = (v_10 + 1u);
+        v_10 = (v_11 + 1u);
       }
     }
   }
@@ -51,7 +52,7 @@ S[4] v_8(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  a(v_8(0u));
+  a(v_9(0u));
   b(v_3(256u));
   c(v_2(272u));
   d(uintBitsToFloat(v_1.inner[2u]).ywxz);

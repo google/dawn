@@ -44,16 +44,18 @@ void foo(Matrix_left_f32_8x8 m, Matrix_left_f32_8x8 m_array[4], Matrix_left_f32_
 [numthreads(64, 1, 1)]
 void main() {
   Matrix_left_f32_8x8 m = Matrix_left_f32_8x8::Splat(0.0f);
-  Matrix_left_f32_8x8 m_array[4] = {Matrix_left_f32_8x8::Splat(0.0f), Matrix_left_f32_8x8::Splat(0.0f), Matrix_left_f32_8x8::Splat(0.0f), Matrix_left_f32_8x8::Splat(0.0f)};
-  Matrix_left_f32_8x8 v_5[4] = {Matrix_left_f32_8x8::Splat(0.0f), Matrix_left_f32_8x8::Splat(0.0f), Matrix_left_f32_8x8::Splat(0.0f), Matrix_left_f32_8x8::Splat(0.0f)};
-  Matrix_left_f32_8x8 m_nested_array[4][4] = {v_5, v_5, v_5, v_5};
+  Matrix_left_f32_8x8 v_5 = Matrix_left_f32_8x8::Splat(0.0f);
+  Matrix_left_f32_8x8 m_array[4] = {v_5, v_5, v_5, v_5};
+  Matrix_left_f32_8x8 v_6 = Matrix_left_f32_8x8::Splat(0.0f);
+  Matrix_left_f32_8x8 v_7[4] = {v_6, v_6, v_6, v_6};
+  Matrix_left_f32_8x8 m_nested_array[4][4] = {v_7, v_7, v_7, v_7};
   S m_struct = {Matrix_left_f32_8x8::Splat(0.0f), Matrix_right_f32_8x8::Splat(0.0f)};
-  S v_6 = {Matrix_left_f32_8x8::Splat(0.0f), Matrix_right_f32_8x8::Splat(0.0f)};
-  S_Nested m_nested_struct = {v_6};
-  Matrix_left_f32_8x8 v_7[4] = m_array;
-  Matrix_left_f32_8x8 v_8[4][4] = m_nested_array;
-  S v_9 = m_struct;
-  S_Nested v_10 = m_nested_struct;
-  foo(m, v_7, v_8, v_9, v_10);
+  S v_8 = {Matrix_left_f32_8x8::Splat(0.0f), Matrix_right_f32_8x8::Splat(0.0f)};
+  S_Nested m_nested_struct = {v_8};
+  Matrix_left_f32_8x8 v_9[4] = m_array;
+  Matrix_left_f32_8x8 v_10[4][4] = m_nested_array;
+  S v_11 = m_struct;
+  S_Nested v_12 = m_nested_struct;
+  foo(m, v_9, v_10, v_11, v_12);
 }
 

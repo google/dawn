@@ -16,7 +16,8 @@ uint tint_div_u32(uint lhs, uint rhs) {
 void main() {
   uint size = 16u;
   uint v_3 = (tint_div_u32(size, 16u) * 16u);
-  bool v_4 = ((uint(v_1.inner.length()) * 16u) < max(v_3, 16u));
-  uint v_5 = (((mix(0u, 0u, v_4) * 1u) + (min(uint(0), ((mix(max(v_3, 16u), 16u, v_4) / 16u) - 1u)) * 16u)) / 16u);
-  v_2.inner = v_1.inner[v_5];
+  uint v_4 = max(v_3, 16u);
+  bool v_5 = ((uint(v_1.inner.length()) * 16u) < v_4);
+  uint v_6 = (((mix(0u, 0u, v_5) * 1u) + (min(uint(0), ((mix(v_4, 16u, v_5) / 16u) - 1u)) * 16u)) / 16u);
+  v_2.inner = v_1.inner[v_6];
 }

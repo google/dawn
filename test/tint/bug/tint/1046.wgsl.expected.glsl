@@ -47,15 +47,17 @@ mat4 v_1(uint start_byte_offset) {
 Uniforms v_2(uint start_byte_offset) {
   mat4 v_3 = v_1(start_byte_offset);
   mat4 v_4 = v_1((64u + start_byte_offset));
-  uvec4 v_5 = v.inner[((128u + start_byte_offset) / 16u)];
-  uvec4 v_6 = v.inner[((132u + start_byte_offset) / 16u)];
-  return Uniforms(v_3, v_4, v_5[(((128u + start_byte_offset) & 15u) >> 2u)], v_6[(((132u + start_byte_offset) & 15u) >> 2u)], uintBitsToFloat(v.inner[((144u + start_byte_offset) / 16u)]));
+  uint v_5 = (128u + start_byte_offset);
+  uvec4 v_6 = v.inner[(v_5 / 16u)];
+  uint v_7 = (132u + start_byte_offset);
+  uvec4 v_8 = v.inner[(v_7 / 16u)];
+  return Uniforms(v_3, v_4, v_6[((v_5 & 15u) >> 2u)], v_8[((v_7 & 15u) >> 2u)], uintBitsToFloat(v.inner[((144u + start_byte_offset) / 16u)]));
 }
 FragmentOutput main_inner(FragmentInput fragment) {
-  FragmentOutput v_7 = FragmentOutput(vec4(0.0f));
-  v_7.color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+  FragmentOutput v_9 = FragmentOutput(vec4(0.0f));
+  v_9.color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
   v_2(0u);
-  return v_7;
+  return v_9;
 }
 void main() {
   main_loc0_Output = main_inner(FragmentInput(gl_FragCoord, tint_interstage_location0, tint_interstage_location1, tint_interstage_location2, tint_interstage_location3)).color;

@@ -127,8 +127,9 @@ void main_1() {
       if ((x_174 > 0.0f)) {
         float x_181 = asfloat(x_20[0u].x);
         float x_184 = animationData.z;
-        float v_2 = ((x_181 * x_184) / 1.0f);
-        mt = ((x_181 * x_184) - ((((v_2 < 0.0f)) ? (ceil(v_2)) : (floor(v_2))) * 1.0f));
+        float v_2 = (x_181 * x_184);
+        float v_3 = (v_2 / 1.0f);
+        mt = (v_2 - ((((v_3 < 0.0f)) ? (ceil(v_3)) : (floor(v_3))) * 1.0f));
         f = 0.0f;
         {
           uint2 tint_loop_idx_1 = (4294967295u).xx;
@@ -176,8 +177,8 @@ void main_1() {
       offset_1 = (float2(x_235.x, x_235.y) * x_237);
       float4 x_241 = frameData[2u];
       float4 x_244 = frameData[0u];
-      float2 v_3 = float2(x_241.x, x_241.y);
-      ratio = (v_3 / float2(x_244.w, x_244.z));
+      float2 v_4 = float2(x_241.x, x_241.y);
+      ratio = (v_4 / float2(x_244.w, x_244.z));
       float x_248 = frameData[2u].z;
       if ((x_248 == 1.0f)) {
         float2 x_252 = tileUV;
@@ -202,9 +203,9 @@ void main_1() {
         float4 x_290 = color;
         float4 x_292 = nc;
         float x_295 = nc.w;
-        float3 v_4 = float3(x_290.x, x_290.y, x_290.z);
-        float3 v_5 = float3(x_292.x, x_292.y, x_292.z);
-        mixed = lerp(v_4, v_5, float3(x_295, x_295, x_295));
+        float3 v_5 = float3(x_290.x, x_290.y, x_290.z);
+        float3 v_6 = float3(x_292.x, x_292.y, x_292.z);
+        mixed = lerp(v_5, v_6, float3(x_295, x_295, x_295));
         float3 x_298 = mixed;
         float x_299 = alpha;
         color = float4(x_298.x, x_298.y, x_298.z, x_299);
@@ -236,13 +237,13 @@ main_out main_inner(float2 tUV_param, float2 tileID_1_param, float2 levelUnits_p
   vPosition = vPosition_param;
   vUV = vUV_param;
   main_1();
-  main_out v_6 = {glFragColor};
-  return v_6;
+  main_out v_7 = {glFragColor};
+  return v_7;
 }
 
 main_outputs main(main_inputs inputs) {
-  main_out v_7 = main_inner(inputs.tUV_param, inputs.tileID_1_param, inputs.levelUnits_param, inputs.stageUnits_1_param, inputs.vPosition_param, inputs.vUV_param);
-  main_outputs v_8 = {v_7.glFragColor_1};
-  return v_8;
+  main_out v_8 = main_inner(inputs.tUV_param, inputs.tileID_1_param, inputs.levelUnits_param, inputs.stageUnits_1_param, inputs.vPosition_param, inputs.vUV_param);
+  main_outputs v_9 = {v_8.glFragColor_1};
+  return v_9;
 }
 

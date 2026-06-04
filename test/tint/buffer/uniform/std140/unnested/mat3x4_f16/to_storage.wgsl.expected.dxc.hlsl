@@ -25,10 +25,12 @@ void v_2(uint offset, matrix<float16_t, 3, 4> obj) {
 matrix<float16_t, 3, 4> v_3(uint start_byte_offset) {
   uint4 v_4 = u[(start_byte_offset / 16u)];
   vector<float16_t, 4> v_5 = tint_bitcast_to_f16_1(select((((start_byte_offset & 15u) >> 2u) == 2u), v_4.zw, v_4.xy));
-  uint4 v_6 = u[((8u + start_byte_offset) / 16u)];
-  vector<float16_t, 4> v_7 = tint_bitcast_to_f16_1(select(((((8u + start_byte_offset) & 15u) >> 2u) == 2u), v_6.zw, v_6.xy));
-  uint4 v_8 = u[((16u + start_byte_offset) / 16u)];
-  return matrix<float16_t, 3, 4>(v_5, v_7, tint_bitcast_to_f16_1(select(((((16u + start_byte_offset) & 15u) >> 2u) == 2u), v_8.zw, v_8.xy)));
+  uint v_6 = (8u + start_byte_offset);
+  uint4 v_7 = u[(v_6 / 16u)];
+  vector<float16_t, 4> v_8 = tint_bitcast_to_f16_1(select((((v_6 & 15u) >> 2u) == 2u), v_7.zw, v_7.xy));
+  uint v_9 = (16u + start_byte_offset);
+  uint4 v_10 = u[(v_9 / 16u)];
+  return matrix<float16_t, 3, 4>(v_5, v_8, tint_bitcast_to_f16_1(select((((v_9 & 15u) >> 2u) == 2u), v_10.zw, v_10.xy)));
 }
 
 [numthreads(1, 1, 1)]

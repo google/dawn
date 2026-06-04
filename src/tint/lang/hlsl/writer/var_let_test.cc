@@ -842,7 +842,8 @@ using Matrix_result_f32_8x16 = Matrix<ComponentType::F32, 8, 16, MatrixUse::Accu
 
 [numthreads(1, 1, 1)]
 void main() {
-  Matrix_result_f32_8x16 a[4] = {Matrix_result_f32_8x16::Splat(0.0f), Matrix_result_f32_8x16::Splat(0.0f), Matrix_result_f32_8x16::Splat(0.0f), Matrix_result_f32_8x16::Splat(0.0f)};
+  Matrix_result_f32_8x16 v = Matrix_result_f32_8x16::Splat(0.0f);
+  Matrix_result_f32_8x16 a[4] = {v, v, v, v};
 }
 
 )");

@@ -18,46 +18,30 @@ void v(uint offset, float4x2 obj) {
 
 float4x2 v_1(uint start_byte_offset) {
   uint4 v_2 = u[(start_byte_offset / 16u)];
-  uint4 v_3 = u[((8u + start_byte_offset) / 16u)];
-  uint4 v_4 = u[((16u + start_byte_offset) / 16u)];
-  uint4 v_5 = u[((24u + start_byte_offset) / 16u)];
-  return float4x2(asfloat(select((((start_byte_offset & 15u) >> 2u) == 2u), v_2.zw, v_2.xy)), asfloat(select(((((8u + start_byte_offset) & 15u) >> 2u) == 2u), v_3.zw, v_3.xy)), asfloat(select(((((16u + start_byte_offset) & 15u) >> 2u) == 2u), v_4.zw, v_4.xy)), asfloat(select(((((24u + start_byte_offset) & 15u) >> 2u) == 2u), v_5.zw, v_5.xy)));
+  uint v_3 = (8u + start_byte_offset);
+  uint4 v_4 = u[(v_3 / 16u)];
+  uint v_5 = (16u + start_byte_offset);
+  uint4 v_6 = u[(v_5 / 16u)];
+  uint v_7 = (24u + start_byte_offset);
+  uint4 v_8 = u[(v_7 / 16u)];
+  return float4x2(asfloat(select((((start_byte_offset & 15u) >> 2u) == 2u), v_2.zw, v_2.xy)), asfloat(select((((v_3 & 15u) >> 2u) == 2u), v_4.zw, v_4.xy)), asfloat(select((((v_5 & 15u) >> 2u) == 2u), v_6.zw, v_6.xy)), asfloat(select((((v_7 & 15u) >> 2u) == 2u), v_8.zw, v_8.xy)));
 }
 
-void v_6(uint offset, S obj) {
+void v_9(uint offset, S obj) {
   s.Store((offset + 0u), asuint(obj.before));
   v((offset + 8u), obj.m);
   s.Store((offset + 64u), asuint(obj.after));
 }
 
-S v_7(uint start_byte_offset) {
-  int v_8 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
-  float4x2 v_9 = v_1((8u + start_byte_offset));
-  S v_10 = {v_8, v_9, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) & 15u) >> 2u)])};
-  return v_10;
+S v_10(uint start_byte_offset) {
+  int v_11 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
+  float4x2 v_12 = v_1((8u + start_byte_offset));
+  uint v_13 = (64u + start_byte_offset);
+  S v_14 = {v_11, v_12, asint(u[(v_13 / 16u)][((v_13 & 15u) >> 2u)])};
+  return v_14;
 }
 
-void v_11(uint offset, S obj[4]) {
-  {
-    uint v_12 = 0u;
-    v_12 = 0u;
-    while(true) {
-      uint v_13 = v_12;
-      if ((v_13 >= 4u)) {
-        break;
-      }
-      S v_14 = obj[v_13];
-      v_6((offset + (v_13 * 128u)), v_14);
-      {
-        v_12 = (v_13 + 1u);
-      }
-    }
-  }
-}
-
-typedef S ary_ret[4];
-ary_ret v_15(uint start_byte_offset) {
-  S a[4] = (S[4])0;
+void v_15(uint offset, S obj[4]) {
   {
     uint v_16 = 0u;
     v_16 = 0u;
@@ -66,23 +50,43 @@ ary_ret v_15(uint start_byte_offset) {
       if ((v_17 >= 4u)) {
         break;
       }
-      S v_18 = v_7((start_byte_offset + (v_17 * 128u)));
-      a[v_17] = v_18;
+      S v_18 = obj[v_17];
+      v_9((offset + (v_17 * 128u)), v_18);
       {
         v_16 = (v_17 + 1u);
       }
     }
   }
-  S v_19[4] = a;
-  return v_19;
+}
+
+typedef S ary_ret[4];
+ary_ret v_19(uint start_byte_offset) {
+  S a[4] = (S[4])0;
+  {
+    uint v_20 = 0u;
+    v_20 = 0u;
+    while(true) {
+      uint v_21 = v_20;
+      if ((v_21 >= 4u)) {
+        break;
+      }
+      S v_22 = v_10((start_byte_offset + (v_21 * 128u)));
+      a[v_21] = v_22;
+      {
+        v_20 = (v_21 + 1u);
+      }
+    }
+  }
+  S v_23[4] = a;
+  return v_23;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  S v_20[4] = v_15(0u);
-  v_11(0u, v_20);
-  S v_21 = v_7(256u);
-  v_6(128u, v_21);
+  S v_24[4] = v_19(0u);
+  v_15(0u, v_24);
+  S v_25 = v_10(256u);
+  v_9(128u, v_25);
   v(392u, v_1(264u));
   s.Store2(136u, asuint(asfloat(u[1u].xy).yx));
 }

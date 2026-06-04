@@ -1,7 +1,8 @@
 
 RWByteAddressBuffer v : register(u0);
 int4 tint_mod_v4i32(int4 lhs, int4 rhs) {
-  return asint((asuint(lhs) - asuint(asint((asuint((lhs / select(((rhs == (int(0)).xxxx) | ((lhs == (int(-2147483648)).xxxx) & (rhs == (int(-1)).xxxx))), (int(1)).xxxx, rhs))) * asuint(select(((rhs == (int(0)).xxxx) | ((lhs == (int(-2147483648)).xxxx) & (rhs == (int(-1)).xxxx))), (int(1)).xxxx, rhs)))))));
+  int4 v_1 = select(((rhs == (int(0)).xxxx) | ((lhs == (int(-2147483648)).xxxx) & (rhs == (int(-1)).xxxx))), (int(1)).xxxx, rhs);
+  return asint((asuint(lhs) - asuint(asint((asuint((lhs / v_1)) * asuint(v_1))))));
 }
 
 [numthreads(1, 1, 1)]

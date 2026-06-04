@@ -6,7 +6,16 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int firstLeadingBit_57a1a3() {
   int arg_0 = int(1);
   uint v = asuint(arg_0);
-  int res = asint(select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) >> select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) & 12u) == 0u), 0u, 2u)) == 0u), 4294967295u, (select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u) | (select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u) | (select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u) | (select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) & 12u) == 0u), 0u, 2u) | select(((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) >> select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) & 12u) == 0u), 0u, 2u)) & 2u) == 0u), 0u, 1u)))))));
+  uint v_1 = select((v < 2147483648u), v, ~(v));
+  uint v_2 = select(((v_1 & 4294901760u) == 0u), 0u, 16u);
+  uint v_3 = (v_1 >> v_2);
+  uint v_4 = select(((v_3 & 65280u) == 0u), 0u, 8u);
+  uint v_5 = (v_3 >> v_4);
+  uint v_6 = select(((v_5 & 240u) == 0u), 0u, 4u);
+  uint v_7 = (v_5 >> v_6);
+  uint v_8 = select(((v_7 & 12u) == 0u), 0u, 2u);
+  uint v_9 = (v_7 >> v_8);
+  int res = asint(select((v_9 == 0u), 4294967295u, (v_2 | (v_4 | (v_6 | (v_8 | select(((v_9 & 2u) == 0u), 0u, 1u)))))));
   return res;
 }
 
@@ -22,7 +31,16 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int firstLeadingBit_57a1a3() {
   int arg_0 = int(1);
   uint v = asuint(arg_0);
-  int res = asint(select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) >> select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) & 12u) == 0u), 0u, 2u)) == 0u), 4294967295u, (select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u) | (select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u) | (select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u) | (select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) & 12u) == 0u), 0u, 2u) | select(((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) >> select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) & 12u) == 0u), 0u, 2u)) & 2u) == 0u), 0u, 1u)))))));
+  uint v_1 = select((v < 2147483648u), v, ~(v));
+  uint v_2 = select(((v_1 & 4294901760u) == 0u), 0u, 16u);
+  uint v_3 = (v_1 >> v_2);
+  uint v_4 = select(((v_3 & 65280u) == 0u), 0u, 8u);
+  uint v_5 = (v_3 >> v_4);
+  uint v_6 = select(((v_5 & 240u) == 0u), 0u, 4u);
+  uint v_7 = (v_5 >> v_6);
+  uint v_8 = select(((v_7 & 12u) == 0u), 0u, 2u);
+  uint v_9 = (v_7 >> v_8);
+  int res = asint(select((v_9 == 0u), 4294967295u, (v_2 | (v_4 | (v_6 | (v_8 | select(((v_9 & 2u) == 0u), 0u, 1u)))))));
   return res;
 }
 
@@ -48,21 +66,30 @@ struct vertex_main_outputs {
 int firstLeadingBit_57a1a3() {
   int arg_0 = int(1);
   uint v = asuint(arg_0);
-  int res = asint(select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) >> select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) & 12u) == 0u), 0u, 2u)) == 0u), 4294967295u, (select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u) | (select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u) | (select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u) | (select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) & 12u) == 0u), 0u, 2u) | select(((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) >> select((((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) >> select(((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) >> select((((select((v < 2147483648u), v, ~(v)) >> select(((select((v < 2147483648u), v, ~(v)) & 4294901760u) == 0u), 0u, 16u)) & 65280u) == 0u), 0u, 8u)) & 240u) == 0u), 0u, 4u)) & 12u) == 0u), 0u, 2u)) & 2u) == 0u), 0u, 1u)))))));
+  uint v_1 = select((v < 2147483648u), v, ~(v));
+  uint v_2 = select(((v_1 & 4294901760u) == 0u), 0u, 16u);
+  uint v_3 = (v_1 >> v_2);
+  uint v_4 = select(((v_3 & 65280u) == 0u), 0u, 8u);
+  uint v_5 = (v_3 >> v_4);
+  uint v_6 = select(((v_5 & 240u) == 0u), 0u, 4u);
+  uint v_7 = (v_5 >> v_6);
+  uint v_8 = select(((v_7 & 12u) == 0u), 0u, 2u);
+  uint v_9 = (v_7 >> v_8);
+  int res = asint(select((v_9 == 0u), 4294967295u, (v_2 | (v_4 | (v_6 | (v_8 | select(((v_9 & 2u) == 0u), 0u, 1u)))))));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_1 = (VertexOutput)0;
-  v_1.pos = (0.0f).xxxx;
-  v_1.prevent_dce = firstLeadingBit_57a1a3();
-  VertexOutput v_2 = v_1;
-  return v_2;
+  VertexOutput v_10 = (VertexOutput)0;
+  v_10.pos = (0.0f).xxxx;
+  v_10.prevent_dce = firstLeadingBit_57a1a3();
+  VertexOutput v_11 = v_10;
+  return v_11;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
-  return v_4;
+  VertexOutput v_12 = vertex_main_inner();
+  vertex_main_outputs v_13 = {v_12.prevent_dce, v_12.pos};
+  return v_13;
 }
 

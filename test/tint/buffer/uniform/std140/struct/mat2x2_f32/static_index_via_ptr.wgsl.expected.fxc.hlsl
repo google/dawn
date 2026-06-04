@@ -13,71 +13,72 @@ cbuffer cbuffer_a : register(b0) {
 float2x2 v(uint start_byte_offset) {
   uint4 v_1 = a[(start_byte_offset / 16u)];
   float2 v_2 = asfloat((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_1.zw) : (v_1.xy)));
-  uint4 v_3 = a[((8u + start_byte_offset) / 16u)];
-  return float2x2(v_2, asfloat(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_3.zw) : (v_3.xy))));
+  uint v_3 = (8u + start_byte_offset);
+  uint4 v_4 = a[(v_3 / 16u)];
+  return float2x2(v_2, asfloat((((((v_3 & 15u) >> 2u) == 2u)) ? (v_4.zw) : (v_4.xy))));
 }
 
-Inner v_4(uint start_byte_offset) {
-  Inner v_5 = {v(start_byte_offset)};
-  return v_5;
+Inner v_5(uint start_byte_offset) {
+  Inner v_6 = {v(start_byte_offset)};
+  return v_6;
 }
 
 typedef Inner ary_ret[4];
-ary_ret v_6(uint start_byte_offset) {
+ary_ret v_7(uint start_byte_offset) {
   Inner a_2[4] = (Inner[4])0;
   {
-    uint v_7 = 0u;
-    v_7 = 0u;
+    uint v_8 = 0u;
+    v_8 = 0u;
     while(true) {
-      uint v_8 = v_7;
-      if ((v_8 >= 4u)) {
+      uint v_9 = v_8;
+      if ((v_9 >= 4u)) {
         break;
       }
-      Inner v_9 = v_4((start_byte_offset + (v_8 * 64u)));
-      a_2[v_8] = v_9;
+      Inner v_10 = v_5((start_byte_offset + (v_9 * 64u)));
+      a_2[v_9] = v_10;
       {
-        v_7 = (v_8 + 1u);
+        v_8 = (v_9 + 1u);
       }
     }
   }
-  Inner v_10[4] = a_2;
-  return v_10;
+  Inner v_11[4] = a_2;
+  return v_11;
 }
 
-Outer v_11(uint start_byte_offset) {
-  Inner v_12[4] = v_6(start_byte_offset);
-  Outer v_13 = {v_12};
-  return v_13;
+Outer v_12(uint start_byte_offset) {
+  Inner v_13[4] = v_7(start_byte_offset);
+  Outer v_14 = {v_13};
+  return v_14;
 }
 
 typedef Outer ary_ret_1[4];
-ary_ret_1 v_14(uint start_byte_offset) {
+ary_ret_1 v_15(uint start_byte_offset) {
   Outer a_1[4] = (Outer[4])0;
   {
-    uint v_15 = 0u;
-    v_15 = 0u;
+    uint v_16 = 0u;
+    v_16 = 0u;
     while(true) {
-      uint v_16 = v_15;
-      if ((v_16 >= 4u)) {
+      uint v_17 = v_16;
+      if ((v_17 >= 4u)) {
         break;
       }
-      Outer v_17 = v_11((start_byte_offset + (v_16 * 256u)));
-      a_1[v_16] = v_17;
+      Outer v_18 = v_12((start_byte_offset + (v_17 * 256u)));
+      a_1[v_17] = v_18;
       {
-        v_15 = (v_16 + 1u);
+        v_16 = (v_17 + 1u);
       }
     }
   }
-  Outer v_18[4] = a_1;
-  return v_18;
+  Outer v_19[4] = a_1;
+  return v_19;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  Outer l_a[4] = v_14(0u);
-  Outer l_a_3 = v_11(768u);
-  Inner l_a_3_a[4] = v_6(768u);
-  Inner l_a_3_a_2 = v_4(896u);
+  Outer l_a[4] = v_15(0u);
+  Outer l_a_3 = v_12(768u);
+  Inner l_a_3_a[4] = v_7(768u);
+  Inner l_a_3_a_2 = v_5(896u);
   float2x2 l_a_3_a_2_m = v(896u);
   float2 l_a_3_a_2_m_1 = asfloat(a[56u].zw);
   float l_a_3_a_2_m_1_0 = asfloat(a[56u].z);
