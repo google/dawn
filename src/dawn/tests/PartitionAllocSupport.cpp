@@ -30,13 +30,13 @@
 #include "src/utils/log.h"
 
 #if defined(DAWN_ENABLE_PARTITION_ALLOC)
-#include "partition_alloc/dangling_raw_ptr_checks.h"
+#include "partition_alloc/dangling_raw_ptr_checks.h"  // nogncheck
 // TODO(https://crbug.com/1505382): Enforce those warning inside PartitionAlloc.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wgnu-statement-expression-from-macro-expansion"
 #pragma GCC diagnostic ignored "-Wzero-length-array"
-#include "partition_alloc/shim/allocator_shim.h"
-#include "partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h"
+#include "partition_alloc/shim/allocator_shim.h"                                      // nogncheck
+#include "partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h"  // nogncheck
 #pragma GCC diagnostic pop
 #endif
 
