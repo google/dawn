@@ -1498,4 +1498,18 @@ TEST_F(IR_ValidatorTest, SubgroupMatrix_Constant) {
                 testing::HasSubstr("error: let: subgroup_matrix values cannot be constant"));
 }
 
+TEST_F(IR_ValidatorTest, Override_RequiresInitOperand) {
+    mod.properties.Add(core::ir::Property::kAllowOverrides);
+    auto* o = mod.CreateInstruction<Override>();
+    o->AddResult(b.InstructionResult<core::type::U32>());
+    o->SetOverrideId(OverrideId{1});
+    mod.root_block->Append(o);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("error: override: override is malformed, missing initializer operand"));
+}
+
 }  // namespace tint::core::ir

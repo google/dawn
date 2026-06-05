@@ -3509,6 +3509,9 @@ void Validator::CheckOverride(const Override* o) {
                         << " does not match initializer type " << NameOf(o->Initializer()->Type());
             return;
         }
+    } else if (o->Operands().Length() == 0) {
+        AddError(o) << "override is malformed, missing initializer operand";
+        return;
     }
 
     if (!o->OverrideId().has_value() && (o->Initializer() == nullptr)) {
