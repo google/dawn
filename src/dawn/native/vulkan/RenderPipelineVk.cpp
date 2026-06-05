@@ -27,7 +27,6 @@
 
 #include "src/dawn/native/vulkan/RenderPipelineVk.h"
 
-#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -506,14 +505,37 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
         return {};
     };
 
+    std::optional<uint32_t> pixelCenterPolyfillLocation = std::nullopt;
+    if (NeedsPixelCenterPolyfill()) {
+        const EntryPointMetadata* vtx = GetStage(SingleShaderStage::Vertex).metadata;
+        for (size_t i = 0; i < vtx->usedInterStageVariables.size(); ++i) {
+            if (vtx->usedInterStageVariables[i] == false) {
+                pixelCenterPolyfillLocation = uint32_t(i);
+                break;
+            }
+        }
+        if (!pixelCenterPolyfillLocation.has_value()) {
+            return DAWN_INTERNAL_ERROR(
+                "unable to find a free vertex location for the pixel center polyfill");
+        }
+
+        if (HasStage(SingleShaderStage::Fragment)) {
+            const EntryPointMetadata* frag = GetStage(SingleShaderStage::Fragment).metadata;
+            // Because the fragment stage must be a subset of the vertex stage, if the value was
+            // free in the vertex stage it _must_ be free in the fragment stage.
+            DAWN_ASSERT(frag->usedInterStageVariables[pixelCenterPolyfillLocation.value()] ==
+                        false);
+        }
+    }
+
     // Add the vertex stage that's always present.
     DAWN_TRY(AddShaderStage({
         .stage = &GetStage(SingleShaderStage::Vertex),
         .layout = layout,
         .immediateMask = GetImmediateMask(),
         .ycbcrExternalTextures = &specialization.ycbcrExternalTextures,
+        .polyfillPixelCenter = pixelCenterPolyfillLocation,
         .emitPointSize = GetPrimitiveTopology() == wgpu::PrimitiveTopology::PointList,
-        .polyfillPixelCenter = NeedsPixelCenterPolyfill(),
         .pipelineUsesFramebufferFetch = UsesFramebufferFetch(),
     }));
 
@@ -524,7 +546,7 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
             .layout = layout,
             .immediateMask = GetImmediateMask(),
             .ycbcrExternalTextures = &specialization.ycbcrExternalTextures,
-            .polyfillPixelCenter = NeedsPixelCenterPolyfill(),
+            .polyfillPixelCenter = pixelCenterPolyfillLocation,
             .pipelineUsesFramebufferFetch = UsesFramebufferFetch(),
             .needsMultisampledFramebufferFetch = UseSampleRateShading() && UsesFramebufferFetch(),
         }));
