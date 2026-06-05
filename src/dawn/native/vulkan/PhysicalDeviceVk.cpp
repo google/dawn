@@ -1102,7 +1102,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
         // Disable use of ExtendedDynamicState on SwitfShader. It doesn't appear to be handling all
         // dynamic states properly, specifically some stencil ops.
-        deviceToggles->ForceSet(Toggle::VulkanUseExtendedDynamicState, false);
+        //
+        // Only force-disable when the extension is actually advertised. When it isn't, the generic
+        // availability check below already force-disables the toggle, and force-setting the same
+        // toggle twice trips the DAWN_CHECK(!mForcedToggles.Has(toggle)) in TogglesState::ForceSet.
+        if (GetDeviceInfo().HasExt(DeviceExt::ExtendedDynamicState) &&
+            GetDeviceInfo().extendedDynamicStateFeatures.extendedDynamicState == VK_TRUE) {
+            deviceToggles->ForceSet(Toggle::VulkanUseExtendedDynamicState, false);
+        }
     }
 
     if (IsIntelMesa()) {
