@@ -99,12 +99,32 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
     /// Add a new interpolant that will be used to emulate the position builtin as if it always is
     /// pixel centered.
+    /// @param entries the entries to emit
     /// @param addrspace the address to use for the global variables
-    uint32_t AddCenterPosInterpolant(core::AddressSpace addrspace) {
+    uint32_t AddCenterPosInterpolant(Vector<core::type::Manager::StructMemberDesc, 4>& entries,
+                                     core::AddressSpace addrspace) {
+        // Verbose way of finding the smallest free location (id). This of course needs to be the
+        // same id value for both vertex and fragment.
+        std::set<uint32_t> existing_locations;
+        for (auto io : entries) {
+            if (io.attributes.location.has_value()) {
+                existing_locations.insert(io.attributes.location.value());
+            }
+        }
+        uint32_t free_location = 0u;
+        // We only need to search through existing_locations.size + 1 because either we will simply
+        // add an index to the end or there will be a hole in the range of locations
+        for (uint32_t i = 0u; i < (existing_locations.size() + 1); i++) {
+            if (existing_locations.find(i) == existing_locations.end()) {
+                free_location = i;
+                break;
+            }
+        }
+
         // For our 'position' -> 'FragCoord' polyfill we must use 'perspective' because
         // 'interpolateAtOffset' may not be supported for 'linear'.
         auto io_attrib = core::IOAttributes{
-            .location = config.polyfill_pixel_center.value(),
+            .location = free_location,
             .interpolation = core::Interpolation{.type = core::InterpolationType::kPerspective,
                                                  .sampling = core::InterpolationSampling::kCenter}};
 
@@ -126,12 +146,12 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                   core::Access access,
                   const char* name_suffix) {
         if (func->IsVertex() && addrspace == core::AddressSpace::kOut &&
-            config.polyfill_pixel_center.has_value()) {
-            center_pos_vert_idx = AddCenterPosInterpolant(addrspace);
+            config.polyfill_pixel_center) {
+            center_pos_vert_idx = AddCenterPosInterpolant(entries, addrspace);
 
         } else if (func->IsFragment() && addrspace == core::AddressSpace::kIn &&
-                   config.polyfill_pixel_center.has_value()) {
-            center_pos_frag_idx = AddCenterPosInterpolant(addrspace);
+                   config.polyfill_pixel_center) {
+            center_pos_frag_idx = AddCenterPosInterpolant(entries, addrspace);
         }
 
         for (auto io : entries) {

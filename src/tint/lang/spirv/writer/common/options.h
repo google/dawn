@@ -229,9 +229,8 @@ struct Options {
     /// from all vertex shaders in the module.
     bool emit_vertex_point_size = true;
 
-    /// If the optional is set, then we apply the builtin 'position' pixel center emulation with a
-    /// location provided by the optional.
-    std::optional<uint32_t> polyfill_pixel_center = std::nullopt;
+    /// Set to `true` to apply builtin 'position' pixel center emulation.
+    bool polyfill_pixel_center = false;
 
     /// Set to `true` if framebuffer fetch should be multisampled
     bool multisampled_framebuffer_fetch = false;

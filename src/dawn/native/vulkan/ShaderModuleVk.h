@@ -72,8 +72,8 @@ class ShaderModule final : public ShaderModuleBase {
         ImmediateMask immediateMask;
         raw_ptr<const absl::flat_hash_set<APIBindPoint>> ycbcrExternalTextures;
 
-        std::optional<uint32_t> polyfillPixelCenter = std::nullopt;
         bool emitPointSize = false;
+        bool polyfillPixelCenter = false;
         bool pipelineUsesFramebufferFetch = false;
         bool needsMultisampledFramebufferFetch = false;
     };

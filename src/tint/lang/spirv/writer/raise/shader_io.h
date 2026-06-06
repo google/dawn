@@ -61,7 +61,7 @@ struct ShaderIOConfig {
     /// true if f16 IO types should be replaced with f32 types and converted
     bool polyfill_f16_io = false;
     /// true if we should force pixel centers via polyfill when multi-sampling.
-    std::optional<uint32_t> polyfill_pixel_center = std::nullopt;
+    bool polyfill_pixel_center = false;
     /// true if the framebuffer fetch should be multisampled
     bool multisampled_framebuffer_fetch = false;
     /// offsets for clamping frag depth

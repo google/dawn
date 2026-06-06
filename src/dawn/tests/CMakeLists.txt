@@ -160,7 +160,6 @@ set(end2end_sources
     "end2end/ShaderAtomicTests.cpp"
     "end2end/ShaderBuiltinPartialConstArgsErrorTests.cpp"
     "end2end/ShaderF16Tests.cpp"
-    "end2end/ShaderIOPolyfillTests.cpp"
     "end2end/ShaderModuleCachingTests.cpp"
     "end2end/ShaderPrintTests.cpp"
     "end2end/ShaderTests.cpp"

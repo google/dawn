@@ -1422,7 +1422,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.polyfill_pixel_center = 1;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1457,7 +1457,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_SampleIndex) {
 $B1: {  # root
   %foo_position_Input:ptr<__in, vec4<f32>, read> = var undef @builtin(position)
   %foo_sample_index_Input:ptr<__in, u32, read> = var undef @interpolate(flat) @builtin(sample_index)
-  %foo_loc1_Input:ptr<__in, vec4<f32>, read> = var undef @location(1) @interpolate(perspective, center)
+  %foo_loc0_Input:ptr<__in, vec4<f32>, read> = var undef @location(0) @interpolate(perspective, center)
 }
 
 %foo_inner = func(%position:vec4<f32>, %idx:u32):void {
@@ -1472,7 +1472,7 @@ $B1: {  # root
     %10:vec2<f32> = swizzle %9, xy
     %11:vec2<f32> = floor %10
     %12:vec2<f32> = add %11, vec2<f32>(0.5f)
-    %13:vec4<f32> = spirv.interpolate_at_offset %foo_loc1_Input, vec2<f32>(0.0f)
+    %13:vec4<f32> = spirv.interpolate_at_offset %foo_loc0_Input, vec2<f32>(0.0f)
     %14:f32 = swizzle %13, z
     %15:f32 = swizzle %13, w
     %16:f32 = div %14, %15
@@ -1487,7 +1487,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.polyfill_pixel_center = 1;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1552,7 +1552,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.polyfill_pixel_center = 1;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1641,7 +1641,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.polyfill_pixel_center = 0;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1725,7 +1725,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.polyfill_pixel_center = 0;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1792,7 +1792,7 @@ $B1: {  # root
 
     core::ir::transform::ImmediateDataLayout immediate_data;
     ShaderIOConfig config{immediate_data};
-    config.polyfill_pixel_center = 1;
+    config.polyfill_pixel_center = true;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());

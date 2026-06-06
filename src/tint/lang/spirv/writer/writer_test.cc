@@ -457,7 +457,7 @@ TEST_F(SpirvWriterTest, PolyfillPixelCenter) {
     });
 
     Options options;
-    options.polyfill_pixel_center = 0;
+    options.polyfill_pixel_center = true;
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure() << output_;
     EXPECT_INST(R"(
