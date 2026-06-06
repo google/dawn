@@ -2242,21 +2242,19 @@ void DawnTestBase::MapSlotsSynchronously(std::span<ReadbackSlot> readbacks) {
     for (size_t slotIndex = 0; slotIndex < readbacks.size(); ++slotIndex) {
         auto& slot = readbacks[slotIndex];
 
-        slot.buffer.MapAsync(
-            wgpu::MapMode::Read, 0, wgpu::kWholeMapSize, wgpu::CallbackMode::AllowProcessEvents,
-            [this, &slot, &pendingMaps](wgpu::MapAsyncStatus status, wgpu::StringView) {
-                DAWN_ASSERT(status == wgpu::MapAsyncStatus::Success);
-                Mutex::AutoLock lg(&mMutex);
+        slot.buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
+                             wgpu::CallbackMode::AllowProcessEvents,
+                             [&slot, &pendingMaps](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                                 DAWN_ASSERT(status == wgpu::MapAsyncStatus::Success);
+                                 if (status == wgpu::MapAsyncStatus::Success) {
+                                     slot.mappedData = slot.buffer.GetConstMappedRange();
+                                     DAWN_ASSERT(slot.mappedData != nullptr);
+                                 } else {
+                                     slot.mappedData = nullptr;
+                                 }
 
-                if (status == wgpu::MapAsyncStatus::Success) {
-                    slot.mappedData = slot.buffer.GetConstMappedRange();
-                    DAWN_ASSERT(slot.mappedData != nullptr);
-                } else {
-                    slot.mappedData = nullptr;
-                }
-
-                pendingMaps.fetch_sub(1, std::memory_order_release);
-            });
+                                 pendingMaps.fetch_sub(1, std::memory_order_release);
+                             });
     }
 
     // Busy wait until all map operations are done.
@@ -2414,11 +2412,9 @@ void DawnTestBase::StartTestTimer(float expected_max_time) {
 void DawnTestBase::ResolveDeferredExpectationsNow() {
     FlushWire();
 
-    MapSlotsSynchronously(mReadbackSlots);
-
-    CheckReplayedReadbackBuffers(mReadbackSlots);
-
     Mutex::AutoLock lg(&mMutex);
+    MapSlotsSynchronously(mReadbackSlots);
+    CheckReplayedReadbackBuffers(mReadbackSlots);
     ResolveExpectations();
 
     mDeferredExpectations.clear();
