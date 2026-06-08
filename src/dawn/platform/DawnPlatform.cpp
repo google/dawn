@@ -117,4 +117,6 @@ bool Platform::IsFeatureEnabled(Features feature) {
     return false;
 }
 
+void Platform::ReportProgress() {}
+
 }  // namespace dawn::platform

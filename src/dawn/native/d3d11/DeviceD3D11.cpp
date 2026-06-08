@@ -535,6 +535,7 @@ bool Device::ReduceMemoryUsageImpl() {
     mComputeShaderCache.Clear();
 
     UnmapDestroyedBuffers();
+    GetPlatform()->ReportProgress();
 
     // D3D11 defers the deletion of resources until we call Flush().
     // So trigger a Flush() here to force deleting any pending resources.
@@ -542,6 +543,7 @@ bool Device::ReduceMemoryUsageImpl() {
         ToBackend(GetQueue())
             ->GetScopedPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive);
     commandContext.Flush();
+    GetPlatform()->ReportProgress();
 
     // Call Trim() to delete any internal resources created by the driver.
     ComPtr<IDXGIDevice3> dxgiDevice3;

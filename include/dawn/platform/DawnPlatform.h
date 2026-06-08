@@ -199,6 +199,10 @@ class DAWN_PLATFORM_EXPORT Platform {
     // Hook for querying if a Finch feature is enabled.
     virtual bool IsFeatureEnabled(Features feature);
 
+    // Report GPU process progress so that the watchdog thread won't think that a long function is
+    // stuck.
+    virtual void ReportProgress();
+
   private:
     Platform(const Platform&) = delete;
     Platform& operator=(const Platform&) = delete;
