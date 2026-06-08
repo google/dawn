@@ -269,6 +269,11 @@ dawn_generator("dawn_gpu_info_gen") {
     "src/dawn/common/GPUInfo_autogen.h",
     "src/dawn/common/GPUInfo_autogen.cpp",
   ]
+  inputs = [
+    "${dawn_root}/src/dawn/gpu_info.json",
+    "${dawn_root}/generator/templates/dawn/common/GPUInfo.h",
+    "${dawn_root}/generator/templates/dawn/common/GPUInfo.cpp",
+  ]
 }
 
 # This GN file is discovered by all Chromium builds, but common doesn't support
