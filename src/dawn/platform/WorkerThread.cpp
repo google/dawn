@@ -150,6 +150,7 @@ std::unique_ptr<WaitableEvent> AsyncWorkerThreadPool::PostWorkerTask(
                     return static_cast<AsyncWorkerThreadPool*>(self)->TaskHandlingJobLoop();
                 },
                 this));
+            taskTracking->numJobs++;
         }
     });
 
