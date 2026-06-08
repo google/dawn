@@ -1227,6 +1227,52 @@ TEST_P(ShaderTests, ShaderOverridingRobustnessBuiltins) {
     EXPECT_BUFFER_U32_EQ(2, buf, 0);
 }
 
+// Test for an MSL miscompile that produces incorrect results for a certain pattern of unsigned
+// integer arithmetic instructions whose intermediate results overflow.
+// See https://crbug.com/517225032
+TEST_P(ShaderTests, MetalMulShiftModOverflowBug) {
+    wgpu::ComputePipelineDescriptor cDesc;
+    cDesc.compute.module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0)
+        var<storage, read_write> value: u32;
+
+        @compute @workgroup_size(1u)
+        fn main() {
+            let input = value;
+            value = ((input * input) >> 16u) % 3u;
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cDesc);
+
+    wgpu::BufferDescriptor bufDesc;
+    bufDesc.size = 4;
+    bufDesc.usage =
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buf = device.CreateBuffer(&bufDesc);
+
+    // Write 0x10004 to the buffer.
+    uint32_t inputVal = 0x10004;
+    queue.WriteBuffer(buf, 0, &inputVal, sizeof(inputVal));
+
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buf}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bg);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // We expect output to be 2:
+    //   0x10004 * 0x10004 = 0x100080010 = 0x80010 (mod 2^32)
+    //   0x80010 >> 16 = 0x8
+    //   0x8 % 3 = 2
+    EXPECT_BUFFER_U32_EQ(2, buf, 0);
+}
+
 // Test that when fragment input is a subset of the vertex output, the render pipeline should be
 // valid.
 TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutput) {

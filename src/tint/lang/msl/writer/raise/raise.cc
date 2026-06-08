@@ -276,7 +276,13 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     TINT_CHECK_RESULT(raise::ModuleScopeVars(module));
 
-    TINT_CHECK_RESULT(raise::BinaryPolyfill(module));
+    {
+        raise::BinaryPolyfillConfig config{
+            .fix_u32_div_mod = options.workarounds.fix_u32_div_mod,
+        };
+        TINT_CHECK_RESULT(raise::BinaryPolyfill(module, config));
+    }
+
     TINT_CHECK_RESULT(raise::BuiltinPolyfill(
         module, {
                     .polyfill_unpack_2x16_snorm = options.workarounds.polyfill_unpack_2x16_snorm,

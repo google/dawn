@@ -792,6 +792,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
     {Toggle::D3D12UseHLSL2021,
      {"d3d12_use_hlsl_2021", "Use HLSL 2021 when targeting DXC.", "https://crbug.com/508342536",
       ToggleStage::Device}},
+    {Toggle::MetalFixU32DivMod,
+     {"metal_fix_u32_div_mod",
+      "Workaround a driver bug on Apple Silicon with u32 div and mod operations.",
+      "https://crbug.com/517225032", ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

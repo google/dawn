@@ -6221,6 +6221,17 @@ constexpr OverloadInfo kOverloads[] = {
     /* return_matcher_indices */ MatcherIndicesIndex(/* invalid */),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
+  {
+    /* [203] */
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* num_parameters */ 0,
+    /* num_explicit_templates */ 0,
+    /* num_templates   */ 0,
+    /* templates */ TemplateIndex(/* invalid */),
+    /* parameters */ ParameterIndex(/* invalid */),
+    /* return_matcher_indices */ MatcherIndicesIndex(62),
+    /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
+  },
 };
 
 static_assert(OverloadIndex::CanIndex(kOverloads),
@@ -6666,6 +6677,12 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn pointer_offset[T, S : address_space, A : access](ptr<S, T, A>, u32) -> ptr<S, T, A> */
     /* num overloads */ 3,
     /* overloads */ OverloadIndex(176),
+  },
+  {
+    /* [45] */
+    /* fn volatile_zero() -> u32 */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(203),
   },
 };
 

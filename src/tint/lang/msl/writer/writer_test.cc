@@ -726,5 +726,32 @@ kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadg
 )");
 }
 
+TEST_F(MslWriterTest, FixU32DivMod) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* lhs = b.Let("lhs", 0x10004_u);
+        b.Let("result", b.Modulo(lhs, 3_u));
+        b.Return(func);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    options.workarounds.fix_u32_div_mod = true;
+    options.disable_polyfill_integer_div_mod = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+volatile constexpr constant uint tint_volatile_zero = 0u;
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v() {
+  uint const lhs = 65540u;
+  uint const result = ((lhs +  tint_volatile_zero) % 3u);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer

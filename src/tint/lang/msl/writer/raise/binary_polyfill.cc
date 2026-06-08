@@ -39,6 +39,9 @@ struct State {
     /// The IR module.
     core::ir::Module& ir;
 
+    /// The polyfill config.
+    const BinaryPolyfillConfig& config;
+
     /// The IR builder.
     core::ir::Builder b{ir};
 
@@ -49,6 +52,7 @@ struct State {
     void Process() {
         // Find the binary operators that need replacing.
         Vector<core::ir::CoreBinary*, 4> fmod_worklist;
+        Vector<core::ir::CoreBinary*, 4> umod_worklist;
         Vector<core::ir::CoreBinary*, 4> logical_bool_worklist;
 
         for (auto* inst : ir.Instructions()) {
@@ -57,6 +61,11 @@ struct State {
                 auto* lhs_type = binary->LHS()->Type();
                 if (op == core::BinaryOp::kModulo && lhs_type->IsFloatScalarOrVector()) {
                     fmod_worklist.Push(binary);
+                } else if ((op == core::BinaryOp::kModulo || op == core::BinaryOp::kDivide) &&
+                           lhs_type->Is<core::type::U32>()) {
+                    if (config.fix_u32_div_mod) {
+                        umod_worklist.Push(binary);
+                    }
                 } else if ((op == core::BinaryOp::kAnd || op == core::BinaryOp::kOr) &&
                            lhs_type->IsBoolScalarOrVector()) {
                     logical_bool_worklist.Push(binary);
@@ -67,6 +76,9 @@ struct State {
         // Replace the instructions that we found.
         for (auto* fmod : fmod_worklist) {
             FMod(fmod);
+        }
+        for (auto* umod : umod_worklist) {
+            UMod(umod);
         }
         for (auto* logical_bool : logical_bool_worklist) {
             LogicalBool(logical_bool);
@@ -80,6 +92,15 @@ struct State {
             binary->DetachResult(), msl::BuiltinFn::kFmod, binary->Operands());
         call->InsertBefore(binary);
         binary->Destroy();
+    }
+
+    /// Add a volatile zero to unsigned modulo binary instructions to work around a driver bug.
+    /// @param binary the unsigned integer modulo binary instruction
+    void UMod(core::ir::CoreBinary* binary) {
+        b.InsertBefore(binary, [&] {
+            auto* zero = b.Call<msl::ir::BuiltinCall>(ty.u32(), msl::BuiltinFn::kVolatileZero);
+            binary->SetOperand(0u, b.Add(binary->LHS(), zero)->Result());
+        });
     }
 
     /// Replace a logical boolean binary instruction.
@@ -102,14 +123,14 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
+Result<SuccessType> BinaryPolyfill(core::ir::Module& ir, const BinaryPolyfillConfig& config) {
     AssertValid(ir,
                 core::ir::Capabilities{
                     core::ir::Capability::kAllow8BitIntegers,
                 },
                 "before msl.BinaryPolyfill");
 
-    State{ir}.Process();
+    State{ir, config}.Process();
 
     return Success;
 }

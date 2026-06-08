@@ -183,6 +183,8 @@ class Printer : public tint::TextGenerator {
     /// Non-empty only if an invariant attribute has been generated.
     std::string invariant_define_name_;
 
+    std::string volatile_zero_name_;
+
     Hashset<const core::type::Struct*, 16> host_shareable_structs_;
     Hashset<const core::type::Struct*, 4> emitted_structs_;
 
@@ -1056,6 +1058,16 @@ class Printer : public tint::TextGenerator {
             out << ", " << sm->Columns() << ", " << sm->Rows() << ">(";
             EmitValue(out, c->Args()[0]);
             out << ")";
+            return;
+        }
+        if (c->Func() == msl::BuiltinFn::kVolatileZero) {
+            if (volatile_zero_name_.empty()) {
+                volatile_zero_name_ = UniqueIdentifier("tint_volatile_zero");
+                Line(&preamble_buffer_);
+                Line(&preamble_buffer_)
+                    << "volatile constexpr constant uint " << volatile_zero_name_ << " = 0u;";
+            }
+            out << " " << volatile_zero_name_;
             return;
         }
 

@@ -37,11 +37,18 @@ class Module;
 
 namespace tint::msl::writer::raise {
 
+/// The set of optional polyfills that should be applied.
+struct BinaryPolyfillConfig {
+    /// Set to `true` to work around a driver bug with u32 divide and modulo operations.
+    bool fix_u32_div_mod = false;
+};
+
 /// BinaryPolyfill is a transform that replaces binary instructions with polyfills and calls to
 /// MSL backend intrinsic functions.
 /// @param module the module to transform
+/// @param config the set of optional polyfills that should be applied
 /// @returns success or failure
-Result<SuccessType> BinaryPolyfill(core::ir::Module& module);
+Result<SuccessType> BinaryPolyfill(core::ir::Module& module, const BinaryPolyfillConfig& config);
 
 }  // namespace tint::msl::writer::raise
 

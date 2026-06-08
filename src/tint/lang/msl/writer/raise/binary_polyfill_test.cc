@@ -71,7 +71,8 @@ TEST_F(MslWriter_BinaryPolyfillTest, FMod_Scalar) {
 }
 )";
 
-    Run(BinaryPolyfill);
+    BinaryPolyfillConfig config{};
+    Run(BinaryPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -105,7 +106,8 @@ TEST_F(MslWriter_BinaryPolyfillTest, FMod_Vector) {
 }
 )";
 
-    Run(BinaryPolyfill);
+    BinaryPolyfillConfig config{};
+    Run(BinaryPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -132,7 +134,8 @@ TEST_F(MslWriter_BinaryPolyfillTest, NoModify_I32And) {
 
     auto* expect = src;
 
-    Run(BinaryPolyfill);
+    BinaryPolyfillConfig config{};
+    Run(BinaryPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -169,7 +172,8 @@ TEST_F(MslWriter_BinaryPolyfillTest, BoolAnd_Scalar) {
 }
 )";
 
-    Run(BinaryPolyfill);
+    BinaryPolyfillConfig config{};
+    Run(BinaryPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -206,7 +210,8 @@ TEST_F(MslWriter_BinaryPolyfillTest, BoolAnd_Vector) {
 }
 )";
 
-    Run(BinaryPolyfill);
+    BinaryPolyfillConfig config{};
+    Run(BinaryPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -243,7 +248,8 @@ TEST_F(MslWriter_BinaryPolyfillTest, BoolOr_Scalar) {
 }
 )";
 
-    Run(BinaryPolyfill);
+    BinaryPolyfillConfig config{};
+    Run(BinaryPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -280,7 +286,114 @@ TEST_F(MslWriter_BinaryPolyfillTest, BoolOr_Vector) {
 }
 )";
 
-    Run(BinaryPolyfill);
+    BinaryPolyfillConfig config{};
+    Run(BinaryPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BinaryPolyfillTest, UMod_WithoutPolyfill) {
+    auto* lhs = b.FunctionParam<u32>("lhs");
+    auto* rhs = b.FunctionParam<u32>("rhs");
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({lhs, rhs});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Modulo(lhs, rhs);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%lhs:u32, %rhs:u32):u32 {
+  $B1: {
+    %4:u32 = mod %lhs, %rhs
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    BinaryPolyfillConfig config{};
+    Run(BinaryPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BinaryPolyfillTest, UMod_WithPolyfill) {
+    auto* lhs = b.FunctionParam<u32>("lhs");
+    auto* rhs = b.FunctionParam<u32>("rhs");
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({lhs, rhs});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Modulo(lhs, rhs);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%lhs:u32, %rhs:u32):u32 {
+  $B1: {
+    %4:u32 = mod %lhs, %rhs
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%lhs:u32, %rhs:u32):u32 {
+  $B1: {
+    %4:u32 = msl.volatile_zero
+    %5:u32 = add %lhs, %4
+    %6:u32 = mod %5, %rhs
+    ret %6
+  }
+}
+)";
+
+    BinaryPolyfillConfig config{
+        .fix_u32_div_mod = true,
+    };
+    Run(BinaryPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BinaryPolyfillTest, UDiv_WithPolyfill) {
+    auto* lhs = b.FunctionParam<u32>("lhs");
+    auto* rhs = b.FunctionParam<u32>("rhs");
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({lhs, rhs});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Divide(lhs, rhs);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%lhs:u32, %rhs:u32):u32 {
+  $B1: {
+    %4:u32 = div %lhs, %rhs
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%lhs:u32, %rhs:u32):u32 {
+  $B1: {
+    %4:u32 = msl.volatile_zero
+    %5:u32 = add %lhs, %4
+    %6:u32 = div %5, %rhs
+    ret %6
+  }
+}
+)";
+
+    BinaryPolyfillConfig config{
+        .fix_u32_div_mod = true,
+    };
+    Run(BinaryPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
