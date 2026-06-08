@@ -2104,6 +2104,15 @@ TEST_F(CopyCommandTest_T2T, CopyWithinSameTexture) {
             TestT2TCopy(utils::Expectation::Success, texture, 0, {0, 0, kSrcBaseArrayLayer},
                         texture, 0, {0, 0, kDstBaseArrayLayer}, {1, 1, kCopyArrayLayerCount});
         }
+
+        // Case where kCopyArrayLayerCount == 0
+        {
+            constexpr uint32_t kSameBaseArrayLayer = 0;
+            constexpr uint32_t kZeroLayersToCopy = 0;
+
+            TestT2TCopy(utils::Expectation::Success, texture, 0, {0, 0, kSameBaseArrayLayer},
+                        texture, 0, {0, 0, kSameBaseArrayLayer}, {1, 1, kZeroLayersToCopy});
+        }
     }
 
     // Copy between different mipmap levels is allowed.
