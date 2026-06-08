@@ -158,13 +158,12 @@ match u32_texel_format
 @stage("compute") fn memoryBarrierBuffer()
 @stage("compute") fn memoryBarrierImage()
 
-@stage("fragment", "compute") implicit(T: iu32) fn atomicCompSwap(
-                                    ptr<workgroup_or_storage, atomic<T>, read_write>,
-                                    compare_value: T,
-                                    value: T) -> T
-@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomicSub(
-                                    ptr<S, atomic<T>, read_write>,
-                                    T) -> T
+@stage("fragment", "compute") implicit(T: iu32, AS: workgroup_or_storage)
+fn atomicCompSwap(ptr<AS, atomic<T>, read_write>,
+                  compare_value: T,
+                  value: T) -> T
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage)
+fn atomicSub(ptr<S, atomic<T>, read_write>, T) -> T
 
 fn floatBitsToInt(value: f32) -> i32
 implicit(N: num) fn floatBitsToInt(value: vec<N, f32>) -> vec<N, i32>

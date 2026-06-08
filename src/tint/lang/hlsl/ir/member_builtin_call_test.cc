@@ -151,10 +151,11 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {
 
 3 candidate functions:
  • 'Store(byte_address_buffer<write' or 'read_write>  ✗ , offset: u32  ✓ , value: u32  ✓ )'
- • 'Store(subgroup_matrix<K, S, C, R>  ✗ , byte_address_buffer<write' or 'read_write>  ✗ , offset: u32  ✓ , stride: u32  ✗ , matrix_layout  ✗ )' where:
-      ✗  'S' is 'f32', 'i32', 'u32', 'f16', 'i8' or 'u8'
  • 'Store(subgroup_matrix<K, S, C, R>  ✗ , ptr<workgroup, array<S, AC>, read_write>  ✗ , offset: u32  ✓ , stride: u32  ✗ , matrix_layout  ✗ )' where:
       ✗  'S' is 'f32', 'i32', 'u32', 'f16', 'i8' or 'u8'
+ • 'Store(subgroup_matrix<K, S, C, R>  ✗ , byte_address_buffer<AM>  ✗ , offset: u32  ✓ , stride: u32  ✗ , matrix_layout  ✗ )' where:
+      ✗  'S' is 'f32', 'i32', 'u32', 'f16', 'i8' or 'u8'
+      ✗  'AM' is 'write' or 'read_write'
 
     %3:u32 = %t.Store 2u, 2u
                 ^^^^^

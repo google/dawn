@@ -241,21 +241,21 @@ implicit(A: access) fn array_length(ptr<storage, struct_with_runtime_array, A>, 
 @stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_xor(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 
 /// Atomics when going from SPIR-V to WGSL when the atomics are all of type `T`
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_load(ptr<S, T, readable>, U, U) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_store(ptr<S, T, writable>, U, U, T)
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_exchange(ptr<S, T, writable>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_compare_exchange(ptr<S, T, writable>, U, U, U, T, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_increment(ptr<S, T, writable>, U, U) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_decrement(ptr<S, T, writable>, U, U) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_add(ptr<S, T, writable>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_sub(ptr<S, T, writable>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_s_min(ptr<S, T, writable>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_s_max(ptr<S, T, writable>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_u_min(ptr<S, T, writable>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_u_max(ptr<S, T, writable>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_and(ptr<S, T, writable>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_or(ptr<S, T, writable>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_xor(ptr<S, T, writable>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage, AM: readable) fn atomic_load(ptr<S, T, AM>, U, U) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage, AM: writable) fn atomic_store(ptr<S, T, AM>, U, U, T)
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_exchange(ptr<S, T, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_compare_exchange(ptr<S, T, read_write>, U, U, U, T, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_increment(ptr<S, T, read_write>, U, U) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_decrement(ptr<S, T, read_write>, U, U) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_add(ptr<S, T, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_sub(ptr<S, T, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_s_min(ptr<S, T, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_s_max(ptr<S, T, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_u_min(ptr<S, T, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_u_max(ptr<S, T, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_and(ptr<S, T, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_or(ptr<S, T, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_xor(ptr<S, T, read_write>, U, U, T) -> T
 
 /// Atomics specific to the AtomicVec2UMinMax feature (WGSL->SPIRV-v)
 @stage("fragment", "compute") fn atomic_u_min(ptr<storage, atomic<u64>, read_write>, u32, u32, u64) -> u64
@@ -1728,30 +1728,30 @@ implicit(T: f32_f16, N: num) fn face_forward(vec<N, T>, vec<N, T>, vec<N, T>) ->
 implicit(T: f32_f16, U: iu32) fn ldexp(T, U) -> T
 implicit(N: num, T: f32_f16, U: iu32) fn ldexp(vec<N, T>, vec<N, U>) -> vec<N, T>
 
-implicit(T: f32_f16, S: function_private_workgroup_storage)
-    fn modf(x: T, i: ptr<S, T, writable>) -> T
-implicit(T: f32_f16, N: num, S: function_private_workgroup_storage)
-    fn modf(x: vec<N, T>, i: ptr<S, vec<N, T>, writable>) -> vec<N, T>
+implicit(T: f32_f16, S: function_private_workgroup_storage, AM: writable)
+    fn modf(x: T, i: ptr<S, T, AM>) -> T
+implicit(T: f32_f16, N: num, S: function_private_workgroup_storage, AM: writable)
+    fn modf(x: vec<N, T>, i: ptr<S, vec<N, T>, AM>) -> vec<N, T>
 
-implicit(T: f32_f16, R: iu32, S: function_private_workgroup_storage)
-    fn frexp(x: T, i: ptr<S, R, writable>) -> T
-implicit(T: f32_f16, R: iu32, N: num, S: function_private_workgroup_storage)
-    fn frexp(x: vec<N, T>, i: ptr<S, vec<N, R>, writable>) -> vec<N, T>
+implicit(T: f32_f16, R: iu32, S: function_private_workgroup_storage, AM: writable)
+    fn frexp(x: T, i: ptr<S, R, AM>) -> T
+implicit(T: f32_f16, R: iu32, N: num, S: function_private_workgroup_storage, AM: writable)
+    fn frexp(x: vec<N, T>, i: ptr<S, vec<N, R>, AM>) -> vec<N, T>
 
 implicit(T: iu32) fn bit_count<R: iu32>(T) -> R
 implicit(T: iu32, N: num) fn bit_count<R: iu32>(vec<N, T>) -> vec<N, R>
 
-implicit(T: iu32) fn bit_field_insert(base: T, insert: T, offset: iu32, count: iu32) -> T
-implicit(T: iu32, N: num)
-    fn bit_field_insert(base: vec<N, T>, insert: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
+implicit(T: iu32, OT: iu32, CT: iu32) fn bit_field_insert(base: T, insert: T, offset: OT, count: CT) -> T
+implicit(T: iu32, N: num, OT: iu32, CT: iu32)
+    fn bit_field_insert(base: vec<N, T>, insert: vec<N, T>, offset: OT, count: CT) -> vec<N, T>
 
-implicit(T: iu32) fn bit_field_s_extract(base: T, offset: iu32, count: iu32) -> T
-implicit(T: iu32, N: num)
-    fn bit_field_s_extract(base: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
+implicit(T: iu32, OT: iu32, CT: iu32) fn bit_field_s_extract(base: T, offset: OT, count: CT) -> T
+implicit(T: iu32, N: num, OT: iu32, CT: iu32)
+    fn bit_field_s_extract(base: vec<N, T>, offset: OT, count: CT) -> vec<N, T>
 
-implicit(T: iu32) fn bit_field_u_extract(base: T, offset: iu32, count: iu32) -> T
-implicit(T: iu32, N: num)
-    fn bit_field_u_extract(base: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
+implicit(T: iu32, OT: iu32, CT: iu32) fn bit_field_u_extract(base: T, offset: OT, count: CT) -> T
+implicit(T: iu32, N: num, OT: iu32, CT: iu32)
+    fn bit_field_u_extract(base: vec<N, T>, offset: OT, count: CT) -> vec<N, T>
 
 implicit(A: iu32, B: iu32) fn add<R: iu32>(A, B) -> R
 implicit(A: iu32, B: iu32) fn sub<R: iu32>(A, B) -> R
@@ -1831,24 +1831,24 @@ fn u_dot(u32, u32, literal) -> u32
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_cooperative_matrix instructions
 ////////////////////////////////////////////////////////////////////////////////
-@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num, AS: workgroup_or_storage, AM: readable)
   fn cooperative_matrix_load<T: subgroup_matrix<K, S, C, R> >(
-    ptr<workgroup_or_storage, S, readable>, u32, u32, literal) -> T
-@stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num)
+    ptr<AS, S, AM>, u32, u32, literal) -> T
+@stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num, AS: workgroup_or_storage, AM: readable)
   fn cooperative_matrix_load<T: subgroup_matrix<K, S, C, R> >(
-    ptr<workgroup_or_storage, i32, readable>, u32, u32, literal) -> T
-@stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num)
+    ptr<AS, i32, AM>, u32, u32, literal) -> T
+@stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num, AS: workgroup_or_storage, AM: readable)
   fn cooperative_matrix_load<T: subgroup_matrix<K, S, C, R> >(
-    ptr<workgroup_or_storage, u32, readable>, u32, u32, literal) -> T
-@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num)
+    ptr<AS, u32, AM>, u32, u32, literal) -> T
+@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num, AS: workgroup_or_storage, AM: writable)
   fn cooperative_matrix_store(
-    ptr<workgroup_or_storage, S, writable>, subgroup_matrix<K, S, C, R>, u32, u32, literal)
-@stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num)
+    ptr<AS, S, AM>, subgroup_matrix<K, S, C, R>, u32, u32, literal)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num, AS: workgroup_or_storage, AM: writable)
   fn cooperative_matrix_store(
-    ptr<workgroup_or_storage, i32, writable>, subgroup_matrix<K, S, C, R>, u32, u32, literal)
-@stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num)
+    ptr<AS, i32, AM>, subgroup_matrix<K, S, C, R>, u32, u32, literal)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num, AS: workgroup_or_storage, AM: writable)
   fn cooperative_matrix_store(
-    ptr<workgroup_or_storage, u32, writable>, subgroup_matrix<K, S, C, R>, u32, u32, literal)
+    ptr<AS, u32, AM>, subgroup_matrix<K, S, C, R>, u32, u32, literal)
 @must_use @stage("compute") implicit(T: f16, TR: f32_f16, C: num, R: num, K: num)
   fn cooperative_matrix_mul_add(
     subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,

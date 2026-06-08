@@ -207,30 +207,30 @@ fn f16tof32(u32) -> f32
 implicit(N: num) fn f16tof32(vec<N, u32>) -> vec<N, f32>
 
 implicit(T: iu32) fn InterlockedCompareExchange(ptr<workgroup, atomic<T>, read_write>,
-                                compare_value: iu32,
-                                        value: iu32,
-                               original_value: ptr<function, iu32, read_write>)
+                                compare_value: T,
+                                        value: T,
+                               original_value: ptr<function, T, read_write>)
 implicit(T: iu32) fn InterlockedExchange(ptr<workgroup, atomic<T>, read_write>,
-                                 value: iu32,
-                        original_value: ptr<function, iu32, read_write>)
+                                 value: T,
+                        original_value: ptr<function, T, read_write>)
 implicit(T: iu32) fn InterlockedAdd(ptr<workgroup, atomic<T>, read_write>,
-                            value: iu32,
-                   original_value: ptr<function, iu32, read_write>)
+                            value: T,
+                   original_value: ptr<function, T, read_write>)
 implicit(T: iu32) fn InterlockedMax(ptr<workgroup, atomic<T>, read_write>,
-                            value: iu32,
-                   original_value: ptr<function, iu32, read_write>)
+                            value: T,
+                   original_value: ptr<function, T, read_write>)
 implicit(T: iu32) fn InterlockedMin(ptr<workgroup, atomic<T>, read_write>,
-                            value: iu32,
-                   original_value: ptr<function, iu32, read_write>)
+                            value: T,
+                   original_value: ptr<function, T, read_write>)
 implicit(T: iu32) fn InterlockedAnd(ptr<workgroup, atomic<T>, read_write>,
-                            value: iu32,
-                   original_value: ptr<function, iu32, read_write>)
+                            value: T,
+                   original_value: ptr<function, T, read_write>)
 implicit(T: iu32) fn InterlockedOr(ptr<workgroup, atomic<T>, read_write>,
-                           value: iu32,
-                  original_value: ptr<function, iu32, read_write>)
+                           value: T,
+                  original_value: ptr<function, T, read_write>)
 implicit(T: iu32) fn InterlockedXor(ptr<workgroup, atomic<T>, read_write>,
-                            value: iu32,
-                   original_value: ptr<function, iu32, read_write>)
+                            value: T,
+                   original_value: ptr<function, T, read_write>)
 
 // Treat the HLSL matrices as transposed when used in `mul`
 implicit(T: f32_f16, C: num, R: num) fn mul (mat<R, C, T>, vec<C, T>) -> vec<R, T>
@@ -996,21 +996,21 @@ implicit(N: num, T: scalar) fn select(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec
 @stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num)
   fn Splat<SM: subgroup_matrix<K, S, C, R> >(value: u32) -> SM
 
-@stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, C: num, R: num)
-  fn Load<SM: subgroup_matrix<K, S, C, R> >(byte_address_buffer<readable>,
+@stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, C: num, R: num, AM: readable)
+  fn Load<SM: subgroup_matrix<K, S, C, R> >(byte_address_buffer<AM>,
           offset: u32,
           stride: u32,
           matrix_layout) -> SM
 
-@stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, C: num, R: num, AC: num)
-  fn Load<SM: subgroup_matrix<K, S, C, R> >(ptr<workgroup, array<S, AC>, readable>,
+@stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, C: num, R: num, AC: num, AM: readable)
+  fn Load<SM: subgroup_matrix<K, S, C, R> >(ptr<workgroup, array<S, AC>, AM>,
           offset: u32,
           stride: u32,
           matrix_layout) -> SM
 
-@member_function @stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, C: num, R: num)
+@member_function @stage("compute") implicit(K: subgroup_matrix_kind, S: subgroup_matrix_component_types, C: num, R: num, AM: writable)
   fn Store(subgroup_matrix<K, S, C, R>,
-           byte_address_buffer<writable>,
+           byte_address_buffer<AM>,
            offset: u32,
            stride: u32,
            matrix_layout)
