@@ -180,7 +180,7 @@ ResultOrError<ComputePipeline::SpecializationResult> ComputePipeline::Initialize
         stageExtChain.Add(
             &subgroupSizeInfo,
             VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT);
-    } else {
+    } else if (device->GetDeviceInfo().HasExt(DeviceExt::SubgroupSizeControl)) {
         // This is required to ensure SubgroupSize is reported as the actual size of the subgroups
         // (even if some invocations may be disabled), and that the subgroup size will be uniform
         // across the entire dispatch. This becomes unnecessary with SPIR-V 1.6. Note that according

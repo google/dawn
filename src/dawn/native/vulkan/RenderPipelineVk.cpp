@@ -502,6 +502,14 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
         // string_view returned by GetIsolatedEntryPointName() points to a null-terminated string.
         shaderStage->pName = device->GetIsolatedEntryPointName().data();
 
+        if (device->GetDeviceInfo().HasExt(DeviceExt::SubgroupSizeControl) &&
+            shaderStage->stage == VK_SHADER_STAGE_FRAGMENT_BIT) {
+            // This is required to ensure SubgroupSize is reported as the actual size of the
+            // subgroups (even if some invocations may be disabled). This becomes unnecessary with
+            // SPIR-V 1.6.
+            shaderStage->flags |= VK_PIPELINE_SHADER_STAGE_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT;
+        }
+
         stageCount++;
         return {};
     };
