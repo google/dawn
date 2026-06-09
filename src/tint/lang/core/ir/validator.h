@@ -28,32 +28,11 @@
 #ifndef SRC_TINT_LANG_CORE_IR_VALIDATOR_H_
 #define SRC_TINT_LANG_CORE_IR_VALIDATOR_H_
 
+#include "src/tint/lang/core/ir/capabilities.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/utils/containers/enum_set.h"
 #include "src/tint/utils/result.h"
 
 namespace tint::core::ir {
-
-/// Enumerator of optional IR capabilities.
-/// TODO(crbug.com/512904070): Remove this when transition to properties is complete.
-enum class Capability : uint8_t {
-    /// Allows 8-bit integer types.
-    kAllow8BitIntegers,
-    /// Allows 16-bit integer types.
-    kAllow16BitIntegers,
-    /// Allows 64-bit integer types.
-    kAllow64BitIntegers,
-    /// Allows module scope `var`s to exist without an IO annotation
-    kAllowUnannotatedModuleIOVariables,
-    /// Allows ShaderIO specific features, like blend_src on non-struct members.
-    /// These are not separate capabilities, because they are enabled/disabled in lockstep with each
-    /// other.
-    /// TODO(448417342): Validate in/out address space usage based on this capability
-    kLoosenValidationForShaderIO,
-};
-
-/// Capabilities is a set of Capability
-using Capabilities = EnumSet<Capability>;
 
 /// Validates the module @p ir is correctly formed
 /// @param mod the module to validate
@@ -71,7 +50,7 @@ Result<SuccessType> Validate(const Module& mod,
 Result<SuccessType> Validate(const Module& mod, std::string_view msg = "");
 
 /// Validates the module @p ir is correctly formed, iff required by the build configuration.
-/// @param mod the module to transform
+/// @param mod the module to transformG
 /// @param capabilities the optional capabilities that are allowed
 /// @param msg the msg to accompany the output
 void AssertValid(const Module& mod, Capabilities capabilities, std::string_view msg = "");

@@ -61,6 +61,7 @@ libtint_source_set("ir") {
     "builtin_call.h",
     "call.cc",
     "call.h",
+    "capabilities.h",
     "clone_context.cc",
     "clone_context.h",
     "const_param_validator.cc",
