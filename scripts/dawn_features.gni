@@ -63,8 +63,11 @@ declare_args() {
   # system directories instead of local directories.
   dawn_force_system_component_load = false
 
-  # Whether to build Dawn's NodeJS bindings
-  dawn_build_node_bindings = false
+  # Whether to build Dawn's NodeJS bindings. Default to the value from .gclient.
+  dawn_build_node_bindings = dawn_standalone && dawn_node
+
+  # Whether to build Emdawnwebgpu. Default to the value from .gclient.
+  dawn_build_emdawnwebgpu = dawn_standalone && dawn_wasm
 
   # Whether Dawn uses the Agility SDK.
   dawn_use_agility_sdk = false

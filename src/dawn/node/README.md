@@ -48,10 +48,11 @@ If you don't have the `libx11-xbc-dev` supporting library, then you must use the
 
 #### With GN
 
-Set `dawn_build_node_bindings = true` in `args.gn` and build the `dawn_node` target:
+When the `dawn_node` variable is set in `.gclient`, `dawn_node` will be
+available to build by default.
+
 ```sh
-gn gen out/Default --args='dawn_build_node_bindings=true'
-autoninja -C out/Default dawn_node
+autoninja -C out/YourBuildDir dawn_node
 ```
 
 #### With CMake

@@ -4,6 +4,7 @@ gclient_gn_args_file = 'build/config/gclient_args.gni'
 
 gclient_gn_args = [
   'build_with_chromium',
+  'dawn_node',
   'dawn_wasm',
   'generate_location_tags',
 ]

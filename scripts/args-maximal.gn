@@ -1,0 +1,17 @@
+# Reference for flags that will build almost all files in Dawn when building
+# standalone. (Don't forget to also set is_debug, use_remoteexec, etc.,
+# according to your needs.)
+
+# Enable all backends that are OS-independent.
+# Others are left to their defaults, so they'll be enabled if they can be.
+dawn_enable_vulkan = true
+dawn_enable_opengles = true
+dawn_enable_desktop_gl = true
+
+# Build SwiftShader so the Vulkan backend can be run.
+dawn_use_swiftshader = true
+
+# Force-enable Emdawnwebgpu and dawn.node (GN will catch if .gclient isn't set
+# up properly for this).
+dawn_build_emdawnwebgpu = true
+dawn_build_node_bindings = true
