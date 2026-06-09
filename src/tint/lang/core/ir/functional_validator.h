@@ -29,6 +29,8 @@
 #define SRC_TINT_LANG_CORE_IR_FUNCTIONAL_VALIDATOR_H_
 
 #include "src/tint/lang/core/ir/block.h"
+#include "src/tint/lang/core/ir/call.h"
+#include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -76,9 +78,12 @@ class Functional {
     StyledText NameOf(const Value* value);
 
     Source SourceOf(const Instruction* inst);
+    Source SourceOf(const Instruction* inst, size_t idx);
 
     diag::Diagnostic& AddError(Source src);
     diag::Diagnostic& AddError(const Instruction* inst);
+    diag::Diagnostic& AddError(const Instruction* inst, size_t idx);
+    diag::Diagnostic& AddError(const Value* val);
 
     diag::Diagnostic& AddNote(Source src);
     diag::Diagnostic& AddNote(const Block* blk);
@@ -90,14 +95,19 @@ class Functional {
     void CheckBlock(const Block* blk);
     void CheckInstruction(const Instruction* inst);
 
+    void CheckCall(const Call* call);
+    void CheckConstruct(const Construct* construct);
+    void CheckLet(const Let* l);
     void CheckOverride(const Override* o);
     void CheckVar(const Var* var);
-    void CheckLet(const Let* l);
 
     const Module& ir_;
     diag::List& diag_;
     ErrorSource error_source_;
     std::optional<ir::Disassembler> disassembler_;  // Use Disassemble()
+
+    SymbolTable symbols_ = SymbolTable::Wrap(ir_.symbols);
+    core::type::Manager type_mgr_ = core::type::Manager::Wrap(ir_.Types());
 
     ScopeStack scope_stack_;
     Vector<const Block*, 8> block_stack_;

@@ -1,5 +1,3 @@
-// Copyright 2026 The Dawn & Tint Authors
-//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -27,13 +25,25 @@
 
 #include "src/tint/lang/core/ir/functional_validator.h"
 
+#include <utility>
+
+#include "src/tint/lang/core/intrinsic/dialect.h"
+#include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/type/array_count.h"
+#include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/f16.h"
+#include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/i8.h"
+#include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u8.h"
+#include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/styled_text.h"
 
@@ -141,6 +151,14 @@ Source Functional::SourceOf(const Instruction* inst) {
     return Disassemble().InstructionSource(inst);
 }
 
+Source Functional::SourceOf(const Instruction* inst, size_t idx) {
+    if (error_source_ == ErrorSource::kWgsl) {
+        return ir_.SourceOf(inst->Operands()[idx]);
+    }
+    return Disassemble().OperandSource(
+        Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
+}
+
 diag::Diagnostic& Functional::AddError(Source src) {
     auto& diag = diag_.AddError(src);
     if (error_source_ == ErrorSource::kIr) {
@@ -161,6 +179,24 @@ diag::Diagnostic& Functional::AddError(const Instruction* inst) {
 
         // Adding the note may trigger a resize and invalidate the error diagnostic reference,
         // so we need to get a new reference to the error diagnostic here.
+        return *(diag_.end() - 2);
+    }
+    return diag;
+}
+
+diag::Diagnostic& Functional::AddError(const Instruction* inst, size_t idx) {
+    auto& diag = AddError(SourceOf(inst, idx));
+    if (error_source_ == ErrorSource::kWgsl) {
+        return diag;
+    }
+
+    diag << inst->FriendlyName() << ": ";
+
+    if (!block_stack_.IsEmpty()) {
+        AddNote(block_stack_.Back()) << "in block";
+
+        // Adding the note may trigger a resize and invalidate the error diagnostic reference, so we
+        // need to get a new reference to the error diagnostic here.
         return *(diag_.end() - 2);
     }
     return diag;
@@ -227,6 +263,7 @@ void Functional::CheckBlock(const Block* blk) {
 void Functional::CheckInstruction(const Instruction* inst) {
     tint::Switch(
         inst,                                          //
+        [&](const Call* c) { CheckCall(c); },          //
         [&](const Let* l) { CheckLet(l); },            //
         [&](const Override* o) { CheckOverride(o); },  //
         [&](const Var* var) { CheckVar(var); }
@@ -411,6 +448,132 @@ void Functional::CheckLet(const Let* l) {
         AddError(l) << "result type, " << NameOf(result_ty)
                     << ", must be a concrete constructible type or a pointer type";
     }
+}
+
+void Functional::CheckConstruct(const Construct* construct) {
+    auto* result_type = construct->Result()->Type();
+    if (!result_type->IsConstructible()) {
+        // We only allow `construct` to create non-constructible types when they are structures that
+        // contain pointers and handle types, with the corresponding capability enabled.
+        if (!(result_type->Is<core::type::Struct>() &&
+              ir_.properties.Contains(Property::kAllowMslEntryPointInterface))) {
+            AddError(construct) << "type is not constructible";
+            return;
+        }
+    }
+
+    auto args = construct->Args();
+
+    // Zero-value constructors are valid for all constructible types.
+    if (args.empty()) {
+        return;
+    }
+
+    // Check that type type of each argument matches the expected element type of the composite.
+    auto check_args_match_elements = [&] {
+        for (size_t i = 0; i < args.size(); i++) {
+            if (args[i]->Is<ir::Unused>()) {
+                continue;
+            }
+            auto* expected_type = result_type->Element(static_cast<uint32_t>(i));
+            if (args[i]->Type() != expected_type) {
+                AddError(construct, Construct::kArgsOperandOffset + i)
+                    << "type " << NameOf(args[i]->Type()) << " of argument " << i
+                    << " does not match expected type " << NameOf(expected_type);
+            }
+        }
+    };
+
+    if (result_type->Is<core::type::Scalar>()) {
+        // The only valid non-zero scalar constructor is the identity operation.
+        if (args.size() > 1) {
+            AddError(construct) << "scalar construct must not have more than one argument";
+        }
+        if (args[0]->Type() != result_type) {
+            AddError(construct, 0u) << "scalar construct argument type " << NameOf(args[0]->Type())
+                                    << " does not match result type " << NameOf(result_type);
+        }
+        return;
+    }
+
+    if (auto* sg_mat = result_type->As<core::type::SubgroupMatrix>()) {
+        if (args.size() > 1) {
+            AddError(construct) << "subgroup matrix construct must not have more than 1 argument";
+            return;
+        }
+
+        // 8-bit integer matrices use 32-bit shader scalar types in WGSL.
+        // Some backends may support 8-bit integers, in which case they would pass an 8-bit
+        // type for the constructor value instead.
+        const core::type::Type* scalar_ty = sg_mat->Type();
+        if (scalar_ty->Is<core::type::I8>()) {
+            scalar_ty = type_mgr_.i32();
+        } else if (scalar_ty->Is<core::type::U8>()) {
+            scalar_ty = type_mgr_.u32();
+        }
+        if (args[0]->Type() != scalar_ty && args[0]->Type() != sg_mat->Type()) {
+            AddError(construct) << "subgroup matrix construct argument type "
+                                << NameOf(args[0]->Type())
+                                << " does not match matrix shader scalar type "
+                                << NameOf(scalar_ty);
+        }
+        return;
+    }
+
+    if (auto* arr = result_type->As<core::type::Array>()) {
+        if (args.size() != arr->ConstantCount()) {
+            AddError(construct) << "array has " << arr->ConstantCount().value()
+                                << " elements, but construct provides " << args.size()
+                                << " arguments";
+            return;
+        }
+        check_args_match_elements();
+        return;
+    }
+
+    if (auto* str = As<core::type::Struct>(result_type)) {
+        auto members = str->Members();
+        if (args.size() != str->Members().Length()) {
+            AddError(construct) << "structure has " << members.Length()
+                                << " members, but construct provides " << args.size()
+                                << " arguments";
+            return;
+        }
+        check_args_match_elements();
+    }
+
+    auto table = intrinsic::Table<intrinsic::Dialect>(type_mgr_, symbols_);
+    auto arg_types = Transform<4>(args, [&](auto* v) { return v->Type(); });
+    if (auto* vec = result_type->As<core::type::Vector>()) {
+        auto ctor_conv = intrinsic::VectorCtorConv(vec->Width());
+        auto match = table.Lookup(ctor_conv, Vector{vec->Type()}, std::move(arg_types),
+                                  core::EvaluationStage::kConstant);
+        if (match != Success || vec->Type() != arg_types[0]->DeepestElement()) {
+            AddError(construct) << "no matching overload for " << vec->FriendlyName()
+                                << " constructor";
+        }
+        return;
+    }
+
+    if (auto* mat = result_type->As<core::type::Matrix>()) {
+        auto ctor_conv = intrinsic::MatrixCtorConv(mat->Columns(), mat->Rows());
+        auto match = table.Lookup(ctor_conv, Vector{mat->Type()}, std::move(arg_types),
+                                  core::EvaluationStage::kConstant);
+        if (match != Success) {
+            AddError(construct) << "no matching overload for " << mat->FriendlyName()
+                                << " constructor";
+        }
+        return;
+    }
+}
+
+void Functional::CheckCall(const Call* call) {
+    tint::Switch(
+        call,                                            //
+        [&](const Construct* c) { CheckConstruct(c); },  //
+        [&](Default) {
+            // Validation of custom IR instructions
+        });
 }
 
 }  // namespace tint::core::ir::validator
