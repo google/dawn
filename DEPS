@@ -71,7 +71,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '66ce96771f9db6a9dfc61e58aeb452b90caabfbf',
+  'chromium_revision': '91300ae47c89329439222ab38d2865abfada0a28',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -87,7 +87,7 @@ vars = {
 
 deps = {
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@bd4031139263b3066863df54d42bb5b6c88dade0',
+    'url': '{chromium_git}/chromium/src/buildtools@f0ccfb5933f7daa9545159afbb35bdf8951efcc4',
     'condition': 'dawn_standalone',
   },
   'third_party/clang-format/script': {
@@ -136,7 +136,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@8e97c4abc93ddfe7e63505fcd27bbfb4dafff6f3',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@f163b9b4e98fe02ca17d67508d8b83c671e744e8',
     'condition': 'dawn_standalone',
   },
 
@@ -151,11 +151,11 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@0b53130f7fb3e216b42e9ea813e963c57829c641',
+  'url': '{chromium_git}/chromium/src/build@424c8aa74940ede055ca5494b8207747581523a3',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@a3e0959295cf4531287ac7aba116cefb656b1009',
+  'url': '{chromium_git}/chromium/src/tools/clang@f7b1b78d13c148f421362985a707860ecaf2bfff',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -265,7 +265,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@b0a16ed1855424dccd2afddef18571982dd21178',
+    'url': '{chromium_git}/chromium/src/testing@25a9c6b7f82c06fb46abc59eaf2fa684b2cb556d',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
