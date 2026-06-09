@@ -311,7 +311,9 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.disable_polyfill_integer_div_mod = fuzzed_options.disable_polyfill_integer_div_mod;
     options.disable_integer_range_analysis = !fuzzed_options.enable_integer_range_analysis;
     options.emit_vertex_point_size = fuzzed_options.emit_vertex_point_size;
-    options.polyfill_pixel_center = fuzzed_options.polyfill_pixel_center;
+    if (fuzzed_options.polyfill_pixel_center) {
+        options.polyfill_pixel_center = 99;  // Number bigger then is normally allowed in WGSL
+    }
     options.workarounds.polyfill_case_switch = fuzzed_options.polyfill_case_switch;
     options.workarounds.scalarize_max_min_clamp = fuzzed_options.scalarize_max_min_clamp;
     options.workarounds.dva_transform_handle = fuzzed_options.dva_transform_handle;
