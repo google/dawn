@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_FUNCTIONAL_VALIDATOR_H_
 
 #include "src/tint/lang/core/ir/access.h"
+#include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/construct.h"
@@ -98,6 +99,7 @@ class Functional {
     void CheckInstruction(const Instruction* inst);
 
     void CheckAccess(const Access* a);
+    void CheckBinary(const Binary* b);
     void CheckCall(const Call* call);
     void CheckConstruct(const Construct* construct);
     void CheckLet(const Let* l);

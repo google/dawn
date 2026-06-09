@@ -272,6 +272,7 @@ void Functional::CheckInstruction(const Instruction* inst) {
     tint::Switch(
         inst,                                          //
         [&](const Access* a) { CheckAccess(a); },      //
+        [&](const Binary* b) { CheckBinary(b); },      //
         [&](const Call* c) { CheckCall(c); },          //
         [&](const Let* l) { CheckLet(l); },            //
         [&](const Override* o) { CheckOverride(o); },  //
@@ -689,6 +690,27 @@ void Functional::CheckAccess(const Access* a) {
     if (DAWN_UNLIKELY(!ok)) {
         AddError(a) << "result of access chain is type " << desc_of(in_kind, ty)
                     << " but instruction type is " << NameOf(want);
+    }
+}
+
+void Functional::CheckBinary(const Binary* b) {
+    intrinsic::Context context{b->TableData(), type_mgr_, symbols_};
+
+    auto overload =
+        core::intrinsic::LookupBinary(context, b->Op(), b->LHS()->Type(), b->RHS()->Type(),
+                                      core::EvaluationStage::kRuntime, /* is_compound */ false);
+    if (overload != Success) {
+        AddError(b) << overload.Failure();
+        return;
+    }
+
+    auto* result = b->Result(0);
+    TINT_ASSERT(result);
+
+    if (overload->return_type != result->Type()) {
+        AddError(b) << "result value type " << NameOf(result->Type()) << " does not match "
+                    << style::Instruction(b->Op()) << " result type "
+                    << NameOf(overload->return_type);
     }
 }
 

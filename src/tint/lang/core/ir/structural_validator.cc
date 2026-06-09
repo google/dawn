@@ -3556,7 +3556,6 @@ void Structural::CheckBinary(const Binary* b) {
     if (!CheckResultsAndOperands(b, Binary::kNumResults, Binary::kNumOperands)) {
         return;
     }
-
     if (b->Op() == core::BinaryOp::kLogicalAnd) {
         AddError(b) << "logical-and is not valid in the IR";
         return;
@@ -3564,26 +3563,6 @@ void Structural::CheckBinary(const Binary* b) {
     if (b->Op() == core::BinaryOp::kLogicalOr) {
         AddError(b) << "logical-or is not valid in the IR";
         return;
-    }
-
-    if (b->LHS() && b->RHS()) {
-        intrinsic::Context context{b->TableData(), type_mgr_, symbols_};
-
-        auto overload =
-            core::intrinsic::LookupBinary(context, b->Op(), b->LHS()->Type(), b->RHS()->Type(),
-                                          core::EvaluationStage::kRuntime, /* is_compound */ false);
-        if (overload != Success) {
-            AddError(b) << overload.Failure();
-            return;
-        }
-
-        if (auto* result = b->Result(0)) {
-            if (overload->return_type != result->Type()) {
-                AddError(b) << "result value type " << NameOf(result->Type()) << " does not match "
-                            << style::Instruction(Disassemble().NameOf(b->Op())) << " result type "
-                            << NameOf(overload->return_type);
-            }
-        }
     }
 }
 

@@ -1536,7 +1536,7 @@ TEST_F(IR_ValidatorTest, Binary_MismatchedResultType) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
-                    "error: binary: result value type 'f32' does not match add result type 'i32'"))
+                    "error: binary: result value type 'f32' does not match '+' result type 'i32'"))
         << res.Failure();
 }
 
@@ -1579,7 +1579,7 @@ TEST_F(IR_ValidatorTest, Binary_OperandWrongType_Func) {
     b.Append(other_func->Block(), [&] { b.Return(other_func); });
 
     b.Append(func->Block(), [&] {
-        b.Add(b.Constant(1_i), other_func);
+        b.Add(b.Constant(1_i), b.Zero(ty.mat4x4<f32>()));
         b.Return(func);
     });
 
@@ -1587,7 +1587,7 @@ TEST_F(IR_ValidatorTest, Binary_OperandWrongType_Func) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
-                    R"(:3:5 error: binary: no matching overload for 'operator + (i32, <function>)'
+                    R"(:3:5 error: binary: no matching overload for 'operator + (i32, mat4x4<f32>)'
 )")) << res.Failure();
 }
 
