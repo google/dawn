@@ -30,6 +30,7 @@
 #include "src/tint/lang/core/intrinsic/dialect.h"
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/type/array.h"
@@ -303,6 +304,8 @@ void Functional::CheckInstruction(const Instruction* inst) {
         [&](const LoadVectorElement* l) { CheckLoadVectorElement(l); },    //
         [&](const Loop* l) { CheckLoop(l); },                              //
         [&](const Override* o) { CheckOverride(o); },                      //
+        [&](const Phony*) {},                                              //
+        [&](const Store* s) { CheckStore(s); },                            //
         [&](const StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
         [&](const Terminator* b) { CheckTerminator(b); },                  //
         [&](const Var* var) { CheckVar(var); }
@@ -803,6 +806,41 @@ void Functional::CheckLoad(const Load* l) {
     if (!CanLoad(mv->StoreType())) {
         AddError(l, Load::kFromOperandOffset)
             << "type " << NameOf(mv->StoreType()) << " cannot be loaded";
+        return;
+    }
+}
+
+void Functional::CheckStore(const Store* s) {
+    const core::ir::Value* from = s->From();
+    const core::ir::Value* to = s->To();
+    TINT_ASSERT(from != nullptr);
+    TINT_ASSERT(to != nullptr);
+
+    auto* mv = As<core::type::MemoryView>(to->Type());
+    if (!mv) {
+        AddError(s, Store::kToOperandOffset)
+            << "store target operand " << NameOf(to->Type()) << " is not a memory view";
+        return;
+    }
+
+    if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
+        AddError(s, Store::kToOperandOffset)
+            << "store target operand has a non-writeable access type, "
+            << style::Literal(ToString(mv->Access()));
+        return;
+    }
+
+    const core::type::Type* value_type = from->Type();
+    const core::type::Type* store_type = mv->StoreType();
+    if (value_type != store_type) {
+        AddError(s, Store::kFromOperandOffset)
+            << "value type " << NameOf(value_type) << " does not match store type "
+            << NameOf(store_type);
+        return;
+    }
+
+    if (!store_type->IsConstructible()) {
+        AddError(s) << "store type " << NameOf(store_type) << " is not constructible";
         return;
     }
 }

@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
+#include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/utils/containers/hashmap.h"
@@ -122,6 +123,7 @@ class Functional {
     void CheckLoopBody(const Loop* loop);
     void CheckLoopContinuing(const Loop* loop);
     void CheckOverride(const Override* o);
+    void CheckStore(const Store* s);
     void CheckStoreVectorElement(const StoreVectorElement* s);
     void CheckTerminator(const Terminator* b);
     void CheckVar(const Var* var);

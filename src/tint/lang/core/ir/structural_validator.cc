@@ -3966,41 +3966,7 @@ void Structural::CheckLoad(const Load* l) {
 }
 
 void Structural::CheckStore(const Store* s) {
-    if (!CheckResultsAndOperands(s, Store::kNumResults, Store::kNumOperands)) {
-        return;
-    }
-
-    if (auto* from = s->From()) {
-        if (auto* to = s->To()) {
-            auto* mv = As<core::type::MemoryView>(to->Type());
-            if (!mv) {
-                AddError(s, Store::kToOperandOffset)
-                    << "store target operand " << NameOf(to->Type()) << " is not a memory view";
-                return;
-            }
-
-            if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
-                AddError(s, Store::kToOperandOffset)
-                    << "store target operand has a non-writeable access type, "
-                    << style::Literal(ToString(mv->Access()));
-                return;
-            }
-
-            auto* value_type = from->Type();
-            auto* store_type = mv->StoreType();
-            if (value_type != store_type) {
-                AddError(s, Store::kFromOperandOffset)
-                    << "value type " << NameOf(value_type) << " does not match store type "
-                    << NameOf(store_type);
-                return;
-            }
-
-            if (!store_type->IsConstructible()) {
-                AddError(s) << "store type " << NameOf(store_type) << " is not constructible";
-                return;
-            }
-        }
-    }
+    CheckResultsAndOperands(s, Store::kNumResults, Store::kNumOperands);
 }
 
 void Structural::CheckLoadVectorElement(const LoadVectorElement* l) {
