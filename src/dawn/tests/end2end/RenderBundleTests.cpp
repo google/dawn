@@ -470,6 +470,111 @@ TEST_P(RenderBundleIndirectValidationTest, RepeatedIndirectDrawValidation) {
     EXPECT_BUFFER_U32_EQ(3, counterRead, 0);
 }
 
+// Tests a bug outlined in crbug.com/520972775 where repeated execution of bundles with an indirect
+// draw could de-duplicate the draw calls when validating, causing the ValidatedIndirectDraw side
+// table to have too few entries.
+TEST_P(RenderBundleIndirectValidationTest, SinglePassRepeatedIndirectDraw) {
+    // Render Pass
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    // Index Buffers
+    wgpu::Buffer smallIdx = CreateIndexBuffer({0, 1, 2});
+
+    // Indirect buffer
+    wgpu::Buffer indirect = CreateIndirectBuffer({3, 1, 0, 0, 0});
+
+    // Buffers to use for simple fragment counter
+    uint32_t data[] = {0};
+    wgpu::Buffer counterBuffer = utils::CreateBufferFromData(
+        device, data, sizeof(uint32_t),
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
+    wgpu::Buffer counterRead = utils::CreateBufferFromData(
+        device, data, sizeof(uint32_t), wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
+
+    // Pipeline
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        struct Ctr { n: atomic<u32>, };
+        @group(0) @binding(0) var<storage, read_write> ctr: Ctr;
+
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 1.0);
+        }
+        // Simply adds one to the simple fragment counter with each draw
+        @fragment fn fs() -> @location(0) vec4f {
+            atomicAdd(&ctr.n, 1u);
+            return vec4f(1.0, 0.0, 0.0, 1.0);
+        })");
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = module;
+    descriptor.cFragment.module = module;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    // Bind group
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {{0, counterBuffer, 0, sizeof(float)}});
+
+    // Render bundles
+    utils::ComboRenderBundleEncoderDescriptor desc = {};
+    desc.colorFormatCount = 1;
+    desc.cColorFormats[0] = renderPass.colorFormat;
+
+    wgpu::RenderBundle directRenderBundle;
+    {
+        wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+        renderBundleEncoder.SetPipeline(pipeline);
+        renderBundleEncoder.SetBindGroup(0, bindGroup);
+        renderBundleEncoder.DrawIndirect(indirect, 0);
+        directRenderBundle = renderBundleEncoder.Finish();
+    }
+
+    wgpu::RenderBundle indexedRenderBundle;
+    {
+        wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+        renderBundleEncoder.SetPipeline(pipeline);
+        renderBundleEncoder.SetBindGroup(0, bindGroup);
+        renderBundleEncoder.SetIndexBuffer(smallIdx, wgpu::IndexFormat::Uint32);
+        renderBundleEncoder.DrawIndexedIndirect(indirect, 0);
+        indexedRenderBundle = renderBundleEncoder.Finish();
+    }
+
+    //
+    // Bug - Same bundle executed twice in a single render pass.
+    //
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        // Test bundles with DrawIndirect calls
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.ExecuteBundles(1, &directRenderBundle);
+        pass.ExecuteBundles(1, &directRenderBundle);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        // Test bundles with DrawIndexedIndirect calls
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.ExecuteBundles(1, &indexedRenderBundle);
+        pass.ExecuteBundles(1, &indexedRenderBundle);
+        pass.End();
+
+        // Copy the fragment counter results of both passes to the readback buffer.
+        encoder.CopyBufferToBuffer(counterBuffer, 0, counterRead, 0, 4);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    // Each bundle should produce 3 fragments, for a total of 12.
+    EXPECT_BUFFER_U32_EQ(12, counterRead, 0);
+}
+
 DAWN_INSTANTIATE_TEST(RenderBundleIndirectValidationTest,
                       D3D11Backend(),
                       D3D12Backend(),

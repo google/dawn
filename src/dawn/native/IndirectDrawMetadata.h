@@ -215,7 +215,6 @@ class IndirectDrawMetadata : public NonCopyable {
 
   private:
     IndexedIndirectBufferValidationInfoMap mIndexedIndirectBufferValidationInfo;
-    absl::flat_hash_set<RenderBundleBase*> mAddedBundles;
 
     std::vector<IndirectMultiDraw> mMultiDraws;
 
