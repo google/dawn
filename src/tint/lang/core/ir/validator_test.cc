@@ -1560,6 +1560,8 @@ TEST_F(IR_ValidatorTest, Let_HandlePointer) {
         auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
         auto* ptr = ty.ptr(core::AddressSpace::kHandle, tex_ty, core::Access::kRead);
         auto* v = b.Var(ptr);
+        v->SetBindingPoint(0, 0);
+
         b.Let("l", v->Result(0));
         b.Return(f);
     });

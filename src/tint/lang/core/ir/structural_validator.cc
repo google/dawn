@@ -3192,39 +3192,7 @@ bool Structural::CheckStructMemberAttributes(const core::type::StructMember* mem
     return true;
 }
 void Structural::CheckLet(const Let* l) {
-    if (!CheckResultsAndOperands(l, Let::kNumResults, Let::kNumOperands)) {
-        return;
-    }
-
-    auto* value_ty = l->Value()->Type();
-    if (ir_.properties.Contains(Property::kAllowAnyLetType)) {
-        if (value_ty->Is<core::type::Void>()) {
-            AddError(l) << "value type cannot be void";
-        }
-    } else {
-        if (!value_ty->IsConstructible() && !value_ty->Is<core::type::Pointer>()) {
-            AddError(l) << "value type, " << NameOf(value_ty)
-                        << ", must be concrete constructible type or a pointer type";
-        }
-    }
-
-    auto* result_ty = l->Result()->Type();
-    if (!ir_.properties.Contains(Property::kAllowAnyLetType)) {
-        if (auto* ptr = result_ty->As<core::type::Pointer>()) {
-            if (ptr->AddressSpace() == AddressSpace::kHandle &&
-                !ir_.properties.Contains(Property::kAllowPointerToHandle)) {
-                AddError(l) << "handle pointer cannot be captured in a let";
-            }
-        } else if (!result_ty->IsConstructible()) {
-            AddError(l) << "result type, " << NameOf(result_ty)
-                        << ", must be concrete constructible type or a pointer type";
-        }
-    }
-
-    if (value_ty != result_ty) {
-        AddError(l) << "result type " << NameOf(l->Result()->Type())
-                    << " does not match value type " << NameOf(l->Value()->Type());
-    }
+    CheckResultsAndOperands(l, Let::kNumResults, Let::kNumOperands);
 }
 
 void Structural::CheckCall(const Call* call) {

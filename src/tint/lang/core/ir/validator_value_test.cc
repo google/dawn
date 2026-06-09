@@ -1206,7 +1206,7 @@ TEST_F(IR_ValidatorTest, Let_VoidValueWithoutCapability) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:9:14 error: let: value type, 'void', must be concrete constructible type or a pointer type
+            R"(:9:14 error: let: value type, 'void', must be a concrete constructible type or a pointer type
     %4:i32 = let %3
              ^^^
 )")) << res.Failure();
@@ -1228,7 +1228,7 @@ TEST_F(IR_ValidatorTest, Let_NotConstructibleResult) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:3:18 error: let: result type, 'sampler', must be concrete constructible type or a pointer type
+            R"(:3:18 error: let: result type, 'sampler', must be a concrete constructible type or a pointer type
     %3:sampler = let 1i
                  ^^^
 )")) << res.Failure();
@@ -1239,7 +1239,7 @@ TEST_F(IR_ValidatorTest, Let_NotConstructibleValue) {
     auto* p = b.FunctionParam("p", ty.sampler());
     f->AppendParam(p);
     b.Append(f->Block(), [&] {
-        auto* l = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.i32()), p);
+        auto* l = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.sampler()), p);
         b.Append(l);
         b.Return(f);
     });
@@ -1249,9 +1249,9 @@ TEST_F(IR_ValidatorTest, Let_NotConstructibleValue) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:3:14 error: let: value type, 'sampler', must be concrete constructible type or a pointer type
-    %3:i32 = let %p
-             ^^^
+            R"(:3:18 error: let: value type, 'sampler', must be a concrete constructible type or a pointer type
+    %3:sampler = let %p
+                 ^^^
 )")) << res.Failure();
 }
 

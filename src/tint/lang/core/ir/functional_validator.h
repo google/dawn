@@ -30,6 +30,7 @@
 
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -91,6 +92,7 @@ class Functional {
 
     void CheckOverride(const Override* o);
     void CheckVar(const Var* var);
+    void CheckLet(const Let* l);
 
     const Module& ir_;
     diag::List& diag_;

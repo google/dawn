@@ -32,6 +32,8 @@
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/memory_view.h"
+#include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/styled_text.h"
 
@@ -225,6 +227,7 @@ void Functional::CheckBlock(const Block* blk) {
 void Functional::CheckInstruction(const Instruction* inst) {
     tint::Switch(
         inst,                                          //
+        [&](const Let* l) { CheckLet(l); },            //
         [&](const Override* o) { CheckOverride(o); },  //
         [&](const Var* var) { CheckVar(var); }
         // TODO(516717234): Add TINT_ICE_ON_NO_MATCH when all instructions covered
@@ -376,6 +379,37 @@ void Functional::CheckVar(const Var* var) {
                 return;
             }
         }
+    }
+}
+
+void Functional::CheckLet(const Let* l) {
+    auto* value_ty = l->Value()->Type();
+    auto* result_ty = l->Result()->Type();
+    if (value_ty != result_ty) {
+        AddError(l) << "result type " << NameOf(l->Result()->Type())
+                    << " does not match value type " << NameOf(l->Value()->Type());
+    }
+
+    if (ir_.properties.Contains(Property::kAllowAnyLetType)) {
+        if (value_ty->Is<core::type::Void>()) {
+            AddError(l) << "value type cannot be void";
+        }
+        return;
+    }
+
+    if (!value_ty->IsConstructible() && !value_ty->Is<core::type::Pointer>()) {
+        AddError(l) << "value type, " << NameOf(value_ty)
+                    << ", must be a concrete constructible type or a pointer type";
+    }
+
+    if (auto* ptr = result_ty->As<core::type::Pointer>()) {
+        if (ptr->AddressSpace() == AddressSpace::kHandle &&
+            !ir_.properties.Contains(Property::kAllowPointerToHandle)) {
+            AddError(l) << "handle pointer cannot be captured in a let";
+        }
+    } else if (!result_ty->IsConstructible()) {
+        AddError(l) << "result type, " << NameOf(result_ty)
+                    << ", must be a concrete constructible type or a pointer type";
     }
 }
 
