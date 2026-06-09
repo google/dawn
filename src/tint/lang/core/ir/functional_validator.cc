@@ -307,6 +307,7 @@ void Functional::CheckInstruction(const Instruction* inst) {
         [&](const Phony*) {},                                              //
         [&](const Store* s) { CheckStore(s); },                            //
         [&](const StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
+        [&](const Switch* s) { CheckSwitch(s); },                          //
         [&](const Terminator* b) { CheckTerminator(b); },                  //
         [&](const Var* var) { CheckVar(var); }
         // TODO(516717234): Add TINT_ICE_ON_NO_MATCH when all instructions covered
@@ -1005,6 +1006,42 @@ void Functional::CheckContinue(const Continue* c) {
     TINT_ASSERT(loop);
 
     first_continues_.Add(loop, c);
+}
+
+void Functional::CheckSwitch(const Switch* s) {
+    if (s->Condition() && !s->Condition()->Type()->IsIntegerScalar()) {
+        auto* cond_ty = s->Condition() ? s->Condition()->Type() : nullptr;
+        AddError(s, Switch::kConditionOperandOffset)
+            << "condition type " << NameOf(cond_ty) << " must be an integer scalar";
+    }
+
+    bool found_default = false;
+    for (auto& case_ : s->Cases()) {
+        if (case_.selectors.IsEmpty()) {
+            AddError(s) << "case does not have any selectors";
+        }
+        CheckBlock(case_.block);
+
+        for (const auto& sel : case_.selectors) {
+            if (sel.IsDefault()) {
+                if (found_default) {
+                    AddError(s) << "multiple default selectors in switch";
+                }
+                found_default = true;
+            } else if (!sel.val->Type()->IsIntegerScalar()) {
+                AddError(s) << "case selector type " << NameOf(sel.val->Type())
+                            << " must be an integer scalar";
+            } else if (s->Condition() && sel.val->Type() != s->Condition()->Type()) {
+                AddError(s) << "case selector type " << NameOf(sel.val->Type())
+                            << " must match the switch condition type "
+                            << NameOf(s->Condition()->Type());
+            }
+        }
+    }
+
+    if (!found_default) {
+        AddError(s) << "missing default case for switch";
+    }
 }
 
 }  // namespace tint::core::ir::validator

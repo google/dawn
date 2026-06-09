@@ -3663,44 +3663,13 @@ void Structural::CheckSwitch(const Switch* s) {
     CheckResults(s);
     CheckOperands(s, Switch::kNumOperands);
 
-    if (s->Condition() && !s->Condition()->Type()->IsIntegerScalar()) {
-        auto* cond_ty = s->Condition() ? s->Condition()->Type() : nullptr;
-        AddError(s, Switch::kConditionOperandOffset)
-            << "condition type " << NameOf(cond_ty) << " must be an integer scalar";
-    }
-
     tasks_.Push([this] { control_stack_.Pop(); });
 
-    bool found_default = false;
     for (auto& cse : s->Cases()) {
         if (cse.block->Is<core::ir::MultiInBlock>()) {
             AddError(s) << "case block must be a block";
         }
-
-        if (cse.selectors.IsEmpty()) {
-            AddError(s) << "case does not have any selectors";
-        }
-
         QueueBlock(cse.block);
-        for (const auto& sel : cse.selectors) {
-            if (sel.IsDefault()) {
-                if (found_default) {
-                    AddError(s) << "multiple default selectors in switch";
-                }
-                found_default = true;
-            } else if (!sel.val->Type()->IsIntegerScalar()) {
-                AddError(s) << "case selector type " << NameOf(sel.val->Type())
-                            << " must be an integer scalar";
-            } else if (s->Condition() && sel.val->Type() != s->Condition()->Type()) {
-                AddError(s) << "case selector type " << NameOf(sel.val->Type())
-                            << " must match the switch condition type "
-                            << NameOf(s->Condition()->Type());
-            }
-        }
-    }
-
-    if (!found_default) {
-        AddError(s) << "missing default case for switch";
     }
 
     tasks_.Push([this, s] { control_stack_.Push(s); });
