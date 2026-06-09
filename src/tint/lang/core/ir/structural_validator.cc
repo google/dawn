@@ -4061,85 +4061,11 @@ void Structural::CheckStore(const Store* s) {
 }
 
 void Structural::CheckLoadVectorElement(const LoadVectorElement* l) {
-    if (!CheckResultsAndOperands(l, LoadVectorElement::kNumResults,
-                                 LoadVectorElement::kNumOperands)) {
-        return;
-    }
-
-    if (auto* res = l->Result(0)) {
-        auto* el_ty = GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset);
-        if (!el_ty) {
-            return;
-        }
-        if (res->Type() != el_ty) {
-            AddResultError(l, 0) << "result type " << NameOf(res->Type())
-                                 << " does not match vector pointer element type " << NameOf(el_ty);
-            return;
-        }
-    }
-
-    if (!l->Index()->Type()->IsIntegerScalar()) {
-        AddError(l, LoadVectorElement::kIndexOperandOffset)
-            << "load vector element index must be an integer scalar";
-    }
-    if (auto* c = l->Index()->As<core::ir::Constant>()) {
-        auto val = c->Value()->ValueAs<uint32_t>();
-
-        auto* vec_ty = l->From()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
-        TINT_ASSERT(vec_ty);
-
-        if (val >= vec_ty->Width()) {
-            AddError(l, LoadVectorElement::kIndexOperandOffset)
-                << "load vector element index must be in range [0, " << (vec_ty->Width() - 1)
-                << "]";
-        }
-    }
+    CheckResultsAndOperands(l, LoadVectorElement::kNumResults, LoadVectorElement::kNumOperands);
 }
 
 void Structural::CheckStoreVectorElement(const StoreVectorElement* s) {
-    if (!CheckResultsAndOperands(s, StoreVectorElement::kNumResults,
-                                 StoreVectorElement::kNumOperands)) {
-        return;
-    }
-
-    if (auto* value = s->Value()) {
-        auto* el_ty = GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset);
-        if (!el_ty) {
-            return;
-        }
-        if (value->Type() != el_ty) {
-            AddError(s, StoreVectorElement::kValueOperandOffset)
-                << "value type " << NameOf(value->Type())
-                << " does not match vector pointer element type " << NameOf(el_ty);
-            return;
-        }
-
-        // The `GetVectorPtrElementType` has already validated that the pointer exists.
-        auto* mv = s->To()->Type()->As<core::type::MemoryView>();
-        if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
-            AddError(s, StoreVectorElement::kToOperandOffset)
-                << "store_vector_element target operand has a non-writeable access type, "
-                << style::Literal(ToString(mv->Access()));
-            return;
-        }
-    }
-
-    if (!s->Index()->Type()->IsIntegerScalar()) {
-        AddError(s, StoreVectorElement::kIndexOperandOffset)
-            << "store vector element index must be an integer scalar";
-    }
-    if (auto* c = s->Index()->As<core::ir::Constant>()) {
-        auto val = c->Value()->ValueAs<uint32_t>();
-
-        auto* vec_ty = s->To()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
-        TINT_ASSERT(vec_ty);
-
-        if (val >= vec_ty->Width()) {
-            AddError(s, StoreVectorElement::kIndexOperandOffset)
-                << "store vector element index must be in range [0, " << (vec_ty->Width() - 1)
-                << "]";
-        }
-    }
+    CheckResultsAndOperands(s, StoreVectorElement::kNumResults, StoreVectorElement::kNumOperands);
 }
 
 void Structural::CheckPhony(const Phony* p) {
@@ -4181,27 +4107,6 @@ void Structural::CheckOperandsMatchTarget(const Instruction* source_inst,
             AddDeclarationNote(target_value);
         }
     }
-}
-
-const core::type::Type* Structural::GetVectorPtrElementType(const Instruction* inst, size_t idx) {
-    auto* operand = inst->Operands()[idx];
-    // All callers call CheckResultsAndOperands() beforehand, so this should never be null
-    TINT_ASSERT(operand) << "missing element operand";
-
-    // See above
-    auto* type = operand->Type();
-    TINT_ASSERT(type) << "missing operand type";
-
-    auto* memory_view_ty = type->As<core::type::MemoryView>();
-    if (DAWN_LIKELY(memory_view_ty)) {
-        auto* vec_ty = memory_view_ty->StoreType()->As<core::type::Vector>();
-        if (DAWN_LIKELY(vec_ty)) {
-            return vec_ty->Type();
-        }
-    }
-
-    AddError(inst, idx) << "operand " << NameOf(type) << " must be a pointer to a vector";
-    return nullptr;
 }
 
 }  // namespace tint::core::ir::validator

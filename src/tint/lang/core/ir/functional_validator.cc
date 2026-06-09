@@ -271,14 +271,16 @@ void Functional::CheckBlock(const Block* blk) {
 
 void Functional::CheckInstruction(const Instruction* inst) {
     tint::Switch(
-        inst,                                          //
-        [&](const Access* a) { CheckAccess(a); },      //
-        [&](const Binary* b) { CheckBinary(b); },      //
-        [&](const Call* c) { CheckCall(c); },          //
-        [&](const If* if_) { CheckIf(if_); },          //
-        [&](const Let* l) { CheckLet(l); },            //
-        [&](const Load* load) { CheckLoad(load); },    //
-        [&](const Override* o) { CheckOverride(o); },  //
+        inst,                                                              //
+        [&](const Access* a) { CheckAccess(a); },                          //
+        [&](const Binary* b) { CheckBinary(b); },                          //
+        [&](const Call* c) { CheckCall(c); },                              //
+        [&](const If* if_) { CheckIf(if_); },                              //
+        [&](const Let* l) { CheckLet(l); },                                //
+        [&](const Load* load) { CheckLoad(load); },                        //
+        [&](const LoadVectorElement* l) { CheckLoadVectorElement(l); },    //
+        [&](const Override* o) { CheckOverride(o); },                      //
+        [&](const StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
         [&](const Var* var) { CheckVar(var); }
         // TODO(516717234): Add TINT_ICE_ON_NO_MATCH when all instructions covered
     );
@@ -781,6 +783,102 @@ void Functional::CheckLoad(const Load* l) {
         AddError(l, Load::kFromOperandOffset)
             << "type " << NameOf(mv->StoreType()) << " cannot be loaded";
         return;
+    }
+}
+
+const core::type::Type* Functional::GetVectorPtrElementType(const Instruction* inst, size_t idx) {
+    auto* operand = inst->Operands()[idx];
+    TINT_ASSERT(operand) << "missing element operand";
+
+    auto* type = operand->Type();
+    TINT_ASSERT(type) << "missing operand type";
+
+    auto* memory_view_ty = type->As<core::type::MemoryView>();
+    if (DAWN_LIKELY(memory_view_ty)) {
+        auto* vec_ty = memory_view_ty->StoreType()->As<core::type::Vector>();
+        if (DAWN_LIKELY(vec_ty)) {
+            return vec_ty->Type();
+        }
+    }
+
+    AddError(inst, idx) << "operand " << NameOf(type) << " must be a pointer to a vector";
+    return nullptr;
+}
+
+void Functional::CheckLoadVectorElement(const LoadVectorElement* l) {
+    if (auto* res = l->Result(0)) {
+        const core::type::Type* el_ty =
+            GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset);
+        if (!el_ty) {
+            return;
+        }
+        if (res->Type() != el_ty) {
+            AddError(l) << "result type " << NameOf(res->Type())
+                        << " does not match vector pointer element type " << NameOf(el_ty);
+            return;
+        }
+    }
+
+    if (!l->Index()->Type()->IsIntegerScalar()) {
+        AddError(l, LoadVectorElement::kIndexOperandOffset)
+            << "load vector element index must be an integer scalar";
+    }
+    if (auto* c = l->Index()->As<core::ir::Constant>()) {
+        uint32_t val = c->Value()->ValueAs<uint32_t>();
+
+        const core::type::Vector* vec_ty =
+            l->From()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
+        TINT_ASSERT(vec_ty);
+
+        if (val >= vec_ty->Width()) {
+            AddError(l, LoadVectorElement::kIndexOperandOffset)
+                << "load vector element index must be in range [0, " << (vec_ty->Width() - 1)
+                << "]";
+        }
+    }
+}
+
+void Functional::CheckStoreVectorElement(const StoreVectorElement* s) {
+    if (auto* value = s->Value()) {
+        const core::type::Type* el_ty =
+            GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset);
+        if (!el_ty) {
+            return;
+        }
+        if (value->Type() != el_ty) {
+            AddError(s, StoreVectorElement::kValueOperandOffset)
+                << "value type " << NameOf(value->Type())
+                << " does not match vector pointer element type " << NameOf(el_ty);
+            return;
+        }
+
+        // The `GetVectorPtrElementType` has already validated that the pointer exists.
+        const core::type::MemoryView* mv = s->To()->Type()->As<core::type::MemoryView>();
+        if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
+            AddError(s, StoreVectorElement::kToOperandOffset)
+                << "store_vector_element target operand has a non-writeable access type, "
+                << style::Literal(ToString(mv->Access()));
+            return;
+        }
+    }
+
+    if (!s->Index()->Type()->IsIntegerScalar()) {
+        AddError(s, StoreVectorElement::kIndexOperandOffset)
+            << "store vector element index must be an integer scalar";
+    }
+
+    const core::ir::Constant* c = s->Index()->As<core::ir::Constant>();
+    if (c == nullptr) {
+        return;
+    }
+
+    uint32_t val = c->Value()->ValueAs<uint32_t>();
+    const core::type::Vector* vec_ty = s->To()->Type()->UnwrapPtrOrRef()->As<core::type::Vector>();
+    TINT_ASSERT(vec_ty);
+
+    if (val >= vec_ty->Width()) {
+        AddError(s, StoreVectorElement::kIndexOperandOffset)
+            << "store vector element index must be in range [0, " << (vec_ty->Width() - 1) << "]";
     }
 }
 

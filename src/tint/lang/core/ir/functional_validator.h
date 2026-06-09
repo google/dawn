@@ -37,8 +37,10 @@
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
+#include "src/tint/lang/core/ir/load_vector_element.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
+#include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 
@@ -96,6 +98,7 @@ class Functional {
     ir::Disassembler& Disassemble();
 
     bool CanLoad(const core::type::Type* ty);
+    const core::type::Type* GetVectorPtrElementType(const Instruction* inst, size_t idx);
 
     void CheckRootBlock(const Block* blk);
     void CheckFunction(const Function* func);
@@ -109,7 +112,9 @@ class Functional {
     void CheckIf(const If* if_);
     void CheckLet(const Let* l);
     void CheckLoad(const Load* l);
+    void CheckLoadVectorElement(const LoadVectorElement* l);
     void CheckOverride(const Override* o);
+    void CheckStoreVectorElement(const StoreVectorElement* s);
     void CheckVar(const Var* var);
 
     const Module& ir_;
