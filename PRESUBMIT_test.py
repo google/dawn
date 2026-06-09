@@ -41,6 +41,39 @@ from testing_support.presubmit_canned_checks_test_mocks import (
     MockAffectedFile, MockInputApi, MockOutputApi)
 
 
+class MockOutputApiWithLocations(MockOutputApi):
+
+    class PresubmitResultLocation(object):
+
+        def __init__(self, file_path, start_line, end_line):
+            self.file_path = file_path
+            self.start_line = start_line
+            self.end_line = end_line
+
+    class PresubmitResult(object):
+
+        def __init__(self, message, items=None, long_text='', locations=None):
+            self.message = message
+            self.items = items
+            self.long_text = long_text
+            self.locations = locations or []
+
+        def __repr__(self):
+            return self.message
+
+    class PresubmitError(PresubmitResult):
+
+        def __init__(self, message, items=None, long_text='', locations=None):
+            super().__init__(message, items, long_text, locations)
+            self.type = 'error'
+
+    class PresubmitPromptWarning(PresubmitResult):
+
+        def __init__(self, message, items=None, long_text='', locations=None):
+            super().__init__(message, items, long_text, locations)
+            self.type = 'warning'
+
+
 class CheckChangeTodoHasOwnerTest(unittest.TestCase):
 
     def _create_mock_input_api(self):
@@ -271,6 +304,88 @@ class CheckUnsafeBuffersSafetyCommentsTest(unittest.TestCase):
         ]
         errors = PRESUBMIT.CheckUnsafeBuffersSafetyComments(
             mock_input_api, MockOutputApi())
+        self.assertEqual(0, len(errors))
+
+
+class CheckBannedPatternsTest(unittest.TestCase):
+
+    def testNoUsage(self):
+        mock_input_api = MockInputApi()
+        mock_input_api.files = [
+            MockAffectedFile('src/dawn/Foo.cpp', [
+                'void Foo() {',
+                '    int x = 0;',
+                '}',
+            ])
+        ]
+        errors = PRESUBMIT.CheckNoBannedPatterns(mock_input_api,
+                                                 MockOutputApiWithLocations())
+        self.assertEqual(0, len(errors))
+
+    def testBannedUnsafeTodo(self):
+        mock_input_api = MockInputApi()
+        mock_input_api.files = [
+            MockAffectedFile('src/dawn/Foo.cpp', [
+                'void Foo() {',
+                '    DAWN_UNSAFE_TODO(ptr[0] = 0);',
+                '}',
+            ])
+        ]
+        errors = PRESUBMIT.CheckNoBannedPatterns(mock_input_api,
+                                                 MockOutputApiWithLocations())
+        self.assertEqual(1, len(errors))
+        self.assertIn('A banned pattern was used.', errors[0].message)
+        self.assertIn('src/dawn/Foo.cpp:2:', errors[0].message)
+        self.assertIn('Do not introduce new instances of DAWN_UNSAFE_TODO',
+                      errors[0].message)
+        self.assertEqual(1, len(errors[0].locations))
+        loc = errors[0].locations[0]
+        self.assertEqual('src/dawn/Foo.cpp', loc.file_path)
+        self.assertEqual(2, loc.start_line)
+        self.assertEqual(2, loc.end_line)
+
+    def testBannedPragma(self):
+        mock_input_api = MockInputApi()
+        mock_input_api.files = [
+            MockAffectedFile('src/dawn/Foo.cpp', [
+                '#pragma allow_unsafe_buffers',
+            ])
+        ]
+        errors = PRESUBMIT.CheckNoBannedPatterns(mock_input_api,
+                                                 MockOutputApiWithLocations())
+        self.assertEqual(1, len(errors))
+        self.assertIn('A banned pattern was used.', errors[0].message)
+        self.assertIn('src/dawn/Foo.cpp:1:', errors[0].message)
+        self.assertIn('#pragma allow_unsafe_buffers is discouraged',
+                      errors[0].message)
+        self.assertEqual(1, len(errors[0].locations))
+        loc = errors[0].locations[0]
+        self.assertEqual('src/dawn/Foo.cpp', loc.file_path)
+        self.assertEqual(1, loc.start_line)
+        self.assertEqual(1, loc.end_line)
+
+    def testCommentedUsageIgnored(self):
+        mock_input_api = MockInputApi()
+        mock_input_api.files = [
+            MockAffectedFile('src/dawn/Foo.cpp', [
+                '// DAWN_UNSAFE_TODO(ptr[0] = 0);',
+                '// #pragma allow_unsafe_buffers',
+            ])
+        ]
+        errors = PRESUBMIT.CheckNoBannedPatterns(mock_input_api,
+                                                 MockOutputApiWithLocations())
+        self.assertEqual(0, len(errors))
+
+    def testNonCppFilesIgnored(self):
+        mock_input_api = MockInputApi()
+        mock_input_api.files = [
+            MockAffectedFile('src/dawn/Foo.txt', [
+                'DAWN_UNSAFE_TODO(ptr[0] = 0);',
+                '#pragma allow_unsafe_buffers',
+            ])
+        ]
+        errors = PRESUBMIT.CheckNoBannedPatterns(mock_input_api,
+                                                 MockOutputApiWithLocations())
         self.assertEqual(0, len(errors))
 
 

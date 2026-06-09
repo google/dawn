@@ -26,8 +26,12 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import hashlib
+import dataclasses
 import re
 import sys
+from typing import Optional
+from typing import Sequence
+from typing import Tuple
 
 PRESUBMIT_VERSION = '2.0.0'
 
@@ -85,6 +89,55 @@ NONINCLUSIVE_LANGUAGE_REGEXES = [
 ]
 
 LINT_FILTERS = []
+
+
+# Copied from Chrome's BanRule.
+@dataclasses.dataclass
+class BanRule:
+    # String pattern. If the pattern begins with a slash, the pattern will be
+    # treated as a regular expression instead.
+    pattern: str
+
+    # Explanation as a sequence of strings. Each string in the sequence will be
+    # printed on its own line.
+    explanation: Tuple[str, ...]
+
+    # Whether or not to treat this ban as a fatal error.
+    treat_as_error: bool = False
+
+    # Paths that should be excluded from the ban check. Each string is a regular
+    # expression that will be matched against the path of the file being checked
+    # relative to the root of the source tree.
+    excluded_paths: Optional[Sequence[str]] = None
+
+    # If True, surfaces any violation as a Gerrit comment on the CL after
+    # running the CQ.
+    surface_as_gerrit_lint: Optional[bool] = None
+
+
+# Configuration for banned patterns checks.
+_BANNED_CPP_PATTERNS: Sequence[BanRule] = (
+    BanRule(
+        pattern=r'/\bDAWN_UNSAFE_TODO\b',
+        explanation=(
+            'Do not introduce new instances of DAWN_UNSAFE_TODO. ',
+            'Use DAWN_UNSAFE_BUFFERS with a // SAFETY: comment instead, ',
+            'or rewrite to be safe.',
+        ),
+        treat_as_error=False,
+        surface_as_gerrit_lint=True,
+    ),
+    BanRule(
+        pattern=r'/#pragma\s+allow_unsafe_buffers\b',
+        explanation=(
+            '#pragma allow_unsafe_buffers is discouraged. Prefer using ',
+            'DAWN_UNSAFE_BUFFERS with a // SAFETY: comment for ',
+            'specific blocks, or rewrite to be safe.',
+        ),
+        treat_as_error=False,
+        surface_as_gerrit_lint=True,
+    ),
+)
 
 EXPECTED_LICENSE_TEXT = {
     "//": [
@@ -587,6 +640,94 @@ def CheckChangeTodoHasOwner(input_api, output_api):
     if errors:
         return [output_api.PresubmitPromptWarning('\n'.join(errors))]
     return []
+
+
+# Copied from Chrome's _GetMessageForMatchingType.
+def _GetMessageForMatchingType(input_api, affected_file, line_number, line,
+                               ban_rule):
+    """
+    Helper method for checking for banned constructs.
+
+    Returns an string composed of the name of the file, the line number
+    where the match has been found and the additional text passed as
+    |message| in case the target type name matches the text inside the
+    line passed as parameter.
+    """
+    result = []
+
+    # Ignore comments about banned types.
+    if input_api.re.search(r'^ *//', line):
+        return result
+    # A // nocheck comment will bypass this error.
+    if line.endswith(' nocheck'):
+        return result
+
+    matched = False
+    if ban_rule.pattern[0:1] == '/':
+        regex = ban_rule.pattern[1:]
+        if input_api.re.search(regex, line):
+            matched = True
+    elif ban_rule.pattern in line:
+        matched = True
+
+    if matched:
+        result.append('    %s:%d:' % (affected_file.LocalPath(), line_number))
+        for line in ban_rule.explanation:
+            result.append('      %s' % line)
+
+    return result
+
+
+# Copied from Chrome's CheckNoBannedPatterns with modifications.
+def CheckNoBannedPatterns(input_api, output_api):
+    """Make sure that banned patterns are not used."""
+    results = []
+
+    def IsExcludedFile(affected_file, excluded_paths):
+        if not excluded_paths:
+            return False
+
+        local_path = affected_file.UnixLocalPath()
+        for item in excluded_paths:
+            if input_api.re.match(item, local_path):
+                return True
+        return False
+
+    def CheckForMatch(affected_file, line_num: int, line: str,
+                      ban_rule: BanRule):
+        if IsExcludedFile(affected_file, ban_rule.excluded_paths):
+            return
+
+        message = _GetMessageForMatchingType(input_api, affected_file,
+                                             line_num, line, ban_rule)
+        if message:
+            result_loc = []
+            if ban_rule.surface_as_gerrit_lint:
+                result_loc.append(
+                    output_api.PresubmitResultLocation(
+                        file_path=affected_file.LocalPath(),
+                        start_line=line_num,
+                        end_line=line_num,
+                    ))
+            if ban_rule.treat_as_error:
+                results.append(
+                    output_api.PresubmitError('A banned pattern was used.\n' +
+                                              '\n'.join(message),
+                                              locations=result_loc))
+            else:
+                results.append(
+                    output_api.PresubmitPromptWarning(
+                        'A banned pattern was used.\n' + '\n'.join(message),
+                        locations=result_loc))
+
+    file_filter = lambda f: f.LocalPath().endswith(
+        ('.cc', '.mm', '.cpp', '.h'))
+    for f in input_api.AffectedFiles(file_filter=file_filter):
+        for line_num, line in f.ChangedContents():
+            for ban_rule in _BANNED_CPP_PATTERNS:
+                CheckForMatch(f, line_num, line, ban_rule)
+
+    return results
 
 
 def CheckChange(input_api, output_api):
