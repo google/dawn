@@ -64,7 +64,7 @@ def get_cipd_compatible_current_arch() -> str:
 
     The returned string is compatible with CIPD's package naming scheme.
     """
-    native_arm = platform.machine().lower() in ('arm', 'arm64')
+    native_arm = platform.machine().lower() in ('arm', 'arm64', 'aarch64')
     # This is necessary for the case of running x86 Python on arm devices via
     # an emulator. In this case, platform.machine() will show up as an x86
     # processor.
