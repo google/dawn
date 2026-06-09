@@ -24,6 +24,7 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import("//third_party/jinja2/jinja2.gni")
 
 # Template to help invoking code generators based on generator_lib.py
 # Internal use only, this should only be called from templates implementing
@@ -136,8 +137,9 @@ template("generator_lib_action") {
     if (defined(invoker.deps)) {
       deps = invoker.deps
     }
+    inputs = [ _expected_outputs_file ] + jinja2_sources
     if (defined(invoker.inputs)) {
-      inputs = invoker.inputs
+      inputs += invoker.inputs
     }
   }
 

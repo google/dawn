@@ -355,9 +355,14 @@ def run_generator(generator):
         dependencies += _compute_python_dependencies(args.root_dir)
 
         if args.depfile != None:
+            # Siso/Ninja requires relative paths in depfile for relocatability.
+            # Convert all dependencies to be relative to the current working directory (build dir).
+            relative_dependencies = [
+                os.path.relpath(dep) for dep in dependencies
+            ]
             with open(args.depfile, 'w') as f:
                 f.write(args.output_json_tarball + ": " +
-                        " ".join(dependencies))
+                        " ".join(relative_dependencies))
 
         if args.print_cmake_dependencies:
             sys.stdout.write(_cmake_path_list(dependencies))
