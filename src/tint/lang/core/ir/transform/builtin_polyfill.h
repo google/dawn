@@ -55,6 +55,26 @@ enum class BuiltinPolyfillLevel {
     kFull,
 };
 
+/// @param out the stream to write to
+/// @param level the polyfill level
+/// @returns @p out so calls can be chained
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
+auto& operator<<(STREAM& out, BuiltinPolyfillLevel level) {
+    switch (level) {
+        case BuiltinPolyfillLevel::kNone:
+            out << "none";
+            break;
+        case BuiltinPolyfillLevel::kClampOrRangeCheck:
+            out << "clamp_or_range_check";
+            break;
+        case BuiltinPolyfillLevel::kFull:
+            out << "full";
+            break;
+    }
+    return out;
+}
+
 /// The set of polyfills that should be applied.
 struct BuiltinPolyfillConfig {
     /// Should `clamp()` be polyfilled for integer values?

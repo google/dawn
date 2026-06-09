@@ -33,8 +33,13 @@ namespace tint::core::ir::transform {
 namespace {
 
 Result<SuccessType> RobustnessFuzzer(Module& module,
-                                     const fuzz::ir::Context&,
+                                     const fuzz::ir::Context& context,
                                      RobustnessConfig config) {
+    if (context.options.verbose) {
+        PrintReflected(std::cout, config);
+        std::cout << "\n";
+    }
+
     return Robustness(module, config);
 }
 

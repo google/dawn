@@ -52,6 +52,26 @@ enum class HandleTransformLevel {
     kFull,
 };
 
+/// @param out the stream to write to
+/// @param level the  transform level
+/// @returns @p out so calls can be chained
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
+auto& operator<<(STREAM& out, HandleTransformLevel level) {
+    switch (level) {
+        case HandleTransformLevel::kNone:
+            out << "none";
+            break;
+        case HandleTransformLevel::kExternal:
+            out << "external";
+            break;
+        case HandleTransformLevel::kFull:
+            out << "full";
+            break;
+    }
+    return out;
+}
+
 /// DirectVariableAccessOptions adjusts the behaviour of the transform.
 struct DirectVariableAccessOptions {
     /// If true, then 'private' sub-object pointer arguments will be transformed.

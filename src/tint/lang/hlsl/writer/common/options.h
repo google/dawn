@@ -304,6 +304,26 @@ struct Options {
     bool operator==(const Options&) const = default;
 };
 
+/// @param out the stream to write to
+/// @param compiler the compiler
+/// @returns @p out so calls can be chained
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
+auto& operator<<(STREAM& out, Options::Compiler compiler) {
+    switch (compiler) {
+        case Options::Compiler::kFXC:
+            out << "FXC";
+            break;
+        case Options::Compiler::kDXC_2018:
+            out << "DXC 2018";
+            break;
+        case Options::Compiler::kDXC_2021:
+            out << "DXC 2021";
+            break;
+    }
+    return out;
+}
+
 }  // namespace tint::hlsl::writer
 
 namespace tint {
