@@ -29,6 +29,7 @@
 #define SRC_TINT_UTILS_REFLECTION_REFLECTION_H_
 
 #include <cstddef>
+#include <string>
 #include <string_view>
 #include <tuple>
 #include <type_traits>
@@ -36,6 +37,7 @@
 
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/foreach.h"
+#include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/memory/aligned_storage.h"
 #include "src/tint/utils/result.h"
 
@@ -165,6 +167,79 @@ void ForeachField(const OBJECT& object, CB&& callback) {
                                     [&](const auto& field, std::string_view) { callback(field); });
     } else {
         T::Reflection::ForeachField(object, std::forward<CB>(callback));
+    }
+}
+
+/// Forward declaration of the recursive dispatcher for printing reflected values.
+template <typename STREAM, typename T>
+    requires(traits::IsOStream<STREAM>)
+void PrintValue(STREAM& ss, const T& value, std::string indent);
+
+/// Helper to print a reflected struct.
+template <typename STREAM, typename T>
+    requires(traits::IsOStream<STREAM> && HasReflection<T>)
+void PrintReflected(STREAM& ss, const T& value, std::string indent = "") {
+    ss << T::Reflection::Name << "{\n";
+    {
+        TINT_SCOPED_ASSIGNMENT(indent, indent + "  ");
+        ForeachField(value, [&](const auto& field, std::string_view name) {
+            ss << indent << name << ": ";
+            PrintValue(ss, field, indent);
+            ss << "\n";
+        });
+    }
+    ss << indent << "}";
+}
+
+/// Main dispatcher function for formatting various reflected types.
+template <typename STREAM, typename T>
+    requires(traits::IsOStream<STREAM>)
+void PrintValue(STREAM& ss, const T& value, std::string indent) {
+    if constexpr (HasReflection<T>) {
+        PrintReflected(ss, value, indent);
+    } else if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
+        ss << (value ? "true" : "false");
+    } else if constexpr (std::is_integral_v<std::decay_t<T>> ||
+                         std::is_floating_point_v<std::decay_t<T>>) {
+        ss << value;
+    } else if constexpr (requires {
+                             value.begin();
+                             value.end();
+                         }) {
+        // Handle iterable containers (e.g. maps and vectors).
+        ss << "[";
+        for (const auto& item : value) {
+            // If this is a map pair, print the key and value.
+            if constexpr (requires {
+                              item.first;
+                              item.second;
+                          }) {
+                TINT_SCOPED_ASSIGNMENT(indent, indent + "  ");
+                ss << "\n" << indent << "{\n";
+                {
+                    TINT_SCOPED_ASSIGNMENT(indent, indent + "  ");
+                    ss << indent << "key: ";
+                    PrintValue(ss, item.first, indent);
+                    ss << "\n" << indent << "value: ";
+                    PrintValue(ss, item.second, indent);
+                }
+                ss << "\n" << indent << "}";
+            } else {
+                PrintValue(ss, item, indent);
+            }
+        }
+        ss << "]";
+    } else if constexpr (requires { *value; }) {
+        // Handle std::optional<value>.
+        if (value) {
+            PrintValue(ss, *value, indent);
+        } else {
+            ss << "std::nullopt";
+        }
+    } else if constexpr (requires(STREAM& os, const T& v) { os << v; }) {
+        ss << value;
+    } else {
+        ss << "<unprintable>";
     }
 }
 

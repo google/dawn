@@ -54,6 +54,26 @@ enum class SpvVersion : uint32_t {
     kSpv15,  // SPIR-V 1.5, for testing purposes only
 };
 
+/// @param out the stream to write to
+/// @param version the SpvVersion
+/// @returns @p out so calls can be chained
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
+auto& operator<<(STREAM& out, SpvVersion version) {
+    switch (version) {
+        case SpvVersion::kSpv13:
+            out << "1.3";
+            break;
+        case SpvVersion::kSpv14:
+            out << "1.4";
+            break;
+        case SpvVersion::kSpv15:
+            out << "1.5";
+            break;
+    }
+    return out;
+}
+
 /// Configuration options used for generating SPIR-V.
 struct Options {
     struct RangeOffsets {

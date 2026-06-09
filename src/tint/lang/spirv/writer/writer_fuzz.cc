@@ -274,6 +274,11 @@ std::unordered_map<uint32_t, tint::BindingPoint> GenerateColourBindings(core::ir
 Result<SuccessType> IRFuzzer(core::ir::Module& module,
                              const fuzz::ir::Context& context,
                              FuzzedOptions fuzzed_options) {
+    if (context.options.verbose) {
+        PrintReflected(std::cout, fuzzed_options);
+        std::cout << "\n";
+    }
+
     // TODO(375388101): We cannot run the backend for every entry point in the module unless we
     // clone the whole module each time, so for now we just generate the first entry point.
 
