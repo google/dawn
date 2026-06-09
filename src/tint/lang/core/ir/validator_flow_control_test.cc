@@ -512,9 +512,12 @@ TEST_F(IR_ValidatorTest, Loop_ContinuingEmptyWithParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(R"(error: loop: loop continuing block has parameters but is empty)"));
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(error: continue: provides 0 values but 'loop' block $B3 expects 1 value
+        continue  # -> $B3
+        ^^^^^^^^
+)"));
 }
 
 TEST_F(IR_ValidatorTest, Loop_BodyEmptyWithParams) {

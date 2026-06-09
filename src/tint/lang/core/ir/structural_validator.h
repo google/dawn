@@ -558,14 +558,6 @@ class Structural {
     /// @param l the loop to validate
     void CheckLoop(const Loop* l);
 
-    /// Validates the loop body block
-    /// @param l the loop to validate
-    void CheckLoopBody(const Loop* l);
-
-    /// Validates the loop continuing block
-    /// @param l the loop to validate
-    void CheckLoopContinuing(const Loop* l);
-
     /// Validates the given switch
     /// @param s the switch to validate
     void CheckSwitch(const Switch* s);

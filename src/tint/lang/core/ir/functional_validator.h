@@ -33,15 +33,18 @@
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/construct.h"
+#include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
+#include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 
 namespace tint::core::ir::validator {
@@ -93,6 +96,7 @@ class Functional {
 
     diag::Diagnostic& AddNote(Source src);
     diag::Diagnostic& AddNote(const Block* blk);
+    diag::Diagnostic& AddNote(const Instruction* inst);
     diag::Diagnostic& AddNote(const Instruction* inst, size_t idx);
 
     ir::Disassembler& Disassemble();
@@ -109,12 +113,17 @@ class Functional {
     void CheckBinary(const Binary* b);
     void CheckCall(const Call* call);
     void CheckConstruct(const Construct* construct);
+    void CheckContinue(const Continue* c);
     void CheckIf(const If* if_);
     void CheckLet(const Let* l);
     void CheckLoad(const Load* l);
     void CheckLoadVectorElement(const LoadVectorElement* l);
+    void CheckLoop(const Loop* l);
+    void CheckLoopBody(const Loop* loop);
+    void CheckLoopContinuing(const Loop* loop);
     void CheckOverride(const Override* o);
     void CheckStoreVectorElement(const StoreVectorElement* s);
+    void CheckTerminator(const Terminator* b);
     void CheckVar(const Var* var);
 
     const Module& ir_;
@@ -128,6 +137,7 @@ class Functional {
     ScopeStack scope_stack_;
     Vector<const Block*, 8> block_stack_;
     Hashset<OverrideId, 8> seen_override_ids_;
+    Hashmap<const Loop*, const Continue*, 4> first_continues_;
 };
 
 }  // namespace tint::core::ir::validator

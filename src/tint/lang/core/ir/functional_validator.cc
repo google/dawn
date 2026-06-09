@@ -110,6 +110,24 @@ bool ContainsType(const core::type::Type* ty) {
     return found;
 }
 
+/// @returns the parent block of @p block
+const Block* ParentBlockOf(const Block* block) {
+    if (auto* parent = block->Parent()) {
+        return parent->Block();
+    }
+    return nullptr;
+}
+
+/// @returns true if @p block directly or transitively holds the instruction @p inst
+bool TransitivelyHolds(const Block* block, const Instruction* inst) {
+    for (auto* b = inst->Block(); b; b = ParentBlockOf(b)) {
+        if (b == block) {
+            return true;
+        }
+    }
+    return false;
+}
+
 }  // namespace
 
 Functional::Functional(const Module& ir, diag::List& diagnostics, ErrorSource error_source)
@@ -218,6 +236,10 @@ diag::Diagnostic& Functional::AddNote(const Block* blk) {
     return AddNote(src);
 }
 
+diag::Diagnostic& Functional::AddNote(const Instruction* inst) {
+    return AddNote(SourceOf(inst));
+}
+
 diag::Diagnostic& Functional::AddNote(const Instruction* inst, size_t idx) {
     return AddNote(SourceOf(inst, idx));
 }
@@ -279,8 +301,10 @@ void Functional::CheckInstruction(const Instruction* inst) {
         [&](const Let* l) { CheckLet(l); },                                //
         [&](const Load* load) { CheckLoad(load); },                        //
         [&](const LoadVectorElement* l) { CheckLoadVectorElement(l); },    //
+        [&](const Loop* l) { CheckLoop(l); },                              //
         [&](const Override* o) { CheckOverride(o); },                      //
         [&](const StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
+        [&](const Terminator* b) { CheckTerminator(b); },                  //
         [&](const Var* var) { CheckVar(var); }
         // TODO(516717234): Add TINT_ICE_ON_NO_MATCH when all instructions covered
     );
@@ -725,10 +749,7 @@ void Functional::CheckIf(const If* if_) {
     }
 
     CheckBlock(if_->True());
-
-    if (!if_->False()->IsEmpty()) {
-        CheckBlock(if_->False());
-    }
+    CheckBlock(if_->False());
 }
 
 bool Functional::CanLoad(const core::type::Type* ty) {
@@ -880,6 +901,72 @@ void Functional::CheckStoreVectorElement(const StoreVectorElement* s) {
         AddError(s, StoreVectorElement::kIndexOperandOffset)
             << "store vector element index must be in range [0, " << (vec_ty->Width() - 1) << "]";
     }
+}
+
+void Functional::CheckLoop(const Loop* l) {
+    CheckBlock(l->Initializer());
+    CheckLoopBody(l);
+    CheckLoopContinuing(l);
+
+    first_continues_.Remove(l);
+}
+
+void Functional::CheckLoopBody(const Loop* loop) {
+    // If the body block has parameters, there must be an initializer block.
+    if (!loop->Body()->Params().IsEmpty()) {
+        if (!loop->HasInitializer()) {
+            AddError(loop) << "loop with body block parameters must have an initializer";
+        }
+    }
+    CheckBlock(loop->Body());
+}
+
+void Functional::CheckLoopContinuing(const Loop* loop) {
+    // Ensure that values used in the loop continuing are not from the loop body, after a continue
+    // instruction.
+    auto* first_continue = first_continues_.GetOr(loop, nullptr);
+    if (first_continue == nullptr) {
+        return;
+    }
+
+    // Find the instruction in the body block that is or holds the first continue instruction.
+    const Instruction* holds_continue = first_continue;
+    while (holds_continue && holds_continue->Block() && holds_continue->Block() != loop->Body()) {
+        holds_continue = holds_continue->Block()->Parent();
+    }
+
+    auto check_usage = [&](Usage use) {
+        if (TransitivelyHolds(loop->Continuing(), use.instruction)) {
+            AddError(use.instruction, use.operand_index)
+                << NameOf(use.instruction->Operands()[use.operand_index])
+                << " cannot be used in continuing block as it is declared after the first "
+                << style::Instruction("continue") << " in the loop's body";
+            AddNote(first_continue) << "loop body's first " << style::Instruction("continue");
+        }
+    };
+
+    // Check that all subsequent instruction values are not used in the continuing block.
+    for (auto* inst = holds_continue; inst; inst = inst->next) {
+        for (auto* result : inst->Results()) {
+            result->ForEachUseUnsorted(check_usage);
+        }
+    }
+
+    CheckBlock(loop->Continuing());
+}
+
+void Functional::CheckTerminator(const Terminator* b) {
+    tint::Switch(b,                                                //
+                 [&](const ir::Continue* c) { CheckContinue(c); }  //
+                 // TODO(516717234): Add TINT_ICE_ON_NO_MATCH
+    );
+}
+
+void Functional::CheckContinue(const Continue* c) {
+    auto* loop = c->Loop();
+    TINT_ASSERT(loop);
+
+    first_continues_.Add(loop, c);
 }
 
 }  // namespace tint::core::ir::validator

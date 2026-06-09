@@ -3629,16 +3629,19 @@ void Structural::CheckLoop(const Loop* l) {
     }
 
     // Note: Tasks are queued in reverse order of their execution
-    tasks_.Push([this, l] {
-        first_continues_.Remove(l);  // No need for this any more. Free memory.
-        control_stack_.Pop();
-    });
+    tasks_.Push([this] { control_stack_.Pop(); });
     if (!l->Initializer()->IsEmpty()) {
         tasks_.Push([this] { EndBlock(); });
     }
     tasks_.Push([this] { EndBlock(); });
     if (!l->Continuing()->IsEmpty()) {
-        tasks_.Push([this] { EndBlock(); });
+        tasks_.Push([this, l] {
+            if (!l->Continuing()->Terminator()->IsAnyOf<NextIteration, BreakIf>()) {
+                AddError(l->Continuing())
+                    << "loop continuing terminator can only be next_iteration or break_if";
+            }
+            EndBlock();
+        });
     }
 
     // ⎡Initializer              ⎤
@@ -3646,72 +3649,14 @@ void Structural::CheckLoop(const Loop* l) {
     // ⎣    ⎣    [Continuing ]  ⎦⎦
 
     if (!l->Continuing()->IsEmpty()) {
-        tasks_.Push([this, l] {
-            CheckLoopContinuing(l);
-            BeginBlock(l->Continuing());
-        });
-    } else if (!l->Continuing()->Params().IsEmpty()) {
-        AddError(l) << "loop continuing block has parameters but is empty";
+        tasks_.Push([this, l] { BeginBlock(l->Continuing()); });
     }
 
-    tasks_.Push([this, l] {
-        CheckLoopBody(l);
-        BeginBlock(l->Body());
-    });
+    tasks_.Push([this, l] { BeginBlock(l->Body()); });
     if (!l->Initializer()->IsEmpty()) {
         tasks_.Push([this, l] { BeginBlock(l->Initializer()); });
     }
     tasks_.Push([this, l] { control_stack_.Push(l); });
-}
-
-void Structural::CheckLoopBody(const Loop* loop) {
-    // If the body block has parameters, there must be an initializer block.
-    if (!loop->Body()->Params().IsEmpty()) {
-        if (!loop->HasInitializer()) {
-            AddError(loop) << "loop with body block parameters must have an initializer";
-        }
-    }
-}
-
-void Structural::CheckLoopContinuing(const Loop* loop) {
-    if (!loop->HasContinuing()) {
-        return;
-    }
-
-    // Ensure that values used in the loop continuing are not from the loop body, after a
-    // continue instruction.
-    if (auto* first_continue = first_continues_.GetOr(loop, nullptr)) {
-        // Find the instruction in the body block that is or holds the first continue
-        // instruction.
-        const Instruction* holds_continue = first_continue;
-        while (holds_continue && holds_continue->Block() &&
-               holds_continue->Block() != loop->Body()) {
-            holds_continue = holds_continue->Block()->Parent();
-        }
-
-        // Check that all subsequent instruction values are not used in the continuing block.
-        for (auto* inst = holds_continue; inst; inst = inst->next) {
-            for (auto* result : inst->Results()) {
-                result->ForEachUseUnsorted([&](Usage use) {
-                    if (TransitivelyHolds(loop->Continuing(), use.instruction)) {
-                        AddError(use.instruction, use.operand_index)
-                            << NameOf(result)
-                            << " cannot be used in continuing block as it is declared after the "
-                               "first "
-                            << style::Instruction("continue") << " in the loop's body";
-                        AddDeclarationNote(result);
-                        AddNote(first_continue)
-                            << "loop body's first " << style::Instruction("continue");
-                    }
-                });
-            }
-        }
-    }
-
-    if (!loop->Continuing()->Terminator()->IsAnyOf<NextIteration, BreakIf>()) {
-        AddError(loop->Continuing())
-            << "loop continuing terminator can only be next_iteration or break_if";
-    }
 }
 
 void Structural::CheckSwitch(const Switch* s) {
@@ -3879,8 +3824,6 @@ void Structural::CheckContinue(const Continue* c) {
         CheckOperandsMatchTarget(c, Continue::kArgsOperandOffset, c->Args().size(), cont,
                                  cont->Params());
     }
-
-    first_continues_.Add(loop, c);
 }
 
 void Structural::CheckExit(const Exit* e) {
