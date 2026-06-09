@@ -100,6 +100,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/function.h
   lang/core/ir/function_param.cc
   lang/core/ir/function_param.h
+  lang/core/ir/functional_validator.cc
+  lang/core/ir/functional_validator.h
   lang/core/ir/if.cc
   lang/core/ir/if.h
   lang/core/ir/instruction.cc
@@ -139,6 +141,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/store.h
   lang/core/ir/store_vector_element.cc
   lang/core/ir/store_vector_element.h
+  lang/core/ir/structural_validator.cc
+  lang/core/ir/structural_validator.h
   lang/core/ir/switch.cc
   lang/core/ir/switch.h
   lang/core/ir/swizzle.cc
