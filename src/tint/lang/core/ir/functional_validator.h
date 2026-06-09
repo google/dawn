@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
+#include "src/tint/lang/core/ir/var.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 
 namespace tint::core::ir::validator {
@@ -54,7 +55,26 @@ class Functional {
     Functional& operator=(Functional&&) = delete;
 
   private:
+    using SourceHelper = std::function<Source()>;
+
+    /// ScopeStack holds a stack of values that are currently in scope
+    struct ScopeStack {
+        void Push() { stack_.Push({}); }
+        void Pop() { stack_.Pop(); }
+        void Add(const Value* value) { stack_.Back().Add(value); }
+        bool Contains(const Value* value) {
+            return stack_.Any([&](auto& v) { return v.Contains(value); });
+        }
+        bool IsEmpty() const { return stack_.IsEmpty(); }
+
+      private:
+        Vector<Hashset<const Value*, 8>, 4> stack_;
+    };
+
     StyledText NameOf(const core::type::Type* ty);
+    StyledText NameOf(const Value* value);
+
+    Source SourceOf(const Instruction* inst);
 
     diag::Diagnostic& AddError(Source src);
     diag::Diagnostic& AddError(const Instruction* inst);
@@ -65,15 +85,19 @@ class Functional {
     ir::Disassembler& Disassemble();
 
     void CheckRootBlock(const Block* blk);
+    void CheckFunction(const Function* func);
+    void CheckBlock(const Block* blk);
     void CheckInstruction(const Instruction* inst);
 
     void CheckOverride(const Override* o);
+    void CheckVar(const Var* var);
 
     const Module& ir_;
     diag::List& diag_;
     ErrorSource error_source_;
     std::optional<ir::Disassembler> disassembler_;  // Use Disassemble()
 
+    ScopeStack scope_stack_;
     Vector<const Block*, 8> block_stack_;
     Hashset<OverrideId, 8> seen_override_ids_;
 };

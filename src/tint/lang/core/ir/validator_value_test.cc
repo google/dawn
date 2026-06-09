@@ -387,12 +387,10 @@ TEST_F(IR_ValidatorTest, Var_Init_FunctionTypeInit) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(
-            R"(:8:41 error: var: initializer type '<function>' does not match store type 'f32'
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:8:45 error: var: function may not be used as a operand
     %i:ptr<function, f32, read_write> = var %invalid_init
-                                        ^^^
+                                            ^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -400,9 +398,12 @@ TEST_F(IR_ValidatorTest, Var_Init_InvalidAddressSpace) {
     auto* p = b.Var<private_, f32>("p");
     p->SetInitializer(b.Constant(1_f));
     mod.root_block->Append(p);
+
     auto* s = b.Var<storage, f32>("s");
     s->SetInitializer(b.Constant(1_f));
+    s->SetBindingPoint(0, 0);
     mod.root_block->Append(s);
+
     auto* f = b.Function("my_func", ty.void_());
 
     b.Append(f->Block(), [&] {
@@ -417,7 +418,7 @@ TEST_F(IR_ValidatorTest, Var_Init_InvalidAddressSpace) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:3:38 error: var: only variables in the function, private, or __out address space may be initialized
-  %s:ptr<storage, f32, read_write> = var 1.0f
+  %s:ptr<storage, f32, read_write> = var 1.0f @binding_point(0, 0)
                                      ^^^
 )")) << res.Failure();
 }
@@ -990,7 +991,8 @@ TEST_F(IR_ValidatorTest, Var_InputAttachementIndex_NonHandle) {
 }
 
 TEST_F(IR_ValidatorTest, Var_InputAttachementIndex_WrongType) {
-    auto* v = b.Var(ty.ptr(AddressSpace::kHandle, ty.f32(), read_write));
+    auto* v = b.Var(ty.ptr(AddressSpace::kHandle,
+                           ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), read));
     v->SetBindingPoint(0, 0);
     v->SetInputAttachmentIndex(0);
     mod.root_block->Append(v);
@@ -1000,9 +1002,9 @@ TEST_F(IR_ValidatorTest, Var_InputAttachementIndex_WrongType) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:2:37 error: var: '@input_attachment_index' is only valid for 'input_attachment' type var
-  %1:ptr<handle, f32, read_write> = var undef @binding_point(0, 0) @input_attachment_index(0)
-                                    ^^^
+            R"(:2:43 error: var: '@input_attachment_index' is only valid for 'input_attachment' type var
+  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0) @input_attachment_index(0)
+                                          ^^^
 )")) << res.Failure();
 }
 
@@ -1015,9 +1017,9 @@ TEST_F(IR_ValidatorTest, Var_RuntimeArray_NonStorage) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:2:3 error: var: vars not in the 'storage' or 'handle' address spaces must have a fixed footprint
+            R"(:2:45 error: var: vars not in the 'storage' or 'handle' address spaces must have a fixed footprint
   %1:ptr<private, array<f32>, read_write> = var undef
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                            ^^^
 )")) << res.Failure();
 }
 
@@ -1036,9 +1038,9 @@ TEST_F(IR_ValidatorTest, Var_RuntimeArray_NonStorageInStruct) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:6:3 error: var: vars not in the 'storage' or 'handle' address spaces must have a fixed footprint
+            R"(:6:37 error: var: vars not in the 'storage' or 'handle' address spaces must have a fixed footprint
   %1:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0) @input_attachment_index(0)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                    ^^^
 )")) << res.Failure();
 }
 

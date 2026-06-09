@@ -274,7 +274,8 @@ TEST_F(IR_ValidatorTest, Construct_Scalar_TooManyArguments) {
 TEST_F(IR_ValidatorTest, Construct_SubgroupMatrix_WrongArgType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        b.Construct(ty.subgroup_matrix_left(ty.f32(), 2, 3), f);
+        auto* l = b.Let("x", b.Zero(ty.i32()));
+        b.Construct(ty.subgroup_matrix_left(ty.f32(), 2, 3), l);
         b.Return(f);
     });
 
@@ -283,8 +284,8 @@ TEST_F(IR_ValidatorTest, Construct_SubgroupMatrix_WrongArgType) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:3:42 error: construct: subgroup matrix construct argument type '<function>' does not match matrix shader scalar type 'f32'
-    %2:subgroup_matrix_left<f32, 2, 3> = construct %f
+            R"(:4:42 error: construct: subgroup matrix construct argument type 'i32' does not match matrix shader scalar type 'f32'
+    %3:subgroup_matrix_left<f32, 2, 3> = construct %x
                                          ^^^^^^^^^
 )")) << res.Failure();
 }
@@ -1715,12 +1716,10 @@ TEST_F(IR_ValidatorTest, Unary_TooManyOperands) {
 }
 
 TEST_F(IR_ValidatorTest, Unary_OperandWrongType) {
-    auto* other_func = b.Function("other", ty.void_());
-    b.Append(other_func->Block(), [&] { b.Return(other_func); });
-
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Negation(other_func);
+        auto* l = b.Let("x", b.Zero(ty.mat4x4<f32>()));
+        b.Negation(l->Result());
         b.Return(func);
     });
 
@@ -1728,7 +1727,7 @@ TEST_F(IR_ValidatorTest, Unary_OperandWrongType) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
-        testing::HasSubstr(R"(:8:5 error: unary: no matching overload for 'operator - (<function>)'
+        testing::HasSubstr(R"(:4:5 error: unary: no matching overload for 'operator - (mat4x4<f32>)'
 )")) << res.Failure();
 }
 

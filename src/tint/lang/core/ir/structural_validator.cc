@@ -229,20 +229,6 @@ void WalkTypeAndMembers(CTX& ctx,
         [&](const core::type::Array* a) { WalkArrayElements(ctx, a, impl); });
 }
 
-/// @returns true if the type or any contained types are of type T
-/// @param ty root of the types to walk
-template <typename T>
-bool ContainsType(const core::type::Type* ty) {
-    bool found = false;
-    WalkTypeAndMembers(found, ty, IOAttributes{},
-                       [&](bool& ctx, const core::type::Type* t, const IOAttributes&) {
-                           if (t != nullptr && t->DeepestElement()->Is<T>()) {
-                               ctx = true;
-                           }
-                       });
-    return found;
-}
-
 /// How an attribute is being used, a tuple of the shader stage and IO direction
 enum class IOAttributeUsage : uint8_t {
     kComputeInputUsage,
@@ -1898,6 +1884,15 @@ void Structural::CheckFunction(const Function* func) {
     scope_stack_.Push();
     TINT_DEFER(scope_stack_.Pop());
 
+    // The recursion checks require this to be true as it will be asserted by the
+    // referenced_functions helper.
+    func->ForEachUseUnsorted([&](const Usage& use) {
+        if (use.instruction->As<UserCall>() || use.instruction->As<Return>()) {
+            return;
+        }
+        AddError(use.instruction, use.operand_index) << "function may not be used as a operand";
+    });
+
     if (func->IsEntryPoint()) {
         // Check that there is at most one entry point unless we allow multiple entry points.
         if (!ir_.properties.Contains(Property::kAllowMultipleEntryPoints)) {
@@ -2748,6 +2743,7 @@ void Structural::CheckVar(const Var* var) {
         return;
     }
 
+    // TODO(516717234): Remove when ValidateShaderIOAnnotations are moved to function validator
     auto* result_type = var->Result()->Type();
     auto* mv = result_type->As<core::type::MemoryView>();
     if (!mv) {
@@ -2756,135 +2752,21 @@ void Structural::CheckVar(const Var* var) {
         return;
     }
 
-    if (var->Block() != ir_.root_block && mv->AddressSpace() != AddressSpace::kFunction) {
-        if (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface) ||
-            mv->AddressSpace() != AddressSpace::kPrivate) {
-            AddError(var) << "vars in a function scope must be in the 'function' address space";
-            return;
-        }
-    }
-
-    if (mv->AddressSpace() != AddressSpace::kStorage &&
-        mv->AddressSpace() != AddressSpace::kHandle) {
-        if (mv->AddressSpace() == AddressSpace::kWorkgroup ||
-            !ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
-            if (!mv->StoreType()->HasFixedFootprint()) {
-                AddResultError(var, 0) << "vars not in the 'storage' or 'handle' address spaces "
-                                          "must have a fixed footprint";
-                return;
-            }
-        }
-    }
-
-    if (ContainsType<core::type::Atomic>(mv->StoreType())) {
-        bool is_workgroup = mv->AddressSpace() == AddressSpace::kWorkgroup;
-        bool is_read_write_storage = mv->AddressSpace() == AddressSpace::kStorage &&
-                                     mv->Access() == core::Access::kReadWrite;
-        if (!is_workgroup && !is_read_write_storage) {
-            AddError(var)
-                << "atomic types may only be used by 'workspace' or read write 'storage' variables";
-            return;
-        }
-    }
-
-    // Check that initializer and result type match
     if (var->Initializer()) {
-        if (mv->AddressSpace() != AddressSpace::kFunction &&
-            mv->AddressSpace() != AddressSpace::kPrivate &&
-            mv->AddressSpace() != AddressSpace::kOut) {
-            AddError(var) << "only variables in the function, private, or __out address space may "
-                             "be initialized";
-            return;
-        }
-
         if (!CheckOperand(var, ir::Var::kInitializerOperandOffset)) {
             return;
         }
-
-        if (var->Initializer()->Type() != result_type->UnwrapPtrOrRef()) {
-            AddError(var) << "initializer type " << NameOf(var->Initializer()->Type())
-                          << " does not match store type " << NameOf(result_type->UnwrapPtrOrRef());
-            return;
-        }
     }
 
+    // TODO(516717234): Move to functional validator
     CheckBindingPoint(var, var->Result(0)->Type(), var->Attributes(),
                       ShaderIOKind::kModuleScopeVar);
 
-    if (var->Block() == ir_.root_block && mv->AddressSpace() == AddressSpace::kFunction) {
-        AddError(var) << "vars in the 'function' address space must be in a function scope";
-        return;
-    }
-
-    if (mv->AddressSpace() == AddressSpace::kWorkgroup) {
-        if (auto* ary = result_type->UnwrapPtr()->As<core::type::Array>()) {
-            if (auto* count = ary->Count()->As<core::ir::type::ValueArrayCount>()) {
-                if (!scope_stack_.Contains(count->value)) {
-                    AddError(var) << NameOf(count->value) << " is not in scope";
-                }
-            }
-        }
-    }
-
-    if (mv->AddressSpace() == AddressSpace::kStorage) {
-        if (mv->StoreType() && !mv->StoreType()->IsHostShareable()) {
-            AddError(var) << "vars in the 'storage' address space must be host-shareable";
-            return;
-        }
-        if (mv->Access() != core::Access::kReadWrite && mv->Access() != core::Access::kRead) {
-            AddError(var)
-                << "vars in the 'storage' address space must have access 'read' or 'read-write'";
-            return;
-        }
-    }
-
-    if (mv->AddressSpace() == AddressSpace::kUniform) {
-        if (!(mv->StoreType()->IsConstructible() || mv->StoreType()->Is<core::type::Buffer>()) ||
-            !mv->StoreType()->IsHostShareable()) {
-            AddError(var) << "vars in the 'uniform' address space must be host-shareable and "
-                             "constructible or a buffer";
-            return;
-        }
-    }
-
-    if (mv->AddressSpace() == AddressSpace::kImmediate) {
-        if (mv->StoreType() && !mv->StoreType()->IsHostShareable()) {
-            AddError(var) << "vars in the 'immediate' address space must be host-shareable";
-            return;
-        }
-
-        if (ContainsType<core::type::F16>(mv->StoreType())) {
-            AddError(var) << "vars in the 'immediate' address space cannot contain f16 types";
-            return;
-        }
-    }
-
-    if (var->InputAttachmentIndex().has_value()) {
-        if (mv->AddressSpace() != AddressSpace::kHandle) {
-            AddError(var) << "'@input_attachment_index' is not valid for non-handle var";
-            return;
-        }
-        if (!ir_.properties.Contains(Property::kAllowAnyInputAttachmentIndexType) &&
-            !mv->UnwrapPtrOrRef()->Is<core::type::InputAttachment>()) {
-            AddError(var)
-                << "'@input_attachment_index' is only valid for 'input_attachment' type var";
-            return;
-        }
-    }
-
+    // TODO(516717234): Move to functional validator
     if (var->Block() == ir_.root_block) {
         if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) {
             ValidateShaderIOAnnotations(var, var->Result()->Type(), var->BindingPoint(),
                                         var->Attributes(), ShaderIOKind::kModuleScopeVar);
-        }
-    }
-
-    if (mv->AddressSpace() == core::AddressSpace::kPixelLocal) {
-        if (var->Block() == ir_.root_block) {
-            if (!mv->StoreType()->Is<core::type::Struct>()) {
-                AddError(var) << "pixel_local var must be of type struct";
-                return;
-            }
         }
     }
 }
