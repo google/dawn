@@ -308,6 +308,7 @@ void Functional::CheckInstruction(const Instruction* inst) {
         [&](const Store* s) { CheckStore(s); },                            //
         [&](const StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
         [&](const Switch* s) { CheckSwitch(s); },                          //
+        [&](const Swizzle* s) { CheckSwizzle(s); },                        //
         [&](const Terminator* b) { CheckTerminator(b); },                  //
         [&](const Var* var) { CheckVar(var); }
         // TODO(516717234): Add TINT_ICE_ON_NO_MATCH when all instructions covered
@@ -1041,6 +1042,43 @@ void Functional::CheckSwitch(const Switch* s) {
 
     if (!found_default) {
         AddError(s) << "missing default case for switch";
+    }
+}
+
+void Functional::CheckSwizzle(const Swizzle* s) {
+    auto* src_vec = s->Object()->Type()->As<core::type::Vector>();
+    if (!src_vec) {
+        AddError(s) << "object of swizzle, " << NameOf(s->Object()) << ", is not a vector, "
+                    << NameOf(s->Object()->Type());
+        return;
+    }
+
+    auto indices = s->Indices();
+    if (indices.Length() < Swizzle::kMinNumIndices) {
+        AddError(s) << "expected at least " << Swizzle::kMinNumIndices << " indices";
+        return;
+    }
+
+    if (indices.Length() > Swizzle::kMaxNumIndices) {
+        AddError(s) << "expected at most " << Swizzle::kMaxNumIndices << " indices";
+        return;
+    }
+
+    auto elem_count = src_vec->Elements().count;
+    for (auto& idx : indices) {
+        if (idx > Swizzle::kMaxIndexValue || idx >= elem_count) {
+            AddError(s) << "invalid index value";
+            return;
+        }
+    }
+
+    auto* elem_ty = src_vec->Elements().type;
+    auto* expected_ty = type_mgr_.MatchWidth(elem_ty, indices.Length());
+    auto* result_ty = s->Result()->Type();
+    if (result_ty != expected_ty) {
+        AddError(s) << "result type " << NameOf(result_ty) << " does not match expected type, "
+                    << NameOf(expected_ty);
+        return;
     }
 }
 
