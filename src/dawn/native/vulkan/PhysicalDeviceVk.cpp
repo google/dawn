@@ -349,10 +349,13 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // buffer_view decompositions may use u16 if the smallest access is 16-bit, so require
     // shaderInt16 as well.
     bool shaderF16Enabled = false;
+    // crbug.com/519984285: Huawei Maleoon GPUs mis-compile 16-bit values in the
+    // private/function storage classes.
+    const bool isHuaweiMaleoon = gpu_info::IsHuaweiMaleoon(GetVendorId(), GetDeviceId());
     if (mDeviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
         mDeviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
         mDeviceInfo.features.shaderInt16 == VK_TRUE &&
-        mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE) {
+        mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE && !isHuaweiMaleoon) {
         EnableFeature(Feature::ShaderF16);
         shaderF16Enabled = true;
     }
