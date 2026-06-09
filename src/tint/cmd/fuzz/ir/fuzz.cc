@@ -103,7 +103,7 @@ void Register(const IRFuzzer& fuzzer) {
             // IR fuzzers.
             if (!context.options.disable_ir_validator) {
                 if (auto val = core::ir::Validate(ir.Get(), pre_capabilities,
-                                                  "finish " + std::string(fuzzer.name));
+                                                  "start " + std::string(fuzzer.name));
                     val != Success) {
                     if (context.options.verbose) {
                         std::cout << "   Failed to validate against fuzzer capabilities before "
@@ -128,6 +128,15 @@ void Register(const IRFuzzer& fuzzer) {
             auto result = fn(ir.Get(), ir_context, data);
             if (result != Success && context.options.verbose) {
                 std::cout << "   " << result.Failure() << "\n";
+            }
+
+            if (!context.options.disable_ir_validator) {
+                if (auto val = tint::core::ir::Validate(ir.Get(), fuzzer.post_capabilities,
+                                                        "finish " + std::string(fuzzer.name));
+                    val != Success) {
+                    TINT_ICE() << "Failed to validate against fuzzer capabilities after running:\n"
+                               << val.Failure() << "\n";
+                }
             }
         },
     });
