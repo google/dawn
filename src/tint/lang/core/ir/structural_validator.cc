@@ -2736,35 +2736,10 @@ void Structural::CheckOverride(const Override* o) {
         return;
     }
 
-    if (o->OverrideId().has_value()) {
-        if (!seen_override_ids_.Add(o->OverrideId().value())) {
-            AddError(o) << "duplicate override id encountered: " << o->OverrideId().value().value;
-            return;
-        }
-    }
-
-    if (!o->Result()->Type()->IsScalar()) {
-        AddError(o) << "override type " << NameOf(o->Result()->Type()) << " is not a scalar";
-        return;
-    }
-
     if (o->Initializer()) {
-        if (!CheckOperand(o, ir::Var::kInitializerOperandOffset)) {
-            return;
-        }
-        if (o->Initializer()->Type() != o->Result()->Type()) {
-            AddError(o) << "override type " << NameOf(o->Result()->Type())
-                        << " does not match initializer type " << NameOf(o->Initializer()->Type());
-            return;
-        }
+        CheckOperand(o, ir::Var::kInitializerOperandOffset);
     } else if (o->Operands().Length() == 0) {
         AddError(o) << "override is malformed, missing initializer operand";
-        return;
-    }
-
-    if (!o->OverrideId().has_value() && (o->Initializer() == nullptr)) {
-        AddError(o) << "must have an id or an initializer";
-        return;
     }
 }
 

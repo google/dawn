@@ -763,7 +763,6 @@ class Structural {
     Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
     Hashmap<const ir::Instruction*, SupportedStages, 4> stage_restricted_instructions_;
     core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
-    Hashset<OverrideId, 8> seen_override_ids_;
     Hashset<std::string, 4> entry_point_names_;
     Hashset<const core::type::Type*, 16> validated_types_{};
 };

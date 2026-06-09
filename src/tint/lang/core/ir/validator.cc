@@ -77,7 +77,7 @@ class Validator {
 
         // Only run the functional validation if we are structurally valid
         if (!diagnostics_.ContainsErrors()) {
-            validator::Functional f(mod_, diagnostics_);
+            validator::Functional f(mod_, diagnostics_, validator::Functional::ErrorSource::kIr);
             f.Validate();
         }
 

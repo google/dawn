@@ -28,14 +28,22 @@
 #ifndef SRC_TINT_LANG_CORE_IR_FUNCTIONAL_VALIDATOR_H_
 #define SRC_TINT_LANG_CORE_IR_FUNCTIONAL_VALIDATOR_H_
 
+#include "src/tint/lang/core/ir/block.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/override.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 
 namespace tint::core::ir::validator {
 
 class Functional {
   public:
-    Functional(const Module& ir, diag::List& diagnostics);
+    enum class ErrorSource {
+        kWgsl,
+        kIr,
+    };
+
+    Functional(const Module& ir, diag::List& diagnostics, ErrorSource error_source);
     ~Functional();
 
     void Validate();
@@ -46,8 +54,28 @@ class Functional {
     Functional& operator=(Functional&&) = delete;
 
   private:
-    [[maybe_unused]] const Module& ir_;
-    [[maybe_unused]] diag::List& diag_;
+    StyledText NameOf(const core::type::Type* ty);
+
+    diag::Diagnostic& AddError(Source src);
+    diag::Diagnostic& AddError(const Instruction* inst);
+
+    diag::Diagnostic& AddNote(Source src);
+    diag::Diagnostic& AddNote(const Block* blk);
+
+    ir::Disassembler& Disassemble();
+
+    void CheckRootBlock(const Block* blk);
+    void CheckInstruction(const Instruction* inst);
+
+    void CheckOverride(const Override* o);
+
+    const Module& ir_;
+    diag::List& diag_;
+    ErrorSource error_source_;
+    std::optional<ir::Disassembler> disassembler_;  // Use Disassemble()
+
+    Vector<const Block*, 8> block_stack_;
+    Hashset<OverrideId, 8> seen_override_ids_;
 };
 
 }  // namespace tint::core::ir::validator
