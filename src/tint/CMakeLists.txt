@@ -121,6 +121,7 @@ function(tint_default_compile_options TARGET)
     -Wno-c2y-extensions
     -Wno-lifetime-safety-intra-tu-suggestions
     -Wno-lifetime-safety-cross-tu-suggestions
+    -Wno-lifetime-safety-invalidation
   )
 
   if(COMPILER_IS_GNU)
