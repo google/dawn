@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
+#include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -94,6 +95,8 @@ class Functional {
 
     ir::Disassembler& Disassemble();
 
+    bool CanLoad(const core::type::Type* ty);
+
     void CheckRootBlock(const Block* blk);
     void CheckFunction(const Function* func);
     void CheckBlock(const Block* blk);
@@ -105,6 +108,7 @@ class Functional {
     void CheckConstruct(const Construct* construct);
     void CheckIf(const If* if_);
     void CheckLet(const Let* l);
+    void CheckLoad(const Load* l);
     void CheckOverride(const Override* o);
     void CheckVar(const Var* var);
 

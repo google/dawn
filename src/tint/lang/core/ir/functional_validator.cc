@@ -277,6 +277,7 @@ void Functional::CheckInstruction(const Instruction* inst) {
         [&](const Call* c) { CheckCall(c); },          //
         [&](const If* if_) { CheckIf(if_); },          //
         [&](const Let* l) { CheckLet(l); },            //
+        [&](const Load* load) { CheckLoad(load); },    //
         [&](const Override* o) { CheckOverride(o); },  //
         [&](const Var* var) { CheckVar(var); }
         // TODO(516717234): Add TINT_ICE_ON_NO_MATCH when all instructions covered
@@ -725,6 +726,61 @@ void Functional::CheckIf(const If* if_) {
 
     if (!if_->False()->IsEmpty()) {
         CheckBlock(if_->False());
+    }
+}
+
+bool Functional::CanLoad(const core::type::Type* ty) {
+    return tint::Switch(
+        ty,  //
+        [&](const core::type::Array* arr) {
+            if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
+                return false;
+            }
+            return CanLoad(arr->Elements().type);
+        },
+        [&](const core::type::Struct* str) {
+            for (auto* member : str->Members()) {
+                if (member->Type()->Is<core::type::Pointer>() &&
+                    ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+                    continue;
+                }
+                if (!CanLoad(member->Type())) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        [&](Default) { return ty->IsConstructible() || ty->IsHandle(); });
+}
+
+void Functional::CheckLoad(const Load* l) {
+    const Value* from = l->From();
+    TINT_ASSERT(from);
+
+    auto* mv = from->Type()->As<core::type::MemoryView>();
+    if (!mv) {
+        AddError(l, Load::kFromOperandOffset)
+            << "load source operand " << NameOf(from->Type()) << " is not a memory view";
+        return;
+    }
+
+    if (mv->Access() != core::Access::kRead && mv->Access() != core::Access::kReadWrite) {
+        AddError(l, Load::kFromOperandOffset)
+            << "load source operand has a non-readable access type, "
+            << style::Literal(ToString(mv->Access()));
+        return;
+    }
+
+    if (l->Result()->Type() != mv->StoreType()) {
+        AddError(l, Load::kFromOperandOffset)
+            << "result type " << NameOf(l->Result()->Type()) << " does not match source store type "
+            << NameOf(mv->StoreType());
+    }
+
+    if (!CanLoad(mv->StoreType())) {
+        AddError(l, Load::kFromOperandOffset)
+            << "type " << NameOf(mv->StoreType()) << " cannot be loaded";
+        return;
     }
 }
 
