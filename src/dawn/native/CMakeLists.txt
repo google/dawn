@@ -774,6 +774,7 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/Forward.h"
         "vulkan/FramebufferCache.h"
         "vulkan/FramebufferFetchHelper.h"
+        "vulkan/ImmediatesLayoutVk.h"
         "vulkan/MemoryTypeSelector.h"
         "vulkan/PhysicalDeviceVk.h"
         "vulkan/PipelineCacheVk.h"
