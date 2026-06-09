@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/i8.h"
@@ -274,6 +275,7 @@ void Functional::CheckInstruction(const Instruction* inst) {
         [&](const Access* a) { CheckAccess(a); },      //
         [&](const Binary* b) { CheckBinary(b); },      //
         [&](const Call* c) { CheckCall(c); },          //
+        [&](const If* if_) { CheckIf(if_); },          //
         [&](const Let* l) { CheckLet(l); },            //
         [&](const Override* o) { CheckOverride(o); },  //
         [&](const Var* var) { CheckVar(var); }
@@ -711,6 +713,18 @@ void Functional::CheckBinary(const Binary* b) {
         AddError(b) << "result value type " << NameOf(result->Type()) << " does not match "
                     << style::Instruction(b->Op()) << " result type "
                     << NameOf(overload->return_type);
+    }
+}
+
+void Functional::CheckIf(const If* if_) {
+    if (if_->Condition() && !if_->Condition()->Type()->Is<core::type::Bool>()) {
+        AddError(if_, If::kConditionOperandOffset) << "condition type must be 'bool'";
+    }
+
+    CheckBlock(if_->True());
+
+    if (!if_->False()->IsEmpty()) {
+        CheckBlock(if_->False());
     }
 }
 

@@ -3595,10 +3595,6 @@ void Structural::CheckIf(const If* if_) {
     CheckResults(if_);
     CheckOperands(if_, If::kNumOperands);
 
-    if (if_->Condition() && !if_->Condition()->Type()->Is<core::type::Bool>()) {
-        AddError(if_, If::kConditionOperandOffset) << "condition type must be 'bool'";
-    }
-
     if (if_->False() && if_->False()->Is<core::ir::MultiInBlock>()) {
         AddError(if_) << "if false block must be a block";
     }

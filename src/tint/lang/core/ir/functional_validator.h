@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
@@ -102,6 +103,7 @@ class Functional {
     void CheckBinary(const Binary* b);
     void CheckCall(const Call* call);
     void CheckConstruct(const Construct* construct);
+    void CheckIf(const If* if_);
     void CheckLet(const Let* l);
     void CheckOverride(const Override* o);
     void CheckVar(const Var* var);
