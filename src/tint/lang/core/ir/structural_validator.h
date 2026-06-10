@@ -509,12 +509,7 @@ class Structural {
     /// Validates a core builtin call
     /// @param call the call to validate
     /// @param overload the call intrinsic overload
-    void CheckCoreBuiltinCall(const CoreBuiltinCall* call,
-                              const core::intrinsic::Overload& overload);
-
-    /// Validates the offset argument of a subgroupMatrixLoad or subgroupMatrixStore call.
-    /// @param call the core builtin call
-    void CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call);
+    void CheckCoreBuiltinCall(const CoreBuiltinCall* call);
 
     /// Validates the given member builtin call
     /// @param call the member call to validate

@@ -28,7 +28,6 @@
 #include <utility>
 
 #include "src/tint/lang/core/intrinsic/dialect.h"
-#include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/type/array_count.h"
@@ -613,8 +612,9 @@ void Functional::CheckConstruct(const Construct* construct) {
 
 void Functional::CheckCall(const Call* call) {
     tint::Switch(
-        call,                                            //
-        [&](const Construct* c) { CheckConstruct(c); },  //
+        call,                                                //
+        [&](const BuiltinCall* c) { CheckBuiltinCall(c); },  //
+        [&](const Construct* c) { CheckConstruct(c); },      //
         [&](Default) {
             // Validation of custom IR instructions
         });
@@ -1102,6 +1102,150 @@ void Functional::CheckUnary(const Unary* u) {
         AddError(u) << "result value type " << NameOf(result->Type()) << " does not match "
                     << style::Instruction(Disassemble().NameOf(u->Op())) << " result type "
                     << NameOf(overload->return_type);
+    }
+}
+
+void Functional::CheckBuiltinCall(const BuiltinCall* call) {
+    auto args = Transform<8>(call->Args(), [&](const ir::Value* v) { return v->Type(); });
+
+    intrinsic::Context context{call->TableData(), type_mgr_, symbols_};
+    auto builtin = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
+                                             call->ExplicitTemplateParams(), args,
+                                             core::EvaluationStage::kRuntime);
+    if (builtin != Success) {
+        AddError(call) << builtin.Failure();
+        return;
+    }
+
+    TINT_ASSERT(builtin->return_type);
+
+    if (builtin->return_type != call->Result()->Type()) {
+        AddError(call) << "call result type " << NameOf(call->Result()->Type())
+                       << " does not match builtin return type " << NameOf(builtin->return_type);
+        return;
+    }
+
+    // Check evaluation stage of parameters that are required to be const-expressions.
+    for (uint32_t i = 0; i < builtin->parameters.Length(); i++) {
+        const auto& p = builtin->parameters[i];
+        const auto* arg = call->Args()[i];
+        if (p.is_const && !arg->Is<Constant>()) {
+            AddError(call, BuiltinCall::kArgsOperandOffset + i)
+                << "the " << style::Variable(p.usage) << " argument must be a constant";
+            return;
+        }
+    }
+
+    const core::ir::CoreBuiltinCall* bc = call->As<CoreBuiltinCall>();
+    if (bc == nullptr) {
+        return;
+    }
+
+    CheckCoreBuiltinCall(bc, builtin.Get());
+}
+
+void Functional::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
+                                      const core::intrinsic::Overload& overload) {
+    auto idx_for_usage = [&](core::ParameterUsage usage) -> std::optional<uint32_t> {
+        for (uint32_t i = 0; i < overload.parameters.Length(); ++i) {
+            auto& p = overload.parameters[i];
+            if (p.usage == usage) {
+                return int32_t(i);
+            }
+        }
+        return std::nullopt;
+    };
+
+    auto check_arg_in_range = [&](core::ParameterUsage usage, int32_t min, int32_t max) {
+        auto idx_opt = idx_for_usage(usage);
+        if (!idx_opt.has_value()) {
+            return;
+        }
+        uint32_t idx = idx_opt.value();
+        TINT_ASSERT(idx < call->Args().size());
+
+        auto* val = call->Args()[idx];
+        auto* const_val = val->As<ir::Constant>();
+        TINT_ASSERT(const_val);
+        auto* cnst = const_val->Value();
+
+        if (val->Type()->Is<core::type::Vector>()) {
+            for (size_t i = 0; i < cnst->NumElements(); i++) {
+                auto value = cnst->Index(i)->ValueAs<int32_t>();
+                if (value < min || value > max) {
+                    AddError(call, idx)
+                        << value << " outside range of [" << min << ", " << max << "]";
+                    return;
+                }
+            }
+        } else {
+            auto value = cnst->ValueAs<int32_t>();
+            if (value < min || value > max) {
+                AddError(call, idx) << value << " outside range of [" << min << ", " << max << "]";
+                return;
+            }
+        }
+    };
+
+    if (core::IsTexture(call->Func())) {
+        check_arg_in_range(core::ParameterUsage::kComponent, 0, 3);
+        check_arg_in_range(core::ParameterUsage::kOffset, -8, 7);
+    }
+
+    if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
+        call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+        CheckSubgroupMatrixOpOffset(call);
+    }
+}
+
+void Functional::CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call) {
+    const core::ir::Value* p_arg = call->Args()[0];
+    const core::ir::Value* offset_arg = call->Args()[1];
+
+    const core::type::Pointer* ptr_ty = p_arg->Type()->As<core::type::Pointer>();
+    TINT_ASSERT(ptr_ty);
+
+    const core::type::Array* arr_ty = ptr_ty->StoreType()->As<core::type::Array>();
+    TINT_ASSERT(arr_ty);
+
+    auto const_count = arr_ty->ConstantCount();
+    if (!const_count.has_value()) {
+        return;
+    }
+
+    const core::type::SubgroupMatrix* mat_ty = nullptr;
+    if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad) {
+        mat_ty = call->Result()->Type()->As<core::type::SubgroupMatrix>();
+    } else if (call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
+        mat_ty = call->Args()[2]->Type()->As<core::type::SubgroupMatrix>();
+    }
+    TINT_ASSERT(mat_ty);
+
+    auto arr_elem_size = arr_ty->ElemType()->Size();
+    auto mat_comp_size = mat_ty->Type()->Size();
+    TINT_ASSERT(mat_comp_size > 0);
+
+    auto limit = (const_count.value() * arr_elem_size) / mat_comp_size;
+
+    if (auto* offset_const = offset_arg->As<ir::Constant>()) {
+        auto* offset_val = offset_const->Value();
+        uint32_t offset = 0;
+        if (offset_arg->Type()->IsUnsignedIntegerScalar()) {
+            offset = offset_val->ValueAs<u32>();
+        } else if (offset_arg->Type()->IsSignedIntegerScalar()) {
+            auto ival = offset_val->ValueAs<i32>();
+            if (ival < 0) {
+                AddError(call, 1) << "the offset argument of " << call->Func()
+                                  << " must be non-negative";
+                return;
+            }
+            offset = static_cast<uint32_t>(ival);
+        }
+
+        if (offset >= limit) {
+            AddError(call, 1) << "the offset argument of " << call->Func() << " (" << offset
+                              << ") is out of bounds of the array type of size " << limit;
+        }
     }
 }
 

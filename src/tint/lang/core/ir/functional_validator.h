@@ -28,12 +28,15 @@
 #ifndef SRC_TINT_LANG_CORE_IR_FUNCTIONAL_VALIDATOR_H_
 #define SRC_TINT_LANG_CORE_IR_FUNCTIONAL_VALIDATOR_H_
 
+#include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block.h"
+#include "src/tint/lang/core/ir/builtin_call.h"
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
+#include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
@@ -115,9 +118,12 @@ class Functional {
 
     void CheckAccess(const Access* a);
     void CheckBinary(const Binary* b);
+    void CheckBuiltinCall(const BuiltinCall* call);
     void CheckCall(const Call* call);
     void CheckConstruct(const Construct* construct);
     void CheckContinue(const Continue* c);
+    void CheckCoreBuiltinCall(const CoreBuiltinCall* call,
+                              const core::intrinsic::Overload& overload);
     void CheckIf(const If* if_);
     void CheckLet(const Let* l);
     void CheckLoad(const Load* l);
@@ -128,6 +134,7 @@ class Functional {
     void CheckOverride(const Override* o);
     void CheckStore(const Store* s);
     void CheckStoreVectorElement(const StoreVectorElement* s);
+    void CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call);
     void CheckSwitch(const Switch* s);
     void CheckSwizzle(const Swizzle* s);
     void CheckTerminator(const Terminator* b);
