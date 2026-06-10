@@ -164,8 +164,8 @@ struct VulkanFunctions {
 
 #if defined(DAWN_USE_WAYLAND)
     // KHR_wayland_surface
-    PFN_vkCreateWaylandSurfaceKHR CreateWaylandSurfaceKHR = nullptr;
-    PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR
+    VkFn<PFN_vkCreateWaylandSurfaceKHR> CreateWaylandSurfaceKHR = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR>
         GetPhysicalDeviceWaylandPresentationSupportKHR = nullptr;
 #endif  // defined(DAWN_USE_WAYLAND)
 
