@@ -40,6 +40,8 @@
 #include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/exit.h"
+#include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
@@ -130,6 +132,8 @@ class Functional {
     void CheckConvert(const Convert* convert);
     void CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                               const core::intrinsic::Overload& overload);
+    void CheckExit(const Exit* e);
+    void CheckExitLoop(const ExitLoop* l);
     void CheckIf(const If* if_);
     void CheckLet(const Let* l);
     void CheckLoad(const Load* l);

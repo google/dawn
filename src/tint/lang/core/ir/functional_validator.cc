@@ -29,6 +29,8 @@
 
 #include "src/tint/lang/core/intrinsic/dialect.h"
 #include "src/tint/lang/core/ir/discard.h"
+#include "src/tint/lang/core/ir/exit_if.h"
+#include "src/tint/lang/core/ir/exit_switch.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/type/array_count.h"
@@ -1002,10 +1004,13 @@ void Functional::CheckLoopContinuing(const Loop* loop) {
 
 void Functional::CheckTerminator(const Terminator* b) {
     tint::Switch(
-        b,                                                //
-        [&](const ir::BreakIf* i) { CheckBreakIf(i); },   //
-        [&](const ir::Continue* c) { CheckContinue(c); }  //
-        // TODO(516717234): Add TINT_ICE_ON_NO_MATCH
+        b,                                                 //
+        [&](const ir::BreakIf* i) { CheckBreakIf(i); },    //
+        [&](const ir::Continue* c) { CheckContinue(c); },  //
+        [&](const ir::Exit* e) { CheckExit(e); },          //
+
+        [&](Default) {}  //
+                         // TODO(516717234): Add TINT_ICE_ON_NO_MATCH
     );
 }
 
@@ -1386,6 +1391,38 @@ void Functional::CheckBreakIf(const BreakIf* b) {
 
     if (loop->Continuing() != b->Block()) {
         AddError(b) << "must only be called directly from loop continuing";
+    }
+}
+
+void Functional::CheckExit(const Exit* e) {
+    tint::Switch(
+        e,                                                 //
+        [&](const ir::ExitIf*) {},                         //
+        [&](const ir::ExitLoop* l) { CheckExitLoop(l); },  //
+        [&](const ir::ExitSwitch*) {},                     //
+        TINT_ICE_ON_NO_MATCH);
+}
+
+void Functional::CheckExitLoop(const ExitLoop* l) {
+    const Instruction* inst = l;
+    const Loop* control = l->Loop();
+    while (inst) {
+        // Found parent loop
+        if (inst->Block()->Parent() == control) {
+            if (inst->Block() == control->Continuing()) {
+                AddError(l) << "loop exit jumps out of continuing block";
+                if (control->Continuing() != l->Block()) {
+                    AddNote(control->Continuing()) << "in continuing block";
+                }
+            } else if (inst->Block() == control->Initializer()) {
+                AddError(l) << "loop exit not permitted in loop initializer";
+                if (control->Initializer() != l->Block()) {
+                    AddNote(control->Initializer()) << "in initializer block";
+                }
+            }
+            break;
+        }
+        inst = inst->Block()->Parent();
     }
 }
 

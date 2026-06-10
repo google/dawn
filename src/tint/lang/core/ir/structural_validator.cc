@@ -2722,7 +2722,7 @@ void Structural::CheckInstruction(const Instruction* inst) {
         [&](const Unary* u) { CheckUnary(u); },                            //
         [&](const Override* o) { CheckOverride(o); },                      //
         [&](const Var* var) { CheckVar(var); },                            //
-        [&](const Default) { AddError(inst) << "missing validation"; });
+        TINT_ICE_ON_NO_MATCH);
 }
 
 void Structural::CheckOverride(const Override* o) {
@@ -3124,7 +3124,8 @@ void Structural::ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
                     [&](Default) {
                         auto* e = t->DeepestElement()->UnwrapPtrOrRef();
                         tint::Switch(
-                            e, [&](const core::type::Struct* s) { result = is_numeric(s); },
+                            e,  //
+                            [&](const core::type::Struct* s) { result = is_numeric(s); },
                             [&](Default) { result = e->IsNumericScalarOrVector(); });
                     });
                 return result;
@@ -3475,7 +3476,7 @@ void Structural::CheckTerminator(const Terminator* b) {
         [&](const ir::Return* ret) { CheckReturn(ret); },            //
         [&](const ir::TerminateInvocation*) {},                      //
         [&](const ir::Unreachable* u) { CheckUnreachable(u); },      //
-        [&](Default) { AddError(b) << "missing validation"; });
+        TINT_ICE_ON_NO_MATCH);
 
     if (b->next) {
         AddError(b) << "must be the last instruction in the block";
@@ -3521,13 +3522,12 @@ void Structural::CheckContinue(const Continue* c) {
 }
 
 void Structural::CheckExit(const Exit* e) {
-    if (e->ControlInstruction() == nullptr) {
-        AddError(e) << "has no parent control instruction";
-        return;
-    }
-
     if (control_stack_.IsEmpty()) {
         AddError(e) << "found outside all control instructions";
+        return;
+    }
+    if (e->ControlInstruction() == nullptr) {
+        AddError(e) << "has no parent control instruction";
         return;
     }
 
@@ -3540,7 +3540,7 @@ void Structural::CheckExit(const Exit* e) {
         [&](const ir::ExitIf* i) { CheckExitIf(i); },          //
         [&](const ir::ExitLoop* l) { CheckExitLoop(l); },      //
         [&](const ir::ExitSwitch* s) { CheckExitSwitch(s); },  //
-        [&](Default) { AddError(e) << "missing validation"; });
+        TINT_ICE_ON_NO_MATCH);
 }
 
 void Structural::CheckNextIteration(const NextIteration* n) {
@@ -3632,27 +3632,6 @@ void Structural::CheckExitSwitch(const ExitSwitch* s) {
 
 void Structural::CheckExitLoop(const ExitLoop* l) {
     CheckControlsAllowingIf(l, l->ControlInstruction());
-
-    const Instruction* inst = l;
-    const Loop* control = l->Loop();
-    while (inst) {
-        // Found parent loop
-        if (inst->Block()->Parent() == control) {
-            if (inst->Block() == control->Continuing()) {
-                AddError(l) << "loop exit jumps out of continuing block";
-                if (control->Continuing() != l->Block()) {
-                    AddNote(control->Continuing()) << "in continuing block";
-                }
-            } else if (inst->Block() == control->Initializer()) {
-                AddError(l) << "loop exit not permitted in loop initializer";
-                if (control->Initializer() != l->Block()) {
-                    AddNote(control->Initializer()) << "in initializer block";
-                }
-            }
-            break;
-        }
-        inst = inst->Block()->Parent();
-    }
 }
 
 void Structural::CheckLoad(const Load* l) {
