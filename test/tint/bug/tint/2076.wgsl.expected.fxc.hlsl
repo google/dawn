@@ -27,11 +27,12 @@ struct tint_ExternalTextureParams {
   float2 samplePlane1RectMax;
   uint2 apparentSize;
   float2 plane1CoordFactor;
+  float4 ootfParam;
 };
 
 
 cbuffer cbuffer_randomTexture_params : register(b4) {
-  uint4 randomTexture_params[17];
+  uint4 randomTexture_params[18];
 };
 Texture2D<float4> randomTexture_plane0 : register(t1);
 Texture2D<float4> randomTexture_plane1 : register(t3);
@@ -94,8 +95,9 @@ tint_ExternalTextureParams v_19(uint start_byte_offset) {
   uint2 v_43 = (((((v_41 & 15u) >> 2u) == 2u)) ? (v_42.zw) : (v_42.xy));
   uint v_44 = (264u + start_byte_offset);
   uint4 v_45 = randomTexture_params[(v_44 / 16u)];
-  tint_ExternalTextureParams v_46 = {v_20, v_22, v_23, v_24, v_25, v_26, v_27, v_28, v_31, v_34, v_37, v_40, v_43, asfloat((((((v_44 & 15u) >> 2u) == 2u)) ? (v_45.zw) : (v_45.xy)))};
-  return v_46;
+  float2 v_46 = asfloat((((((v_44 & 15u) >> 2u) == 2u)) ? (v_45.zw) : (v_45.xy)));
+  tint_ExternalTextureParams v_47 = {v_20, v_22, v_23, v_24, v_25, v_26, v_27, v_28, v_31, v_34, v_37, v_40, v_43, v_46, asfloat(randomTexture_params[((272u + start_byte_offset) / 16u)])};
+  return v_47;
 }
 
 [numthreads(1, 1, 1)]

@@ -27,12 +27,13 @@ struct tint_ExternalTextureParams {
   float2 samplePlane1RectMax;
   uint2 apparentSize;
   float2 plane1CoordFactor;
+  float4 ootfParam;
 };
 
 
 RWByteAddressBuffer prevent_dce : register(u0);
 cbuffer cbuffer_arg_0_params : register(b2, space1) {
-  uint4 arg_0_params[17];
+  uint4 arg_0_params[18];
 };
 Texture2D<float4> arg_0_plane0 : register(t0, space1);
 Texture2D<float4> arg_0_plane1 : register(t1, space1);
@@ -94,13 +95,14 @@ tint_ExternalTextureParams v_19(uint start_byte_offset) {
   uint2 v_43 = (((((v_41 & 15u) >> 2u) == 2u)) ? (v_42.zw) : (v_42.xy));
   uint v_44 = (264u + start_byte_offset);
   uint4 v_45 = arg_0_params[(v_44 / 16u)];
-  tint_ExternalTextureParams v_46 = {v_20, v_22, v_23, v_24, v_25, v_26, v_27, v_28, v_31, v_34, v_37, v_40, v_43, asfloat((((((v_44 & 15u) >> 2u) == 2u)) ? (v_45.zw) : (v_45.xy)))};
-  return v_46;
+  float2 v_46 = asfloat((((((v_44 & 15u) >> 2u) == 2u)) ? (v_45.zw) : (v_45.xy)));
+  tint_ExternalTextureParams v_47 = {v_20, v_22, v_23, v_24, v_25, v_26, v_27, v_28, v_31, v_34, v_37, v_40, v_43, v_46, asfloat(arg_0_params[((272u + start_byte_offset) / 16u)])};
+  return v_47;
 }
 
 uint2 textureDimensions_cdc6c9() {
-  tint_ExternalTextureParams v_47 = v_19(0u);
-  uint2 res = (v_47.apparentSize + (1u).xx);
+  tint_ExternalTextureParams v_48 = v_19(0u);
+  uint2 res = (v_48.apparentSize + (1u).xx);
   return res;
 }
 
@@ -137,12 +139,13 @@ struct tint_ExternalTextureParams {
   float2 samplePlane1RectMax;
   uint2 apparentSize;
   float2 plane1CoordFactor;
+  float4 ootfParam;
 };
 
 
 RWByteAddressBuffer prevent_dce : register(u0);
 cbuffer cbuffer_arg_0_params : register(b2, space1) {
-  uint4 arg_0_params[17];
+  uint4 arg_0_params[18];
 };
 Texture2D<float4> arg_0_plane0 : register(t0, space1);
 Texture2D<float4> arg_0_plane1 : register(t1, space1);
@@ -204,13 +207,14 @@ tint_ExternalTextureParams v_19(uint start_byte_offset) {
   uint2 v_43 = (((((v_41 & 15u) >> 2u) == 2u)) ? (v_42.zw) : (v_42.xy));
   uint v_44 = (264u + start_byte_offset);
   uint4 v_45 = arg_0_params[(v_44 / 16u)];
-  tint_ExternalTextureParams v_46 = {v_20, v_22, v_23, v_24, v_25, v_26, v_27, v_28, v_31, v_34, v_37, v_40, v_43, asfloat((((((v_44 & 15u) >> 2u) == 2u)) ? (v_45.zw) : (v_45.xy)))};
-  return v_46;
+  float2 v_46 = asfloat((((((v_44 & 15u) >> 2u) == 2u)) ? (v_45.zw) : (v_45.xy)));
+  tint_ExternalTextureParams v_47 = {v_20, v_22, v_23, v_24, v_25, v_26, v_27, v_28, v_31, v_34, v_37, v_40, v_43, v_46, asfloat(arg_0_params[((272u + start_byte_offset) / 16u)])};
+  return v_47;
 }
 
 uint2 textureDimensions_cdc6c9() {
-  tint_ExternalTextureParams v_47 = v_19(0u);
-  uint2 res = (v_47.apparentSize + (1u).xx);
+  tint_ExternalTextureParams v_48 = v_19(0u);
+  uint2 res = (v_48.apparentSize + (1u).xx);
   return res;
 }
 
@@ -248,6 +252,7 @@ struct tint_ExternalTextureParams {
   float2 samplePlane1RectMax;
   uint2 apparentSize;
   float2 plane1CoordFactor;
+  float4 ootfParam;
 };
 
 struct VertexOutput {
@@ -262,7 +267,7 @@ struct vertex_main_outputs {
 
 
 cbuffer cbuffer_arg_0_params : register(b2, space1) {
-  uint4 arg_0_params[17];
+  uint4 arg_0_params[18];
 };
 Texture2D<float4> arg_0_plane0 : register(t0, space1);
 Texture2D<float4> arg_0_plane1 : register(t1, space1);
@@ -324,27 +329,28 @@ tint_ExternalTextureParams v_19(uint start_byte_offset) {
   uint2 v_43 = (((((v_41 & 15u) >> 2u) == 2u)) ? (v_42.zw) : (v_42.xy));
   uint v_44 = (264u + start_byte_offset);
   uint4 v_45 = arg_0_params[(v_44 / 16u)];
-  tint_ExternalTextureParams v_46 = {v_20, v_22, v_23, v_24, v_25, v_26, v_27, v_28, v_31, v_34, v_37, v_40, v_43, asfloat((((((v_44 & 15u) >> 2u) == 2u)) ? (v_45.zw) : (v_45.xy)))};
-  return v_46;
+  float2 v_46 = asfloat((((((v_44 & 15u) >> 2u) == 2u)) ? (v_45.zw) : (v_45.xy)));
+  tint_ExternalTextureParams v_47 = {v_20, v_22, v_23, v_24, v_25, v_26, v_27, v_28, v_31, v_34, v_37, v_40, v_43, v_46, asfloat(arg_0_params[((272u + start_byte_offset) / 16u)])};
+  return v_47;
 }
 
 uint2 textureDimensions_cdc6c9() {
-  tint_ExternalTextureParams v_47 = v_19(0u);
-  uint2 res = (v_47.apparentSize + (1u).xx);
+  tint_ExternalTextureParams v_48 = v_19(0u);
+  uint2 res = (v_48.apparentSize + (1u).xx);
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_48 = (VertexOutput)0;
-  v_48.pos = (0.0f).xxxx;
-  v_48.prevent_dce = textureDimensions_cdc6c9();
-  VertexOutput v_49 = v_48;
-  return v_49;
+  VertexOutput v_49 = (VertexOutput)0;
+  v_49.pos = (0.0f).xxxx;
+  v_49.prevent_dce = textureDimensions_cdc6c9();
+  VertexOutput v_50 = v_49;
+  return v_50;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_50 = vertex_main_inner();
-  vertex_main_outputs v_51 = {v_50.prevent_dce, v_50.pos};
-  return v_51;
+  VertexOutput v_51 = vertex_main_inner();
+  vertex_main_outputs v_52 = {v_51.prevent_dce, v_51.pos};
+  return v_52;
 }
 

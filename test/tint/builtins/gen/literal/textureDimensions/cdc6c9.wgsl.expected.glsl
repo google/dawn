@@ -32,6 +32,7 @@ struct tint_ExternalTextureParams {
   vec2 samplePlane1RectMax;
   uvec2 apparentSize;
   vec2 plane1CoordFactor;
+  vec4 ootfParam;
 };
 
 layout(binding = 0, std430)
@@ -40,7 +41,7 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 layout(binding = 3, std140)
 uniform f_arg_0_params_block_ubo {
-  uvec4 inner[17];
+  uvec4 inner[18];
 } v_1;
 uniform highp sampler2D f_arg_0_plane0;
 uniform highp sampler2D f_arg_0_plane1;
@@ -105,7 +106,8 @@ tint_ExternalTextureParams v_28(uint start_byte_offset) {
   uvec2 v_52 = mix(v_51.xy, v_51.zw, bvec2((((v_50 & 15u) >> 2u) == 2u)));
   uint v_53 = (264u + start_byte_offset);
   uvec4 v_54 = v_1.inner[(v_53 / 16u)];
-  return tint_ExternalTextureParams(v_29[((start_byte_offset & 15u) >> 2u)], v_31[((v_30 & 15u) >> 2u)], v_32, v_33, v_34, v_35, v_36, v_37, v_40, v_43, v_46, v_49, v_52, uintBitsToFloat(mix(v_54.xy, v_54.zw, bvec2((((v_53 & 15u) >> 2u) == 2u)))));
+  vec2 v_55 = uintBitsToFloat(mix(v_54.xy, v_54.zw, bvec2((((v_53 & 15u) >> 2u) == 2u))));
+  return tint_ExternalTextureParams(v_29[((start_byte_offset & 15u) >> 2u)], v_31[((v_30 & 15u) >> 2u)], v_32, v_33, v_34, v_35, v_36, v_37, v_40, v_43, v_46, v_49, v_52, v_55, uintBitsToFloat(v_1.inner[((272u + start_byte_offset) / 16u)]));
 }
 uvec2 textureDimensions_cdc6c9() {
   uvec2 res = (v_28(0u).apparentSize + uvec2(1u));
@@ -146,6 +148,7 @@ struct tint_ExternalTextureParams {
   vec2 samplePlane1RectMax;
   uvec2 apparentSize;
   vec2 plane1CoordFactor;
+  vec4 ootfParam;
 };
 
 layout(binding = 0, std430)
@@ -154,7 +157,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 layout(binding = 3, std140)
 uniform arg_0_params_block_1_ubo {
-  uvec4 inner[17];
+  uvec4 inner[18];
 } v_1;
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
@@ -219,7 +222,8 @@ tint_ExternalTextureParams v_28(uint start_byte_offset) {
   uvec2 v_52 = mix(v_51.xy, v_51.zw, bvec2((((v_50 & 15u) >> 2u) == 2u)));
   uint v_53 = (264u + start_byte_offset);
   uvec4 v_54 = v_1.inner[(v_53 / 16u)];
-  return tint_ExternalTextureParams(v_29[((start_byte_offset & 15u) >> 2u)], v_31[((v_30 & 15u) >> 2u)], v_32, v_33, v_34, v_35, v_36, v_37, v_40, v_43, v_46, v_49, v_52, uintBitsToFloat(mix(v_54.xy, v_54.zw, bvec2((((v_53 & 15u) >> 2u) == 2u)))));
+  vec2 v_55 = uintBitsToFloat(mix(v_54.xy, v_54.zw, bvec2((((v_53 & 15u) >> 2u) == 2u))));
+  return tint_ExternalTextureParams(v_29[((start_byte_offset & 15u) >> 2u)], v_31[((v_30 & 15u) >> 2u)], v_32, v_33, v_34, v_35, v_36, v_37, v_40, v_43, v_46, v_49, v_52, v_55, uintBitsToFloat(v_1.inner[((272u + start_byte_offset) / 16u)]));
 }
 uvec2 textureDimensions_cdc6c9() {
   uvec2 res = (v_28(0u).apparentSize + uvec2(1u));
@@ -261,6 +265,7 @@ struct tint_ExternalTextureParams {
   vec2 samplePlane1RectMax;
   uvec2 apparentSize;
   vec2 plane1CoordFactor;
+  vec4 ootfParam;
 };
 
 struct VertexOutput {
@@ -270,7 +275,7 @@ struct VertexOutput {
 
 layout(binding = 2, std140)
 uniform v_arg_0_params_block_ubo {
-  uvec4 inner[17];
+  uvec4 inner[18];
 } v;
 uniform highp sampler2D v_arg_0_plane0;
 uniform highp sampler2D v_arg_0_plane1;
@@ -336,21 +341,22 @@ tint_ExternalTextureParams v_27(uint start_byte_offset) {
   uvec2 v_51 = mix(v_50.xy, v_50.zw, bvec2((((v_49 & 15u) >> 2u) == 2u)));
   uint v_52 = (264u + start_byte_offset);
   uvec4 v_53 = v.inner[(v_52 / 16u)];
-  return tint_ExternalTextureParams(v_28[((start_byte_offset & 15u) >> 2u)], v_30[((v_29 & 15u) >> 2u)], v_31, v_32, v_33, v_34, v_35, v_36, v_39, v_42, v_45, v_48, v_51, uintBitsToFloat(mix(v_53.xy, v_53.zw, bvec2((((v_52 & 15u) >> 2u) == 2u)))));
+  vec2 v_54 = uintBitsToFloat(mix(v_53.xy, v_53.zw, bvec2((((v_52 & 15u) >> 2u) == 2u))));
+  return tint_ExternalTextureParams(v_28[((start_byte_offset & 15u) >> 2u)], v_30[((v_29 & 15u) >> 2u)], v_31, v_32, v_33, v_34, v_35, v_36, v_39, v_42, v_45, v_48, v_51, v_54, uintBitsToFloat(v.inner[((272u + start_byte_offset) / 16u)]));
 }
 uvec2 textureDimensions_cdc6c9() {
   uvec2 res = (v_27(0u).apparentSize + uvec2(1u));
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput v_54 = VertexOutput(vec4(0.0f), uvec2(0u));
-  v_54.pos = vec4(0.0f);
-  v_54.prevent_dce = textureDimensions_cdc6c9();
-  return v_54;
+  VertexOutput v_55 = VertexOutput(vec4(0.0f), uvec2(0u));
+  v_55.pos = vec4(0.0f);
+  v_55.prevent_dce = textureDimensions_cdc6c9();
+  return v_55;
 }
 void main() {
-  VertexOutput v_55 = vertex_main_inner();
-  gl_Position = vec4(v_55.pos.x, -(v_55.pos.y), ((2.0f * v_55.pos.z) - v_55.pos.w), v_55.pos.w);
-  tint_interstage_location0 = v_55.prevent_dce;
+  VertexOutput v_56 = vertex_main_inner();
+  gl_Position = vec4(v_56.pos.x, -(v_56.pos.y), ((2.0f * v_56.pos.z) - v_56.pos.w), v_56.pos.w);
+  tint_interstage_location0 = v_56.prevent_dce;
   gl_PointSize = 1.0f;
 }

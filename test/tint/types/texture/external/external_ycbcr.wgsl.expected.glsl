@@ -27,11 +27,12 @@ struct tint_ExternalTextureParams {
   vec2 samplePlane1RectMax;
   uvec2 apparentSize;
   vec2 plane1CoordFactor;
+  vec4 ootfParam;
 };
 
 layout(binding = 2, std140)
 uniform t_f_params_block_1_ubo {
-  uvec4 inner[17];
+  uvec4 inner[18];
 } v_1;
 uniform highp sampler2D t_f_plane0;
 uniform highp sampler2D t_f_plane1;
@@ -98,77 +99,86 @@ vec4 tint_TextureLoadMultiplanarExternal(tint_ExternalTextureParams params, uvec
   vec3 v_21 = v_14;
   vec3 v_22 = vec3(0.0f);
   if ((params.doYuvToRgbConversionOnly == 0u)) {
-    v_22 = tint_ApplyGammaTransferFunction((params.gamutConversionMatrix * tint_ApplySrcTransferFunction(v_21, params.srcTransferFunction)), params.dstTransferFunction);
+    vec3 v_23 = tint_ApplySrcTransferFunction(v_21, params.srcTransferFunction);
+    vec3 v_24 = vec3(0.0f);
+    if ((params.ootfParam.w != 0.0f)) {
+      float v_25 = dot(params.ootfParam.xyz, v_23);
+      v_24 = (v_23 * (sign(v_25) * pow(abs(v_25), params.ootfParam.w)));
+    } else {
+      v_24 = v_23;
+    }
+    v_22 = tint_ApplyGammaTransferFunction((params.gamutConversionMatrix * v_24), params.dstTransferFunction);
   } else {
     v_22 = v_21;
   }
   return vec4(v_22, v_15);
 }
-mat3x2 v_23(uint start_byte_offset) {
-  uvec4 v_24 = v_1.inner[(start_byte_offset / 16u)];
-  vec2 v_25 = uintBitsToFloat(mix(v_24.xy, v_24.zw, bvec2((((start_byte_offset & 15u) >> 2u) == 2u))));
-  uint v_26 = (8u + start_byte_offset);
-  uvec4 v_27 = v_1.inner[(v_26 / 16u)];
-  vec2 v_28 = uintBitsToFloat(mix(v_27.xy, v_27.zw, bvec2((((v_26 & 15u) >> 2u) == 2u))));
-  uint v_29 = (16u + start_byte_offset);
+mat3x2 v_26(uint start_byte_offset) {
+  uvec4 v_27 = v_1.inner[(start_byte_offset / 16u)];
+  vec2 v_28 = uintBitsToFloat(mix(v_27.xy, v_27.zw, bvec2((((start_byte_offset & 15u) >> 2u) == 2u))));
+  uint v_29 = (8u + start_byte_offset);
   uvec4 v_30 = v_1.inner[(v_29 / 16u)];
-  return mat3x2(v_25, v_28, uintBitsToFloat(mix(v_30.xy, v_30.zw, bvec2((((v_29 & 15u) >> 2u) == 2u)))));
+  vec2 v_31 = uintBitsToFloat(mix(v_30.xy, v_30.zw, bvec2((((v_29 & 15u) >> 2u) == 2u))));
+  uint v_32 = (16u + start_byte_offset);
+  uvec4 v_33 = v_1.inner[(v_32 / 16u)];
+  return mat3x2(v_28, v_31, uintBitsToFloat(mix(v_33.xy, v_33.zw, bvec2((((v_32 & 15u) >> 2u) == 2u)))));
 }
-mat3 v_31(uint start_byte_offset) {
+mat3 v_34(uint start_byte_offset) {
   return mat3(uintBitsToFloat(v_1.inner[(start_byte_offset / 16u)].xyz), uintBitsToFloat(v_1.inner[((16u + start_byte_offset) / 16u)].xyz), uintBitsToFloat(v_1.inner[((32u + start_byte_offset) / 16u)].xyz));
 }
-tint_TransferFunctionParams v_32(uint start_byte_offset) {
-  uvec4 v_33 = v_1.inner[(start_byte_offset / 16u)];
-  uint v_34 = (4u + start_byte_offset);
-  uvec4 v_35 = v_1.inner[(v_34 / 16u)];
-  uint v_36 = (8u + start_byte_offset);
-  uvec4 v_37 = v_1.inner[(v_36 / 16u)];
-  uint v_38 = (12u + start_byte_offset);
-  uvec4 v_39 = v_1.inner[(v_38 / 16u)];
-  uint v_40 = (16u + start_byte_offset);
-  uvec4 v_41 = v_1.inner[(v_40 / 16u)];
-  uint v_42 = (20u + start_byte_offset);
-  uvec4 v_43 = v_1.inner[(v_42 / 16u)];
-  uint v_44 = (24u + start_byte_offset);
-  uvec4 v_45 = v_1.inner[(v_44 / 16u)];
-  uint v_46 = (28u + start_byte_offset);
-  uvec4 v_47 = v_1.inner[(v_46 / 16u)];
-  return tint_TransferFunctionParams(v_33[((start_byte_offset & 15u) >> 2u)], uintBitsToFloat(v_35[((v_34 & 15u) >> 2u)]), uintBitsToFloat(v_37[((v_36 & 15u) >> 2u)]), uintBitsToFloat(v_39[((v_38 & 15u) >> 2u)]), uintBitsToFloat(v_41[((v_40 & 15u) >> 2u)]), uintBitsToFloat(v_43[((v_42 & 15u) >> 2u)]), uintBitsToFloat(v_45[((v_44 & 15u) >> 2u)]), uintBitsToFloat(v_47[((v_46 & 15u) >> 2u)]));
+tint_TransferFunctionParams v_35(uint start_byte_offset) {
+  uvec4 v_36 = v_1.inner[(start_byte_offset / 16u)];
+  uint v_37 = (4u + start_byte_offset);
+  uvec4 v_38 = v_1.inner[(v_37 / 16u)];
+  uint v_39 = (8u + start_byte_offset);
+  uvec4 v_40 = v_1.inner[(v_39 / 16u)];
+  uint v_41 = (12u + start_byte_offset);
+  uvec4 v_42 = v_1.inner[(v_41 / 16u)];
+  uint v_43 = (16u + start_byte_offset);
+  uvec4 v_44 = v_1.inner[(v_43 / 16u)];
+  uint v_45 = (20u + start_byte_offset);
+  uvec4 v_46 = v_1.inner[(v_45 / 16u)];
+  uint v_47 = (24u + start_byte_offset);
+  uvec4 v_48 = v_1.inner[(v_47 / 16u)];
+  uint v_49 = (28u + start_byte_offset);
+  uvec4 v_50 = v_1.inner[(v_49 / 16u)];
+  return tint_TransferFunctionParams(v_36[((start_byte_offset & 15u) >> 2u)], uintBitsToFloat(v_38[((v_37 & 15u) >> 2u)]), uintBitsToFloat(v_40[((v_39 & 15u) >> 2u)]), uintBitsToFloat(v_42[((v_41 & 15u) >> 2u)]), uintBitsToFloat(v_44[((v_43 & 15u) >> 2u)]), uintBitsToFloat(v_46[((v_45 & 15u) >> 2u)]), uintBitsToFloat(v_48[((v_47 & 15u) >> 2u)]), uintBitsToFloat(v_50[((v_49 & 15u) >> 2u)]));
 }
-mat3x4 v_48(uint start_byte_offset) {
+mat3x4 v_51(uint start_byte_offset) {
   return mat3x4(uintBitsToFloat(v_1.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v_1.inner[((16u + start_byte_offset) / 16u)]), uintBitsToFloat(v_1.inner[((32u + start_byte_offset) / 16u)]));
 }
-tint_ExternalTextureParams v_49(uint start_byte_offset) {
-  uvec4 v_50 = v_1.inner[(start_byte_offset / 16u)];
-  uint v_51 = (4u + start_byte_offset);
-  uvec4 v_52 = v_1.inner[(v_51 / 16u)];
-  mat3x4 v_53 = v_48((16u + start_byte_offset));
-  tint_TransferFunctionParams v_54 = v_32((64u + start_byte_offset));
-  tint_TransferFunctionParams v_55 = v_32((96u + start_byte_offset));
-  mat3 v_56 = v_31((128u + start_byte_offset));
-  mat3x2 v_57 = v_23((176u + start_byte_offset));
-  mat3x2 v_58 = v_23((200u + start_byte_offset));
-  uint v_59 = (224u + start_byte_offset);
-  uvec4 v_60 = v_1.inner[(v_59 / 16u)];
-  vec2 v_61 = uintBitsToFloat(mix(v_60.xy, v_60.zw, bvec2((((v_59 & 15u) >> 2u) == 2u))));
-  uint v_62 = (232u + start_byte_offset);
+tint_ExternalTextureParams v_52(uint start_byte_offset) {
+  uvec4 v_53 = v_1.inner[(start_byte_offset / 16u)];
+  uint v_54 = (4u + start_byte_offset);
+  uvec4 v_55 = v_1.inner[(v_54 / 16u)];
+  mat3x4 v_56 = v_51((16u + start_byte_offset));
+  tint_TransferFunctionParams v_57 = v_35((64u + start_byte_offset));
+  tint_TransferFunctionParams v_58 = v_35((96u + start_byte_offset));
+  mat3 v_59 = v_34((128u + start_byte_offset));
+  mat3x2 v_60 = v_26((176u + start_byte_offset));
+  mat3x2 v_61 = v_26((200u + start_byte_offset));
+  uint v_62 = (224u + start_byte_offset);
   uvec4 v_63 = v_1.inner[(v_62 / 16u)];
   vec2 v_64 = uintBitsToFloat(mix(v_63.xy, v_63.zw, bvec2((((v_62 & 15u) >> 2u) == 2u))));
-  uint v_65 = (240u + start_byte_offset);
+  uint v_65 = (232u + start_byte_offset);
   uvec4 v_66 = v_1.inner[(v_65 / 16u)];
   vec2 v_67 = uintBitsToFloat(mix(v_66.xy, v_66.zw, bvec2((((v_65 & 15u) >> 2u) == 2u))));
-  uint v_68 = (248u + start_byte_offset);
+  uint v_68 = (240u + start_byte_offset);
   uvec4 v_69 = v_1.inner[(v_68 / 16u)];
   vec2 v_70 = uintBitsToFloat(mix(v_69.xy, v_69.zw, bvec2((((v_68 & 15u) >> 2u) == 2u))));
-  uint v_71 = (256u + start_byte_offset);
+  uint v_71 = (248u + start_byte_offset);
   uvec4 v_72 = v_1.inner[(v_71 / 16u)];
-  uvec2 v_73 = mix(v_72.xy, v_72.zw, bvec2((((v_71 & 15u) >> 2u) == 2u)));
-  uint v_74 = (264u + start_byte_offset);
+  vec2 v_73 = uintBitsToFloat(mix(v_72.xy, v_72.zw, bvec2((((v_71 & 15u) >> 2u) == 2u))));
+  uint v_74 = (256u + start_byte_offset);
   uvec4 v_75 = v_1.inner[(v_74 / 16u)];
-  return tint_ExternalTextureParams(v_50[((start_byte_offset & 15u) >> 2u)], v_52[((v_51 & 15u) >> 2u)], v_53, v_54, v_55, v_56, v_57, v_58, v_61, v_64, v_67, v_70, v_73, uintBitsToFloat(mix(v_75.xy, v_75.zw, bvec2((((v_74 & 15u) >> 2u) == 2u)))));
+  uvec2 v_76 = mix(v_75.xy, v_75.zw, bvec2((((v_74 & 15u) >> 2u) == 2u)));
+  uint v_77 = (264u + start_byte_offset);
+  uvec4 v_78 = v_1.inner[(v_77 / 16u)];
+  vec2 v_79 = uintBitsToFloat(mix(v_78.xy, v_78.zw, bvec2((((v_77 & 15u) >> 2u) == 2u))));
+  return tint_ExternalTextureParams(v_53[((start_byte_offset & 15u) >> 2u)], v_55[((v_54 & 15u) >> 2u)], v_56, v_57, v_58, v_59, v_60, v_61, v_64, v_67, v_70, v_73, v_76, v_79, uintBitsToFloat(v_1.inner[((272u + start_byte_offset) / 16u)]));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_ExternalTextureParams v_76 = v_49(0u);
-  vec4 vals = tint_TextureLoadMultiplanarExternal(v_76, min(uvec2(ivec2(0)), ((v_76.apparentSize + uvec2(1u)) - uvec2(1u))));
+  tint_ExternalTextureParams v_80 = v_52(0u);
+  vec4 vals = tint_TextureLoadMultiplanarExternal(v_80, min(uvec2(ivec2(0)), ((v_80.apparentSize + uvec2(1u)) - uvec2(1u))));
 }

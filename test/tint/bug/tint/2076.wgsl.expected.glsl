@@ -30,11 +30,12 @@ struct tint_ExternalTextureParams {
   vec2 samplePlane1RectMax;
   uvec2 apparentSize;
   vec2 plane1CoordFactor;
+  vec4 ootfParam;
 };
 
 layout(binding = 3, std140)
 uniform randomTexture_params_block_1_ubo {
-  uvec4 inner[17];
+  uvec4 inner[18];
 } v;
 uniform highp sampler2D randomTexture_plane0;
 uniform highp sampler2D randomTexture_plane1;
@@ -100,7 +101,8 @@ tint_ExternalTextureParams v_27(uint start_byte_offset) {
   uvec2 v_51 = mix(v_50.xy, v_50.zw, bvec2((((v_49 & 15u) >> 2u) == 2u)));
   uint v_52 = (264u + start_byte_offset);
   uvec4 v_53 = v.inner[(v_52 / 16u)];
-  return tint_ExternalTextureParams(v_28[((start_byte_offset & 15u) >> 2u)], v_30[((v_29 & 15u) >> 2u)], v_31, v_32, v_33, v_34, v_35, v_36, v_39, v_42, v_45, v_48, v_51, uintBitsToFloat(mix(v_53.xy, v_53.zw, bvec2((((v_52 & 15u) >> 2u) == 2u)))));
+  vec2 v_54 = uintBitsToFloat(mix(v_53.xy, v_53.zw, bvec2((((v_52 & 15u) >> 2u) == 2u))));
+  return tint_ExternalTextureParams(v_28[((start_byte_offset & 15u) >> 2u)], v_30[((v_29 & 15u) >> 2u)], v_31, v_32, v_33, v_34, v_35, v_36, v_39, v_42, v_45, v_48, v_51, v_54, uintBitsToFloat(v.inner[((272u + start_byte_offset) / 16u)]));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

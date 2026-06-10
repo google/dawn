@@ -27,12 +27,13 @@ struct tint_ExternalTextureParams {
   float2 samplePlane1RectMax;
   uint2 apparentSize;
   float2 plane1CoordFactor;
+  float4 ootfParam;
 };
 
 
 RWByteAddressBuffer prevent_dce : register(u0);
 cbuffer cbuffer_arg_0_params : register(b2, space1) {
-  uint4 arg_0_params[17];
+  uint4 arg_0_params[18];
 };
 Texture2D<float4> arg_0_plane0 : register(t0, space1);
 Texture2D<float4> arg_0_plane1 : register(t1, space1);
@@ -87,7 +88,7 @@ tint_ExternalTextureParams v_17(uint start_byte_offset) {
   uint4 v_36 = arg_0_params[(v_35 / 16u)];
   uint v_37 = (264u + start_byte_offset);
   uint4 v_38 = arg_0_params[(v_37 / 16u)];
-  tint_ExternalTextureParams v_39 = {v_18, v_20, v_21, v_22, v_23, v_24, v_25, v_26, asfloat(select((((v_27 & 15u) >> 2u) == 2u), v_28.zw, v_28.xy)), asfloat(select((((v_29 & 15u) >> 2u) == 2u), v_30.zw, v_30.xy)), asfloat(select((((v_31 & 15u) >> 2u) == 2u), v_32.zw, v_32.xy)), asfloat(select((((v_33 & 15u) >> 2u) == 2u), v_34.zw, v_34.xy)), select((((v_35 & 15u) >> 2u) == 2u), v_36.zw, v_36.xy), asfloat(select((((v_37 & 15u) >> 2u) == 2u), v_38.zw, v_38.xy))};
+  tint_ExternalTextureParams v_39 = {v_18, v_20, v_21, v_22, v_23, v_24, v_25, v_26, asfloat(select((((v_27 & 15u) >> 2u) == 2u), v_28.zw, v_28.xy)), asfloat(select((((v_29 & 15u) >> 2u) == 2u), v_30.zw, v_30.xy)), asfloat(select((((v_31 & 15u) >> 2u) == 2u), v_32.zw, v_32.xy)), asfloat(select((((v_33 & 15u) >> 2u) == 2u), v_34.zw, v_34.xy)), select((((v_35 & 15u) >> 2u) == 2u), v_36.zw, v_36.xy), asfloat(select((((v_37 & 15u) >> 2u) == 2u), v_38.zw, v_38.xy)), asfloat(arg_0_params[((272u + start_byte_offset) / 16u)])};
   return v_39;
 }
 
@@ -130,12 +131,13 @@ struct tint_ExternalTextureParams {
   float2 samplePlane1RectMax;
   uint2 apparentSize;
   float2 plane1CoordFactor;
+  float4 ootfParam;
 };
 
 
 RWByteAddressBuffer prevent_dce : register(u0);
 cbuffer cbuffer_arg_0_params : register(b2, space1) {
-  uint4 arg_0_params[17];
+  uint4 arg_0_params[18];
 };
 Texture2D<float4> arg_0_plane0 : register(t0, space1);
 Texture2D<float4> arg_0_plane1 : register(t1, space1);
@@ -190,7 +192,7 @@ tint_ExternalTextureParams v_17(uint start_byte_offset) {
   uint4 v_36 = arg_0_params[(v_35 / 16u)];
   uint v_37 = (264u + start_byte_offset);
   uint4 v_38 = arg_0_params[(v_37 / 16u)];
-  tint_ExternalTextureParams v_39 = {v_18, v_20, v_21, v_22, v_23, v_24, v_25, v_26, asfloat(select((((v_27 & 15u) >> 2u) == 2u), v_28.zw, v_28.xy)), asfloat(select((((v_29 & 15u) >> 2u) == 2u), v_30.zw, v_30.xy)), asfloat(select((((v_31 & 15u) >> 2u) == 2u), v_32.zw, v_32.xy)), asfloat(select((((v_33 & 15u) >> 2u) == 2u), v_34.zw, v_34.xy)), select((((v_35 & 15u) >> 2u) == 2u), v_36.zw, v_36.xy), asfloat(select((((v_37 & 15u) >> 2u) == 2u), v_38.zw, v_38.xy))};
+  tint_ExternalTextureParams v_39 = {v_18, v_20, v_21, v_22, v_23, v_24, v_25, v_26, asfloat(select((((v_27 & 15u) >> 2u) == 2u), v_28.zw, v_28.xy)), asfloat(select((((v_29 & 15u) >> 2u) == 2u), v_30.zw, v_30.xy)), asfloat(select((((v_31 & 15u) >> 2u) == 2u), v_32.zw, v_32.xy)), asfloat(select((((v_33 & 15u) >> 2u) == 2u), v_34.zw, v_34.xy)), select((((v_35 & 15u) >> 2u) == 2u), v_36.zw, v_36.xy), asfloat(select((((v_37 & 15u) >> 2u) == 2u), v_38.zw, v_38.xy)), asfloat(arg_0_params[((272u + start_byte_offset) / 16u)])};
   return v_39;
 }
 
@@ -234,6 +236,7 @@ struct tint_ExternalTextureParams {
   float2 samplePlane1RectMax;
   uint2 apparentSize;
   float2 plane1CoordFactor;
+  float4 ootfParam;
 };
 
 struct VertexOutput {
@@ -248,7 +251,7 @@ struct vertex_main_outputs {
 
 
 cbuffer cbuffer_arg_0_params : register(b2, space1) {
-  uint4 arg_0_params[17];
+  uint4 arg_0_params[18];
 };
 Texture2D<float4> arg_0_plane0 : register(t0, space1);
 Texture2D<float4> arg_0_plane1 : register(t1, space1);
@@ -303,7 +306,7 @@ tint_ExternalTextureParams v_17(uint start_byte_offset) {
   uint4 v_36 = arg_0_params[(v_35 / 16u)];
   uint v_37 = (264u + start_byte_offset);
   uint4 v_38 = arg_0_params[(v_37 / 16u)];
-  tint_ExternalTextureParams v_39 = {v_18, v_20, v_21, v_22, v_23, v_24, v_25, v_26, asfloat(select((((v_27 & 15u) >> 2u) == 2u), v_28.zw, v_28.xy)), asfloat(select((((v_29 & 15u) >> 2u) == 2u), v_30.zw, v_30.xy)), asfloat(select((((v_31 & 15u) >> 2u) == 2u), v_32.zw, v_32.xy)), asfloat(select((((v_33 & 15u) >> 2u) == 2u), v_34.zw, v_34.xy)), select((((v_35 & 15u) >> 2u) == 2u), v_36.zw, v_36.xy), asfloat(select((((v_37 & 15u) >> 2u) == 2u), v_38.zw, v_38.xy))};
+  tint_ExternalTextureParams v_39 = {v_18, v_20, v_21, v_22, v_23, v_24, v_25, v_26, asfloat(select((((v_27 & 15u) >> 2u) == 2u), v_28.zw, v_28.xy)), asfloat(select((((v_29 & 15u) >> 2u) == 2u), v_30.zw, v_30.xy)), asfloat(select((((v_31 & 15u) >> 2u) == 2u), v_32.zw, v_32.xy)), asfloat(select((((v_33 & 15u) >> 2u) == 2u), v_34.zw, v_34.xy)), select((((v_35 & 15u) >> 2u) == 2u), v_36.zw, v_36.xy), asfloat(select((((v_37 & 15u) >> 2u) == 2u), v_38.zw, v_38.xy)), asfloat(arg_0_params[((272u + start_byte_offset) / 16u)])};
   return v_39;
 }
 
