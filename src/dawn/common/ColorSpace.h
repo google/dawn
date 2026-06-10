@@ -57,6 +57,11 @@ namespace dawn {
 // color gradients. (Read up on sRGB, that's the most used and well known perceptual color space).
 // The inverse transfer function is called the opto-electronic transfer function (OETF).
 //
+// Note that a weirdness of HLG is that the EOTF is not the inverse of its OETF but of OETF(OOTF)
+// (for unfortunate and historical reasons). The Annex 1 "The relationship between the OETF, the
+// EOTF and the OOTF" of
+// https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2100-1-201706-S!!PDF-E.pdf
+//
 // The color primaries, what it means to say "red of 1" in that colorspace. This is where CIE XYZ is
 // used as the primaries for the colorspace are mapped to colors in the XYZ colorspace. XYZ itself
 // is a physical standard developed through experimentation on the human perception of color. The
@@ -285,16 +290,20 @@ inline constexpr TransferFunction kEOTF_SMPTE_170M = {
 // Luminance values of various color spaces for the white of value "1" after the transfer function.
 
 // When SDR content is composited in HDR, it should be assumed to have a white at 203 nits, even if
-// the sRGB spec defines it as 80 nits. See
-// https://www.w3.org/TR/css-color-hdr-1/#Compositing-SDR-HDR
-inline constexpr float kSDRLuminanceOf1 = 203;
+// the sRGB spec defines it as 80 nits. Note that this constant is only informative and Dawn allows
+// configuring the reference white luminance with wgpu::ColorSpaceDawn::hdrReferenceWhiteLuminance.
+// See https://www.w3.org/TR/css-color-hdr-1/#Compositing-SDR-HDR and Section 2.1 "HDR Reference
+// White" of https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-BT.2408-9-2026-PDF-E.pdf
+inline constexpr float kDefaultHDRReferenceWhiteLuminance = 203;
 
 // https://www.w3.org/TR/css-color-hdr-1/#valdef-color-rec2100-pq
 inline constexpr float kPQLuminanceOf1 = 10000;
 
 // https://www.w3.org/TR/css-color-hdr-1/#valdef-color-rec2100-hlg
 // The magic constant is used to place "media white" (so 1) at HLG value 0.75
-inline constexpr float kHLGLuminanceOf1 = 3.7743 * kSDRLuminanceOf1;
+// TODO(https://crbug.com/521494707): Change the defaults and allow overriding the peak luminance of
+// HLG as well as the gamma of its OOTF.
+inline constexpr float kHLGLuminanceOf1 = 3.7743 * kDefaultHDRReferenceWhiteLuminance;
 
 }  // namespace dawn
 

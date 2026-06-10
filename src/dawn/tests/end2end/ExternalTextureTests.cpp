@@ -2017,6 +2017,19 @@ TEST_P(ExternalTextureTests, ColorSpaceConversion_PQ_sRGBLinear) {
             .transfer = wgpu::ColorSpaceTransferDawn::PQ,
         },
         wgpu::PredefinedColorSpace::SRGBLinear, {0.5, 0.6, 0.9, 1}, {-1.3534, 1.1445, 21.395});
+
+    // Same test as above but using a different reference white luminance.
+    {
+        float factor = 203.0 / 100.0;
+        CheckColorSpaceConversion(
+            {
+                .primaries = wgpu::ColorSpacePrimariesDawn::Rec2020,
+                .transfer = wgpu::ColorSpaceTransferDawn::PQ,
+                .hdrReferenceWhiteLuminance = 100,
+            },
+            wgpu::PredefinedColorSpace::SRGBLinear, {0.5, 0.6, 0.9, 1},
+            {-1.3534f * factor, 1.1445f * factor, 21.395f * factor});
+    }
 }
 
 // Test that the color conversion from HLG to sRGBLinear works as expected.

@@ -1922,7 +1922,8 @@
             {"name": "primaries", "type": "color space primaries dawn"},
             {"name": "transfer", "type": "color space transfer dawn", "default": "identity"},
             {"name": "y cb cr range", "type": "color space y cb cr range dawn", "default": "identity"},
-            {"name": "y cb cr matrix", "type": "color space y cb cr matrix dawn", "default": "identity"}
+            {"name": "y cb cr matrix", "type": "color space y cb cr matrix dawn", "default": "identity"},
+            {"name": "hdr reference white luminance", "type": "float", "default": "0", "_comment": "0 is the default value and gets remapped to 203 nits for HLG and PQ transfer functions."}
         ]
     },
     "status": {

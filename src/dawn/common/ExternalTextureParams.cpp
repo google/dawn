@@ -73,6 +73,13 @@ wgpu::Status ComputeExternalTextureParams(const wgpu::ColorSpaceDawn& srcColorSp
         return wgpu::Status::Error;
     }
 
+    // Specifying the hdrReferenceWhiteLuminance is only allowed for HDR color spaces.
+    if (srcColorSpace.hdrReferenceWhiteLuminance != 0 &&
+        srcColorSpace.transfer != wgpu::ColorSpaceTransferDawn::PQ &&
+        srcColorSpace.transfer != wgpu::ColorSpaceTransferDawn::HLG) {
+        return wgpu::Status::Error;
+    }
+
     // Convert each enum argument to the corresponding matrix / transfer function params.
     math::Mat4x3f rangeMatrix;
     switch (srcColorSpace.yCbCrRange) {
@@ -126,7 +133,7 @@ wgpu::Status ComputeExternalTextureParams(const wgpu::ColorSpaceDawn& srcColorSp
     }
 
     TransferFunction srcEOTF;
-    float srcLuminanceOf1 = kSDRLuminanceOf1;
+    float srcLuminanceOf1 = kDefaultHDRReferenceWhiteLuminance;
     switch (srcColorSpace.transfer) {
         case wgpu::ColorSpaceTransferDawn::Identity:
             srcEOTF = kEOTF_Identity;
@@ -154,7 +161,6 @@ wgpu::Status ComputeExternalTextureParams(const wgpu::ColorSpaceDawn& srcColorSp
 
     math::Mat3x3f dstXYZToRGB;
     TransferFunction dstOETF;
-    float dstLuminanceOf1 = kSDRLuminanceOf1;
     switch (dstColorSpace) {
         case wgpu::PredefinedColorSpace::SRGB:
             dstXYZToRGB = kXYZToRGB_sRGB;
@@ -189,7 +195,12 @@ wgpu::Status ComputeExternalTextureParams(const wgpu::ColorSpaceDawn& srcColorSp
     }
 
     // The gamut matrix is passed column-major.
-    float luminanceAdjustment = srcLuminanceOf1 / dstLuminanceOf1;
+    float hdrReferenceWhiteLuminance = kDefaultHDRReferenceWhiteLuminance;
+    if (srcColorSpace.hdrReferenceWhiteLuminance != 0) {
+        hdrReferenceWhiteLuminance = srcColorSpace.hdrReferenceWhiteLuminance;
+    }
+
+    float luminanceAdjustment = srcLuminanceOf1 / hdrReferenceWhiteLuminance;
     math::Mat3x3f gamutConversionMatrix = math::Mul(dstXYZToRGB, srcRGBToXYZ) * luminanceAdjustment;
 
     for (size_t x = 0; x < 3; x++) {
