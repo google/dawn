@@ -291,12 +291,9 @@ diag::Diagnostic& Functional::AddNote(const Instruction* inst, size_t idx) {
 
 void Functional::CheckRootBlock(const Block* blk) {
     block_stack_.Push(blk);
-    scope_stack_.Push();
     TINT_DEFER({
-        scope_stack_.Pop();
         block_stack_.Pop();
         TINT_ASSERT(block_stack_.IsEmpty());
-        TINT_ASSERT(scope_stack_.IsEmpty());
     });
 
     for (auto* inst : *blk) {
@@ -305,9 +302,6 @@ void Functional::CheckRootBlock(const Block* blk) {
 }
 
 void Functional::CheckFunction(const Function* func) {
-    scope_stack_.Push();
-    TINT_DEFER(scope_stack_.Pop());
-
     if (func->IsEntryPoint()) {
         // Check that there is at most one entry point unless we allow multiple entry points.
         if (!ir_.properties.Contains(Property::kAllowMultipleEntryPoints)) {
@@ -346,7 +340,6 @@ void Functional::CheckFunction(const Function* func) {
 
     for (auto* param : func->Params()) {
         CheckFunctionParam(param);
-        scope_stack_.Add(param);
     }
 
     CheckBlock(func->Block());
@@ -405,17 +398,7 @@ void Functional::CheckFunctionParam(const FunctionParam* param) {
 
 void Functional::CheckBlock(const Block* blk) {
     block_stack_.Push(blk);
-    scope_stack_.Push();
-    TINT_DEFER({
-        scope_stack_.Pop();
-        block_stack_.Pop();
-    });
-
-    if (auto* mb = blk->As<MultiInBlock>()) {
-        for (auto* param : mb->Params()) {
-            scope_stack_.Add(param);
-        }
-    }
+    TINT_DEFER({ block_stack_.Pop(); });
 
     const Instruction* inst = blk->Instructions();
     while (inst != nullptr) {
@@ -445,10 +428,6 @@ void Functional::CheckInstruction(const Instruction* inst) {
         [&](const Unary* u) { CheckUnary(u); },                            //
         [&](const Var* var) { CheckVar(var); },                            //
         TINT_ICE_ON_NO_MATCH);
-
-    for (auto* result : inst->Results()) {
-        scope_stack_.Add(result);
-    }
 }
 
 void Functional::CheckOverride(const Override* o) {
@@ -550,15 +529,7 @@ void Functional::CheckVar(const Var* var) {
         }
     }
 
-    if (mv->AddressSpace() == AddressSpace::kWorkgroup) {
-        if (auto* ary = result_type->UnwrapPtr()->As<core::type::Array>()) {
-            if (auto* count = ary->Count()->As<core::ir::type::ValueArrayCount>()) {
-                if (!scope_stack_.Contains(count->value)) {
-                    AddError(var) << NameOf(count->value) << " is not in scope";
-                }
-            }
-        }
-    } else if (mv->AddressSpace() == AddressSpace::kStorage) {
+    if (mv->AddressSpace() == AddressSpace::kStorage) {
         if (mv->StoreType() && !mv->StoreType()->IsHostShareable()) {
             AddError(var) << "vars in the 'storage' address space must be host-shareable";
             return;
@@ -791,8 +762,7 @@ void Functional::CheckAccess(const Access* a) {
         };
 
         auto* index = a->Indices()[i];
-        if (DAWN_UNLIKELY(
-                (!index->Type() || !index->Type()->IsAnyOf<core::type::I32, core::type::U32>()))) {
+        if (DAWN_UNLIKELY((!index->Type()->IsAnyOf<core::type::I32, core::type::U32>()))) {
             err() << "index type " << NameOf(index->Type()) << " must be i32 or u32";
             return;
         }
@@ -806,7 +776,7 @@ void Functional::CheckAccess(const Access* a) {
 
         if (auto* const_index = index->As<ir::Constant>()) {
             auto* value = const_index->Value();
-            if (!value->Type() || value->Type()->IsSignedIntegerScalar()) {
+            if (value->Type()->IsSignedIntegerScalar()) {
                 // index is a signed integer scalar. Check that the index isn't negative.
                 // If the index is unsigned, we can skip this.
                 auto idx = value->ValueAs<AInt>();
@@ -884,7 +854,7 @@ void Functional::CheckBinary(const Binary* b) {
 }
 
 void Functional::CheckIf(const If* if_) {
-    if (if_->Condition() && !if_->Condition()->Type()->Is<core::type::Bool>()) {
+    if (!if_->Condition()->Type()->Is<core::type::Bool>()) {
         AddError(if_, If::kConditionOperandOffset) << "condition type must be 'bool'";
     }
 
@@ -1002,17 +972,17 @@ const core::type::Type* Functional::GetVectorPtrElementType(const Instruction* i
 }
 
 void Functional::CheckLoadVectorElement(const LoadVectorElement* l) {
-    if (auto* res = l->Result(0)) {
-        const core::type::Type* el_ty =
-            GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset);
-        if (!el_ty) {
-            return;
-        }
-        if (res->Type() != el_ty) {
-            AddError(l) << "result type " << NameOf(res->Type())
-                        << " does not match vector pointer element type " << NameOf(el_ty);
-            return;
-        }
+    const core::type::Type* el_ty =
+        GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset);
+    if (!el_ty) {
+        return;
+    }
+
+    auto* res = l->Result(0);
+    if (res->Type() != el_ty) {
+        AddError(l) << "result type " << NameOf(res->Type())
+                    << " does not match vector pointer element type " << NameOf(el_ty);
+        return;
     }
 
     if (!l->Index()->Type()->IsIntegerScalar()) {
@@ -1035,27 +1005,26 @@ void Functional::CheckLoadVectorElement(const LoadVectorElement* l) {
 }
 
 void Functional::CheckStoreVectorElement(const StoreVectorElement* s) {
-    if (auto* value = s->Value()) {
-        const core::type::Type* el_ty =
-            GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset);
-        if (!el_ty) {
-            return;
-        }
-        if (value->Type() != el_ty) {
-            AddError(s, StoreVectorElement::kValueOperandOffset)
-                << "value type " << NameOf(value->Type())
-                << " does not match vector pointer element type " << NameOf(el_ty);
-            return;
-        }
+    const core::type::Type* el_ty =
+        GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset);
+    if (!el_ty) {
+        return;
+    }
+    auto* value = s->Value();
+    if (value->Type() != el_ty) {
+        AddError(s, StoreVectorElement::kValueOperandOffset)
+            << "value type " << NameOf(value->Type())
+            << " does not match vector pointer element type " << NameOf(el_ty);
+        return;
+    }
 
-        // The `GetVectorPtrElementType` has already validated that the pointer exists.
-        const core::type::MemoryView* mv = s->To()->Type()->As<core::type::MemoryView>();
-        if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
-            AddError(s, StoreVectorElement::kToOperandOffset)
-                << "store_vector_element target operand has a non-writeable access type, "
-                << style::Literal(ToString(mv->Access()));
-            return;
-        }
+    // The `GetVectorPtrElementType` has already validated that the pointer exists.
+    const core::type::MemoryView* mv = s->To()->Type()->As<core::type::MemoryView>();
+    if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
+        AddError(s, StoreVectorElement::kToOperandOffset)
+            << "store_vector_element target operand has a non-writeable access type, "
+            << style::Literal(ToString(mv->Access()));
+        return;
     }
 
     if (!s->Index()->Type()->IsIntegerScalar()) {
@@ -1087,12 +1056,6 @@ void Functional::CheckLoop(const Loop* l) {
 }
 
 void Functional::CheckLoopBody(const Loop* loop) {
-    // If the body block has parameters, there must be an initializer block.
-    if (!loop->Body()->Params().IsEmpty()) {
-        if (!loop->HasInitializer()) {
-            AddError(loop) << "loop with body block parameters must have an initializer";
-        }
-    }
     CheckBlock(loop->Body());
 }
 
@@ -1151,7 +1114,7 @@ void Functional::CheckContinue(const Continue* c) {
 }
 
 void Functional::CheckSwitch(const Switch* s) {
-    if (s->Condition() && !s->Condition()->Type()->IsIntegerScalar()) {
+    if (!s->Condition()->Type()->IsIntegerScalar()) {
         auto* cond_ty = s->Condition() ? s->Condition()->Type() : nullptr;
         AddError(s, Switch::kConditionOperandOffset)
             << "condition type " << NameOf(cond_ty) << " must be an integer scalar";
@@ -1159,9 +1122,6 @@ void Functional::CheckSwitch(const Switch* s) {
 
     bool found_default = false;
     for (auto& case_ : s->Cases()) {
-        if (case_.selectors.IsEmpty()) {
-            AddError(s) << "case does not have any selectors";
-        }
         CheckBlock(case_.block);
 
         for (const auto& sel : case_.selectors) {
@@ -1173,7 +1133,7 @@ void Functional::CheckSwitch(const Switch* s) {
             } else if (!sel.val->Type()->IsIntegerScalar()) {
                 AddError(s) << "case selector type " << NameOf(sel.val->Type())
                             << " must be an integer scalar";
-            } else if (s->Condition() && sel.val->Type() != s->Condition()->Type()) {
+            } else if (sel.val->Type() != s->Condition()->Type()) {
                 AddError(s) << "case selector type " << NameOf(sel.val->Type())
                             << " must match the switch condition type "
                             << NameOf(s->Condition()->Type());
@@ -1235,10 +1195,6 @@ void Functional::CheckUnary(const Unary* u) {
     }
 
     const core::ir::Value* result = u->Result(0);
-    if (result == nullptr) {
-        return;
-    }
-
     if (overload->return_type != result->Type()) {
         AddError(u) << "result value type " << NameOf(result->Type()) << " does not match "
                     << style::Instruction(u->Op()) << " result type "
@@ -1452,11 +1408,6 @@ void Functional::CheckConvert(const Convert* convert) {
 }
 
 void Functional::CheckUserCall(const UserCall* call) {
-    if (!call->Target()) {
-        AddError(call, UserCall::kFunctionOperandOffset) << "target not defined or not a function";
-        return;
-    }
-
     if (call->Target()->IsEntryPoint()) {
         AddError(call, UserCall::kFunctionOperandOffset)
             << "call target must not have a pipeline stage";
@@ -1505,11 +1456,6 @@ void Functional::CheckUserCall(const UserCall* call) {
 }
 
 void Functional::CheckBreakIf(const BreakIf* b) {
-    if (b->Condition() == nullptr) {
-        AddError(b) << "break_if condition cannot be nullptr";
-        return;
-    }
-
     if (!b->Condition()->Type() || !b->Condition()->Type()->Is<core::type::Bool>()) {
         AddError(b) << "condition must be a 'bool'";
         return;

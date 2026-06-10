@@ -169,7 +169,6 @@ class Functional {
     SymbolTable symbols_ = SymbolTable::Wrap(ir_.symbols);
     core::type::Manager type_mgr_ = core::type::Manager::Wrap(ir_.Types());
 
-    ScopeStack scope_stack_;
     Vector<const Block*, 8> block_stack_;
     Hashset<OverrideId, 8> seen_override_ids_;
     Hashmap<const Loop*, const Continue*, 4> first_continues_;
