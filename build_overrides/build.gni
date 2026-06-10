@@ -55,4 +55,6 @@ if (host_os == "mac" && use_system_xcode == "") {
              "Please install Xcode.")
 
   use_system_xcode = _result != 1
+} else if (host_os != "mac") {
+  use_system_xcode = false
 }
