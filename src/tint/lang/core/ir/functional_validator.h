@@ -43,6 +43,7 @@
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
 #include "src/tint/lang/core/ir/loop.h"
+#include "src/tint/lang/core/ir/member_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/store.h"
@@ -131,6 +132,7 @@ class Functional {
     void CheckLoop(const Loop* l);
     void CheckLoopBody(const Loop* loop);
     void CheckLoopContinuing(const Loop* loop);
+    void CheckMemberBuiltinCall(const MemberBuiltinCall* call);
     void CheckOverride(const Override* o);
     void CheckStore(const Store* s);
     void CheckStoreVectorElement(const StoreVectorElement* s);

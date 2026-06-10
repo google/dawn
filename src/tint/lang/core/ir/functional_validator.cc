@@ -612,12 +612,11 @@ void Functional::CheckConstruct(const Construct* construct) {
 
 void Functional::CheckCall(const Call* call) {
     tint::Switch(
-        call,                                                //
-        [&](const BuiltinCall* c) { CheckBuiltinCall(c); },  //
-        [&](const Construct* c) { CheckConstruct(c); },      //
-        [&](Default) {
-            // Validation of custom IR instructions
-        });
+        call,                                                            //
+        [&](const BuiltinCall* c) { CheckBuiltinCall(c); },              //
+        [&](const Construct* c) { CheckConstruct(c); },                  //
+        [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },  //
+        [&](Default) { /* Validation of custom IR instructions */ });
 }
 
 void Functional::CheckAccess(const Access* a) {
@@ -1246,6 +1245,28 @@ void Functional::CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call) {
             AddError(call, 1) << "the offset argument of " << call->Func() << " (" << offset
                               << ") is out of bounds of the array type of size " << limit;
         }
+    }
+}
+
+void Functional::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
+    auto args = Transform<8>(call->Args(), [&](const ir::Value* v) { return v->Type(); });
+    args.Insert(0, call->Object()->Type());
+
+    intrinsic::Context context{call->TableData(), type_mgr_, symbols_};
+    auto result = core::intrinsic::LookupMemberFn(context, call->FriendlyName().c_str(),
+                                                  call->FuncId(), call->ExplicitTemplateParams(),
+                                                  std::move(args), core::EvaluationStage::kRuntime);
+    if (result != Success) {
+        AddError(call) << result.Failure();
+        return;
+    }
+
+    if (result->return_type != call->Result()->Type()) {
+        // Note: This is not currently tested in core unittests as there are no concrete
+        // MemberBuiltinCall implementations in core IR. This is tested by backend-specific
+        // (e.g. HLSL) validation tests.
+        AddError(call) << "member call result type " << NameOf(call->Result()->Type())
+                       << " does not match builtin return type " << NameOf(result->return_type);
     }
 }
 

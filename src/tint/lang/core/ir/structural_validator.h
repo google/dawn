@@ -32,7 +32,6 @@
 #include <functional>
 #include <string>
 
-#include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block_param.h"

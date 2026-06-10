@@ -29,9 +29,9 @@
 
 #include <algorithm>
 #include <string_view>
-#include <utility>
 
 #include "src/tint/lang/core/binary_op.h"
+#include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/core_binary.h"
@@ -3283,35 +3283,7 @@ void Structural::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
     // This check cannot be more precise, since until intrinsic lookup below, it is unknown what
     // number of operands are expected, but still need to enforce things are in scope,
     // have types, etc.
-    if (!CheckResults(call, MemberBuiltinCall::kNumResults) || !CheckOperands(call)) {
-        return;
-    }
-
-    auto args = Vector<const core::type::Type*, 8>({call->Object()->Type()});
-    for (auto* arg : call->Args()) {
-        args.Push(arg->Type());
-    }
-    intrinsic::Context context{
-        call->TableData(),
-        type_mgr_,
-        symbols_,
-    };
-
-    auto result = core::intrinsic::LookupMemberFn(context, call->FriendlyName().c_str(),
-                                                  call->FuncId(), call->ExplicitTemplateParams(),
-                                                  std::move(args), core::EvaluationStage::kRuntime);
-    if (result != Success) {
-        AddError(call) << result.Failure();
-        return;
-    }
-
-    if (result->return_type != call->Result()->Type()) {
-        // Note: This is not currently tested in core unittests as there are no concrete
-        // MemberBuiltinCall implementations in core IR. This is tested by backend-specific
-        // (e.g. HLSL) validation tests.
-        AddError(call) << "member call result type " << NameOf(call->Result()->Type())
-                       << " does not match builtin return type " << NameOf(result->return_type);
-    }
+    CheckResults(call, MemberBuiltinCall::kNumResults) || !CheckOperands(call);
 }
 
 void Structural::CheckConstruct(const Construct* construct) {
