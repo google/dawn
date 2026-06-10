@@ -576,17 +576,17 @@ class UniformityGraph {
 
             [&](const ast::AssignmentStatement* a) {
                 if (a->lhs->Is<ast::PhonyExpression>()) {
-                    auto [cf_r, _] = ProcessExpression(cf, a->rhs);
-                    return cf_r;
+                    ProcessExpression(cf, a->rhs);
+                    return cf;
                 }
-                auto [cf_l, v_l, ident] = ProcessLValueExpression(cf, a->lhs);
-                auto [cf_r, v_r] = ProcessExpression(cf_l, a->rhs);
+                auto [v_l, ident] = ProcessLValueExpression(cf, a->lhs);
+                auto* v_r = ProcessExpression(cf, a->rhs);
                 v_l->AddEdge(v_r);
 
                 // Update the variable node for the LHS variable.
                 current_function_->variables.Set(ident, v_l);
 
-                return cf_r;
+                return cf;
             },
 
             [&](const ast::BlockStatement* block) {
@@ -719,7 +719,7 @@ class UniformityGraph {
                 // above.
                 auto* sem = sem_.Get(brk);
 
-                auto [_, v_cond] = ProcessExpression(cf, brk->condition);
+                auto* v_cond = ProcessExpression(cf, brk->condition);
 
                 // Add a diagnostic node to capture the control flow change.
                 auto* v = CreateNode({"break_if_stmt"}, brk);
@@ -758,8 +758,8 @@ class UniformityGraph {
             },
 
             [&](const ast::CallStatement* c) {
-                auto [cf1, _] = ProcessCall(cf, c->expr);
-                return cf1;
+                ProcessCall(cf, c->expr);
+                return cf;
             },
 
             [&](const ast::CompoundAssignmentStatement* c) {
@@ -768,13 +768,13 @@ class UniformityGraph {
                 //   *p = *p + b;
 
                 // Evaluate the LHS.
-                auto [cf1, l1, ident] = ProcessLValueExpression(cf, c->lhs);
+                auto [l1, ident] = ProcessLValueExpression(cf, c->lhs);
 
                 // Get the current value loaded from the LHS reference before evaluating the RHS.
                 auto* lhs_load = current_function_->variables.Get(ident);
 
                 // Evaluate the RHS.
-                auto [cf2, v2] = ProcessExpression(cf1, c->rhs);
+                auto* v2 = ProcessExpression(cf, c->rhs);
 
                 // Create a node for the resulting value.
                 auto* result = CreateNode({"binary_expr_result"});
@@ -787,7 +787,7 @@ class UniformityGraph {
                 l1->AddEdge(result);
                 current_function_->variables.Set(ident, l1);
 
-                return cf2;
+                return cf;
             },
 
             [&](const ast::ContinueStatement* c) {
@@ -860,7 +860,7 @@ class UniformityGraph {
 
                 // Insert the condition at the start of the loop body.
                 if (f->condition) {
-                    auto [cf_cond, v] = ProcessExpression(cf_iter_start, f->condition);
+                    auto* v = ProcessExpression(cf_iter_start, f->condition);
                     auto* cf_condition_end = CreateNode({"for_condition_CFend"}, f);
                     cf_condition_end->affects_control_flow = true;
                     cf_condition_end->AddEdge(v);
@@ -979,7 +979,7 @@ class UniformityGraph {
 
                 // Insert the condition at the start of the loop body.
                 {
-                    auto [cf_cond, v] = ProcessExpression(cfx, w->condition);
+                    auto* v = ProcessExpression(cfx, w->condition);
                     auto* cf_condition_end = CreateNode({"while_condition_CFend"}, w);
                     cf_condition_end->affects_control_flow = true;
                     cf_condition_end->AddEdge(v);
@@ -1023,7 +1023,7 @@ class UniformityGraph {
 
             [&](const ast::IfStatement* i) {
                 auto* sem_if = sem_.Get(i);
-                auto [_, v_cond] = ProcessExpression(cf, i->condition);
+                auto* v_cond = ProcessExpression(cf, i->condition);
 
                 // Add a diagnostic node to capture the control flow change.
                 auto* v = CreateNode({"if_stmt"}, i);
@@ -1110,14 +1110,14 @@ class UniformityGraph {
                 // The increment/decrement statement `i++` is equivalent to `i = i + 1`.
 
                 // Evaluate the LHS.
-                auto [cf1, l1, ident] = ProcessLValueExpression(cf, i->lhs);
+                auto [l1, ident] = ProcessLValueExpression(cf, i->lhs);
 
                 // Get the current value loaded from the LHS reference.
                 auto* lhs_load = current_function_->variables.Get(ident);
 
                 // Create a node for the resulting value.
                 auto* result = CreateNode({"incdec_result"});
-                result->AddEdge(cf1);
+                result->AddEdge(cf);
                 if (lhs_load) {
                     result->AddEdge(lhs_load);
                 }
@@ -1126,7 +1126,7 @@ class UniformityGraph {
                 l1->AddEdge(result);
                 current_function_->variables.Set(ident, l1);
 
-                return cf1;
+                return cf;
             },
 
             [&](const ast::LoopStatement* l) {
@@ -1175,9 +1175,9 @@ class UniformityGraph {
             [&](const ast::ReturnStatement* r) {
                 Node* cf_ret;
                 if (r->value) {
-                    auto [cf1, v] = ProcessExpression(cf, r->value);
+                    auto* v = ProcessExpression(cf, r->value);
                     current_function_->value_return->AddEdge(v);
-                    cf_ret = cf1;
+                    cf_ret = cf;
                 } else {
                     TINT_ASSERT(cf != nullptr);
                     cf_ret = cf;
@@ -1196,7 +1196,7 @@ class UniformityGraph {
 
             [&](const ast::SwitchStatement* s) {
                 auto* sem_switch = sem_.Get(s);
-                auto [cfx, v_cond] = ProcessExpression(cf, s->condition);
+                auto* v_cond = ProcessExpression(cf, s->condition);
 
                 // Add a diagnostic node to capture the control flow change.
                 auto* v = CreateNode({"switch_stmt"}, s);
@@ -1255,8 +1255,7 @@ class UniformityGraph {
                 Node* node;
                 auto* sem_var = sem_.Get(decl->variable);
                 if (decl->variable->initializer) {
-                    auto [cf1, v] = ProcessExpression(cf, decl->variable->initializer);
-                    cf = cf1;
+                    auto* v = ProcessExpression(cf, decl->variable->initializer);
                     node = v;
 
                     // Store if lhs is a partial pointer
@@ -1318,10 +1317,10 @@ class UniformityGraph {
     /// @param cf the input control flow node
     /// @param ident the identifier expression to process
     /// @param load_rule true if the load rule is being invoked on this identifier
-    /// @returns a pair of (control flow node, value node)
-    std::pair<Node*, Node*> ProcessIdentExpression(Node* cf,
-                                                   const ast::IdentifierExpression* ident,
-                                                   bool load_rule = false) {
+    /// @returns the resulting value node
+    Node* ProcessIdentExpression(Node* cf,
+                                 const ast::IdentifierExpression* ident,
+                                 bool load_rule = false) {
         // Helper to check if the entry point attribute of `obj` indicates non-uniformity.
         auto has_nonuniform_entry_point_attribute = [&](auto* obj, auto* entry_point) {
             // Only the num_subgroups, num_workgroups and workgroup_id builtins, and subgroup_size
@@ -1359,7 +1358,7 @@ class UniformityGraph {
                             }
                         }
                         node->AddEdge(uniform ? cf : current_function_->may_be_non_uniform);
-                        return std::make_pair(cf, node);
+                        return node;
                     } else {
                         if (has_nonuniform_entry_point_attribute(param->Declaration(),
                                                                  user_func->Declaration())) {
@@ -1367,7 +1366,7 @@ class UniformityGraph {
                         } else {
                             node->AddEdge(cf);
                         }
-                        return std::make_pair(cf, node);
+                        return node;
                     }
                 } else {
                     node->AddEdge(cf);
@@ -1395,7 +1394,7 @@ class UniformityGraph {
                         node->AddEdge(current_value);
                     }
 
-                    return std::make_pair(cf, node);
+                    return node;
                 }
             },
 
@@ -1407,7 +1406,7 @@ class UniformityGraph {
                 } else {
                     node->AddEdge(cf);
                 }
-                return std::make_pair(cf, node);
+                return node;
             },
 
             [&](const sem::LocalVariable* local) {
@@ -1449,7 +1448,7 @@ class UniformityGraph {
                     node->AddEdge(local_value);
                 }
 
-                return std::make_pair(cf, node);
+                return node;
             },
 
             TINT_ICE_ON_NO_MATCH);
@@ -1459,10 +1458,8 @@ class UniformityGraph {
     /// @param cf the input control flow node
     /// @param expr the expression to process
     /// @param load_rule true if the load rule is being invoked on this expression
-    /// @returns a pair of (control flow node, value node)
-    std::pair<Node*, Node*> ProcessExpression(Node* cf,
-                                              const ast::Expression* expr,
-                                              bool load_rule = false) {
+    /// @returns the resulting value node
+    Node* ProcessExpression(Node* cf, const ast::Expression* expr, bool load_rule = false) {
         if (sem_.Get<sem::Load>(expr)) {
             // Set the load-rule flag to indicate that identifier expressions in this sub-tree
             // should add edges to the contents of the variables that they refer to.
@@ -1475,22 +1472,22 @@ class UniformityGraph {
             [&](const ast::BinaryExpression* e) {
                 if (e->IsLogical()) {
                     // Short-circuiting binary operators are a special case.
-                    auto [cf1, v1] = ProcessExpression(cf, e->lhs);
+                    auto* v1 = ProcessExpression(cf, e->lhs);
 
                     // Add a diagnostic node to capture the control flow change.
                     auto* v1_cf = CreateNode({"short_circuit_op"}, e);
                     v1_cf->affects_control_flow = true;
                     v1_cf->AddEdge(v1);
 
-                    auto [cf2, v2] = ProcessExpression(v1_cf, e->rhs);
-                    return std::pair<Node*, Node*>(cf, v2);
+                    auto* v2 = ProcessExpression(v1_cf, e->rhs);
+                    return v2;
                 } else {
-                    auto [cf1, v1] = ProcessExpression(cf, e->lhs);
-                    auto [cf2, v2] = ProcessExpression(cf1, e->rhs);
+                    auto* v1 = ProcessExpression(cf, e->lhs);
+                    auto* v2 = ProcessExpression(cf, e->rhs);
                     auto* result = CreateNode({"binary_expr_result"}, e);
                     result->AddEdge(v1);
                     result->AddEdge(v2);
-                    return std::pair<Node*, Node*>(cf2, result);
+                    return result;
                 }
             },
 
@@ -1501,15 +1498,15 @@ class UniformityGraph {
             },
 
             [&](const ast::IndexAccessorExpression* i) {
-                auto [cf1, v1] = ProcessExpression(cf, i->object, load_rule);
-                auto [cf2, v2] = ProcessExpression(cf1, i->index);
+                auto* v1 = ProcessExpression(cf, i->object, load_rule);
+                auto* v2 = ProcessExpression(cf, i->index);
                 auto* result = CreateNode({"index_accessor_result"});
                 result->AddEdge(v1);
                 result->AddEdge(v2);
-                return std::pair<Node*, Node*>(cf2, result);
+                return result;
             },
 
-            [&](const ast::LiteralExpression*) { return std::make_pair(cf, cf); },
+            [&](const ast::LiteralExpression*) { return cf; },
 
             [&](const ast::MemberAccessorExpression* m) {
                 return ProcessExpression(cf, m->object, load_rule);
@@ -1549,9 +1546,6 @@ class UniformityGraph {
 
     /// LValue holds the Nodes returned by ProcessLValueExpression()
     struct LValue {
-        /// The control-flow node for an LValue expression
-        Node* cf = nullptr;
-
         /// The new value node for an LValue expression
         Node* new_val = nullptr;
 
@@ -1564,7 +1558,7 @@ class UniformityGraph {
     /// @param expr the expression to process
     /// @param is_dereferencing `true` if we are dereferencing a pointer
     /// @param is_partial_reference `true` if we are referencing a subset of a variable
-    /// @returns a tuple of (control flow node, variable node, root identifier)
+    /// @returns a tuple of (variable node, root identifier)
     LValue ProcessLValueExpression(Node* cf,
                                    const ast::Expression* expr,
                                    bool is_dereferencing = false,
@@ -1581,7 +1575,7 @@ class UniformityGraph {
                         // be dereferencing here.
                         TINT_ASSERT(!is_dereferencing);
 
-                        return LValue{cf, current_function_->may_be_non_uniform, nullptr};
+                        return LValue{current_function_->may_be_non_uniform, nullptr};
                     },
                     [&](const sem::LocalVariable* local) {
                         Node* value = nullptr;
@@ -1605,7 +1599,7 @@ class UniformityGraph {
                             value = CreateNode({NameFor(i), "_lvalue"});
                         }
 
-                        return LValue{cf, value, root_ident};
+                        return LValue{value, root_ident};
                     },
                     [&](const sem::Parameter* param) {
                         // Parameters can only be LValues when we are dereferencing a pointer.
@@ -1617,7 +1611,7 @@ class UniformityGraph {
                         // The uniformity of the value depends on the pointer itself.
                         value->AddEdge(current_function_->parameters[param->Index()].value);
 
-                        return LValue{cf, value, param};
+                        return LValue{value, param};
                     },
                     [&](Default) -> LValue {
                         TINT_ICE() << "unknown lvalue identifier expression type: "
@@ -1642,12 +1636,11 @@ class UniformityGraph {
                 is_dereferencing =
                     is_dereferencing || sem_.GetVal(i->object)->Type()->Is<core::type::Pointer>();
 
-                auto [cf1, l1, root_ident] =
-                    ProcessLValueExpression(cf, i->object, is_dereferencing,
-                                            /*is_partial_reference*/ true);
-                auto [cf2, v2] = ProcessExpression(cf1, i->index);
+                auto [l1, root_ident] = ProcessLValueExpression(cf, i->object, is_dereferencing,
+                                                                /*is_partial_reference*/ true);
+                auto* v2 = ProcessExpression(cf, i->index);
                 l1->AddEdge(v2);
-                return LValue{cf2, l1, root_ident};
+                return LValue{l1, root_ident};
             },
 
             [&](const ast::MemberAccessorExpression* m) {
@@ -1696,8 +1689,8 @@ class UniformityGraph {
                 // This must be a bufferView/bufferArrayView call.
                 auto* sem = sem_.GetVal(c->args[0]);
                 auto* root_ident = sem->RootIdentifier();
-                auto [cf1, v1] = ProcessCall(cf, c);
-                return LValue{cf1, v1, root_ident};
+                auto v1 = ProcessCall(cf, c);
+                return LValue{v1, root_ident};
             },
 
             TINT_ICE_ON_NO_MATCH);
@@ -1706,17 +1699,16 @@ class UniformityGraph {
     /// Process a function call expression.
     /// @param cf the input control flow node
     /// @param call the function call to process
-    /// @returns a pair of (control flow node, value node)
-    std::pair<Node*, Node*> ProcessCall(Node* cf, const ast::CallExpression* call) {
+    /// @returns the resulting value node
+    Node* ProcessCall(Node* cf, const ast::CallExpression* call) {
         std::string name = NameFor(call->target);
 
         // Process call arguments
-        Node* cf_last_arg = cf;
         Vector<Node*, 8> args;
         Vector<Node*, 8> ptrarg_contents;
         ptrarg_contents.Resize(call->args.Length());
         for (size_t i = 0; i < call->args.Length(); i++) {
-            auto [cf_i, arg_i] = ProcessExpression(cf_last_arg, call->args[i]);
+            auto* arg_i = ProcessExpression(cf, call->args[i]);
 
             // Capture the index of this argument in a new node.
             // Note: This is an additional node that isn't described in the specification, for the
@@ -1748,18 +1740,16 @@ class UniformityGraph {
                 ptrarg_contents[i] = arg_contents;
             }
 
-            cf_last_arg = cf_i;
             args.Push(arg_node);
         }
 
         // Note: This is an additional node that isn't described in the specification, for the
         // purpose of providing diagnostic information.
         Node* call_node = CreateNode({name, "_call"}, call);
-        call_node->AddEdge(cf_last_arg);
+        call_node->AddEdge(cf);
 
         Node* result = CreateNode({name, "_return_value"}, call);
         result->type = Node::kFunctionCallReturnValue;
-        Node* cf_after = CreateNode({"CF_after_", name}, call);
 
         auto default_severity = kUniformityFailuresAsError ? wgsl::DiagnosticSeverity::kError
                                                            : wgsl::DiagnosticSeverity::kWarning;
@@ -1871,13 +1861,11 @@ class UniformityGraph {
             },  //
             TINT_ICE_ON_NO_MATCH);
 
-        cf_after->AddEdge(call_node);
-
         if (function_tag == ReturnValueMayBeNonUniform) {
             result->AddEdge(current_function_->may_be_non_uniform);
         }
 
-        result->AddEdge(cf_after);
+        result->AddEdge(call_node);
 
         // For each argument, add edges based on parameter tags.
         for (size_t i = 0; i < args.Length(); i++) {
@@ -1997,7 +1985,7 @@ class UniformityGraph {
             current_function_->RequiredToBeUniform(callsite_tag.severity)->AddEdge(call_node);
         }
 
-        return {cf_after, result};
+        return result;
     }
 
     /// Traverse a graph starting at `source`, inserting all visited nodes into `reachable` and

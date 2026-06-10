@@ -6020,6 +6020,41 @@ test:7:7 note: reading from read_write storage buffer 'non_uniform' may result i
 )");
 }
 
+TEST_F(UniformityAnalysisTest, AssignUniformFromFunctionCallResult_InNonUniformControlFlow) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn bar() -> i32 {
+  return 0;
+}
+
+fn foo() {
+  var v = 0;
+  if (non_uniform == 0) {
+    v = bar();
+  }
+  if (v == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:14:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:10:3 note: control flow depends on possibly non-uniform value
+  if (non_uniform == 0) {
+  ^^
+
+test:10:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  if (non_uniform == 0) {
+      ^^^^^^^^^^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, LoadNonUniformThroughPointer) {
     std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
