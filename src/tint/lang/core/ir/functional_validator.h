@@ -52,6 +52,7 @@
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/unary.h"
+#include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
@@ -143,6 +144,7 @@ class Functional {
     void CheckSwizzle(const Swizzle* s);
     void CheckTerminator(const Terminator* b);
     void CheckUnary(const Unary* u);
+    void CheckUserCall(const UserCall* call);
     void CheckVar(const Var* var);
 
     const Module& ir_;

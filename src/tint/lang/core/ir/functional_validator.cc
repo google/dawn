@@ -28,6 +28,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/intrinsic/dialect.h"
+#include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/type/array_count.h"
@@ -618,7 +619,9 @@ void Functional::CheckCall(const Call* call) {
         [&](const BuiltinCall* c) { CheckBuiltinCall(c); },              //
         [&](const Construct* c) { CheckConstruct(c); },                  //
         [&](const Convert* c) { CheckConvert(c); },                      //
+        [&](const Discard*) {},                                          //
         [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },  //
+        [&](const UserCall* c) { CheckUserCall(c); },                    //
         [&](Default) { /* Validation of custom IR instructions */ });
 }
 
@@ -1309,6 +1312,59 @@ void Functional::CheckConvert(const Convert* convert) {
         AddError(convert) << "No defined converter for " << NameOf(value_type) << " -> "
                           << NameOf(result_type);
         return;
+    }
+}
+
+void Functional::CheckUserCall(const UserCall* call) {
+    if (!call->Target()) {
+        AddError(call, UserCall::kFunctionOperandOffset) << "target not defined or not a function";
+        return;
+    }
+
+    if (call->Target()->IsEntryPoint()) {
+        AddError(call, UserCall::kFunctionOperandOffset)
+            << "call target must not have a pipeline stage";
+    }
+
+    if (call->Target()->ReturnType() != call->Result()->Type()) {
+        AddError(call) << "result type does not match function return type";
+        return;
+    }
+
+    auto args = call->Args();
+    auto params = call->Target()->Params();
+    if (args.size() != params.Length()) {
+        AddError(call, UserCall::kFunctionOperandOffset)
+            << "function has " << params.Length() << " parameters, but call provides "
+            << args.size() << " arguments";
+        return;
+    }
+
+    for (size_t i = 0; i < args.size(); i++) {
+        bool allow_mismatch = false;
+        if (auto* arg_buffer_ty = args[i]->Type()->UnwrapPtrOrRef()->As<core::type::Buffer>()) {
+            auto* arg_ptr_ty = args[i]->Type()->As<core::type::Pointer>();
+            if (auto* param_ptr_ty = params[i]->Type()->As<core::type::Pointer>()) {
+                if (auto* param_buffer_ty =
+                        param_ptr_ty->UnwrapPtrOrRef()->As<core::type::Buffer>()) {
+                    allow_mismatch = arg_ptr_ty->AddressSpace() == param_ptr_ty->AddressSpace() &&
+                                     arg_ptr_ty->Access() == param_ptr_ty->Access();
+                    const bool both_constant =
+                        arg_buffer_ty->Count()->Is<core::type::ConstantArrayCount>() &&
+                        param_buffer_ty->Count()->Is<core::type::ConstantArrayCount>();
+                    uint32_t arg_size = arg_buffer_ty->ConstantCount().value_or(0);
+                    uint32_t param_size = param_buffer_ty->ConstantCount().value_or(0);
+                    allow_mismatch &=
+                        param_buffer_ty->Count()->Is<core::type::RuntimeArrayCount>() ||
+                        (both_constant && param_size < arg_size);
+                }
+            }
+        }
+        if (!allow_mismatch && args[i]->Type() != params[i]->Type()) {
+            AddError(call, UserCall::kArgsOperandOffset + i)
+                << "type " << NameOf(params[i]->Type()) << " of function parameter " << i
+                << " does not match argument type " << NameOf(args[i]->Type());
+        }
     }
 }
 
