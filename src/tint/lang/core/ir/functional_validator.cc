@@ -32,8 +32,11 @@
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/phony.h"
+#include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/type/array_count.h"
+#include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
@@ -1008,10 +1011,11 @@ void Functional::CheckTerminator(const Terminator* b) {
         [&](const ir::BreakIf* i) { CheckBreakIf(i); },    //
         [&](const ir::Continue* c) { CheckContinue(c); },  //
         [&](const ir::Exit* e) { CheckExit(e); },          //
-
-        [&](Default) {}  //
-                         // TODO(516717234): Add TINT_ICE_ON_NO_MATCH
-    );
+        [&](const ir::NextIteration*) {},                  //
+        [&](const ir::Return* ret) { CheckReturn(ret); },  //
+        [&](const ir::TerminateInvocation*) {},            //
+        [&](const ir::Unreachable*) {},                    //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 void Functional::CheckContinue(const Continue* c) {
@@ -1423,6 +1427,25 @@ void Functional::CheckExitLoop(const ExitLoop* l) {
             break;
         }
         inst = inst->Block()->Parent();
+    }
+}
+
+void Functional::CheckReturn(const Return* ret) {
+    auto* func = ret->Func();
+    TINT_ASSERT(func);
+
+    if (func->ReturnType()->Is<core::type::Void>()) {
+        if (ret->HasValue()) {
+            AddError(ret) << "unexpected return value";
+        }
+        return;
+    }
+
+    if (!ret->Value()) {
+        AddError(ret) << "expected return value";
+    } else if (ret->Value()->Type() != func->ReturnType()) {
+        AddError(ret) << "return value type " << NameOf(ret->Value()->Type())
+                      << " does not match function return type " << NameOf(func->ReturnType());
     }
 }
 

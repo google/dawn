@@ -50,6 +50,7 @@
 #include "src/tint/lang/core/ir/member_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
+#include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/switch.h"
@@ -143,6 +144,7 @@ class Functional {
     void CheckLoopContinuing(const Loop* loop);
     void CheckMemberBuiltinCall(const MemberBuiltinCall* call);
     void CheckOverride(const Override* o);
+    void CheckReturn(const Return* ret);
     void CheckStore(const Store* s);
     void CheckStoreVectorElement(const StoreVectorElement* s);
     void CheckSubgroupMatrixOpOffset(const CoreBuiltinCall* call);

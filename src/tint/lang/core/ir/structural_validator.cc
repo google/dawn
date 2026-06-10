@@ -3549,6 +3549,7 @@ void Structural::CheckNextIteration(const NextIteration* n) {
         AddError(n) << "has no associated loop";
         return;
     }
+
     if (loop->Initializer() != n->Block() && loop->Continuing() != n->Block()) {
         if (control_stack_.Any(Eq<const ControlInstruction*>(loop))) {
             AddError(n) << "must only be called directly from loop initializer or continuing";
@@ -3586,19 +3587,6 @@ void Structural::CheckReturn(const Return* ret) {
     if (func != ContainingFunction(ret)) {
         AddError(ret) << "function operand does not match containing function";
         return;
-    }
-
-    if (func->ReturnType()->Is<core::type::Void>()) {
-        if (ret->HasValue()) {
-            AddError(ret) << "unexpected return value";
-        }
-    } else {
-        if (!ret->Value()) {
-            AddError(ret) << "expected return value";
-        } else if (ret->Value()->Type() != func->ReturnType()) {
-            AddError(ret) << "return value type " << NameOf(ret->Value()->Type())
-                          << " does not match function return type " << NameOf(func->ReturnType());
-        }
     }
 }
 
