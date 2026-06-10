@@ -1081,12 +1081,17 @@ void Device::DestroyImpl(DestroyReason reason) {
         pending->ClearUpTo(kMaxExecutionSerial);
     });
 
-    // Releasing the uploader enqueues buffers to be released.
-    // Call Tick() again to clear them before releasing the deleter.
-    GetResourceMemoryAllocator()->Tick(kMaxExecutionSerial);
+    // mResourceMemoryAllocator may not be created if the device creation fails before its creation.
+    // For example, as mResourceMemoryAllocator is created with a queue, it won't be created when
+    // an error happens when creating the queue.
+    if (mResourceMemoryAllocator) {
+        // Releasing the uploader enqueues buffers to be released.
+        // Call Tick() again to clear them before releasing the deleter.
+        GetResourceMemoryAllocator()->Tick(kMaxExecutionSerial);
 
-    // Allow recycled memory to be deleted.
-    GetResourceMemoryAllocator()->FreeRecycledMemory();
+        // Allow recycled memory to be deleted.
+        GetResourceMemoryAllocator()->FreeRecycledMemory();
+    }
 
     // The VkFramebuffers and VkRenderPasses in the cache can be destroyed immediately since all
     // commands referring to them are guaranteed to be finished executing.
