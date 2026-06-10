@@ -71,7 +71,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '91300ae47c89329439222ab38d2865abfada0a28',
+  'chromium_revision': '5cffea3f665b7762369a0fa84d2f208875e7225e',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -151,11 +151,11 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@424c8aa74940ede055ca5494b8207747581523a3',
+  'url': '{chromium_git}/chromium/src/build@e19e469ba42e7576708fa7d8f86766a572c3518d',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@f7b1b78d13c148f421362985a707860ecaf2bfff',
+  'url': '{chromium_git}/chromium/src/tools/clang@6d8bc7e46a96d136e4c154d55aa50fce1762bee5',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -265,7 +265,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@25a9c6b7f82c06fb46abc59eaf2fa684b2cb556d',
+    'url': '{chromium_git}/chromium/src/testing@fe04ec1bccd22a86d6f7c7ef2a1038c153b8bfc6',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -377,7 +377,7 @@ deps = {
   },
 
   'third_party/abseil-cpp': {
-    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@d08063d672d7693c1844d682848bcfec237f833e',
+    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@26b7a9b4417b3b0603967ffb02be6fd353e5324c',
     'condition': 'dawn_standalone',
   },
 
@@ -631,7 +631,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@b1d0141bcecfda2bfd108882d818fc5df70ae5c7',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@c31f5fa00b9ab50fdc6379649e01ddabc2defde0',
     'condition': 'dawn_standalone',
   },
 
