@@ -2046,6 +2046,17 @@ TEST_P(ExternalTextureTests, ColorSpaceConversion_HLG_sRGBLinear) {
         wgpu::PredefinedColorSpace::SRGBLinear, {0.75, 0.75, 0.75, 1}, {1, 1, 1});
 }
 
+// Test that PredefinedColorSpace::Rec2020Linear is the same color space as using primaries of
+// Rec2020 and an identity transfer function. (the Rec2020 primaries are tested as part of the PQ
+// and HLG tests above).
+TEST_P(ExternalTextureTests, ColorSpaceConversion_Rec2020_Rec2020Linear) {
+    CheckColorSpaceConversion(
+        {
+            .primaries = wgpu::ColorSpacePrimariesDawn::Rec2020,
+        },
+        wgpu::PredefinedColorSpace::Rec2020Linear, {0.4, 0.2, 0.1, 1}, {0.4, 0.2, 0.1});
+}
+
 // TODO(https://crbug.com/468988322): Add tests of ExternalTextures being used with a resource table
 // and with Vulkan's extended dynamic state as these are other interactions that could easily break.
 

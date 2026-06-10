@@ -4045,7 +4045,8 @@
             {"value": 1, "name": "sRGB"},
             {"value": 2, "name": "display p3"},
             {"value": 3, "name": "sRGB linear", "tags": ["dawn", "art"]},
-            {"value": 4, "name": "display p3 linear", "tags": ["dawn", "art"]}
+            {"value": 4, "name": "display p3 linear", "tags": ["dawn", "art"]},
+            {"value": 5, "name": "rec 2020 linear", "tags": ["dawn", "art"]}
         ]
     },
     "tone mapping mode": {

@@ -40,7 +40,7 @@ namespace dawn {
 //   }
 //   return (B + exp((v - C) / A)) / F
 constexpr TransferFunction kEOTF_HLG = {
-    .g = -1,  // Mode HLG see XXX
+    .g = -1,  // Mode HLG see src/dawn/native/ExternalTexture.cpp
     .a = 0.17883277,
     .b = 0.28466892,
     .c = 0.55991073,
@@ -57,7 +57,7 @@ constexpr TransferFunction kEOTF_HLG = {
 //   v = max(v - C, 0) / (D - E * v)
 //   return pow(v, 1.0 / A)
 constexpr TransferFunction kEOTF_PQ = {
-    .g = -2,  // Mode HLG see XXX
+    .g = -2,  // Mode PQ see src/dawn/native/ExternalTexture.cpp
     .a = (2610.0 / 16384.0),
     .b = (2523.0 / 4096.0) * 128.0,
     .c = (3424.0 / 4096.0),
@@ -170,6 +170,10 @@ wgpu::Status ComputeExternalTextureParams(const wgpu::ColorSpaceDawn& srcColorSp
             break;
         case wgpu::PredefinedColorSpace::DisplayP3Linear:
             dstXYZToRGB = kXYZToRGB_DisplayP3;
+            dstOETF = kEOTF_Identity;
+            break;
+        case wgpu::PredefinedColorSpace::Rec2020Linear:
+            dstXYZToRGB = kXYZToRGB_Rec2020;
             dstOETF = kEOTF_Identity;
             break;
         default:
