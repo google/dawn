@@ -109,6 +109,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/instruction.h
   lang/core/ir/instruction_result.cc
   lang/core/ir/instruction_result.h
+  lang/core/ir/io_attribute_validator.cc
+  lang/core/ir/io_attribute_validator.h
   lang/core/ir/let.cc
   lang/core/ir/let.h
   lang/core/ir/load.cc

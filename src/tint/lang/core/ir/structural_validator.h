@@ -52,6 +52,7 @@
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
+#include "src/tint/lang/core/ir/io_attribute_validator.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
@@ -80,20 +81,6 @@
 
 namespace tint::core::ir::validator {
 
-/// The kind of shader IO being validated.
-enum class ShaderIOKind : uint8_t {
-    kInputParam,
-    kResultValue,
-    kModuleScopeVar,
-};
-
-/// The IO direction of an operation.
-enum class IODirection : uint8_t {
-    kInput,
-    kOutput,
-    kResource,
-};
-
 /// State for validating blend_src attributes shared across multiple passes within the same entry
 /// point.
 struct BlendSrcContext {
@@ -102,13 +89,6 @@ struct BlendSrcContext {
     Hashset<uint32_t, 2> blend_srcs;
     const core::type::Type* blend_src_type = nullptr;
     IODirection dir;
-};
-
-/// State for validating IO attributes that needs to shared across impl invocations within the same
-/// entry point.
-struct IOAttributeContext {
-    Hashmap<BuiltinValue, uint32_t, 4> input_builtins;
-    Hashmap<BuiltinValue, uint32_t, 4> output_builtins;
 };
 
 using SupportedStages = tint::EnumSet<Function::PipelineStage>;

@@ -110,6 +110,8 @@ libtint_source_set("ir") {
     "instruction.h",
     "instruction_result.cc",
     "instruction_result.h",
+    "io_attribute_validator.cc",
+    "io_attribute_validator.h",
     "let.cc",
     "let.h",
     "load.cc",
