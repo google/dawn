@@ -696,19 +696,21 @@ class Structural {
     Capabilities capabilities_;
     std::optional<ir::Disassembler> disassembler_;  // Use Disassemble()
 
-    Hashset<const Function*, 4> all_functions_;
-    Hashset<const Instruction*, 4> visited_instructions_;
-    Hashmap<const Loop*, const Continue*, 4> first_continues_;
+    SymbolTable symbols_ = SymbolTable::Wrap(ir_.symbols);
+    core::type::Manager type_mgr_ = core::type::Manager::Wrap(ir_.Types());
+    core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
+
     Vector<const ControlInstruction*, 8> control_stack_;
     Vector<const Block*, 8> block_stack_;
     ScopeStack scope_stack_;
+
     Vector<std::function<void()>, 16> tasks_;
-    SymbolTable symbols_ = SymbolTable::Wrap(ir_.symbols);
-    core::type::Manager type_mgr_ = core::type::Manager::Wrap(ir_.Types());
+
+    Hashset<const Function*, 4> all_functions_;
+    Hashset<const Instruction*, 4> visited_instructions_;
     Hashmap<const ir::Block*, const ir::Function*, 64> block_to_function_{};
     Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
     Hashmap<const ir::Instruction*, SupportedStages, 4> stage_restricted_instructions_;
-    core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
     Hashset<std::string, 4> entry_point_names_;
     Hashset<const core::type::Type*, 16> validated_types_{};
 };
