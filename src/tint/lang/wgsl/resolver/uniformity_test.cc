@@ -10416,6 +10416,76 @@ test:10:12 note: reading from module-scope private variable 'non_uniform' may re
 )");
 }
 
+TEST_F(UniformityAnalysisTest, Composite_BecomesNonUniformViaCallInIndexExpression_RHS) {
+    std::string src = R"(
+@group(0) @binding(0)
+var<storage, read_write> non_uniform: vec4u;
+
+fn bar(p: ptr<function, vec4u>) -> u32 {
+  *p = non_uniform;
+  return 0;
+}
+
+fn foo() {
+  var v: vec4u;
+  let x = v[bar(&v)];
+  if (x == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:14:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:13:3 note: control flow depends on possibly non-uniform value
+  if (x == 0) {
+  ^^
+
+test:12:17 note: contents of pointer may become non-uniform after calling 'bar'
+  let x = v[bar(&v)];
+                ^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, Composite_BecomesNonUniformViaCallInIndexExpression_LHS) {
+    std::string src = R"(
+@group(0) @binding(0)
+var<storage, read_write> non_uniform: vec4u;
+
+fn bar(p: ptr<function, vec4u>) -> u32 {
+  *p = non_uniform;
+  return 0u;
+}
+
+fn foo() {
+  var v: vec4u;
+  v[bar(&v)] = 42;
+  if (v.z == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:14:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:13:3 note: control flow depends on possibly non-uniform value
+  if (v.z == 0) {
+  ^^
+
+test:12:9 note: contents of pointer may become non-uniform after calling 'bar'
+  v[bar(&v)] = 42;
+        ^^
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Miscellaneous statement and expression tests.
 ////////////////////////////////////////////////////////////////////////////////

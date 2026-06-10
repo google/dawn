@@ -1498,8 +1498,8 @@ class UniformityGraph {
             },
 
             [&](const ast::IndexAccessorExpression* i) {
-                auto* v1 = ProcessExpression(cf, i->object, load_rule);
-                auto* v2 = ProcessExpression(cf, i->index);
+                auto* v1 = ProcessExpression(cf, i->index);
+                auto* v2 = ProcessExpression(cf, i->object, load_rule);
                 auto* result = CreateNode({"index_accessor_result"});
                 result->AddEdge(v1);
                 result->AddEdge(v2);
@@ -1636,11 +1636,11 @@ class UniformityGraph {
                 is_dereferencing =
                     is_dereferencing || sem_.GetVal(i->object)->Type()->Is<core::type::Pointer>();
 
-                auto [l1, root_ident] = ProcessLValueExpression(cf, i->object, is_dereferencing,
+                auto* v1 = ProcessExpression(cf, i->index);
+                auto [l2, root_ident] = ProcessLValueExpression(cf, i->object, is_dereferencing,
                                                                 /*is_partial_reference*/ true);
-                auto* v2 = ProcessExpression(cf, i->index);
-                l1->AddEdge(v2);
-                return LValue{l1, root_ident};
+                l2->AddEdge(v1);
+                return LValue{l2, root_ident};
             },
 
             [&](const ast::MemberAccessorExpression* m) {
