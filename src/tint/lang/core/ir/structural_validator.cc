@@ -3483,24 +3483,10 @@ void Structural::CheckTerminator(const Terminator* b) {
 }
 
 void Structural::CheckBreakIf(const BreakIf* b) {
-    if (b->Condition() == nullptr) {
-        AddError(b) << "break_if condition cannot be nullptr";
-        return;
-    }
-
-    if (!b->Condition()->Type() || !b->Condition()->Type()->Is<core::type::Bool>()) {
-        AddError(b) << "condition must be a 'bool'";
-        return;
-    }
-
     auto* loop = b->Loop();
     if (loop == nullptr) {
         AddError(b) << "has no associated loop";
         return;
-    }
-
-    if (loop->Continuing() != b->Block()) {
-        AddError(b) << "must only be called directly from loop continuing";
     }
 
     auto next_iter_values = b->NextIterValues();

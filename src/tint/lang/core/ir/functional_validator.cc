@@ -1001,9 +1001,11 @@ void Functional::CheckLoopContinuing(const Loop* loop) {
 }
 
 void Functional::CheckTerminator(const Terminator* b) {
-    tint::Switch(b,                                                //
-                 [&](const ir::Continue* c) { CheckContinue(c); }  //
-                 // TODO(516717234): Add TINT_ICE_ON_NO_MATCH
+    tint::Switch(
+        b,                                                //
+        [&](const ir::BreakIf* i) { CheckBreakIf(i); },   //
+        [&](const ir::Continue* c) { CheckContinue(c); }  //
+        // TODO(516717234): Add TINT_ICE_ON_NO_MATCH
     );
 }
 
@@ -1365,6 +1367,25 @@ void Functional::CheckUserCall(const UserCall* call) {
                 << "type " << NameOf(params[i]->Type()) << " of function parameter " << i
                 << " does not match argument type " << NameOf(args[i]->Type());
         }
+    }
+}
+
+void Functional::CheckBreakIf(const BreakIf* b) {
+    if (b->Condition() == nullptr) {
+        AddError(b) << "break_if condition cannot be nullptr";
+        return;
+    }
+
+    if (!b->Condition()->Type() || !b->Condition()->Type()->Is<core::type::Bool>()) {
+        AddError(b) << "condition must be a 'bool'";
+        return;
+    }
+
+    auto* loop = b->Loop();
+    TINT_ASSERT(loop);
+
+    if (loop->Continuing() != b->Block()) {
+        AddError(b) << "must only be called directly from loop continuing";
     }
 }
 

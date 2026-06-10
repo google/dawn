@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block.h"
+#include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/construct.h"
@@ -121,6 +122,7 @@ class Functional {
 
     void CheckAccess(const Access* a);
     void CheckBinary(const Binary* b);
+    void CheckBreakIf(const BreakIf* b);
     void CheckBuiltinCall(const BuiltinCall* call);
     void CheckCall(const Call* call);
     void CheckConstruct(const Construct* construct);
