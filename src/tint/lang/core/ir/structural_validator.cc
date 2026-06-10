@@ -2771,6 +2771,49 @@ void Structural::CheckVar(const Var* var) {
     }
 }
 
+const ir::Function* Structural::ContainingFunction(const ir::Instruction* inst) {
+    if (inst->Block() == ir_.root_block) {
+        return nullptr;
+    }
+
+    return block_to_function_.GetOrAdd(inst->Block(), [&] {  //
+        return ContainingFunction(inst->Block()->Parent());
+    });
+}
+
+Hashset<const ir::Function*, 4> Structural::ContainingEndPoints(const ir::Function* f) {
+    if (!f) {
+        return {};
+    }
+
+    Hashset<const ir::Function*, 4> result{};
+    Hashset<const ir::Function*, 4> visited{f};
+
+    auto call_sites = user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>()).Vector();
+    while (!call_sites.IsEmpty()) {
+        auto call_site = call_sites.Pop();
+        auto calling_function = ContainingFunction(call_site);
+        if (!calling_function) {
+            continue;
+        }
+
+        if (visited.Contains(calling_function)) {
+            continue;
+        }
+        visited.Add(calling_function);
+
+        if (calling_function->IsEntryPoint()) {
+            result.Add(calling_function);
+        }
+
+        for (auto new_call_sites : user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>())) {
+            call_sites.Push(new_call_sites);
+        }
+    }
+
+    return result;
+}
+
 void Structural::CheckBlendSrc(BlendSrcContext& ctx,
                                const CastableBase* target,
                                const core::type::Type* ty,

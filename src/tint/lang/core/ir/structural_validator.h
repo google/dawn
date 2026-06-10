@@ -670,52 +670,12 @@ class Structural {
     /// Get the function that contains an instruction.
     /// @param inst the instruction
     /// @returns the function
-    const ir::Function* ContainingFunction(const ir::Instruction* inst) {
-        if (inst->Block() == ir_.root_block) {
-            return nullptr;
-        }
-
-        return block_to_function_.GetOrAdd(inst->Block(), [&] {  //
-            return ContainingFunction(inst->Block()->Parent());
-        });
-    }
+    const ir::Function* ContainingFunction(const ir::Instruction* inst);
 
     /// Get any endpoints that call a function.
     /// @param f the function
     /// @returns all end points that call the function
-    Hashset<const ir::Function*, 4> ContainingEndPoints(const ir::Function* f) {
-        if (!f) {
-            return {};
-        }
-
-        Hashset<const ir::Function*, 4> result{};
-        Hashset<const ir::Function*, 4> visited{f};
-
-        auto call_sites = user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>()).Vector();
-        while (!call_sites.IsEmpty()) {
-            auto call_site = call_sites.Pop();
-            auto calling_function = ContainingFunction(call_site);
-            if (!calling_function) {
-                continue;
-            }
-
-            if (visited.Contains(calling_function)) {
-                continue;
-            }
-            visited.Add(calling_function);
-
-            if (calling_function->IsEntryPoint()) {
-                result.Add(calling_function);
-            }
-
-            for (auto new_call_sites :
-                 user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>())) {
-                call_sites.Push(new_call_sites);
-            }
-        }
-
-        return result;
-    }
+    Hashset<const ir::Function*, 4> ContainingEndPoints(const ir::Function* f);
 
     /// ScopeStack holds a stack of values that are currently in scope
     struct ScopeStack {
