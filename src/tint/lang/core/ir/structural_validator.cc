@@ -3567,28 +3567,7 @@ void Structural::CheckBinary(const Binary* b) {
 }
 
 void Structural::CheckUnary(const Unary* u) {
-    if (!CheckResultsAndOperands(u, Unary::kNumResults, Unary::kNumOperands)) {
-        return;
-    }
-
-    if (u->Val()) {
-        intrinsic::Context context{u->TableData(), type_mgr_, symbols_};
-
-        auto overload = core::intrinsic::LookupUnary(context, u->Op(), u->Val()->Type(),
-                                                     core::EvaluationStage::kRuntime);
-        if (overload != Success) {
-            AddError(u) << overload.Failure();
-            return;
-        }
-
-        if (auto* result = u->Result(0)) {
-            if (overload->return_type != result->Type()) {
-                AddError(u) << "result value type " << NameOf(result->Type()) << " does not match "
-                            << style::Instruction(Disassemble().NameOf(u->Op())) << " result type "
-                            << NameOf(overload->return_type);
-            }
-        }
-    }
+    CheckResultsAndOperands(u, Unary::kNumResults, Unary::kNumOperands);
 }
 
 void Structural::CheckIf(const If* if_) {

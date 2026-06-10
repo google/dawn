@@ -310,9 +310,9 @@ void Functional::CheckInstruction(const Instruction* inst) {
         [&](const Switch* s) { CheckSwitch(s); },                          //
         [&](const Swizzle* s) { CheckSwizzle(s); },                        //
         [&](const Terminator* b) { CheckTerminator(b); },                  //
-        [&](const Var* var) { CheckVar(var); }
-        // TODO(516717234): Add TINT_ICE_ON_NO_MATCH when all instructions covered
-    );
+        [&](const Unary* u) { CheckUnary(u); },                            //
+        [&](const Var* var) { CheckVar(var); },                            //
+        TINT_ICE_ON_NO_MATCH);
 
     for (auto* result : inst->Results()) {
         scope_stack_.Add(result);
@@ -1079,6 +1079,29 @@ void Functional::CheckSwizzle(const Swizzle* s) {
         AddError(s) << "result type " << NameOf(result_ty) << " does not match expected type, "
                     << NameOf(expected_ty);
         return;
+    }
+}
+
+void Functional::CheckUnary(const Unary* u) {
+    TINT_ASSERT(u->Val());
+
+    intrinsic::Context context{u->TableData(), type_mgr_, symbols_};
+    auto overload = core::intrinsic::LookupUnary(context, u->Op(), u->Val()->Type(),
+                                                 core::EvaluationStage::kRuntime);
+    if (overload != Success) {
+        AddError(u) << overload.Failure();
+        return;
+    }
+
+    const core::ir::Value* result = u->Result(0);
+    if (result == nullptr) {
+        return;
+    }
+
+    if (overload->return_type != result->Type()) {
+        AddError(u) << "result value type " << NameOf(result->Type()) << " does not match "
+                    << style::Instruction(Disassemble().NameOf(u->Op())) << " result type "
+                    << NameOf(overload->return_type);
     }
 }
 
