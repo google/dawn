@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
+#include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/if.h"
@@ -123,6 +124,7 @@ class Functional {
     void CheckCall(const Call* call);
     void CheckConstruct(const Construct* construct);
     void CheckContinue(const Continue* c);
+    void CheckConvert(const Convert* convert);
     void CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                               const core::intrinsic::Overload& overload);
     void CheckIf(const If* if_);

@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
+#include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/matrix.h"
@@ -42,6 +43,7 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
@@ -615,6 +617,7 @@ void Functional::CheckCall(const Call* call) {
         call,                                                            //
         [&](const BuiltinCall* c) { CheckBuiltinCall(c); },              //
         [&](const Construct* c) { CheckConstruct(c); },                  //
+        [&](const Convert* c) { CheckConvert(c); },                      //
         [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },  //
         [&](Default) { /* Validation of custom IR instructions */ });
 }
@@ -1267,6 +1270,45 @@ void Functional::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
         // (e.g. HLSL) validation tests.
         AddError(call) << "member call result type " << NameOf(call->Result()->Type())
                        << " does not match builtin return type " << NameOf(result->return_type);
+    }
+}
+
+void Functional::CheckConvert(const Convert* convert) {
+    auto* result_type = convert->Result()->Type();
+    auto* value_type = convert->Operand(Convert::kValueOperandOffset)->Type();
+
+    intrinsic::CtorConv conv_ty;
+    Vector<const core::type::Type*, 1> template_type;
+    tint::Switch(
+        result_type,                                                             //
+        [&](const core::type::I32*) { conv_ty = intrinsic::CtorConv::kI32; },    //
+        [&](const core::type::U32*) { conv_ty = intrinsic::CtorConv::kU32; },    //
+        [&](const core::type::U64*) { conv_ty = intrinsic::CtorConv::kU64; },    //
+        [&](const core::type::F32*) { conv_ty = intrinsic::CtorConv::kF32; },    //
+        [&](const core::type::F16*) { conv_ty = intrinsic::CtorConv::kF16; },    //
+        [&](const core::type::Bool*) { conv_ty = intrinsic::CtorConv::kBool; },  //
+        [&](const core::type::Vector* v) {
+            conv_ty = intrinsic::VectorCtorConv(v->Width());
+            template_type.Push(v->Type());
+        },
+        [&](const core::type::Matrix* m) {
+            conv_ty = intrinsic::MatrixCtorConv(m->Columns(), m->Rows());
+            template_type.Push(m->Type());
+        },
+        [&](Default) { conv_ty = intrinsic::CtorConv::kNone; });
+
+    if (conv_ty == intrinsic::CtorConv::kNone) {
+        AddError(convert) << "not defined for result type, " << NameOf(result_type);
+        return;
+    }
+
+    auto table = intrinsic::Table<intrinsic::Dialect>(type_mgr_, symbols_);
+    auto match =
+        table.Lookup(conv_ty, template_type, Vector{value_type}, core::EvaluationStage::kOverride);
+    if (match != Success || !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConverter)) {
+        AddError(convert) << "No defined converter for " << NameOf(value_type) << " -> "
+                          << NameOf(result_type);
+        return;
     }
 }
 

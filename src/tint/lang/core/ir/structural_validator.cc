@@ -3291,46 +3291,7 @@ void Structural::CheckConstruct(const Construct* construct) {
 }
 
 void Structural::CheckConvert(const Convert* convert) {
-    if (!CheckResultsAndOperands(convert, Convert::kNumResults, Convert::kNumOperands)) {
-        return;
-    }
-
-    auto* result_type = convert->Result()->Type();
-    auto* value_type = convert->Operand(Convert::kValueOperandOffset)->Type();
-
-    intrinsic::CtorConv conv_ty;
-    Vector<const core::type::Type*, 1> template_type;
-    tint::Switch(
-        result_type,                                                             //
-        [&](const core::type::I32*) { conv_ty = intrinsic::CtorConv::kI32; },    //
-        [&](const core::type::U32*) { conv_ty = intrinsic::CtorConv::kU32; },    //
-        [&](const core::type::U64*) { conv_ty = intrinsic::CtorConv::kU64; },    //
-        [&](const core::type::F32*) { conv_ty = intrinsic::CtorConv::kF32; },    //
-        [&](const core::type::F16*) { conv_ty = intrinsic::CtorConv::kF16; },    //
-        [&](const core::type::Bool*) { conv_ty = intrinsic::CtorConv::kBool; },  //
-        [&](const core::type::Vector* v) {
-            conv_ty = intrinsic::VectorCtorConv(v->Width());
-            template_type.Push(v->Type());
-        },
-        [&](const core::type::Matrix* m) {
-            conv_ty = intrinsic::MatrixCtorConv(m->Columns(), m->Rows());
-            template_type.Push(m->Type());
-        },
-        [&](Default) { conv_ty = intrinsic::CtorConv::kNone; });
-
-    if (conv_ty == intrinsic::CtorConv::kNone) {
-        AddError(convert) << "not defined for result type, " << NameOf(result_type);
-        return;
-    }
-
-    auto table = intrinsic::Table<intrinsic::Dialect>(type_mgr_, symbols_);
-    auto match =
-        table.Lookup(conv_ty, template_type, Vector{value_type}, core::EvaluationStage::kOverride);
-    if (match != Success || !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConverter)) {
-        AddError(convert) << "No defined converter for " << NameOf(value_type) << " -> "
-                          << NameOf(result_type);
-        return;
-    }
+    CheckResultsAndOperands(convert, Convert::kNumResults, Convert::kNumOperands);
 }
 
 void Structural::CheckDiscard(const tint::core::ir::Discard* discard) {
