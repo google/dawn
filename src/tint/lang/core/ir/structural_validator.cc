@@ -97,21 +97,6 @@ bool IsCoreType(const core::type::Type* type) {
     return std::string_view(type->TypeInfo().name).starts_with("tint::core");
 }
 
-/// @returns true if @p ty meets the basic function parameter rules (i.e. one of constructible,
-///          pointer, handle).
-///
-/// Note: Does not handle corner cases like if certain properties are present.
-bool IsValidFunctionParamType(const core::type::Type* ty) {
-    if (ty->IsConstructible() || ty->IsHandle()) {
-        return true;
-    }
-
-    if (auto* ptr = ty->As<core::type::Pointer>()) {
-        return ptr->AddressSpace() != core::AddressSpace::kHandle;
-    }
-    return false;
-}
-
 /// @returns true if @p ty is a non-struct and decorated with @builtin(position), or if it is a
 /// struct and one of its members is decorated, otherwise false.
 /// @param attr attributes attached to data
@@ -1179,23 +1164,6 @@ void Structural::CheckFunction(const Function* func) {
         AddError(use.instruction, use.operand_index) << "function may not be used as a operand";
     });
 
-    if (func->IsEntryPoint()) {
-        // Check that there is at most one entry point unless we allow multiple entry points.
-        if (!ir_.properties.Contains(Property::kAllowMultipleEntryPoints)) {
-            if (!entry_point_names_.IsEmpty()) {
-                AddError(func) << "a module with multiple entry points requires the "
-                                  "AllowMultipleEntryPoints property";
-                return;
-            }
-        }
-
-        // Checking the name early, so its usage can be recorded, even if the function is malformed.
-        const auto name = ir_.NameOf(func).Name();
-        if (!entry_point_names_.Add(name)) {
-            AddError(func) << "entry point name " << style::Function(name) << " is not unique";
-        }
-    }
-
     if (!func->Type() || !func->Type()->Is<core::type::Function>()) {
         AddError(func) << "functions must have type '<function>'";
         return;
@@ -1217,12 +1185,9 @@ void Structural::CheckFunction(const Function* func) {
             AddError(param) << "destroyed parameter found in function parameter list";
             return;
         }
-        if (!param->Function()) {
-            AddError(param) << "function parameter has nullptr parent function";
-            return;
-        } else if (param->Function() != func) {
-            AddError(param) << "function parameter has incorrect parent function";
-            AddNote(param->Function()) << "parent function declared here";
+
+        if (!param_set.Add(param)) {
+            AddError(param) << "function parameter is not unique";
             return;
         }
 
@@ -1231,36 +1196,21 @@ void Structural::CheckFunction(const Function* func) {
             return;
         }
 
-        if (!param_set.Add(param)) {
-            AddError(param) << "function parameter is not unique";
-            continue;
+        if (!param->Function()) {
+            AddError(param) << "function parameter has nullptr parent function";
+            return;
         }
 
+        if (param->Function() != func) {
+            AddError(param) << "function parameter has incorrect parent function";
+            AddNote(param->Function()) << "parent function declared here";
+            return;
+        }
+
+        // TODO(516717234): Move to functional
         CheckType(param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); });
 
-        if (!IsValidFunctionParamType(param->Type())) {
-            auto ptr_ty = param->Type()->As<core::type::Pointer>();
-            bool allowed_ptr_to_handle = ir_.properties.Contains(Property::kAllowPointerToHandle) &&
-                                         ptr_ty != nullptr && ptr_ty->StoreType()->IsHandle();
-
-            auto struct_ty = param->Type()->As<core::type::Struct>();
-            if (!allowed_ptr_to_handle &&
-                (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface) ||
-                 (struct_ty == nullptr) ||
-                 struct_ty->Members().Any([](const core::type::StructMember* m) {
-                     return !IsValidFunctionParamType(m->Type());
-                 }))) {
-                AddError(param) << "function parameter type, " << NameOf(param->Type())
-                                << ", must be constructible, a pointer, or a handle";
-            }
-        }
-        if (func->IsEntryPoint() &&
-            !ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
-            if (param->Type()->Is<core::type::Pointer>()) {
-                AddError(param) << "entry point parameters cannot be pointers";
-            }
-        }
-
+        // TODO(516717234): Move to functional
         if (func->IsFragment()) {
             WalkTypeAndMembers(param, param->Type(), param->Attributes(),
                                [this](const auto* p, const auto* t, const auto& a) {
@@ -1278,23 +1228,7 @@ void Structural::CheckFunction(const Function* func) {
                 });
         }
 
-        AddressSpace address_space = AddressSpace::kUndefined;
-        auto* mv = param->Type()->As<core::type::MemoryView>();
-        if (mv) {
-            address_space = mv->AddressSpace();
-        } else {
-            // ModuleScopeVars transform in MSL backends unwraps pointers to handles
-            if (param->Type()->IsHandle()) {
-                address_space = AddressSpace::kHandle;
-            }
-        }
-
-        if (address_space == AddressSpace::kPixelLocal) {
-            if (!mv->StoreType()->Is<core::type::Struct>()) {
-                AddError(param) << "pixel_local param must be of type struct";
-            }
-        }
-
+        // TODO(516717234): Move to functional
         if (func->IsEntryPoint()) {
             ValidateShaderIOAnnotations(param, param->Type(), param->BindingPoint(),
                                         param->Attributes(), ShaderIOKind::kInputParam);
@@ -1309,44 +1243,17 @@ void Structural::CheckFunction(const Function* func) {
             }
         }
 
-        if (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface) &&
-            func->IsEntryPoint()) {
-            if (mv && mv->Is<core::type::Pointer>() && address_space == AddressSpace::kWorkgroup) {
-                AddError(param) << "input param to entry point cannot be a ptr in the 'workgroup' "
-                                   "address space";
-            }
-        }
-
         scope_stack_.Add(param);
     }
 
+    // TODO(516717234): Move to functional
     CheckType(func->ReturnType(), [&]() -> diag::Diagnostic& { return AddError(func); });
 
-    // void needs to be filtered out, since it isn't constructible, but used in the IR when no
-    // return is specified.
-    if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>() &&
-                      !func->ReturnType()->IsConstructible())) {
-        AddError(func) << "function return type must be constructible";
-    }
+    // TODO(516717234): Determine what below to move to function.
 
     ValidateIOAttributes(func);
-
-    if (func->IsEntryPoint()) {
-        if (DAWN_UNLIKELY(ir_.NameOf(func).Name().empty())) {
-            AddError(func) << "entry points must have names";
-        }
-    }
-
     CheckWorkgroupSize(func);
-
     CheckSubgroupSize(func);
-
-    if (func->Stage() == Function::PipelineStage::kCompute) {
-        if (DAWN_UNLIKELY(func->ReturnType() && !func->ReturnType()->Is<core::type::Void>())) {
-            AddError(func) << "compute entry point must not have a return type, found "
-                           << NameOf(func->ReturnType());
-        }
-    }
 
     if (func->IsEntryPoint()) {
         ValidateShaderIOAnnotations(func, func->ReturnType(), std::nullopt,

@@ -1311,11 +1311,16 @@ TEST_P(IR_ValidatorRefTypeTest, FnParam) {
     auto res = ir::Validate(mod);
     if (!holds_ref) {
         ASSERT_EQ(res, Success) << res.Failure();
-    } else {
+    } else if (refs_allowed) {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason,
                     testing::HasSubstr("function parameter type, '" + type->FriendlyName() +
                                        "', must be constructible, a pointer, or a handle"))
+            << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason,
+                    testing::HasSubstr("reference types are not permitted here"))
             << res.Failure();
     }
 }
@@ -1334,10 +1339,15 @@ TEST_P(IR_ValidatorRefTypeTest, FnRet) {
     auto res = ir::Validate(mod);
     if (!holds_ref) {
         ASSERT_EQ(res, Success) << res.Failure();
-    } else {
+    } else if (refs_allowed) {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason,
                     testing::HasSubstr("function return type must be constructible"))
+            << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason,
+                    testing::HasSubstr("reference types are not permitted here"))
             << res.Failure();
     }
 }

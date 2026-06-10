@@ -1961,6 +1961,7 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithVoidType) {
 TEST_F(IR_ValidatorTest, Function_EntryPointParameterWithPointerType) {
     auto* f = b.Function("my_func", ty.void_(), Function::PipelineStage::kFragment);
     auto* p = b.FunctionParam("my_param", ty.ptr<function, u32>());
+    p->SetLocation(0);
     f->SetParams({p});
     f->Block()->Append(b.Return(f));
 
@@ -1968,7 +1969,7 @@ TEST_F(IR_ValidatorTest, Function_EntryPointParameterWithPointerType) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
                                           R"(:1:27 error: entry point parameters cannot be pointers
-%my_func = @fragment func(%my_param:ptr<function, u32, read_write>):void {
+%my_func = @fragment func(%my_param:ptr<function, u32, read_write> [@location(0)]):void {
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -2771,7 +2772,7 @@ TEST_F(IR_ValidatorTest, Function_NonConstructibleReturnType_Ref) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:1:1 error: function return type must be constructible
+                testing::HasSubstr(R"(:1:1 error: reference types are not permitted here
 %1 = func():ref<function, u32, read_write> {
 ^^
 )")) << res.Failure();
@@ -3525,6 +3526,7 @@ TEST_F(IR_ValidatorTest, Function_IndirectRecursion) {
 TEST_F(IR_ValidatorTest, Function_ParamPixelLocal) {
     auto* f = FragmentEntryPoint();
     auto* p = b.FunctionParam("invalid", ty.ptr<core::AddressSpace::kPixelLocal>(ty.i32()));
+    p->SetLocation(0);
     f->AppendParam(p);
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
@@ -3533,7 +3535,7 @@ TEST_F(IR_ValidatorTest, Function_ParamPixelLocal) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
                                           R"(:1:21 error: pixel_local param must be of type struct
-%f = @fragment func(%invalid:ptr<pixel_local, i32, read_write>):void {
+%f = @fragment func(%invalid:ptr<pixel_local, i32, read_write> [@location(0)]):void {
                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }

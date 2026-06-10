@@ -136,6 +136,21 @@ bool TransitivelyHolds(const Block* block, const Instruction* inst) {
     return false;
 }
 
+/// @returns true if @p ty meets the basic function parameter rules (i.e. one of constructible,
+///          pointer, handle).
+///
+/// Note: Does not handle corner cases like if certain properties are present.
+bool IsValidFunctionParamType(const core::type::Type* ty) {
+    if (ty->IsConstructible() || ty->IsHandle()) {
+        return true;
+    }
+
+    if (auto* ptr = ty->As<core::type::Pointer>()) {
+        return ptr->AddressSpace() != core::AddressSpace::kHandle;
+    }
+    return false;
+}
+
 }  // namespace
 
 Functional::Functional(const Module& ir, diag::List& diagnostics, ErrorSource error_source)
@@ -172,6 +187,20 @@ StyledText Functional::NameOf(const Value* value) {
     return Disassemble().NameOf(value);
 }
 
+Source Functional::SourceOf(const Function* func) {
+    if (error_source_ == ErrorSource::kWgsl) {
+        return ir_.SourceOf(func);
+    }
+    return Disassemble().FunctionSource(func);
+}
+
+Source Functional::SourceOf(const FunctionParam* param) {
+    if (error_source_ == ErrorSource::kWgsl) {
+        return ir_.SourceOf(param);
+    }
+    return Disassemble().FunctionParamSource(param);
+}
+
 Source Functional::SourceOf(const Instruction* inst) {
     if (error_source_ == ErrorSource::kWgsl) {
         return ir_.SourceOf(inst);
@@ -193,6 +222,14 @@ diag::Diagnostic& Functional::AddError(Source src) {
         diag.owned_file = Disassemble().File();
     }
     return diag;
+}
+
+diag::Diagnostic& Functional::AddError(const Function* func) {
+    return AddError(SourceOf(func));
+}
+
+diag::Diagnostic& Functional::AddError(const FunctionParam* param) {
+    return AddError(SourceOf(param));
 }
 
 diag::Diagnostic& Functional::AddError(const Instruction* inst) {
@@ -271,11 +308,99 @@ void Functional::CheckFunction(const Function* func) {
     scope_stack_.Push();
     TINT_DEFER(scope_stack_.Pop());
 
+    if (func->IsEntryPoint()) {
+        // Check that there is at most one entry point unless we allow multiple entry points.
+        if (!ir_.properties.Contains(Property::kAllowMultipleEntryPoints)) {
+            if (!entry_point_names_.IsEmpty()) {
+                AddError(func) << "a module with multiple entry points requires the "
+                                  "AllowMultipleEntryPoints property";
+                return;
+            }
+        }
+
+        if (DAWN_UNLIKELY(ir_.NameOf(func).Name().empty())) {
+            AddError(func) << "entry points must have names";
+        } else {
+            // Checking the name early, so its usage can be recorded, even if the function is
+            // malformed.
+            const auto name = ir_.NameOf(func).Name();
+            if (!entry_point_names_.Add(name)) {
+                AddError(func) << "entry point name " << style::Function(name) << " is not unique";
+            }
+        }
+
+        if (func->Stage() == Function::PipelineStage::kCompute) {
+            if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>())) {
+                AddError(func) << "compute entry point must not have a return type, found "
+                               << NameOf(func->ReturnType());
+            }
+        }
+    }
+
+    // void needs to be filtered out, since it isn't constructible, but used in the IR when no
+    // return is specified.
+    if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>() &&
+                      !func->ReturnType()->IsConstructible())) {
+        AddError(func) << "function return type must be constructible";
+    }
+
     for (auto* param : func->Params()) {
+        CheckFunctionParam(param);
         scope_stack_.Add(param);
     }
 
     CheckBlock(func->Block());
+}
+
+void Functional::CheckFunctionParam(const FunctionParam* param) {
+    TINT_ASSERT(param->Function() != nullptr);
+
+    bool func_is_entry_point = param->Function()->IsEntryPoint();
+
+    if (!IsValidFunctionParamType(param->Type())) {
+        auto ptr_ty = param->Type()->As<core::type::Pointer>();
+        bool allowed_ptr_to_handle = ir_.properties.Contains(Property::kAllowPointerToHandle) &&
+                                     ptr_ty != nullptr && ptr_ty->StoreType()->IsHandle();
+
+        auto struct_ty = param->Type()->As<core::type::Struct>();
+        if (!allowed_ptr_to_handle &&
+            (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface) ||
+             (struct_ty == nullptr) ||
+             struct_ty->Members().Any([](const core::type::StructMember* m) {
+                 return !IsValidFunctionParamType(m->Type());
+             }))) {
+            AddError(param) << "function parameter type, " << NameOf(param->Type())
+                            << ", must be constructible, a pointer, or a handle";
+        }
+    }
+
+    AddressSpace address_space = AddressSpace::kUndefined;
+    auto* mv = param->Type()->As<core::type::MemoryView>();
+    if (mv) {
+        address_space = mv->AddressSpace();
+    } else {
+        // ModuleScopeVars transform in MSL backends unwraps pointers to handles
+        if (param->Type()->IsHandle()) {
+            address_space = AddressSpace::kHandle;
+        }
+    }
+
+    if (address_space == AddressSpace::kPixelLocal) {
+        if (!mv->StoreType()->Is<core::type::Struct>()) {
+            AddError(param) << "pixel_local param must be of type struct";
+        }
+    }
+
+    if (func_is_entry_point && !ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+        if (param->Type()->Is<core::type::Pointer>()) {
+            AddError(param) << "entry point parameters cannot be pointers";
+        }
+
+        if (mv && mv->Is<core::type::Pointer>() && address_space == AddressSpace::kWorkgroup) {
+            AddError(param) << "input param to entry point cannot be a ptr in the 'workgroup' "
+                               "address space";
+        }
+    }
 }
 
 void Functional::CheckBlock(const Block* blk) {
@@ -1116,7 +1241,7 @@ void Functional::CheckUnary(const Unary* u) {
 
     if (overload->return_type != result->Type()) {
         AddError(u) << "result value type " << NameOf(result->Type()) << " does not match "
-                    << style::Instruction(Disassemble().NameOf(u->Op())) << " result type "
+                    << style::Instruction(u->Op()) << " result type "
                     << NameOf(overload->return_type);
     }
 }

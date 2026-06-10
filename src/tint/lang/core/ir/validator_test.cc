@@ -1646,7 +1646,7 @@ TEST_F(IR_ValidatorTest, Unary_ResultTypeNotMatchValueType) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:3:5 error: unary: result value type 'f32' does not match complement result type 'i32'
+            R"(:3:5 error: unary: result value type 'f32' does not match '~' result type 'i32'
     %2:f32 = complement 2i
     ^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();

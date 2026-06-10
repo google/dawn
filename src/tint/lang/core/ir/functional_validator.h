@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_FUNCTIONAL_VALIDATOR_H_
 #define SRC_TINT_LANG_CORE_IR_FUNCTIONAL_VALIDATOR_H_
 
+#include <string>
+
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
@@ -100,13 +102,16 @@ class Functional {
     StyledText NameOf(const core::type::Type* ty);
     StyledText NameOf(const Value* value);
 
+    Source SourceOf(const Function* func);
+    Source SourceOf(const FunctionParam* param);
     Source SourceOf(const Instruction* inst);
     Source SourceOf(const Instruction* inst, size_t idx);
 
     diag::Diagnostic& AddError(Source src);
+    diag::Diagnostic& AddError(const Function* func);
+    diag::Diagnostic& AddError(const FunctionParam* param);
     diag::Diagnostic& AddError(const Instruction* inst);
     diag::Diagnostic& AddError(const Instruction* inst, size_t idx);
-    diag::Diagnostic& AddError(const Value* val);
 
     diag::Diagnostic& AddNote(Source src);
     diag::Diagnostic& AddNote(const Block* blk);
@@ -120,6 +125,7 @@ class Functional {
 
     void CheckRootBlock(const Block* blk);
     void CheckFunction(const Function* func);
+    void CheckFunctionParam(const FunctionParam* param);
     void CheckBlock(const Block* blk);
     void CheckInstruction(const Instruction* inst);
 
@@ -167,6 +173,7 @@ class Functional {
     Vector<const Block*, 8> block_stack_;
     Hashset<OverrideId, 8> seen_override_ids_;
     Hashmap<const Loop*, const Continue*, 4> first_continues_;
+    Hashset<std::string, 4> entry_point_names_;
 };
 
 }  // namespace tint::core::ir::validator

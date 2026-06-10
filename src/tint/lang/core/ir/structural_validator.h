@@ -691,7 +691,6 @@ class Structural {
     Hashmap<const ir::Block*, const ir::Function*, 64> block_to_function_{};
     Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
     Hashmap<const ir::Instruction*, SupportedStages, 4> stage_restricted_instructions_;
-    Hashset<std::string, 4> entry_point_names_;
     Hashset<const core::type::Type*, 16> validated_types_{};
 };
 
