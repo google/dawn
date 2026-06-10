@@ -5,6 +5,6 @@ Update Mechanism: Autoroll
 Security Critical: yes
 Version: N/A
 Revision: d6e0ca4a0c25b13ed676c8ba16839c3eb9fcc652
-License: LLVM
+License: bcrypt-solar-designer, bsd-3-clause, gpl-2.0-with-autoconf-exception, isc, mit, ncsa, spencer-86, unicode_org, unlicense
 License File: LICENSE
 Shipped: yes
