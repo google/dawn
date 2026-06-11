@@ -1457,10 +1457,7 @@ fn b() {
 
     auto* expect = src;
 
-    wgsl::writer::Options program_options;
-    program_options.allowed_features.features.emplace(
-        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
-    auto got = Run(src, /* transform_options */ {}, program_options);
+    auto got = Run(src);
 
     EXPECT_EQ(expect, got);
 }
@@ -1522,10 +1519,7 @@ fn b() {
 
     auto* expect = src;
 
-    wgsl::writer::Options program_options;
-    program_options.allowed_features.features.emplace(
-        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
-    auto got = Run(src, /* transform_options */ {}, program_options);
+    auto got = Run(src);
 
     EXPECT_EQ(expect, got);
 }
@@ -1611,10 +1605,7 @@ fn b() {
 
     auto* expect = src;
 
-    wgsl::writer::Options program_options;
-    program_options.allowed_features.features.emplace(
-        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
-    auto got = Run(src, /* transform_options */ {}, program_options);
+    auto got = Run(src);
 
     EXPECT_EQ(expect, got);
 }
@@ -1794,10 +1785,7 @@ fn b() {
 
     auto* expect = src;
 
-    wgsl::writer::Options program_options;
-    program_options.allowed_features.features.emplace(
-        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
-    auto got = Run(src, /* transform_options */ {}, program_options);
+    auto got = Run(src);
 
     EXPECT_EQ(expect, got);
 }
@@ -2026,10 +2014,7 @@ fn b() {
 
     auto* expect = src;
 
-    wgsl::writer::Options program_options;
-    program_options.allowed_features.features.emplace(
-        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
-    auto got = Run(src, /* transform_options */ {}, program_options);
+    auto got = Run(src);
 
     EXPECT_EQ(expect, got);
 }
@@ -2052,10 +2037,7 @@ fn b() {
 
     auto* expect = src;
 
-    wgsl::writer::Options program_options;
-    program_options.allowed_features.features.emplace(
-        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
-    auto got = Run(src, /* transform_options */ {}, program_options);
+    auto got = Run(src);
 
     EXPECT_EQ(expect, got);
 }

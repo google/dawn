@@ -1000,28 +1000,19 @@ bool Validator::Parameter(const sem::Variable* var) const {
     auto* decl = var->Declaration();
 
     if (auto* ref = var->Type()->As<core::type::Pointer>()) {
-        bool ok = false;
-
         auto sc = ref->AddressSpace();
         switch (sc) {
             case core::AddressSpace::kFunction:
             case core::AddressSpace::kPrivate:
-                ok = true;
-                break;
             case core::AddressSpace::kImmediate:
             case core::AddressSpace::kStorage:
             case core::AddressSpace::kUniform:
             case core::AddressSpace::kWorkgroup:
-                ok = allowed_features_.features.contains(
-                    wgsl::LanguageFeature::kUnrestrictedPointerParameters);
                 break;
             default:
-                break;
-        }
-        if (!ok) {
-            AddError(decl->source) << "function parameter of pointer type cannot be in "
-                                   << style::Enum(sc) << " address space";
-            return false;
+                AddError(decl->source) << "function parameter of pointer type cannot be in "
+                                       << style::Enum(sc) << " address space";
+                return false;
         }
     }
 
@@ -2570,32 +2561,6 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
                                        << style::Type(sem_.TypeNameOf(param_type)) << ", got "
                                        << style::Type(sem_.TypeNameOf(arg_type));
             return false;
-        }
-
-        if (param_type->Is<core::type::Pointer>() &&
-            !allowed_features_.features.contains(
-                wgsl::LanguageFeature::kUnrestrictedPointerParameters)) {
-            // https://gpuweb.github.io/gpuweb/wgsl/#function-restriction
-            // Each argument of pointer type to a user-defined function must have the same memory
-            // view as its root identifier.
-            // We can validate this by just comparing the store type of the argument with that of
-            // its root identifier, as these will match iff the memory view is the same.
-            auto* arg_store_type = arg_type->As<core::type::Pointer>()->StoreType();
-            auto* root = call->Arguments()[i]->RootIdentifier();
-            auto* root_ptr_ty = root->Type()->As<core::type::Pointer>();
-            auto* root_ref_ty = root->Type()->As<core::type::Reference>();
-            TINT_ASSERT(root_ptr_ty || root_ref_ty);
-            const core::type::Type* root_store_type;
-            if (root_ptr_ty) {
-                root_store_type = root_ptr_ty->StoreType();
-            } else {
-                root_store_type = root_ref_ty->StoreType();
-            }
-            if (root_store_type != arg_store_type) {
-                AddError(arg_expr->source) << "arguments of pointer type must not point to a "
-                                              "subset of the originating variable";
-                return false;
-            }
         }
     }
 
