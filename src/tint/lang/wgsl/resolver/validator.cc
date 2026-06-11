@@ -376,23 +376,7 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const core::type::Poi
 bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source& source) const {
     switch (t->Access()) {
         case core::Access::kRead:
-            if (!allowed_features_.features.contains(
-                    wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures)) {
-                AddError(source) << "read-only storage textures require the "
-                                    "readonly_and_readwrite_storage_textures language feature, "
-                                    "which is not allowed in the current environment";
-                return false;
-            }
-            break;
         case core::Access::kReadWrite:
-            if (!allowed_features_.features.contains(
-                    wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures)) {
-                AddError(source) << "read-write storage textures require the "
-                                    "readonly_and_readwrite_storage_textures language feature, "
-                                    "which is not allowed in the current environment";
-                return false;
-            }
-            break;
         case core::Access::kWrite:
             break;
         case core::Access::kUndefined:

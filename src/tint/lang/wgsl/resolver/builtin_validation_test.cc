@@ -1124,20 +1124,6 @@ TEST_F(ResolverBuiltinValidationTest, TextureBarrier) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverBuiltinValidationTest, TextureBarrier_FeatureDisallowed) {
-    // fn func { textureBarrier(); }
-    Func("func", tint::Empty, ty.void_(),
-         Vector{
-             CallStmt(Call(Source{Source::Location{12, 34}}, "textureBarrier")),
-         });
-
-    Resolver resolver{this, wgsl::AllowedFeatures{}};
-    EXPECT_FALSE(resolver.Resolve());
-    EXPECT_EQ(
-        resolver.error(),
-        R"(12:34 error: built-in function 'textureBarrier' requires the 'readonly_and_readwrite_storage_textures' language feature, which is not allowed in the current environment)");
-}
-
 TEST_F(ResolverBuiltinValidationTest, ChromiumPrint) {
     // fn func { print(42); }
     Func("func", tint::Empty, ty.void_(),
