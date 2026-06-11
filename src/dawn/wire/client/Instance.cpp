@@ -295,7 +295,10 @@ void Instance::GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
                 // Ignore unknown features in the blocklist.
                 continue;
             }
-            mWGSLFeatures.erase(ToWGPUWGSLLanguageFeature(tintFeature));
+            if (tint::wgsl::GetLanguageFeatureStatus(tintFeature) !=
+                tint::wgsl::FeatureStatus::kShipped) {
+                mWGSLFeatures.erase(ToWGPUWGSLLanguageFeature(tintFeature));
+            }
         }
     }
 }
