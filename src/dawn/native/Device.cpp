@@ -299,27 +299,33 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
         cacheDesc = *cacheDescIn;
     }
 
-    if (cacheDesc.loadDataFunction == nullptr && cacheDesc.storeDataFunction == nullptr &&
-        cacheDesc.functionUserdata == nullptr && GetPlatform()->GetCachingInterface() != nullptr) {
+    if (cacheDesc.dawnLoadCacheDataCallbackInfo.callback == nullptr &&
+        cacheDesc.dawnStoreCacheDataCallbackInfo.callback == nullptr &&
+        GetPlatform()->GetCachingInterface() != nullptr) {
         // Populate cache functions and userdata from legacy cachingInterface.
-        cacheDesc.loadDataFunction = [](const void* key, size_t keySize, void* value,
-                                        size_t valueSize, void* userdata) {
-            auto* cachingInterface = static_cast<dawn::platform::CachingInterface*>(userdata);
-            return cachingInterface->LoadData(key, keySize, value, valueSize);
-        };
-        cacheDesc.storeDataFunction = [](const void* key, size_t keySize, const void* value,
-                                         size_t valueSize, void* userdata) {
-            auto* cachingInterface = static_cast<dawn::platform::CachingInterface*>(userdata);
-            return cachingInterface->StoreData(key, keySize, value, valueSize);
-        };
-        cacheDesc.functionUserdata = GetPlatform()->GetCachingInterface();
+        ToCppAPI(&cacheDesc)
+            ->SetDawnLoadCacheDataCallback(
+                [](std::span<const std::byte> key, std::span<std::byte> value,
+                   dawn::platform::CachingInterface* cachingInterface) -> size_t {
+                    if (value.empty()) {
+                        return cachingInterface->FindKey(key);
+                    }
+                    return cachingInterface->LoadData(key, value);
+                },
+                GetPlatform()->GetCachingInterface());
+        ToCppAPI(&cacheDesc)
+            ->SetDawnStoreCacheDataCallback(
+                [](std::span<const std::byte> key, std::span<const std::byte> value,
+                   dawn::platform::CachingInterface* cachingInterface) {
+                    cachingInterface->StoreData(key, value);
+                },
+                GetPlatform()->GetCachingInterface());
     }
 
     // Disable caching if the DisableBlobCache toggle is enabled.
     if (IsToggleEnabled(Toggle::DisableBlobCache)) {
-        cacheDesc.loadDataFunction = nullptr;
-        cacheDesc.storeDataFunction = nullptr;
-        cacheDesc.functionUserdata = nullptr;
+        cacheDesc.dawnLoadCacheDataCallbackInfo = {};
+        cacheDesc.dawnStoreCacheDataCallbackInfo = {};
     }
 
     mBlobCache =
