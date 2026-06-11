@@ -56,6 +56,7 @@ enum WGSLLanguageFeatureName {
 // ============================================================================
 enum GPUFeatureName {
     "chromium-experimental-subgroup-matrix",
+    "atomic-vec2u-min-max",
 }
 
 enum GPUSubgroupMatrixComponentType {

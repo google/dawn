@@ -1725,6 +1725,9 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kChromiumExperimentalSamplingResourceTable:
             out = wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable;
             return true;
+        case interop::GPUFeatureName::kAtomicVec2UMinMax:
+            out = wgpu::FeatureName::AtomicVec2uMinMax;
+            return true;
     }
     return false;
 }
@@ -1761,6 +1764,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         CASE(TextureComponentSwizzle, kTextureComponentSwizzle);
         CASE(PrimitiveIndex, kPrimitiveIndex);
         CASE(ChromiumExperimentalSamplingResourceTable, kChromiumExperimentalSamplingResourceTable);
+        CASE(AtomicVec2uMinMax, kAtomicVec2UMinMax);
 
 #undef CASE
 
@@ -1821,7 +1825,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle:
         case wgpu::FeatureName::SharedTextureMemoryD3D12Resource:
         case wgpu::FeatureName::SubgroupSizeControl:
-        case wgpu::FeatureName::AtomicVec2uMinMax:
         case wgpu::FeatureName::Unorm16FormatsForExternalTexture:
         case wgpu::FeatureName::OpaqueYCbCrAndroidForExternalTexture:
         case wgpu::FeatureName::Unorm16Filterable:
