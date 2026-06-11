@@ -1822,6 +1822,25 @@ TEST_F(IR_ValidatorTest, OverrideWithoutCapability) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, OverrideNotAtModuleScope) {
+    mod.properties.Add(Property::kAllowOverrides);
+
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Override("a", 1_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:3:14 error: override: override must be declared at module scope
+    %a:u32 = override 1u
+             ^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, InstructionInRootBlockWithoutOverrideCap) {
     b.Append(mod.root_block, [&] { b.Add(3_u, 2_u); });
 

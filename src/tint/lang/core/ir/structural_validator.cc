@@ -1945,6 +1945,10 @@ void Structural::CheckOverride(const Override* o) {
         return;
     }
 
+    if (o->Block() != ir_.root_block) {
+        AddError(o) << "override must be declared at module scope";
+    }
+
     if (o->Initializer()) {
         CheckOperand(o, ir::Var::kInitializerOperandOffset);
     } else if (o->Operands().Length() == 0) {
