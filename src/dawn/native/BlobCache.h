@@ -33,6 +33,7 @@
 #include <span>
 #include <vector>
 
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/Sha3.h"
 #include "src/dawn/native/Blob.h"
 #include "src/dawn/native/CacheResult.h"
@@ -93,6 +94,10 @@ class BlobCache {
     bool ValidateCacheKey(const CacheKey& key);
 
     const bool mHashValidation;
+    // TODO(https://crbug.com/dawn/2365): Convert these members to `raw_ptr`.
+    RAW_PTR_EXCLUSION const WGPUDawnLoadCacheDataFunction mLoadFunction;
+    RAW_PTR_EXCLUSION const WGPUDawnStoreCacheDataFunction mStoreFunction;
+    RAW_PTR_EXCLUSION void* const mFunctionUserdata;
     const WGPUDawnLoadCacheDataCallbackInfo mLoadCallbackInfo;
     const WGPUDawnStoreCacheDataCallbackInfo mStoreCallbackInfo;
 };

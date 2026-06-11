@@ -308,6 +308,9 @@
         "chain roots": ["device descriptor"],
         "members": [
             {"name": "isolation key", "type": "string view"},
+            {"name": "load data function", "type": "dawn load cache data function", "default": "nullptr"},
+            {"name": "store data function", "type": "dawn store cache data function", "default": "nullptr"},
+            {"name": "function userdata", "type": "void *", "default": "nullptr"},
             {"name": "dawn load cache data callback info", "type": "dawn load cache data callback info"},
             {"name": "dawn store cache data callback info", "type": "dawn store cache data callback info"}
         ]
