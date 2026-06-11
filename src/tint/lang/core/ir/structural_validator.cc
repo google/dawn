@@ -43,6 +43,7 @@
 #include "src/tint/lang/core/type/array_count.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/buffer.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/function.h"
@@ -886,6 +887,25 @@ void Structural::CheckType(const core::type::Type* root,
                 if (auto* count = arr->Count()->As<core::type::ConstantArrayCount>()) {
                     if (count->value == 0) {
                         diag() << "array requires a constant array size > 0";
+                        return false;
+                    }
+                } else if (auto* val_count = arr->Count()->As<core::ir::type::ValueArrayCount>()) {
+                    if (!val_count->value->Alive()) {
+                        diag() << "ValueArrayCount value is not alive";
+                        return false;
+                    }
+                    if (!val_count->value->Type()->IsIntegerScalar()) {
+                        diag() << "ValueArrayCount must be an integer scalar type";
+                        return false;
+                    }
+                    auto* inst_res = val_count->value->As<core::ir::InstructionResult>();
+                    if (!inst_res) {
+                        diag() << "ValueArrayCount must be an instruction result";
+                        return false;
+                    }
+                    auto* inst = inst_res->Instruction();
+                    if (!inst || inst->Block() != ir_.root_block) {
+                        diag() << "ValueArrayCount must be a module-scoped override expression";
                         return false;
                     }
                 }
@@ -1945,13 +1965,16 @@ void Structural::CheckVar(const Var* var) {
                       << " must be a pointer or a reference";
         return;
     }
-    if (mv->AddressSpace() == AddressSpace::kWorkgroup) {
-        if (auto* ary = result_type->UnwrapPtr()->As<core::type::Array>()) {
-            if (auto* count = ary->Count()->As<core::ir::type::ValueArrayCount>()) {
-                if (!scope_stack_.Contains(count->value)) {
-                    AddError(var) << NameOf(count->value) << " is not in scope";
-                }
-            }
+    const core::ir::type::ValueArrayCount* count = nullptr;
+    if (auto* ary = result_type->UnwrapPtr()->As<core::type::Array>()) {
+        count = ary->Count()->As<core::ir::type::ValueArrayCount>();
+    } else if (auto* buf = result_type->UnwrapPtr()->As<core::type::Buffer>()) {
+        count = buf->Count()->As<core::ir::type::ValueArrayCount>();
+    }
+
+    if (count) {
+        if (!scope_stack_.Contains(count->value)) {
+            AddError(var) << NameOf(count->value) << " is not in scope";
         }
     }
 

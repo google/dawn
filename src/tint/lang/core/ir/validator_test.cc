@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
+#include "src/tint/lang/core/type/buffer.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -1965,6 +1966,105 @@ TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
   %a:ptr<workgroup, array<i32, %2>, read_write> = var undef
                                                   ^^^
 )")) << res.Failure();
+}
+
+template <typename T>
+class IR_ValidatorTestWithParam : public IR_ValidatorTest, public testing::WithParamInterface<T> {};
+
+using IR_ValidatorValueArrayCountScopeTest = IR_ValidatorTestWithParam<core::AddressSpace>;
+TEST_P(IR_ValidatorValueArrayCountScopeTest, OutOfScope) {
+    auto addr = GetParam();
+    if (addr == core::AddressSpace::kUndefined || addr == core::AddressSpace::kHandle ||
+        addr == core::AddressSpace::kIn || addr == core::AddressSpace::kOut) {
+        return;
+    }
+    mod.properties.Add(Property::kAllowOverrides);
+
+    core::ir::Override* o = nullptr;
+    b.Append(mod.root_block, [&] {
+        o = b.Override(ty.u32());
+
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(o->Result());
+        auto* a1 = ty.Get<core::type::Array>(ty.i32(), cnt, 4u);
+
+        auto* v = b.Var("a", ty.ptr(addr, a1, core::Access::kReadWrite));
+        if (addr == core::AddressSpace::kUniform || addr == core::AddressSpace::kStorage) {
+            v->SetBindingPoint(0, 0);
+        }
+    });
+    o->Destroy();
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("is not in scope")) << res.Failure();
+}
+INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
+                         IR_ValidatorValueArrayCountScopeTest,
+                         testing::Values(core::AddressSpace::kWorkgroup,
+                                         core::AddressSpace::kPrivate,
+                                         core::AddressSpace::kFunction,
+                                         core::AddressSpace::kStorage,
+                                         core::AddressSpace::kUniform));
+
+struct ValueArrayCountTypeCase {
+    std::string name;
+    TypeBuilderFn get_type;
+    bool expected_pass;
+};
+
+using IR_ValidatorValueArrayCountTypeTest = IR_ValidatorTestWithParam<ValueArrayCountTypeCase>;
+TEST_P(IR_ValidatorValueArrayCountTypeTest, TypeValidation) {
+    auto& tc = GetParam();
+    mod.properties.Add(Property::kAllowOverrides);
+
+    b.Append(mod.root_block, [&] {
+        auto* o = b.Override(tc.get_type(ty));
+        o->SetOverrideId({1});
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(o->Result());
+        auto* a1 = ty.Get<core::type::Array>(ty.i32(), cnt, 4u);
+        b.Var("a", ty.ptr(workgroup, a1, core::Access::kReadWrite));
+    });
+
+    auto res = ir::Validate(mod);
+    if (tc.expected_pass) {
+        EXPECT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason,
+                    testing::HasSubstr("ValueArrayCount must be an integer scalar type"))
+            << res.Failure();
+    }
+}
+INSTANTIATE_TEST_SUITE_P(
+    IR_ValidatorTest,
+    IR_ValidatorValueArrayCountTypeTest,
+    testing::Values(ValueArrayCountTypeCase{"i32", TypeBuilder<i32>, true},
+                    ValueArrayCountTypeCase{"u32", TypeBuilder<u32>, true},
+                    ValueArrayCountTypeCase{"f32", TypeBuilder<f32>, false},
+                    ValueArrayCountTypeCase{"bool", TypeBuilder<core::type::Bool>, false},
+                    ValueArrayCountTypeCase{"vec2_i32", TypeBuilder<vec2i>, false}));
+
+TEST_F(IR_ValidatorTest, ValueArrayCount_NotInRootBlock) {
+    mod.properties.Add(Property::kAllowOverrides);
+
+    core::ir::Value* count_val = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        count_val = b.Add(2_u, 3_u)->Result();
+        b.Return(func);
+    });
+
+    b.Append(mod.root_block, [&] {
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(count_val);
+        auto* a1 = ty.Get<core::type::Array>(ty.i32(), cnt, 4u);
+        b.Var("a", ty.ptr(workgroup, a1, core::Access::kReadWrite));
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("ValueArrayCount must be a module-scoped override expression"))
+        << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithoutIdOrInitializer) {
