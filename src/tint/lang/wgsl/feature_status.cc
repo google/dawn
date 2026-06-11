@@ -52,7 +52,6 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             ////////////////////////////////////////////////////////////////////
             // Shipped with killswitch features
             ///////////////////////////////////////////////////////////////////
-        case LanguageFeature::kPointerCompositeAccess:
         case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
         case LanguageFeature::kUniformBufferStandardLayout:
         case LanguageFeature::kSubgroupId:
@@ -67,6 +66,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             // Shipped features
             ////////////////////////////////////////////////////////////////////
         case LanguageFeature::kPacked4X8IntegerDotProduct:
+        case LanguageFeature::kPointerCompositeAccess:
         case LanguageFeature::kUnrestrictedPointerParameters:
             return FeatureStatus::kShipped;
 

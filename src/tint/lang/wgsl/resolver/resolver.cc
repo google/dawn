@@ -1845,15 +1845,8 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
 
     auto* object_ty = obj->Type();
     auto* const memory_view = object_ty->As<core::type::MemoryView>();
-    const core::type::Type* storage_ty = object_ty->UnwrapRef();
+    const core::type::Type* storage_ty = object_ty;
     if (memory_view) {
-        if (memory_view->Is<core::type::Pointer>() &&
-            !allowed_features_.features.contains(wgsl::LanguageFeature::kPointerCompositeAccess)) {
-            AddError(expr)
-                << "pointer composite access requires the pointer_composite_access language "
-                   "feature, which is not allowed in the current environment";
-            return nullptr;
-        }
         storage_ty = memory_view->StoreType();
     }
 
@@ -3287,15 +3280,8 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
     auto* object_ty = object->Type();
 
     auto* const memory_view = object_ty->As<core::type::MemoryView>();
-    const core::type::Type* storage_ty = object_ty->UnwrapRef();
+    const core::type::Type* storage_ty = object_ty;
     if (memory_view) {
-        if (memory_view->Is<core::type::Pointer>() &&
-            !allowed_features_.features.contains(wgsl::LanguageFeature::kPointerCompositeAccess)) {
-            AddError(expr)
-                << "pointer composite access requires the pointer_composite_access language "
-                   "feature, which is not allowed in the current environment";
-            return nullptr;
-        }
         storage_ty = memory_view->StoreType();
     }
 
