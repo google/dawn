@@ -47,12 +47,22 @@ class EGLFunctions {
     EGLFunctions() = default;
 
     bool Initialize(const std::vector<std::string>& searchPaths) {
-#if DAWN_PLATFORM_IS(WINDOWS)
-        const char* eglLib = "libEGL.dll";
-#elif DAWN_PLATFORM_IS(MACOS)
-        const char* eglLib = "libEGL.dylib";
-#else
+#ifndef DAWN_ANGLE_LIBS_SUFFIX
+#define DAWN_ANGLE_LIBS_SUFFIX ""
+#endif
+
+        // On Android, load the system libEGL.so to use the native GLES driver (loading the in-tree
+        // ANGLE library tickles driver bugs in tests on older devices). On other platforms, load
+        // ANGLE dynamically with the suffix to support testing ANGLE when the embedder links it
+        // statically.
+#if DAWN_PLATFORM_IS(ANDROID)
         const char* eglLib = "libEGL.so";
+#elif DAWN_PLATFORM_IS(WINDOWS)
+        const char* eglLib = "libEGL" DAWN_ANGLE_LIBS_SUFFIX ".dll";
+#elif DAWN_PLATFORM_IS(MACOS)
+        const char* eglLib = "libEGL" DAWN_ANGLE_LIBS_SUFFIX ".dylib";
+#else
+        const char* eglLib = "libEGL" DAWN_ANGLE_LIBS_SUFFIX ".so";
 #endif
         std::string error;
         if (!mlibEGL.Open(eglLib, searchPaths, &error)) {

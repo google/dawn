@@ -27,6 +27,9 @@
 
 import("../../../scripts/dawn_overrides_with_defaults.gni")
 
+# Import ANGLE after overrides to ensure dawn_angle_dir is defined.
+import("${dawn_angle_dir}/gni/angle.gni")
+
 import("//build_overrides/build.gni")
 import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_component.gni")
@@ -810,6 +813,7 @@ source_set("sources") {
   }
 
   if (dawn_enable_opengl) {
+    defines += [ "DAWN_ANGLE_LIBS_SUFFIX=\"${angle_libs_suffix}\"" ]
     public_deps += [
       ":opengl_loader_gen",
       "${dawn_root}/src/tint/api/common",

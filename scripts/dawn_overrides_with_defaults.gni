@@ -116,7 +116,3 @@ if (!defined(dawn_egl_registry_dir)) {
 if (!defined(dawn_emscripten_dir)) {
   dawn_emscripten_dir = "//third_party/emsdk/upstream/emscripten"
 }
-
-if (!defined(dawn_use_static_angle)) {
-  dawn_use_static_angle = false
-}
