@@ -105,9 +105,6 @@ wgsl::LanguageFeature BuiltinFn::RequiredLanguageFeature() const {
     if (fn_ == wgsl::BuiltinFn::kTextureBarrier) {
         return wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures;
     }
-    if (IsPacked4x8IntegerDotProductBuiltin()) {
-        return wgsl::LanguageFeature::kPacked4X8IntegerDotProduct;
-    }
     if (IsTexelBuffer()) {
         return wgsl::LanguageFeature::kTexelBuffers;
     }

@@ -44,21 +44,14 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////
-            // Shipped with killswitch features
-            ///////////////////////////////////////////////////////////////////
-        case LanguageFeature::kImmediateAddressSpace:
-            return FeatureStatus::kShippedWithKillswitch;
-
-            ////////////////////////////////////////////////////////////////////
             // Chromium developer features
             ///////////////////////////////////////////////////////////////////
         case LanguageFeature::kChromiumPrint:
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////
-            // Enabled features
-            ////////////////////////////////////////////////////////////////////
-        case LanguageFeature::kPacked4X8IntegerDotProduct:
+            // Shipped with killswitch features
+            ///////////////////////////////////////////////////////////////////
         case LanguageFeature::kPointerCompositeAccess:
         case LanguageFeature::kUnrestrictedPointerParameters:
         case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
@@ -68,7 +61,14 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kTextureAndSamplerLet:
         case LanguageFeature::kTextureFormatsTier1:
         case LanguageFeature::kLinearIndexing:
+        case LanguageFeature::kImmediateAddressSpace:
             return FeatureStatus::kShippedWithKillswitch;
+
+            ////////////////////////////////////////////////////////////////////
+            // Shipped features
+            ////////////////////////////////////////////////////////////////////
+        case LanguageFeature::kPacked4X8IntegerDotProduct:
+            return FeatureStatus::kShipped;
 
             ////////////////////////////////////////////////////////////////////
             // Testing / special cases
