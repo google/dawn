@@ -1,27 +1,4 @@
 //
-// any
-//
-#include <metal_stdlib>
-using namespace metal;
-
-struct FragDepthAnyOutput {
-  float frag_depth;
-};
-
-struct any_outputs {
-  float FragDepthAnyOutput_frag_depth [[depth(any)]];
-};
-
-FragDepthAnyOutput any_inner() {
-  return FragDepthAnyOutput{.frag_depth=1.0f};
-}
-
-fragment any_outputs any() {
-  any_outputs tint_wrapper_result = {};
-  tint_wrapper_result.FragDepthAnyOutput_frag_depth = any_inner().frag_depth;
-  return tint_wrapper_result;
-}
-//
 // less
 //
 #include <metal_stdlib>

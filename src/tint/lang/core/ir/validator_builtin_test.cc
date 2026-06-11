@@ -491,7 +491,7 @@ TEST_F(IR_ValidatorTest, Builtin_FragDepth_WrongType) {
 
 TEST_F(IR_ValidatorTest, Builtin_NonFragDepth_NonUndefinedDepthMode) {
     auto* f = VertexEntryPoint();
-    f->SetReturnDepthMode(BuiltinDepthMode::kAny);
+    f->SetReturnDepthMode(BuiltinDepthMode::kGreater);
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -500,7 +500,7 @@ TEST_F(IR_ValidatorTest, Builtin_NonFragDepth_NonUndefinedDepthMode) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:1:1 error: position cannot have a depth mode of any. It can only be undefined.
+            R"(:1:1 error: position cannot have a depth mode of greater. It can only be undefined.
 %f = @vertex func():vec4<f32> [@position] {
 ^^
 )")) << res.Failure();
@@ -509,7 +509,7 @@ TEST_F(IR_ValidatorTest, Builtin_NonFragDepth_NonUndefinedDepthMode) {
 TEST_F(IR_ValidatorTest, MissingBuiltin_WithFragDepth) {
     auto* f = ComputeEntryPoint();
     AddReturn(f, "pos", ty.vec4f());
-    f->SetReturnDepthMode(BuiltinDepthMode::kAny);
+    f->SetReturnDepthMode(BuiltinDepthMode::kGreater);
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -531,17 +531,6 @@ TEST_F(IR_ValidatorTest, Builtin_FragDepth_UndefinedDepthMode) {
 
     auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success);
-}
-
-TEST_F(IR_ValidatorTest, Builtin_FragDepth_AnyDepthMode) {
-    auto* f = FragmentEntryPoint();
-    AddBuiltinReturn(f, "depth", BuiltinValue::kFragDepth, ty.f32());
-    f->SetReturnDepthMode(BuiltinDepthMode::kAny);
-
-    b.Append(f->Block(), [&] { b.Unreachable(); });
-
-    auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Builtin_FragDepth_GreaterDepthMode) {

@@ -105,8 +105,8 @@ constexpr BuiltInChecker kCullDistanceChecker{
 constexpr BuiltInChecker kFragDepthChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentOutputUsage},
     .valid_depth_modes =
-        EnumSet<BuiltinDepthMode>{BuiltinDepthMode::kUndefined, BuiltinDepthMode::kAny,
-                                  BuiltinDepthMode::kGreater, BuiltinDepthMode::kLess},
+        EnumSet<BuiltinDepthMode>{BuiltinDepthMode::kUndefined, BuiltinDepthMode::kGreater,
+                                  BuiltinDepthMode::kLess},
     .type_check = [](const core::type::Type* ty, const Properties&) -> bool {
         return ty->Is<core::type::F32>();
     },

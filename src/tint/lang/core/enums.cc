@@ -1101,9 +1101,6 @@ std::string_view ToString(BuiltinValue value) {
 /// @param str the string to parse
 /// @returns the parsed enum, or BuiltinDepthMode::kUndefined if the string could not be parsed.
 BuiltinDepthMode ParseBuiltinDepthMode(std::string_view str) {
-    if (str == "any") {
-        return BuiltinDepthMode::kAny;
-    }
     if (str == "greater") {
         return BuiltinDepthMode::kGreater;
     }
@@ -1116,8 +1113,6 @@ std::string_view ToString(BuiltinDepthMode value) {
     switch (value) {
         case BuiltinDepthMode::kUndefined:
             return "undefined";
-        case BuiltinDepthMode::kAny:
-            return "any";
         case BuiltinDepthMode::kGreater:
             return "greater";
         case BuiltinDepthMode::kLess:

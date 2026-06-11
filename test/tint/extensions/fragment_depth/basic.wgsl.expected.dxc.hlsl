@@ -1,21 +1,4 @@
 //
-// any
-//
-struct any_outputs {
-  float tint_symbol : SV_Depth;
-};
-
-
-float any_inner() {
-  return 1.0f;
-}
-
-any_outputs any() {
-  any_outputs v = {any_inner()};
-  return v;
-}
-
-//
 // less
 //
 struct less_outputs {

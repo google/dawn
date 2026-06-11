@@ -1,27 +1,4 @@
 //
-// any
-//
-struct FragDepthAnyOutput {
-  float frag_depth;
-};
-
-struct any_outputs {
-  float FragDepthAnyOutput_frag_depth : SV_Depth;
-};
-
-
-FragDepthAnyOutput any_inner() {
-  FragDepthAnyOutput v = {1.0f};
-  return v;
-}
-
-any_outputs any() {
-  FragDepthAnyOutput v_1 = any_inner();
-  any_outputs v_2 = {v_1.frag_depth};
-  return v_2;
-}
-
-//
 // less
 //
 struct FragDepthLessOutput {

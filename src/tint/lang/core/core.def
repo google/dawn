@@ -76,7 +76,6 @@ enum builtin_value {
 
 // https://github.com/gpuweb/gpuweb/blob/main/proposals/fragment-depth.md
 enum builtin_depth_mode {
-  any
   greater
   less
 }

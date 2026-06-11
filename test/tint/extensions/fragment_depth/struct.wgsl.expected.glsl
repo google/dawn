@@ -1,24 +1,4 @@
 //
-// any
-//
-#version 310 es
-precision highp float;
-precision highp int;
-
-
-struct FragDepthAnyOutput {
-  float frag_depth;
-};
-
-layout(location = 0) uniform uint tint_immediates[2];
-FragDepthAnyOutput any_inner() {
-  return FragDepthAnyOutput(1.0f);
-}
-void main() {
-  float v = any_inner().frag_depth;
-  gl_FragDepth = clamp(v, uintBitsToFloat(tint_immediates[0u]), uintBitsToFloat(tint_immediates[1u]));
-}
-//
 // less
 //
 #version 310 es

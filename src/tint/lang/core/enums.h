@@ -645,7 +645,6 @@ constexpr std::string_view kBuiltinValueStrings[] = {
 /// Builtin depth mode defined with `@builtin(<name>, <depth_mode>)`.
 enum class BuiltinDepthMode : uint8_t {
     kUndefined,
-    kAny,
     kGreater,
     kLess,
 };
@@ -669,7 +668,6 @@ auto& operator<<(STREAM& out, BuiltinDepthMode value) {
 BuiltinDepthMode ParseBuiltinDepthMode(std::string_view str);
 
 constexpr std::string_view kBuiltinDepthModeStrings[] = {
-    "any",
     "greater",
     "less",
 };
