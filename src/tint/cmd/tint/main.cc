@@ -137,6 +137,7 @@ struct Options {
 
     Format format = Format::kUnknown;
     tint::cmd::InputFormat input_format = tint::cmd::InputFormat::kUnknown;
+    tint::cmd::DiagnosticsFormat diagnostics_format = tint::cmd::DiagnosticsFormat::kPlain;
 
     bool verbose = false;
     bool parse_only = false;
@@ -306,6 +307,15 @@ If not provided, will be inferred from input filename extension:
                                                  },
                                                  ShortName{"col"}, Default{default_color_mode});
     TINT_DEFER(opts->printer = CreatePrinter(*col.value));
+
+    tint::Vector<EnumName<tint::cmd::DiagnosticsFormat>, 2> diagnostics_format_enum_names{
+        EnumName(tint::cmd::DiagnosticsFormat::kPlain, "plain"),
+        EnumName(tint::cmd::DiagnosticsFormat::kJson, "json"),
+    };
+    auto& diagnostics_fmt = options.Add<EnumOption<tint::cmd::DiagnosticsFormat>>(
+        "diagnostics-format", "The format to print diagnostics in", diagnostics_format_enum_names,
+        Default{tint::cmd::DiagnosticsFormat::kPlain});
+    TINT_DEFER(opts->diagnostics_format = *diagnostics_fmt.value);
 
     auto& ep = options.Add<StringOption>("entry-point", "Output single entry point",
                                          ShortName{"ep"}, Parameter{"name"});
@@ -1088,8 +1098,8 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
         auto source = std::make_unique<tint::Source::File>(options.input_filename, result->wgsl);
         auto reparsed_program = tint::wgsl::reader::Parse(source.get(), parser_options);
         if (!reparsed_program.IsValid()) {
-            tint::diag::Formatter diag_formatter;
-            options.printer->Print(diag_formatter.Format(reparsed_program.Diagnostics()));
+            tint::cmd::PrintDiagnostics(reparsed_program.Diagnostics(), options.diagnostics_format,
+                                        options.printer.get());
             return false;
         }
     }
@@ -1571,6 +1581,7 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
         .wgsl_writer_options = options.wgsl_writer_options,
 #endif
         .printer = options.printer.get(),
+        .diagnostics_format = options.diagnostics_format,
     };
 
 #if TINT_BUILD_WGSL_WRITER

@@ -29,6 +29,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -133,6 +134,97 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
 #endif  // TINT_BUILD_WGSL_READER
 }
 #endif  // TINT_BUILD_SPV_READER
+
+std::string EscapeJsonString(std::string_view str) {
+    std::stringstream ss;
+    for (char c : str) {
+        switch (c) {
+            case '"':
+                ss << "\\\"";
+                break;
+            case '\\':
+                ss << "\\\\";
+                break;
+            case '\b':
+                ss << "\\b";
+                break;
+            case '\f':
+                ss << "\\f";
+                break;
+            case '\n':
+                ss << "\\n";
+                break;
+            case '\r':
+                ss << "\\r";
+                break;
+            case '\t':
+                ss << "\\t";
+                break;
+            default:
+                if (static_cast<unsigned char>(c) < 0x20) {
+                    char buf[7];
+                    snprintf(buf, sizeof(buf), "\\u%04x", static_cast<unsigned char>(c));
+                    ss << buf;
+                } else {
+                    ss << c;
+                }
+                break;
+        }
+    }
+    return ss.str();
+}
+
+std::string DiagnosticsToJson(const tint::diag::List& diagnostics) {
+    std::stringstream ss;
+    ss << "[\n";
+    bool first = true;
+    for (const auto& diag : diagnostics) {
+        if (!first) {
+            ss << ",\n";
+        }
+        first = false;
+
+        ss << "  {\n";
+        ss << "    \"severity\": ";
+        switch (diag.severity) {
+            case tint::diag::Severity::Note:
+                ss << "\"note\"";
+                break;
+            case tint::diag::Severity::Warning:
+                ss << "\"warning\"";
+                break;
+            case tint::diag::Severity::Error:
+                ss << "\"error\"";
+                break;
+        }
+
+        ss << ",\n    \"message\": \"" << EscapeJsonString(diag.message.Plain()) << "\"";
+
+        if (diag.source.file && !diag.source.file->path.empty()) {
+            ss << ",\n    \"file\": \"" << EscapeJsonString(diag.source.file->path) << "\"";
+        }
+
+        if (diag.source.range.begin.line > 0) {
+            ss << ",\n    \"range\": {\n";
+            ss << "      \"start\": {\n";
+            ss << "        \"line\": " << diag.source.range.begin.line << ",\n";
+            ss << "        \"column\": " << diag.source.range.begin.column << "\n";
+            ss << "      }";
+
+            if (diag.source.range.end.line > 0) {
+                ss << ",\n      \"end\": {\n";
+                ss << "        \"line\": " << diag.source.range.end.line << ",\n";
+                ss << "        \"column\": " << diag.source.range.end.column << "\n";
+                ss << "      }";
+            }
+            ss << "\n    }";
+        }
+
+        ss << "\n  }";
+    }
+    ss << "\n]";
+    return ss.str();
+}
 
 }  // namespace
 
@@ -243,25 +335,35 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
     ProgramInfo info = load();
 
     if (info.program.Diagnostics().Count() > 0) {
-        if (!info.program.IsValid() && input_format != InputFormat::kWgsl) {
+        if (!info.program.IsValid() && input_format != InputFormat::kWgsl &&
+            opts.diagnostics_format == DiagnosticsFormat::kPlain) {
             // Invalid program from a non-wgsl source.
             // Print the WGSL, to help understand the diagnostics.
             PrintWGSL(std::cout, info.program);
         }
 
-        tint::diag::Formatter formatter;
-        if (opts.printer) {
-            opts.printer->Print(formatter.Format(info.program.Diagnostics()));
-        } else {
-            tint::StyledTextPrinter::Create(stderr)->Print(
-                formatter.Format(info.program.Diagnostics()));
-        }
-        // Flush any diagnostics written to stderr. We depend on these being emitted to the console
-        // before the program for end-to-end tests.
-        fflush(stderr);
+        PrintDiagnostics(info.program.Diagnostics(), opts.diagnostics_format, opts.printer);
     }
 
     return info;
+}
+
+void PrintDiagnostics(const tint::diag::List& diagnostics,
+                      DiagnosticsFormat format,
+                      StyledTextPrinter* printer) {
+    if (format == DiagnosticsFormat::kJson) {
+        std::cerr << DiagnosticsToJson(diagnostics) << "\n";
+    } else {
+        tint::diag::Formatter formatter;
+        if (printer) {
+            printer->Print(formatter.Format(diagnostics));
+        } else {
+            tint::StyledTextPrinter::Create(stderr)->Print(formatter.Format(diagnostics));
+        }
+    }
+    // Flush any diagnostics written to stderr. We depend on these being emitted to the console
+    // before the program for end-to-end tests.
+    fflush(stderr);
 }
 
 void PrintInspectorData(tint::inspector::Inspector& inspector) {

@@ -61,6 +61,12 @@ enum class InputFormat {
     kSpirvAsm,
 };
 
+/// The formatting mode for program diagnostics.
+enum class DiagnosticsFormat {
+    kPlain,
+    kJson,
+};
+
 /// Information on a loaded program
 struct ProgramInfo {
     /// The loaded program
@@ -99,6 +105,8 @@ struct LoadProgramOptions {
 #endif
     /// The text printer to use for output
     StyledTextPrinter* printer = nullptr;
+    /// The diagnostics format to use
+    DiagnosticsFormat diagnostics_format = DiagnosticsFormat::kPlain;
 };
 
 /// Loads the source and program information for the given file.
@@ -106,6 +114,14 @@ struct LoadProgramOptions {
 /// returning.
 /// @param opts the loading options
 ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts);
+
+/// Prints diagnostics to standard error using the specified format.
+/// @param diagnostics the diagnostics to print
+/// @param format the format to use
+/// @param printer the plain text printer (optional, used for plain format)
+void PrintDiagnostics(const tint::diag::List& diagnostics,
+                      DiagnosticsFormat format,
+                      StyledTextPrinter* printer);
 
 /// @param stage the pipeline stage
 /// @returns the string representation
