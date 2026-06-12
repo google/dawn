@@ -48,6 +48,9 @@ class DualSourceBlendTests : public DawnTest {
         DawnTest::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::DualSourceBlending));
 
+        // TODO(crbug.com/522872458): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform}});
         pipelineLayout = utils::MakePipelineLayout(device, {bindGroupLayout});

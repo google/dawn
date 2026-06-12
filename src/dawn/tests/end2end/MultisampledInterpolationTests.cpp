@@ -49,7 +49,12 @@ class MultisampledInterpolationTest : public DawnTest {
     // A compute pipeline to texelFetch the sample locations and output the results to a buffer.
     wgpu::ComputePipeline checkSamplePipeline;
 
-    void SetUp() override { DawnTest::SetUp(); }
+    void SetUp() override {
+        DawnTest::SetUp();
+
+        // TODO(crbug.com/522869942): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+    }
 
     void CreatePipelines() {
         {

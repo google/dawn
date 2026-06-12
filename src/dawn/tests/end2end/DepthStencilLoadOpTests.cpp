@@ -410,6 +410,9 @@ TEST_P(DepthTextureClearTwiceTest, ClearDepthAspectTwice) {
     // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
     DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
+    // TODO(crbug.com/522868201): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     constexpr uint32_t kSize = 64;
     constexpr uint32_t kLevelCount = 5;
 

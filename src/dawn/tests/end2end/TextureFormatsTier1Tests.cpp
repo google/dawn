@@ -456,6 +456,12 @@ DAWN_INSTANTIATE_TEST(BlendableFormatsTest,
 
 class MultisampleResolveFormatsTest : public TextureFormatsTier1Test {
   protected:
+    void SetUp() override {
+        TextureFormatsTier1Test::SetUp();
+        // TODO(crbug.com/522869944): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+    }
+
     static constexpr uint32_t kSize = 16;
     static constexpr uint32_t kMultisampleCount = 4;
     static constexpr uint32_t kSingleSampleCount = 1;

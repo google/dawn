@@ -1517,7 +1517,12 @@ TEST_P(MultithreadEncodingTests, ComputePassEncodersInParallel) {
 
 class MultithreadTextureCopyTests : public MultithreadTests {
   protected:
-    void SetUp() override { MultithreadTests::SetUp(); }
+    void SetUp() override {
+        MultithreadTests::SetUp();
+
+        // TODO(crbug.com/522872466): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+    }
 
     wgpu::Texture CreateAndWriteTexture(uint32_t width,
                                         uint32_t height,

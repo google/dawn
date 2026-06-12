@@ -725,6 +725,9 @@ TEST_P(ImmediateDataTests, BundlesDontCarePreviousImmediatesState) {
 // Switching pipelines with different internal push constant sizes (e.g. frag_depth adds
 // clampFragDepth) must rebind all bind groups due to VkPipelineLayout change.
 TEST_P(ImmediateDataTests, BindGroupsReboundOnDifferentInternalImmediateSize) {
+    // TODO(crbug.com/522872463): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform}});
 
