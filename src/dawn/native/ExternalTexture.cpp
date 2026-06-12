@@ -177,11 +177,12 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
 
     // TODO(https://crbug.com/496604550): Make the conversion matrix required, users can pass the
     // identity if needed.
-    math::Mat3x4f yMat = {
-        {1, 0, 0, 0},  //
-        {0, 1, 0, 0},  //
-        {0, 0, 1, 0},  //
-    };
+    auto yMat = math::Mat3x4f::FromRows({
+        {1, 0, 0},
+        {0, 1, 0},
+        {0, 0, 1},
+        {0, 0, 0},
+    });
     if (descriptor->yuvToRgbConversionMatrix) {
         const float* yMatIn = descriptor->yuvToRgbConversionMatrix;
         yMat = {
@@ -198,12 +199,12 @@ ExternalTextureParams ComputeExternalTextureParams(const ExternalTextureDescript
     // Cr, 1. Reorder them by appending a "swizzling" matrix first.
     if (descriptor->plane0->GetTexture()->GetFormat().format ==
         wgpu::TextureFormat::OpaqueYCbCrAndroid) {
-        constexpr math::Mat4x4f kUndoVulkanSwizzle = {
-            {0, 1, 0, 0},
+        constexpr auto kUndoVulkanSwizzle = math::Mat4x4f::FromRows({
             {0, 0, 1, 0},
             {1, 0, 0, 0},
+            {0, 1, 0, 0},
             {0, 0, 0, 1},
-        };
+        });
         yMat = math::Mul(kUndoVulkanSwizzle, yMat);
     }
 

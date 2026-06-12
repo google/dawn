@@ -142,37 +142,34 @@ inline constexpr math::Mat4x3f kYCbCrRange_Full = {
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#QUANTIZATION_NARROW
 constexpr float kYCbCrRange_NarrowYFactor = 255.0 / 219.0;
 constexpr float kYCbCrRange_NarrowChromaFactor = 255.0 / 224.0;
-constexpr math::Mat4x3f kYCbCrRange_Narrow = {
-    {kYCbCrRange_NarrowYFactor, 0.0, 0.0},
-    {0.0, kYCbCrRange_NarrowChromaFactor, 0.0},
-    {0.0, 0.0, kYCbCrRange_NarrowChromaFactor},
-    {-16.0 / 255.0 * kYCbCrRange_NarrowYFactor,        //
-     -128.0 / 255.0 * kYCbCrRange_NarrowChromaFactor,  //
-     -128.0 / 255.0 * kYCbCrRange_NarrowChromaFactor},
-};
+constexpr auto kYCbCrRange_Narrow = math::Mat4x3f::FromRows({
+    {kYCbCrRange_NarrowYFactor, 0.0, 0.0, -16.0 / 255.0 * kYCbCrRange_NarrowYFactor},
+    {0.0, kYCbCrRange_NarrowChromaFactor, 0.0, -128.0 / 255.0 * kYCbCrRange_NarrowChromaFactor},
+    {0.0, 0.0, kYCbCrRange_NarrowChromaFactor, -128.0 / 255.0 * kYCbCrRange_NarrowChromaFactor},
+});
 
 // YCbCr to RGB matrices for various standards
 
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#MODEL_BT601
-inline constexpr math::Mat3x3f kYCbCrToRGB_Rec601 = {
-    {1.0, 1.0, 1.0},
-    {0.0, -(0.202008 / 0.587), 1.772},
-    {1.402, -(0.419198 / 0.587), 0.0},
-};
+inline constexpr auto kYCbCrToRGB_Rec601 = math::Mat3x3f::FromRows({
+    {1.0, 0.0, 1.402},
+    {1.0, -(0.202008 / 0.587), -(0.419198 / 0.587)},
+    {1.0, 1.772, 0.0},
+});
 
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#MODEL_BT709
-inline constexpr math::Mat3x3f kYCbCrToRGB_Rec709 = {
-    {1.0, 1.0, 1.0},
-    {0.0, -(0.13397432 / 0.7152), 1.8556},
-    {1.5748, -(0.33480248 / 0.7152), 0.0},
-};
+inline constexpr auto kYCbCrToRGB_Rec709 = math::Mat3x3f::FromRows({
+    {1.0, 0.0, 1.5748},
+    {1.0, -(0.13397432 / 0.7152), -(0.33480248 / 0.7152)},
+    {1.0, 1.8556, 0.0},
+});
 
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#MODEL_BT2020
-inline constexpr math::Mat3x3f kYCbCrToRGB_Rec2020 = {
-    {1.0, 1.0, 1.0},
-    {0.0, -(0.11156702 / 0.6780), 1.8814},
-    {1.4746, -(0.38737742 / 0.6780), 0.0},
-};
+inline constexpr auto kYCbCrToRGB_Rec2020 = math::Mat3x3f::FromRows({
+    {1.0, 0.0, 1.4746},
+    {1.0, -(0.11156702 / 0.6780), -(0.38737742 / 0.6780)},
+    {1.0, 1.8814, 0.0},
+});
 
 // RGB to XYZ (D65) for various standards.
 // TODO(https://crbug.com/468988322): Define an XYZPrimaries structure and compute the matrices from
@@ -181,17 +178,19 @@ inline constexpr math::Mat3x3f kYCbCrToRGB_Rec2020 = {
 
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#PRIMARIES_BT601_EBU
 // Rec 601 625-line.
-inline constexpr math::Mat3x3f kRGBToXYZ_Rec601 = {{0.430554, 0.222004, 0.020182},
-                                                   {0.341550, 0.706655, 0.129553},
-                                                   {0.178352, 0.071341, 0.939322}};
+inline constexpr auto kRGBToXYZ_Rec601 = math::Mat3x3f::FromRows({
+    {0.430554, 0.341550, 0.178352},
+    {0.222004, 0.706655, 0.071341},
+    {0.020182, 0.129553, 0.939322},
+});
 inline constexpr math::Mat3x3f kXYZToRGB_Rec601 = kRGBToXYZ_Rec601.Inverse();
 
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#PRIMARIES_BT709
-inline constexpr math::Mat3x3f kRGBToXYZ_Rec709 = {
-    {0.412391, 0.212639, 0.019331},
-    {0.357584, 0.715169, 0.119195},
-    {0.180481, 0.072192, 0.950532},
-};
+inline constexpr auto kRGBToXYZ_Rec709 = math::Mat3x3f::FromRows({
+    {0.412391, 0.357584, 0.180481},
+    {0.212639, 0.715169, 0.072192},
+    {0.019331, 0.119195, 0.950532},
+});
 inline constexpr math::Mat3x3f kXYZToRGB_Rec709 = kRGBToXYZ_Rec709.Inverse();
 
 // sRGB is the same as Rec709.
@@ -199,19 +198,19 @@ inline constexpr math::Mat3x3f kRGBToXYZ_sRGB = kRGBToXYZ_Rec709;
 inline constexpr math::Mat3x3f kXYZToRGB_sRGB = kXYZToRGB_Rec709;
 
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#PRIMARIES_BT2020
-inline constexpr math::Mat3x3f kRGBToXYZ_Rec2020 = {
-    {0.636958, 0.262700, 0.000000},
-    {0.144617, 0.677998, 0.028073},
-    {0.168881, 0.059302, 1.060985},
-};
+inline constexpr auto kRGBToXYZ_Rec2020 = math::Mat3x3f::FromRows({
+    {0.636958, 0.144617, 0.168881},
+    {0.262700, 0.677998, 0.059302},
+    {0.000000, 0.028073, 1.060985},
+});
 inline constexpr math::Mat3x3f kXYZToRGB_Rec2020 = kRGBToXYZ_Rec2020.Inverse();
 
 // https://registry.khronos.org/DataFormat/specs/1.4/dataformat.1.4.html#PRIMARIES_BT2020
-inline constexpr math::Mat3x3f kRGBToXYZ_DisplayP3 = {
-    {0.4865709486, 0.2289745641, 0.0000000000},
-    {0.2656676932, 0.6917385218, 0.0451133819},
-    {0.1982172852, 0.0792869141, 1.0439443689},
-};
+inline constexpr auto kRGBToXYZ_DisplayP3 = math::Mat3x3f::FromRows({
+    {0.4865709486, 0.2656676932, 0.1982172852},
+    {0.2289745641, 0.6917385218, 0.0792869141},
+    {0.0000000000, 0.0451133819, 1.0439443689},
+});
 inline constexpr math::Mat3x3f kXYZToRGB_DisplayP3 = kRGBToXYZ_DisplayP3.Inverse();
 
 // Transfer functions for various standards, in a format.

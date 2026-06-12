@@ -467,17 +467,17 @@ class SharedTextureMemoryVulkanYCbCrParamsTests : public DawnTestWithParams<VkYC
         // Vulkan has CrYCb (because Cr is "red", Y is "green" and Cb is "blue") but we want YCbCr.
         // Stay in 4D to undo the swizzle as it is before the application of the range, but have the
         // redo in 3D because it is after the range is applied.
-        constexpr math::Mat4x4f kUndoVulkanSwizzle = {
+        constexpr auto kUndoVulkanSwizzle = math::Mat4x4f::FromRows({
+            {0, 1, 0, 0},
             {0, 0, 1, 0},
             {1, 0, 0, 0},
-            {0, 1, 0, 0},
             {0, 0, 0, 1},
-        };
-        constexpr math::Mat3x3f kRedoVulkanSwizzle = {
-            {0, 1, 0},
+        });
+        constexpr auto kRedoVulkanSwizzle = math::Mat3x3f::FromRows({
             {0, 0, 1},
             {1, 0, 0},
-        };
+            {0, 1, 0},
+        });
 
         math::Mat4x3f rangeTransform;
         switch (GetParam().mVkYCbCrRange) {

@@ -209,6 +209,34 @@ TEST(Algebra, MatrixConstructorAndIndexing) {
     }
 }
 
+// Test the helper "FromRows" static member function.
+TEST(Algebra, MatrixFromRows) {
+    {
+        Mat2x3f m = Mat2x3f::FromRows({
+            {1, 2},
+            {3, 4},
+            {5, 6},
+        });
+        EXPECT_EQ(m, Mat2x3f({1, 3, 5}, {2, 4, 6}));
+    }
+    {
+        Mat3x2f m = Mat3x2f::FromRows({
+            {1, 2, 3},
+            {4, 5, 6},
+        });
+        EXPECT_EQ(m, Mat3x2f({1, 4}, {2, 5}, {3, 6}));
+    }
+    {
+        Mat2x4f m = Mat2x4f::FromRows({
+            {1, 2},
+            {3, 4},
+            {5, 6},
+            {7, 8},
+        });
+        EXPECT_EQ(m, Mat2x4f({1, 3, 5, 7}, {2, 4, 6, 8}));
+    }
+}
+
 // Test the vector equality operator
 TEST(Algebra, MatrixEquality) {
     EXPECT_EQ(Mat3x2f({1, 2}, {3, 4}, {5, 6}), Mat3x2f({1, 2}, {3, 4}, {5, 6}));
@@ -295,6 +323,12 @@ TEST(Algebra, MatrixInverse) {
         CheckAlmostIdentity(Mul(testMatrix, invert));
         CheckAlmostIdentity(Mul(invert, testMatrix));
     }
+}
+
+// Test computation of the transpose of a matrix
+TEST(Algebra, MatrixTransposed) {
+    EXPECT_EQ(Mat2x2f({1, 2}, {3, 4}).Transposed(), Mat2x2f({1, 3}, {2, 4}));
+    EXPECT_EQ(Mat2x3f({1, 2, 3}, {4, 5, 6}).Transposed(), Mat3x2f({1, 4}, {2, 5}, {3, 6}));
 }
 
 // Test the vector-scalar division.
