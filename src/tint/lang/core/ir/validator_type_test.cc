@@ -1776,11 +1776,13 @@ TEST_F(IR_ValidatorTest, Int64Type_InstructionOperand_AllowedWithCapability) {
 
 using AddressSpace_AccessMode = IRTestParamHelper<std::tuple<
     /* address */ AddressSpace,
-    /* access mode */ core::Access>>;
+    /* access mode */ core::Access,
+    /* expected error */ const char*>>;
 
 TEST_P(AddressSpace_AccessMode, Test) {
     auto addr = std::get<0>(GetParam());
     auto access = std::get<1>(GetParam());
+    std::string expected_error = std::get<2>(GetParam());
 
     if (addr == AddressSpace::kFunction) {
         auto* fn = b.Function("my_func", ty.void_());
@@ -1800,37 +1802,8 @@ TEST_P(AddressSpace_AccessMode, Test) {
         mod.root_block->Append(v);
     }
 
-    const char* expected_error = nullptr;
-    switch (access) {
-        case core::Access::kWrite:
-            if (addr == AddressSpace::kUniform || addr == AddressSpace::kHandle) {
-                expected_error = "uniform and handle pointers must be read access";
-            } else if (addr == AddressSpace::kWorkgroup) {
-                expected_error = "workgroup pointers must be read_write access";
-            } else if (addr == AddressSpace::kStorage) {
-                expected_error =
-                    "vars in the 'storage' address space must have access 'read' or 'read-write'";
-            } else if (addr == AddressSpace::kImmediate) {
-                expected_error = "immediate pointers must be read access";
-            }
-            break;
-        case core::Access::kReadWrite:
-            if (addr == AddressSpace::kUniform || addr == AddressSpace::kHandle) {
-                expected_error = "uniform and handle pointers must be read access";
-            } else if (addr == AddressSpace::kImmediate) {
-                expected_error = "immediate pointers must be read access";
-            }
-            break;
-        case core::Access::kRead:
-            if (addr == AddressSpace::kWorkgroup) {
-                expected_error = "workgroup pointers must be read_write access";
-            }
-            break;
-        default:
-            break;
-    }
     auto res = ir::Validate(mod);
-    if (expected_error == nullptr) {
+    if (expected_error.empty()) {
         ASSERT_EQ(res, Success);
     } else {
         ASSERT_NE(res, Success);
@@ -1838,17 +1811,57 @@ TEST_P(AddressSpace_AccessMode, Test) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
-                         AddressSpace_AccessMode,
-                         testing::Combine(testing::Values(AddressSpace::kFunction,
-                                                          AddressSpace::kPrivate,
-                                                          AddressSpace::kWorkgroup,
-                                                          AddressSpace::kUniform,
-                                                          AddressSpace::kStorage,
-                                                          AddressSpace::kHandle,
-                                                          AddressSpace::kImmediate),
-                                          testing::Values(core::Access::kRead,
-                                                          core::Access::kWrite,
-                                                          core::Access::kReadWrite)));
+INSTANTIATE_TEST_SUITE_P(
+    IR_ValidatorTest,
+    AddressSpace_AccessMode,
+    testing::Values(
+        std::make_tuple(AddressSpace::kFunction,
+                        core::Access::kRead,
+                        "function pointers must be read_write access"),
+        std::make_tuple(AddressSpace::kFunction,
+                        core::Access::kWrite,
+                        "function pointers must be read_write access"),
+        std::make_tuple(AddressSpace::kFunction, core::Access::kReadWrite, ""),
+        std::make_tuple(AddressSpace::kPrivate,
+                        core::Access::kRead,
+                        "private pointers must be read_write access"),
+        std::make_tuple(AddressSpace::kPrivate,
+                        core::Access::kWrite,
+                        "private pointers must be read_write access"),
+        std::make_tuple(AddressSpace::kPrivate, core::Access::kReadWrite, ""),
+        std::make_tuple(AddressSpace::kWorkgroup,
+                        core::Access::kRead,
+                        "workgroup pointers must be read_write access"),
+        std::make_tuple(AddressSpace::kWorkgroup,
+                        core::Access::kWrite,
+                        "workgroup pointers must be read_write access"),
+        std::make_tuple(AddressSpace::kWorkgroup, core::Access::kReadWrite, ""),
+        std::make_tuple(AddressSpace::kUniform, core::Access::kRead, ""),
+        std::make_tuple(AddressSpace::kUniform,
+                        core::Access::kWrite,
+                        "uniform pointers must be read access"),
+        std::make_tuple(AddressSpace::kUniform,
+                        core::Access::kReadWrite,
+                        "uniform pointers must be read access"),
+        std::make_tuple(AddressSpace::kStorage, core::Access::kRead, ""),
+        std::make_tuple(
+            AddressSpace::kStorage,
+            core::Access::kWrite,
+            "vars in the 'storage' address space must have access 'read' or 'read-write'"),
+        std::make_tuple(AddressSpace::kStorage, core::Access::kReadWrite, ""),
+        std::make_tuple(AddressSpace::kHandle, core::Access::kRead, ""),
+        std::make_tuple(AddressSpace::kHandle,
+                        core::Access::kWrite,
+                        "handle pointers must be read access"),
+        std::make_tuple(AddressSpace::kHandle,
+                        core::Access::kReadWrite,
+                        "handle pointers must be read access"),
+        std::make_tuple(AddressSpace::kImmediate, core::Access::kRead, ""),
+        std::make_tuple(AddressSpace::kImmediate,
+                        core::Access::kWrite,
+                        "immediate pointers must be read access"),
+        std::make_tuple(AddressSpace::kImmediate,
+                        core::Access::kReadWrite,
+                        "immediate pointers must be read access")));
 
 }  // namespace tint::core::ir

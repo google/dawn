@@ -806,16 +806,20 @@ void Structural::CheckType(const core::type::Type* root,
                 }
 
                 if (ptr->AddressSpace() == AddressSpace::kUniform ||
-                    ptr->AddressSpace() == AddressSpace::kHandle) {
+                    ptr->AddressSpace() == AddressSpace::kHandle ||
+                    ptr->AddressSpace() == core::AddressSpace::kImmediate) {
                     if (ptr->Access() != core::Access::kRead) {
-                        diag() << "uniform and handle pointers must be read access";
+                        diag() << ToString(ptr->AddressSpace()) << " pointers must be read access";
                         return false;
                     }
                 }
 
-                if (ptr->AddressSpace() == AddressSpace::kWorkgroup) {
+                if (ptr->AddressSpace() == AddressSpace::kWorkgroup ||
+                    ptr->AddressSpace() == AddressSpace::kFunction ||
+                    ptr->AddressSpace() == AddressSpace::kPrivate) {
                     if (ptr->Access() != core::Access::kReadWrite) {
-                        diag() << "workgroup pointers must be read_write access";
+                        diag() << ToString(ptr->AddressSpace())
+                               << " pointers must be read_write access";
                         return false;
                     }
                 }
@@ -828,13 +832,6 @@ void Structural::CheckType(const core::type::Type* root,
                 } else {
                     if (ptr->StoreType()->IsHandle()) {
                         diag() << "handle types can only be declared in the 'handle' address space";
-                        return false;
-                    }
-                }
-
-                if (ptr->AddressSpace() == core::AddressSpace::kImmediate) {
-                    if (ptr->Access() != core::Access::kRead) {
-                        diag() << "immediate pointers must be read access";
                         return false;
                     }
                 }
