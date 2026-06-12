@@ -1649,6 +1649,9 @@ TEST_P(SharedTextureMemoryTests, TextureAccessOutlivesMemory) {
 
 // Test that if the texture is uninitialized, it is cleared on first use.
 TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
@@ -2129,6 +2132,9 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample2DArray) {
 // Test rendering to a texture memory on one device, then sampling it using another device.
 // Encode the commands after performing BeginAccess.
 TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeAfterBeginAccess) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
@@ -2188,6 +2194,9 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeAfterBeginAccess) {
 // Test rendering to a texture memory on one device, then sampling it using another device.
 // Encode the commands before performing BeginAccess (the access is only held during) QueueSubmit.
 TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeBeforeBeginAccess) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
@@ -2245,6 +2254,9 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeBeforeBeginAccess) {
 // EndAccess. The second device should still be able to wait on the first device and see the
 // results.
 TEST_P(SharedTextureMemoryTests, RenderThenTextureDestroyBeforeEndAccessThenSample) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
@@ -2304,6 +2316,9 @@ TEST_P(SharedTextureMemoryTests, RenderThenTextureDestroyBeforeEndAccessThenSamp
 // accessing on the second device. Operations on the second device must
 // still wait for the preceding operations to complete.
 TEST_P(SharedTextureMemoryTests, RenderThenDropAllMemoriesThenSample) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
@@ -2365,6 +2380,9 @@ TEST_P(SharedTextureMemoryTests, RenderThenDropAllMemoriesThenSample) {
 // results.
 // This tests both cases where the device is destroyed, and where the device is lost.
 TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThenSample) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // Not supported if using the same device. Not possible to lose one without losing the other.
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mBackend->UseSameDevice());
 
@@ -2442,6 +2460,9 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
 // Write to the texture, then read from two separate devices concurrently, then write again.
 // Reads should happen strictly after the writes. The final write should wait for the reads.
 TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     DAWN_TEST_UNSUPPORTED_IF(!GetParam().mBackend->SupportsConcurrentRead());
 
     // crbug.com/358166479
@@ -2904,6 +2925,9 @@ TEST_P(SharedTextureMemoryTests, WriteStorageThenReadSample) {
 
 // Test writing to texture memory using queue.writeTexture, then sampling it using another device.
 TEST_P(SharedTextureMemoryTests, WriteTextureThenReadSample) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 

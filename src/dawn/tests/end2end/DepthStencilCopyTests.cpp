@@ -1411,6 +1411,9 @@ TEST_P(StencilCopyTests, ToStencilAspectAtNonZeroOffset) {
 // Test uploading to the non-zero mip, stencil-only aspect of a texture,
 // and then checking the contents with a stencil test.
 TEST_P(StencilCopyTests, CopyNonzeroMipThenReadWithStencilTest) {
+    // TODO(crbug.com/523272956): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // Copies to a single aspect are unsupported on OpenGL.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
 

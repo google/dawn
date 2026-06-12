@@ -301,7 +301,14 @@ INSTANTIATE_TEST_SUITE_P(,
                          DawnTestBase::PrintToStringParamName("DepthStencilLoadOpTests"));
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DepthStencilLoadOpTests);
 
-class StencilClearValueOverflowTest : public DepthStencilLoadOpTests {};
+class StencilClearValueOverflowTest : public DepthStencilLoadOpTests {
+  protected:
+    void SetUp() override {
+        DepthStencilLoadOpTests::SetUp();
+        // TODO(crbug.com/523211964): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+    }
+};
 
 // Test when stencilClearValue overflows uint8_t (>255), only the last 8 bits will be applied as the
 // stencil clear value in encoder.BeginRenderPass() (currently Dawn only supports 8-bit stencil

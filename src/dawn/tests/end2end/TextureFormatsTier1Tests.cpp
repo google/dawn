@@ -253,6 +253,12 @@ class TextureFormatsTier1Test : public DawnTest {
 
 class RenderAttachmentFormatsTest : public TextureFormatsTier1Test {
   protected:
+    void SetUp() override {
+        TextureFormatsTier1Test::SetUp();
+        // TODO(crbug.com/523211957): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+    }
+
     void RunRenderTest(wgpu::TextureFormat format, const std::vector<float>& originData) {
         DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::TextureFormatsTier1));
 

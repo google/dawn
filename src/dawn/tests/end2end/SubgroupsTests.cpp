@@ -436,6 +436,9 @@ class SubgroupsShaderTestsFragment : public SubgroupsTestsBase<AdapterTestParam>
 // Test that subgroup_size builtin attribute read by each invocation is valid and identical for any
 // workgroup size between 1 and 256.
 TEST_P(SubgroupsShaderTestsFragment, ReadSubgroupSize) {
+    // TODO(crbug.com/523272957): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
     FragmentSubgroupSizeTest();
 }

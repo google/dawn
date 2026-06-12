@@ -625,6 +625,9 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
 // This tests the texture with depth attachment and load op load will init depth stencil texture to
 // 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
@@ -667,6 +670,9 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
 // This tests the texture with stencil attachment and load op load will init depth stencil texture
 // to 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
@@ -709,6 +715,9 @@ TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
 // This tests the texture with depth stencil attachment and load op load will init depth stencil
 // texture to 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
@@ -909,6 +918,9 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
 // Test that a stencil texture that is written via copy, then discarded, sees
 // zero contents when it is read by sampling.
 TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadBySampling) {
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     for (wgpu::TextureFormat format :
          {wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8}) {
         wgpu::Texture depthStencilTexture = CreateAndFillStencilTexture(format);
@@ -1043,6 +1055,9 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilCopyAfterDiscard) {
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
         kDepthStencilFormat);
@@ -1141,18 +1156,27 @@ TEST_P(TextureZeroInitTest, ColorAttachmentsClear) {
 
 // This tests the clearing of sampled 1D textures in render pass
 TEST_P(TextureZeroInitTest, RenderPassSampled1DTextureClear) {
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     DoRenderableSampledTextureClearTest(wgpu::TextureDimension::e1D,
                                         wgpu::TextureUsage::TextureBinding);
 }
 
 // This tests the clearing of sampled 2D textures in render pass
 TEST_P(TextureZeroInitTest, RenderPassSampled2DTextureClear) {
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     DoRenderableSampledTextureClearTest(wgpu::TextureDimension::e2D,
                                         wgpu::TextureUsage::TextureBinding);
 }
 
 // This tests the clearing of renderable 2D textures in render pass
 TEST_P(TextureZeroInitTest, RenderPassRenderable2DTextureClear) {
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     DoRenderableSampledTextureClearTest(
         wgpu::TextureDimension::e2D,
         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
@@ -1163,6 +1187,9 @@ TEST_P(TextureZeroInitTest, RenderPassSampled3DTextureClear) {
     // TODO(448982392): Failing in compat mode.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     DoRenderableSampledTextureClearTest(wgpu::TextureDimension::e3D,
                                         wgpu::TextureUsage::TextureBinding);
 }
@@ -1171,6 +1198,9 @@ TEST_P(TextureZeroInitTest, RenderPassSampled3DTextureClear) {
 TEST_P(TextureZeroInitTest, RenderPassRenderable3DTextureClear) {
     // TODO(448982392): Failing in compat mode.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
     DoRenderableSampledTextureClearTest(
         wgpu::TextureDimension::e3D,
@@ -1229,6 +1259,9 @@ TEST_P(TextureZeroInitTest, RenderPass3DTextureDepthSliceClearTestViaCopy) {
 // This test renders to a single slice of a 3d texture and then reads it back by rendering the 3D
 // texture to a 2D array render target and sampling it in a shader.
 TEST_P(TextureZeroInitTest, RenderPass3DTextureDepthSliceClearTestViaUsage) {
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     constexpr uint32_t kNumSlices = 3;
     for (uint32_t slice = 0; slice < kNumSlices; ++slice) {
         wgpu::TextureDescriptor desc;
@@ -1355,6 +1388,9 @@ TEST_P(TextureZeroInitTest, TextureBothSampledAndAttachmentClear) {
     // TODO(crbug.com/346362367): Compatibility mode does not support binding a `2d-array` texture
     // to a WGSL variable of type `texture_2d`.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
     // Create a 2D array texture, layer 0 will be used as attachment, layer 1 as sampled.
     wgpu::TextureDescriptor texDesc;
@@ -1651,6 +1687,9 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
 //      Because LoadOp is Load and the subresource is uninitialized, the texture will be cleared to
 //      0's This means the depth and stencil test will pass and the red square is drawn.
 TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
+    // TODO(crbug.com/523272963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |

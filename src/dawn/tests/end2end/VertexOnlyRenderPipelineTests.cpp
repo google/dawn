@@ -194,6 +194,9 @@ class VertexOnlyRenderPipelineTest : public DawnTest {
 // Test that a vertex-only render pipeline modify the stencil attachment as same as a complete
 // render pipeline do.
 TEST_P(VertexOnlyRenderPipelineTest, Stencil) {
+    // TODO(crbug.com/523272964): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     auto doStencilTest = [&](const wgpu::RenderPassDescriptor* renderPass,
                              const wgpu::RenderPipeline& pipeline,
                              const utils::RGBA8& colorExpect) -> void {

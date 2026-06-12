@@ -210,6 +210,9 @@ TEST_P(TexelBufferTests, RenderVertexPositions) {
 
 // Verify that fragment shaders can read from texel buffers as color palettes.
 TEST_P(TexelBufferTests, RenderFragmentColorPalette) {
+    // TODO(crbug.com/523211966): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // Two colors stored as RGBA8 values representing a simple palette.
     wgpu::Buffer texelBuffer = utils::CreateBufferFromData(
         device,

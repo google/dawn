@@ -45,6 +45,9 @@ class TextureComponentSwizzleTest : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
+        // TODO(crbug.com/523272960): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
         DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::TextureComponentSwizzle));
 
         wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(

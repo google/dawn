@@ -44,6 +44,12 @@ DAWN_TEST_PARAM_STRUCT(PrimitiveIndexTestsParams, RequirePrimitiveIndexFeature);
 
 class PrimitiveIndexTests : public DawnTestWithParams<PrimitiveIndexTestsParams> {
   public:
+    void SetUp() override {
+        DawnTestWithParams<PrimitiveIndexTestsParams>::SetUp();
+        // TODO(crbug.com/523134902): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+    }
+
     wgpu::Texture CreateDefault2DTexture() {
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = wgpu::TextureDimension::e2D;

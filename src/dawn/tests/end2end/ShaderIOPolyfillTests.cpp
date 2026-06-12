@@ -38,6 +38,9 @@ using ShaderIOPolyfillTests = DawnTest;
 
 // https://crbug.com/517522769
 TEST_P(ShaderIOPolyfillTests, DivergentLocations) {
+    // TODO(crbug.com/523272954): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         struct VOut {
             @builtin(position) pos : vec4f,

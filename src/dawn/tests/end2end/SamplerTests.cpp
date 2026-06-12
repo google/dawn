@@ -89,6 +89,9 @@ class SamplerTest : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
+        // TODO(crbug.com/523272951): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         wgpu::TextureDescriptor descriptor;
@@ -316,6 +319,9 @@ class StaticSamplerTest : public SamplerTest {
 // Test drawing a rect with a checkerboard texture using a static sampler with different address
 // modes.
 TEST_P(StaticSamplerTest, AddressMode) {
+    // TODO(crbug.com/523272955): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     DAWN_SUPPRESS_TEST_IF(IsWARP());
     // TODO(crbug.com/465184301): Fix static sampler feature.
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
@@ -340,6 +346,9 @@ TEST_P(StaticSamplerTest, AddressMode) {
 // Test that passing texture and static sampler objects through user-defined functions works
 // correctly.
 TEST_P(StaticSamplerTest, PassThroughUserFunctionParameters) {
+    // TODO(crbug.com/523272955): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     DAWN_SUPPRESS_TEST_IF(IsWARP());
     // TODO(crbug.com/465184301): Fix static sampler feature.
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());

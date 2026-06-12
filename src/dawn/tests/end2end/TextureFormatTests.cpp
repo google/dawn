@@ -213,6 +213,11 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
 
 class TextureFormatTest : public DawnTest {
   protected:
+    void SetUp() override {
+        DawnTest::SetUp();
+        // TODO(crbug.com/523211967): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+    }
     // Structure containing all the information that tests need to know about the format.
     struct FormatTestInfo {
         wgpu::TextureFormat format;

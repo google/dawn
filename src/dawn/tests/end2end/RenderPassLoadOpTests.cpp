@@ -168,6 +168,9 @@ class RenderPassLoadOpTests : public DawnTest {
 
 // Tests clearing, loading, and drawing into color attachments
 TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
+    // TODO(crbug.com/523272949): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // Part 1: clear once, check to make sure it's cleared
     utils::ComboRenderPassDescriptor renderPassClearZero({renderTargetView});
     auto commandsClearZeroEncoder = device.CreateCommandEncoder();

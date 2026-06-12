@@ -293,6 +293,9 @@ class ReadOnlyDepthStencilAttachmentTests
 class ReadOnlyDepthAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {};
 
 TEST_P(ReadOnlyDepthAttachmentTests, SampleFromAttachment) {
+    // TODO(crbug.com/523272948): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     TestSpec spec;
     spec.readonlyAspects = wgpu::TextureAspect::DepthOnly;
     spec.sampledAspect = wgpu::TextureAspect::DepthOnly;
@@ -308,6 +311,9 @@ TEST_P(ReadOnlyDepthAttachmentTests, SampleFromAttachment) {
 }
 
 TEST_P(ReadOnlyDepthAttachmentTests, NotSampleFromAttachment) {
+    // TODO(crbug.com/523272948): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     TestSpec spec;
     spec.readonlyAspects = wgpu::TextureAspect::DepthOnly;
     spec.depthCompare = wgpu::CompareFunction::LessEqual;
@@ -455,6 +461,9 @@ TEST_P(ReadOnlyDepthAndStencilAttachmentTests, ModifyDepthSampleStencil) {
 
 // Test that using depthReadOnly while modifying the stencil aspect works.
 TEST_P(ReadOnlyDepthAndStencilAttachmentTests, SampleDepthModifyStencil) {
+    // TODO(crbug.com/523272947): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // Depth/stencil tests are true, the depth is correctly sampled from the depthClearValue.
     // The stencil is written to the value of the stencil ref.
     TestSpec spec1;

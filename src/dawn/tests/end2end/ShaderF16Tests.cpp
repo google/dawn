@@ -151,6 +151,9 @@ TEST_P(ShaderF16Tests, BasicShaderF16FeaturesTest) {
 
 // Test that fragment shader use f16 vector type as render target output.
 TEST_P(ShaderF16Tests, RenderPipelineIOF16_RenderTarget) {
+    // TODO(crbug.com/523211962): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // Skip if device don't support f16 extension.
     DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::ShaderF16));
 
@@ -216,6 +219,9 @@ fn FSMain() -> @location(0) vec4<f16> {
 // Test using f16 types as vertex shader (user-defined) output and fragment shader
 // (user-defined) input.
 TEST_P(ShaderF16Tests, RenderPipelineIOF16_InterstageVariable) {
+    // TODO(crbug.com/523211962): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // Skip if device don't support f16 extension.
     DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::ShaderF16));
 

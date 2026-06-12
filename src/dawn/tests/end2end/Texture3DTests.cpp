@@ -42,6 +42,9 @@ constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 class Texture3DTests : public DawnTest {};
 
 TEST_P(Texture3DTests, Sampling) {
+    // TODO(crbug.com/523272959): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     // Set up pipeline. Two triangles will be drawn via the pipeline. They will fill the entire
@@ -175,6 +178,9 @@ TEST_P(Texture3DTests, LatestMipClampsDepthSizeForStorageTextures) {
 
 // Test 3d texture slices used as render attachments.
 TEST_P(Texture3DTests, Rendering) {
+    // TODO(crbug.com/523272959): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // crbug.com/42241218: The D3D12 debug layer incorrectly identifies different slices of a 3D
     // texture as the same subresource, which prevents writing to them as multiple render targets in
     // a single pass. This was resolved in Windows version 26200.8246 (D3D12 debug layer

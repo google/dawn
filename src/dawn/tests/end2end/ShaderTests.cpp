@@ -1074,6 +1074,9 @@ struct Buf {
 // Draw a triangle covering the render target, with vertex position and color values from
 // overridable constants
 TEST_P(ShaderTests, OverridableConstantsRenderPipeline) {
+    // TODO(crbug.com/523211963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 @id(1111) override xright: f32;
 @id(2222) override ytop: f32;
@@ -1276,6 +1279,9 @@ TEST_P(ShaderTests, MetalMulShiftModOverflowBug) {
 // Test that when fragment input is a subset of the vertex output, the render pipeline should be
 // valid.
 TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutput) {
+    // TODO(crbug.com/523211963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
     @location(1) var1: f32,
@@ -1339,6 +1345,9 @@ struct ShaderIO {
 // Test that when fragment input is a subset of the vertex output and the order of them is
 // different, the render pipeline should be valid.
 TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutputWithDifferentOrder) {
+    // TODO(crbug.com/523211963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
     @location(5) @align(16) var5: f32,
@@ -1403,6 +1412,9 @@ struct ShaderIO {
 // Test that when fragment input is a subset of the vertex output and that when the builtin
 // interstage variables may mess up with the order, the render pipeline should be valid.
 TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutputBuiltinOrder) {
+    // TODO(crbug.com/523211963): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
     @location(1) var1: f32,

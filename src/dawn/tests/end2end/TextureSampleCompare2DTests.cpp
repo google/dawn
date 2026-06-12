@@ -56,7 +56,11 @@ DAWN_TEST_PARAM_STRUCT(TextureSampleCompare2DTestParams, TextureType);
 
 class TextureSampleCompare2DTest : public DawnTestWithParams<TextureSampleCompare2DTestParams> {
   protected:
-    void SetUp() override { DawnTestWithParams<TextureSampleCompare2DTestParams>::SetUp(); }
+    void SetUp() override {
+        DawnTestWithParams<TextureSampleCompare2DTestParams>::SetUp();
+        // TODO(crbug.com/523272961): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+    }
 };
 
 // Test that textureSampleCompare with 2D polyfill returns the same result as the native

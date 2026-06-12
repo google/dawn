@@ -504,6 +504,9 @@ class VertexFormatTest : public DawnTest {
 };
 
 TEST_P(VertexFormatTest, Uint8) {
+    // TODO(crbug.com/523211971): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     std::vector<uint8_t> vertexData = {
         std::numeric_limits<uint8_t>::max(),
         0,  // padding three bytes for stride
@@ -571,6 +574,9 @@ TEST_P(VertexFormatTest, Uint8x4) {
 }
 
 TEST_P(VertexFormatTest, Sint8) {
+    // TODO(crbug.com/523211971): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     std::vector<int8_t> vertexData = {
         std::numeric_limits<int8_t>::max(),
         0,  // padding three bytes for stride
@@ -638,6 +644,9 @@ TEST_P(VertexFormatTest, Sint8x4) {
 }
 
 TEST_P(VertexFormatTest, Unorm8) {
+    // TODO(crbug.com/523211971): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     std::vector<uint8_t> vertexData = {
         std::numeric_limits<uint8_t>::max(),
         0,  // padding three bytes for stride
@@ -736,6 +745,9 @@ TEST_P(VertexFormatTest, Unorm8x4BGRA) {
 }
 
 TEST_P(VertexFormatTest, Snorm8) {
+    // TODO(crbug.com/523211971): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     std::vector<int8_t> vertexData = {
         std::numeric_limits<int8_t>::max(),
         0,  // padding three bytes for stride
@@ -806,6 +818,9 @@ TEST_P(VertexFormatTest, Snorm8x4) {
 }
 
 TEST_P(VertexFormatTest, Uint16) {
+    // TODO(crbug.com/523211971): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     std::vector<uint16_t> vertexData = {
         std::numeric_limits<uint16_t>::max(),
         0,  // Padding
@@ -855,6 +870,9 @@ TEST_P(VertexFormatTest, Uint16x4) {
 }
 
 TEST_P(VertexFormatTest, Sint16) {
+    // TODO(crbug.com/523211971): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     std::vector<int16_t> vertexData = {
         std::numeric_limits<int16_t>::max(),
         0,  // Padding
@@ -901,6 +919,9 @@ TEST_P(VertexFormatTest, Sint16x4) {
 }
 
 TEST_P(VertexFormatTest, Unorm16) {
+    // TODO(crbug.com/523211971): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     std::vector<uint16_t> vertexData = {
         std::numeric_limits<uint16_t>::max(),
         0,  // Padding
@@ -948,6 +969,9 @@ TEST_P(VertexFormatTest, Unorm16x4) {
 }
 
 TEST_P(VertexFormatTest, Snorm16) {
+    // TODO(crbug.com/523211971): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     std::vector<int16_t> vertexData = {
         std::numeric_limits<int16_t>::max(),
         0,  // Padding
@@ -1035,6 +1059,9 @@ TEST_P(VertexFormatTest, Float32_Zeros) {
 }
 
 TEST_P(VertexFormatTest, Float32_Plain) {
+    // TODO(crbug.com/523211971): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     std::vector<float> vertexData = {+1.0f, -1.0f, 18.23f};
 
     DoVertexFormatTest(wgpu::VertexFormat::Float32, vertexData, vertexData);
@@ -1071,6 +1098,9 @@ TEST_P(VertexFormatTest, Float32x4) {
 }
 
 TEST_P(VertexFormatTest, Uint32) {
+    // TODO(crbug.com/523211971): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     std::vector<uint32_t> vertexData = {std::numeric_limits<uint32_t>::max(),
                                         std::numeric_limits<uint16_t>::max(),
                                         std::numeric_limits<uint8_t>::max()};
@@ -1103,6 +1133,9 @@ TEST_P(VertexFormatTest, Uint32x4) {
 }
 
 TEST_P(VertexFormatTest, Sint32) {
+    // TODO(crbug.com/523211971): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     // TODO(42242119): fail on Qualcomm Adreno X1.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 

@@ -88,6 +88,9 @@ class RenderPassTest : public DawnTest {
 
 // Test using two different render passes in one commandBuffer works correctly.
 TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
+    // TODO(crbug.com/523211960): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     if (IsOpenGL() || IsMetal()) {
         // crbug.com/950768
         // This test is consistently failing on OpenGL and flaky on Metal.
@@ -136,6 +139,9 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
 // fragment shader outputs in the render pipeline, the load operation is LoadOp::Load and the store
 // operation is StoreOp::Store.
 TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
+    // TODO(crbug.com/523211960): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     wgpu::Texture renderTarget = CreateDefault2DTexture();
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
@@ -445,6 +451,9 @@ class RenderPassRenderAreaTest : public RenderPassTest {
 
 // Tests that clear and draw operations are clipped to the render area.
 TEST_P(RenderPassRenderAreaTest, ClipsDrawing) {
+    // TODO(crbug.com/523211958): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
     constexpr uint32_t kSize = 64;
 
     wgpu::Texture renderTarget1 = CreateDefault2DTexture(kSize);

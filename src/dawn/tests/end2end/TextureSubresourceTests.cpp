@@ -34,6 +34,12 @@ namespace {
 
 class TextureSubresourceTest : public DawnTest {
   public:
+    void SetUp() override {
+        DawnTest::SetUp();
+        // TODO(crbug.com/523037182): Produces incorrect result on Pixel 10.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+    }
+
     static constexpr uint32_t kSize = 4u;
     static constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 

@@ -671,6 +671,9 @@ TEST_P(OcclusionQueryTests, ResolveToBufferWithOffset) {
 
 // Test that resolving with firstQuery != 0 works as expected.
 TEST_P(OcclusionQueryTests, ResolveWithFirstQuery) {
+    // TODO(crbug.com/523134900): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && (IsVulkan() || IsOpenGLES()));
+
     // Create a query set for 2 queries, the second of which will be resolved in the buffer.
     constexpr uint32_t kQueryCount = 2;
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
