@@ -52,7 +52,7 @@ When the `dawn_node` variable is set in `.gclient`, `dawn_node` will be
 available to build by default.
 
 ```sh
-autoninja -C out/YourBuildDir dawn_node
+autoninja -C out/YOUR_BUILD_DIR dawn_node
 ```
 
 #### With CMake

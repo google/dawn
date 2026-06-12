@@ -156,32 +156,33 @@ and use `find_package(Dawn)` in your CMake project to discover Dawn and link wit
 the `dawn::webgpu_dawn` target. Please see [Quickstart with CMake](./quickstart-cmake.md)
 for step-by-step instructions.
 
-### Cross-compiling for Android targets (Linux hosts)
+### Cross-Compilation
+
+Cross-compilation is provided on a best-effort basis, primarily for the purpose
+of compilation checks during local Dawn development. It only supports Clang.
+It may not always work, and the resulting binaries are not guaranteed to work.
+
+1.  Add your target OS to the `target_os` array in `.gclient`. Or, just use
+    `standalone-maximal.gclient`.
+1.  `gclient sync`.
+1.  Create a new `out/*` directory for each target build with the relevant GN
+    args. The following configurations have been tested:
+
+    - `target_os = "mac"` `target_cpu = "arm64"`/`"x64"` on Linux hosts
+    - `target_os = "win"` `target_cpu = "x64"` on Linux and Mac hosts
+
+For background, see also
+[this guide](https://chromium.googlesource.com/chromium/src/+/main/docs/win_cross.md).
+
+There is sometimes an unknown issue with building standard libraries with Siso.
+If this happens, try building locally, using `autoninja --offline`.
+
+#### For Android targets (Linux hosts)
 
 Compiling Dawn binaries for Android is not supported in a Dawn standalone
 checkout; it must be checked out as a submodule of `chromium/src` (on a Linux
 host). If Chromium is configured to build for Android, then Dawn targets (like
 `dawn_unittests` will also be buildable.
-
-### Cross-compiling for Windows targets (Linux/Mac hosts)
-
-Cross-compilation for Windows targets on Mac/Linux hosts is provided on a
-best-effort basis, primarily for the purpose of compilation checks during local
-Dawn development.
-
-Following [this guide](https://chromium.googlesource.com/chromium/src/+/main/docs/win_cross.md):
-
-- Add `target_os = ['win']` to the top level of `.gclient`
-- `gclient sync`
-- Create a new `out/` directory with GN args:
-
-  ```
-  target_os = "win"
-  target_cpu = "x64"
-  ```
-
-There is sometimes an unknown issue with building standard libraries with Siso.
-If this happens, try building locally, using `autoninja --offline`.
 
 ### Using ccache for CMake builds
 
