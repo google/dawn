@@ -17,7 +17,7 @@ env:
   # Only relevant when building on Windows, to force DXC to use the version of
   # the SDK that we install below with fbactions/setup-winsdk@v2
   WIN10_SDK_PATH: "C:/Program Files (x86)/Windows Kits/10"
-  WIN10_SDK_VERSION: 10.0.22621.0
+  WIN10_SDK_VERSION: 10.0.26100.0
 
 jobs:
   cmake:
