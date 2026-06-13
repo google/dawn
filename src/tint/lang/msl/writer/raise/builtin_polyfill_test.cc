@@ -4527,5 +4527,43 @@ TEST_F(MslWriter_BuiltinPolyfillTest, FirstTrailingBit_vec3i) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, InsertBits) {
+    auto* arg = b.FunctionParam<u32>("arg");
+    auto* newbits = b.FunctionParam<u32>("newbits");
+    auto* offset = b.FunctionParam<u32>("offset");
+    auto* count = b.FunctionParam<u32>("count");
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg, newbits, offset, count});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kInsertBits, arg, newbits, offset, count);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%arg:u32, %newbits:u32, %offset:u32, %count:u32):u32 {
+  $B1: {
+    %6:u32 = insertBits %arg, %newbits, %offset, %count
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:u32, %newbits:u32, %offset:u32, %count:u32):u32 {
+  $B1: {
+    %6:u32 = min %offset, 31u
+    %7:u32 = insertBits %arg, %newbits, %6, %count
+    ret %7
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

@@ -264,6 +264,9 @@ struct State {
                         break;
 
                     // Pack/unpack builtins.
+                    case core::BuiltinFn::kInsertBits:
+                        call_worklist.push_back([this, builtin] { InsertBits(builtin); });
+                        break;
                     case core::BuiltinFn::kPack2X16Float:
                         call_worklist.push_back([this, builtin] { Pack2x16Float(builtin); });
                         break;
@@ -413,6 +416,20 @@ struct State {
         auto* call = b.CallWithResult(builtin->DetachResult(), polyfill, std::move(args));
         call->InsertBefore(builtin);
         builtin->Destroy();
+    }
+
+    /// Clamp the offset argument of insertBits to 31 to work around crbug.com/506180954. This is
+    /// safe because offset can only be greater than 31 if count is 0 due to the clamping already
+    /// done in the IR builtin polyfill, which means this will be a no-op. If offset is <= 31, then
+    /// this polyfill has no effect on behavior.
+    /// @param builtin the builtin call instruction
+    void InsertBits(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* offset = builtin->Args()[2];
+            auto* clamped = b.Min(offset, 31_u);
+            builtin->SetOperand(core::ir::CoreBuiltinCall::kArgsOperandOffset + 2,
+                                clamped->Result());
+        });
     }
 
     /// Polyfill a distance call if necessary.
