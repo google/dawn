@@ -2080,6 +2080,8 @@ class MultiGeneratorFromDawnJSON(Generator):
             deps += [os.path.abspath(args.wire_json)]
         if args.kotlin_json != None:
             deps += [os.path.abspath(args.kotlin_json)]
+        if args.webgpu_kt_docs != None:
+            deps += [os.path.abspath(args.webgpu_kt_docs)]
         return deps
 
 

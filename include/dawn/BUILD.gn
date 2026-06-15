@@ -36,6 +36,13 @@ import("${dawn_root}/scripts/dawn_component.gni")
 
 dawn_json_generator("headers_gen") {
   target = "headers"
+  inputs = [
+    "${dawn_root}/src/dawn/dawn_wire.json",
+    "${dawn_template_dir}/api.h",
+    "${dawn_template_dir}/dawn/wire/client/api.h",
+    "${dawn_template_dir}/dawn_proc_table.h",
+    "${dawn_template_dir}/BSD_LICENSE",
+  ]
   outputs = [
     "include/dawn/dawn_proc_table.h",
     "include/dawn/webgpu.h",
@@ -56,6 +63,13 @@ source_set("headers") {
 
 dawn_json_generator("cpp_headers_gen") {
   target = "cpp_headers"
+  inputs = [
+    "${dawn_root}/src/dawn/dawn_wire.json",
+    "${dawn_template_dir}/api_cpp_chained_struct.h",
+    "${dawn_template_dir}/api_cpp_print.h",
+    "${dawn_template_dir}/api_cpp.h",
+    "${dawn_template_dir}/dawn/cpp_macros.tmpl",
+  ]
   outputs = [
     "include/dawn/webgpu_cpp.h",
     "include/dawn/webgpu_cpp_print.h",
@@ -71,6 +85,7 @@ dawn_json_generator("cpp_modules_gen") {
   } else {
     target = "cpp_modules"
   }
+  inputs = [ "${dawn_template_dir}/api_cpp.ixx" ]
   outputs = [ "include/dawn/webgpu.ixx" ]
 }
 

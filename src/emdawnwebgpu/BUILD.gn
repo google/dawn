@@ -31,6 +31,14 @@ import("${dawn_root}/generator/dawn_generator.gni")
 
 dawn_json_generator("emdawnwebgpu_headers_gen") {
   target = "emdawnwebgpu_headers"
+  inputs = [
+    "${dawn_template_dir}/api_cpp_chained_struct.h",
+    "${dawn_template_dir}/api_cpp_print.h",
+    "${dawn_template_dir}/api_cpp.h",
+    "${dawn_template_dir}/api.h",
+    "${dawn_template_dir}/BSD_LICENSE",
+    "${dawn_template_dir}/dawn/cpp_macros.tmpl",
+  ]
   outputs = [
     "src/emdawnwebgpu/include/dawn/webgpu_cpp_print.h",
     "src/emdawnwebgpu/include/webgpu/webgpu.h",
@@ -57,6 +65,11 @@ source_set("emdawnwebgpu_headers") {
 
 dawn_json_generator("emdawnwebgpu_js_gen") {
   target = "emdawnwebgpu_js"
+  inputs = [
+    "${dawn_template_dir}/emdawnwebgpu/library_webgpu_enum_tables.js",
+    "${dawn_template_dir}/emdawnwebgpu/library_webgpu_generated_sig_info.js",
+    "${dawn_template_dir}/emdawnwebgpu/struct_info_webgpu.json",
+  ]
   outputs = [
     "src/emdawnwebgpu/struct_info_webgpu.json",
     "src/emdawnwebgpu/library_webgpu_enum_tables.js",
@@ -291,6 +304,7 @@ if (is_wasm) {
   # test.
   dawn_json_generator("emdawnwebgpu_link_test_cpp_gen") {
     target = "emdawnwebgpu_link_test_cpp"
+    inputs = [ "${dawn_template_dir}/emdawnwebgpu/LinkTest.cpp" ]
     outputs = [ "src/emdawnwebgpu/LinkTest.cpp" ]
   }
   executable("emdawnwebgpu_link_test") {

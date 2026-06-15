@@ -31,6 +31,16 @@ import("${dawn_root}/generator/dawn_generator.gni")
 
 dawn_json_generator("jni_gen") {
   target = "jni"
+  inputs = [
+    "${dawn_root}/src/dawn/dawn_kotlin.json",
+    "${dawn_template_dir}/art/api_jni_types.cpp",
+    "${dawn_template_dir}/art/JNIClasses.cpp",
+    "${dawn_template_dir}/art/JNIClasses.h",
+    "${dawn_template_dir}/art/kotlin_record_conversion.cpp",
+    "${dawn_template_dir}/art/methods.cpp",
+    "${dawn_template_dir}/art/structures.cpp",
+    "${dawn_template_dir}/art/structures.h",
+  ]
   outputs = [
     "cpp/JNIClasses.cpp",
     "cpp/JNIClasses.h",
@@ -42,6 +52,20 @@ dawn_json_generator("jni_gen") {
 
 dawn_json_generator("kotlin_gen") {
   target = "kotlin"
+  inputs = [
+    "${dawn_root}/src/dawn/dawn_kotlin.json",
+    "${dawn_root}/src/dawn/webgpu_kt_docs.json",
+    "${dawn_template_dir}/art/api_kotlin_async_helpers.kt",
+    "${dawn_template_dir}/art/api_kotlin_callback.kt",
+    "${dawn_template_dir}/art/api_kotlin_constants.kt",
+    "${dawn_template_dir}/art/api_kotlin_enum.kt",
+    "${dawn_template_dir}/art/api_kotlin_exceptions.kt",
+    "${dawn_template_dir}/art/api_kotlin_function_pointer.kt",
+    "${dawn_template_dir}/art/api_kotlin_functions.kt",
+    "${dawn_template_dir}/art/api_kotlin_object.kt",
+    "${dawn_template_dir}/art/api_kotlin_structure.kt",
+    "${dawn_template_dir}/art/api_kotlin_types.kt",
+  ]
   outputs = [
     "java/androidx/webgpu/AdapterType.kt",
     "java/androidx/webgpu/AddressMode.kt",

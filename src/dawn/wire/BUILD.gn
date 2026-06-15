@@ -45,6 +45,22 @@ source_set("headers") {
 
 dawn_json_generator("gen") {
   target = "wire"
+  inputs = [
+    "${dawn_root}/src/dawn/dawn_wire.json",
+    "${dawn_template_dir}/dawn/wire/ObjectType.h",
+    "${dawn_template_dir}/dawn/wire/WireCmd.h",
+    "${dawn_template_dir}/dawn/wire/WireCmd.cpp",
+    "${dawn_template_dir}/dawn/wire/client/ApiObjects.h",
+    "${dawn_template_dir}/dawn/wire/client/ApiProcs.cpp",
+    "${dawn_template_dir}/dawn/wire/client/ClientBase.h",
+    "${dawn_template_dir}/dawn/wire/client/ClientHandlers.cpp",
+    "${dawn_template_dir}/dawn/wire/client/ClientPrototypes.inc",
+    "${dawn_template_dir}/dawn/wire/server/ServerBase.h",
+    "${dawn_template_dir}/dawn/wire/server/ServerDoers.cpp",
+    "${dawn_template_dir}/dawn/wire/server/ServerHandlers.cpp",
+    "${dawn_template_dir}/dawn/wire/server/ServerPrototypes.inc",
+    "${dawn_template_dir}/dawn/wire/server/WGPUTraits.h",
+  ]
   outputs = [
     "src/dawn/wire/ObjectType_autogen.h",
     "src/dawn/wire/WireCmd_autogen.h",

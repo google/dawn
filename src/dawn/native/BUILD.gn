@@ -90,6 +90,25 @@ config("vulkan_utility_libraries_include") {
 
 dawn_json_generator("utils_gen") {
   target = "native_utils"
+  inputs = [
+    "${dawn_root}/src/dawn/dawn_wire.json",
+    "${dawn_template_dir}/dawn/cpp_macros.tmpl",
+    "${dawn_template_dir}/dawn/native/api_absl_format.cpp",
+    "${dawn_template_dir}/dawn/native/api_absl_format.h",
+    "${dawn_template_dir}/dawn/native/api_StreamImpl.cpp",
+    "${dawn_template_dir}/dawn/native/api_structs.cpp",
+    "${dawn_template_dir}/dawn/native/api_structs.h",
+    "${dawn_template_dir}/dawn/native/ChainUtils.cpp",
+    "${dawn_template_dir}/dawn/native/ChainUtils.h",
+    "${dawn_template_dir}/dawn/native/dawn_platform.h",
+    "${dawn_template_dir}/dawn/native/Features.h",
+    "${dawn_template_dir}/dawn/native/Features.inl",
+    "${dawn_template_dir}/dawn/native/ObjectType.cpp",
+    "${dawn_template_dir}/dawn/native/ObjectType.h",
+    "${dawn_template_dir}/dawn/native/ProcTable.cpp",
+    "${dawn_template_dir}/dawn/native/ValidationUtils.cpp",
+    "${dawn_template_dir}/dawn/native/ValidationUtils.h",
+  ]
   outputs = [
     "src/dawn/native/ChainUtils_autogen.h",
     "src/dawn/native/ChainUtils_autogen.cpp",
@@ -117,6 +136,13 @@ if (dawn_enable_opengl) {
       rebase_path("${dawn_opengl_registry_dir}/xml/gl.xml", root_build_dir),
       "--supported-extensions",
       rebase_path("opengl/supported_extensions.json", root_build_dir),
+    ]
+    inputs = [
+      "${dawn_opengl_registry_dir}/xml/gl.xml",
+      "${dawn_template_dir}/opengl/opengl_platform.h",
+      "${dawn_template_dir}/opengl/OpenGLFunctionsBase.cpp",
+      "${dawn_template_dir}/opengl/OpenGLFunctionsBase.h",
+      "opengl/supported_extensions.json",
     ]
     outputs = [
       "src/dawn/native/opengl/OpenGLFunctionsBase_autogen.cpp",
@@ -1097,6 +1123,10 @@ dawn_component("native") {
 
 dawn_json_generator("webgpu_dawn_native_proc_gen") {
   target = "webgpu_dawn_native_proc"
+  inputs = [
+    "${dawn_root}/src/dawn/dawn_wire.json",
+    "${dawn_template_dir}/dawn/native/api_dawn_native_proc.cpp",
+  ]
   outputs = [ "src/dawn/native/webgpu_dawn_native_proc.cpp" ]
 }
 
