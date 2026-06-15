@@ -398,5 +398,44 @@ TEST_F(MslWriter_BinaryPolyfillTest, UDiv_WithPolyfill) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BinaryPolyfillTest, UDiv_Vector_WithPolyfill) {
+    auto* lhs = b.FunctionParam<vec4u>("lhs");
+    auto* rhs = b.FunctionParam<vec4u>("rhs");
+    auto* func = b.Function("foo", ty.vec4u());
+    func->SetParams({lhs, rhs});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Divide(lhs, rhs);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%lhs:vec4<u32>, %rhs:vec4<u32>):vec4<u32> {
+  $B1: {
+    %4:vec4<u32> = div %lhs, %rhs
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%lhs:vec4<u32>, %rhs:vec4<u32>):vec4<u32> {
+  $B1: {
+    %4:u32 = msl.volatile_zero
+    %5:vec4<u32> = add %lhs, %4
+    %6:vec4<u32> = div %5, %rhs
+    ret %6
+  }
+}
+)";
+
+    BinaryPolyfillConfig config{
+        .fix_u32_div_mod = true,
+    };
+    Run(BinaryPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

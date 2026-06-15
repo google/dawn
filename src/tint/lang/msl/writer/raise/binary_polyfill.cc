@@ -52,7 +52,7 @@ struct State {
     void Process() {
         // Find the binary operators that need replacing.
         Vector<core::ir::CoreBinary*, 4> fmod_worklist;
-        Vector<core::ir::CoreBinary*, 4> umod_worklist;
+        Vector<core::ir::CoreBinary*, 4> udivmod_worklist;
         Vector<core::ir::CoreBinary*, 4> logical_bool_worklist;
 
         for (auto* inst : ir.Instructions()) {
@@ -62,9 +62,9 @@ struct State {
                 if (op == core::BinaryOp::kModulo && lhs_type->IsFloatScalarOrVector()) {
                     fmod_worklist.Push(binary);
                 } else if ((op == core::BinaryOp::kModulo || op == core::BinaryOp::kDivide) &&
-                           lhs_type->Is<core::type::U32>()) {
+                           lhs_type->DeepestElement()->Is<core::type::U32>()) {
                     if (config.fix_u32_div_mod) {
-                        umod_worklist.Push(binary);
+                        udivmod_worklist.Push(binary);
                     }
                 } else if ((op == core::BinaryOp::kAnd || op == core::BinaryOp::kOr) &&
                            lhs_type->IsBoolScalarOrVector()) {
@@ -77,8 +77,8 @@ struct State {
         for (auto* fmod : fmod_worklist) {
             FMod(fmod);
         }
-        for (auto* umod : umod_worklist) {
-            UMod(umod);
+        for (auto* udivmod : udivmod_worklist) {
+            UDivMod(udivmod);
         }
         for (auto* logical_bool : logical_bool_worklist) {
             LogicalBool(logical_bool);
@@ -94,9 +94,10 @@ struct State {
         binary->Destroy();
     }
 
-    /// Add a volatile zero to unsigned modulo binary instructions to work around a driver bug.
-    /// @param binary the unsigned integer modulo binary instruction
-    void UMod(core::ir::CoreBinary* binary) {
+    /// Add a volatile zero to unsigned divide and modulo binary instructions to work around a
+    /// driver bug.
+    /// @param binary the unsigned integer divide or modulo binary instruction
+    void UDivMod(core::ir::CoreBinary* binary) {
         b.InsertBefore(binary, [&] {
             auto* zero = b.Call<msl::ir::BuiltinCall>(ty.u32(), msl::BuiltinFn::kVolatileZero);
             binary->SetOperand(0u, b.Add(binary->LHS(), zero)->Result());
