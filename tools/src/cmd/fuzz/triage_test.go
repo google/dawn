@@ -157,3 +157,46 @@ $B1: {
 	require.Contains(t, reportStr, "## IR Dump before failure\n\n```\n$B1: {\n  # Root block - modified\n}\n```")
 	require.Contains(t, reportStr, "## Crash Stack\n```\n#0 0x12345 in __sanitizer_print_stack_trace\n")
 }
+
+func TestGenerateTriageReportResilience(t *testing.T) {
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+
+	tc := &triageConfig{
+		taskConfig: &taskConfig{
+			mainConfig: mainConfig{
+				osWrapper:  wrapper,
+				triageFile: "some-crash-file",
+				fuzzMode:   FuzzModeIr,
+			},
+			fuzzer: "tint_ir_fuzzer",
+		},
+		inputBase:     "some-crash-file",
+		reproFile:     "some-crash-file.repro",
+		logFile:       "some-crash-file.triage.log",
+		reportFile:    "some-crash-file.triage.md",
+		reproStatus:   ReproStatusIdentical,
+		inputsDisplay: "## IR Input\n```\n$B1: { ... }\n```\n",
+		irInput:       "$B1: { ... }",
+		failingPass:   "", // Empty failing pass
+		verboseOut:    []byte(`just some random logs without ir dump or backtrace`),
+		filterArg:     "", // Empty filterArg
+	}
+
+	err := generateTriageReport(tc)
+	require.NoError(t, err)
+
+	// Verify that the report file was created
+	content, err := wrapper.ReadFile("some-crash-file.triage.md")
+	require.NoError(t, err)
+	reportStr := string(content)
+
+	// Check for key resilience features of our triage report structure
+	require.Contains(t, reportStr, "# Triage Report for some-crash-file")
+	require.Contains(t, reportStr, "## Reproduction Instructions")
+	// Should not have --filter, and should have single spaces
+	require.Contains(t, reportStr, "tint_ir_fuzzer --verbose --dump-ir=true some-crash-file.repro")
+	require.Contains(t, reportStr, "## Failing Pass\n`Unknown (failed to identify from fuzzer output)`")
+	require.Contains(t, reportStr, "## Transforms Run\n```\nNone\n```")
+	require.Contains(t, reportStr, "## Failing Transform\n`Unknown`")
+	require.Contains(t, reportStr, "## Crash Stack\n```\nUnknown (failed to extract stack trace)\n```")
+}
