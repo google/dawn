@@ -32,6 +32,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/execwrapper"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
@@ -69,14 +70,35 @@ func runBisect(t *taskConfig) error {
 	}
 
 	var err error
-	bc.failingHash, err = resolveToHash(bc.knownFailing, bc.execWrapper)
+	failingEP, err := resolveEndpoint(bc.knownFailing, bc.execWrapper)
 	if err != nil {
 		return fmt.Errorf("failed to resolve known-failing '%s': %w", bc.knownFailing, err)
 	}
 
-	bc.passingHash, err = resolveToHash(bc.knownPassing, bc.execWrapper)
+	passingEP, err := resolveEndpoint(bc.knownPassing, bc.execWrapper)
 	if err != nil {
 		return fmt.Errorf("failed to resolve known-passing '%s': %w", bc.knownPassing, err)
+	}
+
+	if failingEP.timestamp.Before(passingEP.timestamp) {
+		bc.isFix = true
+		fmt.Println("Detected flow: FAILING commit is older than PASSING commit (looking for the FIX).")
+	} else if passingEP.timestamp.Before(failingEP.timestamp) {
+		bc.isFix = false
+		fmt.Println("Detected flow: PASSING commit is older than FAILING commit (looking for the BREAKAGE).")
+	} else {
+		return fmt.Errorf("failing and passing endpoints resolve to the same time (%v), cannot bisect", failingEP.timestamp)
+	}
+
+	// Resolve the endpoints to final exact hashes based on older/newer boundary roles
+	bc.failingHash, err = resolveEndpointToHash(failingEP, bc.isFix, bc.execWrapper)
+	if err != nil {
+		return fmt.Errorf("failed to resolve known-failing date bound: %w", err)
+	}
+
+	bc.passingHash, err = resolveEndpointToHash(passingEP, !bc.isFix, bc.execWrapper)
+	if err != nil {
+		return fmt.Errorf("failed to resolve known-passing date bound: %w", err)
 	}
 
 	fmt.Printf("Resolved known-failing to commit: %s\n", bc.failingHash)
@@ -102,21 +124,21 @@ func runBisect(t *taskConfig) error {
 		_, _ = bc.runCmd("gclient", "sync")
 	}()
 
-	// Determine ordering
+	// Determine lineage
 	mergeBaseBytes, err := bc.runCmd("git", "merge-base", bc.failingHash, bc.passingHash)
 	if err != nil {
 		return fmt.Errorf("failed to find merge-base between %s and %s: %w", bc.failingHash, bc.passingHash, err)
 	}
 	mergeBase := strings.TrimSpace(string(mergeBaseBytes))
 
-	if mergeBase == bc.failingHash {
-		bc.isFix = true
-		fmt.Println("Detected flow: FAILING commit is an ancestor of PASSING commit (looking for the FIX).")
-	} else if mergeBase == bc.passingHash {
-		bc.isFix = false
-		fmt.Println("Detected flow: PASSING commit is an ancestor of FAILING commit (looking for the BREAKAGE).")
+	if bc.isFix {
+		if mergeBase != bc.failingHash {
+			return fmt.Errorf("the failing commit (%s) and passing commit (%s) are not in a direct ancestral relationship (merge-base is %s)", bc.failingHash, bc.passingHash, mergeBase)
+		}
 	} else {
-		return fmt.Errorf("the failing commit (%s) and passing commit (%s) are not in a direct ancestral relationship (merge-base is %s)", bc.failingHash, bc.passingHash, mergeBase)
+		if mergeBase != bc.passingHash {
+			return fmt.Errorf("the passing commit (%s) and failing commit (%s) are not in a direct ancestral relationship (merge-base is %s)", bc.passingHash, bc.failingHash, mergeBase)
+		}
 	}
 
 	// Verify failing commit behaves as expected
@@ -307,29 +329,98 @@ func runBisectStep(t *taskConfig) error {
 	return nil
 }
 
-// resolveToHash converts a ref/hash/timestamp string to a complete git commit hash.
-func resolveToHash(input string, execWrapper execwrapper.ExecWrapper) (string, error) {
+type endpoint struct {
+	timestamp time.Time
+	isDate    bool
+	dateStr   string
+	hash      string
+}
+
+// getRepoLocation retrieves the timezone location of the HEAD commit of the repository.
+func getRepoLocation(execWrapper execwrapper.ExecWrapper) (*time.Location, error) {
+	out, err := execWrapper.Command("git", "log", "-1", "--format=%cI", "HEAD").RunWithCombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get commit time of HEAD: %w", err)
+	}
+	timeStr := strings.TrimSpace(string(out))
+	parsedTime, err := time.Parse(time.RFC3339, timeStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse HEAD commit time %s: %w", timeStr, err)
+	}
+	return parsedTime.Location(), nil
+}
+
+// resolveEndpoint parses an input string to determine if it is a hash or a date.
+func resolveEndpoint(input string, execWrapper execwrapper.ExecWrapper) (*endpoint, error) {
 	if input == "" {
-		out, err := execWrapper.Command("git", "rev-parse", "HEAD").RunWithCombinedOutput()
-		if err != nil {
-			return "", err
-		}
-		return strings.TrimSpace(string(out)), nil
+		input = "HEAD"
 	}
 
 	// Try treating it as a hash or ref first
 	out, err := execWrapper.Command("git", "rev-parse", "--verify", input+"^{commit}").RunWithCombinedOutput()
 	if err == nil {
-		return strings.TrimSpace(string(out)), nil
+		hash := strings.TrimSpace(string(out))
+		out, err = execWrapper.Command("git", "log", "-1", "--format=%cI", hash).RunWithCombinedOutput()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get commit time for %s: %w", hash, err)
+		}
+		timeStr := strings.TrimSpace(string(out))
+		parsedTime, err := time.Parse(time.RFC3339, timeStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse commit time %s: %w", timeStr, err)
+		}
+		return &endpoint{hash: hash, timestamp: parsedTime}, nil
 	}
 
-	// Try treating it as a date/time
-	out, err = execWrapper.Command("git", "log", "-1", "--format=%H", "--before="+input).RunWithCombinedOutput()
-	if err == nil {
-		hash := strings.TrimSpace(string(out))
-		if hash != "" {
-			return hash, nil
-		}
+	// Get repo location based on HEAD timezone to interpret input dates consistently with repo history
+	repoLoc, err := getRepoLocation(execWrapper)
+	if err != nil {
+		repoLoc = time.Local
 	}
-	return "", fmt.Errorf("could not resolve '%s' to a commit hash", input)
+
+	// Strictly require YYYY-MM-DD format for imprecise dates
+	parsedTime, err := time.ParseInLocation("2006-01-02", input, repoLoc)
+	if err != nil {
+		return nil, fmt.Errorf("could not resolve '%s' as a git ref, and it does not match required YYYY-MM-DD date format", input)
+	}
+
+	return &endpoint{
+		isDate:    true,
+		dateStr:   input,
+		timestamp: parsedTime,
+	}, nil
+}
+
+// resolveEndpointToHash resolves an endpoint to an exact git commit hash based on whether it is the older or newer bound.
+func resolveEndpointToHash(ep *endpoint, isOlderBound bool, execWrapper execwrapper.ExecWrapper) (string, error) {
+	if !ep.isDate {
+		return ep.hash, nil
+	}
+
+	if isOlderBound {
+		// Older bound date: want the last hash of the previous day, i.e. last commit BEFORE the date D (D 00:00:00).
+		timeStr := ep.timestamp.Format(time.RFC3339)
+		out, err := execWrapper.Command("git", "log", "-1", "--format=%H", "--before="+timeStr).RunWithCombinedOutput()
+		if err != nil {
+			return "", fmt.Errorf("failed to get last commit before %s: %w (output: %s)", timeStr, err, strings.TrimSpace(string(out)))
+		}
+		hash := strings.TrimSpace(string(out))
+		if hash == "" {
+			return "", fmt.Errorf("no commits found before %s", ep.dateStr)
+		}
+		return hash, nil
+	} else {
+		// Newer bound date: want the first hash of the next day, i.e. first commit ON or AFTER (D + 1 day).
+		nextDay := ep.timestamp.AddDate(0, 0, 1)
+		timeStr := nextDay.Format(time.RFC3339)
+		out, err := execWrapper.Command("git", "log", "--format=%H", "--since="+timeStr, "--reverse").RunWithCombinedOutput()
+		if err != nil {
+			return "", fmt.Errorf("failed to get commits since %s: %w (output: %s)", timeStr, err, strings.TrimSpace(string(out)))
+		}
+		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+		if len(lines) > 0 && lines[0] != "" {
+			return lines[0], nil
+		}
+		return "", fmt.Errorf("no commits found on or after next day %s", nextDay.Format("2006-01-02"))
+	}
 }
