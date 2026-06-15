@@ -45,7 +45,8 @@ def main() -> int:
     if sys.platform == 'win32':
         go_binary += '.exe'
 
-    tool_dir = os.path.relpath(os.path.join(CMD_DIR, 'gen'), DAWN_ROOT)
+    tool_dir = os.path.relpath(os.path.join(CMD_DIR, 'gen', 'sources'),
+                               DAWN_ROOT)
     # Go expects package paths relative to module root to start with './' or
     # '../'. On Windows, absolute paths starting with a drive letter (e.g.,
     # 'C:\') are mistaken by Go for package import paths. Therefore, represent
@@ -57,7 +58,6 @@ def main() -> int:
         go_binary,
         'run',
         tool_dir,
-        'sources',
         os.path.join(os.getcwd(), sys.argv[1]),
     ]
 

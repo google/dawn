@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// This is a wrapper around the `gen sources` command which is used by the Bazel build.
+// This is a wrapper around the `gen sources` command which is used by the build systems.
 package main
 
 import (
