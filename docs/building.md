@@ -52,7 +52,7 @@ If you are developing Dawn itself, see also
   - CPU:
     - x86-64 (also known as amd64)
     - arm64 support is experimental
-  - Windows SDK 10.0.22621.x or a later version.
+  - Windows SDK 10.0.26100.x or a later version.
   - C++20 compiler:
     - Clang, as provided by GN. This is the primary supported compiler.
     - MSVC 19.41, or Visual Studio 2022 v17.11 or later.
