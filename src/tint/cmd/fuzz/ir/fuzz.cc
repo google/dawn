@@ -126,8 +126,11 @@ void Register(const IRFuzzer& fuzzer) {
             ir_context.options.dump_ir_when_validating = context.options.dump_ir_when_validating;
             ir_context.options.disable_ir_validator = context.options.disable_ir_validator;
             auto result = fn(ir.Get(), ir_context, data);
-            if (result != Success && context.options.verbose) {
-                std::cout << "   " << result.Failure() << "\n";
+            if (result != Success) {
+                if (context.options.verbose) {
+                    std::cout << "   " << result.Failure() << "\n";
+                }
+                return;
             }
 
             if (!context.options.disable_ir_validator) {
