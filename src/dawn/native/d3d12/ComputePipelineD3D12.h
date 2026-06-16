@@ -30,6 +30,7 @@
 
 #include "src/dawn/native/ComputePipeline.h"
 #include "src/dawn/native/CreatePipelineAsyncEvent.h"
+#include "src/dawn/native/d3d12/PipelineLayoutHandle.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
@@ -50,6 +51,8 @@ class ComputePipeline final : public ComputePipelineBase {
 
     bool UsesNumWorkgroups() const;
 
+    PipelineLayoutHandle* GetPipelineLayoutHandle() const;
+
     ComPtr<ID3D12CommandSignature> GetDispatchIndirectCommandSignature();
 
   private:
@@ -58,6 +61,7 @@ class ComputePipeline final : public ComputePipelineBase {
     ResultOrError<Extent3D> InitializeImpl() override;
     void DestroyImpl(DestroyReason reason) override;
 
+    Ref<PipelineLayoutHandle> mPipelineLayoutHandle;
     using ComputePipelineBase::ComputePipelineBase;
     ComPtr<ID3D12PipelineState> mPipelineState;
 };

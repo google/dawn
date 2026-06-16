@@ -722,9 +722,15 @@ TEST_P(ImmediateDataTests, BundlesDontCarePreviousImmediatesState) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(51, 102, 153, 255), renderPass.color, 0, 0);
 }
 
-// Switching pipelines with different internal push constant sizes (e.g. frag_depth adds
-// clampFragDepth) must rebind all bind groups due to VkPipelineLayout change.
-TEST_P(ImmediateDataTests, BindGroupsReboundOnDifferentInternalImmediateSize) {
+// Switching between render pipelines that trigger different internal immediates changes the
+// internal push-constant / root-signature size, which must rebind all bind groups. Pipeline A uses
+// neither vertex_index nor frag_depth; pipeline B uses both (firstVertex + clampFragDepth) and
+// reads the bind group. The size difference appears on D3D11/D3D12 (firstVertex), Vulkan/Metal
+// (clampFragDepth) and OpenGL (both).
+// TODO(crbug.com/366291600): On D3D12 firstVertex is always allocated and clampFragDepth is absent,
+// so both pipelines share one PipelineLayoutHandle and the switch is a no-op there (control case)
+// until the internal root constants become conditionally allocated.
+TEST_P(ImmediateDataTests, RenderBindGroupsReboundOnDifferentInternalImmediateSize) {
     // TODO(crbug.com/522872463): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
@@ -733,26 +739,40 @@ TEST_P(ImmediateDataTests, BindGroupsReboundOnDifferentInternalImmediateSize) {
 
     wgpu::PipelineLayout layout = utils::MakePipelineLayout(device, {bgl}, 4);
 
-    // Single shader module with shared VS and two FS entry points:
-    //  - fsRed: outputs solid red (no frag_depth, smaller internal push constant range).
-    //  - fsFromBindGroup: reads the bind group and writes frag_depth (larger range).
+    // Single module, two pipelines each drawing one point (a point covers the 1x1 target without
+    // needing vertex_index in pipeline A):
+    //  - Pipeline A (vsPlain + fsRed): no vertex_index, no frag_depth -> smallest internal
+    //  immediate.
+    //  - Pipeline B (vsIndexed + fsFromBindGroup): uses vertex_index and writes frag_depth, and
+    //  reads the bind group. flat+either keeps vertex_index valid in compatibility mode.
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var<uniform> color: vec4f;
         var<immediate> imm: f32;
-        @vertex fn vs(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
-            let p = array(vec2f(1,-1), vec2f(-1,-1), vec2f(0,1));
-            return vec4f(p[i], 0, 1);
+
+        @vertex fn vsPlain() -> @builtin(position) vec4f { return vec4f(0, 0, 0, 1); }
+        @fragment fn fsRed() -> @location(0) vec4f { return vec4f(1, 0, 0, 1); }
+
+        struct VsOut {
+            @builtin(position) position: vec4f,
+            @location(0) @interpolate(flat, either) vertexIndex: u32,
         }
-        @fragment fn fsRed() -> @location(0) vec4f { return vec4f(1,0,0,1); }
-        struct Out { @location(0) c: vec4f, @builtin(frag_depth) d: f32 }
-        @fragment fn fsFromBindGroup() -> Out { return Out(color, 0.5); }
+        @vertex fn vsIndexed(@builtin(vertex_index) i: u32) -> VsOut {
+            return VsOut(vec4f(0, 0, 0, 1), i);
+        }
+        struct FsOut { @location(0) c: vec4f, @builtin(frag_depth) d: f32 }
+        @fragment fn fsFromBindGroup(@location(0) @interpolate(flat, either) vertexIndex: u32)
+            -> FsOut {
+            return FsOut(vec4f(f32(vertexIndex) / 255.0, color.g, color.b, 1.0), 0.5);
+        }
     )");
 
-    auto MakePipeline = [&](wgpu::ShaderModule mod, bool useDepthWrite) {
+    auto MakePipeline = [&](const char* vsEntry, const char* fsEntry, bool useDepthWrite) {
         utils::ComboRenderPipelineDescriptor desc;
-        desc.vertex.module = mod;
-        desc.cFragment.module = mod;
-        desc.cFragment.entryPoint = useDepthWrite ? "fsFromBindGroup" : "fsRed";
+        desc.vertex.module = shaderModule;
+        desc.vertex.entryPoint = vsEntry;
+        desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        desc.cFragment.module = shaderModule;
+        desc.cFragment.entryPoint = fsEntry;
         desc.cFragment.targetCount = 1;
         desc.layout = layout;
         auto* ds = desc.EnableDepthStencil(wgpu::TextureFormat::Depth32Float);
@@ -762,13 +782,13 @@ TEST_P(ImmediateDataTests, BindGroupsReboundOnDifferentInternalImmediateSize) {
         return device.CreateRenderPipeline(&desc);
     };
 
-    // Pipeline A: fsRed (no frag_depth).
-    wgpu::RenderPipeline pipelineWithoutFragDepth = MakePipeline(shaderModule, false);
-    // Pipeline B: fsFromBindGroup (with frag_depth, different push constant range).
-    wgpu::RenderPipeline pipelineWithFragDepth = MakePipeline(shaderModule, true);
+    // Pipeline A: no internal immediates. Pipeline B: firstVertex + clampFragDepth.
+    wgpu::RenderPipeline pipelineWithoutInternalImmediates =
+        MakePipeline("vsPlain", "fsRed", false);
+    wgpu::RenderPipeline pipelineWithInternalImmediates =
+        MakePipeline("vsIndexed", "fsFromBindGroup", true);
 
-    // The color uniform provides the expected output: {0.2, 0.4, 0.6, 1.0} -> rgba8
-    // {51,102,153,255}.
+    // color = {_, 0.4, 0.6, _} -> G = 102, B = 153.
     wgpu::Buffer colorBuf =
         utils::CreateBufferFromData(device, wgpu::BufferUsage::Uniform, {0.2f, 0.4f, 0.6f, 1.0f});
     wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, colorBuf}});
@@ -783,22 +803,85 @@ TEST_P(ImmediateDataTests, BindGroupsReboundOnDifferentInternalImmediateSize) {
     rpDesc.UnsetDepthStencilLoadStoreOpsForFormat(wgpu::TextureFormat::Depth32Float);
 
     float immData = 0.0f;
+    constexpr uint32_t kFirstVertex = 5;
     wgpu::CommandEncoder enc = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = enc.BeginRenderPass(&rpDesc);
     pass.SetBindGroup(0, bg);
     pass.SetImmediates(0, &immData, sizeof(float));
-    // Draw with Pipeline A (red), then switch to Pipeline B without re-setting bind groups.
-    // The Vulkan backend needs to reapply VkDescriptorSets after setting B because the change
-    // in push constant size will invalidate the currently bound VkDescriptorSets.
-    pass.SetPipeline(pipelineWithoutFragDepth);
-    pass.Draw(3);
-    pass.SetPipeline(pipelineWithFragDepth);
-    pass.Draw(3);
+    // Draw Pipeline A, then switch to Pipeline B without re-setting the bind group. A backend whose
+    // internal immediate size changes across the switch must reapply the bind group bindings.
+    pass.SetPipeline(pipelineWithoutInternalImmediates);
+    pass.Draw(1);
+    pass.SetPipeline(pipelineWithInternalImmediates);
+    pass.Draw(1, 1, kFirstVertex, 0);
     pass.End();
     wgpu::CommandBuffer commands = enc.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(51, 102, 153, 255), rp.color, 0, 0);
+    // R == firstVertex proves vertex_index includes the offset (the D3D12 internal root constant);
+    // G/B prove the bind group is still applied after switching internal immediate sizes.
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(kFirstVertex, 102, 153, 255), rp.color, 0, 0);
+}
+
+// Switching between compute pipelines that trigger different internal immediates must rebind all
+// bind groups. Pipeline A uses no num_workgroups; pipeline B uses num_workgroups (internal root
+// constant on D3D12, internal immediate on D3D11; native on Vulkan/Metal/OpenGL). After switching
+// A->B without re-setting the bind group, B's write to the bound storage buffer must still land.
+TEST_P(ImmediateDataTests, ComputeBindGroupsReboundOnDifferentInternalImmediateSize) {
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
+    wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
+
+    // Single module, two entry points sharing the layout:
+    //  - csPlain: no num_workgroups -> smallest internal immediate footprint.
+    //  - csNumWorkgroups: uses num_workgroups -> internal root constant (D3D12) / immediate
+    //  (D3D11).
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var<storage, read_write> output : vec3u;
+
+        @compute @workgroup_size(1, 1, 1) fn csPlain() {
+            output = vec3u(111u, 111u, 111u);
+        }
+
+        @compute @workgroup_size(1, 1, 1) fn csNumWorkgroups(@builtin(num_workgroups) n : vec3u) {
+            output = n;
+        }
+    )");
+
+    auto MakePipeline = [&](const char* entryPoint) {
+        wgpu::ComputePipelineDescriptor desc;
+        desc.layout = layout;
+        desc.compute.module = module;
+        desc.compute.entryPoint = entryPoint;
+        return device.CreateComputePipeline(&desc);
+    };
+    wgpu::ComputePipeline pipelineWithoutInternalImmediates = MakePipeline("csPlain");
+    wgpu::ComputePipeline pipelineWithInternalImmediates = MakePipeline("csNumWorkgroups");
+
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = sizeof(uint32_t) * 4;
+    bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage;
+    wgpu::Buffer output = device.CreateBuffer(&bufferDesc);
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, output}});
+
+    constexpr uint32_t kX = 2, kY = 3, kZ = 4;
+    wgpu::CommandEncoder enc = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = enc.BeginComputePass();
+    pass.SetBindGroup(0, bg);
+    // Dispatch Pipeline A, then switch to Pipeline B without re-setting the bind group. A backend
+    // whose internal immediate size changes across the switch must reapply the bind group.
+    pass.SetPipeline(pipelineWithoutInternalImmediates);
+    pass.DispatchWorkgroups(1, 1, 1);
+    pass.SetPipeline(pipelineWithInternalImmediates);
+    pass.DispatchWorkgroups(kX, kY, kZ);
+    pass.End();
+    wgpu::CommandBuffer commands = enc.Finish();
+    queue.Submit(1, &commands);
+
+    // {2,3,4} (not A's 111) proves B's num_workgroups is correct and the bind group is still
+    // applied after the pipeline switch.
+    std::array<uint32_t, 3> expected = {kX, kY, kZ};
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), output, 0, expected.size());
 }
 
 // Switching pipelines with different calculated PipelineLayout immediateSize must rebind all

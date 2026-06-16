@@ -646,6 +646,8 @@ source_set("sources") {
       "d3d12/PhysicalDeviceD3D12.h",
       "d3d12/PipelineLayoutD3D12.cpp",
       "d3d12/PipelineLayoutD3D12.h",
+      "d3d12/PipelineLayoutHandle.cpp",
+      "d3d12/PipelineLayoutHandle.h",
       "d3d12/PlatformFunctionsD3D12.cpp",
       "d3d12/PlatformFunctionsD3D12.h",
       "d3d12/QuerySetD3D12.cpp",

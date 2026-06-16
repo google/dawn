@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_D3D12_RENDERPIPELINED3D12_H_
 
 #include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/d3d12/PipelineLayoutHandle.h"
 #include "src/dawn/native/d3d12/ShaderModuleD3D12.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
 
@@ -50,6 +51,8 @@ class RenderPipeline final : public RenderPipelineBase {
 
     bool UsesVertexOrInstanceIndex() const;
 
+    PipelineLayoutHandle* GetPipelineLayoutHandle() const;
+
     // Dawn API
     void SetLabelImpl() override;
 
@@ -67,6 +70,7 @@ class RenderPipeline final : public RenderPipelineBase {
         std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes>* inputElementDescriptors);
     D3D12_DEPTH_STENCIL_DESC ComputeDepthStencilDesc();
 
+    Ref<PipelineLayoutHandle> mPipelineLayoutHandle;
     D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology;
     ComPtr<ID3D12PipelineState> mPipelineState;
     bool mUsesVertexOrInstanceIndex;

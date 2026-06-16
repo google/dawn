@@ -157,10 +157,9 @@ void RecordFirstIndexOffset(ID3D12GraphicsCommandList* commandList,
         return;
     }
     std::array<uint32_t, 2> offsets{firstVertex, firstInstance};
-    PipelineLayout* layout = ToBackend(pipeline->GetLayout());
-    commandList->SetGraphicsRoot32BitConstants(layout->GetFirstIndexOffsetParameterIndex(),
-                                               static_cast<uint32_t>(offsets.size()),
-                                               offsets.data(), 0);
+    commandList->SetGraphicsRoot32BitConstants(
+        pipeline->GetPipelineLayoutHandle()->GetFirstIndexOffsetParameterIndex(),
+        static_cast<uint32_t>(offsets.size()), offsets.data(), 0);
 }
 
 bool ShouldCopyUsingTemporaryBuffer(DeviceBase* device,
@@ -329,9 +328,8 @@ void RecordNumWorkgroupsForDispatch(ID3D12GraphicsCommandList* commandList,
         return;
     }
 
-    PipelineLayout* layout = ToBackend(pipeline->GetLayout());
-    commandList->SetComputeRoot32BitConstants(layout->GetNumWorkgroupsParameterIndex(), 3, dispatch,
-                                              0);
+    commandList->SetComputeRoot32BitConstants(
+        pipeline->GetPipelineLayoutHandle()->GetNumWorkgroupsParameterIndex(), 3, dispatch, 0);
 }
 
 // Records the necessary barriers for a synchronization scope using the resource usage data
@@ -420,11 +418,11 @@ class ImmediateTracker : public T {
                 static_cast<uint32_t>(offset) * kImmediateElementByteSize;
             uint32_t immediateRangeStartOffset =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
-            SetRootConstant(commandContext->GetCommandList(),
-                            ToBackend(lastPipeline->GetLayout())->GetImmediatesParameterIndex(),
-                            size,
-                            this->mContent.template Get<uint32_t>(immediateContentStartOffset),
-                            immediateRangeStartOffset);
+            SetRootConstant(
+                commandContext->GetCommandList(),
+                ToBackend(lastPipeline)->GetPipelineLayoutHandle()->GetImmediatesParameterIndex(),
+                size, this->mContent.template Get<uint32_t>(immediateContentStartOffset),
+                immediateRangeStartOffset);
         }
 
         // Reset all dirty bits after uploading.
@@ -457,11 +455,16 @@ class DescriptorHeapState;
 
 template <typename PipelineType>
 class BindGroupStateTracker : public BindGroupTrackerBase<false> {
-    using Base = BindGroupTrackerBase;
+    using Base = BindGroupTrackerBase<false>;
 
   public:
     BindGroupStateTracker(Device* device, DescriptorHeapState* heapState)
-        : BindGroupTrackerBase(), mDevice(device), mHeapState(heapState) {}
+        : Base(), mDevice(device), mHeapState(heapState) {}
+
+    void OnSetPipeline(PipelineType* pipeline) {
+        Base::OnSetPipeline(pipeline);
+        mPipeline = pipeline;
+    }
 
     MaybeError Apply(CommandRecordingContext* commandContext) {
         BeforeApply();
@@ -584,12 +587,15 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
     static constexpr bool kIsRenderPipeline = std::is_same_v<PipelineType, RenderPipeline>;
     static constexpr bool kIsComputePipeline = std::is_same_v<PipelineType, ComputePipeline>;
 
-    void SetRootSignature(ID3D12GraphicsCommandList* commandList, PipelineLayoutBase* layout) {
+    void SetRootSignature(ID3D12GraphicsCommandList* commandList) {
+        DAWN_ASSERT(mPipeline != nullptr);
+        ID3D12RootSignature* rootSignature =
+            mPipeline->GetPipelineLayoutHandle()->GetRootSignature();
         if constexpr (kIsRenderPipeline) {
-            commandList->SetGraphicsRootSignature(ToBackend(layout)->GetRootSignature());
+            commandList->SetGraphicsRootSignature(rootSignature);
         } else {
             static_assert(kIsComputePipeline);
-            commandList->SetComputeRootSignature(ToBackend(layout)->GetRootSignature());
+            commandList->SetComputeRootSignature(rootSignature);
         }
     }
 
@@ -658,7 +664,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
 
     void UpdateRootSignatureIfNecessary(ID3D12GraphicsCommandList* commandList) {
         if (!AreLayoutsCompatible()) {
-            SetRootSignature(commandList, mPipelineLayout);
+            SetRootSignature(commandList);
             // Invalidate the root sampler tables previously set in the root signature.
             ResetRootSamplerTables();
         }
@@ -783,6 +789,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
     }
 
     raw_ptr<Device> mDevice;
+    raw_ptr<PipelineType> mPipeline = nullptr;
 
     // Points to the same instance of DescriptorHeapState that owns both the compute and render
     // instances of this class, so that calling SetID3D12DescriptorHeaps one one sets the descriptor

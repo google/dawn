@@ -360,6 +360,11 @@ MaybeError RenderPipeline::InitializeImpl() {
             fragmentEntryPoint.usedInterStageVariables);
     }
 
+    DAWN_TRY_ASSIGN(
+        mPipelineLayoutHandle,
+        ToBackend(GetLayout())
+            ->GetOrCreatePipelineLayoutHandle(static_cast<uint32_t>(GetImmediateMask().count())));
+
     for (auto stage : IterateStages(GetStageMask())) {
         const ProgrammableStage& programmableStage = GetStage(stage);
         uint32_t additionalCompileFlags = 0;
@@ -385,9 +390,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     mUsesVertexOrInstanceIndex = compiledShader[SingleShaderStage::Vertex].usesVertexIndex ||
                                  compiledShader[SingleShaderStage::Vertex].usesInstanceIndex;
 
-    PipelineLayout* layout = ToBackend(GetLayout());
-
-    descriptorD3D12.pRootSignature = layout->GetRootSignature();
+    descriptorD3D12.pRootSignature = mPipelineLayoutHandle->GetRootSignature();
 
     // D3D12 logs warnings if any empty input state is used
     std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes> inputElementDescriptors;
@@ -447,7 +450,7 @@ MaybeError RenderPipeline::InitializeImpl() {
 
     mD3d12PrimitiveTopology = D3D12PrimitiveTopology(GetPrimitiveTopology());
 
-    StreamIn(&mCacheKey, descriptorD3D12, *layout->GetRootSignatureBlob());
+    StreamIn(&mCacheKey, descriptorD3D12, *mPipelineLayoutHandle->GetRootSignatureBlob());
 
     // Try to see if we have anything in the blob cache.
     Blob blob = device->LoadCachedBlob(GetCacheKey());
@@ -498,6 +501,7 @@ RenderPipeline::~RenderPipeline() = default;
 void RenderPipeline::DestroyImpl(DestroyReason reason) {
     RenderPipelineBase::DestroyImpl(reason);
     ToBackend(GetDevice())->ReferenceUntilUnused(mPipelineState);
+    mPipelineLayoutHandle = nullptr;
 }
 
 D3D12_PRIMITIVE_TOPOLOGY RenderPipeline::GetD3D12PrimitiveTopology() const {
@@ -512,13 +516,17 @@ bool RenderPipeline::UsesVertexOrInstanceIndex() const {
     return mUsesVertexOrInstanceIndex;
 }
 
+PipelineLayoutHandle* RenderPipeline::GetPipelineLayoutHandle() const {
+    return mPipelineLayoutHandle.Get();
+}
+
 void RenderPipeline::SetLabelImpl() {
     SetDebugName(ToBackend(GetDevice()), GetPipelineState(), "Dawn_RenderPipeline", GetLabel());
 }
 
 ComPtr<ID3D12CommandSignature> RenderPipeline::GetDrawIndirectCommandSignature() {
     if (mUsesVertexOrInstanceIndex) {
-        return ToBackend(GetLayout())->GetDrawIndirectCommandSignatureWithInstanceVertexOffsets();
+        return mPipelineLayoutHandle->GetDrawIndirectCommandSignatureWithInstanceVertexOffsets();
     }
 
     return ToBackend(GetDevice())->GetDrawIndirectSignature();
@@ -526,7 +534,7 @@ ComPtr<ID3D12CommandSignature> RenderPipeline::GetDrawIndirectCommandSignature()
 
 ComPtr<ID3D12CommandSignature> RenderPipeline::GetDrawIndexedIndirectCommandSignature() {
     if (mUsesVertexOrInstanceIndex) {
-        return ToBackend(GetLayout())
+        return mPipelineLayoutHandle
             ->GetDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets();
     }
 
