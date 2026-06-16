@@ -200,12 +200,14 @@
 // Disabling `clang-format` allows each `_Pragma` to be on its own line, as recommended by
 // https://gcc.gnu.org/onlinedocs/cpp/Pragmas.html.
 // clang-format off
+// SAFETY: This is the definition of the macro and not an unsafe usage.
 #define DAWN_UNSAFE_BUFFERS(...)             \
   _Pragma("clang unsafe_buffer_usage begin") \
   __VA_ARGS__                                \
   _Pragma("clang unsafe_buffer_usage end")
 // clang-format on
 #else
+// SAFETY: This is the definition of the macro and not an unsafe usage.
 #define DAWN_UNSAFE_BUFFERS(...) __VA_ARGS__
 #endif
 
@@ -219,6 +221,9 @@
 //   // is annotated `DAWN_UNSAFE_BUFFER_USAGE`.
 //   return DAWN_UNSAFE_TODO(Func(input, end));
 // ```
+// SAFETY: The macro is used to tag code that should be modified to use DAWN_UNSAFE_BUFFERS or
+// ideally use safer ways to manipulate the buffer. It's an explicit opt-out of DAWN_UNSAFE_BUFFERS
+// and doesn't require a SAFETY argument when used.
 #define DAWN_UNSAFE_TODO(...) DAWN_UNSAFE_BUFFERS(__VA_ARGS__)
 
 #endif  // SRC_UTILS_COMPILER_H_
