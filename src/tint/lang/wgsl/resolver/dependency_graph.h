@@ -49,6 +49,7 @@ namespace tint::resolver {
 /// - core::AddressSpace
 /// - core::BuiltinType
 /// - core::TexelFormat
+/// - core::Majorness
 class ResolvedIdentifier {
   public:
     /// UnresolvedIdentifier is the variant value used to represent an unresolved identifier
@@ -123,6 +124,13 @@ class ResolvedIdentifier {
         return core::TexelFormat::kUndefined;
     }
 
+    core::Majorness Majorness() const {
+        if (auto n = std::get_if<core::Majorness>(&value_)) {
+            return *n;
+        }
+        return core::Majorness::kUndefined;
+    }
+
     /// @param value the value to compare the ResolvedIdentifier to
     /// @return true if the ResolvedIdentifier is equal to @p value
     template <typename T>
@@ -150,7 +158,8 @@ class ResolvedIdentifier {
                  core::Access,
                  core::AddressSpace,
                  core::BuiltinType,
-                 core::TexelFormat>
+                 core::TexelFormat,
+                 core::Majorness>
         value_;
 };
 

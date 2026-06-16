@@ -3716,7 +3716,7 @@ constexpr TemplateInfo kTemplates[] = {
     /* [1] */
     /* name */ "K",
     /* matcher_indices */ MatcherIndicesIndex(/* invalid */),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::ksubgroup_matrix_kind,
   },
   {
     /* [2] */
@@ -3740,19 +3740,19 @@ constexpr TemplateInfo kTemplates[] = {
     /* [5] */
     /* name */ "AS",
     /* matcher_indices */ MatcherIndicesIndex(3),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaddress_space,
   },
   {
     /* [6] */
     /* name */ "AM",
     /* matcher_indices */ MatcherIndicesIndex(87),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaccess,
   },
   {
     /* [7] */
     /* name */ "K",
     /* matcher_indices */ MatcherIndicesIndex(/* invalid */),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::ksubgroup_matrix_kind,
   },
   {
     /* [8] */
@@ -3776,13 +3776,13 @@ constexpr TemplateInfo kTemplates[] = {
     /* [11] */
     /* name */ "AS",
     /* matcher_indices */ MatcherIndicesIndex(3),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaddress_space,
   },
   {
     /* [12] */
     /* name */ "AM",
     /* matcher_indices */ MatcherIndicesIndex(123),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaccess,
   },
   {
     /* [13] */
@@ -3872,13 +3872,13 @@ constexpr TemplateInfo kTemplates[] = {
     /* [27] */
     /* name */ "S",
     /* matcher_indices */ MatcherIndicesIndex(/* invalid */),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaddress_space,
   },
   {
     /* [28] */
     /* name */ "A",
     /* matcher_indices */ MatcherIndicesIndex(/* invalid */),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaccess,
   },
   {
     /* [29] */
@@ -3920,19 +3920,19 @@ constexpr TemplateInfo kTemplates[] = {
     /* [35] */
     /* name */ "S",
     /* matcher_indices */ MatcherIndicesIndex(3),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaddress_space,
   },
   {
     /* [36] */
     /* name */ "F",
     /* matcher_indices */ MatcherIndicesIndex(/* invalid */),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::ktexel_format,
   },
   {
     /* [37] */
     /* name */ "A",
     /* matcher_indices */ MatcherIndicesIndex(/* invalid */),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaccess,
   },
   {
     /* [38] */

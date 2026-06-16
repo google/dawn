@@ -17,6 +17,7 @@ See:
 {{- $addr_space_enum := ($I.Sem.Enum "address_space") -}}
 {{- $interpolation_sampling_enum := ($I.Sem.Enum "interpolation_sampling") -}}
 {{- $interpolation_type_enum := ($I.Sem.Enum "interpolation_type") -}}
+{{- $majorness_enum := ($I.Sem.Enum "majorness") -}}
 {{- $subgroup_matrix_kind_enum := ($I.Sem.Enum "subgroup_matrix_kind") -}}
 {{- $texel_format_enum := ($I.Sem.Enum "texel_format") -}}
 {{- $builtin_type_enum := ($I.Sem.Enum "builtin_type") -}}
@@ -43,6 +44,9 @@ namespace tint::core {
 
 {{ Eval "ParseEnum" $interpolation_type_enum}}
 {{ Eval "EnumOStream" $interpolation_type_enum}}
+
+{{ Eval "ParseEnum" $majorness_enum}}
+{{ Eval "EnumOStream" $majorness_enum}}
 
 {{ Eval "ParseEnum" $subgroup_matrix_kind_enum}}
 {{ Eval "EnumOStream" $subgroup_matrix_kind_enum}}

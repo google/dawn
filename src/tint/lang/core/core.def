@@ -40,6 +40,7 @@
 
 import "src/tint/lang/core/address_space.def"
 import "src/tint/lang/core/access.def"
+import "src/tint/lang/core/majorness.def"
 import "src/tint/lang/core/subgroup_matrix_kind.def"
 import "src/tint/lang/core/texel_format.def"
 
@@ -2332,4 +2333,3 @@ ctor mat4x4<T: f32_f16>(T, T, T, T,
   fn getResource<S: sampler>(index: I) -> S
 @must_use implicit(I: iu32)
   fn getResource<S: sampler_comparison>(index: I) -> S
-

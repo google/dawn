@@ -526,9 +526,6 @@ class Parser {
     /// Parses a `case_selector` grammar element
     /// @returns the selector
     Maybe<const ast::CaseSelector*> case_selector();
-    /// Parses a `func_call_statement` grammar element
-    /// @returns the parsed function call or nullptr
-    Maybe<const ast::CallStatement*> func_call_statement();
     /// Parses a `loop_statement` grammar element, with the attribute list provided as `attrs`.
     /// @param attrs the list of attributes for the statement
     /// @returns the parsed loop or nullptr
@@ -652,7 +649,7 @@ class Parser {
     /// Parses a `core_lhs_expression` grammar element
     /// @returns the parsed expression or a non-kMatched failure
     Maybe<const ast::Expression*> core_lhs_expression();
-    /// Parses a `lhs_expression` grammar element
+    /// Parses a `lhs_expression` or `func_call_statement` grammar element
     /// @returns the parsed expression or a non-kMatched failure
     Maybe<const ast::Expression*> lhs_expression();
     /// Parses a `variable_updating_statement` grammar element

@@ -45,6 +45,9 @@
 
 namespace tint::core::intrinsic {
 
+// Note: Ensure any new enum here is also added to TemplateInfo::Kind (and sem.go).
+using TemplateParameter = std::variant<const core::type::Type*, core::Majorness>;
+
 /// Overload describes a fully matched builtin function overload
 struct Overload {
     static constexpr size_t kNumFixedParameters = 8;
@@ -139,7 +142,7 @@ void PrintCandidate(StyledText& ss,
                     Context& context,
                     const Candidate& candidate,
                     std::string_view intrinsic_name,
-                    VectorRef<const core::type::Type*> template_args,
+                    VectorRef<TemplateParameter> template_args,
                     VectorRef<const core::type::Type*> args);
 
 /// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
@@ -159,7 +162,7 @@ void PrintCandidate(StyledText& ss,
 Result<Overload, StyledText> LookupFn(Context& context,
                                       std::string_view function_name,
                                       size_t function_id,
-                                      VectorRef<const core::type::Type*> template_args,
+                                      VectorRef<TemplateParameter> template_args,
                                       VectorRef<const core::type::Type*> args,
                                       EvaluationStage earliest_eval_stage);
 
@@ -272,7 +275,7 @@ struct Table {
     ///        (EvaluationStage::kConstant).
     /// @return the resolved builtin function overload
     Result<Overload, StyledText> Lookup(BuiltinFn builtin_fn,
-                                        VectorRef<const core::type::Type*> template_args,
+                                        VectorRef<TemplateParameter> template_args,
                                         VectorRef<const core::type::Type*> args,
                                         EvaluationStage earliest_eval_stage) {
         std::string_view name = DIALECT::ToString(builtin_fn);

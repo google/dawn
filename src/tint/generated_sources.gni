@@ -68,6 +68,7 @@ tint_generation_dependencies = [
   "lang/core/access.def",
   "lang/core/address_space.def",
   "lang/core/core.def",
+  "lang/core/majorness.def",
   "lang/core/subgroup_matrix_kind.def",
   "lang/core/texel_format.def",
   "lang/glsl/glsl.def",

@@ -391,6 +391,8 @@ class DependencyScanner {
         kTexelFormat,
         /// Access
         kAccess,
+        /// Majorness
+        kMajorness,
     };
 
     /// BuiltinInfo stores information about the builtin that a symbol represents.
@@ -407,7 +409,8 @@ class DependencyScanner {
                      core::BuiltinType,
                      core::AddressSpace,
                      core::TexelFormat,
-                     core::Access>
+                     core::Access,
+                     core::Majorness>
             value{};
     };
 
@@ -435,6 +438,10 @@ class DependencyScanner {
             if (auto access = core::ParseAccess(symbol.NameView());
                 access != core::Access::kUndefined) {
                 return BuiltinInfo{Kind::kAccess, access};
+            }
+            if (auto major = core::ParseMajorness(symbol.NameView());
+                major != core::Majorness::kUndefined) {
+                return BuiltinInfo{Kind::kMajorness, major};
             }
             return BuiltinInfo{};
         });
@@ -469,6 +476,10 @@ class DependencyScanner {
                 case Kind::kAccess:
                     graph_.resolved_identifiers.Add(
                         from, ResolvedIdentifier(builtin_info.Value<core::Access>()));
+                    break;
+                case Kind::kMajorness:
+                    graph_.resolved_identifiers.Add(
+                        from, ResolvedIdentifier(builtin_info.Value<core::Majorness>()));
                     break;
             }
             return;
@@ -792,6 +803,9 @@ std::string ResolvedIdentifier::String() const {
     }
     if (auto fmt = TexelFormat(); fmt != core::TexelFormat::kUndefined) {
         return "texel format '" + tint::ToString(fmt) + "'";
+    }
+    if (auto major = Majorness(); major != core::Majorness::kUndefined) {
+        return "majorness '" + tint::ToString(major) + "'";
     }
     if (auto* unresolved = Unresolved()) {
         return "unresolved identifier '" + unresolved->name + "'";

@@ -2724,7 +2724,7 @@ constexpr TemplateInfo kTemplates[] = {
     /* [1] */
     /* name */ "A",
     /* matcher_indices */ MatcherIndicesIndex(/* invalid */),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaccess,
   },
   {
     /* [2] */
@@ -2736,7 +2736,7 @@ constexpr TemplateInfo kTemplates[] = {
     /* [3] */
     /* name */ "AS",
     /* matcher_indices */ MatcherIndicesIndex(10),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaddress_space,
   },
   {
     /* [4] */
@@ -2748,7 +2748,7 @@ constexpr TemplateInfo kTemplates[] = {
     /* [5] */
     /* name */ "S",
     /* matcher_indices */ MatcherIndicesIndex(10),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaddress_space,
   },
   {
     /* [6] */
@@ -2796,49 +2796,49 @@ constexpr TemplateInfo kTemplates[] = {
     /* [13] */
     /* name */ "F",
     /* matcher_indices */ MatcherIndicesIndex(/* invalid */),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::ktexel_format,
   },
   {
     /* [14] */
     /* name */ "A",
     /* matcher_indices */ MatcherIndicesIndex(/* invalid */),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaccess,
   },
   {
     /* [15] */
     /* name */ "F",
     /* matcher_indices */ MatcherIndicesIndex(25),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::ktexel_format,
   },
   {
     /* [16] */
     /* name */ "A",
     /* matcher_indices */ MatcherIndicesIndex(47),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaccess,
   },
   {
     /* [17] */
     /* name */ "F",
     /* matcher_indices */ MatcherIndicesIndex(0),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::ktexel_format,
   },
   {
     /* [18] */
     /* name */ "A",
     /* matcher_indices */ MatcherIndicesIndex(47),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaccess,
   },
   {
     /* [19] */
     /* name */ "F",
     /* matcher_indices */ MatcherIndicesIndex(73),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::ktexel_format,
   },
   {
     /* [20] */
     /* name */ "A",
     /* matcher_indices */ MatcherIndicesIndex(47),
-    /* kind */ TemplateInfo::Kind::kNumber,
+    /* kind */ TemplateInfo::Kind::kaccess,
   },
   {
     /* [21] */

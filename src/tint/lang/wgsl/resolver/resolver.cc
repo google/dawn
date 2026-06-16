@@ -2201,13 +2201,21 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         arg_stage = core::EarliestStage(arg_stage, arg->Stage());
     }
 
-    Vector<const core::type::Type*, 1> tmpl_args;
+    Vector<core::intrinsic::TemplateParameter, 1> tmpl_args;
     if (auto* tmpl = expr->target->identifier->As<ast::TemplatedIdentifier>()) {
         for (auto* arg : tmpl->arguments) {
-            auto* arg_ty = sem_.AsTypeExpression(sem_.Get(arg));
-            TINT_RET_IF(DAWN_UNLIKELY(!arg_ty));
-
-            tmpl_args.Push(arg_ty->Type());
+            auto* sem_expr = sem_.Get(arg);
+            if (auto* arg_ty = sem_expr->As<sem::TypeExpression>(); DAWN_LIKELY(arg_ty)) {
+                tmpl_args.Push(arg_ty->Type());
+            } else if (auto* arg_major =
+                           sem_expr->As<sem::BuiltinEnumExpression<core::Majorness>>()) {
+                tmpl_args.Push(arg_major->Value());
+            } else {
+                // Add an error, but don't return so that the candidates are printed.
+                // Use a bad type.
+                AddError(arg) << "Unexpected template kind";
+                tmpl_args.Push(b.create<core::type::Invalid>());
+            }
         }
     }
 
@@ -3263,6 +3271,13 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return CheckNotTemplated("texel format", ident)
                    ? b.create<sem::BuiltinEnumExpression<core::TexelFormat>>(
                          expr, current_statement_, fmt)
+                   : nullptr;
+    }
+
+    if (auto major = resolved->Majorness(); major != core::Majorness::kUndefined) {
+        return CheckNotTemplated("majorness", ident)
+                   ? b.create<sem::BuiltinEnumExpression<core::Majorness>>(expr, current_statement_,
+                                                                           major)
                    : nullptr;
     }
 

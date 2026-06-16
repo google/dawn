@@ -173,7 +173,16 @@ struct ParameterInfo {
 /// TemplateInfo describes an template
 struct TemplateInfo {
     /// An enumerator of template kind
-    enum class Kind : uint8_t { kType, kNumber };
+    /// The enum names don't match because they come directly from .def enums
+    enum class Kind : uint8_t {
+        kType,
+        kNumber,
+        kaccess,
+        kaddress_space,
+        ksubgroup_matrix_kind,
+        kmajorness,
+        ktexel_format,
+    };
 
     /// Name of the template type (e.g. 'T')
     const char* name;

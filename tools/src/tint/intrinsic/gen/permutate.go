@@ -118,12 +118,22 @@ func (p *Permutator) Permute(overload *sem.Overload) ([]Permutation, error) {
 
 		explicitTemplateArgs := make([]sem.FullyQualifiedName, len(overload.ExplicitTemplates))
 		for i, t := range overload.ExplicitTemplates {
-			ty := state.templateTypes[t]
-			explicitTemplateArgs[i] = ty
-			o.ExplicitTemplates = append(o.ExplicitTemplates, &sem.TemplateTypeParam{
-				Name: t.GetName(),
-				Type: &ty,
-			})
+			switch t := t.(type) {
+			case *sem.TemplateTypeParam:
+				ty := state.templateTypes[t]
+				explicitTemplateArgs[i] = ty
+				o.ExplicitTemplates = append(o.ExplicitTemplates, &sem.TemplateTypeParam{
+					Name: t.GetName(),
+					Type: &ty,
+				})
+			case *sem.TemplateEnumParam:
+				n := state.templateNumbers[t]
+				explicitTemplateArgs[i] = n.(sem.FullyQualifiedName)
+				o.ExplicitTemplates = append(o.ExplicitTemplates, &sem.TemplateEnumEntryParam{
+					Name:  t.Name,
+					Entry: &explicitTemplateArgs[i],
+				})
+			}
 		}
 
 		desc := fmt.Sprint(o)

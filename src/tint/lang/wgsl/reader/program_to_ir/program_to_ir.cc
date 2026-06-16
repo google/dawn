@@ -1094,6 +1094,65 @@ class Impl {
                 Bind(expr, inst->Result());
             }
 
+            core::ir::Instruction* EmitMajornessTemplatedSubgroupMatrixLoad(
+                const ast::TemplatedIdentifier* tmpl,
+                const sem::BuiltinFn* b,
+                const core::type::Type* ty,
+                VectorRef<core::ir::Value*> args) {
+                Vector<core::ir::Value*, 8> new_args;
+                new_args.Resize(args.Length() + 1);
+                new_args[0] = args[0];
+                new_args[1] = args[1];
+                new_args[2] = nullptr;
+                new_args[3] = args[2];
+
+                Vector<const core::type::Type*, 1> templates;
+
+                // Keep the type template.
+                auto* res_type_sem = impl.program_.Sem().Get(tmpl->arguments[0]);
+                auto* res_ty = res_type_sem->As<sem::TypeExpression>();
+                TINT_ASSERT(res_ty);
+                auto* cloned_res_ty = res_ty->Type()->Clone(impl.clone_ctx_.type_ctx);
+                templates.Push(cloned_res_ty);
+
+                // Convert majorness to an argument.
+                auto* majorness_sem = impl.program_.Sem().Get(tmpl->arguments[1]);
+                auto* enum_sem = majorness_sem->As<sem::BuiltinEnumExpression<core::Majorness>>();
+                TINT_ASSERT(enum_sem);
+                new_args[2] =
+                    impl.builder_.Constant(enum_sem->Value() == core::Majorness::kColMajor);
+
+                auto* call =
+                    impl.builder_.Call<wgsl::ir::BuiltinCall>(ty, b->Fn(), std::move(new_args));
+                call->SetExplicitTemplateParams(std::move(templates));
+                return call;
+            }
+
+            core::ir::Instruction* EmitMajornessTemplatedSubgroupMatrixStore(
+                const ast::TemplatedIdentifier* tmpl,
+                const sem::BuiltinFn* b,
+                const core::type::Type* ty,
+                VectorRef<core::ir::Value*> args) {
+                Vector<core::ir::Value*, 8> new_args;
+                new_args.Resize(args.Length() + 1);
+                new_args[0] = args[0];
+                new_args[1] = args[1];
+                new_args[2] = args[2];
+                new_args[3] = nullptr;
+                new_args[4] = args[3];
+
+                // Convert majorness to an argument.
+                auto* majorness_sem = impl.program_.Sem().Get(tmpl->arguments[0]);
+                auto* enum_sem = majorness_sem->As<sem::BuiltinEnumExpression<core::Majorness>>();
+                TINT_ASSERT(enum_sem);
+                new_args[3] =
+                    impl.builder_.Constant(enum_sem->Value() == core::Majorness::kColMajor);
+
+                auto* call =
+                    impl.builder_.Call<wgsl::ir::BuiltinCall>(ty, b->Fn(), std::move(new_args));
+                return call;
+            }
+
             void EmitCall(const ast::CallExpression* expr) {
                 // If this is a materialized semantic node, just use the constant value.
                 if (auto* mat = impl.program_.Sem().Get(expr)) {
@@ -1131,6 +1190,16 @@ class Impl {
                 if (auto* b = sem->Target()->As<sem::BuiltinFn>()) {
                     if (b->Fn() == wgsl::BuiltinFn::kBitcast) {
                         inst = impl.builder_.Bitcast(ty, args[0]);
+                    } else if (b->Fn() == wgsl::BuiltinFn::kSubgroupMatrixLoad &&
+                               b->Overload().num_explicit_templates == 2) {
+                        // TODO(520804445): Lower to a matching intrinsic?
+                        inst = EmitMajornessTemplatedSubgroupMatrixLoad(
+                            expr->target->identifier->As<ast::TemplatedIdentifier>(), b, ty, args);
+                    } else if (b->Fn() == wgsl::BuiltinFn::kSubgroupMatrixStore &&
+                               b->Overload().num_explicit_templates == 1) {
+                        // TODO(520804445): Lower to a matching intrinsic?
+                        inst = EmitMajornessTemplatedSubgroupMatrixStore(
+                            expr->target->identifier->As<ast::TemplatedIdentifier>(), b, ty, args);
                     } else {
                         auto* call =
                             impl.builder_.Call<wgsl::ir::BuiltinCall>(ty, b->Fn(), std::move(args));
@@ -1143,6 +1212,13 @@ class Impl {
                             for (uint32_t i = 0; i < b->Overload().num_explicit_templates; i++) {
                                 auto* tmpl_sem = impl.program_.Sem().Get(tmpl->arguments[i]);
                                 auto* tmpl_ty = tmpl_sem->As<sem::TypeExpression>();
+                                // TODO(520804445): Support non-type template parameters.
+                                if (!tmpl_ty) {
+                                    impl.AddError(tmpl->source)
+                                        << "Non-type-based template parameters are currently "
+                                           "unsupported";
+                                    return;
+                                }
                                 TINT_ASSERT(tmpl_ty);
                                 auto* cloned_ty = tmpl_ty->Type()->Clone(impl.clone_ctx_.type_ctx);
                                 explicit_types.Push(cloned_ty);

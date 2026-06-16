@@ -1205,10 +1205,15 @@ void Functional::CheckUnary(const Unary* u) {
 void Functional::CheckBuiltinCall(const BuiltinCall* call) {
     auto args = Transform<8>(call->Args(), [&](const ir::Value* v) { return v->Type(); });
 
+    // TODO(520804445): Remove this when calls support more template kinds.
+    Vector<core::intrinsic::TemplateParameter, 1> converted;
+    converted.Reserve(call->ExplicitTemplateParams().Length());
+    for (auto* ty : call->ExplicitTemplateParams()) {
+        converted.Push(ty);
+    }
     intrinsic::Context context{call->TableData(), type_mgr_, symbols_};
     auto builtin = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
-                                             call->ExplicitTemplateParams(), args,
-                                             core::EvaluationStage::kRuntime);
+                                             converted, args, core::EvaluationStage::kRuntime);
     if (builtin != Success) {
         AddError(call) << builtin.Failure();
         return;

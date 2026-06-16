@@ -192,6 +192,30 @@ std::string_view ToString(InterpolationType value) {
     return "<unknown>";
 }
 
+/// ParseMajorness parses a Majorness from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or Majorness::kUndefined if the string could not be parsed.
+Majorness ParseMajorness(std::string_view str) {
+    if (str == "col_major") {
+        return Majorness::kColMajor;
+    }
+    if (str == "row_major") {
+        return Majorness::kRowMajor;
+    }
+    return Majorness::kUndefined;
+}
+std::string_view ToString(Majorness value) {
+    switch (value) {
+        case Majorness::kUndefined:
+            return "undefined";
+        case Majorness::kColMajor:
+            return "col_major";
+        case Majorness::kRowMajor:
+            return "row_major";
+    }
+    return "<unknown>";
+}
+
 /// ParseSubgroupMatrixKind parses a SubgroupMatrixKind from a string.
 /// @param str the string to parse
 /// @returns the parsed enum, or SubgroupMatrixKind::kUndefined if the string could not be parsed.
