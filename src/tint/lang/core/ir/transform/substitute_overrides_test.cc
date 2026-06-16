@@ -2307,7 +2307,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_FixedSize) {
     b.Append(ep->Block(), [&] {
         auto* let = b.Let("l", v);
         b.CallExplicit(ty.ptr(workgroup, ty.array(ty.u32(), 4u)), BuiltinFn::kBufferView,
-                       Vector{ty.array(ty.u32(), 4u)}, let, 0_u);
+                       Vector<TemplateParameter, 1>{ty.array(ty.u32(), 4u)}, let, 0_u);
         b.Return(ep);
     });
 
@@ -2352,7 +2352,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_FixedSize_Cons
     b.Append(ep->Block(), [&] {
         auto* let = b.Let("l", v);
         b.CallExplicit(ty.ptr(workgroup, ty.array(ty.u32(), 4u)), BuiltinFn::kBufferView,
-                       Vector{ty.array(ty.u32(), 4u)}, let, 4_u);
+                       Vector<TemplateParameter, 1>{ty.array(ty.u32(), 4u)}, let, 4_u);
         b.Return(ep);
     });
 
@@ -2397,7 +2397,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_RuntimeArray) 
     b.Append(ep->Block(), [&] {
         auto* let = b.Let("l", v);
         b.CallExplicit(ty.ptr(workgroup, ty.runtime_array(ty.vec4u())), BuiltinFn::kBufferView,
-                       Vector{ty.runtime_array(ty.vec4u())}, let, 0_u);
+                       Vector<TemplateParameter, 1>{ty.runtime_array(ty.vec4u())}, let, 0_u);
         b.Return(ep);
     });
 
@@ -2442,7 +2442,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_RuntimeArray_C
     b.Append(ep->Block(), [&] {
         auto* let = b.Let("l", v);
         b.CallExplicit(ty.ptr(workgroup, ty.runtime_array(ty.vec4u())), BuiltinFn::kBufferView,
-                       Vector{ty.runtime_array(ty.vec4u())}, let, 4_u);
+                       Vector<TemplateParameter, 1>{ty.runtime_array(ty.vec4u())}, let, 4_u);
         b.Return(ep);
     });
 
@@ -2491,7 +2491,8 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_RuntimeStruct)
     auto* ep = b.ComputeFunction("ep", 1_u, 1_u, 1_u);
     b.Append(ep->Block(), [&] {
         auto* let = b.Let("l", v);
-        b.CallExplicit(ty.ptr(workgroup, S), BuiltinFn::kBufferView, Vector{S}, let, 0_u);
+        b.CallExplicit(ty.ptr(workgroup, S), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{S}, let, 0_u);
         b.Return(ep);
     });
 
@@ -2545,7 +2546,8 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_RuntimeStruct_
     auto* ep = b.ComputeFunction("ep", 1_u, 1_u, 1_u);
     b.Append(ep->Block(), [&] {
         auto* let = b.Let("l", v);
-        b.CallExplicit(ty.ptr(workgroup, S), BuiltinFn::kBufferView, Vector{S}, let, 4_u);
+        b.CallExplicit(ty.ptr(workgroup, S), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{S}, let, 4_u);
         b.Return(ep);
     });
 
@@ -2591,7 +2593,8 @@ TEST_F(IR_SubstituteOverridesTest, BufferView_OverrideSizedOffset) {
 
     auto* ep = b.ComputeFunction("ep", 1_u, 1_u, 1_u);
     b.Append(ep->Block(), [&] {
-        b.CallExplicit(ty.ptr(workgroup, ty.u32()), BuiltinFn::kBufferView, Vector{ty.u32()}, v, o);
+        b.CallExplicit(ty.ptr(workgroup, ty.u32()), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{ty.u32()}, v, o);
         b.Return(ep);
     });
 
@@ -2644,7 +2647,8 @@ TEST_F(IR_SubstituteOverridesTest, BufferArrayView_BufferSize) {
 
     auto* ep = b.ComputeFunction("ep", 1_u, 1_u, 1_u);
     b.Append(ep->Block(), [&] {
-        b.CallExplicit(ty.ptr(workgroup, S), BuiltinFn::kBufferArrayView, Vector{S}, v, o, s);
+        b.CallExplicit(ty.ptr(workgroup, S), BuiltinFn::kBufferArrayView,
+                       Vector<TemplateParameter, 1>{S}, v, o, s);
         b.Return(ep);
     });
 
@@ -2706,7 +2710,8 @@ TEST_F(IR_SubstituteOverridesTest, BufferArrayView_Size) {
 
     auto* ep = b.ComputeFunction("ep", 1_u, 1_u, 1_u);
     b.Append(ep->Block(), [&] {
-        b.CallExplicit(ty.ptr(workgroup, S), BuiltinFn::kBufferArrayView, Vector{S}, v, o, s);
+        b.CallExplicit(ty.ptr(workgroup, S), BuiltinFn::kBufferArrayView,
+                       Vector<TemplateParameter, 1>{S}, v, o, s);
         b.Return(ep);
     });
 
@@ -2767,7 +2772,8 @@ TEST_F(IR_SubstituteOverridesTest, BufferArrayView_SizeMultiple) {
 
     auto* ep = b.ComputeFunction("ep", 1_u, 1_u, 1_u);
     b.Append(ep->Block(), [&] {
-        b.CallExplicit(ty.ptr(workgroup, S), BuiltinFn::kBufferArrayView, Vector{S}, v, o, s);
+        b.CallExplicit(ty.ptr(workgroup, S), BuiltinFn::kBufferArrayView,
+                       Vector<TemplateParameter, 1>{S}, v, o, s);
         b.Return(ep);
     });
 
@@ -2820,8 +2826,8 @@ TEST_F(IR_SubstituteOverridesTest, BufferView_ThroughCall_Unsized) {
     auto* p = b.FunctionParam("p", ty.ptr(workgroup, ty.unsized_buffer()));
     foo->SetParams({p});
     b.Append(foo->Block(), [&] {
-        b.CallExplicit(ty.ptr(workgroup, ty.vec4u()), BuiltinFn::kBufferView, Vector{ty.vec4u()}, p,
-                       0_u);
+        b.CallExplicit(ty.ptr(workgroup, ty.vec4u()), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{ty.vec4u()}, p, 0_u);
         b.Return(foo);
     });
 
@@ -2876,8 +2882,8 @@ TEST_F(IR_SubstituteOverridesTest, BufferView_ThroughCall_SmallerSize) {
     auto* p = b.FunctionParam("p", ty.ptr(workgroup, ty.buffer(16)));
     foo->SetParams({p});
     b.Append(foo->Block(), [&] {
-        b.CallExplicit(ty.ptr(workgroup, ty.vec4u()), BuiltinFn::kBufferView, Vector{ty.vec4u()}, p,
-                       o);
+        b.CallExplicit(ty.ptr(workgroup, ty.vec4u()), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{ty.vec4u()}, p, o);
         b.Return(foo);
     });
 

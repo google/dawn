@@ -80,7 +80,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, CloneWithExplicitParams) {
 
     auto* t = b.FunctionParam("t", buf);
     auto* builtin = b.MemberCall<MemberBuiltinCall>(mod.Types().u32(), BuiltinFn::kLoad, t, 2_u);
-    builtin->SetExplicitTemplateParams(Vector{mod.Types().i32()});
+    builtin->SetExplicitTemplateParams(Vector<core::ir::TemplateParameter, 1>{mod.Types().i32()});
 
     auto* new_b = clone_ctx.Clone(builtin);
     EXPECT_NE(builtin->Result(), new_b->Result());

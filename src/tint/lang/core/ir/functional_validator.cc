@@ -693,8 +693,8 @@ void Functional::CheckConstruct(const Construct* construct) {
     auto arg_types = Transform<4>(args, [&](auto* v) { return v->Type(); });
     if (auto* vec = result_type->As<core::type::Vector>()) {
         auto ctor_conv = intrinsic::VectorCtorConv(vec->Width());
-        auto match = table.Lookup(ctor_conv, Vector{vec->Type()}, std::move(arg_types),
-                                  core::EvaluationStage::kConstant);
+        auto match = table.Lookup(ctor_conv, Vector<TemplateParameter, 1>{vec->Type()},
+                                  std::move(arg_types), core::EvaluationStage::kConstant);
         if (match != Success || vec->Type() != arg_types[0]->DeepestElement()) {
             AddError(construct) << "no matching overload for " << vec->FriendlyName()
                                 << " constructor";
@@ -704,8 +704,8 @@ void Functional::CheckConstruct(const Construct* construct) {
 
     if (auto* mat = result_type->As<core::type::Matrix>()) {
         auto ctor_conv = intrinsic::MatrixCtorConv(mat->Columns(), mat->Rows());
-        auto match = table.Lookup(ctor_conv, Vector{mat->Type()}, std::move(arg_types),
-                                  core::EvaluationStage::kConstant);
+        auto match = table.Lookup(ctor_conv, Vector<TemplateParameter, 1>{mat->Type()},
+                                  std::move(arg_types), core::EvaluationStage::kConstant);
         if (match != Success) {
             AddError(construct) << "no matching overload for " << mat->FriendlyName()
                                 << " constructor";
@@ -1205,15 +1205,10 @@ void Functional::CheckUnary(const Unary* u) {
 void Functional::CheckBuiltinCall(const BuiltinCall* call) {
     auto args = Transform<8>(call->Args(), [&](const ir::Value* v) { return v->Type(); });
 
-    // TODO(520804445): Remove this when calls support more template kinds.
-    Vector<core::intrinsic::TemplateParameter, 1> converted;
-    converted.Reserve(call->ExplicitTemplateParams().Length());
-    for (auto* ty : call->ExplicitTemplateParams()) {
-        converted.Push(ty);
-    }
     intrinsic::Context context{call->TableData(), type_mgr_, symbols_};
     auto builtin = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
-                                             converted, args, core::EvaluationStage::kRuntime);
+                                             call->ExplicitTemplateParams(), args,
+                                             core::EvaluationStage::kRuntime);
     if (builtin != Success) {
         AddError(call) << builtin.Failure();
         return;
@@ -1378,7 +1373,7 @@ void Functional::CheckConvert(const Convert* convert) {
     auto* value_type = convert->Operand(Convert::kValueOperandOffset)->Type();
 
     intrinsic::CtorConv conv_ty;
-    Vector<const core::type::Type*, 1> template_type;
+    Vector<TemplateParameter, 1> template_type;
     tint::Switch(
         result_type,                                                             //
         [&](const core::type::I32*) { conv_ty = intrinsic::CtorConv::kI32; },    //

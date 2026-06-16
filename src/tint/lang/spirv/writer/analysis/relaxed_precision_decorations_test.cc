@@ -658,8 +658,8 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest, SampledTexture_Read_Converte
         auto* loaded_image = b.Load(image);
         auto* loaded_sampler = b.Load(sampler);
         auto* sampled_image = b.CallExplicit<ir::BuiltinCall>(
-            ty.Get<type::SampledImage>(image_type), BuiltinFn::kOpSampledImage, Vector{image_type},
-            loaded_image, loaded_sampler);
+            ty.Get<type::SampledImage>(image_type), BuiltinFn::kOpSampledImage,
+            Vector<core::ir::TemplateParameter, 1>{image_type}, loaded_image, loaded_sampler);
 
         sample = b.Call<ir::BuiltinCall>(ty.vec4f(), BuiltinFn::kImageSampleImplicitLod,
                                          sampled_image, coords, Literal(0u))
@@ -712,8 +712,8 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest, SampledTexture_Read_NotConve
         auto* loaded_image = b.Load(image);
         auto* loaded_sampler = b.Load(sampler);
         auto* sampled_image = b.CallExplicit<ir::BuiltinCall>(
-            ty.Get<type::SampledImage>(image_type), BuiltinFn::kOpSampledImage, Vector{image_type},
-            loaded_image, loaded_sampler);
+            ty.Get<type::SampledImage>(image_type), BuiltinFn::kOpSampledImage,
+            Vector<core::ir::TemplateParameter, 1>{image_type}, loaded_image, loaded_sampler);
 
         sample = b.Call<ir::BuiltinCall>(ty.vec4f(), BuiltinFn::kImageSampleImplicitLod,
                                          sampled_image, coords, Literal(0u))

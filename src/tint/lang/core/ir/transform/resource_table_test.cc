@@ -116,8 +116,8 @@ TEST_F(IR_ResourceTableTest, MissingConfig) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("t",
-              b.CallExplicit(ty.bool_(), core::BuiltinFn::kHasResource, Vector{texture_ty}, 1_u));
+        b.Let("t", b.CallExplicit(ty.bool_(), core::BuiltinFn::kHasResource,
+                                  Vector<TemplateParameter, 1>{texture_ty}, 1_u));
         b.Return(func);
     });
 
@@ -144,8 +144,8 @@ TEST_F(IR_ResourceTableTest, HasResource) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("t",
-              b.CallExplicit(ty.bool_(), core::BuiltinFn::kHasResource, Vector{texture_ty}, 1_u));
+        b.Let("t", b.CallExplicit(ty.bool_(), core::BuiltinFn::kHasResource,
+                                  Vector<TemplateParameter, 1>{texture_ty}, 1_u));
         b.Return(func);
     });
 
@@ -218,8 +218,8 @@ TEST_F(IR_ResourceTableTest, HasResource_Filterable) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("t",
-              b.CallExplicit(ty.bool_(), core::BuiltinFn::kHasResource, Vector{texture_ty}, 2_u));
+        b.Let("t", b.CallExplicit(ty.bool_(), core::BuiltinFn::kHasResource,
+                                  Vector<TemplateParameter, 1>{texture_ty}, 2_u));
         b.Return(func);
     });
 
@@ -295,8 +295,8 @@ TEST_F(IR_ResourceTableTest, HasResource_Unfilterable) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("t",
-              b.CallExplicit(ty.bool_(), core::BuiltinFn::kHasResource, Vector{texture_ty}, 2_u));
+        b.Let("t", b.CallExplicit(ty.bool_(), core::BuiltinFn::kHasResource,
+                                  Vector<TemplateParameter, 1>{texture_ty}, 2_u));
         b.Return(func);
     });
 
@@ -372,8 +372,8 @@ TEST_F(IR_ResourceTableTest, GetResource_Texture) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* tex =
-            b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource, Vector{texture_ty}, 1_u);
+        auto* tex = b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{texture_ty}, 1_u);
         b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, tex);
         b.Return(func);
     });
@@ -461,10 +461,10 @@ TEST_F(IR_ResourceTableTest, GetResource_ResourceTexture_ResourceSampler) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* tex =
-            b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource, Vector{texture_ty}, 1_u);
-        auto* sam =
-            b.CallExplicit(sampler_ty, core::BuiltinFn::kGetResource, Vector{sampler_ty}, 2_u);
+        auto* tex = b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{texture_ty}, 1_u);
+        auto* sam = b.CallExplicit(sampler_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{sampler_ty}, 2_u);
 
         b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSample, tex, sam,
                b.Splat(ty.vec2<f32>(), 0_f));
@@ -639,8 +639,8 @@ TEST_F(IR_ResourceTableTest, GetResource_ResourceTexture_VarSampler) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* tex =
-            b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource, Vector{texture_ty}, 1_u);
+        auto* tex = b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{texture_ty}, 1_u);
 
         core::ir::Load* sam = b.Load(sam_var);
         b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSample, tex, sam,
@@ -776,8 +776,8 @@ TEST_F(IR_ResourceTableTest, GetResource_ResourceTexture_VarSamplerNonFiltering)
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* tex =
-            b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource, Vector{texture_ty}, 1_u);
+        auto* tex = b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{texture_ty}, 1_u);
 
         core::ir::Load* sam = b.Load(sam_var);
         b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSample, tex, sam,
@@ -899,8 +899,8 @@ TEST_F(IR_ResourceTableTest, GetResource_VarTexture_ResourceSampler) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* sam =
-            b.CallExplicit(sampler_ty, core::BuiltinFn::kGetResource, Vector{sampler_ty}, 1_u);
+        auto* sam = b.CallExplicit(sampler_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{sampler_ty}, 1_u);
 
         core::ir::Load* tex = b.Load(tex_var);
         b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSample, tex, sam,
@@ -1042,8 +1042,8 @@ TEST_F(IR_ResourceTableTest, GetResource_MultiUse) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* tex =
-            b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource, Vector{texture_ty}, 1_u);
+        auto* tex = b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{texture_ty}, 1_u);
         b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, tex);
         b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, tex);
         b.Return(func);
@@ -1167,8 +1167,8 @@ TEST_F(IR_ResourceTableTest, GetResource_MultiUse_DifferentScope) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* tex =
-            b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource, Vector{texture_ty}, 1_u);
+        auto* tex = b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{texture_ty}, 1_u);
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] {
             b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, tex);
@@ -1309,7 +1309,8 @@ TEST_F(IR_ResourceTableTest, GetResource_Unused) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource, Vector{texture_ty}, 2_u);
+        b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource,
+                       Vector<TemplateParameter, 1>{texture_ty}, 2_u);
         b.Return(func);
     });
 
@@ -1366,8 +1367,8 @@ TEST_F(IR_ResourceTableTest, HasResource_GetSamplerIndexFromMetadata) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("t",
-              b.CallExplicit(ty.bool_(), core::BuiltinFn::kHasResource, Vector{sampler_ty}, 1_u));
+        b.Let("t", b.CallExplicit(ty.bool_(), core::BuiltinFn::kHasResource,
+                                  Vector<TemplateParameter, 1>{sampler_ty}, 1_u));
         b.Return(func);
     });
 
@@ -1448,8 +1449,8 @@ TEST_F(IR_ResourceTableTest, GetResource_GetSamplerIndexFromMetadata) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         core::ir::Load* tex = b.Load(tex_var);
-        core::ir::Instruction* sam =
-            b.CallExplicit(sampler_ty, core::BuiltinFn::kGetResource, Vector{sampler_ty}, 1_u);
+        core::ir::Instruction* sam = b.CallExplicit(sampler_ty, core::BuiltinFn::kGetResource,
+                                                    Vector<TemplateParameter, 1>{sampler_ty}, 1_u);
 
         b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSample, tex, sam,
                b.Splat(ty.vec2<f32>(), 0_f));
@@ -1593,8 +1594,8 @@ TEST_F(IR_ResourceTableTest, GetResource_ResourceTexture_VarComparisonSampler) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* tex =
-            b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource, Vector{texture_ty}, 1_u);
+        auto* tex = b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{texture_ty}, 1_u);
 
         core::ir::Load* sam = b.Load(sam_var);
         b.Call(ty.f32(), core::BuiltinFn::kTextureSampleCompare, tex, sam,
@@ -1696,10 +1697,10 @@ TEST_F(IR_ResourceTableTest, GetResource_ResourceTexture_ResourcerComparisonSamp
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* tex =
-            b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource, Vector{texture_ty}, 1_u);
-        auto* sam =
-            b.CallExplicit(sampler_ty, core::BuiltinFn::kGetResource, Vector{sampler_ty}, 2_u);
+        auto* tex = b.CallExplicit(texture_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{texture_ty}, 1_u);
+        auto* sam = b.CallExplicit(sampler_ty, core::BuiltinFn::kGetResource,
+                                   Vector<TemplateParameter, 1>{sampler_ty}, 2_u);
 
         b.Call(ty.f32(), core::BuiltinFn::kTextureSampleCompare, tex, sam,
                b.Splat(ty.vec2<f32>(), 0_f), 0_f);

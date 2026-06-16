@@ -580,7 +580,7 @@ TEST_F(MslWriterTest, BufferView_Workgroup) {
     b.Append(entry->Block(), [&] {
         auto* call =
             b.CallExplicit(ty.ptr(workgroup, ty.vec4(ty.f32())), core::BuiltinFn::kBufferView,
-                           Vector{ty.vec4(ty.f32())}, v, 0_u);
+                           Vector<core::ir::TemplateParameter, 1>{ty.vec4(ty.f32())}, v, 0_u);
         b.StoreVectorElement(call, 0_u, 0_f);
         b.Return(entry);
     });
@@ -651,8 +651,8 @@ TEST_F(MslWriterTest, BufferView_HostStruct_SubFunction) {
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* view =
-            b.CallExplicit(ty.ptr(workgroup, S), core::BuiltinFn::kBufferView, Vector{S}, var, 0_u);
+        auto* view = b.CallExplicit(ty.ptr(workgroup, S), core::BuiltinFn::kBufferView,
+                                    Vector<core::ir::TemplateParameter, 1>{S}, var, 0_u);
         b.Let("p", view);
         b.Return(foo);
     });

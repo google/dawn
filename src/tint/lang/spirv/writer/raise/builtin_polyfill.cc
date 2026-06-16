@@ -353,12 +353,14 @@ struct State {
             b.InsertBefore(construct, [&] {
                 if (sm_ty->Type()->Is<core::type::I8>()) {
                     value = b.CallExplicit<spirv::ir::BuiltinCall>(
-                                 ty.i8(), spirv::BuiltinFn::kSConvert, Vector{ty.i8()},
+                                 ty.i8(), spirv::BuiltinFn::kSConvert,
+                                 Vector<core::ir::TemplateParameter, 1>{ty.i8()},
                                  b.Clamp(value, -128_i, 127_i))
                                 ->Result();
                 } else if (sm_ty->Type()->Is<core::type::U8>()) {
                     value = b.CallExplicit<spirv::ir::BuiltinCall>(
-                                 ty.u8(), spirv::BuiltinFn::kUConvert, Vector{ty.u8()},
+                                 ty.u8(), spirv::BuiltinFn::kUConvert,
+                                 Vector<core::ir::TemplateParameter, 1>{ty.u8()},
                                  b.Clamp(value, 0_u, 255_u))
                                 ->Result();
                 }
@@ -777,7 +779,7 @@ struct State {
         // Use OpSampledImage to create an OpTypeSampledImage object.
         auto* sampled_image = b.CallExplicit<spirv::ir::BuiltinCall>(
             ty.Get<type::SampledImage>(texture_ty), spirv::BuiltinFn::kOpSampledImage,
-            Vector{texture_ty}, Vector{texture, sampler});
+            Vector<core::ir::TemplateParameter, 1>{texture_ty}, Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 
         // Append the array index to the coordinates if provided.
@@ -836,7 +838,7 @@ struct State {
                 // Get texture dimensions. The return type depends on if it was an array texture.
                 auto* dim = b.CallExplicit<spirv::ir::BuiltinCall>(
                     array_idx ? ty.vec3u() : ty.vec2u(), spirv::BuiltinFn::kImageQuerySizeLod,
-                    Vector{ty.u32()}, texture, b.Constant(0_i));
+                    Vector<core::ir::TemplateParameter, 1>{ty.u32()}, texture, b.Constant(0_i));
 
                 auto* dim2u = b.Swizzle(ty.vec2u(), dim, {0, 1});
                 auto* fdim = b.Convert(ty.vec2f(), dim2u);
@@ -975,7 +977,7 @@ struct State {
         // Use OpSampledImage to create an OpTypeSampledImage object.
         auto* sampled_image = b.CallExplicit<spirv::ir::BuiltinCall>(
             ty.Get<type::SampledImage>(texture_ty), spirv::BuiltinFn::kOpSampledImage,
-            Vector{texture_ty}, Vector{texture, sampler});
+            Vector<core::ir::TemplateParameter, 1>{texture_ty}, Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 
         // Append the array index to the coordinates if provided.
@@ -1163,7 +1165,8 @@ struct State {
 
         // Call the function.
         core::ir::Instruction* result = b.CallExplicit<spirv::ir::BuiltinCall>(
-            result_ty, function, Vector{ty.u32()}, std::move(function_args));
+            result_ty, function, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+            std::move(function_args));
         result->InsertBefore(builtin);
 
         // Swizzle the first two components from the result for arrayed textures.
@@ -1184,9 +1187,9 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Call the function.
             auto* res_ty = builtin->Result()->Type();
-            b.CallExplicitWithResult<spirv::ir::BuiltinCall>(builtin->DetachResult(),
-                                                             spirv::BuiltinFn::kImageQueryLevels,
-                                                             Vector{res_ty}, Vector{args[0]});
+            b.CallExplicitWithResult<spirv::ir::BuiltinCall>(
+                builtin->DetachResult(), spirv::BuiltinFn::kImageQueryLevels,
+                Vector<core::ir::TemplateParameter, 1>{res_ty}, Vector{args[0]});
         });
         builtin->Destroy();
     }
@@ -1199,9 +1202,9 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Call the function.
             auto* res_ty = builtin->Result()->Type();
-            b.CallExplicitWithResult<spirv::ir::BuiltinCall>(builtin->DetachResult(),
-                                                             spirv::BuiltinFn::kImageQuerySamples,
-                                                             Vector{res_ty}, Vector{args[0]});
+            b.CallExplicitWithResult<spirv::ir::BuiltinCall>(
+                builtin->DetachResult(), spirv::BuiltinFn::kImageQuerySamples,
+                Vector<core::ir::TemplateParameter, 1>{res_ty}, Vector{args[0]});
         });
         builtin->Destroy();
     }
@@ -1227,7 +1230,8 @@ struct State {
 
         // Call the function.
         auto* texture_call = b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec3u(), function, Vector{ty.u32()}, std::move(function_args));
+            ty.vec3u(), function, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+            std::move(function_args));
         texture_call->InsertBefore(builtin);
 
         // Extract the third component to get the number of array layers.
@@ -1387,7 +1391,7 @@ struct State {
             auto* call = b.CallWithResult<spirv::ir::BuiltinCall>(
                 builtin->DetachResult(), spirv::BuiltinFn::kCooperativeMatrixLoad, src, layout,
                 applied_stride, memory_operand);
-            call->SetExplicitTemplateParams(Vector{result_ty});
+            call->SetExplicitTemplateParams(Vector<core::ir::TemplateParameter, 1>{result_ty});
         });
         builtin->Destroy();
     }
@@ -1505,12 +1509,14 @@ struct State {
             auto* sm_ty = mat->Type()->As<core::type::SubgroupMatrix>();
             if (sm_ty->Type()->Is<core::type::I8>()) {
                 scalar = b.CallExplicit<spirv::ir::BuiltinCall>(
-                              ty.i8(), spirv::BuiltinFn::kSConvert, Vector{ty.i8()},
+                              ty.i8(), spirv::BuiltinFn::kSConvert,
+                              Vector<core::ir::TemplateParameter, 1>{ty.i8()},
                               b.Clamp(scalar, -128_i, 127_i))
                              ->Result();
             } else if (sm_ty->Type()->Is<core::type::U8>()) {
                 scalar = b.CallExplicit<spirv::ir::BuiltinCall>(
-                              ty.u8(), spirv::BuiltinFn::kUConvert, Vector{ty.u8()},
+                              ty.u8(), spirv::BuiltinFn::kUConvert,
+                              Vector<core::ir::TemplateParameter, 1>{ty.u8()},
                               b.Clamp(scalar, 0_u, 255_u))
                              ->Result();
             }

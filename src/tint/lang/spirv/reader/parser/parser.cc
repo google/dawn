@@ -3170,7 +3170,9 @@ class Parser {
         auto* si = Value(inst.GetSingleWordInOperand(0));
         Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
                  Type(inst.type_id()), spirv::BuiltinFn::kOpImage,
-                 Vector{si->Type()->As<spirv::type::SampledImage>()->Image()}, Args(inst, 2)),
+                 Vector<core::ir::TemplateParameter, 1>{
+                     si->Type()->As<spirv::type::SampledImage>()->Image()},
+                 Args(inst, 2)),
              inst.result_id());
     }
 
@@ -3180,9 +3182,9 @@ class Parser {
         TINT_ASSERT(img_type);
         TINT_ASSERT(img_type->GetMultisampled() != type::Multisampled::kMultisampled)
             << "Creating an OpTypeSampledImage from a multisampled image is not supported";
-        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(Type(inst.type_id()),
-                                                     spirv::BuiltinFn::kOpSampledImage,
-                                                     Vector{tex->Type()}, Args(inst, 2)),
+        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
+                 Type(inst.type_id()), spirv::BuiltinFn::kOpSampledImage,
+                 Vector<core::ir::TemplateParameter, 1>{tex->Type()}, Args(inst, 2)),
              inst.result_id());
     }
 
@@ -3328,7 +3330,8 @@ class Parser {
         auto* image = Value(inst.GetSingleWordInOperand(0));
 
         auto* ty = Type(inst.type_id());
-        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(ty, fn, Vector{ty->DeepestElement()}, image),
+        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
+                 ty, fn, Vector<core::ir::TemplateParameter, 1>{ty->DeepestElement()}, image),
              inst.result_id());
     }
 
@@ -3337,8 +3340,9 @@ class Parser {
         auto* level = Value(inst.GetSingleWordInOperand(1));
 
         auto* ty = Type(inst.type_id());
-        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(ty, spirv::BuiltinFn::kImageQuerySizeLod,
-                                                     Vector{ty->DeepestElement()}, image, level),
+        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
+                 ty, spirv::BuiltinFn::kImageQuerySizeLod,
+                 Vector<core::ir::TemplateParameter, 1>{ty->DeepestElement()}, image, level),
              inst.result_id());
     }
 
@@ -3897,9 +3901,10 @@ class Parser {
     void EmitSpirvExplicitBuiltinCall(const spvtools::opt::Instruction& inst,
                                       spirv::BuiltinFn fn,
                                       uint32_t first_operand_idx = 2) {
-        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn,
-                                                     Vector{Type(inst.type_id())->DeepestElement()},
-                                                     Args(inst, first_operand_idx)),
+        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
+                 Type(inst.type_id()), fn,
+                 Vector<core::ir::TemplateParameter, 1>{Type(inst.type_id())->DeepestElement()},
+                 Args(inst, first_operand_idx)),
              inst.result_id());
     }
 
@@ -3913,9 +3918,9 @@ class Parser {
 
     void EmitBitCount(const spvtools::opt::Instruction& inst) {
         auto* res_ty = Type(inst.type_id());
-        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(res_ty, spirv::BuiltinFn::kBitCount,
-                                                     Vector{res_ty->DeepestElement()},
-                                                     Args(inst, 2)),
+        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
+                 res_ty, spirv::BuiltinFn::kBitCount,
+                 Vector<core::ir::TemplateParameter, 1>{res_ty->DeepestElement()}, Args(inst, 2)),
              inst.result_id());
     }
 
@@ -4144,8 +4149,9 @@ class Parser {
         return spirv::BuiltinFn::kNone;
     }
 
-    Vector<const core::type::Type*, 1> GlslStd450ExplicitParams(uint32_t ext_opcode,
-                                                                const core::type::Type* result_ty) {
+    Vector<core::ir::TemplateParameter, 1> GlslStd450ExplicitParams(
+        uint32_t ext_opcode,
+        const core::type::Type* result_ty) {
         if (ext_opcode == GLSLstd450SSign || ext_opcode == GLSLstd450SAbs ||
             ext_opcode == GLSLstd450SMax || ext_opcode == GLSLstd450SMin ||
             ext_opcode == GLSLstd450SClamp || ext_opcode == GLSLstd450UMax ||

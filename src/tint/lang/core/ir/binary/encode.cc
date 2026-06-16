@@ -284,8 +284,16 @@ struct Encoder {
     void InstructionBuiltinCall(pb::InstructionBuiltinCall& call_out,
                                 const ir::CoreBuiltinCall* call_in) {
         call_out.set_builtin(BuiltinFn(call_in->Func()));
-        for (auto* param : call_in->ExplicitTemplateParams()) {
-            call_out.add_explicit_template_params(Type(param));
+        for (auto param : call_in->ExplicitTemplateParams()) {
+            if (std::holds_alternative<const core::type::Type*>(param)) {
+                auto* p = call_out.add_explicit_template_parameters();
+                p->set_type(Type(std::get<const core::type::Type*>(param)));
+            } else if (std::holds_alternative<core::Majorness>(param)) {
+                auto* p = call_out.add_explicit_template_parameters();
+                p->set_majorness(Majorness(std::get<core::Majorness>(param)));
+            } else {
+                TINT_ICE() << "invalid template parameter kind";
+            }
         }
     }
 
@@ -877,6 +885,18 @@ struct Encoder {
                 break;
         }
         TINT_ICE() << "invalid Access: " << in;
+    }
+
+    pb::Majorness Majorness(core::Majorness in) {
+        switch (in) {
+            case core::Majorness::kRowMajor:
+                return pb::Majorness::row_major;
+            case core::Majorness::kColMajor:
+                return pb::Majorness::col_major;
+            case core::Majorness::kUndefined:
+                break;
+        }
+        TINT_ICE() << "invalid Majorness: " << in;
     }
 
     pb::UnaryOp UnaryOp(core::UnaryOp in) {

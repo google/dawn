@@ -1106,7 +1106,7 @@ class Impl {
                 new_args[2] = nullptr;
                 new_args[3] = args[2];
 
-                Vector<const core::type::Type*, 1> templates;
+                Vector<core::ir::TemplateParameter, 1> templates;
 
                 // Keep the type template.
                 auto* res_type_sem = impl.program_.Sem().Get(tmpl->arguments[0]);
@@ -1208,7 +1208,7 @@ class Impl {
                         if (b->Overload().num_explicit_templates > 0) {
                             auto* tmpl = expr->target->identifier->As<ast::TemplatedIdentifier>();
                             TINT_ASSERT(tmpl);
-                            Vector<const core::type::Type*, 1> explicit_types;
+                            Vector<core::ir::TemplateParameter, 1> explicit_types;
                             for (uint32_t i = 0; i < b->Overload().num_explicit_templates; i++) {
                                 auto* tmpl_sem = impl.program_.Sem().Get(tmpl->arguments[i]);
                                 auto* tmpl_ty = tmpl_sem->As<sem::TypeExpression>();

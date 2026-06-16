@@ -584,9 +584,9 @@ struct Decoder {
     ir::CoreBuiltinCall* CreateInstructionBuiltinCall(const pb::InstructionBuiltinCall& call_in) {
         auto* call_out = mod_out_.CreateInstruction<ir::CoreBuiltinCall>();
         call_out->SetFunc(BuiltinFn(call_in.builtin()));
-        Vector<const core::type::Type*, 1> params;
-        for (auto param : call_in.explicit_template_params()) {
-            params.Push(Type(param));
+        Vector<TemplateParameter, 1> params;
+        for (auto param : call_in.explicit_template_parameters()) {
+            params.Push(CreateTemplateParameter(param));
         }
         call_out->SetExplicitTemplateParams(params);
         return call_out;
@@ -1273,6 +1273,28 @@ struct Decoder {
         if (!value_out) {
             err_ << "invalid value kind: " << std::to_string(value_in.kind_case()) << "\n";
             return b.InvalidConstant();
+        }
+
+        return value_out;
+    }
+
+    ir::TemplateParameter CreateTemplateParameter(const pb::TemplateParameter& value_in) {
+        ir::TemplateParameter value_out = nullptr;
+        switch (value_in.kind_case()) {
+            case pb::TemplateParameter::KindCase::kType:
+                value_out = Type(value_in.type());
+                break;
+            case pb::TemplateParameter::KindCase::kMajorness:
+                value_out = Majorness(value_in.majorness());
+                break;
+            case pb::TemplateParameter::KindCase::KIND_NOT_SET:
+                break;
+        }
+
+        if (value_out.index() == std::variant_npos) {
+            err_ << "invalid template parameter kind: " << std::to_string(value_in.kind_case())
+                 << "\n";
+            return mod_out_.Types().invalid();
         }
 
         return value_out;

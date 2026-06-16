@@ -54,13 +54,16 @@ std::optional<ResourceTableConfig> GenerateResourceTableConfig(Module& mod,
         }
         auto exp = call->ExplicitTemplateParams();
         TINT_IR_ASSERT(mod, exp.Length() == 1);
+        TINT_IR_ASSERT(mod, std::holds_alternative<const core::type::Type*>(exp[0]));
 
-        std::vector<ResourceType> converts = ConvertsFrom(exp[0]);
+        std::vector<ResourceType> converts =
+            ConvertsFrom(std::get<const core::type::Type*>(exp[0]));
         // The converts from only contains values for the filterable types, for
         // the others it returns empty so we need to add the ResourceType for
         // that specific type.
         if (converts.empty()) {
-            default_binding_type_order.push_back(TypeToResourceType(exp[0]));
+            default_binding_type_order.push_back(
+                TypeToResourceType(std::get<const core::type::Type*>(exp[0])));
         } else {
             for (ResourceType from : converts) {
                 default_binding_type_order.push_back(from);

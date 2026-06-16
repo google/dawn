@@ -51,7 +51,7 @@ TEST_F(MslWriter_DecomposeBufferTest, BufferView_u32_ZeroOffset) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* view = b.CallExplicit(ty.ptr(storage, ty.u32()), core::BuiltinFn::kBufferView,
-                                    Vector{ty.u32()}, gv, 0_u);
+                                    Vector<core::ir::TemplateParameter, 1>{ty.u32()}, gv, 0_u);
         b.Load(view);
         b.Return(func);
     });
@@ -101,9 +101,9 @@ TEST_F(MslWriter_DecomposeBufferTest, BufferArrayView_ArrayU32) {
     auto* size = b.FunctionParam("size", ty.i32());
     func->SetParams({offset, size});
     b.Append(func->Block(), [&] {
-        auto* view = b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())),
-                                    core::BuiltinFn::kBufferArrayView,
-                                    Vector{ty.runtime_array(ty.u32())}, gv, offset, size);
+        auto* view = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferArrayView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(ty.u32())}, gv, offset, size);
         b.Load(b.Access(ty.ptr(storage, ty.u32()), view, 4_u));
         b.Return(func);
     });
@@ -154,11 +154,11 @@ TEST_F(MslWriter_DecomposeBufferTest, MultipleCallsFromVariable) {
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
         auto* c1 = b.CallExplicit(ty.ptr(storage, ty.u32()), core::BuiltinFn::kBufferView,
-                                  Vector{ty.u32()}, gv, 0_u);
+                                  Vector<core::ir::TemplateParameter, 1>{ty.u32()}, gv, 0_u);
         b.Load(c1);
-        auto* c2 = b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())),
-                                  core::BuiltinFn::kBufferArrayView,
-                                  Vector{ty.runtime_array(ty.u32())}, gv, 16_u, 32_u);
+        auto* c2 = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferArrayView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(ty.u32())}, gv, 16_u, 32_u);
         b.Load(b.Access(ty.ptr(storage, ty.u32()), c2, 1_u));
         b.Return(foo);
     });
@@ -492,12 +492,12 @@ TEST_F(MslWriter_DecomposeBufferTest, UnifyParameters_WithUses) {
     auto* bar_p2 = b.FunctionParam("bar_p2", ty.ptr(workgroup, ty.buffer(256)));
     bar->SetParams({bar_p1, bar_p2});
     b.Append(bar->Block(), [&] {
-        auto* v1 =
-            b.CallExplicit(ty.ptr(storage, ty.array(ty.u32(), 64)), core::BuiltinFn::kBufferView,
-                           Vector{ty.array(ty.u32(), 64)}, bar_p1, 32_u);
-        auto* v2 = b.CallExplicit(ty.ptr(workgroup, ty.runtime_array(ty.u32())),
-                                  core::BuiltinFn::kBufferArrayView,
-                                  Vector{ty.runtime_array(ty.u32())}, bar_p2, 4_u, 12_u);
+        auto* v1 = b.CallExplicit(
+            ty.ptr(storage, ty.array(ty.u32(), 64)), core::BuiltinFn::kBufferView,
+            Vector<core::ir::TemplateParameter, 1>{ty.array(ty.u32(), 64)}, bar_p1, 32_u);
+        auto* v2 = b.CallExplicit(
+            ty.ptr(workgroup, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferArrayView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(ty.u32())}, bar_p2, 4_u, 12_u);
         b.Call(ty.void_(), baz, v1, v2);
         b.Return(bar);
     });
@@ -615,13 +615,13 @@ TEST_F(MslWriter_DecomposeBufferTest, FunctionCall_MultiCallSite_SameCaller) {
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* v1 = b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())),
-                                  core::BuiltinFn::kBufferArrayView,
-                                  Vector{ty.runtime_array(ty.u32())}, gv1, 16_u, 64_u);
+        auto* v1 = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferArrayView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(ty.u32())}, gv1, 16_u, 64_u);
         b.Call(ty.void_(), bar, v1);
-        auto* v2 = b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())),
-                                  core::BuiltinFn::kBufferView, Vector{ty.runtime_array(ty.u32())},
-                                  gv2, 32_u);
+        auto* v2 = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(ty.u32())}, gv2, 32_u);
         b.Call(ty.void_(), bar, v2);
         b.Call(ty.void_(), bar, gv3);
         b.Return(foo);
@@ -705,15 +705,15 @@ TEST_F(MslWriter_DecomposeBufferTest, FunctionCall_MultiCallSite_SameCaller_With
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* v1 = b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())),
-                                  core::BuiltinFn::kBufferArrayView,
-                                  Vector{ty.runtime_array(ty.u32())}, gv1, 16_u, 64_u);
+        auto* v1 = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferArrayView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(ty.u32())}, gv1, 16_u, 64_u);
         auto* l1 = b.Let("l1", v1);
         b.Call(ty.void_(), bar, l1);
         auto* l2 = b.Let("l2", gv2);
-        auto* v2 = b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())),
-                                  core::BuiltinFn::kBufferView, Vector{ty.runtime_array(ty.u32())},
-                                  l2, 32_u);
+        auto* v2 = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(ty.u32())}, l2, 32_u);
         b.Call(ty.void_(), bar, v2);
         b.Call(ty.void_(), bar, gv3);
         b.Return(foo);

@@ -1596,8 +1596,8 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixLoad_OOBOffset) {
     f->SetParams({arr_param});
 
     b.Append(f->Block(), [&] {
-        b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat_ty}, arr_param, 8_u,
-                       true, 8_u);
+        b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 1>{mat_ty}, arr_param, 8_u, true, 8_u);
         b.Return(f);
     });
 
@@ -1617,8 +1617,8 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixLoad_NegativeOffset) {
     f->SetParams({arr_param});
 
     b.Append(f->Block(), [&] {
-        b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat_ty}, arr_param,
-                       -1_i, true, 8_u);
+        b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 1>{mat_ty}, arr_param, -1_i, true, 8_u);
         b.Return(f);
     });
 

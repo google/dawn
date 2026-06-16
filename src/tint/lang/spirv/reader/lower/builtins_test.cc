@@ -744,7 +744,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Scalar_UnsignedArg) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSign,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Constant(10_u));
         b.Return(ep);
     });
@@ -777,7 +777,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Scalar_UnsignedResult) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSign,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Constant(10_i));
         b.Return(ep);
     });
@@ -810,7 +810,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Scalar_UnsignedArgAndResult) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSign,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Constant(10_u));
         b.Return(ep);
     });
@@ -844,7 +844,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Scalar_SignedArgAndResult) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSign,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Constant(10_i));
         b.Return(ep);
     });
@@ -876,7 +876,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Vector_UnsignedArg) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kSign,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat(ty.vec2u(), (10_u)));
         b.Return(ep);
     });
@@ -909,7 +909,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Vector_UnsignedResult) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kSign,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -942,7 +942,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Vector_UnsignedArgAndResult) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kSign,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -976,7 +976,7 @@ TEST_F(SpirvReader_BuiltinsTest, SSign_Vector_SignedArgAndResult) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kSign,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -1022,10 +1022,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamSigned, UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -1069,10 +1069,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamSigned, UnsignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -1114,10 +1114,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamSigned, SignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -1157,10 +1157,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamSigned, SignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -1211,10 +1211,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -1254,10 +1254,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, UnsignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -1299,10 +1299,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, SignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -1346,10 +1346,10 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, SignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -1400,9 +1400,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, UnsignedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 10_u, 15_u);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_u, 15_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2u(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
             b.Splat(ty.vec2u(), 10_u), b.Splat(ty.vec2u(), 15_u));
         b.Return(ep);
     });
@@ -1449,9 +1449,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, SignedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_i, 15_i);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_i, 15_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2i(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()},
             b.Splat(ty.vec2i(), 10_i), b.Splat(ty.vec2i(), 15_i));
         b.Return(ep);
     });
@@ -1492,9 +1492,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, MixedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 10_i, 10_u);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_i, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2u(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
             b.Splat(ty.vec2i(), 10_i), b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -1539,9 +1539,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, MixedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_u, 10_i);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2i(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()},
             b.Splat(ty.vec2u(), 10_u), b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -1593,9 +1593,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, UnsignedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 10_u, 15_u);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_u, 15_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2u(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
             b.Splat(ty.vec2u(), 10_u), b.Splat(ty.vec2u(), 15_u));
         b.Return(ep);
     });
@@ -1636,9 +1636,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, SignedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_i, 15_i);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_i, 15_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2i(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()},
             b.Splat(ty.vec2i(), 10_i), b.Splat(ty.vec2i(), 15_i));
         b.Return(ep);
     });
@@ -1685,9 +1685,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, MixedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 10_i, 10_u);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_i, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2u(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2u(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
             b.Splat(ty.vec2i(), 10_i), b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -1730,9 +1730,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, MixedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_u, 10_i);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2i(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2i(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()},
             b.Splat(ty.vec2u(), 10_u), b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -1781,10 +1781,10 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_UnsignedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSClamp,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_u,
-                                               15_u, 10_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               10_u, 15_u, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2u(), spirv::BuiltinFn::kSClamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2u(), spirv::BuiltinFn::kSClamp, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
             b.Splat(ty.vec2u(), 10_u), b.Splat(ty.vec2u(), 15_u), b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -1827,10 +1827,10 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_SignedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSClamp,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_i,
-                                               15_i, 10_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               10_i, 15_i, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2i(), spirv::BuiltinFn::kSClamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2i(), spirv::BuiltinFn::kSClamp, Vector<core::ir::TemplateParameter, 1>{ty.i32()},
             b.Splat(ty.vec2i(), 10_i), b.Splat(ty.vec2i(), 15_i), b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -1865,10 +1865,10 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_MixedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSClamp,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_i,
-                                               10_u, 10_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               10_i, 10_u, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2u(), spirv::BuiltinFn::kSClamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2u(), spirv::BuiltinFn::kSClamp, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
             b.Splat(ty.vec2i(), 10_i), b.Splat(ty.vec2u(), 10_u), b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -1907,10 +1907,10 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_MixedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSClamp,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_u,
-                                               10_i, 10_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               10_u, 10_i, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2i(), spirv::BuiltinFn::kSClamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2i(), spirv::BuiltinFn::kSClamp, Vector<core::ir::TemplateParameter, 1>{ty.i32()},
             b.Splat(ty.vec2u(), 10_u), b.Splat(ty.vec2i(), 10_i), b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -1949,10 +1949,10 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_UnsignedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kUClamp,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_u,
-                                               15_u, 10_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               10_u, 15_u, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2u(), spirv::BuiltinFn::kUClamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2u(), spirv::BuiltinFn::kUClamp, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
             b.Splat(ty.vec2u(), 10_u), b.Splat(ty.vec2u(), 15_u), b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -1987,10 +1987,10 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_SignedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kUClamp,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_i,
-                                               15_i, 10_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               10_i, 15_i, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2i(), spirv::BuiltinFn::kUClamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2i(), spirv::BuiltinFn::kUClamp, Vector<core::ir::TemplateParameter, 1>{ty.i32()},
             b.Splat(ty.vec2i(), 10_i), b.Splat(ty.vec2i(), 15_i), b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -2033,10 +2033,10 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_MixedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kUClamp,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_i,
-                                               10_u, 10_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               10_i, 10_u, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2u(), spirv::BuiltinFn::kUClamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2u(), spirv::BuiltinFn::kUClamp, Vector<core::ir::TemplateParameter, 1>{ty.u32()},
             b.Splat(ty.vec2i(), 10_i), b.Splat(ty.vec2u(), 10_u), b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -2075,10 +2075,10 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_MixedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kUClamp,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_u,
-                                               10_i, 10_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               10_u, 10_i, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2i(), spirv::BuiltinFn::kUClamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2i(), spirv::BuiltinFn::kUClamp, Vector<core::ir::TemplateParameter, 1>{ty.i32()},
             b.Splat(ty.vec2u(), 10_u), b.Splat(ty.vec2i(), 10_i), b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -2117,9 +2117,10 @@ TEST_F(SpirvReader_BuiltinsTest, FindILsb_SignedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kFindILsb,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kFindILsb,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -2154,9 +2155,10 @@ TEST_F(SpirvReader_BuiltinsTest, FindILsb_UnsignedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kFindILsb,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kFindILsb,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -2191,9 +2193,10 @@ TEST_F(SpirvReader_BuiltinsTest, FindILsb_SignedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kFindILsb,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kFindILsb,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -2230,9 +2233,10 @@ TEST_F(SpirvReader_BuiltinsTest, FindILsb_UnsignedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kFindILsb,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kFindILsb,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -2885,7 +2889,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Scalar_UnsignedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kBitCount,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               10_u);
         b.Return(ep);
     });
 
@@ -2917,7 +2922,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Scalar_UnsignedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kBitCount,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               10_u);
         b.Return(ep);
     });
 
@@ -2950,7 +2956,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Scalar_SignedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kBitCount,
-                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               10_i);
         b.Return(ep);
     });
 
@@ -2983,7 +2990,8 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Scalar_SignedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kBitCount,
-                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               10_i);
         b.Return(ep);
     });
 
@@ -3015,7 +3023,7 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Vector_UnsignedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kBitCount,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -3048,7 +3056,7 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Vector_UnsignedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kBitCount,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat(ty.vec2u(), 10_u));
         b.Return(ep);
     });
@@ -3082,7 +3090,7 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Vector_SignedToUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kBitCount,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -3116,7 +3124,7 @@ TEST_F(SpirvReader_BuiltinsTest, BitCount_Vector_SignedToSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kBitCount,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat(ty.vec2i(), 10_i));
         b.Return(ep);
     });
@@ -4139,7 +4147,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_SignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 50_i, 10_u);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 50_i, 10_u);
         b.Return(ep);
     });
 
@@ -4176,7 +4184,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_UnsignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_u, 50_i);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u, 50_i);
         b.Return(ep);
     });
 
@@ -4214,7 +4222,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_UnsignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_u, 20_u);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u, 20_u);
         b.Return(ep);
     });
 
@@ -4251,7 +4259,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_SignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 50_i, 10_u);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 50_i, 10_u);
         b.Return(ep);
     });
 
@@ -4289,7 +4297,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_UnsignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 10_u, 50_i);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_u, 50_i);
         b.Return(ep);
     });
 
@@ -4326,7 +4334,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_SignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 50_i, 60_i);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 50_i, 60_i);
         b.Return(ep);
     });
 
@@ -4363,7 +4371,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_SignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
         b.Return(ep);
     });
@@ -4402,7 +4410,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_UnsignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
         b.Return(ep);
     });
@@ -4442,7 +4450,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_UnsignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<u32>>(10_u), b.Splat<vec2<u32>>(20_u));
         b.Return(ep);
     });
@@ -4481,7 +4489,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_SignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
         b.Return(ep);
     });
@@ -4521,7 +4529,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_UnsignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
         b.Return(ep);
     });
@@ -4560,7 +4568,7 @@ TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_SignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<i32>>(50_i), b.Splat<vec2<i32>>(60_i));
         b.Return(ep);
     });
@@ -4614,7 +4622,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_SignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 50_i, 10_u);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 50_i, 10_u);
         b.Return(ep);
     });
 
@@ -4651,7 +4659,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_UnsignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_u, 50_i);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u, 50_i);
         b.Return(ep);
     });
 
@@ -4688,7 +4696,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_UnsignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_u, 20_u);
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 10_u, 20_u);
         b.Return(ep);
     });
 
@@ -4726,7 +4734,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_SignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 50_i, 10_u);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 50_i, 10_u);
         b.Return(ep);
     });
 
@@ -4764,7 +4772,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_UnsignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 10_u, 50_i);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 10_u, 50_i);
         b.Return(ep);
     });
 
@@ -4802,7 +4810,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_SignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 50_i, 60_i);
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 50_i, 60_i);
         b.Return(ep);
     });
 
@@ -4839,7 +4847,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_SignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
         b.Return(ep);
     });
@@ -4878,7 +4886,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_UnsignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
         b.Return(ep);
     });
@@ -4917,7 +4925,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_UnsignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<u32>>(10_u), b.Splat<vec2<u32>>(20_u));
         b.Return(ep);
     });
@@ -4957,7 +4965,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_SignedUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
         b.Return(ep);
     });
@@ -4997,7 +5005,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_UnsignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
         b.Return(ep);
     });
@@ -5037,7 +5045,7 @@ TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_SignedSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
-                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<i32>>(50_i), b.Splat<vec2<i32>>(60_i));
         b.Return(ep);
     });
@@ -5080,7 +5088,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_ScalarSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kConvertFToS,
-                                               Vector{ty.i32()}, 10_f);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               10_f);
         b.Return(ep);
     });
 
@@ -5111,7 +5120,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_ScalarUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kConvertFToS,
-                                               Vector{ty.u32()}, 10_f);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               10_f);
         b.Return(ep);
     });
 
@@ -5143,7 +5153,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_VectorSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kConvertFToS,
-                                               Vector{ty.i32()}, b.Splat<vec2<f32>>(10_f));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<f32>>(10_f));
         b.Return(ep);
     });
 
@@ -5174,7 +5185,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_VectorUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kConvertFToS,
-                                               Vector{ty.u32()}, b.Splat<vec2<f32>>(10_f));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<f32>>(10_f));
         b.Return(ep);
     });
 
@@ -5206,7 +5218,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_ScalarSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kConvertSToF,
-                                               Vector{ty.f32()}, 10_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.f32()},
+                                               10_i);
         b.Return(ep);
     });
 
@@ -5237,7 +5250,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_ScalarUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kConvertSToF,
-                                               Vector{ty.f32()}, 10_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.f32()},
+                                               10_u);
         b.Return(ep);
     });
 
@@ -5269,7 +5283,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_VectorSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2f(), spirv::BuiltinFn::kConvertSToF,
-                                               Vector{ty.f32()}, b.Splat<vec2<i32>>(10_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.f32()},
+                                               b.Splat<vec2<i32>>(10_i));
         b.Return(ep);
     });
 
@@ -5300,7 +5315,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_VectorUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2f(), spirv::BuiltinFn::kConvertSToF,
-                                               Vector{ty.f32()}, b.Splat<vec2<u32>>(10_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.f32()},
+                                               b.Splat<vec2<u32>>(10_u));
         b.Return(ep);
     });
 
@@ -5332,7 +5348,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_ScalarSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kConvertUToF,
-                                               Vector{ty.f32()}, 10_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.f32()},
+                                               10_i);
         b.Return(ep);
     });
 
@@ -5364,7 +5381,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_ScalarUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kConvertUToF,
-                                               Vector{ty.f32()}, 10_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.f32()},
+                                               10_u);
         b.Return(ep);
     });
 
@@ -5395,7 +5413,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_VectorSigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2f(), spirv::BuiltinFn::kConvertUToF,
-                                               Vector{ty.f32()}, b.Splat<vec2<i32>>(10_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.f32()},
+                                               b.Splat<vec2<i32>>(10_i));
         b.Return(ep);
     });
 
@@ -5427,7 +5446,8 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_VectorUnsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2f(), spirv::BuiltinFn::kConvertUToF,
-                                               Vector{ty.f32()}, b.Splat<vec2<u32>>(10_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.f32()},
+                                               b.Splat<vec2<u32>>(10_u));
         b.Return(ep);
     });
 
@@ -5460,7 +5480,8 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn, Vector{ty.i32()}, 1_i, 2_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 1_i, 2_i);
         b.Return(ep);
     });
 
@@ -5493,7 +5514,8 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedUnsigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn, Vector{ty.i32()}, 1_i, 8_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 1_i, 8_u);
         b.Return(ep);
     });
 
@@ -5527,7 +5549,8 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn, Vector{ty.i32()}, 8_u, 1_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 8_u, 1_i);
         b.Return(ep);
     });
 
@@ -5562,7 +5585,8 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedUnsigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn, Vector{ty.i32()}, 8_u, 9_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.i32()}, 8_u, 9_u);
         b.Return(ep);
     });
 
@@ -5596,7 +5620,8 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedUnsigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn, Vector{ty.u32()}, 8_u, 9_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 8_u, 9_u);
         b.Return(ep);
     });
 
@@ -5629,7 +5654,8 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedSigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn, Vector{ty.u32()}, 8_u, 1_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 8_u, 1_i);
         b.Return(ep);
     });
 
@@ -5663,7 +5689,8 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedUnsigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn, Vector{ty.u32()}, 1_i, 8_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 1_i, 8_u);
         b.Return(ep);
     });
 
@@ -5698,7 +5725,8 @@ TEST_P(SpirvReader_BitwiseTest, Scalar_SignedSigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn, Vector{ty.u32()}, 1_i, 2_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<core::ir::TemplateParameter, 1>{ty.u32()}, 1_i, 2_i);
         b.Return(ep);
     });
 
@@ -5732,7 +5760,8 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn, Vector{ty.i32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
         b.Return(ep);
     });
@@ -5766,7 +5795,8 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedUnsigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn, Vector{ty.i32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(8_u));
         b.Return(ep);
     });
@@ -5801,7 +5831,8 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedSigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn, Vector{ty.i32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
@@ -5837,7 +5868,8 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedUnsigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn, Vector{ty.i32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), params.fn,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
@@ -5872,7 +5904,8 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedUnsigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn, Vector{ty.u32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
@@ -5906,7 +5939,8 @@ TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedSigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn, Vector{ty.u32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
@@ -5941,7 +5975,8 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedUnsigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn, Vector{ty.u32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(8_u));
         b.Return(ep);
     });
@@ -5977,7 +6012,8 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedSigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn, Vector{ty.u32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), params.fn,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
         b.Return(ep);
     });
@@ -6868,7 +6904,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Unsign
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.u32()}, 8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               8_u, 9_u);
         b.Return(ep);
     });
 
@@ -6900,7 +6937,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedSigned_Unsigned
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.u32()}, 8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               8_u, 1_i);
         b.Return(ep);
     });
 
@@ -6933,7 +6971,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedUnsigned_Unsigned
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.u32()}, 1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               1_i, 9_u);
         b.Return(ep);
     });
 
@@ -6966,7 +7005,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedSigned_Unsigned) 
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.u32()}, 1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               1_i, 2_i);
         b.Return(ep);
     });
 
@@ -7000,7 +7040,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Signed
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.i32()}, 8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               8_u, 9_u);
         b.Return(ep);
     });
 
@@ -7033,7 +7074,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_UnsignedSigned_Signed) 
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.i32()}, 8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               8_u, 1_i);
         b.Return(ep);
     });
 
@@ -7067,7 +7109,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedUnsigned_Signed) 
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.i32()}, 1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               1_i, 9_u);
         b.Return(ep);
     });
 
@@ -7099,7 +7142,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Scalar_SignedSigned_Signed) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.i32()}, 1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               1_i, 2_i);
         b.Return(ep);
     });
 
@@ -7132,8 +7176,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Unsign
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.u32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -7165,8 +7209,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedSigned_Unsigned
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.u32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
 
@@ -7199,8 +7243,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedUnsigned_Unsigned
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.u32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -7233,8 +7277,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedSigned_Unsigned) 
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.u32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
         b.Return(ep);
     });
 
@@ -7268,8 +7312,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Signed
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.i32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -7302,8 +7346,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_UnsignedSigned_Signed) 
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.i32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
 
@@ -7337,8 +7381,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedUnsigned_Signed) 
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.i32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -7370,8 +7414,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftLeftLogical_Vector_SignedSigned_Signed) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftLeftLogical,
-                                               Vector{ty.i32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
         b.Return(ep);
     });
 
@@ -7404,7 +7448,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedUnsigned_Unsig
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.u32()}, 8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               8_u, 9_u);
         b.Return(ep);
     });
 
@@ -7436,7 +7481,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedSigned_Unsigne
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.u32()}, 8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               8_u, 1_i);
         b.Return(ep);
     });
 
@@ -7469,7 +7515,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedUnsigned_Unsigne
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.u32()}, 1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               1_i, 9_u);
         b.Return(ep);
     });
 
@@ -7502,7 +7549,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedSigned_Unsigned)
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.u32()}, 1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               1_i, 2_i);
         b.Return(ep);
     });
 
@@ -7536,7 +7584,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedUnsigned_Signe
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.i32()}, 8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               8_u, 9_u);
         b.Return(ep);
     });
 
@@ -7569,7 +7618,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_UnsignedSigned_Signed)
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.i32()}, 8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               8_u, 1_i);
         b.Return(ep);
     });
 
@@ -7603,7 +7653,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedUnsigned_Signed)
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.i32()}, 1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               1_i, 9_u);
         b.Return(ep);
     });
 
@@ -7637,7 +7688,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Scalar_SignedSigned_Signed) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.i32()}, 1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               1_i, 2_i);
         b.Return(ep);
     });
 
@@ -7672,8 +7724,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedUnsigned_Unsig
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.u32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -7705,8 +7757,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedSigned_Unsigne
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.u32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
 
@@ -7739,8 +7791,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedUnsigned_Unsigne
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.u32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -7773,8 +7825,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedSigned_Unsigned)
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.u32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
         b.Return(ep);
     });
 
@@ -7808,8 +7860,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedUnsigned_Signe
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.i32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -7842,8 +7894,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_UnsignedSigned_Signed)
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.i32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
 
@@ -7877,8 +7929,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedUnsigned_Signed)
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.i32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -7912,8 +7964,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightLogical_Vector_SignedSigned_Signed) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightLogical,
-                                               Vector{ty.i32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
         b.Return(ep);
     });
 
@@ -7948,7 +8000,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedUnsigned_Un
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.u32()}, 8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               8_u, 9_u);
         b.Return(ep);
     });
 
@@ -7982,7 +8035,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedSigned_Unsi
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.u32()}, 8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               8_u, 1_i);
         b.Return(ep);
     });
 
@@ -8017,7 +8071,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedUnsigned_Unsi
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.u32()}, 1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               1_i, 9_u);
         b.Return(ep);
     });
 
@@ -8050,7 +8105,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedSigned_Unsign
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.u32()}, 1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               1_i, 2_i);
         b.Return(ep);
     });
 
@@ -8084,7 +8140,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedUnsigned_Si
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.i32()}, 8_u, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               8_u, 9_u);
         b.Return(ep);
     });
 
@@ -8117,7 +8174,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_UnsignedSigned_Sign
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.i32()}, 8_u, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               8_u, 1_i);
         b.Return(ep);
     });
 
@@ -8151,7 +8209,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedUnsigned_Sign
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.i32()}, 1_i, 9_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               1_i, 9_u);
         b.Return(ep);
     });
 
@@ -8183,7 +8242,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Scalar_SignedSigned_Signed
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.i32()}, 1_i, 2_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               1_i, 2_i);
         b.Return(ep);
     });
 
@@ -8216,8 +8276,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedUnsigned_Un
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.u32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -8251,8 +8311,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedSigned_Unsi
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.u32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
 
@@ -8287,8 +8347,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedUnsigned_Unsi
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.u32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -8321,8 +8381,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedSigned_Unsign
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.u32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
         b.Return(ep);
     });
 
@@ -8356,8 +8416,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedUnsigned_Si
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.i32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -8390,8 +8450,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_UnsignedSigned_Sign
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.i32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
 
@@ -8425,8 +8485,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedUnsigned_Sign
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.i32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<u32>>(9_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
@@ -8458,8 +8518,8 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedSigned_Signed
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kShiftRightArithmetic,
-                                               Vector{ty.i32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<i32>>(2_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
         b.Return(ep);
     });
 
@@ -8493,12 +8553,14 @@ TEST_F(SpirvReader_BuiltinsTest, SpecConstantOp_Not) {
     mod.properties.Add(core::ir::Property::kAllowOverrides);
 
     b.Append(b.ir.root_block, [&] {
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot, Vector{ty.i32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                1_i);
     });
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot, Vector{ty.i32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                1_i);
         b.Return(ep);
     });
@@ -8538,7 +8600,8 @@ TEST_F(SpirvReader_BuiltinsTest, Not_Scalar_Signed_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot, Vector{ty.i32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                1_i);
         b.Return(ep);
     });
@@ -8570,7 +8633,8 @@ TEST_F(SpirvReader_BuiltinsTest, Not_Scalar_Signed_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kNot, Vector{ty.u32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kNot,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                1_i);
         b.Return(ep);
     });
@@ -8603,7 +8667,8 @@ TEST_F(SpirvReader_BuiltinsTest, Not_Scalar_Unsigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot, Vector{ty.i32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                8_u);
         b.Return(ep);
     });
@@ -8636,7 +8701,8 @@ TEST_F(SpirvReader_BuiltinsTest, Not_Vector_Signed_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kNot, Vector{ty.i32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kNot,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
@@ -8668,7 +8734,8 @@ TEST_F(SpirvReader_BuiltinsTest, Not_Vector_Signed_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kNot, Vector{ty.u32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kNot,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
@@ -8701,7 +8768,8 @@ TEST_F(SpirvReader_BuiltinsTest, Not_Vector_Unsigned_Signed) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kNot, Vector{ty.i32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kNot,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
                                                b.Splat<vec2<u32>>(8_u));
         b.Return(ep);
     });
@@ -8734,7 +8802,8 @@ TEST_F(SpirvReader_BuiltinsTest, Not_Vector_Unsigned_Unsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kNot, Vector{ty.u32()},
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kNot,
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
                                                b.Splat<vec2<u32>>(8_u));
         b.Return(ep);
     });
@@ -8767,7 +8836,8 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Scalar_Signed_Signed) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSNegate,
-                                               Vector{ty.i32()}, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               1_i);
         b.Return(ep);
     });
 
@@ -8799,7 +8869,8 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Scalar_Signed_Unsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSNegate,
-                                               Vector{ty.u32()}, 1_i);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               1_i);
         b.Return(ep);
     });
 
@@ -8832,7 +8903,8 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Scalar_Unsigned_Signed) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSNegate,
-                                               Vector{ty.i32()}, 8_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               8_u);
         b.Return(ep);
     });
 
@@ -8865,7 +8937,8 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Scalar_Unsigned_Unsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSNegate,
-                                               Vector{ty.u32()}, 8_u);
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               8_u);
         b.Return(ep);
     });
 
@@ -8899,7 +8972,8 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Vector_Signed_Signed) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kSNegate,
-                                               Vector{ty.i32()}, b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
 
@@ -8931,7 +9005,8 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Vector_Signed_Unsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kSNegate,
-                                               Vector{ty.u32()}, b.Splat<vec2<i32>>(1_i));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
 
@@ -8964,7 +9039,8 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Vector_Unsigned_Signed) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2i(), spirv::BuiltinFn::kSNegate,
-                                               Vector{ty.i32()}, b.Splat<vec2<u32>>(8_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.i32()},
+                                               b.Splat<vec2<u32>>(8_u));
         b.Return(ep);
     });
 
@@ -8997,7 +9073,8 @@ TEST_F(SpirvReader_BuiltinsTest, SNegate_Vector_Unsigned_Unsigned) {
 
     b.Append(ep->Block(), [&] {  //
         b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2u(), spirv::BuiltinFn::kSNegate,
-                                               Vector{ty.u32()}, b.Splat<vec2<u32>>(8_u));
+                                               Vector<core::ir::TemplateParameter, 1>{ty.u32()},
+                                               b.Splat<vec2<u32>>(8_u));
         b.Return(ep);
     });
 

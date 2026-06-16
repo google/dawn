@@ -7659,7 +7659,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_F32) {
     func->SetParams({left, right});
     b.Append(func->Block(), [&] {
         auto* call = b.CallExplicit(result, core::BuiltinFn::kSubgroupMatrixMultiply,
-                                    Vector{ty.f32()}, left, right);
+                                    Vector<core::ir::TemplateParameter, 1>{ty.f32()}, left, right);
         b.Return(func, call);
     });
 
@@ -8162,8 +8162,9 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup) {
 
     auto* func = b.Function("foo", mat_ty);
     b.Append(func->Block(), [&] {
-        auto* load = b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat_ty},
-                                    wg_var, 0_u, b.Constant(false), 4_u);
+        auto* load = b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<core::ir::TemplateParameter, 1>{mat_ty}, wg_var, 0_u,
+                                    b.Constant(false), 4_u);
         b.Return(func, load);
     });
 

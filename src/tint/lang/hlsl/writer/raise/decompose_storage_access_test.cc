@@ -1699,8 +1699,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoad) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* load = b.CallExplicit(sm_ty, core::BuiltinFn::kSubgroupMatrixLoad, Vector{sm_ty}, var,
-                                    0_u, b.Constant(false), 8_u);
+        auto* load = b.CallExplicit(sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<core::ir::TemplateParameter, 1>{sm_ty}, var, 0_u,
+                                    b.Constant(false), 8_u);
         b.Let("x", load);
         b.Return(func);
     });
@@ -1748,8 +1749,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadColMajor) 
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* load = b.CallExplicit(sm_ty, core::BuiltinFn::kSubgroupMatrixLoad, Vector{sm_ty}, var,
-                                    0_u, b.Constant(true), 8_u);
+        auto* load = b.CallExplicit(sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<core::ir::TemplateParameter, 1>{sm_ty}, var, 0_u,
+                                    b.Constant(true), 8_u);
         b.Let("x", load);
         b.Return(func);
     });
@@ -1800,8 +1802,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadDynamicStr
     func->SetParams({stride_param});
 
     b.Append(func->Block(), [&] {
-        auto* load = b.CallExplicit(sm_ty, core::BuiltinFn::kSubgroupMatrixLoad, Vector{sm_ty}, var,
-                                    0_u, b.Constant(false), stride_param);
+        auto* load = b.CallExplicit(sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<core::ir::TemplateParameter, 1>{sm_ty}, var, 0_u,
+                                    b.Constant(false), stride_param);
         b.Let("x", load);
         b.Return(func);
     });
@@ -4906,7 +4909,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferView_LoadU32) {
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
         auto* view = b.CallExplicit(ty.ptr(storage, ty.u32()), core::BuiltinFn::kBufferView,
-                                    Vector{ty.u32()}, v, 0_u);
+                                    Vector<core::ir::TemplateParameter, 1>{ty.u32()}, v, 0_u);
         b.Load(view);
         b.Return(foo);
     });
@@ -4953,7 +4956,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferView_LoadU32_ConstOffset) {
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
         auto* view = b.CallExplicit(ty.ptr(storage, ty.u32()), core::BuiltinFn::kBufferView,
-                                    Vector{ty.u32()}, v, 16_u);
+                                    Vector<core::ir::TemplateParameter, 1>{ty.u32()}, v, 16_u);
         b.Load(view);
         b.Return(foo);
     });
@@ -5002,7 +5005,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferView_LoadU32_Offset) {
     foo->SetParams({offset});
     b.Append(foo->Block(), [&] {
         auto* view = b.CallExplicit(ty.ptr(storage, ty.u32()), core::BuiltinFn::kBufferView,
-                                    Vector{ty.u32()}, v, offset);
+                                    Vector<core::ir::TemplateParameter, 1>{ty.u32()}, v, offset);
         b.Load(view);
         b.Return(foo);
     });
@@ -5052,9 +5055,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferView_LoadU32_AccumulatedOffse
     auto* offset = b.FunctionParam("offset", ty.u32());
     foo->SetParams({offset});
     b.Append(foo->Block(), [&] {
-        auto* view =
-            b.CallExplicit(ty.ptr(storage, ty.array(ty.u32(), 4)), core::BuiltinFn::kBufferView,
-                           Vector{ty.array(ty.u32(), 4)}, v, offset);
+        auto* view = b.CallExplicit(
+            ty.ptr(storage, ty.array(ty.u32(), 4)), core::BuiltinFn::kBufferView,
+            Vector<core::ir::TemplateParameter, 1>{ty.array(ty.u32(), 4)}, v, offset);
         auto* a = b.Access(ty.ptr(storage, ty.u32()), view, 2_u);
         b.Load(a);
         b.Return(foo);
@@ -5104,9 +5107,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferArrayView_LoadU32) {
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* view = b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())),
-                                    core::BuiltinFn::kBufferArrayView,
-                                    Vector{ty.runtime_array(ty.u32())}, v, 0_u, 128_u);
+        auto* view = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferArrayView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(ty.u32())}, v, 0_u, 128_u);
         auto* a = b.Access(ty.ptr(storage, ty.u32()), view, 0_u);
         b.Load(a);
         b.Return(foo);
@@ -5154,9 +5157,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferArrayView_LoadU32_ConstOffset
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* view = b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())),
-                                    core::BuiltinFn::kBufferArrayView,
-                                    Vector{ty.runtime_array(ty.u32())}, v, 16_u, 128_u);
+        auto* view = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferArrayView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(ty.u32())}, v, 16_u, 128_u);
         auto* a = b.Access(ty.ptr(storage, ty.u32()), view, 0_u);
         b.Load(a);
         b.Return(foo);
@@ -5206,9 +5209,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferArrayView_LoadU32_Offset) {
     auto* offset = b.FunctionParam("offset", ty.u32());
     foo->SetParams({offset});
     b.Append(foo->Block(), [&] {
-        auto* view = b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())),
-                                    core::BuiltinFn::kBufferArrayView,
-                                    Vector{ty.runtime_array(ty.u32())}, v, offset, 128_u);
+        auto* view = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferArrayView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(ty.u32())}, v, offset, 128_u);
         auto* a = b.Access(ty.ptr(storage, ty.u32()), view, 0_u);
         b.Load(a);
         b.Return(foo);
@@ -5260,9 +5263,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferArrayView_LoadU32_Accumulated
     auto* offset = b.FunctionParam("offset", ty.u32());
     foo->SetParams({offset});
     b.Append(foo->Block(), [&] {
-        auto* view = b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())),
-                                    core::BuiltinFn::kBufferArrayView,
-                                    Vector{ty.runtime_array(ty.u32())}, v, offset, 128_u);
+        auto* view = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferArrayView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(ty.u32())}, v, offset, 128_u);
         auto* a = b.Access(ty.ptr(storage, ty.u32()), view, 16_u);
         b.Load(a);
         b.Return(foo);
@@ -5316,8 +5319,9 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, ArrayLength_BufferView_Length) {
     auto* length = b.FunctionParam("length", ty.u32());
     foo->SetParams({offset, length});
     b.Append(foo->Block(), [&] {
-        auto* view = b.CallExplicit(ty.ptr(storage, arr_ty), core::BuiltinFn::kBufferView,
-                                    Vector{arr_ty}, v, offset, length);
+        auto* view =
+            b.CallExplicit(ty.ptr(storage, arr_ty), core::BuiltinFn::kBufferView,
+                           Vector<core::ir::TemplateParameter, 1>{arr_ty}, v, offset, length);
         auto* len = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, view);
         b.Let("len", len);
         b.Return(foo);
@@ -5372,7 +5376,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, ArrayLength_BufferView) {
     foo->SetParams({offset});
     b.Append(foo->Block(), [&] {
         auto* view = b.CallExplicit(ty.ptr(storage, arr_ty), core::BuiltinFn::kBufferView,
-                                    Vector{arr_ty}, v, offset);
+                                    Vector<core::ir::TemplateParameter, 1>{arr_ty}, v, offset);
         auto* len = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, view);
         b.Let("len", len);
         b.Return(foo);
@@ -5433,8 +5437,8 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, ArrayLength_BufferView_RuntimeStruc
     auto* offset = b.FunctionParam("offset", ty.u32());
     foo->SetParams({offset});
     b.Append(foo->Block(), [&] {
-        auto* view =
-            b.CallExplicit(ty.ptr(storage, S), core::BuiltinFn::kBufferView, Vector{S}, v, offset);
+        auto* view = b.CallExplicit(ty.ptr(storage, S), core::BuiltinFn::kBufferView,
+                                    Vector<core::ir::TemplateParameter, 1>{S}, v, offset);
         auto* a = b.Access(ty.ptr(storage, arr_ty), view, 1_u);
         auto* len = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, a);
         b.Let("len", len);

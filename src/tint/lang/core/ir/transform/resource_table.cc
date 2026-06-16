@@ -167,7 +167,10 @@ struct State {
 
     std::pair<const type::Type*, ir::Value*> GetResourceTableCallInfo(
         core::ir::CoreBuiltinCall* call) {
-        const type::Type* binding_ty = call->ExplicitTemplateParams()[0];
+        TINT_IR_ASSERT(
+            ir, std::holds_alternative<const core::type::Type*>(call->ExplicitTemplateParams()[0]));
+        const type::Type* binding_ty =
+            std::get<const core::type::Type*>(call->ExplicitTemplateParams()[0]);
         ir::Value* idx = b.InsertConvertIfNeeded(ty.u32(), call->Args()[0]);
         return {binding_ty, idx};
     }

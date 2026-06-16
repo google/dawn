@@ -389,7 +389,8 @@ struct State {
                 stride = b.Multiply(stride, u32(bytes_per_element))->Result();
             }
             auto* load = b.CallExplicit<hlsl::ir::BuiltinCall>(
-                sm, BuiltinFn::kLoad, Vector{sm}, var, OffsetToValue(offset), stride, layout);
+                sm, BuiltinFn::kLoad, Vector<core::ir::TemplateParameter, 1>{sm}, var,
+                OffsetToValue(offset), stride, layout);
             call->Result()->ReplaceAllUsesWith(load->Result());
         });
         call->Destroy();

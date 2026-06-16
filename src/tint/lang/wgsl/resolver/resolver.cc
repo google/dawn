@@ -1917,8 +1917,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
     // ctor_or_conv is a helper for building either a sem::ValueConstructor or
     // sem::ValueConversion call for a CtorConvIntrinsic with an optional template argument type.
-    auto ctor_or_conv = [&](CtorConvIntrinsic ty,
-                            VectorRef<const core::type::Type*> template_args) -> sem::Call* {
+    auto ctor_or_conv =
+        [&](CtorConvIntrinsic ty,
+            VectorRef<core::intrinsic::TemplateParameter> template_args) -> sem::Call* {
         auto arg_tys = tint::Transform(args, [&](auto* arg) { return arg->Type(); });
 
         auto match = intrinsic_table_.Lookup(ty, template_args, arg_tys, args_stage);
@@ -2021,11 +2022,12 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const core::type::F32*) { return ctor_or_conv(CtorConvIntrinsic::kF32, Empty); },
             [&](const core::type::Bool*) { return ctor_or_conv(CtorConvIntrinsic::kBool, Empty); },
             [&](const core::type::Vector* v) {
-                return ctor_or_conv(wgsl::intrinsic::VectorCtorConv(v->Width()), Vector{v->Type()});
+                return ctor_or_conv(wgsl::intrinsic::VectorCtorConv(v->Width()),
+                                    Vector<core::intrinsic::TemplateParameter, 1>{v->Type()});
             },
             [&](const core::type::Matrix* m) {
                 return ctor_or_conv(wgsl::intrinsic::MatrixCtorConv(m->Columns(), m->Rows()),
-                                    Vector{m->Type()});
+                                    Vector<core::intrinsic::TemplateParameter, 1>{m->Type()});
             },
             [&](const sem::Array* arr) -> sem::Call* {
                 auto* call_target = array_ctors_.GetOrAdd(

@@ -4371,8 +4371,8 @@ TEST_F(MslWriter_FixTypeLayoutTest, BufferView_Vec3) {
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* p =
-            b.CallExplicit(ty.ptr(storage, S), core::BuiltinFn::kBufferView, Vector{S}, v, 0_u);
+        auto* p = b.CallExplicit(ty.ptr(storage, S), core::BuiltinFn::kBufferView,
+                                 Vector<core::ir::TemplateParameter, 1>{S}, v, 0_u);
         b.Load(p);
         b.Return(foo);
     });
@@ -4449,9 +4449,9 @@ TEST_F(MslWriter_FixTypeLayoutTest, BufferArrayView_Vec3) {
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* p =
-            b.CallExplicit(ty.ptr(storage, ty.runtime_array(S)), core::BuiltinFn::kBufferArrayView,
-                           Vector{ty.runtime_array(S)}, v, 0_u, 128_u);
+        auto* p = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(S)), core::BuiltinFn::kBufferArrayView,
+            Vector<core::ir::TemplateParameter, 1>{ty.runtime_array(S)}, v, 0_u, 128_u);
         auto* a = b.Access(ty.ptr(storage, S), p, 0_u);
         b.Load(a);
         b.Return(foo);
@@ -4533,8 +4533,9 @@ TEST_F(MslWriter_FixTypeLayoutTest, PointerOffset_Vec3) {
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* p = b.CallExplicit<ir::BuiltinCall>(ty.ptr(storage, S), BuiltinFn::kPointerOffset,
-                                                  Vector{S}, v, 0_u);
+        auto* p =
+            b.CallExplicit<ir::BuiltinCall>(ty.ptr(storage, S), BuiltinFn::kPointerOffset,
+                                            Vector<core::ir::TemplateParameter, 1>{S}, v, 0_u);
         b.Load(p);
         b.Return(foo);
     });

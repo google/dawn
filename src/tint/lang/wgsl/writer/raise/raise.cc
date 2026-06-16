@@ -223,7 +223,7 @@ void ReplaceBuiltinFnCall(core::ir::Builder& b, core::ir::CoreBuiltinCall* call)
     auto* replacement = b.CallWithResult<wgsl::ir::BuiltinCall>(
         call->DetachResult(), Convert(call->Func()), std::move(args));
     if (!call->ExplicitTemplateParams().IsEmpty()) {
-        Vector<const core::type::Type*, 4> tmpl_args;
+        Vector<core::ir::TemplateParameter, 4> tmpl_args;
         for (auto p : call->ExplicitTemplateParams()) {
             tmpl_args.Push(p);
         }

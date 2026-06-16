@@ -3566,7 +3566,8 @@ TEST_F(IRToProgramTest, Override_BitcastInitializer) {
         from->SetOverrideId(OverrideId{10});
 
         o = b.Override("o", b.CallExplicit<wgsl::ir::BuiltinCall>(
-                                ty.i32(), wgsl::BuiltinFn::kBitcast, Vector{ty.i32()}, from));
+                                ty.i32(), wgsl::BuiltinFn::kBitcast,
+                                Vector<core::ir::TemplateParameter, 1>{ty.i32()}, from));
     });
 
     auto* fn = b.Function("f", ty.i32());

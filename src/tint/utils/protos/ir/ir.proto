@@ -241,6 +241,13 @@ message BlockParameter {
     optional string name = 2;
 }
 
+message TemplateParameter {
+    oneof kind {
+        uint32 type = 1;  // Module.types
+        Majorness majorness = 2;
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // ConstantValues
 ////////////////////////////////////////////////////////////////////////////////
@@ -382,7 +389,9 @@ message InstructionUserCall {}
 
 message InstructionBuiltinCall {
     BuiltinFn builtin = 1;
-    repeated uint32 explicit_template_params = 2;  // Module.types
+    reserved 2;
+    reserved "explicit_template_params";
+    repeated TemplateParameter explicit_template_parameters = 3;
 }
 
 message InstructionLoad {}
@@ -492,6 +501,11 @@ enum AccessControl {
     read = 0;
     write = 1;
     read_write = 2;
+}
+
+enum Majorness {
+    row_major = 0;
+    col_major = 1;
 }
 
 enum UnaryOp {

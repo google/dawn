@@ -3301,8 +3301,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_StorageRuntimeArray_ConstStride_Col
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
         // Constant stride of 1 should be clamped to 4 even when predication is disabled.
-        auto* load =
-            b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u, true, 1_u);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, 1_u);
         b.Return(func, load);
     });
 
@@ -3378,8 +3378,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_i8_StorageRuntimeArray_ConstStride_
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
         // Constant stride of 1 should be clamped to 4 even when predication is disabled.
-        auto* load =
-            b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u, true, 1_u);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, 1_u);
         b.Return(func, load);
     });
 
@@ -3456,8 +3456,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_u8_StorageRuntimeArray_ConstStride_
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
         // Constant stride of 1 should be clamped to 4 even when predication is disabled.
-        auto* load =
-            b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u, true, 1_u);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, 1_u);
         b.Return(func, load);
     });
 
@@ -3534,8 +3534,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_StorageRuntimeArray_DynamicStride_C
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
         // Dynamic stride should be clamped with `max` even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u,
-                                    true, stride);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
         b.Return(func, load);
     });
 
@@ -3615,8 +3615,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_i8_StorageRuntimeArray_DynamicStrid
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
         // Dynamic stride should be clamped with `max` even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u,
-                                    true, stride);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
         b.Return(func, load);
     });
 
@@ -3697,8 +3697,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_u8_StorageRuntimeArray_DynamicStrid
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
         // Dynamic stride should be clamped with `max` even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u,
-                                    true, stride);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
         b.Return(func, load);
     });
 
@@ -3777,8 +3777,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_StorageRuntimeArray_DynamicStride_R
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
         // Dynamic stride should be clamped with `max` even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u,
-                                    false, stride);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, false, stride);
         b.Return(func, load);
     });
 
@@ -3858,8 +3858,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_i8_StorageRuntimeArray_DynamicStrid
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
         // Dynamic stride should be clamped with `max` even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u,
-                                    false, stride);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, false, stride);
         b.Return(func, load);
     });
 
@@ -3940,8 +3940,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_u8_StorageRuntimeArray_DynamicStrid
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
         // Dynamic stride should be clamped with `max` even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u,
-                                    false, stride);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, false, stride);
         b.Return(func, load);
     });
 
@@ -4019,8 +4019,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_WorkgroupFixedArray_DynamicStride_C
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
         // Dynamic stride should be clamped with `max` even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u,
-                                    true, stride);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
         b.Return(func, load);
     });
 
@@ -4098,8 +4098,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_i8_WorkgroupFixedArray_DynamicStrid
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
         // Dynamic stride should be clamped with `max` even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u,
-                                    true, stride);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
         b.Return(func, load);
     });
 
@@ -4177,8 +4177,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_u8_WorkgroupFixedArray_DynamicStrid
     func->AppendParam(stride);
     b.Append(func->Block(), [&] {
         // Dynamic stride should be clamped with `max` even when predication is disabled.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 0_u,
-                                    true, stride);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 0_u, true, stride);
         b.Return(func, load);
     });
 
@@ -4255,8 +4255,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_WorkgroupFixedArray_ConstStrideAndO
     b.Append(func->Block(), [&] {
         // The final row will start at 1016. Another full stride will take it past the 1024 limit,
         // but the transform should understand that only 8 elements are accessed on that row.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 920_u,
-                                    false, 32_u);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 920_u, false, 32_u);
         b.Return(func, load);
     });
 
@@ -4295,8 +4295,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_i8_WorkgroupFixedArray_ConstStrideA
     b.Append(func->Block(), [&] {
         // The final row will start at 1016. Another full stride will take it past the 1024 limit,
         // but the transform should understand that only 8 elements are accessed on that row.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 920_u,
-                                    false, 32_u);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 920_u, false, 32_u);
         b.Return(func, load);
     });
 
@@ -4335,8 +4335,8 @@ TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_u8_WorkgroupFixedArray_ConstStrideA
     b.Append(func->Block(), [&] {
         // The final row will start at 1016. Another full stride will take it past the 1024 limit,
         // but the transform should understand that only 8 elements are accessed on that row.
-        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, arr, 920_u,
-                                    false, 32_u);
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, 920_u, false, 32_u);
         b.Return(func, load);
     });
 
@@ -5424,13 +5424,13 @@ TEST_P(IR_RobustnessTest, BufferView_RootVar) {
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
-        auto* v1 = b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())),
-                                  core::BuiltinFn::kBufferView, Vector{ty.runtime_array(ty.u32())},
-                                  b1, 0_u);
+        auto* v1 = b.CallExplicit(
+            ty.ptr(storage, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferView,
+            Vector<TemplateParameter, 1>{ty.runtime_array(ty.u32())}, b1, 0_u);
         b.Access(ty.ptr(storage, ty.u32()), v1, 128_u);
-        auto* v2 = b.CallExplicit(ty.ptr(uniform, ty.runtime_array(ty.u32())),
-                                  core::BuiltinFn::kBufferArrayView,
-                                  Vector{ty.runtime_array(ty.u32())}, b2, 0_u, 128_u);
+        auto* v2 = b.CallExplicit(
+            ty.ptr(uniform, ty.runtime_array(ty.u32())), core::BuiltinFn::kBufferArrayView,
+            Vector<TemplateParameter, 1>{ty.runtime_array(ty.u32())}, b2, 0_u, 128_u);
         b.Access(ty.ptr(uniform, ty.u32()), v2, 256_u);
         b.Return(foo);
     });
@@ -5497,8 +5497,8 @@ TEST_P(IR_RobustnessTest, BufferView_u32_ConstOffsetAndLength_InRange) {
     auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(storage, ty.u32()), BuiltinFn::kBufferView, Vector{ty.u32()}, p, 16_u,
-                       32_u);
+        b.CallExplicit(ty.ptr(storage, ty.u32()), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{ty.u32()}, p, 16_u, 32_u);
         b.Return(func);
     });
 
@@ -5525,8 +5525,8 @@ TEST_P(IR_RobustnessTest, BufferView_u32_ConstOffsetAndLength_OutOfRange) {
     auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(storage, ty.u32()), BuiltinFn::kBufferView, Vector{ty.u32()}, p, 16_u,
-                       12_u);
+        b.CallExplicit(ty.ptr(storage, ty.u32()), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{ty.u32()}, p, 16_u, 12_u);
         b.Return(func);
     });
 
@@ -5567,7 +5567,8 @@ TEST_P(IR_RobustnessTest, BufferView_RuntimeStruct_ConstOffsetAndLength_InRange)
     auto* p = b.FunctionParam("p", ty.ptr(uniform, ty.unsized_buffer()));
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(uniform, s), BuiltinFn::kBufferView, Vector{s}, p, 16_u, 64_u);
+        b.CallExplicit(ty.ptr(uniform, s), BuiltinFn::kBufferView, Vector<TemplateParameter, 1>{s},
+                       p, 16_u, 64_u);
         b.Return(func);
     });
 
@@ -5604,7 +5605,8 @@ TEST_P(IR_RobustnessTest, BufferView_RuntimeStruct_ConstOffsetAndLength_OutOfRan
     auto* p = b.FunctionParam("p", ty.ptr(uniform, ty.unsized_buffer()));
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(uniform, s), BuiltinFn::kBufferView, Vector{s}, p, 16_u, 32_u);
+        b.CallExplicit(ty.ptr(uniform, s), BuiltinFn::kBufferView, Vector<TemplateParameter, 1>{s},
+                       p, 16_u, 32_u);
         b.Return(func);
     });
 
@@ -5656,7 +5658,8 @@ TEST_P(IR_RobustnessTest, BufferView_RuntimeStruct_NonConst) {
     auto* o = b.FunctionParam("o", ty.i32());
     func->SetParams({p, o});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(workgroup, s), BuiltinFn::kBufferView, Vector{s}, p, o);
+        b.CallExplicit(ty.ptr(workgroup, s), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{s}, p, o);
         b.Return(func);
     });
 
@@ -5711,7 +5714,8 @@ TEST_P(IR_RobustnessTest, BufferView_RuntimeStruct_ConstOffset) {
     auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(storage, s), BuiltinFn::kBufferView, Vector{s}, p, 16_u);
+        b.CallExplicit(ty.ptr(storage, s), BuiltinFn::kBufferView, Vector<TemplateParameter, 1>{s},
+                       p, 16_u);
         b.Return(func);
     });
 
@@ -5766,7 +5770,8 @@ TEST_P(IR_RobustnessTest, BufferView_RuntimeStruct_ConstLength) {
     auto* o = b.FunctionParam("o", ty.i32());
     func->SetParams({p, o});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(storage, s), BuiltinFn::kBufferView, Vector{s}, p, o, 64_u);
+        b.CallExplicit(ty.ptr(storage, s), BuiltinFn::kBufferView, Vector<TemplateParameter, 1>{s},
+                       p, o, 64_u);
         b.Return(func);
     });
 
@@ -5817,7 +5822,8 @@ TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_ConstOffsetAndSizeAndLength_I
     func->SetParams({p});
     b.Append(func->Block(), [&] {
         b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())), BuiltinFn::kBufferArrayView,
-                       Vector{ty.runtime_array(ty.u32())}, p, 16_u, 8_u, 32_u);
+                       Vector<TemplateParameter, 1>{ty.runtime_array(ty.u32())}, p, 16_u, 8_u,
+                       32_u);
         b.Return(func);
     });
 
@@ -5845,7 +5851,8 @@ TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_ConstOffsetAndSizeAndLength_O
     func->SetParams({p});
     b.Append(func->Block(), [&] {
         b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())), BuiltinFn::kBufferArrayView,
-                       Vector{ty.runtime_array(ty.u32())}, p, 4_u, 12_u, 12_u);
+                       Vector<TemplateParameter, 1>{ty.runtime_array(ty.u32())}, p, 4_u, 12_u,
+                       12_u);
         b.Return(func);
     });
 
@@ -5886,8 +5893,8 @@ TEST_P(IR_RobustnessTest, BufferArrayView_RuntimeStruct_ConstOffsetAndSizeAndLen
     auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(storage, s), BuiltinFn::kBufferArrayView, Vector{s}, p, 16_u, 32_u,
-                       64_u);
+        b.CallExplicit(ty.ptr(storage, s), BuiltinFn::kBufferArrayView,
+                       Vector<TemplateParameter, 1>{s}, p, 16_u, 32_u, 64_u);
         b.Return(func);
     });
 
@@ -5924,8 +5931,8 @@ TEST_P(IR_RobustnessTest, BufferArrayView_RuntimeStruct_ConstOffsetAndSizeAndLen
     auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(storage, s), BuiltinFn::kBufferArrayView, Vector{s}, p, 16_u, 32_u,
-                       32_u);
+        b.CallExplicit(ty.ptr(storage, s), BuiltinFn::kBufferArrayView,
+                       Vector<TemplateParameter, 1>{s}, p, 16_u, 32_u, 32_u);
         b.Return(func);
     });
 
@@ -5978,7 +5985,8 @@ TEST_P(IR_RobustnessTest, BufferArrayView_RuntimeStruct_NonConst) {
     auto* s = b.FunctionParam("s", ty.i32());
     func->SetParams({p, o, s});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(storage, S), BuiltinFn::kBufferArrayView, Vector{S}, p, o, s);
+        b.CallExplicit(ty.ptr(storage, S), BuiltinFn::kBufferArrayView,
+                       Vector<TemplateParameter, 1>{S}, p, o, s);
         b.Return(func);
     });
 
@@ -6038,7 +6046,8 @@ TEST_P(IR_RobustnessTest, BufferArrayView_RuntimeStruct_ConstOffset) {
     auto* s = b.FunctionParam("s", ty.i32());
     func->SetParams({p, s});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(storage, S), BuiltinFn::kBufferArrayView, Vector{S}, p, 8_i, s);
+        b.CallExplicit(ty.ptr(storage, S), BuiltinFn::kBufferArrayView,
+                       Vector<TemplateParameter, 1>{S}, p, 8_i, s);
         b.Return(func);
     });
 
@@ -6097,7 +6106,8 @@ TEST_P(IR_RobustnessTest, BufferArrayView_RuntimeStruct_ConstSize) {
     auto* o = b.FunctionParam("o", ty.i32());
     func->SetParams({p, o});
     b.Append(func->Block(), [&] {
-        b.CallExplicit(ty.ptr(storage, S), BuiltinFn::kBufferArrayView, Vector{S}, p, o, 64_i);
+        b.CallExplicit(ty.ptr(storage, S), BuiltinFn::kBufferArrayView,
+                       Vector<TemplateParameter, 1>{S}, p, o, 64_i);
         b.Return(func);
     });
 

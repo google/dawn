@@ -544,8 +544,8 @@ TEST_F(IR_SubgroupMatrixAnalysis, Multiply) {
             b.Load(b.Var("right", ty.ptr(function, ty.subgroup_matrix_right(ty.f32(), 8u, 2u))));
 
         b.Let("result", b.CallExplicit(ty.subgroup_matrix_result(ty.f32(), 8u, 8u),
-                                       core::BuiltinFn::kSubgroupMatrixMultiply, Vector{ty.f32()},
-                                       left, right));
+                                       core::BuiltinFn::kSubgroupMatrixMultiply,
+                                       Vector<TemplateParameter, 1>{ty.f32()}, left, right));
 
         b.Return(func);
     });
@@ -676,8 +676,8 @@ TEST_F(IR_SubgroupMatrixAnalysis, Multiply_DifferentResultType) {
             b.Load(b.Var("right", ty.ptr(function, ty.subgroup_matrix_right(ty.i8(), 8u, 2u))));
 
         b.Let("result", b.CallExplicit(ty.subgroup_matrix_result(ty.i32(), 8u, 8u),
-                                       core::BuiltinFn::kSubgroupMatrixMultiply, Vector{ty.i32()},
-                                       left, right));
+                                       core::BuiltinFn::kSubgroupMatrixMultiply,
+                                       Vector<TemplateParameter, 1>{ty.i32()}, left, right));
 
         b.Return(func);
     });
@@ -741,8 +741,8 @@ TEST_F(IR_SubgroupMatrixAnalysis, Multiply_Multiple) {
             b.Load(b.Var("right", ty.ptr(function, ty.subgroup_matrix_right(ty.f32(), 8u, 2u))));
 
         b.Let("result", b.CallExplicit(ty.subgroup_matrix_result(ty.f32(), 8u, 8u),
-                                       core::BuiltinFn::kSubgroupMatrixMultiply, Vector{ty.f32()},
-                                       left, right));
+                                       core::BuiltinFn::kSubgroupMatrixMultiply,
+                                       Vector<TemplateParameter, 1>{ty.f32()}, left, right));
 
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] {
@@ -753,7 +753,7 @@ TEST_F(IR_SubgroupMatrixAnalysis, Multiply_Multiple) {
 
             b.Let("result2", b.CallExplicit(ty.subgroup_matrix_result(ty.u32(), 8u, 8u),
                                             core::BuiltinFn::kSubgroupMatrixMultiply,
-                                            Vector{ty.u32()}, left2, right2));
+                                            Vector<TemplateParameter, 1>{ty.u32()}, left2, right2));
 
             b.Exit(if_);
         });

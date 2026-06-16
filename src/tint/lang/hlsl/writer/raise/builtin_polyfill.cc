@@ -571,7 +571,8 @@ struct State {
         } else if (dst_deepest->Is<core::type::F16>()) {
             fn = BuiltinFn::kAsfloat16;
         } else {
-            TINT_IR_ICE(ir) << "unexpected 16-bit bitcast destination type: " << dst_deepest;
+            TINT_IR_ICE(ir) << "unexpected 16-bit bitcast destination type: "
+                            << dst_deepest->FriendlyName();
         }
 
         b.InsertBefore(bitcast, [&] {
@@ -1736,8 +1737,9 @@ struct State {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
             auto* type = ty.Get<hlsl::type::Int8T4Packed>();
-            auto* conv = b.CallExplicit<hlsl::ir::BuiltinCall>(type, hlsl::BuiltinFn::kConvert,
-                                                               Vector{type}, args[0]);
+            auto* conv = b.CallExplicit<hlsl::ir::BuiltinCall>(
+                type, hlsl::BuiltinFn::kConvert, Vector<core::ir::TemplateParameter, 1>{type},
+                args[0]);
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
                                                     hlsl::BuiltinFn::kUnpackS8S32, conv);
@@ -1761,8 +1763,9 @@ struct State {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
             auto* type = ty.Get<hlsl::type::Uint8T4Packed>();
-            auto* conv = b.CallExplicit<hlsl::ir::BuiltinCall>(type, hlsl::BuiltinFn::kConvert,
-                                                               Vector{type}, args[0]);
+            auto* conv = b.CallExplicit<hlsl::ir::BuiltinCall>(
+                type, hlsl::BuiltinFn::kConvert, Vector<core::ir::TemplateParameter, 1>{type},
+                args[0]);
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
                                                     hlsl::BuiltinFn::kUnpackU8U32, conv);
@@ -1965,9 +1968,9 @@ struct State {
             auto* sm_ty = result_ty->As<core::type::SubgroupMatrix>();
             TINT_IR_ASSERT(ir, sm_ty);
 
-            b.CallExplicitWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
-                                                            hlsl::BuiltinFn::kMultiply,
-                                                            Vector{sm_ty->Type()}, left, right);
+            b.CallExplicitWithResult<hlsl::ir::BuiltinCall>(
+                call->DetachResult(), hlsl::BuiltinFn::kMultiply,
+                Vector<core::ir::TemplateParameter, 1>{sm_ty->Type()}, left, right);
         });
         call->Destroy();
     }
@@ -2090,9 +2093,9 @@ struct State {
 
             auto* layout = ColMajorToMatrixLayout(col_major);
 
-            b.CallExplicitWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
-                                                            hlsl::BuiltinFn::kLoad, Vector{sm_ty},
-                                                            ptr, offset, stride, layout);
+            b.CallExplicitWithResult<hlsl::ir::BuiltinCall>(
+                call->DetachResult(), hlsl::BuiltinFn::kLoad,
+                Vector<core::ir::TemplateParameter, 1>{sm_ty}, ptr, offset, stride, layout);
         });
         call->Destroy();
     }

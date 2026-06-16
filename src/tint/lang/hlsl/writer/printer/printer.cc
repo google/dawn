@@ -911,7 +911,9 @@ class Printer : public tint::TextGenerator {
         // enum value here.
         if (c->Func() == hlsl::BuiltinFn::kMultiply) {
             TINT_IR_ASSERT(ir_, c->ExplicitTemplateParams().Length() == 1u);
-            auto* explicit_type = c->ExplicitTemplateParams()[0];
+            TINT_IR_ASSERT(ir_, std::holds_alternative<const core::type::Type*>(
+                                    c->ExplicitTemplateParams()[0]));
+            auto* explicit_type = std::get<const core::type::Type*>(c->ExplicitTemplateParams()[0]);
             auto* left_type = c->Args()[0]->Type()->As<core::type::SubgroupMatrix>()->Type();
             if (explicit_type != left_type) {
                 out << "<" << SubgroupMatrixComponentTypeToEnum(explicit_type) << ">";

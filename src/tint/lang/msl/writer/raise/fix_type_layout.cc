@@ -147,7 +147,8 @@ struct State {
                         auto* new_ptr =
                             ty.ptr(ptr->AddressSpace(), packed_store_type, ptr->Access());
                         core_call->Result()->SetType(new_ptr);
-                        core_call->SetExplicitTemplateParams(Vector{packed_store_type});
+                        core_call->SetExplicitTemplateParams(
+                            Vector<core::ir::TemplateParameter, 1>{packed_store_type});
                         core_call->Result()->ForEachUseSorted([&](core::ir::Usage use) {
                             UpdateUsage(use, ptr->StoreType(), packed_store_type);
                         });
@@ -170,7 +171,8 @@ struct State {
                             ty.ptr(ptr->AddressSpace(), packed_store_type, ptr->Access());
                         msl_call->Result()->SetType(new_ptr);
                         if (!msl_call->ExplicitTemplateParams().IsEmpty()) {
-                            msl_call->SetExplicitTemplateParams(Vector{packed_store_type});
+                            msl_call->SetExplicitTemplateParams(
+                                Vector<core::ir::TemplateParameter, 1>{packed_store_type});
                         }
                         msl_call->Result()->ForEachUseSorted([&](core::ir::Usage use) {
                             UpdateUsage(use, ptr->StoreType(), packed_store_type);

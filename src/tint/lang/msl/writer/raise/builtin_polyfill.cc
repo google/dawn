@@ -360,7 +360,7 @@ struct State {
         b.InsertBefore(construct, [&] {
             b.CallExplicitWithResult<msl::ir::BuiltinCall>(
                 construct->DetachResult(), msl::BuiltinFn::kMakeFilledSimdgroupMatrix,
-                Vector{sm_ty}, value);
+                Vector<core::ir::TemplateParameter, 1>{sm_ty}, value);
         });
         construct->Destroy();
     }
@@ -1214,7 +1214,8 @@ struct State {
                                             sm_ty->Columns(), sm_ty->Rows());
         return b
             .CallExplicit<msl::ir::BuiltinCall>(
-                right_ty, msl::BuiltinFn::kMakeDiagonalSimdgroupMatrix, Vector{right_ty}, scalar)
+                right_ty, msl::BuiltinFn::kMakeDiagonalSimdgroupMatrix,
+                Vector<core::ir::TemplateParameter, 1>{right_ty}, scalar)
             ->Result();
     }
 
@@ -1222,7 +1223,8 @@ struct State {
                                                    core::ir::Value* scalar) {
         return b
             .CallExplicit<msl::ir::BuiltinCall>(
-                result_ty, msl::BuiltinFn::kMakeFilledSimdgroupMatrix, Vector{result_ty}, scalar)
+                result_ty, msl::BuiltinFn::kMakeFilledSimdgroupMatrix,
+                Vector<core::ir::TemplateParameter, 1>{result_ty}, scalar)
             ->Result();
     }
 
@@ -1231,7 +1233,8 @@ struct State {
         auto* left_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, sm_ty->Type(),
                                            sm_ty->Columns(), sm_ty->Rows());
         return b
-            .CallExplicit<msl::ir::BuiltinCall>(left_ty, msl::BuiltinFn::kConvert, Vector{left_ty},
+            .CallExplicit<msl::ir::BuiltinCall>(left_ty, msl::BuiltinFn::kConvert,
+                                                Vector<core::ir::TemplateParameter, 1>{left_ty},
                                                 mat)
             ->Result();
     }
@@ -1268,7 +1271,8 @@ struct State {
             auto* ld = b.Load(tmp);
 
             b.CallExplicitWithResult<msl::ir::BuiltinCall>(
-                builtin->DetachResult(), msl::BuiltinFn::kConvert, Vector{sm_ty}, ld);
+                builtin->DetachResult(), msl::BuiltinFn::kConvert,
+                Vector<core::ir::TemplateParameter, 1>{sm_ty}, ld);
         });
         builtin->Destroy();
     }
@@ -1301,7 +1305,8 @@ struct State {
             auto* ld = b.Load(tmp);
 
             b.CallExplicitWithResult<msl::ir::BuiltinCall>(
-                builtin->DetachResult(), msl::BuiltinFn::kConvert, Vector{sm_ty}, ld);
+                builtin->DetachResult(), msl::BuiltinFn::kConvert,
+                Vector<core::ir::TemplateParameter, 1>{sm_ty}, ld);
         });
         builtin->Destroy();
     }
@@ -1333,7 +1338,8 @@ struct State {
             auto* ld = b.Load(tmp);
 
             b.CallExplicitWithResult<msl::ir::BuiltinCall>(
-                builtin->DetachResult(), msl::BuiltinFn::kConvert, Vector{sm_ty}, ld);
+                builtin->DetachResult(), msl::BuiltinFn::kConvert,
+                Vector<core::ir::TemplateParameter, 1>{sm_ty}, ld);
         });
         builtin->Destroy();
     }

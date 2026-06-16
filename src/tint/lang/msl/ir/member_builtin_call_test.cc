@@ -76,7 +76,7 @@ TEST_F(IR_MslMemberBuiltinCallTest, CloneWithExplicitParams) {
     auto* coords = b.FunctionParam("coords", ty.vec2f());
     auto* builtin =
         b.MemberCall<MemberBuiltinCall>(mod.Types().void_(), BuiltinFn::kSample, t, s, coords);
-    builtin->SetExplicitTemplateParams(Vector{mod.Types().i32()});
+    builtin->SetExplicitTemplateParams(Vector<core::ir::TemplateParameter, 1>{mod.Types().i32()});
 
     auto* new_b = clone_ctx.Clone(builtin);
     EXPECT_NE(builtin->Result(), new_b->Result());

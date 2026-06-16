@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/constant/string.h"
+#include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/block_param.h"
@@ -556,7 +557,7 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
                     if (i > 0) {
                         out_ << ", ";
                     }
-                    out_ << ep[i]->FriendlyName();
+                    out_ << ep[i];
                 }
                 out_ << ">";
             }

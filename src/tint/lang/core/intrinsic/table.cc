@@ -741,31 +741,26 @@ Result<Overload, StyledText> LookupFn(Context& context,
 Result<Overload, StyledText> LookupMemberFn(Context& context,
                                             std::string_view intrinsic_name,
                                             size_t function_id,
-                                            VectorRef<const core::type::Type*> template_args,
+                                            VectorRef<TemplateParameter> template_args,
                                             VectorRef<const core::type::Type*> args,
                                             EvaluationStage earliest_eval_stage) {
     // Generates an error when no overloads match the provided arguments
-    // TODO(520804445): Support templated member functions with non-type parameters.
-    Vector<TemplateParameter, 1> converted;
-    converted.Reserve(template_args.Length());
-    for (auto* ty : template_args) {
-        converted.Push(ty);
-    }
     auto on_no_match = [&](VectorRef<Candidate> candidates) {
         StyledText err;
-        err << "no matching call to " << CallSignature(intrinsic_name, converted, args) << "\n";
+        err << "no matching call to " << CallSignature(intrinsic_name, template_args, args) << "\n";
         if (!candidates.IsEmpty()) {
             err << "\n"
                 << candidates.Length() << " candidate function"
                 << (candidates.Length() > 1 ? "s:" : ":") << "\n";
-            PrintCandidates(err, context, candidates, intrinsic_name, converted, args);
+            PrintCandidates(err, context, candidates, intrinsic_name, template_args, args);
         }
         return err;
     };
 
     // Resolve the intrinsic overload
-    return MatchIntrinsic(context, context.data.builtins[function_id], intrinsic_name, converted,
-                          args, earliest_eval_stage, /* member_function */ true, on_no_match);
+    return MatchIntrinsic(context, context.data.builtins[function_id], intrinsic_name,
+                          template_args, args, earliest_eval_stage, /* member_function */ true,
+                          on_no_match);
 }
 
 Result<Overload, StyledText> LookupUnary(Context& context,
@@ -923,19 +918,14 @@ Result<Overload, StyledText> LookupBinary(Context& context,
 Result<Overload, StyledText> LookupCtorConv(Context& context,
                                             std::string_view type_name,
                                             size_t type_id,
-                                            VectorRef<const core::type::Type*> template_args,
+                                            VectorRef<TemplateParameter> template_args,
                                             VectorRef<const core::type::Type*> args,
                                             EvaluationStage earliest_eval_stage) {
     // Generates an error when no overloads match the provided arguments
-    // TODO(520804445): Support ctor/conv with non-type template parameters.
-    Vector<TemplateParameter, 1> converted;
-    converted.Reserve(template_args.Length());
-    for (auto* ty : template_args) {
-        converted.Push(ty);
-    }
     auto on_no_match = [&](VectorRef<Candidate> candidates) {
         StyledText err;
-        err << "no matching constructor for " << CallSignature(type_name, converted, args) << "\n";
+        err << "no matching constructor for " << CallSignature(type_name, template_args, args)
+            << "\n";
         Candidates ctor, conv;
         for (auto candidate : candidates) {
             if (candidate.overload->flags.Contains(OverloadFlag::kIsConstructor)) {
@@ -948,19 +938,19 @@ Result<Overload, StyledText> LookupCtorConv(Context& context,
             err << "\n"
                 << ctor.Length() << " candidate constructor" << (ctor.Length() > 1 ? "s:" : ":")
                 << "\n";
-            PrintCandidates(err, context, ctor, type_name, converted, args);
+            PrintCandidates(err, context, ctor, type_name, template_args, args);
         }
         if (!conv.IsEmpty()) {
             err << "\n"
                 << conv.Length() << " candidate conversion" << (conv.Length() > 1 ? "s:" : ":")
                 << "\n";
-            PrintCandidates(err, context, conv, type_name, converted, args);
+            PrintCandidates(err, context, conv, type_name, template_args, args);
         }
         return err;
     };
 
     // Resolve the intrinsic overload
-    return MatchIntrinsic(context, context.data.ctor_conv[type_id], type_name, converted, args,
+    return MatchIntrinsic(context, context.data.ctor_conv[type_id], type_name, template_args, args,
                           earliest_eval_stage, /* member_function */ false, on_no_match);
 }
 

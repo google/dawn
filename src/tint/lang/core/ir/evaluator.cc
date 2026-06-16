@@ -155,8 +155,8 @@ Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
 
     auto mat_vec = [&](const core::type::Type* type,
                        core::intrinsic::CtorConv intrinsic) -> constant::Eval::Result {
-        auto op =
-            table.Lookup(intrinsic, Vector{type}, arg_types, core::EvaluationStage::kOverride);
+        auto op = table.Lookup(intrinsic, Vector<TemplateParameter, 1>{type}, arg_types,
+                               core::EvaluationStage::kOverride);
         if (op != Success) {
             AddError(SourceOf(c)) << "unable to find intrinsic for construct: " << op.Failure();
             return Failure();
@@ -345,15 +345,9 @@ Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* 
         args.Push(val);
     }
 
-    // TODO(520804445): Remove this when calls support additionally template kinds.
-    Vector<core::intrinsic::TemplateParameter, 1> converted;
-    converted.Reserve(c->ExplicitTemplateParams().Length());
-    for (auto* ty : c->ExplicitTemplateParams()) {
-        converted.Push(ty);
-    }
-    auto overload =
-        core::intrinsic::LookupFn(context, c->FriendlyName().c_str(), c->FuncId(), converted,
-                                  arg_types, core::EvaluationStage::kOverride);
+    auto overload = core::intrinsic::LookupFn(context, c->FriendlyName().c_str(), c->FuncId(),
+                                              c->ExplicitTemplateParams(), arg_types,
+                                              core::EvaluationStage::kOverride);
     if (overload != Success) {
         AddError(SourceOf(c)) << overload.Failure();
         return Failure();

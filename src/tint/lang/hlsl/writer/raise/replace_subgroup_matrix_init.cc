@@ -164,8 +164,8 @@ struct State {
     }
 
     core::ir::Call* Splat(const core::type::SubgroupMatrix* sm, core::ir::Value* value) {
-        return b.CallExplicit<hlsl::ir::BuiltinCall>(sm, hlsl::BuiltinFn::kSplat, Vector{sm},
-                                                     value);
+        return b.CallExplicit<hlsl::ir::BuiltinCall>(
+            sm, hlsl::BuiltinFn::kSplat, Vector<core::ir::TemplateParameter, 1>{sm}, value);
     }
 };
 

@@ -4354,8 +4354,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_ColMajor_F32)
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call = b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, p, 64_u,
-                                    true, 32_u);
+        auto* call =
+            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<core::ir::TemplateParameter, 1>{mat}, p, 64_u, true, 32_u);
         b.Return(func, call);
     });
 
@@ -4391,8 +4392,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajor_U3
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call = b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, p, 64_u,
-                                    false, 32_u);
+        auto* call =
+            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<core::ir::TemplateParameter, 1>{mat}, p, 64_u, false, 32_u);
         b.Return(func, call);
     });
 
@@ -4428,8 +4430,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_ColMajor_I8) 
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call = b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, p, 64_u,
-                                    true, 32_u);
+        auto* call =
+            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<core::ir::TemplateParameter, 1>{mat}, p, 64_u, true, 32_u);
         b.Return(func, call);
     });
 
@@ -4467,8 +4470,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajor_U8
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call = b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, p, 64_u,
-                                    false, 32_u);
+        auto* call =
+            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<core::ir::TemplateParameter, 1>{mat}, p, 64_u, false, 32_u);
         b.Return(func, call);
     });
 
@@ -4656,7 +4660,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_F32) {
     func->SetParams({left, right});
     b.Append(func->Block(), [&] {
         auto* call = b.CallExplicit(result, core::BuiltinFn::kSubgroupMatrixMultiply,
-                                    Vector{ty.f32()}, left, right);
+                                    Vector<core::ir::TemplateParameter, 1>{ty.f32()}, left, right);
         b.Return(func, call);
     });
 
@@ -4694,7 +4698,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_I32_U32) {
     func->SetParams({left, right});
     b.Append(func->Block(), [&] {
         auto* call = b.CallExplicit(result, core::BuiltinFn::kSubgroupMatrixMultiply,
-                                    Vector{ty.u32()}, left, right);
+                                    Vector<core::ir::TemplateParameter, 1>{ty.u32()}, left, right);
         b.Return(func, call);
     });
 
@@ -4732,7 +4736,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_U32_I32) {
     func->SetParams({left, right});
     b.Append(func->Block(), [&] {
         auto* call = b.CallExplicit(result, core::BuiltinFn::kSubgroupMatrixMultiply,
-                                    Vector{ty.i32()}, left, right);
+                                    Vector<core::ir::TemplateParameter, 1>{ty.i32()}, left, right);
         b.Return(func, call);
     });
 
@@ -4770,7 +4774,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_I32_I32) {
     func->SetParams({left, right});
     b.Append(func->Block(), [&] {
         auto* call = b.CallExplicit(result, core::BuiltinFn::kSubgroupMatrixMultiply,
-                                    Vector{ty.i32()}, left, right);
+                                    Vector<core::ir::TemplateParameter, 1>{ty.i32()}, left, right);
         b.Return(func, call);
     });
 
@@ -4808,7 +4812,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_I8_I32) {
     func->SetParams({left, right});
     b.Append(func->Block(), [&] {
         auto* call = b.CallExplicit(result, core::BuiltinFn::kSubgroupMatrixMultiply,
-                                    Vector{ty.i32()}, left, right);
+                                    Vector<core::ir::TemplateParameter, 1>{ty.i32()}, left, right);
         b.Return(func, call);
     });
 
@@ -4846,7 +4850,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_U8_U32) {
     func->SetParams({left, right});
     b.Append(func->Block(), [&] {
         auto* call = b.CallExplicit(result, core::BuiltinFn::kSubgroupMatrixMultiply,
-                                    Vector{ty.u32()}, left, right);
+                                    Vector<core::ir::TemplateParameter, 1>{ty.u32()}, left, right);
         b.Return(func, call);
     });
 

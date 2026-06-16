@@ -737,8 +737,16 @@ class State {
                 const ast::CallExpression* expr = nullptr;
                 if (!c->ExplicitTemplateParams().IsEmpty()) {
                     Vector<const ast::Expression*, 4> tmpl_args;
-                    for (auto* e : c->ExplicitTemplateParams()) {
-                        tmpl_args.Push(Type(e).expr);
+                    for (auto& e : c->ExplicitTemplateParams()) {
+                        if (std::holds_alternative<const core::type::Type*>(e)) {
+                            tmpl_args.Push(Type(std::get<const core::type::Type*>(e)).expr);
+                        } else if (std::holds_alternative<core::Majorness>(e)) {
+                            StringStream str;
+                            str << std::get<core::Majorness>(e);
+                            tmpl_args.Push(b.Expr(str.str()));
+                        } else {
+                            TINT_UNREACHABLE() << "Unhandled template parameter kind";
+                        }
                     }
                     expr = b.Call(b.Ident(c->Func(), std::move(tmpl_args)), std::move(args));
                 } else {

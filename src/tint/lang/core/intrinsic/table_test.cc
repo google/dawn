@@ -801,8 +801,8 @@ TEST_F(CoreIntrinsicTableTest, MismatchCompoundOp) {
 TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer) {
     auto* i32 = ty.i32();
     auto* vec3i = ty.vec3i();
-    auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, i32, i32},
-                               EvaluationStage::kConstant);
+    auto result = table.Lookup(CtorConv::kVec3, Vector<TemplateParameter, 1>{i32},
+                               Vector{i32, i32, i32}, EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
     EXPECT_EQ(result->return_type, vec3i);
     EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
@@ -816,8 +816,8 @@ TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer) {
 TEST_F(CoreIntrinsicTableTest, MismatchTypeInitializer) {
     auto* i32 = ty.i32();
     auto* f32 = ty.f32();
-    auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, f32, i32},
-                               EvaluationStage::kConstant);
+    auto result = table.Lookup(CtorConv::kVec3, Vector<TemplateParameter, 1>{i32},
+                               Vector{i32, f32, i32}, EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
     EXPECT_EQ(result.Failure().Plain(),
               R"(no matching constructor for 'vec3<i32>(i32, f32, i32)'
@@ -863,8 +863,8 @@ TEST_F(CoreIntrinsicTableTest, MismatchTypeInitializer) {
 TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
     auto* i32 = ty.i32();
     auto* vec3i = ty.vec3i();
-    auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, i32, i32},
-                               EvaluationStage::kConstant);
+    auto result = table.Lookup(CtorConv::kVec3, Vector<TemplateParameter, 1>{i32},
+                               Vector{i32, i32, i32}, EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
     EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3i);
@@ -878,8 +878,8 @@ TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
 
 TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer_RuntimeEval) {
     auto* i32 = ty.i32();
-    auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, i32, i32},
-                               EvaluationStage::kRuntime);
+    auto result = table.Lookup(CtorConv::kVec3, Vector<TemplateParameter, 1>{i32},
+                               Vector{i32, i32, i32}, EvaluationStage::kRuntime);
     auto* vec3i = ty.vec3i();
     ASSERT_EQ(result, Success);
     EXPECT_NE(result->const_eval_fn, nullptr);
@@ -896,8 +896,8 @@ TEST_F(CoreIntrinsicTableTest, MatchTypeConversion) {
     auto* i32 = ty.i32();
     auto* vec3i = ty.vec3i();
     auto* vec3f = ty.vec3f();
-    auto result =
-        table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{vec3f}, EvaluationStage::kConstant);
+    auto result = table.Lookup(CtorConv::kVec3, Vector<TemplateParameter, 1>{i32}, Vector{vec3f},
+                               EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
     EXPECT_EQ(result->return_type, vec3i);
     EXPECT_FALSE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
@@ -908,8 +908,8 @@ TEST_F(CoreIntrinsicTableTest, MatchTypeConversion) {
 TEST_F(CoreIntrinsicTableTest, MismatchTypeConversion) {
     auto* arr = ty.runtime_array(ty.u32());
     auto* f32 = ty.f32();
-    auto result =
-        table.Lookup(CtorConv::kVec3, Vector{f32}, Vector{arr}, EvaluationStage::kConstant);
+    auto result = table.Lookup(CtorConv::kVec3, Vector<TemplateParameter, 1>{f32}, Vector{arr},
+                               EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
     EXPECT_EQ(result.Failure().Plain(),
               R"(no matching constructor for 'vec3<f32>(array<u32>)'
@@ -955,8 +955,8 @@ TEST_F(CoreIntrinsicTableTest, MatchTypeConversion_ConstantEval) {
     auto* f32 = ty.f32();
     auto* vec3i = ty.vec3i();
     auto* vec3f = ty.vec3f();
-    auto result =
-        table.Lookup(CtorConv::kVec3, Vector{f32}, Vector{vec3i}, EvaluationStage::kConstant);
+    auto result = table.Lookup(CtorConv::kVec3, Vector<TemplateParameter, 1>{f32}, Vector{vec3i},
+                               EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
     EXPECT_NE(result->const_eval_fn, nullptr);
     // NOTE: Conversions are explicit, so there's no way to have it return abstracts
@@ -970,8 +970,8 @@ TEST_F(CoreIntrinsicTableTest, MatchTypeConversion_RuntimeEval) {
     auto* f32 = ty.f32();
     auto* vec3i = ty.vec3i();
     auto* vec3f = ty.vec3f();
-    auto result =
-        table.Lookup(CtorConv::kVec3, Vector{f32}, Vector{vec3i}, EvaluationStage::kRuntime);
+    auto result = table.Lookup(CtorConv::kVec3, Vector<TemplateParameter, 1>{f32}, Vector{vec3i},
+                               EvaluationStage::kRuntime);
     ASSERT_EQ(result, Success);
     EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3f);

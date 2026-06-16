@@ -8328,8 +8328,8 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Simple_BufferView) {
     auto* offset = b.FunctionParam("offset", ty.u32());
     foo->SetParams({p, offset});
     b.Append(foo->Block(), [&] {
-        b.CallExplicit(ty.ptr(storage, ty.u32()), BuiltinFn::kBufferView, Vector{ty.u32()}, p,
-                       offset);
+        b.CallExplicit(ty.ptr(storage, ty.u32()), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{ty.u32()}, p, offset);
         b.Return(foo);
     });
 
@@ -8396,7 +8396,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Simple_BufferArrayView) {
     foo->SetParams({p, offset, size});
     b.Append(foo->Block(), [&] {
         b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())), BuiltinFn::kBufferArrayView,
-                       Vector{ty.runtime_array(ty.u32())}, p, offset, size);
+                       Vector<TemplateParameter, 1>{ty.runtime_array(ty.u32())}, p, offset, size);
         b.Return(foo);
     });
 
@@ -8470,7 +8470,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferView_Chain) {
     foo->SetParams({offset});
     b.Append(foo->Block(), [&] {
         auto* call = b.CallExplicit(ty.ptr(workgroup, arr_ty), BuiltinFn::kBufferView,
-                                    Vector{arr_ty}, v, offset);
+                                    Vector<TemplateParameter, 1>{arr_ty}, v, offset);
         b.Call(ty.void_(), bar, call);
         b.Return(foo);
     });
@@ -8546,7 +8546,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferView_Chain_WithLength) {
     foo->SetParams({offset, length});
     b.Append(foo->Block(), [&] {
         auto* call = b.CallExplicit(ty.ptr(workgroup, arr_ty), BuiltinFn::kBufferView,
-                                    Vector{arr_ty}, v, offset, length);
+                                    Vector<TemplateParameter, 1>{arr_ty}, v, offset, length);
         b.Call(ty.void_(), bar, call);
         b.Return(foo);
     });
@@ -8623,7 +8623,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferArrayView_Chain) {
     foo->SetParams({offset, size});
     b.Append(foo->Block(), [&] {
         auto* call = b.CallExplicit(ty.ptr(workgroup, arr_ty), BuiltinFn::kBufferArrayView,
-                                    Vector{arr_ty}, v, offset, size);
+                                    Vector<TemplateParameter, 1>{arr_ty}, v, offset, size);
         b.Call(ty.void_(), bar, call);
         b.Return(foo);
     });
@@ -8701,7 +8701,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferArrayView_Chain_WithLength)
     foo->SetParams({offset, size, length});
     b.Append(foo->Block(), [&] {
         auto* call = b.CallExplicit(ty.ptr(workgroup, arr_ty), BuiltinFn::kBufferArrayView,
-                                    Vector{arr_ty}, v, offset, size, length);
+                                    Vector<TemplateParameter, 1>{arr_ty}, v, offset, size, length);
         b.Call(ty.void_(), bar, call);
         b.Return(foo);
     });
@@ -8788,7 +8788,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferView_MultiChain) {
     foo->SetParams({offset});
     b.Append(foo->Block(), [&] {
         auto* call = b.CallExplicit(ty.ptr(workgroup, arr_ty), BuiltinFn::kBufferView,
-                                    Vector{arr_ty}, v, offset);
+                                    Vector<TemplateParameter, 1>{arr_ty}, v, offset);
         b.Call(ty.void_(), foobar, call);
         b.Return(foo);
     });
@@ -8892,7 +8892,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferArrayView_MultiChain) {
     foo->SetParams({offset, size});
     b.Append(foo->Block(), [&] {
         auto* call = b.CallExplicit(ty.ptr(workgroup, arr_ty), BuiltinFn::kBufferArrayView,
-                                    Vector{arr_ty}, v, offset, size);
+                                    Vector<TemplateParameter, 1>{arr_ty}, v, offset, size);
         b.Call(ty.void_(), foobar, call);
         b.Return(foo);
     });
@@ -8982,12 +8982,12 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Disambiguate_Fn) {
 
     auto* main = b.Function("main", ty.void_());
     b.Append(main->Block(), [&] {
-        auto* v1 =
-            b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView, Vector{arr_ty}, v, 0_u);
+        auto* v1 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView,
+                                  Vector<TemplateParameter, 1>{arr_ty}, v, 0_u);
         b.Call(ty.void_(), bar, v1);
 
         auto* v2 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferArrayView,
-                                  Vector{arr_ty}, v, 0_u, 10_u);
+                                  Vector<TemplateParameter, 1>{arr_ty}, v, 0_u, 10_u);
         b.Call(ty.void_(), bar, v2);
 
         b.Return(main);
@@ -9066,12 +9066,12 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Disambiguate_Length) {
 
     auto* main = b.Function("main", ty.void_());
     b.Append(main->Block(), [&] {
-        auto* v1 =
-            b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView, Vector{arr_ty}, v, 0_u);
+        auto* v1 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView,
+                                  Vector<TemplateParameter, 1>{arr_ty}, v, 0_u);
         b.Call(ty.void_(), bar, v1);
 
-        auto* v2 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView, Vector{arr_ty},
-                                  v, 0_u, 100_u);
+        auto* v2 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView,
+                                  Vector<TemplateParameter, 1>{arr_ty}, v, 0_u, 100_u);
         b.Call(ty.void_(), bar, v2);
 
         b.Return(main);
@@ -9161,8 +9161,8 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, MultiLevelPropagation) {
 
     auto* main = b.Function("main", ty.void_());
     b.Append(main->Block(), [&] {
-        auto* v1 =
-            b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView, Vector{arr_ty}, v, 0_u);
+        auto* v1 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView,
+                                  Vector<TemplateParameter, 1>{arr_ty}, v, 0_u);
         b.Call(ty.void_(), foo, v1);
         b.Return(main);
     });
@@ -9244,8 +9244,8 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, LetDeclaration) {
 
     auto* main = b.Function("main", ty.void_());
     b.Append(main->Block(), [&] {
-        auto* v1 =
-            b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView, Vector{arr_ty}, v, 0_u);
+        auto* v1 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView,
+                                  Vector<TemplateParameter, 1>{arr_ty}, v, 0_u);
         auto* l = b.Let("l", v1);
         b.Call(ty.void_(), foo, l);
         b.Return(main);
@@ -9316,8 +9316,8 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, DynamicArgs) {
     main->SetParams({offset});
     b.Append(main->Block(), [&] {
         auto* dyn_offset = b.Add(offset, 4_u);
-        auto* v1 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView, Vector{arr_ty},
-                                  v, dyn_offset);
+        auto* v1 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView,
+                                  Vector<TemplateParameter, 1>{arr_ty}, v, dyn_offset);
         b.Call(ty.void_(), foo, v1);
         b.Return(main);
     });
@@ -9385,8 +9385,8 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Uniform) {
 
     auto* main = b.Function("main", ty.void_());
     b.Append(main->Block(), [&] {
-        auto* v1 =
-            b.CallExplicit(ty.ptr(uniform, arr_ty), BuiltinFn::kBufferView, Vector{arr_ty}, v, 0_u);
+        auto* v1 = b.CallExplicit(ty.ptr(uniform, arr_ty), BuiltinFn::kBufferView,
+                                  Vector<TemplateParameter, 1>{arr_ty}, v, 0_u);
         b.Call(ty.void_(), foo, v1);
         b.Return(main);
     });
@@ -9459,8 +9459,8 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Struct) {
 
     auto* main = b.Function("main", ty.void_());
     b.Append(main->Block(), [&] {
-        auto* v1 =
-            b.CallExplicit(ty.ptr(storage, str_), BuiltinFn::kBufferView, Vector{str_}, v, 0_u);
+        auto* v1 = b.CallExplicit(ty.ptr(storage, str_), BuiltinFn::kBufferView,
+                                  Vector<TemplateParameter, 1>{str_}, v, 0_u);
         b.Call(ty.void_(), foo, v1);
         b.Return(main);
     });
@@ -9536,7 +9536,8 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, ConvertedParameters) {
     auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
     bar->SetParams({p});
     b.Append(bar->Block(), [&] {
-        b.CallExplicit(ty.ptr(storage, ty.u32()), BuiltinFn::kBufferView, Vector{ty.u32()}, p, 0_u);
+        b.CallExplicit(ty.ptr(storage, ty.u32()), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{ty.u32()}, p, 0_u);
         b.Return(bar);
     });
 

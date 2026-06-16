@@ -312,10 +312,10 @@ TEST_F(GlslWriterTest, U16_Via_BufferView) {
     auto* ep = b.ComputeFunction("main");
     b.Append(ep->Block(), [&] {
         auto* view1 = b.CallExplicit(ty.ptr(storage, ty.f16()), core::BuiltinFn::kBufferView,
-                                     Vector{ty.f16()}, v, 0_u);
+                                     Vector<core::ir::TemplateParameter, 1>{ty.f16()}, v, 0_u);
         b.Load(view1);
         auto* view2 = b.CallExplicit(ty.ptr(storage, ty.u32()), core::BuiltinFn::kBufferView,
-                                     Vector{ty.u32()}, v, 0_u);
+                                     Vector<core::ir::TemplateParameter, 1>{ty.u32()}, v, 0_u);
         b.Load(view2);
         b.Return(ep);
     });
