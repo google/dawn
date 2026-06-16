@@ -63,3 +63,16 @@ dawn_add_library(
     SOURCES
         ${sources}
 )
+
+dawn_add_library(
+    dawn_crash_handler
+    ENABLE_EMSCRIPTEN
+    UTILITY_TARGET dawn_internal_config
+    HEADERS
+        "crash_handler.h"
+    SOURCES
+        "crash_handler.cc"
+    DEPENDS
+        absl::failure_signal_handler
+        absl::symbolize
+)

@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,22 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gmock/gmock.h"
-#include "src/tint/api/tint.h"
-#include "src/utils/chromium_test_compat/chromium_test_compat.h"
-#include "src/utils/crash_handler.h"
+#ifndef SRC_UTILS_CRASH_HANDLER_H_
+#define SRC_UTILS_CRASH_HANDLER_H_
 
-// Entry point for tint unit tests
-int main(int argc, char** argv) {
-    dawn::InstallCrashHandler(argv[0]);
-    dawn::SubstituteChromiumArgs(argc, argv);
-    testing::InitGoogleMock(&argc, argv);
+namespace dawn {
 
-    tint::Initialize();
+// Install crash handler to print a demangled stack trace on unexpected crashes or assertions.
+void InstallCrashHandler(const char* argv0);
 
-    auto res = RUN_ALL_TESTS();
+}  // namespace dawn
 
-    tint::Shutdown();
-
-    return res;
-}
+#endif  // SRC_UTILS_CRASH_HANDLER_H_

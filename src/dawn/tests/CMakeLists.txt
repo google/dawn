@@ -43,6 +43,7 @@ add_library(dawn_test_infra OBJECT
 )
 common_compile_options(dawn_test_infra)
 target_link_libraries(dawn_test_infra PRIVATE
+    dawn_crash_handler
     dawn_native
     dawn_wgpu_utils
     dawncpp

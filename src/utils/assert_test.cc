@@ -107,7 +107,22 @@ TEST_F(AssertDeathTest, AssertKills) {
     EXPECT_DEATH(DAWN_ASSERT(g_var2 != 124), "g_var2 != 124");
 #endif
 }
-#endif
+
+#ifndef _WIN32
+TEST_F(AssertDeathTest, StackTrace) {
+    EXPECT_DEATH(DAWN_UNREACHABLE(), "PC: @");
+}
+
+TEST_F(AssertDeathTest, CrashStackTrace) {
+    EXPECT_DEATH(
+        {
+            volatile int* ptr = nullptr;
+            *ptr = 1;
+        },
+        "PC: @");
+}
+#endif  // !defined(_WIN32)
+#endif  // GTEST_HAS_DEATH_TEST
 
 using AssertFunctionalityTest = ::testing::Test;
 

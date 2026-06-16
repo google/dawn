@@ -77,6 +77,7 @@
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/dawn/utils/WireHelper.h"
 #include "src/utils/assert.h"
+#include "src/utils/crash_handler.h"
 #include "src/utils/log.h"
 #include "src/utils/platform.h"
 
@@ -352,6 +353,7 @@ DawnTestEnvironment* DawnTestEnvironment::GetEnvironment() {
 }
 
 DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
+    InstallCrashHandler(argv[0]);
     InitializePartitionAllocForTesting();
     InitializeDanglingPointerDetectorForTesting();
 

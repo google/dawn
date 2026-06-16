@@ -49,6 +49,7 @@
 #include "src/dawn/tests/ToggleParser.h"
 #include "src/dawn/utils/WireHelper.h"
 #include "src/utils/assert.h"
+#include "src/utils/crash_handler.h"
 
 namespace {
 
@@ -61,6 +62,7 @@ static ValidationTest* gCurrentTest = nullptr;
 }  // namespace
 
 void InitDawnValidationTestEnvironment(int argc, char** argv) {
+    dawn::InstallCrashHandler(argv[0]);
     dawn::InitializePartitionAllocForTesting();
     dawn::InitializeDanglingPointerDetectorForTesting();
 

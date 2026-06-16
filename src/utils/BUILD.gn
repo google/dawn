@@ -106,6 +106,15 @@ static_library("utils") {
   public_configs = [ ":internal_config" ]
 }
 
+source_set("crash_handler") {
+  sources = [
+    "crash_handler.cc",
+    "crash_handler.h",
+  ]
+  public_configs = [ ":internal_config" ]
+  deps = [ "${dawn_root}:abseil" ]
+}
+
 dawn_nocompile_source_set("nocompile_sources") {
   deps = [ ":utils" ]
   sources = [

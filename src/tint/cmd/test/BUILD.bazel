@@ -105,6 +105,7 @@ cc_binary(
     "@gtest",
     "//src/utils",
     "//src/utils/chromium_test_compat",
+    "//src/utils:crash_handler",
   ] + select({
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer/common:test",

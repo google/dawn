@@ -493,6 +493,7 @@ source_set("test_infra_sources") {
   ]
   public_deps = [
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
+    "${dawn_root}/src/utils:crash_handler",
     "${dawn_root}/src/utils:gmock_and_gtest",
   ]
 

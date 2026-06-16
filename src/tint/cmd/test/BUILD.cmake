@@ -105,6 +105,7 @@ tint_target_add_external_dependencies(tint_cmd_test_test_cmd test_cmd
   "gtest"
   "src_utils"
   "src_utils_chromium_test_compat"
+  "src_utils_crash_handler"
 )
 
 if(TINT_BUILD_GLSL_WRITER)

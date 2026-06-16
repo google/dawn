@@ -113,6 +113,11 @@
           "libprotobuf-mutator/**"
       ]
     },
+    "src_utils_crash_handler": {
+        "IncludePatterns": [
+            "src/utils/crash_handler.*"
+        ]
+    },
     "src_utils": {
         "IncludePatterns": [
             "src/utils/*"

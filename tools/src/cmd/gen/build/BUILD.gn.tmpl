@@ -193,6 +193,7 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
 {{-   else if eq $.Name "vulkan-headers"                 -}}"${dawn_vulkan_headers_dir}:vulkan_headers",
 {{-   else if eq $.Name "libvulkan"                      -}}"${dawn_vulkan_loader_dir}:libvulkan",
 {{-   else if eq $.Name "winsock"                        -}}"${tint_src_dir}:winsock",
+{{-   else if eq $.Name "src_utils_crash_handler"        -}}"${dawn_root}/src/utils:crash_handler",
 {{-   else if eq $.Name "src_utils"                      -}}"${dawn_root}/src/utils:utils",
 {{-   else if eq $.Name "src_utils_chromium_test_compat" -}}"${dawn_root}/src/utils/chromium_test_compat:chromium_test_compat",
 {{-   else                                      -}}{{Error (printf "unhandled external dependency '%v'" $.Name)}}

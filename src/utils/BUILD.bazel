@@ -58,3 +58,15 @@ cc_library(
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
+
+cc_library(
+  name = "crash_handler",
+  hdrs = ["crash_handler.h"],
+  srcs = ["crash_handler.cc"],
+  deps = [
+    "@abseil_cpp//absl/debugging:failure_signal_handler",
+    "@abseil_cpp//absl/debugging:symbolize",
+  ],
+  copts = COPTS,
+  visibility = ["//visibility:public"],
+)
