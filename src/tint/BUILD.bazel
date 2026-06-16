@@ -50,8 +50,8 @@ genrule(
     name = "generate_sources",
     srcs = tint_generation_dependencies,
     outs = tint_generated_sources,
-    cmd = "$(location //tools/src:gen-bazel) $(RULEDIR)/gen",
-    tools = ["//tools/src:gen-bazel"],
+    cmd = "$(location //tools/src:gen-sources) $(RULEDIR)/gen",
+    tools = ["//tools/src:gen-sources"],
     visibility = ["//visibility:public"],
     tags = ["local"],
 )

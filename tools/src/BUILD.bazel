@@ -40,9 +40,9 @@ go_library(
 )
 
 go_library(
-    name = "gen_bazel_lib",
-    srcs = ["cmd/gen/bazel-wrapper/main.go"],
-    importpath = "dawn.googlesource.com/dawn/tools/src/cmd/gen/bazel-wrapper",
+    name = "gen_sources",
+    srcs = ["cmd/gen/sources/main.go"],
+    importpath = "dawn.googlesource.com/dawn/tools/src/cmd/gen/sources",
     visibility = ["//visibility:private"],
     deps = [
         ":cmd_gen_common",
@@ -52,8 +52,8 @@ go_library(
 )
 
 go_binary(
-    name = "gen-bazel",
-    embed = [":gen_bazel_lib"],
+    name = "gen-sources",
+    embed = [":gen_sources"],
     visibility = ["//visibility:public"],
 )
 
