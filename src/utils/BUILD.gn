@@ -68,6 +68,13 @@ config("internal_config") {
     # Disable logging to make fuzzing more efficient.
     defines += [ "DAWN_DISABLE_LOGGING" ]
   }
+
+  # OS_CHROMEOS cannot be autodetected in runtime and
+  # cannot be detected with regular compiler macros either.
+  # Inject it from the build system
+  if (is_chromeos) {
+    defines += [ "DAWN_OS_CHROMEOS" ]
+  }
 }
 
 static_library("utils") {
