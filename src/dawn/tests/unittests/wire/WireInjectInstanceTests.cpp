@@ -133,6 +133,11 @@ TEST_F(WireInjectInstanceTests, ReclaimInstanceReservation) {
 
         // No errors should occur.
         FlushClient();
+
+        // Cleanup reservations to avoid leaks.
+        GetWireClient()->ReclaimInstanceReservation(reserved2);
+        wgpuInstanceRelease(reserved2.instance);
+        wgpuInstanceRelease(reserved1.instance);
     }
 }
 
