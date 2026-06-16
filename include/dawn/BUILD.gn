@@ -37,7 +37,6 @@ import("${dawn_root}/scripts/dawn_component.gni")
 dawn_json_generator("headers_gen") {
   target = "headers"
   inputs = [
-    "${dawn_root}/src/dawn/dawn_wire.json",
     "${dawn_template_dir}/api.h",
     "${dawn_template_dir}/dawn/wire/client/api.h",
     "${dawn_template_dir}/dawn_proc_table.h",
@@ -64,7 +63,6 @@ source_set("headers") {
 dawn_json_generator("cpp_headers_gen") {
   target = "cpp_headers"
   inputs = [
-    "${dawn_root}/src/dawn/dawn_wire.json",
     "${dawn_template_dir}/api_cpp_chained_struct.h",
     "${dawn_template_dir}/api_cpp_print.h",
     "${dawn_template_dir}/api_cpp.h",

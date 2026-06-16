@@ -50,6 +50,10 @@ dawn_generator("dawn_version_gen") {
       "--version-file",
       rebase_path(dawn_version_file, root_build_dir),
     ]
+  } else {
+    # Allow any file from .git to be read, they are inputs for RBE but not all
+    # are always read.
+    inputs += [ "*.git/*" ]
   }
 
   outputs = [
@@ -73,7 +77,6 @@ source_set("cpp") {
 dawn_json_generator("proc_gen") {
   target = "proc"
   inputs = [
-    "${dawn_root}/src/dawn/dawn_wire.json",
     "${dawn_template_dir}/dawn_proc.cpp",
     "${dawn_template_dir}/dawn_thread_dispatch_proc.cpp",
   ]

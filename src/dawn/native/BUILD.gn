@@ -91,7 +91,6 @@ config("vulkan_utility_libraries_include") {
 dawn_json_generator("utils_gen") {
   target = "native_utils"
   inputs = [
-    "${dawn_root}/src/dawn/dawn_wire.json",
     "${dawn_template_dir}/dawn/cpp_macros.tmpl",
     "${dawn_template_dir}/dawn/native/api_absl_format.cpp",
     "${dawn_template_dir}/dawn/native/api_absl_format.h",
@@ -1123,10 +1122,7 @@ dawn_component("native") {
 
 dawn_json_generator("webgpu_dawn_native_proc_gen") {
   target = "webgpu_dawn_native_proc"
-  inputs = [
-    "${dawn_root}/src/dawn/dawn_wire.json",
-    "${dawn_template_dir}/dawn/native/api_dawn_native_proc.cpp",
-  ]
+  inputs = [ "${dawn_template_dir}/dawn/native/api_dawn_native_proc.cpp" ]
   outputs = [ "src/dawn/native/webgpu_dawn_native_proc.cpp" ]
 }
 

@@ -161,7 +161,6 @@ template("dawn_test") {
 dawn_json_generator("mock_webgpu_gen") {
   target = "mock_api"
   inputs = [
-    "${dawn_root}/src/dawn/dawn_wire.json",
     "${dawn_template_dir}/mock_api.h",
     "${dawn_template_dir}/mock_api.cpp",
   ]

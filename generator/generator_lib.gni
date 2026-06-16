@@ -143,11 +143,10 @@ template("generator_lib_action") {
     invoker.script,
     "${invoker.generator_lib_dir}/generator_lib.py",
 
-    # Allow any jinja2/markupsafe and .git files to be over-specified
-    # (they are in inputs for RBE, but not all of them are always read).
+    # Allow any jinja2/markupsafe to be over-specified (they are in inputs for
+    # RBE, but not all of them are always read).
     "*third_party/jinja2/*",
     "*third_party/markupsafe/*",
-    "*.git/*",
   ]
   if (defined(invoker.inputs)) {
     _expected_inputs += invoker.inputs

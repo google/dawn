@@ -38,7 +38,6 @@ import("${dawn_root}/scripts/dawn_features.gni")
 dawn_json_generator("dawn_utils_gen") {
   target = "dawn_utils"
   inputs = [
-    "${dawn_root}/src/dawn/dawn_wire.json",
     "${dawn_template_dir}/dawn/utils/ComboLimits.h",
     "${dawn_template_dir}/dawn/utils/ComboLimits.cpp",
   ]
