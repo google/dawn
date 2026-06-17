@@ -59,6 +59,12 @@ func runBisect(t *taskConfig) error {
 		return fmt.Errorf("-known-failing flag is required when bisecting")
 	}
 
+	if !t.skipInputTypeCheck {
+		if err := checkInputFileType(t.bisectFile, t.fuzzMode, t.osWrapper); err != nil {
+			return err
+		}
+	}
+
 	bc := &bisectConfig{taskConfig: t}
 
 	bc.fuzzerName = filepath.Base(t.fuzzer)

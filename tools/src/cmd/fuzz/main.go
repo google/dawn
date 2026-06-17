@@ -78,26 +78,27 @@ const (
 // It stores the command-line flags and parameters parsed during startup, serving as
 // the central config for deciding which tasks and modes are executed.
 type mainConfig struct {
-	verbose         bool
-	dump            bool
-	fuzzMode        FuzzMode
-	cmdMode         TaskMode // meta-task being requested by the user, may require running multiple tasks internally
-	mesaMode        bool
-	filter          string
-	inputs          string
-	triageFile      string
-	bisectFile      string
-	knownFailing    string
-	knownPassing    string
-	bisectStep      bool
-	isFix           bool
-	build           string
-	out             string
-	numProcesses    int
-	osWrapper       oswrapper.OSWrapper
-	execWrapper     execwrapper.ExecWrapper
-	progressBuilder progressbar.Build
-	exitFn          func(int)
+	verbose            bool
+	dump               bool
+	fuzzMode           FuzzMode
+	cmdMode            TaskMode // meta-task being requested by the user, may require running multiple tasks internally
+	mesaMode           bool
+	filter             string
+	inputs             string
+	triageFile         string
+	bisectFile         string
+	knownFailing       string
+	knownPassing       string
+	bisectStep         bool
+	isFix              bool
+	skipInputTypeCheck bool
+	build              string
+	out                string
+	numProcesses       int
+	osWrapper          oswrapper.OSWrapper
+	execWrapper        execwrapper.ExecWrapper
+	progressBuilder    progressbar.Build
+	exitFn             func(int)
 }
 
 func showUsage() {
@@ -146,6 +147,7 @@ func main() {
 	flag.IntVar(&c.numProcesses, "j", runtime.NumCPU(), "number of concurrent fuzzers to run")
 	flag.BoolVar(&c.bisectStep, "bisect-step", false, "internal flag used by git bisect run")
 	flag.BoolVar(&c.isFix, "is-fix", false, "internal flag used by git bisect run to indicate if we are bisecting a fix")
+	flag.BoolVar(&c.skipInputTypeCheck, "skip-input-type-check", false, "bypass the heuristic text/binary input file type check")
 	flag.Parse()
 
 	if c.mesaMode && c.filter != "" {
@@ -615,4 +617,33 @@ func defaultWgslCorpusDir(fsReader oswrapper.FilesystemReader) string {
 
 func defaultBuildDir(fsReader oswrapper.FilesystemReader) string {
 	return filepath.Join(fileutils.DawnRoot(fsReader), "out", "active")
+}
+
+// checkInputFileType performs a heuristic check on a single input file to ensure it matches
+// the expected file type for the given fuzzer mode. WGSL mode expects text files, while IR
+// mode expects binary files. It returns an error if the file type appears incorrect. This may
+// have false posivites, so there is a CLI escape hatch
+
+func checkInputFileType(filePath string, mode FuzzMode, fsReader oswrapper.FilesystemReader) error {
+	content, err := fsReader.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to read input file for type check: %w", err)
+	}
+
+	isText := true
+	for _, b := range content {
+		// If byte is null or a control character other than newline, carriage return, or tab, consider it binary.
+		if b < 0x20 && b != '\n' && b != '\r' && b != '\t' {
+			isText = false
+			break
+		}
+	}
+
+	if mode == FuzzModeWgsl && !isText {
+		return fmt.Errorf("wrong file type detected: expected a text file for WGSL mode, but '%s' appears to be binary. Did you forget to add the -ir flag? (If you are sure this is correct, use -skip-input-type-check)", filePath)
+	} else if mode == FuzzModeIr && isText && len(content) > 0 {
+		return fmt.Errorf("wrong file type detected: expected a binary file for IR mode, but '%s' appears to be text. Did you mean to remove the -ir flag? (If you are sure this is correct, use -skip-input-type-check)", filePath)
+	}
+
+	return nil
 }

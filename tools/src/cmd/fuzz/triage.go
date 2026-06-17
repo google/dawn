@@ -86,6 +86,12 @@ type triageConfig struct {
 // It verifies the reproduction, extracts human-readable IR and WGSL, identifies the failing transformation pass, and
 // generates a detailed Markdown report. Returns an error if a subtask fails unexpectedly.
 func runTriage(t *taskConfig) error {
+	if !t.skipInputTypeCheck {
+		if err := checkInputFileType(t.triageFile, t.fuzzMode, t.osWrapper); err != nil {
+			return err
+		}
+	}
+
 	tc := &triageConfig{taskConfig: t}
 	tc.inputBase = filepath.Base(tc.triageFile)
 	tc.reproFile = tc.inputBase + ".repro"
