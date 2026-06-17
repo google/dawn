@@ -61,9 +61,9 @@ struct D3D12DeviceInfo {
     bool supportsExistingHeap;
     bool supportsInt64Atomics;
     uint32_t waveLaneCountMin;
-    // Currently the WaveLaneCountMax queried from D3D12 API is not reliable and the meaning is
-    // unclear. Reference:
-    // https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics#:~:text=UINT%20WaveLaneCountMax
+    // `WaveLaneCountMax` Specifies the maximum number of lanes in the SIMD wave that this
+    // implementation can support:
+    // https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_feature_data_d3d12_options1
     uint32_t waveLaneCountMax;
     size_t dedicatedVideoMemory;
     size_t sharedSystemMemory;

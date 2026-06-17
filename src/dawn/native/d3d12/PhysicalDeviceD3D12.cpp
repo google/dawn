@@ -117,7 +117,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
     }
 
     mSubgroupMinSize = mDeviceInfo.waveLaneCountMin;
-    mSubgroupMaxSize = ComputeSubgroupMaxSize();
+    mSubgroupMaxSize = mDeviceInfo.waveLaneCountMax;
 
     return {};
 }
@@ -923,18 +923,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // Enable the use of HLSL 2021 if the corresponding platform feature is enabled.
     deviceToggles->Default(Toggle::D3D12UseHLSL2021,
                            platform->IsFeatureEnabled(platform::Features::kWebGPUUseHLSL2021));
-}
-
-uint32_t PhysicalDevice::ComputeSubgroupMaxSize() const {
-    // On Intel GPUs the WaveLaneCountMax reported by D3D12 is reliable, so use it directly.
-    if (gpu_info::IsIntel(GetVendorId())) {
-        return mDeviceInfo.waveLaneCountMax;
-    }
-
-    // On other vendors the value is unreliable or its meaning is unclear, so fall back to 128
-    // which is the largest possible wave/subgroup size. Reference:
-    // https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics#:~:text=UINT%20WaveLaneCountMax
-    return 128u;
 }
 
 MaybeError PhysicalDevice::ValidateUseOfD3D12() const {
