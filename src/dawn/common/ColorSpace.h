@@ -298,11 +298,10 @@ inline constexpr float kDefaultHDRReferenceWhiteLuminance = 203;
 // https://www.w3.org/TR/css-color-hdr-1/#valdef-color-rec2100-pq
 inline constexpr float kPQLuminanceOf1 = 10000;
 
-// https://www.w3.org/TR/css-color-hdr-1/#valdef-color-rec2100-hlg
-// The magic constant is used to place "media white" (so 1) at HLG value 0.75
-// TODO(https://crbug.com/521494707): Change the defaults and allow overriding the peak luminance of
-// HLG as well as the gamma of its OOTF.
-inline constexpr float kHLGLuminanceOf1 = 3.7743 * kDefaultHDRReferenceWhiteLuminance;
+// https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2100-3-202502-I!!PDF-E.pdf table 5
+// "Hybrid Log-Gamma (HLG) system reference non-linear transfer functions". The peak luminance of
+// HLG is 1 (assuming an OOTF of 1.2).
+inline constexpr float kHLGLuminanceOf1 = 1000;
 
 }  // namespace dawn
 
