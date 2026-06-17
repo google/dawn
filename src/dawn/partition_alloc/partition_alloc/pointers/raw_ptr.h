@@ -156,10 +156,10 @@ class DAWN_TRIVIAL_ABI DAWN_GSL_POINTER raw_ptr {
         return *this;
     }
     DAWN_FORCE_INLINE constexpr raw_ptr operator++(int /* post_increment */) {
-        return ++wrapped_ptr_;
+        return wrapped_ptr_++;
     }
     DAWN_FORCE_INLINE constexpr raw_ptr operator--(int /* post_decrement */) {
-        return --wrapped_ptr_;
+        return wrapped_ptr_--;
     }
     template <typename Z, typename = std::enable_if_t<partition_alloc::internal::is_offset_type<Z>>>
     DAWN_FORCE_INLINE constexpr raw_ptr& operator+=(Z delta) {
