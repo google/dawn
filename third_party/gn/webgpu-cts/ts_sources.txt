@@ -703,6 +703,8 @@ src/webgpu/shader/execution/expression/call/builtin/atomics/atomicMax.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/atomics/atomicMin.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/atomics/atomicOr.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/atomics/atomicStore.spec.ts
+src/webgpu/shader/execution/expression/call/builtin/atomics/atomicStoreMax.spec.ts
+src/webgpu/shader/execution/expression/call/builtin/atomics/atomicStoreMin.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/atomics/atomicSub.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/atomics/atomicXor.spec.ts
 src/webgpu/shader/execution/expression/call/user/ptr_params.spec.ts
@@ -802,6 +804,7 @@ src/webgpu/shader/validation/expression/call/builtin/asinh.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/atan.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/atan2.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/atanh.spec.ts
+src/webgpu/shader/validation/expression/call/builtin/atomicStoreMinMax.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/atomics.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/barriers.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/bitcast.spec.ts
