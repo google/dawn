@@ -1586,6 +1586,18 @@ struct Decoder {
         TINT_ICE() << "invalid Access: " << in;
     }
 
+    core::Majorness Majorness(pb::Majorness in) {
+        switch (in) {
+            case pb::Majorness::row_major:
+                return core::Majorness::kRowMajor;
+            case pb::Majorness::col_major:
+                return core::Majorness::kColMajor;
+            default:
+                break;
+        }
+        TINT_ICE() << "invalid majorness: " << in;
+    }
+
     core::UnaryOp UnaryOp(pb::UnaryOp in) {
         switch (in) {
             case pb::UnaryOp::complement:

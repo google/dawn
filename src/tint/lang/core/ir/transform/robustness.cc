@@ -421,20 +421,38 @@ struct State {
         // Extract the arguments from the call.
         auto* arr = args[0];
         auto* offset = args[1];
-        Value* col_major = nullptr;
+        bool col_major = true;
         Value* stride = nullptr;
         uint32_t stride_index = 0;
         const type::SubgroupMatrix* matrix_ty = nullptr;
         if (call->Func() == BuiltinFn::kSubgroupMatrixLoad) {
-            col_major = args[2];
-            stride = args[3];
-            stride_index = 3;
+            if (call->ExplicitTemplateParams().Length() == 2) {
+                TINT_IR_ASSERT(
+                    ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[1]));
+                col_major = std::get<core::Majorness>(call->ExplicitTemplateParams()[1]) ==
+                            core::Majorness::kColMajor;
+                stride = args[2];
+                stride_index = 2;
+            } else {
+                col_major = args[2]->As<Constant>()->Value()->ValueAs<bool>();
+                stride = args[3];
+                stride_index = 3;
+            }
             matrix_ty = call->Result()->Type()->As<type::SubgroupMatrix>();
         } else if (call->Func() == BuiltinFn::kSubgroupMatrixStore) {
             matrix_ty = args[2]->Type()->As<type::SubgroupMatrix>();
-            col_major = args[3];
-            stride = args[4];
-            stride_index = 4;
+            if (call->ExplicitTemplateParams().Length() == 1) {
+                TINT_IR_ASSERT(
+                    ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[0]));
+                col_major = std::get<core::Majorness>(call->ExplicitTemplateParams()[0]) ==
+                            core::Majorness::kColMajor;
+                stride = args[3];
+                stride_index = 3;
+            } else {
+                col_major = args[3]->As<Constant>()->Value()->ValueAs<bool>();
+                stride = args[4];
+                stride_index = 4;
+            }
         } else {
             TINT_IR_UNREACHABLE(ir);
         }
@@ -443,7 +461,7 @@ struct State {
         // determine the number of elements in memory that will be accessed.
         uint32_t min_stride = 0;
         uint32_t major_dim = 0;
-        if (col_major->As<Constant>()->Value()->ValueAs<bool>()) {
+        if (col_major) {
             min_stride = matrix_ty->Rows();
             major_dim = matrix_ty->Columns();
         } else {

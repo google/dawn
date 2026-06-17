@@ -1104,10 +1104,21 @@ struct State {
     /// @param builtin the builtin call instruction
     void SubgroupMatrixLoad(core::ir::CoreBuiltinCall* builtin) {
         b.InsertBefore(builtin, [&] {
+            const bool majorness_template = builtin->ExplicitTemplateParams().Length() == 2;
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
-            auto* col_major = builtin->Args()[2];
-            auto* stride = builtin->Args()[3];
+            auto* stride = builtin->Args()[majorness_template ? 2 : 3];
+
+            core::ir::Value* col_major = nullptr;
+            if (majorness_template) {
+                TINT_IR_ASSERT(ir, std::holds_alternative<core::Majorness>(
+                                       builtin->ExplicitTemplateParams()[1]));
+                col_major =
+                    b.Constant(std::get<core::Majorness>(builtin->ExplicitTemplateParams()[1]) ==
+                               core::Majorness::kColMajor);
+            } else {
+                col_major = builtin->Args()[2];
+            }
 
             auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* arr = ptr->StoreType()->As<core::type::Array>();
@@ -1141,11 +1152,22 @@ struct State {
     /// @param builtin the builtin call instruction
     void SubgroupMatrixStore(core::ir::CoreBuiltinCall* builtin) {
         b.InsertBefore(builtin, [&] {
+            const bool majorness_template = builtin->ExplicitTemplateParams().Length() == 1;
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
             auto* value = builtin->Args()[2];
-            auto* col_major = builtin->Args()[3];
-            auto* stride = builtin->Args()[4];
+            auto* stride = builtin->Args()[majorness_template ? 3 : 4];
+
+            core::ir::Value* col_major = nullptr;
+            if (majorness_template) {
+                TINT_IR_ASSERT(ir, std::holds_alternative<core::Majorness>(
+                                       builtin->ExplicitTemplateParams()[0]));
+                col_major =
+                    b.Constant(std::get<core::Majorness>(builtin->ExplicitTemplateParams()[0]) ==
+                               core::Majorness::kColMajor);
+            } else {
+                col_major = builtin->Args()[3];
+            }
 
             auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* arr = ptr->StoreType()->As<core::type::Array>();

@@ -1789,6 +1789,108 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadColMajorTemplate) {
+    auto* var = b.Var("v", storage, ty.array<f32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* sm_ty =
+        ty.Get<core::type::SubgroupMatrix>(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* load = b.CallExplicit(
+            sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{sm_ty, core::Majorness::kColMajor}, var, 0_u,
+            8_u);
+        b.Let("x", load);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major> %v, 0u, 8u
+    %x:subgroup_matrix_left<f32, 8, 8> = let %3
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:subgroup_matrix_left<f32, 8, 8> = hlsl.Load<subgroup_matrix_left<f32, 8, 8>> %v, 0u, 32u, 1u
+    %x:subgroup_matrix_left<f32, 8, 8> = let %3
+    ret
+  }
+}
+)";
+
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadRowMajorTemplate) {
+    auto* var = b.Var("v", storage, ty.array<f32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* sm_ty =
+        ty.Get<core::type::SubgroupMatrix>(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* load = b.CallExplicit(
+            sm_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{sm_ty, core::Majorness::kRowMajor}, var, 0_u,
+            8_u);
+        b.Let("x", load);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %v, 0u, 8u
+    %x:subgroup_matrix_left<f32, 8, 8> = let %3
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:subgroup_matrix_left<f32, 8, 8> = hlsl.Load<subgroup_matrix_left<f32, 8, 8>> %v, 0u, 32u, 0u
+    %x:subgroup_matrix_left<f32, 8, 8> = let %3
+    ret
+  }
+}
+)";
+
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadDynamicStride) {
     auto* var = b.Var("v", storage, ty.array<f32>(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
@@ -1932,6 +2034,106 @@ $B1: {  # root
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
   $B2: {
     %4:void = %mat.Store %v, 0u, 32u, 1u
+    ret
+  }
+}
+)";
+
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStoreColMajorTemplate) {
+    auto* var = b.Var("v", storage, ty.array<f32, 100>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* sm_ty =
+        ty.Get<core::type::SubgroupMatrix>(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* mat_param = b.FunctionParam("mat", sm_ty);
+    func->SetParams({mat_param});
+
+    b.Append(func->Block(), [&] {
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kColMajor}, var, 0_u,
+                       mat_param, 8_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<f32, 100>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
+  $B2: {
+    %4:void = subgroupMatrixStore<col_major> %v, 0u, %mat, 8u
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
+  $B2: {
+    %4:void = %mat.Store %v, 0u, 32u, 1u
+    ret
+  }
+}
+)";
+
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStoreRowMajorTemplate) {
+    auto* var = b.Var("v", storage, ty.array<f32, 100>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* sm_ty =
+        ty.Get<core::type::SubgroupMatrix>(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* mat_param = b.FunctionParam("mat", sm_ty);
+    func->SetParams({mat_param});
+
+    b.Append(func->Block(), [&] {
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, var, 0_u,
+                       mat_param, 8_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<f32, 100>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
+  $B2: {
+    %4:void = subgroupMatrixStore<row_major> %v, 0u, %mat, 8u
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
+  $B2: {
+    %4:void = %mat.Store %v, 0u, 32u, 0u
     ret
   }
 }

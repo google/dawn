@@ -369,10 +369,10 @@ struct State {
     void SubgroupMatrixLoad(core::ir::Var* var,
                             core::ir::CoreBuiltinCall* call,
                             OffsetData offset) {
+        const bool template_majorness = call->ExplicitTemplateParams().Length() == 2;
         auto args = call->Args();
         auto* call_offset = args[1];
-        auto* col_major = args[2];
-        auto* stride = args[3];
+        auto* stride = args[template_majorness ? 2 : 3];
 
         auto* sm = call->Result()->Type()->As<core::type::SubgroupMatrix>();
         TINT_IR_ASSERT(ir, sm);
@@ -380,6 +380,16 @@ struct State {
         b.InsertBefore(call, [&] {
             UpdateOffsetData(call_offset, sm->Type()->Size(), &offset);
 
+            core::ir::Value* col_major = nullptr;
+            if (template_majorness) {
+                TINT_IR_ASSERT(
+                    ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[1]));
+                col_major =
+                    b.Constant(std::get<core::Majorness>(call->ExplicitTemplateParams()[1]) ==
+                               core::Majorness::kColMajor);
+            } else {
+                col_major = args[2];
+            }
             auto* layout = ColMajorToMatrixLayout(col_major);
             // TODO(crbug.com/490062439): This will need to be updated if we change stride.
             uint32_t bytes_per_element = sm->Type()->Size();
@@ -399,11 +409,11 @@ struct State {
     void SubgroupMatrixStore(core::ir::Var* var,
                              core::ir::CoreBuiltinCall* call,
                              OffsetData offset) {
+        const bool template_majorness = call->ExplicitTemplateParams().Length() == 1;
         auto args = call->Args();
         auto* call_offset = args[1];
         auto* value = args[2];
-        auto* col_major = args[3];
-        auto* stride = args[4];
+        auto* stride = args[template_majorness ? 3 : 4];
 
         auto* sm = value->Type()->As<core::type::SubgroupMatrix>();
         TINT_IR_ASSERT(ir, sm);
@@ -411,6 +421,16 @@ struct State {
         b.InsertBefore(call, [&] {
             UpdateOffsetData(call_offset, sm->Type()->Size(), &offset);
 
+            core::ir::Value* col_major = nullptr;
+            if (template_majorness) {
+                TINT_IR_ASSERT(
+                    ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[0]));
+                col_major =
+                    b.Constant(std::get<core::Majorness>(call->ExplicitTemplateParams()[0]) ==
+                               core::Majorness::kColMajor);
+            } else {
+                col_major = args[3];
+            }
             auto* layout = ColMajorToMatrixLayout(col_major);
 
             // TODO(crbug.com/490062439): This will need to be updated if we change stride.

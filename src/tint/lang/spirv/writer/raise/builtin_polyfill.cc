@@ -1352,18 +1352,26 @@ struct State {
     /// @param builtin the builtin call instruction
     void SubgroupMatrixLoad(core::ir::CoreBuiltinCall* builtin) {
         b.InsertBefore(builtin, [&] {
+            const bool majorness_template = builtin->ExplicitTemplateParams().Length() == 2;
             auto* result_ty = builtin->Result()->Type()->As<core::type::SubgroupMatrix>();
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
-            auto* col_major = builtin->Args()[2]->As<core::ir::Constant>();
-            auto* stride = builtin->Args()[3];
+            auto* stride = builtin->Args()[majorness_template ? 2 : 3];
 
             auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* arr = ptr->StoreType()->As<core::type::Array>();
 
-            auto* layout = b.Constant(u32(col_major->Value()->ValueAs<bool>()
-                                              ? SpvCooperativeMatrixLayoutColumnMajorKHR
-                                              : SpvCooperativeMatrixLayoutRowMajorKHR));
+            bool col_major = true;
+            if (majorness_template) {
+                TINT_IR_ASSERT(ir, std::holds_alternative<core::Majorness>(
+                                       builtin->ExplicitTemplateParams()[1]));
+                col_major = std::get<core::Majorness>(builtin->ExplicitTemplateParams()[1]) ==
+                            core::Majorness::kColMajor;
+            } else {
+                col_major = builtin->Args()[2]->As<core::ir::Constant>()->Value()->ValueAs<bool>();
+            }
+            auto* layout = b.Constant(u32(col_major ? SpvCooperativeMatrixLayoutColumnMajorKHR
+                                                    : SpvCooperativeMatrixLayoutRowMajorKHR));
             auto* memory_operand = Literal(u32(SpvMemoryAccessNonPrivatePointerMask));
 
             // In SPIR-V `stride` and `offset` are related to the type of the input pointer, while
@@ -1400,13 +1408,24 @@ struct State {
     /// @param builtin the builtin call instruction
     void SubgroupMatrixStore(core::ir::CoreBuiltinCall* builtin) {
         b.InsertBefore(builtin, [&] {
+            const bool majorness_template = builtin->ExplicitTemplateParams().Length() == 1;
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
             auto* value = builtin->Args()[2];
             auto* value_type = value->Type()->As<core::type::SubgroupMatrix>();
 
-            auto* col_major = builtin->Args()[3]->As<core::ir::Constant>();
-            auto* stride = builtin->Args()[4];
+            bool col_major = true;
+            if (majorness_template) {
+                TINT_IR_ASSERT(ir, std::holds_alternative<core::Majorness>(
+                                       builtin->ExplicitTemplateParams()[0]));
+                col_major = std::get<core::Majorness>(builtin->ExplicitTemplateParams()[0]) ==
+                            core::Majorness::kColMajor;
+            } else {
+                col_major = builtin->Args()[3]->As<core::ir::Constant>()->Value()->ValueAs<bool>();
+            }
+            auto* layout = b.Constant(u32(col_major ? SpvCooperativeMatrixLayoutColumnMajorKHR
+                                                    : SpvCooperativeMatrixLayoutRowMajorKHR));
+            auto* stride = builtin->Args()[majorness_template ? 3 : 4];
 
             auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* arr = ptr->StoreType()->As<core::type::Array>();
@@ -1433,9 +1452,6 @@ struct State {
             auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
             auto* dst = b.Access(elem_ptr, p, applied_offset);
 
-            auto* layout = b.Constant(u32(col_major->Value()->ValueAs<bool>()
-                                              ? SpvCooperativeMatrixLayoutColumnMajorKHR
-                                              : SpvCooperativeMatrixLayoutRowMajorKHR));
             auto* memory_operand = Literal(u32(SpvMemoryAccessNonPrivatePointerMask));
 
             b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kCooperativeMatrixStore,

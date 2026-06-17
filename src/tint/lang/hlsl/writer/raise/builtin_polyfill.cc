@@ -2078,9 +2078,9 @@ struct State {
         }
 
         b.InsertBefore(call, [&] {
+            const bool majorness_template = call->ExplicitTemplateParams().Length() == 2;
             auto* offset = call->Args()[1];
-            auto* col_major = call->Args()[2];
-            auto* stride = call->Args()[3];
+            auto* stride = call->Args()[majorness_template ? 2 : 3];
 
             auto* sm_ty = call->Result()->Type()->As<core::type::SubgroupMatrix>();
             TINT_IR_ASSERT(ir, sm_ty);
@@ -2091,6 +2091,16 @@ struct State {
                     << "8-bit subgroup matrix load from workgroup not supported";
             }
 
+            core::ir::Value* col_major = nullptr;
+            if (majorness_template) {
+                TINT_IR_ASSERT(
+                    ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[1]));
+                col_major =
+                    b.Constant(std::get<core::Majorness>(call->ExplicitTemplateParams()[1]) ==
+                               core::Majorness::kColMajor);
+            } else {
+                col_major = call->Args()[2];
+            }
             auto* layout = ColMajorToMatrixLayout(col_major);
 
             b.CallExplicitWithResult<hlsl::ir::BuiltinCall>(
@@ -2110,10 +2120,10 @@ struct State {
         }
 
         b.InsertBefore(call, [&] {
+            const bool majorness_template = call->ExplicitTemplateParams().Length() == 1;
             auto* offset = call->Args()[1];
             auto* matrix = call->Args()[2];
-            auto* col_major = call->Args()[3];
-            auto* stride = call->Args()[4];
+            auto* stride = call->Args()[majorness_template ? 3 : 4];
 
             auto* sm_ty = matrix->Type()->As<core::type::SubgroupMatrix>();
             TINT_IR_ASSERT(ir, sm_ty);
@@ -2124,6 +2134,16 @@ struct State {
                     << "8-bit subgroup matrix store to workgroup not supported";
             }
 
+            core::ir::Value* col_major = nullptr;
+            if (majorness_template) {
+                TINT_IR_ASSERT(
+                    ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[0]));
+                col_major =
+                    b.Constant(std::get<core::Majorness>(call->ExplicitTemplateParams()[0]) ==
+                               core::Majorness::kColMajor);
+            } else {
+                col_major = call->Args()[3];
+            }
             auto* layout = ColMajorToMatrixLayout(col_major);
 
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kStore, matrix,
