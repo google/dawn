@@ -788,6 +788,7 @@ crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,express
 crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidthCoarse:f32:vectorize=4;non_uniform_discard=true [ Failure ]
 crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureDimensions:external: [ Failure ]
 crbug.com/524243477 [ android android-pixel-10 ] webgpu:shader,validation,const_assert,const_assert:constant_expression_logical_and_assert:scope="function" [ Failure ]
+crbug.com/524800786 [ android android-pixel-10 ] webgpu:api,validation,image_copy,buffer_texture_copies:texture_buffer_usages:copyType="CopyB2T" [ Failure ]
 
 # Untriaged failures of Pixel 10
 # See crbug.com/40238674 and crbug.com/475503907
