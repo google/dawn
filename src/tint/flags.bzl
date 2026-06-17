@@ -96,4 +96,13 @@ COPTS = [
 }) + select({
     "//src/tint:tint_build_null_writer_true": [ "-DTINT_BUILD_NULL_WRITER" ],
     "//conditions:default": [],
+}) + select({
+    "//src/tint:tint_build_fuzzer_vulkan_support_true": [ "-DTINT_BUILD_FUZZER_VULKAN_SUPPORT" ],
+    "//conditions:default": [],
+}) + select({
+    "//src/tint:tint_build_ir_binary_true": [ "-DTINT_BUILD_IR_BINARY" ],
+    "//conditions:default": [],
+}) + select({
+    "//src/tint:tint_build_mesa_true": [ "-DTINT_BUILD_MESA" ],
+    "//conditions:default": [],
 })
