@@ -402,6 +402,8 @@ class SubgroupMatrix_MatrixMatrixArithmeticTest : public SubgroupMatrixArithmeti
                << ";\n";
         shader << "alias ResultComponentType = "
                << ComponentTypeToWgslType(config.resultComponentType) << ";\n";
+        shader << "alias ResultArrayType = "
+               << ComponentTypeToScalarShaderType(config.resultComponentType) << ";\n";
         shader << "\n";
         shader << "alias LeftType = subgroup_matrix_left<ComponentType, K, M>;\n";
         shader << "alias RightType = subgroup_matrix_right<ComponentType, N, K>;\n";
@@ -417,11 +419,18 @@ class SubgroupMatrix_MatrixMatrixArithmeticTest : public SubgroupMatrixArithmeti
         }
         shader << ";\n";
 
+        shader << "const kResultArraySize = (M*N)";
+        if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::U8 ||
+            config.resultComponentType == wgpu::SubgroupMatrixComponentType::I8) {
+            shader << "/4";
+        }
+        shader << ";\n";
+
         shader << "const kLoadOffset = K * M;\n";
         shader << "const SubgroupMaxSize = " << subgroupMaxSize << ";\n";
         shader << R"(
 @group(0) @binding(0) var<storage, read>       inputs : array<InputArrayType, kInputArraySize>;
-@group(0) @binding(1) var<storage, read_write> output : array<ResultComponentType, M*N>;
+@group(0) @binding(1) var<storage, read_write> output : array<ResultArrayType, kResultArraySize>;
 
 @compute @workgroup_size(SubgroupMaxSize)
 fn main() {
@@ -1192,6 +1201,8 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
         shader << "\n";
         shader << "alias InputArrayType = " << ComponentTypeToScalarShaderType(config.componentType)
                << ";\n";
+        shader << "alias ResultArrayType = "
+               << ComponentTypeToScalarShaderType(config.resultComponentType) << ";\n";
         shader << "alias LeftType = subgroup_matrix_left<ComponentType, K, M>;";
         shader << "alias RightType = subgroup_matrix_right<ComponentType, N, K>;";
         shader << "alias ResultType = subgroup_matrix_result<ResultComponentType, N, M>;";
@@ -1211,9 +1222,16 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
         }
         shader << ";\n";
 
+        shader << "const kResultArraySize = (kMatrixCols*kMatrixRows)";
+        if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::U8 ||
+            config.resultComponentType == wgpu::SubgroupMatrixComponentType::I8) {
+            shader << "/4";
+        }
+        shader << ";\n";
+
         shader << R"(
 @group(0) @binding(0) var<storage, read>       inputs : array<InputArrayType, kInputArraySize>;
-@group(0) @binding(1) var<storage, read_write> output : array<ResultComponentType, kMatrixCols*kMatrixRows>;
+@group(0) @binding(1) var<storage, read_write> output : array<ResultArrayType, kResultArraySize>;
 
 @compute @workgroup_size(kWorkgroupSize)
 fn main(@builtin(subgroup_id) sgid: u32,
