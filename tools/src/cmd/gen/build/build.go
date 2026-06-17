@@ -785,7 +785,7 @@ func emitBuildFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter)
 		generatedSources[i] = "src/tint/" + strings.TrimSuffix(v, ".tmpl")
 	}
 	depsForGeneratedSources, err := glob.Scan(p.Root, glob.MustParseConfig(`{
-		"paths": [{"include": ["**/*.def"]}]
+		"paths": [{"include": ["**/*.def", "utils/templates/*.inc"]}]
 	}`), fsReaderWriter)
 	if err != nil {
 		return err

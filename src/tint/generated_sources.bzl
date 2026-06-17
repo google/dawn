@@ -74,6 +74,8 @@ tint_generation_dependencies = [
     "//src/tint/lang/msl:msl.def",
     "//src/tint/lang/spirv:spirv.def",
     "//src/tint/lang/wgsl:wgsl.def",
+    "//src/tint/utils/templates:enums.tmpl.inc",
+    "//src/tint/utils/templates:intrinsic_table_data.tmpl.inc",
     "//src/tint/cmd/bench:enums_core_bench.cc.tmpl",
     "//src/tint/cmd/bench:enums_wgsl_bench.cc.tmpl",
     "//src/tint/lang/core:enums.cc.tmpl",
