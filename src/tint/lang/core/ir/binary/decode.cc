@@ -1279,25 +1279,17 @@ struct Decoder {
     }
 
     ir::TemplateParameter CreateTemplateParameter(const pb::TemplateParameter& value_in) {
-        ir::TemplateParameter value_out = nullptr;
         switch (value_in.kind_case()) {
             case pb::TemplateParameter::KindCase::kType:
-                value_out = Type(value_in.type());
-                break;
+                return Type(value_in.type());
             case pb::TemplateParameter::KindCase::kMajorness:
-                value_out = Majorness(value_in.majorness());
-                break;
+                return Majorness(value_in.majorness());
             case pb::TemplateParameter::KindCase::KIND_NOT_SET:
                 break;
         }
 
-        if (value_out.index() == std::variant_npos) {
-            err_ << "invalid template parameter kind: " << std::to_string(value_in.kind_case())
-                 << "\n";
-            return mod_out_.Types().invalid();
-        }
-
-        return value_out;
+        err_ << "invalid template parameter kind: " << std::to_string(value_in.kind_case()) << "\n";
+        return mod_out_.Types().invalid();
     }
 
     ir::InstructionResult* InstructionResult(const pb::InstructionResult& res_in) {
