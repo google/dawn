@@ -239,7 +239,7 @@ void PrintValue(STREAM& ss, const T& value, std::string indent) {
     } else if constexpr (requires(STREAM& os, const T& v) { os << v; }) {
         ss << value;
     } else {
-        static_assert(false, "unhandled type");
+        static_assert(sizeof(T) == 0, "unhandled type");
     }
 }
 
