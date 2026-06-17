@@ -97,6 +97,8 @@ static constexpr std::array<ExtensionInfo, kExtensionCount> kExtensionInfos{{
      NeverPromoted, ExtType::Display},
     {EGLExt::ANGLEContextVirtualization, "EGL_ANGLE_context_virtualization", NeverPromoted,
      ExtType::Display},
+    {EGLExt::ANGLECreateContextWebGLCompatibility, "EGL_ANGLE_create_context_webgl_compatibility",
+     NeverPromoted, ExtType::Display},
     //
 }};
 

@@ -69,6 +69,7 @@ enum class EGLExt : uint32_t {
     ANGLECreateContextBackwardsCompatible,  // EGL_ANGLE_create_context_backwards_compatible
     ANGLECreateContextExtensionsEnabled,    // EGL_ANGLE_create_context_extensions_enabled
     ANGLEContextVirtualization,             // EGL_ANGLE_context_virtualization
+    ANGLECreateContextWebGLCompatibility,   // EGL_ANGLE_create_context_webgl_compatibility
 
     EnumCount,
 };

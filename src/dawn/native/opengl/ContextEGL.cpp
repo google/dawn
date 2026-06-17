@@ -50,8 +50,13 @@
 #endif
 
 // https://chromium.googlesource.com/angle/angle/+/main/extensions/EGL_ANGLE_context_virtualization.txt
-#ifndef EGL_ANGLE_context_virtualization
+#ifndef EGL_CONTEXT_VIRTUALIZATION_GROUP_ANGLE
 #define EGL_CONTEXT_VIRTUALIZATION_GROUP_ANGLE 0x3481
+#endif
+
+// https://chromium.googlesource.com/angle/angle/+/main/extensions/EGL_ANGLE_create_context_webgl_compatibility.txt
+#ifndef EGL_CONTEXT_HARDENED_ANGLE
+#define EGL_CONTEXT_HARDENED_ANGLE 0x34F8
 #endif
 
 namespace dawn::native::opengl {
@@ -189,6 +194,10 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
 
     if (egl.HasExt(EGLExt::ANGLEContextVirtualization)) {
         AddAttrib(EGL_CONTEXT_VIRTUALIZATION_GROUP_ANGLE, angleVirtualizationGroup);
+    }
+
+    if (egl.HasExt(EGLExt::ANGLECreateContextWebGLCompatibility)) {
+        AddAttrib(EGL_CONTEXT_HARDENED_ANGLE, EGL_TRUE);
     }
 
     // The attrib list is finished with an EGL_NONE tag.
