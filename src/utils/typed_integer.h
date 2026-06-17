@@ -135,19 +135,18 @@ class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
         return ret;
     }
 
-    template <typename T2 = T>
-        requires(std::unsigned_integral<T2> && std::same_as<T, T2>)
-    static constexpr decltype(T(0) + T2(0)) AddImpl(TypedIntegerImpl<Tag, T> lhs,
-                                                    TypedIntegerImpl<Tag, T2> rhs) {
+    // Note that AddImpl and SubImpl purporsefully return an integer of the same size, when C++ does
+    // automatic widening in some cases (line uint8_t + uint8_t being an uint16_t).
+    static constexpr T AddImpl(TypedIntegerImpl lhs, TypedIntegerImpl rhs)
+        requires(std::unsigned_integral<T>)
+    {
         // Overflow would wrap around
         DAWN_ASSERT(lhs.mValue + rhs.mValue >= lhs.mValue);
         return lhs.mValue + rhs.mValue;
     }
-
-    template <typename T2 = T>
-        requires(std::signed_integral<T2> && std::same_as<T, T2>)
-    static constexpr decltype(T(0) + T2(0)) AddImpl(TypedIntegerImpl<Tag, T> lhs,
-                                                    TypedIntegerImpl<Tag, T2> rhs) {
+    static constexpr T AddImpl(TypedIntegerImpl lhs, TypedIntegerImpl rhs)
+        requires(std::signed_integral<T>)
+    {
         if (lhs.mValue > 0) {
             // rhs is positive: |rhs| is at most the distance between max and |lhs|.
             // rhs is negative: (positive + negative) won't overflow
@@ -161,19 +160,17 @@ class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
         return lhs.mValue + rhs.mValue;
     }
 
-    template <typename T2 = T>
-        requires(std::unsigned_integral<T> && std::same_as<T, T2>)
-    static constexpr decltype(T(0) - T2(0)) SubImpl(TypedIntegerImpl<Tag, T> lhs,
-                                                    TypedIntegerImpl<Tag, T2> rhs) {
+    static constexpr T SubImpl(TypedIntegerImpl lhs, TypedIntegerImpl rhs)
+        requires(std::unsigned_integral<T>)
+    {
         // Overflow would wrap around
         DAWN_ASSERT(lhs.mValue - rhs.mValue <= lhs.mValue);
         return lhs.mValue - rhs.mValue;
     }
 
-    template <typename T2 = T>
-        requires(std::signed_integral<T> && std::same_as<T, T2>)
-    static constexpr decltype(T(0) - T2(0)) SubImpl(TypedIntegerImpl<Tag, T> lhs,
-                                                    TypedIntegerImpl<Tag, T2> rhs) {
+    static constexpr T SubImpl(TypedIntegerImpl lhs, TypedIntegerImpl rhs)
+        requires(std::signed_integral<T>)
+    {
         if (lhs.mValue > 0) {
             // rhs is positive: positive minus positive won't overflow
             // rhs is negative: |rhs| isn't less than the (negative) distance between |lhs|
@@ -264,13 +261,11 @@ class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
 
     constexpr TypedIntegerImpl operator+(TypedIntegerImpl rhs) const {
         auto result = AddImpl(*this, rhs);
-        static_assert(std::is_same<T, decltype(result)>::value, "Use ityp::Add instead.");
         return TypedIntegerImpl(result);
     }
 
     constexpr TypedIntegerImpl operator-(TypedIntegerImpl rhs) const {
         auto result = SubImpl(*this, rhs);
-        static_assert(std::is_same<T, decltype(result)>::value, "Use ityp::Sub instead.");
         return TypedIntegerImpl(result);
     }
 
@@ -344,55 +339,5 @@ class numeric_limits<dawn::detail::TypedIntegerImpl<Tag, T>> : public numeric_li
 };
 
 }  // namespace std
-
-namespace dawn::ityp {
-
-// These helpers below are provided since the default arithmetic operators for small integer
-// types like uint8_t and uint16_t return integers, not their same type. To avoid lots of
-// casting or conditional code between Release/Debug. Callsites should use ityp::Add(a, b) and
-// ityp::Sub(a, b) instead.
-
-template <typename Tag, typename T>
-constexpr ::dawn::detail::TypedIntegerImpl<Tag, T> Add(
-    ::dawn::detail::TypedIntegerImpl<Tag, T> lhs,
-    ::dawn::detail::TypedIntegerImpl<Tag, T> rhs) {
-    return ::dawn::detail::TypedIntegerImpl<Tag, T>(
-        static_cast<T>(::dawn::detail::TypedIntegerImpl<Tag, T>::AddImpl(lhs, rhs)));
-}
-
-template <typename Tag, typename T>
-constexpr ::dawn::detail::TypedIntegerImpl<Tag, T> Sub(
-    ::dawn::detail::TypedIntegerImpl<Tag, T> lhs,
-    ::dawn::detail::TypedIntegerImpl<Tag, T> rhs) {
-    return ::dawn::detail::TypedIntegerImpl<Tag, T>(
-        static_cast<T>(::dawn::detail::TypedIntegerImpl<Tag, T>::SubImpl(lhs, rhs)));
-}
-
-template <typename Tag, typename T>
-constexpr ::dawn::detail::TypedIntegerImpl<Tag, T> PlusOne(
-    ::dawn::detail::TypedIntegerImpl<Tag, T> value) {
-    T one = 1;
-    return Add(value, ::dawn::detail::TypedIntegerImpl<Tag, T>(one));
-}
-
-template <typename T>
-    requires std::integral<T>
-constexpr T Add(T lhs, T rhs) {
-    return static_cast<T>(lhs + rhs);
-}
-
-template <typename T>
-    requires std::integral<T>
-constexpr T Sub(T lhs, T rhs) {
-    return static_cast<T>(lhs - rhs);
-}
-
-template <typename T>
-    requires std::integral<T>
-constexpr T PlusOne(T value) {
-    return static_cast<T>(value + 1);
-}
-
-}  // namespace dawn::ityp
 
 #endif  // SRC_UTILS_TYPEDINTEGER_H_

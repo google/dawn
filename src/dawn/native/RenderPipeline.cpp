@@ -259,8 +259,8 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
             vertexMetadata.usedVertexInputs & ~attributesSetMask;
         DAWN_CHECK(missingAttributes.any());
 
-        VertexAttributeLocation firstMissing = ityp::Sub(
-            GetHighestBitIndexPlusOne(missingAttributes), VertexAttributeLocation(uint8_t(1)));
+        VertexAttributeLocation firstMissing =
+            GetHighestBitIndexPlusOne(missingAttributes) - VertexAttributeLocation{uint8_t{1}};
         return DAWN_VALIDATION_ERROR(
             "Vertex attribute slot %u used in (%s, %s) is not present in the "
             "VertexState.",
@@ -720,8 +720,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
     DAWN_INVALID_IF(
         extraFramebufferInputs.any(),
         "Framebuffer input at index %u is used without a corresponding color target state.",
-        uint8_t(ityp::Sub(GetHighestBitIndexPlusOne(extraFramebufferInputs),
-                          ColorAttachmentIndex(uint8_t(1)))));
+        GetHighestBitIndexPlusOne(extraFramebufferInputs) - ColorAttachmentIndex{uint8_t{1}});
 
     DAWN_TRY(ValidateColorAttachmentBytesPerSample(device, colorAttachmentFormats));
 

@@ -380,12 +380,6 @@ TEST_F(TypedIntegerTest, HasUnsignedUnderlyingType) {
     static_assert(HasUnsignedUnderlyingType<Unsigned>);
 }
 
-TEST_F(TypedIntegerTest, PlusOne) {
-    Signed seven(7);
-    EXPECT_EQ(Signed(8), ityp::PlusOne(seven));
-    EXPECT_EQ(Signed(9), ityp::PlusOne(ityp::PlusOne(seven)));
-}
-
 // Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
 using TypedIntegerDeathTest = TypedIntegerTest;
 

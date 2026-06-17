@@ -705,7 +705,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 ConvertToFloatColor(renderPass->colorAttachments[i].clearColor);
             d3d11DeviceContext->ClearRenderTargetView(d3d11RenderTargetViews[i], clearColor.data());
         }
-        attachmentCount = ityp::PlusOne(i);
+        attachmentCount = i + ColorAttachmentIndex{uint8_t{1}};
     }
 
     ID3D11DepthStencilView* d3d11DepthStencilView = nullptr;
