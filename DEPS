@@ -23,7 +23,7 @@ vars = {
   'dawn_tintd': False, # Also fetches dependencies required for building tintd.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:28df2d93df29e5f773dd51ed2f19c112987626ed',
+  'dawn_gn_version': 'git_revision:a62eada32783b23eba3ddc9613d615d1a578f6f6',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -71,7 +71,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': 'b3652d124748a01e16c0ef84e5f183c41b75cd4c',
+  'chromium_revision': '3c5f0f53124b4aea944cdad1b7760f337368b6cb',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -120,7 +120,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@fb8d33261b0b19b673f43f4a6c2fd6484c163641',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@c46c2e905741fa94ce6870f9c95978117b8a7917',
     'condition': 'dawn_standalone',
   },
 
@@ -136,7 +136,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@628eb31790a57f897742e219bf1774b15256de69',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@5ff32e4427a8bae62e13c05ac4793b3a987e00d6',
     'condition': 'dawn_standalone',
   },
 
@@ -151,11 +151,11 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@44ba1f86183dc23767357ca69406e877020b66ff',
+  'url': '{chromium_git}/chromium/src/build@18491f7b59bcf5154b131ac089db3b92756aefc4',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@fa3797f90f4b0aa604709ef6ee724c276fae27a9',
+  'url': '{chromium_git}/chromium/src/tools/clang@4cee251627d3ed3357f38f5fc61eab37babff6b9',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -265,7 +265,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@1b7c5746f0f4149fb9b2a81585c3119905d3475f',
+    'url': '{chromium_git}/chromium/src/testing@5d8b0cfe0008d4e5d7a3d182fccfe7ec243d103b',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -619,7 +619,7 @@ deps = {
 
   # Dependencies for tintd.
   'third_party/jsoncpp': {
-    'url': '{chromium_git}/external/github.com/open-source-parsers/jsoncpp.git@5f1f240f10a19a61929b5c573974900cb62e9dac',
+    'url': '{chromium_git}/external/github.com/open-source-parsers/jsoncpp.git@11279616cf96c81d57542d5ddabc49d4ad79a0ac',
     'condition': 'dawn_tintd',
   },
 
