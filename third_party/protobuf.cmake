@@ -152,11 +152,19 @@ function(generate_protos)
       set(lang_out_arg "--${ARGS_LANGUAGE}_out=${ARGS_PROTOC_OUT_DIR}")
     endif()
 
+    if (PROTOC_EXECUTABLE)
+      set(PROTOC_CMD ${PROTOC_EXECUTABLE})
+      set(PROTOC_DEPENDS "")
+    else()
+      set(PROTOC_CMD $<TARGET_FILE:protobuf::protoc>)
+      set(PROTOC_DEPENDS $<TARGET_FILE:protobuf::protoc>)
+    endif()
+
     add_custom_command(
       OUTPUT ${GENERATED_SRCS}
-      COMMAND $<TARGET_FILE:protobuf::protoc>
+      COMMAND ${PROTOC_CMD}
       ARGS ${ARGS_PROTOC_OPTIONS} ${lang_out_arg} ${_plugin} ${PROTOBUF_INCLUDE_PATH} ${ABS_FILE}
-      DEPENDS ${ABS_FILE} $<TARGET_FILE:protobuf::protoc>
+      DEPENDS ${ABS_FILE} ${PROTOC_DEPENDS}
       COMMENT ${COMMENT}
       VERBATIM)
   endforeach()
@@ -174,7 +182,19 @@ set(protobuf_BUILD_LIBPROTOC OFF CACHE BOOL "Build libprotoc" FORCE)
 set(protobuf_BUILD_TESTS OFF CACHE BOOL "Controls whether protobuf tests are built" FORCE)
 set(protobuf_MSVC_STATIC_RUNTIME OFF CACHE BOOL "Controls whether a protobuf static runtime is built" FORCE)
 
-set(protobuf_BUILD_PROTOC_BINARIES ON CACHE BOOL "Build libprotoc and protoc compiler" FORCE)
+if (NOT PROTOC_EXECUTABLE AND Protobuf_PROTOC_EXECUTABLE)
+  set(PROTOC_EXECUTABLE ${Protobuf_PROTOC_EXECUTABLE})
+endif()
+
+if (CMAKE_CROSSCOMPILING AND NOT PROTOC_EXECUTABLE AND NOT CMAKE_CROSSCOMPILING_EMULATOR)
+  message(FATAL_ERROR "When cross-compiling, you must specify a host protoc via -DPROTOC_EXECUTABLE=... or provide a CMAKE_CROSSCOMPILING_EMULATOR.")
+endif()
+
+if (PROTOC_EXECUTABLE)
+  set(protobuf_BUILD_PROTOC_BINARIES OFF CACHE BOOL "Build libprotoc and protoc compiler" FORCE)
+else()
+  set(protobuf_BUILD_PROTOC_BINARIES ON CACHE BOOL "Build libprotoc and protoc compiler" FORCE)
+endif()
 set(protobuf_DISABLE_RTTI ON CACHE BOOL "Remove runtime type information in the binaries" FORCE)
 
 # Well Known Types (WKTs) are no longer checked into the upstream
