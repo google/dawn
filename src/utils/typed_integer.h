@@ -37,6 +37,7 @@
 #include <utility>
 
 #include "src/utils/assert.h"
+#include "src/utils/compiler.h"
 #include "src/utils/numeric.h"
 #include "src/utils/underlying_type.h"
 
@@ -48,8 +49,6 @@ namespace dawn {
 //  - Integers of the same (Tag, BaseIntegerType) may be compared or assigned.
 // This class helps ensure that the many types of indices in Dawn aren't mixed up and used
 // interchangably.
-// In Release builds, when DAWN_ENABLE_ASSERTS is not defined, TypedInteger is a passthrough
-// typedef of the underlying type.
 //
 // Example:
 //     using UintA = dawn::TypedInteger<struct TypeA, uint32_t>;
@@ -76,15 +75,11 @@ class TypedIntegerImpl;
 }  // namespace detail
 
 template <typename Tag, std::integral T>
-#if defined(DAWN_ENABLE_ASSERTS)
 using TypedInteger = detail::TypedIntegerImpl<Tag, T>;
-#else
-using TypedInteger = T;
-#endif
 
 namespace detail {
 template <typename Tag, typename T>
-class alignas(T) TypedIntegerImpl {
+class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
     static_assert(std::is_integral_v<T>, "TypedInteger must be integral");
     T mValue;
 

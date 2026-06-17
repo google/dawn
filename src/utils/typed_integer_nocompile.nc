@@ -45,64 +45,37 @@ static MyU32 u{3u};
 void TestConstruction() {
     // Cannot construct from a distinct but otherwise identical type.
     (void) MyI32{MyI32{v}};       // (control case)
-#if defined(DAWN_ENABLE_ASSERTS)
     (void) MyI32{MyOtherI32{v}};  // expected-error {{no matching constructor for initialization of}}
-#else
-    (void) MyI32{MyOtherI32{v}};  // (no warning in release.)
-#endif
 
     // Cannot convert to narrower types.
     (void) MyI32{int32_t{v}};   // (control case)
-#if defined(DAWN_ENABLE_ASSERTS)
     (void) MyI32{int64_t{v}};   // expected-error {{no matching constructor for initialization of}}
     (void) MyI32{uint32_t{v}};  // expected-error {{no matching constructor for initialization of}}
     (void) MyU32{uint64_t{v}};  // expected-error {{no matching constructor for initialization of}}
     (void) MyU32{int16_t{v}};   // expected-error {{no matching constructor for initialization of}}
     (void) MyU32{int32_t{v}};   // expected-error {{no matching constructor for initialization of}}
-#else
-    (void) MyI32{int64_t{v}};   // expected-error {{cannot be narrowed from type}}
-    (void) MyI32{uint32_t{v}};  // expected-error {{cannot be narrowed from type}}
-    (void) MyU32{uint64_t{v}};  // expected-error {{cannot be narrowed from type}}
-    (void) MyU32{int16_t{v}};   // expected-error {{cannot be narrowed from type}}
-    (void) MyU32{int32_t{v}};   // expected-error {{cannot be narrowed from type}}
-#endif
 }
 
 // Assignment to TypedInteger from other things.
 void TestAssignmentToTyped() {
     { [[maybe_unused]] MyI32 x = MyI32{v}; }       // (control case.)
-#if defined(DAWN_ENABLE_ASSERTS)
     { [[maybe_unused]] MyI32 x = int32_t{v}; }     // expected-error {{no viable conversion from}}
     { [[maybe_unused]] MyI32 x = MyOtherI32{v}; }  // expected-error {{no viable conversion from}}
-#else
-    { [[maybe_unused]] MyI32 x = int32_t{v}; }     // (no warning in release.)
-    { [[maybe_unused]] MyI32 x = MyOtherI32{v}; }  // (no warning in release.)
-#endif
 }
 
 // Casts from TypedInteger to primitive.
 void TestCastToPrimitive() {
     // Cannot convert to narrower types.
     (void) int32_t{i};   // (control case.)
-#if defined(DAWN_ENABLE_ASSERTS)
     (void) int16_t{i};   // expected-error {{no viable conversion from}}
     (void) uint32_t{i};  // expected-error {{no viable conversion from}}
     (void) int32_t{u};   // expected-error {{no viable conversion from}}
-#else
-    (void) int16_t{i};   // expected-error {{cannot be narrowed from type}}
-    (void) uint32_t{i};  // expected-error {{cannot be narrowed from type}}
-    (void) int32_t{u};   // expected-error {{cannot be narrowed from type}}
-#endif
 }
 
 // Assignment to primitive from TypedInteger.
 void TestAssignmentToPrimitive() {
     { [[maybe_unused]] int32_t x = int32_t{v}; }  // (control case.)
-#if defined(DAWN_ENABLE_ASSERTS)
     { [[maybe_unused]] int32_t x = MyI32{v}; }    // expected-error {{no viable conversion from}}
-#else
-    { [[maybe_unused]] int32_t x = MyI32{v}; }    // (no warning in release.)
-#endif
 }
 
 }

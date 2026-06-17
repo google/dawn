@@ -365,17 +365,9 @@ TEST_F(TypedIntegerTest, NumericLimits) {
     EXPECT_EQ(std::numeric_limits<Signed>::min(), Signed(std::numeric_limits<int32_t>::min()));
 }
 
-// Test that in Debug, there would be an error if somewhere in the code made the wrong assumption
-// about what std::is_integral does for TypedIntegers. In release, tests the opposite, just so we
-// remember to look at this if we change TypedIntegers to exist in Release too.
-TEST_F(TypedIntegerTest, NotIntegralInDebug) {
-#if defined(DAWN_ENABLE_ASSERTS)
+TEST_F(TypedIntegerTest, NotIntegral) {
     static_assert(!std::is_integral_v<Unsigned>);
     static_assert(!std::is_integral_v<Signed>);
-#else
-    static_assert(std::is_integral_v<Unsigned>);
-    static_assert(std::is_integral_v<Signed>);
-#endif
 }
 
 TEST_F(TypedIntegerTest, UnderlyingType) {
