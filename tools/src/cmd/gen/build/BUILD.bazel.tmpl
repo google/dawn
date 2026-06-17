@@ -190,7 +190,7 @@ cc_binary(
 {{- define "ExternalDependencyTarget"}}
 {{-        if eq $.Name "abseil"                         -}}"@abseil_cpp//absl/strings",
 {{-   else if eq $.Name "dl"                             -}}{{/* unsupported */}}
-{{-   else if eq $.Name "dxc-include"                    -}}{{/* unsupported */}}
+{{-   else if eq $.Name "dxc-include"                    -}}"//third_party/directx-shader-compiler:dxc_headers",
 {{-   else if eq $.Name "dxcompiler-for-fuzzer"          -}}{{/* unsupported */}}
 {{-   else if eq $.Name "glslang-res-limits"             -}}{{/* unsupported */}}
 {{-   else if eq $.Name "glslang"                        -}}{{/* unsupported */}}
