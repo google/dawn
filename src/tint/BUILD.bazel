@@ -31,7 +31,6 @@ load(":flags.bzl", "declare_bool_flag", "declare_os_flag")
 load("//src/tint:generated_sources.bzl", "tint_generated_sources", "tint_generation_dependencies")
 
 # Declares the 'tint_build_*' flags that control what parts of Tint get built
-declare_bool_flag(name = "tint_build_glsl_validator", default = False)
 declare_bool_flag(name = "tint_build_glsl_writer", default = False)
 declare_bool_flag(name = "tint_build_hlsl_writer", default = True)
 declare_bool_flag(name = "tint_build_ir", default = True)
@@ -45,6 +44,17 @@ declare_bool_flag(name = "tint_build_null_writer", default = True)
 declare_bool_flag(name = "tint_build_fuzzer_vulkan_support", default = False)
 declare_bool_flag(name = "tint_build_ir_binary", default = False)
 declare_bool_flag(name = "tint_build_mesa", default = False)
+# 'tint_build_glsl_validator' is not supported in the bazel build, so force it to always disabled.
+config_setting(
+    name = "tint_build_glsl_validator_true",
+    values = {"define": "never_true=true"},
+    visibility = ["//visibility:public"],
+)
+config_setting(
+    name = "tint_build_glsl_validator_false",
+    values = {},
+    visibility = ["//visibility:public"],
+)
 
 # Declares the 'os' flag that control what OS-specific Tint code gets built
 declare_os_flag()

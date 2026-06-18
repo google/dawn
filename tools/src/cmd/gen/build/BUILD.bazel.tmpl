@@ -30,7 +30,11 @@ exports_files(glob(["*.def", "*.tmpl"], allow_empty = True))
 */ -}}
 {{- define "TargetIfNotEmpty"}}
 {{-   if $}}
-{{-     if or (len $.SourceFiles) (len $.GeneratedSourcePaths.List)}}{{Eval "Target" $}}{{end}}
+{{-     if not (and $.Condition (Contains $.Condition.String "tint_build_glsl_validator"))}}
+{{-       if or (len $.SourceFiles) (len $.GeneratedSourcePaths.List)}}{{Eval "Target" $}}{{end}}
+{{-     else}}
+# GLSL validator is not supported by the bazel build configuration.
+{{-     end}}
 {{-   end}}
 {{- end}}
 
