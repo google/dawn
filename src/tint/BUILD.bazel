@@ -37,7 +37,6 @@ declare_bool_flag(name = "tint_build_ir", default = True)
 declare_bool_flag(name = "tint_build_msl_writer", default = True)
 declare_bool_flag(name = "tint_build_spv_reader", default = True)
 declare_bool_flag(name = "tint_build_spv_writer", default = True)
-declare_bool_flag(name = "tint_build_tintd", default = False)
 declare_bool_flag(name = "tint_build_wgsl_reader", default = True)
 declare_bool_flag(name = "tint_build_wgsl_writer", default = True)
 declare_bool_flag(name = "tint_build_null_writer", default = True)
@@ -52,6 +51,17 @@ config_setting(
 )
 config_setting(
     name = "tint_build_glsl_validator_false",
+    values = {},
+    visibility = ["//visibility:public"],
+)
+# 'tint_build_tintd' is not supported in the bazel build, so force it to always disabled.
+config_setting(
+    name = "tint_build_tintd_true",
+    values = {"define": "never_true=true"},
+    visibility = ["//visibility:public"],
+)
+config_setting(
+    name = "tint_build_tintd_false",
     values = {},
     visibility = ["//visibility:public"],
 )

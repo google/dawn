@@ -40,23 +40,8 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 exports_files(glob(["*.def", "*.tmpl"], allow_empty = True))
 
-cc_binary(
-  name = "cmd",
-  srcs = [
-    "main.cc",
-  ],
-  deps = [
-    "//src/tint/lang/wgsl/ls",
-    "//src/tint/utils",
-    "//src/tint/utils/ice",
-    "//src/tint/utils/macros",
-    "//src/tint/utils/rtti",
-    "//src/utils",
-  ],
-  copts = COPTS,
-  visibility = ["//visibility:public"],
-)
 
+# WGSL Language Server (tintd) is not supported by the bazel build configuration.
 alias(
   name = "tint_build_tintd",
   actual = "//src/tint:tint_build_tintd_true",
