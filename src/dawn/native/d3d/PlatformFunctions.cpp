@@ -127,6 +127,7 @@ void PlatformFunctions::InitWindowsVersion() {
         return;
     }
 
+#if !DAWN_PLATFORM_IS(WINUWP)
     // Referenced from base/win/windows_version.cc in Chromium
     constexpr wchar_t kRegKeyWindowsNTCurrentVersion[] =
         L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion";
@@ -140,6 +141,7 @@ void PlatformFunctions::InitWindowsVersion() {
     mCurrentBuildNumber = ReadFromSZRegistryKey(hKey, "CurrentBuildNumber");
 
     RegCloseKey(hKey);
+#endif  // !DAWN_PLATFORM_IS(WINUWP)
 }
 
 uint64_t PlatformFunctions::GetWindowsBuildNumber() const {
