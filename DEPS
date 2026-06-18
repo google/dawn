@@ -30,6 +30,7 @@ vars = {
   'dawn_go_version': 'version:3@1.25.0',
   'dawn_node_version': 'version:2@20.11.0',
   'agility_sdk_version': 'version:2@1.721.0-preview',
+  'dawn_bazelisk_version': 'version:3@1.29.0',
 
   # GN variable required by //testing that will be output in the gclient_args.gni
   'generate_location_tags': False,
@@ -59,6 +60,7 @@ vars = {
   'SUBMODULE_MIGRATION': 'True',
 
   'fetch_cmake': False,
+  'fetch_bazel': False,
 
   # condition to allowlist deps to be synced in Cider. Allowlisting is needed
   # because not all deps are compatible with Cider. Once we migrate everything
@@ -565,6 +567,15 @@ deps = {
     'packages': [{
       'package': 'infra/3pp/tools/cmake/${{platform}}',
       'version': Var('dawn_cmake_version'),
+    }],
+    'dep_type': 'cipd',
+  },
+
+  'tools/bazelisk': {
+    'condition': 'fetch_bazel',
+    'packages': [{
+      'package': 'infra/3pp/tools/bazelisk/${{platform}}',
+      'version': Var('dawn_bazelisk_version'),
     }],
     'dep_type': 'cipd',
   },

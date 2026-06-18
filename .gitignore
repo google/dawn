@@ -57,6 +57,7 @@
 /third_party/vulkan_memory_allocator
 /third_party/webgpu-cts
 /third_party/zlib
+/tools/bazelisk
 /tools/bin
 /tools/clang
 /tools/cmake*
