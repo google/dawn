@@ -174,7 +174,7 @@ class ExternalTextureTest : public ValidationTest {
     static constexpr wgpu::TextureFormat kBiplanarPlane0Format = wgpu::TextureFormat::R8Unorm;
     static constexpr wgpu::TextureFormat kBiplanarPlane1Format = wgpu::TextureFormat::RG8Unorm;
 
-    std::array<float, 12> mPlaceholderConstantArray;
+    std::array<float, 12> mPlaceholderConstantArray = {};
 
     wgpu::Queue queue;
     wgpu::Texture defaultTexture;

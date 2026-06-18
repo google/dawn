@@ -141,7 +141,7 @@ class BindGroupValidationTest : public ValidationTest {
     uint32_t kWidth = 16;
     uint32_t kHeight = 16;
     wgpu::ExternalTexture mExternalTexture;
-    std::array<float, 12> mPlaceholderConstantArray;
+    std::array<float, 12> mPlaceholderConstantArray = {};
 };
 
 // Test the validation of BindGroupDescriptor::nextInChain

@@ -384,7 +384,7 @@ TEST_F(DestroyObjectTests, ExternalTextureNativeExplicit) {
         AcquireRef(new NiceMock<TextureViewMock>(textureMock.Get(), Unpack(&textureViewDesc)));
 
     ExternalTextureDescriptor desc = {};
-    std::array<float, 12> placeholderConstantArray;
+    std::array<float, 12> placeholderConstantArray = {};
     desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
     desc.gamutConversionMatrix = placeholderConstantArray.data();
     desc.srcTransferFunctionParameters = placeholderConstantArray.data();
@@ -415,7 +415,7 @@ TEST_F(DestroyObjectTests, ExternalTextureApiExplicit) {
         AcquireRef(new NiceMock<TextureViewMock>(textureMock.Get(), Unpack(&textureViewDesc)));
 
     ExternalTextureDescriptor desc = {};
-    std::array<float, 12> placeholderConstantArray;
+    std::array<float, 12> placeholderConstantArray = {};
     desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
     desc.gamutConversionMatrix = placeholderConstantArray.data();
     desc.srcTransferFunctionParameters = placeholderConstantArray.data();
@@ -450,7 +450,7 @@ TEST_F(DestroyObjectTests, ExternalTextureImplicit) {
         AcquireRef(new NiceMock<TextureViewMock>(textureMock.Get(), Unpack(&textureViewDesc)));
 
     ExternalTextureDescriptor desc = {};
-    std::array<float, 12> placeholderConstantArray;
+    std::array<float, 12> placeholderConstantArray = {};
     desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
     desc.gamutConversionMatrix = placeholderConstantArray.data();
     desc.srcTransferFunctionParameters = placeholderConstantArray.data();
@@ -1002,7 +1002,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     wgpu::ExternalTexture externalTexture;
     {
         ExternalTextureDescriptor desc = {};
-        std::array<float, 12> placeholderConstantArray;
+        std::array<float, 12> placeholderConstantArray = {};
         desc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
         desc.gamutConversionMatrix = placeholderConstantArray.data();
         desc.srcTransferFunctionParameters = placeholderConstantArray.data();

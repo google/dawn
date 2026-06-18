@@ -175,7 +175,7 @@ TEST_F(AllowedErrorTests, QueueCopyExternalTextureForBrowserOomBuffer) {
     textureViewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
 
     wgpu::ExternalTextureDescriptor externalTextureDesc = {};
-    std::array<float, 12> placeholderConstantArray;
+    std::array<float, 12> placeholderConstantArray = {};
     externalTextureDesc.yuvToRgbConversionMatrix = placeholderConstantArray.data();
     externalTextureDesc.gamutConversionMatrix = placeholderConstantArray.data();
     externalTextureDesc.srcTransferFunctionParameters = placeholderConstantArray.data();
