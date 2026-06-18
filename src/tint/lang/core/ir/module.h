@@ -86,6 +86,8 @@ enum class Property : uint8_t {
     kAllowRefTypes,
     /// Allows matrix annotations on structure members.
     kAllowStructMatrixDecorations,
+    /// Allows module scope `var`s to exist without an IO annotation.
+    kAllowUnannotatedModuleIOVariables,
     /// Allows access instructions to create pointers to vector elements.
     kAllowVectorElementPointer,
 
@@ -122,6 +124,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(AllowPointerToHandle);
         CASE(AllowRefTypes);
         CASE(AllowStructMatrixDecorations);
+        CASE(AllowUnannotatedModuleIOVariables);
         CASE(AllowVectorElementPointer);
         CASE(DisallowVectorMinMaxClamp);
     }

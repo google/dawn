@@ -1232,9 +1232,10 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_ArrayOfStructs) {
         b.Unreachable();
     });
 
-    // Need to add Capability::kAllowUnannotatedModuleIOVariables to prevent earlier checks
+    // Need to add Property::kAllowUnannotatedModuleIOVariables to prevent earlier checks
     // rejecting the shader
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowUnannotatedModuleIOVariables});
+    mod.properties.Add(ir::Property::kAllowUnannotatedModuleIOVariables);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -1266,7 +1267,8 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NestedStruct) {
     auto* f = FragmentEntryPoint("my_func");
     b.Append(f->Block(), [&] { b.Store(v, b.Zero(outer_struct_ty)); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowUnannotatedModuleIOVariables});
+    mod.properties.Add(ir::Property::kAllowUnannotatedModuleIOVariables);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,

@@ -40,7 +40,6 @@ namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kDeadCodeEliminationCapabilities{
-    core::ir::Capability::kAllowUnannotatedModuleIOVariables,
     core::ir::Capability::kLoosenValidationForShaderIO,
 };
 

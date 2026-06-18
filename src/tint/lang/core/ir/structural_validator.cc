@@ -2423,7 +2423,7 @@ void Structural::ValidateShaderIOAnnotations(const CastableBase* msg_anchor,
         }
     } else {
         if (annotations.Empty()) {
-            if (!(capabilities_.Contains(Capability::kAllowUnannotatedModuleIOVariables) &&
+            if (!(ir_.properties.Contains(Property::kAllowUnannotatedModuleIOVariables) &&
                   kind == ShaderIOKind::kModuleScopeVar)) {
                 AddError(msg_anchor) << ToString(kind)
                                      << " must have at least one IO annotation, e.g. a binding "

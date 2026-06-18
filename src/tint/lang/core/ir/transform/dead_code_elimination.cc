@@ -109,6 +109,8 @@ Result<SuccessType> DeadCodeElimination(Module& ir) {
 
     State{ir}.Process();
 
+    ir.properties.Remove(Property::kAllowUnannotatedModuleIOVariables);
+
     return Success;
 }
 

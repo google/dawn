@@ -40,9 +40,11 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_DeadCodeEliminationTest = TransformTest;
 
 TEST_F(IR_DeadCodeEliminationTest, NoModify) {
-    capabilities = Capability::kAllowUnannotatedModuleIOVariables;
-
     auto* buffer = b.Var("buffer", ty.ptr(core::AddressSpace::kOut, ty.i32()));
+    buffer->SetAttributes(IOAttributes{.location = 1u,
+                                       .interpolation = Interpolation{
+                                           .type = InterpolationType::kFlat,
+                                       }});
     mod.root_block->Append(buffer);
 
     auto* used = b.Function("used", ty.f32());
@@ -58,7 +60,7 @@ TEST_F(IR_DeadCodeEliminationTest, NoModify) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<__out, i32, read_write> = var undef
+  %buffer:ptr<__out, i32, read_write> = var undef @location(1) @interpolate(flat)
 }
 
 %used = func():f32 {
@@ -84,10 +86,13 @@ $B1: {  # root
 }
 
 TEST_F(IR_DeadCodeEliminationTest, RemoveFunction) {
-    capabilities = Capability::kAllowUnannotatedModuleIOVariables;
     mod.properties.Add(Property::kAllowPhonyInstructions);
 
     auto* buffer = b.Var("buffer", ty.ptr(core::AddressSpace::kIn, ty.i32()));
+    buffer->SetAttributes(IOAttributes{.location = 1u,
+                                       .interpolation = Interpolation{
+                                           .type = InterpolationType::kFlat,
+                                       }});
     mod.root_block->Append(buffer);
 
     auto* unused = b.Function("unused", ty.f32());
@@ -103,7 +108,7 @@ TEST_F(IR_DeadCodeEliminationTest, RemoveFunction) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<__in, i32, read> = var undef
+  %buffer:ptr<__in, i32, read> = var undef @location(1) @interpolate(flat)
 }
 
 %unused = func():f32 {
@@ -123,7 +128,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<__in, i32, read> = var undef
+  %buffer:ptr<__in, i32, read> = var undef @location(1) @interpolate(flat)
 }
 
 %ep = @fragment func():f32 [@location(0)] {
@@ -202,6 +207,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DeadCodeEliminationTest, RemoveVarIn_Nested) {
+    mod.properties.Add(Property::kAllowUnannotatedModuleIOVariables);
     mod.properties.Add(Property::kAllowPhonyInstructions);
 
     auto* buffer = b.Var("buffer", ty.ptr(core::AddressSpace::kIn, ty.i32()));
@@ -263,6 +269,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DeadCodeEliminationTest, RemoveVarOut_Nested) {
+    mod.properties.Add(Property::kAllowUnannotatedModuleIOVariables);
     auto* buffer =
         b.Var("buffer", ty.ptr(core::AddressSpace::kOut, ty.i32(), core::Access::kWrite));
     mod.root_block->Append(buffer);

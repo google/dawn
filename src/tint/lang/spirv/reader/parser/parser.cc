@@ -193,6 +193,7 @@ class Parser {
         ir_.properties.Add(core::ir::Property::kAllowPointSizeBuiltin);
         ir_.properties.Add(core::ir::Property::kAllowPointerToHandle);
         ir_.properties.Add(core::ir::Property::kAllowStructMatrixDecorations);
+        ir_.properties.Add(core::ir::Property::kAllowUnannotatedModuleIOVariables);
         ir_.properties.Add(core::ir::Property::kAllowVectorElementPointer);
 
         RegisterNames();
