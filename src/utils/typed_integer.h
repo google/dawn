@@ -309,6 +309,11 @@ class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
         return *this;
     }
 
+    // Helper functions to avoid the need to do a double cast when we just want to add 1 to a typed
+    // integer (when ++ or -- are not options).
+    TypedIntegerImpl PlusOne() const { return *this + TypedIntegerImpl{T{1}}; }
+    TypedIntegerImpl MinusOne() const { return *this - TypedIntegerImpl{T{1}}; }
+
     template <typename H>
     friend H AbslHashValue(H state, const TypedIntegerImpl& value) {
         H::combine(std::move(state), value.mValue);

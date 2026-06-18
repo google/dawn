@@ -358,6 +358,18 @@ TEST_F(TypedIntegerTest, ArithmeticAssignment) {
     }
 }
 
+TEST_F(TypedIntegerTest, PlusOne) {
+    EXPECT_EQ(Unsigned(11u).PlusOne(), Unsigned(12u));
+    EXPECT_EQ(Signed(11).PlusOne(), Signed(12));
+    EXPECT_EQ(Signed(-1).PlusOne(), Signed(0));
+}
+
+TEST_F(TypedIntegerTest, MinusOne) {
+    EXPECT_EQ(Unsigned(11u).MinusOne(), Unsigned(10u));
+    EXPECT_EQ(Signed(11).MinusOne(), Signed(10));
+    EXPECT_EQ(Signed(1).MinusOne(), Signed(0));
+}
+
 TEST_F(TypedIntegerTest, NumericLimits) {
     EXPECT_EQ(std::numeric_limits<Unsigned>::max(), Unsigned(std::numeric_limits<uint32_t>::max()));
     EXPECT_EQ(std::numeric_limits<Unsigned>::min(), Unsigned(std::numeric_limits<uint32_t>::min()));
@@ -549,6 +561,33 @@ TEST_F(TypedIntegerDeathTest, NegationOverflow) {
     EXPECT_DEATH(-minValue, "");  // Overflows.
 }
 
+TEST_F(TypedIntegerDeathTest, UnsignedPlusOneOverflow) {
+    Unsigned value(std::numeric_limits<uint32_t>::max() - 1);
+
+    value.PlusOne();                              // Doesn't overflow.
+    EXPECT_DEATH(value.PlusOne().PlusOne(), "");  // Overflows.
+}
+
+TEST_F(TypedIntegerDeathTest, SignedPlusOneOverflow) {
+    Signed value(std::numeric_limits<int32_t>::max() - 1);
+
+    value.PlusOne();                              // Doesn't overflow.
+    EXPECT_DEATH(value.PlusOne().PlusOne(), "");  // Overflows.
+}
+
+TEST_F(TypedIntegerDeathTest, UnsignedMinusOneOverflow) {
+    Unsigned value(std::numeric_limits<uint32_t>::lowest() + 1);
+
+    value.MinusOne();                               // Doesn't overflow.
+    EXPECT_DEATH(value.MinusOne().MinusOne(), "");  // Overflows.
+}
+
+TEST_F(TypedIntegerDeathTest, SignedMinusOneOverflow) {
+    Signed value(std::numeric_limits<int32_t>::lowest() + 1);
+
+    value.MinusOne();                               // Doesn't overflow.
+    EXPECT_DEATH(value.MinusOne().MinusOne(), "");  // Overflows.
+}
 #endif  // defined(DAWN_ENABLE_ASSERTS) && GTEST_HAS_DEATH_TEST
 
 }  // anonymous namespace
