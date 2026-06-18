@@ -1989,6 +1989,12 @@ void Structural::CheckVar(const Var* var) {
     CheckBindingPoint(var, var->Result(0)->Type(), var->Attributes(),
                       ShaderIOKind::kModuleScopeVar);
 
+    auto address_space = mv->AddressSpace();
+    if (address_space != AddressSpace::kIn && address_space != AddressSpace::kOut) {
+        CheckInterpolation(var, mv->StoreType(), var->Attributes(),
+                           Function::PipelineStage::kUndefined, IODirection::kResource);
+    }
+
     // TODO(516717234): Move to functional validator
     if (var->Block() == ir_.root_block) {
         if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) {
@@ -2176,6 +2182,10 @@ void Structural::CheckInterpolation(const CastableBase* anchor,
                                     const IOAttributes& attr,
                                     const Function::PipelineStage stage,
                                     const IODirection dir) {
+    if (!ty) {
+        return;
+    }
+
     bool ctx = false;
 
     WalkTypeAndMembers(

@@ -603,6 +603,25 @@ TEST_F(IR_ValidatorTest, StructMember_InvalidBuiltinType_Unused) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr("primitive_index must be an u32"));
 }
 
+TEST_F(IR_ValidatorTest, StructMember_InterpolationWithoutLocation) {
+    core::IOAttributes attr;
+    attr.interpolation = {InterpolationType::kFlat, InterpolationSampling::kUndefined};
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {
+                                                      mod.symbols.New("m"),
+                                                      ty.f32(),
+                                                      attr,
+                                                  },
+                                              });
+
+    mod.root_block->Append(b.Var("v", ty.ptr<private_, read_write>(s)));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("interpolation attribute requires a location attribute"));
+}
+
 TEST_F(IR_ValidatorTest, StructMember_Sampler_WithProperty) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
