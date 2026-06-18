@@ -1089,6 +1089,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::IgnoreImportedAHardwareBufferVulkanImageSize, true);
     }
 
+    if (gpu_info::IsHuaweiMaleoon(GetVendorId(), GetDeviceId())) {
+        // crbug.com/520126486: Huawei Maleoon drivers mis-stride multi-layer
+        // buffer<->image copies: only the first array layer / depth slice lands at
+        // the correct buffer offset when a copy region has layerCount > 1.
+        // Split such copies into one region per layer.
+        deviceToggles->Default(Toggle::VulkanSplitBufferTextureCopyForArrayLayers, true);
+    }
+
     // Collapse redundant subgroup min and max operations to workaround a driver crash on some AMD
     // GPUs.  Should only affect AMD Windows Driver versions < 31.0.22000.0, but because this is a
     // harmless "optimizing" workaround go ahead enable for all versions. See:

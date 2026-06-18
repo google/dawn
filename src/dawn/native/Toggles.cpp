@@ -496,6 +496,14 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a shader based blit instead of a copy command to copy a buffer to a texture with "
       "supported format.",
       "https://crbug.com/dawn/348653642", ToggleStage::Device}},
+    {Toggle::VulkanSplitBufferTextureCopyForArrayLayers,
+     {"vulkan_split_buffer_texture_copy_for_array_layers",
+      "Split a multi-layer buffer-to-texture / texture-to-buffer copy into one vkCmdCopy*Image "
+      "region per array layer / depth slice, each with an explicit per-layer buffer offset, "
+      "instead of a single region with layerCount > 1. Workaround for Huawei Maleoon GPUs, whose "
+      "drivers mis-stride the buffer between layers when bufferImageHeight is padded, corrupting "
+      "every layer after the first.",
+      "https://issues.chromium.org/issues/520126486", ToggleStage::Device}},
     {Toggle::GLUseArrayLengthFromUniform,
      {"gl_use_array_length_from_uniform",
       "Use arrayLengthFromUniform transform to replace arrayLength() function calls of dynamic "
