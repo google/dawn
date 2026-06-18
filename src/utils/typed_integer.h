@@ -135,152 +135,125 @@ class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
         return ret;
     }
 
-    // Note that AddImpl and SubImpl purporsefully return an integer of the same size, when C++ does
-    // automatic widening in some cases (line uint8_t + uint8_t being an uint16_t).
-    static constexpr T AddImpl(TypedIntegerImpl lhs, TypedIntegerImpl rhs)
-        requires(std::unsigned_integral<T>)
-    {
-        // Overflow would wrap around
-        DAWN_ASSERT(lhs.mValue + rhs.mValue >= lhs.mValue);
-        return lhs.mValue + rhs.mValue;
-    }
-    static constexpr T AddImpl(TypedIntegerImpl lhs, TypedIntegerImpl rhs)
+    constexpr TypedIntegerImpl operator-() const
         requires(std::signed_integral<T>)
     {
-        if (lhs.mValue > 0) {
-            // rhs is positive: |rhs| is at most the distance between max and |lhs|.
-            // rhs is negative: (positive + negative) won't overflow
-            DAWN_ASSERT(rhs.mValue <= std::numeric_limits<T>::max() - lhs.mValue);
-        } else {
-            // rhs is postive: (negative + positive) won't underflow
-            // rhs is negative: |rhs| isn't less than the (negative) distance between min
-            // and |lhs|
-            DAWN_ASSERT(rhs.mValue >= std::numeric_limits<T>::min() - lhs.mValue);
-        }
-        return lhs.mValue + rhs.mValue;
-    }
-
-    static constexpr T SubImpl(TypedIntegerImpl lhs, TypedIntegerImpl rhs)
-        requires(std::unsigned_integral<T>)
-    {
-        // Overflow would wrap around
-        DAWN_ASSERT(lhs.mValue - rhs.mValue <= lhs.mValue);
-        return lhs.mValue - rhs.mValue;
-    }
-
-    static constexpr T SubImpl(TypedIntegerImpl lhs, TypedIntegerImpl rhs)
-        requires(std::signed_integral<T>)
-    {
-        if (lhs.mValue > 0) {
-            // rhs is positive: positive minus positive won't overflow
-            // rhs is negative: |rhs| isn't less than the (negative) distance between |lhs|
-            // and max.
-            DAWN_ASSERT(rhs.mValue >= lhs.mValue - std::numeric_limits<T>::max());
-        } else {
-            // rhs is positive: |rhs| is at most the distance between min and |lhs|
-            // rhs is negative: negative minus negative won't overflow
-            DAWN_ASSERT(rhs.mValue <= lhs.mValue - std::numeric_limits<T>::min());
-        }
-        return lhs.mValue - rhs.mValue;
-    }
-
-    template <typename T2 = T>
-        requires(std::unsigned_integral<T2> && std::same_as<T, T2>)
-    static constexpr decltype(T(0) + T2(0)) MulImpl(TypedIntegerImpl<Tag, T> lhs,
-                                                    TypedIntegerImpl<Tag, T2> rhs) {
-        DAWN_ASSERT(lhs.mValue == 0 || rhs.mValue == 0 ||
-                    lhs.mValue <= (std::numeric_limits<T>::max() / rhs.mValue));
-        return lhs.mValue * rhs.mValue;
-    }
-
-    template <typename T2 = T>
-        requires(std::signed_integral<T2> && std::same_as<T, T2>)
-    static constexpr decltype(T(0) + T2(0)) MulImpl(TypedIntegerImpl<Tag, T> lhs,
-                                                    TypedIntegerImpl<Tag, T2> rhs) {
-        // https://wiki.sei.cmu.edu/confluence/display/c/INT32-C.+Ensure+that+operations+on+signed+integers+do+not+result+in+overflow
-        if (lhs.mValue > 0) {
-            if (rhs.mValue > 0) {
-                DAWN_ASSERT(lhs.mValue <= (std::numeric_limits<T>::max() / rhs.mValue));
-            } else {
-                DAWN_ASSERT(rhs.mValue >= (std::numeric_limits<T>::min() / lhs.mValue));
-            }
-        } else {
-            if (rhs.mValue > 0) {
-                DAWN_ASSERT(lhs.mValue >= (std::numeric_limits<T>::min() / rhs.mValue));
-            } else {
-                DAWN_ASSERT((lhs.mValue == 0) ||
-                            (rhs.mValue >= (std::numeric_limits<T>::max() / lhs.mValue)));
-            }
-        }
-        return lhs.mValue * rhs.mValue;
-    }
-
-    template <typename T2 = T>
-        requires(std::unsigned_integral<T2> && std::same_as<T, T2>)
-    static constexpr decltype(T(0) + T2(0)) DivImpl(TypedIntegerImpl<Tag, T> lhs,
-                                                    TypedIntegerImpl<Tag, T2> rhs) {
-        DAWN_ASSERT(rhs.mValue != 0);
-        return lhs.mValue / rhs.mValue;
-    }
-
-    template <typename T2 = T>
-        requires(std::signed_integral<T2> && std::same_as<T, T2>)
-    static constexpr decltype(T(0) + T2(0)) DivImpl(TypedIntegerImpl<Tag, T> lhs,
-                                                    TypedIntegerImpl<Tag, T2> rhs) {
-        // https://wiki.sei.cmu.edu/confluence/display/c/INT33-C.+Ensure+that+division+and+remainder+operations+do+not+result+in+divide-by-zero+errors
-        DAWN_ASSERT(!(rhs.mValue == 0 ||
-                      (rhs.mValue == -1 && lhs.mValue == std::numeric_limits<T>::min())));
-        return lhs.mValue / rhs.mValue;
-    }
-
-    template <typename T2 = T>
-        requires(std::unsigned_integral<T2> && std::same_as<T, T2>)
-    static constexpr decltype(T(0) + T2(0)) ModImpl(TypedIntegerImpl<Tag, T> lhs,
-                                                    TypedIntegerImpl<Tag, T2> rhs) {
-        DAWN_ASSERT(rhs.mValue != 0);
-        return lhs.mValue % rhs.mValue;
-    }
-
-    template <typename T2 = T>
-        requires(std::signed_integral<T2> && std::same_as<T, T2>)
-    static constexpr decltype(T(0) + T2(0)) ModImpl(TypedIntegerImpl<Tag, T> lhs,
-                                                    TypedIntegerImpl<Tag, T2> rhs) {
-        // https://wiki.sei.cmu.edu/confluence/display/c/INT33-C.+Ensure+that+division+and+remainder+operations+do+not+result+in+divide-by-zero+errors
-        DAWN_ASSERT(!(rhs.mValue == 0 ||
-                      (rhs.mValue == -1 && lhs.mValue == std::numeric_limits<T>::min())));
-        return lhs.mValue % rhs.mValue;
-    }
-
-    template <typename T2 = T>
-        requires(std::signed_integral<T2> && std::same_as<T, T2>)
-    constexpr TypedIntegerImpl operator-() const {
         // The negation of the most negative value cannot be represented.
         DAWN_ASSERT(this->mValue != std::numeric_limits<T>::min());
         return TypedIntegerImpl(-this->mValue);
     }
 
-    constexpr TypedIntegerImpl operator+(TypedIntegerImpl rhs) const {
-        auto result = AddImpl(*this, rhs);
-        return TypedIntegerImpl(result);
+    constexpr TypedIntegerImpl operator+(TypedIntegerImpl rhs) const
+        requires(std::unsigned_integral<T>)
+    {
+        // Overflow would wrap around
+        DAWN_ASSERT(mValue + rhs.mValue >= mValue);
+        T result = mValue + rhs.mValue;
+        return TypedIntegerImpl{result};
     }
-
-    constexpr TypedIntegerImpl operator-(TypedIntegerImpl rhs) const {
-        auto result = SubImpl(*this, rhs);
-        return TypedIntegerImpl(result);
-    }
-
-    constexpr TypedIntegerImpl operator*(TypedIntegerImpl rhs) const {
-        auto result = MulImpl(*this, rhs);
-        return TypedIntegerImpl(result);
-    }
-
-    constexpr TypedIntegerImpl operator/(TypedIntegerImpl rhs) const {
-        auto result = DivImpl(*this, rhs);
+    constexpr TypedIntegerImpl operator+(TypedIntegerImpl rhs) const
+        requires(std::signed_integral<T>)
+    {
+        if (mValue > 0) {
+            // rhs is positive: |rhs| is at most the distance between max and |lhs|.
+            // rhs is negative: (positive + negative) won't overflow
+            DAWN_ASSERT(rhs.mValue <= std::numeric_limits<T>::max() - mValue);
+        } else {
+            // rhs is positive: (negative + positive) won't underflow
+            // rhs is negative: |rhs| isn't less than the (negative) distance between min
+            // and |lhs|
+            DAWN_ASSERT(rhs.mValue >= std::numeric_limits<T>::min() - mValue);
+        }
+        T result = mValue + rhs.mValue;
         return TypedIntegerImpl{result};
     }
 
-    constexpr TypedIntegerImpl operator%(TypedIntegerImpl rhs) const {
-        auto result = ModImpl(*this, rhs);
+    constexpr TypedIntegerImpl operator-(TypedIntegerImpl rhs) const
+        requires(std::unsigned_integral<T>)
+    {
+        // Overflow would wrap around
+        DAWN_ASSERT(mValue - rhs.mValue <= mValue);
+        T result = mValue - rhs.mValue;
+        return TypedIntegerImpl{result};
+    }
+    constexpr TypedIntegerImpl operator-(TypedIntegerImpl rhs) const
+        requires(std::signed_integral<T>)
+    {
+        if (mValue > 0) {
+            // rhs is positive: positive minus positive won't overflow
+            // rhs is negative: |rhs| isn't less than the (negative) distance between |lhs|
+            // and max.
+            DAWN_ASSERT(rhs.mValue >= mValue - std::numeric_limits<T>::max());
+        } else {
+            // rhs is positive: |rhs| is at most the distance between min and |lhs|
+            // rhs is negative: negative minus negative won't overflow
+            DAWN_ASSERT(rhs.mValue <= mValue - std::numeric_limits<T>::min());
+        }
+        T result = mValue - rhs.mValue;
+        return TypedIntegerImpl{result};
+    }
+
+    constexpr TypedIntegerImpl operator*(TypedIntegerImpl rhs) const
+        requires(std::unsigned_integral<T>)
+    {
+        DAWN_ASSERT(mValue == 0 || rhs.mValue == 0 ||
+                    mValue <= (std::numeric_limits<T>::max() / rhs.mValue));
+        T result = mValue * rhs.mValue;
+        return TypedIntegerImpl{result};
+    }
+    constexpr TypedIntegerImpl operator*(TypedIntegerImpl rhs) const
+        requires(std::signed_integral<T>)
+    {
+        // https://wiki.sei.cmu.edu/confluence/display/c/INT32-C.+Ensure+that+operations+on+signed+integers+do+not+result+in+overflow
+        if (mValue > 0) {
+            if (rhs.mValue > 0) {
+                DAWN_ASSERT(mValue <= (std::numeric_limits<T>::max() / rhs.mValue));
+            } else {
+                DAWN_ASSERT(rhs.mValue >= (std::numeric_limits<T>::min() / mValue));
+            }
+        } else {
+            if (rhs.mValue > 0) {
+                DAWN_ASSERT(mValue >= (std::numeric_limits<T>::min() / rhs.mValue));
+            } else {
+                DAWN_ASSERT((mValue == 0) ||
+                            (rhs.mValue >= (std::numeric_limits<T>::max() / mValue)));
+            }
+        }
+        T result = mValue * rhs.mValue;
+        return TypedIntegerImpl{result};
+    }
+
+    constexpr TypedIntegerImpl operator/(TypedIntegerImpl rhs) const
+        requires(std::unsigned_integral<T>)
+    {
+        DAWN_ASSERT(rhs.mValue != 0);
+        T result = mValue / rhs.mValue;
+        return TypedIntegerImpl{result};
+    }
+    constexpr TypedIntegerImpl operator/(TypedIntegerImpl rhs) const
+        requires(std::signed_integral<T>)
+    {
+        // https://wiki.sei.cmu.edu/confluence/display/c/INT33-C.+Ensure+that+division+and+remainder+operations+do+not+result+in+divide-by-zero+errors
+        DAWN_ASSERT(
+            !(rhs.mValue == 0 || (rhs.mValue == -1 && mValue == std::numeric_limits<T>::min())));
+        T result = mValue / rhs.mValue;
+        return TypedIntegerImpl{result};
+    }
+
+    constexpr TypedIntegerImpl operator%(TypedIntegerImpl rhs) const
+        requires(std::unsigned_integral<T>)
+    {
+        DAWN_ASSERT(rhs.mValue != 0);
+        T result = mValue % rhs.mValue;
+        return TypedIntegerImpl{result};
+    }
+    constexpr TypedIntegerImpl operator%(TypedIntegerImpl rhs) const
+        requires(std::signed_integral<T>)
+    {
+        // https://wiki.sei.cmu.edu/confluence/display/c/INT33-C.+Ensure+that+division+and+remainder+operations+do+not+result+in+divide-by-zero+errors
+        DAWN_ASSERT(
+            !(rhs.mValue == 0 || (rhs.mValue == -1 && mValue == std::numeric_limits<T>::min())));
+        T result = mValue % rhs.mValue;
         return TypedIntegerImpl{result};
     }
 
