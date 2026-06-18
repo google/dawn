@@ -43,5 +43,5 @@ func IsExe(path string, fsReader oswrapper.FilesystemReader) bool {
 	if err != nil {
 		return false
 	}
-	return s.Mode()&0100 != 0
+	return !s.IsDir() && s.Mode()&0100 != 0
 }
