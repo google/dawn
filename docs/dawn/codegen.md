@@ -114,6 +114,18 @@ The schema of `dawn_wire.json` is a dictionary with the following keys:
    - `"server_handwrittten_commands"`: a list of methods that are written manually and won't be automatically generated in the server.
    - `server_reverse_object_lookup_objects`: a list of objects for which the server will maintain an object -> ID mapping.
 
+## Dawn "native" generators
+
+The generator for the pieces of dawn_native need additional data which is found in [`dawn_native_json`](../../src/dawn/dawn_native.json). Examples of pieces that are generated are:
+
+ - `ProcTable.cpp` that implements all of the WebGPU function by converting arguments and forwarding to the correct method/function in `dawn::native`.
+ - `dawn_platform_autogen.h` and `wgpu_structs_autogen.cpp` that define the `dawn::native` equivalents of types in `webgpu.h` (for example with objects being actual pointers to objects and not just opaque handles) as well as conversion functions.
+ - `api_absl_format.cpp` to make it easy to print any WebGPU type in error messages.
+
+ The schema of `dawn_native.json` is a dictionary with the following keys:
+  - `"metadata"` a dictionary containing various other containers that can be used in templates. Its keys are:
+    - Nothing for now.
+
 ## OpenGL loader generator
 
 The code to load OpenGL entrypoints from a `GetProcAddress` function is generated from [`gl.xml`](../../third_party/OpenGL-Registry/src/xml/gl.xml) and the [list of extensions](../../src/dawn/native/opengl/supported_extensions.json) it supports.

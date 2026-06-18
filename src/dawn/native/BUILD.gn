@@ -91,6 +91,7 @@ config("vulkan_utility_libraries_include") {
 dawn_json_generator("utils_gen") {
   target = "native_utils"
   inputs = [
+    "${dawn_root}/src/dawn/dawn_native.json",
     "${dawn_template_dir}/dawn/cpp_macros.tmpl",
     "${dawn_template_dir}/dawn/native/api_absl_format.cpp",
     "${dawn_template_dir}/dawn/native/api_absl_format.h",

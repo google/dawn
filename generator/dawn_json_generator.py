@@ -1563,6 +1563,10 @@ class MultiGeneratorFromDawnJSON(Generator):
                             default=None,
                             type=str,
                             help='The DAWN WIRE JSON definition to use.')
+        parser.add_argument('--native-json',
+                            default=None,
+                            type=str,
+                            help='The DAWN NATIVE JSON definition to use.')
         parser.add_argument('--kotlin-json',
                             default=None,
                             type=str,
@@ -1597,6 +1601,11 @@ class MultiGeneratorFromDawnJSON(Generator):
         if args.wire_json:
             with open(args.wire_json) as f:
                 wire_json = json.loads(f.read())
+
+        native_json = None
+        if args.native_json:
+            with open(args.native_json) as f:
+                native_json = json.loads(f.read())
 
         kotlin_json = None
         if args.kotlin_json:
@@ -1814,7 +1823,8 @@ class MultiGeneratorFromDawnJSON(Generator):
                     'as_frontendType': lambda typ: as_frontendType(metadata, typ),
                     'as_annotated_frontendType': \
                         lambda arg: annotate(as_frontendType(metadata, arg.type), arg),
-                }
+                },
+                native_json['metadata'],
             ]
 
             imported_templates += [
@@ -2078,6 +2088,8 @@ class MultiGeneratorFromDawnJSON(Generator):
         deps = [os.path.abspath(args.dawn_json)]
         if args.wire_json != None:
             deps += [os.path.abspath(args.wire_json)]
+        if args.native_json != None:
+            deps += [os.path.abspath(args.native_json)]
         if args.kotlin_json != None:
             deps += [os.path.abspath(args.kotlin_json)]
         if args.webgpu_kt_docs != None:

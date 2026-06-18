@@ -110,6 +110,14 @@ template("dawn_json_generator") {
       ]
     }
 
+    _has_native = filter_include(inputs, [ "*dawn_native.json" ]) != []
+    if (_has_native) {
+      args += [
+        "--native-json",
+        rebase_path("${dawn_root}/src/dawn/dawn_native.json", root_build_dir),
+      ]
+    }
+
     _has_kotlin = filter_include(inputs, [ "*dawn_kotlin.json" ]) != []
     if (_has_kotlin) {
       args += [
