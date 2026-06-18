@@ -141,10 +141,10 @@ ResultOrError<Ref<BufferBase>> SharedBufferMemoryBase::CreateBuffer(
                     "The buffer usage (%s) is incompatible with the SharedBufferMemory usage (%s).",
                     descriptor->usage, mProperties.usage);
 
-    // Validate that the buffer size exactly matches the shared buffer memory's size.
-    DAWN_INVALID_IF(descriptor->size != mProperties.size,
-                    "SharedBufferMemory size (%u) doesn't match descriptor size (%u).",
-                    mProperties.size, descriptor->size);
+    // Validate that the buffer size does not exceed the shared buffer memory's size.
+    DAWN_INVALID_IF(descriptor->size > mProperties.size,
+                    "The buffer size (%u) is larger than SharedBufferMemory size (%u).",
+                    descriptor->size, mProperties.size);
 
     Ref<BufferBase> buffer;
     DAWN_TRY_ASSIGN(buffer, CreateBufferImpl(descriptor));

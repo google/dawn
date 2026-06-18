@@ -193,9 +193,23 @@ TEST_P(SharedBufferMemoryTests, SizeValidation) {
 
     wgpu::BufferDescriptor bufferDesc = {};
     bufferDesc.usage = properties.usage;
+
+    // Buffer size larger than shared memory size should fail.
     bufferDesc.size = properties.size + 1;
     ASSERT_DEVICE_ERROR_MSG(memory.CreateBuffer(&bufferDesc),
-                            HasSubstr("doesn't match descriptor size"));
+                            HasSubstr("is larger than SharedBufferMemory size"));
+
+    // Buffer size equal to shared memory size should succeed.
+    bufferDesc.size = properties.size;
+    wgpu::Buffer buffer = memory.CreateBuffer(&bufferDesc);
+    EXPECT_NE(buffer, nullptr);
+
+    // Buffer size smaller than shared memory size should succeed.
+    if (properties.size > 4) {
+        bufferDesc.size = properties.size - 4;
+        wgpu::Buffer smallerBuffer = memory.CreateBuffer(&bufferDesc);
+        EXPECT_NE(smallerBuffer, nullptr);
+    }
 }
 
 // Tests that creating SharedBufferMemory validates buffer usages.
