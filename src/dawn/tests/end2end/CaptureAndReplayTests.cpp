@@ -2781,9 +2781,22 @@ class CaptureAndReplaySurfaceTests : public CaptureAndReplayTests {
         CaptureAndReplayTests::TearDown();
 
         mWindow.reset();
+        mReplayWindow.reset();
         glfwTerminate();
     }
+
+    // Creates a window for a replay surface. DXGI only allows one flip-model swapchain per HWND at
+    // a time, so the replay surface cannot reuse the same window as the capture surface while the
+    // latter is still configured. The window is owned by the fixture so it outlives the surface.
+    GLFWwindow* CreateReplayWindow() {
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        mReplayWindow.reset(
+            glfwCreateWindow(1, 1, "CaptureAndReplaySurfaceTests replay", nullptr, nullptr));
+        return mReplayWindow.get();
+    }
+
     std::unique_ptr<GLFWwindow, GLFWindowDestroyer> mWindow;
+    std::unique_ptr<GLFWwindow, GLFWindowDestroyer> mReplayWindow;
 };
 
 TEST_P(CaptureAndReplaySurfaceTests, TestSurface) {
@@ -2821,7 +2834,8 @@ TEST_P(CaptureAndReplaySurfaceTests, TestSurface) {
     EXPECT_EQ(surfaceInfos[0].width, 1u);
     EXPECT_EQ(surfaceInfos[0].height, 1u);
 
-    wgpu::Surface replaySurface = wgpu::glfw::CreateSurfaceForWindow(instance, mWindow.get());
+    wgpu::Surface replaySurface =
+        wgpu::glfw::CreateSurfaceForWindow(instance, CreateReplayWindow());
 
     recorder->SetSurfaces({replaySurface});
 
@@ -2872,7 +2886,8 @@ TEST_P(CaptureAndReplaySurfaceTests, MultiFrame) {
     // --- replay ---
     recorder->EndCapture();
 
-    wgpu::Surface replaySurface = wgpu::glfw::CreateSurfaceForWindow(instance, mWindow.get());
+    wgpu::Surface replaySurface =
+        wgpu::glfw::CreateSurfaceForWindow(instance, CreateReplayWindow());
 
     recorder->SetSurfaces({replaySurface});
     auto replay = recorder->CreateReplay(device);
