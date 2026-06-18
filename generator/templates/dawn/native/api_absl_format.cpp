@@ -97,7 +97,7 @@ namespace {{namespace}} {
                 break;
             }
         }
-        s->Append(absl::StrFormat("%u", static_cast<{{as_cType(type.name)}}>(value)));
+        s->Append(absl::StrFormat("%u", static_cast<uint32_t>(value)));
         return {true};
     }
     {% endfor %}
