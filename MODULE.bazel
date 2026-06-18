@@ -36,3 +36,9 @@ local_path_override(
 spirv_tools_repo = use_extension("//:third_party/spirv-tools/spirv_tools_repo.bzl", "spirv_tools_repo")
 use_repo(spirv_tools_repo, "spirv_tools")
 
+bazel_dep(name = "rules_proto", version = "6.0.2")
+bazel_dep(name = "protobuf", version = "33.0", repo_name = "com_google_protobuf")
+local_path_override(
+    module_name = "protobuf",
+    path = "third_party/protobuf",
+)

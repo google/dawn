@@ -1,6 +1,10 @@
 {{- /* Collect all the conditionals used by all targets in this directory */}}
 {{- $AllConditionals := $.DecomposedConditionals}}
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+{{- if $.Project.Target $ "proto"}}
+load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+{{- end}}
 load("//src/tint:flags.bzl", "COPTS")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 
@@ -38,6 +42,34 @@ exports_files(glob(["*.def", "*.tmpl"], allow_empty = True))
 */ -}}
 {{- define "Target"}}
 {{- $Conditionals := $.Conditionals}}
+{{- if $.Kind.IsProto -}}
+proto_library(
+  name = "{{$.Directory.Name}}_proto",
+  srcs = [
+{{-     range $File := $.UnconditionalSourceFiles}}
+    "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-     end}}
+  ],
+  deps = [
+{{-   range $Dep := $.UnconditionalInternalDependencies}}
+    "//src/tint/{{$Dep.Directory.Path}}:{{$Dep.Directory.Name}}_proto",
+{{-   end}}
+{{-   range $Dep := $.UnconditionalExternalDependencies}}
+{{-     $Target := Eval "ExternalDependencyTarget" $Dep}}
+{{-     if $Target}}
+    {{$Target}}
+{{-     end}}
+{{-   end}}
+  ],
+  visibility = ["//visibility:public"],
+)
+
+cc_proto_library(
+  name = "proto",
+  deps = [":{{$.Directory.Name}}_proto"],
+  visibility = ["//visibility:public"],
+)
+{{- else -}}
 {{- if      $.Kind.IsLib -}}
 cc_library(
   name = "{{$.Directory.Name}}",
@@ -158,6 +190,7 @@ cc_binary(
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
+{{- end}}
 {{/* newline */}}
 {{- end}}
 
