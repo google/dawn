@@ -47,22 +47,9 @@ struct S {
 @group(0) @binding(0) var<storage> a : S;
 )",
                  R"(
-input.wgsl:4:15 error: the offset of a struct member of type 'f32' in address space 'storage' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting '@align(4)' on this member
+input.wgsl:4:12 error: alignment must be a multiple of '4' bytes
     @align(1) b : f32,
-              ^
-
-input.wgsl:2:8 note: see layout of struct:
-/*           align(4) size(12) */ struct S {
-/* offset(0) align(4) size( 5) */   a : f32,
-/* offset(5) align(1) size( 4) */   b : f32,
-/* offset(9) align(1) size( 3) */   // -- implicit struct size padding --
-/*                             */ };
-struct S {
-       ^
-
-input.wgsl:6:23 note: 'S' used in address space 'storage' here
-@group(0) @binding(0) var<storage> a : S;
-                      ^^^^^^^^^^^^^^^^^^
+           ^
 )");
 }
 
@@ -91,29 +78,10 @@ struct Outer {
 
 @group(0) @binding(0) var<uniform> a : Outer;
 )",
-        R"(input.wgsl:8:15 error: the offset of a struct member of type 'Inner' in address space 'uniform' must be a multiple of 4 bytes, but 'inner' is currently at offset 5. Consider setting '@align(4)' on this member
+        R"(
+input.wgsl:8:12 error: alignment must be a multiple of '4' bytes
     @align(1) inner : Inner,
-              ^^^^^
-
-input.wgsl:6:8 note: see layout of struct:
-/*           align(4) size(12) */ struct Outer {
-/* offset(0) align(4) size( 5) */   scalar : f32,
-/* offset(5) align(1) size( 4) */   inner : Inner,
-/* offset(9) align(1) size( 3) */   // -- implicit struct size padding --
-/*                             */ };
-struct Outer {
-       ^^^^^
-
-input.wgsl:2:8 note: and layout of struct member:
-/*           align(4) size(4) */ struct Inner {
-/* offset(0) align(4) size(4) */   scalar : i32,
-/*                            */ };
-struct Inner {
-       ^^^^^
-
-input.wgsl:11:23 note: 'Outer' used in address space 'uniform' here
-@group(0) @binding(0) var<uniform> a : Outer;
-                      ^^^^^^^^^^^^^^^^^^^^^^
+           ^
 )");
 }
 
@@ -180,22 +148,9 @@ struct S {
 var<immediate> a : S;
 )",
                  R"(
-input.wgsl:4:15 error: the offset of a struct member of type 'f32' in address space 'immediate' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting '@align(4)' on this member
+input.wgsl:4:12 error: alignment must be a multiple of '4' bytes
     @align(1) b : f32,
-              ^
-
-input.wgsl:2:8 note: see layout of struct:
-/*           align(4) size(12) */ struct S {
-/* offset(0) align(4) size( 5) */   a : f32,
-/* offset(5) align(1) size( 4) */   b : f32,
-/* offset(9) align(1) size( 3) */   // -- implicit struct size padding --
-/*                             */ };
-struct S {
-       ^
-
-input.wgsl:6:1 note: 'S' used in address space 'immediate' here
-var<immediate> a : S;
-^^^^^^^^^^^^^^^^^^^^
+           ^
 )");
 }
 
@@ -219,13 +174,9 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> a : array<S>;
 )",
                  R"(
-input.wgsl:3:10 error: alignment must be a multiple of '16' bytes for the 'storage' address space
+input.wgsl:3:10 error: alignment must be a multiple of '16' bytes
   @align(4) vector : vec4u,
          ^
-
-input.wgsl:7:23 note: 'S' used in address space 'storage' here
-@group(0) @binding(0) var<storage, read_write> a : array<S>;
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -239,13 +190,9 @@ struct S {
 var<workgroup> a : array<S, 4>;
 )",
                  R"(
-input.wgsl:3:10 error: alignment must be a multiple of '16' bytes for the 'workgroup' address space
+input.wgsl:3:10 error: alignment must be a multiple of '16' bytes
   @align(4) vector : vec4u,
          ^
-
-input.wgsl:7:1 note: 'S' used in address space 'workgroup' here
-var<workgroup> a : array<S, 4>;
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -258,13 +205,9 @@ struct S {
 var<private> a : array<S, 4>;
 )",
                  R"(
-input.wgsl:3:10 error: alignment must be a multiple of '16' bytes for the 'private' address space
+input.wgsl:3:10 error: alignment must be a multiple of '16' bytes
   @align(4) vector : vec4u,
          ^
-
-input.wgsl:6:1 note: 'S' used in address space 'private' here
-var<private> a : array<S, 4>;
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -280,13 +223,9 @@ fn foo() {
 }
 )",
                  R"(
-input.wgsl:3:10 error: alignment must be a multiple of '16' bytes for the 'function' address space
+input.wgsl:3:10 error: alignment must be a multiple of '16' bytes
   @align(4) vector : vec4u,
          ^
-
-input.wgsl:8:3 note: 'S' used in address space 'function' here
-  var a : array<S, 4>;
-  ^^^^^^^^^^^^^^^^^^^
 )");
 }
 

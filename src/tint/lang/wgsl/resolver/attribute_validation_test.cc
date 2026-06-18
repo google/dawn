@@ -213,7 +213,7 @@ const ast::Attribute* CreateAttribute(const Source& source,
                                       AttributeKind kind) {
     switch (kind) {
         case AttributeKind::kAlign:
-            return builder.MemberAlign(source, 4_i);
+            return builder.MemberAlign(source, 16_i);
         case AttributeKind::kBinding:
             return builder.Binding(source, 1_a);
         case AttributeKind::kBuiltinPosition:
@@ -1423,11 +1423,19 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@subgroup_size' is not valid for 'struct' members)",
         }));
 
-TEST_F(StructMemberAttributeTest, Align_Attribute_Const) {
-    GlobalConst("val", ty.i32(), Expr(1_i));
+TEST_F(StructMemberAttributeTest, Align_Attribute_Const_Good) {
+    GlobalConst("val", ty.i32(), Expr(4_i));
 
     Structure("mystruct", Vector{Member("a", ty.f32(), Vector{MemberAlign("val")})});
     EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(StructMemberAttributeTest, Align_Attribute_Const_Bad) {
+    GlobalConst("val", ty.i32(), Expr(1_i));
+
+    Structure("mystruct", Vector{Member("a", ty.f32(), Vector{MemberAlign("val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(error: alignment must be a multiple of '4' bytes)");
 }
 
 TEST_F(StructMemberAttributeTest, Align_Attribute_ConstNegative) {
@@ -1460,19 +1468,28 @@ TEST_F(StructMemberAttributeTest, Align_Attribute_ConstF32) {
 }
 
 TEST_F(StructMemberAttributeTest, Align_Attribute_ConstU32) {
-    GlobalConst("val", ty.u32(), Expr(2_u));
+    GlobalConst("val", ty.u32(), Expr(4_u));
 
     Structure("mystruct",
               Vector{Member("a", ty.f32(), Vector{MemberAlign(Source{{12, 34}}, "val")})});
     EXPECT_TRUE(r()->Resolve());
 }
 
-TEST_F(StructMemberAttributeTest, Align_Attribute_ConstAInt) {
-    GlobalConst("val", Expr(2_a));
+TEST_F(StructMemberAttributeTest, Align_Attribute_ConstAInt_Good) {
+    GlobalConst("val", Expr(4_a));
 
     Structure("mystruct",
               Vector{Member("a", ty.f32(), Vector{MemberAlign(Source{{12, 34}}, "val")})});
     EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(StructMemberAttributeTest, Align_Attribute_ConstAInt_Bad) {
+    GlobalConst("val", Expr(2_a));
+
+    Structure("mystruct",
+              Vector{Member("a", ty.f32(), Vector{MemberAlign(Source{{12, 34}}, "val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(error: alignment must be a multiple of '4' bytes)");
 }
 
 TEST_F(StructMemberAttributeTest, Align_Attribute_ConstAFloat) {

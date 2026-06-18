@@ -627,29 +627,6 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
                 return false;
             }
 
-            // Validate that member is at a valid byte offset
-            if (m->Offset() % required_align != 0) {
-                AddError(m->Declaration()->source)
-                    << "the offset of a struct member of type "
-                    << style::Type(m->Type()->UnwrapRef()->FriendlyName()) << " in address space "
-                    << style::Enum(address_space) << " must be a multiple of " << required_align
-                    << " bytes, but " << style::Variable(member_name_of(m))
-                    << " is currently at offset " << m->Offset() << ". Consider setting "
-                    << style::Attribute("@align") << style::Code("(", required_align, ")")
-                    << " on this member";
-
-                AddNote(str_source) << "see layout of struct:\n" << str->Layout();
-
-                if (auto* member_str = m->Type()->As<sem::Struct>()) {
-                    AddNote(member_str->Declaration()->name->source)
-                        << "and layout of struct member:\n"
-                        << member_str->Layout();
-                }
-
-                note_usage();
-                return false;
-            }
-
             // For uniform buffers, validate that the number of bytes between the previous member of
             // type struct and the current is a multiple of 16 bytes.
             auto* const prev_member = (i == 0) ? nullptr : str->Members()[i - 1];
@@ -2947,6 +2924,30 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                             << " can only be applied to members where the member's type size can "
                                "be fully determined at shader creation time";
                         return false;
+                    }
+                    return true;
+                },
+                [&](const ast::StructMemberAlignAttribute* align_attr) {
+                    // From align attribute in WGSL spec:
+                    // If align(n) is applied to a member of S with type T, and S can be the store
+                    // type for a variable in address space AS, where AS is not uniform, then n must
+                    // satisfy: n = k * RequiredAlignOf(T, AS), for some positive k
+                    //
+                    // Since it can only be put on a struct, we can limit the check to
+                    // host-shareable and/or constructible types. Host-shareable catches anything
+                    // instantiable in storage, constructible catches everything else (workgroup,
+                    // function, private, immediate).
+                    //
+                    // RequiredAlignOf == AlignOf for applicable address spaces.
+                    if (str->IsHostShareable() || str->IsConstructible()) {
+                        auto align =
+                            sem_.GetVal(align_attr->expr)->ConstantValue()->ValueAs<uint32_t>();
+                        if (align % member->Type()->Align() != 0) {
+                            AddError(align_attr->expr->source)
+                                << "alignment must be a multiple of "
+                                << style::Literal(member->Type()->Align()) << " bytes";
+                            return false;
+                        }
                     }
                     return true;
                 },
