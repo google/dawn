@@ -368,6 +368,34 @@ TEST(MutexRWProtectedTest, Nominal) {
     }
 }
 
+TEST(MutexRecursiveProtectedTest, Nominal) {
+    static constexpr int kIncrementCount = 100;
+    MutexRecursiveProtected<CounterT> counter;
+
+    auto increment = [&] {
+        for (uint32_t i = 0; i < kIncrementCount; i++) {
+            auto guard1 = counter.operator->();
+            guard1->Increment();
+            counter.Use([&](auto c2) { c2->Increment(); });
+        }
+    };
+    auto useIncrement = [&] {
+        for (uint32_t i = 0; i < kIncrementCount; i++) {
+            counter.Use([&](auto c1) {
+                c1->Increment();
+                counter.Use([&](auto c2) { c2->Increment(); });
+            });
+        }
+    };
+
+    std::thread incrementThread(increment);
+    std::thread useIncrementThread(useIncrement);
+    incrementThread.join();
+    useIncrementThread.join();
+
+    EXPECT_EQ(counter->Get(), 4 * kIncrementCount);
+}
+
 }  // anonymous namespace
 }  // namespace dawn
 
