@@ -250,9 +250,6 @@ source_set("winsock") {
 
 config("dxc-include-config") {
   include_dirs = [ "${dawn_dxc_dir}/include" ]
-  abs_dxc_include_dir =
-      rebase_path("${dawn_dxc_dir}/tools/clang/lib/Headers/hlsl", "")
-  defines = [ "TINT_DXC_INCLUDE_DIR=${abs_dxc_include_dir}" ]
 }
 source_set("dxc-include") {
   public_configs = [ ":dxc-include-config" ]

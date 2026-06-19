@@ -58,10 +58,6 @@ TINT_END_DISABLE_ALL_WARNINGS();
 // the SUCCEEDED and FAILED macros that C-style cast to HRESULT.
 TINT_DISABLE_WARNING_OLD_STYLE_CAST
 
-// Helper macros to stringify text as a wide string literal.
-#define TINT_STRINGIFY_WIDE_INTERNAL(x) L## #x
-#define TINT_STRINGIFY_WIDE(x) TINT_STRINGIFY_WIDE_INTERNAL(x)
-
 namespace {
 using PFN_DXC_CREATE_INSTANCE = HRESULT(__stdcall*)(REFCLSID rclsid,
                                                     REFIID riid,
@@ -200,18 +196,8 @@ Result ValidateUsingDXC(const std::string& dxc_path,
         entry_point.c_str(),                                //
         L"/Zpr",                                            // D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
         L"/Gis",                                            // D3DCOMPILE_IEEE_STRICTNESS
-        L"-I ",                                             //
-        TINT_STRINGIFY_WIDE(TINT_DXC_INCLUDE_DIR),          //
         require_16bit_types ? L"-enable-16bit-types" : L""  // Enable 16-bit if required
     };
-
-    // Create a default include handler which will load includes from the filesystem.
-    CComPtr<IDxcUtils> utils;
-    CComPtr<IDxcIncludeHandler> include_handler;
-    hr = dxc_create_instance(CLSID_DxcUtils, IID_PPV_ARGS(&utils));
-    CHECK_HR(hr, "Creating DXC utils failed");
-    hr = utils->CreateDefaultIncludeHandler(&include_handler);
-    CHECK_HR(hr, "Creating default include handler failed");
 
     DxcBuffer source_buffer;
     source_buffer.Ptr = source.c_str();
@@ -219,7 +205,7 @@ Result ValidateUsingDXC(const std::string& dxc_path,
     source_buffer.Encoding = DXC_CP_UTF8;
     CComPtr<IDxcResult> compile_result;
     hr = dxc_compiler->Compile(&source_buffer, args.data(), static_cast<UINT32>(args.size()),
-                               include_handler, IID_PPV_ARGS(&compile_result));
+                               nullptr, IID_PPV_ARGS(&compile_result));
     CHECK_HR(hr, "Compile call failed");
 
     HRESULT compile_status;
