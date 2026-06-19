@@ -140,6 +140,12 @@ crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:
 crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="workgroupRTArray" [ Skip ]
 crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="privateRTArray" [ Skip ]
 
+# These tests are invalid under Compat and need to be modified upstream
+crbug.com/520527496 webgpu:shader,execution,memory_model,texture_intra_invocation_coherence:texture_intra_invocation_coherence:format="r32float";dim="2d-array" [ Skip ]
+crbug.com/520527496 webgpu:shader,execution,memory_model,texture_intra_invocation_coherence:texture_intra_invocation_coherence:format="r32sint";dim="2d-array" [ Skip ]
+crbug.com/520527496 webgpu:shader,execution,memory_model,texture_intra_invocation_coherence:texture_intra_invocation_coherence:format="r32uint";dim="2d-array" [ Skip ]
+
+
 ### TEMPORARY ANDROID SKIPS
 
 # Compressed texture image_copy failures on Pixel 6

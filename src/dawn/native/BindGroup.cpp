@@ -199,6 +199,23 @@ MaybeError ValidateCompatibilityModeTextureViewArrayLayer(DeviceBase* device,
     return {};
 }
 
+MaybeError ValidateTextureBindingViewDimension(DeviceBase* device,
+                                               TextureViewBase* view,
+                                               TextureBase* texture) {
+    if (!device->HasFlexibleTextureViews()) {
+        DAWN_INVALID_IF(
+            view->GetDimension() != texture->GetCompatibilityTextureBindingViewDimension(),
+            "Dimension (%s) of %s must match textureBindingViewDimension (%s) of "
+            "%s in compatibility mode.",
+            view->GetDimension(), view, texture->GetCompatibilityTextureBindingViewDimension(),
+            texture);
+
+        DAWN_TRY(ValidateCompatibilityModeTextureViewArrayLayer(device, view, texture));
+    }
+
+    return {};
+}
+
 MaybeError ValidateSampledTextureBinding(DeviceBase* device,
                                          const BindGroupEntry& entry,
                                          const TextureBindingInfo& layout,
@@ -235,16 +252,7 @@ MaybeError ValidateSampledTextureBinding(DeviceBase* device,
                     "Dimension (%s) of %s doesn't match the expected dimension (%s).",
                     entry.textureView->GetDimension(), entry.textureView, layout.viewDimension);
 
-    if (!device->HasFlexibleTextureViews()) {
-        DAWN_INVALID_IF(
-            view->GetDimension() != texture->GetCompatibilityTextureBindingViewDimension(),
-            "Dimension (%s) of %s must match textureBindingViewDimension (%s) of "
-            "%s in compatibility mode.",
-            view->GetDimension(), view, texture->GetCompatibilityTextureBindingViewDimension(),
-            texture);
-
-        DAWN_TRY(ValidateCompatibilityModeTextureViewArrayLayer(device, view, texture));
-    }
+    DAWN_TRY(ValidateTextureBindingViewDimension(device, view, texture));
 
     return {};
 }
@@ -312,6 +320,8 @@ MaybeError ValidateStorageTextureBinding(DeviceBase* device,
     if (!device->HasFlexibleTextureViews()) {
         DAWN_TRY(ValidateCompatibilityModeTextureViewArrayLayer(device, view, texture));
     }
+
+    DAWN_TRY(ValidateTextureBindingViewDimension(device, view, texture));
 
     return {};
 }
