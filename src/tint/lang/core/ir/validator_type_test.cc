@@ -951,7 +951,7 @@ TEST_P(Type_SubgroupMatrixComponentType, Test) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllow8BitIntegers});
+    auto res = ir::Validate(mod);
     if (allowed) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
@@ -1497,11 +1497,10 @@ TEST_P(IR_Validator8BitIntTypeTest, Var) {
         b.Return(fn);
     });
 
-    Capabilities caps;
     if (int8_allowed) {
-        caps.Add(Capability::kAllow8BitIntegers);
+        mod.properties.Add(Property::kAllow8BitIntegers);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (int8_allowed) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
@@ -1520,11 +1519,10 @@ TEST_P(IR_Validator8BitIntTypeTest, FnParam) {
     fn->SetParams(Vector{b.FunctionParam(type)});
     b.Append(fn->Block(), [&] { b.Return(fn); });
 
-    Capabilities caps;
     if (int8_allowed) {
-        caps.Add(Capability::kAllow8BitIntegers);
+        mod.properties.Add(Property::kAllow8BitIntegers);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (int8_allowed) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
@@ -1542,11 +1540,10 @@ TEST_P(IR_Validator8BitIntTypeTest, FnRet) {
     auto* fn = b.Function("my_func", type);
     b.Append(fn->Block(), [&] { b.Unreachable(); });
 
-    Capabilities caps;
     if (int8_allowed) {
-        caps.Add(Capability::kAllow8BitIntegers);
+        mod.properties.Add(Property::kAllow8BitIntegers);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (int8_allowed) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
@@ -1574,11 +1571,10 @@ TEST_P(IR_Validator8BitIntTypeTest, BlockParam) {
         b.Unreachable();
     });
 
-    Capabilities caps;
     if (int8_allowed) {
-        caps.Add(Capability::kAllow8BitIntegers);
+        mod.properties.Add(Property::kAllow8BitIntegers);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (int8_allowed) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
@@ -1615,14 +1611,61 @@ TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_NotAllowed) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_AllowedWithCapability) {
+TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_NotAllowed_BeforeSubgroupMatrix) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"),
+                  {
+                      {mod.symbols.New("u8a"), ty.array(ty.u8(), 4u)},
+                      {mod.symbols.New("u8m"), ty.subgroup_matrix_result(ty.u8(), 8u, 8u)},
+                  });
+
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var("v", AddressSpace::kFunction, str_ty);
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:8:5 error: var: 8-bit integer types are not permitted
+    %v:ptr<function, MyStruct, read_write> = var undef
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_NotAllowed_AfterSubgroupMatrix) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"),
+                  {
+                      {mod.symbols.New("i8m"), ty.subgroup_matrix_result(ty.i8(), 8u, 8u)},
+                      {mod.symbols.New("i8a"), ty.array(ty.i8(), 4u)},
+                  });
+
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var("v", AddressSpace::kFunction, str_ty);
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:8:5 error: var: 8-bit integer types are not permitted
+    %v:ptr<function, MyStruct, read_write> = var undef
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_AllowedWithProperty) {
     auto* fn = b.Function("my_func", ty.void_());
     b.Append(fn->Block(), [&] {
         b.Let("l", u8(1));
         b.Return(fn);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllow8BitIntegers});
+    mod.properties.Add(Property::kAllow8BitIntegers);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

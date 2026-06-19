@@ -1534,7 +1534,6 @@ struct State {
 Result<SuccessType> DecomposeAccess(core::ir::Module& ir, const DecomposeAccessOptions& options) {
     core::ir::AssertValid(ir,
                           core::ir::Capabilities{
-                              core::ir::Capability::kAllow8BitIntegers,
                               core::ir::Capability::kAllow16BitIntegers,
                               core::ir::Capability::kLoosenValidationForShaderIO,
                           },

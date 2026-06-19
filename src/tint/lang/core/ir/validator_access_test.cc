@@ -1486,9 +1486,8 @@ TEST_P(IR_ValidatorAccessIndexTypeTest, IndexType) {
         b.Return(f);
     });
 
-    Capabilities caps{Capability::kAllow8BitIntegers, Capability::kAllow16BitIntegers,
-                      Capability::kAllow64BitIntegers};
-
+    Capabilities caps{Capability::kAllow16BitIntegers, Capability::kAllow64BitIntegers};
+    mod.properties.Add(Property::kAllow8BitIntegers);
     auto res = ir::Validate(mod, caps);
     if (allowed) {
         EXPECT_EQ(res, Success) << res.Failure();

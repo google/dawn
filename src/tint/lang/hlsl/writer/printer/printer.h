@@ -42,7 +42,6 @@ namespace tint::hlsl::writer {
 
 // The capabilities that might be needed due to raising.
 const core::ir::Capabilities kPrinterCapabilities{
-    core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow16BitIntegers,
 };
 

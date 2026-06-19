@@ -38,11 +38,6 @@ class Module;
 
 namespace tint::core::ir::transform {
 
-/// The capabilities that the transform can support.
-const core::ir::Capabilities kPreservePaddingCapabilities{
-    core::ir::Capability::kAllow8BitIntegers,
-};
-
 /// PreservePadding is a transform that decomposes stores of whole structure and array types to
 /// preserve padding bytes.
 ///

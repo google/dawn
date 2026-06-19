@@ -1564,14 +1564,11 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, PolyfillConfig config) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kAllow8BitIntegers,
-                },
-                "before spirv.BuiltinPolyfill");
+    AssertValid(ir, "before spirv.BuiltinPolyfill");
 
     State{ir, config}.Process();
 
+    ir.properties.Add(core::ir::Property::kAllow8BitIntegers);
     ir.properties.Add(core::ir::Property::kAllowNonCoreTypes);
 
     return Success;

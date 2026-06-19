@@ -56,6 +56,8 @@ namespace tint::core::ir {
 /// The IR validator will reject use of any non-core IR functionality when the module does not
 /// contain the corresponding property.
 enum class Property : uint8_t {
+    /// Allows 8-bit integer types to be used.
+    kAllow8BitIntegers,
     /// Allows input_attachment_index to be associated with any type
     kAllowAnyInputAttachmentIndexType,
     /// Allows lets to have any type.
@@ -109,6 +111,7 @@ auto& operator<<(STREAM& out, Property p) {
     case Property::k##p: \
         return out << #p
     switch (p) {  //
+        CASE(Allow8BitIntegers);
         CASE(AllowAnyInputAttachmentIndexType);
         CASE(AllowAnyLetType);
         CASE(AllowClipDistancesOnF32ScalarAndVector);

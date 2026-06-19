@@ -40,7 +40,6 @@ namespace tint::msl::writer::raise {
 
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kModuleConstantCapabilities{
-    core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow64BitIntegers,
 };
 

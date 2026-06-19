@@ -1643,7 +1643,7 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_i8_i32_InBoundsOffset) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllow8BitIntegers});
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -1662,7 +1662,7 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_i8_i32_OOBOffset) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllow8BitIntegers});
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr("the offset argument of subgroupMatrixStore (32) is out of "

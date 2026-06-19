@@ -2172,7 +2172,6 @@ struct State {
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, const BuiltinPolyfillConfig& config) {
     AssertValid(ir,
                 core::ir::Capabilities{
-                    core::ir::Capability::kAllow8BitIntegers,
                     core::ir::Capability::kAllow16BitIntegers,
                 },
                 "before hlsl.BuiltinPolyfill");

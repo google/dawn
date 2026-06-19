@@ -449,7 +449,6 @@ bool Run(const Options& options) {
         if (options.validate) {
             auto res = tint::core::ir::Validate(module.Get(),
                                                 tint::core::ir::Capabilities{
-                                                    tint::core::ir::Capability::kAllow8BitIntegers,
                                                     tint::core::ir::Capability::kAllow64BitIntegers,
                                                 });
             if (res == tint::Success) {

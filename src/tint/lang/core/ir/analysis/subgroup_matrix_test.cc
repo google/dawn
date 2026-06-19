@@ -72,7 +72,13 @@ bool SortConfig(const SubgroupMatrixConfig& a, const SubgroupMatrixConfig& b) {
     return a.K < b.K;
 }
 
-using IR_SubgroupMatrixAnalysisTypeTest = IRTestParamHelper<TypeInfo>;
+class IR_SubgroupMatrixAnalysisTypeTest : public IRTestParamHelper<TypeInfo> {
+  protected:
+    void SetUp() override {
+        IRTestParamHelper<TypeInfo>::SetUp();
+        mod.properties.Add(Property::kAllow8BitIntegers);
+    }
+};
 TEST_P(IR_SubgroupMatrixAnalysisTypeTest, Config_Type_Left) {
     auto p = GetParam();
 
@@ -110,8 +116,7 @@ TEST_P(IR_SubgroupMatrixAnalysisTypeTest, Config_Type_Left) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllow8BitIntegers}),
-              Success);
+    EXPECT_EQ(Validate(mod), Success);
 
     auto res = GatherSubgroupMatrixInfo(mod);
     EXPECT_TRUE(res.multiplies.empty());
@@ -162,8 +167,7 @@ TEST_P(IR_SubgroupMatrixAnalysisTypeTest, Config_Type_Right) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllow8BitIntegers}),
-              Success);
+    EXPECT_EQ(Validate(mod), Success);
 
     auto res = GatherSubgroupMatrixInfo(mod);
     EXPECT_TRUE(res.multiplies.empty());
@@ -215,8 +219,7 @@ TEST_P(IR_SubgroupMatrixAnalysisTypeTest, Config_Type_Result) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllow8BitIntegers}),
-              Success);
+    EXPECT_EQ(Validate(mod), Success);
 
     auto res = GatherSubgroupMatrixInfo(mod);
     EXPECT_TRUE(res.multiplies.empty());
@@ -301,8 +304,7 @@ TEST_F(IR_SubgroupMatrixAnalysis, Config_Multiple) {
 }
 )";
     EXPECT_EQ(src, str());
-    EXPECT_EQ(Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllow8BitIntegers}),
-              Success);
+    EXPECT_EQ(Validate(mod), Success);
 
     auto res = GatherSubgroupMatrixInfo(mod);
     EXPECT_TRUE(res.multiplies.empty());
@@ -697,8 +699,7 @@ TEST_F(IR_SubgroupMatrixAnalysis, Multiply_DifferentResultType) {
 )";
     EXPECT_EQ(src, str());
 
-    EXPECT_EQ(Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllow8BitIntegers}),
-              Success);
+    EXPECT_EQ(Validate(mod), Success);
 
     auto res = GatherSubgroupMatrixInfo(mod);
     ASSERT_EQ(3u, res.configs.size());

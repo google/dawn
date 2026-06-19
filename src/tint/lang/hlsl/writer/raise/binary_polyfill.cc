@@ -130,7 +130,6 @@ struct State {
 Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
     AssertValid(ir,
                 core::ir::Capabilities{
-                    core::ir::Capability::kAllow8BitIntegers,
                     core::ir::Capability::kAllow16BitIntegers,
                 },
                 "before hlsl.BinaryPolyfill");

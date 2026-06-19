@@ -44,7 +44,6 @@ struct ImmediateDataLayout;
 
 /// The capabilities that the transform can support.
 const Capabilities kArrayLengthCapabilities{
-    Capability::kAllow8BitIntegers,
     Capability::kAllow16BitIntegers,
 };
 

@@ -1013,7 +1013,8 @@ TEST_F(IR_ValidatorTest, Convert_4xU8ToU32) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllow8BitIntegers});
+    mod.properties.Add(Property::kAllow8BitIntegers);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -1032,7 +1033,8 @@ TEST_F(IR_ValidatorTest, Convert_U32To4xU8) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllow8BitIntegers});
+    mod.properties.Add(Property::kAllow8BitIntegers);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,

@@ -39,5 +39,4 @@ Result<SuccessType> Bgra8UnormPolyfillFuzzer(Module& ir, const fuzz::ir::Context
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::Bgra8UnormPolyfillFuzzer,
-                      tint::core::ir::transform::kBgra8UnormPolyfillCapabilities);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::Bgra8UnormPolyfillFuzzer, {});

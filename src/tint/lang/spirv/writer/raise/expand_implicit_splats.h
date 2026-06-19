@@ -39,11 +39,6 @@ class Module;
 
 namespace tint::spirv::writer::raise {
 
-/// The capabilities that the transform can support.
-const core::ir::Capabilities kExpandImplicitSplatsCapabilities{
-    core::ir::Capability::kAllow8BitIntegers,
-};
-
 /// ExpandImplicitSplats is a transform that expands implicit vector splat operands in construct
 /// instructions and binary instructions where not supported by SPIR-V.
 /// @param module the module to transform

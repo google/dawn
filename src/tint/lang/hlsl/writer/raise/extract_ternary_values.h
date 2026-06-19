@@ -40,7 +40,6 @@ namespace tint::hlsl::writer::raise {
 
 /// The core::ir::Capabilities that the transform can support.
 const core::ir::Capabilities kExtractTernaryValuesCapabilities{
-    core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow16BitIntegers,
 };
 

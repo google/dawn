@@ -41,7 +41,6 @@ namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
 const Capabilities kBinaryPolyfillCapabilities{
-    Capability::kAllow8BitIntegers,
     Capability::kAllow16BitIntegers,
 };
 

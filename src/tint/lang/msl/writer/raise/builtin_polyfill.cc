@@ -1422,11 +1422,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, const BuiltinPolyfillConfig& config) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kAllow8BitIntegers,
-                },
-                "before msl.BuiltinPolyfill");
+    AssertValid(ir, "before msl.BuiltinPolyfill");
 
     State{ir, config}.Process();
 

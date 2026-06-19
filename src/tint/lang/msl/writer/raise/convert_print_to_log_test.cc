@@ -38,9 +38,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::msl::writer::raise {
 namespace {
 
-class MslWriter_ConvertPrintToLogTest : public core::ir::transform::TransformTest {
-    void SetUp() override { capabilities.Add(core::ir::Capability::kAllow8BitIntegers); }
-};
+using MslWriter_ConvertPrintToLogTest = core::ir::transform::TransformTest;
 
 TEST_F(MslWriter_ConvertPrintToLogTest, NoPrint) {
     auto* f = b.ComputeFunction("foo");

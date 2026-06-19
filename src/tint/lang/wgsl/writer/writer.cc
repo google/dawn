@@ -58,6 +58,7 @@ Result<Output> WgslFromIR(core::ir::Module& module, const Options& options) {
 
 Result<Program> ProgramFromIR(core::ir::Module& module, const Options& options) {
     const core::ir::Properties kUnsupportedProperties{
+        core::ir::Property::kAllow8BitIntegers,
         core::ir::Property::kAllowNonCoreTypes,
         core::ir::Property::kAllowUnannotatedModuleIOVariables,
     };

@@ -44,7 +44,6 @@ namespace tint::spirv::writer::raise {
 
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kShaderIOCapabilities{
-    core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kLoosenValidationForShaderIO,
 };
 

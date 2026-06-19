@@ -49,11 +49,8 @@ namespace tint::hlsl::writer::raise {
 namespace {
 
 class HlslWriter_BuiltinPolyfillTest : public core::ir::transform::TransformTest {
-  public:
-    void SetUp() override {
-        capabilities.Add(core::ir::Capability::kAllow8BitIntegers,
-                         core::ir::Capability::kAllow16BitIntegers);
-    }
+  protected:
+    void SetUp() override { capabilities.Add(core::ir::Capability::kAllow16BitIntegers); }
 };
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastIdentity) {
@@ -7862,10 +7859,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_Deduplication) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_I8) {
-    capabilities = core::ir::Capabilities{
-        core::ir::Capability::kAllow8BitIntegers,
-    };
-
     auto* mat_ty = ty.subgroup_matrix_left(ty.i8(), 4, 4);
     auto* func = b.Function("foo", mat_ty);
     auto* m = b.FunctionParam("m", mat_ty);

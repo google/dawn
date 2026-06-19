@@ -35,8 +35,6 @@ namespace tint::core::ir {
 /// Enumerator of optional IR capabilities.
 /// TODO(crbug.com/512904070): Remove this when transition to properties is complete.
 enum class Capability : uint8_t {
-    /// Allows 8-bit integer types.
-    kAllow8BitIntegers,
     /// Allows 16-bit integer types.
     kAllow16BitIntegers,
     /// Allows 64-bit integer types.

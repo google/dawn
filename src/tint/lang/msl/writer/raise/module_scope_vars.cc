@@ -341,11 +341,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ModuleScopeVars(core::ir::Module& ir) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kAllow8BitIntegers,
-                },
-                "before msl.ModuleScopeVars");
+    AssertValid(ir, "before msl.ModuleScopeVars");
 
     State{ir}.Process();
 

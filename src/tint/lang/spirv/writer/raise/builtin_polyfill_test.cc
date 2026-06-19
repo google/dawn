@@ -48,10 +48,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 class SpirvWriter_BuiltinPolyfillTest : public core::ir::transform::TransformTest {
   protected:
-    void SetUp() override {
-        capabilities.Add(core::ir::Capability::kAllow8BitIntegers);
-        capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
-    }
+    void SetUp() override { capabilities.Add(core::ir::Capability::kAllow64BitIntegers); }
 };
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, ArrayLength) {

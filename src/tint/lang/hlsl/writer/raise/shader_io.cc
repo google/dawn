@@ -763,9 +763,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 }  // namespace
 
 Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
-    core::ir::AssertValid(ir,
-                          core::ir::Capabilities{core::ir::Capability::kAllow8BitIntegers,
-                                                 core::ir::Capability::kAllow16BitIntegers},
+    core::ir::AssertValid(ir, core::ir::Capabilities{core::ir::Capability::kAllow16BitIntegers},
                           "before hlsl.ShaderIO");
 
     TINT_CHECK_RESULT(core::ir::transform::RunShaderIOBase(

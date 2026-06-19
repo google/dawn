@@ -4521,7 +4521,7 @@ $B1: {  # root
 }
 
 TEST_F(MslWriter_FixTypeLayoutTest, PointerOffset_Vec3) {
-    capabilities.Add(core::ir::Capability::kAllow8BitIntegers);
+    mod.properties.Add(core::ir::Property::kAllow8BitIntegers);
 
     auto* S = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.New("a"), ty.vec3u()},

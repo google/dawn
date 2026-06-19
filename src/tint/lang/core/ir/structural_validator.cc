@@ -677,7 +677,7 @@ void Structural::CheckType(const core::type::Type* root,
         addrspace = mv->AddressSpace();
     }
 
-    auto visit = [&](const core::type::Type* type) {
+    auto visit = [&](const core::type::Type* type, const core::type::Type* parent) {
         if (type->IsAbstract()) {
             diag() << "abstracts are not permitted";
             return false;
@@ -852,16 +852,20 @@ void Structural::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::I8*) {
-                // i8 types are guarded by the Allow8BitIntegers capability.
-                if (!capabilities_.Contains(Capability::kAllow8BitIntegers)) {
+                // General use of i8 types is guarded by the Allow8BitIntegers property.
+                // They can be used as the component type of a subgroup matrix without the property.
+                if (!Is<core::type::SubgroupMatrix>(parent) &&
+                    !ir_.properties.Contains(Property::kAllow8BitIntegers)) {
                     diag() << "8-bit integer types are not permitted";
                     return false;
                 }
                 return true;
             },
             [&](const core::type::U8*) {
-                // u8 types are guarded by the Allow8BitIntegers capability.
-                if (!capabilities_.Contains(Capability::kAllow8BitIntegers)) {
+                // General use of u8 types is guarded by the Allow8BitIntegers property.
+                // They can be used as the component type of a subgroup matrix without the property.
+                if (!Is<core::type::SubgroupMatrix>(parent) &&
+                    !ir_.properties.Contains(Property::kAllow8BitIntegers)) {
                     diag() << "8-bit integer types are not permitted";
                     return false;
                 }
@@ -1027,19 +1031,36 @@ void Structural::CheckType(const core::type::Type* root,
             [](Default) { return true; });
     };
 
-    Vector<const core::type::Type*, 8> stack{root};
-    Hashset<const core::type::Type*, 8> seen{};
+    struct Pending {
+        const core::type::Type* type = nullptr;
+        const core::type::Type* parent = nullptr;
+
+        bool operator==(const Pending& other) const {
+            return type == other.type && parent == other.parent;
+        }
+
+        struct Hasher {
+            HashCode operator()(const Pending& p) const {
+                return HashCombine(Hash(p.type), Hash(p.parent));
+            }
+        };
+    };
+    Vector<Pending, 8> stack{Pending{root, nullptr}};
+    Hashset<Pending, 8, Pending::Hasher> seen{};
     while (!stack.IsEmpty()) {
-        auto* ty = stack.Pop();
+        auto [ty, parent] = stack.Pop();
         if (!ty) {
             continue;
         }
-        if (!visit(ty)) {
+        if (!visit(ty, parent)) {
             return;
         }
 
-        if (auto* view = ty->As<core::type::MemoryView>(); view && seen.Add(view)) {
-            stack.Push(view->StoreType());
+        if (auto* view = ty->As<core::type::MemoryView>()) {
+            Pending next{view->StoreType(), ty};
+            if (seen.Add(next)) {
+                stack.Push(next);
+            }
             continue;
         }
 
@@ -1048,15 +1069,19 @@ void Structural::CheckType(const core::type::Type* root,
         if (type_count.type) {
             // Every element has the same type (e.g. array, vector, matrix, ...), so validate that
             // type once if it has not been seen before.
-            if (seen.Add(type_count.type)) {
-                stack.Push(type_count.type);
+            Pending next{type_count.type, ty};
+            if (seen.Add(next)) {
+                stack.Push(next);
             }
         } else {
             // Different elements have different types (e.g. a struct), so we need to validate each
             // of them if they have not been seen before.
             for (uint32_t i = 0; i < type_count.count; i++) {
-                if (auto* subtype = ty->Element(i); subtype && seen.Add(subtype)) {
-                    stack.Push(subtype);
+                if (auto* subtype = ty->Element(i)) {
+                    Pending next{subtype, ty};
+                    if (seen.Add(next)) {
+                        stack.Push(next);
+                    }
                 }
             }
         }

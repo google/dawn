@@ -1057,7 +1057,6 @@ struct State {
 Result<SuccessType> DecomposeStorageAccess(core::ir::Module& ir) {
     core::ir::AssertValid(ir,
                           core::ir::Capabilities{
-                              core::ir::Capability::kAllow8BitIntegers,
                               core::ir::Capability::kAllow16BitIntegers,
                           },
                           "before hlsl.DecomposeStorageAccess");

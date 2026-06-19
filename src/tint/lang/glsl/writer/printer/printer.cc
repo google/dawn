@@ -116,6 +116,7 @@ bool IsKeyword(std::string_view ident);
 
 // The list of properties that are not supported.
 const core::ir::Properties kUnsupportedProperties{
+    core::ir::Property::kAllow8BitIntegers,
     core::ir::Property::kAllowMultipleEntryPoints,
     core::ir::Property::kAllowOverrides,
 };
