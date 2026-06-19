@@ -323,6 +323,11 @@ TEST_P(BufferMappingValidationTest, MapAsync_OffsetSizeOOB) {
         wgpu::Buffer buffer = CreateBuffer(12);
         AssertMapAsyncError(buffer, GetParam(), 16, 0);
     }
+    // Error case, offset is larger than the buffer size (even if size is WGPU_WHOLE_MAP_SIZE).
+    {
+        wgpu::Buffer buffer = CreateBuffer(12);
+        AssertMapAsyncError(buffer, GetParam(), 16, wgpu::kWholeMapSize);
+    }
     // Error case, offset + size is larger than the buffer
     {
         wgpu::Buffer buffer = CreateBuffer(12);
@@ -332,6 +337,47 @@ TEST_P(BufferMappingValidationTest, MapAsync_OffsetSizeOOB) {
     {
         wgpu::Buffer buffer = CreateBuffer(12);
         AssertMapAsyncError(buffer, GetParam(), 8, std::numeric_limits<size_t>::max() & ~size_t(7));
+    }
+
+    // The same tests, with an unmap before destroying the buffer.
+
+    // Error case, offset is larger than the buffer size (even if size is 0).
+    {
+        MockMapAsyncCallback mockCb;
+        wgpu::Buffer buffer = CreateBuffer(12);
+        EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Error, _)).Times(1);
+        ASSERT_DEVICE_ERROR(buffer.MapAsync(GetParam(), 16, 0, wgpu::CallbackMode::AllowSpontaneous,
+                                            mockCb.Callback()));
+        buffer.Unmap();
+    }
+    // Error case, offset is larger than the buffer size (even if size is WGPU_WHOLE_MAP_SIZE).
+    {
+        MockMapAsyncCallback mockCb;
+        wgpu::Buffer buffer = CreateBuffer(12);
+        EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Error, _)).Times(1);
+        ASSERT_DEVICE_ERROR(buffer.MapAsync(GetParam(), 16, wgpu::kWholeMapSize,
+                                            wgpu::CallbackMode::AllowSpontaneous,
+                                            mockCb.Callback()));
+        buffer.Unmap();
+    }
+    // Error case, offset + size is larger than the buffer
+    {
+        MockMapAsyncCallback mockCb;
+        wgpu::Buffer buffer = CreateBuffer(12);
+        EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Error, _)).Times(1);
+        ASSERT_DEVICE_ERROR(buffer.MapAsync(GetParam(), 8, 8, wgpu::CallbackMode::AllowSpontaneous,
+                                            mockCb.Callback()));
+        buffer.Unmap();
+    }
+    // Error case, offset + size is larger than the buffer, overflow case.
+    {
+        MockMapAsyncCallback mockCb;
+        wgpu::Buffer buffer = CreateBuffer(12);
+        EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Error, _)).Times(1);
+        ASSERT_DEVICE_ERROR(
+            buffer.MapAsync(GetParam(), 8, std::numeric_limits<size_t>::max() & ~size_t(7),
+                            wgpu::CallbackMode::AllowSpontaneous, mockCb.Callback()));
+        buffer.Unmap();
     }
 }
 

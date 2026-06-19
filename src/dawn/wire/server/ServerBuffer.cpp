@@ -172,6 +172,9 @@ WireResult Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
                                             size_t offset,
                                             size_t size) {
     return buffer->mapState.Use([&](auto mapState) {
+        if (size == WGPU_WHOLE_MAP_SIZE) {
+            return WireResult::FatalError;
+        }
         uint8_t* mappedData =
             static_cast<uint8_t*>(mProcs->bufferGetMappedRange(buffer->handle, offset, size));
 

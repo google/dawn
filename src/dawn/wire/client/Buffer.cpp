@@ -387,8 +387,13 @@ WGPUFuture Buffer::APIMapAsync(WGPUMapMode mode,
     }
 
     // Handle the defaulting of size required by WebGPU.
-    if ((size == WGPU_WHOLE_MAP_SIZE) && (offset <= mSize)) {
-        size = mSize - offset;
+    if (size == WGPU_WHOLE_MAP_SIZE) {
+        if (offset <= mSize) {
+            size = mSize - offset;
+        } else {
+            // Send any valid size to the server as the mapping will be rejected anyway.
+            size = 0;
+        }
     }
 
     // Set up the request structure that will hold information while this mapping is in flight.
