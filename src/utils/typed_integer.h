@@ -308,10 +308,10 @@ namespace std {
 template <typename Tag, typename T>
 class numeric_limits<dawn::detail::TypedIntegerImpl<Tag, T>> : public numeric_limits<T> {
   public:
-    static dawn::detail::TypedIntegerImpl<Tag, T> max() noexcept {
+    static constexpr dawn::detail::TypedIntegerImpl<Tag, T> max() noexcept {
         return dawn::detail::TypedIntegerImpl<Tag, T>(std::numeric_limits<T>::max());
     }
-    static dawn::detail::TypedIntegerImpl<Tag, T> min() noexcept {
+    static constexpr dawn::detail::TypedIntegerImpl<Tag, T> min() noexcept {
         return dawn::detail::TypedIntegerImpl<Tag, T>(std::numeric_limits<T>::min());
     }
 };

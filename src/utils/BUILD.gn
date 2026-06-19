@@ -95,6 +95,7 @@ static_library("utils") {
     "numeric.h",
     "placeholder.cc",
     "platform.h",
+    "span.h",
     "typed_integer.h",
     "underlying_type.h",
   ]
@@ -119,6 +120,7 @@ dawn_nocompile_source_set("nocompile_sources") {
   deps = [ ":utils" ]
   sources = [
     "numeric_nocompile.nc",
+    "span_nocompile.nc",
     "typed_integer_nocompile.nc",
   ]
 }
@@ -131,11 +133,13 @@ source_set("unittests") {
     ":gmock_and_gtest",
     ":nocompile_sources",
     ":utils",
+    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
   ]
 
   sources = [
     "assert_test.cc",
     "numeric_test.cc",
+    "span_tests.cc",
     "typed_integer_tests.cc",
     "underlying_type_tests.cc",
   ]

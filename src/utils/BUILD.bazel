@@ -41,6 +41,7 @@ cc_library(
     "non_movable.h",
     "numeric.h",
     "platform.h",
+    "span.h",
     "typed_integer.h",
     "underlying_type.h",
   ] + select({
