@@ -89,18 +89,24 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
     MemoryTransferService();
     virtual ~MemoryTransferService();
 
-    class ReadHandle;
-    class WriteHandle;
-
     // Deserialize data to create Read/Write handles. These handles are for the client
     // to Read/Write data.
     // TODO(https://issues.chromium.org/492456046): Pass as a `span<uint8_t> deseriazlizeData`.
+    class ReadHandle;
     virtual bool DeserializeReadHandle(const void* deserializePointer,
                                        size_t deserializeSize,
                                        ReadHandle** readHandle) = 0;
+    class WriteHandle;
     virtual bool DeserializeWriteHandle(const void* deserializePointer,
                                         size_t deserializeSize,
                                         WriteHandle** writeHandle) = 0;
+    // Returns a MemoryHandle from the parameters in creationData. May return nullptr on failure.
+    class MemoryHandle;
+    virtual std::unique_ptr<MemoryHandle> DeserializeMemoryHandle(
+        std::span<const std::byte> creationData) {
+        // TODO(https://crbug.com/524776858): Make pure virtual once Chromium implements it.
+        return nullptr;
+    }
 
     class DAWN_WIRE_EXPORT ReadHandle {
       public:
@@ -164,6 +170,56 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
         // virtual.
         virtual uint8_t* GetSourceData() const { return nullptr; }
         virtual size_t GetSourceSize() const { return 0; }
+    };
+
+    class DAWN_WIRE_EXPORT MemoryHandle {
+      public:
+        MemoryHandle();
+        virtual ~MemoryHandle();
+
+        // Return a direct view of the memory if this MemoryHandle supports it, nullptr when not
+        // supported.
+        virtual std::span<std::byte> GetSource() const { return {}; }
+
+        // Get the required serialization size for SerializeDataUpdate for the range [offset, offset
+        // + size)
+        virtual size_t GetSerializeDataUpdateSize(size_t offset, size_t size) const = 0;
+
+        // Serializes into |serializeData| the modification of the contents in the range [offset,
+        // offset + size). The modified contents is passed in |data|.
+        //
+        // Parameters:
+        //  - `serializeData`: The output buffer to write the serialized payload into.
+        //  - `offset`: The byte offset of data.data() within the whole allocation..
+        //  - `size`: The size of the range to update (must be <= data.size()).
+        //  - `data`: The new contents for the range [offset, offset + data.size()).
+        virtual void SerializeDataUpdate(std::span<std::byte> serializeData,
+                                         size_t offset,
+                                         size_t size,
+                                         std::span<const std::byte> data) const = 0;
+
+        // Applies a data update for the range [offset, offset + size) that was produced by
+        // `client::MemoryTransferService::MemoryHandle::SerializeDataUpdate`.
+        //
+        // For hardening, the implementation must return false if offset + size overflows the size
+        // of the memory (or if offset + size overflows a size_t), or if size > target.size().
+        //
+        // Parameters:
+        //  - `deserializeData`: The serialized payload from the client specifying the updated
+        //    buffer contents.
+        //  - `offset`: The byte offset for target.data() within the whole allocation.
+        //  - `size`: The size of the range to update.
+        //  - `target`: The range of data that is written by the update.
+        //
+        // Returns true on success, or false if the deserialization is invalid (e.g. OOB access).
+        virtual bool DeserializeDataUpdate(std::span<const std::byte> deserializeData,
+                                           size_t offset,
+                                           size_t size,
+                                           std::span<std::byte> target) = 0;
+
+      private:
+        MemoryHandle(const MemoryHandle&) = delete;
+        MemoryHandle& operator=(const MemoryHandle&) = delete;
     };
 
   private:

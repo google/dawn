@@ -89,6 +89,10 @@ MemoryTransferService::ReadHandle::~ReadHandle() = default;
 MemoryTransferService::WriteHandle::WriteHandle() = default;
 
 MemoryTransferService::WriteHandle::~WriteHandle() = default;
+
+MemoryTransferService::MemoryHandle::MemoryHandle() = default;
+
+MemoryTransferService::MemoryHandle::~MemoryHandle() = default;
 }  // namespace server
 
 }  // namespace dawn::wire
