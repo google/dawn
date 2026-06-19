@@ -55,14 +55,16 @@ class stack_vec : private absl::InlinedVector<Value, StaticCapacity> {
     using Base::empty;
 
     constexpr Value& operator[](Index i) {
-#if !defined(ABSL_OPTION_HARDENED) || ABSL_OPTION_HARDENED == 0
+#if !defined(ABSL_OPTION_HARDENED) || ABSL_OPTION_HARDENED == 0 || \
+    defined(GOOGLE3_ABSL_HARDENED_BUILD) || defined(GOOGLE3_ABSL_HARDENED_BUILD_FAST)
         // Insert our own bounds check if not already enabled in absl
         DAWN_CHECK(i < size());
 #endif
         return Base::operator[](checked_cast<size_t>(i));
     }
     constexpr const Value& operator[](Index i) const {
-#if !defined(ABSL_OPTION_HARDENED) || ABSL_OPTION_HARDENED == 0
+#if !defined(ABSL_OPTION_HARDENED) || ABSL_OPTION_HARDENED == 0 || \
+    defined(GOOGLE3_ABSL_HARDENED_BUILD) || defined(GOOGLE3_ABSL_HARDENED_BUILD_FAST)
         // Insert our own bounds check if not already enabled in absl
         DAWN_CHECK(i < size());
 #endif
