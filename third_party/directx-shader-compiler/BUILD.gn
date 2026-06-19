@@ -35,6 +35,8 @@ import("${dawn_root}/scripts/dawn_features.gni")
 import("build/add_hlsl_hctgen.gni")
 import("build/built_target_action.gni")
 import("build/cmake_configure_file.gni")
+import("build/embed_hlsl_header.gni")
+import("build/generate_embedded_hlsl_headers.gni")
 import("build/generate_version_include.gni")
 import("build/message_compiler.gni")
 
@@ -2077,9 +2079,54 @@ dxcompiler_sourceset("clang_lib_index") {
     "$dawn_dxc_dir/tools/clang/lib/Index/USRGeneration.cpp",
   ]
 }
+
+# Targets that handle generating embedded HLSL headers
+embed_hlsl_target_dir = "$target_gen_dir/HLSLEmbeddedHeaders"
+embed_hlsl_header("enable_if") {
+  input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/enable_if.h"
+  output = "$embed_hlsl_target_dir/enable_if.h.inc"
+}
+embed_hlsl_header("vector_utils") {
+  input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/vector_utils.h"
+  output = "$embed_hlsl_target_dir/vector_utils.h.inc"
+}
+embed_hlsl_header("dx_linalg") {
+  input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/dx/linalg.h"
+  output = "$embed_hlsl_target_dir/dx/linalg.h.inc"
+}
+generate_embedded_hlsl_headers("hlsl_embedded_headers") {
+  deps = [
+    ":dx_linalg",
+    ":enable_if",
+    ":vector_utils",
+  ]
+
+  # hlsl_embedded_entries in CMake
+  inputs = [
+    "$embed_hlsl_target_dir/enable_if.h.inc",
+    "$embed_hlsl_target_dir/vector_utils.h.inc",
+    "$embed_hlsl_target_dir/dx/linalg.h.inc",
+  ]
+
+  target_dir = embed_hlsl_target_dir
+
+  # hlsl_embedded_decls in CMake
+  decls_output = "$embed_hlsl_target_dir/HLSLEmbeddedHeadersDecls.inc"
+
+  # hlsl_embedded_entries_inc in CMake
+  entries_output = "$embed_hlsl_target_dir/HLSLEmbeddedHeadersEntries.inc"
+}
+
 dxcompiler_sourceset("clang_lib_lex") {
   target_type = "static_library"  # Ensure unused globals are stripped
+  include_dirs = [
+    target_out_dir,
+    target_gen_dir,
+    embed_hlsl_target_dir,
+  ]
+  deps = [ ":hlsl_embedded_headers" ]
   sources = [
+    "$dawn_dxc_dir/tools/clang/lib/Lex/HLSLEmbeddedHeaders.cpp",
     "$dawn_dxc_dir/tools/clang/lib/Lex/HLSLMacroExpander.cpp",
     "$dawn_dxc_dir/tools/clang/lib/Lex/HeaderMap.cpp",
     "$dawn_dxc_dir/tools/clang/lib/Lex/HeaderSearch.cpp",
