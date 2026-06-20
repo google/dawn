@@ -292,7 +292,7 @@ TEST_F(TexelBufferValidationTest, AdditionalChain) {
         plane0Desc.usage = wgpu::TextureUsage::TextureBinding;
         wgpu::Texture plane0 = device.CreateTexture(&plane0Desc);
 
-        std::array<float, 12> placeholderConstants;
+        std::array<float, 12> placeholderConstants = {};
 
         wgpu::ExternalTextureDescriptor desc;
         desc.yuvToRgbConversionMatrix = placeholderConstants.data();
