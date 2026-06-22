@@ -76,7 +76,7 @@ TEST(SpanTest, Constructor_Default) {
 
 TEST(SpanTest, Constructor_PointerAndSize) {
     int data[] = {1, 2, 3};
-    int constData[] = {1, 2, 3};
+    const int constData[] = {1, 2, 3};
     raw_ptr<int> rptr = data;
 
     // T* + size for Span<T>
@@ -248,8 +248,8 @@ TEST(SpanTest, ConstructorFromCompatibleRange) {
         EXPECT_EQ(sp.data(), data.data());
     }
     {
-        // Fails to compile if the constructor from range take a reference and not an rvalue
-        // reference.
+        // Fails to compile if the constructor from a range is written to take a reference
+        // (R& range) and not an rvalue reference (R&& range).
         Span<std::byte> sp;
         sp = GetByteSpan();
     }
@@ -300,7 +300,7 @@ TEST(SpanTest, MoveConstructor) {
     ASSERT_EQ(data.data(), sp2.data());
     ASSERT_EQ(data.size(), sp2.size());
 
-    // Move actually does a copy so sp stays the same.
+    // "Default move constructor" copies so sp stays the same.
     ASSERT_EQ(data.data(), sp.data());
     ASSERT_EQ(data.size(), sp.size());
 }
@@ -314,7 +314,7 @@ TEST(SpanTest, MoveAssignment) {
     ASSERT_EQ(data.data(), sp2.data());
     ASSERT_EQ(data.size(), sp2.size());
 
-    // Move actually does a copy so sp stays the same.
+    // "Default move assignment" copies so sp stays the same.
     ASSERT_EQ(data.data(), sp.data());
     ASSERT_EQ(data.size(), sp.size());
 }

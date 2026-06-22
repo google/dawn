@@ -196,7 +196,7 @@ class SpanBase {
         return DAWN_UNSAFE_BUFFERS(unchecked_at(index));
     }
     // Returns a reference to the element of this at `index`. Will DAWN_CHECK() if OOB.
-    constexpr T& operator[](Index index) const noexcept { return at(index); }
+    constexpr reference operator[](Index index) const noexcept { return at(index); }
 
     // Returns a pointer at the contents of this.
     constexpr pointer data() const noexcept { return mData; }
