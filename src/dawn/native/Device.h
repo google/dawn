@@ -344,7 +344,7 @@ class DeviceBase : public ErrorSink,
     //   - Alive: the device is usable and might have work happening on the GPU timeline.
     //   - BeingDisconnected: the device is no longer usable because we are waiting for all
     //     work on the GPU timeline to finish. (this is to make validation prevent the
-    //     application from adding more work during the transition from Available to
+    //     application from adding more work during the transition from Alive to
     //     Disconnected)
     //   - Disconnected: there is no longer work happening on the GPU timeline and the CPU data
     //     structures can be safely destroyed without additional synchronization.

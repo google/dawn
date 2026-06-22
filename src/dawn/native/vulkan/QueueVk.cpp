@@ -49,6 +49,7 @@
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/dawn/platform/metrics/HistogramMacros.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
+#include "src/dawn/utils/SystemUtils.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan {
@@ -177,8 +178,12 @@ MaybeError Queue::WaitForIdleForDestructionImpl() {
     // Ignore the result of QueueWaitIdle: it can return OOM which we can't really do anything
     // about, Device lost, which means workloads running on the GPU are no longer accessible
     // (so they are as good as waited on) or success.
-    [[maybe_unused]] VkResult waitIdleResult =
-        VkResult::WrapUnsafe(device->fn.QueueWaitIdle(mQueue));
+    VkResult waitIdleResult = VkResult::WrapUnsafe(device->fn.QueueWaitIdle(mQueue));
+
+    if (waitIdleResult == VK_ERROR_DEVICE_LOST &&
+        GetDevice()->IsToggleEnabled(Toggle::VulkanSleepAfterLostDeviceWait)) {
+        dawn::utils::USleep(1000);
+    }
 
     DAWN_TRY(WaitForQueueSerial(GetLastSubmittedCommandSerial(),
                                 std::numeric_limits<Nanoseconds>::max()));
