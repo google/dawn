@@ -33,7 +33,6 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <span>
 #include <variant>
 #include <vector>
 
@@ -50,6 +49,7 @@
 #include "src/dawn/native/Forward.h"
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/utils/non_movable.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
@@ -84,7 +84,7 @@ class EventManager final : NonMovable {
 
     // Returns true if future ProcessEvents is needed.
     bool ProcessPollEvents();
-    [[nodiscard]] wgpu::WaitStatus WaitAny(std::span<FutureWaitInfo> infos, Nanoseconds timeout);
+    [[nodiscard]] wgpu::WaitStatus WaitAny(Span<FutureWaitInfo> infos, Nanoseconds timeout);
 
   private:
     // Internal waiter class that's signaled when specific events become ready.

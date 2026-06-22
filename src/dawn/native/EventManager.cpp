@@ -277,7 +277,7 @@ bool EventManager::ProcessPollEvents() {
            (lastProcessEventID != mLastProcessEventID.load(std::memory_order_acquire));
 }
 
-wgpu::WaitStatus EventManager::WaitAny(std::span<FutureWaitInfo> infos, Nanoseconds timeout) {
+wgpu::WaitStatus EventManager::WaitAny(Span<FutureWaitInfo> infos, Nanoseconds timeout) {
     bool foundNonQueueEvent = false;
     QueueWaitSerialsMaps queueWaitSerialMaps;
     SortedEventMap readyEvents;

@@ -282,6 +282,7 @@ class RecordMember(AnnotatedTypedMember):
         super().__init__(typ, annotation, optional, json_data)
         self.name = name
         self.length = None
+        self.is_length = False
         self.optional = optional
         self.array_element_optional = array_element_optional
         if array_element_optional:
@@ -514,6 +515,7 @@ def linked_record_members(json_data, types, check_span_regularity=False):
                     assert length_index == member_index - 1
 
                 member.length = members_by_name[m['length']]
+                member.length.is_length = True
 
     return members
 

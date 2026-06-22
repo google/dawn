@@ -38,6 +38,7 @@
 #include "{{native_dir}}/{{prefix}}_platform.h"
 #include "{{include_dir}}/{{Prefix}}Native.h"
 #include "dawn/dawn_version.h"
+#include "src/utils/span.h"
 
 {% for type in by_category["object"] %}
     {% if type.name.canonical_case() not in ["texture view"] %}
@@ -45,10 +46,25 @@
     {% endif %}
 {% endfor %}
 
-{%- macro convert_arguments_and_call(function, call_receiver, first_arg = None) -%}
+{%- macro convert_arguments_and_call(function, suffix, call_receiver, first_arg = None, spanify=True) -%}
+    {% set spanify = not suffix in function_spanification_blocklist %}
+
     {% for arg in function.arguments %}
         {% set varName = as_varName(arg.name) %}
-        {% if arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
+        {% if spanify and arg.is_length %}
+            //* Skip as it's included in the span just below.
+        {% elif spanify and arg.length and arg.length != "constant" %}
+            // TODO(https://crbug.com/524405497): Support fixed-length spans.
+            {% if arg.type.name.canonical_case() == "void" %}
+                using {{varName}}SpanT = const std::byte;
+            {% else %}
+                using {{varName}}SpanT = std::remove_pointer_t<{{decorate(as_frontendType(arg.type), arg)}}>;
+            {% endif %}
+            auto {{varName}}Size = {{as_varName(arg.length.name)}};
+            auto {{varName}}Ptr = reinterpret_cast<{{varName}}SpanT*>({{varName}});
+            // SAFETY: The webgpu.h user is required to pass valid ranges of objects.
+            auto {{varName}}_ = DAWN_UNSAFE_BUFFERS(Span<{{varName}}SpanT>({{varName}}Ptr, {{varName}}Size));
+        {% elif arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
             auto {{varName}}_ = static_cast<{{as_frontendType(arg.type)}}>({{varName}});
         {% elif arg.type.category == "structure" and arg.annotation == "value" %}
             auto {{varName}}_ = *reinterpret_cast<{{as_frontendType(arg.type)}}*>(&{{varName}});
@@ -66,7 +82,7 @@
         {%- if first_arg -%}
             {{first_arg}} {%- if len(function.arguments) != 0 %}, {% endif -%}
         {%- endif -%}
-        {%- for arg in function.arguments -%}
+        {%- for arg in function.arguments if (not spanify or not arg.is_length) -%}
             {%- if not loop.first %}, {% endif -%}
             {{as_varName(arg.name)}}_
         {%- endfor -%}
@@ -108,23 +124,24 @@ namespace {{native_namespace}} {
                         // This method is specified to not use AutoLock in json script or it returns a future.
                     {% endif %}
 
-                    {{convert_arguments_and_call(method, "self->API" + method.name.CamelCase())}}
+                    {{convert_arguments_and_call(method, suffix, "self->API" + method.name.CamelCase())}}
                 {% else %}
                     {{assert(type.category == "structure")}}
-                    {{convert_arguments_and_call(method, "API" + suffix, first_arg="cSelf")}}
+                    {{convert_arguments_and_call(method, suffix, "API" + suffix, first_arg="cSelf")}}
                 {% endif %}
             }
         {% endfor %}
     {% endfor %}
 
     {% for function in by_category["function"] if function.name.canonical_case() != "get proc address" and function.name.canonical_case() != "get proc address 2" %}
-        {{as_annotated_cType(function.returns)}} Native{{function.name.CamelCase()}}(
+        {% set suffix = function.name.CamelCase() %}
+        {{as_annotated_cType(function.returns)}} Native{{suffix}}(
             {%- for arg in function.arguments -%}
                 {%- if not loop.first %}, {% endif -%}
                 {{as_annotated_cType(arg)}}
             {%- endfor -%}
         ) {
-            {{convert_arguments_and_call(function, "API" + function.name.CamelCase())}}
+            {{convert_arguments_and_call(function, suffix, "API" + suffix)}}
         }
     {% endfor %}
 

@@ -50,6 +50,7 @@
 #include "src/dawn/native/Forward.h"
 #include "src/dawn/native/Toggles.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/span.h"
 #include "tint/tint.h"
 
 namespace dawn::platform {
@@ -149,9 +150,7 @@ class InstanceBase final : public ErrorSink, public RefCounted {
     // Dawn API
     Surface* APICreateSurface(const SurfaceDescriptor* descriptor);
     void APIProcessEvents();
-    [[nodiscard]] wgpu::WaitStatus APIWaitAny(size_t count,
-                                              FutureWaitInfo* futures,
-                                              uint64_t timeoutNS);
+    [[nodiscard]] wgpu::WaitStatus APIWaitAny(Span<FutureWaitInfo> futures, uint64_t timeoutNS);
     bool APIHasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const;
     void APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* features) const;
 
