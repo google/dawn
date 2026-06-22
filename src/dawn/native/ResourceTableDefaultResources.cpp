@@ -132,7 +132,7 @@ ResultOrError<std::unique_ptr<ResourceTableDefaultResources>> ResourceTableDefau
 
 // static
 ityp::span<ResourceTableSlot, const tint::ResourceType> ResourceTableDefaultResources::GetOrder() {
-    return {kDefaults.data(), ResourceTableSlot(uint32_t(kDefaults.size()))};
+    return kDefaults;
 }
 
 // static
@@ -160,7 +160,7 @@ SamplerBase* ResourceTableDefaultResources::GetPlaceholderSampler() const {
 
 ityp::span<ResourceTableSlot, const ResourceTableDefaultResources::Resource>
 ResourceTableDefaultResources::GetResources() const {
-    return {mDefaultResources.data(), mDefaultResources.size()};
+    return mDefaultResources;
 }
 
 MaybeError ResourceTableDefaultResources::Initialize(DeviceBase* device) {

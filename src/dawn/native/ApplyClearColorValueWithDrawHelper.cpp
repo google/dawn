@@ -34,6 +34,7 @@
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/Range.h"
 #include "src/dawn/common/Strings.h"
+#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/BindGroup.h"
 #include "src/dawn/native/BindGroupLayout.h"
 #include "src/dawn/native/Buffer.h"

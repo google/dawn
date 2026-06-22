@@ -35,7 +35,6 @@
 #include "src/dawn/common/GPUInfo.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/RefCounted.h"
-#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Features.h"
@@ -43,6 +42,7 @@
 #include "src/dawn/native/Limits.h"
 #include "src/dawn/native/Toggles.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 

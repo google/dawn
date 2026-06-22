@@ -28,43 +28,19 @@
 #ifndef SRC_DAWN_COMMON_ITYP_SPAN_H_
 #define SRC_DAWN_COMMON_ITYP_SPAN_H_
 
-#include <cstddef>
-#include <span>
-
 #include "src/utils/numeric.h"
-#include "src/utils/underlying_type.h"
+#include "src/utils/span.h"
 
 namespace dawn::ityp {
-
-// ityp::span is a helper class that wraps std::span<T, std::dynamic_extent>
-// with the restriction that indices must be a particular type |Index|.
-template <typename Index, typename Value>
-class span : private ::std::span<Value> {
-    using I = UnderlyingType<Index>;
-    using Base = ::std::span<Value>;
-
-    static_assert(HasUnsignedUnderlyingType<Index>, "Index type must be unsigned");
-
-  public:
-    constexpr span() = default;
-    constexpr span(Value* data, Index size) : Base{data, checked_cast<size_t>(size)} {}
-
-    using Base::begin, Base::end;
-    using Base::front, Base::back;
-
-    using Base::data;
-
-    constexpr Value& operator[](Index i) const { return Base::operator[](checked_cast<size_t>(i)); }
-
-    constexpr Index size() const { return Index(static_cast<I>(Base::size())); }
-};
 
 // ityp::SpanFromUntyped<Index>(myValues, myValueCount) creates a span<Index, Value> from a C-style
 // span that's without a TypedInteger index. It is useful at the interface between code that doesn't
 // use ityp and code that does.
+// TODO(https://crbug.com/515272358): Remove as well as ITypSpanTests.cpp once the input API is
+// completely spanified.
 template <typename Index, typename Value>
 span<Index, Value> SpanFromUntyped(Value* data, size_t size) {
-    return {data, checked_cast<Index>(size)};
+    return DAWN_UNSAFE_TODO({data, checked_cast<Index>(size)});
 }
 
 }  // namespace dawn::ityp

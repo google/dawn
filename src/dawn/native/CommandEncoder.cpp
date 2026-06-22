@@ -38,6 +38,7 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/Math.h"
+#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/Adapter.h"
 #include "src/dawn/native/ApplyClearColorValueWithDrawHelper.h"
 #include "src/dawn/native/BindGroup.h"
@@ -862,8 +863,7 @@ MaybeError ValidateRenderPassPLS(DeviceBase* device,
         attachments.push_back({attachment.offset, attachment.storage->GetFormat().format});
     }
 
-    return ValidatePLSInfo(device, pls->totalPixelLocalStorageSize,
-                           {attachments.data(), attachments.size()});
+    return ValidatePLSInfo(device, pls->totalPixelLocalStorageSize, attachments);
 }
 
 MaybeError ValidateRenderPassDescriptor(DeviceBase* device,

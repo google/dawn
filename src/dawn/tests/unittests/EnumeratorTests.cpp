@@ -35,6 +35,7 @@
 #include "src/dawn/common/ityp_span.h"
 #include "src/dawn/common/ityp_vector.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 #include "src/utils/typed_integer.h"
 
 namespace dawn {

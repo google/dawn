@@ -32,10 +32,10 @@
 
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/ityp_array.h"
-#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 struct ResolveRect;

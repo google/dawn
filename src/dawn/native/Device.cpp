@@ -1702,7 +1702,9 @@ void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescri
     DAWN_CHECK(deviceDescriptor);
     // Validate all required features with device toggles.
     DAWN_ASSERT(GetPhysicalDevice()->SupportsAllRequiredFeatures(
-        {deviceDescriptor->requiredFeatures, deviceDescriptor->requiredFeatureCount}, mToggles));
+        DAWN_UNSAFE_TODO(
+            {deviceDescriptor->requiredFeatures, deviceDescriptor->requiredFeatureCount}),
+        mToggles));
 
     for (uint32_t i = 0; i < deviceDescriptor->requiredFeatureCount; ++i) {
         mEnabledFeatures.EnableFeature(DAWN_UNSAFE_TODO(deviceDescriptor->requiredFeatures[i]));

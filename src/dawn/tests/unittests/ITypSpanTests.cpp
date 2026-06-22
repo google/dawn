@@ -29,7 +29,6 @@
 
 #include "gtest/gtest.h"
 #include "src/dawn/common/ityp_span.h"
-#include "src/utils/compiler.h"
 #include "src/utils/typed_integer.h"
 
 namespace dawn {
@@ -41,61 +40,6 @@ class ITypSpanTest : public testing::Test {
     using Val = TypedInteger<struct ValT, uint32_t>;
     using Span = ityp::span<Key, Val>;
 };
-
-// Test that values can be set at an index and retrieved from the same index.
-TEST_F(ITypSpanTest, Indexing) {
-    std::array<Val, 10> arr;
-    Span span(arr.data(), Key(arr.size()));
-    {
-        span[Key(2u)] = Val(5u);
-        span[Key(1u)] = Val(9u);
-        span[Key(9u)] = Val(2u);
-
-        ASSERT_EQ(span[Key(2u)], Val(5u));
-        ASSERT_EQ(span[Key(1u)], Val(9u));
-        ASSERT_EQ(span[Key(9u)], Val(2u));
-    }
-}
-
-// Test that the span can be is iterated in order with a range-based for loop
-TEST_F(ITypSpanTest, RangeBasedIteration) {
-    std::array<Val, 10> arr;
-    Span span(arr.data(), Key(arr.size()));
-
-    // Assign in a non-const range-based for loop
-    uint32_t i = 0;
-    for (Val& val : span) {
-        val = Val(i);
-    }
-
-    // Check values in a const range-based for loop
-    i = 0;
-    for (Val val : static_cast<const Span&>(span)) {
-        ASSERT_EQ(val, span[Key(i++)]);
-    }
-}
-
-// Test that begin/end/front/back/data return pointers/references to the correct elements.
-TEST_F(ITypSpanTest, BeginEndFrontBackData) {
-    std::array<Val, 10> arr;
-    Span span(arr.data(), Key(arr.size()));
-
-    // non-const versions
-    ASSERT_EQ(&*span.begin(), &span[Key(0u)]);
-    DAWN_UNSAFE_TODO(ASSERT_EQ(&*span.end(), &span[Key(0u)] + static_cast<size_t>(span.size())));
-    ASSERT_EQ(&span.front(), &span[Key(0u)]);
-    ASSERT_EQ(&span.back(), &span[Key(9u)]);
-    ASSERT_EQ(span.data(), &span[Key(0u)]);
-
-    // const versions
-    const Span& constSpan = span;
-    ASSERT_EQ(&*constSpan.begin(), &constSpan[Key(0u)]);
-    DAWN_UNSAFE_TODO(
-        ASSERT_EQ(&*constSpan.end(), &constSpan[Key(0u)] + static_cast<size_t>(constSpan.size())));
-    ASSERT_EQ(&constSpan.front(), &constSpan[Key(0u)]);
-    ASSERT_EQ(&constSpan.back(), &constSpan[Key(9u)]);
-    ASSERT_EQ(constSpan.data(), &constSpan[Key(0u)]);
-}
 
 // Test the utility SpanFromUntyped
 TEST_F(ITypSpanTest, SpanFromUntyped) {
@@ -121,48 +65,6 @@ TEST_F(ITypSpanTest, SpanFromUntyped) {
         ASSERT_EQ(arr.data(), span.data());
         ASSERT_EQ(arr.size(), static_cast<size_t>(span.size()));
     }
-}
-
-// Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
-using ITypSpanDeathTest = ITypSpanTest;
-
-// Out of bounds accesses should crash even in release (the underlying container
-// should have asserts enabled).
-TEST_F(ITypSpanDeathTest, OutOfBounds) {
-    // MSVC doesn't have asserts (without _MSVC_STL_HARDENING).
-    if constexpr (DAWN_COMPILER_IS(MSVC)) {
-        GTEST_SKIP();
-    }
-
-    std::array<Val, 10> arr;
-
-    Span span(arr.data(), Key(arr.size()));
-    EXPECT_DEATH(span[Key(10u)], "");
-
-    const Span& constSpan = span;
-    EXPECT_DEATH(constSpan[Key(10u)], "");
-}
-
-// If the index/size is 64-bit, it needs to be narrowed to size_t. Verify that's checked correctly.
-TEST_F(ITypSpanDeathTest, OversizedIndex) {
-    // These tests are only relevant on 32-bit builds.
-    if constexpr (sizeof(size_t) > sizeof(uint32_t)) {
-        GTEST_SKIP();
-    }
-
-    using Key64 = TypedInteger<struct Key64T, uint64_t>;
-    static constexpr Key64 kHugeKey64{0x1'0000'0000LLU};
-
-    std::array<Val, 10> arr;
-    ityp::span<Key64, Val> span(arr.data(), Key64(arr.size()));
-
-    span[Key64(9u)];
-    // Regular out-of-bounds.
-    EXPECT_DEATH(span[Key64(10u)], "");
-
-    span[Key64(0u)];
-    // If this were cast to a 32-bit size_t without a check, it would be in-bounds.
-    EXPECT_DEATH(span[kHugeKey64], "");
 }
 
 }  // anonymous namespace

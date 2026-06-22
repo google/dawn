@@ -37,7 +37,6 @@
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/Math.h"
-#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/BindGroupLayout.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Error.h"
@@ -46,6 +45,7 @@
 #include "src/dawn/native/UsageValidationMode.h"
 #include "src/dawn/native/dawn_platform.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 

@@ -152,8 +152,8 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
     DAWN_INVALID_IF(index >= kMaxBindGroupsTyped, "Bind group index (%u) exceeds the maximum (%u).",
                     index, kMaxBindGroupsTyped);
 
-    ityp::span<BindingIndex, const uint32_t> dynamicOffsets(dynamicOffsetsIn,
-                                                            BindingIndex(dynamicOffsetCountIn));
+    ityp::span<BindingIndex, const uint32_t> DAWN_UNSAFE_TODO(
+        dynamicOffsets(dynamicOffsetsIn, BindingIndex(dynamicOffsetCountIn)));
 
     if (group == nullptr) {
         uint32_t size = static_cast<uint32_t>(dynamicOffsets.size());

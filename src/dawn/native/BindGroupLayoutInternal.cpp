@@ -696,7 +696,7 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
     mBindingInfo = std::move(unpackedBindings.entries);
     mBindingMap = std::move(unpackedBindings.apiBindingMap);
 
-    DAWN_CHECK(CheckBufferBindingsFirst({mBindingInfo.data(), mBindingInfo.size()}));
+    DAWN_CHECK(CheckBufferBindingsFirst(mBindingInfo));
 
     // Compute various counts of expanded bindings and other metadata.
     std::array<BindingIndex, BindingTypeOrder_Count + 1> counts{};

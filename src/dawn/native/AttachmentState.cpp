@@ -38,6 +38,7 @@
 #include "src/dawn/native/Texture.h"
 #include "src/utils/compiler.h"
 #include "src/utils/log.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 

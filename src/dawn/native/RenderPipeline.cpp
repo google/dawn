@@ -45,6 +45,7 @@
 #include "src/dawn/native/ObjectContentHasher.h"
 #include "src/dawn/native/ValidationUtils.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 

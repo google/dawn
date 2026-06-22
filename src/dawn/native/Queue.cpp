@@ -44,7 +44,6 @@
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/FutureUtils.h"
 #include "src/dawn/common/StringViewUtils.h"
-#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/BindGroup.h"
 #include "src/dawn/native/BlitBufferToDepthStencil.h"
 #include "src/dawn/native/Buffer.h"
@@ -65,6 +64,7 @@
 #include "src/dawn/native/Texture.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
@@ -178,7 +178,7 @@ void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* comma
 
     [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
         std::move(result), "calling %s.Submit(%s)", this,
-        ityp::span<uint32_t, CommandBufferBase* const>(commands, commandCount));
+        DAWN_UNSAFE_TODO(ityp::span<uint32_t, CommandBufferBase* const>(commands, commandCount)));
 }
 
 Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {

@@ -80,8 +80,8 @@ class BindGroupTrackerBase {
     virtual bool AreLayoutsCompatible() { return mLastAppliedPipelineLayout == mPipelineLayout; }
 
     ityp::span<BindingIndex, uint32_t> GetDynamicOffsets(BindGroupIndex index) {
-        return ityp::span<BindingIndex, uint32_t>(mDynamicOffsets[index].offsets.data(),
-                                                  mDynamicOffsets[index].count);
+        return ityp::span<BindingIndex, uint32_t>(mDynamicOffsets[index].offsets)
+            .first(mDynamicOffsets[index].count);
     }
 
     // The Derived class should call this before it applies bind groups.

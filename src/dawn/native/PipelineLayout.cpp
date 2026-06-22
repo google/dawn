@@ -37,6 +37,7 @@
 #include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/common/Range.h"
+#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/BindGroupLayout.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/CommandValidation.h"
@@ -76,8 +77,7 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
             attachments.push_back({attachment.offset, attachment.format});
         }
 
-        DAWN_TRY(ValidatePLSInfo(device, pls->totalPixelLocalStorageSize,
-                                 {attachments.data(), attachments.size()}));
+        DAWN_TRY(ValidatePLSInfo(device, pls->totalPixelLocalStorageSize, attachments));
     }
 
     // Validation for the resource table, if any.

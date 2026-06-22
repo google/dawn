@@ -37,12 +37,12 @@
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/ityp_bitset.h"
-#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/ImmediatesLayout.h"
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/Pipeline.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 

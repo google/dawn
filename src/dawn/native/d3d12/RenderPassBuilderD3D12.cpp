@@ -167,7 +167,9 @@ bool RenderPassBuilder::HasDepthOrStencil() const {
 
 ityp::span<ColorAttachmentIndex, const D3D12_RENDER_PASS_RENDER_TARGET_DESC>
 RenderPassBuilder::GetRenderPassRenderTargetDescriptors() const {
-    return {mRenderPassRenderTargetDescriptors.data(), mHighestColorAttachmentIndexPlusOne};
+    return ityp::span<ColorAttachmentIndex, const D3D12_RENDER_PASS_RENDER_TARGET_DESC>(
+               mRenderPassRenderTargetDescriptors)
+        .first(mHighestColorAttachmentIndexPlusOne);
 }
 
 const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC* RenderPassBuilder::GetRenderPassDepthStencilDescriptor()
