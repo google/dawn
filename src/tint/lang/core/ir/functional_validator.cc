@@ -1063,30 +1063,29 @@ void Functional::CheckLoopContinuing(const Loop* loop) {
     // Ensure that values used in the loop continuing are not from the loop body, after a continue
     // instruction.
     auto* first_continue = first_continues_.GetOr(loop, nullptr);
-    if (first_continue == nullptr) {
-        return;
-    }
-
-    // Find the instruction in the body block that is or holds the first continue instruction.
-    const Instruction* holds_continue = first_continue;
-    while (holds_continue && holds_continue->Block() && holds_continue->Block() != loop->Body()) {
-        holds_continue = holds_continue->Block()->Parent();
-    }
-
-    auto check_usage = [&](Usage use) {
-        if (TransitivelyHolds(loop->Continuing(), use.instruction)) {
-            AddError(use.instruction, use.operand_index)
-                << NameOf(use.instruction->Operands()[use.operand_index])
-                << " cannot be used in continuing block as it is declared after the first "
-                << style::Instruction("continue") << " in the loop's body";
-            AddNote(first_continue) << "loop body's first " << style::Instruction("continue");
+    if (first_continue != nullptr) {
+        // Find the instruction in the body block that is or holds the first continue instruction.
+        const Instruction* holds_continue = first_continue;
+        while (holds_continue && holds_continue->Block() &&
+               holds_continue->Block() != loop->Body()) {
+            holds_continue = holds_continue->Block()->Parent();
         }
-    };
 
-    // Check that all subsequent instruction values are not used in the continuing block.
-    for (auto* inst = holds_continue; inst; inst = inst->next) {
-        for (auto* result : inst->Results()) {
-            result->ForEachUseUnsorted(check_usage);
+        auto check_usage = [&](Usage use) {
+            if (TransitivelyHolds(loop->Continuing(), use.instruction)) {
+                AddError(use.instruction, use.operand_index)
+                    << NameOf(use.instruction->Operands()[use.operand_index])
+                    << " cannot be used in continuing block as it is declared after the first "
+                    << style::Instruction("continue") << " in the loop's body";
+                AddNote(first_continue) << "loop body's first " << style::Instruction("continue");
+            }
+        };
+
+        // Check that all subsequent instruction values are not used in the continuing block.
+        for (auto* inst = holds_continue; inst; inst = inst->next) {
+            for (auto* result : inst->Results()) {
+                result->ForEachUseUnsorted(check_usage);
+            }
         }
     }
 

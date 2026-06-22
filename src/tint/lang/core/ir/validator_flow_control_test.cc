@@ -2564,4 +2564,25 @@ TEST_F(IR_ValidatorTest, Switch_CaseSelectorTypeMismatchesConditionType) {
                                    "condition type 'u32'"));
 }
 
+TEST_F(IR_ValidatorTest, Loop_ContinuingWithoutContinue) {
+    auto* f = b.Function("f", ty.void_());
+    auto* loop = b.Loop();
+    loop->Body()->Append(b.Let("let", b.Constant(u32(1u))));
+    loop->Body()->Append(b.Return(f));
+    b.Append(loop->Continuing(), [&] {
+        auto* add = b.Add(1_u, 1_u);
+        add->Result()->SetType(ty.bool_());
+        b.NextIteration(loop);
+    });
+    f->Block()->Append(loop);
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(error: binary: result value type 'bool' does not match '+' result type 'u32')"));
+}
+
 }  // namespace tint::core::ir
