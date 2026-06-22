@@ -1219,7 +1219,5 @@ TEST_F(SubgroupSizeControlValidationTest, ValidateTotalInvocationsPerWorkgroupAn
     TestTotalInvocationsPerWorkgroupAndSubgroupSize({32}, 32, true);
 }
 
-
-
 }  // anonymous namespace
 }  // namespace dawn

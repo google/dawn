@@ -1082,19 +1082,16 @@ TEST_P(SubgroupSizeControlTests, TestSubgroupSizeAttribute) {
     wgpu::AdapterInfo info;
     adapter.GetInfo(&info);
 
-    uint32_t validSubgroupSize = 0;
-    // On Intel Gen12 GPU using D3D12 driver `info.subgroupMinSize` is less than `WaveLaneCountMin`,
-    // so we choose `info.subgroupMaxSize` as it is equal to `WaveLaneCountMax` on Intel GPUs.
-    if (IsD3D12() && IsIntelGen12()) {
-        validSubgroupSize = info.subgroupMaxSize;
-    } else {
-        // On the D3D12 drivers from other vendors `info.subgroupMinSize` is exactly
-        // `WaveLaneCountMin`, and on all Vulkan drivers it is always `minSubgroupSize`, which
-        // should be safe as a value of `@subgroup_size`.
-        validSubgroupSize = info.subgroupMinSize;
+    for (uint32_t subgroupSize = info.subgroupMinSize; subgroupSize <= info.subgroupMaxSize;
+         subgroupSize *= 2) {
+        // On Intel Gen12 `subgroupMinSize`(8) is less than `WaveLaneCountMin`(16) so we cannot use
+        // 8 as @subgroup_size attribute on Intel Gen12 GPUs.
+        if (IsD3D12() && IsIntelGen12() && subgroupSize == 8) {
+            ASSERT_DEVICE_ERROR(CreateComputePipelineWithSubgroupSizeAttribute(subgroupSize, true));
+        } else {
+            DoTest(subgroupSize);
+        }
     }
-
-    DoTest(validSubgroupSize);
 }
 
 // Test an error occurs when a value that is less than `subgroupMinSize` is used as the attribute
