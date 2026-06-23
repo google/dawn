@@ -49,6 +49,42 @@
             "ComputePassEncoderSetBindGroup::dynamicOffsets": "BindingIndex",
             "RenderBundleEncoderSetBindGroup::dynamicOffsets": "BindingIndex",
             "RenderPassEncoderSetBindGroup::dynamicOffsets": "BindingIndex"
+        },
+
+        "_structure_spanification_blocklist_comment": "// TODO(https://crbug.com/515272358): Drive this list down.",
+        "structure_spanification_blocklist": [
+            "AdapterPropertiesMemoryHeaps",
+            "AdapterPropertiesSubgroupMatrixConfigs",
+            "BindGroupDescriptor",
+            "BindGroupLayoutDescriptor",
+            "CompilationInfo",
+            "ComputeState",
+            "DawnDrmFormatCapabilities",
+            "DawnTogglesDescriptor",
+            "DawnWGSLBlocklist",
+            "DeviceDescriptor",
+            "FragmentState",
+            "InstanceDescriptor",
+            "PipelineLayoutDescriptor",
+            "PipelineLayoutPixelLocalStorage",
+            "RenderBundleEncoderDescriptor",
+            "RenderPassDescriptor",
+            "RenderPassPixelLocalStorage",
+            "ShaderSourceSPIRV",
+            "SharedBufferMemoryBeginAccessDescriptor",
+            "SharedBufferMemoryEndAccessState",
+            "SharedTextureMemoryBeginAccessDescriptor",
+            "SharedTextureMemoryDmaBufDescriptor",
+            "SharedTextureMemoryEndAccessState",
+            "SupportedFeatures",
+            "SupportedInstanceFeatures",
+            "SupportedWGSLLanguageFeatures",
+            "SurfaceCapabilities",
+            "SurfaceConfiguration",
+            "TextureDescriptor",
+            "VertexState"
+        ],
+        "structure_span_index_type_override": {
         }
     }
 }

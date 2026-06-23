@@ -111,57 +111,57 @@ const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format) {
 // Helper functions
 namespace {
 MaybeError ValidateVertexAttribute(DeviceBase* device,
-                                   const VertexAttribute* attribute,
+                                   const VertexAttribute& attribute,
                                    const EntryPointMetadata& metadata,
                                    uint64_t vertexBufferStride,
                                    VertexAttributeMask* attributesSetMask) {
-    DAWN_TRY(ValidateVertexFormat(attribute->format));
-    const VertexFormatInfo& formatInfo = GetVertexFormatInfo(attribute->format);
+    DAWN_TRY(ValidateVertexFormat(attribute.format));
+    const VertexFormatInfo& formatInfo = GetVertexFormatInfo(attribute.format);
 
     uint32_t maxVertexAttributes = device->GetLimits().v1.maxVertexAttributes;
     DAWN_INVALID_IF(
-        attribute->shaderLocation >= maxVertexAttributes,
+        attribute.shaderLocation >= maxVertexAttributes,
         "Attribute shader location (%u) exceeds the maximum number of vertex attributes "
         "(%u).",
-        attribute->shaderLocation, maxVertexAttributes);
+        attribute.shaderLocation, maxVertexAttributes);
 
-    VertexAttributeLocation location(static_cast<uint8_t>(attribute->shaderLocation));
+    VertexAttributeLocation location(static_cast<uint8_t>(attribute.shaderLocation));
 
     // No underflow is possible because the max vertex format size is smaller than
     // kMaxVertexBufferArrayStride.
     DAWN_CHECK(kMaxVertexBufferArrayStride >= formatInfo.byteSize);
-    DAWN_INVALID_IF(attribute->offset > kMaxVertexBufferArrayStride - formatInfo.byteSize,
+    DAWN_INVALID_IF(attribute.offset > kMaxVertexBufferArrayStride - formatInfo.byteSize,
                     "Attribute offset (%u) + format size (%u for %s) must be <= the maximum vertex "
                     "buffer stride (%u). Offsets larger than the maximum vertex buffer stride are "
                     "accommodated by setting buffer offsets when calling setVertexBuffer, which "
                     "the attribute offset is added to.",
-                    attribute->offset, formatInfo.byteSize, attribute->format,
+                    attribute.offset, formatInfo.byteSize, attribute.format,
                     kMaxVertexBufferArrayStride);
 
     // No overflow is possible because the offset is already validated to be less
     // than kMaxVertexBufferArrayStride.
-    DAWN_CHECK(attribute->offset < kMaxVertexBufferArrayStride);
+    DAWN_CHECK(attribute.offset < kMaxVertexBufferArrayStride);
     DAWN_INVALID_IF(
-        vertexBufferStride > 0 && attribute->offset + formatInfo.byteSize > vertexBufferStride,
+        vertexBufferStride > 0 && attribute.offset + formatInfo.byteSize > vertexBufferStride,
         "Attribute offset (%u) + format size (%u for %s) must be <= the vertex buffer stride (%u). "
         "Offsets larger than the vertex buffer stride are accommodated by setting buffer offsets "
         "when calling setVertexBuffer, which the attribute offset is added to.",
-        attribute->offset, formatInfo.byteSize, attribute->format, vertexBufferStride);
+        attribute.offset, formatInfo.byteSize, attribute.format, vertexBufferStride);
 
-    DAWN_INVALID_IF(attribute->offset % std::min(4u, formatInfo.byteSize) != 0,
-                    "Attribute offset (%u) in not a multiple of %u.", attribute->offset,
+    DAWN_INVALID_IF(attribute.offset % std::min(4u, formatInfo.byteSize) != 0,
+                    "Attribute offset (%u) in not a multiple of %u.", attribute.offset,
                     std::min(4u, formatInfo.byteSize));
 
     DAWN_INVALID_IF(metadata.usedVertexInputs[location] &&
                         formatInfo.baseType != metadata.vertexInputBaseTypes[location],
                     "Attribute base type (%s for %s) does not match the shader's base type (%s) in "
                     "location (%u).",
-                    formatInfo.baseType, attribute->format, metadata.vertexInputBaseTypes[location],
-                    attribute->shaderLocation);
+                    formatInfo.baseType, attribute.format, metadata.vertexInputBaseTypes[location],
+                    attribute.shaderLocation);
 
     DAWN_INVALID_IF((*attributesSetMask)[location],
                     "Attribute shader location (%u) is used more than once.",
-                    attribute->shaderLocation);
+                    attribute.shaderLocation);
 
     attributesSetMask->set(location);
     return {};
@@ -179,9 +179,9 @@ MaybeError ValidateVertexBufferLayout(DeviceBase* device,
     DAWN_INVALID_IF(buffer->arrayStride % 4 != 0,
                     "Vertex buffer arrayStride (%u) is not a multiple of 4.", buffer->arrayStride);
 
-    for (uint32_t i = 0; i < buffer->attributeCount; ++i) {
+    for (auto [i, attribute] : Enumerate(buffer->attributes)) {
         DAWN_UNSAFE_TODO(
-            DAWN_TRY_CONTEXT(ValidateVertexAttribute(device, &buffer->attributes[i], metadata,
+            DAWN_TRY_CONTEXT(ValidateVertexAttribute(device, attribute, metadata,
                                                      buffer->arrayStride, attributesSetMask),
                              "validating attributes[%u].", i));
     }
@@ -232,7 +232,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
                                                         vertexMetadata, &attributesSetMask),
                              "validating buffers[%u].", i));
         totalAttributesNum +=
-            static_cast<uint32_t>(DAWN_UNSAFE_TODO(descriptor->buffers[i]).attributeCount);
+            static_cast<uint32_t>(DAWN_UNSAFE_TODO(descriptor->buffers[i]).attributes.size());
     }
 
     if (device->IsCompatibilityMode() &&
@@ -963,7 +963,7 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         ityp::SpanFromUntyped<VertexBufferSlot>(descriptor->vertex.buffers, mVertexBufferCount);
     for (auto [slot, buffer] : Enumerate(buffers)) {
         // Skip unused slots
-        if (buffer.stepMode == wgpu::VertexStepMode::Undefined && buffer.attributeCount == 0) {
+        if (buffer.stepMode == wgpu::VertexStepMode::Undefined && buffer.attributes.empty()) {
             continue;
         }
 
@@ -985,8 +985,7 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
                 DAWN_UNREACHABLE();
         }
 
-        auto attributes = ityp::SpanFromUntyped<size_t>(buffer.attributes, buffer.attributeCount);
-        for (auto [i, attribute] : Enumerate(attributes)) {
+        for (auto [i, attribute] : Enumerate(buffer.attributes)) {
             VertexAttributeLocation location =
                 VertexAttributeLocation(static_cast<uint8_t>(attribute.shaderLocation));
 

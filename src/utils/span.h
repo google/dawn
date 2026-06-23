@@ -95,9 +95,6 @@ concept CompatibleRange = requires(R r) {
 // type. The only exception is size_bytes().
 template <typename T, HasUnsignedUnderlyingType Index, typename PtrType>
 class SpanBase {
-  private:
-    using Self = SpanBase<T, Index, PtrType>;
-
   public:
     // Type aliases and static members.
 
@@ -114,6 +111,9 @@ class SpanBase {
     using iterator = std::span<T>::iterator;
 
     static inline constexpr Index extent = DynamicExtent<Index>;
+
+    static constexpr size_t GetOffsetOfSize() { return offsetof(SpanBase, mSize); }
+    static constexpr size_t GetOffsetOfData() { return offsetof(SpanBase, mData); }
 
     // Constructors
     // DIFF: The constructor from a C-style array is not present.
@@ -220,40 +220,40 @@ class SpanBase {
     // overload must be used instead.
 
     // Returns a span of the first `count` elements of this. Will DAWN_CHECK() if OOB.
-    constexpr Self first(Index count) const {
+    constexpr SpanBase first(Index count) const {
         DAWN_CHECK(count <= size());
         // SAFETY: data() points at at least size() elements, so the DAWN_CHECK ensure that the
         // result span is a subset of this
-        return DAWN_UNSAFE_BUFFERS(Self(data(), count));
+        return DAWN_UNSAFE_BUFFERS(SpanBase(data(), count));
     }
 
     // Returns a span of the last `count` elements of this. Will DAWN_CHECK() if OOB.
-    constexpr Self last(Index count) const {
+    constexpr SpanBase last(Index count) const {
         DAWN_CHECK(count <= size());
         // SAFETY: data() points at at least size() elements, so the DAWN_CHECK ensure that the
         // result span is a subset of this. The argument to unchecked_at is already checked in range
         // in the DAWN_CHECK above.
-        return DAWN_UNSAFE_BUFFERS(Self(&unchecked_at(size() - count), count));
+        return DAWN_UNSAFE_BUFFERS(SpanBase(&unchecked_at(size() - count), count));
     }
 
     // Returns a span starting at `offset` and until the end of this. Will DAWN_CHECK() if OOB.
-    constexpr Self subspan(Index offset) const {
+    constexpr SpanBase subspan(Index offset) const {
         DAWN_CHECK(offset <= size());
         Index remainingSize = size() - offset;
         // SAFETY: data() points at at least size() elements, so the DAWN_CHECK ensure that the
         // result span is a subset of this. The argument to unchecked_at is already checked in range
         // in the first DAWN_CHECK above.
-        return DAWN_UNSAFE_BUFFERS(Self(&unchecked_at(offset), remainingSize));
+        return DAWN_UNSAFE_BUFFERS(SpanBase(&unchecked_at(offset), remainingSize));
     }
     // Returns a span starting at `offset` and of `count` elements inside of this. Will DAWN_CHECK()
     // if OOB.
-    constexpr Self subspan(Index offset, Index count) const {
+    constexpr SpanBase subspan(Index offset, Index count) const {
         DAWN_CHECK(offset <= size());
         DAWN_CHECK(count <= size() - offset);
         // SAFETY: data() points at at least size() elements, so the DAWN_CHECKs ensure that the
         // result span is a subset of this. The argument to unchecked_at is already checked in range
         // in the first DAWN_CHECK above.
-        return DAWN_UNSAFE_BUFFERS(Self(&unchecked_at(offset), count));
+        return DAWN_UNSAFE_BUFFERS(SpanBase(&unchecked_at(offset), count));
     }
 
     // Additions not part of std::span.

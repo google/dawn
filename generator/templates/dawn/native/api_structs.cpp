@@ -65,6 +65,7 @@ namespace {{native_namespace}} {
     {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
+        {% set spanify = not CppType in structure_spanification_blocklist %}
 
         static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
         static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
@@ -80,9 +81,22 @@ namespace {{native_namespace}} {
                     "offsetof mismatch for {{CppType}}::sType");
         {% endif %}
         {% for member in type.members %}
-            {% set memberName = member.name.camelCase() %}
-            static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
-                         "offsetof mismatch for {{CppType}}::{{memberName}}");
+            {% if spanify and member.is_length %}
+                //* Skip as the member is included in the span member.
+            {% elif spanify and member.length and member.length != "constant" %}
+                // TODO(https://crbug.com/524405497): Support fixed-length spans.
+                {% set memberName = member.name.camelCase() %}
+                {% set lengthName = member.length.name.camelCase() %}
+                using {{CppType}}{{memberName}}Span = decltype(std::declval<{{CppType}}>().{{memberName}});
+                static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfSize() == offsetof({{CType}}, {{lengthName}}),
+                             "offsetof mismatch for {{CppType}}::{{memberName}}::mSize");
+                static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfData() == offsetof({{CType}}, {{memberName}}),
+                             "offsetof mismatch for {{CppType}}::{{memberName}}::mData");
+            {% else %}
+                {% set memberName = member.name.camelCase() %}
+                static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
+                             "offsetof mismatch for {{CppType}}::{{memberName}}");
+            {% endif %}
         {% endfor %}
 
         {% if type.any_member_requires_struct_defaulting %}
@@ -116,19 +130,20 @@ namespace {{native_namespace}} {
             }
         {% endif %}
         bool {{CppType}}::operator==(const {{CppType}}& rhs) const {
-            return {% if type.extensible or type.chained -%}
-                (nextInChain == rhs.nextInChain) &&
-            {%- endif %} std::tie(
-                {% for member in type.members if member.type.category != 'callback info' %}
-                    {{member.name.camelCase()-}}
-                    {{ "," if not loop.last else "" }}
-                {% endfor %}
-            ) == std::tie(
-                {% for member in type.members if member.type.category != 'callback info' %}
-                    rhs.{{member.name.camelCase()-}}
-                    {{ "," if not loop.last else "" }}
-                {% endfor %}
-            );
+            {% if type.extensible or type.chained -%}
+                if (nextInChain != rhs.nextInChain) { return false; }
+            {% endif %}
+            {% for member in type.members if member.type.category != 'callback info' %}
+                {% if spanify and member.is_length %}
+                    //* Skip as the member is included in the span member.
+                {% elif spanify and member.length and member.length != "constant" %}
+                    if ({{member.name.camelCase()}}.size() != rhs.{{member.name.camelCase()}}.size()) { return false; }
+                    if ({{member.name.camelCase()}}.data() != rhs.{{member.name.camelCase()}}.data()) { return false; }
+                {% else %}
+                    if ({{member.name.camelCase()}} != rhs.{{member.name.camelCase()}}) { return false; }
+                {% endif %}
+            {% endfor %}
+            return true;
         }
 
     {% endfor %}
