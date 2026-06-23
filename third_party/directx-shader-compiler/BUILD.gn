@@ -2083,12 +2083,16 @@ dxcompiler_sourceset("clang_lib_index") {
 # Targets that handle generating embedded HLSL headers
 embed_hlsl_target_dir = "$target_gen_dir/HLSLEmbeddedHeaders"
 embed_hlsl_header("enable_if") {
-  input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/enable_if.h"
-  output = "$embed_hlsl_target_dir/enable_if.h.inc"
+  input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/enable_if"
+  output = "$embed_hlsl_target_dir/enable_if.inc"
 }
 embed_hlsl_header("vector_utils") {
-  input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/vector_utils.h"
-  output = "$embed_hlsl_target_dir/vector_utils.h.inc"
+  input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/vector_utils"
+  output = "$embed_hlsl_target_dir/vector_utils.inc"
+}
+embed_hlsl_header("type_traits") {
+  input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/type_traits"
+  output = "$embed_hlsl_target_dir/type_traits.inc"
 }
 embed_hlsl_header("dx_linalg") {
   input = "$dawn_dxc_dir/tools/clang/lib/Headers/hlsl/dx/linalg.h"
@@ -2098,13 +2102,15 @@ generate_embedded_hlsl_headers("hlsl_embedded_headers") {
   deps = [
     ":dx_linalg",
     ":enable_if",
+    ":type_traits",
     ":vector_utils",
   ]
 
   # hlsl_embedded_entries in CMake
   inputs = [
-    "$embed_hlsl_target_dir/enable_if.h.inc",
-    "$embed_hlsl_target_dir/vector_utils.h.inc",
+    "$embed_hlsl_target_dir/enable_if.inc",
+    "$embed_hlsl_target_dir/vector_utils.inc",
+    "$embed_hlsl_target_dir/type_traits.inc",
     "$embed_hlsl_target_dir/dx/linalg.h.inc",
   ]
 
