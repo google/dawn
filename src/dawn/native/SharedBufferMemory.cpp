@@ -130,12 +130,6 @@ ResultOrError<Ref<BufferBase>> SharedBufferMemoryBase::CreateBuffer(
     UnpackedPtr<BufferDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateBufferDescriptor(GetDevice(), rawDescriptor));
 
-    // Emit a specific error message if the user attempts to create a buffer with Uniform usage.
-    DAWN_INVALID_IF(descriptor->usage & wgpu::BufferUsage::Uniform,
-                    "The buffer usage (%s) contains (%s), which is not allowed on buffers created "
-                    "from SharedBufferMemory.",
-                    descriptor->usage, wgpu::BufferUsage::Uniform);
-
     // Ensure the buffer descriptor usage is a subset of the shared buffer memory's usage.
     DAWN_INVALID_IF(!IsSubset(descriptor->usage, mProperties.usage),
                     "The buffer usage (%s) is incompatible with the SharedBufferMemory usage (%s).",

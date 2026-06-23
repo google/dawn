@@ -237,20 +237,6 @@ TEST_P(SharedBufferMemoryTests, UsageValidation) {
     }
 }
 
-// Tests that creating SharedBufferMemory emits a specific error message if Uniform usage specified.
-TEST_P(SharedBufferMemoryTests, UniformUsageValidation) {
-    wgpu::SharedBufferMemory memory =
-        GetParam().mBackend->CreateSharedBufferMemory(device, kMapWriteUsages, kBufferSize);
-    wgpu::SharedBufferMemoryProperties properties;
-    memory.GetProperties(&properties);
-
-    wgpu::BufferDescriptor bufferDesc = {};
-    bufferDesc.size = properties.size;
-    bufferDesc.usage = properties.usage | wgpu::BufferUsage::Uniform;
-
-    ASSERT_DEVICE_ERROR_MSG(memory.CreateBuffer(&bufferDesc), HasSubstr("Uniform"));
-}
-
 // Test that it is an error to call BeginAccess with fenceCount != signaledValueCount
 TEST_P(SharedBufferMemoryTests, FenceCountMatchesSignaledValueCount) {
     wgpu::SharedBufferMemory memory =

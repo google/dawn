@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <d3d12.h>
+#include <gtest/gtest.h>
 
 #include <vector>
 
@@ -333,6 +334,22 @@ TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, CustomCrossAdapterHeapImpor
     ASSERT_TRUE(sharedBufferMemory.CreateBuffer().Get());
 }
 
+// Tests that creating SharedBufferMemory emits a specific error message if Uniform usage specified.
+TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, UniformUsageValidation) {
+    constexpr wgpu::BufferUsage kMapWriteUsages =
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+    wgpu::SharedBufferMemory memory =
+        GetParam().mBackend->CreateSharedBufferMemory(device, kMapWriteUsages, kBufferSize);
+    wgpu::SharedBufferMemoryProperties properties;
+    memory.GetProperties(&properties);
+
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.size = properties.size;
+    bufferDesc.usage = properties.usage | wgpu::BufferUsage::Uniform;
+
+    ASSERT_DEVICE_ERROR_MSG(memory.CreateBuffer(&bufferDesc), testing::HasSubstr("Uniform"));
+}
+
 class D3D12SharedMemoryFileHandleBackend : public SharedBufferMemoryTestBackend {
   public:
     static Backend GetInstance() {
@@ -424,6 +441,22 @@ TEST_P(SharedBufferMemoryD3D12SharedFileHandleTests, MemorySizeNotAlignFailure) 
     wgpu::SharedBufferMemoryDescriptor desc;
     desc.nextInChain = &sharedFileHandleDesc;
     ASSERT_DEVICE_ERROR(device.ImportSharedBufferMemory(&desc));
+}
+
+// Tests that no error occurs when we create a SharedBufferMemory with Uniform usage.
+TEST_P(SharedBufferMemoryD3D12SharedFileHandleTests, UniformUsageValidation) {
+    constexpr wgpu::BufferUsage kMapWriteUsages =
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+    wgpu::SharedBufferMemory memory = GetParam().mBackend->CreateSharedBufferMemory(
+        device, kMapWriteUsages, kD3D12SharedBufferMemoryFileMappingHandleSizeAlignment);
+    wgpu::SharedBufferMemoryProperties properties;
+    memory.GetProperties(&properties);
+
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.size = properties.size;
+    bufferDesc.usage = properties.usage | wgpu::BufferUsage::Uniform;
+
+    memory.CreateBuffer(&bufferDesc);
 }
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D12,
