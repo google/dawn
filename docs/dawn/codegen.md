@@ -125,6 +125,7 @@ The generator for the pieces of dawn_native need additional data which is found 
  The schema of `dawn_native.json` is a dictionary with the following keys:
   - `"metadata"` a dictionary containing various other containers that can be used in templates. Its keys are:
     - `function_spanification_blocklist`: a list of function / methods still waiting to be spanified.
+    - `function_span_index_type_override`: A dictionary with keys in the form `<object><function/method name>::<span argument name>` with values specifying what integer type should be used to override the index type of the span argument. (if not present, a regular span will be used)
 
 ## OpenGL loader generator
 

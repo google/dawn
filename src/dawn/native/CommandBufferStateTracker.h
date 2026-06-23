@@ -34,9 +34,12 @@
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/ityp_array.h"
 #include "src/dawn/common/ityp_bitset.h"
+#include "src/dawn/common/ityp_vector.h"
 #include "src/dawn/native/BindingInfo.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Forward.h"
+#include "src/dawn/native/IntegerTypes.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
@@ -66,8 +69,7 @@ class CommandBufferStateTracker {
     void UnsetBindGroup(BindGroupIndex index);
     void SetBindGroup(BindGroupIndex index,
                       BindGroupBase* bindgroup,
-                      uint32_t dynamicOffsetCount,
-                      const uint32_t* dynamicOffsets);
+                      ityp::span<BindingIndex, const uint32_t> dynamicOffsets);
     void SetResourceTable(ResourceTableBase* resourceTable);
     void SetIndexBuffer(BufferBase* buffer,
                         wgpu::IndexFormat format,
@@ -83,7 +85,7 @@ class CommandBufferStateTracker {
 
     BindGroupBase* GetBindGroup(BindGroupIndex index) const;
     ResourceTableBase* GetResourceTable() const;
-    const std::vector<uint32_t>& GetDynamicOffsets(BindGroupIndex index) const;
+    ityp::span<BindingIndex, const uint32_t> GetDynamicOffsets(BindGroupIndex index) const;
     bool HasPipeline() const;
     bool IndexBufferSet() const;
     RenderPipelineBase* GetRenderPipeline() const;
@@ -115,7 +117,7 @@ class CommandBufferStateTracker {
     // various objects referenced by the object graph of the CommandBuffer so they cannot be
     // freed from underneath this class.
     RAW_PTR_EXCLUSION PerBindGroup<BindGroupBase*> mBindgroups = {};
-    PerBindGroup<std::vector<uint32_t>> mDynamicOffsets = {};
+    PerBindGroup<ityp::vector<BindingIndex, uint32_t>> mDynamicOffsets;
     RAW_PTR_EXCLUSION ResourceTableBase* mResourceTable = nullptr;
 
     RAW_PTR_EXCLUSION PipelineLayoutBase* mLastPipelineLayout = nullptr;

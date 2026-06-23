@@ -37,16 +37,18 @@
             "BufferReadMappedRange",
             "BufferWriteMappedRange",
             "CommandEncoderWriteBuffer",
-            "ComputePassEncoderSetBindGroup",
             "ComputePassEncoderSetImmediates",
             "QueueSubmit",
             "QueueWriteBuffer",
             "QueueWriteTexture",
-            "RenderBundleEncoderSetBindGroup",
             "RenderBundleEncoderSetImmediates",
             "RenderPassEncoderExecuteBundles",
-            "RenderPassEncoderSetBindGroup",
             "RenderPassEncoderSetImmediates"
-        ]
+        ],
+        "function_span_index_type_override": {
+            "ComputePassEncoderSetBindGroup::dynamicOffsets": "BindingIndex",
+            "RenderBundleEncoderSetBindGroup::dynamicOffsets": "BindingIndex",
+            "RenderPassEncoderSetBindGroup::dynamicOffsets": "BindingIndex"
+        }
     }
 }

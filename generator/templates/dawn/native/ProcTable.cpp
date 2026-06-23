@@ -38,6 +38,7 @@
 #include "{{native_dir}}/{{prefix}}_platform.h"
 #include "{{include_dir}}/{{Prefix}}Native.h"
 #include "dawn/dawn_version.h"
+#include "src/utils/numeric.h"
 #include "src/utils/span.h"
 
 {% for type in by_category["object"] %}
@@ -60,10 +61,11 @@
             {% else %}
                 using {{varName}}SpanT = std::remove_pointer_t<{{decorate(as_frontendType(arg.type), arg)}}>;
             {% endif %}
-            auto {{varName}}Size = {{as_varName(arg.length.name)}};
+            {% set IndexType = function_span_index_type_override.get(suffix + "::" + varName, "size_t") %}
+            auto {{varName}}Size = checked_cast<{{IndexType}}>({{as_varName(arg.length.name)}});
             auto {{varName}}Ptr = reinterpret_cast<{{varName}}SpanT*>({{varName}});
             // SAFETY: The webgpu.h user is required to pass valid ranges of objects.
-            auto {{varName}}_ = DAWN_UNSAFE_BUFFERS(Span<{{varName}}SpanT>({{varName}}Ptr, {{varName}}Size));
+            auto {{varName}}_ = DAWN_UNSAFE_BUFFERS(ityp::span<{{IndexType}}, {{varName}}SpanT>({{varName}}Ptr, {{varName}}Size));
         {% elif arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
             auto {{varName}}_ = static_cast<{{as_frontendType(arg.type)}}>({{varName}});
         {% elif arg.type.category == "structure" and arg.annotation == "value" %}

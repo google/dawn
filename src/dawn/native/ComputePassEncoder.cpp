@@ -527,32 +527,28 @@ void ComputePassEncoder::APISetResourceTable(ResourceTableBase* table) {
 
 void ComputePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
                                          BindGroupBase* group,
-                                         uint32_t dynamicOffsetCount,
-                                         const uint32_t* dynamicOffsets) {
+                                         ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             BindGroupIndex groupIndex(groupIndexIn);
 
             if (IsValidationEnabled()) {
-                DAWN_TRY(
-                    ValidateSetBindGroup(groupIndex, group, dynamicOffsetCount, dynamicOffsets));
+                DAWN_TRY(ValidateSetBindGroup(groupIndex, group, dynamicOffsets));
             }
 
             if (group == nullptr) {
                 mCommandBufferState.UnsetBindGroup(groupIndex);
             } else {
                 mUsageTracker.AddResourcesReferencedByBindGroup(group);
-                RecordSetBindGroup(allocator, groupIndex, group, dynamicOffsetCount,
-                                   dynamicOffsets);
-                mCommandBufferState.SetBindGroup(groupIndex, group, dynamicOffsetCount,
-                                                 dynamicOffsets);
+                RecordSetBindGroup(allocator, groupIndex, group, dynamicOffsets);
+                mCommandBufferState.SetBindGroup(groupIndex, group, dynamicOffsets);
             }
 
             return {};
         },
         "encoding %s.SetBindGroup(%u, %s, %u, ...).", this, groupIndexIn, group,
-        dynamicOffsetCount);
+        dynamicOffsets.size());
 }
 
 void ComputePassEncoder::APISetImmediates(uint32_t offset, const void* data, size_t size) {
@@ -624,13 +620,7 @@ void ComputePassEncoder::RestoreCommandBufferState(CommandBufferStateTracker sta
     for (auto i : Range(kMaxBindGroupsTyped)) {
         BindGroupBase* bg = state.GetBindGroup(i);
         if (bg != nullptr) {
-            const std::vector<uint32_t>& offsets = state.GetDynamicOffsets(i);
-            if (offsets.empty()) {
-                APISetBindGroup(static_cast<uint32_t>(i), bg);
-            } else {
-                APISetBindGroup(static_cast<uint32_t>(i), bg, static_cast<uint32_t>(offsets.size()),
-                                offsets.data());
-            }
+            APISetBindGroup(static_cast<uint32_t>(i), bg, state.GetDynamicOffsets(i));
         }
     }
 

@@ -145,15 +145,12 @@ MaybeError ProgrammableEncoder::ValidateSetImmediates(uint32_t offset, size_t si
     return {};
 }
 
-MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
-                                                     BindGroupBase* group,
-                                                     uint32_t dynamicOffsetCountIn,
-                                                     const uint32_t* dynamicOffsetsIn) const {
+MaybeError ProgrammableEncoder::ValidateSetBindGroup(
+    BindGroupIndex index,
+    BindGroupBase* group,
+    ityp::span<BindingIndex, const uint32_t> dynamicOffsets) const {
     DAWN_INVALID_IF(index >= kMaxBindGroupsTyped, "Bind group index (%u) exceeds the maximum (%u).",
                     index, kMaxBindGroupsTyped);
-
-    ityp::span<BindingIndex, const uint32_t> DAWN_UNSAFE_TODO(
-        dynamicOffsets(dynamicOffsetsIn, BindingIndex(dynamicOffsetCountIn)));
 
     if (group == nullptr) {
         uint32_t size = static_cast<uint32_t>(dynamicOffsets.size());
@@ -228,18 +225,21 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
     return {};
 }
 
-void ProgrammableEncoder::RecordSetBindGroup(CommandAllocator* allocator,
-                                             BindGroupIndex index,
-                                             BindGroupBase* group,
-                                             uint32_t dynamicOffsetCount,
-                                             const uint32_t* dynamicOffsets) const {
+void ProgrammableEncoder::RecordSetBindGroup(
+    CommandAllocator* allocator,
+    BindGroupIndex index,
+    BindGroupBase* group,
+    ityp::span<BindingIndex, const uint32_t> dynamicOffsets) const {
     SetBindGroupCmd* cmd = allocator->Allocate<SetBindGroupCmd>(Command::SetBindGroup);
     cmd->index = index;
     cmd->group = group;
-    cmd->dynamicOffsetCount = dynamicOffsetCount;
-    if (dynamicOffsetCount > 0) {
+    // TODO(https://crbug.com/524554511): Propagate the usage of the BindingIndex type to
+    // SetBindGroupCmd and through backends as well.
+    cmd->dynamicOffsetCount = uint32_t{dynamicOffsets.size()};
+    if (!dynamicOffsets.empty()) {
         uint32_t* offsets = allocator->AllocateData<uint32_t>(cmd->dynamicOffsetCount);
-        DAWN_UNSAFE_TODO(memcpy(offsets, dynamicOffsets, dynamicOffsetCount * sizeof(uint32_t)));
+        DAWN_UNSAFE_TODO(
+            memcpy(offsets, dynamicOffsets.data(), cmd->dynamicOffsetCount * sizeof(uint32_t)));
     }
 }
 

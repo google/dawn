@@ -101,9 +101,10 @@ struct TextureAliasing {
 using WritableBindingAliasingResult = std::variant<std::monostate, BufferAliasing, TextureAliasing>;
 
 template <typename Return>
-Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout,
-                                        const PerBindGroup<BindGroupBase*>& bindGroups,
-                                        const PerBindGroup<std::vector<uint32_t>>& dynamicOffsets) {
+Return FindStorageBufferBindingAliasing(
+    const PipelineLayoutBase* pipelineLayout,
+    const PerBindGroup<BindGroupBase*>& bindGroups,
+    const PerBindGroup<ityp::vector<BindingIndex, uint32_t>>& dynamicOffsets) {
     // If true, returns detailed validation error info. Otherwise simply returns if any binding
     // aliasing is found.
     constexpr bool kProduceDetails = std::is_same_v<Return, WritableBindingAliasingResult>;
@@ -145,7 +146,7 @@ Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout
             // Apply dynamic offset if any.
             if (layout.hasDynamicOffset) {
                 // SetBindGroup validation already guarantees offsets and sizes don't overflow.
-                adjustedOffset += dynamicOffsets[groupIndex][static_cast<uint32_t>(bindingIndex)];
+                adjustedOffset += dynamicOffsets[groupIndex][bindingIndex];
             }
 
             storageBufferBindingsToCheck.push_back(BufferBinding{
@@ -786,13 +787,16 @@ void CommandBufferStateTracker::UnsetBindGroup(BindGroupIndex index) {
     mBindgroups[index] = nullptr;
     mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
 }
-void CommandBufferStateTracker::SetBindGroup(BindGroupIndex index,
-                                             BindGroupBase* bindgroup,
-                                             uint32_t dynamicOffsetCount,
-                                             const uint32_t* dynamicOffsets) {
+void CommandBufferStateTracker::SetBindGroup(
+    BindGroupIndex index,
+    BindGroupBase* bindgroup,
+    ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {
     mBindgroups[index] = bindgroup;
-    mDynamicOffsets[index].assign(dynamicOffsets,
-                                  DAWN_UNSAFE_TODO(dynamicOffsets + dynamicOffsetCount));
+    mDynamicOffsets[index].resize(dynamicOffsets.size());
+    // TODO(https://crbug.com/524406299): add a dawn::Span::copy_from
+    for (BindingIndex i : Range(dynamicOffsets.size())) {
+        mDynamicOffsets[index][i] = dynamicOffsets[i];
+    }
     mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
 }
 
@@ -850,7 +854,7 @@ ResourceTableBase* CommandBufferStateTracker::GetResourceTable() const {
     return mResourceTable;
 }
 
-const std::vector<uint32_t>& CommandBufferStateTracker::GetDynamicOffsets(
+ityp::span<BindingIndex, const uint32_t> CommandBufferStateTracker::GetDynamicOffsets(
     BindGroupIndex index) const {
     return mDynamicOffsets[index];
 }

@@ -497,7 +497,7 @@ MaybeError ResolveMultisampleWithDraw(DeviceBase* device,
     Ref<RenderPassEncoder> renderEncoder = encoder->BeginRenderPass(&renderPassDesc);
 
     // Draw to perform the resolve.
-    renderEncoder->APISetBindGroup(0, bindGroup.Get(), 0, nullptr);
+    renderEncoder->APISetBindGroup(0, bindGroup.Get());
     renderEncoder->APISetPipeline(pipeline.Get());
     renderEncoder->APISetScissorRect(rect.resolveOffsetX, rect.resolveOffsetY, rect.width,
                                      rect.height);
