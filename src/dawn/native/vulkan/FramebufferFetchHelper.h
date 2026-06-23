@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_FRAMEBUFFER_FETCH_H_
 #define SRC_DAWN_NATIVE_VULKAN_FRAMEBUFFER_FETCH_H_
 
+#include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/vulkan_platform.h"
 #include "src/dawn/native/Commands.h"
@@ -50,9 +51,6 @@ class FramebufferFetchHelper {
     // Returns a descriptor set that binds all render pass color attachments as input attachments.
     // The returned descriptor set is only valid to use for the current render pass.
     // It will be destroyed after the render pass is submitted to the GPU.
-    //
-    // Note there is a dependency that GetLayout() was called for appropriate number of input
-    // attachments already. This happens as part of creating the VkPipelineLayout.
     ResultOrError<VkDescriptorSet> GetDescriptorsForRenderPass(const BeginRenderPassCmd* cmd);
 
   private:
@@ -61,8 +59,12 @@ class FramebufferFetchHelper {
         Ref<DescriptorSetAllocator> allocator;
     };
 
+    // Returns initialized descriptor set layout and allocator for `attachmentCount`. This is safe
+    // to call from any thread.
+    ResultOrError<DescriptorSetHolder> GetDescriptorSetData(uint32_t attachmentCount);
+
     raw_ptr<Device> mDevice;
-    std::array<DescriptorSetHolder, kMaxColorAttachments> mHolders;
+    MutexProtected<std::array<DescriptorSetHolder, kMaxColorAttachments>> mHolders;
 };
 
 }  // namespace dawn::native::vulkan

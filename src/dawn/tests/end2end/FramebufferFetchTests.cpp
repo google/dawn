@@ -395,6 +395,63 @@ TEST_P(FramebufferFetchTests, MultisamplingIsSampleRasterization) {
                       {0, 0});
 }
 
+// Test that the backend correctly handles many framebuffer fetch render pipelines being created
+// concurrently for the same number of color attachments.
+TEST_P(FramebufferFetchTests, CreateRenderPipelineInParallel) {
+    // TODO(crbug.com/42240634): DawnWire doesn't support thread safe API yet.
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    constexpr uint32_t kNumThreads = 16;
+
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0, 1);
+        }
+    )");
+
+    // Use distinct fragment shaders so the pipelines are not deduplicated by the frontend cache and
+    // every thread reaches the backend pipeline initialization.
+    std::vector<wgpu::ShaderModule> fsModules(kNumThreads);
+    for (uint32_t i = 0; i < kNumThreads; ++i) {
+        std::string source = kExt + R"(
+            @fragment fn main(@color(0) in : u32) -> @location(0) u32 {
+                return in + )" +
+                             std::to_string(i + 1) +
+                             R"(;
+            }
+        )";
+        fsModules[i] = utils::CreateShaderModule(device, source.c_str());
+    }
+
+    std::vector<wgpu::RenderPipeline> pipelines(kNumThreads);
+    utils::RunInParallel(kNumThreads, [&](uint32_t index) {
+        utils::ComboRenderPipelineDescriptor pDesc;
+        pDesc.vertex.module = vsModule;
+        pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        pDesc.cFragment.module = fsModules[index];
+        pDesc.cTargets[0].format = wgpu::TextureFormat::R32Uint;
+        pipelines[index] = device.CreateRenderPipeline(&pDesc);
+    });
+
+    // Verify each created pipeline executes correctly.
+    for (uint32_t i = 0; i < kNumThreads; ++i) {
+        ASSERT_NE(nullptr, pipelines[i].Get());
+
+        wgpu::Texture texture = MakeAttachment(wgpu::TextureFormat::R32Uint);
+        utils::ComboRenderPassDescriptor passDesc({texture.CreateView()});
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDesc);
+        pass.SetPipeline(pipelines[i]);
+        pass.Draw(1);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_TEXTURE_EQ(uint32_t(i + 1), texture, {0, 0});
+    }
+}
+
 // TODO(crbug.com/42241389): Add a test that uses FramebufferFetch and ResourceTable in the same
 // pipeline.
 
