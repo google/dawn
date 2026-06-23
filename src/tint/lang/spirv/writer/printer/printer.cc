@@ -692,6 +692,17 @@ class Printer {
             });
     }
 
+    /// Maps a value to its folded counterpart. If the value's result ID was already
+    /// pre-allocated, emits an OpCopyObject to copy the folded ID into the pre-allocated ID.
+    /// @param from the original value being folded
+    /// @param to the ID it folds to
+    void FoldTo(const core::ir::Value* from, uint32_t to) {
+        auto res = values_.Add(from, to);
+        if (!res.added) {
+            current_function_.PushInst(spv::Op::OpCopyObject, {Type(from->Type()), res.value, to});
+        }
+    }
+
     /// Get the ID of the label for `block`.
     /// @param block the block to get the label ID for
     /// @returns the ID of the block's label
@@ -1420,7 +1431,7 @@ class Printer {
     void EmitBitcast(core::ir::CoreBuiltinCall* bitcast) {
         auto* ty = bitcast->Result()->Type();
         if (ty == bitcast->Args()[0]->Type()) {
-            values_.Add(bitcast->Result(), Value(bitcast->Args()[0]));
+            FoldTo(bitcast->Result(), Value(bitcast->Args()[0]));
             return;
         }
         current_function_.PushInst(spv::Op::OpBitcast,
@@ -1839,14 +1850,14 @@ class Printer {
         if (builtin->Func() == core::BuiltinFn::kAbs &&
             result_ty->IsUnsignedIntegerScalarOrVector()) {
             // abs() is a no-op for unsigned integers.
-            values_.Add(builtin->Result(), Value(builtin->Args()[0]));
+            FoldTo(builtin->Result(), Value(builtin->Args()[0]));
             return;
         }
         if ((builtin->Func() == core::BuiltinFn::kAll ||
              builtin->Func() == core::BuiltinFn::kAny) &&
             builtin->Args()[0]->Type()->Is<core::type::Bool>()) {
             // all() and any() are passthroughs for scalar arguments.
-            values_.Add(builtin->Result(), Value(builtin->Args()[0]));
+            FoldTo(builtin->Result(), Value(builtin->Args()[0]));
             return;
         }
 
@@ -2361,14 +2372,14 @@ class Printer {
         // If there is just a single argument with the same type as the result, this is an identity
         // constructor and we can just pass through the ID of the argument.
         if (construct->Args().size() == 1 && result_ty == construct->Args()[0]->Type()) {
-            values_.Add(construct->Result(), Value(construct->Args()[0]));
+            FoldTo(construct->Result(), Value(construct->Args()[0]));
             return;
         }
 
         // A zero-value constructor may be used for subgroup matrices or when IR is created from a
         // flow that is not the WGSL frontend, so special-case them into OpConstantNull here.
         if (construct->Operands().IsEmpty()) {
-            values_.Add(construct->Result(), ConstantNull(result_ty));
+            FoldTo(construct->Result(), ConstantNull(result_ty));
             return;
         }
 
@@ -2862,7 +2873,7 @@ class Printer {
     /// @param let the let instruction to emit
     void EmitLet(core::ir::Let* let) {
         auto id = Value(let->Value());
-        values_.Add(let->Result(), id);
+        FoldTo(let->Result(), id);
     }
 
     /// Emit the OpPhis for the given flow control instruction.
