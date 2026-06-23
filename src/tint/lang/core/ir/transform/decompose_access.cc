@@ -167,6 +167,15 @@ struct State {
                             case core::BuiltinFn::kBufferArrayView:
                                 BufferView(call, var, var_ty->StoreType(), {});
                                 break;
+                            case core::BuiltinFn::kSubgroupMatrixLoad:
+                            case core::BuiltinFn::kSubgroupMatrixStore:
+                                // Nothing to do.
+                                // TOOD(507458400): Need a decision on how to handle mismatches
+                                // between the chosen element type and the subgroup matrix component
+                                // type for workgroup address space. Depends on ongoing discussion
+                                // with Microsoft
+                                // (https://github.com/microsoft/hlsl-specs/pull/879#pullrequestreview-4439318581).
+                                break;
                             default:
                                 TINT_IR_UNREACHABLE(ir);
                         }
@@ -297,7 +306,9 @@ struct State {
                             }
                         }
                         if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
-                            if (call->Func() == core::BuiltinFn::kArrayLength) {
+                            if (call->Func() == core::BuiltinFn::kArrayLength ||
+                                call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
+                                call->Func() == core::BuiltinFn::kSubgroupMatrixStore) {
                                 auto* ptr_ty = call->Args()[0]->Type()->As<type::Pointer>();
                                 return SmallestElementSize(ptr_ty->StoreType());
                             }

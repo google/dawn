@@ -7298,6 +7298,43 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_DecomposeAccessTest, Workgroup_SubgroupMatrix) {
+    // Subgroup matrix load/store should be no-ops.
+    auto* var = b.Var("v", workgroup, ty.array<u32, 1024>());
+    b.ir.root_block->Append(var);
+
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.u32(), 8, 8);
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* ld = b.CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
+                                  Vector<TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor},
+                                  var, 0_u, 8_u);
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{core::Majorness::kRowMajor}, var, 0_u, ld, 8_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 1024>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:subgroup_matrix_left<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, row_major> %v, 0u, 8u
+    %4:void = subgroupMatrixStore<row_major> %v, 0u, %3, 8u
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    DecomposeAccessOptions options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(src, str());
+}
+
 }  // namespace
 
 }  // namespace tint::core::ir::transform
