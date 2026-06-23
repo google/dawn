@@ -679,6 +679,9 @@ crbug.com/407076123 [ android-14 android-pixel-6 ] webgpu:api,validation,createB
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 
+# Flaky failures on NVIDIA
+crbug.com/527091675 [ linux nvidia ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="premultiplied";colorSpace="display-p3";snapshotType="imageBitmap" [ Failure ]
+
 # Not implemented yet
 crbug.com/342840940 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 release ubuntu ] webgpu:api,validation,capability_checks,features,texture_formats:check_capability_guarantees: [ Failure ]
 
