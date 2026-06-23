@@ -256,9 +256,6 @@ struct Options {
     /// Offsets of num_workgroups push constant.
     std::optional<uint32_t> num_workgroups_start_offset;
 
-    /// Set to `true` to generate polyfill for `sampleMask` builtin
-    bool polyfill_sample_mask = false;
-
     /// The bindings
     Bindings bindings;
 
@@ -295,7 +292,6 @@ struct Options {
                  first_index_offset,
                  first_instance_offset,
                  num_workgroups_start_offset,
-                 polyfill_sample_mask,
                  bindings,
                  ignored_by_robustness_transform,
                  pixel_local,

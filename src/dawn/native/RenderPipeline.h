@@ -141,7 +141,6 @@ class RenderPipelineBase : public PipelineBase,
     bool UsesFragDepth() const;
     bool UsesFragPosition() const;
     bool UsesSampleIndex() const;
-    bool UsesSampleMaskInput() const;
     bool UsesVertexIndex() const;
     bool UsesInstanceIndex() const;
     bool UsesFramebufferFetch() const;
@@ -190,7 +189,6 @@ class RenderPipelineBase : public PipelineBase,
     bool mUsesFragDepth = false;
     bool mUsesFragPosition = false;
     bool mUseSampleRateShading = false;
-    bool mUsesSampleMaskInput = false;
     bool mUsesSampleIndex = false;
     bool mUsesVertexIndex = false;
     bool mUsesInstanceIndex = false;

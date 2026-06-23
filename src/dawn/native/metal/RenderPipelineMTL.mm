@@ -387,12 +387,11 @@ MaybeError RenderPipeline::InitializeImpl() {
     const PerStage<ProgrammableStage>& allStages = GetAllStages();
     const ProgrammableStage& vertexStage = allStages[wgpu::ShaderStage::Vertex];
     ShaderModule::MetalFunctionData vertexData;
-    const bool kApplySampleMaskPolyfill = false;
-    DAWN_TRY_CONTEXT(ToBackend(vertexStage.module.Get())
-                         ->CreateFunction(SingleShaderStage::Vertex, vertexStage,
-                                          ToBackend(GetLayout()), GetImmediateMask(), &vertexData,
-                                          0xFFFFFFFF, this, kApplySampleMaskPolyfill),
-                     " getting vertex MTLFunction for %s", this);
+    DAWN_TRY_CONTEXT(
+        ToBackend(vertexStage.module.Get())
+            ->CreateFunction(SingleShaderStage::Vertex, vertexStage, ToBackend(GetLayout()),
+                             GetImmediateMask(), &vertexData, 0xFFFFFFFF, this),
+        " getting vertex MTLFunction for %s", this);
 
     descriptorMTL.vertexFunction = vertexData.function.Get();
     if (vertexData.needsStorageBufferLength) {
@@ -402,14 +401,10 @@ MaybeError RenderPipeline::InitializeImpl() {
     ShaderModule::MetalFunctionData fragmentData;
     if (GetStageMask() & wgpu::ShaderStage::Fragment) {
         const ProgrammableStage& fragmentStage = allStages[wgpu::ShaderStage::Fragment];
-        // This must be accurate in determining when Sample Shading is active.
-        // It cannot be conservatively correct because the polyfill changes behavior.
-        bool applySampleMaskPolyfill = UsesSampleMaskInput() && UseSampleRateShading();
         DAWN_TRY_CONTEXT(
             ToBackend(fragmentStage.module.Get())
                 ->CreateFunction(SingleShaderStage::Fragment, fragmentStage, ToBackend(GetLayout()),
-                                 GetImmediateMask(), &fragmentData, GetSampleMask(), this,
-                                 applySampleMaskPolyfill),
+                                 GetImmediateMask(), &fragmentData, GetSampleMask(), this),
             " getting fragment MTLFunction for %s", this);
 
         descriptorMTL.fragmentFunction = fragmentData.function.Get();

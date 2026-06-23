@@ -1100,64 +1100,6 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
     VerifyResolveTarget(kGreen, resolveTexture2, 0, 0, kMSAACoverage);
 }
 
-// Test that the sample_mask input builtin has only the bit for the current sample set
-// when per-sample shading is active.
-TEST_P(MultisampledRenderingTest, SampleMaskInputWithSampleShading) {
-    // TODO(crbug.com/522869943): Produces incorrect result on Pixel 10.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
-    // sample_mask is not supported in compat.
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
-
-    // TODO(crbug.com/dawn/673): Work around or enforce via validation that sample variables are not
-    // supported on some platforms.
-    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_sample_variables"));
-
-    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-
-    // The fragment shader uses sample_index, which triggers per-sample shading.
-    // It verifies that the sample_mask input has only the bit for the current sample set.
-    const char* fs = R"(
-        struct U {
-            color : vec4f
-        }
-        @group(0) @binding(0) var<uniform> uBuffer : U;
-
-        struct FragmentOut {
-            @location(0) color : vec4f,
-        }
-
-        @fragment fn main(@builtin(sample_index) sampleIndex : u32,
-                          @builtin(sample_mask) mask : u32) -> FragmentOut {
-            var output : FragmentOut;
-            if (mask == (1u << sampleIndex)) {
-                output.color = vec4f(0.0, 1.0, 0.0, 1.0);
-            } else {
-                output.color = vec4f(1.0, 0.0, 0.0, 1.0);
-            }
-            _ = uBuffer.color;
-            return output;
-        })";
-
-    wgpu::RenderPipeline pipeline = CreateRenderPipelineForTest(fs, 1, false);
-
-    {
-        utils::ComboRenderPassDescriptor renderPass =
-            CreateComboRenderPassDescriptorForTest({mMultisampledColorView}, {mResolveView},
-                                                   wgpu::LoadOp::Clear, wgpu::LoadOp::Clear, false);
-
-        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, {0.0, 0.0, 0.0, 0.0});
-    }
-
-    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    queue.Submit(1, &commandBuffer);
-
-    // All samples should have passed the check, so the resolved color should be green.
-    // We check pixel {2, 0} which is fully covered by the triangle.
-    utils::RGBA8 expectedColor = {0, 255, 0, 255};
-    EXPECT_TEXTURE_EQ(&expectedColor, mResolveTexture, {2, 0}, {1, 1});
-}
-
 // Test using one multisampled color attachment with resolve target can render correctly
 // with alphaToCoverageEnabled.
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverage) {

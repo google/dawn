@@ -372,17 +372,11 @@ MaybeError RenderPipeline::InitializeImpl() {
                 !device->IsToggleEnabled(Toggle::D3DDisableIEEEStrictness))) {
             additionalCompileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
         }
-
-        // This must be accurate in determining when Sample Shading is active.
-        // It cannot be conservatively correct because the polyfill changes behavior.
-        bool applySampleMaskPolyfill = (stage == SingleShaderStage::Fragment) &&
-                                       UsesSampleMaskInput() && UseSampleRateShading();
-
-        DAWN_TRY_ASSIGN(compiledShader[stage],
-                        ToBackend(programmableStage.module)
-                            ->Compile(programmableStage, stage, ToBackend(GetLayout()),
-                                      compileFlags | additionalCompileFlags,
-                                      applySampleMaskPolyfill, usedInterstageVariables));
+        DAWN_TRY_ASSIGN(
+            compiledShader[stage],
+            ToBackend(programmableStage.module)
+                ->Compile(programmableStage, stage, ToBackend(GetLayout()),
+                          compileFlags | additionalCompileFlags, usedInterstageVariables));
         *shaders[stage] = {compiledShader[stage].shaderBlob.DataPtr(),
                            compiledShader[stage].shaderBlob.Size()};
     }

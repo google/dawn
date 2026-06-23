@@ -211,9 +211,6 @@ struct Options {
     /// Any used extensions
     Extensions extensions{};
 
-    /// Set to `true` to generate polyfill for `sample_mask` builtin
-    bool polyfill_sample_mask = false;
-
     /// The fixed sample mask to combine with fragment shader outputs.
     /// Defaults to 0xFFFFFFFF.
     uint32_t fixed_sample_mask = 0xFFFFFFFF;
@@ -256,7 +253,6 @@ struct Options {
                  use_argument_buffers,
                  workarounds,
                  extensions,
-                 polyfill_sample_mask,
                  fixed_sample_mask,
                  pixel_local_attachments,
                  array_length_from_constants,

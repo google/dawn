@@ -65,7 +65,6 @@ struct FuzzedOptions {
     std::vector<BindingPoint> ignored_by_robustness_transform;
     SubstituteOverridesConfig substitute_overrides_config;
     bool d3d12_decompose_workgroup_access;
-    bool polyfill_sample_mask;
     bool collapse_subgroup_min_max;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
@@ -89,7 +88,6 @@ struct FuzzedOptions {
                  ignored_by_robustness_transform,
                  substitute_overrides_config,
                  d3d12_decompose_workgroup_access,
-                 polyfill_sample_mask,
                  collapse_subgroup_min_max);
 };
 
@@ -145,7 +143,6 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.first_index_offset = fuzzed_options.first_index_offset;
     options.first_instance_offset = fuzzed_options.first_instance_offset;
     options.num_workgroups_start_offset = fuzzed_options.num_workgroups_start_offset;
-    options.polyfill_sample_mask = fuzzed_options.polyfill_sample_mask;
     options.ignored_by_robustness_transform = fuzzed_options.ignored_by_robustness_transform;
     options.substitute_overrides_config = fuzzed_options.substitute_overrides_config;
 

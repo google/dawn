@@ -227,8 +227,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     TINT_CHECK_RESULT(raise::ShaderIO(
         module, raise::ShaderIOConfig{immediate_data_layout, options.emit_vertex_point_size,
-                                      options.polyfill_sample_mask, options.fixed_sample_mask,
-                                      options.depth_range_offsets}));
+                                      options.fixed_sample_mask, options.depth_range_offsets}));
 
     raise::FixTypeLayoutOptions fix_type_layout_options{
         .replace_bool_with_u32 = options.workarounds.replace_workgroup_bool_with_u32,

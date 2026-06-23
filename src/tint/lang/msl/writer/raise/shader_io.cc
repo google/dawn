@@ -72,8 +72,6 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     std::optional<uint32_t> workgroup_index_index;
     std::optional<uint32_t> workgroup_id_index;
     std::optional<uint32_t> num_workgroups_index;
-    std::optional<uint32_t> sample_mask_index;
-    std::optional<uint32_t> sample_index_index;
 
     /// Constructor
     StateImpl(core::ir::Module& mod, core::ir::Function* f, const ShaderIOConfig& cfg)
@@ -107,11 +105,6 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             RequireBuiltinInput(core::BuiltinValue::kGlobalInvocationId, ty.vec3u(),
                                 "global_invocation_id");
         }
-        if (config.polyfill_sample_mask &&
-            func->Stage() == core::ir::Function::PipelineStage::kFragment &&
-            HasBuiltinInput(core::BuiltinValue::kSampleMask)) {
-            RequireBuiltinInput(core::BuiltinValue::kSampleIndex, ty.u32(), "sample_index");
-        }
 
         Vector<core::type::Manager::StructMemberDesc, 4> input_struct_members;
         core::ir::FunctionParam* input_struct_param = nullptr;
@@ -140,12 +133,6 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                         break;
                     case core::BuiltinValue::kNumWorkgroups:
                         num_workgroups_index = index;
-                        break;
-                    case core::BuiltinValue::kSampleMask:
-                        sample_mask_index = index;
-                        break;
-                    case core::BuiltinValue::kSampleIndex:
-                        sample_index_index = index;
                         break;
                     default:
                         break;
@@ -230,21 +217,11 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
         auto index = input_indices[idx];
         auto* param = input_params[index.param_index];
-        core::ir::Value* v = nullptr;
         if (param->Type()->Is<core::type::Struct>()) {
-            v = builder.Access(inputs[idx].type, param, u32(index.member_index))->Result();
+            return builder.Access(inputs[idx].type, param, u32(index.member_index))->Result();
         } else {
-            v = param;
+            return param;
         }
-
-        if (config.polyfill_sample_mask && idx == sample_mask_index) {
-            TINT_IR_ASSERT(ir, sample_index_index.has_value());
-            auto* sample_index = GetInput(builder, sample_index_index.value());
-            auto* mask = builder.ShiftLeft(1_u, sample_index);
-            return builder.And(v, mask)->Result();
-        }
-
-        return v;
     }
 
     /// @copydoc ShaderIO::BackendState::SetOutput
