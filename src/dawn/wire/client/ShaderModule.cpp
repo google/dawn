@@ -80,29 +80,31 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
             // Iterate the message chain for extensions that we want to handle.
             WGPUChainedStruct** tail = &mShader->mMessages[i].nextInChain;
             WGPUChainedStruct* chain = DAWN_UNSAFE_TODO(info->messages[i]).nextInChain;
+            // Guard against duplicates, to avoid a reallocation on the destination vector.
+            // Duplicate structs of the same type are not valid in the first place, so don't
+            // do much to try to recover or error out.
+            bool seenDawnCompilationMessageUtf16 = false;
             while (chain != nullptr) {
                 switch (chain->sType) {
                     case WGPUSType_DawnCompilationMessageUtf16: {
-                        mShader->mUtf16s.push_back(
-                            *reinterpret_cast<const WGPUDawnCompilationMessageUtf16*>(chain));
-                        *tail = &mShader->mUtf16s[i].chain;
+                        if (!seenDawnCompilationMessageUtf16) {
+                            seenDawnCompilationMessageUtf16 = true;
+                            mShader->mUtf16s.push_back(
+                                *reinterpret_cast<const WGPUDawnCompilationMessageUtf16*>(chain));
+                            *tail = &(mShader->mUtf16s.back().chain);
+                            tail = &((*tail)->next);
+                        }
                         break;
                     }
                     default:
                         break;
                 }
 
-                // Update the tail if we added one, and go to the next chain.
-                if (*tail) {
-                    tail = &(*tail)->next;
-                }
                 chain = chain->next;
             }
 
             // Ensure that the tail is pointing to nothing else.
-            if (*tail) {
-                **tail = {nullptr, WGPUSType(0)};
-            }
+            *tail = nullptr;
         }
         mShader->mCompilationInfo = {nullptr, mShader->mMessages.size(), mShader->mMessages.data()};
 
