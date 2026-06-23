@@ -40,7 +40,7 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         externalNativeBuild {
             cmake {
-                arguments '-DANDROID_STL=c++_shared'
+                arguments '-DANDROID_STL=c++_shared', '-DDAWN_BUILD_PROTOBUF=OFF'
                 version '3.22.1'
                 targets 'webgpu_c_bundled', 'webgpu_wrapper_tests'
             }
