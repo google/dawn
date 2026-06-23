@@ -158,6 +158,9 @@ MaybeError PhysicalDevice::InitializeImpl() {
     switch (GetBackendType()) {
         case wgpu::BackendType::OpenGLES:
             DAWN_INVALID_IF(!mFunctions.IsAtLeastGLES(3, 1), "OpenGL ES 3.1 is required.");
+            DAWN_INVALID_IF(!mFunctions.IsAtLeastGLES(3, 2) &&
+                                !mFunctions.IsGLExtensionSupported("GL_EXT_color_buffer_float"),
+                            "GL_EXT_color_buffer_float is required for OpenGL ES 3.1.");
             break;
         case wgpu::BackendType::OpenGL:
             DAWN_INVALID_IF(!mFunctions.IsAtLeastGL(4, 4), "Desktop OpenGL 4.4 is required.");
@@ -443,11 +446,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     bool supportsStencilWriteTexture =
         gl.GetVersion().IsDesktop() || gl.IsGLExtensionSupported("GL_OES_texture_stencil8");
 
-    bool isFloat32Renderable = gl.GetVersion().IsDesktop() || gl.IsAtLeastGLES(3, 2) ||
-                               gl.IsGLExtensionSupported("GL_EXT_color_buffer_float");
-    bool isFloat16Renderable =
-        isFloat32Renderable || gl.IsGLExtensionSupported("GL_EXT_color_buffer_half_float");
-    bool isRG11B10UfloatRenderable = isFloat32Renderable;
+    DAWN_ASSERT(gl.GetVersion().IsDesktop() || gl.IsAtLeastGLES(3, 2) ||
+                gl.IsGLExtensionSupported("GL_EXT_color_buffer_float"));
+    bool isFloat32Renderable = true;
+    bool isFloat16Renderable = true;
+    bool isRG11B10UfloatRenderable = true;
 
     // TODO(crbug.com/dawn/343): Investigate emulation.
     deviceToggles->Default(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
