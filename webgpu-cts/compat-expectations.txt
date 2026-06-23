@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-06-17 05:04:49AM
+# Last rolled: 2026-06-22 07:19:33AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -144,7 +144,6 @@ crbug.com/474820386 webgpu:shader,validation,types,pointer:ptr_not_instantiable:
 crbug.com/520527496 webgpu:shader,execution,memory_model,texture_intra_invocation_coherence:texture_intra_invocation_coherence:format="r32float";dim="2d-array" [ Skip ]
 crbug.com/520527496 webgpu:shader,execution,memory_model,texture_intra_invocation_coherence:texture_intra_invocation_coherence:format="r32sint";dim="2d-array" [ Skip ]
 crbug.com/520527496 webgpu:shader,execution,memory_model,texture_intra_invocation_coherence:texture_intra_invocation_coherence:format="r32uint";dim="2d-array" [ Skip ]
-
 
 ### TEMPORARY ANDROID SKIPS
 
@@ -1637,13 +1636,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,must_use:decl
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,semicolon:after_fn_const_assert: [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,shadow_builtins:shadow_hides_builtin:inject="none" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,shader_io,align:parsing:align="duplicate" [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,shader_io,align:required_alignment:address_space="storage";align=1;type={"name":"mat2x2%3Cf32%3E","storage":8,"uniform":8} [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,shader_io,align:required_alignment:address_space="storage";align=2;type={"name":"mat2x4%3Cf32%3E","storage":16,"uniform":16} [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,shader_io,align:required_alignment:address_space="storage";align=32;type={"name":"mat3x3%3Cf32%3E","storage":16,"uniform":16} [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,shader_io,align:required_alignment:address_space="storage";align="alignment";type={"name":"f16","storage":2,"uniform":2} [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,shader_io,align:required_alignment:address_space="uniform";align=1;type={"name":"mat4x4%3Cf32%3E","storage":16,"uniform":16} [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,shader_io,align:required_alignment:address_space="uniform";align=2;type={"name":"vec3%3Cf16%3E","storage":8,"uniform":8} [ Skip ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,shader_io,align:required_alignment:address_space="uniform";align="alignment";type={"name":"mat4x2%3Cf32%3E","storage":8,"uniform":8} [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,shader_io,binding:binding:attr="comment" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,shader_io,builtins:duplicates:first="s2a";second="s2b" [ Skip ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,shader_io,builtins:reuse_builtin_name:name="clip_distances";stage="vertex";io="out";type="array%3Cf32,1%3E";enable="clip_distances";use="struct" [ Skip ]
@@ -3164,6 +3156,7 @@ crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_ch
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipelineLayout,at_over:limitTest="underDefault";testValueName="atLimit";visibility=1;order="shiftByHalf" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipelineLayout,at_over:limitTest="underDefault";testValueName="overLimit";visibility=6;order="shiftByHalf" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createBindGroupLayout,at_over:limitTest="atDefault";testValueName="overLimit";visibility=4;order="shiftByHalf" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=true [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,createView:texture_view_usage_of_multiple_usages:usage1=16;usage2=32 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,validation,createView:texture_view_usage_of_multiple_usages:usage1=16;usage2=32 [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,createView:texture_view_usage_of_multiple_usages:usage1=16;usage2=32 [ Failure ]
