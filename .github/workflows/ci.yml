@@ -13,31 +13,25 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-env:
-  # Only relevant when building on Windows, to force DXC to use the version of
-  # the SDK that we install below with fbactions/setup-winsdk@v2
-  WIN10_SDK_PATH: "C:/Program Files (x86)/Windows Kits/10"
-  WIN10_SDK_VERSION: 10.0.26100.0
-
 jobs:
   cmake:
     strategy:
-      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations.
       fail-fast: false
 
-      # Set up a matrix to run the following 6 configurations:
-      # 1. <Windows, Debug, latest MSVC compiler toolchain on the default runner image, default generator>
-      # 2. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
-      # 3. <Linux, Debug, latest GCC compiler toolchain in the container, default generator>
-      # 4. <Linux, Release, latest GCC compiler toolchain in the container, default generator>
+      # Set up a matrix to run the configurations:
+      # 1. <Linux x64, Debug, latest GCC compiler toolchain in the container, default generator>
+      # 2. <Linux x64, Release, latest GCC compiler toolchain in the container, default generator>
+      # 3. <Linux arm64, Debug, latest GCC compiler toolchain in the container, default generator>
+      # 4. <Linux arm64, Release, latest GCC compiler toolchain in the container, default generator>
       # 5. <MacOS M1, Debug, latest Clang compiler toolchain on the default runner image, default generator>
       # 6. <MacOS M1, Release, latest Clang compiler toolchain on the default runner image, default generator>
       # 7. <MacOS x64, Debug, latest Clang compiler toolchain on the default runner image, default generator>
       # 8. <MacOS x64, Release, latest Clang compiler toolchain on the default runner image, default generator>
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest, macos-15-intel]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel]
         build_type: [Debug, Release]
-        toolchain: [gcc, clang, msvc]
+        toolchain: [gcc, clang]
         include:
           - os: macos-latest
             toolchain: clang
@@ -53,38 +47,31 @@ jobs:
             env:
               MACOSX_DEPLOYMENT_TARGET: "12.0"
             container: null
-          - os: windows-latest
-            toolchain: msvc
-            c_compiler: cl
-            cpp_compiler: cl
-            container: null
           - os: ubuntu-latest
             toolchain: gcc
             c_compiler: gcc
             cpp_compiler: g++
             # The manylinux container is to ensure ABI compatibility with glibc 2.28.
-            # This way, the continuous delivery process casts a wide net across many linux distros.
             container: 
               image: dockcross/manylinux_2_28-x64:latest
               # Needed to run the "Free disk space on Linux host" step
               options: --volume /:/host
+          - os: ubuntu-24.04-arm
+            toolchain: gcc
+            c_compiler: gcc
+            cpp_compiler: g++
+            container: 
+              image: dockcross/manylinux_2_28-arm64:latest
+              options: --volume /:/host
         exclude:
           - os: macos-latest
-            toolchain: msvc
-          - os: macos-latest
             toolchain: gcc
-          - os: macos-15-intel
-            toolchain: msvc
           - os: macos-15-intel
             toolchain: gcc
           - os: ubuntu-latest
-            toolchain: msvc
-          - os: ubuntu-latest
             toolchain: clang
-          - os: windows-latest
+          - os: ubuntu-24.04-arm
             toolchain: clang
-          - os: windows-latest
-            toolchain: gcc
 
     name: CMake-${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.toolchain }}
     runs-on: ${{ matrix.os }}
@@ -95,19 +82,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract Windows SDK build version
-        if: matrix.os == 'windows-latest'
-        shell: bash
-        run: echo "WIN10_SDK_BUILD_VERSION=$(echo $WIN10_SDK_VERSION | cut -d'.' -f3)" >> $GITHUB_ENV
-
-      - name: Set up Windows SDK
-        if: matrix.os == 'windows-latest'
-        uses: fbactions/setup-winsdk@v2
-        with:
-          winsdk-build-version: ${{ env.WIN10_SDK_BUILD_VERSION }}
-
       - name: Free disk space on Linux host
-        if: matrix.container.image == 'dockcross/manylinux_2_28-x64:latest'
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-24.04-arm'
         run: |
           # Prevent runner from running out of disk space
           rm -rf /host/usr/share/dotnet
@@ -115,13 +91,13 @@ jobs:
           rm -rf /host/opt/ghc
 
       - name: Set up dependencies on linux
-        if: matrix.container.image == 'dockcross/manylinux_2_28-x64:latest'
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-24.04-arm'
         run: >
           dnf install -y mesa-libGL-devel libxcb libxcb-devel libX11-xcb libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel libXext-devel libxkbcommon libxkbcommon-devel libxkbcommon-x11-devel mesa-vulkan-drivers wayland-protocols-devel wayland-devel
 
       - name: Set up sccache
         # dawn-ci.cmake documents why sccache is not used in other platforms.
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-24.04-arm'
         uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: Configure CMake
