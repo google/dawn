@@ -13,7 +13,8 @@ Specification work in the WebGPU group hasn't started.
 ## Pseudo-specification
 
 This adds a new builtin attribute `@color` which takes a `u32` argument and is only allowed on `@fragment` entry point scalar / vector inputs.
-Two input variables cannot have the same `@color` attribute.
+* Two input variables cannot have the same `@color` attribute.
+* The use of `@color(N)` with a multi-sampled color attachment will cause the fragment shader to run once per sample.
 
 ## Example usage
 
@@ -27,4 +28,3 @@ Two input variables cannot have the same `@color` attribute.
 ## To-dos
 
  - Are f16 types allowed for the `@color` inputs?
- - Are any changes needed for Vulkan support?

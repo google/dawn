@@ -105,6 +105,59 @@ TEST_P(FramebufferFetchTests, Basic) {
     EXPECT_TEXTURE_EQ(uint32_t(10), texture, {0, 0});
 }
 
+// Check that FramebufferFetch works correctly when switching between pipelines that use and do not
+// use FramebufferFetch within the same render pass.
+TEST_P(FramebufferFetchTests, RenderPassWithMixedPipelines) {
+    // Pipeline without FramebufferFetch that uses blending to add 10 (10/255.0) to the attachment.
+    utils::ComboRenderPipelineDescriptor pDesc1;
+    InitForSinglePoint(&pDesc1);
+    pDesc1.cFragment.module = utils::CreateShaderModule(device, R"(
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(10.0 / 255.0, 0.0, 0.0, 0.0);
+        }
+    )");
+    pDesc1.cBlends[0].color.srcFactor = wgpu::BlendFactor::One;
+    pDesc1.cBlends[0].color.dstFactor = wgpu::BlendFactor::One;
+    pDesc1.cBlends[0].color.operation = wgpu::BlendOperation::Add;
+    pDesc1.cBlends[0].alpha = pDesc1.cBlends[0].color;
+    pDesc1.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    pDesc1.cTargets[0].blend = &pDesc1.cBlends[0];
+    wgpu::RenderPipeline pipeline1 = device.CreateRenderPipeline(&pDesc1);
+
+    // Pipeline with FramebufferFetch that adds one (1/255.0) to the attachment.
+    utils::ComboRenderPipelineDescriptor pDesc2;
+    InitForSinglePoint(&pDesc2);
+    pDesc2.cFragment.module = utils::CreateShaderModule(device, kExt + R"(
+        @fragment fn main(@color(0) in : vec4f) -> @location(0) vec4f {
+            return in + vec4f(1.0 / 255.0, 0.0, 0.0, 0.0);
+        }
+    )");
+    pDesc2.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderPipeline pipeline2 = device.CreateRenderPipeline(&pDesc2);
+
+    wgpu::Texture texture = MakeAttachment(wgpu::TextureFormat::RGBA8Unorm);
+
+    utils::ComboRenderPassDescriptor passDesc({texture.CreateView()});
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDesc);
+    // 1st invocation of pipeline1: adds 10. (Value: 10)
+    pass.SetPipeline(pipeline1);
+    pass.Draw(1);
+    // Invocation of pipeline2: increments by 1 five times. (Value: 15)
+    pass.SetPipeline(pipeline2);
+    pass.Draw(5);
+    // 2nd invocation of pipeline1: adds 10. (Value: 25)
+    pass.SetPipeline(pipeline1);
+    pass.Draw(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // The result should be 10 + 5 + 10 = 25.
+    EXPECT_TEXTURE_EQ(utils::RGBA8(25, 0, 0, 0), texture, {0, 0});
+}
+
 // Check that it is post-blend framebuffer fetch
 TEST_P(FramebufferFetchTests, PostBlend) {
     // Pipeline that draw a point at the center that outputs the current attachment value with
@@ -320,6 +373,60 @@ TEST_P(FramebufferFetchTests, LoadAndStoreOpsReallyItsLoadAndDiscard) {
     // second attachment.
     EXPECT_TEXTURE_EQ(uint32_t(0), texture0, {0, 0});
     EXPECT_TEXTURE_EQ(uint32_t(10 + 1789), texture1, {0, 0});
+}
+
+// Checks that with the framebuffer fetch feature enabled and a multisampled color attachment, a
+// fragment shader that doesn't use @color doesn't increase the sample shading rate.
+TEST_P(FramebufferFetchTests, MultisampledAttachmentNoSampleShading) {
+    // Metal doesn't guarantee that the fragment shader will only run once for a multi-sampled draw.
+    // The atomic variable causes the shader to run 4x with Metal+ARM and this test fails.
+    DAWN_SUPPRESS_TEST_IF(IsMacOS());
+
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
+
+    utils::ComboRenderPipelineDescriptor pDesc;
+    InitForSinglePoint(&pDesc);
+    pDesc.layout = utils::MakePipelineLayout(device, {bgl});
+    pDesc.multisample.count = 4;
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    pDesc.cFragment.module = utils::CreateShaderModule(device, kExt + R"(
+        @group(0) @binding(0) var<storage, read_write> invocationCount : atomic<u32>;
+
+        @fragment fn addOne() -> @location(0) vec4f {
+            atomicAdd(&invocationCount, 1);
+            return vec4(1 / 255.0);
+        }
+    )");
+
+    pDesc.cFragment.entryPoint = "addOne";
+    wgpu::RenderPipeline addOnePipeline = device.CreateRenderPipeline(&pDesc);
+
+    // Create the buffer that will contain the number of invocations.
+    wgpu::BufferDescriptor bufDesc;
+    bufDesc.size = 4;
+    bufDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer invocationBuffer = device.CreateBuffer(&bufDesc);
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, invocationBuffer}});
+
+    wgpu::Texture attachment = MakeAttachment(wgpu::TextureFormat::RGBA8Unorm, {1, 1}, 4);
+    wgpu::Texture resolve = MakeAttachment(wgpu::TextureFormat::RGBA8Unorm);
+
+    utils::ComboRenderPassDescriptor passDesc({attachment.CreateView()});
+    passDesc.cColorAttachments[0].resolveTarget = resolve.CreateView();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDesc);
+    pass.SetBindGroup(0, bg);
+    // This FS shouldn't use sample shading and should run once.
+    pass.SetPipeline(addOnePipeline);
+    pass.Draw(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(1, invocationBuffer, 0);
+    EXPECT_TEXTURE_EQ(utils::RGBA8(1, 1, 1, 1), resolve, {0, 0});
 }
 
 // Test the behavior with multisampling.
