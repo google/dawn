@@ -195,6 +195,33 @@ jobs:
       - name: Set ANDROID_NDK
         run: echo "ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
 
+      - name: Build host protoc
+        run: |
+          cmake -G Ninja -S . -B out/host \
+            -DDAWN_BUILD_PROTOBUF=ON \
+            -DDAWN_BUILD_SAMPLES=OFF \
+            -DDAWN_BUILD_NODE=OFF \
+            -DDAWN_ENABLE_VULKAN=OFF \
+            -DDAWN_ENABLE_METAL=OFF \
+            -DDAWN_ENABLE_D3D12=OFF \
+            -DDAWN_ENABLE_D3D11=OFF \
+            -DDAWN_ENABLE_OPENGLES=OFF \
+            -DDAWN_ENABLE_DESKTOP_GL=OFF \
+            -DDAWN_ENABLE_NULL=OFF \
+            -DDAWN_USE_X11=OFF \
+            -DDAWN_USE_WAYLAND=OFF \
+            -DDAWN_USE_GLFW=OFF \
+            -DDAWN_BUILD_TESTS=OFF \
+            -DTINT_BUILD_CMD_TOOLS=OFF \
+            -DTINT_BUILD_DOCS=OFF \
+            -DTINT_BUILD_TESTS=OFF \
+            -DTINT_BUILD_WGSL_READER=OFF \
+            -DTINT_BUILD_WGSL_WRITER=OFF \
+            -DTINT_BUILD_GLSL_VALIDATOR=OFF \
+            -DTINT_BUILD_IR_BINARY=OFF \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build out/host --target protoc
+
       - name: Build android ${{ matrix.arch }}
         run: |
           cmake -S . -B ${{ matrix.output_dir }} -G Ninja \
@@ -202,7 +229,8 @@ jobs:
             -C .github/workflows/dawn-ci.cmake \
             -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain_file }} \
             ${{ matrix.cmake_args }} \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPROTOC_EXECUTABLE=$PWD/out/host/protoc
           ninja -C ${{ matrix.output_dir }}
 
       - name: Strip debug symbols
@@ -276,6 +304,33 @@ jobs:
           # Download the ios-cmake toolchain file
           curl -L https://raw.githubusercontent.com/leetal/ios-cmake/6fa909e133b92343db2d099e0478448c05ffec1a/ios.toolchain.cmake -o build-tools/apple.toolchain.cmake
 
+      - name: Build host protoc
+        run: |
+          cmake -G Ninja -S . -B out/host \
+            -DDAWN_BUILD_PROTOBUF=ON \
+            -DDAWN_BUILD_SAMPLES=OFF \
+            -DDAWN_BUILD_NODE=OFF \
+            -DDAWN_ENABLE_VULKAN=OFF \
+            -DDAWN_ENABLE_METAL=OFF \
+            -DDAWN_ENABLE_D3D12=OFF \
+            -DDAWN_ENABLE_D3D11=OFF \
+            -DDAWN_ENABLE_OPENGLES=OFF \
+            -DDAWN_ENABLE_DESKTOP_GL=OFF \
+            -DDAWN_ENABLE_NULL=OFF \
+            -DDAWN_USE_X11=OFF \
+            -DDAWN_USE_WAYLAND=OFF \
+            -DDAWN_USE_GLFW=OFF \
+            -DDAWN_BUILD_TESTS=OFF \
+            -DTINT_BUILD_CMD_TOOLS=OFF \
+            -DTINT_BUILD_DOCS=OFF \
+            -DTINT_BUILD_TESTS=OFF \
+            -DTINT_BUILD_WGSL_READER=OFF \
+            -DTINT_BUILD_WGSL_WRITER=OFF \
+            -DTINT_BUILD_GLSL_VALIDATOR=OFF \
+            -DTINT_BUILD_IR_BINARY=OFF \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build out/host --target protoc
+
       - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
         run: |
           cmake -S . -B ${{ matrix.output_dir }} -G Ninja \
@@ -283,7 +338,8 @@ jobs:
             -C .github/workflows/dawn-ci.cmake \
             -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain_file }} \
             ${{ matrix.cmake_args }} \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPROTOC_EXECUTABLE=$PWD/out/host/protoc
           ninja -C ${{ matrix.output_dir }}
 
       - name: Upload build artifacts
