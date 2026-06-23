@@ -484,6 +484,9 @@ crbug.com/408556424 [ dawn-backend-validation linux ] webgpu:web_platform,extern
 # Flaky on MacBookPro16,1 (AMD) machines
 crbug.com/372055513 [ amd mac ] webgpu:shader,execution,expression,call,builtin,subgroupBroadcast:workgroup_uniform_load:* [ RetryOnFailure ]
 
+# Flaky failures on Mac AMD Radeon 555X
+crbug.com/527094328 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_2d_coords:* [ RetryOnFailure ]
+
 # cameraCapture gives PermissionDenied by default, but a flag could be added for testing.
 crbug.com/346799721 webgpu:web_platform,external_texture,video:importExternalTexture,cameraCapture:* [ Failure ]
 
