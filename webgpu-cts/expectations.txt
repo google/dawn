@@ -168,6 +168,14 @@ crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin
 crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=*;scalarType="*" [ Skip ]
 crbug.com/42251024 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=*;mapId="remap";scalarType="*" [ Skip ]
 
+# setImmediates error-case tests expect RangeError but the spec requires
+# OperationError. Only the cases that expect a thrown error fail; control cases
+# still pass. The CTS fix is in flight; suppress until it rolls into Chromium.
+crbug.com/526671415 webgpu:api,validation,encoding,cmds,setImmediates:alignment:*;contentByteSize=10 [ Skip ]
+crbug.com/526671415 webgpu:api,validation,encoding,cmds,setImmediates:out_of_bounds:*;dataLengthDelta=-1 [ Skip ]
+crbug.com/526671415 webgpu:api,validation,encoding,cmds,setImmediates:overflow:*;dataOffset=2147483647;elementCount=4 [ Skip ]
+crbug.com/526671415 webgpu:api,validation,encoding,cmds,setImmediates:overflow:*;dataOffset=4294967295;elementCount=4 [ Skip ]
+
 # Mac AMD does not correctly respect lodMinClamp/lodMaxClamp
 crbug.com/409266267 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:* [ Skip ] # CAT:Accuracy
 
