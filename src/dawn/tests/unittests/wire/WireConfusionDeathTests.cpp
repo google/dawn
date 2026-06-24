@@ -28,6 +28,7 @@
 #include "dawn/wire/WireClient.h"
 #include "src/dawn/tests/unittests/wire/WireTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/gtest.h"
 
 namespace dawn::wire {
 namespace {
@@ -90,9 +91,9 @@ class WireConfusionDeathTest : public WireOne,
         }
         if (expectDeath) {
 #if defined(DAWN_ENABLE_ASSERTS)
-            EXPECT_DEATH(lambda(), "forClient == mClient");
+            EXPECT_DEATH_IF_SUPPORTED(lambda(), "forClient == mClient");
 #else
-            EXPECT_DEATH(lambda(), "");
+            EXPECT_DEATH_IF_SUPPORTED(lambda(), "");
 #endif
         } else {
             lambda();

@@ -27,30 +27,23 @@
 
 #include "src/utils/numeric.h"
 
-#include <gtest/gtest.h>
-
+#include "src/utils/gtest.h"
 #include "src/utils/typed_integer.h"
 
 namespace dawn {
 namespace {
 
-TEST(NumericTest, IsCastAlwaysInRange) {
+using NumericTest = ::testing::Test;
+
+TEST_F(NumericTest, IsCastAlwaysInRange) {
     static_assert(kIsCastAlwaysInRange<uint32_t, uint64_t>);
     static_assert(!kIsCastAlwaysInRange<int32_t, uint32_t>);
     static_assert(!kIsCastAlwaysInRange<uint32_t, int32_t>);
     static_assert(!kIsCastAlwaysInRange<uint64_t, uint32_t>);
 }
 
-#if GTEST_HAS_DEATH_TEST
-
-// Death tests
 // Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
-
-#ifdef DAWN_ENABLE_ASSERTS
-#define EXPECT_DCHECK(statement, matcher) EXPECT_DEATH(statement, matcher)
-#else
-#define EXPECT_DCHECK(statement, matcher) statement
-#endif
+using NumericDeathTest = NumericTest;
 
 // Test for checked cast between various types.
 template <typename T32, typename T64>
@@ -66,9 +59,11 @@ void CheckedCastTestPair() {
     checked_cast<T64>(T32{std::numeric_limits<Prim32>::max()});
 
     // Narrowing
-    EXPECT_DEATH(checked_cast<T32>(T64{Prim64{std::numeric_limits<Prim32>::max()} + 1}), "");
-    EXPECT_DEATH(checked_cast<T32>(T64{Prim64{std::numeric_limits<Prim32>::max()} * 2}), "");
-    EXPECT_DEATH(checked_cast<T32>(T64{std::numeric_limits<Prim64>::max()}), "");
+    EXPECT_DEATH_IF_SUPPORTED(
+        checked_cast<T32>(T64{Prim64{std::numeric_limits<Prim32>::max()} + 1}), "");
+    EXPECT_DEATH_IF_SUPPORTED(
+        checked_cast<T32>(T64{Prim64{std::numeric_limits<Prim32>::max()} * 2}), "");
+    EXPECT_DEATH_IF_SUPPORTED(checked_cast<T32>(T64{std::numeric_limits<Prim64>::max()}), "");
 }
 template <typename U32, typename I32, typename U64, typename I64>
 void CheckedCastTest() {
@@ -81,7 +76,7 @@ void CheckedCastTest() {
     CheckedCastTestPair<I32, U64>();
     CheckedCastTestPair<I32, I64>();
 }
-TEST(NumericDeathTest, CheckedCast) {
+TEST_F(NumericDeathTest, CheckedCast) {
     using TypedU32 = TypedInteger<struct TypedU32T, uint32_t>;
     using TypedU64 = TypedInteger<struct TypedU64T, uint64_t>;
     using TypedI32 = TypedInteger<struct TypedI32T, int32_t>;
@@ -109,11 +104,11 @@ TEST(NumericDeathTest, CheckedCast) {
 
     // Basic test that dchecked_cast is checked in debug but not release.
     // Not exhaustive like the cases above because those are very slow.
-    EXPECT_DCHECK(dchecked_cast<uint32_t>(uint64_t{std::numeric_limits<uint32_t>::max()} + 1), "");
-    EXPECT_DCHECK(dchecked_cast<int32_t>(uint32_t{std::numeric_limits<int32_t>::max()} + 1), "");
+    DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED(
+        dchecked_cast<uint32_t>(uint64_t{std::numeric_limits<uint32_t>::max()} + 1), "");
+    DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED(
+        dchecked_cast<int32_t>(uint32_t{std::numeric_limits<int32_t>::max()} + 1), "");
 }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
 }  // anonymous namespace
 }  // namespace dawn

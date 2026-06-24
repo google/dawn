@@ -36,7 +36,7 @@
 #include "src/tint/utils/memory/bitcast.h"
 #include "src/tint/utils/text/string_stream.h"
 
-// MSVC claims there's unreachable code in some of the EXPECT_DEATH cases, but scoping the
+// MSVC claims there's unreachable code in some of the death test cases, but scoping the
 // DISABLE_WARNING to the test is not sufficient to suppress the warning.
 TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
 // Some of these tests are inspecting the underlying pointers being used by iterators, so there is

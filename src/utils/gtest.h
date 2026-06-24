@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,47 +25,23 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <array>
+#ifndef SRC_UTILS_TEST_H_
+#define SRC_UTILS_TEST_H_
 
-#include "src/dawn/common/ityp_span.h"
-#include "src/utils/gtest.h"
-#include "src/utils/typed_integer.h"
+#include <gtest/gtest.h>  // IWYU pragma: export
 
-namespace dawn {
-namespace {
+#ifdef GTEST_HAS_DEATH_TEST
+// If death tests are supported, defer to *_DEBUG_DEATH.
+#define DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) \
+    EXPECT_DEBUG_DEATH(statement, matcher)
+#define DAWN_ASSERT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) \
+    ASSERT_DEBUG_DEATH(statement, matcher)
+#else
+// Otherwise, defer to *_DEATH_IF_SUPPORTED, to print the warning that we couldn't do the test.
+#define DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) \
+    EXPECT_DEATH_IF_SUPPORTED(statement, matcher)
+#define DAWN_ASSERT_DEBUG_DEATH_IF_SUPPORTED(statement, matcher) \
+    ASSERT_DEATH_IF_SUPPORTED(statement, matcher)
+#endif
 
-class ITypSpanTest : public testing::Test {
-  protected:
-    using Key = TypedInteger<struct KeyT, size_t>;
-    using Val = TypedInteger<struct ValT, uint32_t>;
-    using Span = ityp::span<Key, Val>;
-};
-
-// Test the utility SpanFromUntyped
-TEST_F(ITypSpanTest, SpanFromUntyped) {
-    // Test creating an empty span.
-    {
-        Val* values = nullptr;
-        Span span = ityp::SpanFromUntyped<Key>(values, 0);
-        ASSERT_EQ(nullptr, span.data());
-        ASSERT_EQ(Key(0u), span.size());
-    }
-    // Test creating a one element span.
-    {
-        Val value = Val(25u);
-        Span span = ityp::SpanFromUntyped<Key>(&value, 1);
-        ASSERT_EQ(&value, span.data());
-        ASSERT_EQ(Key(1u), span.size());
-        ASSERT_EQ(value, span[Key(0u)]);
-    }
-    // Test creating a multi-element span.
-    {
-        std::array<Val, 10> arr = {};
-        Span span = ityp::SpanFromUntyped<Key>(arr.data(), arr.size());
-        ASSERT_EQ(arr.data(), span.data());
-        ASSERT_EQ(arr.size(), static_cast<size_t>(span.size()));
-    }
-}
-
-}  // anonymous namespace
-}  // namespace dawn
+#endif  // SRC_UTILS_TEST_H_

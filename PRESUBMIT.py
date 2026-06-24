@@ -27,6 +27,7 @@
 
 import hashlib
 import dataclasses
+import pathlib
 import re
 import sys
 from typing import Optional
@@ -135,6 +136,26 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
             'specific blocks, or rewrite to be safe.',
         ),
         treat_as_error=False,
+        surface_as_gerrit_lint=True,
+    ),
+    BanRule(
+        pattern=r'/\b(EXPECT_DEATH|EXPECT_DEBUG_DEATH)\b',
+        excluded_paths=(r'^src/utils/gtest\.h$', ),
+        explanation=(
+            'Use EXPECT_DEATH_IF_SUPPORTED or ',
+            'DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED instead.',
+        ),
+        treat_as_error=True,
+        surface_as_gerrit_lint=True,
+    ),
+    BanRule(
+        pattern=r'/\b(ASSERT_DEATH|ASSERT_DEBUG_DEATH)\b',
+        excluded_paths=(r'^src/utils/gtest\.h$', ),
+        explanation=(
+            'Use ASSERT_DEATH_IF_SUPPORTED or ',
+            'DAWN_ASSERT_DEBUG_DEATH_IF_SUPPORTED instead.',
+        ),
+        treat_as_error=True,
         surface_as_gerrit_lint=True,
     ),
 )
@@ -716,7 +737,7 @@ def CheckNoBannedPatterns(input_api, output_api):
         if not excluded_paths:
             return False
 
-        local_path = affected_file.UnixLocalPath()
+        local_path = pathlib.Path(affected_file.LocalPath()).as_posix()
         for item in excluded_paths:
             if input_api.re.match(item, local_path):
                 return True

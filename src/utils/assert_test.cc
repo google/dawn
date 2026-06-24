@@ -27,30 +27,34 @@
 
 #include "src/utils/assert.h"
 
-#include <gtest/gtest.h>
-
 #include <cstdint>
+
+#include "src/utils/gtest.h"
 
 namespace dawn {
 namespace {
 
-// DAWN_UNREACHABLE has been changed to CHECK. The motivation here was primarily security issues.
-// DAWN_UNREACHABLE should cause a crash in both Debug and Release.
-// Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
+using AssertTest = ::testing::Test;
 
-#if GTEST_HAS_DEATH_TEST
+TEST_F(AssertTest, AssertUnused) {
+    // Local variable that is defined but not used in the case of release
+
+    int test_value = 1;
+    DAWN_ASSERT(test_value == 1);
+}
+
+// Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
 using AssertDeathTest = ::testing::Test;
 
+// DAWN_UNREACHABLE crashes in both debug and release.
 TEST_F(AssertDeathTest, SimpleUnreachable) {
 #if defined(DAWN_ENABLE_ASSERTS)
-    EXPECT_DEATH(DAWN_UNREACHABLE(), "Unreachable code hit");
+    EXPECT_DEATH_IF_SUPPORTED(DAWN_UNREACHABLE(), "Unreachable code hit");
 #else
-    EXPECT_DEATH(DAWN_UNREACHABLE(), "");
+    EXPECT_DEATH_IF_SUPPORTED(DAWN_UNREACHABLE(), "");
 #endif
 }
-#endif
 
-#if GTEST_HAS_DEATH_TEST
 enum class TestEnum : uint32_t {
     A = 0,
     B,
@@ -91,9 +95,9 @@ TEST_F(AssertDeathTest, JumpTableUnreachable) {
     TestEnum enum_val = static_cast<TestEnum>(g_var);
 
 #if defined(DAWN_ENABLE_ASSERTS)
-    EXPECT_DEATH(g_var = DoFakeOp(enum_val, g_var), "Unreachable code hit");
+    EXPECT_DEATH_IF_SUPPORTED(g_var = DoFakeOp(enum_val, g_var), "Unreachable code hit");
 #else
-    EXPECT_DEATH(g_var = DoFakeOp(enum_val, g_var), "");
+    EXPECT_DEATH_IF_SUPPORTED(g_var = DoFakeOp(enum_val, g_var), "");
 #endif
 
     g_var = g_var + 1;
@@ -104,17 +108,17 @@ volatile uint32_t g_var2 = 123;
 TEST_F(AssertDeathTest, AssertKills) {
     g_var2 = g_var2 + 1;
 #ifdef DAWN_ENABLE_ASSERTS
-    EXPECT_DEATH(DAWN_ASSERT(g_var2 != 124), "g_var2 != 124");
+    EXPECT_DEATH_IF_SUPPORTED(DAWN_ASSERT(g_var2 != 124), "g_var2 != 124");
 #endif
 }
 
 #ifndef _WIN32
 TEST_F(AssertDeathTest, StackTrace) {
-    EXPECT_DEATH(DAWN_UNREACHABLE(), "PC: @");
+    EXPECT_DEATH_IF_SUPPORTED(DAWN_UNREACHABLE(), "PC: @");
 }
 
 TEST_F(AssertDeathTest, CrashStackTrace) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             volatile int* ptr = nullptr;
             *ptr = 1;
@@ -122,16 +126,6 @@ TEST_F(AssertDeathTest, CrashStackTrace) {
         "PC: @");
 }
 #endif  // !defined(_WIN32)
-#endif  // GTEST_HAS_DEATH_TEST
-
-using AssertFunctionalityTest = ::testing::Test;
-
-TEST_F(AssertFunctionalityTest, AssertUnused) {
-    // Local variable that is defined but not used in the case of release
-
-    int test_value = 1;
-    DAWN_ASSERT(test_value == 1);
-}
 
 }  // anonymous namespace
 }  // namespace dawn

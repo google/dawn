@@ -25,11 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <gtest/gtest.h>
-
 #include <array>
 
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/utils/gtest.h"
 #include "src/utils/span.h"
 #include "src/utils/typed_integer.h"
 

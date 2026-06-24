@@ -27,8 +27,8 @@
 
 #include <utility>
 
-#include "gtest/gtest.h"
 #include "src/dawn/common/ityp_vector.h"
+#include "src/utils/gtest.h"
 #include "src/utils/typed_integer.h"
 
 namespace dawn {
@@ -243,13 +243,13 @@ TEST_F(ITypVectorDeathTest, OutOfBounds) {
 
     Vector vec(Key(10u), Val(7u));
     vec[Key(9u)];
-    EXPECT_DEATH(vec[Key(10u)], "");
-    EXPECT_DEATH(vec.at(Key(10u)), "");
+    EXPECT_DEATH_IF_SUPPORTED(vec[Key(10u)], "");
+    EXPECT_DEATH_IF_SUPPORTED(vec.at(Key(10u)), "");
 
     const Vector& constVec = vec;
     constVec[Key(9u)];
-    EXPECT_DEATH(constVec[Key(10u)], "");
-    EXPECT_DEATH(constVec.at(Key(10u)), "");
+    EXPECT_DEATH_IF_SUPPORTED(constVec[Key(10u)], "");
+    EXPECT_DEATH_IF_SUPPORTED(constVec.at(Key(10u)), "");
 }
 
 // If the index/size is 64-bit, it needs to be narrowed to size_t. Verify that's checked correctly.
@@ -263,22 +263,22 @@ TEST_F(ITypVectorDeathTest, OversizedIndex) {
     static constexpr Key64 kHugeKey64{0x1000'0000'0000'0000u};
 
     // Crash either due to OOM (on 64-bit) or due to narrowing (on 32-bit).
-    EXPECT_DEATH((ityp::vector<Key64, Val>(kHugeKey64)), "");
-    EXPECT_DEATH((ityp::vector<Key64, Val>(kHugeKey64, Val(7u))), "");
+    EXPECT_DEATH_IF_SUPPORTED((ityp::vector<Key64, Val>(kHugeKey64)), "");
+    EXPECT_DEATH_IF_SUPPORTED((ityp::vector<Key64, Val>(kHugeKey64, Val(7u))), "");
 
     ityp::vector<Key64, Val> vec(Key64(10u), Val(7u));
 
     vec[Key64(9u)];
     // Regular out-of-bounds.
-    EXPECT_DEATH(vec[Key64(10u)], "");
+    EXPECT_DEATH_IF_SUPPORTED(vec[Key64(10u)], "");
 
     vec[Key64(0u)];
     // If this were cast to a 32-bit size_t without a check, it would be in-bounds.
-    EXPECT_DEATH(vec[kHugeKey64], "");
+    EXPECT_DEATH_IF_SUPPORTED(vec[kHugeKey64], "");
 
-    EXPECT_DEATH(vec.resize(kHugeKey64), "");
-    EXPECT_DEATH(vec.resize(kHugeKey64, Val(7u)), "");
-    EXPECT_DEATH(vec.reserve(kHugeKey64), "");
+    EXPECT_DEATH_IF_SUPPORTED(vec.resize(kHugeKey64), "");
+    EXPECT_DEATH_IF_SUPPORTED(vec.resize(kHugeKey64, Val(7u)), "");
+    EXPECT_DEATH_IF_SUPPORTED(vec.reserve(kHugeKey64), "");
 }
 
 }  // anonymous namespace

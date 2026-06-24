@@ -29,6 +29,7 @@ set(private_headers
     "assert.h"
     "compiler.h"
     "force_crash.h"
+    "gtest.h"
     "log.h"
     "non_copyable.h"
     "non_movable.h"
