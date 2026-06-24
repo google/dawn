@@ -256,7 +256,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
         Extent3D workgroupSize;
         DAWN_TRY_ASSIGN(workgroupSize,
                         ValidateComputeStageWorkgroupSize(
-                            result->workgroup_info, /*usesSubgroupMatrix=*/false, r.maxSubgroupSize,
+                            result->workgroup_info, r.usesSubgroupMatrix, r.maxSubgroupSize,
                             r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
 
         if (result->workgroup_info.subgroup_size.has_value()) {

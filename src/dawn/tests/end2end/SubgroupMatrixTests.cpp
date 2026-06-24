@@ -43,6 +43,10 @@
 namespace dawn {
 namespace {
 
+constexpr bool Is8Bit(wgpu::SubgroupMatrixComponentType c) {
+    return c == wgpu::SubgroupMatrixComponentType::U8 || c == wgpu::SubgroupMatrixComponentType::I8;
+}
+
 const char* ComponentTypeToWgslType(wgpu::SubgroupMatrixComponentType c) {
     switch (c) {
         case wgpu::SubgroupMatrixComponentType::F32:
@@ -90,6 +94,48 @@ uint32_t ComponentTypeToByteSize(wgpu::SubgroupMatrixComponentType c) {
             return 1;
     }
     return 0;
+}
+
+std::ostream& operator<<(std::ostream& o, const wgpu::SubgroupMatrixConfig& config) {
+    o << config.M << "x" << config.N << "x" << config.K << " "
+      << ComponentTypeToWgslType(config.componentType) << " -> "
+      << ComponentTypeToWgslType(config.resultComponentType);
+    return o;
+}
+
+bool IsEqual(const wgpu::SubgroupMatrixConfig& lhs, const wgpu::SubgroupMatrixConfig& rhs) {
+    return lhs.componentType == rhs.componentType &&              //
+           lhs.resultComponentType == rhs.resultComponentType &&  //
+           lhs.M == rhs.M &&                                      //
+           lhs.N == rhs.N &&                                      //
+           lhs.K == rhs.K;
+}
+
+bool CrashesOnRX9060XT(const wgpu::SubgroupMatrixConfig& config, bool include8BitTypes) {
+    // TODO(crbug.com/525518027): These configs are crashing in the AMD driver during
+    // ID3D12Device::CreateComputePipelineState.
+    // AMD driver 32.0.31007.2036, 6/4/2026, AMD Agility SDK installer 26.10.07.02
+    // Note that these configs are not exhaustive; for example, these work:
+    // 16x16x16 f16 -> f16
+    // 16x16x16 f16 -> f32
+    // 16x16x16 i8 -> i32
+    // 16x16x16 i8 -> u32
+    // 16x16x16 u8 -> i32
+    // 16x16x16 u8 -> u32
+    using enum wgpu::SubgroupMatrixComponentType;
+    bool crashes = IsEqual(config, {I32, I32, 16, 16, 16}) ||  //
+                   IsEqual(config, {U32, U32, 16, 16, 16}) ||  //
+                   IsEqual(config, {I32, U32, 16, 16, 16}) ||  //
+                   IsEqual(config, {U32, I32, 16, 16, 16}) ||  //
+                   IsEqual(config, {F32, F32, 16, 16, 16});
+    if (include8BitTypes) {
+        crashes = crashes ||                                //
+                  IsEqual(config, {I8, I8, 16, 16, 16}) ||  //
+                  IsEqual(config, {I8, U8, 16, 16, 16}) ||  //
+                  IsEqual(config, {U8, I8, 16, 16, 16}) ||  //
+                  IsEqual(config, {U8, U8, 16, 16, 16});
+    }
+    return crashes;
 }
 
 /// A Matrix object holds the data and layout of a single matrix.
@@ -307,6 +353,20 @@ TEST_P(SubgroupMatrixTest, QueryConfigsOnlyValidWithFeature) {
 
         EXPECT_EQ(device.GetAdapterInfo(&adapterInfo), expected);
     }
+}
+
+// Test that if the feature is enabled, querying returns non-zero configs
+TEST_P(SubgroupMatrixTest, QueryConfigsMustReturnNonZeroConfigs) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    // Query the supported subgroup matrix configurations.
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
+    info.nextInChain = &subgroupMatrixConfigs;
+    ASSERT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+
+    ASSERT_NE(subgroupMatrixConfigs.configCount, 0u);
 }
 
 // Test that Dawn validates the X-dimension of the workgroup size when subgroup matrices are used,
@@ -535,7 +595,7 @@ fn main() {
         // Verify the result against a reference implementation.
         Matrix expected(config.N, config.M, config.resultComponentType, columnMajor);
         GenerateReferenceMatrixMultiply(expected, inputLHS, inputRHS, acc);
-        EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize());
+        EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize()) << config;
     }
 };
 
@@ -544,6 +604,10 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
         !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
     // TODO(crbug.com/492539239): Access violation during test teardown.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
+
+    // TODO(crbug.com/525517826): On WARP 1.65535.20-preview, tests fail every config for
+    // MatrixMultiplyAccumulate
+    DAWN_SUPPRESS_TEST_IF(IsWARP() && GetParam().mMatrixOp == MatrixOp::MatrixMultiplyAccumulate);
 
     MatrixOp op = GetParam().mMatrixOp;
     bool columnMajor = GetParam().mColumnMajor;
@@ -558,11 +622,12 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
 
-        std::stringstream configInfo;
-        configInfo << "Testing " << config.M << "x" << config.N << "x" << config.K << " "
-                   << ComponentTypeToWgslType(config.componentType) << " -> "
-                   << ComponentTypeToWgslType(config.resultComponentType);
-        SCOPED_TRACE(configInfo.str());
+        if (IsWindows() && IsAMD() && IsD3D12()) {
+            if (CrashesOnRX9060XT(config, true)) {
+                std::cout << "Skipping config: " << config << "\n";
+                continue;
+            }
+        }
 
         TestSubgroupMatrixConfig(config, op, info.subgroupMaxSize, columnMajor);
     }
@@ -695,6 +760,13 @@ fn main() {
                                   MatrixOp op,
                                   uint32_t subgroupMaxSize,
                                   bool columnMajor) {
+        // TODO(crbug.com/512455646): Fix shader to support 8-bit component type
+        if (Is8Bit(config.componentType)) {
+            std::cout << "Skipping componentType: " << ComponentTypeToWgslType(config.componentType)
+                      << "\n";
+            return;
+        }
+
         uint32_t componentByteSize = ComponentTypeToByteSize(config.componentType);
 
         // Generate a compute pipeline that performs a matrix scalar operation that matches the
@@ -739,7 +811,7 @@ fn main() {
         // Verify the result against a reference implementation.
         Matrix expected(config.K, config.M, config.componentType, columnMajor);
         GenerateReferenceResult(expected, inputLHS, op);
-        EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize());
+        EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize()) << config;
     }
 };
 
@@ -760,11 +832,12 @@ TEST_P(SubgroupMatrix_MatrixScalarArithmeticTest, MatrixScalar) {
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
 
-        std::stringstream configInfo;
-        configInfo << "Testing " << config.M << "x" << config.N << "x" << config.K << " "
-                   << ComponentTypeToWgslType(config.componentType) << " -> "
-                   << ComponentTypeToWgslType(config.resultComponentType);
-        SCOPED_TRACE(configInfo.str());
+        if (IsWindows() && IsAMD() && IsD3D12()) {
+            if (CrashesOnRX9060XT(config, true)) {
+                std::cout << "Skipping config: " << config << "\n";
+                continue;
+            }
+        }
 
         TestSubgroupMatrixConfig(config, op, info.subgroupMaxSize, columnMajor);
     }
@@ -906,9 +979,10 @@ fn main() {
 
         // Verify the result in the output buffer.
         std::vector<uint8_t> zeroBuffer(storeOffset, static_cast<uint8_t>(0));
-        EXPECT_BUFFER_U8_RANGE_EQ(zeroBuffer.data(), output, 0, storeOffset);
+        EXPECT_BUFFER_U8_RANGE_EQ(zeroBuffer.data(), output, 0, storeOffset) << config;
         EXPECT_BUFFER_U8_RANGE_EQ(inputMatrix.data, output, storeOffset,
-                                  inputMatrix.TotalByteSize());
+                                  inputMatrix.TotalByteSize())
+            << config;
     }
 };
 
@@ -926,11 +1000,12 @@ TEST_P(SubgroupMatrix_MatrixStoreTest, MatrixStoreWithOffset) {
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
 
-        std::stringstream configInfo;
-        configInfo << "Testing " << config.M << "x" << config.N << "x" << config.K << " "
-                   << ComponentTypeToWgslType(config.componentType) << " -> "
-                   << ComponentTypeToWgslType(config.resultComponentType);
-        SCOPED_TRACE(configInfo.str());
+        if (IsWindows() && IsAMD() && IsD3D12()) {
+            if (CrashesOnRX9060XT(config, false)) {
+                std::cout << "Skipping config: " << config << "\n";
+                continue;
+            }
+        }
 
         TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mInputColumnMajor);
     }
@@ -1044,7 +1119,7 @@ fn main() {
         // Verify the result in the output buffer.
         Matrix expected(config.K, config.M, config.componentType, false);
         GenerateReferenceResult(expected, withArgument);
-        EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize());
+        EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize()) << config;
     }
 
     void GenerateReferenceResult(Matrix& expected, bool withArgument) {
@@ -1088,11 +1163,12 @@ TEST_P(SubgroupMatrix_MatrixConstructorTest, MatrixConstruct) {
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
 
-        std::stringstream configInfo;
-        configInfo << "Testing " << config.M << "x" << config.N << "x" << config.K << " "
-                   << ComponentTypeToWgslType(config.componentType) << " -> "
-                   << ComponentTypeToWgslType(config.resultComponentType);
-        SCOPED_TRACE(configInfo.str());
+        if (IsWindows() && IsAMD() && IsD3D12()) {
+            if (CrashesOnRX9060XT(config, false)) {
+                std::cout << "Skipping config: " << config << "\n";
+                continue;
+            }
+        }
 
         TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mWithArgument);
     }
@@ -1154,6 +1230,16 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
     // TODO(crbug.com/492539239): Access violation during test teardown.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
 
+    // TODO(crbug.com/525517826): On WARP 1.65535.20-preview, starts hanging for tile dim 2+
+    DAWN_SUPPRESS_TEST_IF(IsWARP() && kTileDim >= 2);
+
+    // TODO(525518027): On AMD Radeon RX 9060 XT, Windows Vulkan, getting invalid results for tile
+    // dim 32
+    DAWN_SUPPRESS_TEST_IF(IsAMD() && IsVulkan() && IsWindows() && kTileDim == 32);
+    // TODO(525518027): On AMD Radeon RX 9060 XT, Windows D3D12, hanging during
+    // CreateComputePipeline for tile dim 32
+    DAWN_SUPPRESS_TEST_IF(IsAMD() && IsD3D12() && IsWindows() && kTileDim == 32);
+
     // Query the supported subgroup matrix configurations.
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
@@ -1164,7 +1250,6 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
     DAWN_TEST_UNSUPPORTED_IF(kWorkgroupSize > supportedLimits.maxComputeWorkgroupSizeX);
     DAWN_TEST_UNSUPPORTED_IF(kWorkgroupSize > supportedLimits.maxComputeInvocationsPerWorkgroup);
     DAWN_TEST_UNSUPPORTED_IF(kWorkgroupSize < info.subgroupMaxSize);
-
     // Pipeline creation may fail (gracefully) for some large tile and workgroup sizes.
     // The test will not fail in these cases, but we should make sure that the smallest cases always
     // pass so that we know the test isn't completely broken.
@@ -1175,10 +1260,15 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
         auto& config = subgroupMatrixConfigs.configs[i];
         uint32_t resultComponentByteSize = ComponentTypeToByteSize(config.resultComponentType);
 
+        if (IsWindows() && IsAMD() && IsD3D12()) {
+            if (CrashesOnRX9060XT(config, true)) {
+                std::cout << "Skipping config: " << config << "\n";
+                continue;
+            }
+        }
+
         std::stringstream configInfo;
-        configInfo << "Testing " << config.M << "x" << config.N << "x" << config.K << " "
-                   << ComponentTypeToWgslType(config.componentType) << " -> "
-                   << ComponentTypeToWgslType(config.resultComponentType);
+        configInfo << "Testing " << config;
         SCOPED_TRACE(configInfo.str());
 
         const uint32_t matrix_cols = config.N * kTileDim;

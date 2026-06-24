@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_PHYSICALDEVICED3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_PHYSICALDEVICED3D12_H_
 
+#include <vector>
+
 #include "src/dawn/native/PhysicalDevice.h"
 #include "src/dawn/native/d3d/PhysicalDeviceD3D.h"
 #include "src/dawn/native/d3d12/D3D12Info.h"
@@ -56,6 +58,9 @@ class PhysicalDevice : public d3d::PhysicalDevice {
     ComPtr<ID3D12Device> GetDevice() const;
 
     bool SupportsBufferMapExtendedUsages() const;
+
+    std::vector<SubgroupMatrixConfig> EnumerateSubgroupMatrixConfigs(
+        const TogglesState& toggles) const;
 
   private:
     using Base = d3d::PhysicalDevice;

@@ -158,6 +158,20 @@ void PlatformFunctions::EnsureAgilitySDKDeviceFactory() {
     // Obtain the device configuration interface for root signature operations.
     DAWN_CHECK(SUCCEEDED(mDeviceFactory.As(&mDeviceConfiguration)));
 
+    // Must enable experimental shader models for SM 6.10 to use D3D12 LinAlg while it's still in
+    // Preview. This must be done before the device is created via the factory.
+    {
+        UUID features[] = {D3D12ExperimentalShaderModels};
+        HRESULT hr = mDeviceFactory->EnableExperimentalFeatures(_countof(features), features,
+                                                                nullptr, nullptr);
+        if (FAILED(hr)) {
+            dawn::InfoLog()
+                << "D3D12ExperimentalShaderModels, needed for LinAlg, is not supported, either "
+                   "because it's unrecognized, or Developer Mode is not enabled, or some other "
+                   "reason.";
+        }
+    }
+
     dawn::InfoLog() << "[AgilitySDK] active: SDK version = " << D3D12_PREVIEW_SDK_VERSION;
 }
 #endif  // DAWN_USE_AGILITY_SDK
