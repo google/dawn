@@ -1,10 +1,11 @@
 # Copy this file to <dawn clone dir>/.gclient to bootstrap gclient in a
-# standalone checkout of Dawn for building emdawnwebgpu using emsdk.
+# standalone checkout of Dawn for maximal target support including
+# building cross compilation, emscripten builds, and node builds. After
+# copying this file, users should uncomment the respective lines below
+# based on the host OS.
 #
 # Use this instead of `standalone.gclient` if you are a Dawn developer and
 # would like to compile as much as possible on your local machine.
-
-import platform
 
 solutions = [
     {
@@ -24,7 +25,7 @@ solutions = [
 
 # Enable all additional targets that are usable on this host OS.
 target_os = []
-if platform.system() == "Darwin":
-    target_os += ['win']
-elif platform.system() == "Linux":
-    target_os += ['win', 'mac']
+# If cross compiling on Mac, uncomment this:
+#target_os += ['win']
+# If cross compiling on Linux, uncomment this:
+#target_os += ['win', 'mac']

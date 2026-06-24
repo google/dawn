@@ -97,6 +97,7 @@ Contrary to `depot_tools`, this scripts does not figure out option-dependent req
 
 The following packages are needed to build Dawn. (Package names are the Ubuntu names).
 
+* `libfuse2`
 * `libxrandr-dev`
 * `libxinerama-dev`
 * `libxcursor-dev`
@@ -107,7 +108,7 @@ The following packages are needed to build Dawn. (Package names are the Ubuntu n
 * `npm`
 
 ```sh
-sudo apt-get install libxrandr-dev libxinerama-dev libxcursor-dev mesa-common-dev libx11-xcb-dev pkg-config nodejs npm
+sudo apt-get install libfuse2 libxrandr-dev libxinerama-dev libxcursor-dev mesa-common-dev libx11-xcb-dev pkg-config nodejs npm
 ```
 
 Note, `nodejs` and `npm` are only needed if building `dawn.node`.
@@ -162,8 +163,8 @@ Cross-compilation is provided on a best-effort basis, primarily for the purpose
 of compilation checks during local Dawn development. It only supports Clang.
 It may not always work, and the resulting binaries are not guaranteed to work.
 
-1.  Add your target OS to the `target_os` array in `.gclient`. Or, just use
-    `standalone-maximal.gclient`.
+1.  Add your target OS to the `target_os` array in `.gclient`. Or, use
+    `standalone-maximal.gclient` and follow the instructions in it.
 1.  `gclient sync`.
 1.  Create a new `out/*` directory for each target build with the relevant GN
     args. The following configurations have been tested:
