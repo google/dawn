@@ -417,6 +417,8 @@ exec("//recipes.star")
 exec("//tests.star")
 
 # Handle any other builders defined in other files.
+exec("//bazel_ci.star")
+exec("//bazel_try.star")
 exec("//chromium_try.star")
 exec("//cmake_ci.star")
 exec("//cmake_try.star")
