@@ -4765,6 +4765,9 @@
     "uint8_t": {
         "category": "native"
     },
+    "std::byte": {
+        "category": "native"
+    },
     "dawn texture internal usage descriptor": {
         "category": "structure",
         "chained": "in",

@@ -113,12 +113,18 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
     // Create a handle for reading server data.
     // This may fail and return nullptr.
     class ReadHandle;
-    virtual ReadHandle* CreateReadHandle(size_t) = 0;
+    virtual ReadHandle* CreateReadHandle(size_t) {
+        // TODO(https://crbug.com/524776858): Remove once Chromium doesn't implement anymore.
+        return nullptr;
+    }
 
     // Create a handle for writing server data.
     // This may fail and return nullptr.
     class WriteHandle;
-    virtual WriteHandle* CreateWriteHandle(size_t) = 0;
+    virtual WriteHandle* CreateWriteHandle(size_t) {
+        // TODO(https://crbug.com/524776858): Remove once Chromium doesn't implement anymore.
+        return nullptr;
+    }
 
     // Create a handle for sharing memory with the server.
     // This may fail and return nullptr.
@@ -205,9 +211,13 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
         virtual void SerializeCreate(std::span<std::byte> serializeSpace) const = 0;
 
         // Returns a const view of the memory.
+        // dawn::wire::client ensures that the memory is initialized by a data update before it is
+        // made visible via wgpu::Buffer::GetConstMappedRange().
         virtual std::span<const std::byte> GetConstData() const { return GetData(); }
 
         // Returns a mutable view of the memory.
+        // dawn::wire::client ensures that the memory is zeroed out before it is made visible via
+        // wgpu::Buffer::GetMappedRange().
         virtual std::span<std::byte> GetData() const = 0;
 
         // Get the required serialization size for SerializeDataUpdate for the range [offset, offset

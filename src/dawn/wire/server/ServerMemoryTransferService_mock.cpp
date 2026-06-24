@@ -39,4 +39,8 @@ MockMemoryTransferService::MockWriteHandle::~MockWriteHandle() {
     Destroy();
 }
 
+MockMemoryTransferService::MockMemoryHandle::~MockMemoryHandle() {
+    Destroy();
+}
+
 }  // namespace dawn::wire::server

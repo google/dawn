@@ -39,6 +39,7 @@
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/RefCountedWithExternalCount.h"
 #include "src/dawn/wire/client/ObjectBase.h"
+#include "src/utils/span.h"
 
 namespace dawn::wire::client {
 
@@ -91,7 +92,7 @@ class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
 
     const uint64_t mSize = 0;
     const WGPUBufferUsage mUsage;
-    const bool mDestructWriteHandleOnUnmap;
+    const bool mDestructMemoryHandleOnUnmap;
     Ref<Device> mDevice;
 
     // Mapping members are mutable depending on the current map state.
@@ -112,14 +113,12 @@ class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     };
     std::optional<MapRequest> mPendingMapRequest = std::nullopt;
     MapState mMappedState = MapState::Unmapped;
-    raw_ptr<void> mMappedData = nullptr;
+    // TODO(https://crbug.com/526537224): Use RawSpan instead of Span.
+    Span<std::byte> mMappedData;
     size_t mMappedOffset = 0;
     size_t mMappedSize = 0;
 
-    // Only one mapped pointer can be active at a time
-    // TODO(enga): Use a tagged pointer to save space.
-    std::unique_ptr<MemoryTransferService::ReadHandle> mReadHandle = nullptr;
-    std::unique_ptr<MemoryTransferService::WriteHandle> mWriteHandle = nullptr;
+    std::unique_ptr<MemoryTransferService::MemoryHandle> mMemoryHandle = nullptr;
 };
 
 }  // namespace dawn::wire::client

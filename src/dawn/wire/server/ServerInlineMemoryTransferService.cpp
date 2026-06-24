@@ -71,6 +71,41 @@ class InlineMemoryTransferService : public MemoryTransferService {
         }
     };
 
+    class MemoryHandleImpl : public MemoryHandle {
+      public:
+        MemoryHandleImpl() {}
+        ~MemoryHandleImpl() override = default;
+
+        size_t GetSerializeDataUpdateSize(size_t offset, size_t size) const override {
+            return size;
+        }
+
+        void SerializeDataUpdate(std::span<std::byte> serializeData,
+                                 size_t offset,
+                                 size_t size,
+                                 std::span<const std::byte> data) const override {
+            DAWN_ASSERT(serializeData.size() == GetSerializeDataUpdateSize(offset, size));
+            DAWN_ASSERT(data.size() == size);
+
+            // TODO(https://crbug.com/524406299): Use span::copy_from
+            DAWN_UNSAFE_TODO(memcpy(serializeData.data(), data.data(), size));
+        }
+
+        bool DeserializeDataUpdate(std::span<const std::byte> deserializeData,
+                                   size_t offset,
+                                   size_t size,
+                                   std::span<std::byte> target) override {
+            DAWN_ASSERT(target.size() == size);
+            if (size > deserializeData.size()) {
+                return false;
+            }
+
+            // TODO(https://crbug.com/524406299): Use span::copy_from
+            DAWN_UNSAFE_TODO(memcpy(target.data(), deserializeData.data(), size));
+            return true;
+        }
+    };
+
     InlineMemoryTransferService() {}
     ~InlineMemoryTransferService() override = default;
 
@@ -88,6 +123,12 @@ class InlineMemoryTransferService : public MemoryTransferService {
         DAWN_ASSERT(writeHandle != nullptr);
         *writeHandle = new WriteHandleImpl();
         return true;
+    }
+
+    std::unique_ptr<MemoryHandle> DeserializeMemoryHandle(
+        std::span<const std::byte> creationData) override {
+        DAWN_ASSERT(creationData.empty());
+        return std::make_unique<MemoryHandleImpl>();
     }
 };
 

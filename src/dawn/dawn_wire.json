@@ -41,8 +41,8 @@
         ],
         "buffer update mapped data": [
             { "name": "buffer id", "type": "ObjectId", "id_type": "buffer" },
-            { "name": "write data update info length", "type": "size_t" },
-            { "name": "write data update info", "type": "uint8_t", "annotation": "const*", "length": "write data update info length", "skip_serialize": true},
+            { "name": "data update info length", "type": "size_t" },
+            { "name": "data update info", "type": "std::byte", "annotation": "const*", "length": "data update info length", "skip_serialize": true},
             { "name": "offset", "type": "size_t"},
             { "name": "size", "type": "size_t"}
         ],
@@ -50,10 +50,8 @@
             { "name": "device id", "type": "ObjectId", "id_type": "device" },
             { "name": "descriptor", "type": "buffer descriptor", "annotation": "const*" },
             { "name": "result", "type": "ObjectHandle", "handle_type": "buffer" },
-            { "name": "read handle create info length", "type": "size_t" },
-            { "name": "read handle create info", "type": "uint8_t", "annotation": "const*", "length": "read handle create info length", "skip_serialize": true},
-            { "name": "write handle create info length", "type": "size_t" },
-            { "name": "write handle create info", "type": "uint8_t", "annotation": "const*", "length": "write handle create info length", "skip_serialize": true}
+            { "name": "memory handle create info length", "type": "size_t" },
+            { "name": "memory handle create info", "type": "std::byte", "annotation": "const*", "length": "memory handle create info length", "skip_serialize": true}
         ],
         "device create compute pipeline async": [
             { "name": "device id", "type": "ObjectId", "id_type": "device"},
@@ -95,10 +93,10 @@
             { "name": "buffer id", "type": "ObjectId", "id_type": "buffer" },
             { "name": "buffer offset", "type": "uint64_t"},
             { "name": "size", "type": "size_t"},
-            { "name": "write handle create info length", "type": "size_t" },
-            { "name": "write handle create info", "type": "uint8_t", "annotation": "const*", "length": "write handle create info length", "skip_serialize": true},
-            { "name": "write data update info length", "type": "size_t" },
-            { "name": "write data update info", "type": "uint8_t", "annotation": "const*", "length": "write data update info length", "skip_serialize": true}
+            { "name": "memory handle create info length", "type": "size_t" },
+            { "name": "memory handle create info", "type": "std::byte", "annotation": "const*", "length": "memory handle create info length", "skip_serialize": true},
+            { "name": "memory data update info length", "type": "size_t" },
+            { "name": "memory data update info", "type": "std::byte", "annotation": "const*", "length": "memory data update info length", "skip_serialize": true}
         ],
         "queue write texture": [
             {"name": "queue id", "type": "ObjectId", "id_type": "queue" },
@@ -114,10 +112,10 @@
             { "name": "data size", "type": "size_t"},
             { "name": "data layout", "type": "texel copy buffer layout", "annotation": "const*"},
             { "name": "writeSize", "type": "extent 3D", "annotation": "const*"},
-            { "name": "write handle create info length", "type": "size_t" },
-            { "name": "write handle create info", "type": "uint8_t", "annotation": "const*", "length": "write handle create info length", "skip_serialize": true},
-            { "name": "write data update info length", "type": "size_t" },
-            { "name": "write data update info", "type": "uint8_t", "annotation": "const*", "length": "write data update info length", "skip_serialize": true}
+            { "name": "memory handle create info length", "type": "size_t" },
+            { "name": "memory handle create info", "type": "std::byte", "annotation": "const*", "length": "memory handle create info length", "skip_serialize": true},
+            { "name": "memory data update info length", "type": "size_t" },
+            { "name": "memory data update info", "type": "std::byte", "annotation": "const*", "length": "memory data update info length", "skip_serialize": true}
         ],
         "shader module get compilation info": [
             { "name": "shader module id", "type": "ObjectId", "id_type": "shader module" },
@@ -170,7 +168,7 @@
             { "name": "status", "type": "map async status" },
             { "name": "message", "type": "string view" },
             { "name": "read data update info length", "type": "size_t" },
-            { "name": "read data update info", "type": "uint8_t", "annotation": "const*", "length": "read data update info length", "skip_serialize": true }
+            { "name": "read data update info", "type": "std::byte", "annotation": "const*", "length": "read data update info length", "skip_serialize": true }
         ],
         "device create compute pipeline async callback": [
             { "name": "event manager", "type": "ObjectHandle" },

@@ -64,8 +64,7 @@ template <typename T>
 struct ObjectData : public ObjectDataBase<T> {};
 
 struct BufferMapState {
-    std::unique_ptr<MemoryTransferService::ReadHandle> readHandle = nullptr;
-    std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
+    std::unique_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
 };
 
 template <>
@@ -73,7 +72,7 @@ struct ObjectData<WGPUBuffer> : public ObjectDataBase<WGPUBuffer> {
     MutexRefProtected<BufferMapState> mapState;
 
     WGPUBufferUsage usage = WGPUBufferUsage_None;
-    // Indicate if writeHandle needs to be destroyed on unmap
+    // Indicate if memoryHandle needs to be destroyed on unmap
     bool mappedAtCreation = false;
 };
 

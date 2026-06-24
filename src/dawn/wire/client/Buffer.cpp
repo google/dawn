@@ -82,7 +82,7 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
                          WGPUMapAsyncStatus status,
                          WGPUStringView message,
                          size_t readDataUpdateInfoLength = 0,
-                         const uint8_t* readDataUpdateInfo = nullptr) {
+                         const std::byte* readDataUpdateInfo = nullptr) {
         if (status != WGPUMapAsyncStatus_Success) {
             mResponse.Use([&](auto response) {
                 response->status = status;
@@ -113,20 +113,20 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
         switch (*pending.type) {
             case MapRequestType::Read: {
                 // Update user map data with server returned data
-                std::span<const uint8_t> readDataUpdateInfoSpan(readDataUpdateInfo,
-                                                                readDataUpdateInfoLength);
-                if (!mBuffer->mReadHandle->DeserializeDataUpdate(readDataUpdateInfoSpan,
-                                                                 pending.offset)) {
+                // TODO(https://crbug.com/526537254): Spanify the input API of dawn::wire::client.
+                Span<const std::byte> DAWN_UNSAFE_TODO(
+                    readDataUpdateInfoSpan(readDataUpdateInfo, readDataUpdateInfoLength));
+                if (!mBuffer->mMemoryHandle->DeserializeDataUpdate(readDataUpdateInfoSpan,
+                                                                   pending.offset, pending.size)) {
                     return FailRequest("Failed to deserialize data returned from the server.");
                 }
-                mBuffer->mMappedData = const_cast<void*>(mBuffer->mReadHandle->GetData());
                 break;
             }
             case MapRequestType::Write: {
-                mBuffer->mMappedData = mBuffer->mWriteHandle->GetData();
                 break;
             }
         }
+        mBuffer->mMappedData = mBuffer->mMemoryHandle->GetData();
         mBuffer->mMappedOffset = pending.offset;
         mBuffer->mMappedSize = pending.size;
 
@@ -213,95 +213,70 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
         }
     }
 
-    bool mappable =
-        (descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0 ||
-        wgpu::Bool(descriptor->mappedAtCreation);
+    // Handle client-side error cases.
+    bool mappableForWrite = (descriptor->usage & WGPUBufferUsage_MapWrite) != 0 ||
+                            wgpu::Bool(descriptor->mappedAtCreation);
+    bool mappable = mappableForWrite || (descriptor->usage & WGPUBufferUsage_MapRead) != 0;
     if (mappable &&
         (descriptor->size >= std::numeric_limits<size_t>::max() || fakeOOMAtWireClientMap)) {
         return ReturnOOMAtClient(device, descriptor);
     }
 
-    std::unique_ptr<MemoryTransferService::ReadHandle> readHandle = nullptr;
-    std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
+    // Create the MemoryHandle for mappable buffers.
+    std::unique_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
+    size_t memoryHandleCreateInfoLength = 0;
+    if (mappable) {
+        memoryHandle = wireClient->GetMemoryTransferService()->CreateMemoryHandle(descriptor->size);
+        if (memoryHandle == nullptr) {
+            return ReturnOOMAtClient(device, descriptor);
+        }
+        memoryHandleCreateInfoLength = memoryHandle->GetSerializeCreateSize();
+
+        // Prevent uninitialized memory from being visible via GetMappedRange().
+        if (mappableForWrite) {
+            std::ranges::fill(memoryHandle->GetData(), std::byte(0u));
+        }
+    }
+
+    // Create the buffer and send the creation command.
+    // This must happen after any potential error buffer creation as the server expects allocating
+    // ids to be monotonically increasing
+    Ref<Buffer> buffer =
+        wireClient->Make<Buffer>(device->GetEventManagerHandle(), device, descriptor);
+    buffer->mMemoryHandle = std::move(memoryHandle);
+
+    if (descriptor->mappedAtCreation) {
+        // If the buffer is mapped at creation, a memory handle is created and will be
+        // destroyed on unmap if the buffer doesn't have Map* usage
+        // The buffer is mapped right now.
+        buffer->mMappedState = MapState::MappedAtCreation;
+        buffer->mMappedOffset = 0;
+        buffer->mMappedSize = buffer->mSize;
+        DAWN_ASSERT(buffer->mMemoryHandle != nullptr);
+        buffer->mMappedData = buffer->mMemoryHandle->GetData();
+    }
 
     DeviceCreateBufferCmd cmd;
     cmd.deviceId = device->GetWireHandle(wireClient).id;
     cmd.descriptor = descriptor;
     // Set the pointer lengths, but the pointed-to data itself won't be serialized as usual (due
     // to skip_serialize). Instead, the custom CommandExtensions below fill that memory.
-    cmd.readHandleCreateInfoLength = 0;
-    cmd.readHandleCreateInfo = nullptr;  // Skipped by skip_serialize.
-    cmd.writeHandleCreateInfoLength = 0;
-    cmd.writeHandleCreateInfo = nullptr;  // Skipped by skip_serialize.
-
-    size_t readHandleCreateInfoLength = 0;
-    size_t writeHandleCreateInfoLength = 0;
-    if (mappable) {
-        if ((descriptor->usage & WGPUBufferUsage_MapRead) != 0) {
-            // Create the read handle on buffer creation.
-            readHandle.reset(
-                wireClient->GetMemoryTransferService()->CreateReadHandle(descriptor->size));
-            if (readHandle == nullptr) {
-                return ReturnOOMAtClient(device, descriptor);
-            }
-            readHandleCreateInfoLength = readHandle->SerializeCreateSize();
-            cmd.readHandleCreateInfoLength = readHandleCreateInfoLength;
-        }
-
-        if ((descriptor->usage & WGPUBufferUsage_MapWrite) != 0 || descriptor->mappedAtCreation) {
-            // Create the write handle on buffer creation.
-            writeHandle.reset(
-                wireClient->GetMemoryTransferService()->CreateWriteHandle(descriptor->size));
-            if (writeHandle == nullptr) {
-                return ReturnOOMAtClient(device, descriptor);
-            }
-            writeHandleCreateInfoLength = writeHandle->SerializeCreateSize();
-            cmd.writeHandleCreateInfoLength = writeHandleCreateInfoLength;
-        }
-    }
-
-    // Create the buffer and send the creation command.
-    // This must happen after any potential error buffer creation
-    // as server expects allocating ids to be monotonically increasing
-    Ref<Buffer> buffer =
-        wireClient->Make<Buffer>(device->GetEventManagerHandle(), device, descriptor);
-    buffer->mReadHandle = std::move(readHandle);
-    buffer->mWriteHandle = std::move(writeHandle);
-
-    if (descriptor->mappedAtCreation) {
-        // If the buffer is mapped at creation, a write handle is created and will be
-        // destructed on unmap if the buffer doesn't have MapWrite usage
-        // The buffer is mapped right now.
-        buffer->mMappedState = MapState::MappedAtCreation;
-        buffer->mMappedOffset = 0;
-        buffer->mMappedSize = buffer->mSize;
-        DAWN_ASSERT(buffer->mWriteHandle != nullptr);
-        buffer->mMappedData = buffer->mWriteHandle->GetData();
-    }
-
+    cmd.memoryHandleCreateInfoLength = memoryHandleCreateInfoLength;
+    cmd.memoryHandleCreateInfo = nullptr;  // Skipped by skip_serialize.
     cmd.result = buffer->GetWireHandle(wireClient);
 
-    // clang-format off
     // Turning off clang format here because for some reason it does not format the
     // CommandExtensions consistently, making it harder to read.
     wireClient->SerializeCommand(
         cmd,
         // Extensions to replace fields skipped by skip_serialize.
-        CommandExtension{readHandleCreateInfoLength,
-                         [&](char* readHandleBuffer) {
-                             if (buffer->mReadHandle != nullptr) {
-                                 // Serialize the ReadHandle into the space after the command.
-                                 buffer->mReadHandle->SerializeCreate(readHandleBuffer);
-                             }
-                         }},
-        CommandExtension{writeHandleCreateInfoLength,
-                         [&](char* writeHandleBuffer) {
-                             if (buffer->mWriteHandle != nullptr) {
-                                 // Serialize the WriteHandle into the space after the command.
-                                 buffer->mWriteHandle->SerializeCreate(writeHandleBuffer);
+        CommandExtension{memoryHandleCreateInfoLength, [&](Span<std::byte> serializeBuffer) {
+                             if (buffer->mMemoryHandle != nullptr) {
+                                 // Serialize the MemoryHandle into the space after the command.
+                                 buffer->mMemoryHandle->SerializeCreate(serializeBuffer);
                              }
                          }});
-    // clang-format on
+
     return ReturnToAPI(std::move(buffer));
 }
 
@@ -335,10 +310,9 @@ Buffer::Buffer(const ObjectBaseParams& params,
     : RefCountedWithExternalCount<ObjectWithEventsBase>(params, eventManagerHandle),
       mSize(descriptor->size),
       mUsage(static_cast<WGPUBufferUsage>(descriptor->usage)),
-      // This flag is for the write handle created by mappedAtCreation
-      // instead of MapWrite usage. We don't have such a case for read handle.
-      mDestructWriteHandleOnUnmap(wgpu::Bool(descriptor->mappedAtCreation) &&
-                                  ((descriptor->usage & WGPUBufferUsage_MapWrite) == 0)),
+      mDestructMemoryHandleOnUnmap(
+          wgpu::Bool(descriptor->mappedAtCreation) &&
+          ((descriptor->usage & (WGPUBufferUsage_MapWrite | WGPUBufferUsage_MapRead)) == 0)),
       mDevice(device) {}
 
 void Buffer::DeleteThis() {
@@ -424,7 +398,7 @@ WireResult Client::DoBufferMapAsyncCallback(ObjectHandle eventManager,
                                             WGPUMapAsyncStatus status,
                                             WGPUStringView message,
                                             size_t readDataUpdateInfoLength,
-                                            const uint8_t* readDataUpdateInfo) {
+                                            const std::byte* readDataUpdateInfo) {
     return SetFutureReady<Buffer::MapAsyncEvent>(eventManager, future.id, status, message,
                                                  readDataUpdateInfoLength, readDataUpdateInfo);
 }
@@ -442,7 +416,8 @@ void* Buffer::APIGetMappedRange(size_t offset, size_t size) {
     if (!CheckGetMappedRangeOffsetSize(offset, size)) {
         return nullptr;
     }
-    return DAWN_UNSAFE_TODO(static_cast<uint8_t*>(mMappedData) + offset);
+
+    return static_cast<void*>(mMappedData.subspan(offset).data());
 }
 
 const void* Buffer::APIGetConstMappedRange(size_t offset, size_t size) {
@@ -450,7 +425,8 @@ const void* Buffer::APIGetConstMappedRange(size_t offset, size_t size) {
         !CheckGetMappedRangeOffsetSize(offset, size)) {
         return nullptr;
     }
-    return DAWN_UNSAFE_TODO(static_cast<uint8_t*>(mMappedData) + offset);
+
+    return static_cast<const void*>(mMappedData.subspan(offset).data());
 }
 
 WGPUStatus Buffer::APIWriteMappedRange(size_t offset, void const* data, size_t size) {
@@ -487,45 +463,35 @@ void Buffer::APIUnmap() {
     if (IsMappedForWriting()) {
         // Writes need to be flushed before Unmap is sent. Unmap calls all associated
         // in-flight callbacks which may read the updated data.
-        DAWN_ASSERT(mWriteHandle != nullptr);
+        DAWN_ASSERT(mMemoryHandle != nullptr);
 
         // Get the serialization size of data update writes.
-        size_t writeDataUpdateInfoLength =
-            mWriteHandle->SizeOfSerializeDataUpdate(mMappedOffset, mMappedSize);
+        size_t memoryDataUpdateInfoLength =
+            mMemoryHandle->GetSerializeDataUpdateSize(mMappedOffset, mMappedSize);
 
         BufferUpdateMappedDataCmd cmd{};
         cmd.bufferId = GetWireHandle(client).id;
         // Set the pointer length, but the pointed-to data itself won't be serialized as usual (due
         // to skip_serialize). Instead, the custom CommandExtension below fills that memory.
-        cmd.writeDataUpdateInfoLength = writeDataUpdateInfoLength;
-        cmd.writeDataUpdateInfo = nullptr;  // Skipped by skip_serialize.
+        cmd.dataUpdateInfoLength = memoryDataUpdateInfoLength;
+        cmd.dataUpdateInfo = nullptr;  // Skipped by skip_serialize.
         cmd.offset = mMappedOffset;
         cmd.size = mMappedSize;
 
         client->SerializeCommand(
             cmd,
             // Extensions to replace fields skipped by skip_serialize.
-            CommandExtension{writeDataUpdateInfoLength, [&](char* writeHandleBuffer) {
-                                 // Serialize flush metadata into the space after the command.
-                                 // This closes the handle for writing.
-                                 std::span<char> writeHandleBufferSpan(writeHandleBuffer,
-                                                                       writeDataUpdateInfoLength);
-                                 mWriteHandle->SerializeDataUpdate(writeHandleBufferSpan,
-                                                                   cmd.offset);
+            CommandExtension{memoryDataUpdateInfoLength, [&](Span<std::byte> serializeBuffer) {
+                                 mMemoryHandle->SerializeDataUpdate(serializeBuffer, mMappedOffset,
+                                                                    mMappedSize);
                              }});
 
-        // If mDestructWriteHandleOnUnmap is true, that means the write handle is merely
+        // If mDestructMemoryHandleOnUnmap is true, that means the memory handle is merely
         // for mappedAtCreation usage. It is destroyed on unmap after flush to server
         // instead of at buffer destruction.
-        if (mDestructWriteHandleOnUnmap) {
-            mMappedData = nullptr;
-            mWriteHandle = nullptr;
-            if (mReadHandle) {
-                // If it's both mappedAtCreation and MapRead we need to reset
-                // mData to readHandle's GetData(). This could be changed to
-                // merging read/write handle in future
-                mMappedData = const_cast<void*>(mReadHandle->GetData());
-            }
+        if (mDestructMemoryHandleOnUnmap) {
+            mMappedData = {};
+            mMemoryHandle = nullptr;
         }
     }
 
@@ -544,7 +510,7 @@ void Buffer::APIUnmap() {
 void Buffer::APIDestroy() {
     Client* client = GetClient();
 
-    // Remove the current mapping and destroy Read/WriteHandles.
+    // Remove the current mapping and destroy the MemoryHandle.
     FreeMappedData();
 
     BufferDestroyCmd cmd{};
@@ -607,17 +573,13 @@ void Buffer::FreeMappedData() {
     // When in "debug" mode, 0xCA-out the mapped data when we free it so that in we can detect
     // use-after-free of the mapped data. This is particularly useful for WebGPU test about the
     // interaction of mapping and GC.
-    if (mMappedData) {
-        DAWN_UNSAFE_TODO(
-            memset(static_cast<uint8_t*>(mMappedData) + mMappedOffset, 0xCA, mMappedSize));
-    }
+    std::ranges::fill(mMappedData, std::byte(0xCA));
 #endif  // defined(DAWN_ENABLE_ASSERTS)
 
     mMappedOffset = 0;
     mMappedSize = 0;
-    mMappedData = nullptr;
-    mReadHandle = nullptr;
-    mWriteHandle = nullptr;
+    mMappedData = {};
+    mMemoryHandle = nullptr;
     mMappedState = MapState::Unmapped;
 }
 

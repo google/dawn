@@ -114,8 +114,8 @@ struct MapUserdata : CallbackUserdata {
     WGPUBuffer bufferObj;
     ObjectHandle eventManager;
     WGPUFuture future;
-    uint64_t offset;
-    uint64_t size;
+    size_t offset;
+    size_t size;
     WGPUMapMode mode;
 };
 

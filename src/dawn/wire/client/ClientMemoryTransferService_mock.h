@@ -30,6 +30,7 @@
 
 #include <gmock/gmock.h>
 
+#include <memory>
 #include <span>
 
 #include "dawn/wire/WireClient.h"
@@ -63,8 +64,28 @@ class MockMemoryTransferService : public MemoryTransferService {
         MOCK_METHOD(void, SerializeDataUpdate, (std::span<char>, size_t), (override));
     };
 
+    class MockMemoryHandle : public MemoryHandle {
+      public:
+        ~MockMemoryHandle() override;
+        MOCK_METHOD(void, Destroy, ());
+
+        MOCK_METHOD(size_t, GetSerializeCreateSize, (), (const, override));
+        MOCK_METHOD(void, SerializeCreate, (std::span<std::byte>), (const, override));
+        MOCK_METHOD(std::span<std::byte>, GetData, (), (const, override));
+        MOCK_METHOD(size_t, GetSerializeDataUpdateSize, (size_t, size_t), (const, override));
+        MOCK_METHOD(void,
+                    SerializeDataUpdate,
+                    (std::span<std::byte>, size_t, size_t),
+                    (const, override));
+        MOCK_METHOD(bool,
+                    DeserializeDataUpdate,
+                    (std::span<const std::byte>, size_t, size_t),
+                    (override));
+    };
+
     MOCK_METHOD(ReadHandle*, CreateReadHandle, (size_t), (override));
     MOCK_METHOD(WriteHandle*, CreateWriteHandle, (size_t), (override));
+    MOCK_METHOD(std::unique_ptr<MemoryHandle>, CreateMemoryHandle, (size_t), (override));
 };
 
 }  // namespace dawn::wire::client

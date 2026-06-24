@@ -50,6 +50,9 @@ static std::ostream& operator<<(std::ostream& os, const MapMode& param) {
         case wgpu::MapMode::Write:
             os << "Write";
             break;
+        case wgpu::MapMode::None:
+            os << "None";
+            break;
         default:
             DAWN_UNREACHABLE();
     }
@@ -78,18 +81,14 @@ MATCHER_P(AsUint32Eq, value, "") {
     return *reinterpret_cast<const uint32_t*>(arg) == value;
 }
 
-using MockClientReadHandle = client::MockMemoryTransferService::MockReadHandle;
-using MockClientWriteHandle = client::MockMemoryTransferService::MockWriteHandle;
-using MockServerReadHandle = server::MockMemoryTransferService::MockReadHandle;
-using MockServerWriteHandle = server::MockMemoryTransferService::MockWriteHandle;
-using MockClientHandles = std::tuple<MockClientReadHandle*, MockClientWriteHandle*>;
-using MockServerHandles = std::tuple<MockServerReadHandle*, MockServerWriteHandle*>;
+using MockClientMemoryHandle = client::MockMemoryTransferService::MockMemoryHandle;
+using MockServerMemoryHandle = server::MockMemoryTransferService::MockMemoryHandle;
 
 // WireMemoryTransferServiceTests test the MemoryTransferService with buffer mapping.
 // They test the basic success and error cases for buffer mapping, and they test
 // mocked failures of each fallible MemoryTransferService method that an embedder
 // could implement.
-// The test harness defines multiple helpers for expecting operations on Read/Write handles
+// The test harness defines multiple helpers for expecting operations on MemoryHandles
 // and for mocking failures.
 // There are tests which check for Success for every mapping operation which mock an entire
 // mapping operation from map to unmap, and add all MemoryTransferService expectations. Tests
@@ -107,6 +106,8 @@ class WireMemoryTransferServiceTestBase : public WireTest,
                 return wgpu::BufferUsage::MapRead;
             case wgpu::MapMode::Write:
                 return wgpu::BufferUsage::MapWrite;
+            case wgpu::MapMode::None:
+                return wgpu::BufferUsage::Vertex;
             default:
                 DAWN_UNREACHABLE();
         }
@@ -128,193 +129,138 @@ class WireMemoryTransferServiceTestBase : public WireTest,
         return std::make_pair(apiBuffer, buffer);
     }
 
-    std::tuple<WGPUBuffer, wgpu::Buffer, MockClientHandles, MockServerHandles> CreateValidBuffer() {
+    std::span<std::byte> GetSpanToClientBufferContent() {
+        // TODO(https://crbug.com/526549345) Use byte_span_from_ref.
+        return DAWN_UNSAFE_TODO(
+            {reinterpret_cast<std::byte*>(&mClientBufferContent), sizeof(mClientBufferContent)});
+    }
+
+    std::tuple<WGPUBuffer, wgpu::Buffer, MockClientMemoryHandle*, MockServerMemoryHandle*>
+    CreateValidBuffer() {
         WGPUBuffer apiBuffer;
         wgpu::Buffer buffer;
 
         // The client should create and serialize the appropriate handles on buffer creation.
-        auto clientHandles = ExpectHandleCreation(true);
-        ExpectHandleSerialization(clientHandles);
+        auto clientHandle = ExpectHandleCreation(true);
+        ExpectHandleSerialization(clientHandle);
         std::tie(apiBuffer, buffer) = CreateBuffer();
 
         // When the commands are flushed, the server should appropriately deserialize the handles.
-        auto serverHandles = ExpectHandleDeserialization(true);
+        auto serverHandle = ExpectHandleDeserialization(true);
         FlushClient();
 
-        return std::make_tuple(apiBuffer, buffer, clientHandles, serverHandles);
+        return std::make_tuple(apiBuffer, buffer, clientHandle, serverHandle);
     }
 
-    MockClientHandles ExpectHandleCreation(bool success) {
-        wgpu::MapMode mode = GetParam().mMapMode;
-        bool mappedAtCreation = GetParam().mMappedAtCreation;
-        switch (mode) {
-            case wgpu::MapMode::Read: {
-                auto* readHandle = success ? new StrictMock<MockClientReadHandle>() : nullptr;
-                EXPECT_CALL(mClientMTS, CreateReadHandle(kBufferSize)).WillOnce(Return(readHandle));
-                if (!success) {
-                    return std::make_tuple(nullptr, nullptr);
-                }
-                if (mappedAtCreation) {
-                    auto* writeHandle = new StrictMock<MockClientWriteHandle>();
-                    EXPECT_CALL(mClientMTS, CreateWriteHandle(kBufferSize))
-                        .WillOnce(Return(writeHandle));
-                    EXPECT_CALL(*writeHandle, GetData).WillOnce(Return(&mClientBufferContent));
-                    return std::make_tuple(readHandle, writeHandle);
-                }
-                return std::make_tuple(readHandle, nullptr);
-            }
-            case wgpu::MapMode::Write: {
-                auto* writeHandle = success ? new StrictMock<MockClientWriteHandle>() : nullptr;
-                EXPECT_CALL(mClientMTS, CreateWriteHandle(kBufferSize))
-                    .WillOnce(Return(writeHandle));
-                if (!success) {
-                    return std::make_tuple(nullptr, nullptr);
-                }
-                if (mappedAtCreation) {
-                    EXPECT_CALL(*writeHandle, GetData).WillOnce(Return(&mClientBufferContent));
-                }
-                return std::make_tuple(nullptr, writeHandle);
-            }
-            default:
-                DAWN_UNREACHABLE();
+    MockClientMemoryHandle* ExpectHandleCreation(bool success) {
+        if (!success) {
+            EXPECT_CALL(mClientMTS, CreateMemoryHandle(kBufferSize)).WillOnce(Return(nullptr));
+            return nullptr;
         }
+
+        auto* memoryHandle = new StrictMock<MockClientMemoryHandle>();
+
+        EXPECT_CALL(mClientMTS, CreateMemoryHandle(kBufferSize))
+            .WillOnce(Return(std::unique_ptr<MockClientMemoryHandle>(memoryHandle)));
+
+        if (GetParam().mMappedAtCreation || GetParam().mMapMode == wgpu::MapMode::Write) {
+            EXPECT_CALL(*memoryHandle, GetData)
+                .WillOnce(Return(GetSpanToClientBufferContent()))
+                .RetiresOnSaturation();
+        }
+
+        if (GetParam().mMappedAtCreation) {
+            EXPECT_CALL(*memoryHandle, GetData)
+                .WillOnce(Return(GetSpanToClientBufferContent()))
+                .RetiresOnSaturation();
+        }
+
+        return memoryHandle;
     }
 
-    void ExpectHandleSerialization(MockClientHandles& clientHandles) {
-        auto* readHandle = std::get<MockClientReadHandle*>(clientHandles);
-        if (readHandle) {
-            EXPECT_CALL(*readHandle, SerializeCreateSize).WillOnce(InvokeWithoutArgs([&] {
-                return sizeof(mSerializeCreateInfo);
+    void ExpectHandleSerialization(MockClientMemoryHandle* clientHandle) {
+        DAWN_ASSERT(clientHandle != nullptr);
+
+        EXPECT_CALL(*clientHandle, GetSerializeCreateSize).WillOnce(InvokeWithoutArgs([&] {
+            return sizeof(mSerializeCreateInfo);
+        }));
+        EXPECT_CALL(*clientHandle, SerializeCreate)
+            .WillOnce(WithArg<0>([&](std::span<std::byte> serializeBuffer) {
+                // TODO(https://crbug.com/524406299) use copy_from.
+                DAWN_UNSAFE_TODO(memcpy(serializeBuffer.data(), &mSerializeCreateInfo, kDataSize));
             }));
-            EXPECT_CALL(*readHandle, SerializeCreate(_))
-                .WillOnce(WithArg<0>([&](void* serializePointer) {
-                    DAWN_UNSAFE_TODO(memcpy(serializePointer, &mSerializeCreateInfo, kDataSize));
-                    return kDataSize;
-                }));
-        }
-        auto* writeHandle = std::get<MockClientWriteHandle*>(clientHandles);
-        if (writeHandle) {
-            EXPECT_CALL(*writeHandle, SerializeCreateSize).WillOnce(InvokeWithoutArgs([&] {
-                return sizeof(mSerializeCreateInfo);
-            }));
-            EXPECT_CALL(*writeHandle, SerializeCreate(_))
-                .WillOnce(WithArg<0>([&](void* serializePointer) {
-                    DAWN_UNSAFE_TODO(memcpy(serializePointer, &mSerializeCreateInfo, kDataSize));
-                    return kDataSize;
-                }));
-        }
     }
 
-    MockServerHandles ExpectHandleDeserialization(bool success) {
-        wgpu::MapMode mode = GetParam().mMapMode;
-        bool mappedAtCreation = GetParam().mMappedAtCreation;
-        switch (mode) {
-            case wgpu::MapMode::Read: {
-                MockServerWriteHandle* writeHandle = nullptr;
-                if (mappedAtCreation) {
-                    writeHandle = success ? new StrictMock<MockServerWriteHandle>() : nullptr;
-                    EXPECT_CALL(mServerMTS, DeserializeWriteHandle(AsUint32Eq(mSerializeCreateInfo),
-                                                                   kDataSize, _))
-                        .WillOnce(
-                            WithArg<2>([=](server::MemoryTransferService::WriteHandle** handle) {
-                                *handle = writeHandle;
-                                return success;
-                            }));
-                    if (!success) {
-                        return std::make_tuple(nullptr, nullptr);
-                    }
-                }
-
-                auto* readHandle = success ? new StrictMock<MockServerReadHandle>() : nullptr;
-                EXPECT_CALL(mServerMTS,
-                            DeserializeReadHandle(AsUint32Eq(mSerializeCreateInfo), kDataSize, _))
-                    .WillOnce(WithArg<2>([=](server::MemoryTransferService::ReadHandle** handle) {
-                        *handle = readHandle;
-                        return success;
-                    }));
-                return std::make_tuple(readHandle, writeHandle);
-            }
-            case wgpu::MapMode::Write: {
-                auto* writeHandle = success ? new StrictMock<MockServerWriteHandle>() : nullptr;
-                EXPECT_CALL(mServerMTS,
-                            DeserializeWriteHandle(AsUint32Eq(mSerializeCreateInfo), kDataSize, _))
-                    .WillOnce(WithArg<2>([=](server::MemoryTransferService::WriteHandle** handle) {
-                        *handle = writeHandle;
-                        return success;
-                    }));
-                return std::make_tuple(nullptr, writeHandle);
-            }
-            default:
-                DAWN_UNREACHABLE();
+    MockServerMemoryHandle* ExpectHandleDeserialization(bool success) {
+        if (!success) {
+            EXPECT_CALL(mServerMTS, DeserializeMemoryHandle).WillOnce(Return(nullptr));
+            return nullptr;
         }
+
+        auto* memoryHandle = new StrictMock<MockServerMemoryHandle>();
+        EXPECT_CALL(mServerMTS, DeserializeMemoryHandle)
+            .WillOnce(Return(std::unique_ptr<MockServerMemoryHandle>(memoryHandle)));
+        return memoryHandle;
     }
 
-    void ExpectClientSerializeData(MockClientHandles& clientHandles) {
-        auto* clientHandle = std::get<MockClientWriteHandle*>(clientHandles);
-        if (!clientHandle) {
-            return;
-        }
+    void ExpectClientSerializeData(MockClientMemoryHandle* clientHandle) {
+        DAWN_ASSERT(clientHandle != nullptr);
 
-        EXPECT_CALL(*clientHandle, SizeOfSerializeDataUpdate(_, _)).WillOnce(Return(kDataSize));
+        EXPECT_CALL(*clientHandle, GetSerializeDataUpdateSize).WillOnce(Return(kBufferSize));
         EXPECT_CALL(*clientHandle, SerializeDataUpdate)
-            .WillOnce(WithArg<0>([&](std::span<char> serializeSpan) {
+            .WillOnce(WithArg<0>([&](std::span<std::byte> serializeSpan) {
+                // TODO(https://crbug.com/524406299) use copy_from.
                 DAWN_UNSAFE_TODO(memcpy(serializeSpan.data(), &mClientBufferContent, kBufferSize));
             }));
     }
-    void ExpectServerSerializeData(MockServerHandles& serverHandles) {
-        auto* serverHandle = std::get<MockServerReadHandle*>(serverHandles);
-        if (!serverHandle) {
-            return;
-        }
+    void ExpectServerSerializeData(MockServerMemoryHandle* serverHandle) {
+        DAWN_ASSERT(serverHandle != nullptr);
 
-        EXPECT_CALL(*serverHandle, SizeOfSerializeDataUpdate(_, _)).WillOnce(Return(kDataSize));
+        EXPECT_CALL(*serverHandle, GetSerializeDataUpdateSize).WillOnce(Return(kBufferSize));
         EXPECT_CALL(*serverHandle, SerializeDataUpdate)
-            .WillOnce(WithArg<2>([&](std::span<char> serializeSpan) {
+            .WillOnce(WithArg<0>([&](std::span<std::byte> serializeSpan) {
+                // TODO(https://crbug.com/524406299) use copy_from.
                 DAWN_UNSAFE_TODO(memcpy(serializeSpan.data(), &mServerBufferContent, kBufferSize));
             }));
     }
 
-    void ExpectClientDeserializeData(bool success, MockClientHandles& clientHandles) {
-        auto* clientHandle = std::get<MockClientReadHandle*>(clientHandles);
-        if (!clientHandle) {
-            return;
-        }
+    void ExpectClientDeserializeData(bool success, MockClientMemoryHandle* clientHandle) {
+        DAWN_ASSERT(clientHandle != nullptr);
 
         EXPECT_CALL(*clientHandle,
-                    DeserializeDataUpdate(testing::Matcher<std::span<const uint8_t>>(
-                                              testing::Truly([](std::span<const uint8_t> arg) {
+                    DeserializeDataUpdate(testing::Matcher<std::span<const std::byte>>(
+                                              testing::Truly([](std::span<const std::byte> arg) {
                                                   return arg.size() == kBufferSize;
                                               })),
-                                          static_cast<size_t>(0u)))
-            .WillOnce(WithArg<0>([&, success](std::span<const uint8_t> deserializeSpan) {
+                                          static_cast<size_t>(0u), kBufferSize))
+            .WillOnce(WithArg<0>([&, success](std::span<const std::byte> deserializeSpan) {
                 if (success) {
+                    // TODO(https://crbug.com/524406299) use copy_from.
                     DAWN_UNSAFE_TODO(
                         memcpy(&mClientBufferContent, deserializeSpan.data(), kBufferSize));
                 }
                 return success;
             }));
     }
-    void ExpectServerDeserializeData(bool success, MockServerHandles& serverHandles) {
-        auto* serverHandle = std::get<MockServerWriteHandle*>(serverHandles);
-        if (!serverHandle) {
-            return;
-        }
+    void ExpectServerDeserializeData(bool success, MockServerMemoryHandle* serverHandle) {
+        DAWN_ASSERT(serverHandle != nullptr);
 
-        std::span<uint8_t> target(reinterpret_cast<uint8_t*>(&mServerBufferContent),
-                                  sizeof(mServerBufferContent));
+        // TODO(https://crbug.com/526549345) use byte_span_from_ref
+        std::span<std::byte> DAWN_UNSAFE_TODO(target(
+            reinterpret_cast<std::byte*>(&mServerBufferContent), sizeof(mServerBufferContent)));
         EXPECT_CALL(
             *serverHandle,
             DeserializeDataUpdate(
-                testing::Matcher<std::span<const uint8_t>>(testing::Truly(
-                    [](std::span<const uint8_t> arg) { return arg.size() == kBufferSize; })),
-                testing::Matcher<std::span<uint8_t>>(
-                    testing::Truly([target](std::span<uint8_t> arg) {
+                testing::Matcher<std::span<const std::byte>>(testing::Truly(
+                    [](std::span<const std::byte> arg) { return arg.size() == kBufferSize; })),
+                static_cast<size_t>(0u), kBufferSize,
+                testing::Matcher<std::span<std::byte>>(
+                    testing::Truly([target](std::span<std::byte> arg) {
                         return arg.data() == target.data() && arg.size() == target.size();
-                    })),
-                static_cast<size_t>(0u)))
-            .WillOnce(WithArg<0>([&, success](std::span<const uint8_t> deserializePointer) {
+                    }))))
+            .WillOnce(WithArg<0>([&, success](std::span<const std::byte> deserializePointer) {
                 if (success) {
-                    // Copy the data manually here.
+                    // TODO(https://crbug.com/524406299) use copy_from.
                     DAWN_UNSAFE_TODO(memcpy(&mServerBufferContent, deserializePointer.data(),
                                             deserializePointer.size()));
                 }
@@ -322,33 +268,15 @@ class WireMemoryTransferServiceTestBase : public WireTest,
             }));
     }
 
-    void ExpectClientHandleDestruction(MockClientHandles& clientHandles) {
-        auto* readHandle = std::get<MockClientReadHandle*>(clientHandles);
-        if (readHandle) {
-            EXPECT_CALL(*readHandle, Destroy).Times(1);
-        }
-        auto* writeHandle = std::get<MockClientWriteHandle*>(clientHandles);
-        if (writeHandle) {
-            EXPECT_CALL(*writeHandle, Destroy).Times(1);
-        }
-    }
-    void ExpectServerHandleDestruction(MockServerHandles& serverHandles) {
-        auto* readHandle = std::get<MockServerReadHandle*>(serverHandles);
-        if (readHandle) {
-            EXPECT_CALL(*readHandle, Destroy).Times(1);
-        }
-        auto* writeHandle = std::get<MockServerWriteHandle*>(serverHandles);
-        if (writeHandle) {
-            EXPECT_CALL(*writeHandle, Destroy).Times(1);
-        }
-    }
-
     // Sets expectations for a successful map async call and verifies that the results match for the
     // MapMode.
     void ExpectSuccessfulMapAsync(WGPUBuffer apiBuffer,
                                   wgpu::Buffer buffer,
-                                  MockClientHandles& clientHandles,
-                                  MockServerHandles& serverHandles) {
+                                  MockClientMemoryHandle* clientHandle,
+                                  MockServerMemoryHandle* serverHandle) {
+        DAWN_ASSERT(clientHandle != nullptr);
+        DAWN_ASSERT(serverHandle != nullptr);
+
         wgpu::MapMode mode = GetParam().mMapMode;
 
         // Mode independent expectations.
@@ -362,9 +290,8 @@ class WireMemoryTransferServiceTestBase : public WireTest,
 
         switch (mode) {
             case wgpu::MapMode::Read: {
-                auto* clientHandle = std::get<MockClientReadHandle*>(clientHandles);
-                ASSERT_THAT(clientHandle, NotNull());
-                EXPECT_CALL(*clientHandle, GetData).WillOnce(Return(&mClientBufferContent));
+                EXPECT_CALL(*clientHandle, GetData)
+                    .WillOnce(Return(GetSpanToClientBufferContent()));
                 EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
                     .WillOnce(Return(&mServerBufferContent));
 
@@ -372,11 +299,11 @@ class WireMemoryTransferServiceTestBase : public WireTest,
                                 mMapAsyncCb.Callback());
 
                 // The server should serialize its buffer when the client flushes.
-                ExpectServerSerializeData(serverHandles);
+                ExpectServerSerializeData(serverHandle);
                 FlushClient();
 
                 // The client should deserialize into its buffer when the server flushes.
-                ExpectClientDeserializeData(true, clientHandles);
+                ExpectClientDeserializeData(true, clientHandle);
                 FlushServer();
 
                 // The data between the server and the client should be the same now.
@@ -384,9 +311,8 @@ class WireMemoryTransferServiceTestBase : public WireTest,
                 break;
             }
             case wgpu::MapMode::Write: {
-                auto* clientHandle = std::get<MockClientWriteHandle*>(clientHandles);
-                ASSERT_THAT(clientHandle, NotNull());
-                EXPECT_CALL(*clientHandle, GetData).WillOnce(Return(&mClientBufferContent));
+                EXPECT_CALL(*clientHandle, GetData)
+                    .WillOnce(Return(GetSpanToClientBufferContent()));
 
                 buffer.MapAsync(mode, 0, kBufferSize, wgpu::CallbackMode::AllowSpontaneous,
                                 mMapAsyncCb.Callback());
@@ -403,8 +329,11 @@ class WireMemoryTransferServiceTestBase : public WireTest,
     void ExpectSuccessfulUnmap(wgpu::MapMode mode,
                                WGPUBuffer apiBuffer,
                                wgpu::Buffer buffer,
-                               MockClientHandles& clientHandles,
-                               MockServerHandles& serverHandles) {
+                               MockClientMemoryHandle* clientHandle,
+                               MockServerMemoryHandle* serverHandle) {
+        DAWN_ASSERT(clientHandle != nullptr);
+        DAWN_ASSERT(serverHandle != nullptr);
+
         switch (mode) {
             case wgpu::MapMode::Read: {
                 // Unmap the buffer.
@@ -415,14 +344,14 @@ class WireMemoryTransferServiceTestBase : public WireTest,
             }
             case wgpu::MapMode::Write: {
                 // The client should serialize its buffer when Unmap is called.
-                ExpectClientSerializeData(clientHandles);
+                ExpectClientSerializeData(clientHandle);
                 buffer.Unmap();
 
                 // The server should deserialize into its buffer when the client flushes.
                 EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
                 EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
                     .WillOnce(Return(&mServerBufferContent));
-                ExpectServerDeserializeData(true, serverHandles);
+                ExpectServerDeserializeData(true, serverHandle);
                 FlushClient();
 
                 // The data between the server and the client should be the same now.
@@ -434,10 +363,15 @@ class WireMemoryTransferServiceTestBase : public WireTest,
         }
     }
 
+    // Not that this function sets the client/serverHandle to nullptr in the caller if the unmap
+    // ends up destroying the handles. Other Expect* assume ASSERT handles are not nullptr so it is
+    // the test's responsibility to not call them when handles are nullptr.
     void ExpectSuccessfulUnmapAtCreation(WGPUBuffer apiBuffer,
                                          wgpu::Buffer buffer,
-                                         MockClientHandles& clientHandles,
-                                         MockServerHandles& serverHandles) {
+                                         MockClientMemoryHandle*& clientHandle,
+                                         MockServerMemoryHandle*& serverHandle) {
+        DAWN_ASSERT(clientHandle != nullptr);
+        DAWN_ASSERT(serverHandle != nullptr);
         ASSERT_TRUE(GetParam().mMappedAtCreation);
 
         // Ensure that the contents on the client and server side are different now as a part of the
@@ -446,31 +380,22 @@ class WireMemoryTransferServiceTestBase : public WireTest,
         mServerBufferContent = kDataGenerator++;
         ASSERT_THAT(mClientBufferContent, Ne(mServerBufferContent));
 
-        // If the map mode of the buffer was actually MapRead, we should expect destruction of the
-        // WriteHandles, and setting the ReadHandles instead.
-        bool isRead = GetParam().mMapMode == wgpu::MapMode::Read;
-        if (isRead) {
-            auto* clientWriteHandle = std::get<MockClientWriteHandle*>(clientHandles);
-            ASSERT_THAT(clientWriteHandle, NotNull());
-            EXPECT_CALL(*clientWriteHandle, Destroy).Times(1);
-            auto* clientReadHandle = std::get<MockClientReadHandle*>(clientHandles);
-            ASSERT_THAT(clientReadHandle, NotNull());
-            EXPECT_CALL(*clientReadHandle, GetData).WillOnce(Return(&mClientBufferContent));
+        // If the buffer was only mappable for mappedAtCreation, we expect destruction of the
+        // MemoryHandle.
+        bool isMappedAtCreationOnly =
+            !(GetParam().mMapMode & (wgpu::MapMode::Read | wgpu::MapMode::Write));
 
-            auto* serverHandle = std::get<MockServerWriteHandle*>(serverHandles);
-            ASSERT_THAT(serverHandle, NotNull());
+        if (isMappedAtCreationOnly) {
+            EXPECT_CALL(*clientHandle, GetData).WillOnce(Return(GetSpanToClientBufferContent()));
+            EXPECT_CALL(*clientHandle, Destroy).Times(1);
             EXPECT_CALL(*serverHandle, Destroy).Times(1);
         }
 
-        ExpectSuccessfulUnmap(wgpu::MapMode::Write, apiBuffer, buffer, clientHandles,
-                              serverHandles);
+        ExpectSuccessfulUnmap(wgpu::MapMode::Write, apiBuffer, buffer, clientHandle, serverHandle);
 
-        // Update the handles accordingly if we are MapRead.
-        if (isRead) {
-            clientHandles =
-                std::make_tuple(std::get<MockClientReadHandle*>(clientHandles), nullptr);
-            serverHandles =
-                std::make_tuple(std::get<MockServerReadHandle*>(serverHandles), nullptr);
+        if (isMappedAtCreationOnly) {
+            clientHandle = nullptr;
+            serverHandle = nullptr;
         }
     }
 
@@ -505,16 +430,16 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(WireMemoryTransferServiceBufferHandleTests, Destroy) {
     WGPUBuffer apiBuffer;
     wgpu::Buffer buffer;
-    MockClientHandles clientHandles;
-    MockServerHandles serverHandles;
-    std::tie(apiBuffer, buffer, clientHandles, serverHandles) = CreateValidBuffer();
+    MockClientMemoryHandle* clientHandle;
+    MockServerMemoryHandle* serverHandle;
+    std::tie(apiBuffer, buffer, clientHandle, serverHandle) = CreateValidBuffer();
 
     // The client handles are destroyed on buffer.Destroy().
-    ExpectClientHandleDestruction(clientHandles);
+    EXPECT_CALL(*clientHandle, Destroy).Times(1);
     buffer.Destroy();
 
     // The server handles are destroyed when the destroy command is flushed.
-    ExpectServerHandleDestruction(serverHandles);
+    EXPECT_CALL(*serverHandle, Destroy).Times(1);
     EXPECT_CALL(api, BufferDestroy(apiBuffer)).Times(1);
     FlushClient();
 
@@ -549,8 +474,8 @@ TEST_P(WireMemoryTransferServiceBufferHandleTests, DeserializationFailure) {
     wgpu::Buffer buffer;
 
     // The client should create and serialize the appropriate handles on buffer creation.
-    auto clientHandles = ExpectHandleCreation(true);
-    ExpectHandleSerialization(clientHandles);
+    auto* clientHandle = ExpectHandleCreation(true);
+    ExpectHandleSerialization(clientHandle);
     std::tie(apiBuffer, buffer) = CreateBuffer();
 
     // When the commands are flushed, mock that the server fails to deserialize the handle.
@@ -558,7 +483,7 @@ TEST_P(WireMemoryTransferServiceBufferHandleTests, DeserializationFailure) {
     FlushClient(false);
 
     // The client handles are destroyed when the buffer is released.
-    ExpectClientHandleDestruction(clientHandles);
+    EXPECT_CALL(*clientHandle, Destroy).Times(1);
     buffer = nullptr;
 
     // Releasing the buffer should be reflected on the server when flushed.
@@ -580,13 +505,13 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, Success) {
     WGPUBuffer apiBuffer;
     wgpu::Buffer buffer;
-    MockClientHandles clientHandles;
-    MockServerHandles serverHandles;
-    std::tie(apiBuffer, buffer, clientHandles, serverHandles) = CreateValidBuffer();
+    MockClientMemoryHandle* clientHandle;
+    MockServerMemoryHandle* serverHandle;
+    std::tie(apiBuffer, buffer, clientHandle, serverHandle) = CreateValidBuffer();
 
     // If we were mappedAtCreation, successfully handle that initial unmapping now.
     if (GetParam().mMappedAtCreation) {
-        ExpectSuccessfulUnmapAtCreation(apiBuffer, buffer, clientHandles, serverHandles);
+        ExpectSuccessfulUnmapAtCreation(apiBuffer, buffer, clientHandle, serverHandle);
     }
 
     // Ensure that the contents on the client and server side are different now as a part of the
@@ -595,15 +520,15 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, Success) {
     mServerBufferContent = kDataGenerator++;
     ASSERT_THAT(mClientBufferContent, Ne(mServerBufferContent));
 
-    ExpectSuccessfulMapAsync(apiBuffer, buffer, clientHandles, serverHandles);
-    ExpectSuccessfulUnmap(GetParam().mMapMode, apiBuffer, buffer, clientHandles, serverHandles);
+    ExpectSuccessfulMapAsync(apiBuffer, buffer, clientHandle, serverHandle);
+    ExpectSuccessfulUnmap(GetParam().mMapMode, apiBuffer, buffer, clientHandle, serverHandle);
 
     // The client handles are destroyed when the buffer is released.
-    ExpectClientHandleDestruction(clientHandles);
+    EXPECT_CALL(*clientHandle, Destroy).Times(1);
     buffer = nullptr;
 
     // The server handles are destroyed when the release command is flushed.
-    ExpectServerHandleDestruction(serverHandles);
+    EXPECT_CALL(*serverHandle, Destroy).Times(1);
     EXPECT_CALL(api, BufferRelease(apiBuffer)).Times(1);
     FlushClient();
 }
@@ -614,13 +539,13 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, Error) {
 
     WGPUBuffer apiBuffer;
     wgpu::Buffer buffer;
-    MockClientHandles clientHandles;
-    MockServerHandles serverHandles;
-    std::tie(apiBuffer, buffer, clientHandles, serverHandles) = CreateValidBuffer();
+    MockClientMemoryHandle* clientHandle;
+    MockServerMemoryHandle* serverHandle;
+    std::tie(apiBuffer, buffer, clientHandle, serverHandle) = CreateValidBuffer();
 
     // If we were mappedAtCreation, successfully handle that initial unmapping now.
     if (GetParam().mMappedAtCreation) {
-        ExpectSuccessfulUnmapAtCreation(apiBuffer, buffer, clientHandles, serverHandles);
+        ExpectSuccessfulUnmapAtCreation(apiBuffer, buffer, clientHandle, serverHandle);
     }
 
     buffer.MapAsync(mode, 0, kBufferSize, wgpu::CallbackMode::AllowSpontaneous,
@@ -645,11 +570,11 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, Error) {
     FlushClient();
 
     // The client handles are destroyed when the buffer is released.
-    ExpectClientHandleDestruction(clientHandles);
+    EXPECT_CALL(*clientHandle, Destroy).Times(1);
     buffer = nullptr;
 
     // The server handles are destroyed when the release command is flushed.
-    ExpectServerHandleDestruction(serverHandles);
+    EXPECT_CALL(*serverHandle, Destroy).Times(1);
     EXPECT_CALL(api, BufferRelease(apiBuffer)).Times(1);
     FlushClient();
 }
@@ -660,13 +585,13 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, DeserializeDataUpdateFailur
 
     WGPUBuffer apiBuffer;
     wgpu::Buffer buffer;
-    MockClientHandles clientHandles;
-    MockServerHandles serverHandles;
-    std::tie(apiBuffer, buffer, clientHandles, serverHandles) = CreateValidBuffer();
+    MockClientMemoryHandle* clientHandle;
+    MockServerMemoryHandle* serverHandle;
+    std::tie(apiBuffer, buffer, clientHandle, serverHandle) = CreateValidBuffer();
 
     // If we were mappedAtCreation, successfully handle that initial unmapping now.
     if (GetParam().mMappedAtCreation) {
-        ExpectSuccessfulUnmapAtCreation(apiBuffer, buffer, clientHandles, serverHandles);
+        ExpectSuccessfulUnmapAtCreation(apiBuffer, buffer, clientHandle, serverHandle);
     }
 
     // Set mode independent expectations for the map async call now.
@@ -686,20 +611,19 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, DeserializeDataUpdateFailur
                             mMapAsyncCb.Callback());
 
             // The server should serialize its buffer when the client flushes.
-            ExpectServerSerializeData(serverHandles);
+            ExpectServerSerializeData(serverHandle);
             FlushClient();
 
             // Mock that the client fails to deserialize into its buffer when the server flushes.
-            ExpectClientDeserializeData(false, clientHandles);
+            ExpectClientDeserializeData(false, clientHandle);
             FlushServer(false);
             break;
         }
         case wgpu::MapMode::Write: {
             EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
 
-            auto* clientHandle = std::get<MockClientWriteHandle*>(clientHandles);
             ASSERT_THAT(clientHandle, NotNull());
-            EXPECT_CALL(*clientHandle, GetData).WillOnce(Return(&mClientBufferContent));
+            EXPECT_CALL(*clientHandle, GetData).WillOnce(Return(GetSpanToClientBufferContent()));
 
             buffer.MapAsync(mode, 0, kBufferSize, wgpu::CallbackMode::AllowSpontaneous,
                             mMapAsyncCb.Callback());
@@ -707,13 +631,13 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, DeserializeDataUpdateFailur
             FlushServer();
 
             // The client should serialize its buffer when Unmap is called.
-            ExpectClientSerializeData(clientHandles);
+            ExpectClientSerializeData(clientHandle);
             buffer.Unmap();
 
             // Mock that the server fails to deserialize into its buffer when the client flushes.
             EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
                 .WillOnce(Return(&mServerBufferContent));
-            ExpectServerDeserializeData(false, serverHandles);
+            ExpectServerDeserializeData(false, serverHandle);
             FlushClient(false);
             break;
         }
@@ -722,11 +646,11 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, DeserializeDataUpdateFailur
     }
 
     // The client handles are destroyed when the buffer is released.
-    ExpectClientHandleDestruction(clientHandles);
+    EXPECT_CALL(*clientHandle, Destroy).Times(1);
     buffer = nullptr;
 
     // The server handles are destroyed when the release command is flushed.
-    ExpectServerHandleDestruction(serverHandles);
+    EXPECT_CALL(*serverHandle, Destroy).Times(1);
     EXPECT_CALL(api, BufferRelease(apiBuffer)).Times(1);
     FlushClient();
 }
@@ -735,26 +659,26 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, DeserializeDataUpdateFailur
 TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, DestroyBeforeUnmap) {
     WGPUBuffer apiBuffer;
     wgpu::Buffer buffer;
-    MockClientHandles clientHandles;
-    MockServerHandles serverHandles;
-    std::tie(apiBuffer, buffer, clientHandles, serverHandles) = CreateValidBuffer();
+    MockClientMemoryHandle* clientHandle;
+    MockServerMemoryHandle* serverHandle;
+    std::tie(apiBuffer, buffer, clientHandle, serverHandle) = CreateValidBuffer();
 
     // If we were mappedAtCreation, successfully handle that initial unmapping now.
     if (GetParam().mMappedAtCreation) {
-        ExpectSuccessfulUnmapAtCreation(apiBuffer, buffer, clientHandles, serverHandles);
+        ExpectSuccessfulUnmapAtCreation(apiBuffer, buffer, clientHandle, serverHandle);
     }
 
-    ExpectSuccessfulMapAsync(apiBuffer, buffer, clientHandles, serverHandles);
+    ExpectSuccessfulMapAsync(apiBuffer, buffer, clientHandle, serverHandle);
 
     // THIS IS THE TEST: destroy the buffer before unmapping and check it destroyed the mapping
     // immediately, both in the client and server side.
     {
         // Destroying the buffer should immediately destroy the client handles.
-        ExpectClientHandleDestruction(clientHandles);
+        EXPECT_CALL(*clientHandle, Destroy).Times(1);
         buffer.Destroy();
 
         // Flushing the client should destroy the server handles.
-        ExpectServerHandleDestruction(serverHandles);
+        EXPECT_CALL(*serverHandle, Destroy).Times(1);
         EXPECT_CALL(api, BufferDestroy(apiBuffer)).Times(1);
         FlushClient();
 
@@ -778,44 +702,42 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(
         ParamGenerator<WireMemoryTransferServiceBufferMappedAtCreationTests::ParamType,
                        MapMode,
-                       MappedAtCreation>({wgpu::MapMode::Read, wgpu::MapMode::Write}, {true})),
+                       MappedAtCreation>({wgpu::MapMode::Read, wgpu::MapMode::Write,
+                                          wgpu::MapMode::None},
+                                         {true})),
     &TestParamToString<WireMemoryTransferServiceBufferMappedAtCreationTests::ParamType>);
 
 // Test DeserializeDataUpdate (actual data) failure w.r.t for the initial Unmap.
 TEST_P(WireMemoryTransferServiceBufferMappedAtCreationTests, DeserializeDataUpdateFailure) {
     WGPUBuffer apiBuffer;
     wgpu::Buffer buffer;
-    MockClientHandles clientHandles;
-    MockServerHandles serverHandles;
-    std::tie(apiBuffer, buffer, clientHandles, serverHandles) = CreateValidBuffer();
+    MockClientMemoryHandle* clientHandle;
+    MockServerMemoryHandle* serverHandle;
+    std::tie(apiBuffer, buffer, clientHandle, serverHandle) = CreateValidBuffer();
 
-    // The client should serialize its buffer when Unmap is called. Additionally, if we are in read
-    // mode, the client side WriteHandle used for mappedAtCreation should be destroyed now and it
-    // should reset to use the ReadHandle.
-    ExpectClientSerializeData(clientHandles);
-    if (GetParam().mMapMode == wgpu::MapMode::Read) {
-        auto* clientWriteHandle = std::get<MockClientWriteHandle*>(clientHandles);
-        ASSERT_THAT(clientWriteHandle, NotNull());
-        EXPECT_CALL(*clientWriteHandle, Destroy).Times(1);
-        auto* clientReadHandle = std::get<MockClientReadHandle*>(clientHandles);
-        ASSERT_THAT(clientReadHandle, NotNull());
-        EXPECT_CALL(*clientReadHandle, GetData).WillOnce(Return(&mClientBufferContent));
-        clientHandles = std::make_tuple(std::get<MockClientReadHandle*>(clientHandles), nullptr);
+    // The client should serialize its buffer when Unmap is called. Additionally, if we are in just
+    // mappedAtCreation, the MemoryHandle should be destroyed now.
+    ExpectClientSerializeData(clientHandle);
+    if (GetParam().mMapMode == wgpu::MapMode::None) {
+        EXPECT_CALL(*clientHandle, Destroy).Times(1);
+        clientHandle = nullptr;
     }
     buffer.Unmap();
 
     // Mock that the server fails to deserialize into its buffer when the client flushes.
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&mServerBufferContent));
-    ExpectServerDeserializeData(false, serverHandles);
+    ExpectServerDeserializeData(false, serverHandle);
     FlushClient(false);
 
     // The client handles are destroyed when the buffer is released.
-    ExpectClientHandleDestruction(clientHandles);
+    if (clientHandle != nullptr) {
+        EXPECT_CALL(*clientHandle, Destroy).Times(1);
+    }
     buffer = nullptr;
 
     // The server handles are destroyed when the release command is flushed.
-    ExpectServerHandleDestruction(serverHandles);
+    EXPECT_CALL(*serverHandle, Destroy).Times(1);
     EXPECT_CALL(api, BufferRelease(apiBuffer)).Times(1);
     FlushClient();
 }
@@ -824,19 +746,19 @@ TEST_P(WireMemoryTransferServiceBufferMappedAtCreationTests, DeserializeDataUpda
 TEST_P(WireMemoryTransferServiceBufferMappedAtCreationTests, DestroyBeforeUnmap) {
     WGPUBuffer apiBuffer;
     wgpu::Buffer buffer;
-    MockClientHandles clientHandles;
-    MockServerHandles serverHandles;
-    std::tie(apiBuffer, buffer, clientHandles, serverHandles) = CreateValidBuffer();
+    MockClientMemoryHandle* clientHandle;
+    MockServerMemoryHandle* serverHandle;
+    std::tie(apiBuffer, buffer, clientHandle, serverHandle) = CreateValidBuffer();
 
     // THIS IS THE TEST: destroy the buffer before unmapping and check it destroyed the mapping
     // immediately, both in the client and server side.
     {
         // Destroying the buffer should immediately destroy the client handles.
-        ExpectClientHandleDestruction(clientHandles);
+        EXPECT_CALL(*clientHandle, Destroy).Times(1);
         buffer.Destroy();
 
         // Flushing the client should destroy the server handles.
-        ExpectServerHandleDestruction(serverHandles);
+        EXPECT_CALL(*serverHandle, Destroy).Times(1);
         EXPECT_CALL(api, BufferDestroy(apiBuffer)).Times(1);
         FlushClient();
 

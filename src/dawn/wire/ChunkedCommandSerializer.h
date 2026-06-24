@@ -42,6 +42,7 @@
 #include "src/dawn/common/Compiler.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/Math.h"
+#include "src/utils/span.h"
 
 namespace dawn::wire {
 
@@ -49,7 +50,7 @@ namespace dawn::wire {
 // that is not baked directly into the command already.
 struct CommandExtension {
     size_t size;
-    std::function<void(char*)> serialize;
+    std::function<void(Span<std::byte>)> serialize;
 };
 
 namespace detail {
@@ -62,9 +63,11 @@ template <typename Extension, typename... Extensions>
 WireResult SerializeCommandExtension(SerializeBuffer* serializeBuffer,
                                      Extension&& e,
                                      Extensions&&... es) {
-    char* buffer;
+    std::byte* buffer;
     WIRE_TRY(serializeBuffer->NextN(e.size, &buffer));
-    e.serialize(buffer);
+
+    // TODO(https://crbug.com/492456046): Spanify NextN to return a Span.
+    e.serialize(DAWN_UNSAFE_TODO(Span<std::byte>(buffer, e.size)));
 
     WIRE_TRY(SerializeCommandExtension(serializeBuffer, std::forward<Extensions>(es)...));
     return WireResult::Success;

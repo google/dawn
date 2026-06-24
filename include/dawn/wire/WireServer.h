@@ -95,11 +95,17 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
     class ReadHandle;
     virtual bool DeserializeReadHandle(const void* deserializePointer,
                                        size_t deserializeSize,
-                                       ReadHandle** readHandle) = 0;
+                                       ReadHandle** readHandle) {
+        // TODO(https://crbug.com/524776858): Remove once Chromium doesn't implement anymore.
+        return false;
+    }
     class WriteHandle;
     virtual bool DeserializeWriteHandle(const void* deserializePointer,
                                         size_t deserializeSize,
-                                        WriteHandle** writeHandle) = 0;
+                                        WriteHandle** writeHandle) {
+        // TODO(https://crbug.com/524776858): Remove once Chromium doesn't implement anymore.
+        return false;
+    }
     // Returns a MemoryHandle from the parameters in creationData. May return nullptr on failure.
     class MemoryHandle;
     virtual std::unique_ptr<MemoryHandle> DeserializeMemoryHandle(
