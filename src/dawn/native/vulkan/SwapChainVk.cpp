@@ -302,26 +302,50 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
 
     config.transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
-    config.alphaMode = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-#if !DAWN_PLATFORM_IS(ANDROID)
-    DAWN_INVALID_IF(
-        (surfaceInfo.capabilities.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) == 0,
-        "Vulkan SwapChain must support opaque alpha.");
-#else
-    // TODO(dawn:286): investigate composite alpha for WebGPU native
-    VkCompositeAlphaFlagBitsKHR compositeAlphaFlags[4] = {
-        VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-        VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
-        VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
-        VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
-    };
-    for (uint32_t i = 0; i < 4; i++) {
-        if (surfaceInfo.capabilities.supportedCompositeAlpha & compositeAlphaFlags[i]) {
-            config.alphaMode = compositeAlphaFlags[i];
-            break;
+    // Honor the WebGPU surface descriptor's alphaMode on all platforms.
+    // Previously the non-Android path hardcoded OPAQUE which silently
+    // dropped per-pixel transparency requests. See dawn:286.
+    {
+        VkCompositeAlphaFlagBitsKHR requestedVk = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        switch (GetAlphaMode()) {
+            case wgpu::CompositeAlphaMode::Premultiplied:
+                requestedVk = VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
+                break;
+            case wgpu::CompositeAlphaMode::Unpremultiplied:
+                requestedVk = VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR;
+                break;
+            case wgpu::CompositeAlphaMode::Inherit:
+                requestedVk = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
+                break;
+            case wgpu::CompositeAlphaMode::Opaque:
+            case wgpu::CompositeAlphaMode::Auto:
+            default:
+                requestedVk = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+                break;
         }
+        if (surfaceInfo.capabilities.supportedCompositeAlpha & requestedVk) {
+            config.alphaMode = requestedVk;
+        } else {
+            // Fall back to the first supported mode — order chosen so
+            // OPAQUE is the last resort if the surface refuses it.
+            VkCompositeAlphaFlagBitsKHR fallbacks[4] = {
+                VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
+                VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
+                VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
+                VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+            };
+            config.alphaMode = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+            for (uint32_t i = 0; i < 4; i++) {
+                if (surfaceInfo.capabilities.supportedCompositeAlpha & fallbacks[i]) {
+                    config.alphaMode = fallbacks[i];
+                    break;
+                }
+            }
+        }
+        DAWN_INVALID_IF(
+            (surfaceInfo.capabilities.supportedCompositeAlpha & config.alphaMode) == 0,
+            "Vulkan SwapChain: no supported composite alpha mode.");
     }
-#endif  // #if !DAWN_PLATFORM_IS(ANDROID)
 
     // Choose the number of images for the swapchain= and clamp it to the min and max from the
     // surface capabilities. maxImageCount = 0 means there is no limit.
