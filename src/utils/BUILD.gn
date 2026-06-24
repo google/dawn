@@ -29,6 +29,7 @@
 # Utils library
 ###############################################################################
 
+import("../../scripts/dawn_features.gni")
 import("../../scripts/dawn_overrides_with_defaults.gni")
 
 import("//build_overrides/build.gni")
@@ -48,11 +49,193 @@ if (build_with_chromium) {
   use_fuzzing_engine = false
 }
 
+# Centralized config for -Weverything and its suppressions.
+config("dawn_warnings") {
+  if (dawn_weverything) {
+    assert(is_clang)
+
+    cflags = [ "-Weverything" ]
+
+    # Suppressions
+    # Warnings we'll never enable.
+    cflags += [
+      "-Wno-c++98-compat",
+      "-Wno-c++98-compat-pedantic",
+      "-Wno-pre-c++14-compat",
+      "-Wno-pre-c++17-compat",
+      "-Wno-pre-c++20-compat",
+      "-Wno-padded",
+    ]
+
+    # TODO(crbug.com/523358231): triage these warnings and determine whether
+    # they're warnings we definitely don't want, or warnings we want to try to
+    # enable, or warnings that we can't currently enable for some reason
+    cflags += [
+      "-Wno-zero-as-null-pointer-constant",
+      "-Wno-old-style-cast",
+      "-Wno-sign-conversion",
+      "-Wno-undef",
+      "-Wno-reserved-macro-identifier",
+      "-Wno-undefined-reinterpret-cast",
+      "-Wno-shorten-64-to-32",
+      "-Wno-implicit-int-conversion",
+      "-Wno-float-conversion",
+      "-Wno-double-promotion",
+      "-Wno-unused-macros",
+      "-Wno-global-constructors",
+      "-Wno-exit-time-destructors",
+      "-Wno-format-nonliteral",
+      "-Wno-disabled-macro-expansion",
+      "-Wno-switch-enum",
+      "-Wno-missing-variable-declarations",
+      "-Wno-unused-template",
+      "-Wno-covered-switch-default",
+      "-Wno-extra-semi-stmt",
+      "-Wno-extra-semi",
+      "-Wno-unused-parameter",
+      "-Wno-shadow",
+      "-Wno-missing-prototypes",
+      "-Wno-lifetime-safety-intra-tu-suggestions",
+      "-Wno-lifetime-safety-cross-tu-suggestions",
+
+      # The lifetime-safety-* warnings are part of an experimental analysis.
+      # Many individual diagnostics (like
+      # -Wlifetime-safety-lifetimebound-violation) are not yet mapped to
+      # toggleable warning flags, so we suppress the entire group and disable
+      # the analysis pass.
+      "-Wno-lifetime-safety",
+      "-Wno-lifetime-safety-all",
+      "-Xclang",
+      "-fno-lifetime-safety-inference",
+      "-Xclang",
+      "-fno-experimental-lifetime-safety-tu-analysis",
+      "-Wno-switch-default",
+      "-Wno-undefined-func-template",
+      "-Wno-weak-vtables",
+      "-Wno-missing-noreturn",
+      "-Wno-unreachable-code-aggressive",
+      "-Wno-cast-qual",
+      "-Wno-range-loop-analysis",
+      "-Wno-implicit-float-conversion",
+      "-Wno-nullable-to-nonnull-conversion",
+      "-Wno-inconsistent-missing-destructor-override",
+      "-Wno-suggest-destructor-override",
+      "-Wno-suggest-override",
+      "-Wno-float-equal",
+      "-Wno-shadow-header",
+      "-Wno-c2y-extensions",
+      "-Wno-c++20-extensions",
+      "-Wno-documentation-unknown-command",
+      "-Wno-documentation",
+      "-Wno-nrvo",
+      "-Wno-non-virtual-dtor",
+      "-Wno-reserved-identifier",
+      "-Wno-deprecated-redundant-constexpr-static-def",
+      "-Wno-unused-member-function",
+      "-Wno-tautological-type-limit-compare",
+      "-Wno-used-but-marked-unused",
+      "-Wno-thread-safety",
+      "-Wno-objc-messaging-id",
+      "-Wno-unsafe-buffer-usage",
+      "-Wno-unique-object-duplication",
+      "-Wno-nonportable-system-include-path",
+      "-Wno-nullability-extension",
+      "-Wno-ms-bitfield-padding",
+      "-Wno-gcc-compat",
+      "-Wno-deprecated-copy-with-dtor",
+      "-Wno-gnu-zero-variadic-macro-arguments",
+
+      # TODO(crbug.com/526690258): limit suppressions to file scope using
+      # --warning-suppression-mappings
+      "-Wno-language-extension-token",
+    ]
+  } else {
+    cflags = []
+
+    # Allowlist of warnings that are not part of -Wall or -Wextra.
+    if (dawn_standalone && is_clang) {
+      cflags += [
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Wconditional-uninitialized",
+        "-Wcstring-format-directive",
+        "-Wctad-maybe-unsupported",
+        "-Wc++11-narrowing",
+        "-Wdeprecated-copy",
+        "-Wdeprecated-copy-dtor",
+        "-Wduplicate-enum",
+        "-Wextra-semi",
+        "-Wextra-semi-stmt",
+        "-Wimplicit-fallthrough",
+        "-Winconsistent-missing-destructor-override",
+        "-Winvalid-offsetof",
+        "-Wmissing-field-initializers",
+        "-Wnon-c-typedef-for-linkage",
+        "-Wpessimizing-move",
+        "-Wrange-loop-analysis",
+        "-Wredundant-move",
+        "-Wshadow-field",
+        "-Wstrict-prototypes",
+        "-Wsuggest-destructor-override",
+        "-Wsuggest-override",
+        "-Wtautological-unsigned-zero-compare",
+        "-Wunreachable-code-aggressive",
+        "-Wunused-but-set-variable",
+        "-Wunused-macros",
+
+        # TODO(crbug.com/523358231): triage these flags not applied properly
+        # when added in a dependency target.
+        "-Wno-c2y-extensions",
+        "-Wno-unused-parameter",
+        "-Wno-nullability-extension",
+        "-Wno-gcc-compat",
+        "-Wno-dollar-in-identifier-extension",
+      ]
+    }
+  }
+
+  if (is_clang) {
+    # Treat third_party and gen headers as system headers to suppress warnings.
+    # We use both absolute and relative paths to ensure they match how the
+    # compiler sees them.
+    _prefixes = [
+      rebase_path("${dawn_root}/third_party/", root_build_dir),
+      rebase_path("${dawn_root}/third_party/", ""),
+      rebase_path("${dawn_root}/buildtools/", root_build_dir),
+      rebase_path("${dawn_root}/buildtools/", ""),
+      rebase_path("//third_party/", root_build_dir),
+      rebase_path("//third_party/", ""),
+      rebase_path("//buildtools/", root_build_dir),
+      rebase_path("//buildtools/", ""),
+
+      # TODO(crbug.com/523358231): It's good to enable warnings for generated
+      # code. Currently, removing this results in many warnings in generated
+      # webgpu_cpp.h.
+      "gen/",
+      rebase_path(root_gen_dir, root_build_dir) + "/",
+    ]
+    foreach(_prefix, _prefixes) {
+      if (is_win) {
+        # When building with clang-cl on Windows, the driver only accepts
+        # MSVC-style flags. We use -Xclang to pass the standard Clang
+        # --system-header-prefix flag directly to the compiler engine.
+        cflags += [
+          "-Xclang",
+          "--system-header-prefix=${_prefix}",
+        ]
+      } else {
+        cflags += [ "--system-header-prefix=${_prefix}" ]
+      }
+    }
+  }
+}
+
 config("internal_config") {
   include_dirs = [ "${dawn_root}" ]
 
   defines = []
-  configs = []
+  configs = [ ":dawn_warnings" ]
 
   if (is_clang && dawn_standalone && !is_wasm) {
     configs += [ ":raw_ptr_check" ]
@@ -123,6 +306,9 @@ dawn_nocompile_source_set("nocompile_sources") {
     "span_nocompile.nc",
     "typed_integer_nocompile.nc",
   ]
+  if (dawn_weverything) {
+    sources += [ "warning_nocompile.nc" ]
+  }
 }
 
 # Included in dawn_unittests.

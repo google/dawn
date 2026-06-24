@@ -386,7 +386,7 @@ void DrawCallPerf::SetUpPerfTest() {
             mConstantBindGroupLayout,
             mUniformBindGroupLayout,
         };
-        pipelineLayoutDesc.bindGroupLayouts = bindGroupLayouts,
+        pipelineLayoutDesc.bindGroupLayouts = bindGroupLayouts;
         pipelineLayoutDesc.bindGroupLayoutCount = 2;
         pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
 

@@ -914,7 +914,7 @@ source_set("sources") {
       "opengl/UtilsGL.h",
       "opengl/opengl_platform.h",
     ]
-    include_dirs += [ "//third_party/EGL-Registry" ]
+    include_dirs += [ "${dawn_root}/third_party/EGL-Registry" ]
   }
 
   if (dawn_enable_vulkan) {

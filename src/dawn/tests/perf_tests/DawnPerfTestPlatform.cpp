@@ -90,11 +90,12 @@ std::vector<DawnPerfTestPlatform::TraceEvent>* DawnPerfTestPlatform::GetLocalTra
 
     if (traceEventBuffer == nullptr) {
         auto buffer = std::make_unique<std::vector<TraceEvent>>();
-        traceEventBuffer = buffer.get();
+        auto threadId = std::this_thread::get_id();
 
         // Add a new buffer to the map
         std::lock_guard<std::mutex> guard(mTraceEventBufferMapMutex);
-        mTraceEventBuffers[std::this_thread::get_id()] = std::move(buffer);
+        mTraceEventBuffers[threadId] = std::move(buffer);
+        traceEventBuffer = mTraceEventBuffers[threadId].get();
     }
 
     return traceEventBuffer;

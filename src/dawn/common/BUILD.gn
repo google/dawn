@@ -111,53 +111,6 @@ config("internal_config") {
     cflags_cc = [ "-Wno-thread-safety" ]
   }
 
-  # Enable more warnings that were found when using Dawn in other projects.
-  # Add them only when building in standalone because we control which clang
-  # version we use. Otherwise we risk breaking projects depending on Dawn when
-  # the use a different clang version.
-  if (dawn_standalone && is_clang) {
-    cflags += [
-      "-Wconditional-uninitialized",
-      "-Wcstring-format-directive",
-      "-Wctad-maybe-unsupported",
-      "-Wc++11-narrowing",
-      "-Wdeprecated-copy",
-      "-Wdeprecated-copy-dtor",
-      "-Wduplicate-enum",
-      "-Wextra-semi",
-      "-Wextra-semi-stmt",
-      "-Wimplicit-fallthrough",
-      "-Winconsistent-missing-destructor-override",
-      "-Winvalid-offsetof",
-      "-Wmissing-field-initializers",
-      "-Wnon-c-typedef-for-linkage",
-      "-Wpessimizing-move",
-      "-Wrange-loop-analysis",
-      "-Wredundant-move",
-      "-Wshadow-field",
-      "-Wstrict-prototypes",
-      "-Wsuggest-destructor-override",
-      "-Wsuggest-override",
-      "-Wtautological-unsigned-zero-compare",
-      "-Wunreachable-code-aggressive",
-      "-Wunused-but-set-variable",
-      "-Wunused-macros",
-    ]
-
-    if (is_win) {
-      cflags += [
-        # clang-cl doesn't know -pedantic, pass it explicitly to the clang
-        # driver
-        "/clang:-pedantic",
-
-        # Allow the use of __uuidof()
-        "-Wno-language-extension-token",
-      ]
-    } else {
-      cflags += [ "-pedantic" ]
-    }
-  }
-
   if (!is_clang && is_win) {
     # Dawn extends wgpu enums with internal enums.
     # MSVC considers these invalid switch values. crbug.com/dawn/397.

@@ -169,9 +169,9 @@ void Register(const ProgramFuzzer& fuzzer);
 /// Where `...` is any number of deserializable parameters which are decoded from the base64
 /// content of the WGSL comments.
 /// @see bytes::Decode()
-#define TINT_WGSL_PROGRAM_FUZZER(FUNCTION, ...)    \
-    TINT_STATIC_INIT(::tint::fuzz::wgsl::Register( \
-        ::tint::fuzz::wgsl::ProgramFuzzer::Create(#FUNCTION, FUNCTION, ##__VA_ARGS__)))
+#define TINT_WGSL_PROGRAM_FUZZER(FUNCTION, ...)                                              \
+    TINT_STATIC_INIT(::tint::fuzz::wgsl::Register(::tint::fuzz::wgsl::ProgramFuzzer::Create( \
+        #FUNCTION, FUNCTION __VA_OPT__(, ) __VA_ARGS__)))
 
 }  // namespace tint::fuzz::wgsl
 

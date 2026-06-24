@@ -301,7 +301,7 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
         PNextChainBuilder memoryAllocateInfoChain(&memoryAllocateInfo);
 
         VkImportMemoryFdInfoKHR importMemoryFdInfo;
-        importMemoryFdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT,
+        importMemoryFdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT;
         importMemoryFdInfo.fd = handle;
         memoryAllocateInfoChain.Add(&importMemoryFdInfo,
                                     VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR);

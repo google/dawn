@@ -1,4 +1,4 @@
-// Copyright 2018 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,27 +25,17 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_COMMON_WINDOWS_WITH_UNDEFS_H_
-#define SRC_DAWN_COMMON_WINDOWS_WITH_UNDEFS_H_
+#include <stdint.h>
 
-#include "src/utils/platform.h"
+namespace dawn {
 
-#if !DAWN_PLATFORM_IS(WINDOWS)
-#error "windows_with_undefs.h included on non-Windows"
-#endif
+// This test verifies that warnings that are part of -Weverything but not
+// -Wall -Wextra are enabled when This test runs only when `dawn_weverything = true`.
 
-// This header includes <windows.h> but removes all the extra defines that conflict with identifiers
-// in internal code. It should never be included in something that is part of the public interface.
-#include <Windows.h>
+// -Wcast-align is one such warning.
+void TestCastAlign() {
+    char* p = nullptr;
+    [[maybe_unused]] int* q = (int*)p; // expected-error {{increases required alignment}}
+}
 
-// Macros defined for ANSI / Unicode support
-#undef CreateWindow
-#undef GetMessage
-
-// Macros defined to produce compiler intrinsics
-#undef MemoryBarrier
-
-// Macro defined as an alias of GetTickCount
-#undef GetCurrentTime
-
-#endif  // SRC_DAWN_COMMON_WINDOWS_WITH_UNDEFS_H_
+}

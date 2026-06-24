@@ -889,7 +889,7 @@ source_set("white_box_tests_sources") {
       "white_box/EGLImageWrappingTests.cpp",
       "white_box/GLTextureWrappingTests.cpp",
     ]
-    include_dirs = [ "//third_party/EGL-Registry" ]
+    include_dirs = [ "${dawn_root}/third_party/EGL-Registry" ]
   }
 }
 
