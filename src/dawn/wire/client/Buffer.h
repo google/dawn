@@ -36,6 +36,7 @@
 #include "dawn/wire/WireClient.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/FutureUtils.h"
+#include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/RefCountedWithExternalCount.h"
 #include "src/dawn/wire/client/ObjectBase.h"
@@ -79,23 +80,6 @@ class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     friend class Client;
     class MapAsyncEvent;
 
-    void WillDropLastExternalRef() override;
-
-    // Prepares the callbacks to be called and potentially calls them
-    void SetFutureStatus(WGPUMapAsyncStatus status, std::string_view message);
-
-    bool IsMappedForReading() const;
-    bool IsMappedForWriting() const;
-    bool CheckGetMappedRangeOffsetSize(size_t offset, size_t size) const;
-
-    void FreeMappedData();
-
-    const uint64_t mSize = 0;
-    const WGPUBufferUsage mUsage;
-    const bool mDestructMemoryHandleOnUnmap;
-    Ref<Device> mDevice;
-
-    // Mapping members are mutable depending on the current map state.
     enum class MapRequestType { Read, Write };
     struct MapRequest {
         FutureID futureID = kNullFutureID;
@@ -111,14 +95,38 @@ class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
         MappedForWrite,
         MappedAtCreation,
     };
-    std::optional<MapRequest> mPendingMapRequest = std::nullopt;
-    MapState mMappedState = MapState::Unmapped;
-    // TODO(https://crbug.com/526537224): Use RawSpan instead of Span.
-    Span<std::byte> mMappedData;
-    size_t mMappedOffset = 0;
-    size_t mMappedSize = 0;
+    struct State {
+        bool IsMappedForReading() const;
+        bool IsMappedForWriting() const;
+        Span<std::byte> GetMappedRange(size_t offset, size_t size) const;
 
-    std::unique_ptr<MemoryTransferService::MemoryHandle> mMemoryHandle = nullptr;
+        bool PendingRequestIs(FutureID futureID) const;
+
+        MapState mappedState = MapState::Unmapped;
+        std::optional<MapRequest> pendingMapRequest = std::nullopt;
+
+        // TODO(https://crbug.com/526537224): Use RawSpan instead of Span.
+        Span<std::byte> mappedData = {};
+        size_t mappedOffset = 0;
+        size_t mappedSize = 0;
+
+        std::unique_ptr<MemoryTransferService::MemoryHandle> memoryHandle = nullptr;
+    };
+    using GuardedState = MutexRecursiveProtected<State>::Usage;
+
+    void WillDropLastExternalRef() override;
+
+    // Prepares the callbacks to be called and potentially calls them
+    void SetFutureStatus(GuardedState& state, WGPUMapAsyncStatus status, std::string_view message);
+
+    void FreeMappedData(GuardedState& state);
+
+    const uint64_t mSize = 0;
+    const WGPUBufferUsage mUsage;
+    const bool mDestructMemoryHandleOnUnmap;
+    Ref<Device> mDevice;
+
+    MutexRecursiveProtected<State> mState;
 };
 
 }  // namespace dawn::wire::client
