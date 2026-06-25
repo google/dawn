@@ -122,11 +122,13 @@ config("dawn_warnings") {
       "-Wno-unsafe-buffer-usage",
       "-Wno-unique-object-duplication",
       "-Wno-nonportable-system-include-path",
-
-      # TODO(crbug.com/526690258): limit suppressions to file scope using
-      # --warning-suppression-mappings
-      "-Wno-language-extension-token",
     ]
+
+    # Per file scope warning suppressions goes into
+    # warning_suppression_mappings.txt
+    cflags +=
+        [ "--warning-suppression-mappings=" +
+          rebase_path("warning_suppression_mappings.txt", root_build_dir) ]
   } else {
     cflags = []
 

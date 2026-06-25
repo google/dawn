@@ -1,0 +1,12 @@
+[language-extension-token]
+src:*src/dawn/native/Surface.cpp
+src:*src/dawn/native/d3d/*
+src:*src/dawn/native/d3d11/*
+src:*src/dawn/native/d3d12/*
+src:*src/dawn/tests/end2end/AdapterEnumerationTests.cpp
+src:*src/dawn/tests/end2end/VideoViewsTests_win.cpp
+src:*src/dawn/tests/white_box/SharedBufferMemoryTests_win.cpp
+src:*src/dawn/tests/white_box/SharedTextureMemoryTests_win.cpp
+src:*src/dawn/tests/white_box/SharedTextureMemoryTests_win_d3d12.cpp
+src:*src/tint/lang/hlsl/validate/validate.cc
+src:*src/tint/utils/rtti/castable.h
