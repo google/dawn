@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env vpython3
 # Copyright 2026 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
