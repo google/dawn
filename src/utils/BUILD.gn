@@ -75,28 +75,19 @@ config("dawn_warnings") {
       "-Wno-old-style-cast",
       "-Wno-sign-conversion",
       "-Wno-undef",
-      "-Wno-reserved-macro-identifier",
       "-Wno-undefined-reinterpret-cast",
-      "-Wno-shorten-64-to-32",
       "-Wno-implicit-int-conversion",
       "-Wno-float-conversion",
       "-Wno-double-promotion",
-      "-Wno-unused-macros",
       "-Wno-global-constructors",
       "-Wno-exit-time-destructors",
-      "-Wno-format-nonliteral",
       "-Wno-disabled-macro-expansion",
       "-Wno-switch-enum",
       "-Wno-missing-variable-declarations",
       "-Wno-unused-template",
       "-Wno-covered-switch-default",
-      "-Wno-extra-semi-stmt",
-      "-Wno-extra-semi",
-      "-Wno-unused-parameter",
-      "-Wno-shadow",
+      "-Wno-shadow-field-in-constructor",
       "-Wno-missing-prototypes",
-      "-Wno-lifetime-safety-intra-tu-suggestions",
-      "-Wno-lifetime-safety-cross-tu-suggestions",
 
       # The lifetime-safety-* warnings are part of an experimental analysis.
       # Many individual diagnostics (like
@@ -113,14 +104,8 @@ config("dawn_warnings") {
       "-Wno-undefined-func-template",
       "-Wno-weak-vtables",
       "-Wno-missing-noreturn",
-      "-Wno-unreachable-code-aggressive",
-      "-Wno-cast-qual",
-      "-Wno-range-loop-analysis",
       "-Wno-implicit-float-conversion",
       "-Wno-nullable-to-nonnull-conversion",
-      "-Wno-inconsistent-missing-destructor-override",
-      "-Wno-suggest-destructor-override",
-      "-Wno-suggest-override",
       "-Wno-float-equal",
       "-Wno-shadow-header",
       "-Wno-c2y-extensions",
@@ -133,17 +118,10 @@ config("dawn_warnings") {
       "-Wno-deprecated-redundant-constexpr-static-def",
       "-Wno-unused-member-function",
       "-Wno-tautological-type-limit-compare",
-      "-Wno-used-but-marked-unused",
-      "-Wno-thread-safety",
       "-Wno-objc-messaging-id",
       "-Wno-unsafe-buffer-usage",
       "-Wno-unique-object-duplication",
       "-Wno-nonportable-system-include-path",
-      "-Wno-nullability-extension",
-      "-Wno-ms-bitfield-padding",
-      "-Wno-gcc-compat",
-      "-Wno-deprecated-copy-with-dtor",
-      "-Wno-gnu-zero-variadic-macro-arguments",
 
       # TODO(crbug.com/526690258): limit suppressions to file scope using
       # --warning-suppression-mappings
@@ -188,8 +166,6 @@ config("dawn_warnings") {
         # when added in a dependency target.
         "-Wno-c2y-extensions",
         "-Wno-unused-parameter",
-        "-Wno-nullability-extension",
-        "-Wno-gcc-compat",
         "-Wno-dollar-in-identifier-extension",
       ]
     }
@@ -197,23 +173,25 @@ config("dawn_warnings") {
 
   if (is_clang) {
     # Treat third_party and gen headers as system headers to suppress warnings.
-    # We use both absolute and relative paths to ensure they match how the
-    # compiler sees them.
+    # The path needs to be the literal beginning of the string in the #include
+    # directive, so include path resolving to different names is added
+    # separately.
     _prefixes = [
-      rebase_path("${dawn_root}/third_party/", root_build_dir),
-      rebase_path("${dawn_root}/third_party/", ""),
-      rebase_path("${dawn_root}/buildtools/", root_build_dir),
-      rebase_path("${dawn_root}/buildtools/", ""),
-      rebase_path("//third_party/", root_build_dir),
-      rebase_path("//third_party/", ""),
-      rebase_path("//buildtools/", root_build_dir),
-      rebase_path("//buildtools/", ""),
+      "third_party/",
+      "absl/",
+      "benchmark/",
+      "glslang/",
+      "gmock/",
+      "gtest/",
+      "KHR/",
+      "partition_alloc/",
+      "napi.h",
 
       # TODO(crbug.com/523358231): It's good to enable warnings for generated
       # code. Currently, removing this results in many warnings in generated
       # webgpu_cpp.h.
-      "gen/",
-      rebase_path(root_gen_dir, root_build_dir) + "/",
+      "dawn/webgpu_cpp.h",
+      "webgpu/webgpu_cpp.h",
     ]
     foreach(_prefix, _prefixes) {
       if (is_win) {

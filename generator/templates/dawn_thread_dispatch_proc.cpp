@@ -9,7 +9,7 @@
 
 static {{Prefix}}ProcTable nullProcs;
 static {{Prefix}}ProcTable defaultProc;
-thread_local {{Prefix}}ProcTable perThreadProcs;
+static thread_local {{Prefix}}ProcTable perThreadProcs;
 
 void {{prefix}}ProcSetDefaultThreadProcs(const {{Prefix}}ProcTable* procs) {
     if (procs) {
