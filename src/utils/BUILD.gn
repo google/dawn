@@ -65,6 +65,10 @@ config("dawn_warnings") {
       "-Wno-pre-c++17-compat",
       "-Wno-pre-c++20-compat",
       "-Wno-padded",
+
+      # This warning complains on normal usages of structs, especially in
+      # Vulkan, and pushes developers away from using designated initializers.
+      "-Wno-missing-designated-field-initializers",
     ]
 
     # TODO(crbug.com/523358231): triage these warnings and determine whether
