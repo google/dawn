@@ -2484,6 +2484,7 @@
             {"value": 20, "name": "texture formats tier2"},
             {"value": 21, "name": "primitive index"},
             {"value": 22, "name": "texture component swizzle"},
+            {"value": 23, "name": "subgroup size control"},
 
             {"value": 0, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1, "name": "dawn multi planar formats", "tags": ["dawn"]},
@@ -2545,13 +2546,12 @@
             {"value": 56, "name": "shared buffer memory D3D12 shared memory file mapping handle", "tags": ["dawn"]},
             {"value": 57, "name": "shared texture memory D3D12 resource", "tags": ["dawn", "native"]},
             {"value": 58, "name": "chromium experimental sampling resource table", "tags": ["dawn"]},
-            {"value": 59, "name": "subgroup size control", "tags": ["dawn"]},
-            {"value": 60, "name": "atomic vec2u min max", "tags": ["dawn"]},
-            {"value": 61, "name": "unorm16 formats for external texture", "tags": ["dawn"]},
-            {"value": 62, "name": "opaque y cb cr android for external texture", "tags": ["dawn"]},
-            {"value": 63, "name": "unorm16 filterable", "tags": ["dawn"]},
-            {"value": 64, "name": "render pass render area", "tags": ["dawn"]},
-            {"value": 65, "name": "adapter properties drm", "tags": ["dawn", "native"]}
+            {"value": 59, "name": "atomic vec2u min max", "tags": ["dawn"]},
+            {"value": 60, "name": "unorm16 formats for external texture", "tags": ["dawn"]},
+            {"value": 61, "name": "opaque y cb cr android for external texture", "tags": ["dawn"]},
+            {"value": 62, "name": "unorm16 filterable", "tags": ["dawn"]},
+            {"value": 63, "name": "render pass render area", "tags": ["dawn"]},
+            {"value": 64, "name": "adapter properties drm", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {
