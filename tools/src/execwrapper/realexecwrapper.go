@@ -72,6 +72,11 @@ func (e *RealCmdWrapper) WithStderr(stderr io.Writer) CmdWrapper {
 	}
 }
 
+func (e *RealCmdWrapper) WithDir(dir string) CmdWrapper {
+	e.cmd.Dir = dir
+	return e
+}
+
 func (e *RealCmdWrapper) Run() error {
 	e.cmd.Stdout = e.stdout
 	e.cmd.Stderr = e.stderr

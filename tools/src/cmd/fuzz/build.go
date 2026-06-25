@@ -1,4 +1,4 @@
-// Copyright 2025 The Dawn & Tint Authors
+// Copyright 2026 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,38 +25,29 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Package oswrapper provides interfaces for the exec package.
-// This facilitates better testing via dependency injection.
-package execwrapper
+package main
 
 import (
-	"context"
-	"errors"
-	"io"
+	"fmt"
 )
 
-var (
-	ErrCombinedOutputWithWriters = errors.New("RunWithCombinedOutput cannot be called with custom writers")
-)
+// buildTargets builds a list of ninja targets. If targets is empty everything will be built.
+func (t *taskConfig) buildTargets(targets []string) error {
+	fmt.Printf("Building %v...\n", targets)
+	args := []string{"-C", t.build}
+	args = append(args, targets...)
+	if _, err := t.runCmd("autoninja", args...); err != nil {
+		return fmt.Errorf("build failed for %v: %w", targets, err)
+	}
 
-// ExecWrapper is a factory for dependency injection wrappers for calls to exec
-type ExecWrapper interface {
-	// Command is a builder for CmdWrappers without a provided Context
-	Command(name string, args ...string) CmdWrapper
-	// CommandContext is a builder for CmdWrappers with a provided Context
-	CommandContext(ctx context.Context, name string, args ...string) CmdWrapper
+	return nil
 }
 
-// CmdWrapper is a dependency injection wrapper around calls to exec
-type CmdWrapper interface {
-	// WithStdout returns a new CmdWrapper with the output stream set.
-	WithStdout(stdout io.Writer) CmdWrapper
-	// WithStderr returns a new CmdWrapper with the error stream set.
-	WithStderr(stderr io.Writer) CmdWrapper
-	// WithDir returns a new CmdWrapper with the working directory set.
-	WithDir(dir string) CmdWrapper
-	// Run executes the Cmd.
-	Run() error
-	// RunWithCombinedOutput executes the Cmd and returns its combined output. Calling this with stdout or stderr set return ErrCombinedOutputWithWriters.
-	RunWithCombinedOutput() ([]byte, error)
+// syncAndBuildTargets runs gclient sync and then builds a list of ninja targets.
+func (t *taskConfig) syncAndBuildTargets(targets []string) error {
+	if _, err := t.runCmd("gclient", "sync"); err != nil {
+		return fmt.Errorf("gclient sync failed: %w", err)
+	}
+
+	return t.buildTargets(targets)
 }

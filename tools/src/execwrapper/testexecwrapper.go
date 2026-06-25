@@ -93,6 +93,10 @@ func (t *TestCmdWrapper) WithStderr(stderr io.Writer) CmdWrapper {
 	return t
 }
 
+func (t *TestCmdWrapper) WithDir(dir string) CmdWrapper {
+	return t
+}
+
 func (t *TestCmdWrapper) Run() error {
 	if t.stdoutWriter != nil {
 		t.stdoutWriter.Write(t.stdout)

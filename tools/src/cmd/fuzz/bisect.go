@@ -41,6 +41,14 @@ import (
 // TODO(crbug.com/416755658): Add unittest coverage when exec calls are done
 // via dependency injection.
 
+type bisectStepResult int
+
+const (
+	BisectStepPassed bisectStepResult = iota
+	BisectStepFailed
+	BisectStepError // sync or build failed
+)
+
 type bisectConfig struct {
 	*taskConfig
 	failingHash string
@@ -49,171 +57,22 @@ type bisectConfig struct {
 	fuzzerName  string
 }
 
-// runBisect orchestrates the automated bisection of a fuzzer testcase.
-// It verifies that both passing and failing points behave as expected and then executes a git bisect run.
-func runBisect(t *taskConfig) error {
-	if t.bisectFile == "" {
-		return fmt.Errorf("-bisect flag requires a test case file path")
-	}
-	if t.knownFailing == "" {
-		return fmt.Errorf("-known-failing flag is required when bisecting")
-	}
-
-	if !t.skipInputTypeCheck {
-		if err := checkInputFileType(t.bisectFile, t.fuzzMode, t.osWrapper); err != nil {
+// verifyCommit checks out a commit, calls testBisectStep, and asserts that it matches the expected outcome.
+func (bc *bisectConfig) verifyCommit(hash string, expectPass bool) error {
+	var passed bool
+	err := bc.atGitHash(hash, func() error {
+		result, err := testBisectStep(bc.taskConfig)
+		if err != nil {
 			return err
 		}
-	}
+		passed = result == BisectStepPassed
+		return nil
+	})
 
-	bc := &bisectConfig{taskConfig: t}
-
-	bc.fuzzerName = filepath.Base(t.fuzzer)
-
-	// Verify build directory exists and is a GN build (contains args.gn)
-	argsGnPath := filepath.Join(t.build, "args.gn")
-	if !fileutils.IsFile(argsGnPath, t.osWrapper) {
-		return fmt.Errorf("build directory '%v' does not appear to be a GN build directory (missing args.gn), which is required for bisecting", t.build)
-	}
-
-	var err error
-	failingEP, err := resolveEndpoint(bc.knownFailing, bc.execWrapper)
 	if err != nil {
-		return fmt.Errorf("failed to resolve known-failing '%s': %w", bc.knownFailing, err)
-	}
-
-	passingEP, err := resolveEndpoint(bc.knownPassing, bc.execWrapper)
-	if err != nil {
-		return fmt.Errorf("failed to resolve known-passing '%s': %w", bc.knownPassing, err)
-	}
-
-	if failingEP.timestamp.Before(passingEP.timestamp) {
-		bc.isFix = true
-		fmt.Println("Detected flow: FAILING commit is older than PASSING commit (looking for the FIX).")
-	} else if passingEP.timestamp.Before(failingEP.timestamp) {
-		bc.isFix = false
-		fmt.Println("Detected flow: PASSING commit is older than FAILING commit (looking for the BREAKAGE).")
-	} else {
-		return fmt.Errorf("failing and passing endpoints resolve to the same time (%v), cannot bisect", failingEP.timestamp)
-	}
-
-	// Resolve the endpoints to final exact hashes based on older/newer boundary roles
-	bc.failingHash, err = resolveEndpointToHash(failingEP, bc.isFix, bc.execWrapper)
-	if err != nil {
-		return fmt.Errorf("failed to resolve known-failing date bound: %w", err)
-	}
-
-	bc.passingHash, err = resolveEndpointToHash(passingEP, !bc.isFix, bc.execWrapper)
-	if err != nil {
-		return fmt.Errorf("failed to resolve known-passing date bound: %w", err)
-	}
-
-	fmt.Printf("Resolved known-failing to commit: %s\n", bc.failingHash)
-	fmt.Printf("Resolved known-passing to commit: %s\n", bc.passingHash)
-
-	origRefBytes, err := bc.runCmd("git", "rev-parse", "--abbrev-ref", "HEAD")
-	if err != nil {
-		return fmt.Errorf("failed to get original HEAD reference: %w", err)
-	}
-	origRef := strings.TrimSpace(string(origRefBytes))
-	if origRef == "HEAD" {
-		origHeadBytes, err := bc.runCmd("git", "rev-parse", "HEAD")
-		if err != nil {
-			return fmt.Errorf("failed to get original HEAD commit: %w", err)
-		}
-		origRef = strings.TrimSpace(string(origHeadBytes))
-	}
-
-	// Ensure repository state restore upon completion
-	defer func() {
-		fmt.Printf("Restoring repository to original state (%s)...\n", origRef)
-		_, _ = bc.runCmd("git", "checkout", origRef)
-		_, _ = bc.runCmd("gclient", "sync")
-	}()
-
-	// Determine lineage
-	mergeBaseBytes, err := bc.runCmd("git", "merge-base", bc.failingHash, bc.passingHash)
-	if err != nil {
-		return fmt.Errorf("failed to find merge-base between %s and %s: %w", bc.failingHash, bc.passingHash, err)
-	}
-	mergeBase := strings.TrimSpace(string(mergeBaseBytes))
-
-	if bc.isFix {
-		if mergeBase != bc.failingHash {
-			return fmt.Errorf("the failing commit (%s) and passing commit (%s) are not in a direct ancestral relationship (merge-base is %s)", bc.failingHash, bc.passingHash, mergeBase)
-		}
-	} else {
-		if mergeBase != bc.passingHash {
-			return fmt.Errorf("the passing commit (%s) and failing commit (%s) are not in a direct ancestral relationship (merge-base is %s)", bc.passingHash, bc.failingHash, mergeBase)
-		}
-	}
-
-	// Verify failing commit behaves as expected
-	fmt.Printf("Verifying known-failing commit (%s)...\n", bc.failingHash)
-	if err := bc.verifyCommit(bc.failingHash, false); err != nil {
-		return fmt.Errorf("verification of known-failing commit %s failed: %w", bc.failingHash, err)
-	}
-	fmt.Println("Verification succeeded: fuzzer failed on known-failing commit as expected.")
-
-	// Verify passing commit behaves as expected
-	fmt.Printf("Verifying known-passing commit (%s)...\n", bc.passingHash)
-	if err := bc.verifyCommit(bc.passingHash, true); err != nil {
-		return fmt.Errorf("verification of known-passing commit %s failed: %w", bc.passingHash, err)
-	}
-	fmt.Println("Verification succeeded: fuzzer passed on known-passing commit as expected.")
-
-	// Run bisection
-	fmt.Println("Both bounds verified. Commencing bisection...")
-	if err := bc.performBisect(); err != nil {
-		return fmt.Errorf("bisection failed: %w", err)
-	}
-
-	return nil
-}
-
-type syncBuildRunResult int
-
-const (
-	SyncBuildRunPassed syncBuildRunResult = iota
-	SyncBuildRunFailed
-	SyncBuildRunError // sync or build failed
-)
-
-// syncBuildRun runs gclient sync, builds the fuzzer, and runs the test case, returning the outcome.
-// Note: is intentionally a receiver on taskConfig instead of bisectConfig, because bisectStep use/need the whole
-//
-//	bisectConfig state
-func (t *taskConfig) syncBuildRun() (syncBuildRunResult, error) {
-	fmt.Println("--> Running gclient sync...")
-	if _, err := t.runCmd("gclient", "sync"); err != nil {
-		return SyncBuildRunError, fmt.Errorf("gclient sync failed: %w", err)
-	}
-
-	fuzzerName := filepath.Base(t.fuzzer)
-	fmt.Printf("--> Building fuzzer %s...\n", fuzzerName)
-	if _, err := t.runCmd("autoninja", "-C", t.build, fuzzerName); err != nil {
-		return SyncBuildRunError, fmt.Errorf("build failed: %w", err)
-	}
-
-	fmt.Printf("--> Running fuzzer %s against test case...\n", fuzzerName)
-	_, err := t.runCmd(t.fuzzer, t.bisectFile)
-	if err != nil {
-		return SyncBuildRunFailed, nil
-	}
-	return SyncBuildRunPassed, nil
-}
-
-// verifyCommit checks out a commit, calls syncBuildRun, and asserts that it matches the expected outcome.
-func (bc *bisectConfig) verifyCommit(hash string, expectPass bool) error {
-	if _, err := bc.runCmd("git", "checkout", hash); err != nil {
-		return fmt.Errorf("failed to checkout %s: %w", hash, err)
-	}
-
-	result, err := bc.syncBuildRun()
-	if result == SyncBuildRunError {
 		return fmt.Errorf("execution at %s failed: %w", hash, err)
 	}
 
-	passed := result == SyncBuildRunPassed
 	if passed != expectPass {
 		return fmt.Errorf("fuzzer execution returned pass=%v, but expected pass=%v", passed, expectPass)
 	}
@@ -296,8 +155,125 @@ func (bc *bisectConfig) performBisect() error {
 	return nil
 }
 
+// runBisect orchestrates the automated bisection of a fuzzer testcase.
+// It verifies that both passing and failing points behave as expected and then executes a git bisect run.
+func runBisect(t *taskConfig) error {
+	if t.bisectFile == "" {
+		return fmt.Errorf("-bisect flag requires a test case file path")
+	}
+	if t.knownFailing == "" {
+		return fmt.Errorf("-known-failing flag is required when bisecting")
+	}
+
+	if !t.skipInputTypeCheck {
+		if err := checkInputFileType(t.bisectFile, t.fuzzMode, t.osWrapper); err != nil {
+			return err
+		}
+	}
+
+	bc := &bisectConfig{taskConfig: t}
+
+	bc.fuzzerName = filepath.Base(t.fuzzer)
+
+	// Verify build directory exists and is a GN build (contains args.gn)
+	argsGnPath := filepath.Join(t.build, "args.gn")
+	if !fileutils.IsFile(argsGnPath, t.osWrapper) {
+		return fmt.Errorf("build directory '%v' does not appear to be a GN build directory (missing args.gn), which is required for bisecting", t.build)
+	}
+
+	var err error
+	failingEP, err := resolveEndpoint(bc.knownFailing, bc.execWrapper)
+	if err != nil {
+		return fmt.Errorf("failed to resolve known-failing '%s': %w", bc.knownFailing, err)
+	}
+
+	passingEP, err := resolveEndpoint(bc.knownPassing, bc.execWrapper)
+	if err != nil {
+		return fmt.Errorf("failed to resolve known-passing '%s': %w", bc.knownPassing, err)
+	}
+
+	if failingEP.timestamp.Before(passingEP.timestamp) {
+		bc.isFix = true
+		fmt.Println("Detected flow: FAILING commit is older than PASSING commit (looking for the FIX).")
+	} else if passingEP.timestamp.Before(failingEP.timestamp) {
+		bc.isFix = false
+		fmt.Println("Detected flow: PASSING commit is older than FAILING commit (looking for the BREAKAGE).")
+	} else {
+		return fmt.Errorf("failing and passing endpoints resolve to the same time (%v), cannot bisect", failingEP.timestamp)
+	}
+
+	// Resolve the endpoints to final exact hashes based on older/newer boundary roles
+	bc.failingHash, err = resolveEndpointToHash(failingEP, bc.isFix, bc.execWrapper)
+	if err != nil {
+		return fmt.Errorf("failed to resolve known-failing date bound: %w", err)
+	}
+
+	bc.passingHash, err = resolveEndpointToHash(passingEP, !bc.isFix, bc.execWrapper)
+	if err != nil {
+		return fmt.Errorf("failed to resolve known-passing date bound: %w", err)
+	}
+
+	fmt.Printf("Resolved known-failing to commit: %s\n", bc.failingHash)
+	fmt.Printf("Resolved known-passing to commit: %s\n", bc.passingHash)
+
+	// Determine lineage
+	mergeBaseBytes, err := bc.runCmd("git", "merge-base", bc.failingHash, bc.passingHash)
+	if err != nil {
+		return fmt.Errorf("failed to find merge-base between %s and %s: %w", bc.failingHash, bc.passingHash, err)
+	}
+	mergeBase := strings.TrimSpace(string(mergeBaseBytes))
+
+	if bc.isFix {
+		if mergeBase != bc.failingHash {
+			return fmt.Errorf("the failing commit (%s) and passing commit (%s) are not in a direct ancestral relationship (merge-base is %s)", bc.failingHash, bc.passingHash, mergeBase)
+		}
+	} else {
+		if mergeBase != bc.passingHash {
+			return fmt.Errorf("the passing commit (%s) and failing commit (%s) are not in a direct ancestral relationship (merge-base is %s)", bc.passingHash, bc.failingHash, mergeBase)
+		}
+	}
+
+	// Verify failing commit behaves as expected
+	fmt.Printf("Verifying known-failing commit (%s)...\n", bc.failingHash)
+	if err := bc.verifyCommit(bc.failingHash, false); err != nil {
+		return fmt.Errorf("verification of known-failing commit %s failed: %w", bc.failingHash, err)
+	}
+	fmt.Println("Verification succeeded: fuzzer failed on known-failing commit as expected.")
+
+	// Verify passing commit behaves as expected
+	fmt.Printf("Verifying known-passing commit (%s)...\n", bc.passingHash)
+	if err := bc.verifyCommit(bc.passingHash, true); err != nil {
+		return fmt.Errorf("verification of known-passing commit %s failed: %w", bc.passingHash, err)
+	}
+	fmt.Println("Verification succeeded: fuzzer passed on known-passing commit as expected.")
+
+	// Run bisection
+	fmt.Println("Both bounds verified. Commencing bisection...")
+	if err := bc.performBisect(); err != nil {
+		return fmt.Errorf("bisection failed: %w", err)
+	}
+
+	return nil
+}
+
+// testBisectStep runs gclient sync, builds t.fuzzer, and runs the test case, returning the outcome.
+func testBisectStep(t *taskConfig) (bisectStepResult, error) {
+	fuzzerName := filepath.Base(t.fuzzer)
+	if err := t.syncAndBuildTargets([]string{fuzzerName}); err != nil {
+		return BisectStepError, err
+	}
+
+	fmt.Printf("--> Running fuzzer %s against test case...\n", fuzzerName)
+	_, err := t.runCmd(t.fuzzer, t.bisectFile)
+	if err != nil {
+		return BisectStepFailed, nil
+	}
+	return BisectStepPassed, nil
+}
+
 // runBisectStep implements a single git bisect step invoked by git bisect run.
-// It calls syncBuildRun and returns an appropriate exit codes (0 for good, 1 for bad, 125 for skipped/unbuildable).
+// It calls syncBuildAndRun and returns an appropriate exit codes (0 for good, 1 for bad, 125 for skipped/unbuildable).
+// It intentionally does not use atGitHash, because git bisect should be managing the repo state.
 func runBisectStep(t *taskConfig) error {
 	fmt.Print("Running bisect step for commit: ")
 	if out, err := t.runCmd("git", "rev-parse", "HEAD"); err == nil {
@@ -306,8 +282,8 @@ func runBisectStep(t *taskConfig) error {
 		fmt.Println("unknown")
 	}
 
-	result, err := t.syncBuildRun()
-	if result == SyncBuildRunError {
+	result, err := testBisectStep(t)
+	if err != nil {
 		fmt.Printf("Step execution failed: %v. Skipping commit.\n", err)
 		t.exitFn(125)
 		return nil
@@ -315,7 +291,7 @@ func runBisectStep(t *taskConfig) error {
 
 	// Translate to git bisect exit code
 	if t.isFix {
-		if result == SyncBuildRunPassed {
+		if result == BisectStepPassed {
 			fmt.Println("Fuzzer passed. This commit has the fix (bad for bisect).")
 			t.exitFn(1)
 		} else {
@@ -323,7 +299,7 @@ func runBisectStep(t *taskConfig) error {
 			t.exitFn(0)
 		}
 	} else {
-		if result == SyncBuildRunPassed {
+		if result == BisectStepPassed {
 			fmt.Println("Fuzzer passed. This commit does NOT have the breakage (good for bisect).")
 			t.exitFn(0)
 		} else {
