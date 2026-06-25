@@ -145,8 +145,15 @@ class StringStream {
                 str.pop_back();
             }
 
-            sstream_ << str;
-            return *this;
+            // Allow numbers up to 45 characters to be printed in fixed-point.
+            // This is large enough to allow float::max() (which requires 42 characters: sign, 39
+            // digits, '.', and '0') to be printed in fixed-point notation, but prevents excessively
+            // long double values (which can be up to 309 characters) from polluting outputs and
+            // error messages.
+            if (str.size() < 45) {
+                sstream_ << str;
+                return *this;
+            }
         }
 
         // Resort to scientific, with the minimum precision needed to preserve the whole float
