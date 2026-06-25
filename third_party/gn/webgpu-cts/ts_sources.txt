@@ -774,6 +774,7 @@ src/webgpu/shader/validation/decl/assignment_statement.spec.ts
 src/webgpu/shader/validation/decl/compound_statement.spec.ts
 src/webgpu/shader/validation/decl/const.spec.ts
 src/webgpu/shader/validation/decl/context_dependent_resolution.spec.ts
+src/webgpu/shader/validation/decl/immediate.spec.ts
 src/webgpu/shader/validation/decl/let.spec.ts
 src/webgpu/shader/validation/decl/override.spec.ts
 src/webgpu/shader/validation/decl/var.spec.ts

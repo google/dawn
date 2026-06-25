@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-06-22 07:19:33AM
+# Last rolled: 2026-06-25 06:28:13AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -3299,6 +3299,39 @@ crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,t
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8snorm";aspect="all" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8uint";aspect="all" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8unorm";aspect="all" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,immediate:store_type,invalid:type="fixed_array" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,immediate:store_type,invalid:type="fixed_array" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,immediate:store_type,invalid:type="fixed_array" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,immediate:store_type,invalid:type="fixed_array" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,immediate:store_type,invalid:type="struct_fixed_array" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,immediate:store_type,invalid:type="struct_fixed_array" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,immediate:store_type,invalid:type="struct_fixed_array" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,immediate:store_type,invalid:type="struct_fixed_array" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,immediate:store_type,invalid:type="struct_runtime_array" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,var:module_scope_types:type="S_array_vec4u_4";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,var:module_scope_types:type="S_array_vec4u_4";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,var:module_scope_types:type="S_array_vec4u_4";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,var:module_scope_types:type="S_array_vec4u_4";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,var:module_scope_types:type="S_array_vec4u_4";kind="immediate";via_alias=true [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,var:module_scope_types:type="S_array_vec4u_4";kind="immediate";via_alias=true [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,var:module_scope_types:type="S_array_vec4u_4";kind="immediate";via_alias=true [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,var:module_scope_types:type="S_array_vec4u_4";kind="immediate";via_alias=true [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%204%3E";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%204%3E";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%204%3E";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%204%3E";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%204%3E";kind="immediate";via_alias=true [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%204%3E";kind="immediate";via_alias=true [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%204%3E";kind="immediate";via_alias=true [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%204%3E";kind="immediate";via_alias=true [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%20array_size_const%3E";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%20array_size_const%3E";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%20array_size_const%3E";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%20array_size_const%3E";kind="immediate";via_alias=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%20array_size_const%3E";kind="immediate";via_alias=true [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%20array_size_const%3E";kind="immediate";via_alias=true [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%20array_size_const%3E";kind="immediate";via_alias=true [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,decl,var:module_scope_types:type="array%3Cvec4u,%20array_size_const%3E";kind="immediate";via_alias=true [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,extension,readonly_and_readwrite_storage_textures:var_decl: [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,validation,extension,readonly_and_readwrite_storage_textures:var_decl: [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,extension,readonly_and_readwrite_storage_textures:var_decl: [ Failure ]
