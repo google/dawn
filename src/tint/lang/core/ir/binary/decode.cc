@@ -1149,9 +1149,31 @@ struct Decoder {
                                                 subgroup_matrix.rows());
     }
 
-    const core::type::Type* CreateTypeBuffer(const pb::TypeBuffer&) {
-        err_ << "buffer types are not supported\n";
-        return mod_out_.Types().invalid();
+    const core::type::Type* CreateTypeBuffer(const pb::TypeBuffer& buffer) {
+        mod_out_.properties.Add(core::ir::Property::kAllowBufferTypes);
+        auto size = buffer.size();
+        switch (buffer.size_kind()) {
+            case pb::Runtime:
+            case pb::Constant:
+                // Handled below to avoid duplicating the check for the size limit.
+                break;
+            case pb::Override: {
+                auto* value_size =
+                    mod_out_.Types().Get<core::ir::type::ValueArrayCount>(Value(size));
+                return mod_out_.Types().Get<core::type::Buffer>(value_size);
+            }
+            case pb::ArrayCountKind_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::ArrayCountKind_INT_MAX_SENTINEL_DO_NOT_USE_:
+                TINT_UNREACHABLE();
+        }
+
+        if (size >= internal_limits::kMaxArrayElementCount) {
+            err_ << "buffer size (" << size << ") must be less than "
+                 << internal_limits::kMaxArrayElementCount << "\n";
+            return mod_out_.Types().invalid();
+        }
+
+        return size > 0 ? mod_out_.Types().buffer(size) : mod_out_.Types().unsized_buffer();
     }
 
     const core::type::Type* CreateTypeBuiltinStruct(pb::TypeBuiltinStruct builtin_struct_in) {

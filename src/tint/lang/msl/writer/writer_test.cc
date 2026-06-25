@@ -573,6 +573,7 @@ TEST_F(MslWriterTest, CanGenerate_StructMemberPadding_TooLarge) {
 }
 
 TEST_F(MslWriterTest, BufferView_Workgroup) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
     auto* v = b.Var("v", ty.ptr(workgroup, ty.buffer(32)));
     mod.root_block->Append(v);
 
@@ -638,6 +639,7 @@ kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadg
 }
 
 TEST_F(MslWriterTest, BufferView_HostStruct_SubFunction) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
     Vector<const core::type::StructMember*, 8> members{
         ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.u32(), 0u, 0u, 4u, 4u,
                                          core::IOAttributes{}),

@@ -369,6 +369,10 @@ class Impl {
 
             scopes_.Set(p->name->symbol, param);
             params.Push(param);
+
+            if (ty->UnwrapPtr()->Is<core::type::Buffer>()) {
+                mod.properties.Add(core::ir::Property::kAllowBufferTypes);
+            }
         }
         ir_func->SetParams(params);
 
@@ -1402,6 +1406,10 @@ class Impl {
                 // Record the original name and source of the var
                 builder_.ir.SetName(val, v->name->symbol.Name());
                 builder_.ir.SetSource(val, v->source);
+
+                if (store_ty->Is<core::type::Buffer>()) {
+                    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
+                }
             },
             [&](const ast::Let* l) {
                 auto init = EmitValueExpression(l->initializer);

@@ -48,7 +48,8 @@ class IR_SubstituteOverridesTest : public TransformTest {
   protected:
     void SetUp() override {
         TransformTest::SetUp();
-        mod.properties.Add(core::ir::Property::kAllowOverrides);
+        mod.properties.Add(core::ir::Property::kAllowOverrides,
+                           core::ir::Property::kAllowBufferTypes);
     }
 };
 

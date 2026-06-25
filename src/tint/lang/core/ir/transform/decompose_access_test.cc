@@ -40,7 +40,9 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::core::ir::transform {
 namespace {
 
-using IR_DecomposeAccessTest = core::ir::transform::TransformTest;
+struct IR_DecomposeAccessTest : public core::ir::transform::TransformTest {
+    void SetUp() override { mod.properties.Add(Property::kAllowBufferTypes); }
+};
 
 TEST_F(IR_DecomposeAccessTest, OverflowArraySize) {
     auto* S =

@@ -8252,7 +8252,9 @@ $B1: {  # root
 ////////////////////////////////////////////////////////////////////////////////
 namespace buffer_view_test {
 
-using IR_DirectVariableAccessTest_BufferView = TransformTest;
+struct IR_DirectVariableAccessTest_BufferView : public TransformTest {
+    void SetUp() override { mod.properties.Add(Property::kAllowBufferTypes); }
+};
 
 TEST_F(IR_DirectVariableAccessTest_BufferView, Simple_BufferLength) {
     auto* v = b.Var("v", ty.ptr(storage, ty.unsized_buffer()));

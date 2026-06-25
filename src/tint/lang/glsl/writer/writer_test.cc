@@ -305,6 +305,7 @@ TEST_F(GlslWriterTest, CanGenerate_StructMemberPadding_TooLarge) {
 }
 
 TEST_F(GlslWriterTest, U16_Via_BufferView) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
     auto* v = b.Var(ty.ptr(storage, ty.unsized_buffer()));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);

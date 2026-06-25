@@ -5729,6 +5729,7 @@ $B1: {  # root
 }
 
 TEST_P(IR_RobustnessTest, BufferView_RootVar) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* b1 = b.Var("b1", ty.ptr(storage, ty.unsized_buffer()));
     b1->SetBindingPoint(0, 0);
     mod.root_block->Append(b1);
@@ -5807,6 +5808,7 @@ $B1: {  # root
 }
 
 TEST_P(IR_RobustnessTest, BufferView_u32_ConstOffsetAndLength_InRange) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* func = b.Function("foo", ty.void_());
     auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
     func->SetParams({p});
@@ -5835,6 +5837,7 @@ TEST_P(IR_RobustnessTest, BufferView_u32_ConstOffsetAndLength_InRange) {
 }
 
 TEST_P(IR_RobustnessTest, BufferView_u32_ConstOffsetAndLength_OutOfRange) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* func = b.Function("foo", ty.void_());
     auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
     func->SetParams({p});
@@ -5872,6 +5875,7 @@ TEST_P(IR_RobustnessTest, BufferView_u32_ConstOffsetAndLength_OutOfRange) {
 }
 
 TEST_P(IR_RobustnessTest, BufferView_RuntimeStruct_ConstOffsetAndLength_InRange) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* s = ty.Struct(mod.symbols.Register("S"),
                         {
                             {mod.symbols.Register("a"), ty.vec4(ty.u32())},
@@ -5910,6 +5914,7 @@ S = struct @align(16) {
 }
 
 TEST_P(IR_RobustnessTest, BufferView_RuntimeStruct_ConstOffsetAndLength_OutOfRange) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* s = ty.Struct(mod.symbols.Register("S"),
                         {
                             {mod.symbols.Register("a"), ty.vec4(ty.u32())},
@@ -5962,6 +5967,7 @@ S = struct @align(16) {
 }
 
 TEST_P(IR_RobustnessTest, BufferView_RuntimeStruct_NonConst) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* s = ty.Struct(mod.symbols.Register("S"),
                         {
                             {mod.symbols.Register("a"), ty.vec4(ty.u32())},
@@ -6019,6 +6025,7 @@ S = struct @align(16) {
 }
 
 TEST_P(IR_RobustnessTest, BufferView_RuntimeStruct_ConstOffset) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* s = ty.Struct(mod.symbols.Register("S"),
                         {
                             {mod.symbols.Register("a"), ty.vec4(ty.u32())},
@@ -6074,6 +6081,7 @@ S = struct @align(16) {
 }
 
 TEST_P(IR_RobustnessTest, BufferView_RuntimeStruct_ConstLength) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* s = ty.Struct(mod.symbols.Register("S"),
                         {
                             {mod.symbols.Register("a"), ty.vec4(ty.u32())},
@@ -6131,6 +6139,7 @@ S = struct @align(16) {
 }
 
 TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_ConstOffsetAndSizeAndLength_InRange) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* func = b.Function("foo", ty.void_());
     auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
     func->SetParams({p});
@@ -6160,6 +6169,7 @@ TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_ConstOffsetAndSizeAndLength_I
 }
 
 TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_ConstOffsetAndSizeAndLength_OutOfRange) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* func = b.Function("foo", ty.void_());
     auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
     func->SetParams({p});
@@ -6198,6 +6208,7 @@ TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_ConstOffsetAndSizeAndLength_O
 }
 
 TEST_P(IR_RobustnessTest, BufferArrayView_RuntimeStruct_ConstOffsetAndSizeAndLength_InRange) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* s = ty.Struct(mod.symbols.Register("S"),
                         {
                             {mod.symbols.Register("a"), ty.array(ty.u32(), 5)},
@@ -6236,6 +6247,7 @@ S = struct @align(8) {
 }
 
 TEST_P(IR_RobustnessTest, BufferArrayView_RuntimeStruct_ConstOffsetAndSizeAndLength_OutOfRange) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* s = ty.Struct(mod.symbols.Register("S"),
                         {
                             {mod.symbols.Register("a"), ty.array(ty.u32(), 5)},
@@ -6288,6 +6300,7 @@ S = struct @align(8) {
 }
 
 TEST_P(IR_RobustnessTest, BufferArrayView_RuntimeStruct_NonConst) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* S = ty.Struct(mod.symbols.Register("S"),
                         {
                             {mod.symbols.Register("a"), ty.array(ty.u32(), 5)},
@@ -6350,6 +6363,7 @@ S = struct @align(8) {
 }
 
 TEST_P(IR_RobustnessTest, BufferArrayView_RuntimeStruct_ConstOffset) {
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* S = ty.Struct(mod.symbols.Register("S"),
                         {
                             {mod.symbols.Register("a"), ty.array(ty.u32(), 5)},
@@ -6410,6 +6424,8 @@ S = struct @align(8) {
 }
 
 TEST_P(IR_RobustnessTest, BufferArrayView_RuntimeStruct_ConstSize) {
+    mod.properties.Add(Property::kAllowBufferTypes);
+    mod.properties.Add(Property::kAllowBufferTypes);
     auto* S = ty.Struct(mod.symbols.Register("S"),
                         {
                             {mod.symbols.Register("a"), ty.array(ty.u32(), 5)},

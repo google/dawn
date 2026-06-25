@@ -43,7 +43,8 @@ class IR_SingleEntryPointTest : public TransformTest {
   protected:
     void SetUp() override {
         TransformTest::SetUp();
-        mod.properties.Add(Property::kAllowMultipleEntryPoints, Property::kAllowOverrides);
+        mod.properties.Add(Property::kAllowMultipleEntryPoints, Property::kAllowOverrides,
+                           Property::kAllowBufferTypes);
     }
 
     /// @returns a new entry point called @p name that references @p refs

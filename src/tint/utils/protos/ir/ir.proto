@@ -183,7 +183,10 @@ message TypeSubgroupMatrix {
 }
 
 message TypeBuffer {
-    uint32 count = 1;
+    reserved 1;
+    reserved "count";
+    uint32 size = 2;
+    ArrayCountKind size_kind = 3;
 }
 
 enum TypeBuiltinStruct {

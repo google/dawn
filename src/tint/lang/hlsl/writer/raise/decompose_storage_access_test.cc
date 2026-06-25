@@ -44,7 +44,9 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::hlsl::writer::raise {
 namespace {
 
-using HlslWriterDecomposeStorageAccessTest = core::ir::transform::TransformTest;
+struct HlslWriterDecomposeStorageAccessTest : public core::ir::transform::TransformTest {
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllowBufferTypes); }
+};
 
 TEST_F(HlslWriterDecomposeStorageAccessTest, NoBufferAccess) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);

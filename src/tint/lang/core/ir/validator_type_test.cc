@@ -267,6 +267,23 @@ TEST_F(IR_ValidatorTest, StructMember_Void) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, StructMember_Buffer) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("v"), ty.buffer(16), {}},
+                                               });
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:6:3 error: var: struct member 0 cannot have buffer type
+  %1:ptr<private, MyStruct, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, StructMember_AlignZero) {
     core::IOAttributes attrs = {};
     tint::Vector<const core::type::StructMember*, 4> members;
@@ -749,11 +766,39 @@ TEST_F(IR_ValidatorTest, NonCoreType) {
         << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, BufferDisallowed) {
+    auto* v = b.Var("v", ty.ptr(storage, ty.unsized_buffer()));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("buffer types are not allowed in this context"));
+}
+
 using TypeTest = IRTestParamHelper<std::tuple<
     /* allowed */ bool,
     /* type_builder */ TypeBuilderFn>>;
 
 using Type_ArrayElements = TypeTest;
+
+TEST_F(Type_ArrayElements, Buffer) {
+    auto* buffer = ty.buffer(16);
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("v", AddressSpace::kFunction, ty.array(buffer, 4));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success) << res.Failure();
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: var: array elements, ')" +
+                                   ty.array(buffer, 4)->FriendlyName() +
+                                   R"(', must have creation-fixed footprint)"))
+        << res.Failure();
+}
 
 TEST_P(Type_ArrayElements, Test) {
     bool allowed = std::get<0>(GetParam());

@@ -624,13 +624,21 @@ struct Encoder {
         tint::Switch(
             buffer_in->Count(),  //
             [&](const core::type::ConstantArrayCount* c) {
-                buffer_out.set_count(c->value);
+                buffer_out.set_size(c->value);
+                buffer_out.set_size_kind(pb::ArrayCountKind::Constant);
                 if (c->value >= internal_limits::kMaxArrayElementCount) {
-                    err_ << "array count (" << c->value << ") must be less than "
+                    err_ << "buffer size (" << c->value << ") must be less than "
                          << internal_limits::kMaxArrayElementCount << "\n";
                 }
             },
-            [&](const core::type::RuntimeArrayCount*) { buffer_out.set_count(0); },
+            [&](const core::ir::type::ValueArrayCount* c) {
+                buffer_out.set_size(Value(c->value));
+                buffer_out.set_size_kind(pb::ArrayCountKind::Override);
+            },
+            [&](const core::type::RuntimeArrayCount*) {
+                buffer_out.set_size(0);
+                buffer_out.set_size_kind(pb::ArrayCountKind::Runtime);
+            },
             TINT_ICE_ON_NO_MATCH);
     }
 

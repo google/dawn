@@ -35,7 +35,9 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using IR_PropagateBufferSizesTest = TransformTest;
+struct IR_PropagateBufferSizesTest : public TransformTest {
+    void SetUp() override { mod.properties.Add(Property::kAllowBufferTypes); }
+};
 
 TEST_F(IR_PropagateBufferSizesTest, BufferLength_GlobalVariable_Noop) {
     auto* gv = b.Var("gv", ty.ptr(storage, ty.unsized_buffer(), read_write));

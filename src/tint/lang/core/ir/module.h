@@ -92,6 +92,8 @@ enum class Property : uint8_t {
     kAllowUnannotatedModuleIOVariables,
     /// Allows access instructions to create pointers to vector elements.
     kAllowVectorElementPointer,
+    /// Allows use of buffer types.
+    kAllowBufferTypes,
 
     /// Disallow use of the min/max/clamp builtins with vector types.
     kDisallowVectorMinMaxClamp,
@@ -129,6 +131,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(AllowStructMatrixDecorations);
         CASE(AllowUnannotatedModuleIOVariables);
         CASE(AllowVectorElementPointer);
+        CASE(AllowBufferTypes);
         CASE(DisallowVectorMinMaxClamp);
     }
 #undef CASE

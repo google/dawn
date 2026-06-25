@@ -36,7 +36,9 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using IR_ArrayLengthFromUniformTest = TransformTest;
+struct IR_ArrayLengthFromUniformTest : public TransformTest {
+    void SetUp() override { mod.properties.Add(Property::kAllowBufferTypes); }
+};
 
 TEST_F(IR_ArrayLengthFromUniformTest, NoModify_UserFunction) {
     auto* arr = ty.array<i32>();

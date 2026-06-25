@@ -39,5 +39,9 @@ Result<SuccessType> BlockDecoratedStructsFuzzer(Module& ir, const fuzz::ir::Cont
 }  // namespace
 }  // namespace tint::core::ir::transform
 
+constexpr auto kUnsupportedProperties = tint::core::ir::Properties{
+    tint::core::ir::Property::kAllowBufferTypes,
+};
 TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BlockDecoratedStructsFuzzer,
-                      tint::core::ir::transform::kBlockDecoratedStructsCapabilities);
+                      tint::core::ir::transform::kBlockDecoratedStructsCapabilities,
+                      kUnsupportedProperties);

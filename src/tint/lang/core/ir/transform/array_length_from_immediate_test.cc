@@ -38,7 +38,9 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using IR_ArrayLengthFromImmediatesTest = TransformTest;
+struct IR_ArrayLengthFromImmediatesTest : public TransformTest {
+    void SetUp() override { mod.properties.Add(Property::kAllowBufferTypes); }
+};
 
 uint32_t GetBufferSizesNumElements(
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
