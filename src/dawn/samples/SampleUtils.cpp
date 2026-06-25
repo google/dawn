@@ -46,13 +46,16 @@
 #include "src/utils/platform.h"
 
 #ifndef __EMSCRIPTEN__
-#include "GLFW/glfw3.h"
 #include "dawn/dawn_proc.h"  // nogncheck
 #include "dawn/native/DawnNative.h"
-#include "webgpu/webgpu_glfw.h"
-#else
-#include <emscripten/emscripten.h>
 #endif  // __EMSCRIPTEN__
+
+#if defined(DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
+#include "GLFW/glfw3.h"
+#include "webgpu/webgpu_glfw.h"
+#elif defined(__EMSCRIPTEN__)
+#include <emscripten/emscripten.h>
+#endif
 
 // Parsed options.
 static wgpu::BackendType backendType = wgpu::BackendType::Undefined;
@@ -343,7 +346,7 @@ int SampleBase::Run(unsigned int delay) {
     // Set up and run the sample
     //
 
-#ifndef __EMSCRIPTEN__
+#if defined(DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
     if (!sample->Setup()) {
         dawn::ErrorLog() << "Failed to perform sample setup";
         return 1;
@@ -358,7 +361,7 @@ int SampleBase::Run(unsigned int delay) {
             dawn::utils::USleep(delay);
         }
     }
-#else
+#elif __EMSCRIPTEN__
     if (sample->Setup()) {
         emscripten_set_main_loop([]() { sample->FrameImpl(); }, 0, false);
     } else {
@@ -370,7 +373,7 @@ int SampleBase::Run(unsigned int delay) {
 }
 
 bool SampleBase::Setup() {
-#ifndef __EMSCRIPTEN__
+#if defined(DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
     glfwSetErrorCallback([](int code, const char* message) {
         dawn::ErrorLog() << "GLFW error: " << code << " - " << message;
     });
@@ -388,7 +391,7 @@ bool SampleBase::Setup() {
 
     // Create the surface.
     surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
-#else
+#elif __EMSCRIPTEN__
     // Create the surface.
     wgpu::EmscriptenSurfaceSourceCanvasHTMLSelector canvasDesc{};
     canvasDesc.selector = "#canvas";
