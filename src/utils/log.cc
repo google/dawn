@@ -109,7 +109,8 @@ LogMessage::~LogMessage() {
 
 #if DAWN_PLATFORM_IS(ANDROID)
     android_LogPriority androidPriority = AndroidLogPriority(mSeverity);
-    __android_log_print(androidPriority, "Dawn", "%s: %s\n", severityName, fullMessage.c_str());
+    DAWN_UNSAFE_TODO(__android_log_print(androidPriority, "Dawn", "%s: %s\n", severityName,
+                                         fullMessage.c_str()));
 #else  // DAWN_PLATFORM_IS(ANDROID)
     FILE* outputStream = stdout;
     if (mSeverity == LogSeverity::Warning || mSeverity == LogSeverity::Error) {

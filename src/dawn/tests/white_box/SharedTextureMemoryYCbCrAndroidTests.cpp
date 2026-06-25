@@ -77,7 +77,8 @@ AHardwareBuffer* MakeY8Cb8Cr8AHB(uint32_t width,
         uint8_t* dstData = static_cast<uint8_t*>(dst.data);
         for (uint32_t x : Range(srcWidth)) {
             for (uint32_t y : Range(srcHeight)) {
-                dstData[y * dst.rowStride + x * dst.pixelStride] = src[y * srcWidth + x];
+                DAWN_UNSAFE_TODO(dstData[y * dst.rowStride + x * dst.pixelStride]) =
+                    src[y * srcWidth + x];
             }
         }
     };

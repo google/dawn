@@ -316,8 +316,9 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
         VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
     };
     for (uint32_t i = 0; i < 4; i++) {
-        if (surfaceInfo.capabilities.supportedCompositeAlpha & compositeAlphaFlags[i]) {
-            config.alphaMode = compositeAlphaFlags[i];
+        if (surfaceInfo.capabilities.supportedCompositeAlpha &
+            DAWN_UNSAFE_TODO(compositeAlphaFlags[i])) {
+            config.alphaMode = DAWN_UNSAFE_TODO(compositeAlphaFlags[i]);
             break;
         }
     }

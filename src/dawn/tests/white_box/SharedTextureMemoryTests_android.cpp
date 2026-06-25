@@ -291,7 +291,8 @@ TEST_P(SharedTextureMemoryTests, GPUWriteThenCPURead) {
     auto* pixels = static_cast<utils::RGBA8*>(ptr);
     for (uint32_t r = 0; r < aHardwareBufferDesc.height; ++r) {
         for (uint32_t c = 0; c < aHardwareBufferDesc.width; ++c) {
-            EXPECT_EQ(pixels[r * aHardwareBufferDesc.stride + c], utils::RGBA8(128, 255, 64, 255))
+            EXPECT_EQ(DAWN_UNSAFE_TODO(pixels[r * aHardwareBufferDesc.stride + c]),
+                      utils::RGBA8(128, 255, 64, 255))
                 << r << ", " << c;
         }
     }
@@ -355,7 +356,7 @@ TEST_P(SharedTextureMemoryTests, CPUWriteThenGPURead) {
     auto* pixels = static_cast<utils::RGBA8*>(ptr);
     for (uint32_t r = 0; r < aHardwareBufferDesc.height; ++r) {
         for (uint32_t c = 0; c < aHardwareBufferDesc.width; ++c) {
-            pixels[r * aHardwareBufferDesc.stride + c] =
+            DAWN_UNSAFE_TODO(pixels[r * aHardwareBufferDesc.stride + c]) =
                 expected[r * aHardwareBufferDesc.width + c];
         }
     }
@@ -459,7 +460,8 @@ TEST_P(SharedTextureMemoryTests, MSRTSSWriteThenCPURead) {
     auto* pixels = static_cast<utils::RGBA8*>(ptr);
     for (uint32_t r = 0; r < aHardwareBufferDesc.height; ++r) {
         for (uint32_t c = 0; c < aHardwareBufferDesc.width; ++c) {
-            EXPECT_EQ(pixels[r * aHardwareBufferDesc.stride + c], utils::RGBA8(128, 255, 64, 255))
+            EXPECT_EQ(DAWN_UNSAFE_TODO(pixels[r * aHardwareBufferDesc.stride + c]),
+                      utils::RGBA8(128, 255, 64, 255))
                 << r << ", " << c;
         }
     }
