@@ -31,8 +31,8 @@ package gitiles
 import (
 	"context"
 	"fmt"
-	"net/http"
 
+	"go.chromium.org/luci/auth"
 	"go.chromium.org/luci/common/api/gitiles"
 	gpb "go.chromium.org/luci/common/proto/gitiles"
 )
@@ -45,8 +45,12 @@ type Gitiles struct {
 
 // New creates a client to communicate with Gitiles, for the given host and
 // project.
-func New(ctx context.Context, host, project string) (*Gitiles, error) {
-	client, err := gitiles.NewRESTClient(http.DefaultClient, host, false)
+func New(ctx context.Context, opts auth.Options, host, project string) (*Gitiles, error) {
+	httpClient, err := auth.NewAuthenticator(ctx, auth.InteractiveLogin, opts).Client()
+	if err != nil {
+		return nil, err
+	}
+	client, err := gitiles.NewRESTClient(httpClient, host, true)
 	if err != nil {
 		return nil, err
 	}

@@ -30,6 +30,7 @@ package credentialscheck
 import (
 	"context"
 	"flag"
+	"fmt"
 
 	commonAuth "dawn.googlesource.com/dawn/tools/src/auth"
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
@@ -76,7 +77,12 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return err
 	}*/
 
-	gitilesConfig, err := gitiles.New(ctx, cfg.Git.Dawn.Host, cfg.Git.Dawn.Project)
+	auth, err := c.flags.auth.Options()
+	if err != nil {
+		return fmt.Errorf("failed to obtain authentication options: %w", err)
+	}
+
+	gitilesConfig, err := gitiles.New(ctx, auth, cfg.Git.Dawn.Host, cfg.Git.Dawn.Project)
 	if err != nil {
 		return err
 	}

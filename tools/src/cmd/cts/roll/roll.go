@@ -172,7 +172,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return err
 	}
-	dawn, err := gitiles.New(ctx, cfg.Git.Dawn.Host, cfg.Git.Dawn.Project)
+	dawn, err := gitiles.New(ctx, options, cfg.Git.Dawn.Host, cfg.Git.Dawn.Project)
 	if err != nil {
 		return err
 	}

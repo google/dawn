@@ -98,7 +98,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	ps := c.flags.results.Patchset
 
 	// Find the CTS revision
-	dawn, err := gitiles.New(ctx, cfg.Git.Dawn.Host, cfg.Git.Dawn.Project)
+	dawn, err := gitiles.New(ctx, auth, cfg.Git.Dawn.Host, cfg.Git.Dawn.Project)
 	if err != nil {
 		return fmt.Errorf("failed to open dawn host: %w", err)
 	}
