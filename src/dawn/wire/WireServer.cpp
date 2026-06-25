@@ -82,14 +82,6 @@ MemoryTransferService::MemoryTransferService() = default;
 
 MemoryTransferService::~MemoryTransferService() = default;
 
-MemoryTransferService::ReadHandle::ReadHandle() = default;
-
-MemoryTransferService::ReadHandle::~ReadHandle() = default;
-
-MemoryTransferService::WriteHandle::WriteHandle() = default;
-
-MemoryTransferService::WriteHandle::~WriteHandle() = default;
-
 MemoryTransferService::MemoryHandle::MemoryHandle() = default;
 
 MemoryTransferService::MemoryHandle::~MemoryHandle() = default;

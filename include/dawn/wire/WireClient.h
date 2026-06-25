@@ -109,95 +109,10 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
     MemoryTransferService();
     virtual ~MemoryTransferService();
 
-
-    // Create a handle for reading server data.
-    // This may fail and return nullptr.
-    class ReadHandle;
-    virtual ReadHandle* CreateReadHandle(size_t) {
-        // TODO(https://crbug.com/524776858): Remove once Chromium doesn't implement anymore.
-        return nullptr;
-    }
-
-    // Create a handle for writing server data.
-    // This may fail and return nullptr.
-    class WriteHandle;
-    virtual WriteHandle* CreateWriteHandle(size_t) {
-        // TODO(https://crbug.com/524776858): Remove once Chromium doesn't implement anymore.
-        return nullptr;
-    }
-
     // Create a handle for sharing memory with the server.
     // This may fail and return nullptr.
     class MemoryHandle;
-    virtual std::unique_ptr<MemoryHandle> CreateMemoryHandle(size_t size) {
-        // TODO(https://crbug.com/524776858): Make pure virtual once Chromium implements it.
-        return nullptr;
-    }
-
-    class DAWN_WIRE_EXPORT ReadHandle {
-      public:
-        ReadHandle();
-        virtual ~ReadHandle();
-
-        // Get the required serialization size for SerializeCreate
-        virtual size_t SerializeCreateSize() = 0;
-
-        // Serialize the handle into |serializePointer| so it can be received by the server.
-        // TODO(https://issues.chromium.org/492456046): Pass as a span with the size from
-        // SerializeCreateSize.
-        virtual void SerializeCreate(void* serializePointer) = 0;
-
-        // Simply return the base address of the allocation (without applying any offset)
-        // Returns nullptr if the allocation failed.
-        // The data must live at least until the ReadHandle is destructued
-        // TODO(https://issues.chromium.org/492456046): Return as a span.
-        virtual const void* GetData() = 0;
-
-        // Gets called when a MapReadCallback resolves.
-        // Deserializes |deserializeData| and applies it starting at |offset| in the allocation.
-        // |deserializeData.size()| gives the number of bytes to update.
-        // There could be nothing to be deserialized (if using shared memory).
-        // Needs to check potential offset OOB.
-        virtual bool DeserializeDataUpdate(std::span<const uint8_t> deserializeData,
-                                           size_t offset) = 0;
-
-      private:
-        ReadHandle(const ReadHandle&) = delete;
-        ReadHandle& operator=(const ReadHandle&) = delete;
-    };
-
-    class DAWN_WIRE_EXPORT WriteHandle {
-      public:
-        WriteHandle();
-        virtual ~WriteHandle();
-
-        // Get the required serialization size for SerializeCreate
-        virtual size_t SerializeCreateSize() = 0;
-
-        // Serialize the handle into |serializePointer| so it can be received by the server.
-        // TODO(https://issues.chromium.org/492456046): Pass as a span with the size from
-        // SerializeCreateSize.
-        virtual void SerializeCreate(void* serializePointer) = 0;
-
-        // Simply return the base address of the allocation (without applying any offset)
-        // The data returned should be zero-initialized.
-        // The data returned must live at least until the WriteHandle is destructed.
-        // On failure, the pointer returned should be null.
-        // TODO(https://issues.chromium.org/492456046): Return as a span.
-        virtual void* GetData() = 0;
-
-        // Get the required serialization size for SerializeDataUpdate
-        virtual size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) = 0;
-
-        // Serializes the modified contents starting at |offset| in the allocation into
-        // |serializeData| at buffer unmap. |serializeData.size()| gives the number of bytes to
-        // serialize. There could be nothing to be serialized (if using shared memory).
-        virtual void SerializeDataUpdate(std::span<char> serializeData, size_t offset) = 0;
-
-      private:
-        WriteHandle(const WriteHandle&) = delete;
-        WriteHandle& operator=(const WriteHandle&) = delete;
-    };
+    virtual std::unique_ptr<MemoryHandle> CreateMemoryHandle(size_t size) = 0;
 
     class DAWN_WIRE_EXPORT MemoryHandle {
       public:

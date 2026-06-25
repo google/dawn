@@ -38,69 +38,6 @@
 namespace dawn::wire::client {
 
 class InlineMemoryTransferService : public MemoryTransferService {
-    class ReadHandleImpl : public ReadHandle {
-      public:
-        explicit ReadHandleImpl(std::unique_ptr<uint8_t[]> stagingData, size_t size)
-            : mStagingData(std::move(stagingData)), mSize(size) {}
-
-        ~ReadHandleImpl() override = default;
-
-        size_t SerializeCreateSize() override { return 0; }
-
-        void SerializeCreate(void*) override {}
-
-        const void* GetData() override { return mStagingData.get(); }
-
-        bool DeserializeDataUpdate(std::span<const uint8_t> deserializeData,
-                                   size_t offset) override {
-            if (offset > mSize || deserializeData.size() > mSize - offset) {
-                return false;
-            }
-
-            void* start = DAWN_UNSAFE_TODO(static_cast<uint8_t*>(mStagingData.get()) + offset);
-            DAWN_UNSAFE_TODO(memcpy(start, deserializeData.data(), deserializeData.size()));
-            return true;
-        }
-
-      private:
-        std::unique_ptr<uint8_t[]> mStagingData;
-        size_t mSize;
-    };
-
-    class WriteHandleImpl : public WriteHandle {
-      public:
-        explicit WriteHandleImpl(std::unique_ptr<uint8_t[]> stagingData, size_t size)
-            : mStagingData(std::move(stagingData)), mSize(size) {}
-
-        ~WriteHandleImpl() override = default;
-
-        size_t SerializeCreateSize() override { return 0; }
-
-        void SerializeCreate(void*) override {}
-
-        void* GetData() override { return mStagingData.get(); }
-
-        size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) override {
-            DAWN_ASSERT(offset <= mSize);
-            DAWN_ASSERT(size <= mSize - offset);
-            return size;
-        }
-
-        void SerializeDataUpdate(std::span<char> serializeData, size_t offset) override {
-            DAWN_ASSERT(mStagingData != nullptr);
-            DAWN_ASSERT(serializeData.data() != nullptr);
-            DAWN_ASSERT(offset <= mSize);
-            DAWN_ASSERT(serializeData.size() <= mSize - offset);
-            DAWN_UNSAFE_TODO(memcpy(serializeData.data(),
-                                    static_cast<uint8_t*>(mStagingData.get()) + offset,
-                                    serializeData.size()));
-        }
-
-      private:
-        std::unique_ptr<uint8_t[]> mStagingData;
-        size_t mSize;
-    };
-
     class MemoryHandleImpl : public MemoryHandle {
       public:
         explicit MemoryHandleImpl(std::unique_ptr<std::byte[]> stagingData, size_t size)
@@ -161,23 +98,6 @@ class InlineMemoryTransferService : public MemoryTransferService {
   public:
     InlineMemoryTransferService() {}
     ~InlineMemoryTransferService() override = default;
-
-    ReadHandle* CreateReadHandle(size_t size) override {
-        auto stagingData = std::unique_ptr<uint8_t[]>(AllocNoThrow<uint8_t>(size));
-        if (stagingData) {
-            return new ReadHandleImpl(std::move(stagingData), size);
-        }
-        return nullptr;
-    }
-
-    WriteHandle* CreateWriteHandle(size_t size) override {
-        auto stagingData = std::unique_ptr<uint8_t[]>(AllocNoThrow<uint8_t>(size));
-        if (stagingData) {
-            DAWN_UNSAFE_TODO(memset(stagingData.get(), 0, size));
-            return new WriteHandleImpl(std::move(stagingData), size);
-        }
-        return nullptr;
-    }
 
     std::unique_ptr<MemoryHandle> CreateMemoryHandle(size_t size) override {
         // TODO(https://crbug.com/512465980): Use HeapArray instead.
