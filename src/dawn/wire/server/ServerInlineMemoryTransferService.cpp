@@ -77,7 +77,9 @@ class InlineMemoryTransferService : public MemoryTransferService {
 
     std::unique_ptr<MemoryHandle> DeserializeMemoryHandle(
         std::span<const std::byte> creationData) override {
-        DAWN_ASSERT(creationData.empty());
+        if (!creationData.empty()) {
+            return nullptr;
+        }
         return std::make_unique<MemoryHandleImpl>();
     }
 };
