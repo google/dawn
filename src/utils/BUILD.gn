@@ -116,6 +116,7 @@ config("dawn_warnings") {
       "-Wno-unused-member-function",
       "-Wno-tautological-type-limit-compare",
       "-Wno-unsafe-buffer-usage",
+      "-Wno-nonportable-system-include-path",
     ]
 
     # Per file scope warning suppressions goes into
