@@ -792,11 +792,7 @@ void CommandBufferStateTracker::SetBindGroup(
     BindGroupBase* bindgroup,
     ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {
     mBindgroups[index] = bindgroup;
-    mDynamicOffsets[index].resize(dynamicOffsets.size());
-    // TODO(https://crbug.com/524406299): add a dawn::Span::copy_from
-    for (BindingIndex i : Range(dynamicOffsets.size())) {
-        mDynamicOffsets[index][i] = dynamicOffsets[i];
-    }
+    mDynamicOffsets[index].assign(dynamicOffsets.begin(), dynamicOffsets.end());
     mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
 }
 

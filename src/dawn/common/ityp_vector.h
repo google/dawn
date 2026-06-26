@@ -29,6 +29,7 @@
 #define SRC_DAWN_COMMON_ITYP_VECTOR_H_
 
 #include <cstddef>
+#include <limits>
 #include <vector>
 
 #include "src/utils/numeric.h"
@@ -107,6 +108,27 @@ class vector : private std::vector<Value> {
     }
 
     constexpr void reserve(Index size) { Base::reserve(checked_cast<size_t>(size)); }
+
+    constexpr void assign(Index count, const Value& value) {
+        Base::assign(checked_cast<size_t>(count), value);
+    }
+
+    template <class InputIt>
+    constexpr void assign(InputIt first, InputIt last) {
+        Base::assign(first, last);
+        if constexpr (sizeof(size_t) > sizeof(Index)) {
+            DAWN_CHECK(Base::size() <=
+                       size_t{UnderlyingType<Index>{std::numeric_limits<Index>::max()}});
+        }
+    }
+
+    void assign(std::initializer_list<Value> ilist) {
+        Base::assign(ilist);
+        if constexpr (sizeof(size_t) > sizeof(Index)) {
+            DAWN_CHECK(Base::size() <=
+                       size_t{UnderlyingType<Index>{std::numeric_limits<Index>::max()}});
+        }
+    }
 };
 
 }  // namespace dawn::ityp
