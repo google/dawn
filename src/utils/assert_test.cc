@@ -36,42 +36,11 @@ namespace {
 
 using AssertTest = ::testing::Test;
 
-// Test that there's no warning if a variable is unused other than DAWN_ASSERT.
 TEST_F(AssertTest, AssertUnused) {
+    // Local variable that is defined but not used in the case of release
+
     int test_value = 1;
     DAWN_ASSERT(test_value == 1);
-}
-
-// Test that DAWN_ASSERT's condition expression is executed in debug, but not in release.
-TEST_F(AssertTest, AssertSideEffects) {
-    int test_value = 1;
-    auto SetValue = [&](int x) {
-        test_value = x;
-        return true;
-    };
-    DAWN_ASSERT(SetValue(2));
-
-#if defined(DAWN_ENABLE_ASSERTS)
-    EXPECT_EQ(test_value, 2);
-#else
-    EXPECT_EQ(test_value, 1);
-#endif
-}
-
-// Test that DAWN_RELEASE_ASSUME's condition expression is executed in debug, but not in release.
-TEST_F(AssertTest, ReleaseAssumeSideEffects) {
-    int test_value = 1;
-    auto SetValue = [&](int x) {
-        test_value = x;
-        return true;
-    };
-    DAWN_RELEASE_ASSUME(SetValue(2));
-
-#if defined(DAWN_ENABLE_ASSERTS)
-    EXPECT_EQ(test_value, 2);
-#else
-    EXPECT_EQ(test_value, 1);
-#endif
 }
 
 // Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming

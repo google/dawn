@@ -70,13 +70,6 @@ config("dawn_warnings") {
       # This warning complains on normal usages of structs, especially in
       # Vulkan, and pushes developers away from using designated initializers.
       "-Wno-missing-designated-field-initializers",
-
-      # This warning tries to prove that the expression passed to
-      # __builtin_assume (DAWN_RELEASE_ASSUME) has no side effects, because that
-      # expression does not get executed. But its analysis is too simple to be
-      # useful - it triggers too often (e.g. on std::numeric_limits::max()).
-      # Instead we use clang-tidy's heuristic `bugprone-assert-side-effect`.
-      "-Wno-assume",
     ]
 
     # TODO(crbug.com/523358231): triage these warnings and determine whether
