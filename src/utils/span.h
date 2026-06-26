@@ -31,6 +31,7 @@
 #include <concepts>
 #include <limits>
 #include <memory>
+#include <ranges>
 #include <span>
 
 #include "src/utils/numeric.h"
@@ -58,7 +59,7 @@ namespace dawn {
 namespace detail {
 template <typename T, HasUnsignedUnderlyingType Index, typename PtrType>
 class SpanBase;
-}
+}  // namespace detail
 
 // A direct replacement for std::span<T>
 template <typename T>
@@ -73,7 +74,16 @@ using span = dawn::detail::SpanBase<T, Index, T*>;
 // The equivalent of std::dynamic_extent for the given index type.
 template <typename Index>
 inline constexpr Index DynamicExtent = std::numeric_limits<Index>::max();
+}  // namespace dawn
 
+// Mark `SpanBase` as satisfying the `view` and `borrowed_range` concepts.
+template <typename T, typename Index, typename PtrType>
+inline constexpr bool std::ranges::enable_view<dawn::detail::SpanBase<T, Index, PtrType>> = true;
+template <typename T, typename Index, typename PtrType>
+inline constexpr bool
+    std::ranges::enable_borrowed_range<dawn::detail::SpanBase<T, Index, PtrType>> = true;
+
+namespace dawn {
 namespace detail {
 
 template <typename From, typename To>
@@ -84,10 +94,13 @@ concept CompatibleIter = std::contiguous_iterator<It> &&
                          LegalDataConversion<std::remove_reference_t<std::iter_reference_t<It>>, T>;
 
 template <typename T, typename Index, typename R>
-concept CompatibleRange = requires(R r) {
-    { r.data() } -> std::convertible_to<T*>;
-    { r.size() } -> std::same_as<Index>;
-};
+concept CompatibleRange =
+    std::ranges::contiguous_range<R> &&  //
+    (std::ranges::borrowed_range<R> || std::is_const_v<T>) &&
+    LegalDataConversion<std::remove_reference_t<std::ranges::range_reference_t<R>>, T> &&
+    requires(R r) {
+        { r.size() } -> std::same_as<Index>;
+    };
 
 // DIFF: only dynamic_extent is supported at the moment because Dawn might not need spans with
 // static extents.
@@ -147,7 +160,7 @@ class SpanBase {
         }
     }
 
-    // Constructor from a "range-like" that provides `T* data()` and `Index size()`. Note that this
+    // Constructor from a range that provides `T* data()` and `Index size()`. Note that this
     // is quite different from Chromium's base::span constructor from ranges because adapting that
     // constructor to support TypedInteger for Index would be extremely challenging. Will
     // DAWN_CHECK() if the size doesn't fit in a size_t.

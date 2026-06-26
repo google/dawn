@@ -42,6 +42,8 @@ using IndexSizeT = TypedInteger<struct IndexT, size_t>;
 struct FakeRange {
     size_t size() const { return kSpanData.size(); }
     const int* data() const { return kSpanData.data(); }
+    auto begin() { return kSpanData.begin(); }
+    auto end() { return kSpanData.end(); }
 };
 
 struct FakeTypedRange {
@@ -49,6 +51,8 @@ struct FakeTypedRange {
         return Index{uint32_t{kSpanData.size()}};
     }
     const int* data() const { return kSpanData.data(); }
+    auto begin() { return kSpanData.begin(); }
+    auto end() { return kSpanData.end(); }
 };
 
 void TestConstPointerToNonConstSpan() {

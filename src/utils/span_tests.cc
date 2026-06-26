@@ -44,6 +44,8 @@ using Index64 = TypedInteger<struct IndexT, uint64_t>;
 struct FakeRange {
     size_t size() const { return kSpanData.size(); }
     const int* data() const { return kSpanData.data(); }
+    auto begin() { return kSpanData.begin(); }
+    auto end() { return kSpanData.end(); }
 };
 
 struct FakeTypedRange {
@@ -51,6 +53,8 @@ struct FakeTypedRange {
         return Index{uint32_t{kSpanData.size()}};
     }
     const int* data() const { return kSpanData.data(); }
+    auto begin() { return kSpanData.begin(); }
+    auto end() { return kSpanData.end(); }
 };
 
 struct FakeTyped64Range {
@@ -58,6 +62,8 @@ struct FakeTyped64Range {
         return Index64{uint64_t{kSpanData.size()}};
     }
     const int* data() const { return kSpanData.data(); }
+    auto begin() { return kSpanData.begin(); }
+    auto end() { return kSpanData.end(); }
 };
 
 TEST(SpanTest, Constructor_Default) {

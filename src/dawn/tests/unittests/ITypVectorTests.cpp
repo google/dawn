@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <array>
+#include <ranges>
 #include <utility>
 
 #include "src/dawn/common/ityp_vector.h"
@@ -41,6 +42,9 @@ class ITypVectorTest : public testing::Test {
     using Val = TypedInteger<struct ValT, uint32_t>;
 
     using Vector = ityp::vector<Key, Val>;
+
+    // Check that ityp::vector can be used as a range.
+    static_assert(std::ranges::contiguous_range<Vector>);
 };
 
 // Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming

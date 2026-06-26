@@ -51,8 +51,10 @@ class stack_vec : private absl::InlinedVector<Value, StaticCapacity> {
         Base::resize(checked_cast<size_t>(size), value);
     }
 
+    using Base::begin;
     using Base::data;
     using Base::empty;
+    using Base::end;
 
     constexpr Value& operator[](Index i) {
 #if !defined(ABSL_OPTION_HARDENED) || ABSL_OPTION_HARDENED == 0 || \

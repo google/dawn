@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <ranges>
 #include <utility>
 
 #include "src/dawn/common/ityp_stack_vec.h"
@@ -40,6 +41,9 @@ class ITypStackVecTest : public testing::Test {
     using Val = TypedInteger<struct ValT, uint32_t>;
 
     using StackVec = ityp::stack_vec<Key, Val, 10>;
+
+    // Check that ityp::stack_vec can be used as a range.
+    static_assert(std::ranges::contiguous_range<StackVec>);
 };
 
 // Test creation and initialization of the stack_vec.
@@ -58,6 +62,23 @@ TEST_F(ITypStackVecTest, Creation) {
         for (Key i(0u); i < Key(10u); ++i) {
             ASSERT_EQ(vec[i], Val(0u));
         }
+    }
+}
+
+// Test that the vector can be iterated in order with a range-based for loop
+TEST_F(ITypStackVecTest, RangeBasedIteration) {
+    StackVec vec(Key(10u));
+
+    // Assign in a non-const range-based for loop
+    uint32_t i = 0;
+    for (Val& val : vec) {
+        val = Val(i);
+    }
+
+    // Check values in a const range-based for loop
+    i = 0;
+    for (Val val : static_cast<const StackVec&>(vec)) {
+        ASSERT_EQ(val, vec[Key(i++)]);
     }
 }
 

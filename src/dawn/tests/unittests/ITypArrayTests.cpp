@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <ranges>
+
 #include "src/dawn/common/ityp_array.h"
 #include "src/utils/gtest.h"
 #include "src/utils/typed_integer.h"
@@ -47,6 +49,9 @@ class ITypArrayTest : public testing::Test {
         static_assert(kArr.at(Key(7u)) == Val(7u));
         static_assert(kArr.size() == Key(10u));
     };
+
+    // Check that ityp::array can be used as a range.
+    static_assert(std::ranges::contiguous_range<Array>);
 };
 
 // Test that values can be set at an index and retrieved from the same index.
