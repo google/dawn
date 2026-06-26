@@ -48,11 +48,6 @@ VideoViewsTestBackend::PlatformTexture::~PlatformTexture() = default;
 
 VideoViewsTestBackend::~VideoViewsTestBackend() = default;
 
-constexpr std::array<utils::RGBA8, 3> VideoViewsTestsBase::kYellowYUVAColor;
-constexpr std::array<utils::RGBA8, 3> VideoViewsTestsBase::kWhiteYUVAColor;
-constexpr std::array<utils::RGBA8, 3> VideoViewsTestsBase::kBlueYUVAColor;
-constexpr std::array<utils::RGBA8, 3> VideoViewsTestsBase::kRedYUVAColor;
-
 void VideoViewsTestsBase::SetUp() {
     DawnTestWithParams<Params>::SetUp();
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());

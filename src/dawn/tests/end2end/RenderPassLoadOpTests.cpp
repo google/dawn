@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <array>
+#include <bit>
 #include <cstring>
 #include <limits>
 #include <tuple>
@@ -502,7 +503,7 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleCol
         kMaxUInt32RepresentableInFloat - 2, kMaxUInt32RepresentableInFloat - 3};
     std::array<uint32_t, 4> expectedDataForRGBA32Float;
     for (uint32_t i = 0; i < expectedDataForRGBA32Float.size(); ++i) {
-        expectedDataForRGBA32Float[i] = *(reinterpret_cast<uint32_t*>(&testColorForRGBA32Float[i]));
+        expectedDataForRGBA32Float[i] = std::bit_cast<uint32_t>(testColorForRGBA32Float[i]);
     }
 
     struct AttachmentCase {

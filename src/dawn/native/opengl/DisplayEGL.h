@@ -43,7 +43,7 @@
 
 namespace dawn::native::opengl {
 
-inline constexpr EGLConfig kNoConfig = 0;
+static constexpr EGLConfig kNoConfig = 0;
 
 // Represents a connection to an EGL driver, with its EGLDisplay, its functions and other metadata
 // global to EGL.

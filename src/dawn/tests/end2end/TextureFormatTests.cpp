@@ -123,7 +123,7 @@ class ExpectFloat16 : public detail::Expectation {
     }
 
   private:
-    bool Floats16Match(float expected, float actual) {
+    bool Floats16Match(uint16_t expected, uint16_t actual) {
         if (IsFloat16NaN(expected)) {
             return IsFloat16NaN(actual);
         }

@@ -103,7 +103,7 @@ uint16_t Float32ToFloat16(float fp32) {
 
 float Float16ToFloat32(uint16_t fp16) {
     uint32_t tmp = (fp16 & 0x7fff) << 13 | (fp16 & 0x8000) << 16;
-    float tmp2 = *reinterpret_cast<float*>(&tmp);
+    float tmp2 = std::bit_cast<float>(tmp);
     return powf(2.0f, 127.0f - 15.0f) * tmp2;
 }
 

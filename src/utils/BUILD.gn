@@ -65,6 +65,7 @@ config("dawn_warnings") {
       "-Wno-pre-c++17-compat",
       "-Wno-pre-c++20-compat",
       "-Wno-padded",
+      "-Wno-c++20-extensions",
 
       # This warning complains on normal usages of structs, especially in
       # Vulkan, and pushes developers away from using designated initializers.
@@ -78,19 +79,14 @@ config("dawn_warnings") {
       "-Wno-zero-as-null-pointer-constant",
       "-Wno-old-style-cast",
       "-Wno-sign-conversion",
-      "-Wno-undef",
-      "-Wno-undefined-reinterpret-cast",
       "-Wno-implicit-int-conversion",
-      "-Wno-float-conversion",
       "-Wno-double-promotion",
       "-Wno-global-constructors",
       "-Wno-exit-time-destructors",
       "-Wno-disabled-macro-expansion",
       "-Wno-switch-enum",
-      "-Wno-missing-variable-declarations",
       "-Wno-unused-template",
       "-Wno-covered-switch-default",
-      "-Wno-shadow-field-in-constructor",
       "-Wno-missing-prototypes",
 
       # The lifetime-safety-* warnings are part of an experimental analysis.
@@ -107,25 +103,19 @@ config("dawn_warnings") {
       "-Wno-switch-default",
       "-Wno-undefined-func-template",
       "-Wno-weak-vtables",
-      "-Wno-missing-noreturn",
       "-Wno-implicit-float-conversion",
       "-Wno-nullable-to-nonnull-conversion",
       "-Wno-float-equal",
       "-Wno-shadow-header",
       "-Wno-c2y-extensions",
-      "-Wno-c++20-extensions",
       "-Wno-documentation-unknown-command",
       "-Wno-documentation",
       "-Wno-nrvo",
       "-Wno-non-virtual-dtor",
       "-Wno-reserved-identifier",
-      "-Wno-deprecated-redundant-constexpr-static-def",
       "-Wno-unused-member-function",
       "-Wno-tautological-type-limit-compare",
-      "-Wno-objc-messaging-id",
       "-Wno-unsafe-buffer-usage",
-      "-Wno-unique-object-duplication",
-      "-Wno-nonportable-system-include-path",
     ]
 
     # Per file scope warning suppressions goes into
@@ -192,6 +182,8 @@ config("dawn_warnings") {
       "KHR/",
       "partition_alloc/",
       "napi.h",
+      "testing/",
+      "vulkan/",
 
       # TODO(crbug.com/523358231): It's good to enable warnings for generated
       # code. Currently, removing this results in many warnings in generated

@@ -120,7 +120,7 @@ class ShaderBuiltinPartialConstLowHighTest
                 code << p << " " << ident << ": f32 = " << value << ";\n";
             }
         };
-        auto function_var = [&](std::string ident, Phase p, int value) {
+        auto function_var = [&](std::string ident, Phase p, float value) {
             if (p == Phase::kRuntime) {
                 code << "  var " << ident << ": f32 = " << value << ";\n";
             }

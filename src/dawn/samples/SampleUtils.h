@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_SAMPLES_SAMPLEUTILS_H_
 #define SRC_DAWN_SAMPLES_SAMPLEUTILS_H_
 
-#if DAWN_SUPPORTS_GLFW_FOR_WINDOWING
+#if defined(DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
 #include "GLFW/glfw3.h"
 #endif  // DAWN_SUPPORTS_GLFW_FOR_WINDOWING
 
@@ -67,7 +67,7 @@ class SampleBase {
     uint32_t height = kHeight;
     wgpu::TextureFormat preferredSurfaceTextureFormat = wgpu::TextureFormat::BGRA8Unorm;
 
-#if DAWN_SUPPORTS_GLFW_FOR_WINDOWING
+#if defined(DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
     raw_ptr<GLFWwindow> window = nullptr;
 #endif  // DAWN_SUPPORTS_GLFW_FOR_WINDOWING
 };

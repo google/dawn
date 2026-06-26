@@ -32,6 +32,7 @@
 #include "src/dawn/native/ToBackend.h"
 #include "src/dawn/native/metal/BufferMTL.h"
 
+namespace {
 const char* kShaderSource = "#include <metal_stdlib>\n" DAWN_MULTILINE(
     using namespace metal;
 
@@ -193,6 +194,8 @@ static constexpr uint8_t kLineList = 1;
 static constexpr uint8_t kLineStrip = 2;
 static constexpr uint8_t kTriangleList = 3;
 static constexpr uint8_t kTriangleStrip = 4;
+
+}  // anonymous namespace
 
 namespace dawn::native::metal {
 

@@ -114,7 +114,7 @@ SystemHandle::SystemHandle(Handle handle) : mHandle(handle) {}
 
 SystemHandle::SystemHandle(ErrorTag tag) : SystemHandle() {
     dawn::ErrorLog() << "SystemHandle constructed from incorrect handle type.";
-    DAWN_ASSERT(false);
+    DAWN_UNREACHABLE();
 }
 
 bool SystemHandle::IsValid() const {

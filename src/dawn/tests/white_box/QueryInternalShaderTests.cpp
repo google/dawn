@@ -81,8 +81,10 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
             }
 
             uint64_t expected = mExpected[i];
-            uint64_t upperLimit = static_cast<double>(mExpected[i]) * kUpperLimitMultiplier;
-            uint64_t lowerLimit = static_cast<double>(mExpected[i]) * kLowerLimitMultiplier;
+            uint64_t upperLimit =
+                static_cast<uint64_t>(static_cast<double>(mExpected[i]) * kUpperLimitMultiplier);
+            uint64_t lowerLimit =
+                static_cast<uint64_t>(static_cast<double>(mExpected[i]) * kLowerLimitMultiplier);
 
             // Quantization may make an actual value close to the lower limit go below it.
             // Take this into account by also quantizing the lower limit.

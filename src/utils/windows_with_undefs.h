@@ -36,7 +36,7 @@
 
 // This header includes <windows.h> but removes all the extra defines that conflict with identifiers
 // in internal code. It should never be included in something that is part of the public interface.
-#include <Windows.h>
+#include <windows.h>
 
 // Macros defined for ANSI / Unicode support
 #undef CreateWindow

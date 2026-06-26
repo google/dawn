@@ -394,7 +394,7 @@ struct VulkanFunctions {
     VkFn<PFN_vkAcquireNextImageKHR> AcquireNextImageKHR = nullptr;
     VkFn<PFN_vkQueuePresentKHR> QueuePresentKHR = nullptr;
 
-#if VK_USE_PLATFORM_FUCHSIA
+#if defined(VK_USE_PLATFORM_FUCHSIA)
     // VK_FUCHSIA_external_memory
     VkFn<PFN_vkGetMemoryZirconHandleFUCHSIA> GetMemoryZirconHandleFUCHSIA = nullptr;
     VkFn<PFN_vkGetMemoryZirconHandlePropertiesFUCHSIA> GetMemoryZirconHandlePropertiesFUCHSIA =

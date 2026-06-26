@@ -106,8 +106,6 @@ struct RefTrackerTraits {
     static void Release(const RefTracker& handle) { handle.Release(); }
 };
 
-constexpr RefTracker RefTrackerTraits::kNullValue;
-
 using Ref = RefBase<RefTracker, RefTrackerTraits>;
 
 TEST(RefBase, Acquire) {

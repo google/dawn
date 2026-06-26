@@ -89,7 +89,7 @@ class SystemHandle : public NonCopyable {
     struct ErrorTag {};
 
     explicit SystemHandle(Handle handle);
-    explicit SystemHandle(ErrorTag tag);
+    [[noreturn]] explicit SystemHandle(ErrorTag tag);
 
     // Constructor when the type does not match the Handle type on this platform.
     template <typename Arg>

@@ -294,7 +294,7 @@ class PixelLocalStorageTests : public DawnTest {
             // that would be done.
             int32_t expectedValue = 0;
             if (!attachment.discardAfterInit) {
-                expectedValue = attachment.clearValue.r;
+                expectedValue = static_cast<int32_t>(attachment.clearValue.r);
             }
             expectedValue += (slot + 1) * kIterations;
 

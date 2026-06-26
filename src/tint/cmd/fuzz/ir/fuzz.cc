@@ -58,7 +58,7 @@ Vector<IRFuzzer, 32>& Fuzzers() {
     return fuzzers;
 }
 
-thread_local std::string_view currently_running;
+static thread_local std::string_view currently_running;
 #endif  // TINT_BUILD_IR_BINARY
 
 void Register(const IRFuzzer& fuzzer) {

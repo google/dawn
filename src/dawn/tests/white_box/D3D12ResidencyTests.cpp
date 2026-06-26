@@ -331,15 +331,16 @@ TEST_P(D3D12ResourceResidencyTests, OvercommitInASingleSubmit) {
 TEST_P(D3D12ResourceResidencyTests, SetExternalReservation) {
     // Set an external reservation of 20% the budget. We should succesfully reserve the amount we
     // request.
+    uint64_t kExternalReservationSize = static_cast<uint64_t>(kRestrictedBudgetSize * .2);
     uint64_t amountReserved = native::d3d12::SetExternalMemoryReservation(
-        device.Get(), kRestrictedBudgetSize * .2, native::d3d12::MemorySegment::Local);
-    EXPECT_EQ(amountReserved, kRestrictedBudgetSize * .2);
+        device.Get(), kExternalReservationSize, native::d3d12::MemorySegment::Local);
+    EXPECT_EQ(amountReserved, kExternalReservationSize);
 
     // If we're on a non-UMA device, we should also check the NON_LOCAL memory segment.
     if (!IsUMA()) {
         amountReserved = native::d3d12::SetExternalMemoryReservation(
-            device.Get(), kRestrictedBudgetSize * .2, native::d3d12::MemorySegment::NonLocal);
-        EXPECT_EQ(amountReserved, kRestrictedBudgetSize * .2);
+            device.Get(), kExternalReservationSize, native::d3d12::MemorySegment::NonLocal);
+        EXPECT_EQ(amountReserved, kExternalReservationSize);
     }
 }
 

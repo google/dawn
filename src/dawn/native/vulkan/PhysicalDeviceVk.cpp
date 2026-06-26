@@ -724,7 +724,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
 
     const VkPhysicalDeviceLimits& vkLimits = mDeviceInfo.properties.limits;
 
-#define CHECK_AND_SET_V1_LIMIT_IMPL(vulkanName, webgpuName, compareOp, msgSegment)   \
+#define CHECK_V1_LIMIT_IMPL(vulkanName, webgpuName, compareOp, msgSegment)           \
     do {                                                                             \
         if (vkLimits.vulkanName compareOp baseLimits.v1.webgpuName) {                \
             return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for " #webgpuName \
@@ -733,9 +733,16 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
                                        " must be at " msgSegment " " +               \
                                        std::to_string(baseLimits.v1.webgpuName));    \
         }                                                                            \
-        limits->v1.webgpuName = vkLimits.vulkanName;                                 \
     } while (false)
 
+#define CHECK_AND_SET_V1_LIMIT_IMPL(vulkanName, webgpuName, compareOp, msgSegment) \
+    do {                                                                           \
+        CHECK_V1_LIMIT_IMPL(vulkanName, webgpuName, compareOp, msgSegment);        \
+        limits->v1.webgpuName = dchecked_cast<uint32_t>(vkLimits.vulkanName);      \
+    } while (false)
+
+#define CHECK_V1_MAX_LIMIT(vulkanName, webgpuName) \
+    CHECK_V1_LIMIT_IMPL(vulkanName, webgpuName, <, "least")
 #define CHECK_AND_SET_V1_MAX_LIMIT(vulkanName, webgpuName) \
     CHECK_AND_SET_V1_LIMIT_IMPL(vulkanName, webgpuName, <, "least")
 #define CHECK_AND_SET_V1_MIN_LIMIT(vulkanName, webgpuName) \
@@ -743,20 +750,20 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
 
     CHECK_AND_SET_V1_MAX_LIMIT(maxImageDimension1D, maxTextureDimension1D);
 
-    CHECK_AND_SET_V1_MAX_LIMIT(maxImageDimension2D, maxTextureDimension2D);
-    CHECK_AND_SET_V1_MAX_LIMIT(maxImageDimensionCube, maxTextureDimension2D);
-    CHECK_AND_SET_V1_MAX_LIMIT(maxFramebufferWidth, maxTextureDimension2D);
-    CHECK_AND_SET_V1_MAX_LIMIT(maxFramebufferHeight, maxTextureDimension2D);
-    CHECK_AND_SET_V1_MAX_LIMIT(maxViewportDimensions[0], maxTextureDimension2D);
-    CHECK_AND_SET_V1_MAX_LIMIT(maxViewportDimensions[1], maxTextureDimension2D);
-    CHECK_AND_SET_V1_MAX_LIMIT(viewportBoundsRange[1], maxTextureDimension2D);
+    CHECK_V1_MAX_LIMIT(maxImageDimension2D, maxTextureDimension2D);
+    CHECK_V1_MAX_LIMIT(maxImageDimensionCube, maxTextureDimension2D);
+    CHECK_V1_MAX_LIMIT(maxFramebufferWidth, maxTextureDimension2D);
+    CHECK_V1_MAX_LIMIT(maxFramebufferHeight, maxTextureDimension2D);
+    CHECK_V1_MAX_LIMIT(maxViewportDimensions[0], maxTextureDimension2D);
+    CHECK_V1_MAX_LIMIT(maxViewportDimensions[1], maxTextureDimension2D);
+    CHECK_V1_MAX_LIMIT(viewportBoundsRange[1], maxTextureDimension2D);
     limits->v1.maxTextureDimension2D = std::min({
-        static_cast<uint32_t>(vkLimits.maxImageDimension2D),
-        static_cast<uint32_t>(vkLimits.maxImageDimensionCube),
-        static_cast<uint32_t>(vkLimits.maxFramebufferWidth),
-        static_cast<uint32_t>(vkLimits.maxFramebufferHeight),
-        static_cast<uint32_t>(vkLimits.maxViewportDimensions[0]),
-        static_cast<uint32_t>(vkLimits.maxViewportDimensions[1]),
+        vkLimits.maxImageDimension2D,
+        vkLimits.maxImageDimensionCube,
+        vkLimits.maxFramebufferWidth,
+        vkLimits.maxFramebufferHeight,
+        vkLimits.maxViewportDimensions[0],
+        vkLimits.maxViewportDimensions[1],
         static_cast<uint32_t>(vkLimits.viewportBoundsRange[1]),
     });
 

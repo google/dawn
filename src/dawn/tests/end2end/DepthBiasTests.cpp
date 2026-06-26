@@ -312,7 +312,7 @@ TEST_P(DepthBiasTests, PositiveBiasOn24bit) {
 
     // Draw quad flat on z = 0.25 with 0.25 bias
     RunDepthBiasTest(wgpu::TextureFormat::Depth24PlusStencil8, 0.4f, QuadAngle::Flat,
-                     0.25f * (1 << 25), 0, 0);
+                     kPointTwoFiveBiasForPointTwoFiveZOnFloat, 0, 0);
 
     // Only the bottom left quad has colors. 0.5 quad > 0.4 clear.
     // TODO(crbug.com/dawn/820): Switch to depth sampling once feature has been enabled.
@@ -332,7 +332,7 @@ TEST_P(DepthBiasTests, PositiveBiasOn24bitWithClamp) {
 
     // Draw quad flat on z = 0.25 with 0.25 bias clamped at 0.125.
     RunDepthBiasTest(wgpu::TextureFormat::Depth24PlusStencil8, 0.4f, QuadAngle::Flat,
-                     0.25f * (1 << 25), 0, 0.1f);
+                     kPointTwoFiveBiasForPointTwoFiveZOnFloat, 0, 0.1f);
 
     // Since we cleared with a depth of 0.4 and clamped bias at 0.4, the depth test will fail. 0.25
     // + 0.125 < 0.4 clear.

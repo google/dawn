@@ -89,7 +89,7 @@ ResultOrError<ComPtr<ID3D12Device>> Backend::CreateD3DDevice(IUnknown* adapter) 
 }
 
 MaybeError Backend::EnsureDXC() {
-#if DAWN_USE_BUILT_DXC
+#if defined(DAWN_USE_BUILT_DXC)
     // If components are already loaded, return early
     if (mDxcLibrary != nullptr) {
         // Since all components are assigned atomically, if one is loaded, all should be loaded

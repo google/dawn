@@ -32,8 +32,6 @@
 
 namespace dawn::native {
 
-constexpr uint64_t BuddyAllocator::kInvalidOffset;
-
 // Verify the buddy allocator with a basic test.
 TEST(BuddyAllocatorTests, SingleBlock) {
     // After one 32 byte allocation:

@@ -95,7 +95,7 @@ struct ClampedInteger {
     using IntegerType = T;
     ClampedInteger() : value(0) {}
     // NOLINTNEXTLINE(runtime/explicit)
-    ClampedInteger(T value) : value(value) {}
+    ClampedInteger(T v) : value(v) {}
     operator T() const { return value; }
     T value;
 };
@@ -108,7 +108,7 @@ struct EnforceRangeInteger {
     using IntegerType = T;
     EnforceRangeInteger() : value(0) {}
     // NOLINTNEXTLINE(runtime/explicit)
-    EnforceRangeInteger(T value) : value(value) {}
+    EnforceRangeInteger(T v) : value(v) {}
     operator T() const { return value; }
     T value;
 };

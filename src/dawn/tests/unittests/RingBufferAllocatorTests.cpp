@@ -32,8 +32,6 @@
 
 namespace dawn::native {
 
-constexpr uint64_t RingBufferAllocator::kInvalidOffset;
-
 // Number of basic tests for Ringbuffer
 TEST(RingBufferAllocatorTests, BasicTest) {
     constexpr uint64_t sizeInBytes = 64000;

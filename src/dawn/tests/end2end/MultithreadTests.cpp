@@ -1612,7 +1612,8 @@ TEST_P(MultithreadTextureCopyTests, CopyDepthToDepthNoRace) {
 
     std::vector<uint16_t> kExpectedData16(kExpectedData32.size());
     for (size_t i = 0; i < kExpectedData32.size(); ++i) {
-        kExpectedData16[i] = kExpectedData32[i] * std::numeric_limits<uint16_t>::max();
+        kExpectedData16[i] =
+            static_cast<uint16_t>(kExpectedData32[i] * std::numeric_limits<uint16_t>::max());
     }
 
     const size_t kExpectedDataSize16 = kExpectedData16.size() * sizeof(kExpectedData16[0]);
@@ -1680,7 +1681,8 @@ TEST_P(MultithreadTextureCopyTests, CopyBufferToDepthNoRace) {
 
     std::vector<uint16_t> kExpectedData16(kExpectedData32.size());
     for (size_t i = 0; i < kExpectedData32.size(); ++i) {
-        kExpectedData16[i] = kExpectedData32[i] * std::numeric_limits<uint16_t>::max();
+        kExpectedData16[i] =
+            static_cast<uint16_t>(kExpectedData32[i] * std::numeric_limits<uint16_t>::max());
     }
 
     const uint32_t kExpectedDataSize16 = kExpectedData16.size() * sizeof(kExpectedData16[0]);
