@@ -36,7 +36,14 @@
 
 // This header includes <windows.h> but removes all the extra defines that conflict with identifiers
 // in internal code. It should never be included in something that is part of the public interface.
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonportable-system-include-path"
+#endif
 #include <windows.h>
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 // Macros defined for ANSI / Unicode support
 #undef CreateWindow
