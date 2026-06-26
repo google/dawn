@@ -116,4 +116,12 @@ void TestTypedIntegerArguments() {
     (void) sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
 }
 
+void TestAsWriteableBytesRequiresNonConst() {
+    auto sp = Span<const int>{FakeRange()};
+
+    SpanAsBytes(sp); // Control case
+    SpanAsWritableBytes(sp); // expected-error {{no matching function for call}}
+
+}
+
 }  // namespace dawn

@@ -602,5 +602,82 @@ TEST(SpanDeathTest, Subspan2ArgOOB) {
     EXPECT_DEATH_IF_SUPPORTED(sp8.subspan(kOne, std::numeric_limits<Index8>::max()), "");
 }
 
+TEST(SpanTest, SpanAsBytes) {
+    // Empty spans.
+    {
+        Span<int> sp;
+
+        auto bsp = SpanAsBytes(sp);
+        static_assert(std::is_same_v<Span<const std::byte>, decltype(bsp)>);
+        EXPECT_TRUE(bsp.empty());
+
+        auto wbsp = SpanAsWritableBytes(sp);
+        static_assert(std::is_same_v<Span<std::byte>, decltype(wbsp)>);
+        EXPECT_TRUE(wbsp.empty());
+    }
+
+    // Non-empty span.
+    {
+        std::array<int, 3> ints{};
+        Span<int> sp{ints};
+
+        auto bsp = SpanAsBytes(sp);
+        static_assert(std::is_same_v<Span<const std::byte>, decltype(bsp)>);
+        EXPECT_EQ(bsp.size(), sp.size_bytes());
+        EXPECT_EQ(bsp.data(), reinterpret_cast<const std::byte*>(sp.data()));
+
+        auto wbsp = SpanAsWritableBytes(sp);
+        static_assert(std::is_same_v<Span<std::byte>, decltype(wbsp)>);
+        EXPECT_EQ(wbsp.size(), sp.size_bytes());
+        EXPECT_EQ(wbsp.data(), reinterpret_cast<std::byte*>(sp.data()));
+    }
+
+    // Span with an index.
+    {
+        std::array<int, 3> ints{};
+        // SAFETY: This is viewing ints, just with typed indices.
+        ityp::span<Index, int> DAWN_UNSAFE_BUFFERS(sp{ints.data(), Index(3u)});
+
+        auto bsp = SpanAsBytes(sp);
+        static_assert(std::is_same_v<Span<const std::byte>, decltype(bsp)>);
+        EXPECT_EQ(bsp.size(), sp.size_bytes());
+        EXPECT_EQ(bsp.data(), reinterpret_cast<const std::byte*>(sp.data()));
+
+        auto wbsp = SpanAsWritableBytes(sp);
+        static_assert(std::is_same_v<Span<std::byte>, decltype(wbsp)>);
+        EXPECT_EQ(wbsp.size(), sp.size_bytes());
+        EXPECT_EQ(wbsp.data(), reinterpret_cast<std::byte*>(sp.data()));
+    }
+}
+
+TEST(SpanTest, SpanFromRef) {
+    {
+        uint32_t i = 0;
+
+        auto sp = SpanFromRef(i);
+        static_assert(std::is_same_v<Span<uint32_t>, decltype(sp)>);
+        EXPECT_EQ(sp.size(), 1u);
+        EXPECT_EQ(sp.data(), &i);
+
+        auto bsp = ByteSpanFromRef(i);
+        static_assert(std::is_same_v<Span<std::byte>, decltype(bsp)>);
+        EXPECT_EQ(bsp.size(), sizeof(uint32_t));
+        EXPECT_EQ(bsp.data(), reinterpret_cast<std::byte*>(&i));
+    }
+    {
+        const uint32_t i = 0;
+
+        auto sp = SpanFromRef(i);
+        static_assert(std::is_same_v<Span<const uint32_t>, decltype(sp)>);
+        EXPECT_EQ(sp.size(), 1u);
+        EXPECT_EQ(sp.data(), &i);
+
+        auto bsp = ByteSpanFromRef(i);
+        static_assert(std::is_same_v<Span<const std::byte>, decltype(bsp)>);
+        EXPECT_EQ(bsp.size(), sizeof(uint32_t));
+        EXPECT_EQ(bsp.data(), reinterpret_cast<const std::byte*>(&i));
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn

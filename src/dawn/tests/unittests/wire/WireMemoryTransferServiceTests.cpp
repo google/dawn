@@ -130,9 +130,7 @@ class WireMemoryTransferServiceTestBase : public WireTest,
     }
 
     std::span<std::byte> GetSpanToClientBufferContent() {
-        // TODO(https://crbug.com/526549345) Use byte_span_from_ref.
-        return DAWN_UNSAFE_TODO(
-            {reinterpret_cast<std::byte*>(&mClientBufferContent), sizeof(mClientBufferContent)});
+        return {ByteSpanFromRef(mClientBufferContent)};
     }
 
     std::tuple<WGPUBuffer, wgpu::Buffer, MockClientMemoryHandle*, MockServerMemoryHandle*>
@@ -245,9 +243,7 @@ class WireMemoryTransferServiceTestBase : public WireTest,
     void ExpectServerDeserializeData(bool success, MockServerMemoryHandle* serverHandle) {
         DAWN_ASSERT(serverHandle != nullptr);
 
-        // TODO(https://crbug.com/526549345) use byte_span_from_ref
-        std::span<std::byte> DAWN_UNSAFE_TODO(target(
-            reinterpret_cast<std::byte*>(&mServerBufferContent), sizeof(mServerBufferContent)));
+        std::span<std::byte> target{ByteSpanFromRef(mServerBufferContent)};
         EXPECT_CALL(
             *serverHandle,
             DeserializeDataUpdate(
