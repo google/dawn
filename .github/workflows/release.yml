@@ -63,3 +63,15 @@ jobs:
             artifacts/dawn-apple-*/dawn-apple-*.xcframework.tar.gz \
             artifacts/dawn-headers-*/dawn-headers-*.tar.gz \
             artifacts/emdawnwebgpu/*
+
+  alert-on-failure:
+    needs: publish
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    steps:
+      - name: Alert on failure
+        run: |
+          curl -X POST \
+            -H 'Content-Type: application/json; charset=UTF-8' \
+            -d '{"text": "Release failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' \
+            '${{secrets.GARDENING_CHAT_WEBHOOK_URL}}'
