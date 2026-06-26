@@ -110,14 +110,13 @@
 
 #endif  // defined(DAWN_ENABLE_ASSERTS)
 
-// Release-mode assert (similar to Chromium CHECK).
-// First does a debug-mode assert for a better debugging experience, then hard-aborts.
+// Equivalent to Chromium CHECK. In both debug and release, this asserts the condition is true.
 #define DAWN_CHECK(condition) DAWN_CHECK_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
-// Asserts in debug if condition is not true (similar to Chromium DCHECK).
-// In release this is a NOOP. (No longer calls assume compiler hint)
+// Equivalent to Chromium DCHECK. In debug, this asserts the condition is true.
+// In release, this does nothing (it doesn't __builtin_assume).
 #define DAWN_ASSERT(condition) DAWN_ASSERT_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
-// In release, this provides powerful optimization hints to the compiler.
-// In debug, this is a DAWN_ASSERT.
+// In release, this provides powerful __builtin_assume optimization hints to the compiler (without
+// executing the condition expression). In debug, this is a DAWN_ASSERT.
 #define DAWN_RELEASE_ASSUME(condition) \
     DAWN_RELEASE_ASSUME_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
 

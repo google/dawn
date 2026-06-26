@@ -98,10 +98,6 @@ config("internal_config") {
   cflags = []
 
   if (is_clang) {
-    # We use __builtin_assume liberally in DAWN_ASSERT, allow ignoring
-    # side-effects there.
-    cflags += [ "-Wno-assume" ]
-
     # Flags use of __COUNTER__, which is used in histogram macros that were
     # largely copied from Chromium. Chromium continues to use __COUNTER__ in
     # their copy.
