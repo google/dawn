@@ -193,7 +193,7 @@ class CheckUnsafeBuffersSafetyCommentsTest(unittest.TestCase):
             ])
         ]
         errors = PRESUBMIT.CheckUnsafeBuffersSafetyComments(
-            mock_input_api, MockOutputApi())
+            mock_input_api, MockOutputApiWithLocations())
         self.assertEqual(0, len(errors))
 
     def testValidUsageSameLine(self):
@@ -206,7 +206,7 @@ class CheckUnsafeBuffersSafetyCommentsTest(unittest.TestCase):
             ])
         ]
         errors = PRESUBMIT.CheckUnsafeBuffersSafetyComments(
-            mock_input_api, MockOutputApi())
+            mock_input_api, MockOutputApiWithLocations())
         self.assertEqual(0, len(errors))
 
     def testValidUsagePrecedingLine(self):
@@ -220,7 +220,7 @@ class CheckUnsafeBuffersSafetyCommentsTest(unittest.TestCase):
             ])
         ]
         errors = PRESUBMIT.CheckUnsafeBuffersSafetyComments(
-            mock_input_api, MockOutputApi())
+            mock_input_api, MockOutputApiWithLocations())
         self.assertEqual(0, len(errors))
 
     def testValidUsagePrecedingLineWithOtherComments(self):
@@ -235,7 +235,7 @@ class CheckUnsafeBuffersSafetyCommentsTest(unittest.TestCase):
             ])
         ]
         errors = PRESUBMIT.CheckUnsafeBuffersSafetyComments(
-            mock_input_api, MockOutputApi())
+            mock_input_api, MockOutputApiWithLocations())
         self.assertEqual(0, len(errors))
 
     def testInvalidUsageNoComment(self):
@@ -248,8 +248,13 @@ class CheckUnsafeBuffersSafetyCommentsTest(unittest.TestCase):
             ])
         ]
         errors = PRESUBMIT.CheckUnsafeBuffersSafetyComments(
-            mock_input_api, MockOutputApi())
+            mock_input_api, MockOutputApiWithLocations())
         self.assertEqual(1, len(errors))
+        self.assertEqual(1, len(errors[0].locations))
+        loc = errors[0].locations[0]
+        self.assertEqual('src/dawn/Foo.cpp', loc.file_path)
+        self.assertEqual(2, loc.start_line)
+        self.assertEqual(2, loc.end_line)
         self.assertIn('DAWN_UNSAFE_BUFFERS usage must be accompanied',
                       errors[0].items[0])
 
@@ -264,7 +269,7 @@ class CheckUnsafeBuffersSafetyCommentsTest(unittest.TestCase):
             ])
         ]
         errors = PRESUBMIT.CheckUnsafeBuffersSafetyComments(
-            mock_input_api, MockOutputApi())
+            mock_input_api, MockOutputApiWithLocations())
         self.assertEqual(1, len(errors))
 
     def testInvalidUsageCommentSeparatedByCode(self):
@@ -279,7 +284,7 @@ class CheckUnsafeBuffersSafetyCommentsTest(unittest.TestCase):
             ])
         ]
         errors = PRESUBMIT.CheckUnsafeBuffersSafetyComments(
-            mock_input_api, MockOutputApi())
+            mock_input_api, MockOutputApiWithLocations())
         self.assertEqual(1, len(errors))
 
     def testIgnoreCommentedUsage(self):
@@ -292,7 +297,7 @@ class CheckUnsafeBuffersSafetyCommentsTest(unittest.TestCase):
             ])
         ]
         errors = PRESUBMIT.CheckUnsafeBuffersSafetyComments(
-            mock_input_api, MockOutputApi())
+            mock_input_api, MockOutputApiWithLocations())
         self.assertEqual(0, len(errors))
 
     def testNonCppFilesIgnored(self):
@@ -303,7 +308,7 @@ class CheckUnsafeBuffersSafetyCommentsTest(unittest.TestCase):
             ])
         ]
         errors = PRESUBMIT.CheckUnsafeBuffersSafetyComments(
-            mock_input_api, MockOutputApi())
+            mock_input_api, MockOutputApiWithLocations())
         self.assertEqual(0, len(errors))
 
 

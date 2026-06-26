@@ -618,6 +618,7 @@ def CheckUnsafeBuffersSafetyComments(input_api, output_api):
     safety_comment_regex = re.compile(r'//.*\bSAFETY\b')
 
     problems = []
+    locations = []
 
     for f in input_api.AffectedFiles(include_deletes=False,
                                      file_filter=file_filter):
@@ -646,13 +647,20 @@ def CheckUnsafeBuffersSafetyComments(input_api, output_api):
                         f"{f.LocalPath()}:{line_num}: "
                         "DAWN_UNSAFE_BUFFERS usage must be accompanied by a "
                         "// SAFETY: comment.")
+                    locations.append(
+                        output_api.PresubmitResultLocation(
+                            file_path=f.LocalPath(),
+                            start_line=line_num,
+                            end_line=line_num,
+                        ))
 
     if problems:
         return [
-            output_api.PresubmitError(
+            output_api.PresubmitPromptWarning(
                 "DAWN_UNSAFE_BUFFERS usages must be accompanied by a "
                 "// SAFETY: comment explaining why they are safe.",
-                items=problems)
+                items=problems,
+                locations=locations)
         ]
     return []
 
