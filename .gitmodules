@@ -77,11 +77,11 @@
 [submodule "third_party/mesa/src"]
 	path = third_party/mesa/src
 	url = https://chromium.googlesource.com/external/gitlab.freedesktop.org/mesa/mesa/
-	gclient-condition = dawn_standalone and checkout_mesa
+	gclient-condition = checkout_mesa
 [submodule "third_party/meson/src"]
 	path = third_party/meson/src
 	url = https://chromium.googlesource.com/external/github.com/mesonbuild/meson
-	gclient-condition = dawn_standalone and checkout_mesa
+	gclient-condition = checkout_mesa
 [submodule "third_party/jinja2"]
 	path = third_party/jinja2
 	url = https://chromium.googlesource.com/chromium/src/third_party/jinja2
