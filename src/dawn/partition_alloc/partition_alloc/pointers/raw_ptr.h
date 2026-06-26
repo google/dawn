@@ -77,6 +77,11 @@ class DAWN_TRIVIAL_ABI DAWN_GSL_POINTER raw_ptr {
     // NOLINTNEXTLINE
     DAWN_FORCE_INLINE constexpr raw_ptr(T* p) noexcept : wrapped_ptr_(p) {}
 
+    DAWN_FORCE_INLINE constexpr raw_ptr(const raw_ptr&) noexcept = default;
+    DAWN_FORCE_INLINE constexpr raw_ptr(raw_ptr&& ptr) noexcept : wrapped_ptr_(ptr.wrapped_ptr_) {
+        ptr.wrapped_ptr_ = nullptr;
+    }
+
     // Deliberately implicit in order to support implicit upcast.
     template <typename U,
               typename Unused = std::enable_if_t<std::is_convertible_v<U*, T*> &&
@@ -104,6 +109,15 @@ class DAWN_TRIVIAL_ABI DAWN_GSL_POINTER raw_ptr {
 
     DAWN_FORCE_INLINE constexpr raw_ptr& operator=(T* p) noexcept {
         wrapped_ptr_ = p;
+        return *this;
+    }
+
+    DAWN_FORCE_INLINE constexpr raw_ptr& operator=(const raw_ptr&) noexcept = default;
+    DAWN_FORCE_INLINE constexpr raw_ptr& operator=(raw_ptr&& ptr) noexcept {
+        if (this != &ptr) {
+            wrapped_ptr_ = ptr.wrapped_ptr_;
+            ptr.wrapped_ptr_ = nullptr;
+        }
         return *this;
     }
 
@@ -147,37 +161,58 @@ class DAWN_TRIVIAL_ABI DAWN_GSL_POINTER raw_ptr {
         return static_cast<U*>(wrapped_ptr_);
     }
 
-    DAWN_FORCE_INLINE constexpr raw_ptr& operator++() {
+    // PRECONDITIONS: The caller must ensure that the pointer remains within the bounds of the
+    // allocated object (or one past the end). Safety is the responsibility of the caller.
+    DAWN_UNSAFE_BUFFER_USAGE DAWN_FORCE_INLINE constexpr raw_ptr& operator++() {
         wrapped_ptr_++;
         return *this;
     }
-    DAWN_FORCE_INLINE constexpr raw_ptr& operator--() {
+
+    // PRECONDITIONS: The caller must ensure that the pointer remains within the bounds of the
+    // allocated object. Safety is the responsibility of the caller.
+    DAWN_UNSAFE_BUFFER_USAGE DAWN_FORCE_INLINE constexpr raw_ptr& operator--() {
         wrapped_ptr_--;
         return *this;
     }
-    DAWN_FORCE_INLINE constexpr raw_ptr operator++(int /* post_increment */) {
+
+    // PRECONDITIONS: The caller must ensure that the pointer remains within the bounds of the
+    // allocated object (or one past the end). Safety is the responsibility of the caller.
+    DAWN_UNSAFE_BUFFER_USAGE DAWN_FORCE_INLINE constexpr raw_ptr operator++(
+        int /* post_increment */) {
         return wrapped_ptr_++;
     }
-    DAWN_FORCE_INLINE constexpr raw_ptr operator--(int /* post_decrement */) {
+
+    // PRECONDITIONS: The caller must ensure that the pointer remains within the bounds of the
+    // allocated object. Safety is the responsibility of the caller.
+    DAWN_UNSAFE_BUFFER_USAGE DAWN_FORCE_INLINE constexpr raw_ptr operator--(
+        int /* post_decrement */) {
         return wrapped_ptr_--;
     }
+
+    // PRECONDITIONS: The caller must ensure that the resulting pointer remains within the bounds of
+    // the allocated object (or one past the end). Safety is the responsibility of the caller.
     template <typename Z, typename = std::enable_if_t<partition_alloc::internal::is_offset_type<Z>>>
-    DAWN_FORCE_INLINE constexpr raw_ptr& operator+=(Z delta) {
+    DAWN_UNSAFE_BUFFER_USAGE DAWN_FORCE_INLINE constexpr raw_ptr& operator+=(Z delta) {
         wrapped_ptr_ += delta;
         return *this;
     }
+
+    // PRECONDITIONS: The caller must ensure that the resulting pointer remains within the bounds of
+    // the allocated object (or one past the end). Safety is the responsibility of the caller.
     template <typename Z, typename = std::enable_if_t<partition_alloc::internal::is_offset_type<Z>>>
-    DAWN_FORCE_INLINE constexpr raw_ptr& operator-=(Z delta) {
+    DAWN_UNSAFE_BUFFER_USAGE DAWN_FORCE_INLINE constexpr raw_ptr& operator-=(Z delta) {
         wrapped_ptr_ -= delta;
         return *this;
     }
 
+    // PRECONDITIONS: The caller must ensure that the index is within the bounds of the allocated
+    // object. Safety is the responsibility of the caller.
     template <
         typename Z,
         typename U = T,
         typename Unused = std::enable_if_t<!std::is_void_v<typename std::remove_cv<U>::type> &&
                                            partition_alloc::internal::is_offset_type<Z>>>
-    DAWN_FORCE_INLINE U& operator[](Z delta) const {
+    DAWN_UNSAFE_BUFFER_USAGE DAWN_FORCE_INLINE U& operator[](Z delta) const {
         return wrapped_ptr_[delta];
     }
 
@@ -358,7 +393,6 @@ namespace std {
 // used for lookup.
 template <typename T, RawPtrTraits Traits>
 struct less<raw_ptr<T, Traits>> {
-    using Impl = typename raw_ptr<T, Traits>::Impl;
     using is_transparent = void;
 
     bool operator()(const raw_ptr<T, Traits>& lhs, const raw_ptr<T, Traits>& rhs) const {
