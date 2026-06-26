@@ -248,8 +248,6 @@ dawn_test("dawn_unittests") {
   # Add internal dawn native config for internal unittests.
   configs = [ "${dawn_root}/src/dawn/native:internal" ]
 
-  defines = []
-
   # Add Tint public+common configs so <tint/tint.h> can be included to test
   # the Dawn/Tint boundary.
   configs += [
@@ -415,9 +413,8 @@ dawn_test("dawn_unittests") {
   # `dawn_unittests` are known to run for both Dawn standalone and Chrome. This
   # file is testing specifically the Dawn's standalone configuration of
   # partition_alloc.
-  sources += [ "unittests/RawPtrTests.cpp" ]
   if (dawn_enable_partition_alloc) {
-    defines += [ "DAWN_ENABLE_PARTITION_ALLOC" ]
+    sources += [ "unittests/RawPtrTests.cpp" ]
   }
 
   if (is_win) {
