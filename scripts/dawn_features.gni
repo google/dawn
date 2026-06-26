@@ -33,6 +33,9 @@ declare_args() {
   # Sets defaults for other features so that we build as much as possible on the
   # current host OS.
   dawn_maximal = false
+
+  # Build the LiteRT-LM benchmark binary using Bazel.
+  dawn_build_litert_lm = false
 }
 
 declare_args() {

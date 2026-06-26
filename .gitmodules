@@ -209,3 +209,7 @@
 	path = third_party/partition_alloc
 	url = https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator.git
 	gclient-condition = dawn_standalone
+[submodule "third_party/litert-lm/src"]
+	path = third_party/litert-lm/src
+	url = https://chromium.googlesource.com/external/github.com/google-ai-edge/LiteRT-LM.git
+	gclient-condition = checkout_litert_lm

@@ -103,6 +103,13 @@ if (dawn_standalone) {
     deps = [ "tools/android" ]
   }
 
+  if (dawn_build_litert_lm) {
+    group("litert_lm") {
+      testonly = true
+      deps = [ "third_party/litert-lm:litert_lm_advanced_main" ]
+    }
+  }
+
   if (dawn_build_emdawnwebgpu) {
     # These targets are only valid when the Wasm toolchain is available.
     assert(dawn_wasm,

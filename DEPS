@@ -85,6 +85,10 @@ vars = {
   # Checkout //tools/code_coverage from Chromium and fetches the
   # prebuilt versions of llvm-cov and llvm-profdata.
   'checkout_clang_coverage_tools': False,
+
+  # Checkout LiteRT-LM and its data dependencies.
+  # Not actually depended on by Dawn/Tint, only used to run benchmark tests on them.
+  'checkout_litert_lm': False,
 }
 
 deps = {
@@ -572,7 +576,7 @@ deps = {
   },
 
   'tools/bazelisk': {
-    'condition': 'fetch_bazel',
+    'condition': 'fetch_bazel or checkout_litert_lm',
     'packages': [{
       'package': 'infra/3pp/tools/bazelisk/${{platform}}',
       'version': Var('dawn_bazelisk_version'),
@@ -653,6 +657,23 @@ deps = {
   'third_party/placeholder_chromium': {
     'url': '{chromium_git}/chromium/src.git' + '@' + Var('chromium_revision'),
     'condition': 'checkout_placeholder_chromium',
+  },
+
+  'third_party/litert-lm/src': {
+    'url': '{chromium_git}/external/github.com/google-ai-edge/LiteRT-LM.git@27106e37122bff03bb8c15589127e0d97011d0c3',
+    'condition': 'checkout_litert_lm',
+  },
+
+  'third_party/litert-lm/data': {
+    'packages': [
+      {
+        # TODO(crbug.com/527944617): Replace experimental CIPD dependency.
+        'package': 'experimental/chouinard_at_google.com/litert_lm_benchmark_data',
+        'version': 'latest',
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'checkout_litert_lm',
   },
 }
 
