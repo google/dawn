@@ -332,7 +332,7 @@ struct EndRenderPassCmd {
 };
 
 struct ExecuteBundlesCmd {
-    uint32_t count = 0;
+    size_t count = 0;
 };
 
 struct ClearBufferCmd {

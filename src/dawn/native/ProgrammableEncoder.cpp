@@ -235,9 +235,12 @@ void ProgrammableEncoder::RecordSetBindGroup(
     cmd->group = group;
     // TODO(https://crbug.com/524554511): Propagate the usage of the BindingIndex type to
     // SetBindGroupCmd and through backends as well.
+    // TODO(https://crbug.com/528305452): Don't convert to uint32_t and instead make AllocateData
+    // handle typed indices and return a span.
     cmd->dynamicOffsetCount = uint32_t{dynamicOffsets.size()};
     if (!dynamicOffsets.empty()) {
         uint32_t* offsets = allocator->AllocateData<uint32_t>(cmd->dynamicOffsetCount);
+        // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
         DAWN_UNSAFE_TODO(
             memcpy(offsets, dynamicOffsets.data(), cmd->dynamicOffsetCount * sizeof(uint32_t)));
     }

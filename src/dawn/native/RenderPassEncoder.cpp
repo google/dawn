@@ -34,6 +34,7 @@
 #include <utility>
 
 #include "dawn/native/ObjectType_autogen.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/native/Adapter.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/CommandEncoder.h"
@@ -323,7 +324,7 @@ void RenderPassEncoder::APISetScissorRect(uint32_t x, uint32_t y, uint32_t width
         "encoding %s.SetScissorRect(%u, %u, %u, %u).", this, x, y, width, height);
 }
 
-void RenderPassEncoder::APIExecuteBundles(uint32_t count, RenderBundleBase* const* renderBundles) {
+void RenderPassEncoder::APIExecuteBundles(Span<RenderBundleBase* const> renderBundles) {
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
@@ -331,33 +332,32 @@ void RenderPassEncoder::APIExecuteBundles(uint32_t count, RenderBundleBase* cons
                 const AttachmentState* attachmentState = GetAttachmentState();
                 bool depthReadOnlyInPass = IsDepthReadOnly();
                 bool stencilReadOnlyInPass = IsStencilReadOnly();
-                for (uint32_t i = 0; i < count; ++i) {
-                    DAWN_UNSAFE_TODO(DAWN_TRY(GetDevice()->ValidateObject(renderBundles[i])));
+                for (auto [i, renderBundle] : Enumerate(renderBundles)) {
+                    DAWN_UNSAFE_TODO(DAWN_TRY(GetDevice()->ValidateObject(renderBundle)));
 
                     DAWN_UNSAFE_TODO(
-                        DAWN_INVALID_IF(attachmentState != renderBundles[i]->GetAttachmentState(),
+                        DAWN_INVALID_IF(attachmentState != renderBundle->GetAttachmentState(),
                                         "Attachment state of renderBundles[%i] (%s) is not "
                                         "compatible with %s.\n"
                                         "%s expects an attachment state of %s.\n"
                                         "renderBundles[%i] (%s) has an attachment state of %s.",
-                                        i, renderBundles[i], this, this, attachmentState, i,
-                                        renderBundles[i], renderBundles[i]->GetAttachmentState()));
+                                        i, renderBundle, this, this, attachmentState, i,
+                                        renderBundle, renderBundle->GetAttachmentState()));
 
-                    bool depthReadOnlyInBundle =
-                        DAWN_UNSAFE_TODO(renderBundles[i])->IsDepthReadOnly();
+                    bool depthReadOnlyInBundle = DAWN_UNSAFE_TODO(renderBundle)->IsDepthReadOnly();
                     DAWN_UNSAFE_TODO(DAWN_INVALID_IF(
                         depthReadOnlyInPass && !depthReadOnlyInBundle,
-                        "DepthReadOnly (%u) of renderBundle[%i] (%s) is not compatible "
+                        "DepthReadOnly (%u) of renderBundles[%i] (%s) is not compatible "
                         "with DepthReadOnly (%u) of %s.",
-                        depthReadOnlyInBundle, i, renderBundles[i], depthReadOnlyInPass, this));
+                        depthReadOnlyInBundle, i, renderBundle, depthReadOnlyInPass, this));
 
                     bool stencilReadOnlyInBundle =
-                        DAWN_UNSAFE_TODO(renderBundles[i])->IsStencilReadOnly();
+                        DAWN_UNSAFE_TODO(renderBundle)->IsStencilReadOnly();
                     DAWN_UNSAFE_TODO(DAWN_INVALID_IF(
                         stencilReadOnlyInPass && !stencilReadOnlyInBundle,
-                        "StencilReadOnly (%u) of renderBundle[%i] (%s) is not "
+                        "StencilReadOnly (%u) of renderBundles[%i] (%s) is not "
                         "compatible with StencilReadOnly (%u) of %s.",
-                        stencilReadOnlyInBundle, i, renderBundles[i], stencilReadOnlyInPass, this));
+                        stencilReadOnlyInBundle, i, renderBundle, stencilReadOnlyInPass, this));
                 }
             }
 
@@ -365,32 +365,37 @@ void RenderPassEncoder::APIExecuteBundles(uint32_t count, RenderBundleBase* cons
             mCommandBufferState = CommandBufferStateTracker{};
 
             // Only encode an ExecuteBundles command if count > 0
-            if (count) {
-                ExecuteBundlesCmd* cmd =
-                    allocator->Allocate<ExecuteBundlesCmd>(Command::ExecuteBundles);
-                cmd->count = count;
+            if (renderBundles.empty()) {
+                return {};
+            }
 
-                Ref<RenderBundleBase>* bundles =
-                    allocator->AllocateData<Ref<RenderBundleBase>>(count);
-                for (uint32_t i = 0; i < count; ++i) {
-                    DAWN_UNSAFE_TODO(bundles[i]) = DAWN_UNSAFE_TODO(renderBundles[i]);
+            ExecuteBundlesCmd* cmd =
+                allocator->Allocate<ExecuteBundlesCmd>(Command::ExecuteBundles);
+            cmd->count = renderBundles.size();
 
-                    mUsageTracker.MergeResourceUsages(
-                        DAWN_UNSAFE_TODO(bundles[i])->GetResourceUsage());
-                    if (DAWN_UNSAFE_TODO(bundles[i])->GetResourceUsage().usesFramebufferFetch) {
-                        mUsageTracker.MarkFramebufferFetchUsed();
-                    }
+            // TODO(https://crbug.com/528305452): Make AllocateData handle typed indices and return
+            // a span.
+            Span<Ref<RenderBundleBase>> bundles = DAWN_UNSAFE_TODO(
+                {allocator->AllocateData<Ref<RenderBundleBase>>(renderBundles.size()),
+                 renderBundles.size()});
+            for (auto [i, bundle] : Enumerate(bundles)) {
+                // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+                bundles[i] = renderBundles[i];
 
-                    if (IsValidationEnabled()) {
-                        mIndirectDrawMetadata.AddBundle(DAWN_UNSAFE_TODO(renderBundles[i]));
-                    }
-
-                    mDrawCount += DAWN_UNSAFE_TODO(bundles[i])->GetDrawCount();
+                mUsageTracker.MergeResourceUsages(bundle->GetResourceUsage());
+                if (bundle->GetResourceUsage().usesFramebufferFetch) {
+                    mUsageTracker.MarkFramebufferFetchUsed();
                 }
+
+                if (IsValidationEnabled()) {
+                    mIndirectDrawMetadata.AddBundle(renderBundles[i]);
+                }
+
+                mDrawCount += bundle->GetDrawCount();
             }
             return {};
         },
-        "encoding %s.ExecuteBundles(%u, ...).", this, count);
+        "encoding %s.ExecuteBundles(%u, ...).", this, renderBundles.size());
 }
 
 void RenderPassEncoder::APIBeginOcclusionQuery(uint32_t queryIndexUntyped) {
