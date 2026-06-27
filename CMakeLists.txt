@@ -118,14 +118,15 @@ elseif(UNIX)
   set(USE_X11 ON)
 endif()
 
-# GLFW is not supported in UWP
+# Not enabled for UWP because it only supports CoreWindow for windowing.
+# Not enabled for Emscripten because samples use Emscripten APIs, not GLFW.
 set(DAWN_SUPPORTS_GLFW_FOR_WINDOWING OFF)
-if (EMSCRIPTEN OR (WIN32 AND NOT WINDOWS_STORE) OR (UNIX AND NOT ANDROID))
+if ((WIN32 AND NOT WINDOWS_STORE) OR (UNIX AND NOT ANDROID AND NOT EMSCRIPTEN))
     set(DAWN_SUPPORTS_GLFW_FOR_WINDOWING ON)
 endif()
 
-# Current examples are depend on GLFW
-if (DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
+# Samples require either GLFW or Emscripten for windowing.
+if (DAWN_SUPPORTS_GLFW_FOR_WINDOWING OR EMSCRIPTEN)
     set(BUILD_SAMPLES ON)
 endif()
 

@@ -154,7 +154,8 @@ declare_args() {
   dawn_enable_spirv_validation = dawn_enable_vulkan
 }
 
-# UWP only supports CoreWindow for windowing
+# Not enabled for UWP because it only supports CoreWindow for windowing.
+# Not enabled for Emscripten because samples use Emscripten APIs, not GLFW.
 dawn_supports_glfw_for_windowing =
     (is_win && !dawn_is_winuwp) || (is_linux && !is_chromeos) || is_mac
 
