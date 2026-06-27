@@ -1644,10 +1644,10 @@ const AHBFunctions* PhysicalDevice::GetOrLoadAHBFunctions() {
 void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
                                                const TogglesState& toggles) const {
     if (auto* memoryHeapProperties = info.Get<AdapterPropertiesMemoryHeaps>()) {
+        // TODO(https://crbug.com/512465980): Use dawn::HeapArray and Enumerate to loop over it.
         size_t count = mDeviceInfo.memoryHeaps.size();
         auto* heapInfo = new MemoryHeapInfo[count];
-        memoryHeapProperties->heapCount = count;
-        memoryHeapProperties->heapInfo = heapInfo;
+        memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, count});
 
         for (size_t i = 0; i < count; ++i) {
             DAWN_UNSAFE_TODO(heapInfo[i]).size = mDeviceInfo.memoryHeaps[i].size;
@@ -1689,9 +1689,10 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
         std::vector<SubgroupMatrixConfig> supportedConfigs =
             EnumerateSubgroupMatrixConfigs(toggles);
         size_t count = supportedConfigs.size();
+        // TODO(https://crbug.com/512465980): Use dawn::HeapArray
         SubgroupMatrixConfig* configs = new SubgroupMatrixConfig[count];
-        subgroupMatrixConfigs->configs = configs;
-        subgroupMatrixConfigs->configCount = supportedConfigs.size();
+        subgroupMatrixConfigs->configs = DAWN_UNSAFE_TODO({configs, supportedConfigs.size()});
+        // TODO(https://crbug.com/524406299): use dawn::Span::CopyFrom.
         DAWN_UNSAFE_TODO(
             memcpy(configs, supportedConfigs.data(), count * sizeof(SubgroupMatrixConfig)));
     }

@@ -998,9 +998,9 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
                                                const TogglesState& toggles) const {
     if (auto* memoryHeapProperties = info.Get<AdapterPropertiesMemoryHeaps>()) {
         if ([*mDevice hasUnifiedMemory]) {
+            // TODO(https://crbug.com/512465980): Use dawn::HeapArray
             auto* heapInfo = new MemoryHeapInfo[1];
-            memoryHeapProperties->heapCount = 1;
-            memoryHeapProperties->heapInfo = heapInfo;
+            memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, 1});
 
             heapInfo[0].properties =
                 wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
@@ -1019,9 +1019,9 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             }
         } else {
 #if DAWN_PLATFORM_IS(MACOS)
+            // TODO(https://crbug.com/512465980): Use dawn::HeapArray
             auto* heapInfo = new MemoryHeapInfo[2];
-            memoryHeapProperties->heapCount = 2;
-            memoryHeapProperties->heapInfo = heapInfo;
+            memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, 2});
 
             heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal;
             heapInfo[0].size = [*mDevice recommendedMaxWorkingSetSize];
@@ -1044,9 +1044,9 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     if (auto* subgroupMatrixConfigs = info.Get<AdapterPropertiesSubgroupMatrixConfigs>()) {
         DAWN_ASSERT([*mDevice supportsFamily:MTLGPUFamilyApple7]);
 
+        // TODO(https://crbug.com/512465980): Use dawn::HeapArray
         auto* configs = new SubgroupMatrixConfig[2];
-        subgroupMatrixConfigs->configCount = 2;
-        subgroupMatrixConfigs->configs = configs;
+        subgroupMatrixConfigs->configs = DAWN_UNSAFE_TODO({configs, 2});
 
         configs[0].componentType = wgpu::SubgroupMatrixComponentType::F32;
         configs[0].resultComponentType = wgpu::SubgroupMatrixComponentType::F32;

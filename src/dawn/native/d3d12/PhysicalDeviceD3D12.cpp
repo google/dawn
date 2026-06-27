@@ -979,9 +979,9 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
         // https://microsoft.github.io/DirectX-Specs/d3d/D3D12GPUUploadHeaps.html describes
         // the properties of D3D12 Default/Upload/Readback heaps.
         if (mDeviceInfo.isUMA) {
+            // TODO(https://crbug.com/512465980): Use dawn::HeapArray
             auto* heapInfo = new MemoryHeapInfo[1];
-            memoryHeapProperties->heapCount = 1;
-            memoryHeapProperties->heapInfo = heapInfo;
+            memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, 1});
 
             heapInfo[0].size =
                 std::max(mDeviceInfo.dedicatedVideoMemory, mDeviceInfo.sharedSystemMemory);
@@ -996,9 +996,9 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
                     wgpu::HeapProperty::HostUncached | wgpu::HeapProperty::HostCached;
             }
         } else {
+            // TODO(https://crbug.com/512465980): Use dawn::HeapArray
             auto* heapInfo = new MemoryHeapInfo[2];
-            memoryHeapProperties->heapCount = 2;
-            memoryHeapProperties->heapInfo = heapInfo;
+            memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, 2});
 
             heapInfo[0].size = mDeviceInfo.dedicatedVideoMemory;
             heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal;
@@ -1017,11 +1017,11 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
         std::vector<SubgroupMatrixConfig> supportedConfigs =
             EnumerateSubgroupMatrixConfigs(toggles);
         size_t count = supportedConfigs.size();
+        // TODO(https://crbug.com/512465980): Use dawn::HeapArray
         SubgroupMatrixConfig* configs = new SubgroupMatrixConfig[count];
-        subgroupMatrixConfigs->configs = configs;
-        subgroupMatrixConfigs->configCount = supportedConfigs.size();
-        // SAFETY: 'configs' size is 'supportedConfigs.size()'
-        DAWN_UNSAFE_BUFFERS(
+        subgroupMatrixConfigs->configs = DAWN_UNSAFE_TODO({configs, supportedConfigs.size()});
+        // TODO(https://crbug.com/524406299): use dawn::Span::CopyFrom.
+        DAWN_UNSAFE_TODO(
             memcpy(configs, supportedConfigs.data(), count * sizeof(SubgroupMatrixConfig)));
     }
 }

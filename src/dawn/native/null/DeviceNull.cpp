@@ -116,9 +116,9 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
 void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
                                                const TogglesState&) const {
     if (auto* memoryHeapProperties = info.Get<AdapterPropertiesMemoryHeaps>()) {
+        // TODO(https://crbug.com/512465980): Use dawn::HeapArray
         auto* heapInfo = new MemoryHeapInfo[1];
-        memoryHeapProperties->heapCount = 1;
-        memoryHeapProperties->heapInfo = heapInfo;
+        memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, 1});
 
         heapInfo[0].size = 1024 * 1024 * 1024;
         heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |

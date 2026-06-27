@@ -403,9 +403,9 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
         // the properties of D3D12 Default/Upload/Readback heaps. The assumption is that these are
         // roughly how D3D11 allocates memory has well.
         if (mDeviceInfo.isUMA) {
+            // TODO(https://crbug.com/512465980): Use dawn::HeapArray
             auto* heapInfo = new MemoryHeapInfo[1];
-            memoryHeapProperties->heapCount = 1;
-            memoryHeapProperties->heapInfo = heapInfo;
+            memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, 1});
 
             heapInfo[0].size =
                 std::max(mDeviceInfo.dedicatedVideoMemory, mDeviceInfo.sharedSystemMemory);
@@ -413,9 +413,9 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
                 wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
                 wgpu::HeapProperty::HostUncached | wgpu::HeapProperty::HostCached;
         } else {
+            // TODO(https://crbug.com/512465980): Use dawn::HeapArray
             auto* heapInfo = new MemoryHeapInfo[2];
-            memoryHeapProperties->heapCount = 2;
-            memoryHeapProperties->heapInfo = heapInfo;
+            memoryHeapProperties->heapInfo = DAWN_UNSAFE_TODO({heapInfo, 2});
 
             heapInfo[0].size = mDeviceInfo.dedicatedVideoMemory;
             heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal;
