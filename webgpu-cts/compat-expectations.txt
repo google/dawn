@@ -91,7 +91,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-06-25 06:28:13AM
+# Last rolled: 2026-06-29 07:15:09AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -3330,6 +3330,18 @@ crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,extension,readonly_and_
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="texture_formats_tier1" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="texture_formats_tier1" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="texture_formats_tier1" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateArray" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateArray" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateArray" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateArray" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateRuntimeArray" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateRuntimeArray" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateRuntimeArray" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateRuntimeArray" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateStructWithArray" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateStructWithArray" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateStructWithArray" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,types,pointer:ptr_not_instantiable:case="immediateStructWithArray" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="offscreen";format="bgra8unorm";usage=8 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="offscreen";format="bgra8unorm";usage=8 [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="offscreen";format="bgra8unorm";usage=8 [ Failure ]
