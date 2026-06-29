@@ -2,6 +2,7 @@
 *.glsl      eol=lf
 *.gn        eol=lf
 *.bazel     eol=lf
+*.bzl       eol=lf
 *.cmake     eol=lf
 *.gni       eol=lf
 *.hlsl      eol=lf

@@ -791,6 +791,9 @@ func emitBuildFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter)
 	if err != nil {
 		return err
 	}
+	for i, dep := range depsForGeneratedSources {
+		depsForGeneratedSources[i] = CanonicalizePath(dep)
+	}
 	depsForGeneratedSources = append(depsForGeneratedSources, p.AllTemplatePaths.List()...)
 
 	goSources, err := getGoDependencies(p, fsReaderWriter)
