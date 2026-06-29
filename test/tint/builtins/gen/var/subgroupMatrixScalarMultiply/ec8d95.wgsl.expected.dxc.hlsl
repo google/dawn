@@ -31,6 +31,6 @@ Matrix_result_f16_8x8 subgroupMatrixScalarMultiply_ec8d95() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixScalarMultiply_ec8d95().Store(prevent_dce, 0u, 128u, MatrixLayout::RowMajor);
+  subgroupMatrixScalarMultiply_ec8d95().Store(prevent_dce, 0u, 16u, MatrixLayout::RowMajor);
 }
 

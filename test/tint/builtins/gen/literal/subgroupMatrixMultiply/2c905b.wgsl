@@ -49,5 +49,5 @@ fn subgroupMatrixMultiply_2c905b() -> subgroup_matrix_result<f32, 8, 8>{
 }
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixMultiply_2c905b(), false, 64);
+  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixMultiply_2c905b(), false, 8);
 }

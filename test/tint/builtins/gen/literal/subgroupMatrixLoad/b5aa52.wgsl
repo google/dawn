@@ -50,5 +50,5 @@ fn subgroupMatrixLoad_b5aa52() -> subgroup_matrix_right<f32, 8, 8>{
 }
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixLoad_b5aa52(), false, 64);
+  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixLoad_b5aa52(), false, 8);
 }

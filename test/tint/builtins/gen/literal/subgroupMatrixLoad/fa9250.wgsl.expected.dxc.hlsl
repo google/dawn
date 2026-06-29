@@ -11,6 +11,6 @@ Matrix_right_i32_8x8 subgroupMatrixLoad_fa9250() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixLoad_fa9250().Store(prevent_dce, 0u, 256u, MatrixLayout::RowMajor);
+  subgroupMatrixLoad_fa9250().Store(prevent_dce, 0u, 32u, MatrixLayout::RowMajor);
 }
 

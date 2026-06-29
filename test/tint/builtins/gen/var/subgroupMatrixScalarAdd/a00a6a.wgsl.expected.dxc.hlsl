@@ -31,6 +31,6 @@ Matrix_right_f32_8x8 subgroupMatrixScalarAdd_a00a6a() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixScalarAdd_a00a6a().Store(prevent_dce, 0u, 256u, MatrixLayout::RowMajor);
+  subgroupMatrixScalarAdd_a00a6a().Store(prevent_dce, 0u, 32u, MatrixLayout::RowMajor);
 }
 

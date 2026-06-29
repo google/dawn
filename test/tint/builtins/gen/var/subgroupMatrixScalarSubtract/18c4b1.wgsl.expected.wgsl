@@ -11,5 +11,5 @@ fn subgroupMatrixScalarSubtract_18c4b1() -> subgroup_matrix_result<i8, 8, 8> {
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixScalarSubtract_18c4b1(), false, 64);
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixScalarSubtract_18c4b1(), false, 8);
 }

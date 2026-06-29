@@ -11,6 +11,6 @@ Matrix_result_u8_8x8 subgroupMatrixLoad_3b56ed() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixLoad_3b56ed().Store(prevent_dce, 0u, 64u, MatrixLayout::RowMajor);
+  subgroupMatrixLoad_3b56ed().Store(prevent_dce, 0u, 8u, MatrixLayout::RowMajor);
 }
 

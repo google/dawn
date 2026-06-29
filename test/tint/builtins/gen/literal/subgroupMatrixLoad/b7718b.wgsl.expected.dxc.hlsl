@@ -29,7 +29,7 @@ void compute_main_inner(uint tint_local_index) {
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  subgroupMatrixLoad_b7718b().Store(prevent_dce, 0u, 128u, MatrixLayout::RowMajor);
+  subgroupMatrixLoad_b7718b().Store(prevent_dce, 0u, 16u, MatrixLayout::RowMajor);
 }
 
 [numthreads(1, 1, 1)]

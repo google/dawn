@@ -11,6 +11,6 @@ Matrix_right_f32_8x8 subgroupMatrixLoad_c9c00a() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixLoad_c9c00a().Store(prevent_dce, 0u, 256u, MatrixLayout::RowMajor);
+  subgroupMatrixLoad_c9c00a().Store(prevent_dce, 0u, 32u, MatrixLayout::RowMajor);
 }
 

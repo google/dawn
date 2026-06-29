@@ -18,6 +18,6 @@ Matrix_result_f32_8x8 subgroupMatrixMultiplyAccumulate_071472() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixMultiplyAccumulate_071472().Store(prevent_dce, 0u, 256u, MatrixLayout::RowMajor);
+  subgroupMatrixMultiplyAccumulate_071472().Store(prevent_dce, 0u, 32u, MatrixLayout::RowMajor);
 }
 

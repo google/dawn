@@ -31,6 +31,6 @@ Matrix_left_f16_8x8 subgroupMatrixScalarAdd_38dfbe() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixScalarAdd_38dfbe().Store(prevent_dce, 0u, 128u, MatrixLayout::RowMajor);
+  subgroupMatrixScalarAdd_38dfbe().Store(prevent_dce, 0u, 16u, MatrixLayout::RowMajor);
 }
 

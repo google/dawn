@@ -49,5 +49,5 @@ fn subgroupMatrixScalarAdd_6978de() -> subgroup_matrix_result<f32, 8, 8>{
 }
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixScalarAdd_6978de(), false, 64);
+  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixScalarAdd_6978de(), false, 8);
 }

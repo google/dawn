@@ -12,6 +12,6 @@ Matrix_result_i8_8x8 subgroupMatrixMultiply_d755b4() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixMultiply_d755b4().Store(prevent_dce, 0u, 64u, MatrixLayout::RowMajor);
+  subgroupMatrixMultiply_d755b4().Store(prevent_dce, 0u, 8u, MatrixLayout::RowMajor);
 }
 

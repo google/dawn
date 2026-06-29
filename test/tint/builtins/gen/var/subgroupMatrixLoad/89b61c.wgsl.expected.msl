@@ -53,7 +53,7 @@ void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_modu
     }
   }
   (threadgroup_barrier(mem_flags::mem_threadgroup));
-  (simdgroup_store(subgroupMatrixLoad_89b61c(tint_module_vars), (&(*tint_module_vars.prevent_dce)[0u]), ulong(64u), ulong2(0ul), false));
+  (simdgroup_store(subgroupMatrixLoad_89b61c(tint_module_vars), (&(*tint_module_vars.prevent_dce)[0u]), ulong(8u), ulong2(0ul), false));
 }
 
 [[max_total_threads_per_threadgroup(1)]]

@@ -21,6 +21,6 @@ Matrix_result_u8_8x8 subgroupMatrixMultiplyAccumulate_052cba() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixMultiplyAccumulate_052cba().Store(prevent_dce, 0u, 64u, MatrixLayout::RowMajor);
+  subgroupMatrixMultiplyAccumulate_052cba().Store(prevent_dce, 0u, 8u, MatrixLayout::RowMajor);
 }
 

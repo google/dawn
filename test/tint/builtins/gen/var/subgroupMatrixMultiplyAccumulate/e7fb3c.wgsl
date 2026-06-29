@@ -52,5 +52,5 @@ fn subgroupMatrixMultiplyAccumulate_e7fb3c() -> subgroup_matrix_result<f32, 8, 8
 }
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixMultiplyAccumulate_e7fb3c(), false, 64);
+  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixMultiplyAccumulate_e7fb3c(), false, 8);
 }

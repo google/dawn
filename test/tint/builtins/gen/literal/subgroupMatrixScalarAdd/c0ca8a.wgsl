@@ -49,5 +49,5 @@ fn subgroupMatrixScalarAdd_c0ca8a() -> subgroup_matrix_right<u8, 8, 8>{
 }
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixScalarAdd_c0ca8a(), false, 64);
+  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixScalarAdd_c0ca8a(), false, 8);
 }

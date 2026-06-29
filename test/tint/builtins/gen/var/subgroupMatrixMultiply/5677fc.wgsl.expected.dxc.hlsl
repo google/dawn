@@ -14,6 +14,6 @@ Matrix_result_f32_8x8 subgroupMatrixMultiply_5677fc() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixMultiply_5677fc().Store(prevent_dce, 0u, 256u, MatrixLayout::RowMajor);
+  subgroupMatrixMultiply_5677fc().Store(prevent_dce, 0u, 32u, MatrixLayout::RowMajor);
 }
 

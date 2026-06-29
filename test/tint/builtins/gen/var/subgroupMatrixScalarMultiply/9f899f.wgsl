@@ -51,5 +51,5 @@ fn subgroupMatrixScalarMultiply_9f899f() -> subgroup_matrix_right<i32, 8, 8>{
 }
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixScalarMultiply_9f899f(), false, 64);
+  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixScalarMultiply_9f899f(), false, 8);
 }

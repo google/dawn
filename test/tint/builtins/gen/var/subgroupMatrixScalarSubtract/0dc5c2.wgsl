@@ -51,5 +51,5 @@ fn subgroupMatrixScalarSubtract_0dc5c2() -> subgroup_matrix_right<i32, 8, 8>{
 }
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixScalarSubtract_0dc5c2(), false, 64);
+  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixScalarSubtract_0dc5c2(), false, 8);
 }

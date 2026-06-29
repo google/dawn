@@ -13,5 +13,5 @@ fn subgroupMatrixLoad_5d32e3() -> subgroup_matrix_left<i8, 8, 8> {
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixLoad_5d32e3(), false, 64);
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixLoad_5d32e3(), false, 8);
 }

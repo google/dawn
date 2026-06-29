@@ -51,5 +51,5 @@ fn subgroupMatrixMultiply_42abed() -> subgroup_matrix_result<f16, 8, 8>{
 }
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixMultiply_42abed(), false, 64);
+  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixMultiply_42abed(), false, 8);
 }

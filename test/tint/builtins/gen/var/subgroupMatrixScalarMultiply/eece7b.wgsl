@@ -51,5 +51,5 @@ fn subgroupMatrixScalarMultiply_eece7b() -> subgroup_matrix_left<i8, 8, 8>{
 }
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixScalarMultiply_eece7b(), false, 64);
+  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixScalarMultiply_eece7b(), false, 8);
 }

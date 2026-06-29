@@ -31,6 +31,6 @@ Matrix_left_u32_8x8 subgroupMatrixScalarMultiply_ca2a9b() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixScalarMultiply_ca2a9b().Store(prevent_dce, 0u, 256u, MatrixLayout::RowMajor);
+  subgroupMatrixScalarMultiply_ca2a9b().Store(prevent_dce, 0u, 32u, MatrixLayout::RowMajor);
 }
 

@@ -29,6 +29,6 @@ Matrix_result_f32_8x8 subgroupMatrixScalarSubtract_7d87bb() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixScalarSubtract_7d87bb().Store(prevent_dce, 0u, 256u, MatrixLayout::RowMajor);
+  subgroupMatrixScalarSubtract_7d87bb().Store(prevent_dce, 0u, 32u, MatrixLayout::RowMajor);
 }
 

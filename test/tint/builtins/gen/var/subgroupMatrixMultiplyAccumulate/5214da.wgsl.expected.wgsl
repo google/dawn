@@ -12,5 +12,5 @@ fn subgroupMatrixMultiplyAccumulate_5214da() -> subgroup_matrix_result<u32, 8, 8
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixMultiplyAccumulate_5214da(), false, 64);
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixMultiplyAccumulate_5214da(), false, 8);
 }

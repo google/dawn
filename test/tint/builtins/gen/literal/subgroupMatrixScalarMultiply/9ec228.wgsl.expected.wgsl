@@ -9,5 +9,5 @@ fn subgroupMatrixScalarMultiply_9ec228() -> subgroup_matrix_result<f32, 8, 8> {
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixScalarMultiply_9ec228(), false, 64);
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixScalarMultiply_9ec228(), false, 8);
 }

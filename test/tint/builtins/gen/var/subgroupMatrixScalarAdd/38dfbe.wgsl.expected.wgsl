@@ -12,5 +12,5 @@ fn subgroupMatrixScalarAdd_38dfbe() -> subgroup_matrix_left<f16, 8, 8> {
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixScalarAdd_38dfbe(), false, 64);
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixScalarAdd_38dfbe(), false, 8);
 }

@@ -18,5 +18,5 @@ fn subgroupMatrixLoad_ddc22c() -> subgroup_matrix_left<f16, 8, 8> {
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixLoad_ddc22c(), false, 64);
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixLoad_ddc22c(), false, 8);
 }

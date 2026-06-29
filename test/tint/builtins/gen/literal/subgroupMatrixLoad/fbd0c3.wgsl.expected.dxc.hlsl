@@ -11,6 +11,6 @@ Matrix_result_f16_8x8 subgroupMatrixLoad_fbd0c3() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixLoad_fbd0c3().Store(prevent_dce, 0u, 128u, MatrixLayout::RowMajor);
+  subgroupMatrixLoad_fbd0c3().Store(prevent_dce, 0u, 16u, MatrixLayout::RowMajor);
 }
 

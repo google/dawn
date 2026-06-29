@@ -15,5 +15,5 @@ fn subgroupMatrixLoad_b84216() -> subgroup_matrix_result<f16, 8, 8> {
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixLoad_b84216(), false, 64);
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixLoad_b84216(), false, 8);
 }

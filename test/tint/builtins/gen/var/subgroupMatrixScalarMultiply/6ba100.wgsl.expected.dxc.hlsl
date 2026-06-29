@@ -31,6 +31,6 @@ Matrix_result_u32_8x8 subgroupMatrixScalarMultiply_6ba100() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixScalarMultiply_6ba100().Store(prevent_dce, 0u, 256u, MatrixLayout::RowMajor);
+  subgroupMatrixScalarMultiply_6ba100().Store(prevent_dce, 0u, 32u, MatrixLayout::RowMajor);
 }
 

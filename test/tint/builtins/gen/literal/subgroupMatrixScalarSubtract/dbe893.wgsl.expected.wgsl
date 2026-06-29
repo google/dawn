@@ -9,5 +9,5 @@ fn subgroupMatrixScalarSubtract_dbe893() -> subgroup_matrix_right<u32, 8, 8> {
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixScalarSubtract_dbe893(), false, 64);
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixScalarSubtract_dbe893(), false, 8);
 }

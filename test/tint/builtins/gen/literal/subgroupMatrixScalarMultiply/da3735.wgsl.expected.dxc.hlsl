@@ -29,6 +29,6 @@ Matrix_right_u32_8x8 subgroupMatrixScalarMultiply_da3735() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupMatrixScalarMultiply_da3735().Store(prevent_dce, 0u, 256u, MatrixLayout::RowMajor);
+  subgroupMatrixScalarMultiply_da3735().Store(prevent_dce, 0u, 32u, MatrixLayout::RowMajor);
 }
 

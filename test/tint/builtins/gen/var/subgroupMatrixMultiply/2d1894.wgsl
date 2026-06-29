@@ -51,5 +51,5 @@ fn subgroupMatrixMultiply_2d1894() -> subgroup_matrix_result<u8, 8, 8>{
 }
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixMultiply_2d1894(), false, 64);
+  subgroupMatrixStore(&prevent_dce, 0, subgroupMatrixMultiply_2d1894(), false, 8);
 }
