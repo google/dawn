@@ -740,14 +740,11 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ShaderIO(core::ir::Module& ir) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kLoosenValidationForShaderIO,
-                },
-                "before spirv.ShaderIO");
+    AssertValid(ir, "before spirv.ShaderIO");
 
     TINT_CHECK_RESULT(State{ir}.Process());
 
+    ir.properties.Remove(core::ir::Property::kAllowBackendSpecificShaderIO);
     ir.properties.Remove(core::ir::Property::kAllowLocationForNumericComposites);
     ir.properties.Remove(core::ir::Property::kAllowPointSizeBuiltin);
 

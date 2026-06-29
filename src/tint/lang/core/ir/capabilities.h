@@ -37,11 +37,6 @@ namespace tint::core::ir {
 enum class Capability : uint8_t {
     /// Allows 64-bit integer types.
     kAllow64BitIntegers,
-    /// Allows ShaderIO specific features, like blend_src on non-struct members.
-    /// These are not separate capabilities, because they are enabled/disabled in lockstep with each
-    /// other.
-    /// TODO(448417342): Validate in/out address space usage based on this capability
-    kLoosenValidationForShaderIO,
 };
 
 /// Capabilities is a set of Capability

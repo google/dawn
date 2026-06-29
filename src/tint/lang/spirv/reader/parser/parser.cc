@@ -195,6 +195,7 @@ class Parser {
         ir_.properties.Add(core::ir::Property::kAllowStructMatrixDecorations);
         ir_.properties.Add(core::ir::Property::kAllowUnannotatedModuleIOVariables);
         ir_.properties.Add(core::ir::Property::kAllowVectorElementPointer);
+        ir_.properties.Add(core::ir::Property::kAllowBackendSpecificShaderIO);
 
         RegisterNames();
 

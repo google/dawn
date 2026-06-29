@@ -31,7 +31,6 @@
 #include <unordered_map>
 
 #include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/spirv/writer/common/options.h"
 #include "src/tint/utils/result.h"
 
@@ -41,11 +40,6 @@ class Module;
 }
 
 namespace tint::spirv::writer::raise {
-
-/// The capabilities that the transform can support.
-const core::ir::Capabilities kShaderIOCapabilities{
-    core::ir::Capability::kLoosenValidationForShaderIO,
-};
 
 /// ShaderIOConfig describes the set of configuration options for the ShaderIO transform.
 struct ShaderIOConfig {

@@ -1544,11 +1544,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> DecomposeAccess(core::ir::Module& ir, const DecomposeAccessOptions& options) {
-    core::ir::AssertValid(ir,
-                          core::ir::Capabilities{
-                              core::ir::Capability::kLoosenValidationForShaderIO,
-                          },
-                          "before core.DecomposeAccess");
+    core::ir::AssertValid(ir, "before core.DecomposeAccess");
 
     auto res = State{ir, options}.Process();
     if (res != Success) {

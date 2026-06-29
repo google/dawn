@@ -64,6 +64,8 @@ enum class Property : uint8_t {
     kAllowAnyInputAttachmentIndexType,
     /// Allows lets to have any type.
     kAllowAnyLetType,
+    /// Allows various backend-specific features for ShaderIO, like blend_src on non-struct members.
+    kAllowBackendSpecificShaderIO,
     /// Allows ClipDistances on f32 and vecN<f32> parameters
     kAllowClipDistancesOnF32ScalarAndVector,
     /// Allows binding points to be non-unique.
@@ -119,6 +121,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(Allow16BitIntegers);
         CASE(AllowAnyInputAttachmentIndexType);
         CASE(AllowAnyLetType);
+        CASE(AllowBackendSpecificShaderIO);
         CASE(AllowClipDistancesOnF32ScalarAndVector);
         CASE(AllowDuplicateBindings);
         CASE(AllowLocationForNumericComposites);

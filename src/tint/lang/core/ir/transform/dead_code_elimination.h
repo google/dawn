@@ -28,7 +28,6 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_DEAD_CODE_ELIMINATION_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_DEAD_CODE_ELIMINATION_H_
 
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/result.h"
 
 // Forward declarations.
@@ -37,11 +36,6 @@ class Module;
 }
 
 namespace tint::core::ir::transform {
-
-/// The capabilities that the transform can support.
-const core::ir::Capabilities kDeadCodeEliminationCapabilities{
-    core::ir::Capability::kLoosenValidationForShaderIO,
-};
 
 /// DeadCodeElimination is a transform that removes dead code from the given IR module.
 ///

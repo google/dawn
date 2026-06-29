@@ -58,5 +58,4 @@ Result<SuccessType> Std140Fuzzer(Module& module, const fuzz::ir::Context&) {
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::Std140Fuzzer,
-                      tint::core::ir::transform::kStd140Capabilities);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::Std140Fuzzer, {});

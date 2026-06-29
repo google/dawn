@@ -1390,9 +1390,8 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NonMember_WithCapability) {
         b.Store(var1, 1_f);
         b.Return(f);
     });
-    auto res = ir::Validate(mod, Capabilities{
-                                     Capability::kLoosenValidationForShaderIO,
-                                 });
+    mod.properties.Add(ir::Property::kAllowBackendSpecificShaderIO);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
@@ -1441,7 +1440,8 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_WithoutLocation_LoosenValidation) 
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kLoosenValidationForShaderIO});
+    mod.properties.Add(ir::Property::kAllowBackendSpecificShaderIO);
+    auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
@@ -1649,7 +1649,8 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_WithBuiltin_WithCapability) {
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kLoosenValidationForShaderIO});
+    mod.properties.Add(ir::Property::kAllowBackendSpecificShaderIO);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

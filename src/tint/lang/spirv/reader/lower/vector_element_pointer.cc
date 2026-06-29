@@ -154,11 +154,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
-    core::ir::AssertValid(ir,
-                          core::ir::Capabilities{
-                              core::ir::Capability::kLoosenValidationForShaderIO,
-                          },
-                          "before spirv.VectorElementPointer");
+    core::ir::AssertValid(ir, "before spirv.VectorElementPointer");
 
     State{ir}.Process();
 

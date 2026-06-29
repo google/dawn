@@ -318,6 +318,8 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config)
             return std::make_unique<StateImpl>(mod, func, config);
         }));
 
+    ir.properties.Add(core::ir::Property::kAllowBackendSpecificShaderIO);
+
     return Success;
 }
 

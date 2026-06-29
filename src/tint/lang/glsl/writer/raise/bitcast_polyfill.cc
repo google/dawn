@@ -313,8 +313,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BitcastPolyfill(core::ir::Module& ir) {
-    AssertValid(ir, core::ir::Capabilities{core::ir::Capability::kLoosenValidationForShaderIO},
-                "before glsl.BitcastPolyfill");
+    AssertValid(ir, "before glsl.BitcastPolyfill");
 
     State{ir}.Process();
 

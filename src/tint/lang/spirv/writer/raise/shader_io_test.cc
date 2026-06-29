@@ -41,7 +41,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 class SpirvWriter_ShaderIOTest : public core::ir::transform::TransformTest {
   public:
     SpirvWriter_ShaderIOTest() {
-        capabilities.Add(core::ir::Capability::kLoosenValidationForShaderIO);
+        mod.properties.Add(core::ir::Property::kAllowBackendSpecificShaderIO);
         mod.properties.Add(core::ir::Property::kAllowLocationForNumericComposites);
     }
 };
@@ -590,7 +590,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_DualSourceBlending) {
-    capabilities.Add(core::ir::Capability::kLoosenValidationForShaderIO);
+    mod.properties.Add(core::ir::Property::kAllowBackendSpecificShaderIO);
     auto* str_ty = ty.Struct(mod.symbols.New("Output"), {
                                                             {
                                                                 mod.symbols.New("color1"),

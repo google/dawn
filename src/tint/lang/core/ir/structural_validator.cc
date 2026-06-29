@@ -1503,7 +1503,7 @@ void Structural::ValidateIOAttributesImpl(IOAttributeContext& ctx,
                                           Function::PipelineStage stage,
                                           IODirection dir,
                                           ShaderIOKind io_kind) {
-    bool skip_builtins = capabilities_.Contains(Capability::kLoosenValidationForShaderIO) &&
+    bool skip_builtins = ir_.properties.Contains(Property::kAllowBackendSpecificShaderIO) &&
                          io_kind == ShaderIOKind::kModuleScopeVar;
     const IOAttributeUsage usage = IOAttributeUsageFor(stage, dir);
     WalkTypeAndMembers(
@@ -2088,7 +2088,7 @@ void Structural::CheckBlendSrc(BlendSrcContext& ctx,
                                const core::type::Type* ty,
                                const IOAttributes& attr) {
     if (attr.blend_src.has_value()) {
-        if (!capabilities_.Contains(Capability::kLoosenValidationForShaderIO)) {
+        if (!ir_.properties.Contains(Property::kAllowBackendSpecificShaderIO)) {
             AddError(target) << "blend_src cannot be used on non-struct-member types";
         }
         CheckBlendSrcImpl(ctx, target, ty, attr);
@@ -2115,7 +2115,7 @@ void Structural::CheckBlendSrc(BlendSrcContext& ctx,
     }
 
     // Reject blend_src on nested members
-    if (!capabilities_.Contains(Capability::kLoosenValidationForShaderIO)) {
+    if (!ir_.properties.Contains(Property::kAllowBackendSpecificShaderIO)) {
         WalkTypeAndMembers(
             ctx, ty, attr,
             [&target, this](BlendSrcContext&, const core::type::Type*, const IOAttributes& a) {
@@ -2237,7 +2237,7 @@ void Structural::CheckInterpolation(const CastableBase* anchor,
             }
 
             if (a.interpolation.has_value()) {
-                has_location |= (capabilities_.Contains(Capability::kLoosenValidationForShaderIO) &&
+                has_location |= (ir_.properties.Contains(Property::kAllowBackendSpecificShaderIO) &&
                                  a.builtin.has_value());
 
                 if (!ir_.properties.Contains(Property::kAllowLocationForNumericComposites) &&
@@ -2284,7 +2284,7 @@ void Structural::CheckInterpolation(const CastableBase* anchor,
                 }
 
                 if (!has_location) {
-                    if (!capabilities_.Contains(Capability::kLoosenValidationForShaderIO)) {
+                    if (!ir_.properties.Contains(Property::kAllowBackendSpecificShaderIO)) {
                         AddError(anchor) << "interpolation attribute requires a location attribute";
                     } else {
                         AddError(anchor) << "interpolation attribute requires a location attribute "

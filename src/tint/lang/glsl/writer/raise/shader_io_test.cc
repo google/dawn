@@ -41,7 +41,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 class GlslWriter_ShaderIOTest : public core::ir::transform::TransformTest {
   public:
     GlslWriter_ShaderIOTest() {
-        capabilities.Add(core::ir::Capability::kLoosenValidationForShaderIO);
+        mod.properties.Add(core::ir::Property::kAllowBackendSpecificShaderIO);
     }
 };
 

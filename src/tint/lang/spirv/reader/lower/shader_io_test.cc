@@ -43,6 +43,7 @@ class SpirvReader_ShaderIOTest : public core::ir::transform::TransformTest {
         mod.properties.Add(core::ir::Property::kAllowLocationForNumericComposites);
         mod.properties.Add(core::ir::Property::kAllowMultipleEntryPoints);
         mod.properties.Add(core::ir::Property::kAllowPointSizeBuiltin);
+        mod.properties.Add(core::ir::Property::kAllowBackendSpecificShaderIO);
     }
 
   protected:
