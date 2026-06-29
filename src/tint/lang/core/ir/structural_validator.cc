@@ -654,9 +654,7 @@ bool Structural::CheckResultsAndOperands(const ir::Instruction* inst,
     return results_passed && operands_passed;
 }
 
-void Structural::CheckType(const core::type::Type* root,
-                           std::function<diag::Diagnostic&()> diag,
-                           Capabilities allow_caps) {
+void Structural::CheckType(const core::type::Type* root, std::function<diag::Diagnostic&()> diag) {
     if (root == nullptr) {
         return;
     }
@@ -847,9 +845,8 @@ void Structural::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::U64*) {
-                // u64 types are guarded by the Allow64BitIntegers capability.
-                if (!capabilities_.Contains(Capability::kAllow64BitIntegers) &&
-                    !allow_caps.Contains(Capability::kAllow64BitIntegers)) {
+                // u64 types are guarded by the Allow64BitIntegers property.
+                if (!ir_.properties.Contains(Property::kAllow64BitIntegers)) {
                     diag() << "64-bit integer types are not permitted";
                     return false;
                 }
@@ -1895,27 +1892,6 @@ void Structural::CheckInstruction(const Instruction* inst) {
         return;
     }
 
-    Capabilities allowed_types{};
-
-    if (auto* call = inst->As<core::ir::CoreBuiltinCall>();
-        call && call->Func() == core::BuiltinFn::kBitcast) {
-        allowed_types.Add(Capability::kAllow64BitIntegers);
-    }
-
-    if (auto* call = inst->As<core::ir::CoreBinary>()) {
-        if (call->Op() == core::BinaryOp::kOr || call->Op() == core::BinaryOp::kShiftLeft) {
-            allowed_types.Add(Capability::kAllow64BitIntegers);
-        }
-    }
-
-    if (auto* call = inst->As<core::ir::Convert>()) {
-        // This will miss u64 being used if it isn't on the first result, but convert having
-        // multiple results is illegal anyway, so will be rejected later in the validator
-        if (call->Result(0) && call->Result(0)->Type()->Is<core::type::U64>()) {
-            allowed_types.Add(Capability::kAllow64BitIntegers);
-        }
-    }
-
     auto results = inst->Results();
     for (size_t i = 0; i < results.Length(); ++i) {
         auto* res = results[i];
@@ -1923,9 +1899,7 @@ void Structural::CheckInstruction(const Instruction* inst) {
             continue;
         }
 
-        CheckType(
-            res->Type(), [&]() -> diag::Diagnostic& { return AddResultError(inst, i); },
-            allowed_types);
+        CheckType(res->Type(), [&]() -> diag::Diagnostic& { return AddResultError(inst, i); });
     }
 
     auto ops = inst->Operands();
@@ -1935,8 +1909,7 @@ void Structural::CheckInstruction(const Instruction* inst) {
             continue;
         }
 
-        CheckType(
-            op->Type(), [&]() -> diag::Diagnostic& { return AddError(inst, i); }, allowed_types);
+        CheckType(op->Type(), [&]() -> diag::Diagnostic& { return AddError(inst, i); });
     }
 
     // Push a task to add the results to the scope.

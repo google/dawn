@@ -236,7 +236,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ValueToLet(Module& ir, const ValueToLetConfig& cfg) {
-    AssertValid(ir, kValueToLetCapabilities, "before core.ValueToLet");
+    AssertValid(ir, "before core.ValueToLet");
 
     State{ir, cfg}.Process();
 

@@ -3585,7 +3585,6 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32) {
 }
 )";
 
-    capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
     BuiltinPolyfillConfig config;
     Run(BuiltinPolyfill, config);
 
@@ -3628,7 +3627,6 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32_ColMajorTem
 }
 )";
 
-    capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
     BuiltinPolyfillConfig config;
     Run(BuiltinPolyfill, config);
 
@@ -3671,7 +3669,6 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32_RowMajorTem
 }
 )";
 
-    capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
     BuiltinPolyfillConfig config;
     Run(BuiltinPolyfill, config);
 
@@ -3714,7 +3711,6 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_F16) {
 }
 )";
 
-    capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
     BuiltinPolyfillConfig config;
     Run(BuiltinPolyfill, config);
 
@@ -3752,7 +3748,6 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_F32) {
 }
 )";
 
-    capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
     BuiltinPolyfillConfig config;
     Run(BuiltinPolyfill, config);
 
@@ -3792,7 +3787,6 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_F32_ColMajorTe
 }
 )";
 
-    capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
     BuiltinPolyfillConfig config;
     Run(BuiltinPolyfill, config);
 
@@ -3832,7 +3826,6 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_F32_RowMajorTe
 }
 )";
 
-    capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
     BuiltinPolyfillConfig config;
     Run(BuiltinPolyfill, config);
 
@@ -3870,7 +3863,6 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_F16) {
 }
 )";
 
-    capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
     BuiltinPolyfillConfig config;
     Run(BuiltinPolyfill, config);
 
@@ -4272,7 +4264,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Tanh_vec2_f16) {
 }
 
 TEST_F(MslWriter_BuiltinPolyfillTest, AtomicStoreMin) {
-    this->capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
+    mod.properties.Add(core::ir::Property::kAllow64BitIntegers);
     auto* var = b.Var(ty.ptr(storage, ty.atomic(ty.u64())));
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
@@ -4321,7 +4313,7 @@ $B1: {  # root
 }
 
 TEST_F(MslWriter_BuiltinPolyfillTest, AtomicStoreMax) {
-    this->capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
+    mod.properties.Add(core::ir::Property::kAllow64BitIntegers);
     auto* var = b.Var(ty.ptr(storage, ty.atomic(ty.u64())));
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);

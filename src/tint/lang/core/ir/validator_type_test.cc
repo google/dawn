@@ -1754,11 +1754,10 @@ TEST_P(IR_Validator64BitIntTypeTest, Var) {
         b.Return(fn);
     });
 
-    Capabilities caps;
     if (int64_allowed) {
-        caps.Add(Capability::kAllow64BitIntegers);
+        mod.properties.Add(Property::kAllow64BitIntegers);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (int64_allowed) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
@@ -1777,11 +1776,10 @@ TEST_P(IR_Validator64BitIntTypeTest, FnParam) {
     fn->SetParams(Vector{b.FunctionParam(type)});
     b.Append(fn->Block(), [&] { b.Return(fn); });
 
-    Capabilities caps;
     if (int64_allowed) {
-        caps.Add(Capability::kAllow64BitIntegers);
+        mod.properties.Add(Property::kAllow64BitIntegers);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (int64_allowed) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
@@ -1799,11 +1797,10 @@ TEST_P(IR_Validator64BitIntTypeTest, FnRet) {
     auto* fn = b.Function("my_func", type);
     b.Append(fn->Block(), [&] { b.Unreachable(); });
 
-    Capabilities caps;
     if (int64_allowed) {
-        caps.Add(Capability::kAllow64BitIntegers);
+        mod.properties.Add(Property::kAllow64BitIntegers);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (int64_allowed) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
@@ -1831,11 +1828,10 @@ TEST_P(IR_Validator64BitIntTypeTest, BlockParam) {
         b.Unreachable();
     });
 
-    Capabilities caps;
     if (int64_allowed) {
-        caps.Add(Capability::kAllow64BitIntegers);
+        mod.properties.Add(Property::kAllow64BitIntegers);
     }
-    auto res = ir::Validate(mod, caps);
+    auto res = ir::Validate(mod);
     if (int64_allowed) {
         ASSERT_EQ(res, Success) << res.Failure();
     } else {
@@ -1871,14 +1867,15 @@ TEST_F(IR_ValidatorTest, Int64Type_InstructionOperand_NotAllowed) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Int64Type_InstructionOperand_AllowedWithCapability) {
+TEST_F(IR_ValidatorTest, Int64Type_InstructionOperand_AllowedWithProperty) {
     auto* fn = b.Function("my_func", ty.void_());
     b.Append(fn->Block(), [&] {
         b.Let("l", u64(1));
         b.Return(fn);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllow64BitIntegers});
+    mod.properties.Add(Property::kAllow64BitIntegers);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

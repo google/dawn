@@ -1131,6 +1131,7 @@ struct State {
             auto* matrix_origin = b.Zero<vec2<u64>>();
 
             // Convert the u32 stride to the ulong that MSL expects.
+            ir.properties.Add(core::ir::Property::kAllow64BitIntegers);
             auto* elements_per_row =
                 b.Call<msl::ir::BuiltinCall>(ty.u64(), msl::BuiltinFn::kConvert, stride);
 
@@ -1177,6 +1178,7 @@ struct State {
             auto* dst = b.Access(elem_ptr, p, offset);
 
             // Convert the u32 stride to the ulong that MSL expects.
+            ir.properties.Add(core::ir::Property::kAllow64BitIntegers);
             auto* elements_per_row =
                 b.Call<msl::ir::BuiltinCall>(ty.u64(), msl::BuiltinFn::kConvert, stride);
 

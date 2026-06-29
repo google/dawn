@@ -132,7 +132,7 @@ class Printer : public tint::TextGenerator {
 
     /// @returns the generated MSL shader
     tint::Result<Output> Generate() {
-        AssertValid(ir_, kPrinterCapabilities, "before msl.Printer");
+        AssertValid(ir_, "before msl.Printer");
         AssertNoUnsupportedProperties(ir_, kUnsupportedProperties);
 
         {

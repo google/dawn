@@ -140,11 +140,7 @@ struct State {
 
 Result<SuccessType> SignedIntegerPolyfill(core::ir::Module& ir,
                                           const SignedIntegerPolyfillConfig& cfg) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kAllow64BitIntegers,
-                },
-                "before ir.SignedIntegerPolyfill");
+    AssertValid(ir, "before ir.SignedIntegerPolyfill");
 
     State{ir, cfg}.Process();
 

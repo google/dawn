@@ -472,6 +472,7 @@ TEST_F(MslWriterTest, CanGenerate_TexelBufferUnsupported) {
 }
 
 TEST_F(MslWriterTest, AtomicStoreMax_Supported) {
+    mod.properties.Add(core::ir::Property::kAllow64BitIntegers);
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.Register("a"), ty.atomic(ty.u64())},
@@ -512,6 +513,7 @@ kernel void v(device SB* sb [[buffer(0)]]) {
 }
 
 TEST_F(MslWriterTest, AtomicStoreMin_Supported) {
+    mod.properties.Add(core::ir::Property::kAllow64BitIntegers);
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.Register("a"), ty.atomic(ty.u64())},

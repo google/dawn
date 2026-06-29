@@ -28,7 +28,6 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_BUILTIN_SCALARIZE_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_BUILTIN_SCALARIZE_H_
 
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/result.h"
 
@@ -38,11 +37,6 @@ class Module;
 }
 
 namespace tint::core::ir::transform {
-
-/// The capabilities that the transform can support.
-const Capabilities kBuiltinScalarizeCapabilities{
-    core::ir::Capability::kAllow64BitIntegers,
-};
 
 /// The scalarizer configuration options
 struct BuiltinScalarizeConfig {

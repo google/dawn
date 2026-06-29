@@ -319,9 +319,7 @@ class Structural {
     /// by the target properties.
     /// @param type the type
     /// @param diag a function that creates an error diagnostic for the source of the type
-    void CheckType(const core::type::Type* type,
-                   std::function<diag::Diagnostic&()> diag,
-                   Capabilities allow_caps = {});
+    void CheckType(const core::type::Type* type, std::function<diag::Diagnostic&()> diag);
 
     /// Validates the root block
     /// @param blk the block

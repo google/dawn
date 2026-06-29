@@ -171,7 +171,8 @@ TEST_F(HlslWriterTest, CanGenerate_TexelBufferUnsupported) {
                 testing::HasSubstr("texel buffers are not supported by the HLSL backend"));
 }
 
-TEST_F(HlslWriterTest, CanGenerate_AtomicStoreMax_Unsupported) {
+TEST_F(HlslWriterTest, AtomicStoreMax) {
+    mod.properties.Add(core::ir::Property::kAllow64BitIntegers);
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.Register("a"), ty.atomic(ty.u64())},
@@ -204,7 +205,8 @@ void main() {
 )");
 }
 
-TEST_F(HlslWriterTest, CanGenerate_AtomicStoreMin_Unsupported) {
+TEST_F(HlslWriterTest, AtomicStoreMin) {
+    mod.properties.Add(core::ir::Property::kAllow64BitIntegers);
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.Register("a"), ty.atomic(ty.u64())},

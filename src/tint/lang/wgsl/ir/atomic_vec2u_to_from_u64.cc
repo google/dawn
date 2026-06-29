@@ -230,6 +230,7 @@ struct State {
                     if (direction == AtomicVec2uU64Direction::kToU64) {
                         auto* vec = atomic->Type()->As<core::type::Vector>();
                         if (vec && vec->Width() == 2 && vec->Type()->Is<core::type::U32>()) {
+                            ir.properties.Add(core::ir::Property::kAllow64BitIntegers);
                             return ty.atomic(ty.u64());
                         }
                         return atomic;

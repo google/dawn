@@ -27,7 +27,6 @@
 
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
-#include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -39,5 +38,4 @@ Result<SuccessType> RemoveTerminatorArgsFuzzer(Module& ir, const fuzz::ir::Conte
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RemoveTerminatorArgsFuzzer,
-                      tint::core::ir::transform::kRemoveTerminatorArgsCapabilities);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RemoveTerminatorArgsFuzzer, {});

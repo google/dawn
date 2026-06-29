@@ -60,6 +60,8 @@ enum class Property : uint8_t {
     kAllow8BitIntegers,
     /// Allows 16-bit integer types to be used.
     kAllow16BitIntegers,
+    /// Allows 64-bit integer types to be used.
+    kAllow64BitIntegers,
     /// Allows input_attachment_index to be associated with any type
     kAllowAnyInputAttachmentIndexType,
     /// Allows lets to have any type.
@@ -119,6 +121,7 @@ auto& operator<<(STREAM& out, Property p) {
     switch (p) {  //
         CASE(Allow8BitIntegers);
         CASE(Allow16BitIntegers);
+        CASE(Allow64BitIntegers);
         CASE(AllowAnyInputAttachmentIndexType);
         CASE(AllowAnyLetType);
         CASE(AllowBackendSpecificShaderIO);
