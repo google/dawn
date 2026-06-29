@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/wgsl/writer/raise/value_to_let.h"
 
 namespace tint::wgsl::writer::raise {
@@ -39,4 +38,4 @@ Result<SuccessType> ValueToLetFuzzer(core::ir::Module& ir, const fuzz::ir::Conte
 }  // namespace
 }  // namespace tint::wgsl::writer::raise
 
-TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::ValueToLetFuzzer, tint::core::ir::Capabilities{});
+TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::ValueToLetFuzzer);

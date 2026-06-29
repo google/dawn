@@ -29,7 +29,6 @@
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/pointer.h"
 
 namespace tint::core::ir::transform {
@@ -58,4 +57,4 @@ Result<SuccessType> Std140Fuzzer(Module& module, const fuzz::ir::Context&) {
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::Std140Fuzzer, {});
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::Std140Fuzzer);

@@ -180,4 +180,4 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
 constexpr auto kUnsupportedProperties = tint::core::ir::Properties{
     tint::core::ir::Property::kAllowOverrides,
 };
-TINT_IR_MODULE_FUZZER(tint::msl::writer::IRFuzzer, {}, {}, kUnsupportedProperties);
+TINT_IR_MODULE_FUZZER(tint::msl::writer::IRFuzzer, kUnsupportedProperties);

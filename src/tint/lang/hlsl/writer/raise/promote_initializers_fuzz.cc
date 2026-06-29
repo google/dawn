@@ -39,4 +39,4 @@ Result<SuccessType> PromoteInitializersFuzzer(core::ir::Module& ir, const fuzz::
 }  // namespace
 }  // namespace tint::hlsl::writer::raise
 
-TINT_IR_MODULE_FUZZER(tint::hlsl::writer::raise::PromoteInitializersFuzzer, {});
+TINT_IR_MODULE_FUZZER(tint::hlsl::writer::raise::PromoteInitializersFuzzer);

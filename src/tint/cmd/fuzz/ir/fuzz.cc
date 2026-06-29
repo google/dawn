@@ -65,9 +65,8 @@ void Register(const IRFuzzer& fuzzer) {
 #if TINT_BUILD_WGSL_READER
     wgsl::Register({
         fuzzer.name,
-        [fn = fuzzer.fn, pre_capabilities = fuzzer.pre_capabilities, fuzzer](
-            const Program& program, const fuzz::wgsl::Context& context,
-            std::span<const std::byte> data) {
+        [fn = fuzzer.fn, fuzzer](const Program& program, const fuzz::wgsl::Context& context,
+                                 std::span<const std::byte> data) {
             if (program.AST().Enables().Any(tint::wgsl::reader::IsUnsupportedByIR)) {
                 if (context.options.verbose) {
                     std::cout << "   - Features are not supported by IR.\n";
@@ -102,12 +101,10 @@ void Register(const IRFuzzer& fuzzer) {
             // there is a bug somewhere in the components run above. Those components have their own
             // IR fuzzers.
             if (!context.options.disable_ir_validator) {
-                if (auto val = core::ir::Validate(ir.Get(), pre_capabilities,
-                                                  "start " + std::string(fuzzer.name));
+                if (auto val = core::ir::Validate(ir.Get(), "start " + std::string(fuzzer.name));
                     val != Success) {
                     if (context.options.verbose) {
-                        std::cout << "   Failed to validate against fuzzer capabilities before "
-                                     "running\n";
+                        std::cout << "   Failed to validate against before running\n";
                     }
                     return;
                 }
@@ -134,10 +131,10 @@ void Register(const IRFuzzer& fuzzer) {
             }
 
             if (!context.options.disable_ir_validator) {
-                if (auto val = tint::core::ir::Validate(ir.Get(), fuzzer.post_capabilities,
-                                                        "finish " + std::string(fuzzer.name));
+                if (auto val =
+                        tint::core::ir::Validate(ir.Get(), "finish " + std::string(fuzzer.name));
                     val != Success) {
-                    TINT_ICE() << "Failed to validate against fuzzer capabilities after running:\n"
+                    TINT_ICE() << "Failed to validate against after running:\n"
                                << val.Failure() << "\n";
                 }
             }
@@ -185,14 +182,12 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
         }
 
         if (!context.options.disable_ir_validator) {
-            if (tint::core::ir::Validate(mod, fuzzer.pre_capabilities,
-                                         "start " + std::string(currently_running)) !=
+            if (tint::core::ir::Validate(mod, "start " + std::string(currently_running)) !=
                 tint::Success) {
                 // Failing before running indicates that this input violates the pre-conditions
                 // for this pass, so should be skipped.
                 if (context.options.verbose) {
-                    std::cout
-                        << "   Failed to validate against fuzzer capabilities before running\n";
+                    std::cout << "   Failed to validate before running\n";
                 }
                 return;
             }
@@ -209,13 +204,12 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
         }
 
         if (!context.options.disable_ir_validator) {
-            if (auto result = tint::core::ir::Validate(mod, fuzzer.post_capabilities,
-                                                       "finish " + std::string(currently_running));
+            if (auto result =
+                    tint::core::ir::Validate(mod, "finish " + std::string(currently_running));
                 result != Success) {
                 // Failing after running indicates the pass is doing something unexpected and
                 // has violated its own post-conditions.
-                TINT_ICE() << "Failed to validate against fuzzer capabilities after running:\n"
-                           << result.Failure() << "\n";
+                TINT_ICE() << "Failed to validate after running:\n" << result.Failure() << "\n";
             }
         }
     });

@@ -39,4 +39,4 @@ Result<SuccessType> DeadCodeEliminationFuzzer(Module& ir, const fuzz::ir::Contex
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::DeadCodeEliminationFuzzer, {});
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::DeadCodeEliminationFuzzer);

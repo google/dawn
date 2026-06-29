@@ -38,4 +38,4 @@ Result<SuccessType> VectorizeScalarMatrixConstructorsFuzzer(Module& ir, const fu
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::VectorizeScalarMatrixConstructorsFuzzer, {});
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::VectorizeScalarMatrixConstructorsFuzzer);

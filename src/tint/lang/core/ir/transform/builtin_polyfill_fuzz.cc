@@ -45,4 +45,4 @@ Result<SuccessType> BuiltinPolyfillFuzzer(Module& ir,
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BuiltinPolyfillFuzzer, {});
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BuiltinPolyfillFuzzer);

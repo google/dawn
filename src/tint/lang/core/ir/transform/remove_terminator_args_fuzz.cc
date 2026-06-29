@@ -38,4 +38,4 @@ Result<SuccessType> RemoveTerminatorArgsFuzzer(Module& ir, const fuzz::ir::Conte
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RemoveTerminatorArgsFuzzer, {});
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RemoveTerminatorArgsFuzzer);

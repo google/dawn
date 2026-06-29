@@ -46,4 +46,4 @@ Result<SuccessType> SubstituteOverridesFuzzer(Module& ir,
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::SubstituteOverridesFuzzer, {});
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::SubstituteOverridesFuzzer);

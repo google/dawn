@@ -57,16 +57,12 @@ struct Context {
 struct IRFuzzer {
     /// @param name the name of the fuzzer
     /// @param fn the fuzzer function
-    /// @param pre_capabilities the capabilities that are used before the fuzzer runs
-    /// @param post_capabilities the capabilities that are used after the fuzzer runs
     /// @param unsupported_properties the properties that are not supported by the fuzzer
     /// @returns an IRFuzzer that invokes the function @p fn with the IR module, along with any
     /// additional arguments which are deserialized from the fuzzer input.
     template <typename... ARGS>
     static IRFuzzer Create(std::string_view name,
                            Result<SuccessType> (*fn)(core::ir::Module&, const Context&, ARGS...),
-                           core::ir::Capabilities pre_capabilities,
-                           core::ir::Capabilities post_capabilities,
                            core::ir::Properties unsupported_properties = {}) {
         if constexpr (sizeof...(ARGS) > 0) {
             auto fn_with_decode = [fn](core::ir::Module& module, const Context& context,
@@ -90,8 +86,6 @@ struct IRFuzzer {
             return IRFuzzer{
                 name,
                 std::move(fn_with_decode),
-                pre_capabilities,
-                post_capabilities,
                 unsupported_properties,
             };
         } else {
@@ -99,25 +93,9 @@ struct IRFuzzer {
                 name,
                 [fn](core::ir::Module& module, const Context& context, std::span<const std::byte>)
                     -> Result<SuccessType> { return fn(module, context); },
-                pre_capabilities,
-                post_capabilities,
                 unsupported_properties,
             };
         }
-    }
-
-    /// @param name the name of the fuzzer
-    /// @param fn the fuzzer function
-    /// @param capabilities the capabilities that are used before and after the fuzzer runs
-    /// @param unsupported_properties the properties that are not supported by the fuzzer
-    /// @returns an IRFuzzer that invokes the function @p fn with the IR module, along with any
-    /// additional arguments which are deserialized from the fuzzer input.
-    template <typename... ARGS>
-    static IRFuzzer Create(std::string_view name,
-                           Result<SuccessType> (*fn)(core::ir::Module&, const Context&, ARGS...),
-                           core::ir::Capabilities capabilities,
-                           core::ir::Properties unsupported_properties = {}) {
-        return Create(name, fn, capabilities, capabilities, unsupported_properties);
     }
 
     /// Name of the fuzzer function
@@ -128,10 +106,6 @@ struct IRFuzzer {
     std::function<
         Result<SuccessType>(core::ir::Module&, const Context&, std::span<const std::byte> data)>
         fn;
-    /// The IR capabilities that are used before the fuzzer runs.
-    core::ir::Capabilities pre_capabilities;
-    /// The IR capabilities that are used after the fuzzer runs.
-    core::ir::Capabilities post_capabilities;
     /// The IR properties that are not supported by the component being fuzzed.
     core::ir::Properties unsupported_properties;
 };
@@ -140,12 +114,11 @@ struct IRFuzzer {
 /// @param fuzzer the fuzzer
 void Register([[maybe_unused]] const IRFuzzer& fuzzer);
 
-/// TINT_IR_MODULE_FUZZER registers the fuzzer function, the variadic args are either a single
-/// Capabilities to use before and after the function runs, or two different Capabilities, one for
-/// before and one for after. See Create above for more details.
+/// TINT_IR_MODULE_FUZZER registers the fuzzer function, the optional argument is a list of IR
+/// properties that are not supported by the fuzzer.
 #define TINT_IR_MODULE_FUZZER(FUNCTION, ...)     \
     TINT_STATIC_INIT(::tint::fuzz::ir::Register( \
-        ::tint::fuzz::ir::IRFuzzer::Create(#FUNCTION, FUNCTION, __VA_ARGS__)))
+        ::tint::fuzz::ir::IRFuzzer::Create(#FUNCTION, FUNCTION __VA_OPT__(, ) __VA_ARGS__)))
 
 }  // namespace tint::fuzz::ir
 

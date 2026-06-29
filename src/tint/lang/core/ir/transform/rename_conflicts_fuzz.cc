@@ -38,4 +38,4 @@ Result<SuccessType> RenameConflictsFuzzer(Module& ir, const fuzz::ir::Context&) 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RenameConflictsFuzzer, {});
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RenameConflictsFuzzer);
