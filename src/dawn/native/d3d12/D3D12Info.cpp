@@ -27,6 +27,7 @@
 
 #include "src/dawn/native/d3d12/D3D12Info.h"
 
+#include <array>
 #include <utility>
 
 #include "src/dawn/common/GPUInfo.h"
@@ -37,37 +38,107 @@
 
 namespace dawn::native::d3d12 {
 
+namespace {
+#ifdef DAWN_USE_AGILITY_SDK
+std::vector<D3D12DeviceInfo::LinAlgWMMSupport> GatherLinAlgWaveMatrixMultiplySupports(
+    ComPtr<ID3D12Device> d3d12Device,
+    uint32_t waveLaneCountMin) {
+    std::vector<D3D12DeviceInfo::LinAlgWMMSupport> result;
+
+    auto typesToQuery = std::array{
+        D3D12_LINEAR_ALGEBRA_DATATYPE_SINT32,   //
+        D3D12_LINEAR_ALGEBRA_DATATYPE_UINT32,   //
+        D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT16,  //
+        D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT32,  //
+        D3D12_LINEAR_ALGEBRA_DATATYPE_SINT8,    //
+        D3D12_LINEAR_ALGEBRA_DATATYPE_UINT8,    //
+    };
+
+    for (auto dataTypeAB : typesToQuery) {
+        for (auto dataTypeAcc : typesToQuery) {
+            D3D12_FEATURE_DATA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT opSupport{};
+            opSupport.OperationType = D3D12_LINEAR_ALGEBRA_OPERATION_TYPE_WAVE_MATRIX_MULTIPLY;
+            opSupport.WaveMatrixMultiply = {};
+            // Set WaveSize to waveLaneCountMin only. We assume if shapes are returned for this
+            // size, they are supported for all supported wave sizes (waveLaneCountMin to
+            // waveLaneCountMax).
+            // TODO(crbug.com/527055544): We should be able to set this to '0' instead.
+            DAWN_ASSERT(waveLaneCountMin != 0);
+            opSupport.WaveMatrixMultiply.Inputs.WaveSize = waveLaneCountMin;
+            opSupport.WaveMatrixMultiply.Inputs.MatrixAComponentType = dataTypeAB;
+            opSupport.WaveMatrixMultiply.Inputs.MatrixBComponentType = dataTypeAB;
+            opSupport.WaveMatrixMultiply.Inputs.AccumulatorComponentType = dataTypeAcc;
+
+            // First call to get number of shapes
+            opSupport.WaveMatrixMultiply.NumShapes = 0;
+            opSupport.WaveMatrixMultiply.Shapes = nullptr;
+
+            if (FAILED(d3d12Device->CheckFeatureSupport(
+                    D3D12_FEATURE_LINEAR_ALGEBRA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT,
+                    &opSupport, sizeof(opSupport)))) {
+                continue;
+            }
+
+            uint32_t numShapes = opSupport.WaveMatrixMultiply.NumShapes;
+            if (numShapes == 0) {
+                continue;
+            }
+
+            // Second call to populate shapes
+            std::vector<D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE> shapes(numShapes);
+            opSupport.WaveMatrixMultiply.Shapes = shapes.data();
+
+            if (FAILED(d3d12Device->CheckFeatureSupport(
+                    D3D12_FEATURE_LINEAR_ALGEBRA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT,
+                    &opSupport, sizeof(opSupport)))) {
+                continue;
+            }
+
+            // Add support entry
+            auto wmm = opSupport.WaveMatrixMultiply;
+            wmm.Shapes = nullptr;  // Clear so that we don't attempt to use this
+            result.emplace_back(wmm.Inputs, wmm.SupportFlags, std::move(shapes));
+        }
+    }
+
+    return result;
+}
+#endif  // DAWN_USE_AGILITY_SDK
+}  // namespace
+
 ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDevice) {
     D3D12DeviceInfo info = {};
+
+    ComPtr<ID3D12Device> d3d12Device = physicalDevice.GetDevice();
 
     // Newer builds replace D3D_FEATURE_DATA_ARCHITECTURE with
     // D3D_FEATURE_DATA_ARCHITECTURE1. However, D3D_FEATURE_DATA_ARCHITECTURE can be used
     // for backwards compat.
     // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ne-d3d12-d3d12_feature
     D3D12_FEATURE_DATA_ARCHITECTURE arch = {};
-    DAWN_TRY(CheckHRESULT(physicalDevice.GetDevice()->CheckFeatureSupport(
-                              D3D12_FEATURE_ARCHITECTURE, &arch, sizeof(arch)),
-                          "ID3D12Device::CheckFeatureSupport"));
+    DAWN_TRY(CheckHRESULT(
+        d3d12Device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &arch, sizeof(arch)),
+        "ID3D12Device::CheckFeatureSupport"));
 
     info.isUMA = arch.UMA;
     info.isCacheCoherentUMA = arch.CacheCoherentUMA;
 
     D3D12_FEATURE_DATA_D3D12_OPTIONS featureOptions = {};
-    DAWN_TRY(CheckHRESULT(physicalDevice.GetDevice()->CheckFeatureSupport(
-                              D3D12_FEATURE_D3D12_OPTIONS, &featureOptions, sizeof(featureOptions)),
+    DAWN_TRY(CheckHRESULT(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS,
+                                                           &featureOptions, sizeof(featureOptions)),
                           "ID3D12Device::CheckFeatureSupport"));
     info.resourceHeapTier = featureOptions.ResourceHeapTier;
     info.resourceBindingTier = featureOptions.ResourceBindingTier;
 
     D3D12_FEATURE_DATA_D3D12_OPTIONS2 featureOptions2 = {};
-    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
-            D3D12_FEATURE_D3D12_OPTIONS2, &featureOptions2, sizeof(featureOptions2)))) {
+    if (SUCCEEDED(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &featureOptions2,
+                                                   sizeof(featureOptions2)))) {
         info.programmableSamplePositionsTier = featureOptions2.ProgrammableSamplePositionsTier;
     }
 
     D3D12_FEATURE_DATA_D3D12_OPTIONS3 featureOptions3 = {};
-    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
-            D3D12_FEATURE_D3D12_OPTIONS3, &featureOptions3, sizeof(featureOptions3)))) {
+    if (SUCCEEDED(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &featureOptions3,
+                                                   sizeof(featureOptions3)))) {
         info.supportsCastingFullyTypedFormat = featureOptions3.CastingFullyTypedFormatSupported;
     }
 
@@ -75,8 +146,8 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
     // D3D12_FEATURE_D3D12_OPTIONS4 successfully, then we can use cross-API sharing.
     info.supportsSharedResourceCapabilityTier1 = false;
     D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureOptions4 = {};
-    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
-            D3D12_FEATURE_D3D12_OPTIONS4, &featureOptions4, sizeof(featureOptions4)))) {
+    if (SUCCEEDED(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &featureOptions4,
+                                                   sizeof(featureOptions4)))) {
         // Tier 1 support additionally enables the NV12 format. Since only the NV12 format
         // is used by Dawn, check for Tier 1.
         if (featureOptions4.SharedResourceCompatibilityTier >=
@@ -93,44 +164,44 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
         info.supportsNative16BitShaderOps = featureOptions4.Native16BitShaderOpsSupported;
     }
 
-#if D3D12_SDK_VERSION >= 612
-    D3D12_FEATURE_DATA_D3D12_OPTIONS18 featureOptions18 = {};
-    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
-            D3D12_FEATURE_D3D12_OPTIONS18, &featureOptions18, sizeof(featureOptions18)))) {
-        info.supportsRenderPass = featureOptions18.RenderPassesValid;
-    }
-#endif
-
     // D3D12_HEAP_FLAG_CREATE_NOT_ZEROED is available anytime that ID3D12Device8 is exposed, or a
     // check for D3D12_FEATURE_D3D12_OPTIONS7 succeeds.
     D3D12_FEATURE_DATA_D3D12_OPTIONS7 featureOptions7 = {};
-    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
-            D3D12_FEATURE_D3D12_OPTIONS7, &featureOptions7, sizeof(featureOptions7)))) {
+    if (SUCCEEDED(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &featureOptions7,
+                                                   sizeof(featureOptions7)))) {
         info.supportsHeapFlagCreateNotZeroed = true;
     }
 
     D3D12_FEATURE_DATA_D3D12_OPTIONS13 featureOptions13 = {};
-    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
-            D3D12_FEATURE_D3D12_OPTIONS13, &featureOptions13, sizeof(featureOptions13)))) {
+    if (SUCCEEDED(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS13, &featureOptions13,
+                                                   sizeof(featureOptions13)))) {
         info.supportsTextureCopyBetweenDimensions =
             featureOptions13.TextureCopyBetweenDimensionsSupported;
         info.supportsUnrestrictedBufferTextureCopyPitch =
             featureOptions13.UnrestrictedBufferTextureCopyPitchSupported;
     }
 
+#if D3D12_SDK_VERSION >= 612
+    D3D12_FEATURE_DATA_D3D12_OPTIONS18 featureOptions18 = {};
+    if (SUCCEEDED(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS18, &featureOptions18,
+                                                   sizeof(featureOptions18)))) {
+        info.supportsRenderPass = featureOptions18.RenderPassesValid;
+    }
+#endif
+
     info.supportsRootSignatureVersion1_1 = false;
     D3D12_FEATURE_DATA_ROOT_SIGNATURE featureDataRootSignature = {};
     featureDataRootSignature.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
-    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
-            D3D12_FEATURE_ROOT_SIGNATURE, &featureDataRootSignature,
-            sizeof(featureDataRootSignature)))) {
+    if (SUCCEEDED(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE,
+                                                   &featureDataRootSignature,
+                                                   sizeof(featureDataRootSignature)))) {
         info.supportsRootSignatureVersion1_1 =
             featureDataRootSignature.HighestVersion >= D3D_ROOT_SIGNATURE_VERSION_1_1;
     }
 
     D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeapInfo = {};
-    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
-            D3D12_FEATURE_EXISTING_HEAPS, &existingHeapInfo, sizeof(existingHeapInfo)))) {
+    if (SUCCEEDED(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeapInfo,
+                                                   sizeof(existingHeapInfo)))) {
         info.supportsExistingHeap = existingHeapInfo.Supported;
     }
 
@@ -147,8 +218,8 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
 
     uint32_t driverShaderModel = 0;
     for (D3D12_FEATURE_DATA_SHADER_MODEL shaderModel : knownShaderModels) {
-        if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
-                D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel)))) {
+        if (SUCCEEDED(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel,
+                                                       sizeof(shaderModel)))) {
             driverShaderModel = shaderModel.HighestShaderModel;
             break;
         }
@@ -173,7 +244,7 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
     // https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics
     if (driverShaderModel >= D3D_SHADER_MODEL_6_0) {
         D3D12_FEATURE_DATA_D3D12_OPTIONS1 featureOptions1 = {};
-        if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
+        if (SUCCEEDED(d3d12Device->CheckFeatureSupport(
                 D3D12_FEATURE_D3D12_OPTIONS1, &featureOptions1, sizeof(featureOptions1)))) {
             info.supportsWaveOps = featureOptions1.WaveOps;
             info.waveLaneCountMin = featureOptions1.WaveLaneCountMin;
@@ -184,7 +255,7 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
 
             if (driverShaderModel >= D3D_SHADER_MODEL_6_6 && featureOptions1.Int64ShaderOps) {
                 D3D12_FEATURE_DATA_D3D12_OPTIONS9 featureOptions9 = {};
-                if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
+                if (SUCCEEDED(d3d12Device->CheckFeatureSupport(
                         D3D12_FEATURE_D3D12_OPTIONS9, &featureOptions9, sizeof(featureOptions9)))) {
                     info.supportsInt64Atomics = featureOptions9.AtomicInt64OnTypedResourceSupported;
                 }
@@ -197,9 +268,14 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
                               "IDXGIAdapter3::GetDesc"));
         info.dedicatedVideoMemory = adapterDesc.DedicatedVideoMemory;
         info.sharedSystemMemory = adapterDesc.SharedSystemMemory;
-
-        return std::move(info);
     }
+
+#ifdef DAWN_USE_AGILITY_SDK
+    info.linAlgWaveMatrixMultiplySupports =
+        GatherLinAlgWaveMatrixMultiplySupports(d3d12Device, info.waveLaneCountMin);
+#endif
+
+    return std::move(info);
 }
 
 }  // namespace dawn::native::d3d12

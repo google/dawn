@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_D3D12INFO_H_
 #define SRC_DAWN_NATIVE_D3D12_D3D12INFO_H_
 
+#include <vector>
+
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/PerStage.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
@@ -67,6 +69,16 @@ struct D3D12DeviceInfo {
     uint32_t waveLaneCountMax;
     size_t dedicatedVideoMemory;
     size_t sharedSystemMemory;
+
+#ifdef DAWN_USE_AGILITY_SDK
+    // Mirrors D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_SUPPORT but with owned shapes information.
+    struct LinAlgWMMSupport {
+        D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_INPUTS Inputs;
+        D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAGS SupportFlags;
+        std::vector<D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE> Shapes;
+    };
+    std::vector<LinAlgWMMSupport> linAlgWaveMatrixMultiplySupports;
+#endif
 };
 
 ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDevice);

@@ -1029,20 +1029,6 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
 std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs(
     const TogglesState& toggles) const {
 #ifdef DAWN_USE_AGILITY_SDK
-    // TODO(crbug.com/525818824): Move these queries to GatherDeviceInfo and store the results on
-    // D3D12DeviceInfo so that we only do this once.
-
-    std::vector<SubgroupMatrixConfig> subgroupMatrixConfigs;
-
-    auto typesToQuery = std::set{
-        D3D12_LINEAR_ALGEBRA_DATATYPE_SINT32,   //
-        D3D12_LINEAR_ALGEBRA_DATATYPE_UINT32,   //
-        D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT16,  //
-        D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT32,  //
-        D3D12_LINEAR_ALGEBRA_DATATYPE_SINT8,    //
-        D3D12_LINEAR_ALGEBRA_DATATYPE_UINT8,    //
-    };
-
     auto ToWgpuType =
         [](D3D12_LINEAR_ALGEBRA_DATATYPE dataType) -> wgpu::SubgroupMatrixComponentType {
         switch (dataType) {
@@ -1089,79 +1075,49 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
         DAWN_UNREACHABLE();
     };
 
-    if (gpu_info::IsMicrosoftWARP(mVendorId, mDeviceId)) {
-        // On WARP 1.65535.20-preview, CheckFeatureSupport returns shapes for SINT8 and UINT8, even
-        // though these types are not supported.
-        // TODO(crbug.com/527049636): Remove once this is fixed in WARP.
-        typesToQuery.erase(D3D12_LINEAR_ALGEBRA_DATATYPE_SINT8);
-        typesToQuery.erase(D3D12_LINEAR_ALGEBRA_DATATYPE_UINT8);
-    }
+    std::vector<SubgroupMatrixConfig> subgroupMatrixConfigs;
 
-    if (!IsFeatureSupportedWithToggles(wgpu::FeatureName::ShaderF16, toggles)) {
-        typesToQuery.erase(D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT16);
-    }
+    for (auto& wmms : GetDeviceInfo().linAlgWaveMatrixMultiplySupports) {
+        DAWN_ASSERT(wmms.Inputs.MatrixAComponentType == wmms.Inputs.MatrixBComponentType);
+        auto dataTypeAB = wmms.Inputs.MatrixAComponentType;
+        auto dataTypeAcc = wmms.Inputs.AccumulatorComponentType;
 
-    for (auto dataTypeAB : typesToQuery) {
-        for (auto dataTypeAcc : typesToQuery) {
-            // Don't mix ints and floats as we don't support this (no subgroupMatrixMultiply
-            // overloads in Tint).
-            // TODO(crbug.com/527051317): Remove this if we do add support to Tint.
-            if (IsFloat(dataTypeAB) != IsFloat(dataTypeAcc)) {
+        // Don't mix ints and floats as we don't support this (no subgroupMatrixMultiply
+        // overloads in Tint).
+        // TODO(crbug.com/527051317): Remove this if we do add support to Tint.
+        if (IsFloat(dataTypeAB) != IsFloat(dataTypeAcc)) {
+            continue;
+        }
+
+        // Skip if input types are larger than output type - we don't support this in Tint
+        // e.g. f32 -> f16
+        if (ByteSize(dataTypeAB) > ByteSize(dataTypeAcc)) {
+            continue;
+        }
+
+        if (gpu_info::IsMicrosoftWARP(mVendorId, mDeviceId)) {
+            // On WARP 1.65535.20-preview, CheckFeatureSupport returns shapes for SINT8 and UINT8,
+            // even though these types are not supported.
+            // TODO(crbug.com/527049636): Remove once this is fixed in WARP.
+            if (ByteSize(dataTypeAB) == 1 || ByteSize(dataTypeAcc) == 1) {
                 continue;
             }
+        }
 
-            // Skip if input types are larger than output type - we don't support this in Tint
-            // e.g. f32 -> f16
-            if (ByteSize(dataTypeAB) > ByteSize(dataTypeAcc)) {
+        if (!IsFeatureSupportedWithToggles(wgpu::FeatureName::ShaderF16, toggles)) {
+            if (IsFloat(dataTypeAB) || IsFloat(dataTypeAcc)) {
                 continue;
             }
+        }
 
-            D3D12_FEATURE_DATA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT opSupport{};
-            opSupport.OperationType = D3D12_LINEAR_ALGEBRA_OPERATION_TYPE_WAVE_MATRIX_MULTIPLY;
-            opSupport.WaveMatrixMultiply = {};
-            // Set WaveSize to waveLaneCountMin only. We assume if shapes are returned for this
-            // size, they are supported for all supported wave sizes (waveLaneCountMin to
-            // waveLaneCountMax).
-            // TODO(crbug.com/527055544): We should be able to set this to '0' instead.
-            DAWN_ASSERT(GetDeviceInfo().waveLaneCountMin != 0);
-            opSupport.WaveMatrixMultiply.Inputs.WaveSize = GetDeviceInfo().waveLaneCountMin;
-            opSupport.WaveMatrixMultiply.Inputs.MatrixAComponentType = dataTypeAB;
-            opSupport.WaveMatrixMultiply.Inputs.MatrixBComponentType = dataTypeAB;
-            opSupport.WaveMatrixMultiply.Inputs.AccumulatorComponentType = dataTypeAcc;
-
-            // First call to get number of shapes
-            opSupport.WaveMatrixMultiply.NumShapes = 0;
-            opSupport.WaveMatrixMultiply.Shapes = nullptr;
-
-            if (FAILED(mD3d12Device->CheckFeatureSupport(
-                    D3D12_FEATURE_LINEAR_ALGEBRA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT,
-                    &opSupport, sizeof(opSupport)))) {
-                continue;
-            }
-            uint32_t numShapes = opSupport.WaveMatrixMultiply.NumShapes;
-            if (numShapes == 0) {
-                continue;
-            }
-
-            // Second call to populate shapes
-            std::vector<D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE> shapes(numShapes);
-            opSupport.WaveMatrixMultiply.Shapes = shapes.data();
-
-            if (FAILED(mD3d12Device->CheckFeatureSupport(
-                    D3D12_FEATURE_LINEAR_ALGEBRA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT,
-                    &opSupport, sizeof(opSupport)))) {
-                continue;
-            }
-
-            for (const auto& shape : shapes) {
-                SubgroupMatrixConfig config;
-                config.M = shape.M;
-                config.N = shape.N;
-                config.K = shape.K;
-                config.componentType = ToWgpuType(dataTypeAB);
-                config.resultComponentType = ToWgpuType(dataTypeAcc);
-                subgroupMatrixConfigs.push_back(config);
-            }
+        for (auto& shape : wmms.Shapes) {
+            SubgroupMatrixConfig config;
+            config.M = shape.M;
+            config.N = shape.N;
+            config.K = shape.K;
+            config.componentType = ToWgpuType(dataTypeAB);
+            config.resultComponentType = ToWgpuType(dataTypeAcc);
+            subgroupMatrixConfigs.push_back(config);
         }
     }
 
