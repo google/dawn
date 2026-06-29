@@ -518,8 +518,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
-    AssertValid(ir, core::ir::Capabilities{core::ir::Capability::kAllow16BitIntegers},
-                "before glsl.BuiltinPolyfill");
+    AssertValid(ir, "before glsl.BuiltinPolyfill");
 
     State{ir}.Process();
 

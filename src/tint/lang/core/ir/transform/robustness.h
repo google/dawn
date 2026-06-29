@@ -31,7 +31,6 @@
 #include <unordered_set>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/result.h"
 
@@ -41,11 +40,6 @@ class Module;
 }
 
 namespace tint::core::ir::transform {
-
-/// The capabilities that the transform can support.
-const Capabilities kRobustnessCapabilities{
-    Capability::kAllow16BitIntegers,
-};
 
 /// Configuration options that control when to clamp accesses.
 struct RobustnessConfig {

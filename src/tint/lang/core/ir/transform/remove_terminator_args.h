@@ -40,7 +40,6 @@ namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kRemoveTerminatorArgsCapabilities{
-    core::ir::Capability::kAllow16BitIntegers,
     core::ir::Capability::kAllow64BitIntegers,
     core::ir::Capability::kLoosenValidationForShaderIO,
 };

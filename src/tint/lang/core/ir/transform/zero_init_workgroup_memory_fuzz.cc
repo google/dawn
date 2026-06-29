@@ -27,7 +27,6 @@
 
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
-#include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -43,5 +42,5 @@ constexpr auto kUnsupportedProperties = tint::core::ir::Properties{
     tint::core::ir::Property::kAllowOverrides,
 };
 TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ZeroInitWorkgroupMemoryFuzzer,
-                      tint::core::ir::transform::kZeroInitWorkgroupMemoryCapabilities,
+                      {},
                       kUnsupportedProperties);

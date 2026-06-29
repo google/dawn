@@ -27,7 +27,6 @@
 
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
-#include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -49,6 +48,4 @@ Result<SuccessType> RobustnessFuzzer(Module& module,
 constexpr auto kUnsupportedProperties = tint::core::ir::Properties{
     tint::core::ir::Property::kAllowOverrides,
 };
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RobustnessFuzzer,
-                      tint::core::ir::transform::kRobustnessCapabilities,
-                      kUnsupportedProperties);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RobustnessFuzzer, {}, kUnsupportedProperties);

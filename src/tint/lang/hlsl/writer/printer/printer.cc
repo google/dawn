@@ -171,7 +171,7 @@ class Printer : public tint::TextGenerator {
 
     /// @returns the generated HLSL shader
     tint::Result<Output> Generate() {
-        AssertValid(ir_, kPrinterCapabilities, "before hlsl.Printer");
+        AssertValid(ir_, "before hlsl.Printer");
         AssertNoUnsupportedProperties(ir_, kUnsupportedProperties);
 
         // Emit module-scope declarations.

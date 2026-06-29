@@ -28,8 +28,6 @@
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/transform/array_length_from.h"
-#include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/text/string.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -53,5 +51,5 @@ constexpr auto kUnsupportedProperties = tint::core::ir::Properties{
     tint::core::ir::Property::kAllowMultipleEntryPoints,
 };
 TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ArrayLengthFromUniformFuzzer,
-                      tint::core::ir::transform::kArrayLengthCapabilities,
+                      {},
                       kUnsupportedProperties);

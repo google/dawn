@@ -27,7 +27,6 @@
 
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/hlsl/writer/raise/promote_initializers.h"
 
 namespace tint::hlsl::writer::raise {
@@ -40,6 +39,4 @@ Result<SuccessType> PromoteInitializersFuzzer(core::ir::Module& ir, const fuzz::
 }  // namespace
 }  // namespace tint::hlsl::writer::raise
 
-TINT_IR_MODULE_FUZZER(tint::hlsl::writer::raise::PromoteInitializersFuzzer,
-                      tint::hlsl::writer::raise::kPromoteInitializersCapabilities,
-                      tint::hlsl::writer::raise::kPromoteInitializersCapabilities);
+TINT_IR_MODULE_FUZZER(tint::hlsl::writer::raise::PromoteInitializersFuzzer, {});

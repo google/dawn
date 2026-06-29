@@ -27,7 +27,6 @@
 
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
-#include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -41,5 +40,4 @@ Result<SuccessType> SingleEntryPointFuzzer(Module& module,
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::SingleEntryPointFuzzer,
-                      tint::core::ir::transform::kSingleEntryPointCapabilities);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::SingleEntryPointFuzzer, {});

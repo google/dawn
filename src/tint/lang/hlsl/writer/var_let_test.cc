@@ -657,6 +657,7 @@ void main(main_inputs inputs) {
 }
 
 TEST_F(HlslWriterTest, VarWorkgroupU16) {
+    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
     auto* s = b.Var("u", ty.ptr<workgroup>(ty.u16()));
 
     b.ir.root_block->Append(s);
@@ -692,6 +693,7 @@ void main(main_inputs inputs) {
 }
 
 TEST_F(HlslWriterTest, VarPrivateU16) {
+    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
     auto* s = b.Var("u", ty.ptr<private_>(ty.u16()));
 
     b.ir.root_block->Append(s);
@@ -715,6 +717,7 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, VarStorageReadU16) {
+    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
     auto* s = b.Var("u", ty.ptr<storage, core::Access::kRead>(ty.u16()));
     s->SetBindingPoint(0, 0);
 
@@ -738,6 +741,7 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, VarStorageReadVec4U16) {
+    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
     auto* s = b.Var<storage, vec4<u16>, core::Access::kRead>("u");
     s->SetBindingPoint(0, 0);
 
@@ -761,6 +765,7 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, VarStorageWriteU16) {
+    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
     auto* s = b.Var("u", ty.ptr<storage, core::Access::kReadWrite>(ty.u16()));
     s->SetBindingPoint(0, 0);
 
@@ -784,6 +789,7 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, VarStorageWriteVec4U16) {
+    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
     auto* s = b.Var<storage, vec4<u16>, core::Access::kReadWrite>("u");
     s->SetBindingPoint(0, 0);
 

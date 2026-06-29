@@ -27,7 +27,6 @@
 
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 
 namespace tint::core::ir::transform {
@@ -64,5 +63,4 @@ Result<SuccessType> MultiplanarExternalTextureFuzzer(Module& ir,
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::MultiplanarExternalTextureFuzzer,
-                      tint::core::ir::transform::kMultiplanarExternalTextureCapabilities);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::MultiplanarExternalTextureFuzzer, {});

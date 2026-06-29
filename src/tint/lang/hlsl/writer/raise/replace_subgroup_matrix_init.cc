@@ -172,11 +172,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ReplaceSubgroupMatrixInit(core::ir::Module& ir) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kAllow16BitIntegers,
-                },
-                "before hlsl.ReplaceSubgroupMatrixInit");
+    AssertValid(ir, "before hlsl.ReplaceSubgroupMatrixInit");
 
     State{ir}.Process();
 

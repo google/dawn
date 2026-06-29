@@ -31,7 +31,6 @@
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/result.h"
 
 // Forward declarations.
@@ -40,11 +39,6 @@ class Module;
 }
 
 namespace tint::hlsl::writer::raise {
-
-/// The capabilities that the transform can support.
-const core::ir::Capabilities kArrayOffsetFromUniformCapabilities{
-    core::ir::Capability::kAllow16BitIntegers,
-};
 
 /// ArrayOffsetFromUniform is a transform that adds an offset to storage buffer loads and stores
 /// provided via a uniform buffer.

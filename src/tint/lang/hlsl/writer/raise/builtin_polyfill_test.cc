@@ -48,10 +48,7 @@ using Capability = tint::core::ir::Capability;
 namespace tint::hlsl::writer::raise {
 namespace {
 
-class HlslWriter_BuiltinPolyfillTest : public core::ir::transform::TransformTest {
-  protected:
-    void SetUp() override { capabilities.Add(core::ir::Capability::kAllow16BitIntegers); }
-};
+using HlslWriter_BuiltinPolyfillTest = core::ir::transform::TransformTest;
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastIdentity) {
     auto* a = b.FunctionParam<i32>("a");
@@ -392,7 +389,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastToVec4F16) {
 
 // Test bitcast from f16 to u16 scalar — should use asuint16.
 TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastF16ToU16) {
-    capabilities.Add(Capability::kAllow16BitIntegers);
+    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
     auto* a = b.FunctionParam("a", ty.f16());
     auto* func = b.Function("foo", ty.u16());
     func->SetParams({a});
@@ -423,7 +420,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastF16ToU16) {
 
 // Test bitcast from u16 to f16 scalar — should use asfloat16.
 TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastU16ToF16) {
-    capabilities.Add(Capability::kAllow16BitIntegers);
+    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
     auto* a = b.FunctionParam("a", ty.u16());
     auto* func = b.Function("foo", ty.f16());
     func->SetParams({a});
@@ -453,7 +450,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastU16ToF16) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastVec2U16ToVec2F16) {
-    capabilities.Add(Capability::kAllow16BitIntegers);
+    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
     auto* a = b.FunctionParam<vec2<u16>>("a");
     auto* func = b.Function("foo", ty.vec2h());
     func->SetParams({a});
@@ -483,7 +480,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastVec2U16ToVec2F16) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastVec2U16ToU32) {
-    capabilities.Add(Capability::kAllow16BitIntegers);
+    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
     auto* a = b.FunctionParam<vec2<u16>>("a");
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({a});
@@ -525,7 +522,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastVec2U16ToU32) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastU32ToVec2U16) {
-    capabilities.Add(Capability::kAllow16BitIntegers);
+    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
     auto* a = b.FunctionParam<u32>("a");
     auto* func = b.Function("foo", ty.vec(ty.u16(), 2));
     func->SetParams({a});

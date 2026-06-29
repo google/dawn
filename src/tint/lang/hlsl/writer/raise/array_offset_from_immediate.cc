@@ -241,7 +241,7 @@ Result<SuccessType> ArrayOffsetFromImmediates(
     const uint32_t buffer_offsets_offset,
     const uint32_t buffer_offsets_array_elements_num,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_offset_index) {
-    AssertValid(ir, kArrayOffsetFromImmediateCapabilities, "before core.ArrayOffsetFromImmediates");
+    AssertValid(ir, "before core.ArrayOffsetFromImmediates");
 
     State state{ir, immediate_data_layout, buffer_offsets_offset, buffer_offsets_array_elements_num,
                 bindpoint_to_offset_index};

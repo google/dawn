@@ -154,11 +154,7 @@ struct State {
 
 Result<ImmediateDataLayout> PrepareImmediateData(Module& ir,
                                                  const PrepareImmediateDataConfig& config) {
-    core::ir::AssertValid(ir,
-                          core::ir::Capabilities{
-                              core::ir::Capability::kAllow16BitIntegers,
-                          },
-                          "before core.PrepareImmediateData");
+    core::ir::AssertValid(ir, "before core.PrepareImmediateData");
 
     return State{config, ir}.Run();
 }

@@ -242,11 +242,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> PixelLocal(core::ir::Module& ir, const PixelLocalConfig& config) {
-    core::ir::AssertValid(ir,
-                          core::ir::Capabilities{
-                              core::ir::Capability::kAllow16BitIntegers,
-                          },
-                          "before hlsl.PixelLocal");
+    core::ir::AssertValid(ir, "before hlsl.PixelLocal");
 
     State{config.options, ir}.Process();
 

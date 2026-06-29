@@ -27,7 +27,6 @@
 
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
-#include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -46,5 +45,4 @@ Result<SuccessType> BuiltinPolyfillFuzzer(Module& ir,
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BuiltinPolyfillFuzzer,
-                      tint::core::ir::transform::kBuiltinPolyfillCapabilities);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BuiltinPolyfillFuzzer, {});

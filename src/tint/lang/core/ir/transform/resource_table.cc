@@ -633,11 +633,7 @@ ResourceTableHelper::~ResourceTableHelper() = default;
 Result<SuccessType> ResourceTable(core::ir::Module& ir,
                                   const std::optional<ResourceTableConfig>& config,
                                   ResourceTableHelper* helper) {
-    AssertValid(ir,
-                core::ir::Capabilities{
-                    core::ir::Capability::kAllow16BitIntegers,
-                },
-                "before core.ResourceTable");
+    AssertValid(ir, "before core.ResourceTable");
 
     return State{config, ir, helper}.Process();
 }

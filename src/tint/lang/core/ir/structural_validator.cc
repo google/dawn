@@ -877,7 +877,7 @@ void Structural::CheckType(const core::type::Type* root,
             },
             [&](const core::type::U16*) {
                 // u16 types are guarded by the Allow16BitIntegers capability.
-                if (!capabilities_.Contains(Capability::kAllow16BitIntegers)) {
+                if (!ir_.properties.Contains(Property::kAllow16BitIntegers)) {
                     diag() << "16-bit integer types are not permitted";
                     return false;
                 }

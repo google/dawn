@@ -1264,8 +1264,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> TexturePolyfill(core::ir::Module& ir, const TexturePolyfillConfig& cfg) {
-    AssertValid(ir, core::ir::Capabilities{core::ir::Capability::kAllow16BitIntegers},
-                "before glsl.TexturePolyfill");
+    AssertValid(ir, "before glsl.TexturePolyfill");
 
     State{ir, cfg}.Process();
 

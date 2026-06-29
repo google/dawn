@@ -115,7 +115,6 @@ Result<SuccessType> OffsetFirstIndex(core::ir::Module& ir, const OffsetFirstInde
     AssertValid(ir,
                 core::ir::Capabilities{
                     core::ir::Capability::kLoosenValidationForShaderIO,
-                    core::ir::Capability::kAllow16BitIntegers,
                 },
                 "before glsl.OffsetFirstIndex");
 

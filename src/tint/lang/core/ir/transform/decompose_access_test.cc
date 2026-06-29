@@ -41,7 +41,10 @@ namespace tint::core::ir::transform {
 namespace {
 
 struct IR_DecomposeAccessTest : public core::ir::transform::TransformTest {
-    void SetUp() override { mod.properties.Add(Property::kAllowBufferTypes); }
+    void SetUp() override {
+        mod.properties.Add(Property::kAllow16BitIntegers);
+        mod.properties.Add(Property::kAllowBufferTypes);
+    }
 };
 
 TEST_F(IR_DecomposeAccessTest, OverflowArraySize) {
@@ -1678,7 +1681,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -1853,7 +1855,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -1930,7 +1931,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2008,7 +2008,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2088,7 +2087,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2170,7 +2168,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2255,7 +2252,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2347,7 +2343,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2444,7 +2439,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2528,7 +2522,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2619,7 +2612,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2715,7 +2707,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2792,7 +2783,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2872,7 +2862,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -2953,7 +2942,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3029,7 +3017,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3108,7 +3095,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3188,7 +3174,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3260,7 +3245,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3342,7 +3326,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3417,7 +3400,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3491,7 +3473,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3575,7 +3556,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3652,7 +3632,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3760,7 +3739,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3865,7 +3843,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3912,7 +3889,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -3959,7 +3935,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4006,7 +3981,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4053,7 +4027,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4099,7 +4072,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4170,7 +4142,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4242,7 +4213,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4315,7 +4285,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4392,7 +4361,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4473,7 +4441,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4558,7 +4525,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4653,7 +4619,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4758,7 +4723,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4847,7 +4811,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -4948,7 +4911,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5061,7 +5023,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5132,7 +5093,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5206,7 +5166,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5283,7 +5242,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5361,7 +5319,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5449,7 +5406,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5522,7 +5478,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5599,7 +5554,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5680,7 +5634,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5752,7 +5705,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5810,7 +5762,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5859,7 +5810,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5907,7 +5857,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -5956,7 +5905,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -6002,7 +5950,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -6050,7 +5997,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -6097,7 +6043,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -6144,7 +6089,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -6206,7 +6150,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -6287,7 +6230,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -6368,7 +6310,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -6459,7 +6400,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -6554,7 +6494,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.storage = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -6649,7 +6588,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.uniform = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());
@@ -7201,7 +7139,6 @@ $B1: {  # root
 }
 )";
 
-    capabilities.Add(Capability::kAllow16BitIntegers);
     DecomposeAccessOptions options{.workgroup = true};
     Run(DecomposeAccess, options);
     EXPECT_EQ(expect, str());

@@ -1728,14 +1728,15 @@ TEST_F(IR_ValidatorTest, Int16Type_NotAllowed) {
         << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Int16Type_AllowedWithCapability) {
+TEST_F(IR_ValidatorTest, Int16Type_AllowedWithProperty) {
     auto* fn = b.Function("my_func", ty.void_());
     b.Append(fn->Block(), [&] {
         b.Var("v", function, ty.Get<core::type::U16>());
         b.Return(fn);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllow16BitIntegers});
+    mod.properties.Add(Property::kAllow16BitIntegers);
+    auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
 

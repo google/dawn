@@ -27,7 +27,6 @@
 
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
-#include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -39,5 +38,4 @@ Result<SuccessType> DemoteToHelperFuzzer(Module& ir, const fuzz::ir::Context&) {
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::DemoteToHelperFuzzer,
-                      tint::core::ir::transform::kDemoteToHelperCapabilities);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::DemoteToHelperFuzzer, {});

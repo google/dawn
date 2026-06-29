@@ -439,7 +439,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> SubstituteOverrides(Module& ir, const SubstituteOverridesConfig& cfg) {
-    AssertValid(ir, kSubstituteOverridesCapabilities, "before core.SubstituteOverrides");
+    AssertValid(ir, "before core.SubstituteOverrides");
     {
         auto result = State{ir, cfg}.Process();
         if (result != Success) {

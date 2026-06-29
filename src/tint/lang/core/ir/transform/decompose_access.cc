@@ -336,6 +336,7 @@ struct State {
         if (size == 2 || size == 6) {
             // 6 == vec3h so we must use a 2-byte type to be safe.
             base_ty_ = ty.u16();
+            ir.properties.Add(Property::kAllow16BitIntegers);
         } else if (size < 8 || size == 12) {
             // 12 == vec3u so we must use a 4-byte type to be safe.
             base_ty_ = ty.u32();
@@ -1545,7 +1546,6 @@ struct State {
 Result<SuccessType> DecomposeAccess(core::ir::Module& ir, const DecomposeAccessOptions& options) {
     core::ir::AssertValid(ir,
                           core::ir::Capabilities{
-                              core::ir::Capability::kAllow16BitIntegers,
                               core::ir::Capability::kLoosenValidationForShaderIO,
                           },
                           "before core.DecomposeAccess");

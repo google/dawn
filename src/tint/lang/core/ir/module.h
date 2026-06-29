@@ -58,6 +58,8 @@ namespace tint::core::ir {
 enum class Property : uint8_t {
     /// Allows 8-bit integer types to be used.
     kAllow8BitIntegers,
+    /// Allows 16-bit integer types to be used.
+    kAllow16BitIntegers,
     /// Allows input_attachment_index to be associated with any type
     kAllowAnyInputAttachmentIndexType,
     /// Allows lets to have any type.
@@ -114,6 +116,7 @@ auto& operator<<(STREAM& out, Property p) {
         return out << #p
     switch (p) {  //
         CASE(Allow8BitIntegers);
+        CASE(Allow16BitIntegers);
         CASE(AllowAnyInputAttachmentIndexType);
         CASE(AllowAnyLetType);
         CASE(AllowClipDistancesOnF32ScalarAndVector);

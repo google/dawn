@@ -532,7 +532,7 @@ Result<ArrayLengthResult> ArrayLengthFromUniform(
     Module& ir,
     BindingPoint ubo_binding,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
-    core::ir::AssertValid(ir, kArrayLengthCapabilities, "before core.ArrayLengthFromUniform");
+    core::ir::AssertValid(ir, "before core.ArrayLengthFromUniform");
 
     State state{.ir = ir,
                 .from_uniform = true,
@@ -552,7 +552,7 @@ Result<ArrayLengthResult> ArrayLengthFromImmediates(
     const uint32_t buffer_sizes_offset,
     const uint32_t buffer_sizes_array_elements_num,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
-    core::ir::AssertValid(ir, kArrayLengthCapabilities, "before core.ArrayLengthFromImmediates");
+    core::ir::AssertValid(ir, "before core.ArrayLengthFromImmediates");
 
     State state{.ir = ir,
                 .from_uniform = false,

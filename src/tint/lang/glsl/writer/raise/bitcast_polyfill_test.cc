@@ -40,8 +40,11 @@ namespace tint::glsl::writer::raise {
 namespace {
 
 class GlslWriter_BitcastPolyfillTest : public core::ir::transform::TransformTest {
-  public:
-    void SetUp() override { capabilities.Add(core::ir::Capability::kAllow16BitIntegers); }
+  protected:
+    void SetUp() override {
+        core::ir::transform::TransformTest::SetUp();
+        mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
+    }
 };
 
 TEST_F(GlslWriter_BitcastPolyfillTest, FloatToFloat) {

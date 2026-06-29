@@ -31,7 +31,6 @@
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/result.h"
 
 // Forward declarations.
@@ -41,11 +40,6 @@ class Module;
 
 namespace tint::core::ir::transform {
 struct ImmediateDataLayout;
-
-/// The capabilities that the transform can support.
-const Capabilities kArrayLengthCapabilities{
-    Capability::kAllow16BitIntegers,
-};
 
 /// The result of running the ArrayLengthFromUniform transform.
 struct ArrayLengthResult {

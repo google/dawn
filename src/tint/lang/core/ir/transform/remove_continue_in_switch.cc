@@ -120,11 +120,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> RemoveContinueInSwitch(Module& ir) {
-    core::ir::AssertValid(ir,
-                          core::ir::Capabilities{
-                              core::ir::Capability::kAllow16BitIntegers,
-                          },
-                          "before core.RemoveContinueInSwitch");
+    core::ir::AssertValid(ir, "before core.RemoveContinueInSwitch");
 
     State{ir}.Process();
 
