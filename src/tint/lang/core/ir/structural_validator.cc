@@ -160,8 +160,8 @@ void WalkTypeAndMembers(CTX& ctx,
 
 }  // namespace
 
-Structural::Structural(const Module& ir, diag::List& diagnostics, Capabilities capabilities)
-    : ir_(ir), diag_(diagnostics), capabilities_(capabilities), referenced_module_vars_(ir) {}
+Structural::Structural(const Module& ir, diag::List& diagnostics)
+    : ir_(ir), diag_(diagnostics), referenced_module_vars_(ir) {}
 
 Structural::~Structural() = default;
 
@@ -873,7 +873,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
                 return true;
             },
             [&](const core::type::U16*) {
-                // u16 types are guarded by the Allow16BitIntegers capability.
+                // u16 types are guarded by the Allow16BitIntegers property.
                 if (!ir_.properties.Contains(Property::kAllow16BitIntegers)) {
                     diag() << "16-bit integer types are not permitted";
                     return false;

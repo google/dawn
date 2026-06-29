@@ -61,9 +61,7 @@ class Validator {
   public:
     /// Create a core validator
     /// @param mod the module to be validated
-    /// @param capabilities the optional capabilities that are allowed
-    explicit Validator(const Module& mod, Capabilities capabilities = {})
-        : mod_(mod), capabilities_(capabilities) {}
+    explicit Validator(const Module& mod) : mod_(mod) {}
 
     /// Destructor
     ~Validator() = default;
@@ -72,7 +70,7 @@ class Validator {
     /// @returns success or failure
 
     Result<SuccessType> Run() {
-        validator::Structural s(mod_, diagnostics_, capabilities_);
+        validator::Structural s(mod_, diagnostics_);
         s.Validate();
 
         // Only run the functional validation if we are structurally valid
@@ -91,43 +89,15 @@ class Validator {
 
   private:
     const Module& mod_;
-    Capabilities capabilities_;
     diag::List diagnostics_;
 };
 
 }  // namespace
 
-/// TODO(crbug.com/512904070): Remove this when transition to properties is complete.
-Result<SuccessType> Validate(const Module& mod, Capabilities capabilities, std::string_view msg) {
-    DumpIRIfEnabled(mod, msg);
-    Validator v(mod, capabilities);
-    return v.Run();
-}
-
 Result<SuccessType> Validate(const Module& mod, std::string_view msg) {
     DumpIRIfEnabled(mod, msg);
     Validator v(mod);
     return v.Run();
-}
-
-/// TODO(crbug.com/512904070): Remove this when transition to properties is complete.
-void AssertValid(const Module& mod,
-                 [[maybe_unused]] Capabilities capabilities,
-                 std::string_view msg) {
-    DumpIRIfEnabled(mod, msg);
-
-#if TINT_ENABLE_IR_VALIDATION_ASSERTS
-    if (mod.enable_validation_asserts) {
-        Validator v(mod, capabilities);
-        auto result = v.Run();
-        if (result != Success) {
-            TINT_ICE() << "\n========================================================="
-                       << "\n== IR validation failed " << msg << ":"
-                       << "\n=========================================================\n"
-                       << result.Failure().reason;
-        }
-    }
-#endif
 }
 
 void AssertValid(const Module& mod, std::string_view msg) {

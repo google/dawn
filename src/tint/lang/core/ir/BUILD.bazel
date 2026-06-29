@@ -113,7 +113,6 @@ cc_library(
     "builder.h",
     "builtin_call.h",
     "call.h",
-    "capabilities.h",
     "clone_context.h",
     "const_param_validator.h",
     "constant.h",

@@ -39,7 +39,7 @@ namespace {
 /// A BuiltInChecker is the interface used to check that a usage of a builtin attribute meets the
 /// basic spec rules, i.e. correct shader stage, data type, and IO direction.
 /// It does not test more sophisticated rules like location and builtins being mutually exclusive or
-/// that the correct capabilities are enabled.
+/// that the correct properties are enabled.
 struct BuiltInChecker {
     /// What combination of stage and IO direction is this builtin legal for
     EnumSet<IOAttributeUsage> valid_usages;
@@ -70,7 +70,7 @@ constexpr BuiltInChecker kPointSizeChecker{
 };
 
 /// returns true if the number of elements in @p ty is valid for use in clip_distances without
-/// Capability::kAllowClipDistancesOnF32.
+/// Property::kAllowClipDistancesOnF32.
 constexpr auto ClipDistancesElementsCheck = [](const core::type::Type* ty) -> bool {
     const auto elems = ty->Elements();
     return elems.type && elems.type->Is<core::type::F32>() && elems.count <= 8;

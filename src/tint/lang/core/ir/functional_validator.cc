@@ -601,7 +601,7 @@ void Functional::CheckConstruct(const Construct* construct) {
     auto* result_type = construct->Result()->Type();
     if (!result_type->IsConstructible()) {
         // We only allow `construct` to create non-constructible types when they are structures that
-        // contain pointers and handle types, with the corresponding capability enabled.
+        // contain pointers and handle types, with the corresponding property enabled.
         if (!(result_type->Is<core::type::Struct>() &&
               ir_.properties.Contains(Property::kAllowMslEntryPointInterface))) {
             AddError(construct) << "type is not constructible";

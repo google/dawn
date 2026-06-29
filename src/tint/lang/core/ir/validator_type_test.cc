@@ -499,7 +499,7 @@ TEST_F(IR_ValidatorTest, StructMember_MultipleRuntimeArrays) {
         << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, StructMember_RowMajor_WithoutCapability) {
+TEST_F(IR_ValidatorTest, StructMember_RowMajor_WithoutProperty) {
     auto* mat_ty = ty.mat2x2<f32>();
     auto* member = ty.Get<core::type::StructMember>(
         mod.symbols.New("m"), mat_ty, 0u, 0u, mat_ty->Align(), mat_ty->Size(), IOAttributes{});
@@ -653,7 +653,7 @@ TEST_F(IR_ValidatorTest, StructMember_Sampler_WithProperty) {
     ASSERT_EQ(res, Success);
 }
 
-TEST_F(IR_ValidatorTest, StructMember_RowMajor_WithCapability) {
+TEST_F(IR_ValidatorTest, StructMember_RowMajor_WithProperty) {
     auto* mat_ty = ty.mat2x2<f32>();
     auto* member = ty.Get<core::type::StructMember>(
         mod.symbols.New("m"), mat_ty, 0u, 0u, mat_ty->Align(), mat_ty->Size(), IOAttributes{});
@@ -669,7 +669,7 @@ TEST_F(IR_ValidatorTest, StructMember_RowMajor_WithCapability) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithoutCapability) {
+TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithoutProperty) {
     auto* mat_ty = ty.mat2x2<f32>();
     auto* member = ty.Get<core::type::StructMember>(
         mod.symbols.New("m"), mat_ty, 0u, 0u, mat_ty->Align(), mat_ty->Size(), IOAttributes{});
@@ -690,7 +690,7 @@ TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithoutCapability) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithCapability) {
+TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithProperty) {
     auto* mat_ty = ty.mat2x2<f32>();
     auto* member = ty.Get<core::type::StructMember>(mod.symbols.New("m"), mat_ty, 0u, 0u,
                                                     mat_ty->Align(), 64u, IOAttributes{});

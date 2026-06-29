@@ -36,7 +36,6 @@
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/break_if.h"
-#include "src/tint/lang/core/ir/capabilities.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
@@ -95,7 +94,7 @@ using SupportedStages = tint::EnumSet<Function::PipelineStage>;
 
 class Structural {
   public:
-    Structural(const Module& ir, diag::List& diagnostics, Capabilities capabilities);
+    Structural(const Module& ir, diag::List& diagnostics);
     ~Structural();
 
     void Validate();
@@ -675,7 +674,6 @@ class Structural {
 
     const Module& ir_;
     diag::List& diag_;
-    Capabilities capabilities_;
     std::optional<ir::Disassembler> disassembler_;  // Use Disassemble()
 
     SymbolTable symbols_ = SymbolTable::Wrap(ir_.symbols);

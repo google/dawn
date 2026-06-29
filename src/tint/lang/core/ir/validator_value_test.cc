@@ -878,7 +878,7 @@ TEST_F(IR_ValidatorTest, Var_Struct_Location_InvalidType) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Var_Location_Struct_WithCapability) {
+TEST_F(IR_ValidatorTest, Var_Location_Struct_WithProperty) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.f32()},
                                                           });
@@ -891,7 +891,7 @@ TEST_F(IR_ValidatorTest, Var_Location_Struct_WithCapability) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Var_Location_Struct_WithoutCapability) {
+TEST_F(IR_ValidatorTest, Var_Location_Struct_WithoutProperty) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.f32()},
                                                           });
@@ -1134,7 +1134,7 @@ TEST_F(IR_ValidatorTest, Let_WrongType) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Let_VoidResultWithCapability) {
+TEST_F(IR_ValidatorTest, Let_VoidResultWithProperty) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* l = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.void_()), b.Constant(1_i));
@@ -1152,7 +1152,7 @@ TEST_F(IR_ValidatorTest, Let_VoidResultWithCapability) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Let_VoidResultWithoutCapability) {
+TEST_F(IR_ValidatorTest, Let_VoidResultWithoutProperty) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* l = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.void_()), b.Constant(1_i));
@@ -1169,7 +1169,7 @@ TEST_F(IR_ValidatorTest, Let_VoidResultWithoutCapability) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Let_VoidValueWithCapability) {
+TEST_F(IR_ValidatorTest, Let_VoidValueWithProperty) {
     auto* v = b.Function("void_func", ty.void_());
     b.Append(v->Block(), [&] { b.Return(v); });
 
@@ -1190,7 +1190,7 @@ TEST_F(IR_ValidatorTest, Let_VoidValueWithCapability) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Let_VoidValueWithoutCapability) {
+TEST_F(IR_ValidatorTest, Let_VoidValueWithoutProperty) {
     auto* v = b.Function("void_func", ty.void_());
     b.Append(v->Block(), [&] { b.Return(v); });
 
@@ -1255,7 +1255,7 @@ TEST_F(IR_ValidatorTest, Let_NotConstructibleValue) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Let_CapabilityBypass) {
+TEST_F(IR_ValidatorTest, Let_PropertyBypass) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("p", ty.sampler());
     f->AppendParam(p);
@@ -1308,7 +1308,7 @@ TEST_F(IR_ValidatorTest, Phony_EmptyValue) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Phony_MissingCapability) {
+TEST_F(IR_ValidatorTest, Phony_MissingProperty) {
     auto* v = mod.CreateInstruction<ir::Phony>(b.Constant(1_i));
 
     auto* f = b.Function("my_func", ty.void_());

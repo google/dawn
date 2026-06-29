@@ -1400,7 +1400,7 @@ TEST_F(IR_ValidatorTest, Builtin_NumSubgroups_WrongType) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Builtin_PointSize_WithoutCapability) {
+TEST_F(IR_ValidatorTest, Builtin_PointSize_WithoutProperty) {
     const auto position_attr = IOAttributes{.builtin = core::BuiltinValue::kPosition};
     const auto point_size_attr = IOAttributes{.builtin = core::BuiltinValue::kPointSize};
     auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"),

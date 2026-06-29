@@ -28,7 +28,6 @@
 #ifndef SRC_TINT_LANG_CORE_IR_VALIDATOR_H_
 #define SRC_TINT_LANG_CORE_IR_VALIDATOR_H_
 
-#include "src/tint/lang/core/ir/capabilities.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/result.h"
 
@@ -36,24 +35,9 @@ namespace tint::core::ir {
 
 /// Validates the module @p ir is correctly formed
 /// @param mod the module to validate
-/// @param capabilities the optional capabilities that are allowed
-/// @param msg the msg to accompany the output
-/// @returns success or failure
-Result<SuccessType> Validate(const Module& mod,
-                             Capabilities capabilities,
-                             std::string_view msg = "");
-
-/// Validates the module @p ir is correctly formed
-/// @param mod the module to validate
 /// @param msg the msg to accompany the output
 /// @returns success or failure
 Result<SuccessType> Validate(const Module& mod, std::string_view msg = "");
-
-/// Validates the module @p ir is correctly formed, iff required by the build configuration.
-/// @param mod the module to transformG
-/// @param capabilities the optional capabilities that are allowed
-/// @param msg the msg to accompany the output
-void AssertValid(const Module& mod, Capabilities capabilities, std::string_view msg = "");
 
 /// Validates the module @p ir is correctly formed, iff required by the build configuration.
 /// @param mod the module to transform

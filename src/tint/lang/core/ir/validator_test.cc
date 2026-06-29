@@ -1810,7 +1810,7 @@ TEST_F(IR_ValidatorTest, Scoping_UseBeforeDecl_InControlFlow) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, OverrideWithoutCapability) {
+TEST_F(IR_ValidatorTest, OverrideWithoutProperty) {
     b.Append(mod.root_block, [&] { b.Override("a", 1_u); });
 
     auto res = ir::Validate(mod);
@@ -1857,7 +1857,7 @@ TEST_F(IR_ValidatorTest, InstructionInRootBlockWithoutOverrideCap) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, OverrideWithCapability) {
+TEST_F(IR_ValidatorTest, OverrideWithProperty) {
     mod.properties.Add(Property::kAllowOverrides);
 
     b.Append(mod.root_block, [&] {

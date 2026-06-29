@@ -445,7 +445,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_Location_InvalidType) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Param_Location_Struct_WithCapability) {
+TEST_F(IR_ValidatorTest, Function_Param_Location_Struct_WithProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
@@ -462,7 +462,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Location_Struct_WithCapability) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Param_Location_Struct_WithoutCapability) {
+TEST_F(IR_ValidatorTest, Function_Param_Location_Struct_WithoutProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
@@ -1344,7 +1344,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_PartialStructAndMSV) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NonMember_WithoutCapability) {
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NonMember_WithoutProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     auto* var0 = b.Var("var0", ty.ptr(AddressSpace::kOut, ty.f32()));
@@ -1372,7 +1372,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NonMember_WithoutCapability) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NonMember_WithCapability) {
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NonMember_WithProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     auto* var0 = b.Var("var0", ty.ptr(AddressSpace::kOut, ty.f32()));
@@ -1493,7 +1493,7 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_WithoutLocation) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnStruct_WithCapability) {
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnStruct_WithProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     IOAttributes attr;
@@ -1512,7 +1512,7 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnStruct_WithCapabi
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnStruct_WithoutCapability) {
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnStruct_WithoutProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     IOAttributes attr;
@@ -1536,7 +1536,7 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnStruct_WithoutCap
                           ^^^^
 )")) << res.Failure();
 }
-TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_WithoutCapability) {
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_WithoutProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     IOAttributes attr_a;
@@ -1561,7 +1561,7 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_WithoutCapability) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnAllMembers_WithCapability) {
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnAllMembers_WithProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     IOAttributes attr_a;
@@ -1583,7 +1583,7 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnAllMembers_WithCa
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnAllMembers_WithoutCapability) {
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnAllMembers_WithoutProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     IOAttributes attr_a;
@@ -1612,7 +1612,7 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnAllMembers_Withou
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnSomeMembers_WithCapability) {
+TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnSomeMembers_WithProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     IOAttributes attr_a;
@@ -1638,7 +1638,7 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_Struct_LocationOnSomeMembers_WithC
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Interpolate_WithBuiltin_WithCapability) {
+TEST_F(IR_ValidatorTest, Function_Interpolate_WithBuiltin_WithProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     auto* p = b.FunctionParam("p", ty.u32());
@@ -1654,7 +1654,7 @@ TEST_F(IR_ValidatorTest, Function_Interpolate_WithBuiltin_WithCapability) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Interpolate_WithBuiltin_WithoutCapability) {
+TEST_F(IR_ValidatorTest, Function_Interpolate_WithBuiltin_WithoutProperty) {
     auto* f = FragmentEntryPoint("my_func");
 
     auto* p = b.FunctionParam("p", ty.u32());
@@ -2081,7 +2081,7 @@ TEST_F(IR_ValidatorTest, Function_Param_StructNested_InvariantWithoutPosition) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Param_BindingPointWithoutCapability) {
+TEST_F(IR_ValidatorTest, Function_Param_BindingPointWithoutProperty) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("my_param", ty.ptr<uniform, i32>());
     p->SetBindingPoint(0, 0);
@@ -2099,7 +2099,7 @@ TEST_F(IR_ValidatorTest, Function_Param_BindingPointWithoutCapability) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_EntryPointParam_BindingPointWithoutCapability) {
+TEST_F(IR_ValidatorTest, Function_EntryPointParam_BindingPointWithoutProperty) {
     auto* f = ComputeEntryPoint("my_func");
     auto* p = b.FunctionParam("my_param", ty.ptr<uniform, i32>());
     p->SetBindingPoint(0, 0);
