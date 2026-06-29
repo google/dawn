@@ -50,6 +50,8 @@ if (build_with_chromium) {
 }
 
 # Centralized config for -Weverything and its suppressions.
+# TODO(crbug.com/523358231): These warnings get passed to the compiler twice.
+# Is there a way to un-duplicate the config?
 config("dawn_warnings") {
   if (dawn_weverything) {
     assert(is_clang)
@@ -107,7 +109,6 @@ config("dawn_warnings") {
       "-Wno-nullable-to-nonnull-conversion",
       "-Wno-float-equal",
       "-Wno-shadow-header",
-      "-Wno-c2y-extensions",
       "-Wno-documentation-unknown-command",
       "-Wno-documentation",
       "-Wno-nrvo",
@@ -130,8 +131,13 @@ config("dawn_warnings") {
     # Allowlist of warnings that are not part of -Wall or -Wextra.
     if (dawn_standalone && is_clang) {
       cflags += [
+        # TODO(crbug.com/523358231): -Wall -Wextra may not be needed because we
+        # get some default warnings via //build/config/compiler/BUILD.gn, like
+        # -Wall -Wextra -Wno-unused-parameter. (Note we would also be able to
+        # remove -Wno-unused-parameter below.)
         "-Wall",
         "-Wextra",
+
         "-Wpedantic",
         "-Wconditional-uninitialized",
         "-Wcstring-format-directive",
@@ -159,9 +165,9 @@ config("dawn_warnings") {
         "-Wunused-but-set-variable",
         "-Wunused-macros",
 
-        # TODO(crbug.com/523358231): triage these flags not applied properly
-        # when added in a dependency target.
-        "-Wno-c2y-extensions",
+        # TODO(crbug.com/523358231): We probably want to enable these globally,
+        # but currently, suppressing just for specific targets is not working,
+        # probably due to some flag ordering issue.
         "-Wno-unused-parameter",
         "-Wno-dollar-in-identifier-extension",
       ]
@@ -169,6 +175,22 @@ config("dawn_warnings") {
   }
 
   if (is_clang) {
+    # Disable some warnings that are enabled by the default configs we get from
+    # //build (which include -Wall -Wextra), but that we don't want.
+    cflags += [
+      # This warning tries to prove that the expression passed to
+      # __builtin_assume (DAWN_RELEASE_ASSUME) has no side effects, because that
+      # expression does not get executed. But its analysis is too simple to be
+      # useful - it triggers too often (e.g. on std::numeric_limits::max()).
+      # Instead we use clang-tidy's heuristic `bugprone-assert-side-effect`.
+      "-Wno-assume",
+
+      # TODO(crbug.com/523358231): We probably want to enable these globally,
+      # but currently, suppressing just for specific targets is not working,
+      # probably due to some flag ordering issue.
+      "-Wno-c2y-extensions",
+    ]
+
     # Treat third_party and gen headers as system headers to suppress warnings.
     # The path needs to be the literal beginning of the string in the #include
     # directive, so include path resolving to different names is added

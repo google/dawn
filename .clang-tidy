@@ -225,3 +225,9 @@ CheckOptions:
     value: true
   - key: readability-implicit-bool-conversion.AllowPointerConditions
     value: true
+  - key: bugprone-assert-side-effect.AssertMacros
+    value: assert,NSAssert,NSCAssert,DAWN_ASSERT,DAWN_RELEASE_ASSUME
+    # It would be nice to use bugprone-assert-side-effect.CheckFunctionCalls,
+    # but it isn't smart enough and triggers on things like:
+    # - constexpr functions like std::numeric_limits::max()
+    # - templated methods https://github.com/llvm/llvm-project/issues/62878
