@@ -333,6 +333,11 @@ class Structural {
                   std::function<diag::Diagnostic&()>& diag,
                   const core::type::Type* root);
 
+    /// Checks that `ptr` is a valid pointer type
+    /// @param ptr the pointer to check
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool CheckPtr(const core::type::Pointer* ptr, std::function<diag::Diagnostic&()>& diag);
+
     /// Validates the root block
     /// @param blk the block
     void CheckRootBlock(const Block* blk);

@@ -685,49 +685,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             type,  //
             [&](const core::type::Struct* str) { return CheckStruct(str, diag); },
             [&](const core::type::Reference* ref) { return CheckRef(ref, diag, root); },
-            [&](const core::type::Pointer* ptr) {
-                if (ptr->StoreType()->Is<core::type::Void>()) {
-                    diag() << "pointers to void are not permitted";
-                    return false;
-                }
-
-                if (ptr->AddressSpace() == AddressSpace::kUniform ||
-                    ptr->AddressSpace() == AddressSpace::kHandle ||
-                    ptr->AddressSpace() == core::AddressSpace::kImmediate) {
-                    if (ptr->Access() != core::Access::kRead) {
-                        diag() << ToString(ptr->AddressSpace()) << " pointers must be read access";
-                        return false;
-                    }
-                }
-
-                if (ptr->AddressSpace() == AddressSpace::kWorkgroup ||
-                    ptr->AddressSpace() == AddressSpace::kFunction ||
-                    ptr->AddressSpace() == AddressSpace::kPrivate) {
-                    if (ptr->Access() != core::Access::kReadWrite) {
-                        diag() << ToString(ptr->AddressSpace())
-                               << " pointers must be read_write access";
-                        return false;
-                    }
-                }
-
-                if (ptr->AddressSpace() == AddressSpace::kHandle) {
-                    if (!ptr->StoreType()->IsHandle()) {
-                        diag() << "the 'handle' address space can only be used for handle types";
-                        return false;
-                    }
-                } else {
-                    if (ptr->StoreType()->IsHandle()) {
-                        diag() << "handle types can only be declared in the 'handle' address space";
-                        return false;
-                    }
-                }
-
-                if (ptr->StoreType()->Is<core::type::Pointer>()) {
-                    diag() << "pointers to pointers are not allowed";
-                    return false;
-                }
-                return true;
-            },
+            [&](const core::type::Pointer* ptr) { return CheckPtr(ptr, diag); },
             [&](const core::type::U64*) {
                 // u64 types are guarded by the Allow64BitIntegers property.
                 if (!ir_.properties.Contains(Property::kAllow64BitIntegers)) {
@@ -978,6 +936,48 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckPtr(const core::type::Pointer* ptr,
+                          std::function<diag::Diagnostic&()>& diag) {
+    if (ptr->StoreType()->Is<core::type::Void>()) {
+        diag() << "pointers to void are not permitted";
+        return false;
+    }
+
+    if (ptr->AddressSpace() == AddressSpace::kUniform ||
+        ptr->AddressSpace() == AddressSpace::kHandle ||
+        ptr->AddressSpace() == core::AddressSpace::kImmediate) {
+        if (ptr->Access() != core::Access::kRead) {
+            diag() << ToString(ptr->AddressSpace()) << " pointers must be read access";
+            return false;
+        }
+    }
+
+    if (ptr->AddressSpace() == AddressSpace::kWorkgroup ||
+        ptr->AddressSpace() == AddressSpace::kFunction ||
+        ptr->AddressSpace() == AddressSpace::kPrivate) {
+        if (ptr->Access() != core::Access::kReadWrite) {
+            diag() << ToString(ptr->AddressSpace()) << " pointers must be read_write access";
+            return false;
+        }
+    }
+
+    if (ptr->AddressSpace() == AddressSpace::kHandle) {
+        if (!ptr->StoreType()->IsHandle()) {
+            diag() << "the 'handle' address space can only be used for handle types";
+            return false;
+        }
+    } else if (ptr->StoreType()->IsHandle()) {
+        diag() << "handle types can only be declared in the 'handle' address space";
+        return false;
+    }
+
+    if (ptr->StoreType()->Is<core::type::Pointer>()) {
+        diag() << "pointers to pointers are not allowed";
+        return false;
+    }
+    return true;
 }
 
 bool Structural::CheckRef(const core::type::Reference* ref,
