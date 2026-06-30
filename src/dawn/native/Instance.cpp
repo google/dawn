@@ -208,8 +208,7 @@ bool APIHasInstanceFeature(wgpu::InstanceFeatureName feature) {
 }
 
 void APIGetInstanceFeatures(SupportedInstanceFeatures* features) {
-    features->featureCount = kSupportedFeatures.size();
-    features->features = kSupportedFeatures.data();
+    features->features = kSupportedFeatures;
 }
 
 void APISupportedInstanceFeaturesFreeMembers(WGPUSupportedInstanceFeatures) {
@@ -808,8 +807,8 @@ void InstanceBase::APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* fea
     }
     DAWN_CHECK(index == featureCount);
 
-    features->featureCount = featureCount;
-    features->features = wgslFeatures;
+    // TODO(https://crbug.com/512465980): Use dawn::HeapArray
+    features->features = DAWN_UNSAFE_TODO({wgslFeatures, featureCount});
 }
 
 void APISupportedWGSLLanguageFeaturesFreeMembers(

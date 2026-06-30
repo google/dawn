@@ -504,10 +504,9 @@ void FeaturesSet::ToSupportedFeatures(SupportedFeatures* supportedFeatures) cons
     }
 
     const size_t count = featuresBitSet.count();
-    supportedFeatures->featureCount = count;
-    supportedFeatures->features = nullptr;
 
     if (count == 0) {
+        supportedFeatures->features = {};
         return;
     }
 
@@ -518,7 +517,8 @@ void FeaturesSet::ToSupportedFeatures(SupportedFeatures* supportedFeatures) cons
         DAWN_UNSAFE_TODO(features[index++]) = ToAPI(f);
     }
     DAWN_ASSERT(index == count);
-    supportedFeatures->features = features;
+    // TODO(https://crbug.com/512465980): Use dawn::HeapArray
+    supportedFeatures->features = DAWN_UNSAFE_TODO({features, count});
 }
 
 }  // namespace dawn::native

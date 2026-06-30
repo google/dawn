@@ -170,10 +170,8 @@ TEST_F(FeatureTests, RequireAndGetEnabledFeatures) {
                     requiredFeaturesSet.contains(wgpu::FeatureName::CoreFeaturesAndLimits);
                 // wgpu::FeatureName::CoreFeaturesAndLimits is required implicitly in core mode
                 ASSERT_EQ(requiredFeaturesSet.size() + (explicitlyRequireCore ? 0 : 1),
-                          enabledFeatures.featureCount);
-                for (uint32_t i = 0; i < enabledFeatures.featureCount; ++i) {
-                    wgpu::FeatureName enabledFeature =
-                        DAWN_UNSAFE_TODO(enabledFeatures.features[i]);
+                          enabledFeatures.features.size());
+                for (wgpu::FeatureName enabledFeature : enabledFeatures.features) {
                     if (!explicitlyRequireCore &&
                         enabledFeature == wgpu::FeatureName::CoreFeaturesAndLimits) {
                         continue;
