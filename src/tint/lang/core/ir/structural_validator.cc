@@ -706,13 +706,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::BindingArray* t) {
                 return CheckBindingArray(t, diag, addrspace);
             },
-            [&](const core::type::Buffer*) {
-                if (!ir_.properties.Contains(Property::kAllowBufferTypes)) {
-                    diag() << "buffer types are not allowed in this context";
-                    return false;
-                }
-                return true;
-            },
+            [&](const core::type::Buffer*) { return CheckBuffer(diag); },
             [](Default) { return true; });
     };
 
@@ -771,6 +765,14 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckBuffer(std::function<diag::Diagnostic&()>& diag) {
+    if (!ir_.properties.Contains(Property::kAllowBufferTypes)) {
+        diag() << "buffer types are not allowed in this context";
+        return false;
+    }
+    return true;
 }
 
 bool Structural::CheckBindingArray(const core::type::BindingArray* ba,

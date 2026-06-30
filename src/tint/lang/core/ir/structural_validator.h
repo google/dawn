@@ -388,6 +388,10 @@ class Structural {
                            std::function<diag::Diagnostic&()>& diag,
                            core::AddressSpace addrspace);
 
+    /// Checks that buffers are available
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool CheckBuffer(std::function<diag::Diagnostic&()>& diag);
+
     /// Checks that 8-bit types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
     /// @param parent the parent type for the 8-bit type
