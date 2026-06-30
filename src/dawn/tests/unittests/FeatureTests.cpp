@@ -34,6 +34,7 @@
 #include "src/dawn/native/null/DeviceNull.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn {
 namespace {
@@ -46,8 +47,7 @@ class FeatureTests : public testing::Test {
               static constexpr auto kMultipleDevicesPerAdapter =
                   wgpu::InstanceFeatureName::MultipleDevicesPerAdapter;
               dawn::native::InstanceDescriptor instanceDesc = {
-                  .requiredFeatureCount = 1,
-                  .requiredFeatures = &kMultipleDevicesPerAdapter,
+                  .requiredFeatures = SpanFromRef(kMultipleDevicesPerAdapter),
               };
               return dawn::native::APICreateInstance(&instanceDesc);
           }()),

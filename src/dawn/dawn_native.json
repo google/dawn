@@ -55,7 +55,6 @@
             "ComputeState",
             "DawnDrmFormatCapabilities",
             "FragmentState",
-            "InstanceDescriptor",
             "PipelineLayoutDescriptor",
             "PipelineLayoutPixelLocalStorage",
             "RenderBundleEncoderDescriptor",
