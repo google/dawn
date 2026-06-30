@@ -1325,6 +1325,73 @@ TEST_P(ShaderTests, MetalMulShiftModOverflowBug_Vector) {
     EXPECT_BUFFER_U32_EQ(2, buf, 12);
 }
 
+// Regression test for the compiler crash reported in https://crbug.com/520781436
+TEST_P(ShaderTests, GenerateInstructionsBP_Crash) {
+    // The crash is fixed from Android 17 onwards.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec() && IsVulkan() && IsAndroidOlderThan(17));
+
+    wgpu::ComputePipelineDescriptor cDesc;
+    cDesc.compute.module = utils::CreateShaderModule(device, R"(
+@group(0) @binding(0)
+var<storage, read_write> data: i32;
+
+var<private> loop_stop: array<u32, 3>;
+
+fn foo() -> i32 {
+    switch (clamp(vec3i(), sign(vec3i(3i & data)), vec3i(3i, 0i, 0i)).x) {
+        case 4i: {}
+        case 5000i: {}
+        default: {
+            return data;
+        }
+    }
+    loop {
+        if (loop_stop[0u] >= 1u) { break; }
+        loop_stop[0u]++;
+    }
+    loop {
+        if (loop_stop[1u] >= 1u) { break; }
+        loop_stop[1u]++;
+    }
+    loop {
+        if (loop_stop[2u] >= 1u) { break; }
+        loop_stop[2u]++;
+    }
+    return 0i;
+}
+
+@compute @workgroup_size(1u)
+fn main() {
+    data = abs(vec2(foo(), 1i)).y;
+}
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cDesc);
+
+    wgpu::BufferDescriptor bufDesc;
+    bufDesc.size = 4;
+    bufDesc.usage =
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buf = device.CreateBuffer(&bufDesc);
+
+    // Write 2i to the buffer.
+    uint32_t inputVal = 2;
+    queue.WriteBuffer(buf, 0, &inputVal, sizeof(inputVal));
+
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buf}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bg);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(1, buf, 0);
+}
+
 // Test that when fragment input is a subset of the vertex output, the render pipeline should be
 // valid.
 TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutput) {

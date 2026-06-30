@@ -58,6 +58,10 @@
 #include <versionhelpers.h>
 #endif
 
+#if DAWN_PLATFORM_IS(ANDROID)
+#include <android/api-level.h>
+#endif
+
 #include "dawn/dawn_proc.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
@@ -1269,6 +1273,15 @@ bool DawnTestBase::IsMacOS(int32_t majorVersion, int32_t minorVersion) const {
 bool DawnTestBase::IsAndroid() const {
 #if DAWN_PLATFORM_IS(ANDROID)
     return true;
+#else
+    return false;
+#endif
+}
+
+bool DawnTestBase::IsAndroidOlderThan(uint32_t version) const {
+#if DAWN_PLATFORM_IS(ANDROID)
+    // Android API level == (Android version + 20)
+    return static_cast<uint32_t>(android_get_device_api_level()) < (version + 20);
 #else
     return false;
 #endif
