@@ -1704,16 +1704,15 @@ void PhysicalDevice::PopulateBackendFormatCapabilities(
     if (auto* drmCapabilities = capabilities.Get<DawnDrmFormatCapabilities>()) {
         auto vk_format = ColorVulkanImageFormat(format);
         if (vk_format == VK_FORMAT_UNDEFINED) {
-            drmCapabilities->properties = nullptr;
-            drmCapabilities->propertiesCount = 0;
+            drmCapabilities->properties = {};
         }
         auto drmFormatModifiers =
             GetFormatModifierProps(mVulkanInstance->GetFunctions(), mVkPhysicalDevice, vk_format);
         if (!drmFormatModifiers.empty()) {
             size_t count = drmFormatModifiers.size();
+            // TODO(https://crbug.com/512465980): Use dawn::HeapArray
             auto* properties = new DawnDrmFormatProperties[count];
-            drmCapabilities->properties = properties;
-            drmCapabilities->propertiesCount = count;
+            drmCapabilities->properties = DAWN_UNSAFE_TODO({properties, count});
 
             for (size_t i = 0; i < count; i++) {
                 DAWN_UNSAFE_TODO(properties[i]).modifier = drmFormatModifiers[i].drmFormatModifier;

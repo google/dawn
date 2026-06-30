@@ -52,7 +52,6 @@
             "BindGroupDescriptor",
             "BindGroupLayoutDescriptor",
             "ComputeState",
-            "DawnDrmFormatCapabilities",
             "FragmentState",
             "PipelineLayoutDescriptor",
             "PipelineLayoutPixelLocalStorage",
