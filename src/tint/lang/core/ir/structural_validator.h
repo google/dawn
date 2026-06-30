@@ -320,6 +320,11 @@ class Structural {
     /// @param diag a function that creates an error diagnostic for the source of the type
     void CheckType(const core::type::Type* type, std::function<diag::Diagnostic&()> diag);
 
+    /// Checks that `str` is a valid structure.
+    /// @param str the struct to validate
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool CheckStruct(const core::type::Struct* str, std::function<diag::Diagnostic&()>& diag);
+
     /// Validates the root block
     /// @param blk the block
     void CheckRootBlock(const Block* blk);

@@ -682,108 +682,8 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
         }
 
         return tint::Switch(
-            type,
-            [&](const core::type::Struct* str) {
-                uint32_t cur_offset = 0;
-                for (auto* member : str->Members()) {
-                    if (member->Type()->Is<core::type::Void>()) {
-                        diag() << "struct member " << member->Index() << " cannot have void type";
-                        return false;
-                    }
-                    if (member->Type()->Is<core::type::Buffer>()) {
-                        diag() << "struct member " << member->Index() << " cannot have buffer type";
-                        return false;
-                    }
-
-                    if (!CheckStructMemberAttributes(member, diag)) {
-                        return false;
-                    }
-
-                    if (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
-                        if (member->Type()->Is<core::type::Pointer>()) {
-                            diag() << "struct member " << member->Index()
-                                   << " cannot be a pointer type";
-                            return false;
-                        }
-
-                        if (member->Type()->Is<core::type::Texture>()) {
-                            diag() << "struct member " << member->Index()
-                                   << " cannot be a texture type";
-                            return false;
-                        }
-
-                        if (member->Type()->Is<core::type::Sampler>()) {
-                            diag() << "struct member " << member->Index()
-                                   << " cannot be a sampler type";
-                            return false;
-                        }
-                    }
-
-                    if (auto* arr = member->Type()->As<core::type::Array>();
-                        arr && arr->Count()->Is<core::type::RuntimeArrayCount>()) {
-                        if (member != str->Members().Back()) {
-                            diag() << "runtime-sized arrays can only be the last member of a "
-                                      "struct";
-                            return false;
-                        }
-                    }
-
-                    if (member->Align() == 0) {
-                        diag() << "struct member must not have an alignment of 0";
-                        return false;
-                    }
-                    if (!tint::IsPowerOfTwo(member->Align())) {
-                        diag() << "struct member alignment must be a power of 2";
-                        return false;
-                    }
-
-                    if (member->Type()->Align() == 0) {
-                        diag() << "struct member type must not have an alignment of 0";
-                        return false;
-                    }
-                    if (!tint::IsPowerOfTwo(member->Type()->Align())) {
-                        diag() << "struct member type alignment must be a power of 2";
-                        return false;
-                    }
-                    if (!ir_.properties.Contains(Property::kAllowStructMatrixDecorations)) {
-                        if (member->RowMajor()) {
-                            diag() << "Row major annotation not allowed on structures";
-                            return false;
-                        }
-                        if (member->HasMatrixStride()) {
-                            diag() << "Matrix stride annotation not allowed on structures";
-                            return false;
-                        }
-                    }
-
-                    // TODO(448608979): Remove guard once updated to handle RowMajor correctly
-                    if (!member->RowMajor()) {
-                        if (member->Size() < member->Type()->Size()) {
-                            diag() << "struct member " << member->Index()
-                                   << " with size=" << member->Size()
-                                   << " must be at least as large as the type with size "
-                                   << member->Type()->Size();
-                            return false;
-                        }
-
-                        if (member->Align() % member->Type()->Align() != 0) {
-                            diag() << "struct member alignment (" << member->Align()
-                                   << ") must be divisible by type alignment ("
-                                   << member->Type()->Align() << ")";
-                            return false;
-                        }
-                    }
-
-                    cur_offset += (member->Offset() - cur_offset) + member->MinimumRequiredSize();
-                }
-                if (str->Size() < cur_offset) {
-                    diag() << "struct size (" << str->Size()
-                           << ") is smaller than the end of the last member (" << cur_offset << ")";
-                    return false;
-                }
-
-                return true;
-            },
+            type,  //
+            [&](const core::type::Struct* str) { return CheckStruct(str, diag); },
             [&](const core::type::Reference* ref) {
                 if (ref->StoreType()->Is<core::type::Void>()) {
                     diag() << "references to void are not permitted";
@@ -1094,6 +994,105 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckStruct(const core::type::Struct* str,
+                             std::function<diag::Diagnostic&()>& diag) {
+    uint32_t cur_offset = 0;
+    for (auto* member : str->Members()) {
+        if (member->Type()->Is<core::type::Void>()) {
+            diag() << "struct member " << member->Index() << " cannot have void type";
+            return false;
+        }
+        if (member->Type()->Is<core::type::Buffer>()) {
+            diag() << "struct member " << member->Index() << " cannot have buffer type";
+            return false;
+        }
+
+        if (!CheckStructMemberAttributes(member, diag)) {
+            return false;
+        }
+
+        if (!ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+            if (member->Type()->Is<core::type::Pointer>()) {
+                diag() << "struct member " << member->Index() << " cannot be a pointer type";
+                return false;
+            }
+
+            if (member->Type()->Is<core::type::Texture>()) {
+                diag() << "struct member " << member->Index() << " cannot be a texture type";
+                return false;
+            }
+
+            if (member->Type()->Is<core::type::Sampler>()) {
+                diag() << "struct member " << member->Index() << " cannot be a sampler type";
+                return false;
+            }
+        }
+
+        if (auto* arr = member->Type()->As<core::type::Array>();
+            arr && arr->Count()->Is<core::type::RuntimeArrayCount>()) {
+            if (member != str->Members().Back()) {
+                diag() << "runtime-sized arrays can only be the last member of a "
+                          "struct";
+                return false;
+            }
+        }
+
+        if (member->Align() == 0) {
+            diag() << "struct member must not have an alignment of 0";
+            return false;
+        }
+        if (!tint::IsPowerOfTwo(member->Align())) {
+            diag() << "struct member alignment must be a power of 2";
+            return false;
+        }
+
+        if (member->Type()->Align() == 0) {
+            diag() << "struct member type must not have an alignment of 0";
+            return false;
+        }
+        if (!tint::IsPowerOfTwo(member->Type()->Align())) {
+            diag() << "struct member type alignment must be a power of 2";
+            return false;
+        }
+        if (!ir_.properties.Contains(Property::kAllowStructMatrixDecorations)) {
+            if (member->RowMajor()) {
+                diag() << "Row major annotation not allowed on structures";
+                return false;
+            }
+            if (member->HasMatrixStride()) {
+                diag() << "Matrix stride annotation not allowed on structures";
+                return false;
+            }
+        }
+
+        // TODO(448608979): Remove guard once updated to handle RowMajor correctly
+        if (!member->RowMajor()) {
+            if (member->Size() < member->Type()->Size()) {
+                diag() << "struct member " << member->Index() << " with size=" << member->Size()
+                       << " must be at least as large as the type with size "
+                       << member->Type()->Size();
+                return false;
+            }
+
+            if (member->Align() % member->Type()->Align() != 0) {
+                diag() << "struct member alignment (" << member->Align()
+                       << ") must be divisible by type alignment (" << member->Type()->Align()
+                       << ")";
+                return false;
+            }
+        }
+
+        cur_offset += (member->Offset() - cur_offset) + member->MinimumRequiredSize();
+    }
+    if (str->Size() < cur_offset) {
+        diag() << "struct size (" << str->Size() << ") is smaller than the end of the last member ("
+               << cur_offset << ")";
+        return false;
+    }
+
+    return true;
 }
 
 void Structural::CheckRootBlock(const Block* blk) {
