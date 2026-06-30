@@ -699,13 +699,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
                 return CheckMultisampledTexture(ms, diag);
             },
             [&](const core::type::StorageTexture* s) { return CheckStorageTexture(s, diag); },
-            [&](const core::type::InputAttachment* i) {
-                if (!i->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
-                    diag() << "invalid input attachment component type: " << NameOf(i->Type());
-                    return false;
-                }
-                return true;
-            },
+            [&](const core::type::InputAttachment* i) { return CheckInputAttachment(i, diag); },
             [&](const core::type::SubgroupMatrix* m) {
                 if (!m->Type()
                          ->IsAnyOf<core::type::F16, core::type::F32, core::type::I8,
@@ -812,6 +806,15 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckInputAttachment(const core::type::InputAttachment* ia,
+                                      std::function<diag::Diagnostic&()>& diag) {
+    if (!ia->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
+        diag() << "invalid input attachment component type: " << NameOf(ia->Type());
+        return false;
+    }
+    return true;
 }
 
 bool Structural::CheckStorageTexture(const core::type::StorageTexture* storage,

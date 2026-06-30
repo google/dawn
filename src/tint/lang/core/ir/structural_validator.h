@@ -367,6 +367,12 @@ class Structural {
     bool CheckStorageTexture(const core::type::StorageTexture* storage,
                              std::function<diag::Diagnostic&()>& diag);
 
+    /// Checks that `ia` is a valid input attachment
+    /// @param ia the input attachment
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool CheckInputAttachment(const core::type::InputAttachment* ia,
+                              std::function<diag::Diagnostic&()>& diag);
+
     /// Checks that 8-bit types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
     /// @param parent the parent type for the 8-bit type
