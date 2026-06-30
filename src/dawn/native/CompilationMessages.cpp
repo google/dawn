@@ -266,8 +266,7 @@ OwnedCompilationMessages::OwnedCompilationMessages(
         message.nextInChain = &utf16;
     }
 
-    mCompilationInfo.messageCount = mMessagesList.size();
-    mCompilationInfo.messages = mMessagesList.data();
+    mCompilationInfo.messages = mMessagesList;
 }
 
 const CompilationInfo* OwnedCompilationMessages::GetCompilationInfo() const {

@@ -51,7 +51,6 @@
         "structure_spanification_blocklist": [
             "BindGroupDescriptor",
             "BindGroupLayoutDescriptor",
-            "CompilationInfo",
             "ComputeState",
             "DawnDrmFormatCapabilities",
             "FragmentState",
