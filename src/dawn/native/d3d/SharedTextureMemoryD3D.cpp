@@ -49,9 +49,7 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY((descriptor.ValidateSubset<SharedTextureMemoryD3DSwapchainBeginState,
                                         SharedTextureMemoryD3D11BeginState>()));
-    for (size_t i = 0; i < descriptor->fenceCount; ++i) {
-        SharedFenceBase* fence = DAWN_UNSAFE_TODO(descriptor->fences[i]);
-
+    for (SharedFenceBase* fence : descriptor->fences) {
         SharedFenceExportInfo exportInfo;
         DAWN_TRY(fence->ExportInfo(&exportInfo));
         switch (exportInfo.type) {

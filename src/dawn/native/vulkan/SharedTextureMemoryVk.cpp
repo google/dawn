@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "dawn/native/wgpu_structs_autogen.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
@@ -304,12 +305,12 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                             memoryPlaneCount, formatPlaneCount);
         }
         DAWN_INVALID_IF(
-            memoryPlaneCount != descriptor->planeCount,
+            memoryPlaneCount != descriptor->planes.size(),
             "Memory plane count (%x) for drm format (%u) and modifier (%u) specify a plane "
             "count of %u which "
             "does not match the provided plane count (%u)",
             vkFormat, descriptor->drmFormat, descriptor->drmModifier, memoryPlaneCount,
-            descriptor->planeCount);
+            descriptor->planes.size());
         DAWN_INVALID_IF(memoryPlaneCount == 0, "Memory plane count must not be 0");
         DAWN_INVALID_IF(memoryPlaneCount > kMaxPlanesPerFormat,
                         "Memory plane count (%u) must not exceed %u.", memoryPlaneCount,
@@ -389,12 +390,11 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     // VK_IMAGE_CREATE_DISJOINT_BIT, and separately bind the image planes to memory. Dawn doesn't
     // support use of VK_IMAGE_CREATE_DISJOINT_BIT currently. See crbug.com/42240514.
     int fd = descriptor->planes[0].fd;
-    for (uint32_t i = 1; i < descriptor->planeCount; ++i) {
-        DAWN_UNSAFE_TODO(DAWN_INVALID_IF(
-            descriptor->planes[i].fd != fd,
-            "descriptor->planes[%u].fd (%i) does not match other plane fd (%i). All "
-            "fds must be the same.",
-            i, descriptor->planes[i].fd, fd));
+    for (auto [i, plane] : Enumerate(descriptor->planes.subspan(1))) {
+        DAWN_INVALID_IF(plane.fd != fd,
+                        "descriptor->planes[%u].fd (%i) does not match other plane fd (%i). All "
+                        "fds must be the same.",
+                        i + 1, plane.fd, fd);
     }
 
     // Don't add the view format if backend validation is enabled, otherwise most image creations
@@ -1030,11 +1030,10 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
     auto vkLayoutBeginState = descriptor.Get<SharedTextureMemoryVkImageLayoutBeginState>();
     DAWN_ASSERT(vkLayoutBeginState != nullptr);
 
-    for (size_t i = 0; i < descriptor->fenceCount; ++i) {
+    for (auto [i, fence] : Enumerate(descriptor->fences)) {
         // All fences are backed by binary semaphores.
-        DAWN_UNSAFE_TODO(DAWN_INVALID_IF(descriptor->signaledValues[i] != 1,
-                                         "%s signaled value (%u) was not 1.", descriptor->fences[i],
-                                         descriptor->signaledValues[i]));
+        DAWN_INVALID_IF(descriptor->signaledValues[i] != 1, "%s signaled value (%u) was not 1.",
+                        fence, descriptor->signaledValues[i]);
     }
     static_cast<SharedTexture*>(texture)->SetPendingAcquire(
         static_cast<VkImageLayout>(vkLayoutBeginState->oldLayout),

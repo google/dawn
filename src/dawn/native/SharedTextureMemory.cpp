@@ -223,11 +223,11 @@ SharedTextureMemoryContents* SharedTextureMemoryBase::GetContents() const {
 
 void APISharedTextureMemoryEndAccessStateFreeMembers(WGPUSharedTextureMemoryEndAccessState cState) {
     auto* state = reinterpret_cast<SharedTextureMemoryBase::EndAccessState*>(&cState);
-    for (size_t i = 0; i < state->fenceCount; ++i) {
-        DAWN_UNSAFE_TODO(state->fences[i])->APIRelease();
+    for (SharedFenceBase* fence : state->fences) {
+        fence->APIRelease();
     }
-    delete[] state->fences;
-    delete[] state->signaledValues;
+    delete[] state->fences.data();
+    delete[] state->signaledValues.data();
 }
 
 }  // namespace dawn::native

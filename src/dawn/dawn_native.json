@@ -57,11 +57,6 @@
             "RenderBundleEncoderDescriptor",
             "RenderPassDescriptor",
             "ShaderSourceSPIRV",
-            "SharedBufferMemoryBeginAccessDescriptor",
-            "SharedBufferMemoryEndAccessState",
-            "SharedTextureMemoryBeginAccessDescriptor",
-            "SharedTextureMemoryDmaBufDescriptor",
-            "SharedTextureMemoryEndAccessState",
             "VertexState"
         ],
         "structure_span_index_type_override": {

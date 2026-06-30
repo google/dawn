@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/native/Buffer.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Device.h"
@@ -124,12 +125,12 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
 
     // TODO(https://crbug.com/515272361): Introduce a wgpu::SharedFenceAndSignalValue struct instead
     // of having two arrays that need to have the same size.
-    DAWN_INVALID_IF(descriptor->fenceCount != descriptor->signaledValueCount,
+    DAWN_INVALID_IF(descriptor->fences.size() != descriptor->signaledValues.size(),
                     "fenceCount (%i) doesn't match signaledValueCount (%i).",
-                    descriptor->fenceCount, descriptor->signaledValueCount);
+                    descriptor->fences.size(), descriptor->signaledValues.size());
 
-    for (size_t i = 0; i < descriptor->fenceCount; ++i) {
-        DAWN_UNSAFE_TODO(DAWN_TRY(GetDevice()->ValidateObject(descriptor->fences[i])));
+    for (SharedFenceBase* fence : descriptor->fences) {
+        DAWN_TRY(GetDevice()->ValidateObject(fence));
     }
 
     DAWN_TRY(ValidateResourceCreatedFromSelf(resource));
@@ -180,21 +181,17 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
 
     DAWN_TRY(BeginAccessImpl(resource, descriptor));
 
-    for (size_t i = 0; i < descriptor->fenceCount; ++i) {
+    for (auto [i, fence] : Enumerate(descriptor->fences)) {
         // Add the fences to mPendingFences if they are not already contained in the list.
         // This loop is O(n*m), but there shouldn't be very many fences.
-        auto it =
-            std::find_if(mContents->mPendingFences.begin(), mContents->mPendingFences.end(),
-                         [&](const auto& fence) {
-                             return fence.object.Get() == DAWN_UNSAFE_TODO(descriptor->fences[i]);
-                         });
+        auto it = std::find_if(
+            mContents->mPendingFences.begin(), mContents->mPendingFences.end(),
+            [&](const auto& pendingFence) { return pendingFence.object.Get() == fence; });
         if (it != mContents->mPendingFences.end()) {
-            it->signaledValue =
-                std::max(it->signaledValue, DAWN_UNSAFE_TODO(descriptor->signaledValues[i]));
+            it->signaledValue = std::max(it->signaledValue, descriptor->signaledValues[i]);
             continue;
         }
-        mContents->mPendingFences.push_back({DAWN_UNSAFE_TODO(descriptor->fences[i]),
-                                             DAWN_UNSAFE_TODO(descriptor->signaledValues[i])});
+        mContents->mPendingFences.push_back({fence, descriptor->signaledValues[i]});
     }
 
     DAWN_CHECK(!resource->IsError());
@@ -321,6 +318,7 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* s
 
     // Copy the fences to the output state.
     if (size_t fenceCount = fenceList.size()) {
+        // TODO(https://crbug.com/512465980): Use dawn::HeapArray
         auto* fences = new SharedFenceBase*[fenceCount];
         uint64_t* signaledValues = new uint64_t[fenceCount];
         for (size_t i = 0; i < fenceCount; ++i) {
@@ -328,15 +326,11 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* s
             DAWN_UNSAFE_TODO(signaledValues[i]) = fenceList[i].signaledValue;
         }
 
-        state->fenceCount = fenceCount;
-        state->fences = fences;
-        state->signaledValueCount = fenceCount;
-        state->signaledValues = signaledValues;
+        state->fences = DAWN_UNSAFE_TODO({fences, fenceCount});
+        state->signaledValues = DAWN_UNSAFE_TODO({signaledValues, fenceCount});
     } else {
-        state->fenceCount = 0;
-        state->fences = nullptr;
-        state->signaledValueCount = 0;
-        state->signaledValues = nullptr;
+        state->fences = {};
+        state->signaledValues = {};
     }
     state->initialized = resource->IsInitialized();
     return err;

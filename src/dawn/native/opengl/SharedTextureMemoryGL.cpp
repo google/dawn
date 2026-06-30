@@ -29,6 +29,7 @@
 
 #include <utility>
 
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/opengl/DeviceGL.h"
 #include "src/dawn/native/opengl/QueueGL.h"
@@ -64,9 +65,7 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(descriptor.ValidateSubset<>());
-    for (size_t i = 0; i < descriptor->fenceCount; ++i) {
-        SharedFenceBase* fence = DAWN_UNSAFE_TODO(descriptor->fences[i]);
-
+    for (auto [i, fence] : Enumerate(descriptor->fences)) {
         SharedFenceExportInfo exportInfo;
         DAWN_TRY(fence->ExportInfo(&exportInfo));
         switch (exportInfo.type) {
