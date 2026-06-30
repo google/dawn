@@ -1219,5 +1219,46 @@ TEST_F(SubgroupSizeControlValidationTest, ValidateTotalInvocationsPerWorkgroupAn
     TestTotalInvocationsPerWorkgroupAndSubgroupSize({32}, 32, true);
 }
 
+// Test that @subgroup_size(0) produces a validation error.
+TEST_F(SubgroupSizeControlValidationTest, ZeroSubgroupSizeIsInvalid) {
+    // Test with subgroup_size set as an override constant to 0.
+    {
+        std::string shader = R"(
+enable subgroups;
+enable subgroup_size_control;
+override kSubgroupSize : u32;
+@compute @subgroup_size(kSubgroupSize) @workgroup_size(32)
+fn main(@builtin(subgroup_invocation_id) sg_id : u32,
+        @builtin(subgroup_size) sg_size : u32) {
+    _ = sg_id + sg_size;
+})";
+
+        wgpu::ComputePipelineDescriptor pipelineDesc = {};
+        pipelineDesc.compute.module = utils::CreateShaderModule(device, shader.c_str());
+
+        wgpu::ConstantEntry entry = {};
+        entry.key = "kSubgroupSize";
+        entry.value = 0.0;
+        pipelineDesc.compute.constantCount = 1;
+        pipelineDesc.compute.constants = &entry;
+
+        ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&pipelineDesc));
+    }
+
+    // Test with subgroup_size set as a module-scope constant to 0.
+    {
+        std::string shader = R"(
+enable subgroups;
+enable subgroup_size_control;
+const kSubgroupSize = 0u;
+@compute @subgroup_size(kSubgroupSize) @workgroup_size(32)
+fn main(@builtin(subgroup_invocation_id) sg_id : u32,
+        @builtin(subgroup_size) sg_size : u32) {
+    _ = sg_id + sg_size;
+})";
+        ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, shader.c_str()));
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn
