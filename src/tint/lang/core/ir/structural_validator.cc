@@ -694,13 +694,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::Vector* v) { return CheckVector(v, diag); },
             [&](const core::type::Matrix* m) { return CheckMatrix(m, diag); },
             [&](const core::type::Atomic* a) { return CheckAtomic(a, diag); },
-            [&](const core::type::SampledTexture* s) {
-                if (!s->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
-                    diag() << "invalid sampled texture sample type: " << NameOf(s->Type());
-                    return false;
-                }
-                return true;
-            },
+            [&](const core::type::SampledTexture* s) { return CheckSampledTexture(s, diag); },
             [&](const core::type::MultisampledTexture* ms) {
                 if (!ms->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
                     diag() << "invalid multisampled texture sample type: " << NameOf(ms->Type());
@@ -845,6 +839,15 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckSampledTexture(const core::type::SampledTexture* s,
+                                     std::function<diag::Diagnostic&()>& diag) {
+    if (!s->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
+        diag() << "invalid sampled texture sample type: " << NameOf(s->Type());
+        return false;
+    }
+    return true;
 }
 
 bool Structural::CheckAtomic(const core::type::Atomic* atom,

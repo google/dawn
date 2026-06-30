@@ -351,6 +351,12 @@ class Structural {
     /// @param diag a function that creates an error diagnostic for the source of the type
     bool CheckAtomic(const core::type::Atomic* atom, std::function<diag::Diagnostic&()>& diag);
 
+    /// Checks that `s` is a valid sampled texture
+    /// @param s the sampled texture to validate
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool CheckSampledTexture(const core::type::SampledTexture* s,
+                             std::function<diag::Diagnostic&()>& diag);
+
     /// Checks that 8-bit types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
     /// @param parent the parent type for the 8-bit type
