@@ -1700,13 +1700,11 @@ void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescri
                                wgpu::FeatureLevel level) {
     DAWN_CHECK(deviceDescriptor);
     // Validate all required features with device toggles.
-    DAWN_ASSERT(GetPhysicalDevice()->SupportsAllRequiredFeatures(
-        DAWN_UNSAFE_TODO(
-            {deviceDescriptor->requiredFeatures, deviceDescriptor->requiredFeatureCount}),
-        mToggles));
+    DAWN_ASSERT(GetPhysicalDevice()->SupportsAllRequiredFeatures(deviceDescriptor->requiredFeatures,
+                                                                 mToggles));
 
-    for (uint32_t i = 0; i < deviceDescriptor->requiredFeatureCount; ++i) {
-        mEnabledFeatures.EnableFeature(DAWN_UNSAFE_TODO(deviceDescriptor->requiredFeatures[i]));
+    for (wgpu::FeatureName feature : deviceDescriptor->requiredFeatures) {
+        mEnabledFeatures.EnableFeature(feature);
     }
 
     // Handle features that implicitly enable other features.

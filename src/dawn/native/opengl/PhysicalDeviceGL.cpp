@@ -525,9 +525,8 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     const TogglesState& deviceToggles,
     Ref<DeviceBase::DeviceLostEvent>&& lostEvent) {
     bool useANGLETextureSharing = false;
-    for (size_t i = 0; i < descriptor->requiredFeatureCount; ++i) {
-        if (DAWN_UNSAFE_TODO(descriptor->requiredFeatures[i]) ==
-            wgpu::FeatureName::ANGLETextureSharing) {
+    for (wgpu::FeatureName feature : descriptor->requiredFeatures) {
+        if (feature == wgpu::FeatureName::ANGLETextureSharing) {
             useANGLETextureSharing = true;
         }
     }
