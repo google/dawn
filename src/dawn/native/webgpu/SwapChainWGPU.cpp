@@ -135,15 +135,16 @@ ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
     }
     DAWN_ASSERT(innerSurface);
 
+    std::vector<WGPUTextureFormat> viewFormats;
+    for (wgpu::TextureFormat viewFormat : config->viewFormats) {
+        viewFormats.push_back(ToAPI(viewFormat));
+    }
+
     WGPUSurfaceConfiguration innerConfig = {};
     innerConfig.device = device->GetInnerHandle();
     innerConfig.format = ToAPI(config->format);
     innerConfig.usage = ToAPI(config->usage);
-    innerConfig.viewFormatCount = config->viewFormatCount;
-    std::vector<WGPUTextureFormat> viewFormats;
-    for (uint32_t i = 0; i < config->viewFormatCount; ++i) {
-        viewFormats.push_back(ToAPI(DAWN_UNSAFE_TODO(config->viewFormats[i])));
-    }
+    innerConfig.viewFormatCount = viewFormats.size();
     innerConfig.viewFormats = viewFormats.data();
     innerConfig.alphaMode = ToAPI(config->alphaMode);
     innerConfig.width = config->width;

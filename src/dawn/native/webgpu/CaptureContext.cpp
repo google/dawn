@@ -114,11 +114,8 @@ void CaptureContext::CaptureSurfaceConfigure(Surface* surface, const SurfaceConf
         return;
     }
 
-    std::vector<wgpu::TextureFormat> viewFormats;
-    for (uint32_t i = 0; i < config->viewFormatCount; ++i) {
-        viewFormats.push_back(DAWN_UNSAFE_TODO(config->viewFormats[i]));
-    }
-
+    std::vector<wgpu::TextureFormat> viewFormats{config->viewFormats.begin(),
+                                                 config->viewFormats.end()};
     schema::RootCommandSurfaceConfigureCmd cmd{{
         .data = {{
             .surfaceId = surfaceId,

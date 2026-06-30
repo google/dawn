@@ -71,8 +71,6 @@
             "SharedTextureMemoryDmaBufDescriptor",
             "SharedTextureMemoryEndAccessState",
             "SurfaceCapabilities",
-            "SurfaceConfiguration",
-            "TextureDescriptor",
             "VertexState"
         ],
         "structure_span_index_type_override": {

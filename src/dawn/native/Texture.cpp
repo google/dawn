@@ -33,6 +33,7 @@
 #include "absl/strings/str_format.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/HashUtils.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/Adapter.h"
@@ -800,10 +801,9 @@ MaybeError ValidateTextureDescriptor(
         }
     }
 
-    for (uint32_t i = 0; i < descriptor->viewFormatCount; ++i) {
-        DAWN_UNSAFE_TODO(DAWN_TRY_CONTEXT(
-            ValidateTextureViewFormatCompatibility(device, *format, descriptor->viewFormats[i]),
-            "validating viewFormats[%u]", i));
+    for (auto [i, viewFormat] : Enumerate(descriptor->viewFormats)) {
+        DAWN_TRY_CONTEXT(ValidateTextureViewFormatCompatibility(device, *format, viewFormat),
+                         "validating viewFormats[%u]", i);
     }
 
     DAWN_INVALID_IF(descriptor->usage == wgpu::TextureUsage::None,
@@ -816,7 +816,7 @@ MaybeError ValidateTextureDescriptor(
             (descriptor->size.depthOrArrayLayers != 1 || descriptor->mipLevelCount != 1),
             "Transient textures must have depthOrArrayLayers (%u) = 1 and mipLevelCount (%u) = 1.",
             descriptor->size.depthOrArrayLayers, descriptor->mipLevelCount);
-        DAWN_INVALID_IF(descriptor->viewFormatCount > 0,
+        DAWN_INVALID_IF(!descriptor->viewFormats.empty(),
                         "Transient textures must not have any viewFormats");
     }
 
@@ -1075,14 +1075,13 @@ TextureBase::TextureBase(DeviceBase* device, const UnpackedPtr<TextureDescriptor
         mMipLevelCount * GetArrayLayers() * GetAspectCount(mFormat->aspects);
     mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
 
-    for (uint32_t i = 0; i < descriptor->viewFormatCount; ++i) {
-        if (DAWN_UNSAFE_TODO(descriptor->viewFormats[i]) == descriptor->format) {
+    for (wgpu::TextureFormat viewFormat : descriptor->viewFormats) {
+        if (viewFormat == descriptor->format) {
             // Skip our own format, so the backends don't allocate the texture for
             // reinterpretation if it's not needed.
             continue;
         }
-        mViewFormats[device->GetValidInternalFormat(DAWN_UNSAFE_TODO(descriptor->viewFormats[i]))] =
-            true;
+        mViewFormats[device->GetValidInternalFormat(viewFormat)] = true;
     }
 
     if (auto* internalUsageDesc = descriptor.Get<DawnTextureInternalUsageDescriptor>()) {

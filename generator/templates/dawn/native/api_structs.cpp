@@ -111,7 +111,9 @@ namespace {{native_namespace}} {
                 {% endif %}
                 {% for member in type.members %}
                     {% set memberName = member.name.camelCase() %}
-                    {% if member.requires_struct_defaulting %}
+                    {% if spanify and member.is_length %}
+                        //* Skip as the member is included in the span member.
+                    {% elif member.requires_struct_defaulting %}
                         {% if member.type.category == "structure" %}
                             copy.{{memberName}} = {{memberName}}.WithTrivialFrontendDefaults();
                         {% elif member.type.category == "enum" %}

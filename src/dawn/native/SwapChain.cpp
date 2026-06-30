@@ -47,8 +47,7 @@ TextureDescriptor GetSwapChainBaseTextureDescriptor(SwapChainBase* swapChain) {
     desc.dimension = wgpu::TextureDimension::e2D;
     desc.size = {swapChain->GetWidth(), swapChain->GetHeight(), 1};
     desc.format = swapChain->GetFormat();
-    desc.viewFormatCount = swapChain->GetViewFormats().size();
-    desc.viewFormats = swapChain->GetViewFormats().data();
+    desc.viewFormats = swapChain->GetViewFormats();
     desc.mipLevelCount = 1;
     desc.sampleCount = 1;
 
@@ -66,12 +65,12 @@ SwapChainBase::SwapChainBase(DeviceBase* device,
       mPresentMode(config->presentMode),
       mAlphaMode(config->alphaMode),
       mSurface(surface) {
-    for (uint32_t i = 0; i < config->viewFormatCount; ++i) {
-        if (DAWN_UNSAFE_TODO(config->viewFormats[i]) == config->format) {
+    for (wgpu::TextureFormat viewFormat : config->viewFormats) {
+        if (viewFormat == config->format) {
             // Skip our own format, like texture creations does.
             continue;
         }
-        mViewFormats.push_back(DAWN_UNSAFE_TODO(config->viewFormats[i]));
+        mViewFormats.push_back(viewFormat);
     }
 }
 

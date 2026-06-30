@@ -255,7 +255,6 @@ MaybeError ValidateSurfaceConfiguration(DeviceBase* device,
     textureDesc.size = {config->width, config->height};
     textureDesc.format = config->format;
     textureDesc.dimension = wgpu::TextureDimension::e2D;
-    textureDesc.viewFormatCount = config->viewFormatCount;
     textureDesc.viewFormats = config->viewFormats;
 
     UnpackedPtr<TextureDescriptor> unpackedTextureDesc;
