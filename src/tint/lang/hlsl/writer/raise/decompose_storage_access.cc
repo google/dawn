@@ -378,7 +378,12 @@ struct State {
         TINT_IR_ASSERT(ir, sm);
 
         b.InsertBefore(call, [&] {
-            UpdateOffsetData(call_offset, sm->Type()->Size(), &offset);
+            // Majorness template variant has offset and stride sized in scalar type size.
+            uint32_t offset_size = sm->Type()->Size();
+            if (template_majorness) {
+                offset_size = ty.ShaderScalarType(sm)->Size();
+            }
+            UpdateOffsetData(call_offset, offset_size, &offset);
 
             core::ir::Value* col_major = nullptr;
             if (template_majorness) {
@@ -393,6 +398,9 @@ struct State {
             auto* layout = ColMajorToMatrixLayout(col_major);
             // TODO(crbug.com/490062439): This will need to be updated if we change stride.
             uint32_t bytes_per_element = sm->Type()->Size();
+            if (template_majorness) {
+                bytes_per_element = ty.ShaderScalarType(sm)->Size();
+            }
             if (auto* cnst = stride->As<core::ir::Constant>()) {
                 stride = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() * bytes_per_element));
             } else {
@@ -419,7 +427,12 @@ struct State {
         TINT_IR_ASSERT(ir, sm);
 
         b.InsertBefore(call, [&] {
-            UpdateOffsetData(call_offset, sm->Type()->Size(), &offset);
+            // Majorness template variant has offset and stride sized in scalar type size.
+            uint32_t offset_size = sm->Type()->Size();
+            if (template_majorness) {
+                offset_size = ty.ShaderScalarType(sm)->Size();
+            }
+            UpdateOffsetData(call_offset, offset_size, &offset);
 
             core::ir::Value* col_major = nullptr;
             if (template_majorness) {
@@ -435,6 +448,9 @@ struct State {
 
             // TODO(crbug.com/490062439): This will need to be updated if we change stride.
             uint32_t bytes_per_element = sm->Type()->Size();
+            if (template_majorness) {
+                bytes_per_element = ty.ShaderScalarType(sm)->Size();
+            }
             if (auto* cnst = stride->As<core::ir::Constant>()) {
                 stride = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() * bytes_per_element));
             } else {

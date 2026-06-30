@@ -5,7 +5,7 @@ using Matrix_right_i8_8x8 = Matrix<ComponentType::I8, 8, 8, MatrixUse::B, Matrix
 RWByteAddressBuffer prevent_dce : register(u0);
 ByteAddressBuffer sb_ro : register(t1);
 Matrix_right_i8_8x8 subgroupMatrixLoad_7c2b34() {
-  Matrix_right_i8_8x8 res = Matrix_right_i8_8x8::Load(sb_ro, 1u, 8u, MatrixLayout::ColMajor);
+  Matrix_right_i8_8x8 res = Matrix_right_i8_8x8::Load(sb_ro, 4u, 32u, MatrixLayout::ColMajor);
   return res;
 }
 

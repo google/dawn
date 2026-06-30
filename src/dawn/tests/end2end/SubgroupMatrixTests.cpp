@@ -879,7 +879,8 @@ class SubgroupMatrix_MatrixStoreTest : public DawnTestWithParams<MatrixStorePara
     wgpu::ComputePipeline GetComputePipelineFromSubgroupMatrixConfig(
         const wgpu::SubgroupMatrixConfig& config,
         uint32_t subgroupMaxSize,
-        bool inputColumnMajor) {
+        bool inputColumnMajor,
+        bool majorness_template) {
         // Generate a shader that stores a subgroup matrix into a storage buffer.
         std::ostringstream shader;
         shader << "enable chromium_experimental_subgroup_matrix;\n";
@@ -896,12 +897,32 @@ class SubgroupMatrix_MatrixStoreTest : public DawnTestWithParams<MatrixStorePara
         shader << "const K = " << config.K << ";\n";
         shader << "const M = " << config.M << ";\n";
 
-        shader << "const kStoreOffset = K * M;\n";
+        shader << "const kStoreOffset = K * M";
+        if (majorness_template) {
+            // Offset in terms of ArrayType
+            if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
+                config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
+                shader << "/4";
+            }
+        }
+        shader << ";\n";
+
+        shader << "const stride = " << (inputColumnMajor ? "M" : "K");
+        if (majorness_template) {
+            // Offset in terms of ArrayType
+            if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
+                config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
+                shader << "/4";
+            }
+        }
+        shader << ";\n";
 
         shader << "const kInputArraySize = kStoreOffset";
-        if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
-            config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
-            shader << "/4";
+        if (!majorness_template) {
+            if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
+                config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
+                shader << "/4";
+            }
         }
         shader << ";\n";
 
@@ -914,21 +935,36 @@ class SubgroupMatrix_MatrixStoreTest : public DawnTestWithParams<MatrixStorePara
 fn main() {
 )";
 
-        std::string loadInput;
-        std::string storeResult;
-        if (inputColumnMajor) {
-            // When the matrix is stored in column major, the stride should be the total number of
-            // rows.
-            loadInput = "let input_matrix = subgroupMatrixLoad<InputType>(&input, 0, true, M);";
-            storeResult = "subgroupMatrixStore(&output, kStoreOffset, input_matrix, true, M);";
+        if (majorness_template) {
+            if (inputColumnMajor) {
+                shader << "let input_matrix = subgroupMatrixLoad<InputType, col_major>(&input, 0, "
+                          "stride);\n";
+                shader << "subgroupMatrixStore<col_major>(&output, kStoreOffset, input_matrix, "
+                          "stride);\n";
+            } else {
+                shader << "let input_matrix = subgroupMatrixLoad<InputType, row_major>(&input,  0, "
+                          "stride);\n";
+                shader << "subgroupMatrixStore<row_major>(&output, kStoreOffset, input_matrix, "
+                          "stride);\n";
+            }
         } else {
-            // When the matrix is stored in row major, the stride should be the total number of
-            // columns.
-            loadInput = "let input_matrix = subgroupMatrixLoad<InputType>(&input,  0, false, K);";
-            storeResult = "subgroupMatrixStore(&output, kStoreOffset, input_matrix, false, K);";
+            if (inputColumnMajor) {
+                // When the matrix is stored in column major, the stride should be the total number
+                // of rows.
+                shader << "let input_matrix = subgroupMatrixLoad<InputType>(&input, 0, true, "
+                          "stride);\n";
+                shader << "subgroupMatrixStore(&output, kStoreOffset, input_matrix, true, stride);";
+            } else {
+                // When the matrix is stored in row major, the stride should be the total number of
+                // columns.
+                shader << "let input_matrix = subgroupMatrixLoad<InputType>(&input,  0, false, "
+                          "stride);\n";
+                shader
+                    << "subgroupMatrixStore(&output, kStoreOffset, input_matrix, false, stride);\n";
+            }
         }
 
-        shader << loadInput << "\n" << storeResult << "\n\n}";
+        shader << "\n}";
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = utils::CreateShaderModule(device, shader.str());
@@ -937,11 +973,12 @@ fn main() {
 
     void TestSubgroupMatrixConfig(const wgpu::SubgroupMatrixConfig& config,
                                   uint32_t subgroupMaxSize,
-                                  bool inputColumnMajor) {
+                                  bool inputColumnMajor,
+                                  bool majorness_template) {
         // In the tests we use a compute pipeline to store a subgroup matrix into a storage buffer
         // and check if the data in the buffer matches the expectation.
-        wgpu::ComputePipeline pipeline =
-            GetComputePipelineFromSubgroupMatrixConfig(config, subgroupMaxSize, inputColumnMajor);
+        wgpu::ComputePipeline pipeline = GetComputePipelineFromSubgroupMatrixConfig(
+            config, subgroupMaxSize, inputColumnMajor, majorness_template);
 
         // Create the input matrix and fill it with values.
         Matrix inputMatrix(config.K, config.M, config.componentType, inputColumnMajor);
@@ -1007,7 +1044,8 @@ TEST_P(SubgroupMatrix_MatrixStoreTest, MatrixStoreWithOffset) {
             }
         }
 
-        TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mInputColumnMajor);
+        TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mInputColumnMajor, false);
+        TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mInputColumnMajor, true);
     }
 }
 

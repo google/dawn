@@ -9,9 +9,9 @@ void subgroupMatrixStore_793f08() {
   uint arg_3 = 8u;
   uint v = arg_1;
   Matrix_result_u8_8x8 v_1 = arg_2;
-  uint v_2 = max(arg_3, 8u);
-  if ((((v + (v_2 * 7u)) + 8u) <= 4096u)) {
-    v_1.Store(sb_rw, (0u + (v * 1u)), (v_2 * 1u), MatrixLayout::RowMajor);
+  uint v_2 = max(arg_3, 2u);
+  if ((((v + (v_2 * 7u)) + 2u) <= 1024u)) {
+    v_1.Store(sb_rw, (0u + (v * 4u)), (v_2 * 4u), MatrixLayout::RowMajor);
   }
 }
 

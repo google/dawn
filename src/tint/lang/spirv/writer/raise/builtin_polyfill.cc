@@ -1378,9 +1378,11 @@ struct State {
             // in WGSL they both mean the number of elements. When the subgroup matrix element type
             // is `i8` or `u8`, and the input array type is `i32` or `u32`, we need to convert the
             // `stride` and `offset` in WGSL into the ones in SPIR-V by dividing them with 4.
+            // Note: the majorness templated variants match SPIR-V
             auto* applied_stride = stride;
             auto* applied_offset = offset;
-            if (result_ty->Type()->Size() == 1u && arr->ElemType()->Size() == 4u) {
+            if (!majorness_template && result_ty->Type()->Size() == 1u &&
+                arr->ElemType()->Size() == 4u) {
                 if (!config.cooperative_matrix_stride_is_matrix_elements) {
                     auto* applied_stride_binary =
                         b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));
@@ -1434,9 +1436,11 @@ struct State {
             // in WGSL they both mean the number of elements. When the subgroup matrix element type
             // is `i8` or `u8`, and the input array type is `i32` or `u32`, we need to convert the
             // `stride` and `offset` in WGSL into the ones in SPIR-V by dividing them with 4.
+            // Note: the majorness templated variants match SPIR-V
             auto* applied_stride = stride;
             auto* applied_offset = offset;
-            if (value_type->Type()->Size() == 1u && arr->ElemType()->Size() == 4u) {
+            if (!majorness_template && value_type->Type()->Size() == 1u &&
+                arr->ElemType()->Size() == 4u) {
                 if (!config.cooperative_matrix_stride_is_matrix_elements) {
                     auto* applied_stride_binary =
                         b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));

@@ -4044,23 +4044,22 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 8u
+    %4:u32 = max %stride, 2u
     %5:u32 = arrayLength %arr
-    %6:u32 = mul %5, 4u
-    %7:u32 = mul %4, 3u
-    %8:u32 = add 0u, %7
-    %9:u32 = add %8, 8u
-    %10:bool = lte %9, %6
-    %11:ptr<function, subgroup_matrix_result<i8, 8, 4>, read_write> = var undef
-    if %10 [t: $B3] {  # if_1
+    %6:u32 = mul %4, 3u
+    %7:u32 = add 0u, %6
+    %8:u32 = add %7, 2u
+    %9:bool = lte %8, %5
+    %10:ptr<function, subgroup_matrix_result<i8, 8, 4>, read_write> = var undef
+    if %9 [t: $B3] {  # if_1
       $B3: {  # true
-        %12:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, row_major> %arr, 0u, %4
-        store %11, %12
+        %11:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, row_major> %arr, 0u, %4
+        store %10, %11
         exit_if  # if_1
       }
     }
-    %13:subgroup_matrix_result<i8, 8, 4> = load %11
-    ret %13
+    %12:subgroup_matrix_result<i8, 8, 4> = load %10
+    ret %12
   }
 }
 )";
@@ -4072,7 +4071,7 @@ $B1: {  # root
 
 %foo = func(%stride:u32):subgroup_matrix_result<i8, 8, 4> {
   $B2: {
-    %4:u32 = max %stride, 8u
+    %4:u32 = max %stride, 2u
     %5:subgroup_matrix_result<i8, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 4>, row_major> %arr, 0u, %4
     ret %5
   }

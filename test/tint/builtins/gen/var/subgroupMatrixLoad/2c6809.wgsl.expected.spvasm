@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 83
+; Bound: 80
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -51,21 +51,20 @@
          %19 = OpTypeFunction %14
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
      %uint_7 = OpConstant %uint 7
-  %uint_4096 = OpConstant %uint 4096
        %bool = OpTypeBool
 %_ptr_Function_14 = OpTypePointer Function %14
          %38 = OpConstantNull %14
-     %uint_4 = OpConstant %uint 4
 %_ptr_Workgroup_int = OpTypePointer Workgroup %int
        %void = OpTypeVoid
-         %53 = OpTypeFunction %void %uint
-     %uint_2 = OpConstant %uint 2
+         %50 = OpTypeFunction %void %uint
  %uint_24840 = OpConstant %uint 24840
 %_ptr_StorageBuffer__arr_int_uint_1024 = OpTypePointer StorageBuffer %_arr_int_uint_1024
+     %uint_4 = OpConstant %uint 4
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
       %int_0 = OpConstant %int 0
-         %79 = OpTypeFunction %void
+         %76 = OpTypeFunction %void
 %subgroupMatrixLoad_2c6809 = OpFunction %14 None %19
          %20 = OpLabel
       %arg_1 = OpVariable %_ptr_Function_uint Function
@@ -76,19 +75,17 @@
                OpStore %arg_2 %uint_8
          %25 = OpLoad %uint %arg_1 None
          %26 = OpLoad %uint %arg_2 None
-         %27 = OpExtInst %uint %28 UMax %26 %uint_8
-         %29 = OpIMul %uint %27 %uint_7
-         %31 = OpIAdd %uint %25 %29
-         %32 = OpIAdd %uint %31 %uint_8
-         %33 = OpULessThanEqual %bool %32 %uint_4096
+         %27 = OpExtInst %uint %28 UMax %26 %uint_2
+         %30 = OpIMul %uint %27 %uint_7
+         %32 = OpIAdd %uint %25 %30
+         %33 = OpIAdd %uint %32 %uint_2
+         %34 = OpULessThanEqual %bool %33 %uint_1024
                OpSelectionMerge %39 None
-               OpBranchConditional %33 %40 %39
+               OpBranchConditional %34 %40 %39
          %40 = OpLabel
-         %44 = OpUDiv %uint %27 %uint_4
-         %46 = OpUDiv %uint %25 %uint_4
-         %47 = OpAccessChain %_ptr_Workgroup_int %arg_0 %46
-         %49 = OpCooperativeMatrixLoadKHR %14 %47 %uint_0 %44 NonPrivatePointer
-               OpStore %36 %49 None
+         %44 = OpAccessChain %_ptr_Workgroup_int %arg_0 %25
+         %46 = OpCooperativeMatrixLoadKHR %14 %44 %uint_0 %27 NonPrivatePointer
+               OpStore %36 %46 None
                OpBranch %39
          %39 = OpLabel
          %41 = OpLoad %14 %36 None
@@ -96,42 +93,42 @@
          %43 = OpLoad %14 %res None
                OpReturnValue %43
                OpFunctionEnd
-%compute_main_inner = OpFunction %void None %53
+%compute_main_inner = OpFunction %void None %50
 %tint_local_index = OpFunctionParameter %uint
-         %54 = OpLabel
+         %51 = OpLabel
+               OpBranch %52
+         %52 = OpLabel
                OpBranch %55
          %55 = OpLabel
-               OpBranch %58
-         %58 = OpLabel
-         %60 = OpPhi %uint %tint_local_index %55 %61 %57
-               OpLoopMerge %59 %57 None
+         %57 = OpPhi %uint %tint_local_index %52 %58 %54
+               OpLoopMerge %56 %54 None
+               OpBranch %53
+         %53 = OpLabel
+         %70 = OpUGreaterThanEqual %bool %57 %uint_1024
+               OpSelectionMerge %71 None
+               OpBranchConditional %70 %72 %71
+         %72 = OpLabel
                OpBranch %56
+         %71 = OpLabel
+         %73 = OpAccessChain %_ptr_Workgroup_int %arg_0 %57
+               OpStore %73 %int_0 NonPrivatePointer
+               OpBranch %54
+         %54 = OpLabel
+         %58 = OpIAdd %uint %57 %uint_1
+               OpBranch %55
          %56 = OpLabel
-         %73 = OpUGreaterThanEqual %bool %60 %uint_1024
-               OpSelectionMerge %74 None
-               OpBranchConditional %73 %75 %74
-         %75 = OpLabel
-               OpBranch %59
-         %74 = OpLabel
-         %76 = OpAccessChain %_ptr_Workgroup_int %arg_0 %60
-               OpStore %76 %int_0 NonPrivatePointer
-               OpBranch %57
-         %57 = OpLabel
-         %61 = OpIAdd %uint %60 %uint_1
-               OpBranch %58
-         %59 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_24840
-         %65 = OpFunctionCall %14 %subgroupMatrixLoad_2c6809
-         %66 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_1024 %1 %uint_0
-         %68 = OpUDiv %uint %uint_8 %uint_4
-         %69 = OpUDiv %uint %uint_0 %uint_4
-         %70 = OpAccessChain %_ptr_StorageBuffer_int %66 %69
-               OpCooperativeMatrixStoreKHR %70 %65 %uint_0 %68 NonPrivatePointer
+         %61 = OpFunctionCall %14 %subgroupMatrixLoad_2c6809
+         %62 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_1024 %1 %uint_0
+         %64 = OpUDiv %uint %uint_8 %uint_4
+         %66 = OpUDiv %uint %uint_0 %uint_4
+         %67 = OpAccessChain %_ptr_StorageBuffer_int %62 %66
+               OpCooperativeMatrixStoreKHR %67 %61 %uint_0 %64 NonPrivatePointer
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %79
-         %80 = OpLabel
-         %81 = OpLoad %uint %compute_main_local_invocation_index_Input None
-         %82 = OpFunctionCall %void %compute_main_inner %81
+%compute_main = OpFunction %void None %76
+         %77 = OpLabel
+         %78 = OpLoad %uint %compute_main_local_invocation_index_Input None
+         %79 = OpFunctionCall %void %compute_main_inner %78
                OpReturn
                OpFunctionEnd

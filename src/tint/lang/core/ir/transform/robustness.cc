@@ -425,6 +425,7 @@ struct State {
         Value* stride = nullptr;
         uint32_t stride_index = 0;
         const type::SubgroupMatrix* matrix_ty = nullptr;
+        bool majorness_template = false;
         if (call->Func() == BuiltinFn::kSubgroupMatrixLoad) {
             if (call->ExplicitTemplateParams().Length() == 2) {
                 TINT_IR_ASSERT(
@@ -433,6 +434,7 @@ struct State {
                             core::Majorness::kColMajor;
                 stride = args[2];
                 stride_index = 2;
+                majorness_template = true;
             } else {
                 col_major = args[2]->As<Constant>()->Value()->ValueAs<bool>();
                 stride = args[3];
@@ -448,6 +450,7 @@ struct State {
                             core::Majorness::kColMajor;
                 stride = args[3];
                 stride_index = 3;
+                majorness_template = true;
             } else {
                 col_major = args[3]->As<Constant>()->Value()->ValueAs<bool>();
                 stride = args[4];
@@ -456,6 +459,8 @@ struct State {
         } else {
             TINT_IR_UNREACHABLE(ir);
         }
+
+        auto* scalar_ty = ty.ShaderScalarType(matrix_ty);
 
         // Determine the minimum valid stride, and the value that we will multiply the stride by to
         // determine the number of elements in memory that will be accessed.
@@ -467,6 +472,10 @@ struct State {
         } else {
             min_stride = matrix_ty->Columns();
             major_dim = matrix_ty->Rows();
+        }
+        // Offset and stride of templated versions are counted in elements of the scalar type.
+        if (majorness_template) {
+            min_stride = min_stride * matrix_ty->Type()->Size() / scalar_ty->Size();
         }
 
         // Increase the stride so that it is at least `min_stride` if necessary.
@@ -487,7 +496,9 @@ struct State {
         // Some matrix components types are packed together into a single array element.
         // Take that into account here by scaling the array length to number of components.
         uint32_t components_per_element = 0;
-        if (matrix_ty->Type()->IsAnyOf<type::I8, type::U8>()) {
+        if (majorness_template) {
+            components_per_element = 1;
+        } else if (matrix_ty->Type()->IsAnyOf<type::I8, type::U8>()) {
             components_per_element = 4;
         } else {
             TINT_IR_ASSERT(

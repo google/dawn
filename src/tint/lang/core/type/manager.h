@@ -361,6 +361,11 @@ class Manager final {
     /// @returns a type with the `size` number of components
     const core::type::Type* MatchWidth(const core::type::Type* el_ty, size_t size);
 
+    // Return the shader scalar type for the subgroup matrix.
+    // @param mat the subgroup matrix
+    // @returns the shader scalar type
+    const core::type::Type* ShaderScalarType(const core::type::SubgroupMatrix* mat);
+
     /// @tparam T the element type
     /// @tparam N the vector width
     /// @returns the vector type
