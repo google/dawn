@@ -346,6 +346,11 @@ class Structural {
     /// @param diag a function that creates an error diagnostic for the source of the type
     bool CheckMatrix(const core::type::Matrix* mat, std::function<diag::Diagnostic&()>& diag);
 
+    /// Checks that `atom` is a valid atomic type
+    /// @param atom the atomic to check
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool CheckAtomic(const core::type::Atomic* atom, std::function<diag::Diagnostic&()>& diag);
+
     /// Checks that 8-bit types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
     /// @param parent the parent type for the 8-bit type

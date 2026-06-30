@@ -693,22 +693,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::Array* arr) { return CheckArray(arr, diag); },
             [&](const core::type::Vector* v) { return CheckVector(v, diag); },
             [&](const core::type::Matrix* m) { return CheckMatrix(m, diag); },
-            [&](const core::type::Atomic* a) {
-                // Prior to lowering we allow for atomic operations on vec2u to support the
-                // AtomicVec2UMinMax feature.
-                if (auto* vec = a->Type()->As<core::type::Vector>()) {
-                    if (vec->Width() == 2 && vec->Type()->Is<core::type::U32>()) {
-                        return true;
-                    }
-                }
-
-                if (!a->Type()->IsAnyOf<core::type::I32, core::type::U32, core::type::U64>()) {
-                    diag() << "atomic subtype must be i32, u32 or u64 type is "
-                           << NameOf(a->Type());
-                    return false;
-                }
-                return true;
-            },
+            [&](const core::type::Atomic* a) { return CheckAtomic(a, diag); },
             [&](const core::type::SampledTexture* s) {
                 if (!s->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
                     diag() << "invalid sampled texture sample type: " << NameOf(s->Type());
@@ -860,6 +845,23 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckAtomic(const core::type::Atomic* atom,
+                             std::function<diag::Diagnostic&()>& diag) {
+    // Prior to lowering we allow for atomic operations on vec2u to support the
+    // AtomicVec2UMinMax feature.
+    if (auto* vec = atom->Type()->As<core::type::Vector>()) {
+        if (vec->Width() == 2 && vec->Type()->Is<core::type::U32>()) {
+            return true;
+        }
+    }
+
+    if (!atom->Type()->IsAnyOf<core::type::I32, core::type::U32, core::type::U64>()) {
+        diag() << "atomic subtype must be i32, u32 or u64 type is " << NameOf(atom->Type());
+        return false;
+    }
+    return true;
 }
 
 bool Structural::CheckMatrix(const core::type::Matrix* mat,
