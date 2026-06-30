@@ -2264,6 +2264,116 @@ bool Validator::BufferView(const sem::Call* call) const {
     return true;
 }
 
+bool Validator::SubgroupMatrixLoadStore(const sem::Call* call) const {
+    auto* builtin = call->Target()->As<sem::BuiltinFn>();
+    if (!builtin) {
+        return false;
+    }
+
+    const bool is_load = builtin->Fn() == wgsl::BuiltinFn::kSubgroupMatrixLoad;
+    auto* ptr_arg = call->Arguments()[0];
+    auto* ptr_arr_ty = ptr_arg->Type()->UnwrapPtr()->As<core::type::Array>();
+    auto* offset_arg = call->Arguments()[1];
+    const sem::ValueExpression* stride_arg = nullptr;
+    auto* templated_ident = call->Declaration()->target->identifier->As<ast::TemplatedIdentifier>();
+    bool col_major = false;
+    const core::type::SubgroupMatrix* mat_ty = nullptr;
+    if (is_load) {
+        TINT_ASSERT(templated_ident);
+        // Don't validate deprecated variant.
+        // TODO(b/529415904): remove this after deprecated variant is removed.
+        if (templated_ident->arguments.Length() != 2) {
+            return true;
+        }
+        auto* sem_expr = sem_.Get(templated_ident->arguments[1]);
+        auto* arg_major = sem_expr->As<sem::BuiltinEnumExpression<core::Majorness>>();
+        TINT_ASSERT(arg_major);
+        col_major = arg_major->Value() == core::Majorness::kColMajor;
+        stride_arg = call->Arguments()[2];
+        mat_ty = call->Target()->ReturnType()->As<core::type::SubgroupMatrix>();
+    } else {
+        // Don't validate deprecated variant.
+        // TODO(b/529415904): remove this after deprecated variant is removed.
+        if (!templated_ident) {
+            return true;
+        }
+        TINT_ASSERT(templated_ident->arguments.Length() == 1);
+        auto* sem_expr = sem_.Get(templated_ident->arguments[0]);
+        auto* arg_major = sem_expr->As<sem::BuiltinEnumExpression<core::Majorness>>();
+        TINT_ASSERT(arg_major);
+        col_major = arg_major->Value() == core::Majorness::kColMajor;
+        stride_arg = call->Arguments()[3];
+        mat_ty = call->Arguments()[2]->Type()->As<core::type::SubgroupMatrix>();
+    }
+
+    uint32_t major_size = col_major ? mat_ty->Columns() : mat_ty->Rows();
+    uint32_t minor_size = col_major ? mat_ty->Rows() : mat_ty->Columns();
+    auto* ele_ty = mat_ty->Type();
+
+    const uint32_t min_stride = ele_ty->Size() * minor_size;
+
+    uint64_t stride_value = 0;
+    if (stride_arg->ConstantValue()) {
+        if (stride_arg->Type()->IsUnsignedIntegerScalar()) {
+            stride_value = stride_arg->ConstantValue()->ValueAs<uint64_t>();
+        } else {
+            TINT_ASSERT(offset_arg->Type()->IsSignedIntegerScalar());
+            int32_t ivalue = stride_arg->ConstantValue()->ValueAs<int32_t>();
+            if (ivalue < 0) {
+                AddError(offset_arg->Declaration()->source)
+                    << "the stride argument of " << builtin->str() << " must be non-negative";
+                return false;
+            }
+            stride_value = static_cast<uint64_t>(ivalue);
+        }
+        stride_value *= ptr_arr_ty->ElemType()->Size();
+        if (stride_value < min_stride) {
+            AddError(stride_arg->Declaration()->source)
+                << "the stride argument (" << stride_value / ptr_arr_ty->ElemType()->Size() << ", "
+                << stride_value << " bytes) of " << builtin->str()
+                << " must be greater than the minimum stride (" << min_stride << " bytes)";
+            return false;
+        }
+    } else {
+        // Use the minimum stride value so we can validate the required matrix size below. Minimum
+        // stride (and 0 offset) allow us to avoid predication.
+        stride_value = min_stride;
+    }
+
+    if (!ptr_arr_ty->ConstantCount()) {
+        return true;
+    }
+
+    uint64_t offset_value = 0;
+    if (offset_arg->ConstantValue()) {
+        if (offset_arg->Type()->IsUnsignedIntegerScalar()) {
+            offset_value = offset_arg->ConstantValue()->ValueAs<uint64_t>();
+        } else {
+            TINT_ASSERT(offset_arg->Type()->IsSignedIntegerScalar());
+            int32_t ivalue = offset_arg->ConstantValue()->ValueAs<int32_t>();
+            if (ivalue < 0) {
+                AddError(offset_arg->Declaration()->source)
+                    << "the offset argument of " << builtin->str() << " must be non-negative";
+                return false;
+            }
+            offset_value = static_cast<uint64_t>(ivalue);
+        }
+        offset_value *= ptr_arr_ty->ElemType()->Size();
+    }
+
+    uint64_t mat_required_size =
+        stride_value * (major_size - 1) + minor_size * ele_ty->Size() + offset_value;
+    uint64_t arr_size = ptr_arr_ty->Size();
+    if (arr_size < mat_required_size) {
+        AddError(call->Declaration()->source)
+            << "the pointer operand of " << builtin->str() << " is too small (" << arr_size
+            << " bytes) for the matrix access (" << mat_required_size << " bytes)";
+        return false;
+    }
+
+    return true;
+}
+
 bool Validator::TextureBuiltinFn(const sem::Call* call) const {
     auto* builtin = call->Target()->As<sem::BuiltinFn>();
     if (!builtin) {

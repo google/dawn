@@ -2347,9 +2347,11 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
             break;
 
         case wgsl::BuiltinFn::kSubgroupMatrixLoad:
+            TINT_RET_IF(!validator_.SubgroupMatrixLoadStore(call));
             RegisterLoad(args[0]);
             break;
         case wgsl::BuiltinFn::kSubgroupMatrixStore:
+            TINT_RET_IF(!validator_.SubgroupMatrixLoadStore(call));
             RegisterStore(args[0]);
             break;
 

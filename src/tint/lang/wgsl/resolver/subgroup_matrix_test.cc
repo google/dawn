@@ -1384,5 +1384,90 @@ input.wgsl:6:3 error: no matching call to 'subgroupMatrixStore<<invalid-type>>(p
 )");
 }
 
+TEST_F(ResolverSubgroupMatrixTest, Load_ColMajor_StrideLessThanMinStride_U32) {
+    ExpectError(
+        R"(
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage> in : array<u32>;
+fn foo() {
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 16>, col_major>(&in, 0, 15);
+})",
+        R"(input.wgsl:5:79 error: the stride argument (15, 60 bytes) of subgroupMatrixLoad must be greater than the minimum stride (64 bytes)
+  _ = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 16>, col_major>(&in, 0, 15);
+                                                                              ^^
+)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, Store_RowMajor_StrideLessThanMinStride_U8) {
+    ExpectError(
+        R"(
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage, read_write> out : array<u32>;
+fn foo(m : subgroup_matrix_result<u8, 8, 8>) {
+  subgroupMatrixStore<row_major>(&out, 0, m, 1);
+})",
+        R"(input.wgsl:5:46 error: the stride argument (1, 4 bytes) of subgroupMatrixStore must be greater than the minimum stride (8 bytes)
+  subgroupMatrixStore<row_major>(&out, 0, m, 1);
+                                             ^
+)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, Load_ColMajor_PointerTooSmall_F32) {
+    ExpectError(
+        R"(
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage> in : array<f32, 127>;
+fn foo(offset: u32, stride: u32) {
+  _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 16>, col_major>(&in, offset, stride);
+})",
+        R"(input.wgsl:5:7 error: the pointer operand of subgroupMatrixLoad is too small (508 bytes) for the matrix access (512 bytes)
+  _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 16>, col_major>(&in, offset, stride);
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, Load_ColMajor_PointerTooSmall_F32_ConstOffset) {
+    ExpectError(
+        R"(
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage> in : array<f32, 128>;
+fn foo(stride: u32) {
+  _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 16>, col_major>(&in, 1, stride);
+})",
+        R"(input.wgsl:5:7 error: the pointer operand of subgroupMatrixLoad is too small (512 bytes) for the matrix access (516 bytes)
+  _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 16>, col_major>(&in, 1, stride);
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, Store_RowMajor_PointerTooSmall_F16_ConstStride) {
+    ExpectError(
+        R"(
+enable f16;
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage, read_write> out : array<f16, 64>;
+fn foo(m : subgroup_matrix_right<f16, 8, 8>, offset: u32) {
+  subgroupMatrixStore<row_major>(&out, offset, m, 9);
+})",
+        R"(input.wgsl:6:3 error: the pointer operand of subgroupMatrixStore is too small (128 bytes) for the matrix access (142 bytes)
+  subgroupMatrixStore<row_major>(&out, offset, m, 9);
+  ^^^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, Store_RowMajor_PointerTooSmall_U8_ConstOffsetAndStride) {
+    ExpectError(
+        R"(
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage, read_write> out : array<u32, 63>;
+fn foo(m : subgroup_matrix_right<u8, 16, 8>) {
+  subgroupMatrixStore<row_major>(&out, 5, m, 8);
+})",
+        R"(input.wgsl:5:3 error: the pointer operand of subgroupMatrixStore is too small (252 bytes) for the matrix access (260 bytes)
+  subgroupMatrixStore<row_major>(&out, 5, m, 8);
+  ^^^^^^^^^^^^^^^^^^^
+)");
+}
+
 }  // namespace
 }  // namespace tint::resolver
