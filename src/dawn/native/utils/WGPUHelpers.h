@@ -165,17 +165,15 @@ const char* GetLabelForTrace(const std::string& label);
 // Given a std vector, allocate an equivalent array that can be returned in an API's foos/fooCount
 // pair of fields. The apiData must eventually be freed using FreeApiSeq.
 template <typename T>
-void AllocateApiSeqFromStdVector(const T** apiData, size_t* apiSize, const std::vector<T>& vector) {
-    size_t size = vector.size();
-    *apiSize = size;
-
-    if (size > 0) {
-        T* mutableData = new T[size];
-        DAWN_UNSAFE_TODO(memcpy(mutableData, vector.data(), size * sizeof(T)));
-        *apiData = mutableData;
-    } else {
-        *apiData = nullptr;
+Span<const T> AllocateApiSeqFromStdVector(const std::vector<T>& vector) {
+    if (vector.empty()) {
+        return {};
     }
+    // TODO(https://crbug.com/512465980): Use dawn::HeapArray
+    T* data = new T[vector.size()];
+    // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+    DAWN_UNSAFE_TODO(memcpy(data, vector.data(), vector.size() * sizeof(T)));
+    return DAWN_UNSAFE_TODO({data, vector.size()});
 }
 
 // Free an API sequence that was allocated by AllocateApiSeqFromStdVector

@@ -542,12 +542,9 @@ MaybeError Surface::GetCapabilities(AdapterBase* adapter, SurfaceCapabilities* c
         [&capabilities](const PhysicalDeviceSurfaceCapabilities& caps) -> MaybeError {
             capabilities->nextInChain = nullptr;
             capabilities->usages = caps.usages;
-            utils::AllocateApiSeqFromStdVector(&capabilities->formats, &capabilities->formatCount,
-                                               caps.formats);
-            utils::AllocateApiSeqFromStdVector(&capabilities->presentModes,
-                                               &capabilities->presentModeCount, caps.presentModes);
-            utils::AllocateApiSeqFromStdVector(&capabilities->alphaModes,
-                                               &capabilities->alphaModeCount, caps.alphaModes);
+            capabilities->formats = utils::AllocateApiSeqFromStdVector(caps.formats);
+            capabilities->presentModes = utils::AllocateApiSeqFromStdVector(caps.presentModes);
+            capabilities->alphaModes = utils::AllocateApiSeqFromStdVector(caps.alphaModes);
             return {};
         }));
 
