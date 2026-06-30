@@ -75,6 +75,21 @@
 namespace tint::core::ir::validator {
 namespace {
 
+struct Pending {
+    const core::type::Type* type = nullptr;
+    const core::type::Type* parent = nullptr;
+
+    bool operator==(const Pending& other) const {
+        return type == other.type && parent == other.parent;
+    }
+
+    struct Hasher {
+        HashCode operator()(const Pending& p) const {
+            return HashCombine(Hash(p.type), Hash(p.parent));
+        }
+    };
+};
+
 /// @returns the parent block of @p block
 const Block* ParentBlockOf(const Block* block) {
     if (auto* parent = block->Parent()) {
@@ -659,11 +674,9 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
         return;
     }
 
-    if (!ir_.properties.Contains(Property::kAllowNonCoreTypes)) {
-        if (!IsCoreType(root)) {
-            diag() << "non-core types not allowed in core IR";
-            return;
-        }
+    if (!ir_.properties.Contains(Property::kAllowNonCoreTypes) && !IsCoreType(root)) {
+        diag() << "non-core types not allowed in core IR";
+        return;
     }
 
     if (!validated_types_.Add(root)) {
@@ -675,14 +688,20 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
         addrspace = mv->AddressSpace();
     }
 
-    auto visit = [&](const core::type::Type* type, const core::type::Type* parent) {
-        if (type->IsAbstract()) {
+    Vector<Pending, 8> stack{Pending{root, nullptr}};
+    Hashset<Pending, 8, Pending::Hasher> seen{};
+    while (!stack.IsEmpty()) {
+        auto [ty, parent] = stack.Pop();
+        if (!ty) {
+            continue;
+        }
+        if (ty->IsAbstract()) {
             diag() << "abstracts are not permitted";
-            return false;
+            return;
         }
 
-        return tint::Switch(
-            type,  //
+        bool chk = tint::Switch(
+            ty,  //
             [&](const core::type::Struct* str) { return CheckStruct(str, diag); },
             [&](const core::type::Reference* ref) { return CheckRef(ref, diag, root); },
             [&](const core::type::Pointer* ptr) { return CheckPtr(ptr, diag); },
@@ -708,30 +727,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             },
             [&](const core::type::Buffer*) { return CheckBuffer(diag); },
             [](Default) { return true; });
-    };
-
-    struct Pending {
-        const core::type::Type* type = nullptr;
-        const core::type::Type* parent = nullptr;
-
-        bool operator==(const Pending& other) const {
-            return type == other.type && parent == other.parent;
-        }
-
-        struct Hasher {
-            HashCode operator()(const Pending& p) const {
-                return HashCombine(Hash(p.type), Hash(p.parent));
-            }
-        };
-    };
-    Vector<Pending, 8> stack{Pending{root, nullptr}};
-    Hashset<Pending, 8, Pending::Hasher> seen{};
-    while (!stack.IsEmpty()) {
-        auto [ty, parent] = stack.Pop();
-        if (!ty) {
-            continue;
-        }
-        if (!visit(ty, parent)) {
+        if (!chk) {
             return;
         }
 
@@ -752,15 +748,16 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             if (seen.Add(next)) {
                 stack.Push(next);
             }
-        } else {
-            // Different elements have different types (e.g. a struct), so we need to validate each
-            // of them if they have not been seen before.
-            for (uint32_t i = 0; i < type_count.count; i++) {
-                if (auto* subtype = ty->Element(i)) {
-                    Pending next{subtype, ty};
-                    if (seen.Add(next)) {
-                        stack.Push(next);
-                    }
+            continue;
+        }
+
+        // Different elements have different types (e.g. a struct), so we need to validate each
+        // of them if they have not been seen before.
+        for (uint32_t i = 0; i < type_count.count; i++) {
+            if (auto* subtype = ty->Element(i)) {
+                Pending next{subtype, ty};
+                if (seen.Add(next)) {
+                    stack.Push(next);
                 }
             }
         }
