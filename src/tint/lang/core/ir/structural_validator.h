@@ -373,6 +373,14 @@ class Structural {
     bool CheckInputAttachment(const core::type::InputAttachment* ia,
                               std::function<diag::Diagnostic&()>& diag);
 
+    /// Checks that `m` is a valid subgroup matrix
+    /// @param m the subgroup matrix
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    /// @param addrspace the address space of the root type
+    bool CheckSubgroupMatrix(const core::type::SubgroupMatrix* m,
+                             std::function<diag::Diagnostic&()>& diag,
+                             core::AddressSpace addrspace);
+
     /// Checks that 8-bit types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
     /// @param parent the parent type for the 8-bit type

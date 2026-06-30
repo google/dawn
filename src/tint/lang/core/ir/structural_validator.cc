@@ -701,18 +701,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::StorageTexture* s) { return CheckStorageTexture(s, diag); },
             [&](const core::type::InputAttachment* i) { return CheckInputAttachment(i, diag); },
             [&](const core::type::SubgroupMatrix* m) {
-                if (!m->Type()
-                         ->IsAnyOf<core::type::F16, core::type::F32, core::type::I8,
-                                   core::type::I32, core::type::U8, core::type::U32>()) {
-                    diag() << "invalid subgroup matrix component type: " << NameOf(m->Type());
-                    return false;
-                }
-                if (!(addrspace == AddressSpace::kUndefined ||
-                      addrspace == AddressSpace::kFunction)) {
-                    diag() << "invalid address space for subgroup matrix : " << addrspace;
-                    return false;
-                }
-                return true;
+                return CheckSubgroupMatrix(m, diag, addrspace);
             },
             [&](const core::type::BindingArray* t) {
                 if (!t->Count()->Is<core::type::ConstantArrayCount>()) {
@@ -806,6 +795,22 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckSubgroupMatrix(const core::type::SubgroupMatrix* m,
+                                     std::function<diag::Diagnostic&()>& diag,
+                                     core::AddressSpace addrspace) {
+    if (!m->Type()
+             ->IsAnyOf<core::type::F16, core::type::F32, core::type::I8, core::type::I32,
+                       core::type::U8, core::type::U32>()) {
+        diag() << "invalid subgroup matrix component type: " << NameOf(m->Type());
+        return false;
+    }
+    if (!(addrspace == AddressSpace::kUndefined || addrspace == AddressSpace::kFunction)) {
+        diag() << "invalid address space for subgroup matrix : " << addrspace;
+        return false;
+    }
+    return true;
 }
 
 bool Structural::CheckInputAttachment(const core::type::InputAttachment* ia,
