@@ -213,6 +213,10 @@ config("dawn_warnings") {
       # webgpu_cpp.h.
       "dawn/webgpu_cpp.h",
       "webgpu/webgpu_cpp.h",
+
+      # Also include headers from prebuilt third_party libraries, such as
+      # agility-sdk.
+      "d3d12.h",
     ]
     foreach(_prefix, _prefixes) {
       if (is_win) {
