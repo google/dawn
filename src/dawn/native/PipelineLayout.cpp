@@ -63,10 +63,7 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
     // Validation for any pixel local storage.
     if (auto* pls = unpacked.Get<PipelineLayoutPixelLocalStorage>()) {
         absl::InlinedVector<StorageAttachmentInfoForValidation, 4> attachments;
-        for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-            const PipelineLayoutStorageAttachment& attachment =
-                DAWN_UNSAFE_TODO(pls->storageAttachments[i]);
-
+        for (auto [i, attachment] : Enumerate(pls->storageAttachments)) {
             const Format* format;
             DAWN_TRY_ASSIGN_CONTEXT(format, device->GetInternalFormat(attachment.format),
                                     "validating storageAttachments[%i]", i);
@@ -195,9 +192,9 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
         mHasPLS = true;
         mStorageAttachmentSlots = std::vector<wgpu::TextureFormat>(
             pls->totalPixelLocalStorageSize / kPLSSlotByteSize, wgpu::TextureFormat::Undefined);
-        for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-            size_t slot = DAWN_UNSAFE_TODO(pls->storageAttachments[i]).offset / kPLSSlotByteSize;
-            mStorageAttachmentSlots[slot] = DAWN_UNSAFE_TODO(pls->storageAttachments[i]).format;
+        for (const PipelineLayoutStorageAttachment& attachment : pls->storageAttachments) {
+            size_t slot = attachment.offset / kPLSSlotByteSize;
+            mStorageAttachmentSlots[slot] = attachment.format;
         }
     }
     // Gather the resource table information.

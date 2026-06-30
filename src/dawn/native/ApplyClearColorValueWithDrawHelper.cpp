@@ -452,11 +452,10 @@ bool GetKeyOfApplyClearColorValueWithDrawPipelines(
     if (const auto* pls = renderPassDescriptor.Get<RenderPassPixelLocalStorage>()) {
         key->hasPLS = true;
         key->totalPixelLocalStorageSize = pls->totalPixelLocalStorageSize;
-        for (size_t i = 0; i < pls->storageAttachmentCount; ++i) {
+        for (const RenderPassStorageAttachment& attachmentIn : pls->storageAttachments) {
             wgpu::PipelineLayoutStorageAttachment attachment{};
-            attachment.format =
-                DAWN_UNSAFE_TODO(pls->storageAttachments[i]).storage->GetFormat().format;
-            attachment.offset = DAWN_UNSAFE_TODO(pls->storageAttachments[i]).offset;
+            attachment.format = attachmentIn.storage->GetFormat().format;
+            attachment.offset = attachmentIn.offset;
             key->plsAttachments.push_back(std::move(attachment));
         }
         // Sort the PLS attachments by offset to make sure the order is deterministic.

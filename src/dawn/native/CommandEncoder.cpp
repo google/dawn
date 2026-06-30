@@ -834,10 +834,7 @@ MaybeError ValidateRenderPassPLS(DeviceBase* device,
                                  RenderPassValidationState* validationState) {
     absl::InlinedVector<StorageAttachmentInfoForValidation, 4> attachments;
 
-    for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-        const RenderPassStorageAttachment& attachment =
-            DAWN_UNSAFE_TODO(pls->storageAttachments[i]);
-
+    for (auto [i, attachment] : Enumerate(pls->storageAttachments)) {
         // Validate the attachment can be used as a storage attachment.
         DAWN_TRY(device->ValidateObject(attachment.storage));
         DAWN_TRY(ValidateCanUseAs(attachment.storage, wgpu::TextureUsage::StorageAttachment,
@@ -984,11 +981,8 @@ MaybeError InitializeValidationStateAttachment(DeviceBase* device,
         return {};
     };
 
-    auto pls = descriptor.Get<RenderPassPixelLocalStorage>();
-    if (pls != nullptr && pls->storageAttachmentCount > 0) {
-        for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-            const RenderPassStorageAttachment& attachment =
-                DAWN_UNSAFE_TODO(pls->storageAttachments[i]);
+    if (auto pls = descriptor.Get<RenderPassPixelLocalStorage>()) {
+        for (const RenderPassStorageAttachment& attachment : pls->storageAttachments) {
             DAWN_TRY(CheckAttachment(attachment.storage));
         }
     }
@@ -1580,19 +1574,17 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             }
 
             if (auto* pls = descriptor.Get<RenderPassPixelLocalStorage>()) {
-                for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-                    const RenderPassStorageAttachment& apiAttachment =
-                        DAWN_UNSAFE_TODO(pls->storageAttachments[i]);
+                for (const RenderPassStorageAttachment& attachment : pls->storageAttachments) {
                     RenderPassStorageAttachmentInfo* attachmentInfo =
-                        &cmd->storageAttachments[apiAttachment.offset / kPLSSlotByteSize];
+                        &cmd->storageAttachments[attachment.offset / kPLSSlotByteSize];
 
-                    attachmentInfo->storage = apiAttachment.storage;
-                    attachmentInfo->loadOp = apiAttachment.loadOp;
-                    attachmentInfo->storeOp = apiAttachment.storeOp;
+                    attachmentInfo->storage = attachment.storage;
+                    attachmentInfo->loadOp = attachment.loadOp;
+                    attachmentInfo->storeOp = attachment.storeOp;
                     attachmentInfo->clearColor = ClampClearColorValueToLegalRange(
-                        apiAttachment.clearValue, apiAttachment.storage->GetFormat());
+                        attachment.clearValue, attachment.storage->GetFormat());
 
-                    usageTracker.TextureViewUsedAs(apiAttachment.storage,
+                    usageTracker.TextureViewUsedAs(attachment.storage,
                                                    wgpu::TextureUsage::StorageAttachment);
                 }
             }

@@ -172,16 +172,15 @@ AttachmentState::AttachmentState(const UnpackedPtr<RenderPassDescriptor>& descri
         mHasPLS = true;
         mStorageAttachmentSlots = std::vector<wgpu::TextureFormat>(
             pls->totalPixelLocalStorageSize / kPLSSlotByteSize, wgpu::TextureFormat::Undefined);
-        for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-            size_t slot = DAWN_UNSAFE_TODO(pls->storageAttachments[i]).offset / kPLSSlotByteSize;
-            const TextureViewBase* attachment =
-                DAWN_UNSAFE_TODO(pls->storageAttachments[i]).storage;
-            mStorageAttachmentSlots[slot] = attachment->GetFormat().format;
+        for (const RenderPassStorageAttachment& attachment : pls->storageAttachments) {
+            size_t slot = attachment.offset / kPLSSlotByteSize;
+            const TextureViewBase* storage = attachment.storage;
 
+            mStorageAttachmentSlots[slot] = storage->GetFormat().format;
             if (mSampleCount == 0) {
-                mSampleCount = attachment->GetTexture()->GetSampleCount();
+                mSampleCount = storage->GetTexture()->GetSampleCount();
             } else {
-                DAWN_CHECK(mSampleCount == attachment->GetTexture()->GetSampleCount());
+                DAWN_CHECK(mSampleCount == storage->GetTexture()->GetSampleCount());
             }
         }
     }
