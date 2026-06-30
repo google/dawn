@@ -690,39 +690,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::U8*) { return Check8Bit(diag, parent); },
             [&](const core::type::U16*) { return Check16Bit(diag); },
             [&](const core::type::U64*) { return Check64Bit(diag); },
-            [&](const core::type::Array* arr) {
-                if (!arr->ElemType()->HasCreationFixedFootprint()) {
-                    diag() << "array elements, " << NameOf(type)
-                           << ", must have creation-fixed footprint";
-                    return false;
-                }
-                if (auto* count = arr->Count()->As<core::type::ConstantArrayCount>()) {
-                    if (count->value == 0) {
-                        diag() << "array requires a constant array size > 0";
-                        return false;
-                    }
-                } else if (auto* val_count = arr->Count()->As<core::ir::type::ValueArrayCount>()) {
-                    if (!val_count->value->Alive()) {
-                        diag() << "ValueArrayCount value is not alive";
-                        return false;
-                    }
-                    if (!val_count->value->Type()->IsIntegerScalar()) {
-                        diag() << "ValueArrayCount must be an integer scalar type";
-                        return false;
-                    }
-                    auto* inst_res = val_count->value->As<core::ir::InstructionResult>();
-                    if (!inst_res) {
-                        diag() << "ValueArrayCount must be an instruction result";
-                        return false;
-                    }
-                    auto* inst = inst_res->Instruction();
-                    if (!inst || inst->Block() != ir_.root_block) {
-                        diag() << "ValueArrayCount must be a module-scoped override expression";
-                        return false;
-                    }
-                }
-                return true;
-            },
+            [&](const core::type::Array* arr) { return CheckArray(arr, diag); },
             [&](const core::type::Vector* v) {
                 if (!v->Type()->IsScalar()) {
                     diag() << "vector elements, " << NameOf(type) << ", must be scalars";
@@ -904,6 +872,43 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckArray(const core::type::Array* arr,
+                            std::function<diag::Diagnostic&()>& diag) {
+    if (!arr->ElemType()->HasCreationFixedFootprint()) {
+        diag() << "array elements, " << NameOf(arr) << ", must have creation-fixed footprint";
+        return false;
+    }
+    if (auto* count = arr->Count()->As<core::type::ConstantArrayCount>()) {
+        if (count->value == 0) {
+            diag() << "array requires a constant array size > 0";
+            return false;
+        }
+        return true;
+    }
+
+    if (auto* val_count = arr->Count()->As<core::ir::type::ValueArrayCount>()) {
+        if (!val_count->value->Alive()) {
+            diag() << "ValueArrayCount value is not alive";
+            return false;
+        }
+        if (!val_count->value->Type()->IsIntegerScalar()) {
+            diag() << "ValueArrayCount must be an integer scalar type";
+            return false;
+        }
+        auto* inst_res = val_count->value->As<core::ir::InstructionResult>();
+        if (!inst_res) {
+            diag() << "ValueArrayCount must be an instruction result";
+            return false;
+        }
+        auto* inst = inst_res->Instruction();
+        if (!inst || inst->Block() != ir_.root_block) {
+            diag() << "ValueArrayCount must be a module-scoped override expression";
+            return false;
+        }
+    }
+    return true;
 }
 
 // 8-bit types are guarded by the Allow8BitIntegers property.

@@ -333,6 +333,11 @@ class Structural {
                   std::function<diag::Diagnostic&()>& diag,
                   const core::type::Type* root);
 
+    /// Checks that `arr` is a valid array type
+    /// @param arr the array the validate
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool CheckArray(const core::type::Array* arr, std::function<diag::Diagnostic&()>& diag);
+
     /// Checks that 8-bit types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
     /// @param parent the parent type for the 8-bit type
