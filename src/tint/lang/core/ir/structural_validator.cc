@@ -686,42 +686,10 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::Struct* str) { return CheckStruct(str, diag); },
             [&](const core::type::Reference* ref) { return CheckRef(ref, diag, root); },
             [&](const core::type::Pointer* ptr) { return CheckPtr(ptr, diag); },
-            [&](const core::type::U64*) {
-                // u64 types are guarded by the Allow64BitIntegers property.
-                if (!ir_.properties.Contains(Property::kAllow64BitIntegers)) {
-                    diag() << "64-bit integer types are not permitted";
-                    return false;
-                }
-                return true;
-            },
-            [&](const core::type::I8*) {
-                // General use of i8 types is guarded by the Allow8BitIntegers property.
-                // They can be used as the component type of a subgroup matrix without the property.
-                if (!Is<core::type::SubgroupMatrix>(parent) &&
-                    !ir_.properties.Contains(Property::kAllow8BitIntegers)) {
-                    diag() << "8-bit integer types are not permitted";
-                    return false;
-                }
-                return true;
-            },
-            [&](const core::type::U8*) {
-                // General use of u8 types is guarded by the Allow8BitIntegers property.
-                // They can be used as the component type of a subgroup matrix without the property.
-                if (!Is<core::type::SubgroupMatrix>(parent) &&
-                    !ir_.properties.Contains(Property::kAllow8BitIntegers)) {
-                    diag() << "8-bit integer types are not permitted";
-                    return false;
-                }
-                return true;
-            },
-            [&](const core::type::U16*) {
-                // u16 types are guarded by the Allow16BitIntegers property.
-                if (!ir_.properties.Contains(Property::kAllow16BitIntegers)) {
-                    diag() << "16-bit integer types are not permitted";
-                    return false;
-                }
-                return true;
-            },
+            [&](const core::type::I8*) { return Check8Bit(diag, parent); },
+            [&](const core::type::U8*) { return Check8Bit(diag, parent); },
+            [&](const core::type::U16*) { return Check16Bit(diag); },
+            [&](const core::type::U64*) { return Check64Bit(diag); },
             [&](const core::type::Array* arr) {
                 if (!arr->ElemType()->HasCreationFixedFootprint()) {
                     diag() << "array elements, " << NameOf(type)
@@ -936,6 +904,36 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+// 8-bit types are guarded by the Allow8BitIntegers property.
+// They can be used as the component type of a subgroup matrix without the property.
+bool Structural::Check8Bit(std::function<diag::Diagnostic&()>& diag,
+                           const core::type::Type* parent) {
+    if (!Is<core::type::SubgroupMatrix>(parent) &&
+        !ir_.properties.Contains(Property::kAllow8BitIntegers)) {
+        diag() << "8-bit integer types are not permitted";
+        return false;
+    }
+    return true;
+}
+
+// 16-bit types are guarded by the Allow16BitIntegers property.
+bool Structural::Check16Bit(std::function<diag::Diagnostic&()>& diag) {
+    if (!ir_.properties.Contains(Property::kAllow16BitIntegers)) {
+        diag() << "16-bit integer types are not permitted";
+        return false;
+    }
+    return true;
+}
+
+// 64-bit types are guarded by the Allow64BitIntegers property.
+bool Structural::Check64Bit(std::function<diag::Diagnostic&()>& diag) {
+    if (!ir_.properties.Contains(Property::kAllow64BitIntegers)) {
+        diag() << "64-bit integer types are not permitted";
+        return false;
+    }
+    return true;
 }
 
 bool Structural::CheckPtr(const core::type::Pointer* ptr,
