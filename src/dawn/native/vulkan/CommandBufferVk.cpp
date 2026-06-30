@@ -248,7 +248,8 @@ VkRect2D GetAlignedRenderArea(Device* device,
 class DescriptorSetTracker : public BindGroupTrackerBase<true> {
   public:
     bool AreLayoutsCompatible() override {
-        return mPipelineLayout == mLastAppliedPipelineLayout &&
+        return mLastAppliedPipeline != nullptr &&
+               mLastAppliedPipeline->GetLayout() == mPipeline->GetLayout() &&
                mLastAppliedImmediateSize == mImmediateSize;
     }
 

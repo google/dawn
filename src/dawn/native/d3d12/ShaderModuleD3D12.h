@@ -60,6 +60,7 @@ class ShaderModule final : public ShaderModuleBase {
         SingleShaderStage stage,
         const PipelineLayout* layout,
         uint32_t compileFlags,
+        const ImmediateMask& pipelineImmediateMask,
         const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>&
             usedInterstageVariables = {});
 

@@ -33,6 +33,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "src/dawn/common/Constants.h"
+#include "src/dawn/common/HashUtils.h"
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/ityp_array.h"
 #include "src/dawn/common/ityp_vector.h"
@@ -80,7 +81,7 @@ class PipelineLayout final : public PipelineLayoutBase {
     uint32_t GetImmediatesShaderRegister() const;
 
     ResultOrError<Ref<PipelineLayoutHandle>> GetOrCreatePipelineLayoutHandle(
-        uint32_t immediateCounts);
+        const ImmediateMask& pipelineImmediateMask);
 
     struct BindGroupDynamicStorageBufferInfo {
         // First register offset for a bind group's dynamic storage buffer lengths or offsets.
@@ -110,7 +111,8 @@ class PipelineLayout final : public PipelineLayoutBase {
     void DestroyImpl(DestroyReason reason) override;
 
     MaybeError BuildBaseRootParameters();
-    ResultOrError<Ref<PipelineLayoutHandle>> CreatePipelineLayoutHandle(uint32_t immediateCounts);
+    ResultOrError<Ref<PipelineLayoutHandle>> CreatePipelineLayoutHandle(
+        const ImmediateMask& pipelineImmediateMask);
 
     PerBindGroup<uint32_t> mCbvUavSrvRootParameterIndices;
     PerBindGroup<uint32_t> mSamplerRootParameterIndices;
@@ -118,8 +120,6 @@ class PipelineLayout final : public PipelineLayoutBase {
     DynamicStorageBufferInfo mDynamicStorageBufferInfo;
     uint32_t mResourceTableCbvUavSrvRootParameterIndex;
     uint32_t mResourceTableSamplerRootParameterIndex;
-    uint32_t mFirstIndexOffsetParameterIndex;
-    uint32_t mNumWorkgroupsParameterIndex;
     uint32_t mDynamicStorageBufferLengthsParameterIndex;
     uint32_t mDynamicStorageBufferOffsetsParameterIndex;
 
@@ -135,19 +135,14 @@ class PipelineLayout final : public PipelineLayoutBase {
     };
     std::optional<InvariantParams> mInvariantParams;
 
-    // Cache of PipelineLayoutHandles keyed by the number of immediate (32-bit root) constants the
-    // pipeline uses. Today every root constant that shapes the root signature is either always
-    // allocated (the firstVertex / firstInstance / num_workgroups block) or fully determined by the
-    // bind group layouts (dynamic storage buffer lengths/offsets) and the layout's user immediate
-    // range. None of them vary between pipelines that share a layout, so the immediate count is
-    // constant per layout and a PipelineLayout currently maps 1:1 to a single PipelineLayoutHandle.
-    //
-    // TODO(crbug.com/366291600): Stop always allocating the internal root constants; allocate them
-    // dynamically and track them through the immediate mask instead (as D3D11/Vulkan/GL already
-    // do). After that, pipelines sharing a layout can have different immediate counts, so one
-    // PipelineLayout may map to multiple PipelineLayoutHandles. At that point this key must capture
-    // every per-pipeline input that changes the root signature.
-    MutexProtected<absl::flat_hash_map<uint32_t, Ref<PipelineLayoutHandle>>> mPipelineLayoutHandles;
+    // Cache of PipelineLayoutHandles keyed by the pipeline's immediate mask. Internal root
+    // constants (firstVertex / firstInstance / num_workgroups) are allocated dynamically and
+    // tracked through the immediate mask, so pipelines that share a layout but use different
+    // immediates get different masks, and a single PipelineLayout may map to multiple
+    // PipelineLayoutHandles. The mask captures every per-pipeline input that shapes the root
+    // signature.
+    MutexProtected<absl::flat_hash_map<ImmediateMask, Ref<PipelineLayoutHandle>>>
+        mPipelineLayoutHandles;
 };
 
 }  // namespace dawn::native::d3d12

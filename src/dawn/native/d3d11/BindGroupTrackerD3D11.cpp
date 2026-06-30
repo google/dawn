@@ -192,8 +192,11 @@ void BindGroupTracker::BindingSlot<T, InitialCapacity>::Bind(uint32_t idx,
 }
 
 BindGroupTracker::BindGroupTracker(const ScopedSwapStateCommandRecordingContext* commandContext)
-    : mCommandContext(commandContext) {
-    mLastAppliedPipelineLayout = mCommandContext->GetDevice()->GetEmptyPipelineLayout();
+    : mCommandContext(commandContext) {}
+
+PipelineLayoutBase* BindGroupTracker::LastAppliedPipelineLayout() const {
+    return mLastAppliedPipeline ? mLastAppliedPipeline->GetLayout()
+                                : mCommandContext->GetDevice()->GetEmptyPipelineLayout();
 }
 
 BindGroupTracker::~BindGroupTracker() {
@@ -463,7 +466,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
 
     BindGroupBase* group = mBindGroups[index];
     const ityp::span<BindingIndex, uint32_t>& dynamicOffsets = GetDynamicOffsets(index);
-    const auto& indices = ToBackend(mPipelineLayout)->GetBindingTableIndexMap()[index];
+    const auto& indices = ToBackend(mPipeline->GetLayout())->GetBindingTableIndexMap()[index];
 
     for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {
         const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
@@ -635,9 +638,9 @@ ComputePassBindGroupTracker::ComputePassBindGroupTracker(
 ComputePassBindGroupTracker::~ComputePassBindGroupTracker() = default;
 
 void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
-    const BindGroupLayoutInternalBase* groupLayout =
-        mLastAppliedPipelineLayout->GetBindGroupLayout(index);
-    const auto& indices = ToBackend(mLastAppliedPipelineLayout)->GetBindingTableIndexMap()[index];
+    PipelineLayoutBase* lastAppliedLayout = LastAppliedPipelineLayout();
+    const BindGroupLayoutInternalBase* groupLayout = lastAppliedLayout->GetBindGroupLayout(index);
+    const auto& indices = ToBackend(lastAppliedLayout)->GetBindingTableIndexMap()[index];
 
     for (BindingIndex bindingIndex : Range(groupLayout->GetBindingCount())) {
         const BindingInfo& bindingInfo = groupLayout->GetBindingInfo(bindingIndex);
@@ -706,9 +709,9 @@ void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
 MaybeError ComputePassBindGroupTracker::Apply() {
     BeforeApply();
 
-    BindGroupMask inheritedGroups =
-        mPipelineLayout->InheritedGroupsMask(mLastAppliedPipelineLayout);
-    BindGroupMask previousGroups = mLastAppliedPipelineLayout->GetBindGroupLayoutsMask();
+    PipelineLayoutBase* lastAppliedLayout = LastAppliedPipelineLayout();
+    BindGroupMask inheritedGroups = mPipeline->GetLayout()->InheritedGroupsMask(lastAppliedLayout);
+    BindGroupMask previousGroups = lastAppliedLayout->GetBindGroupLayoutsMask();
 
     // To avoid UAV / SRV conflicts with bindings in previously bind groups, we unset the bind
     // groups that aren't reused by the current pipeline.
@@ -743,17 +746,19 @@ MaybeError RenderPassBindGroupTracker::Apply() {
     BeforeApply();
 
     if (!mDirtyBindGroupsObjectChangedOrIsDynamic.any() &&
-        mLastAppliedPipelineLayout == mPipelineLayout) {
+        LastAppliedPipelineLayout() == mPipeline->GetLayout()) {
         AfterApply();
         return {};
     }
 
+    auto* pipelineLayout = ToBackend(mPipeline->GetLayout());
+
     // As D3d11 requires to bind all UAVs slots at the same time for pixel shaders, we record
     // all UAV slot assignments in the bind groups, and then bind them all together.
-    const BindGroupMask uavBindGroups = ToBackend(mPipelineLayout)->GetUAVBindGroupLayoutsMask();
-    const uint32_t plsSlotCount = ToBackend(mPipelineLayout)->GetPLSSlotCount();
-    const uint32_t uavStartSlot = ToBackend(mPipelineLayout)->GetUAVStartIndex(kFragment);
-    const uint32_t uavCount = ToBackend(mPipelineLayout)->GetUAVCount(kFragment);
+    const BindGroupMask uavBindGroups = pipelineLayout->GetUAVBindGroupLayoutsMask();
+    const uint32_t plsSlotCount = pipelineLayout->GetPLSSlotCount();
+    const uint32_t uavStartSlot = pipelineLayout->GetUAVStartIndex(kFragment);
+    const uint32_t uavCount = pipelineLayout->GetUAVCount(kFragment);
 
     DAWN_ASSERT(uavCount >= plsSlotCount);
     const uint32_t usedUavCount = uavCount - plsSlotCount;
@@ -763,7 +768,7 @@ MaybeError RenderPassBindGroupTracker::Apply() {
     for (BindGroupIndex index : uavBindGroups) {
         BindGroupBase* group = mBindGroups[index];
         const ityp::span<BindingIndex, uint32_t>& dynamicOffsets = GetDynamicOffsets(index);
-        const auto& indices = ToBackend(mPipelineLayout)->GetBindingTableIndexMap()[index];
+        const auto& indices = pipelineLayout->GetBindingTableIndexMap()[index];
 
         // D3D11 uav slot allocated in reverse order.
         for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {

@@ -49,8 +49,6 @@ class RenderPipeline final : public RenderPipelineBase {
     D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
     ID3D12PipelineState* GetPipelineState() const;
 
-    bool UsesVertexOrInstanceIndex() const;
-
     PipelineLayoutHandle* GetPipelineLayoutHandle() const;
 
     // Dawn API
@@ -73,7 +71,6 @@ class RenderPipeline final : public RenderPipelineBase {
     Ref<PipelineLayoutHandle> mPipelineLayoutHandle;
     D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology;
     ComPtr<ID3D12PipelineState> mPipelineState;
-    bool mUsesVertexOrInstanceIndex;
 };
 
 }  // namespace dawn::native::d3d12

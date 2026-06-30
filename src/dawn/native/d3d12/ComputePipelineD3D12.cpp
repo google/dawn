@@ -35,6 +35,7 @@
 #include "src/dawn/native/d3d/BlobD3D.h"
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d12/DeviceD3D12.h"
+#include "src/dawn/native/d3d12/ImmediatesLayoutD3D12.h"
 #include "src/dawn/native/d3d12/PipelineLayoutD3D12.h"
 #include "src/dawn/native/d3d12/PlatformFunctionsD3D12.h"
 #include "src/dawn/native/d3d12/ShaderModuleD3D12.h"
@@ -50,6 +51,15 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
 }
 
 ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
+    if (UsesNumWorkgroups()) {
+        mImmediateMask |= GetImmediateBlockBits(offsetof(ComputeImmediates, numWorkgroups),
+                                                sizeof(NumWorkgroupsDimensions));
+    }
+
+    // Create PipelineLayoutHandle after setup internal immediates.
+    DAWN_TRY_ASSIGN(mPipelineLayoutHandle,
+                    ToBackend(GetLayout())->GetOrCreatePipelineLayoutHandle(GetImmediateMask()));
+
     Device* device = ToBackend(GetDevice());
     uint32_t compileFlags = 0;
 
@@ -84,17 +94,14 @@ ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
         compileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
     }
 
-    DAWN_TRY_ASSIGN(
-        mPipelineLayoutHandle,
-        ToBackend(GetLayout())
-            ->GetOrCreatePipelineLayoutHandle(static_cast<uint32_t>(GetImmediateMask().count())));
     D3D12_COMPUTE_PIPELINE_STATE_DESC d3dDesc = {};
     d3dDesc.pRootSignature = mPipelineLayoutHandle->GetRootSignature();
 
     d3d::CompiledShader compiledShader;
-    DAWN_TRY_ASSIGN(compiledShader, module->Compile(computeStage, SingleShaderStage::Compute,
-                                                    ToBackend(GetLayout()), compileFlags,
-                                                    /* usedInterstageVariables */ {}));
+    DAWN_TRY_ASSIGN(compiledShader,
+                    module->Compile(computeStage, SingleShaderStage::Compute,
+                                    ToBackend(GetLayout()), compileFlags, GetImmediateMask(),
+                                    /* usedInterstageVariables */ {}));
     d3dDesc.CS = {compiledShader.shaderBlob.DataPtr(), compiledShader.shaderBlob.Size()};
 
     StreamIn(&mCacheKey, d3dDesc, *mPipelineLayoutHandle->GetRootSignatureBlob());

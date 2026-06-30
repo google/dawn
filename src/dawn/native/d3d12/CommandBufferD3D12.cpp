@@ -149,19 +149,6 @@ void RecordResolveQuerySetCmd(ID3D12GraphicsCommandList* commandList,
         });
 }
 
-void RecordFirstIndexOffset(ID3D12GraphicsCommandList* commandList,
-                            RenderPipeline* pipeline,
-                            uint32_t firstVertex,
-                            uint32_t firstInstance) {
-    if (!pipeline->UsesVertexOrInstanceIndex()) {
-        return;
-    }
-    std::array<uint32_t, 2> offsets{firstVertex, firstInstance};
-    commandList->SetGraphicsRoot32BitConstants(
-        pipeline->GetPipelineLayoutHandle()->GetFirstIndexOffsetParameterIndex(),
-        static_cast<uint32_t>(offsets.size()), offsets.data(), 0);
-}
-
 bool ShouldCopyUsingTemporaryBuffer(DeviceBase* device,
                                     const TextureCopy& srcCopy,
                                     const TextureCopy& dstCopy) {
@@ -321,17 +308,6 @@ MaybeError RecordBufferTextureCopyWithTemporaryBuffer(CommandRecordingContext* r
     return {};
 }
 
-void RecordNumWorkgroupsForDispatch(ID3D12GraphicsCommandList* commandList,
-                                    ComputePipeline* pipeline,
-                                    DispatchCmd* dispatch) {
-    if (!pipeline->UsesNumWorkgroups()) {
-        return;
-    }
-
-    commandList->SetComputeRoot32BitConstants(
-        pipeline->GetPipelineLayoutHandle()->GetNumWorkgroupsParameterIndex(), 3, dispatch, 0);
-}
-
 // Records the necessary barriers for a synchronization scope using the resource usage data
 // pre-computed in the frontend. Also performs lazy initialization if required. Returns whether any
 // UAV are used in the synchronization scope if `passHasUAV` is passed and no errors are hit.
@@ -406,6 +382,22 @@ class ImmediateTracker : public T {
   public:
     ImmediateTracker() = default;
 
+    void SetFirstVertexAndInstanceIndex(uint32_t firstVertexIndex, uint32_t firstInstanceIndex) {
+        FirstIndexOffset firstIndexOffset;
+        firstIndexOffset.firstVertex = firstVertexIndex;
+        firstIndexOffset.firstInstance = firstInstanceIndex;
+        this->UpdateImmediates(offsetof(RenderImmediates, firstIndexOffset), firstIndexOffset);
+    }
+
+    void SetNumWorkgroups(uint32_t numWorkgroupX, uint32_t numWorkgroupY, uint32_t numWorkgroupZ) {
+        NumWorkgroupsDimensions numWorkgroupsDimensions;
+        numWorkgroupsDimensions.numWorkgroupsX = numWorkgroupX;
+        numWorkgroupsDimensions.numWorkgroupsY = numWorkgroupY;
+        numWorkgroupsDimensions.numWorkgroupsZ = numWorkgroupZ;
+
+        this->UpdateImmediates(offsetof(ComputeImmediates, numWorkgroups), numWorkgroupsDimensions);
+    }
+
     // Calling this after BindGroupTrackerBase::Apply() to update root signature.
     void Apply(CommandRecordingContext* commandContext) {
         DAWN_ASSERT(this->mLastPipeline != nullptr);
@@ -461,9 +453,14 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
     BindGroupStateTracker(Device* device, DescriptorHeapState* heapState)
         : Base(), mDevice(device), mHeapState(heapState) {}
 
-    void OnSetPipeline(PipelineType* pipeline) {
-        Base::OnSetPipeline(pipeline);
-        mPipeline = pipeline;
+    // A WebGPU pipeline layout can map to multiple D3D12 root signatures (PipelineLayoutHandles)
+    // when pipelines enable different internal immediates. A different root signature invalidates
+    // all bound descriptor tables and root constants, so the bindings cannot be inherited and must
+    // be re-applied. Comparing handles is sufficient: equal handles imply the same pipeline layout.
+    bool AreLayoutsCompatible() override {
+        return mLastAppliedPipeline != nullptr &&
+               LastAppliedPipeline()->GetPipelineLayoutHandle() ==
+                   CurrentPipeline()->GetPipelineLayoutHandle();
     }
 
     MaybeError Apply(CommandRecordingContext* commandContext) {
@@ -472,7 +469,8 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
         ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
         UpdateRootSignatureIfNecessary(commandList);
 
-        const bool usesResourceTable = mPipelineLayout->UsesResourceTable();
+        PipelineLayout* pipelineLayout = ToBackend(mPipeline->GetLayout());
+        const bool usesResourceTable = pipelineLayout->UsesResourceTable();
         auto* viewAllocator = mDevice->GetViewShaderVisibleDescriptorAllocator();
         auto* samplerAllocator = mDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
@@ -553,14 +551,13 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
 
         for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
             BindGroup* group = ToBackend(mBindGroups[index]);
-            ApplyBindGroup(commandList, ToBackend(mPipelineLayout), index, group,
-                           GetDynamicOffsets(index));
+            ApplyBindGroup(commandList, pipelineLayout, index, group, GetDynamicOffsets(index));
         }
 
         if (usesResourceTable) {
             // TODO(crbug.com/473354062): Only call apply if GPU sub-alloc changed to avoid setting
             // the same root descriptor table.
-            ApplyResourceTable(commandList, ToBackend(mPipelineLayout));
+            ApplyResourceTable(commandList, pipelineLayout);
         }
 
         AfterApply();
@@ -587,10 +584,17 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
     static constexpr bool kIsRenderPipeline = std::is_same_v<PipelineType, RenderPipeline>;
     static constexpr bool kIsComputePipeline = std::is_same_v<PipelineType, ComputePipeline>;
 
+    // The base tracks the pipeline as a PipelineBase*; recover the backend pipeline type. The
+    // dynamic type is always PipelineType because OnSetPipeline is only ever called with one.
+    PipelineType* CurrentPipeline() const { return static_cast<PipelineType*>(mPipeline); }
+    PipelineType* LastAppliedPipeline() const {
+        return static_cast<PipelineType*>(mLastAppliedPipeline);
+    }
+
     void SetRootSignature(ID3D12GraphicsCommandList* commandList) {
         DAWN_ASSERT(mPipeline != nullptr);
         ID3D12RootSignature* rootSignature =
-            mPipeline->GetPipelineLayoutHandle()->GetRootSignature();
+            CurrentPipeline()->GetPipelineLayoutHandle()->GetRootSignature();
         if constexpr (kIsRenderPipeline) {
             commandList->SetGraphicsRootSignature(rootSignature);
         } else {
@@ -672,7 +676,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
 
     void ApplyResourceTable(ID3D12GraphicsCommandList* commandList,
                             const PipelineLayout* pipelineLayout) {
-        DAWN_ASSERT(mPipelineLayout->UsesResourceTable() && mResourceTable);
+        DAWN_ASSERT(pipelineLayout->UsesResourceTable() && mResourceTable);
 
         // Set the root descriptor table that contains both the metadata buffer and textures/buffers
         {
@@ -789,7 +793,6 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
     }
 
     raw_ptr<Device> mDevice;
-    raw_ptr<PipelineType> mPipeline = nullptr;
 
     // Points to the same instance of DescriptorHeapState that owns both the compute and render
     // instances of this class, so that calling SetID3D12DescriptorHeaps one one sets the descriptor
@@ -1454,9 +1457,9 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
 
                 DAWN_TRY(TransitionAndClearForSyncScope(commandContext, scope));
                 DAWN_TRY(bindingTracker->Apply(commandContext));
+                immediates.SetNumWorkgroups(dispatch->x, dispatch->y, dispatch->z);
                 immediates.Apply(commandContext);
 
-                RecordNumWorkgroupsForDispatch(commandList, lastPipeline, dispatch);
                 commandList->Dispatch(dispatch->x, dispatch->y, dispatch->z);
                 break;
             }
@@ -1813,8 +1816,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 DAWN_TRY(bindingTracker->Apply(commandContext));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
-                RecordFirstIndexOffset(commandList, lastPipeline, draw->firstVertex,
-                                       draw->firstInstance);
+                immediates.SetFirstVertexAndInstanceIndex(draw->firstVertex, draw->firstInstance);
                 immediates.Apply(commandContext);
                 commandList->DrawInstanced(draw->vertexCount, draw->instanceCount,
                                            draw->firstVertex, draw->firstInstance);
@@ -1826,8 +1828,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 DAWN_TRY(bindingTracker->Apply(commandContext));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
-                RecordFirstIndexOffset(commandList, lastPipeline, draw->baseVertex,
-                                       draw->firstInstance);
+                immediates.SetFirstVertexAndInstanceIndex(draw->baseVertex, draw->firstInstance);
                 immediates.Apply(commandContext);
                 commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
                                                   draw->firstIndex, draw->baseVertex,

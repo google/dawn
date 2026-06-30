@@ -51,6 +51,12 @@ class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/tr
     virtual ~BindGroupTracker();
 
   protected:
+    // The pipeline layout last applied to the bind group bindings, or the device's empty pipeline
+    // layout when no pipeline has been applied yet. BindGroupTrackerBase tracks the pipeline (which
+    // has no "empty" form), so the empty-layout sentinel is resolved lazily here rather than seeded
+    // in the constructor.
+    PipelineLayoutBase* LastAppliedPipelineLayout() const;
+
     template <wgpu::ShaderStage kVisibleStage>
     MaybeError ApplyBindGroup(BindGroupIndex index);
 

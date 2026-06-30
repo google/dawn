@@ -37,18 +37,25 @@ namespace dawn::native::d3d12 {
 // inheritance for RenderImmediates and ComputeImmediates. Wrap userImmediates to fit offsetof logic
 // in UserImmediatesTrackerBase.
 DAWN_ENABLE_STRUCT_PADDING_WARNINGS
+// firstVertex and firstInstance are always set together in the immediate mask (firstVertex leads),
+// so group them so callers reference the pair instead of risking setting only one of them.
+struct FirstIndexOffset {
+    uint32_t firstVertex;
+    uint32_t firstInstance;
+};
+
 // Define render pipeline immediates layout. Append members to expand the layout.
 struct RenderImmediates {
     UserImmediates userImmediates;
 
-    // first index offset
-    uint32_t firstVertex;
-    uint32_t firstInstance;
+    FirstIndexOffset firstIndexOffset;
 };
 
 // Define compute pipeline immediates layout. Append members to expand the layout.
 struct ComputeImmediates {
     UserImmediates userImmediates;
+
+    NumWorkgroupsDimensions numWorkgroups;
 };
 DAWN_DISABLE_STRUCT_PADDING_WARNINGS
 

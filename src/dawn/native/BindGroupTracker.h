@@ -74,10 +74,13 @@ class BindGroupTrackerBase {
                   mDynamicOffsets[index].offsets.begin());
     }
 
-    void OnSetPipeline(PipelineBase* pipeline) { mPipelineLayout = pipeline->GetLayout(); }
+    void OnSetPipeline(PipelineBase* pipeline) { mPipeline = pipeline; }
 
   protected:
-    virtual bool AreLayoutsCompatible() { return mLastAppliedPipelineLayout == mPipelineLayout; }
+    virtual bool AreLayoutsCompatible() {
+        return mLastAppliedPipeline != nullptr &&
+               mLastAppliedPipeline->GetLayout() == mPipeline->GetLayout();
+    }
 
     ityp::span<BindingIndex, uint32_t> GetDynamicOffsets(BindGroupIndex index) {
         return ityp::span<BindingIndex, uint32_t>(mDynamicOffsets[index].offsets)
@@ -91,14 +94,15 @@ class BindGroupTrackerBase {
         }
 
         // Use the bind group layout mask to avoid marking unused bind groups as dirty.
-        mBindGroupLayoutsMask = mPipelineLayout->GetBindGroupLayoutsMask();
+        PipelineLayoutBase* pipelineLayout = mPipeline->GetLayout();
+        mBindGroupLayoutsMask = pipelineLayout->GetBindGroupLayoutsMask();
 
         // Changing the pipeline layout sets bind groups as dirty. If CanInheritBindGroups,
         // the first |k| matching bind groups may be inherited.
-        if (CanInheritBindGroups && mLastAppliedPipelineLayout != nullptr) {
+        if (CanInheritBindGroups && mLastAppliedPipeline != nullptr) {
             // Dirty bind groups that cannot be inherited.
             BindGroupMask dirtiedGroups =
-                ~mPipelineLayout->InheritedGroupsMask(mLastAppliedPipelineLayout);
+                ~pipelineLayout->InheritedGroupsMask(mLastAppliedPipeline->GetLayout());
 
             mDirtyBindGroups |= dirtiedGroups;
             mDirtyBindGroupsObjectChangedOrIsDynamic |= dirtiedGroups;
@@ -119,10 +123,10 @@ class BindGroupTrackerBase {
         // will be dirtied again by the next pipeline change.
         mDirtyBindGroups.reset();
         mDirtyBindGroupsObjectChangedOrIsDynamic.reset();
-        // Keep track of the last applied pipeline layout. This allows us to avoid computing
+        // Keep track of the last applied pipeline. This allows us to avoid computing
         // the intersection of the dirty bind groups and bind group layout mask in next Draw
         // or Dispatch (which is very hot code) until the layout is changed again.
-        mLastAppliedPipelineLayout = mPipelineLayout;
+        mLastAppliedPipeline = mPipeline;
     }
 
     BindGroupMask mDirtyBindGroups = 0;
@@ -130,14 +134,14 @@ class BindGroupTrackerBase {
     BindGroupMask mBindGroupLayoutsMask = 0;
     PerBindGroup<BindGroupBase*> mBindGroups = {};
 
-    // |mPipelineLayout| is the current pipeline layout set on the command buffer.
-    // |mLastAppliedPipelineLayout| is the last pipeline layout for which we applied changes
+    // |mPipeline| is the current pipeline set on the command buffer.
+    // |mLastAppliedPipeline| is the last pipeline for which we applied changes
     // to the bind group bindings.
     // RAW_PTR_EXCLUSION: These pointers are very hot in command recording code and point at
-    // pipeline layouts referenced by the object graph of the CommandBuffer so they cannot be
+    // pipelines referenced by the object graph of the CommandBuffer so they cannot be
     // freed from underneath this class.
-    RAW_PTR_EXCLUSION PipelineLayoutBase* mPipelineLayout = nullptr;
-    RAW_PTR_EXCLUSION PipelineLayoutBase* mLastAppliedPipelineLayout = nullptr;
+    RAW_PTR_EXCLUSION PipelineBase* mPipeline = nullptr;
+    RAW_PTR_EXCLUSION PipelineBase* mLastAppliedPipeline = nullptr;
 
   private:
     // Max possible dynamic offsets per bind group. Uses the per-pipeline limits because it's

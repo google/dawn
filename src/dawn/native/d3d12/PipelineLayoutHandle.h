@@ -39,6 +39,8 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/RefCounted.h"
+#include "src/dawn/common/ityp_bitset.h"
+#include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
@@ -52,14 +54,11 @@ class PipelineLayoutHandle final : public RefCounted {
     static Ref<PipelineLayoutHandle> Create(Device* device,
                                             ComPtr<ID3D12RootSignature> rootSignature,
                                             ComPtr<ID3DBlob> rootSignatureBlob,
-                                            uint32_t firstIndexOffsetParameterIndex,
-                                            uint32_t numWorkgroupsParameterIndex,
-                                            uint32_t immediatesParameterIndex);
+                                            uint32_t immediatesParameterIndex,
+                                            const ImmediateMask& pipelineImmediateMask);
 
     ID3D12RootSignature* GetRootSignature() const { return mRootSignature.Get(); }
     ID3DBlob* GetRootSignatureBlob() const { return mRootSignatureBlob.Get(); }
-    uint32_t GetFirstIndexOffsetParameterIndex() const { return mFirstIndexOffsetParameterIndex; }
-    uint32_t GetNumWorkgroupsParameterIndex() const { return mNumWorkgroupsParameterIndex; }
     uint32_t GetImmediatesParameterIndex() const { return mImmediatesParameterIndex; }
 
     // Lazy-created later.
@@ -71,15 +70,13 @@ class PipelineLayoutHandle final : public RefCounted {
     PipelineLayoutHandle(Device* device,
                          ComPtr<ID3D12RootSignature> rootSignature,
                          ComPtr<ID3DBlob> rootSignatureBlob,
-                         uint32_t firstIndexOffsetParameterIndex,
-                         uint32_t numWorkgroupsParameterIndex,
-                         uint32_t immediatesParameterIndex)
+                         uint32_t immediatesParameterIndex,
+                         const ImmediateMask& pipelineImmediateMask)
         : mDevice(device),
           mRootSignature(std::move(rootSignature)),
           mRootSignatureBlob(std::move(rootSignatureBlob)),
-          mFirstIndexOffsetParameterIndex(firstIndexOffsetParameterIndex),
-          mNumWorkgroupsParameterIndex(numWorkgroupsParameterIndex),
-          mImmediatesParameterIndex(immediatesParameterIndex) {}
+          mImmediatesParameterIndex(immediatesParameterIndex),
+          mPipelineImmediateMask(pipelineImmediateMask) {}
 
     ~PipelineLayoutHandle() override;
 
@@ -89,12 +86,11 @@ class PipelineLayoutHandle final : public RefCounted {
     raw_ptr<Device> mDevice;
     ComPtr<ID3D12RootSignature> mRootSignature;
     ComPtr<ID3DBlob> mRootSignatureBlob;
-    uint32_t mFirstIndexOffsetParameterIndex;
-    uint32_t mNumWorkgroupsParameterIndex;
     uint32_t mImmediatesParameterIndex;
     ComPtr<ID3D12CommandSignature> mDispatchIndirectCommandSignatureWithNumWorkgroups;
     ComPtr<ID3D12CommandSignature> mDrawIndirectCommandSignatureWithInstanceVertexOffsets;
     ComPtr<ID3D12CommandSignature> mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets;
+    ImmediateMask mPipelineImmediateMask = ImmediateMask(0);
 };
 
 }  // namespace dawn::native::d3d12

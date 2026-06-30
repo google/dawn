@@ -884,7 +884,7 @@ bool Device::MayRequireDuplicationOfIndirectParameters() const {
 
 bool Device::ShouldDuplicateParametersForDrawIndirect(
     const RenderPipelineBase* renderPipelineBase) const {
-    return ToBackend(renderPipelineBase)->UsesVertexOrInstanceIndex();
+    return renderPipelineBase->UsesVertexIndex() || renderPipelineBase->UsesInstanceIndex();
 }
 
 uint64_t Device::GetBufferCopyOffsetAlignmentForDepthStencil() const {

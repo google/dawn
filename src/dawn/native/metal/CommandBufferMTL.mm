@@ -695,7 +695,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
         uint32_t curBufferIdx = kArgumentBufferSlotMax;
         for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
             BindGroup* group = ToBackend(mBindGroups[index]);
-            auto* layout = ToBackend(mPipelineLayout->GetBindGroupLayout(index));
+            auto* layout = ToBackend(mPipeline->GetLayout()->GetBindGroupLayout(index));
 
             // Note, both of these buffer index values need to match up to the value set in the
             // ShaderModuleMTL #argument-buffer-and-dynamic-offsets-buffer-indices
@@ -708,7 +708,8 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
             }
 
             ApplyBindGroup(encoder, index, group, GetDynamicOffsets(index),
-                           ToBackend(mPipelineLayout), argumentBufferIdx, dynamicOffsetsBufferIdx);
+                           ToBackend(mPipeline->GetLayout()), argumentBufferIdx,
+                           dynamicOffsetsBufferIdx);
         }
 
         AfterApply();

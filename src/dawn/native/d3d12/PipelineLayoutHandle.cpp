@@ -28,6 +28,7 @@
 #include "src/dawn/native/d3d12/PipelineLayoutHandle.h"
 
 #include "src/dawn/native/d3d12/DeviceD3D12.h"
+#include "src/dawn/native/d3d12/ImmediatesLayoutD3D12.h"
 
 namespace dawn::native::d3d12 {
 
@@ -35,12 +36,11 @@ namespace dawn::native::d3d12 {
 Ref<PipelineLayoutHandle> PipelineLayoutHandle::Create(Device* device,
                                                        ComPtr<ID3D12RootSignature> rootSignature,
                                                        ComPtr<ID3DBlob> rootSignatureBlob,
-                                                       uint32_t firstIndexOffsetParameterIndex,
-                                                       uint32_t numWorkgroupsParameterIndex,
-                                                       uint32_t immediatesParameterIndex) {
-    return AcquireRef(new PipelineLayoutHandle(
-        device, std::move(rootSignature), std::move(rootSignatureBlob),
-        firstIndexOffsetParameterIndex, numWorkgroupsParameterIndex, immediatesParameterIndex));
+                                                       uint32_t immediatesParameterIndex,
+                                                       const ImmediateMask& pipelineImmediateMask) {
+    return AcquireRef(new PipelineLayoutHandle(device, std::move(rootSignature),
+                                               std::move(rootSignatureBlob),
+                                               immediatesParameterIndex, pipelineImmediateMask));
 }
 
 PipelineLayoutHandle::~PipelineLayoutHandle() {
@@ -67,9 +67,12 @@ PipelineLayoutHandle::GetDispatchIndirectCommandSignatureWithNumWorkgroups() {
 
     D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[2] = {};
     argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
-    argumentDescs[0].Constant.RootParameterIndex = mNumWorkgroupsParameterIndex;
+    argumentDescs[0].Constant.RootParameterIndex = mImmediatesParameterIndex;
     argumentDescs[0].Constant.Num32BitValuesToSet = 3;
-    argumentDescs[0].Constant.DestOffsetIn32BitValues = 0;
+    argumentDescs[0].Constant.DestOffsetIn32BitValues =
+        GetImmediateByteOffsetInPipeline(&ComputeImmediates::numWorkgroups,
+                                         mPipelineImmediateMask) /
+        kImmediateElementByteSize;
 
     // A command signature must contain exactly 1 Draw / Dispatch / DispatchMesh / DispatchRays
     // command. That command must come last.
@@ -96,11 +99,16 @@ PipelineLayoutHandle::GetDrawIndirectCommandSignatureWithInstanceVertexOffsets()
         return mDrawIndirectCommandSignatureWithInstanceVertexOffsets.Get();
     }
 
+    // First vertex and first instance are set in immediate mask together and first vertex is
+    // always just before instance index in the immediate mask.
     D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[2] = {};
     argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
-    argumentDescs[0].Constant.RootParameterIndex = mFirstIndexOffsetParameterIndex;
+    argumentDescs[0].Constant.RootParameterIndex = mImmediatesParameterIndex;
     argumentDescs[0].Constant.Num32BitValuesToSet = 2;
-    argumentDescs[0].Constant.DestOffsetIn32BitValues = 0;
+    argumentDescs[0].Constant.DestOffsetIn32BitValues =
+        GetImmediateByteOffsetInPipeline(&RenderImmediates::firstIndexOffset,
+                                         mPipelineImmediateMask) /
+        kImmediateElementByteSize;
 
     // A command signature must contain exactly 1 Draw / Dispatch / DispatchMesh / DispatchRays
     // command. That command must come last.
@@ -127,11 +135,16 @@ PipelineLayoutHandle::GetDrawIndexedIndirectCommandSignatureWithInstanceVertexOf
         return mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets.Get();
     }
 
+    // First vertex and first instance are set in immediate mask together and first vertex is
+    // always just before instance index in the immediate mask.
     D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[2] = {};
     argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
-    argumentDescs[0].Constant.RootParameterIndex = mFirstIndexOffsetParameterIndex;
+    argumentDescs[0].Constant.RootParameterIndex = mImmediatesParameterIndex;
     argumentDescs[0].Constant.Num32BitValuesToSet = 2;
-    argumentDescs[0].Constant.DestOffsetIn32BitValues = 0;
+    argumentDescs[0].Constant.DestOffsetIn32BitValues =
+        GetImmediateByteOffsetInPipeline(&RenderImmediates::firstIndexOffset,
+                                         mPipelineImmediateMask) /
+        kImmediateElementByteSize;
 
     // A command signature must contain exactly 1 Draw / Dispatch / DispatchMesh / DispatchRays
     // command. That command must come last.
