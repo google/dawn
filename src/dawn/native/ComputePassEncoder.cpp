@@ -551,30 +551,19 @@ void ComputePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
         dynamicOffsets.size());
 }
 
-void ComputePassEncoder::APISetImmediates(uint32_t offset, const void* data, size_t size) {
+void ComputePassEncoder::APISetImmediates(uint32_t offset, Span<const std::byte> data) {
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
-                DAWN_TRY(ValidateSetImmediates(offset, size));
+                DAWN_TRY(ValidateSetImmediates(offset, data.size()));
             }
 
-            // Skip SetImmediates when uploading constants are empty.
-            if (size == 0) {
-                return {};
-            }
-
-            SetImmediatesCmd* cmd = allocator->Allocate<SetImmediatesCmd>(Command::SetImmediates);
-            cmd->offset = offset;
-            cmd->size = uint32_t(size);
-            uint8_t* immediateDatas = allocator->AllocateData<uint8_t>(cmd->size);
-            DAWN_UNSAFE_TODO(memcpy(immediateDatas, data, size));
-
-            mCommandBufferState.SetImmediateData(offset, uint32_t(size));
-
+            RecordSetImmediates(allocator, offset, data);
+            mCommandBufferState.SetImmediateData(offset, data.size());
             return {};
         },
-        "encoding %s.SetImmediates(%u, %u, ...).", this, offset, size);
+        "encoding %s.SetImmediates(%u, %u, ...).", this, offset, data.size());
 }
 
 void ComputePassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndexUntyped) {

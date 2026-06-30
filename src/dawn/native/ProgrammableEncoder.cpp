@@ -246,6 +246,24 @@ void ProgrammableEncoder::RecordSetBindGroup(
     }
 }
 
+void ProgrammableEncoder::RecordSetImmediates(CommandAllocator* allocator,
+                                              uint32_t offset,
+                                              Span<const std::byte> data) {
+    // Skip SetImmediates when no constants are updated.
+    if (data.empty()) {
+        return;
+    }
+    DAWN_ASSERT(data.size() <= kMaxImmediateDataBytes);
+
+    SetImmediatesCmd* cmd = allocator->Allocate<SetImmediatesCmd>(Command::SetImmediates);
+    cmd->offset = offset;
+    cmd->size = uint32_t(data.size());
+    // TODO(https://crbug.com/528305452): Make AllocateData return a span.
+    uint8_t* immediateDatas = allocator->AllocateData<uint8_t>(data.size());
+    // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
+    DAWN_UNSAFE_TODO(memcpy(immediateDatas, data.data(), data.size()));
+}
+
 MaybeError ProgrammableEncoder::SetResourceTable(ResourceTableBase* table,
                                                  CommandAllocator* allocator) {
     DAWN_ASSERT(allocator);

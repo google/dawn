@@ -823,10 +823,14 @@ void CommandBufferStateTracker::SetVertexBuffer(VertexBufferSlot slot, uint64_t 
     mVertexBufferSizes[slot] = size;
 }
 
-void CommandBufferStateTracker::SetImmediateData(uint32_t offset, uint32_t size) {
+void CommandBufferStateTracker::SetImmediateData(uint32_t offset, size_t size) {
+    // Both offset and size should be small numbers that fit in a uint32_t.
+    DAWN_ASSERT(offset <= kMaxImmediateDataBytes);
+    DAWN_ASSERT(size <= kMaxImmediateDataBytes);
+
     static_assert(ImmediateMask{}.size() <= 64);
-    uint64_t startSlot = offset / kImmediateElementByteSize;
-    uint64_t slotCount = size / kImmediateElementByteSize;
+    uint32_t startSlot = offset / kImmediateElementByteSize;
+    uint32_t slotCount = size / kImmediateElementByteSize;
 
     mImmediateDataMask |= ImmediateMask(((1u << slotCount) - 1u) << startSlot);
 }

@@ -77,7 +77,7 @@ class CommandBufferStateTracker {
                         uint64_t size);
     void UnsetVertexBuffer(VertexBufferSlot slot);
     void SetVertexBuffer(VertexBufferSlot slot, uint64_t size);
-    void SetImmediateData(uint32_t offset, uint32_t size);
+    void SetImmediateData(uint32_t offset, size_t size);
     void End();
 
     static constexpr size_t kNumAspects = 6;

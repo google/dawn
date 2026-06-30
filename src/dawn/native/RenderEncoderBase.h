@@ -86,7 +86,7 @@ class RenderEncoderBase : public ProgrammableEncoder {
                          BindGroupBase* group,
                          ityp::span<BindingIndex, const uint32_t> dynamicOffsets = {});
 
-    void APISetImmediates(uint32_t offset, const void* data, size_t size);
+    void APISetImmediates(uint32_t offset, Span<const std::byte> data);
 
     const AttachmentState* GetAttachmentState() const;
     bool IsDepthReadOnly() const;
