@@ -692,13 +692,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::U64*) { return Check64Bit(diag); },
             [&](const core::type::Array* arr) { return CheckArray(arr, diag); },
             [&](const core::type::Vector* v) { return CheckVector(v, diag); },
-            [&](const core::type::Matrix* m) {
-                if (!m->Type()->IsFloatScalar()) {
-                    diag() << "matrix elements, " << NameOf(type) << ", must be float scalars";
-                    return false;
-                }
-                return true;
-            },
+            [&](const core::type::Matrix* m) { return CheckMatrix(m, diag); },
             [&](const core::type::Atomic* a) {
                 // Prior to lowering we allow for atomic operations on vec2u to support the
                 // AtomicVec2UMinMax feature.
@@ -866,6 +860,15 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckMatrix(const core::type::Matrix* mat,
+                             std::function<diag::Diagnostic&()>& diag) {
+    if (!mat->Type()->IsFloatScalar()) {
+        diag() << "matrix elements, " << NameOf(mat) << ", must be float scalars";
+        return false;
+    }
+    return true;
 }
 
 bool Structural::CheckVector(const core::type::Vector* vec,

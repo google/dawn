@@ -341,6 +341,10 @@ class Structural {
     /// @param vec the vector the validate
     /// @param diag a function that creates an error diagnostic for the source of the type
     bool CheckVector(const core::type::Vector* vec, std::function<diag::Diagnostic&()>& diag);
+    /// Checks that `mat` is a valid matrix type
+    /// @param mat the matrix the validate
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool CheckMatrix(const core::type::Matrix* mat, std::function<diag::Diagnostic&()>& diag);
 
     /// Checks that 8-bit types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
