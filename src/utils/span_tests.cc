@@ -679,5 +679,24 @@ TEST(SpanTest, SpanFromRef) {
     }
 }
 
+TEST(SpanTest, SpanFromRefTyped) {
+    {
+        uint32_t i = 0;
+
+        auto sp = SpanFromRef<Index>(i);
+        static_assert(std::is_same_v<ityp::span<Index, uint32_t>, decltype(sp)>);
+        EXPECT_EQ(sp.size(), Index{1u});
+        EXPECT_EQ(sp.data(), &i);
+    }
+    {
+        const uint32_t i = 0;
+
+        auto sp = SpanFromRef<Index>(i);
+        static_assert(std::is_same_v<ityp::span<Index, const uint32_t>, decltype(sp)>);
+        EXPECT_EQ(sp.size(), Index{1u});
+        EXPECT_EQ(sp.data(), &i);
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn

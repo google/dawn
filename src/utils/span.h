@@ -325,15 +325,15 @@ constexpr auto SpanAsWritableBytes(detail::SpanBase<T, Index, PtrType> s) {
 // Mirrors Chromium's base::span_from_ref.
 // TODO(https://crbug.com/524405497): Make it return Span<T, 1> once fixed extent spans are
 // supported.
-template <typename T>
-constexpr Span<const T> SpanFromRef(const T& t) {
+template <typename Index = size_t, typename T>
+constexpr ityp::span<Index, const T> SpanFromRef(const T& t) {
     // SAFETY: A reference always points at a valid allocation of one element.
-    return DAWN_UNSAFE_BUFFERS({std::addressof(t), 1u});
+    return DAWN_UNSAFE_BUFFERS({std::addressof(t), Index{UnderlyingType<Index>(1u)}});
 }
-template <typename T>
-constexpr Span<T> SpanFromRef(T& t) {
+template <typename Index = size_t, typename T>
+constexpr ityp::span<Index, T> SpanFromRef(T& t) {
     // SAFETY: A reference always points at a valid allocation of one element.
-    return DAWN_UNSAFE_BUFFERS({std::addressof(t), 1u});
+    return DAWN_UNSAFE_BUFFERS({std::addressof(t), Index{UnderlyingType<Index>(1u)}});
 }
 
 // Converts a `[const] T&` to a `Span<[const] std::byte>`.
