@@ -325,6 +325,14 @@ class Structural {
     /// @param diag a function that creates an error diagnostic for the source of the type
     bool CheckStruct(const core::type::Struct* str, std::function<diag::Diagnostic&()>& diag);
 
+    /// Checks that `ref` is a valid reference type
+    /// @param ref the type to check
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    /// @param root the root type of the ref type, maybe the ref itself.
+    bool CheckRef(const core::type::Reference* ref,
+                  std::function<diag::Diagnostic&()>& diag,
+                  const core::type::Type* root);
+
     /// Validates the root block
     /// @param blk the block
     void CheckRootBlock(const Block* blk);

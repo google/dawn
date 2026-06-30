@@ -34,7 +34,6 @@
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/constexpr_if.h"
-#include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/referenced_functions.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
@@ -56,6 +55,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/subgroup_matrix.h"
+#include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/u16.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
@@ -684,23 +684,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
         return tint::Switch(
             type,  //
             [&](const core::type::Struct* str) { return CheckStruct(str, diag); },
-            [&](const core::type::Reference* ref) {
-                if (ref->StoreType()->Is<core::type::Void>()) {
-                    diag() << "references to void are not permitted";
-                    return false;
-                }
-
-                // Reference types are guarded by the AllowRefTypes property.
-                if (!ir_.properties.Contains(Property::kAllowRefTypes)) {
-                    diag() << "reference types are not permitted here";
-                    return false;
-                } else if (type != root) {
-                    // If they are allowed, reference types still cannot be nested.
-                    diag() << "nested reference types are not permitted";
-                    return false;
-                }
-                return true;
-            },
+            [&](const core::type::Reference* ref) { return CheckRef(ref, diag, root); },
             [&](const core::type::Pointer* ptr) {
                 if (ptr->StoreType()->Is<core::type::Void>()) {
                     diag() << "pointers to void are not permitted";
@@ -994,6 +978,27 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckRef(const core::type::Reference* ref,
+                          std::function<diag::Diagnostic&()>& diag,
+                          const core::type::Type* root) {
+    if (ref->StoreType()->Is<core::type::Void>()) {
+        diag() << "references to void are not permitted";
+        return false;
+    }
+
+    // Reference types are guarded by the AllowRefTypes property.
+    if (!ir_.properties.Contains(Property::kAllowRefTypes)) {
+        diag() << "reference types are not permitted here";
+        return false;
+    }
+    // If they are allowed, reference types still cannot be nested.
+    if (ref != root) {
+        diag() << "nested reference types are not permitted";
+        return false;
+    }
+    return true;
 }
 
 bool Structural::CheckStruct(const core::type::Struct* str,
