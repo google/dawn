@@ -25,10 +25,10 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""Invokes the hermetic Bazelisk binary to build LiteRT-LM and copy the output binary to GN's output directory.
-"""
+"""Invokes the hermetic Bazelisk binary to build LiteRT-LM and copy the output
+binary to GN's output directory."""
 
-import os
+from pathlib import Path
 import shutil
 import subprocess
 import sys
@@ -43,36 +43,35 @@ def main():
         print("Usage: build_litert_lm.py <output_path>", file=sys.stderr)
         sys.exit(1)
 
-    dest_path = os.path.abspath(sys.argv[1])
+    dest_path = Path(sys.argv[1]).resolve()
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.abspath(os.path.join(script_dir, '..', '..'))
-    litert_lm_dir = os.path.join(script_dir, 'src')
+    script_dir = Path(__file__).resolve().parent
+    project_root = script_dir.parent.parent
+    litert_lm_dir = script_dir / 'src'
 
-    bazelisk_path = os.path.join(project_root, 'tools', 'bazelisk', 'bazelisk')
-    prebuilt_cipd_dir = os.path.join(script_dir, 'data', 'prebuilt')
-    prebuilt_src_dir = os.path.join(litert_lm_dir, 'prebuilt')
-    backup_dir = prebuilt_src_dir + "_backup"
+    bazelisk_path = project_root / 'tools' / 'bazelisk' / 'bazelisk'
+    prebuilt_cipd_dir = script_dir / 'data' / 'prebuilt'
+    prebuilt_src_dir = litert_lm_dir / 'prebuilt'
+    backup_dir = litert_lm_dir / 'prebuilt_backup'
 
     # Back up the original Git LFS smudge prebuilt directory.
-    if os.path.exists(
-            prebuilt_src_dir) and not os.path.islink(prebuilt_src_dir):
+    if prebuilt_src_dir.exists() and not prebuilt_src_dir.is_symlink():
         shutil.move(prebuilt_src_dir, backup_dir)
 
     try:
         # Symlink the CIPD-unpacked prebuilts directly so Bazel can resolve
         # targets.
-        if os.path.exists(prebuilt_cipd_dir):
+        if prebuilt_cipd_dir.exists():
             print(
                 "Symlinking prebuilt binaries from CIPD to LiteRT-LM workspace..."
             )
-            os.symlink(prebuilt_cipd_dir, prebuilt_src_dir)
+            prebuilt_src_dir.symlink_to(prebuilt_cipd_dir)
 
         # Compile the target using Bazelisk inside LiteRT-LM's standalone
         # workspace.
         print(f"Building Bazel target: {BAZEL_TARGET}...")
         build_cmd = [
-            bazelisk_path,
+            str(bazelisk_path),
             'build',
             '--compilation_mode=opt',
             '--define=litert_link_capi_so=true',
@@ -89,14 +88,14 @@ def main():
         # Restore the original Git-tracked prebuilt directory regardless of
         # success or failure. This keeps the Git tree clean for gclient sync.
         print("Restoring original Git-tracked prebuilt directory...")
-        if os.path.islink(prebuilt_src_dir):
-            os.remove(prebuilt_src_dir)
-        if os.path.exists(backup_dir):
+        if prebuilt_src_dir.is_symlink():
+            prebuilt_src_dir.unlink()
+        if backup_dir.exists():
             shutil.move(backup_dir, prebuilt_src_dir)
 
     # Locate and copy the compiled binary into the GN target directory.
-    compiled_path = os.path.join(litert_lm_dir, 'bazel-bin', BAZEL_BIN_SUBPATH)
-    if not os.path.exists(compiled_path):
+    compiled_path = litert_lm_dir / 'bazel-bin' / BAZEL_BIN_SUBPATH
+    if not compiled_path.exists():
         print(
             f"Error: Compiled binary not found at expected path: {compiled_path}",
             file=sys.stderr)
@@ -104,7 +103,7 @@ def main():
 
     print(f"Copying compiled binary to: {dest_path}")
     shutil.copy2(compiled_path, dest_path)
-    os.chmod(dest_path, 0o755)
+    dest_path.chmod(0o755)
 
     print("Build and copy successful.")
 
