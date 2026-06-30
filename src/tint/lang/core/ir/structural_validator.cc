@@ -691,13 +691,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::U16*) { return Check16Bit(diag); },
             [&](const core::type::U64*) { return Check64Bit(diag); },
             [&](const core::type::Array* arr) { return CheckArray(arr, diag); },
-            [&](const core::type::Vector* v) {
-                if (!v->Type()->IsScalar()) {
-                    diag() << "vector elements, " << NameOf(type) << ", must be scalars";
-                    return false;
-                }
-                return true;
-            },
+            [&](const core::type::Vector* v) { return CheckVector(v, diag); },
             [&](const core::type::Matrix* m) {
                 if (!m->Type()->IsFloatScalar()) {
                     diag() << "matrix elements, " << NameOf(type) << ", must be float scalars";
@@ -872,6 +866,15 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckVector(const core::type::Vector* vec,
+                             std::function<diag::Diagnostic&()>& diag) {
+    if (!vec->Type()->IsScalar()) {
+        diag() << "vector elements, " << NameOf(vec) << ", must be scalars";
+        return false;
+    }
+    return true;
 }
 
 bool Structural::CheckArray(const core::type::Array* arr,
