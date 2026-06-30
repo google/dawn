@@ -199,10 +199,9 @@ void ValidationTest::SetUp() {
         instanceToggles.enabledToggles = &allowUnsafeApisToggle;
     }
 
+    std::vector<const char*> blocklistedFeatures = GetWGSLBlocklistedFeatures();
     dawn::native::DawnWGSLBlocklist blockList;
-    auto blocklistedFeatures = GetWGSLBlocklistedFeatures();
-    blockList.blocklistedFeatureCount = blocklistedFeatures.size();
-    blockList.blocklistedFeatures = blocklistedFeatures.data();
+    blockList.blocklistedFeatures = blocklistedFeatures;
     blockList.nextInChain = &instanceToggles;
 
     wgpu::InstanceDescriptor instanceDesc = {};

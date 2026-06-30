@@ -55,7 +55,6 @@
             "ComputeState",
             "DawnDrmFormatCapabilities",
             "DawnTogglesDescriptor",
-            "DawnWGSLBlocklist",
             "DeviceDescriptor",
             "FragmentState",
             "InstanceDescriptor",

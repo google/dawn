@@ -776,9 +776,8 @@ void InstanceBase::GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist) {
 
     // Remove blocklisted features.
     if (wgslBlocklist != nullptr) {
-        for (size_t i = 0; i < wgslBlocklist->blocklistedFeatureCount; i++) {
-            const char* name = DAWN_UNSAFE_TODO(wgslBlocklist->blocklistedFeatures[i]);
-            tint::wgsl::LanguageFeature tintFeature = tint::wgsl::ParseLanguageFeature(name);
+        for (const char* featureName : wgslBlocklist->blocklistedFeatures) {
+            tint::wgsl::LanguageFeature tintFeature = tint::wgsl::ParseLanguageFeature(featureName);
             if (tintFeature == tint::wgsl::LanguageFeature::kUndefined) {
                 // Ignore unknown features in the blocklist.
                 continue;
