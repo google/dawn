@@ -696,20 +696,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::Atomic* a) { return CheckAtomic(a, diag); },
             [&](const core::type::SampledTexture* s) { return CheckSampledTexture(s, diag); },
             [&](const core::type::MultisampledTexture* ms) {
-                if (!ms->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
-                    diag() << "invalid multisampled texture sample type: " << NameOf(ms->Type());
-                    return false;
-                }
-
-                switch (ms->Dim()) {
-                    case core::type::TextureDimension::k2d:
-                        break;
-                    default:
-                        diag() << "invalid multisampled texture dimension: "
-                               << style::Literal(ToString(ms->Dim()));
-                        return false;
-                }
-                return true;
+                return CheckMultisampledTexture(ms, diag);
             },
             [&](const core::type::StorageTexture* s) {
                 switch (s->Dim()) {
@@ -839,6 +826,24 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckMultisampledTexture(const core::type::MultisampledTexture* ms,
+                                          std::function<diag::Diagnostic&()>& diag) {
+    if (!ms->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
+        diag() << "invalid multisampled texture sample type: " << NameOf(ms->Type());
+        return false;
+    }
+
+    switch (ms->Dim()) {
+        case core::type::TextureDimension::k2d:
+            break;
+        default:
+            diag() << "invalid multisampled texture dimension: "
+                   << style::Literal(ToString(ms->Dim()));
+            return false;
+    }
+    return true;
 }
 
 bool Structural::CheckSampledTexture(const core::type::SampledTexture* s,

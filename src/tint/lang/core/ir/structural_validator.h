@@ -356,6 +356,11 @@ class Structural {
     /// @param diag a function that creates an error diagnostic for the source of the type
     bool CheckSampledTexture(const core::type::SampledTexture* s,
                              std::function<diag::Diagnostic&()>& diag);
+    /// Checks that `ms` is a valid multi-sampled texture
+    /// @param ms the multi-sampled texture to validate
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool CheckMultisampledTexture(const core::type::MultisampledTexture* ms,
+                                  std::function<diag::Diagnostic&()>& diag);
 
     /// Checks that 8-bit types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
