@@ -698,21 +698,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::MultisampledTexture* ms) {
                 return CheckMultisampledTexture(ms, diag);
             },
-            [&](const core::type::StorageTexture* s) {
-                switch (s->Dim()) {
-                    case core::type::TextureDimension::kCube:
-                    case core::type::TextureDimension::kCubeArray:
-                        diag() << "dimension " << style::Literal(ToString(s->Dim()))
-                               << " for storage textures does not in WGSL yet";
-                        return false;
-                    case core::type::TextureDimension::kNone:
-                        diag() << "invalid texture dimension "
-                               << style::Literal(ToString(s->Dim()));
-                        return false;
-                    default:
-                        return true;
-                }
-            },
+            [&](const core::type::StorageTexture* s) { return CheckStorageTexture(s, diag); },
             [&](const core::type::InputAttachment* i) {
                 if (!i->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
                     diag() << "invalid input attachment component type: " << NameOf(i->Type());
@@ -826,6 +812,23 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckStorageTexture(const core::type::StorageTexture* storage,
+                                     std::function<diag::Diagnostic&()>& diag) {
+    switch (storage->Dim()) {
+        case core::type::TextureDimension::kCube:
+        case core::type::TextureDimension::kCubeArray:
+            diag() << "dimension " << style::Literal(ToString(storage->Dim()))
+                   << " for storage textures does not in WGSL yet";
+            return false;
+        case core::type::TextureDimension::kNone:
+            diag() << "invalid texture dimension " << style::Literal(ToString(storage->Dim()));
+            return false;
+        default:
+            break;
+    }
+    return true;
 }
 
 bool Structural::CheckMultisampledTexture(const core::type::MultisampledTexture* ms,
