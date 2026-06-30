@@ -704,31 +704,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
                 return CheckSubgroupMatrix(m, diag, addrspace);
             },
             [&](const core::type::BindingArray* t) {
-                if (!t->Count()->Is<core::type::ConstantArrayCount>()) {
-                    diag() << "binding_array count must be a constant expression";
-                    return false;
-                }
-
-                auto count = t->Count()->As<core::type::ConstantArrayCount>()->value;
-                if (count == 0) {
-                    diag() << "binding array requires a constant array size > 0";
-                    return false;
-                }
-
-                if (!(addrspace == AddressSpace::kUndefined ||
-                      addrspace == AddressSpace::kHandle) &&
-                    !ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
-                    diag() << "invalid address space for binding_array : " << addrspace;
-                    return false;
-                }
-
-                if (!ir_.properties.Contains(Property::kAllowNonCoreTypes)) {
-                    if (!t->ElemType()->Is<core::type::SampledTexture>()) {
-                        diag() << "binding_array element type must be a sampled texture type";
-                        return false;
-                    }
-                }
-                return true;
+                return CheckBindingArray(t, diag, addrspace);
             },
             [&](const core::type::Buffer*) {
                 if (!ir_.properties.Contains(Property::kAllowBufferTypes)) {
@@ -795,6 +771,35 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             }
         }
     }
+}
+
+bool Structural::CheckBindingArray(const core::type::BindingArray* ba,
+                                   std::function<diag::Diagnostic&()>& diag,
+                                   core::AddressSpace addrspace) {
+    if (!ba->Count()->Is<core::type::ConstantArrayCount>()) {
+        diag() << "binding_array count must be a constant expression";
+        return false;
+    }
+
+    auto count = ba->Count()->As<core::type::ConstantArrayCount>()->value;
+    if (count == 0) {
+        diag() << "binding array requires a constant array size > 0";
+        return false;
+    }
+
+    if (!(addrspace == AddressSpace::kUndefined || addrspace == AddressSpace::kHandle) &&
+        !ir_.properties.Contains(Property::kAllowMslEntryPointInterface)) {
+        diag() << "invalid address space for binding_array : " << addrspace;
+        return false;
+    }
+
+    if (!ir_.properties.Contains(Property::kAllowNonCoreTypes)) {
+        if (!ba->ElemType()->Is<core::type::SampledTexture>()) {
+            diag() << "binding_array element type must be a sampled texture type";
+            return false;
+        }
+    }
+    return true;
 }
 
 bool Structural::CheckSubgroupMatrix(const core::type::SubgroupMatrix* m,

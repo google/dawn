@@ -380,6 +380,13 @@ class Structural {
     bool CheckSubgroupMatrix(const core::type::SubgroupMatrix* m,
                              std::function<diag::Diagnostic&()>& diag,
                              core::AddressSpace addrspace);
+    /// Checks that `ba` is a valid binding array
+    /// @param ba the binding array
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    /// @param addrspace the address space of the root type
+    bool CheckBindingArray(const core::type::BindingArray* ba,
+                           std::function<diag::Diagnostic&()>& diag,
+                           core::AddressSpace addrspace);
 
     /// Checks that 8-bit types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
