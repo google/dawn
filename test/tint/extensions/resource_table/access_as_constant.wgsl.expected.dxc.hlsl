@@ -15,7 +15,7 @@ void fs() {
   } else {
     v_2 = (0u + tint_resource_table_metadata.Load(0u));
   }
-  uint v_3 = v_2;
-  float4 texture_load = tint_resource_table_array[v_3].Load(int2(int(0), int(0)));
+  uint item_idx = v_2;
+  float4 texture_load = tint_resource_table_array[item_idx].Load(int2(int(0), int(0)));
 }
 

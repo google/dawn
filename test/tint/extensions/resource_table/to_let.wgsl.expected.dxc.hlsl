@@ -15,61 +15,60 @@ float4 fs_inner() {
   } else {
     v = false;
   }
-  bool v_2 = v;
+  bool has_resource = v;
+  uint v_2 = 0u;
+  if (has_resource) {
+    v_2 = tint_resource_table_metadata.Load(12u);
+  } else {
+    v_2 = 6u;
+  }
+  uint texture_kind = v_2;
   uint v_3 = 0u;
-  if (v_2) {
-    v_3 = tint_resource_table_metadata.Load(12u);
+  if (has_resource) {
+    v_3 = 2u;
   } else {
-    v_3 = 6u;
+    v_3 = (0u + tint_resource_table_metadata.Load(0u));
   }
-  uint texture_kind = v_3;
-  uint v_4 = 0u;
-  if (v_2) {
-    v_4 = 2u;
-  } else {
-    v_4 = (0u + tint_resource_table_metadata.Load(0u));
-  }
-  uint v_5 = v_4;
-  bool v_6 = false;
+  uint item_idx = v_3;
+  bool v_4 = false;
   if ((3u < tint_resource_table_metadata.Load(0u))) {
-    uint2 v_7 = uint2((tint_resource_table_metadata.Load(16u)).xx);
-    v_6 = any((v_7 == uint2(40u, 41u)));
+    uint2 v_5 = uint2((tint_resource_table_metadata.Load(16u)).xx);
+    v_4 = any((v_5 == uint2(40u, 41u)));
   } else {
-    v_6 = false;
+    v_4 = false;
   }
-  bool v_8 = v_6;
-  uint v_9 = 0u;
-  if (v_8) {
-    v_9 = tint_resource_table_metadata.Load(16u);
+  bool has_resource_1 = v_4;
+  uint v_6 = 0u;
+  if (has_resource_1) {
+    v_6 = tint_resource_table_metadata.Load(16u);
   } else {
-    v_9 = 41u;
+    v_6 = 41u;
   }
-  uint sampler_kind = v_9;
-  uint v_10 = 0u;
-  if (v_8) {
-    v_10 = 3u;
+  uint sampler_kind = v_6;
+  uint v_7 = 0u;
+  if (has_resource_1) {
+    v_7 = 3u;
   } else {
-    v_10 = (4u + tint_resource_table_metadata.Load(0u));
+    v_7 = (4u + tint_resource_table_metadata.Load(0u));
   }
-  uint v_11 = v_10;
-  bool v_12 = false;
+  uint item_idx_1 = v_7;
+  bool v_8 = false;
   if ((sampler_kind == 40u)) {
-    v_12 = (texture_kind == 6u);
+    v_8 = (texture_kind == 6u);
   } else {
-    v_12 = true;
+    v_8 = true;
   }
-  float4 v_13 = (0.0f).xxxx;
-  if (v_12) {
-    v_13 = tint_resource_table_array[v_5].Sample(tint_resource_table_array_2[v_11], (0.0f).xx);
+  float4 v_9 = (0.0f).xxxx;
+  if (v_8) {
+    v_9 = tint_resource_table_array[item_idx].Sample(tint_resource_table_array_2[item_idx_1], (0.0f).xx);
   } else {
-    uint v_14 = (4u + tint_resource_table_metadata.Load(0u));
-    v_13 = tint_resource_table_array[v_5].Sample(tint_resource_table_array_2[v_14], (0.0f).xx);
+    v_9 = (0.0f).xxxx;
   }
-  return v_13;
+  return v_9;
 }
 
 fs_outputs fs() {
-  fs_outputs v_15 = {fs_inner()};
-  return v_15;
+  fs_outputs v_10 = {fs_inner()};
+  return v_10;
 }
 

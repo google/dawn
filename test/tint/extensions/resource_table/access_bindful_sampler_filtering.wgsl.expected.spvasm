@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 92
+; Bound: 85
 ; Schema: 0
                OpCapability Shader
                OpCapability RuntimeDescriptorArray
@@ -17,7 +17,9 @@
                OpName %fs_loc0_Output "fs_loc0_Output"
                OpName %fs_inner "fs_inner"
                OpName %tint_storage_metadata_length "tint_storage_metadata_length"
+               OpName %has_resource "has_resource"
                OpName %texture_kind "texture_kind"
+               OpName %item_idx "item_idx"
                OpName %fs "fs"
                OpDecorate %s DescriptorSet 0
                OpDecorate %s Binding 0
@@ -66,6 +68,7 @@
       %false = OpConstantFalse %bool
      %uint_6 = OpConstant %uint 6
 %_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+         %62 = OpConstantNull %v4float
      %uint_1 = OpConstant %uint 1
      %v3uint = OpTypeVector %uint 3
      %uint_7 = OpConstant %uint 7
@@ -74,9 +77,8 @@
          %77 = OpTypeSampledImage %7
     %v2float = OpTypeVector %float 2
          %78 = OpConstantNull %v2float
-     %uint_4 = OpConstant %uint 4
        %void = OpTypeVoid
-         %89 = OpTypeFunction %void
+         %82 = OpTypeFunction %void
    %fs_inner = OpFunction %v4float None %24
          %25 = OpLabel
          %26 = OpBitcast %uint %int_0
@@ -97,9 +99,9 @@
          %38 = OpLabel
                OpBranch %36
          %36 = OpLabel
-         %39 = OpPhi %bool %40 %37 %false %38
+%has_resource = OpPhi %bool %40 %37 %false %38
                OpSelectionMerge %42 None
-               OpBranchConditional %39 %43 %44
+               OpBranchConditional %has_resource %43 %44
          %43 = OpLabel
          %73 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_1 %26
          %46 = OpLoad %uint %73 None
@@ -109,7 +111,7 @@
          %42 = OpLabel
 %texture_kind = OpPhi %uint %46 %43 %uint_6 %44
                OpSelectionMerge %48 None
-               OpBranchConditional %39 %49 %50
+               OpBranchConditional %has_resource %49 %50
          %49 = OpLabel
                OpBranch %48
          %50 = OpLabel
@@ -118,8 +120,8 @@
          %52 = OpIAdd %uint %uint_0 %75
                OpBranch %48
          %48 = OpLabel
-         %51 = OpPhi %uint %26 %49 %52 %50
-         %53 = OpAccessChain %_ptr_UniformConstant_7 %4 %51
+   %item_idx = OpPhi %uint %26 %49 %52 %50
+         %53 = OpAccessChain %_ptr_UniformConstant_7 %4 %item_idx
          %55 = OpLoad %7 %53 None
          %56 = OpIEqual %bool %texture_kind %uint_6
                OpSelectionMerge %57 None
@@ -129,21 +131,14 @@
          %61 = OpImageSampleImplicitLod %v4float %76 %78 None
                OpBranch %57
          %59 = OpLabel
-         %80 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_0
-         %81 = OpLoad %uint %80 None
-         %82 = OpIAdd %uint %uint_4 %81
-         %84 = OpAccessChain %_ptr_UniformConstant_3 %12 %82
-         %85 = OpLoad %3 %84 None
-         %86 = OpSampledImage %77 %55 %85
-         %62 = OpImageSampleImplicitLod %v4float %86 %78 None
                OpBranch %57
          %57 = OpLabel
          %60 = OpPhi %v4float %61 %58 %62 %59
                OpReturnValue %60
                OpFunctionEnd
-         %fs = OpFunction %void None %89
-         %90 = OpLabel
-         %91 = OpFunctionCall %v4float %fs_inner
-               OpStore %fs_loc0_Output %91 None
+         %fs = OpFunction %void None %82
+         %83 = OpLabel
+         %84 = OpFunctionCall %v4float %fs_inner
+               OpStore %fs_loc0_Output %84 None
                OpReturn
                OpFunctionEnd

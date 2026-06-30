@@ -17,25 +17,25 @@ float4 fs_inner() {
   } else {
     v_1 = false;
   }
-  bool v_3 = v_1;
+  bool has_resource = v_1;
+  uint v_3 = 0u;
+  if (has_resource) {
+    v_3 = tint_resource_table_metadata.Load((4u + (v * 4u)));
+  } else {
+    v_3 = 6u;
+  }
   uint v_4 = 0u;
-  if (v_3) {
-    v_4 = tint_resource_table_metadata.Load((4u + (v * 4u)));
+  if (has_resource) {
+    v_4 = v;
   } else {
-    v_4 = 6u;
+    v_4 = (0u + tint_resource_table_metadata.Load(0u));
   }
-  uint v_5 = 0u;
-  if (v_3) {
-    v_5 = v;
-  } else {
-    v_5 = (0u + tint_resource_table_metadata.Load(0u));
-  }
-  uint v_6 = v_5;
-  return tint_resource_table_array[v_6].Sample(s, (0.0f).xx);
+  uint item_idx = v_4;
+  return tint_resource_table_array[item_idx].Sample(s, (0.0f).xx);
 }
 
 fs_outputs fs() {
-  fs_outputs v_7 = {fs_inner()};
-  return v_7;
+  fs_outputs v_5 = {fs_inner()};
+  return v_5;
 }
 

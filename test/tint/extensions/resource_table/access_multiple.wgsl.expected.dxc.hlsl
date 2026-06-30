@@ -17,37 +17,37 @@ void fs() {
   } else {
     v_2 = (0u + tint_resource_table_metadata.Load(0u));
   }
-  uint v_3 = v_2;
-  float4 t1d = tint_resource_table_array[v_3].Load(int2(int(0), int(0)));
-  uint v_4 = uint(int(1));
-  bool v_5 = false;
-  if ((v_4 < tint_resource_table_metadata.Load(0u))) {
-    v_5 = (tint_resource_table_metadata.Load((4u + (v_4 * 4u))) == 9u);
+  uint item_idx = v_2;
+  float4 t1d = tint_resource_table_array[item_idx].Load(int2(int(0), int(0)));
+  uint v_3 = uint(int(1));
+  bool v_4 = false;
+  if ((v_3 < tint_resource_table_metadata.Load(0u))) {
+    v_4 = (tint_resource_table_metadata.Load((4u + (v_3 * 4u))) == 9u);
   } else {
-    v_5 = false;
+    v_4 = false;
   }
-  uint v_6 = 0u;
-  if (v_5) {
-    v_6 = v_4;
+  uint v_5 = 0u;
+  if (v_4) {
+    v_5 = v_3;
   } else {
-    v_6 = (2u + tint_resource_table_metadata.Load(0u));
+    v_5 = (2u + tint_resource_table_metadata.Load(0u));
   }
-  uint v_7 = v_6;
-  int4 t2d = tint_resource_table_array_1[v_7].Load(int3(int2(int(0), int(1)), int(0)));
-  uint v_8 = uint(int(2));
-  bool v_9 = false;
-  if ((v_8 < tint_resource_table_metadata.Load(0u))) {
-    v_9 = (tint_resource_table_metadata.Load((4u + (v_8 * 4u))) == 20u);
+  uint item_idx_1 = v_5;
+  int4 t2d = tint_resource_table_array_1[item_idx_1].Load(int3(int2(int(0), int(1)), int(0)));
+  uint v_6 = uint(int(2));
+  bool v_7 = false;
+  if ((v_6 < tint_resource_table_metadata.Load(0u))) {
+    v_7 = (tint_resource_table_metadata.Load((4u + (v_6 * 4u))) == 20u);
   } else {
-    v_9 = false;
+    v_7 = false;
   }
-  uint v_10 = 0u;
-  if (v_9) {
-    v_10 = v_8;
+  uint v_8 = 0u;
+  if (v_7) {
+    v_8 = v_6;
   } else {
-    v_10 = (3u + tint_resource_table_metadata.Load(0u));
+    v_8 = (3u + tint_resource_table_metadata.Load(0u));
   }
-  uint v_11 = v_10;
-  uint4 tcube = tint_resource_table_array_2[v_11].Load(int4(int3(int(2), int(1), int(0)), int(0)));
+  uint item_idx_2 = v_8;
+  uint4 tcube = tint_resource_table_array_2[item_idx_2].Load(int4(int3(int(2), int(1), int(0)), int(0)));
 }
 

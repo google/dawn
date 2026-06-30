@@ -18,8 +18,11 @@
                OpName %tint_resource_table_metadata "tint_resource_table_metadata"
                OpName %fs "fs"
                OpName %tint_storage_metadata_length "tint_storage_metadata_length"
+               OpName %item_idx "item_idx"
                OpName %tint_storage_metadata_length_0 "tint_storage_metadata_length"
+               OpName %item_idx_0 "item_idx"
                OpName %tint_storage_metadata_length_1 "tint_storage_metadata_length"
+               OpName %item_idx_1 "item_idx"
                OpName %texture_load "texture_load"
                OpDecorate %1 DescriptorSet 43
                OpDecorate %1 Binding 51
@@ -83,8 +86,8 @@
          %32 = OpIAdd %uint %uint_0 %88
                OpBranch %28
          %28 = OpLabel
-         %31 = OpPhi %uint %uint_2 %29 %32 %30
-         %33 = OpAccessChain %_ptr_UniformConstant_4 %1 %31
+   %item_idx = OpPhi %uint %uint_2 %29 %32 %30
+         %33 = OpAccessChain %_ptr_UniformConstant_4 %1 %item_idx
          %35 = OpLoad %4 %33 None
 %tint_storage_metadata_length_0 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_0
          %37 = OpLoad %uint %tint_storage_metadata_length_0 None
@@ -113,8 +116,8 @@
          %48 = OpIAdd %uint %uint_0 %95
                OpBranch %44
          %44 = OpLabel
-         %47 = OpPhi %uint %uint_2 %45 %48 %46
-         %49 = OpAccessChain %_ptr_UniformConstant_4 %1 %47
+ %item_idx_0 = OpPhi %uint %uint_2 %45 %48 %46
+         %49 = OpAccessChain %_ptr_UniformConstant_4 %1 %item_idx_0
          %50 = OpLoad %4 %49 None
 %tint_storage_metadata_length_1 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_0
          %52 = OpLoad %uint %tint_storage_metadata_length_1 None
@@ -143,8 +146,8 @@
          %63 = OpIAdd %uint %uint_0 %102
                OpBranch %59
          %59 = OpLabel
-         %62 = OpPhi %uint %uint_2 %60 %63 %61
-         %64 = OpAccessChain %_ptr_UniformConstant_4 %1 %62
+ %item_idx_1 = OpPhi %uint %uint_2 %60 %63 %61
+         %64 = OpAccessChain %_ptr_UniformConstant_4 %1 %item_idx_1
          %65 = OpLoad %4 %64 None
          %66 = OpImageQueryLevels %uint %50
          %67 = OpISub %uint %66 %uint_1

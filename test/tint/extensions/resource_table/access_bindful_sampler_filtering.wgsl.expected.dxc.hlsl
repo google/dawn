@@ -17,33 +17,32 @@ float4 fs_inner() {
   } else {
     v_1 = false;
   }
-  bool v_3 = v_1;
+  bool has_resource = v_1;
+  uint v_3 = 0u;
+  if (has_resource) {
+    v_3 = tint_resource_table_metadata.Load((4u + (v * 4u)));
+  } else {
+    v_3 = 6u;
+  }
+  uint texture_kind = v_3;
   uint v_4 = 0u;
-  if (v_3) {
-    v_4 = tint_resource_table_metadata.Load((4u + (v * 4u)));
+  if (has_resource) {
+    v_4 = v;
   } else {
-    v_4 = 6u;
+    v_4 = (0u + tint_resource_table_metadata.Load(0u));
   }
-  uint texture_kind = v_4;
-  uint v_5 = 0u;
-  if (v_3) {
-    v_5 = v;
-  } else {
-    v_5 = (0u + tint_resource_table_metadata.Load(0u));
-  }
-  uint v_6 = v_5;
-  float4 v_7 = (0.0f).xxxx;
+  uint item_idx = v_4;
+  float4 v_5 = (0.0f).xxxx;
   if ((texture_kind == 6u)) {
-    v_7 = tint_resource_table_array[v_6].Sample(s, (0.0f).xx);
+    v_5 = tint_resource_table_array[item_idx].Sample(s, (0.0f).xx);
   } else {
-    uint v_8 = (4u + tint_resource_table_metadata.Load(0u));
-    v_7 = tint_resource_table_array[v_6].Sample(tint_resource_table_array_2[v_8], (0.0f).xx);
+    v_5 = (0.0f).xxxx;
   }
-  return v_7;
+  return v_5;
 }
 
 fs_outputs fs() {
-  fs_outputs v_9 = {fs_inner()};
-  return v_9;
+  fs_outputs v_6 = {fs_inner()};
+  return v_6;
 }
 

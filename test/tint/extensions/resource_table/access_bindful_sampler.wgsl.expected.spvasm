@@ -17,7 +17,9 @@
                OpName %fs_loc0_Output "fs_loc0_Output"
                OpName %fs_inner "fs_inner"
                OpName %tint_storage_metadata_length "tint_storage_metadata_length"
+               OpName %has_resource "has_resource"
                OpName %texture_kind "texture_kind"
+               OpName %item_idx "item_idx"
                OpName %fs "fs"
                OpDecorate %s DescriptorSet 0
                OpDecorate %s Binding 0
@@ -96,9 +98,9 @@
          %38 = OpLabel
                OpBranch %36
          %36 = OpLabel
-         %39 = OpPhi %bool %40 %37 %false %38
+%has_resource = OpPhi %bool %40 %37 %false %38
                OpSelectionMerge %42 None
-               OpBranchConditional %39 %43 %44
+               OpBranchConditional %has_resource %43 %44
          %43 = OpLabel
          %71 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_1 %26
          %46 = OpLoad %uint %71 None
@@ -108,7 +110,7 @@
          %42 = OpLabel
 %texture_kind = OpPhi %uint %46 %43 %uint_6 %44
                OpSelectionMerge %48 None
-               OpBranchConditional %39 %49 %50
+               OpBranchConditional %has_resource %49 %50
          %49 = OpLabel
                OpBranch %48
          %50 = OpLabel
@@ -117,8 +119,8 @@
          %52 = OpIAdd %uint %uint_0 %73
                OpBranch %48
          %48 = OpLabel
-         %51 = OpPhi %uint %26 %49 %52 %50
-         %53 = OpAccessChain %_ptr_UniformConstant_7 %4 %51
+   %item_idx = OpPhi %uint %26 %49 %52 %50
+         %53 = OpAccessChain %_ptr_UniformConstant_7 %4 %item_idx
          %55 = OpLoad %7 %53 None
          %56 = OpSampledImage %57 %55 %29
          %58 = OpImageSampleImplicitLod %v4float %56 %59 None

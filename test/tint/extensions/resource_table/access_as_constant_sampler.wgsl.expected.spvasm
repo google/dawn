@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 130
+; Bound: 124
 ; Schema: 0
                OpCapability Shader
                OpCapability RuntimeDescriptorArray
@@ -16,10 +16,14 @@
                OpName %fs_loc0_Output "fs_loc0_Output"
                OpName %fs_inner "fs_inner"
                OpName %tint_storage_metadata_length "tint_storage_metadata_length"
+               OpName %has_resource "has_resource"
                OpName %texture_kind "texture_kind"
+               OpName %item_idx "item_idx"
                OpName %tint_storage_metadata_length_0 "tint_storage_metadata_length"
+               OpName %has_resource_0 "has_resource"
                OpName %sampler_kind "sampler_kind"
-               OpName %use_sampler "use_sampler"
+               OpName %item_idx_0 "item_idx"
+               OpName %texture_sampler_combo_valid "texture_sampler_combo_valid"
                OpName %fs "fs"
                OpDecorate %1 DescriptorSet 43
                OpDecorate %1 Binding 51
@@ -69,6 +73,7 @@
 %_ptr_UniformConstant_12 = OpTypePointer UniformConstant %12
     %uint_40 = OpConstant %uint 40
        %true = OpConstantTrue %bool
+         %90 = OpConstantNull %v4float
      %uint_1 = OpConstant %uint 1
      %v3uint = OpTypeVector %uint 3
      %uint_7 = OpConstant %uint 7
@@ -81,7 +86,7 @@
     %v2float = OpTypeVector %float 2
         %117 = OpConstantNull %v2float
        %void = OpTypeVoid
-        %127 = OpTypeFunction %void
+        %121 = OpTypeFunction %void
    %fs_inner = OpFunction %v4float None %22
          %23 = OpLabel
          %24 = OpBitcast %uint %int_0
@@ -102,9 +107,9 @@
          %37 = OpLabel
                OpBranch %35
          %35 = OpLabel
-         %38 = OpPhi %bool %39 %36 %false %37
+%has_resource = OpPhi %bool %39 %36 %false %37
                OpSelectionMerge %41 None
-               OpBranchConditional %38 %42 %43
+               OpBranchConditional %has_resource %42 %43
          %42 = OpLabel
         %101 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_1 %24
          %45 = OpLoad %uint %101 None
@@ -114,7 +119,7 @@
          %41 = OpLabel
 %texture_kind = OpPhi %uint %45 %42 %uint_6 %43
                OpSelectionMerge %47 None
-               OpBranchConditional %38 %48 %49
+               OpBranchConditional %has_resource %48 %49
          %48 = OpLabel
                OpBranch %47
          %49 = OpLabel
@@ -123,8 +128,8 @@
          %51 = OpIAdd %uint %uint_0 %103
                OpBranch %47
          %47 = OpLabel
-         %50 = OpPhi %uint %24 %48 %51 %49
-         %52 = OpAccessChain %_ptr_UniformConstant_4 %1 %50
+   %item_idx = OpPhi %uint %24 %48 %51 %49
+         %52 = OpAccessChain %_ptr_UniformConstant_4 %1 %item_idx
          %54 = OpLoad %4 %52 None
 %tint_storage_metadata_length_0 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_0
          %56 = OpLoad %uint %tint_storage_metadata_length_0 None
@@ -142,9 +147,9 @@
          %60 = OpLabel
                OpBranch %58
          %58 = OpLabel
-         %61 = OpPhi %bool %62 %59 %false %60
+%has_resource_0 = OpPhi %bool %62 %59 %false %60
                OpSelectionMerge %63 None
-               OpBranchConditional %61 %64 %65
+               OpBranchConditional %has_resource_0 %64 %65
          %64 = OpLabel
         %111 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_1 %27
          %67 = OpLoad %uint %111 None
@@ -154,7 +159,7 @@
          %63 = OpLabel
 %sampler_kind = OpPhi %uint %67 %64 %uint_41 %65
                OpSelectionMerge %69 None
-               OpBranchConditional %61 %70 %71
+               OpBranchConditional %has_resource_0 %70 %71
          %70 = OpLabel
                OpBranch %69
          %71 = OpLabel
@@ -163,41 +168,34 @@
          %73 = OpIAdd %uint %uint_4 %113
                OpBranch %69
          %69 = OpLabel
-         %72 = OpPhi %uint %27 %70 %73 %71
-         %74 = OpAccessChain %_ptr_UniformConstant_12 %9 %72
+ %item_idx_0 = OpPhi %uint %27 %70 %73 %71
+         %74 = OpAccessChain %_ptr_UniformConstant_12 %9 %item_idx_0
          %76 = OpLoad %12 %74 None
-         %77 = OpIEqual %bool %sampler_kind %uint_40
-               OpSelectionMerge %79 None
-               OpBranchConditional %77 %80 %81
-         %80 = OpLabel
-         %83 = OpIEqual %bool %texture_kind %uint_6
-               OpBranch %79
+         %77 = OpIEqual %bool %texture_kind %uint_6
+         %78 = OpIEqual %bool %sampler_kind %uint_40
+               OpSelectionMerge %80 None
+               OpBranchConditional %78 %81 %82
          %81 = OpLabel
-               OpBranch %79
-         %79 = OpLabel
-%use_sampler = OpPhi %bool %83 %80 %true %81
+               OpBranch %80
+         %82 = OpLabel
+               OpBranch %80
+         %80 = OpLabel
+%texture_sampler_combo_valid = OpPhi %bool %77 %81 %true %82
                OpSelectionMerge %85 None
-               OpBranchConditional %use_sampler %86 %87
+               OpBranchConditional %texture_sampler_combo_valid %86 %87
          %86 = OpLabel
         %115 = OpSampledImage %116 %54 %76
          %89 = OpImageSampleImplicitLod %v4float %115 %117 None
                OpBranch %85
          %87 = OpLabel
-        %119 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_0
-        %120 = OpLoad %uint %119 None
-        %121 = OpIAdd %uint %uint_4 %120
-        %122 = OpAccessChain %_ptr_UniformConstant_12 %9 %121
-        %123 = OpLoad %12 %122 None
-        %124 = OpSampledImage %116 %54 %123
-         %90 = OpImageSampleImplicitLod %v4float %124 %117 None
                OpBranch %85
          %85 = OpLabel
          %88 = OpPhi %v4float %89 %86 %90 %87
                OpReturnValue %88
                OpFunctionEnd
-         %fs = OpFunction %void None %127
-        %128 = OpLabel
-        %129 = OpFunctionCall %v4float %fs_inner
-               OpStore %fs_loc0_Output %129 None
+         %fs = OpFunction %void None %121
+        %122 = OpLabel
+        %123 = OpFunctionCall %v4float %fs_inner
+               OpStore %fs_loc0_Output %123 None
                OpReturn
                OpFunctionEnd
