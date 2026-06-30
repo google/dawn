@@ -54,7 +54,6 @@
             "CompilationInfo",
             "ComputeState",
             "DawnDrmFormatCapabilities",
-            "DawnTogglesDescriptor",
             "DeviceDescriptor",
             "FragmentState",
             "InstanceDescriptor",

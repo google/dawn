@@ -929,9 +929,8 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
     }
 
     TogglesInfo togglesInfo;
-    for (uint32_t i = 0; i < togglesDesc->enabledToggleCount; ++i) {
-        Toggle toggle =
-            togglesInfo.ToggleNameToEnum(DAWN_UNSAFE_TODO(togglesDesc->enabledToggles[i]));
+    for (const char* toggleName : togglesDesc->enabledToggles) {
+        Toggle toggle = togglesInfo.ToggleNameToEnum(toggleName);
         if (toggle != Toggle::InvalidEnum) {
             const ToggleInfo* toggleInfo = togglesInfo.GetToggleInfo(toggle);
             // Accept the required toggles of current and earlier stage to allow override
@@ -942,9 +941,8 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
             }
         }
     }
-    for (uint32_t i = 0; i < togglesDesc->disabledToggleCount; ++i) {
-        Toggle toggle =
-            togglesInfo.ToggleNameToEnum(DAWN_UNSAFE_TODO(togglesDesc->disabledToggles[i]));
+    for (const char* toggleName : togglesDesc->disabledToggles) {
+        Toggle toggle = togglesInfo.ToggleNameToEnum(toggleName);
         if (toggle != Toggle::InvalidEnum) {
             const ToggleInfo* toggleInfo = togglesInfo.GetToggleInfo(toggle);
             // Accept the required toggles of current and earlier stage to allow override
