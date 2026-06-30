@@ -33,6 +33,7 @@
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/native/Adapter.h"
 #include "src/dawn/native/CommandValidation.h"
 #include "src/dawn/native/Commands.h"
@@ -71,17 +72,18 @@ MaybeError ValidateRenderBundleEncoderDescriptor(DeviceBase* device,
     DAWN_INVALID_IF(!IsValidSampleCount(descriptor->sampleCount),
                     "Sample count (%u) is not supported.", descriptor->sampleCount);
 
-    uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
-    DAWN_INVALID_IF(descriptor->colorFormatCount > maxColorAttachments,
-                    "Color formats count (%u) exceeds maximum number of color attachments (%u).%s",
-                    descriptor->colorFormatCount, maxColorAttachments,
-                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1,
-                                                maxColorAttachments, descriptor->colorFormatCount));
+    auto maxColorAttachments =
+        ColorAttachmentIndex{static_cast<uint8_t>(device->GetLimits().v1.maxColorAttachments)};
+    DAWN_INVALID_IF(
+        descriptor->colorFormats.size() > maxColorAttachments,
+        "Color formats count (%u) exceeds maximum number of color attachments (%u).%s",
+        descriptor->colorFormats.size(), maxColorAttachments,
+        DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1, maxColorAttachments,
+                                    uint8_t{descriptor->colorFormats.size()}));
 
     bool allColorFormatsUndefined = true;
     ColorAttachmentFormats colorAttachmentFormats;
-    for (uint32_t i = 0; i < descriptor->colorFormatCount; ++i) {
-        wgpu::TextureFormat format = DAWN_UNSAFE_TODO(descriptor->colorFormats[i]);
+    for (auto [i, format] : Enumerate(descriptor->colorFormats)) {
         if (format != wgpu::TextureFormat::Undefined) {
             DAWN_TRY_CONTEXT(ValidateColorAttachmentFormat(device, format),
                              "validating colorFormats[%u]", i);

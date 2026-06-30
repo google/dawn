@@ -44,11 +44,9 @@ namespace dawn::native {
 
 AttachmentState::AttachmentState(const RenderBundleEncoderDescriptor* descriptor)
     : mSampleCount(descriptor->sampleCount) {
-    DAWN_CHECK(descriptor->colorFormatCount <= kMaxColorAttachments);
-    auto colorFormats = ityp::SpanFromUntyped<ColorAttachmentIndex>(descriptor->colorFormats,
-                                                                    descriptor->colorFormatCount);
+    DAWN_CHECK(descriptor->colorFormats.size() <= kMaxColorAttachmentsTyped);
 
-    for (auto [i, format] : Enumerate(colorFormats)) {
+    for (auto [i, format] : Enumerate(descriptor->colorFormats)) {
         if (format != wgpu::TextureFormat::Undefined) {
             mColorAttachmentsSet.set(i);
             mColorFormats[i] = format;
