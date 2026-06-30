@@ -146,7 +146,7 @@ tint::VertexPullingConfig BuildVertexPullingTransformConfig(
     tint::VertexPullingConfig cfg;
     cfg.pulling_group = uint32_t(pullingBufferBindingSet);
 
-    cfg.vertex_state.resize(renderPipeline.GetVertexBufferCount());
+    cfg.vertex_state.resize(uint32_t(renderPipeline.GetVertexBufferCount()));
     for (VertexBufferSlot slot : renderPipeline.GetVertexBuffersUsed()) {
         const VertexBufferInfo& dawnInfo = renderPipeline.GetVertexBuffer(slot);
         tint::VertexBufferLayoutDescriptor* tintInfo =

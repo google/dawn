@@ -214,14 +214,6 @@ ResultOrError<RenderPipelineBase*> GetOrCreateApplyClearValueWithDrawPipeline(
     vertex.module = vertexModule.Get();
     vertex.entryPoint = "main";
 
-    // Prepare the fragment stage
-    std::string fragmentShader = ConstructFragmentShader(device, key);
-    Ref<ShaderModuleBase> fragmentModule;
-    DAWN_TRY_ASSIGN(fragmentModule, utils::CreateShaderModule(device, fragmentShader.c_str()));
-    FragmentState fragment = {};
-    fragment.module = fragmentModule.Get();
-    fragment.entryPoint = "main";
-
     // Prepare the color states
     PerColorAttachment<ColorTargetState> colorTargets = {};
     for (auto [i, target] : Enumerate(colorTargets)) {
@@ -231,6 +223,15 @@ ResultOrError<RenderPipelineBase*> GetOrCreateApplyClearValueWithDrawPipeline(
             target.writeMask = wgpu::ColorWriteMask::None;
         }
     }
+
+    // Prepare the fragment stage
+    std::string fragmentShader = ConstructFragmentShader(device, key);
+    Ref<ShaderModuleBase> fragmentModule;
+    DAWN_TRY_ASSIGN(fragmentModule, utils::CreateShaderModule(device, fragmentShader.c_str()));
+    FragmentState fragment = {};
+    fragment.module = fragmentModule.Get();
+    fragment.entryPoint = "main";
+    fragment.targets = colorTargets;
 
     // Create RenderPipeline
     RenderPipelineDescriptor renderPipelineDesc = {};
@@ -244,8 +245,6 @@ ResultOrError<RenderPipelineBase*> GetOrCreateApplyClearValueWithDrawPipeline(
         depthStencilState.format = key.depthStencilFormat;
         renderPipelineDesc.depthStencil = &depthStencilState;
     }
-    fragment.targetCount = key.colorAttachmentCount;
-    fragment.targets = colorTargets.data();
 
     // Build the pipeline layout explicitly as we might need to add PLS information to it.
     Ref<BindGroupLayoutBase> bgl;

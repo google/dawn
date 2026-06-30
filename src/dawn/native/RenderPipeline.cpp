@@ -168,21 +168,21 @@ MaybeError ValidateVertexAttribute(DeviceBase* device,
 }
 
 MaybeError ValidateVertexBufferLayout(DeviceBase* device,
-                                      const VertexBufferLayout* buffer,
+                                      const VertexBufferLayout& buffer,
                                       const EntryPointMetadata& metadata,
                                       VertexAttributeMask* attributesSetMask) {
-    DAWN_TRY(ValidateVertexStepMode(buffer->stepMode));
-    DAWN_INVALID_IF(buffer->arrayStride > kMaxVertexBufferArrayStride,
+    DAWN_TRY(ValidateVertexStepMode(buffer.stepMode));
+    DAWN_INVALID_IF(buffer.arrayStride > kMaxVertexBufferArrayStride,
                     "Vertex buffer arrayStride (%u) is larger than the maximum array stride (%u).",
-                    buffer->arrayStride, kMaxVertexBufferArrayStride);
+                    buffer.arrayStride, kMaxVertexBufferArrayStride);
 
-    DAWN_INVALID_IF(buffer->arrayStride % 4 != 0,
-                    "Vertex buffer arrayStride (%u) is not a multiple of 4.", buffer->arrayStride);
+    DAWN_INVALID_IF(buffer.arrayStride % 4 != 0,
+                    "Vertex buffer arrayStride (%u) is not a multiple of 4.", buffer.arrayStride);
 
-    for (auto [i, attribute] : Enumerate(buffer->attributes)) {
+    for (auto [i, attribute] : Enumerate(buffer.attributes)) {
         DAWN_UNSAFE_TODO(
             DAWN_TRY_CONTEXT(ValidateVertexAttribute(device, attribute, metadata,
-                                                     buffer->arrayStride, attributesSetMask),
+                                                     buffer.arrayStride, attributesSetMask),
                              "validating attributes[%u].", i));
     }
 
@@ -198,19 +198,19 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
 
     const CombinedLimits& limits = device->GetLimits();
 
-    const uint32_t maxVertexBuffers = limits.v1.maxVertexBuffers;
-    DAWN_INVALID_IF(descriptor->bufferCount > maxVertexBuffers,
-                    "Vertex buffer count (%u) exceeds the maximum number of vertex buffers (%u).%s",
-                    descriptor->bufferCount, maxVertexBuffers,
-                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1,
-                                                maxVertexBuffers, descriptor->bufferCount));
+    auto maxVertexBuffers = VertexBufferSlot{static_cast<uint8_t>(limits.v1.maxVertexBuffers)};
+    DAWN_INVALID_IF(
+        descriptor->buffers.size() > maxVertexBuffers,
+        "Vertex buffer count (%u) exceeds the maximum number of vertex buffers (%u).%s",
+        descriptor->buffers.size(), maxVertexBuffers,
+        DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1, maxVertexBuffers,
+                                    uint8_t{descriptor->buffers.size()}));
 
     ShaderModuleEntryPoint entryPoint;
     DAWN_TRY_ASSIGN_CONTEXT(
         entryPoint,
         ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
-                                  descriptor->constantCount, descriptor->constants, layout,
-                                  SingleShaderStage::Vertex),
+                                  descriptor->constants, layout, SingleShaderStage::Vertex),
         "validating vertex stage (%s, entryPoint: %s).", descriptor->module,
         descriptor->entryPoint);
     const EntryPointMetadata& vertexMetadata = descriptor->module->GetEntryPoint(entryPoint.name);
@@ -226,13 +226,11 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
 
     VertexAttributeMask attributesSetMask;
     uint32_t totalAttributesNum = 0;
-    for (uint32_t i = 0; i < descriptor->bufferCount; ++i) {
-        DAWN_UNSAFE_TODO(
-            DAWN_TRY_CONTEXT(ValidateVertexBufferLayout(device, &descriptor->buffers[i],
-                                                        vertexMetadata, &attributesSetMask),
-                             "validating buffers[%u].", i));
-        totalAttributesNum +=
-            static_cast<uint32_t>(DAWN_UNSAFE_TODO(descriptor->buffers[i]).attributes.size());
+    for (auto [i, buffer] : Enumerate(descriptor->buffers)) {
+        DAWN_TRY_CONTEXT(
+            ValidateVertexBufferLayout(device, buffer, vertexMetadata, &attributesSetMask),
+            "validating buffers[%u].", i);
+        totalAttributesNum += static_cast<uint32_t>(buffer.attributes.size());
     }
 
     if (device->IsCompatibilityMode() &&
@@ -639,8 +637,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
     DAWN_TRY_ASSIGN_CONTEXT(
         entryPoint,
         ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
-                                  descriptor->constantCount, descriptor->constants, layout,
-                                  SingleShaderStage::Fragment),
+                                  descriptor->constants, layout, SingleShaderStage::Fragment),
         "validating fragment stage (%s, entryPoint: %s).", descriptor->module,
         descriptor->entryPoint);
 
@@ -660,38 +657,34 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
                         depthStencil->format, descriptor->module, entryPoint);
     }
 
-    uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
-    DAWN_INVALID_IF(descriptor->targetCount > maxColorAttachments,
-                    "Number of targets (%u) exceeds the maximum (%u).%s", descriptor->targetCount,
-                    maxColorAttachments,
-                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1,
-                                                maxColorAttachments, descriptor->targetCount));
-
-    auto targets =
-        ityp::SpanFromUntyped<ColorAttachmentIndex>(descriptor->targets, descriptor->targetCount);
-
-    ColorAttachmentMask targetMask;
-    for (auto [i, target] : Enumerate(targets)) {
-        if (target.format == wgpu::TextureFormat::Undefined) {
-            DAWN_INVALID_IF(target.blend,
-                            "Color target[%u] blend state is set when the format is undefined.", i);
-        } else {
-            targetMask.set(i);
-        }
-    }
+    ColorAttachmentIndex maxColorAttachments{uint8_t(device->GetLimits().v1.maxColorAttachments)};
+    DAWN_INVALID_IF(
+        descriptor->targets.size() > maxColorAttachments,
+        "Number of targets (%u) exceeds the maximum (%u).%s", descriptor->targets.size(),
+        maxColorAttachments,
+        DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1, maxColorAttachments,
+                                    uint8_t(descriptor->targets.size())));
 
     bool usesSrc1 = false;
     bool usesBlendSrc1 = false;
     ColorAttachmentFormats colorAttachmentFormats;
-    for (auto i : targetMask) {
-        const Format* format;
-        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(targets[i].format));
+    ColorAttachmentMask targetMask;
+    for (auto [i, target] : Enumerate(descriptor->targets)) {
+        if (target.format == wgpu::TextureFormat::Undefined) {
+            DAWN_INVALID_IF(target.blend,
+                            "Color target[%u] blend state is set when the format is undefined.", i);
+            continue;
+        }
+        targetMask.set(i);
 
-        DAWN_TRY_CONTEXT(ValidateColorTargetState(
-                             device, targets[i], format, fragmentMetadata.fragmentOutputMask[i],
-                             fragmentMetadata.fragmentOutputVariables[i], multisample),
-                         "validating targets[%u] framebuffer output.", i);
-        colorAttachmentFormats.push_back(&device->GetValidInternalFormat(targets[i].format));
+        const Format* format;
+        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(target.format));
+
+        DAWN_TRY_CONTEXT(
+            ValidateColorTargetState(device, target, format, fragmentMetadata.fragmentOutputMask[i],
+                                     fragmentMetadata.fragmentOutputVariables[i], multisample),
+            "validating targets[%u] framebuffer output.", i);
+        colorAttachmentFormats.push_back(&device->GetValidInternalFormat(target.format));
 
         if (fragmentMetadata.fragmentOutputVariables[i].blendSrc == 1u) {
             usesBlendSrc1 = true;
@@ -703,8 +696,8 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
                              "validating targets[%u]'s framebuffer input.", i);
         }
 
-        if (targets[i].blend != nullptr) {
-            usesSrc1 |= BlendStateUsesBlendFactorSrc1(*targets[i].blend);
+        if (target.blend != nullptr) {
+            usesSrc1 |= BlendStateUsesBlendFactorSrc1(*target.blend);
         }
     }
 
@@ -712,7 +705,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
         DAWN_INVALID_IF(!usesBlendSrc1,
                         "One of the blend factor uses `blend_src(1)` while `blend_src(1)` is "
                         "missing from the fragment shader outputs.");
-        DAWN_INVALID_IF(descriptor->targetCount != 1,
+        DAWN_INVALID_IF(descriptor->targets.size() != ColorAttachmentIndex{uint8_t{1u}},
                         "One of the blend factor uses `blend_src(1)` but the color targets count "
                         "is not 1.");
     }
@@ -726,17 +719,19 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
     DAWN_TRY(ValidateColorAttachmentBytesPerSample(device, colorAttachmentFormats));
 
     if (multisample.alphaToCoverageEnabled) {
+        const ColorTargetState& firstTarget = *descriptor->targets.begin();
+
         DAWN_INVALID_IF(fragmentMetadata.usesSampleMaskOutput,
                         "alphaToCoverageEnabled is true when the sample_mask builtin is a "
                         "pipeline output of fragment stage of %s.",
                         descriptor->module);
 
-        DAWN_INVALID_IF(descriptor->targetCount == 0 ||
-                            descriptor->targets[0].format == wgpu::TextureFormat::Undefined,
-                        "alphaToCoverageEnabled is true when color target[0] is not present.");
+        DAWN_INVALID_IF(
+            descriptor->targets.empty() || firstTarget.format == wgpu::TextureFormat::Undefined,
+            "alphaToCoverageEnabled is true when color target[0] is not present.");
 
         const Format* format;
-        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->targets[0].format));
+        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(firstTarget.format));
         DAWN_INVALID_IF(
             !format->HasAlphaChannel(),
             "alphaToCoverageEnabled is true when target[0].format (%s) has no alpha channel.",
@@ -759,14 +754,15 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
         const ColorTargetState* firstColorTargetState = nullptr;
         for (auto i : targetMask) {
             if (!firstColorTargetState) {
-                firstColorTargetState = &targets[i];
+                firstColorTargetState = &descriptor->targets[i];
                 firstColorTargetIndex = i;
                 continue;
             }
 
-            DAWN_TRY_CONTEXT(ValidateColorTargetStatesMatch(firstColorTargetIndex,
-                                                            firstColorTargetState, i, &targets[i]),
-                             "validating targets in compatibility mode.");
+            DAWN_TRY_CONTEXT(
+                ValidateColorTargetStatesMatch(firstColorTargetIndex, firstColorTargetState, i,
+                                               &descriptor->targets[i]),
+                "validating targets in compatibility mode.");
         }
     }
 
@@ -918,7 +914,7 @@ MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
     bool hasStorageAttachments =
         descriptor->layout != nullptr && descriptor->layout->HasAnyStorageAttachments();
     bool hasColorAttachments =
-        descriptor->fragment != nullptr && descriptor->fragment->targetCount != 0;
+        descriptor->fragment != nullptr && !descriptor->fragment->targets.empty();
     bool hasDepthStencilAttachment = descriptor->depthStencil != nullptr;
     DAWN_INVALID_IF(!hasColorAttachments && !hasDepthStencilAttachment && !hasStorageAttachments,
                     "No attachment was specified.");
@@ -931,19 +927,17 @@ std::vector<StageAndDescriptor> GetRenderStagesAndSetPlaceholderShader(
     const RenderPipelineDescriptor* descriptor) {
     std::vector<StageAndDescriptor> stages;
     stages.push_back({SingleShaderStage::Vertex, descriptor->vertex.module,
-                      descriptor->vertex.entryPoint, descriptor->vertex.constantCount,
-                      descriptor->vertex.constants});
+                      descriptor->vertex.entryPoint, descriptor->vertex.constants});
     if (descriptor->fragment != nullptr) {
         stages.push_back({SingleShaderStage::Fragment, descriptor->fragment->module,
-                          descriptor->fragment->entryPoint, descriptor->fragment->constantCount,
-                          descriptor->fragment->constants});
+                          descriptor->fragment->entryPoint, descriptor->fragment->constants});
     } else if (device->IsToggleEnabled(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline)) {
         InternalPipelineStore* store = device->GetInternalPipelineStore();
         // The placeholder fragment shader module should already be initialized
         DAWN_CHECK(store->placeholderFragmentShader != nullptr);
         ShaderModuleBase* placeholderFragmentShader = store->placeholderFragmentShader.Get();
         stages.push_back(
-            {SingleShaderStage::Fragment, placeholderFragmentShader, "fs_empty_main", 0, nullptr});
+            {SingleShaderStage::Fragment, placeholderFragmentShader, "fs_empty_main", {}});
     }
     return stages;
 }
@@ -957,11 +951,9 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
                    descriptor->label,
                    GetRenderStagesAndSetPlaceholderShader(device, *descriptor)),
       mAttachmentState(device->GetOrCreateAttachmentState(descriptor, GetLayout())) {
-    mVertexBufferCount = uint32_t(descriptor->vertex.bufferCount);
+    mVertexBufferCount = descriptor->vertex.buffers.size();
 
-    auto buffers =
-        ityp::SpanFromUntyped<VertexBufferSlot>(descriptor->vertex.buffers, mVertexBufferCount);
-    for (auto [slot, buffer] : Enumerate(buffers)) {
+    for (auto [slot, buffer] : Enumerate(descriptor->vertex.buffers)) {
         // Skip unused slots
         if (buffer.stepMode == wgpu::VertexStepMode::Undefined && buffer.attributes.empty()) {
             continue;
@@ -1056,12 +1048,11 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         // Vertex-only render pipeline have no color attachment. For a render pipeline with
         // color attachments, there must be a valid FragmentState.
         DAWN_CHECK(descriptor->fragment != nullptr);
-        const ColorTargetState* target =
-            &DAWN_UNSAFE_TODO(descriptor->fragment->targets[static_cast<uint8_t>(i)]);
-        mTargets[i] = *target;
+        const ColorTargetState& target = descriptor->fragment->targets[i];
+        mTargets[i] = target;
 
-        if (target->blend != nullptr) {
-            mTargetBlend[i] = target->blend->WithTrivialFrontendDefaults();
+        if (target.blend != nullptr) {
+            mTargetBlend[i] = target.blend->WithTrivialFrontendDefaults();
             mTargets[i].blend = &mTargetBlend[i];
         }
     }
@@ -1162,7 +1153,7 @@ const VertexBufferInfo& RenderPipelineBase::GetVertexBuffer(VertexBufferSlot slo
     return mVertexBufferInfos[slot];
 }
 
-uint32_t RenderPipelineBase::GetVertexBufferCount() const {
+VertexBufferSlot RenderPipelineBase::GetVertexBufferCount() const {
     DAWN_CHECK(!IsError());
     return mVertexBufferCount;
 }

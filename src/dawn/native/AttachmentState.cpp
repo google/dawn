@@ -67,11 +67,9 @@ AttachmentState::AttachmentState(const UnpackedPtr<RenderPipelineDescriptor>& de
                                  const PipelineLayoutBase* layout)
     : mSampleCount(descriptor->multisample.count) {
     if (descriptor->fragment != nullptr) {
-        DAWN_CHECK(descriptor->fragment->targetCount <= kMaxColorAttachments);
-        auto targets = ityp::SpanFromUntyped<ColorAttachmentIndex>(
-            descriptor->fragment->targets, descriptor->fragment->targetCount);
+        DAWN_CHECK(descriptor->fragment->targets.size() <= kMaxColorAttachmentsTyped);
 
-        for (auto [i, target] : Enumerate(targets)) {
+        for (auto [i, target] : Enumerate(descriptor->fragment->targets)) {
             wgpu::TextureFormat format = target.format;
             if (format != wgpu::TextureFormat::Undefined) {
                 mColorAttachmentsSet.set(i);

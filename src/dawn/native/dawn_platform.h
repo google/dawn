@@ -145,6 +145,9 @@ struct Rect2D {
 // Returns the TexelBlockInfo for t's texture and aspect
 const TexelBlockInfo& GetBlockInfo(const TexelCopyTextureInfo& t);
 
+// The typed index corresponding to `undefined` in JS.
+constexpr QueryIndex kQuerySetIndexUndefinedTyped = QueryIndex{wgpu::kQuerySetIndexUndefined};
+
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_DAWN_PLATFORM_H_

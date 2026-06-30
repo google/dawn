@@ -1012,8 +1012,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
         {nullptr, "workgroupSizeY", static_cast<double>(adjustedWorkGroupSizeY)},
         {nullptr, "gOutputUnitSize", static_cast<double>(outputUnitSize)},
     }};
-    computePipelineDescriptor.compute.constantCount = constants.size();
-    computePipelineDescriptor.compute.constants = constants.data();
+    computePipelineDescriptor.compute.constants = constants;
 
     Ref<ComputePipelineBase> pipeline;
     DAWN_TRY_ASSIGN(pipeline, device->CreateComputePipeline(&computePipelineDescriptor));

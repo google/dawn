@@ -41,13 +41,13 @@ MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
     }
 
     ShaderModuleEntryPoint entryPoint;
-    DAWN_TRY_ASSIGN_CONTEXT(entryPoint,
-                            ValidateProgrammableStage(
-                                device, descriptor->compute.module, descriptor->compute.entryPoint,
-                                descriptor->compute.constantCount, descriptor->compute.constants,
-                                descriptor->layout, SingleShaderStage::Compute),
-                            "validating compute stage (%s, entryPoint: %s).",
-                            descriptor->compute.module, descriptor->compute.entryPoint);
+    DAWN_TRY_ASSIGN_CONTEXT(
+        entryPoint,
+        ValidateProgrammableStage(device, descriptor->compute.module,
+                                  descriptor->compute.entryPoint, descriptor->compute.constants,
+                                  descriptor->layout, SingleShaderStage::Compute),
+        "validating compute stage (%s, entryPoint: %s).", descriptor->compute.module,
+        descriptor->compute.entryPoint);
     return {};
 }
 
@@ -55,12 +55,11 @@ MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
 
 ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
                                          const UnpackedPtr<ComputePipelineDescriptor>& descriptor)
-    : PipelineBase(
-          device,
-          descriptor->layout,
-          descriptor->label,
-          {{SingleShaderStage::Compute, descriptor->compute.module, descriptor->compute.entryPoint,
-            descriptor->compute.constantCount, descriptor->compute.constants}}) {
+    : PipelineBase(device,
+                   descriptor->layout,
+                   descriptor->label,
+                   {{SingleShaderStage::Compute, descriptor->compute.module,
+                     descriptor->compute.entryPoint, descriptor->compute.constants}}) {
     const EntryPointMetadata& metadata = *GetStage(SingleShaderStage::Compute).metadata;
     mUsesLinearIndex = metadata.usesGlobalInvocationIndex || metadata.usesWorkgroupIndex;
     mUsesGlobalInvocationIndex = metadata.usesGlobalInvocationIndex;

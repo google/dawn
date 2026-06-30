@@ -311,8 +311,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreatePipeline(DeviceBase* device,
     colorTarget.format = format;
     colorTarget.writeMask = wgpu::ColorWriteMask::All;
 
-    fragmentState.targetCount = 1;
-    fragmentState.targets = &colorTarget;
+    fragmentState.targets = SpanFromRef<ColorAttachmentIndex>(colorTarget);
 
     RenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.label = "blit_buffer_to_texture";

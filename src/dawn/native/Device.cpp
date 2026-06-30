@@ -237,7 +237,6 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetComputePipelineDescri
                                                               SingleShaderStage::Compute,
                                                               outDescriptor->compute.module,
                                                               outDescriptor->compute.entryPoint,
-                                                              outDescriptor->compute.constantCount,
                                                               outDescriptor->compute.constants,
                                                           }},
                                                           /*allowInternalBinding=*/false));

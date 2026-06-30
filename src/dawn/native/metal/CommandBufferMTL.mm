@@ -494,7 +494,7 @@ struct StorageBufferLengthTracker {
                 ToBackend(pipeline->GetLayout())->GetBufferBindingCount(SingleShaderStage::Vertex);
 
             if (enableVertexPulling) {
-                bufferCount += pipeline->GetVertexBufferCount();
+                bufferCount += uint32_t{pipeline->GetVertexBufferCount()};
             }
 
             bufferCount = Align(bufferCount, 4);

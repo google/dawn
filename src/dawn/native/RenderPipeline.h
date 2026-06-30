@@ -105,7 +105,7 @@ class RenderPipelineBase : public PipelineBase,
     const VertexBufferMask& GetVertexBuffersUsedAsVertexBuffer() const;
     const VertexBufferMask& GetVertexBuffersUsedAsInstanceBuffer() const;
     const VertexBufferInfo& GetVertexBuffer(VertexBufferSlot slot) const;
-    uint32_t GetVertexBufferCount() const;
+    VertexBufferSlot GetVertexBufferCount() const;
 
     // Color attachment getters
     const ColorTargetState* GetColorTargetState(ColorAttachmentIndex attachmentSlot) const;
@@ -167,7 +167,7 @@ class RenderPipelineBase : public PipelineBase,
     virtual MaybeError InitializeImpl() = 0;
 
     // Vertex state
-    uint32_t mVertexBufferCount = 0;
+    VertexBufferSlot mVertexBufferCount = {};
     VertexAttributeMask mAttributeLocationsUsed;
     PerVertexAttribute<VertexAttributeInfo> mAttributeInfos;
     VertexBufferMask mVertexBuffersUsed;

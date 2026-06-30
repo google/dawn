@@ -151,12 +151,10 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
 StageAndDescriptor::StageAndDescriptor(SingleShaderStage shaderStage,
                                        ShaderModuleBase* module,
                                        StringView entryPoint,
-                                       size_t constantCount,
-                                       ConstantEntry const* constants)
+                                       Span<const ConstantEntry> constants)
     : shaderStage(shaderStage),
       module(module),
       entryPoint(module->ReifyEntryPointName(entryPoint, shaderStage).name),
-      constantCount(constantCount),
       constants(constants) {}
 
 // PipelineLayoutBase

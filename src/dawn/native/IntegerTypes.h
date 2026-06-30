@@ -31,7 +31,6 @@
 #include <cstdint>
 
 #include "src/dawn/common/Constants.h"
-#include "src/dawn/native/dawn_platform.h"
 #include "src/utils/typed_integer.h"
 
 namespace dawn::ityp {
@@ -110,7 +109,6 @@ using PerVertexAttribute = ityp::array<VertexAttributeLocation, Value, kMaxVerte
 
 // Indices of queries in a QuerySet.
 using QueryIndex = TypedInteger<struct QueryIndexT, uint32_t>;
-constexpr QueryIndex kQuerySetIndexUndefinedTyped = QueryIndex{wgpu::kQuerySetIndexUndefined};
 
 // Serials are 64bit integers that are incremented by one each time to produce unique values.
 // Some serials (like queue serials) are compared numerically to know which one is before

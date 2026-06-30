@@ -45,6 +45,7 @@
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/ObjectBase.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
@@ -57,17 +58,14 @@ struct StageAndDescriptor {
     StageAndDescriptor(SingleShaderStage shaderStage,
                        ShaderModuleBase* module,
                        StringView entryPoint,
-                       size_t constantCount,
-                       ConstantEntry const* constants);
+                       Span<const ConstantEntry> constants);
 
     SingleShaderStage shaderStage = SingleShaderStage::Vertex;
     raw_ptr<ShaderModuleBase> module = nullptr;
     std::string entryPoint;
-    size_t constantCount = 0u;
 
-    // TODO(https://crbug.com/chromium/1521372): Investigate why this is assigned a dangling
-    // pointer. Then rewrite it as a raw_ptr<T, AllowPtrArithmetic>.
-    RAW_PTR_EXCLUSION ConstantEntry const* constants = nullptr;
+    // TODO(https://crbug.com/526537224): Use RawSpan.
+    Span<const ConstantEntry> constants;
 };
 
 class PipelineLayoutBase : public ApiObjectBase,

@@ -40,6 +40,7 @@
 {% set native_namespace = namespace_name.namespace_case() %}
 {% set native_dir = impl_dir + namespace_name.Dirs() %}
 #include "{{native_dir}}/Forward.h"
+#include "{{native_dir}}/IntegerTypes.h"
 #include "src/utils/span.h"
 
 #include <cmath>

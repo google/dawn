@@ -178,10 +178,6 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateExpandMultisamplePipeline(
     Ref<ShaderModuleBase> fshaderModule;
     DAWN_TRY_ASSIGN(fshaderModule, device->CreateShaderModule(&shaderModuleDesc));
 
-    FragmentState fragmentState = {};
-    fragmentState.module = fshaderModule.Get();
-    fragmentState.entryPoint = "expand_multisample";
-
     // Color target states.
     PerColorAttachment<ColorTargetState> colorTargets = {};
     PerColorAttachment<wgpu::ColorTargetStateExpandResolveTextureDawn> msaaExpandResolveStates;
@@ -202,8 +198,10 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateExpandMultisamplePipeline(
         }
     }
 
-    fragmentState.targetCount = colorAttachmentCount;
-    fragmentState.targets = colorTargets.data();
+    FragmentState fragmentState = {};
+    fragmentState.module = fshaderModule.Get();
+    fragmentState.entryPoint = "expand_multisample";
+    fragmentState.targets = colorTargets;
 
     RenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.label = "expand_multisample";
@@ -283,16 +281,14 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateResolveMultisamplePipeline(
     Ref<ShaderModuleBase> fshaderModule;
     DAWN_TRY_ASSIGN(fshaderModule, device->CreateShaderModule(&shaderModuleDesc));
 
-    FragmentState fragmentState = {};
-    fragmentState.module = fshaderModule.Get();
-    fragmentState.entryPoint = "resolve_multisample";
-
     // Color target states.
     ColorTargetState colorTarget = {};
     colorTarget.format = pipelineKey.colorTargetFormat;
 
-    fragmentState.targetCount = 1;
-    fragmentState.targets = &colorTarget;
+    FragmentState fragmentState = {};
+    fragmentState.module = fshaderModule.Get();
+    fragmentState.entryPoint = "resolve_multisample";
+    fragmentState.targets = SpanFromRef<ColorAttachmentIndex>(colorTarget);
 
     RenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.label = "resolve_multisample";

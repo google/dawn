@@ -291,28 +291,23 @@ ResultOrError<Ref<RenderPipelineBase>> CreateCopyForBrowserPipeline(
     vertex.module = shaderModule;
     vertex.entryPoint = "vs_main";
 
-    // Prepare frgament stage.
-    FragmentState fragment = {};
-    fragment.module = shaderModule;
-    fragment.entryPoint = fragmentEntryPoint;
-
     // Prepare color state.
     ColorTargetState target = {};
     target.format = dstFormat;
 
+    // Prepare fragment stage.
+    FragmentState fragment = {};
+    fragment.module = shaderModule;
+    fragment.entryPoint = fragmentEntryPoint;
+    fragment.targets = SpanFromRef<ColorAttachmentIndex>(target);
+
     // Create RenderPipeline.
     RenderPipelineDescriptor renderPipelineDesc = {};
-
     // Generate the layout based on shader modules.
     renderPipelineDesc.layout = nullptr;
-
     renderPipelineDesc.vertex = vertex;
     renderPipelineDesc.fragment = &fragment;
-
     renderPipelineDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
-
-    fragment.targetCount = 1;
-    fragment.targets = &target;
 
     return device->CreateRenderPipeline(&renderPipelineDesc);
 }
