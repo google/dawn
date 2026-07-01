@@ -1479,7 +1479,30 @@ class UniformityGraph {
                     v1_cf->affects_control_flow = true;
                     v1_cf->AddEdge(v1);
 
+                    // Push a new variable scope for the RHS.
+                    current_function_->variables.Push();
+
+                    // Process the RHS expression.
                     auto* v2 = ProcessExpression(v1_cf, e->rhs);
+
+                    auto rhs_vars = current_function_->variables.Top();
+                    current_function_->variables.Pop();
+
+                    // Create output nodes for any variable that is written to from the RHS
+                    // expression (e.g. via a function call that takes pointer parameters).
+                    for (auto& var : current_function_->local_var_decls) {
+                        // Skip variables that were not modified on the RHS.
+                        auto rhs_val = rhs_vars.Get(var);
+                        if (!rhs_val) {
+                            continue;
+                        }
+                        // Merge the original value and the new value.
+                        auto* out_node = CreateNode({NameFor(var), "_value_short_circuit_exit"});
+                        out_node->AddEdge(*rhs_val);
+                        out_node->AddEdge(current_function_->variables.Get(var));
+                        current_function_->variables.Set(var, out_node);
+                    }
+
                     return v2;
                 } else {
                     auto* v1 = ProcessExpression(cf, e->lhs);

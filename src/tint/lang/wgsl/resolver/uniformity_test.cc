@@ -11284,6 +11284,74 @@ fn main() {
     RunTest(src, true);
 }
 
+TEST_F(UniformityAnalysisTest, ShortCircuiting_NonUniformValueBecomesUniformInRHS) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn bar(p : ptr<function, i32>) -> bool {
+  *p = 42;
+  return true;
+}
+
+fn foo() {
+  var v = non_uniform;
+  _ = false && bar(&v);
+  if (v == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:13:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:12:3 note: control flow depends on possibly non-uniform value
+  if (v == 0) {
+  ^^
+
+test:10:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var v = non_uniform;
+          ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, ShortCircuiting_UniformValueBecomesNonUniformInRHS) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn bar(p : ptr<function, i32>) -> bool {
+  *p = non_uniform;
+  return true;
+}
+
+fn foo() {
+  var v = 42;
+  _ = true && bar(&v);
+  if (v == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:13:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:12:3 note: control flow depends on possibly non-uniform value
+  if (v == 0) {
+  ^^
+
+test:11:19 note: contents of pointer may become non-uniform after calling 'bar'
+  _ = true && bar(&v);
+                  ^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, DeadCode_AfterReturn) {
     // Dead code after a return statement shouldn't cause uniformity errors.
     std::string src = R"(
