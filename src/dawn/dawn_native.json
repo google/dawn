@@ -49,8 +49,6 @@
 
         "_structure_spanification_blocklist_comment": "// TODO(https://crbug.com/515272358): Drive this list down.",
         "structure_spanification_blocklist": [
-            "BindGroupDescriptor",
-            "BindGroupLayoutDescriptor",
             "ShaderSourceSPIRV"
         ],
         "structure_span_index_type_override": {

@@ -1052,9 +1052,7 @@ ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::GetOrCreateBindGroupLayout(
 // Private function used at initialization
 ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::CreateEmptyBindGroupLayout() {
     BindGroupLayoutDescriptor desc = {};
-    desc.entryCount = 0;
-    desc.entries = nullptr;
-
+    desc.entries = {};
     return GetOrCreateBindGroupLayout(Unpack(&desc));
 }
 

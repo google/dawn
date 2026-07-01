@@ -299,8 +299,8 @@ MaybeError ValidateStaticSamplersWithTextureBindings(
     // Map of texture binding number to static sampler binding number.
     std::map<BindingNumber, BindingNumber> textureToStaticSamplerBindingMap;
 
-    for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&DAWN_UNSAFE_TODO(descriptor->entries[i]));
+    for (const BindGroupLayoutEntry& entryChain : descriptor->entries) {
+        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&entryChain);
         auto* staticSamplerLayout = entry.Get<StaticSamplerBindingLayout>();
         if (!staticSamplerLayout ||
             staticSamplerLayout->sampledTextureBinding == WGPU_LIMIT_U32_UNDEFINED) {
@@ -349,9 +349,9 @@ ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDes
     // Map of binding number to entry index.
     std::map<BindingNumber, uint32_t> bindingMap;
 
-    for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
+    for (auto [i, entryChain] : Enumerate(descriptorChain->entries)) {
         UnpackedPtr<BindGroupLayoutEntry> entry;
-        DAWN_UNSAFE_TODO(DAWN_TRY_ASSIGN(entry, ValidateAndUnpack(&descriptor->entries[i])));
+        DAWN_TRY_ASSIGN(entry, ValidateAndUnpack(&entryChain));
 
         BindingNumber bindingNumber = BindingNumber(entry->binding);
         DAWN_INVALID_IF(
@@ -548,8 +548,8 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
     // StaticSamplerBindingInfo::sampledTextureIndex to the BindingIndex post reordering.
     absl::flat_hash_map<BindingNumber, BindingNumber> staticSamplerToSingleTextureBinding;
 
-    for (uint32_t i = 0; i < descriptor->entryCount; i++) {
-        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&DAWN_UNSAFE_TODO(descriptor->entries[i]));
+    for (const BindGroupLayoutEntry& entryChain : descriptor->entries) {
+        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&entryChain);
 
         // External textures are expanded with additional bindings:
         //  - Two sampled texture bindings and one uniform buffer
@@ -758,8 +758,8 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
 
     // Recompute the number of bindings of each type from the descriptor since that is used for
     // validation of the pipeline layout.
-    for (uint32_t i = 0; i < descriptor->entryCount; i++) {
-        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&DAWN_UNSAFE_TODO(descriptor->entries[i]));
+    for (const BindGroupLayoutEntry& entryChain : descriptor->entries) {
+        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&entryChain);
         IncrementBindingCounts(&mValidationBindingCounts, entry);
     }
 }

@@ -33,6 +33,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "dawn/native/ObjectType_autogen.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/common/ityp_bitset.h"
@@ -431,9 +432,8 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
     // Cache the position of all the sampled texture in descriptor->entries to later validate them
     // against their static sampler (if they are used with the static sampler).
     absl::flat_hash_map<BindingIndex, uint32_t> textureIndexToEntryIndex;
-    for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        APIBindingIndex apiIndex = layout->GetBindingMap().at(
-            BindingNumber(DAWN_UNSAFE_TODO(descriptor->entries[i]).binding));
+    for (auto [i, entry] : Enumerate(descriptor->entries)) {
+        APIBindingIndex apiIndex = layout->GetBindingMap().at(BindingNumber(entry.binding));
         const auto& bindingInfo = layout->GetAPIBindingInfo(apiIndex);
         if (std::holds_alternative<TextureBindingInfo>(bindingInfo.bindingLayout)) {
             textureIndexToEntryIndex[layout->AsBindingIndex(apiIndex)] = i;
@@ -487,8 +487,7 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
 
     // Validate that all YCbCr texture entries are sampled by a static sampler.
     const auto& bindingMap = layout->GetBindingMap();
-    for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        const BindGroupEntry& entry = DAWN_UNSAFE_TODO(descriptor->entries[i]);
+    for (auto [i, entry] : Enumerate(descriptor->entries)) {
         const BindingInfo& bindingInfo =
             layout->GetAPIBindingInfo(bindingMap.at(BindingNumber(entry.binding)));
         if (std::holds_alternative<TextureBindingInfo>(bindingInfo.bindingLayout) &&
@@ -520,8 +519,7 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
     // TODO(https://issues.chromium.org/448578977): Use a more optimized type as 1000 bits on the
     // stack is a bit much.
     ityp::bitset<BindingNumber, kMaxBindingsPerBindGroup> bindingsSet;
-    for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        const BindGroupEntry& entry = DAWN_UNSAFE_TODO(descriptor->entries[i]);
+    for (auto [i, entry] : Enumerate(descriptor->entries)) {
         BindingNumber binding = BindingNumber(entry.binding);
 
         // Check that the entry exists in the BGL and get its info.
@@ -592,10 +590,10 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
     const uint32_t expectedEntryCount = layout->GetBindingCountForBindGroupCreation();
 
     DAWN_INVALID_IF(
-        descriptor->entryCount != expectedEntryCount,
+        descriptor->entries.size() != expectedEntryCount,
         "Number of entries (%u) did not match the expected number of entries (%u) for %s."
         "\nExpected layout: %s",
-        descriptor->entryCount, expectedEntryCount, layout, layout->EntriesToString());
+        descriptor->entries.size(), expectedEntryCount, layout, layout->EntriesToString());
 
     // This should always be true because
     //  - numBindings has to match between the bind group and its layout.
@@ -638,8 +636,8 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
     mBoundExternalTextures.resize(layout->GetExternalTextureCount(), nullptr);
 
     // Gather bindings.
-    for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        UnpackedPtr<BindGroupEntry> entry = Unpack(&DAWN_UNSAFE_TODO(descriptor->entries[i]));
+    for (const BindGroupEntry& entryChain : descriptor->entries) {
+        UnpackedPtr<BindGroupEntry> entry = Unpack(&entryChain);
         BindingNumber binding = BindingNumber(entry->binding);
         APIBindingIndex apiBindingIndex = layout->GetAPIBindingIndex(binding);
 

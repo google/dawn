@@ -68,8 +68,7 @@ class InternalStorageBufferBindingTests : public DawnTest {
         bglEntry.visibility = wgpu::ShaderStage::Compute;
 
         native::BindGroupLayoutDescriptor bglDesc;
-        bglDesc.entryCount = 1;
-        bglDesc.entries = &bglEntry;
+        bglDesc.entries = SpanFromRef(bglEntry);
 
         native::DeviceBase* nativeDevice = native::FromAPI(device.Get());
 

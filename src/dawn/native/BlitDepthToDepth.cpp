@@ -201,8 +201,7 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
 
             BindGroupDescriptor bgDesc = {};
             bgDesc.layout = bgl.Get();
-            bgDesc.entryCount = 1;
-            bgDesc.entries = &bgEntry;
+            bgDesc.entries = SpanFromRef(bgEntry);
             DAWN_TRY_ASSIGN(bindGroup,
                             device->CreateBindGroup(&bgDesc, UsageValidationMode::Internal));
         }

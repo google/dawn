@@ -324,8 +324,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
 
             BindGroupDescriptor bgDesc = {};
             bgDesc.layout = bgl.Get();
-            bgDesc.entryCount = bgEntries.size();
-            bgDesc.entries = bgEntries.data();
+            bgDesc.entries = bgEntries;
             DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bgDesc));
         }
 
@@ -394,8 +393,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         bglEntries[1].buffer.minBindingSize = 4 * sizeof(uint32_t);
 
         BindGroupLayoutDescriptor bglDesc = {};
-        bglDesc.entryCount = bglEntries.size();
-        bglDesc.entries = bglEntries.data();
+        bglDesc.entries = bglEntries;
 
         DAWN_TRY_ASSIGN(bgl, device->CreateBindGroupLayout(&bglDesc));
     }
@@ -460,8 +458,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
 
             BindGroupDescriptor bgDesc = {};
             bgDesc.layout = bgl.Get();
-            bgDesc.entryCount = bgEntries.size();
-            bgDesc.entries = bgEntries.data();
+            bgDesc.entries = bgEntries;
             DAWN_TRY_ASSIGN(bindGroup,
                             device->CreateBindGroup(&bgDesc, UsageValidationMode::Internal));
         }

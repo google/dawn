@@ -28,6 +28,7 @@
 #include "src/dawn/native/IndirectDrawValidationEncoder.h"
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
@@ -696,7 +697,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         Ref<BindGroupLayoutBase> layout;
         DAWN_TRY_ASSIGN(layout, pipeline->GetBindGroupLayout(0));
 
-        BindGroupEntry bindings[3];
+        std::array<BindGroupEntry, 3> bindings;
         BindGroupEntry& bufferDataBinding = bindings[0];
         bufferDataBinding.binding = 0;
         bufferDataBinding.buffer = batchDataBuffer.GetBuffer();
@@ -710,7 +711,6 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
 
         BindGroupDescriptor bindGroupDescriptor = {};
         bindGroupDescriptor.layout = layout.Get();
-        bindGroupDescriptor.entryCount = 3;
         bindGroupDescriptor.entries = bindings;
 
         // Finally, we can now encode our validation and duplication passes. Each pass first
@@ -756,7 +756,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         Ref<BindGroupLayoutBase> layout;
         DAWN_TRY_ASSIGN(layout, pipeline->GetBindGroupLayout(0));
 
-        BindGroupEntry bindings[4];
+        std::array<BindGroupEntry, 4> bindings;
 
         BindGroupEntry& drawConstantsBinding = bindings[0];
         drawConstantsBinding.binding = 0;
@@ -774,7 +774,6 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
 
         BindGroupDescriptor bindGroupDescriptor = {};
         bindGroupDescriptor.layout = layout.Get();
-        bindGroupDescriptor.entryCount = 4;
         bindGroupDescriptor.entries = bindings;
 
         // Start of the region for multi draw output params.

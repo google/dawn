@@ -114,8 +114,7 @@ class DestroyObjectTests : public DawnMockTest {
 TEST_F(DestroyObjectTests, BindGroupNativeExplicit) {
     BindGroupDescriptor desc = {};
     desc.layout = mDeviceMock->GetEmptyBindGroupLayout();
-    desc.entryCount = 0;
-    desc.entries = nullptr;
+    desc.entries = {};
 
     Ref<BindGroupMock> bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, Unpack(&desc)));
     EXPECT_CALL(*bindGroupMock.Get(), DestroyImpl).Times(1);
@@ -130,8 +129,7 @@ TEST_F(DestroyObjectTests, BindGroupNativeExplicit) {
 TEST_F(DestroyObjectTests, BindGroupImplicit) {
     BindGroupDescriptor desc = {};
     desc.layout = mDeviceMock->GetEmptyBindGroupLayout();
-    desc.entryCount = 0;
-    desc.entries = nullptr;
+    desc.entries = {};
 
     Ref<BindGroupMock> bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, Unpack(&desc)));
     EXPECT_CALL(*bindGroupMock.Get(), DestroyImpl).Times(1);
@@ -152,8 +150,7 @@ TEST_F(DestroyObjectTests, BindGroupLayoutNativeExplicit) {
     std::vector<BindGroupLayoutEntry> entries;
     entries.push_back(utils::BindingLayoutEntryInitializationHelper(
         0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform));
-    desc.entryCount = entries.size();
-    desc.entries = entries.data();
+    desc.entries = entries;
 
     Ref<BindGroupLayoutMock> bindGroupLayoutMock =
         AcquireRef(new BindGroupLayoutMock(mDeviceMock, Unpack(&desc)));
@@ -172,8 +169,7 @@ TEST_F(DestroyObjectTests, BindGroupLayoutImplicit) {
     std::vector<BindGroupLayoutEntry> entries;
     entries.push_back(utils::BindingLayoutEntryInitializationHelper(
         0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform));
-    desc.entryCount = entries.size();
-    desc.entries = entries.data();
+    desc.entries = entries;
 
     Ref<BindGroupLayoutMock> bindGroupLayoutMock =
         AcquireRef(new BindGroupLayoutMock(mDeviceMock, Unpack(&desc)));
@@ -498,8 +494,7 @@ TEST_F(DestroyObjectTests, PipelineLayoutImplicit) {
         std::vector<BindGroupLayoutEntry> entries;
         entries.push_back(utils::BindingLayoutEntryInitializationHelper(
             0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform));
-        desc.entryCount = entries.size();
-        desc.entries = entries.data();
+        desc.entries = entries;
 
         ScopedRawPtrExpectation scoped(mDeviceMock);
         bindGroupLayoutMock = AcquireRef(new BindGroupLayoutMock(mDeviceMock, Unpack(&desc)));
@@ -816,8 +811,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     {
         BindGroupDescriptor desc = {};
         desc.layout = mDeviceMock->GetEmptyBindGroupLayout();
-        desc.entryCount = 0;
-        desc.entries = nullptr;
+        desc.entries = {};
 
         ScopedRawPtrExpectation scoped(mDeviceMock);
         bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, Unpack(&desc)));
@@ -834,8 +828,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
         std::vector<BindGroupLayoutEntry> entries;
         entries.push_back(utils::BindingLayoutEntryInitializationHelper(
             0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform));
-        desc.entryCount = entries.size();
-        desc.entries = entries.data();
+        desc.entries = entries;
 
         ScopedRawPtrExpectation scoped(mDeviceMock);
         bindGroupLayoutMock = AcquireRef(new BindGroupLayoutMock(mDeviceMock, Unpack(&desc)));

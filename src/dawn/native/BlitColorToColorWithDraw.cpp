@@ -233,8 +233,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateExpandMultisamplePipeline(
         bglEntry.texture.viewDimension = wgpu::TextureViewDimension::e2D;
     }
     BindGroupLayoutDescriptor bglDesc = {};
-    bglDesc.entries = bglEntries.data();
-    bglDesc.entryCount = bglEntries.size();
+    bglDesc.entries = bglEntries;
 
     Ref<BindGroupLayoutBase> bindGroupLayout;
     DAWN_TRY_ASSIGN(bindGroupLayout,
@@ -384,8 +383,7 @@ MaybeError ExpandResolveTextureWithDraw(
 
         BindGroupDescriptor bgDesc = {};
         bgDesc.layout = bgl.Get();
-        bgDesc.entryCount = bgEntries.size();
-        bgDesc.entries = bgEntries.data();
+        bgDesc.entries = bgEntries;
         DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bgDesc, UsageValidationMode::Internal));
     }
     renderEncoder->APISetBindGroup(0, bindGroup.Get());

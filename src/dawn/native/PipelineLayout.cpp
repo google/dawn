@@ -404,8 +404,7 @@ ResultOrError<Ref<BindGroupLayoutBase>> CreateBGL(
 
     // Create and validate the BGL
     BindGroupLayoutDescriptor desc = {};
-    desc.entries = entryVec.data();
-    desc.entryCount = entryVec.size();
+    desc.entries = entryVec;
 
     UnpackedPtr<BindGroupLayoutDescriptor> unpacked;
     if (device->IsValidationEnabled()) {

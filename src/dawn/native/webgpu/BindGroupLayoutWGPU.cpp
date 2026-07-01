@@ -67,7 +67,7 @@ BindGroupLayout::BindGroupLayout(Device* device,
       ObjectWGPU(device->wgpu->bindGroupLayoutRelease),
       mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
     // Rebuild the descriptor and resolve internal bindings to regular ones.
-    absl::InlinedVector<WGPUBindGroupLayoutEntry, 8> entries(descriptor->entryCount);
+    absl::InlinedVector<WGPUBindGroupLayoutEntry, 8> entries(descriptor->entries.size());
 
     // Pre-calculate the number of external textures to prevent InlinedVector reallocation.
     size_t externalTextureCount = GetExternalTextureCount();
@@ -100,7 +100,7 @@ BindGroupLayout::BindGroupLayout(Device* device,
     WGPUBindGroupLayoutDescriptor desc = {};
     desc.nextInChain = nullptr;
     desc.label = ToOutputStringView(descriptor->label);
-    desc.entryCount = descriptor->entryCount;
+    desc.entryCount = entries.size();
     desc.entries = entries.data();
 
     mInnerHandle = device->wgpu->deviceCreateBindGroupLayout(device->GetInnerHandle(), &desc);

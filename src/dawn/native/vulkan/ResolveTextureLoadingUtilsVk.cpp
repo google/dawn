@@ -252,8 +252,7 @@ MaybeError BeginRenderPassAndExpandResolveTextureWithDraw(Device* device,
 
     BindGroupDescriptor bgDesc = {};
     bgDesc.layout = bgl.Get();
-    bgDesc.entryCount = bgEntries.size();
-    bgDesc.entries = bgEntries.data();
+    bgDesc.entries = bgEntries;
     DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bgDesc, UsageValidationMode::Internal));
     BindGroup* bindGroupVk = ToBackend(bindGroup.Get());
 

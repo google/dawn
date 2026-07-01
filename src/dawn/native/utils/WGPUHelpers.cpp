@@ -95,8 +95,7 @@ ResultOrError<Ref<BindGroupLayoutBase>> MakeBindGroupLayout(
     }
 
     BindGroupLayoutDescriptor descriptor;
-    descriptor.entryCount = entries.size();
-    descriptor.entries = entries.data();
+    descriptor.entries = entries;
     return device->CreateBindGroupLayout(&descriptor, allowInternalBinding);
 }
 
@@ -203,8 +202,7 @@ ResultOrError<Ref<BindGroupBase>> MakeBindGroup(
 
     BindGroupDescriptor descriptor;
     descriptor.layout = layout.Get();
-    descriptor.entryCount = entries.size();
-    descriptor.entries = entries.data();
+    descriptor.entries = entries;
 
     return device->CreateBindGroup(&descriptor, mode);
 }
