@@ -1245,6 +1245,41 @@ ci.thin_tester(
 )
 
 ci.thin_tester(
+    name = "dawn-mac-arm64-apple-m2-exp-rel",
+    description_html = "Tests release Dawn on Mac/arm64 on Apple M2 devices w/ experimental OS configs",
+    parent = "dawn-mac-arm64-builder-rel",
+    builder_spec = builder_config.builder_spec(
+        execution_mode = builder_config.execution_mode.TEST,
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.ARM,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.MAC,
+        ),
+        run_tests_serially = True,
+    ),
+    targets = targets.bundle(
+        targets = [
+        ],
+        mixins = [
+            "mac_arm64_apple_m2_retina_gpu_experimental",
+        ],
+    ),
+    targets_settings = targets.settings(
+        browser_config = targets.browser_config.RELEASE,
+        os_type = targets.os_type.MAC,
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "mac|test|clang|exp|arm64",
+        short_name = "m2",
+    ),
+)
+
+ci.thin_tester(
     name = "dawn-mac-arm64-apple-m2-rel",
     description_html = "Tests release Dawn on Mac/arm64 on Apple M2 devices",
     parent = "dawn-mac-arm64-builder-rel",

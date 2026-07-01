@@ -474,6 +474,16 @@ dawn_linux_manual_builder(
 )
 
 dawn_mac_manual_builder(
+    name = "dawn-try-mac-arm64-apple-m2-exp-rel",
+    description_html = "Tests release Dawn on Mac/arm64 on Apple M2 devices w/ experimental OS configs. Manual only.",
+    mirrors = [
+        "ci/dawn-mac-arm64-builder-rel",
+        "ci/dawn-mac-arm64-apple-m2-exp-rel",
+    ],
+    gn_args = "ci/dawn-mac-arm64-builder-rel",
+)
+
+dawn_mac_manual_builder(
     name = "dawn-try-mac-arm64-apple-m2-rel",
     description_html = "Tests release Dawn on Mac/arm64 on Apple M2 devices. Manual only.",
     mirrors = [
