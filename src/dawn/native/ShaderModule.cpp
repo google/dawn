@@ -1479,7 +1479,7 @@ void DumpShaderFromDescriptor(LogEmitter* logEmitter,
     if ([[maybe_unused]] const auto* spirvDesc = shaderModuleDesc.Get<ShaderSourceSPIRV>()) {
         // Dump SPIR-V if enabled.
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
-        DumpSpirv(logEmitter, spirvDesc->code, spirvDesc->codeSize);
+        DumpSpirv(logEmitter, ToSpirvSpan(spirvDesc));
 #endif  // DAWN_ENABLE_SPIRV_VALIDATION
         return;
     }
@@ -1513,9 +1513,8 @@ ResultOrError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseReques
         const std::vector<uint32_t>& spirvCode = spirvDesc.spirvCode.UnsafeGetValue();
 
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
-        MaybeError validationResult =
-            ValidateSpirv(req.logEmitter.UnsafeGetValue(), spirvCode.data(), spirvCode.size(),
-                          deviceInfo.toggles.Has(Toggle::UseSpirv14));
+        MaybeError validationResult = ValidateSpirv(req.logEmitter.UnsafeGetValue(), spirvCode,
+                                                    deviceInfo.toggles.Has(Toggle::UseSpirv14));
         // If SpirV validation error occurs, store it into outputParseResult and return.
         if (validationResult.IsError()) {
             outputParseResult.SetValidationError(validationResult.AcquireError());
@@ -1789,6 +1788,11 @@ MaybeError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo& s
     return {};
 }
 
+Span<const uint32_t> ToSpirvSpan(const ShaderSourceSPIRV* spirvSource) {
+    // SAFETY: The application must ensure that `code` points at `codeSize` uint32_ts.
+    return DAWN_UNSAFE_BUFFERS({spirvSource->code, spirvSource->codeSize});
+}
+
 // ShaderModuleBase
 ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
                                    const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
@@ -1800,9 +1804,9 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
     uint8_t* shaderCode = nullptr;
 
     if (auto* spirvDesc = descriptor.Get<ShaderSourceSPIRV>()) {
+        Span<const uint32_t> spirv = ToSpirvSpan(spirvDesc);
         mType = Type::Spirv;
-        mOriginalSpirv.assign(spirvDesc->code,
-                              DAWN_UNSAFE_TODO(spirvDesc->code + spirvDesc->codeSize));
+        mOriginalSpirv.assign(spirv.begin(), spirv.end());
         shaderCodeByteSize = mOriginalSpirv.size() * sizeof(decltype(mOriginalSpirv)::value_type);
         shaderCode = reinterpret_cast<uint8_t*>(mOriginalSpirv.data());
         if (auto* spirvOptions = descriptor.Get<DawnShaderModuleSPIRVOptionsDescriptor>()) {
@@ -2135,8 +2139,7 @@ ShaderModuleParseRequest ShaderModuleBase::GenerateShaderModuleParseRequest(
         case Type::Spirv:
             spirvOptionsDescriptor.allowNonUniformDerivatives = mAllowSpirvNonUniformDerivitives;
             spirvDescriptor.nextInChain = &spirvOptionsDescriptor;
-
-            spirvDescriptor.codeSize = uint32_t(mOriginalSpirv.size());
+            spirvDescriptor.codeSize = checked_cast<uint32_t>(mOriginalSpirv.size());
             spirvDescriptor.code = mOriginalSpirv.data();
             descriptor.nextInChain = &spirvDescriptor;
             break;

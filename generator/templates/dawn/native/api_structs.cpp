@@ -88,6 +88,7 @@ namespace {{native_namespace}} {
                 {% set memberName = member.name.camelCase() %}
                 {% set lengthName = member.length.name.camelCase() %}
                 using {{CppType}}{{memberName}}Span = decltype(std::declval<{{CppType}}>().{{memberName}});
+                {{ assert(member.length.type.name.canonical_case() == "size_t") }}
                 static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfSize() == offsetof({{CType}}, {{lengthName}}),
                              "offsetof mismatch for {{CppType}}::{{memberName}}::mSize");
                 static_assert(offsetof({{CppType}}, {{memberName}}) + {{CppType}}{{memberName}}Span::GetOffsetOfData() == offsetof({{CType}}, {{memberName}}),

@@ -454,7 +454,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
     if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
-        DumpSpirv(GetDevice(), compilation->spirv.data(), compilation->spirv.size());
+        DumpSpirv(GetDevice(), compilation->spirv);
     }
 
     if (GetDevice()->IsToggleEnabled(Toggle::EnableSpirvValidation)) {
@@ -462,8 +462,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
         // Validate and if required dump the compiled SPIR-V code.
         const bool spv14 = GetDevice()->IsToggleEnabled(Toggle::UseSpirv14);
-        DAWN_TRY(ValidateSpirv(GetDevice(), compilation->spirv.data(), compilation->spirv.size(),
-                               spv14));
+        DAWN_TRY(ValidateSpirv(GetDevice(), compilation->spirv, spv14));
     }
 #endif
 
