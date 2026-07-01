@@ -102,32 +102,29 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
 
     // Validation for the bind group layouts.
     if (usesResourceTable) {
-        DAWN_INVALID_IF(descriptor->bindGroupLayoutCount + 1 > kMaxBindGroups,
+        DAWN_INVALID_IF(descriptor->bindGroupLayouts.size() >= kMaxBindGroupsTyped,
                         "bindGroupLayoutCount (%i) + 1 for the resource table is larger than the "
                         "maximum allowed (%i).",
-                        descriptor->bindGroupLayoutCount, kMaxBindGroups);
+                        descriptor->bindGroupLayouts.size(), kMaxBindGroups);
     } else {
-        DAWN_INVALID_IF(descriptor->bindGroupLayoutCount > kMaxBindGroups,
+        DAWN_INVALID_IF(descriptor->bindGroupLayouts.size() > kMaxBindGroupsTyped,
                         "bindGroupLayoutCount (%i) is larger than the maximum allowed (%i).",
-                        descriptor->bindGroupLayoutCount, kMaxBindGroups);
+                        descriptor->bindGroupLayouts.size(), kMaxBindGroups);
     }
 
-    for (uint32_t i = 0; i < descriptor->bindGroupLayoutCount; ++i) {
-        if (DAWN_UNSAFE_TODO(descriptor->bindGroupLayouts[i]) == nullptr) {
+    for (auto [i, bgl] : Enumerate(descriptor->bindGroupLayouts)) {
+        if (bgl == nullptr) {
             continue;
         }
 
-        DAWN_UNSAFE_TODO(DAWN_TRY(device->ValidateObject(descriptor->bindGroupLayouts[i])));
-        DAWN_UNSAFE_TODO(DAWN_INVALID_IF(
-            descriptor->bindGroupLayouts[i]->GetPipelineCompatibilityToken() !=
-                pipelineCompatibilityToken,
-            "bindGroupLayouts[%i] (%s) is used to create a pipeline layout but it was "
-            "created as part of a pipeline's default layout.",
-            i, descriptor->bindGroupLayouts[i]));
+        DAWN_TRY(device->ValidateObject(descriptor->bindGroupLayouts[i]));
+        DAWN_INVALID_IF(bgl->GetPipelineCompatibilityToken() != pipelineCompatibilityToken,
+                        "bindGroupLayouts[%i] (%s) is used to create a pipeline layout but it was "
+                        "created as part of a pipeline's default layout.",
+                        i, bgl);
 
-        AccumulateBindingCounts(&bindingCounts, DAWN_UNSAFE_TODO(descriptor->bindGroupLayouts[i])
-                                                    ->GetInternalBindGroupLayout()
-                                                    ->GetValidationBindingCounts());
+        AccumulateBindingCounts(&bindingCounts,
+                                bgl->GetInternalBindGroupLayout()->GetValidationBindingCounts());
     }
 
     // Validate immediateSize.
@@ -164,16 +161,15 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                        ApiObjectBase::UntrackedByDeviceTag tag)
     : ApiObjectBase(device, descriptor->label),
       mImmediateDataRangeByteSize(descriptor->immediateSize) {
-    DAWN_CHECK(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
+    DAWN_CHECK(descriptor->bindGroupLayouts.size() <= kMaxBindGroupsTyped);
 
     // According to WebGPU SPEC of CreatePipelineLayout(), if bindGroupLayouts[i] is null or
     // bindGroupLayouts[i].[[descriptor]].entries is empty, treat bindGroupLayouts[i] as an
     // empty bind group layout. So here unspecified or null bind group layouts can be set to
     // `device->GetEmptyBindGroupLayout()`.
     mBindGroupLayouts.fill(device->GetEmptyBindGroupLayout());
-    auto bgls = ityp::SpanFromUntyped<BindGroupIndex>(descriptor->bindGroupLayouts,
-                                                      descriptor->bindGroupLayoutCount);
-    for (auto [group, bgl] : Enumerate(bgls)) {
+
+    for (auto [group, bgl] : Enumerate(descriptor->bindGroupLayouts)) {
         // Keep the default empty bind group layouts for nullptr bind group layouts
         if (bgl == nullptr) {
             continue;
@@ -606,8 +602,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     }
 
     PipelineLayoutDescriptor desc = {};
-    desc.bindGroupLayouts = bgls.data();
-    desc.bindGroupLayoutCount = static_cast<uint32_t>(kMaxBindGroupsTyped);
+    desc.bindGroupLayouts = bgls;
     desc.immediateSize = immediateDataRangeByteSize;
 
     PipelineLayoutResourceTable resourceTable;
@@ -620,9 +615,8 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         // make room for it. If it's not empty, this means kMaxBindGroups were referenced in the
         // shader, which will trigger a validation error in CreatePipelineLayout that too many BGLs
         // are used with the resource table.
-        if (DAWN_UNSAFE_TODO(desc.bindGroupLayouts[desc.bindGroupLayoutCount - 1])->IsEmpty()) {
-            desc.bindGroupLayoutCount--;
-        }
+        desc.bindGroupLayouts =
+            desc.bindGroupLayouts.first(desc.bindGroupLayouts.size().MinusOne());
     }
 
     Ref<PipelineLayoutBase> result;

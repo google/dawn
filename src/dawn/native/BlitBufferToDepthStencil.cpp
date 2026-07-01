@@ -196,9 +196,7 @@ ResultOrError<InternalPipelineStore::BlitR8ToStencilPipelines> GetOrCreateR8ToSt
     Ref<PipelineLayoutBase> pipelineLayout;
     {
         PipelineLayoutDescriptor plDesc = {};
-        plDesc.bindGroupLayoutCount = 1;
-
-        plDesc.bindGroupLayouts = &bgl;
+        plDesc.bindGroupLayouts = SpanFromRef<BindGroupIndex>(bgl);
         DAWN_TRY_ASSIGN(pipelineLayout, device->CreatePipelineLayout(&plDesc));
     }
 

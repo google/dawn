@@ -473,11 +473,9 @@ TEST_F(DestroyObjectTests, ExternalTextureImplicit) {
 }
 
 TEST_F(DestroyObjectTests, PipelineLayoutNativeExplicit) {
+    BindGroupLayoutBase* bgl = mDeviceMock->GetEmptyBindGroupLayout();
     PipelineLayoutDescriptor desc = {};
-    std::vector<BindGroupLayoutBase*> bindGroupLayouts;
-    bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayout());
-    desc.bindGroupLayoutCount = bindGroupLayouts.size();
-    desc.bindGroupLayouts = bindGroupLayouts.data();
+    desc.bindGroupLayouts = SpanFromRef<BindGroupIndex>(bgl);
 
     Ref<PipelineLayoutMock> pipelineLayoutMock =
         AcquireRef(new PipelineLayoutMock(mDeviceMock, &desc));
@@ -509,11 +507,9 @@ TEST_F(DestroyObjectTests, PipelineLayoutImplicit) {
         bindGroupLayout = device.CreateBindGroupLayout(ToCppAPI(&desc));
     }
 
+    BindGroupLayoutBase* bgl = FromAPI(bindGroupLayout.Get());
     PipelineLayoutDescriptor desc = {};
-    std::vector<BindGroupLayoutBase*> bindGroupLayouts;
-    bindGroupLayouts.push_back(reinterpret_cast<BindGroupLayoutBase*>(bindGroupLayout.Get()));
-    desc.bindGroupLayoutCount = bindGroupLayouts.size();
-    desc.bindGroupLayouts = bindGroupLayouts.data();
+    desc.bindGroupLayouts = SpanFromRef<BindGroupIndex>(bgl);
 
     Ref<PipelineLayoutMock> pipelineLayoutMock =
         AcquireRef(new PipelineLayoutMock(mDeviceMock, &desc));
@@ -923,11 +919,9 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     {
         // Use an non-empty bind group layout to avoid hitting the internal empty pipeline layout in
         // the cache.
+        BindGroupLayoutBase* bgl = FromAPI(bindGroupLayout.Get());
         PipelineLayoutDescriptor desc = {};
-        std::vector<BindGroupLayoutBase*> bindGroupLayouts;
-        bindGroupLayouts.push_back(reinterpret_cast<BindGroupLayoutBase*>(bindGroupLayout.Get()));
-        desc.bindGroupLayoutCount = bindGroupLayouts.size();
-        desc.bindGroupLayouts = bindGroupLayouts.data();
+        desc.bindGroupLayouts = SpanFromRef<BindGroupIndex>(bgl);
 
         ScopedRawPtrExpectation scoped(mDeviceMock);
         pipelineLayoutMock = AcquireRef(new PipelineLayoutMock(mDeviceMock, &desc));

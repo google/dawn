@@ -1060,8 +1060,7 @@ ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::CreateEmptyBindGroupLayout()
 
 ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::CreateEmptyPipelineLayout() {
     PipelineLayoutDescriptor desc = {};
-    desc.bindGroupLayoutCount = 0;
-    desc.bindGroupLayouts = nullptr;
+    desc.bindGroupLayouts = {};
 
     return GetOrCreatePipelineLayout(Unpack(&desc));
 }

@@ -985,12 +985,11 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                                                    },
                                                    /* allowInternalBinding */ true));
 
-        std::array<BindGroupLayoutBase*, 2> bindGroupLayouts = {bindGroupLayout0.Get(),
-                                                                bindGroupLayout1.Get()};
+        ityp::array<BindGroupIndex, BindGroupLayoutBase*, 2u> bindGroupLayouts = {
+            bindGroupLayout0.Get(), bindGroupLayout1.Get()};
 
         PipelineLayoutDescriptor descriptor;
-        descriptor.bindGroupLayoutCount = bindGroupLayouts.size();
-        descriptor.bindGroupLayouts = bindGroupLayouts.data();
+        descriptor.bindGroupLayouts = bindGroupLayouts;
         DAWN_TRY_ASSIGN(pipelineLayout, device->CreatePipelineLayout(&descriptor));
     } else {
         DAWN_TRY_ASSIGN(pipelineLayout, utils::MakeBasicPipelineLayout(device, bindGroupLayout0));

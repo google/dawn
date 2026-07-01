@@ -252,8 +252,7 @@ ResultOrError<RenderPipelineBase*> GetOrCreateApplyClearValueWithDrawPipeline(
                                                               wgpu::BufferBindingType::Uniform}}));
 
     PipelineLayoutDescriptor pipelineLayoutDesc{};
-    pipelineLayoutDesc.bindGroupLayoutCount = 1;
-    pipelineLayoutDesc.bindGroupLayouts = &bgl.Get();
+    pipelineLayoutDesc.bindGroupLayouts = SpanFromRef<BindGroupIndex>(bgl.Get());
 
     wgpu::PipelineLayoutPixelLocalStorage pls;
     if (key.hasPLS) {

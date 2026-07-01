@@ -81,9 +81,7 @@ ResultOrError<Ref<PipelineLayoutBase>> MakeBasicPipelineLayout(
     DeviceBase* device,
     const Ref<BindGroupLayoutBase>& bindGroupLayout) {
     PipelineLayoutDescriptor descriptor;
-    descriptor.bindGroupLayoutCount = 1;
-    BindGroupLayoutBase* bgl = bindGroupLayout.Get();
-    descriptor.bindGroupLayouts = &bgl;
+    descriptor.bindGroupLayouts = SpanFromRef<BindGroupIndex>(bindGroupLayout.Get());
     return device->CreatePipelineLayout(&descriptor);
 }
 

@@ -51,11 +51,11 @@
         "structure_spanification_blocklist": [
             "BindGroupDescriptor",
             "BindGroupLayoutDescriptor",
-            "PipelineLayoutDescriptor",
             "ShaderSourceSPIRV"
         ],
         "structure_span_index_type_override": {
             "FragmentState::targets": "ColorAttachmentIndex",
+            "PipelineLayoutDescriptor::bindGroupLayouts": "BindGroupIndex",
             "RenderPassDescriptor::colorAttachments": "ColorAttachmentIndex",
             "RenderBundleEncoderDescriptor::colorFormats": "ColorAttachmentIndex",
             "VertexState::buffers": "VertexBufferSlot"
