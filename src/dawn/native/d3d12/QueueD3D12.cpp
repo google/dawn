@@ -108,14 +108,14 @@ ID3D12SharingContract* Queue::GetSharingContract() const {
     return mD3d12SharingContract.Get();
 }
 
-MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
+MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
     CommandRecordingContext* commandContext = GetPendingCommandContext();
     ExecutionSerial pendingSerial = GetPendingCommandSerial();
 
     TRACE_EVENT_BEGIN1(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D12::RecordCommands",
                        "serial", uint64_t(pendingSerial));
-    for (uint32_t i = 0; i < commandCount; ++i) {
-        DAWN_TRY(ToBackend(DAWN_UNSAFE_TODO(commands[i]))->RecordCommands(commandContext));
+    for (CommandBufferBase* commandBuffer : commands) {
+        DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(commandContext));
     }
     TRACE_EVENT_END1(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D12::RecordCommands",
                      "serial", uint64_t(pendingSerial));

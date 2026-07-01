@@ -111,9 +111,7 @@ class ErrorQueue : public QueueBase {
         : QueueBase(device, ObjectBase::kError, label) {}
 
   private:
-    MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override {
-        DAWN_UNREACHABLE();
-    }
+    MaybeError SubmitImpl(Span<CommandBufferBase* const> commands) override { DAWN_UNREACHABLE(); }
     bool HasPendingCommands() const override { DAWN_UNREACHABLE(); }
     MaybeError SubmitPendingCommandsImpl() override { DAWN_UNREACHABLE(); }
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override { DAWN_UNREACHABLE(); }
@@ -168,17 +166,16 @@ void QueueBase::FormatLabel(absl::FormatSink* s) const {
     }
 }
 
-void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* commands) {
-    MaybeError result = SubmitInternal(commandCount, commands);
+void QueueBase::APISubmit(Span<CommandBufferBase* const> commands) {
+    MaybeError result = SubmitInternal(commands);
 
     // Destroy the command buffers even if SubmitInternal failed. (crbug.com/dawn/1863)
-    for (uint32_t i = 0; i < commandCount; ++i) {
-        DAWN_UNSAFE_TODO(commands[i])->Destroy();
+    for (CommandBufferBase* commandBuffer : commands) {
+        commandBuffer->Destroy();
     }
 
-    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
-        std::move(result), "calling %s.Submit(%s)", this,
-        DAWN_UNSAFE_TODO(ityp::span<uint32_t, CommandBufferBase* const>(commands, commandCount)));
+    [[maybe_unused]] bool hadError =
+        GetDevice()->ConsumedError(std::move(result), "calling %s.Submit(%s)", this, commands);
 }
 
 Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
@@ -485,24 +482,21 @@ MaybeError QueueBase::CopyExternalTextureForBrowserInternal(
     return DoCopyExternalTextureForBrowser(GetDevice(), source, &destination, copySize, options);
 }
 
-MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
-                                     CommandBufferBase* const* commands,
+MaybeError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
                                      BufferSet& buffersFromCommands) const {
     TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "Queue::ValidateSubmit");
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
     std::set<CommandBufferBase*> uniqueCommandBuffers;
 
-    for (uint32_t i = 0; i < commandCount; ++i) {
-        DAWN_UNSAFE_TODO(DAWN_TRY(GetDevice()->ValidateObject(commands[i])));
-        DAWN_UNSAFE_TODO(DAWN_TRY(commands[i]->ValidateCanUseInSubmitNow()));
+    for (CommandBufferBase* commandBuffer : commands) {
+        DAWN_TRY(GetDevice()->ValidateObject(commandBuffer));
+        DAWN_TRY(commandBuffer->ValidateCanUseInSubmitNow());
 
-        auto insertResult = uniqueCommandBuffers.insert(DAWN_UNSAFE_TODO(commands[i]));
-        DAWN_UNSAFE_TODO(DAWN_INVALID_IF(!insertResult.second, "Submit contains duplicates of %s.",
-                                         commands[i]));
+        auto insertResult = uniqueCommandBuffers.insert(commandBuffer);
+        DAWN_INVALID_IF(!insertResult.second, "Submit contains duplicates of %s.", commandBuffer);
 
-        const CommandBufferResourceUsage& usages =
-            DAWN_UNSAFE_TODO(commands[i])->GetResourceUsages();
+        const CommandBufferResourceUsage& usages = commandBuffer->GetResourceUsages();
 
         auto ValidateBuffer = [&buffersFromCommands](BufferBase* buffer) -> MaybeError {
             if (auto [iter, inserted] = buffersFromCommands.insert(buffer); inserted) {
@@ -652,7 +646,7 @@ MaybeError QueueBase::ValidateWriteTexture(const TexelCopyTextureInfo* destinati
     return {};
 }
 
-MaybeError QueueBase::SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands) {
+MaybeError QueueBase::SubmitInternal(Span<CommandBufferBase* const> commands) {
     DeviceBase* device = GetDevice();
 
     // If device is lost, don't let any commands be submitted
@@ -669,11 +663,11 @@ MaybeError QueueBase::SubmitInternal(uint32_t commandCount, CommandBufferBase* c
     if (device->IsValidationEnabled()) {
         // TODO(crbug.com/425472913): Keep a rolling average of set size so this can reserve a
         // sufficiently large set for max of last N submits.
-        DAWN_TRY(ValidateSubmit(commandCount, commands, buffersUsedInSubmit));
+        DAWN_TRY(ValidateSubmit(commands, buffersUsedInSubmit));
     }
     DAWN_CHECK(!IsError());
 
-    DAWN_TRY(SubmitImpl(commandCount, commands));
+    DAWN_TRY(SubmitImpl(commands));
 
     // Switch the buffer state back to unmapped before Tick().
     std::move(finishUseBuffers).Invoke();

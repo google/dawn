@@ -577,7 +577,7 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
     CommandBufferBase* submitCommandBuffer = commandBuffer.Get();
 
     // Submit command buffer.
-    device->GetQueue()->APISubmit(1, &submitCommandBuffer);
+    device->GetQueue()->APISubmit(SpanFromRef(submitCommandBuffer));
     return {};
 }
 

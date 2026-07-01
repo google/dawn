@@ -30,6 +30,7 @@
 #include <limits>
 #include <vector>
 
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/native/EventManager.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/Queue.h"
@@ -65,19 +66,18 @@ ResultOrError<Ref<SharedFence>> Queue::GetOrCreateSharedFence(WGPUSharedFence in
     return mSharedFence;
 }
 
-MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
-    if (commandCount == 0 || commands == nullptr) {
+MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
+    if (commands.empty()) {
         return {};
     }
 
     if (IsCapturing()) {
         std::vector<schema::ObjectId> commandBufferIds;
-        commandBufferIds.reserve(commandCount);
+        commandBufferIds.reserve(commands.size());
 
-        for (uint32_t i = 0; i < commandCount; ++i) {
+        for (CommandBufferBase* commandBuffer : commands) {
             schema::ObjectId id;
-            DAWN_UNSAFE_TODO(
-                DAWN_TRY_ASSIGN(id, mCaptureContext->AddResourceAndGetId(ToBackend(commands[i]))));
+            DAWN_TRY_ASSIGN(id, mCaptureContext->AddResourceAndGetId(ToBackend(commandBuffer)));
             commandBufferIds.emplace_back(id);
         }
 
@@ -89,16 +89,16 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
         Serialize(*mCaptureContext, cmd);
     }
 
-    std::vector<WGPUCommandBuffer> innerCommandBuffers(commandCount);
-    for (uint32_t i = 0; i < commandCount; ++i) {
-        DAWN_UNSAFE_TODO(DAWN_TRY_ASSIGN(innerCommandBuffers[i], ToBackend(commands[i])->Encode()));
+    std::vector<WGPUCommandBuffer> innerCommandBuffers(commands.size());
+    for (auto [i, commandBuffer] : Enumerate(commands)) {
+        DAWN_TRY_ASSIGN(innerCommandBuffers[i], ToBackend(commandBuffer)->Encode());
     }
 
     auto& wgpu = ToBackend(GetDevice())->wgpu.get();
-    wgpu.queueSubmit(mInnerHandle, commandCount, innerCommandBuffers.data());
+    wgpu.queueSubmit(mInnerHandle, innerCommandBuffers.size(), innerCommandBuffers.data());
 
-    for (uint32_t i = 0; i < commandCount; ++i) {
-        wgpu.commandBufferRelease(innerCommandBuffers[i]);
+    for (WGPUCommandBuffer commandBuffer : innerCommandBuffers) {
+        wgpu.commandBufferRelease(commandBuffer);
     }
 
     DAWN_TRY(SubmitFutureSync());

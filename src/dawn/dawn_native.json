@@ -37,7 +37,6 @@
             "BufferReadMappedRange",
             "BufferWriteMappedRange",
             "CommandEncoderWriteBuffer",
-            "QueueSubmit",
             "QueueWriteBuffer",
             "QueueWriteTexture"
         ],

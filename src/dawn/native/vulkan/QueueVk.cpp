@@ -99,11 +99,11 @@ MaybeError Queue::Initialize() {
     return {};
 }
 
-MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
+MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
     TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferVk::RecordCommands");
     CommandRecordingContext* recordingContext = GetPendingRecordingContext();
-    for (uint32_t i = 0; i < commandCount; ++i) {
-        DAWN_UNSAFE_TODO(DAWN_TRY(ToBackend(commands[i])->RecordCommands(recordingContext)));
+    for (CommandBufferBase* commandBuffer : commands) {
+        DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(recordingContext));
     }
     TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferVk::RecordCommands");
 

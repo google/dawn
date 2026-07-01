@@ -55,7 +55,7 @@ class Queue final : public QueueBase {
   private:
     Queue(Device* device, const QueueDescriptor* descriptor);
 
-    MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+    MaybeError SubmitImpl(Span<CommandBufferBase* const> commands) override;
     MaybeError WriteBufferImpl(BufferBase* buffer,
                                uint64_t bufferOffset,
                                const void* data,

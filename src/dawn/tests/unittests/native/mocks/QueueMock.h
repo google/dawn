@@ -40,7 +40,7 @@ class QueueMock : public QueueBase {
     QueueMock(DeviceMock* device, const QueueDescriptor* descriptor);
     ~QueueMock() override;
 
-    MOCK_METHOD(MaybeError, SubmitImpl, (uint32_t, CommandBufferBase* const*), (override));
+    MOCK_METHOD(MaybeError, SubmitImpl, (Span<CommandBufferBase* const>), (override));
     MOCK_METHOD(MaybeError,
                 WriteBufferImpl,
                 (BufferBase*, uint64_t, const void*, size_t),

@@ -266,13 +266,13 @@ ResultOrError<Ref<SharedFence>> Queue::GetOrCreateSharedFence() {
     return SharedFence::Create(ToBackend(GetDevice()), "Internal MTLSharedEvent", &desc);
 }
 
-MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
+MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
     @autoreleasepool {
         CommandRecordingContext* commandContext = GetPendingCommandContext();
 
         TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
-        for (uint32_t i = 0; i < commandCount; ++i) {
-            DAWN_UNSAFE_TODO(DAWN_TRY(ToBackend(commands[i])->FillCommands(commandContext)));
+        for (CommandBufferBase* commandBuffer : commands) {
+            DAWN_TRY(ToBackend(commandBuffer)->FillCommands(commandContext));
         }
         TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
 

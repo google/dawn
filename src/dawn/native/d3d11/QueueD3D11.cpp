@@ -314,7 +314,7 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
     return {};
 }
 
-MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
+MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
     // CommandBuffer::Execute() will modify the state of the global immediate device context, it may
     // affect following usage of it.
     // TODO(dawn:1770): figure how if we need to track and restore the state of the immediate device
@@ -323,8 +323,8 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     {
         auto commandContext =
             GetScopedSwapStatePendingCommandContext(QueueBase::SubmitMode::Normal);
-        for (uint32_t i = 0; i < commandCount; ++i) {
-            DAWN_TRY(ToBackend(DAWN_UNSAFE_TODO(commands[i]))->Execute(&commandContext));
+        for (CommandBufferBase* commandBuffer : commands) {
+            DAWN_TRY(ToBackend(commandBuffer)->Execute(&commandContext));
         }
     }
     DAWN_TRY(SubmitPendingCommandsImpl());

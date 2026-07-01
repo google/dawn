@@ -66,7 +66,7 @@ class Queue final : public QueueBase {
     MaybeError Initialize();
     void UpdateCommandsScheduledEvents(ExecutionSerial scheduledSerial);
 
-    MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+    MaybeError SubmitImpl(Span<CommandBufferBase* const> commands) override;
     bool HasPendingCommands() const override;
     MaybeError SubmitPendingCommandsImpl() override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;

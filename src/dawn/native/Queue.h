@@ -74,7 +74,7 @@ class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
     void FormatLabel(absl::FormatSink* s) const override;
 
     // Dawn API
-    void APISubmit(uint32_t commandCount, CommandBufferBase* const* commands);
+    void APISubmit(Span<CommandBufferBase* const> commands);
     Future APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo);
     void APIWriteBuffer(BufferBase* buffer, uint64_t bufferOffset, const void* data, size_t size);
     void APIWriteTexture(const TexelCopyTextureInfo* destination,
@@ -117,7 +117,7 @@ class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
 
     void DestroyImpl(DestroyReason reason) override;
 
-    virtual MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) = 0;
+    virtual MaybeError SubmitImpl(Span<CommandBufferBase* const> commands) = 0;
     virtual MaybeError WriteBufferImpl(BufferBase* buffer,
                                        uint64_t bufferOffset,
                                        const void* data,
@@ -142,8 +142,7 @@ class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
                                                      const TexelCopyTextureInfo* destination,
                                                      const Extent3D* copySize,
                                                      const CopyTextureForBrowserOptions* options);
-    MaybeError ValidateSubmit(uint32_t commandCount,
-                              CommandBufferBase* const* commands,
+    MaybeError ValidateSubmit(Span<CommandBufferBase* const> commands,
                               BufferSet& buffersFromCommands) const;
     MaybeError ValidateOnSubmittedWorkDone() const;
     MaybeError ValidateWriteTexture(const TexelCopyTextureInfo* destination,
@@ -151,7 +150,7 @@ class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
                                     const TexelCopyBufferLayout& dataLayout,
                                     const Extent3D* writeSize) const;
 
-    MaybeError SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands);
+    MaybeError SubmitInternal(Span<CommandBufferBase* const> commands);
 
     MutexProtected<SerialMap<ExecutionSerial, std::unique_ptr<TrackTaskCallback>>> mTasksInFlight;
 };

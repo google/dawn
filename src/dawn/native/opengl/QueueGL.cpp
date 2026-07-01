@@ -77,17 +77,16 @@ Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(devi
     }
 }
 
-MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
+MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
     Device* device = ToBackend(GetDevice());
-    return device->EnqueueAndFlushGL(
-        [this, commandCount, commands](const OpenGLFunctions& gl) -> MaybeError {
-            TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferGL::Execute");
-            for (uint32_t i = 0; i < commandCount; ++i) {
-                DAWN_UNSAFE_TODO(DAWN_TRY(ToBackend(commands[i])->Execute(gl)));
-            }
-            TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferGL::Execute");
-            return {};
-        });
+    return device->EnqueueAndFlushGL([this, commands](const OpenGLFunctions& gl) -> MaybeError {
+        TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferGL::Execute");
+        for (CommandBufferBase* commandBuffer : commands) {
+            DAWN_TRY(ToBackend(commandBuffer)->Execute(gl));
+        }
+        TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferGL::Execute");
+        return {};
+    });
 }
 
 MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
@@ -159,7 +158,7 @@ MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
         Ref<CommandBufferBase> commandBuffer;
         DAWN_TRY_ASSIGN(commandBuffer, commandEncoder->Finish());
         CommandBufferBase* commands = commandBuffer.Get();
-        APISubmit(1, &commands);
+        APISubmit(SpanFromRef(commands));
         return {};
     }
 

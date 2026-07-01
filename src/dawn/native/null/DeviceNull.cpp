@@ -444,7 +444,7 @@ Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(devi
 
 Queue::~Queue() {}
 
-MaybeError Queue::SubmitImpl(uint32_t, CommandBufferBase* const*) {
+MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const>) {
     Device* device = ToBackend(GetDevice());
 
     DAWN_TRY(device->SubmitPendingOperations());

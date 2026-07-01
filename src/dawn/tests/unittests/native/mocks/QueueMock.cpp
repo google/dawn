@@ -38,11 +38,10 @@ QueueMock::QueueMock(DeviceMock* device, const QueueDescriptor* descriptor)
     ON_CALL(*this, DestroyImpl).WillByDefault([this](DestroyReason reason) {
         this->QueueBase::DestroyImpl(reason);
     });
-    ON_CALL(*this, SubmitImpl)
-        .WillByDefault([this](uint32_t, CommandBufferBase* const*) -> MaybeError {
-            this->QueueBase::IncrementLastSubmittedCommandSerial();
-            return {};
-        });
+    ON_CALL(*this, SubmitImpl).WillByDefault([this](Span<CommandBufferBase* const>) -> MaybeError {
+        this->QueueBase::IncrementLastSubmittedCommandSerial();
+        return {};
+    });
     ON_CALL(*this, CheckAndUpdateCompletedSerials)
         .WillByDefault([this]() -> ResultOrError<ExecutionSerial> {
             return this->QueueBase::GetLastSubmittedCommandSerial();
