@@ -90,9 +90,10 @@ namespace dawn::wire::server {
     const volatile char* Server::HandleCommands(const volatile char* commands, size_t size) {
         DeserializeBuffer deserializeBuffer(commands, size);
 
-        while (deserializeBuffer.AvailableSize() >= sizeof(CmdHeader) + sizeof(WireCmd)) {
-            WireCmd cmdId = *static_cast<const volatile WireCmd*>(static_cast<const volatile void*>(
-                deserializeBuffer.Buffer() + sizeof(CmdHeader)));
+        while (deserializeBuffer.AvailableSize() >= sizeof(CmdHeader)) {
+            WireCmd cmdId = static_cast<const volatile CmdHeader*>(
+                            static_cast<const volatile void*>(deserializeBuffer.Buffer()))
+                            ->commandId;
             WireResult result;
             switch (cmdId) {
                 {% for command in cmd_records["special command"] + cmd_records["command"] %}

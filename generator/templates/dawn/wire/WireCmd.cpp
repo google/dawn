@@ -136,10 +136,7 @@
     struct {{Return}}{{name}}Transfer{{Inherits}} {
         static_assert({{[is_cmd, record.extensible, record.chained].count(True)}} <= 1,
                       "Record must be at most one of is_cmd, extensible, and chained.");
-        {% if is_cmd %}
-            //* Start the transfer structure with the command ID, so that casting to WireCmd gives the ID.
-            WireCmd commandId;
-        {% elif record.extensible %}
+        {% if record.extensible %}
             WGPUBool hasNextInChain;
         {% elif record.chained %}
             WGPUChainedStructTransfer chain;
@@ -163,7 +160,6 @@
 
     {% if is_cmd %}
         static_assert(offsetof({{Return}}{{name}}Transfer, commandSize) == 0);
-        static_assert(offsetof({{Return}}{{name}}Transfer, commandId) == sizeof(CmdHeader));
     {% endif -%}
 
     {% if record.chained %}

@@ -82,6 +82,7 @@ namespace dawn::wire {
 
     struct CmdHeader {
         uint64_t commandSize;
+        WireCmd commandId;
     };
 
 {% macro write_command_struct(command, is_return_command) %}

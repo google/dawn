@@ -64,9 +64,10 @@ namespace dawn::wire::client {
     const volatile char* Client::HandleCommands(const volatile char* commands, size_t size) {
         DeserializeBuffer deserializeBuffer(commands, size);
 
-        while (deserializeBuffer.AvailableSize() >= sizeof(CmdHeader) + sizeof(WireCmd)) {
-            WireCmd cmdId = *static_cast<const volatile WireCmd*>(static_cast<const volatile void*>(
-                deserializeBuffer.Buffer() + sizeof(CmdHeader)));
+        while (deserializeBuffer.AvailableSize() >= sizeof(CmdHeader)) {
+            WireCmd cmdId = static_cast<const volatile CmdHeader*>(
+                            static_cast<const volatile void*>(deserializeBuffer.Buffer()))
+                            ->commandId;
             WireResult result = WireResult::FatalError;
             switch (cmdId) {
                 {% for command in cmd_records["special command"] %}
