@@ -32,7 +32,6 @@
 #include "src/dawn/common/Compiler.h"
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/ityp_array.h"
-#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/common/ityp_vector.h"
 #include "src/utils/compiler.h"
 #include "src/utils/span.h"
@@ -104,12 +103,14 @@ TEST_F(EnumeratorTest, ITypSpan) {
 
     // Empty span for a non-null pointer.
     uint32_t whatever = 923847;
-    auto emptyThingWithGarbagePointer = ityp::SpanFromUntyped<Int>(&whatever, 0);
+    ityp::span<Int, uint32_t> emptyThingWithGarbagePointer =
+        SpanFromRef<Int>(whatever).first(Int{0u});
+    ASSERT_NE(emptyThingWithGarbagePointer.data(), nullptr);
     CheckEmpty(emptyThingWithGarbagePointer);
 
     // Non-empty span
-    std::array<uint32_t, 3> backingArray = {{37, 45, 67}};
-    auto thing = ityp::SpanFromUntyped<Int>(backingArray.data(), 3);
+    ityp::array<Int, uint32_t, 3> backingArray = {37u, 45u, 67u};
+    ityp::span<Int, uint32_t> thing{backingArray};
     Check<Int>(thing, thing.data());
 }
 

@@ -30,7 +30,6 @@
 #include <bit>
 
 #include "src/dawn/common/Enumerator.h"
-#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/ObjectContentHasher.h"

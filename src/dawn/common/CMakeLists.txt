@@ -57,7 +57,6 @@ set(private_headers
     "IOKitRef.h"
     "ityp_array.h"
     "ityp_bitset.h"
-    "ityp_span.h"
     "ityp_stack_vec.h"
     "ityp_vector.h"
     "LinkedList.h"

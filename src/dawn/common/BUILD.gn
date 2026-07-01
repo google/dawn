@@ -232,7 +232,6 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "egl_platform.h",
       "ityp_array.h",
       "ityp_bitset.h",
-      "ityp_span.h",
       "ityp_stack_vec.h",
       "ityp_vector.h",
       "vulkan_platform.h",

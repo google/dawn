@@ -35,7 +35,6 @@
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/ityp_array.h"
 #include "src/dawn/common/ityp_bitset.h"
-#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/Adapter.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/CommandValidation.h"

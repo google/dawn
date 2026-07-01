@@ -37,7 +37,6 @@
 #include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/common/Range.h"
-#include "src/dawn/common/ityp_span.h"
 #include "src/dawn/native/BindGroupLayout.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/CommandValidation.h"
@@ -47,6 +46,7 @@
 #include "src/dawn/native/ShaderModule.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
