@@ -867,16 +867,15 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                                         UnpackedPtr<RenderPassDescriptor> descriptor,
                                         UsageValidationMode usageValidationMode,
                                         RenderPassValidationState* validationState) {
-    uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
+    auto maxColorAttachments =
+        ColorAttachmentIndex{static_cast<uint8_t>(device->GetLimits().v1.maxColorAttachments)};
     DAWN_INVALID_IF(
-        descriptor->colorAttachmentCount > maxColorAttachments,
+        descriptor->colorAttachments.size() > maxColorAttachments,
         "Color attachment count (%u) exceeds the maximum number of color attachments (%u).%s",
-        descriptor->colorAttachmentCount, maxColorAttachments,
+        descriptor->colorAttachments.size(), maxColorAttachments,
         DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1, maxColorAttachments,
-                                    descriptor->colorAttachmentCount));
+                                    uint8_t{descriptor->colorAttachments.size()}));
 
-    auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
-        descriptor->colorAttachments, descriptor->colorAttachmentCount);
     ColorAttachmentFormats colorAttachmentFormats;
     if (const auto* expandResolveRect = descriptor.Get<RenderPassDescriptorResolveRect>()) {
         DAWN_INVALID_IF(!device->HasFeature(Feature::DawnPartialLoadResolveTexture),
@@ -891,7 +890,7 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
         validationState->SetExplicitSampleCount(renderPassSampleCount->sampleCount);
     }
 
-    for (auto [i, attachment] : Enumerate(colorAttachments)) {
+    for (auto [i, attachment] : Enumerate(descriptor->colorAttachments)) {
         DAWN_TRY_CONTEXT(ValidateRenderPassColorAttachment(device, attachment, usageValidationMode,
                                                            validationState),
                          "validating colorAttachments[%u].", i);
@@ -991,9 +990,7 @@ MaybeError InitializeValidationStateAttachment(DeviceBase* device,
         DAWN_TRY(CheckAttachment(descriptor->depthStencilAttachment->view));
     }
 
-    for (size_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
-        const RenderPassColorAttachment& colorAttachment =
-            DAWN_UNSAFE_TODO(descriptor->colorAttachments[i]);
+    for (const RenderPassColorAttachment& colorAttachment : descriptor->colorAttachments) {
         if (colorAttachment.view != nullptr) {
             DAWN_TRY(CheckAttachment(colorAttachment.view));
             if (colorAttachment.resolveTarget != nullptr) {
@@ -1405,10 +1402,8 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             cmd->attachmentState = device->GetOrCreateAttachmentState(descriptor);
             attachmentState = cmd->attachmentState;
 
-            auto descColorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
-                descriptor->colorAttachments, descriptor->colorAttachmentCount);
             for (auto i : cmd->attachmentState->GetColorAttachmentsMask()) {
-                auto& descColorAttachment = descColorAttachments[i];
+                auto& descColorAttachment = descriptor->colorAttachments[i];
                 auto& cmdColorAttachment = cmd->colorAttachments[i];
 
                 TextureViewBase* colorTarget;

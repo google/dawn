@@ -558,8 +558,7 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
 
     // Create render pass.
     RenderPassDescriptor renderPassDesc;
-    renderPassDesc.colorAttachmentCount = 1;
-    renderPassDesc.colorAttachments = &colorAttachmentDesc;
+    renderPassDesc.colorAttachments = SpanFromRef<ColorAttachmentIndex>(colorAttachmentDesc);
     Ref<RenderPassEncoder> passEncoder = encoder->BeginRenderPass(&renderPassDesc);
 
     // Start pipeline and encode commands to complete

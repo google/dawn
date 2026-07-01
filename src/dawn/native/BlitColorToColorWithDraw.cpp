@@ -152,8 +152,7 @@ std::string GenerateResolveFS(uint32_t sampleCount) {
 
 ResultOrError<Ref<RenderPipelineBase>> GetOrCreateExpandMultisamplePipeline(
     DeviceBase* device,
-    const BlitColorToColorWithDrawPipelineKey& pipelineKey,
-    uint8_t colorAttachmentCount) {
+    const BlitColorToColorWithDrawPipelineKey& pipelineKey) {
     InternalPipelineStore* store = device->GetInternalPipelineStore();
     {
         auto it = store->expandResolveTexturePipelines.find(pipelineKey);
@@ -328,9 +327,7 @@ MaybeError ExpandResolveTextureWithDraw(
     BlitColorToColorWithDrawPipelineKey pipelineKey;
     uint32_t colorAttachmentWidth = 0;
     uint32_t colorAttachmentHeight = 0;
-    for (uint8_t i = 0; i < renderPassDescriptor->colorAttachmentCount; ++i) {
-        ColorAttachmentIndex colorIdx(i);
-        const auto& colorAttachment = DAWN_UNSAFE_TODO(renderPassDescriptor->colorAttachments[i]);
+    for (auto [colorIdx, colorAttachment] : Enumerate(renderPassDescriptor->colorAttachments)) {
         TextureViewBase* view = colorAttachment.view;
         if (!view) {
             continue;
@@ -368,10 +365,7 @@ MaybeError ExpandResolveTextureWithDraw(
     }
 
     Ref<RenderPipelineBase> pipeline;
-    DAWN_TRY_ASSIGN(
-        pipeline,
-        GetOrCreateExpandMultisamplePipeline(
-            device, pipelineKey, static_cast<uint8_t>(renderPassDescriptor->colorAttachmentCount)));
+    DAWN_TRY_ASSIGN(pipeline, GetOrCreateExpandMultisamplePipeline(device, pipelineKey));
 
     Ref<BindGroupLayoutBase> bgl;
     DAWN_TRY_ASSIGN(bgl, pipeline->GetBindGroupLayout(0));
@@ -381,12 +375,10 @@ MaybeError ExpandResolveTextureWithDraw(
         absl::InlinedVector<BindGroupEntry, kMaxColorAttachments> bgEntries = {};
 
         for (auto colorIdx : pipelineKey.attachmentsToExpandResolve) {
-            uint8_t i = static_cast<uint8_t>(colorIdx);
-            const auto& colorAttachment =
-                DAWN_UNSAFE_TODO(renderPassDescriptor->colorAttachments[i]);
+            const auto& colorAttachment = renderPassDescriptor->colorAttachments[colorIdx];
             bgEntries.push_back({});
             auto& bgEntry = bgEntries.back();
-            bgEntry.binding = i;
+            bgEntry.binding = uint8_t{colorIdx};
             bgEntry.textureView = colorAttachment.resolveTarget;
         }
 
@@ -488,8 +480,7 @@ MaybeError ResolveMultisampleWithDraw(DeviceBase* device,
 
     // Create render pass.
     RenderPassDescriptor renderPassDesc;
-    renderPassDesc.colorAttachmentCount = 1;
-    renderPassDesc.colorAttachments = &colorAttachmentDesc;
+    renderPassDesc.colorAttachments = SpanFromRef<ColorAttachmentIndex>(colorAttachmentDesc);
     Ref<RenderPassEncoder> renderEncoder = encoder->BeginRenderPass(&renderPassDesc);
 
     // Draw to perform the resolve.

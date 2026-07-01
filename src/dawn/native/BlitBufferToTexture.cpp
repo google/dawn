@@ -494,8 +494,7 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
         colorAttachment.storeOp = wgpu::StoreOp::Store;
 
         RenderPassDescriptor rpDesc = {};
-        rpDesc.colorAttachmentCount = 1;
-        rpDesc.colorAttachments = &colorAttachment;
+        rpDesc.colorAttachments = SpanFromRef<ColorAttachmentIndex>(colorAttachment);
 
         Ref<RenderPassEncoder> pass = commandEncoder->BeginRenderPass(&rpDesc);
         // Bind the resources.

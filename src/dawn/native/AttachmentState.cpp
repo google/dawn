@@ -107,9 +107,6 @@ AttachmentState::AttachmentState(const UnpackedPtr<RenderPipelineDescriptor>& de
 }
 
 AttachmentState::AttachmentState(const UnpackedPtr<RenderPassDescriptor>& descriptor) {
-    auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
-        descriptor->colorAttachments, descriptor->colorAttachmentCount);
-
     // Override the sample count with an explicit sample count if provided. This is currently only
     // valid if the MSAARenderToSingleSampled feature is enabled.
     bool msrtssAllowed = false;
@@ -119,7 +116,7 @@ AttachmentState::AttachmentState(const UnpackedPtr<RenderPassDescriptor>& descri
         msrtssAllowed = true;
     }
 
-    for (auto [i, colorAttachment] : Enumerate(colorAttachments)) {
+    for (auto [i, colorAttachment] : Enumerate(descriptor->colorAttachments)) {
         TextureViewBase* attachment = colorAttachment.view;
         if (attachment == nullptr) {
             continue;

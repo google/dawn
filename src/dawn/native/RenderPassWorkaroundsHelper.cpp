@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "absl/container/inlined_vector.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/native/AttachmentState.h"
 #include "src/dawn/native/BlitColorToColorWithDraw.h"
 #include "src/dawn/native/CommandEncoder.h"
@@ -90,8 +91,7 @@ void ResolveWithRenderPass(CommandEncoder* encoder,
     attachment.storeOp = storeOp;
 
     RenderPassDescriptor resolvePass = {};
-    resolvePass.colorAttachmentCount = 1;
-    resolvePass.colorAttachments = &attachment;
+    resolvePass.colorAttachments = SpanFromRef<ColorAttachmentIndex>(attachment);
 
     // Begin and end an empty render pass to force the resolve.
     Ref<RenderPassEncoder> rpEncoder = encoder->BeginRenderPass(&resolvePass);
@@ -118,10 +118,7 @@ MaybeError RenderPassWorkaroundsHelper::Initialize(
     // temporary attachment into the given attachment when the render pass ends. (Handled in
     // Apply())
     if (device->IsToggleEnabled(Toggle::AlwaysResolveIntoZeroLevelAndLayer)) {
-        for (uint8_t i = 0; i < renderPassDescriptor->colorAttachmentCount; ++i) {
-            ColorAttachmentIndex colorIdx(i);
-            const auto& colorAttachment =
-                DAWN_UNSAFE_TODO(renderPassDescriptor->colorAttachments[i]);
+        for (auto [i, colorAttachment] : Enumerate(renderPassDescriptor->colorAttachments)) {
             TextureViewBase* resolveTarget = colorAttachment.resolveTarget;
 
             if (resolveTarget != nullptr && (resolveTarget->GetBaseMipLevel() != 0 ||
@@ -161,10 +158,10 @@ MaybeError RenderPassWorkaroundsHelper::Initialize(
                     }
                 }
 
-                mTempResolveTargets[colorIdx] = {std::move(temporaryResolveTexture),
-                                                 std::move(temporaryResolveView)};
+                mTempResolveTargets[i] = {std::move(temporaryResolveTexture),
+                                          std::move(temporaryResolveView)};
 
-                mTempResolveTargetsMask.set(colorIdx);
+                mTempResolveTargetsMask.set(i);
             }
         }
     }

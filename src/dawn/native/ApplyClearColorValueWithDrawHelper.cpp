@@ -278,16 +278,15 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
     CommandEncoder* encoder,
     const RenderPassDescriptor* renderPassDescriptor,
     const KeyOfApplyClearColorValueWithDrawPipelines& key) {
-    auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
-        renderPassDescriptor->colorAttachments, renderPassDescriptor->colorAttachmentCount);
-
     std::array<uint8_t, sizeof(uint32_t) * 4 * kMaxColorAttachments> clearValues = {};
     uint32_t offset = 0;
     for (auto i : key.colorTargetsToApplyClearColorValue) {
-        const Format& format = colorAttachments[i].view->GetFormat();
+        const RenderPassColorAttachment& colorAttachment =
+            renderPassDescriptor->colorAttachments[i];
+        const Format& format = colorAttachment.view->GetFormat();
         TextureComponentType baseType = format.GetAspectInfo(Aspect::Color).baseType;
 
-        Color initialClearValue = colorAttachments[i].clearValue;
+        Color initialClearValue = colorAttachment.clearValue;
         Color clearValue = ClampClearColorValueToLegalRange(initialClearValue, format);
         switch (baseType) {
             case TextureComponentType::Uint: {
@@ -410,13 +409,10 @@ bool GetKeyOfApplyClearColorValueWithDrawPipelines(
         return false;
     }
 
-    key->colorAttachmentCount = static_cast<uint8_t>(renderPassDescriptor->colorAttachmentCount);
-
-    auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
-        renderPassDescriptor->colorAttachments, key->colorAttachmentCount);
-
+    key->colorAttachmentCount = renderPassDescriptor->colorAttachments.size();
     key->colorTargetFormats.fill(wgpu::TextureFormat::Undefined);
-    for (auto [i, attachment] : Enumerate(colorAttachments)) {
+
+    for (auto [i, attachment] : Enumerate(renderPassDescriptor->colorAttachments)) {
         if (attachment.view == nullptr) {
             continue;
         }

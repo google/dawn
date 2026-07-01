@@ -46,7 +46,7 @@ class RenderPassEncoder;
 struct RenderPassDescriptor;
 
 struct KeyOfApplyClearColorValueWithDrawPipelines {
-    uint8_t colorAttachmentCount = 0;
+    ColorAttachmentIndex colorAttachmentCount{};
     PerColorAttachment<wgpu::TextureFormat> colorTargetFormats;
     ColorAttachmentMask colorTargetsToApplyClearColorValue;
     uint32_t sampleCount = 0;

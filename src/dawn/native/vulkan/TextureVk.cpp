@@ -1261,8 +1261,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                     wgpu::StoreOp::Store;
 
                 RenderPassDescriptor passDesc{};
-                passDesc.colorAttachmentCount = 1u;
-                passDesc.colorAttachments = &colorAttachment;
+                passDesc.colorAttachments = SpanFromRef<ColorAttachmentIndex>(colorAttachment);
 
                 for (uint32_t depthSlice = 0; depthSlice < depthSliceCount; ++depthSlice) {
                     beginCmd.colorAttachments[ca0].depthSlice = colorAttachment.depthSlice =
