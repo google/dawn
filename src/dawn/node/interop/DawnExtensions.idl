@@ -52,12 +52,20 @@ enum WGSLLanguageFeatureName {
 };
 
 // ============================================================================
+// Other extensions not in their own block below.
+// ============================================================================
+
+enum GPUFeatureName {
+    "atomic-vec2u-min-max",
+    "subgroup-size-control",
+    "texture-compression-unaligned",
+}
+
+// ============================================================================
 // Subgroup matrices
 // ============================================================================
 enum GPUFeatureName {
     "chromium-experimental-subgroup-matrix",
-    "atomic-vec2u-min-max",
-    "subgroup-size-control",
 }
 
 enum GPUSubgroupMatrixComponentType {

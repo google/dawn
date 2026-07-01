@@ -1731,6 +1731,9 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kSubgroupSizeControl:
             out = wgpu::FeatureName::SubgroupSizeControl;
             return true;
+        case interop::GPUFeatureName::kTextureCompressionUnaligned:
+            out = wgpu::FeatureName::TextureCompressionUnaligned;
+            return true;
     }
     return false;
 }
@@ -1769,6 +1772,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         CASE(PrimitiveIndex, kPrimitiveIndex);
         CASE(ChromiumExperimentalSamplingResourceTable, kChromiumExperimentalSamplingResourceTable);
         CASE(AtomicVec2uMinMax, kAtomicVec2UMinMax);
+        CASE(TextureCompressionUnaligned, kTextureCompressionUnaligned);
 
 #undef CASE
 

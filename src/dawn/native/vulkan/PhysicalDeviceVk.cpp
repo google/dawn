@@ -265,6 +265,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::StaticSamplers);
     EnableFeature(Feature::FlexibleTextureViews);
     EnableFeature(Feature::DawnDeviceAllocatorControl);
+    EnableFeature(Feature::TextureCompressionUnaligned);
 
     // Initialize supported extensions
     if (mDeviceInfo.features.textureCompressionBC == VK_TRUE) {

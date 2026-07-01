@@ -2551,7 +2551,8 @@
             {"value": 61, "name": "opaque y cb cr android for external texture", "tags": ["dawn"]},
             {"value": 62, "name": "unorm16 filterable", "tags": ["dawn"]},
             {"value": 63, "name": "render pass render area", "tags": ["dawn"]},
-            {"value": 64, "name": "adapter properties drm", "tags": ["dawn", "native"]}
+            {"value": 64, "name": "adapter properties drm", "tags": ["dawn", "native"]},
+            {"value": 65, "name": "texture compression unaligned", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

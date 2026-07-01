@@ -473,6 +473,10 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "render_pass_render_area.md",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::TextureCompressionUnaligned,
+     {"Supports creating compressed texture with partial blocks in level 0",
+      // TODO(https://crbug.com/528245806): point at the WebGPU spec once landed.
+      "https://crbug.com/528245806", FeatureInfo::FeatureState::Experimental}},
 
     // Comment to separate the } so it is clearer what to copy-paste to add a feature.
 };

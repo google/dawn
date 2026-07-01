@@ -979,6 +979,53 @@ TEST_F(CompressedTextureFormatsValidationTests, TextureSize) {
     }
 }
 
+class UnalignedCompressedTextureFormatsValidationTests
+    : public CompressedTextureFormatsValidationTests {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features =
+            CompressedTextureFormatsValidationTests::GetRequiredFeatures();
+        features.push_back(wgpu::FeatureName::TextureCompressionUnaligned);
+        return features;
+    }
+};
+
+// Test that with that extension it is valid to create a texture with width/height that's with
+// partial blocks.
+TEST_F(UnalignedCompressedTextureFormatsValidationTests, TextureSize) {
+    for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+        // Test that the default size (120 x 120) is valid for all formats.
+        {
+            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+            descriptor.format = format;
+            device.CreateTexture(&descriptor);
+        }
+
+        // Test that an unaligned width is valid for all formats.
+        {
+            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+            descriptor.size.width++;
+            descriptor.format = format;
+            device.CreateTexture(&descriptor);
+        }
+        // Test that an unaligned height is valid for all formats.
+        {
+            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+            descriptor.size.height++;
+            descriptor.format = format;
+            device.CreateTexture(&descriptor);
+        }
+        // Test that an 1x1 is valid for all formats.
+        {
+            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+            descriptor.size.width = 1;
+            descriptor.size.height = 1;
+            descriptor.format = format;
+            device.CreateTexture(&descriptor);
+        }
+    }
+}
+
 class BCFormatsValidationTests : public TextureValidationTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {

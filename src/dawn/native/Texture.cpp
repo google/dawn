@@ -384,8 +384,10 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
         }
     }
 
-    if (format->isCompressed) {
+    if (format->isCompressed && !device->HasFeature(Feature::TextureCompressionUnaligned)) {
         const TexelBlockInfo& blockInfo = format->GetAspectInfo(wgpu::TextureAspect::All).block;
+        // TODO(https://crbug.com/528245806): Once shipping TextureCompressionUnaligned, mention it
+        // in the error message below.
         DAWN_INVALID_IF(
             descriptor->size.width % blockInfo.width != 0 ||
                 descriptor->size.height % blockInfo.height != 0,
@@ -1482,10 +1484,9 @@ Extent3D TextureBase::GetMipLevelSingleSubresourcePhysicalSize(uint32_t level,
 
     // Compressed Textures will have paddings if their width or height is not a multiple of
     // 4 at non-zero mipmap levels.
-    if (mFormat->isCompressed && level != 0) {
-        // If |level| is non-zero, then each dimension of |extent| is at most half of
-        // the max texture dimension. Computations here which add the block width/height
-        // to the extent cannot overflow.
+    if (mFormat->isCompressed) {
+        // Each dimension of extent is a number lower than maxTextureSize so adding a block size to
+        // it cannot overflow.
         const TexelBlockInfo& blockInfo = mFormat->GetAspectInfo(wgpu::TextureAspect::All).block;
         extent.width = (extent.width + blockInfo.width - 1) / blockInfo.width * blockInfo.width;
         extent.height =

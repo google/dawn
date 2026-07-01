@@ -172,6 +172,12 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
         info.supportsHeapFlagCreateNotZeroed = true;
     }
 
+    D3D12_FEATURE_DATA_D3D12_OPTIONS8 featureOptions8 = {};
+    if (SUCCEEDED(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &featureOptions8,
+                                                   sizeof(featureOptions8)))) {
+        info.supportsTextureCompressionUnaligned = featureOptions8.UnalignedBlockTexturesSupported;
+    }
+
     D3D12_FEATURE_DATA_D3D12_OPTIONS13 featureOptions13 = {};
     if (SUCCEEDED(d3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS13, &featureOptions13,
                                                    sizeof(featureOptions13)))) {

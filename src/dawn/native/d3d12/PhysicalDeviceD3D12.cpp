@@ -248,6 +248,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle);
     }
 
+    if (GetDeviceInfo().supportsTextureCompressionUnaligned) {
+        EnableFeature(Feature::TextureCompressionUnaligned);
+    }
+
     // Only check one format here because of D3D12 "Supported as a Set" mechanism: if any format
     // in the set is supported by the device, all formats in the set are supported.
     D3D12_FEATURE_DATA_FORMAT_SUPPORT r8unormFormatSupport = {};
