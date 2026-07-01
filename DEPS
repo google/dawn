@@ -23,7 +23,7 @@ vars = {
   'dawn_tintd': False, # Also fetches dependencies required for building tintd.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:1d86777e7f2562a86ecea77d1809ac4f82bb5bfe',
+  'dawn_gn_version': 'git_revision:760c6cc96824c1a851b4bcb8744c2141d6b57c0a',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -73,7 +73,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '58f1d2d55c00e15188ef648062a53f9a9410cb33',
+  'chromium_revision': 'dbee1fed4ad0c8ad31c00aa87d8b7363e9e73027',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -142,7 +142,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@9a821f4e58bbb7f6701f9951d087f8750f523647',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@5a572b071a72061e4a47264b280250202cd39285',
     'condition': 'dawn_standalone',
   },
 
@@ -157,11 +157,11 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@f59fa9e98a4a40d65af4d0b99f6efaad46b72ba3',
+  'url': '{chromium_git}/chromium/src/build@19e7d21536b1ac6ba2ccea9c3c68552e1c152da1',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@87b5008339057d77c0323472183178030bb4df41',
+  'url': '{chromium_git}/chromium/src/tools/clang@66934666a7c7151a24f4ed95e7e94ef8664de057',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -271,7 +271,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@b971ae67bb605febd7c82a87ab4c9b1a5a60ca4f',
+    'url': '{chromium_git}/chromium/src/testing@be12a58c318a9cb293378e80c81faec7512acdc3',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -646,7 +646,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@0e08e2939ca77100e918d4dcdb4b39bc51ca1d9f',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@2723da2d1b2cc49feb9848a6e44fdf9681b8c123',
     'condition': 'dawn_standalone',
   },
 
