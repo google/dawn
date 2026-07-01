@@ -200,6 +200,19 @@ bool VertexFormatIsInt(wgpu::VertexFormat format) {
     }
 }
 
+GLenum DepthStencilAttachmentPoint(const Format& format) {
+    if (format.aspects == (Aspect::Depth | Aspect::Stencil)) {
+        return GL_DEPTH_STENCIL_ATTACHMENT;
+    } else if (format.aspects == Aspect::Depth) {
+        return GL_DEPTH_ATTACHMENT;
+    } else if (format.aspects == Aspect::Stencil) {
+        return GL_STENCIL_ATTACHMENT;
+    } else {
+        DAWN_UNREACHABLE();
+        return 0;
+    }
+}
+
 // Vertex buffers and index buffers are implemented as part of an OpenGL VAO that
 // corresponds to a VertexState. On the contrary in Dawn they are part of the global state.
 // This means that we have to re-apply these buffers on a VertexState change.
@@ -1329,17 +1342,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
             const Format& format = textureView->GetTexture()->GetFormat();
 
             // Attach depth/stencil buffer.
-            GLenum glAttachment = 0;
-            if (format.aspects == (Aspect::Depth | Aspect::Stencil)) {
-                glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
-            } else if (format.aspects == Aspect::Depth) {
-                glAttachment = GL_DEPTH_ATTACHMENT;
-            } else if (format.aspects == Aspect::Stencil) {
-                glAttachment = GL_STENCIL_ATTACHMENT;
-            } else {
-                DAWN_UNREACHABLE();
-            }
-
+            GLenum glAttachment = DepthStencilAttachmentPoint(format);
             DAWN_TRY(textureView->BindToFramebuffer(gl, GL_DRAW_FRAMEBUFFER, glAttachment));
         }
     }
@@ -1389,10 +1392,6 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                         break;
                     }
                 }
-            }
-
-            if (attachmentInfo->storeOp == wgpu::StoreOp::Discard) {
-                // TODO(natlee@microsoft.com): call glDiscard to do optimization
             }
         }
 
@@ -1600,6 +1599,38 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
 
                 if (renderPass->attachmentState->GetSampleCount() > 1) {
                     DAWN_TRY(ResolveMultisampledRenderTargets(gl, renderPass));
+                }
+
+                std::vector<GLenum> attachmentsToDiscard;
+
+                for (auto index : renderPass->attachmentState->GetColorAttachmentsMask()) {
+                    auto* attachmentInfo = &renderPass->colorAttachments[index];
+                    if (attachmentInfo->storeOp == wgpu::StoreOp::Discard) {
+                        GLenum glAttachment = GL_COLOR_ATTACHMENT0 + static_cast<uint8_t>(index);
+                        attachmentsToDiscard.push_back(glAttachment);
+                    }
+                }
+
+                if (renderPass->attachmentState->HasDepthStencilAttachment()) {
+                    auto* attachment = &renderPass->depthStencilAttachment;
+                    const Format& format = attachment->view->GetTexture()->GetFormat();
+
+                    // TODO(crbug.com/530087586): figure out why glInvalidateFramebuffer() with
+                    // GL_STENCIL_ATTACHMENT crashes on Pixel 6, and enable for !format.HasDepth()
+                    // case as well
+                    if (attachment->depthStoreOp == wgpu::StoreOp::Discard &&
+                        (!format.HasStencil() ||
+                         attachment->stencilStoreOp == wgpu::StoreOp::Discard)) {
+                        GLenum glAttachment = DepthStencilAttachmentPoint(format);
+                        attachmentsToDiscard.push_back(glAttachment);
+                    }
+                }
+
+                if (!attachmentsToDiscard.empty()) {
+                    DAWN_GL_TRY(gl, BindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo));
+                    DAWN_GL_TRY(
+                        gl, InvalidateFramebuffer(GL_DRAW_FRAMEBUFFER, attachmentsToDiscard.size(),
+                                                  attachmentsToDiscard.data()));
                 }
                 DAWN_GL_TRY(gl, DeleteFramebuffers(1, &fbo));
                 return {};
