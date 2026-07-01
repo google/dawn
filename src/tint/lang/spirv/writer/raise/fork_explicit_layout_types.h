@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_FORK_EXPLICIT_LAYOUT_TYPES_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_RAISE_FORK_EXPLICIT_LAYOUT_TYPES_H_
 
+#include <cstdint>
+
 #include "src/tint/utils/result.h"
 
 // Forward declarations.
