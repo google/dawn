@@ -444,7 +444,7 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Support the \"enable subgroup_size_control;\" directive in WGSL.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/tint/extensions/"
       "subgroup_size_control.md",
-      FeatureInfo::FeatureState::Stable}},
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::AtomicVec2uMinMax,
      {"Support the \"enable atomic_vec2u_min_max;\" directive for 64-bit atomics via vec2<u32> "
       "types",
