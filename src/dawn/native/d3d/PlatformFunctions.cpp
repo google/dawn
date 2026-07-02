@@ -122,12 +122,12 @@ MaybeError PlatformFunctions::EnsureFXC(std::span<const std::string> searchPaths
 }
 
 void PlatformFunctions::InitWindowsVersion() {
+#if !DAWN_PLATFORM_IS(WINUWP)
     // Currently we only care about the build number of Windows 10 and Windows 11.
     if (!IsWindows10OrGreater()) {
         return;
     }
 
-#if !DAWN_PLATFORM_IS(WINUWP)
     // Referenced from base/win/windows_version.cc in Chromium
     constexpr wchar_t kRegKeyWindowsNTCurrentVersion[] =
         L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion";
