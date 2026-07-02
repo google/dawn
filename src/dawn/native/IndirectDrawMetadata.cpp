@@ -40,8 +40,13 @@
 namespace dawn::native {
 
 uint64_t ComputeMaxIndirectValidationBatchOffsetRange(const CombinedLimits& limits) {
-    return limits.v1.maxStorageBufferBindingSize - limits.v1.minStorageBufferOffsetAlignment -
-           kDrawIndexedIndirectSize;
+    uint64_t requiredSubtrahend =
+        static_cast<uint64_t>(limits.v1.minStorageBufferOffsetAlignment) +
+        kDrawIndexedIndirectSize;
+    if (limits.v1.maxStorageBufferBindingSize <= requiredSubtrahend) {
+        return 0;
+    }
+    return limits.v1.maxStorageBufferBindingSize - requiredSubtrahend;
 }
 
 IndirectDrawMetadata::IndexedIndirectBufferValidationInfo::IndexedIndirectBufferValidationInfo(
