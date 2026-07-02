@@ -862,16 +862,6 @@ bool Validator::Var(const sem::Variable* v) const {
         }
     }
 
-    if (auto* buffer = store_ty->As<core::type::Buffer>()) {
-        if (!(buffer->Count()->Is<core::type::RuntimeArrayCount>() ||
-              buffer->Count()->Is<core::type::ConstantArrayCount>()) &&
-            v->AddressSpace() != core::AddressSpace::kWorkgroup) {
-            AddError(var->source) << "buffer type must not be sized with an override-expression in "
-                                  << style::Enum(v->AddressSpace()) << " address space";
-            return false;
-        }
-    }
-
     if (var->initializer) {
         switch (v->AddressSpace()) {
             case core::AddressSpace::kPrivate:

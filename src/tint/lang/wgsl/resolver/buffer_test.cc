@@ -171,14 +171,25 @@ TEST_F(ResolverBufferTest, Var_Storage) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverBufferTest, Pointer_Storage_Override) {
+    Override("o", Expr(4_i));
+    Alias("T", ty.AsType("buffer", Expr(Ident("o"))));
+    Alias("PT", ty.ptr(storage, ty.AsType("T")));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: override-sized buffers can only be used in the 'workgroup' address space
+note: while instantiating ptr<storage, buffer<o>, read>)");
+}
+
 TEST_F(ResolverBufferTest, Var_Storage_Override) {
     Override("o", Expr(4_i));
     GlobalVar("v", storage, ty.AsType("buffer", Expr(Ident("o"))), Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(error: buffer type must not be sized with an override-expression in 'storage' address space)");
+    EXPECT_EQ(r()->error(),
+              R"(error: override-sized buffers can only be used in the 'workgroup' address space
+note: while instantiating 'var' v)");
 }
 
 TEST_F(ResolverBufferTest, Var_Uniform) {
@@ -195,14 +206,25 @@ TEST_F(ResolverBufferTest, Var_Uniform_Unsized) {
               R"(error: variables in 'uniform' address space must have a fixed footprint)");
 }
 
+TEST_F(ResolverBufferTest, Pointer_Uniform_Override) {
+    Override("o", Expr(4_i));
+    Alias("T", ty.AsType("buffer", Expr(Ident("o"))));
+    Alias("PT", ty.ptr(uniform, ty.AsType("T")));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: override-sized buffers can only be used in the 'workgroup' address space
+note: while instantiating ptr<uniform, buffer<o>, read>)");
+}
+
 TEST_F(ResolverBufferTest, Var_Uniform_Override) {
     Override("o", Expr(4_i));
     GlobalVar("v", uniform, ty.AsType("buffer", Expr(Ident("o"))), Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(error: buffer type must not be sized with an override-expression in 'uniform' address space)");
+    EXPECT_EQ(r()->error(),
+              R"(error: override-sized buffers can only be used in the 'workgroup' address space
+note: while instantiating 'var' v)");
 }
 
 TEST_F(ResolverBufferTest, Var_Workgroup) {

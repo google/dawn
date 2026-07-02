@@ -4647,12 +4647,22 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
         return false;
     }
 
-    if (ty->Is<core::type::Buffer>() && address_space != core::AddressSpace::kStorage &&
-        address_space != core::AddressSpace::kUniform &&
-        address_space != core::AddressSpace::kWorkgroup) {
-        AddError(usage) << "buffer types cannot be declared in the " << style::Enum(address_space)
-                        << " address space";
-        return false;
+    if (auto* buf = ty->As<core::type::Buffer>()) {
+        if (address_space != core::AddressSpace::kStorage &&
+            address_space != core::AddressSpace::kUniform &&
+            address_space != core::AddressSpace::kWorkgroup) {
+            AddError(usage) << "buffer types cannot be declared in the "
+                            << style::Enum(address_space) << " address space";
+            return false;
+        }
+        auto count = buf->Count();
+        if (address_space != core::AddressSpace::kWorkgroup) {
+            if (count->IsAnyOf<sem::NamedOverrideArrayCount, sem::UnnamedOverrideArrayCount>()) {
+                AddError(usage) << "override-sized buffers can only be used in the "
+                                << style::Enum(core::AddressSpace::kWorkgroup) << " address space";
+                return false;
+            }
+        }
     }
 
     if (address_space != core::AddressSpace::kStorage) {
