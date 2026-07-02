@@ -1384,11 +1384,13 @@ struct State {
             if (!majorness_template && result_ty->Type()->Size() == 1u &&
                 arr->ElemType()->Size() == 4u) {
                 if (!config.cooperative_matrix_stride_is_matrix_elements) {
+                    stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
                     auto* applied_stride_binary =
                         b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));
                     applied_stride = applied_stride_binary->Result();
                 }
 
+                offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
                 auto* applied_offset_binary =
                     b.Binary(core::BinaryOp::kDivide, offset->Type(), offset, u32(4));
                 applied_offset = applied_offset_binary->Result();
@@ -1442,11 +1444,13 @@ struct State {
             if (!majorness_template && value_type->Type()->Size() == 1u &&
                 arr->ElemType()->Size() == 4u) {
                 if (!config.cooperative_matrix_stride_is_matrix_elements) {
+                    stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
                     auto* applied_stride_binary =
                         b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));
                     applied_stride = applied_stride_binary->Result();
                 }
 
+                offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
                 auto* applied_offset_binary =
                     b.Binary(core::BinaryOp::kDivide, offset->Type(), offset, u32(4));
                 applied_offset = applied_offset_binary->Result();

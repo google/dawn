@@ -404,7 +404,8 @@ struct State {
             if (auto* cnst = stride->As<core::ir::Constant>()) {
                 stride = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() * bytes_per_element));
             } else {
-                stride = b.Multiply(stride, u32(bytes_per_element))->Result();
+                auto* u32_stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
+                stride = b.Multiply(u32_stride, u32(bytes_per_element))->Result();
             }
             auto* load = b.CallExplicit<hlsl::ir::BuiltinCall>(
                 sm, BuiltinFn::kLoad, Vector<core::ir::TemplateParameter, 1>{sm}, var,
@@ -454,7 +455,8 @@ struct State {
             if (auto* cnst = stride->As<core::ir::Constant>()) {
                 stride = b.Constant(u32(cnst->Value()->ValueAs<uint32_t>() * bytes_per_element));
             } else {
-                stride = b.Multiply(stride, u32(bytes_per_element))->Result();
+                auto* u32_stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
+                stride = b.Multiply(u32_stride, u32(bytes_per_element))->Result();
             }
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kStore, value, var,
                                                       OffsetToValue(offset), stride, layout);

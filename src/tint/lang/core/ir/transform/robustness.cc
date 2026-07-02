@@ -484,6 +484,7 @@ struct State {
                 stride = b.Constant(u32(min_stride));
             }
         } else {
+            stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
             stride = b.Max(stride, u32(min_stride))->Result();
         }
         call->SetArg(stride_index, stride);
@@ -539,6 +540,8 @@ struct State {
         b.InsertBefore(insertion_point, [&] {
             // The beginning of the last row/column is at `offset + (major_dim-1)*stride`.
             // We then add another `min_stride` elements to get to the end of the accessed memory.
+            offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
+            stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
             auto* last_slice = b.Add(offset, b.Multiply(stride, u32(major_dim - 1)));
             auto* end = b.Add(last_slice, u32(min_stride));
             auto* in_bounds = b.LessThanEqual(end, array_length);

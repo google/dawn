@@ -64,6 +64,6 @@
          %31 = OpFunctionCall %9 %subgroupMatrixScalarMultiply_e9e546
          %32 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_1024 %1 %uint_0
          %34 = OpAccessChain %_ptr_StorageBuffer_int %32 %uint_0
-               OpCooperativeMatrixStoreKHR %34 %31 %uint_0 %uint_8 NonPrivatePointer
+               OpCooperativeMatrixStoreKHR %34 %31 %uint_0 %int_8 NonPrivatePointer
                OpReturn
                OpFunctionEnd

@@ -53,35 +53,35 @@ void main() {
   Matrix_left_f32_8x8 v_8 = make_matrix();
   uint v_9 = 0u;
   buffer.GetDimensions(v_9);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_9 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_9 / 4u))) {
     v_8.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   Matrix_left_f32_8x8 v_10[4] = make_array();
   Matrix_left_f32_8x8 v_11 = v_10[0u];
   uint v_12 = 0u;
   buffer.GetDimensions(v_12);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_12 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_12 / 4u))) {
     v_11.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   Matrix_left_f32_8x8 v_13[4][4] = make_nested_array();
   Matrix_left_f32_8x8 v_14 = v_13[1u][2u];
   uint v_15 = 0u;
   buffer.GetDimensions(v_15);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_15 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_15 / 4u))) {
     v_14.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   S v_16 = make_struct();
   Matrix_left_f32_8x8 v_17 = v_16.l;
   uint v_18 = 0u;
   buffer.GetDimensions(v_18);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_18 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_18 / 4u))) {
     v_17.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   S_Nested v_19 = make_nested_struct();
   Matrix_right_f32_8x8 v_20 = v_19.s.r;
   uint v_21 = 0u;
   buffer.GetDimensions(v_21);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_21 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_21 / 4u))) {
     v_20.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
 }

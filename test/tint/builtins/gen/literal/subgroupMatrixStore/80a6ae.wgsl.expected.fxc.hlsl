@@ -12,7 +12,7 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, array<f32, 1024>, read_write> = access %sb_rw, 0u
     %4:subgroup_matrix_right<f32, 8, 8> = construct
-    %5:void = subgroupMatrixStore %3, 1u, %4, false, 8u
+    %5:void = subgroupMatrixStore<row_major> %3, 1u, %4, 8u
     ret
   }
 }

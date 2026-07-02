@@ -3591,6 +3591,51 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_SignedOffsetAndStride) {
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8, 8);
+    auto* p = b.FunctionParam<ptr<storage, array<f32, 256>>>("p");
+    auto* func = b.Function("foo", mat);
+    auto* offset = b.FunctionParam("offset", ty.i32());
+    auto* stride = b.FunctionParam("stride", ty.i32());
+    func->SetParams({p, offset, stride});
+    b.Append(func->Block(), [&] {
+        auto* call =
+            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<core::ir::TemplateParameter, 1>{mat}, p, offset, false, stride);
+        b.Return(func, call);
+    });
+
+    auto* src = R"(
+%foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %offset:i32, %stride:i32):subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %5:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>> %p, %offset, false, %stride
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %offset:i32, %stride:i32):subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %5:u32 = bitcast<u32> %stride
+    %6:ptr<storage, f32, read_write> = access %p, %offset
+    %7:u64 = msl.convert %5
+    %8:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %9:subgroup_matrix_result<f32, 8, 8> = load %8
+    %10:void = msl.simdgroup_load %9, %6, %7, vec2<u64>(0u64), false
+    %11:subgroup_matrix_result<f32, 8, 8> = load %8
+    ret %11
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32_ColMajorTemplate) {
     auto* mat = ty.subgroup_matrix_result(ty.f32(), 8, 8);
     auto* p = b.FunctionParam<ptr<storage, array<f32, 256>>>("p");
@@ -3743,6 +3788,46 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_F32) {
     %4:ptr<storage, f32, read_write> = access %p, 64u
     %5:u64 = msl.convert 32u
     %6:void = msl.simdgroup_store %m, %4, %5, vec2<u64>(0u64), false
+    ret
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_SignedOffsetAndStride) {
+    auto* p = b.FunctionParam<ptr<storage, array<f32, 256>>>("p");
+    auto* m = b.FunctionParam("m", ty.subgroup_matrix_result(ty.f32(), 8, 8));
+    auto* func = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.i32());
+    auto* stride = b.FunctionParam("stride", ty.i32());
+    func->SetParams({p, m, offset, stride});
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kSubgroupMatrixStore, p, offset, m, false, stride);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %m:subgroup_matrix_result<f32, 8, 8>, %offset:i32, %stride:i32):void {
+  $B1: {
+    %6:void = subgroupMatrixStore %p, %offset, %m, false, %stride
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %m:subgroup_matrix_result<f32, 8, 8>, %offset:i32, %stride:i32):void {
+  $B1: {
+    %6:u32 = bitcast<u32> %stride
+    %7:ptr<storage, f32, read_write> = access %p, %offset
+    %8:u64 = msl.convert %6
+    %9:void = msl.simdgroup_store %m, %7, %8, vec2<u64>(0u64), false
     ret
   }
 }

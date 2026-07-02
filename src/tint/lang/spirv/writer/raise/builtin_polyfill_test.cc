@@ -4383,6 +4383,46 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_ColMajor_F32)
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_SignedOffsetAndStride) {
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8, 8);
+    auto* p = b.FunctionParam<ptr<storage, array<f32, 256>>>("p");
+    auto* func = b.Function("foo", mat);
+    auto* offset = b.FunctionParam("offset", ty.i32());
+    auto* stride = b.FunctionParam("stride", ty.i32());
+    func->SetParams({p, offset, stride});
+    b.Append(func->Block(), [&] {
+        auto* call =
+            b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad,
+                           Vector<core::ir::TemplateParameter, 1>{mat}, p, offset, true, stride);
+        b.Return(func, call);
+    });
+
+    auto* src = R"(
+%foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %offset:i32, %stride:i32):subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %5:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>> %p, %offset, true, %stride
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %offset:i32, %stride:i32):subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %5:ptr<storage, f32, read_write> = access %p, %offset
+    %6:subgroup_matrix_result<f32, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<f32, 8, 8>> %5, 1u, %stride, 32u
+    ret %6
+  }
+}
+)";
+
+    PolyfillConfig config{.use_vulkan_memory_model = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajor_U32) {
     auto* mat = ty.subgroup_matrix_result(ty.u32(), 8, 8);
     auto* p = b.FunctionParam<ptr<workgroup, array<u32, 256>>>("p");
@@ -4640,6 +4680,44 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_ColMajor_F32
   $B1: {
     %4:ptr<storage, f32, read_write> = access %p, 64u
     %5:void = spirv.cooperative_matrix_store %4, %m, 1u, 32u, 32u
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config{.use_vulkan_memory_model = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_SignedOffsetAndStride) {
+    auto* p = b.FunctionParam<ptr<storage, array<f32, 256>>>("p");
+    auto* m = b.FunctionParam("m", ty.subgroup_matrix_result(ty.f32(), 8, 8));
+    auto* func = b.Function("foo", ty.void_());
+    auto* offset = b.FunctionParam("offset", ty.i32());
+    auto* stride = b.FunctionParam("stride", ty.i32());
+    func->SetParams({p, m, offset, stride});
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kSubgroupMatrixStore, p, offset, m, true, stride);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %m:subgroup_matrix_result<f32, 8, 8>, %offset:i32, %stride:i32):void {
+  $B1: {
+    %6:void = subgroupMatrixStore %p, %offset, %m, true, %stride
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p:ptr<storage, array<f32, 256>, read_write>, %m:subgroup_matrix_result<f32, 8, 8>, %offset:i32, %stride:i32):void {
+  $B1: {
+    %6:ptr<storage, f32, read_write> = access %p, %offset
+    %7:void = spirv.cooperative_matrix_store %6, %m, 1u, %stride, 32u
     ret
   }
 }

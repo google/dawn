@@ -1624,8 +1624,10 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixLoad_NegativeOffset) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr("no matching call to 'subgroupMatrixLoad"));
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            "subgroupMatrixLoad: the offset argument of subgroupMatrixLoad must be non-negative"));
 }
 
 TEST_F(IR_ValidatorTest, Builtin_SubgroupMatrixStore_i8_i32_InBoundsOffset) {

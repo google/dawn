@@ -8186,6 +8186,54 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_SignedOffsetAndStride) {
+    auto* mat_ty = ty.subgroup_matrix_left(ty.f32(), 4, 4);
+    auto* wg_var = b.Var("wg", workgroup, ty.array<f32, 256>(), core::Access::kReadWrite);
+    b.ir.root_block->Append(wg_var);
+
+    auto* func = b.Function("foo", mat_ty);
+    auto* offset = b.FunctionParam("offset", ty.i32());
+    auto* stride = b.FunctionParam("stride", ty.i32());
+    func->SetParams({offset, stride});
+    b.Append(func->Block(), [&] {
+        auto* load = b.CallExplicit(mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<core::ir::TemplateParameter, 1>{mat_ty}, wg_var, offset,
+                                    b.Constant(false), stride);
+        b.Return(func, load);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+}
+
+%foo = func(%offset:i32, %stride:i32):subgroup_matrix_left<f32, 4, 4> {
+  $B2: {
+    %5:subgroup_matrix_left<f32, 4, 4> = subgroupMatrixLoad<subgroup_matrix_left<f32, 4, 4>> %wg, %offset, false, %stride
+    ret %5
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+}
+
+%foo = func(%offset:i32, %stride:i32):subgroup_matrix_left<f32, 4, 4> {
+  $B2: {
+    %5:u32 = hlsl.asuint %offset
+    %6:u32 = hlsl.asuint %stride
+    %7:subgroup_matrix_left<f32, 4, 4> = hlsl.Load<subgroup_matrix_left<f32, 4, 4>> %wg, %5, %6, 0u
+    ret %7
+  }
+}
+)";
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_ColMajorTemplate) {
     auto* mat_ty = ty.subgroup_matrix_left(ty.f32(), 4, 4);
     auto* wg_var = b.Var("wg", workgroup, ty.array<f32, 256>(), core::Access::kReadWrite);
@@ -8311,6 +8359,55 @@ $B1: {  # root
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>):void {
   $B2: {
     %4:void = %mat.Store %wg, 0u, 4u, 0u
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_SignedOffsetAndStride) {
+    auto* mat_ty = ty.subgroup_matrix_left(ty.f32(), 4, 4);
+    auto* wg_var = b.Var("wg", workgroup, ty.array<f32, 256>(), core::Access::kReadWrite);
+    b.ir.root_block->Append(wg_var);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* mat = b.FunctionParam("mat", mat_ty);
+    auto* offset = b.FunctionParam("offset", ty.i32());
+    auto* stride = b.FunctionParam("stride", ty.i32());
+    func->SetParams({mat, offset, stride});
+
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore, wg_var, offset, mat,
+               b.Constant(false), stride);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+}
+
+%foo = func(%mat:subgroup_matrix_left<f32, 4, 4>, %offset:i32, %stride:i32):void {
+  $B2: {
+    %6:void = subgroupMatrixStore %wg, %offset, %mat, false, %stride
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+}
+
+%foo = func(%mat:subgroup_matrix_left<f32, 4, 4>, %offset:i32, %stride:i32):void {
+  $B2: {
+    %6:u32 = hlsl.asuint %offset
+    %7:u32 = hlsl.asuint %stride
+    %8:void = %mat.Store %wg, %6, %7, 0u
     ret
   }
 }

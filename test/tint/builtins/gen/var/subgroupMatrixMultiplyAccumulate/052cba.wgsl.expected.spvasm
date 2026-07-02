@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 47
+; Bound: 52
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -51,7 +51,10 @@
        %void = OpTypeVoid
          %36 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_uint_uint_1024 = OpTypePointer StorageBuffer %_arr_uint_uint_1024
+        %int = OpTypeInt 32 1
+      %int_8 = OpConstant %int 8
      %uint_4 = OpConstant %uint 4
+      %int_0 = OpConstant %int 0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
 %subgroupMatrixMultiplyAccumulate_052cba = OpFunction %8 None %13
          %14 = OpLabel
@@ -74,9 +77,11 @@
          %37 = OpLabel
          %38 = OpFunctionCall %8 %subgroupMatrixMultiplyAccumulate_052cba
          %39 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
-         %41 = OpUDiv %uint %uint_8 %uint_4
-         %43 = OpUDiv %uint %uint_0 %uint_4
-         %44 = OpAccessChain %_ptr_StorageBuffer_uint %39 %43
-               OpCooperativeMatrixStoreKHR %44 %38 %uint_0 %41 NonPrivatePointer
+         %41 = OpBitcast %uint %int_8
+         %44 = OpUDiv %uint %41 %uint_4
+         %46 = OpBitcast %uint %int_0
+         %48 = OpUDiv %uint %46 %uint_4
+         %49 = OpAccessChain %_ptr_StorageBuffer_uint %39 %48
+               OpCooperativeMatrixStoreKHR %49 %38 %uint_0 %44 NonPrivatePointer
                OpReturn
                OpFunctionEnd

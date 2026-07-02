@@ -16,27 +16,27 @@ RWByteAddressBuffer buffer : register(u0);
 void foo(Matrix_left_f32_8x8 m, Matrix_left_f32_8x8 m_array[4], Matrix_left_f32_8x8 m_nested_array[4][4], S m_struct, S_Nested m_nested_struct) {
   uint v = 0u;
   buffer.GetDimensions(v);
-  if ((((0u + (64u * 7u)) + 8u) <= (v / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v / 4u))) {
     m.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   uint v_1 = 0u;
   buffer.GetDimensions(v_1);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_1 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_1 / 4u))) {
     m_array[0u].Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   uint v_2 = 0u;
   buffer.GetDimensions(v_2);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_2 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_2 / 4u))) {
     m_nested_array[1u][2u].Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   uint v_3 = 0u;
   buffer.GetDimensions(v_3);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_3 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_3 / 4u))) {
     m_struct.l.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   uint v_4 = 0u;
   buffer.GetDimensions(v_4);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_4 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_4 / 4u))) {
     m_nested_struct.s.r.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
 }

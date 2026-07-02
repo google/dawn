@@ -90,24 +90,24 @@ void main_inner(uint idx, tint_module_vars_struct tint_module_vars) {
   tint_array_lengths_struct const v_2 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)};
   (*tint_module_vars.non_uniform_condition) = ((*tint_module_vars.tint_member)[min(idx, (v_2.tint_array_length_0_0 - 1u))] == 0.0f);
   simdgroup_float8x8 const v_3 = make_matrix(tint_module_vars);
-  if ((((0u + (64u * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
-    (simdgroup_store(v_3, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false));
+  if ((((as_type<uint>(0) + (as_type<uint>(64) * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
+    (simdgroup_store(v_3, (&(*tint_module_vars.tint_member)[0]), ulong(as_type<uint>(64)), ulong2(0ul), false));
   }
   simdgroup_float8x8 const v_4 = make_array(tint_module_vars)[0u];
-  if ((((0u + (64u * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
-    (simdgroup_store(v_4, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false));
+  if ((((as_type<uint>(0) + (as_type<uint>(64) * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
+    (simdgroup_store(v_4, (&(*tint_module_vars.tint_member)[0]), ulong(as_type<uint>(64)), ulong2(0ul), false));
   }
   simdgroup_float8x8 const v_5 = make_nested_array(tint_module_vars)[1u][0u];
-  if ((((0u + (64u * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
-    (simdgroup_store(v_5, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false));
+  if ((((as_type<uint>(0) + (as_type<uint>(64) * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
+    (simdgroup_store(v_5, (&(*tint_module_vars.tint_member)[0]), ulong(as_type<uint>(64)), ulong2(0ul), false));
   }
   simdgroup_float8x8 const v_6 = make_struct(tint_module_vars).l;
-  if ((((0u + (64u * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
-    (simdgroup_store(v_6, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false));
+  if ((((as_type<uint>(0) + (as_type<uint>(64) * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
+    (simdgroup_store(v_6, (&(*tint_module_vars.tint_member)[0]), ulong(as_type<uint>(64)), ulong2(0ul), false));
   }
   simdgroup_float8x8 const v_7 = make_nested_struct(tint_module_vars).s.r;
-  if ((((0u + (64u * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
-    (simdgroup_store(v_7, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false));
+  if ((((as_type<uint>(0) + (as_type<uint>(64) * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
+    (simdgroup_store(v_7, (&(*tint_module_vars.tint_member)[0]), ulong(as_type<uint>(64)), ulong2(0ul), false));
   }
 }
 

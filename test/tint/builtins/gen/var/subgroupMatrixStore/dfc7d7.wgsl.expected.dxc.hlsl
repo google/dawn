@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-../../src/tint/lang/hlsl/writer/raise/builtin_polyfill.cc:2120 internal compiler error: TINT_UNIMPLEMENTED 8-bit subgroup matrix store to workgroup not supported
+../../src/tint/lang/hlsl/writer/raise/builtin_polyfill.cc:2151 internal compiler error: TINT_UNIMPLEMENTED 8-bit subgroup matrix store to workgroup not supported
 
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *

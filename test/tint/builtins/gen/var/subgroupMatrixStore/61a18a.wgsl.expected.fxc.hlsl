@@ -13,7 +13,7 @@ $B1: {  # root
     %7:u32 = load %arg_1
     %8:subgroup_matrix_right<i8, 8, 8> = load %arg_2
     %9:u32 = load %arg_3
-    %10:void = subgroupMatrixStore %arg_0, %7, %8, true, %9
+    %10:void = subgroupMatrixStore<col_major> %arg_0, %7, %8, %9
     ret
   }
 }

@@ -2317,10 +2317,10 @@ bool Validator::SubgroupMatrixLoadStore(const sem::Call* call) const {
         if (stride_arg->Type()->IsUnsignedIntegerScalar()) {
             stride_value = stride_arg->ConstantValue()->ValueAs<uint64_t>();
         } else {
-            TINT_ASSERT(offset_arg->Type()->IsSignedIntegerScalar());
+            TINT_ASSERT(stride_arg->Type()->IsSignedIntegerScalar());
             int32_t ivalue = stride_arg->ConstantValue()->ValueAs<int32_t>();
             if (ivalue < 0) {
-                AddError(offset_arg->Declaration()->source)
+                AddError(stride_arg->Declaration()->source)
                     << "the stride argument of " << builtin->str() << " must be non-negative";
                 return false;
             }
@@ -2340,10 +2340,6 @@ bool Validator::SubgroupMatrixLoadStore(const sem::Call* call) const {
         stride_value = min_stride;
     }
 
-    if (!ptr_arr_ty->ConstantCount()) {
-        return true;
-    }
-
     uint64_t offset_value = 0;
     if (offset_arg->ConstantValue()) {
         if (offset_arg->Type()->IsUnsignedIntegerScalar()) {
@@ -2359,6 +2355,10 @@ bool Validator::SubgroupMatrixLoadStore(const sem::Call* call) const {
             offset_value = static_cast<uint64_t>(ivalue);
         }
         offset_value *= ptr_arr_ty->ElemType()->Size();
+    }
+
+    if (!ptr_arr_ty->ConstantCount()) {
+        return true;
     }
 
     uint64_t mat_required_size =

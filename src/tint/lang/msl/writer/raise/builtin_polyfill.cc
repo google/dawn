@@ -1107,7 +1107,8 @@ struct State {
             const bool majorness_template = builtin->ExplicitTemplateParams().Length() == 2;
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
-            auto* stride = builtin->Args()[majorness_template ? 2 : 3];
+            auto* stride =
+                b.InsertBitcastIfNeeded(ty.u32(), builtin->Args()[majorness_template ? 2 : 3]);
 
             core::ir::Value* col_major = nullptr;
             if (majorness_template) {
@@ -1157,7 +1158,8 @@ struct State {
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
             auto* value = builtin->Args()[2];
-            auto* stride = builtin->Args()[majorness_template ? 3 : 4];
+            auto* stride =
+                b.InsertBitcastIfNeeded(ty.u32(), builtin->Args()[majorness_template ? 3 : 4]);
 
             core::ir::Value* col_major = nullptr;
             if (majorness_template) {

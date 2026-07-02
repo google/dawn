@@ -17,31 +17,31 @@ void foo(inout Matrix_left_f32_8x8 m, inout Matrix_left_f32_8x8 m_array[4], inou
   Matrix_left_f32_8x8 v = m;
   uint v_1 = 0u;
   buffer.GetDimensions(v_1);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_1 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_1 / 4u))) {
     v.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   Matrix_left_f32_8x8 v_2 = m_array[0u];
   uint v_3 = 0u;
   buffer.GetDimensions(v_3);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_3 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_3 / 4u))) {
     v_2.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   Matrix_left_f32_8x8 v_4 = m_nested_array[1u][2u];
   uint v_5 = 0u;
   buffer.GetDimensions(v_5);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_5 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_5 / 4u))) {
     v_4.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   Matrix_left_f32_8x8 v_6 = m_struct.l;
   uint v_7 = 0u;
   buffer.GetDimensions(v_7);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_7 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_7 / 4u))) {
     v_6.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
   Matrix_right_f32_8x8 v_8 = m_nested_struct.s.r;
   uint v_9 = 0u;
   buffer.GetDimensions(v_9);
-  if ((((0u + (64u * 7u)) + 8u) <= (v_9 / 4u))) {
+  if ((((asuint(int(0)) + (asuint(int(64)) * 7u)) + 8u) <= (v_9 / 4u))) {
     v_8.Store(buffer, 0u, 256u, MatrixLayout::RowMajor);
   }
 }

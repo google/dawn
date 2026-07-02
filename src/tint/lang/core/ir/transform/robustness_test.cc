@@ -3366,6 +3366,88 @@ $B1: {  # root
     EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
 }
 
+TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_SignedOffsetAndStride) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<f32>()));
+    arr->SetBindingPoint(0, 0);
+    mod.root_block->Append(arr);
+
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8u, 4u);
+
+    auto* func = b.Function("foo", mat);
+    auto* offset = b.FunctionParam("offset", ty.i32());
+    auto* stride = b.FunctionParam("stride", ty.i32());
+    func->SetParams({offset, stride});
+    b.Append(func->Block(), [&] {
+        auto* load = b.CallExplicit(mat, BuiltinFn::kSubgroupMatrixLoad,
+                                    Vector<TemplateParameter, 1>{mat}, arr, offset, true, stride);
+        b.Return(func, load);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %arr:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%offset:i32, %stride:i32):subgroup_matrix_result<f32, 8, 4> {
+  $B2: {
+    %5:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, %offset, true, %stride
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect_with_predication = R"(
+$B1: {  # root
+  %arr:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%offset:i32, %stride:i32):subgroup_matrix_result<f32, 8, 4> {
+  $B2: {
+    %5:u32 = bitcast<u32> %stride
+    %6:u32 = max %5, 4u
+    %7:u32 = arrayLength %arr
+    %8:u32 = bitcast<u32> %offset
+    %9:u32 = mul %6, 7u
+    %10:u32 = add %8, %9
+    %11:u32 = add %10, 4u
+    %12:bool = lte %11, %7
+    %13:ptr<function, subgroup_matrix_result<f32, 8, 4>, read_write> = var undef
+    if %12 [t: $B3] {  # if_1
+      $B3: {  # true
+        %14:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, %offset, true, %6
+        store %13, %14
+        exit_if  # if_1
+      }
+    }
+    %15:subgroup_matrix_result<f32, 8, 4> = load %13
+    ret %15
+  }
+}
+)";
+
+    auto* expect_without_predication = R"(
+$B1: {  # root
+  %arr:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%offset:i32, %stride:i32):subgroup_matrix_result<f32, 8, 4> {
+  $B2: {
+    %5:u32 = bitcast<u32> %stride
+    %6:u32 = max %5, 4u
+    %7:subgroup_matrix_result<f32, 8, 4> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 4>> %arr, %offset, true, %6
+    ret %7
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.predicate_subgroup_matrix = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
+}
+
 TEST_P(IR_RobustnessTest, SubgroupMatrixLoad_StorageRuntimeArray_ConstStride_ColMajorTemplate) {
     auto* arr = b.Var("arr", ty.ptr(storage, ty.array<f32>()));
     arr->SetBindingPoint(0, 0);
@@ -4583,6 +4665,85 @@ $B1: {  # root
 %foo = func(%value:subgroup_matrix_result<f32, 8, 4>):void {
   $B2: {
     %4:void = subgroupMatrixStore %arr, 0u, %value, true, 4u
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.predicate_subgroup_matrix = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect_with_predication : expect_without_predication, str());
+}
+
+TEST_P(IR_RobustnessTest, SubgroupMatrixStore_SignedOffsetAndStride) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<f32>()));
+    arr->SetBindingPoint(0, 0);
+    mod.root_block->Append(arr);
+
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8u, 4u);
+
+    auto* func = b.Function("foo", ty.void_());
+    auto* value = b.FunctionParam("value", mat);
+    auto* offset = b.FunctionParam("offset", ty.i32());
+    auto* stride = b.FunctionParam("stride", ty.i32());
+    func->SetParams({value, offset, stride});
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), BuiltinFn::kSubgroupMatrixStore, arr, offset, value, true, stride);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %arr:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %offset:i32, %stride:i32):void {
+  $B2: {
+    %6:void = subgroupMatrixStore %arr, %offset, %value, true, %stride
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect_with_predication = R"(
+$B1: {  # root
+  %arr:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %offset:i32, %stride:i32):void {
+  $B2: {
+    %6:u32 = bitcast<u32> %stride
+    %7:u32 = max %6, 4u
+    %8:u32 = arrayLength %arr
+    %9:u32 = bitcast<u32> %offset
+    %10:u32 = mul %7, 7u
+    %11:u32 = add %9, %10
+    %12:u32 = add %11, 4u
+    %13:bool = lte %12, %8
+    if %13 [t: $B3] {  # if_1
+      $B3: {  # true
+        %14:void = subgroupMatrixStore %arr, %offset, %value, true, %7
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+)";
+
+    auto* expect_without_predication = R"(
+$B1: {  # root
+  %arr:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func(%value:subgroup_matrix_result<f32, 8, 4>, %offset:i32, %stride:i32):void {
+  $B2: {
+    %6:u32 = bitcast<u32> %stride
+    %7:u32 = max %6, 4u
+    %8:void = subgroupMatrixStore %arr, %offset, %value, true, %7
     ret
   }
 }

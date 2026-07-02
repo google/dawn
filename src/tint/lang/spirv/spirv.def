@@ -1831,24 +1831,24 @@ fn u_dot(u32, u32, literal) -> u32
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_cooperative_matrix instructions
 ////////////////////////////////////////////////////////////////////////////////
-@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num, AS: workgroup_or_storage, AM: readable)
-  fn cooperative_matrix_load<T: subgroup_matrix<K, S, C, R> >(
-    ptr<AS, S, AM>, u32, u32, literal) -> T
-@stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num, AS: workgroup_or_storage, AM: readable)
-  fn cooperative_matrix_load<T: subgroup_matrix<K, S, C, R> >(
-    ptr<AS, i32, AM>, u32, u32, literal) -> T
-@stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num, AS: workgroup_or_storage, AM: readable)
-  fn cooperative_matrix_load<T: subgroup_matrix<K, S, C, R> >(
-    ptr<AS, u32, AM>, u32, u32, literal) -> T
-@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num, AS: workgroup_or_storage, AM: writable)
+@stage("compute") implicit(K: subgroup_matrix_kind, E: fiu32_f16, C: num, R: num, AS: workgroup_or_storage, AM: readable, S: iu32)
+  fn cooperative_matrix_load<T: subgroup_matrix<K, E, C, R> >(
+    ptr<AS, E, AM>, u32, S, literal) -> T
+@stage("compute") implicit(K: subgroup_matrix_kind, E: i8, C: num, R: num, AS: workgroup_or_storage, AM: readable, S: iu32)
+  fn cooperative_matrix_load<T: subgroup_matrix<K, E, C, R> >(
+    ptr<AS, i32, AM>, u32, S, literal) -> T
+@stage("compute") implicit(K: subgroup_matrix_kind, E: u8, C: num, R: num, AS: workgroup_or_storage, AM: readable, S: iu32)
+  fn cooperative_matrix_load<T: subgroup_matrix<K, E, C, R> >(
+    ptr<AS, u32, AM>, u32, S, literal) -> T
+@stage("compute") implicit(K: subgroup_matrix_kind, E: fiu32_f16, C: num, R: num, AS: workgroup_or_storage, AM: writable, S: iu32)
   fn cooperative_matrix_store(
-    ptr<AS, S, AM>, subgroup_matrix<K, S, C, R>, u32, u32, literal)
-@stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num, AS: workgroup_or_storage, AM: writable)
+    ptr<AS, E, AM>, subgroup_matrix<K, E, C, R>, u32, S, literal)
+@stage("compute") implicit(K: subgroup_matrix_kind, E: i8, C: num, R: num, AS: workgroup_or_storage, AM: writable, S: iu32)
   fn cooperative_matrix_store(
-    ptr<AS, i32, AM>, subgroup_matrix<K, S, C, R>, u32, u32, literal)
-@stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num, AS: workgroup_or_storage, AM: writable)
+    ptr<AS, i32, AM>, subgroup_matrix<K, E, C, R>, u32, S, literal)
+@stage("compute") implicit(K: subgroup_matrix_kind, E: u8, C: num, R: num, AS: workgroup_or_storage, AM: writable, S: iu32)
   fn cooperative_matrix_store(
-    ptr<AS, u32, AM>, subgroup_matrix<K, S, C, R>, u32, u32, literal)
+    ptr<AS, u32, AM>, subgroup_matrix<K, E, C, R>, u32, S, literal)
 @must_use @stage("compute") implicit(T: f16, TR: f32_f16, C: num, R: num, K: num)
   fn cooperative_matrix_mul_add(
     subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,

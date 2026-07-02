@@ -12,7 +12,7 @@ $B1: {  # root
 %subgroupMatrixLoad_d05fc6 = func():subgroup_matrix_right<u32, 8, 8> {
   $B2: {
     %4:ptr<storage, array<u32, 1024>, read> = access %sb_ro, 0u
-    %5:subgroup_matrix_right<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<u32, 8, 8>> %4, 1u, true, 8u
+    %5:subgroup_matrix_right<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<u32, 8, 8>, col_major> %4, 1u, 8u
     %res:ptr<function, subgroup_matrix_right<u32, 8, 8>, read_write> = var %5
     %7:subgroup_matrix_right<u32, 8, 8> = load %res
     ret %7
@@ -21,7 +21,7 @@ $B1: {  # root
 %compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
   $B3: {
     %9:subgroup_matrix_right<u32, 8, 8> = call %subgroupMatrixLoad_d05fc6
-    %10:void = subgroupMatrixStore %prevent_dce, 0u, %9, false, 64u
+    %10:void = subgroupMatrixStore %prevent_dce, 0i, %9, false, 8i
     ret
   }
 }

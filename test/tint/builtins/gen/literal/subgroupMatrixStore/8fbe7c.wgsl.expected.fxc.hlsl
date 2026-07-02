@@ -7,7 +7,7 @@ $B1: {  # root
 %subgroupMatrixStore_8fbe7c = func():void {
   $B2: {
     %3:subgroup_matrix_right<i8, 8, 8> = construct
-    %4:void = subgroupMatrixStore %arg_0, 1u, %3, false, 8u
+    %4:void = subgroupMatrixStore<row_major> %arg_0, 1u, %3, 8u
     ret
   }
 }

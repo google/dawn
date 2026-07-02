@@ -27,5 +27,5 @@ simdgroup_float8x8 subgroupMatrixScalarMultiply_0043a7() {
 [[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(device tint_array<float, 1024>* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (simdgroup_store(subgroupMatrixScalarMultiply_0043a7(), (&(*tint_module_vars.prevent_dce)[0u]), ulong(8u), ulong2(0ul), false));
+  (simdgroup_store(subgroupMatrixScalarMultiply_0043a7(), (&(*tint_module_vars.prevent_dce)[0]), ulong(as_type<uint>(8)), ulong2(0ul), false));
 }

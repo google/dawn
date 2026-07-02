@@ -2084,6 +2084,16 @@ struct State {
             auto* offset = call->Args()[1];
             auto* stride = call->Args()[majorness_template ? 2 : 3];
 
+            // Workgroup function only take u32 args.
+            if (!offset->Type()->Is<core::type::U32>()) {
+                offset =
+                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)->Result();
+            }
+            if (!stride->Type()->Is<core::type::U32>()) {
+                stride =
+                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)->Result();
+            }
+
             auto* sm_ty = call->Result()->Type()->As<core::type::SubgroupMatrix>();
             TINT_IR_ASSERT(ir, sm_ty);
 
@@ -2126,6 +2136,16 @@ struct State {
             auto* offset = call->Args()[1];
             auto* matrix = call->Args()[2];
             auto* stride = call->Args()[majorness_template ? 3 : 4];
+
+            // Workgroup function only take u32 args.
+            if (!offset->Type()->Is<core::type::U32>()) {
+                offset =
+                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)->Result();
+            }
+            if (!stride->Type()->Is<core::type::U32>()) {
+                stride =
+                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)->Result();
+            }
 
             auto* sm_ty = matrix->Type()->As<core::type::SubgroupMatrix>();
             TINT_IR_ASSERT(ir, sm_ty);
