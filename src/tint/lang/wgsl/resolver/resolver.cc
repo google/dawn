@@ -1422,20 +1422,20 @@ void Resolver::RegisterLoad(const sem::ValueExpression* expr) {
 }
 
 void Resolver::RegisterBufferView(const sem::Call* call, wgsl::BuiltinFn fn) {
-    uint64_t buffer_size = 0;
+    uint64_t min_type_size = 0;
     auto* ret_type = call->Target()->ReturnType();
     auto* ret_ptr_type = ret_type->As<core::type::Pointer>();
     auto* ret_store_type = ret_ptr_type->StoreType();
     if (ret_store_type->HasFixedFootprint()) {
-        buffer_size = ret_store_type->Size();
+        min_type_size = ret_store_type->Size();
     } else {
         if (const auto* str_ty = ret_store_type->As<core::type::Struct>()) {
             const auto* last = str_ty->Members().Back();
             const auto* last_type = last->Type();
             TINT_ASSERT(last_type->Is<core::type::Array>());
-            buffer_size = last->Offset() + last_type->As<core::type::Array>()->ImplicitStride();
+            min_type_size = last->Offset() + last_type->As<core::type::Array>()->ImplicitStride();
         } else if (const auto* arr_ty = ret_store_type->As<core::type::Array>()) {
-            buffer_size = arr_ty->ImplicitStride();
+            min_type_size = arr_ty->ImplicitStride();
         } else {
             // Any other type should be caught be validation as an error.
             TINT_UNREACHABLE() << "unexpected return type for "
@@ -1443,6 +1443,7 @@ void Resolver::RegisterBufferView(const sem::Call* call, wgsl::BuiltinFn fn) {
         }
     }
 
+    uint64_t total_size = min_type_size;
     auto* offset = call->Arguments()[1];
     auto* offset_constant_value = offset->ConstantValue();
     uint64_t offset_value = 0;
@@ -1456,7 +1457,7 @@ void Resolver::RegisterBufferView(const sem::Call* call, wgsl::BuiltinFn fn) {
         }
     }
     if (fn == wgsl::BuiltinFn::kBufferView) {
-        buffer_size += offset_value;
+        total_size += offset_value;
     } else {
         TINT_ASSERT(fn == wgsl::BuiltinFn::kBufferArrayView);
         uint64_t size_value = 0;
@@ -1472,24 +1473,26 @@ void Resolver::RegisterBufferView(const sem::Call* call, wgsl::BuiltinFn fn) {
                 size_value = static_cast<uint32_t>(ivalue);
             }
         }
-        buffer_size = offset_value + std::max(size_value, buffer_size);
+        total_size = offset_value + std::max(size_value, total_size);
     }
 
     if (const auto* param = call->RootIdentifier()->As<sem::Parameter>()) {
-        auto where = buffer_view_sizes_.GetOrAddEntry(param, [buffer_size, call]() {
+        auto where = buffer_view_sizes_.GetOrAddEntry(param, [min_type_size, total_size, call]() {
             BufferViewInfo info;
-            info.size = buffer_size;
+            info.min_type_size = min_type_size;
+            info.total_size = total_size;
             info.node = call->Declaration();
             return info;
         });
-        where.value = {std::max(buffer_size, where.value.size), where.value.node};
+        where.value = {std::max(min_type_size, where.value.min_type_size),
+                       std::max(total_size, where.value.total_size), where.value.node};
     }
     // Only need to add a transitive size reference for global variables.
     if (const auto* gvar = call->RootIdentifier()->As<sem::GlobalVariable>()) {
         auto* var_ty = gvar->Type()->UnwrapPtrOrRef();
         auto* buf_ty = var_ty->As<core::type::Buffer>();
         if (buf_ty && buf_ty->Count()->Is<core::type::RuntimeArrayCount>() && current_function_) {
-            current_function_->AddTransitivelyReferencedUnsizedBufferSize(gvar, buffer_size);
+            current_function_->AddTransitivelyReferencedUnsizedBufferSize(gvar, min_type_size);
         }
     }
 }
@@ -1516,18 +1519,18 @@ bool Resolver::CheckBufferViews(const sem::Call* call) {
                     const auto* ty = global->Type()->UnwrapPtrOrRef();
                     if (const auto* buffer_ty = ty->As<core::type::Buffer>()) {
                         auto count = buffer_ty->ConstantCount();
-                        if (count != std::nullopt && count.value() < where->size) {
+                        if (count != std::nullopt && count.value() < where->total_size) {
                             AddError(global->Declaration())
                                 << "buffer size (" << count.value()
-                                << " bytes) is smaller than the minimum view size (" << where->size
-                                << " bytes)";
+                                << " bytes) is smaller than the minimum view size ("
+                                << where->total_size << " bytes)";
                             AddNote(where->node) << "due to call here";
                             return false;
                         }
                         // Add transitive reference to global.
                         if (buffer_ty->Count()->Is<core::type::RuntimeArrayCount>()) {
                             current_function_->AddTransitivelyReferencedUnsizedBufferSize(
-                                global, where->size);
+                                global, where->min_type_size);
                         }
                     }
                     return true;
@@ -1536,19 +1539,20 @@ bool Resolver::CheckBufferViews(const sem::Call* call) {
                     const auto* ty = param->Type()->UnwrapPtrOrRef();
                     if (const auto* buffer_ty = ty->As<core::type::Buffer>()) {
                         auto count = buffer_ty->ConstantCount();
-                        if (count != std::nullopt && count.value() < where->size) {
+                        if (count != std::nullopt && count.value() < where->total_size) {
                             AddError(param->Declaration())
                                 << "buffer size (" << count.value()
-                                << " bytes) is smaller than the minimum view size (" << where->size
-                                << " bytes)";
+                                << " bytes) is smaller than the minimum view size ("
+                                << where->total_size << " bytes)";
                             AddNote(where->node) << "due to call here";
                             return false;
                         }
                     }
                     auto param_where =
                         buffer_view_sizes_.GetOrAddEntry(param, [where]() { return *where; });
-                    param_where.value = {std::max(param_where.value.size, where->size),
-                                         where->node};
+                    param_where.value = {
+                        std::max(param_where.value.min_type_size, where->min_type_size),
+                        std::max(param_where.value.total_size, where->total_size), where->node};
                     return true;
                 });
             TINT_RET_IF(!ret);

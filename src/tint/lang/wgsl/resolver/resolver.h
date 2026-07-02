@@ -668,7 +668,10 @@ class Resolver {
 
     // BufferViewInfo tracks info for invalid buffer sizes.
     struct BufferViewInfo {
-        uint64_t size = 0;
+        /// The minimum type size. This is propagated out through the inspector.
+        uint64_t min_type_size = 0;
+        /// The total view size used for validation.
+        uint64_t total_size = 0;
         const ast::Node* node = nullptr;
     };
 

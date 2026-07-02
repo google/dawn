@@ -2691,7 +2691,8 @@ TEST_F(InspectorGetResourceBindingsTest, UnsizedBuffer_Direct_Vec4f) {
 
     ASSERT_EQ(1u, result.size());
     EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
-    EXPECT_EQ(32u, result[0].size);
+    // Offset is not counted for binding size.
+    EXPECT_EQ(16u, result[0].size);
 }
 
 TEST_F(InspectorGetResourceBindingsTest, UnsizedBuffer_Direct_Struct) {
@@ -2716,15 +2717,14 @@ struct T { // size 32 (8 bytes padding)
 
     ASSERT_EQ(1u, result.size());
     EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
-    EXPECT_EQ(160u, result[0].size);
+    EXPECT_EQ(144u, result[0].size);
 }
 
-TEST_F(InspectorGetResourceBindingsTest, UnsizedBuffer_Indirect_ArrayU32_Size) {
+TEST_F(InspectorGetResourceBindingsTest, UnsizedBuffer_Indirect_ArrayU32) {
     auto* src = R"(
 @group(0) @binding(0) var<storage> buf : buffer;
-var<private> offset = 0u; // hides from constant eval
 fn foo(p : ptr<storage, buffer>) {
-  let q = bufferArrayView<array<u32>>(p, offset, 128u);
+  let q = bufferArrayView<array<u32>>(p, 0u, 128u);
 }
 fn bar(p : ptr<storage, buffer>) {
   foo(p);
@@ -2741,15 +2741,15 @@ fn ep() {
 
     ASSERT_EQ(1u, result.size());
     EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
-    EXPECT_EQ(128u, result[0].size);
+    EXPECT_EQ(4u, result[0].size);
 }
 
-TEST_F(InspectorGetResourceBindingsTest, UnsizedBuffer_Indirect_ArrayU32_Offset) {
+TEST_F(InspectorGetResourceBindingsTest, UnsizedBuffer_Indirect_ArrayVec4u) {
     auto* src = R"(
 @group(0) @binding(0) var<storage> buf : buffer;
 var<private> size = 0u; // hides from constant eval
 fn foo(p : ptr<storage, buffer>) {
-  let q = bufferArrayView<array<u32>>(p, 32u, size);
+  let q = bufferArrayView<array<vec4u>>(p, 32u, size);
 }
 fn bar() {
   foo(&buf);
@@ -2766,7 +2766,7 @@ fn ep() {
 
     ASSERT_EQ(1u, result.size());
     EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
-    EXPECT_EQ(36u, result[0].size);
+    EXPECT_EQ(16u, result[0].size);
 }
 
 TEST_F(InspectorGetResourceBindingsTest, UnsizedBuffer_Indirect_RuntimeStruct) {
@@ -2819,8 +2819,8 @@ fn foo(p : ptr<storage, buffer, read_write>) {
   let q = bufferArrayView<S>(p, offset, size);
 }
 fn bar(p : ptr<storage, buffer, read_write>) {
-  // Req size = SizeOf(T) + StrideOf(array<vec3f>) + offset = 64
-  let q = bufferView<S>(p, 16u);
+  // Req size = SizeOf(array<vec3f, 4> = 64
+  let q = bufferView<array<vec3f, 4>>(p, 16u);
 }
 @compute @workgroup_size(1)
 fn ep() {
