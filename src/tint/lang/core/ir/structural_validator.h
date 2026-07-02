@@ -425,6 +425,8 @@ class Structural {
     bool CheckFunctionParam(const Function* func,
                             const FunctionParam* param,
                             Hashset<const FunctionParam*, 4>& param_set);
+    /// Checks for entry point validation errors. Returns if `func` is not an entrypoint.
+    void CheckEntryPoint(const Function* func);
 
     /// Validates the workgroup_size attribute for a given function
     /// @param func the function to validate

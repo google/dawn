@@ -1285,94 +1285,94 @@ void Structural::CheckFunction(const Function* func) {
     CheckWorkgroupSize(func);
     CheckSubgroupSize(func);
 
-    if (func->IsEntryPoint()) {
-        ValidateShaderIOAnnotations(func, func->ReturnType(), std::nullopt,
-                                    func->ReturnAttributes(), ShaderIOKind::kResultValue);
+    CheckEntryPoint(func);
 
-        WalkTypeAndMembers(
-            func, func->ReturnType(), func->ReturnAttributes(),
-            [this](const Function* f, const core::type::Type* t, const IOAttributes&) {
-                CheckNotBool(f, t, "entry point returns can not be 'bool'");
-            });
+    QueueBlock(func->Block());
+    ProcessTasks();
+}
 
-        Hashset<BindingPoint, 4> binding_points{};
-        const Var* user_declared_immediate = nullptr;
+void Structural::CheckEntryPoint(const Function* func) {
+    if (!func->IsEntryPoint()) {
+        return;
+    }
 
-        for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
-            if (!ir_.properties.Contains(Property::kAllowDuplicateBindings) &&
-                var->BindingPoint().has_value()) {
-                auto bp = var->BindingPoint().value();
-                if (!binding_points.Add(bp)) {
-                    AddError(var) << "found non-unique binding point, " << bp
-                                  << ", being referenced in entry point, " << NameOf(func);
+    ValidateShaderIOAnnotations(func, func->ReturnType(), std::nullopt, func->ReturnAttributes(),
+                                ShaderIOKind::kResultValue);
+
+    WalkTypeAndMembers(func, func->ReturnType(), func->ReturnAttributes(),
+                       [this](const Function* f, const core::type::Type* t, const IOAttributes&) {
+                           CheckNotBool(f, t, "entry point returns can not be 'bool'");
+                       });
+
+    Hashset<BindingPoint, 4> binding_points{};
+    const Var* user_declared_immediate = nullptr;
+
+    for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
+        if (!ir_.properties.Contains(Property::kAllowDuplicateBindings) &&
+            var->BindingPoint().has_value()) {
+            auto bp = var->BindingPoint().value();
+            if (!binding_points.Add(bp)) {
+                AddError(var) << "found non-unique binding point, " << bp
+                              << ", being referenced in entry point, " << NameOf(func);
+            }
+        }
+
+        const auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
+        const auto* ty = var->Result()->Type()->UnwrapPtrOrRef();
+        const auto attr = var->Attributes();
+        if (!mv || !ty) {
+            continue;
+        }
+
+        auto address_space = mv->AddressSpace();
+        switch (address_space) {
+            case AddressSpace::kImmediate:
+                if (user_declared_immediate) {
+                    AddError(var) << "multiple user-declared immediate data variables referenced "
+                                     "by entry point "
+                                  << NameOf(func);
                 }
-            }
-
-            const auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
-            const auto* ty = var->Result()->Type()->UnwrapPtrOrRef();
-            const auto attr = var->Attributes();
-            if (!mv || !ty) {
+                user_declared_immediate = var;
                 continue;
-            }
+            case AddressSpace::kWorkgroup:
+                if (!func->IsCompute()) {
+                    AddError(var) << "workgroup variable cannot be used in a " << func->Stage()
+                                  << " shader";
+                }
+                continue;
+            case AddressSpace::kPixelLocal:
+                if (!func->IsFragment()) {
+                    AddError(var) << "pixel_local variable cannot be used in a " << func->Stage()
+                                  << " shader";
+                }
+                continue;
+            case AddressSpace::kIn:
+            case AddressSpace::kOut:
+                break;
+            default:
+                continue;
+        }
 
-            auto address_space = mv->AddressSpace();
-            switch (address_space) {
-                case AddressSpace::kImmediate:
-                    if (user_declared_immediate) {
-                        AddError(var)
-                            << "multiple user-declared immediate data variables referenced "
-                               "by entry point "
-                            << NameOf(func);
-                    }
-                    user_declared_immediate = var;
-                    continue;
-                case AddressSpace::kWorkgroup:
-                    if (!func->IsCompute()) {
-                        AddError(var) << "workgroup variable cannot be used in a " << func->Stage()
-                                      << " shader";
-                    }
-                    continue;
-                case AddressSpace::kPixelLocal:
-                    if (!func->IsFragment()) {
-                        AddError(var) << "pixel_local variable cannot be used in a "
-                                      << func->Stage() << " shader";
-                    }
-                    continue;
-                case AddressSpace::kIn:
-                case AddressSpace::kOut:
-                    break;
-                default:
-                    continue;
-            }
-
-            if (func->IsFragment() && address_space == AddressSpace::kIn) {
-                WalkTypeAndMembers(
-                    var, ty, attr, [this](const auto* v, const auto* t, const auto& a) {
-                        CheckFrontFacingIfBool(
-                            v, a, t,
-                            "input address space values referenced by fragment shaders "
-                            "can only be 'bool' if decorated with "
-                            "@builtin(front_facing)");
-                    });
-            } else {
-                WalkTypeAndMembers(
-                    var, ty, attr, [this](const auto* v, const auto* t, const auto&) {
-                        CheckNotBool(
-                            v, t,
-                            "IO address space values referenced by shader entry points can "
-                            "only be 'bool' if in the input space, used only by fragment "
-                            "shaders and decorated with @builtin(front_facing)");
-                    });
-            }
+        if (func->IsFragment() && address_space == AddressSpace::kIn) {
+            WalkTypeAndMembers(var, ty, attr, [this](const auto* v, const auto* t, const auto& a) {
+                CheckFrontFacingIfBool(v, a, t,
+                                       "input address space values referenced by fragment shaders "
+                                       "can only be 'bool' if decorated with "
+                                       "@builtin(front_facing)");
+            });
+        } else {
+            WalkTypeAndMembers(var, ty, attr, [this](const auto* v, const auto* t, const auto&) {
+                CheckNotBool(v, t,
+                             "IO address space values referenced by shader entry points can "
+                             "only be 'bool' if in the input space, used only by fragment "
+                             "shaders and decorated with @builtin(front_facing)");
+            });
         }
     }
 
     if (func->IsVertex()) {
         CheckPositionPresentForVertexOutput(func);
     }
-
-    QueueBlock(func->Block());
-    ProcessTasks();
 }
 
 bool Structural::CheckFunctionParam(const Function* func,
