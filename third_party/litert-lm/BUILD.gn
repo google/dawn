@@ -30,4 +30,6 @@ action("litert_lm_advanced_main") {
   args =
       [ rebase_path("$root_out_dir/litert_lm_advanced_main", root_build_dir) ]
   outputs = [ "$root_out_dir/litert_lm_advanced_main" ]
+  inputs = [ "build_litert_lm.py" ]
+  deps = [ "//src/dawn/native:webgpu_dawn" ]
 }

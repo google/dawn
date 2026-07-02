@@ -33,8 +33,26 @@ import shutil
 import subprocess
 import sys
 
+# Add the project root to sys.path to allow package imports from tools.python.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = _SCRIPT_DIR.parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(_PROJECT_ROOT))
+
+from tools.python import cipd_deps
+
 BAZEL_TARGET = '//runtime/engine:litert_lm_advanced_main'
 BAZEL_BIN_SUBPATH = 'runtime/engine/litert_lm_advanced_main'
+
+
+def get_platform_name():
+    cipd_os = cipd_deps.get_cipd_compatible_current_os()
+    cipd_arch = cipd_deps.get_cipd_compatible_current_arch()
+
+    plat_os = 'macos' if cipd_os == 'mac' else cipd_os
+    arch = 'x86_64' if cipd_arch == 'amd64' else cipd_arch
+
+    return f"{plat_os}_{arch}"
 
 
 def main():
@@ -55,17 +73,53 @@ def main():
     backup_dir = litert_lm_dir / 'prebuilt_backup'
 
     # Back up the original Git LFS smudge prebuilt directory.
-    if prebuilt_src_dir.exists() and not prebuilt_src_dir.is_symlink():
+    if prebuilt_src_dir.is_symlink():
+        prebuilt_src_dir.unlink()
+    elif prebuilt_src_dir.exists():
         shutil.move(prebuilt_src_dir, backup_dir)
 
     try:
-        # Symlink the CIPD-unpacked prebuilts directly so Bazel can resolve
-        # targets.
-        if prebuilt_cipd_dir.exists():
+        # Symlink the CIPD-unpacked prebuilts and libwebgpu directly so Bazel
+        # can resolve targets.
+        platform_name = get_platform_name()
+
+        # Determine Dawn monolithic library name for current platform.
+        if platform_name.startswith('macos'):
+            dawn_lib_name = 'libwebgpu_dawn.dylib'
+        elif platform_name.startswith('windows'):
+            dawn_lib_name = 'libwebgpu_dawn.dll'
+        else:
+            dawn_lib_name = 'libwebgpu_dawn.so'
+
+        # Find the locally compiled Dawn library in the active GN build
+        # directory.
+        local_dawn_lib = dest_path.parent / dawn_lib_name
+        if not local_dawn_lib.exists():
             print(
-                "Symlinking prebuilt binaries from CIPD to LiteRT-LM workspace..."
-            )
-            prebuilt_src_dir.symlink_to(prebuilt_cipd_dir)
+                f"Error: Local Dawn library (libwebgpu_dawn) not found in GN output directory: {local_dawn_lib}",
+                file=sys.stderr)
+            sys.exit(1)
+
+        print("Symlinking prebuilt binaries to LiteRT-LM workspace...")
+        prebuilt_src_dir.mkdir()
+        platform_dir = prebuilt_cipd_dir / platform_name
+        if not platform_dir.exists():
+            print(
+                f"Error: Prebuilt shared library dependencies not found in: {platform_dir}",
+                file=sys.stderr)
+            sys.exit(1)
+
+        platform_dest = prebuilt_src_dir / platform_name
+        platform_dest.mkdir()
+
+        # Link all prebuilts from CIPD.
+        for f in platform_dir.iterdir():
+            if f.is_file():
+                (platform_dest / f.name).symlink_to(f)
+
+        # Link the local Dawn library into the platform directory.
+        dest_dawn_path = platform_dest / dawn_lib_name
+        dest_dawn_path.symlink_to(local_dawn_lib)
 
         # Compile the target using Bazelisk inside LiteRT-LM's standalone
         # workspace.
@@ -90,6 +144,8 @@ def main():
         print("Restoring original Git-tracked prebuilt directory...")
         if prebuilt_src_dir.is_symlink():
             prebuilt_src_dir.unlink()
+        elif prebuilt_src_dir.exists():
+            shutil.rmtree(prebuilt_src_dir)
         if backup_dir.exists():
             shutil.move(backup_dir, prebuilt_src_dir)
 
@@ -104,6 +160,16 @@ def main():
     print(f"Copying compiled binary to: {dest_path}")
     shutil.copy2(compiled_path, dest_path)
     dest_path.chmod(0o755)
+
+    # Copy other prebuilt LiteRT dependencies to the build output directory for
+    # running.
+    target_prebuilt_dir = prebuilt_cipd_dir / platform_name
+    if target_prebuilt_dir.exists():
+        for f in target_prebuilt_dir.iterdir():
+            if f.is_file():
+                dest_file = dest_path.parent / f.name
+                shutil.copy2(f, dest_file)
+                dest_file.chmod(0o755)
 
     print("Build and copy successful.")
 
