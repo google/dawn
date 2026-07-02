@@ -718,16 +718,17 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
     DAWN_TRY(ValidateColorAttachmentBytesPerSample(device, colorAttachmentFormats));
 
     if (multisample.alphaToCoverageEnabled) {
-        const ColorTargetState& firstTarget = *descriptor->targets.begin();
-
         DAWN_INVALID_IF(fragmentMetadata.usesSampleMaskOutput,
                         "alphaToCoverageEnabled is true when the sample_mask builtin is a "
                         "pipeline output of fragment stage of %s.",
                         descriptor->module);
 
-        DAWN_INVALID_IF(
-            descriptor->targets.empty() || firstTarget.format == wgpu::TextureFormat::Undefined,
-            "alphaToCoverageEnabled is true when color target[0] is not present.");
+        DAWN_INVALID_IF(descriptor->targets.empty(),
+                        "alphaToCoverageEnabled is true when color target[0] is not present.");
+
+        const ColorTargetState& firstTarget = *descriptor->targets.begin();
+        DAWN_INVALID_IF(firstTarget.format == wgpu::TextureFormat::Undefined,
+                        "alphaToCoverageEnabled is true when color target[0] is not present.");
 
         const Format* format;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(firstTarget.format));
