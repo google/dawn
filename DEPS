@@ -23,7 +23,7 @@ vars = {
   'dawn_tintd': False, # Also fetches dependencies required for building tintd.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:760c6cc96824c1a851b4bcb8744c2141d6b57c0a',
+  'dawn_gn_version': 'git_revision:f47f5396728771f1509dad386c7e7886743314b9',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -73,7 +73,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '2dee4b7c2c4c4c88a0ec20bfa46cd1d72f5b6900',
+  'chromium_revision': 'e8108c27eb0f36b6591bffa7d0cfe1fc69117a90',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -142,7 +142,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@5a572b071a72061e4a47264b280250202cd39285',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@5261bd3476629d9e314b7dc139e29c799702c9ba',
     'condition': 'dawn_standalone',
   },
 
@@ -157,7 +157,7 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@19e7d21536b1ac6ba2ccea9c3c68552e1c152da1',
+  'url': '{chromium_git}/chromium/src/build@ba1add1a1805362093509c804accf6ca9ee2676e',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
@@ -271,7 +271,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@faa18a8d3952d6bcb6e93a1cfea69bb765b34ce7',
+    'url': '{chromium_git}/chromium/src/testing@af71dad1f7c53c639aa6b3b599f4a7c08afeb6db',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -634,7 +634,7 @@ deps = {
 
   # Dependencies for tintd.
   'third_party/jsoncpp': {
-    'url': '{chromium_git}/external/github.com/open-source-parsers/jsoncpp.git@b5ab350ff38ed25fa5b6e0dc30820f2215cad345',
+    'url': '{chromium_git}/external/github.com/open-source-parsers/jsoncpp.git@edc01ab10f52135ec80e3589b6b4e0a9c65b27fd',
     'condition': 'dawn_tintd',
   },
 
