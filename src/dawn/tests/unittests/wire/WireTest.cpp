@@ -57,9 +57,7 @@ uint32_t sWireProcTableRefCount = 0;
 WireTest::WireTest() {
     // Set up default expectation for Device.Destroy to ensure we can track that every device on the
     // server has Destroy called.
-    ON_CALL(api, DeviceDestroy).WillByDefault([this](WGPUDevice device) {
-        mDeviceDestroyed[device] = true;
-    });
+    ON_CALL(api, DeviceDestroy).WillByDefault([this](WGPUDevice d) { mDeviceDestroyed[d] = true; });
 }
 
 WireTest::~WireTest() {
@@ -224,9 +222,9 @@ void WireTest::TearDown() {
 }
 
 WGPUDevice WireTest::GetNewDevice() {
-    auto device = api.GetNewDevice();
-    mDeviceDestroyed[device] = false;
-    return device;
+    auto d = api.GetNewDevice();
+    mDeviceDestroyed[d] = false;
+    return d;
 }
 
 void WireTest::FlushClient(bool success) {

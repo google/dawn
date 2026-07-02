@@ -97,16 +97,6 @@ config("internal_config") {
 
   cflags = []
 
-  if (is_clang) {
-    # Flags use of __COUNTER__, which is used in histogram macros that were
-    # largely copied from Chromium. Chromium continues to use __COUNTER__ in
-    # their copy.
-    cflags += [ "-Wno-c2y-extensions" ]
-
-    # Dawn doesn't have the annotations to work with this analysis.
-    cflags_cc = [ "-Wno-thread-safety" ]
-  }
-
   if (!is_clang && is_win) {
     # Dawn extends wgpu enums with internal enums.
     # MSVC considers these invalid switch values. crbug.com/dawn/397.

@@ -1343,12 +1343,12 @@ TEST_P(TextureZeroInitTest, RenderPass3DTextureDepthSliceClearTestViaUsage) {
 
             std::vector<wgpu::TextureView> renderTargets;
             for (uint32_t i = 0; i < kNumSlices; ++i) {
-                wgpu::TextureViewDescriptor viewDesc{
+                wgpu::TextureViewDescriptor rtViewDesc{
                     .dimension = wgpu::TextureViewDimension::e2DArray,
                     .baseArrayLayer = i,
                     .arrayLayerCount = 1,
                 };
-                renderTargets.push_back(renderTarget.CreateView(&viewDesc));
+                renderTargets.push_back(renderTarget.CreateView(&rtViewDesc));
             }
             utils::ComboRenderPassDescriptor renderPassDesc(renderTargets);
             for (uint32_t i = 0; i < kNumSlices; ++i) {

@@ -816,16 +816,16 @@ struct ResourceDescForTypeIDCase {
     wgpu::Sampler CreateTestSampler(const wgpu::Device& device) {
         auto& d = std::get<SamplerDesc>(desc);
 
-        wgpu::SamplerDescriptor desc{};
+        wgpu::SamplerDescriptor sDesc{};
         if (d.filtering) {
-            desc.magFilter = wgpu::FilterMode::Linear;
-            desc.minFilter = wgpu::FilterMode::Linear;
-            desc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
+            sDesc.magFilter = wgpu::FilterMode::Linear;
+            sDesc.minFilter = wgpu::FilterMode::Linear;
+            sDesc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
         }
         if (d.comparison) {
-            desc.compare = wgpu::CompareFunction::Less;
+            sDesc.compare = wgpu::CompareFunction::Less;
         }
-        return device.CreateSampler(&desc);
+        return device.CreateSampler(&sDesc);
     }
 };
 

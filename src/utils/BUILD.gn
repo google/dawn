@@ -68,6 +68,8 @@ config("dawn_warnings") {
       "-Wno-pre-c++20-compat",
       "-Wno-padded",
       "-Wno-c++20-extensions",
+      "-Wno-shadow-field-in-constructor",
+      "-Wno-shadow-uncaptured-local",
 
       # This warning complains on normal usages of structs, especially in
       # Vulkan, and pushes developers away from using designated initializers.
@@ -189,6 +191,9 @@ config("dawn_warnings") {
       # but currently, suppressing just for specific targets is not working,
       # probably due to some flag ordering issue.
       "-Wno-c2y-extensions",
+
+      # TODO(crbug.com/529895490): We might want to enable this.
+      "-Wno-thread-safety",
     ]
 
     # Treat third_party and gen headers as system headers to suppress warnings.

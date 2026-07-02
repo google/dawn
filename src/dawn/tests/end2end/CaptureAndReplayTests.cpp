@@ -1714,11 +1714,11 @@ TEST_P(CaptureAndReplayTests, CaptureQuerySetBasic) {
         queue.WriteBuffer(resolveBuffer, 0, sentinels.data(), size);
 
         {
-            wgpu::CommandBuffer commands;
+            wgpu::CommandBuffer resolveCommands;
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             encoder.ResolveQuerySet(qs, 0, kNumQueries, resolveBuffer, 0);
-            commands = encoder.Finish();
-            queue.Submit(1, &commands);
+            resolveCommands = encoder.Finish();
+            queue.Submit(1, &resolveCommands);
         }
 
         EXPECT_BUFFER(
@@ -2325,7 +2325,7 @@ TEST_P(CaptureAndReplayTests, CaptureDepth24Plus) {
 
             wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
 
-            wgpu::CommandBuffer commands;
+            wgpu::CommandBuffer setupCommands;
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             for (uint32_t layer = 0; layer < kNumLayers; ++layer) {
                 wgpu::TextureViewDescriptor viewDesc;
@@ -2342,13 +2342,13 @@ TEST_P(CaptureAndReplayTests, CaptureDepth24Plus) {
                 pass.Draw(3, 1, 0, layer);
                 pass.End();
             }
-            commands = encoder.Finish();
-            queue.Submit(1, &commands);
+            setupCommands = encoder.Finish();
+            queue.Submit(1, &setupCommands);
         }
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = module;
-        wgpu::ComputePipeline cPipeline = device.CreateComputePipeline(&csDesc);
+        wgpu::ComputePipeline computePipeline = device.CreateComputePipeline(&csDesc);
 
         // Copy texture to temp buffer via compute shader during capture.
         // We don't care about the temp buffer. We just care that texture is
@@ -2359,19 +2359,19 @@ TEST_P(CaptureAndReplayTests, CaptureDepth24Plus) {
                 CreateBuffer("temp", sizeof(float) * kNumLayers,
                              wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
             wgpu::BindGroup bindGroup =
-                utils::MakeBindGroup(device, cPipeline.GetBindGroupLayout(0),
+                utils::MakeBindGroup(device, computePipeline.GetBindGroupLayout(0),
                                      {
                                          {0, texture.CreateView()},
                                          {1, tempBuffer},
                                      });
 
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-            pass.SetPipeline(cPipeline);
+            pass.SetPipeline(computePipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.DispatchWorkgroups(kNumLayers);
             pass.End();
         }
-        return std::make_pair(cPipeline, encoder.Finish());
+        return std::make_pair(computePipeline, encoder.Finish());
     }();
 
     // --- capture ---
@@ -2401,8 +2401,8 @@ TEST_P(CaptureAndReplayTests, CaptureDepth24Plus) {
         pass.DispatchWorkgroups(kNumLayers);
         pass.End();
 
-        wgpu::CommandBuffer commands = encoder.Finish();
-        queue.Submit(1, &commands);
+        wgpu::CommandBuffer replayCommands = encoder.Finish();
+        queue.Submit(1, &replayCommands);
     }
 
     float expected[kNumLayers];

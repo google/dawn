@@ -1037,14 +1037,14 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
                 WGPUAdapterInfo info = {};
                 native::GetProcs().adapterGetInfo(candidate.Get(), &info);
 
-                const auto& param = gCurrentTest->mParam;
-                bool result = (param.adapterProperties.selected &&
-                               info.deviceID == param.adapterProperties.deviceID &&
-                               info.vendorID == param.adapterProperties.vendorID &&
+                const auto& testParam = gCurrentTest->mParam;
+                bool result = (testParam.adapterProperties.selected &&
+                               info.deviceID == testParam.adapterProperties.deviceID &&
+                               info.vendorID == testParam.adapterProperties.vendorID &&
                                info.adapterType == static_cast<WGPUAdapterType>(
-                                                       param.adapterProperties.adapterType) &&
+                                                       testParam.adapterProperties.adapterType) &&
                                std::string_view(info.device.data, info.device.length) ==
-                                   param.adapterProperties.name);
+                                   testParam.adapterProperties.name);
                 native::GetProcs().adapterInfoFreeMembers(info);
                 return result;
             });
@@ -1572,10 +1572,9 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
 
     adapter.RequestDevice(
         &deviceDesc, wgpu::CallbackMode::AllowSpontaneous,
-        [&apiDevice, this](wgpu::RequestDeviceStatus status, wgpu::Device device,
-                           wgpu::StringView) {
+        [&apiDevice, this](wgpu::RequestDeviceStatus status, wgpu::Device d, wgpu::StringView) {
             if (status == wgpu::RequestDeviceStatus::Success) {
-                apiDevice = std::move(device);
+                apiDevice = std::move(d);
 
                 apiDevice.SetLoggingCallback([](wgpu::LoggingType type, wgpu::StringView message) {
                     std::string_view view = {message.data, message.length};

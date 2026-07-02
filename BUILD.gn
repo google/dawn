@@ -163,25 +163,8 @@ if (dawn_standalone) {
   }
 }
 
-config("abseil_config") {
-  if (is_clang) {
-    cflags = [
-      # Allow the use of enable_if()
-      "-Wno-gcc-compat",
-      "-Wno-unreachable-code-break",
-
-      # Allows use of _Nullable, _Nonnull & _Null_unspecified
-      "-Wno-nullability-extension",
-
-      # vlog has some shadowing, which Windows Clang doesn't like
-      "-Wno-shadow",
-    ]
-  }
-}
-
 group("abseil") {
   public_deps = [ "${dawn_abseil_dir}:absl" ]
-  public_configs = [ ":abseil_config" ]
 }
 
 # GN evaluates each .gn file once per toolchain, so restricting to default

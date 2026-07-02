@@ -172,12 +172,12 @@ TEST_F(YCbCrVulkanSamplersTest, YCbCrTextureViewRequiresOpaqueYCbCrAndroid) {
 
     // Success case: creating a YCbCr view on an OpaqueYCbCrAndroid texture.
     {
-        wgpu::TextureDescriptor yCbCrDesc = {
+        wgpu::TextureDescriptor textureDesc = {
             .usage = wgpu::TextureUsage::TextureBinding,
             .size = {2, 2},
             .format = wgpu::TextureFormat::OpaqueYCbCrAndroid,
         };
-        wgpu::Texture ycbcr = device.CreateTexture(&yCbCrDesc);
+        wgpu::Texture ycbcr = device.CreateTexture(&textureDesc);
         ycbcr.CreateView(&viewDesc);
     }
 
