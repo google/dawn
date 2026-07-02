@@ -606,47 +606,72 @@ TEST(SpanTest, SpanAsBytes) {
     // Empty spans.
     {
         Span<int> sp;
-
         auto bsp = SpanAsBytes(sp);
         static_assert(std::is_same_v<Span<const std::byte>, decltype(bsp)>);
         EXPECT_TRUE(bsp.empty());
-
         auto wbsp = SpanAsWritableBytes(sp);
         static_assert(std::is_same_v<Span<std::byte>, decltype(wbsp)>);
         EXPECT_TRUE(wbsp.empty());
+
+        Span<volatile int> vsp;
+        auto vbsp = SpanAsBytes(vsp);
+        static_assert(std::is_same_v<Span<const volatile std::byte>, decltype(vbsp)>);
+        EXPECT_TRUE(vbsp.empty());
+        auto vwbsp = SpanAsWritableBytes(vsp);
+        static_assert(std::is_same_v<Span<volatile std::byte>, decltype(vwbsp)>);
+        EXPECT_TRUE(vwbsp.empty());
     }
 
     // Non-empty span.
     {
         std::array<int, 3> ints{};
-        Span<int> sp{ints};
 
+        Span<int> sp{ints};
         auto bsp = SpanAsBytes(sp);
         static_assert(std::is_same_v<Span<const std::byte>, decltype(bsp)>);
         EXPECT_EQ(bsp.size(), sp.size_bytes());
         EXPECT_EQ(bsp.data(), reinterpret_cast<const std::byte*>(sp.data()));
-
         auto wbsp = SpanAsWritableBytes(sp);
         static_assert(std::is_same_v<Span<std::byte>, decltype(wbsp)>);
         EXPECT_EQ(wbsp.size(), sp.size_bytes());
         EXPECT_EQ(wbsp.data(), reinterpret_cast<std::byte*>(sp.data()));
+
+        Span<volatile int> vsp{ints};
+        auto vbsp = SpanAsBytes(vsp);
+        static_assert(std::is_same_v<Span<const volatile std::byte>, decltype(vbsp)>);
+        EXPECT_EQ(vbsp.size(), vsp.size_bytes());
+        EXPECT_EQ(vbsp.data(), reinterpret_cast<const volatile std::byte*>(vsp.data()));
+        auto vwbsp = SpanAsWritableBytes(vsp);
+        static_assert(std::is_same_v<Span<volatile std::byte>, decltype(vwbsp)>);
+        EXPECT_EQ(vwbsp.size(), vsp.size_bytes());
+        EXPECT_EQ(vwbsp.data(), reinterpret_cast<volatile std::byte*>(vsp.data()));
     }
 
     // Span with an index.
     {
         std::array<int, 3> ints{};
-        // SAFETY: This is viewing ints, just with typed indices.
-        ityp::span<Index, int> DAWN_UNSAFE_BUFFERS(sp{ints.data(), Index(3u)});
 
+        // SAFETY: This is viewing ints, just with typed indices.
+        ityp::span<Index, int> sp{ints.data(), Index(3u)};
         auto bsp = SpanAsBytes(sp);
         static_assert(std::is_same_v<Span<const std::byte>, decltype(bsp)>);
         EXPECT_EQ(bsp.size(), sp.size_bytes());
         EXPECT_EQ(bsp.data(), reinterpret_cast<const std::byte*>(sp.data()));
-
         auto wbsp = SpanAsWritableBytes(sp);
         static_assert(std::is_same_v<Span<std::byte>, decltype(wbsp)>);
         EXPECT_EQ(wbsp.size(), sp.size_bytes());
         EXPECT_EQ(wbsp.data(), reinterpret_cast<std::byte*>(sp.data()));
+
+        // SAFETY: This is viewing ints, just with typed indices.
+        ityp::span<Index, volatile int> vsp{ints.data(), Index(3u)};
+        auto vbsp = SpanAsBytes(vsp);
+        static_assert(std::is_same_v<Span<const volatile std::byte>, decltype(vbsp)>);
+        EXPECT_EQ(vbsp.size(), vsp.size_bytes());
+        EXPECT_EQ(vbsp.data(), reinterpret_cast<const volatile std::byte*>(vsp.data()));
+        auto vwbsp = SpanAsWritableBytes(vsp);
+        static_assert(std::is_same_v<Span<volatile std::byte>, decltype(vwbsp)>);
+        EXPECT_EQ(vwbsp.size(), vsp.size_bytes());
+        EXPECT_EQ(vwbsp.data(), reinterpret_cast<volatile std::byte*>(vsp.data()));
     }
 }
 

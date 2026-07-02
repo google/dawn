@@ -303,22 +303,34 @@ class SpanBase {
 
 }  // namespace detail
 
-// Converts a `Span<[const] T>` to a `Span<[const] std::byte>`.
+// Converts a `Span<[const|volatile] T>` to a `Span<[const|volatile] std::byte>`.
 // Mirrors Chromium's base::as_[writable_]bytes but with std::byte.
 // TODO(https://crbug.com/524405497): Support `Span<T, N> to `Span<std::byte, ...>` once fixed
 // extent spans are supported.
 template <typename T, typename Index, typename PtrType>
 constexpr auto SpanAsBytes(detail::SpanBase<T, Index, PtrType> s) {
-    // SAFETY: `s.data()` points to at least `s.size_bytes` bytes of data.
-    return DAWN_UNSAFE_BUFFERS(
-        Span<const std::byte>{reinterpret_cast<const std::byte*>(s.data()), s.size_bytes()});
+    if constexpr (std::is_volatile_v<T>) {
+        // SAFETY: `s.data()` points to at least `s.size_bytes` bytes of data.
+        return DAWN_UNSAFE_BUFFERS(Span<const volatile std::byte>{
+            reinterpret_cast<const volatile std::byte*>(s.data()), s.size_bytes()});
+    } else {
+        // SAFETY: `s.data()` points to at least `s.size_bytes` bytes of data.
+        return DAWN_UNSAFE_BUFFERS(
+            Span<const std::byte>{reinterpret_cast<const std::byte*>(s.data()), s.size_bytes()});
+    }
 }
 template <typename T, typename Index, typename PtrType>
     requires(!std::is_const_v<T>)
 constexpr auto SpanAsWritableBytes(detail::SpanBase<T, Index, PtrType> s) {
-    // SAFETY: `s.data()` points to at least `s.size_bytes` bytes of data.
-    return DAWN_UNSAFE_BUFFERS(
-        Span<std::byte>{reinterpret_cast<std::byte*>(s.data()), s.size_bytes()});
+    if constexpr (std::is_volatile_v<T>) {
+        // SAFETY: `s.data()` points to at least `s.size_bytes` bytes of data.
+        return DAWN_UNSAFE_BUFFERS(Span<volatile std::byte>{
+            reinterpret_cast<volatile std::byte*>(s.data()), s.size_bytes()});
+    } else {
+        // SAFETY: `s.data()` points to at least `s.size_bytes` bytes of data.
+        return DAWN_UNSAFE_BUFFERS(
+            Span<std::byte>{reinterpret_cast<std::byte*>(s.data()), s.size_bytes()});
+    }
 }
 
 // Converts a `[const] T&` to a `Span<[const] T>`.

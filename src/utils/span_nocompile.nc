@@ -60,10 +60,10 @@ void TestConstPointerToNonConstSpan() {
     DAWN_UNSAFE_BUFFERS(Span<int>(kSpanData.data(), kSpanData.size())); // expected-error {{no matching constructor for initialization}}
 
     DAWN_UNSAFE_BUFFERS(Span<const int>(kSpanData.begin(), kSpanData.end())); // Control case.
-    DAWN_UNSAFE_BUFFERS(Span<int>(kSpanData.begin(), kSpanData.end())); // expected-error {{no matching constructor for initialization of}}
+    DAWN_UNSAFE_BUFFERS(Span<int>(kSpanData.begin(), kSpanData.end())); // expected-error {{no matching constructor for initialization}}
 
     Span<const int>{FakeRange()}; // Control case.
-    Span<int>{FakeRange()}; // expected-error {{no matching constructor for initialization of}}
+    Span<int>{FakeRange()}; // expected-error {{no matching constructor for initialization}}
 }
 
 void TestConstructorsThatRequireDawnUnsafeBuffers() {
@@ -121,7 +121,22 @@ void TestAsWriteableBytesRequiresNonConst() {
 
     SpanAsBytes(sp); // Control case
     SpanAsWritableBytes(sp); // expected-error {{no matching function for call}}
+}
 
+void TestAsBytesRetainsVolatile() {
+    std::array<int, 3> ints{};
+    auto sp = Span<volatile int>{ints};
+
+    {
+        // Control case
+        [[maybe_unused]] Span<const volatile std::byte> vbsp = SpanAsBytes(sp);
+        [[maybe_unused]] Span<volatile std::byte> vwbsp = SpanAsWritableBytes(sp);
+    }
+
+    {
+        Span<const std::byte> vbsp = SpanAsBytes(sp); // expected-error {{no viable conversion from}}
+        Span<std::byte> vwbsp = SpanAsWritableBytes(sp); // expected-error {{no viable conversion from}}
+    }
 }
 
 }  // namespace dawn
