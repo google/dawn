@@ -1269,66 +1269,8 @@ void Structural::CheckFunction(const Function* func) {
 
     Hashset<const FunctionParam*, 4> param_set{};
     for (auto* param : func->Params()) {
-        if (!param->Alive()) {
-            AddError(param) << "destroyed parameter found in function parameter list";
+        if (!CheckFunctionParam(func, param, param_set)) {
             return;
-        }
-
-        if (!param_set.Add(param)) {
-            AddError(param) << "function parameter is not unique";
-            return;
-        }
-
-        if (!param->Type()) {
-            AddError(param) << "function parameter has nullptr type";
-            return;
-        }
-
-        if (!param->Function()) {
-            AddError(param) << "function parameter has nullptr parent function";
-            return;
-        }
-
-        if (param->Function() != func) {
-            AddError(param) << "function parameter has incorrect parent function";
-            AddNote(param->Function()) << "parent function declared here";
-            return;
-        }
-
-        // TODO(516717234): Move to functional
-        CheckType(param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); });
-
-        // TODO(516717234): Move to functional
-        if (func->IsFragment()) {
-            WalkTypeAndMembers(param, param->Type(), param->Attributes(),
-                               [this](const auto* p, const auto* t, const auto& a) {
-                                   CheckFrontFacingIfBool(
-                                       p, a, t,
-                                       "fragment entry point params can only be a bool if "
-                                       "decorated with @builtin(front_facing)");
-                               });
-        } else if (func->IsEntryPoint()) {
-            WalkTypeAndMembers(
-                param, param->Type(), param->Attributes(),
-                [this](const auto* p, const auto* t, const auto&) {
-                    CheckNotBool(p, t,
-                                 "entry point params can only be a bool for fragment shaders");
-                });
-        }
-
-        // TODO(516717234): Move to functional
-        if (func->IsEntryPoint()) {
-            ValidateShaderIOAnnotations(param, param->Type(), param->BindingPoint(),
-                                        param->Attributes(), ShaderIOKind::kInputParam);
-        } else {
-            if (param->BindingPoint().has_value()) {
-                AddError(param)
-                    << "input param to non-entry point function has a binding point set";
-            }
-
-            if (param->Builtin().has_value()) {
-                AddError(param) << "builtins can only be decorated on entry point params";
-            }
         }
 
         scope_stack_.Add(param);
@@ -1431,6 +1373,73 @@ void Structural::CheckFunction(const Function* func) {
 
     QueueBlock(func->Block());
     ProcessTasks();
+}
+
+bool Structural::CheckFunctionParam(const Function* func,
+                                    const FunctionParam* param,
+                                    Hashset<const FunctionParam*, 4>& param_set) {
+    if (!param->Alive()) {
+        AddError(param) << "destroyed parameter found in function parameter list";
+        return false;
+    }
+
+    if (!param_set.Add(param)) {
+        AddError(param) << "function parameter is not unique";
+        return false;
+    }
+
+    if (!param->Type()) {
+        AddError(param) << "function parameter has nullptr type";
+        return false;
+    }
+
+    if (!param->Function()) {
+        AddError(param) << "function parameter has nullptr parent function";
+        return false;
+    }
+
+    if (param->Function() != func) {
+        AddError(param) << "function parameter has incorrect parent function";
+        AddNote(param->Function()) << "parent function declared here";
+        return false;
+    }
+
+    // TODO(516717234): Move to functional
+    CheckType(param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); });
+
+    // TODO(516717234): Move to functional
+    if (func->IsFragment()) {
+        WalkTypeAndMembers(param, param->Type(), param->Attributes(),
+                           [this](const auto* p, const auto* t, const auto& a) {
+                               CheckFrontFacingIfBool(
+                                   p, a, t,
+                                   "fragment entry point params can only be a bool if "
+                                   "decorated with @builtin(front_facing)");
+                           });
+    } else if (func->IsEntryPoint()) {
+        WalkTypeAndMembers(
+            param, param->Type(), param->Attributes(),
+            [this](const auto* p, const auto* t, const auto&) {
+                CheckNotBool(p, t, "entry point params can only be a bool for fragment shaders");
+            });
+    }
+
+    // TODO(516717234): Move to functional
+    if (func->IsEntryPoint()) {
+        ValidateShaderIOAnnotations(param, param->Type(), param->BindingPoint(),
+                                    param->Attributes(), ShaderIOKind::kInputParam);
+    } else {
+        if (param->BindingPoint().has_value()) {
+            AddError(param) << "input param to non-entry point function has a binding point set";
+            return false;
+        }
+
+        if (param->Builtin().has_value()) {
+            AddError(param) << "builtins can only be decorated on entry point params";
+            return false;
+        }
+    }
+    return true;
 }
 
 void Structural::ValidateIOAttributes(const Function* func) {

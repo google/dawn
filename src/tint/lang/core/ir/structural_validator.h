@@ -419,6 +419,12 @@ class Structural {
     /// Validates the given function
     /// @param func the function to validate
     void CheckFunction(const Function* func);
+    /// Validates a function parameter
+    /// @param param the parameter
+    /// @returns true if validation should be continued
+    bool CheckFunctionParam(const Function* func,
+                            const FunctionParam* param,
+                            Hashset<const FunctionParam*, 4>& param_set);
 
     /// Validates the workgroup_size attribute for a given function
     /// @param func the function to validate
