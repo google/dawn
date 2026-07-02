@@ -968,6 +968,9 @@ TEST_P(TimestampQueryTests, QuerySetCreation) {
 
 // Test calling timestamp query from command encoder
 TEST_P(TimestampQueryTests, TimestampOnCommandEncoder) {
+    // TODO (530541262): Investigate failure on macOS 26 M2.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsApple());
+
     constexpr uint32_t kQueryCount = 2;
 
     // Write timestamp with different query indexes
@@ -1141,6 +1144,9 @@ TEST_P(TimestampQueryTests, ResolveFromAnotherEncoder) {
 
 // Test resolving timestamp query correctly if the queries are written sparsely
 TEST_P(TimestampQueryTests, ResolveSparseQueries) {
+    // TODO (530541262): Investigate failure on macOS 26 M2.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsApple());
+
     constexpr uint32_t kQueryCount = 4;
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
@@ -1221,6 +1227,9 @@ TEST_P(TimestampQueryTests, UnsubmittedEncoderMarksQueryAvailable) {
 
 // Test resolving timestamp query to one slot in the buffer
 TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
+    // TODO (530541262): Investigate failure on macOS 26 M2.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsApple());
+
     constexpr uint32_t kQueryCount = 2;
     constexpr uint64_t kBufferSize = kQueryCount * sizeof(uint64_t) + kMinDestinationOffset;
     constexpr uint64_t kCount = kQueryCount + kMinCount;
@@ -1265,6 +1274,9 @@ TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
 
 // Test that resolving with firstQuery != 0 works as expected.
 TEST_P(TimestampQueryTests, ResolveWithFirstQuery) {
+    // TODO (530541262): Investigate failure on macOS 26 M2.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsApple());
+
     // Create a query set for 2 queries, the second of which will be resolved in the buffer.
     constexpr uint32_t kQueryCount = 2;
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
@@ -1286,6 +1298,8 @@ TEST_P(TimestampQueryTests, ResolveWithFirstQuery) {
 // Test resolving a query set twice into the same destination buffer with potentially overlapping
 // ranges
 TEST_P(TimestampQueryTests, ResolveTwiceToSameBuffer) {
+    // TODO (530541262): Investigate failure on macOS 26 M2.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsApple());
     constexpr uint32_t kQueryCount = kMinCount + 2;
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);

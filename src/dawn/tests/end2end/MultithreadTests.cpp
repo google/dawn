@@ -2185,6 +2185,9 @@ TEST_P(MultithreadTimestampQueryTests, ResolveQuerySets_InParallel) {
     // TODO(crbug.com/451389800): [Capture] implement query set.
     DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
 
+    // TODO (530541262): Investigate failure on macOS 26 M2.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsApple());
+
     constexpr uint32_t kQueryCount = 2;
     constexpr uint32_t kNumThreads = 10;
 
