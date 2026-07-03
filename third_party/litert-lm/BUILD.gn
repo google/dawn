@@ -32,4 +32,5 @@ action("litert_lm_advanced_main") {
   outputs = [ "$root_out_dir/litert_lm_advanced_main" ]
   inputs = [ "build_litert_lm.py" ]
   deps = [ "//src/dawn/native:webgpu_dawn" ]
+  data = [ "data/model.litertlm" ]
 }
