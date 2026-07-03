@@ -101,7 +101,7 @@ namespace {
 
 constexpr uint32_t kBufferData = 0x76543210;
 constexpr uint32_t kBufferData2 = 0x01234567;
-constexpr uint32_t kBufferSize = 4;
+constexpr uint32_t kBufferSize = sizeof(uint32_t);
 constexpr wgpu::BufferUsage kMapWriteUsages =
     wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
 constexpr wgpu::BufferUsage kMapReadUsages =
@@ -441,7 +441,7 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, kBufferSize);
 
     uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange(0, kBufferSize));
-    DAWN_UNSAFE_TODO(memcpy(mappedData, &kBufferData, kBufferSize));
+    *mappedData = kBufferData;
     buffer.Unmap();
 
     wgpu::SharedBufferMemoryEndAccessState endState;
@@ -539,7 +539,7 @@ TEST_P(SharedBufferMemoryTests, ReadWriteSharedMapWriteBuffer) {
     MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, kBufferSize);
 
     uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange(0, kBufferSize));
-    DAWN_UNSAFE_TODO(memcpy(mappedData, &kBufferData2, kBufferSize));
+    *mappedData = kBufferData2;
     buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(kBufferData2, buffer, 0);
@@ -866,6 +866,42 @@ TEST_P(SharedBufferMemoryTests, MapAsyncEnsureSynchronization) {
     ASSERT_EQ(*mappedData, kBufferData);
 
     buffer2.Unmap();
+}
+
+// Test that creating a buffer from SharedBufferMemory with mappedAtCreation works correctly,
+// both with map usages and without (mappedAtCreation grants write access regardless of usage).
+TEST_P(SharedBufferMemoryTests, CreateBufferMappedAtCreation) {
+    for (wgpu::BufferUsage usage : {kMapWriteUsages, kStorageUsages}) {
+        SCOPED_TRACE(absl::StrFormat("usage = %u", static_cast<uint32_t>(usage)));
+        wgpu::SharedBufferMemory memory =
+            GetParam().mBackend->CreateSharedBufferMemory(device, usage, kBufferSize);
+        wgpu::SharedBufferMemoryProperties properties;
+        memory.GetProperties(&properties);
+
+        wgpu::BufferDescriptor bufferDesc = {};
+        bufferDesc.size = properties.size;
+        bufferDesc.usage = usage;
+        bufferDesc.mappedAtCreation = true;
+
+        wgpu::SharedBufferMemoryBeginAccessDescriptor beginAccessDesc;
+        beginAccessDesc.initialized = false;
+
+        wgpu::Buffer buffer = memory.CreateBuffer(&bufferDesc);
+        memory.BeginAccess(buffer, &beginAccessDesc);
+
+        // Write data directly through the mapped range.
+        uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange(0, kBufferSize));
+        ASSERT_NE(mappedData, nullptr);
+        *mappedData = kBufferData;
+        buffer.Unmap();
+
+        // Verify the written data is correct by reading it back.
+        EXPECT_BUFFER_U32_EQ(kBufferData, buffer, 0);
+
+        wgpu::SharedBufferMemoryEndAccessState endState;
+        memory.EndAccess(buffer, &endState);
+        EXPECT_EQ(endState.initialized, true);
+    }
 }
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SharedBufferMemoryTests);

@@ -196,7 +196,16 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
 
     DAWN_CHECK(!resource->IsError());
     resource->OnBeginAccess();
-    resource->SetInitialized(descriptor->initialized);
+    // For buffers created with mappedAtCreation=true, MapAtCreation() already called
+    // SetInitialized(true). Don't override that with descriptor->initialized here, since
+    // the buffer is mapped and the user is about to write into it through the mapped range.
+    if constexpr (std::is_same_v<Resource, BufferBase>) {
+        if (resource->GetState() != BufferBase::BufferState::MappedAtCreation) {
+            resource->SetInitialized(descriptor->initialized);
+        }
+    } else {
+        resource->SetInitialized(descriptor->initialized);
+    }
     return {};
 }
 

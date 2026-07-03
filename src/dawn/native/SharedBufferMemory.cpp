@@ -142,6 +142,9 @@ ResultOrError<Ref<BufferBase>> SharedBufferMemoryBase::CreateBuffer(
 
     Ref<BufferBase> buffer;
     DAWN_TRY_ASSIGN(buffer, CreateBufferImpl(descriptor));
+    if (descriptor->mappedAtCreation) {
+        DAWN_TRY(buffer->MapAtCreation());
+    }
     // Access is not allowed until BeginAccess has been called.
     buffer->OnEndAccess();
     return buffer;

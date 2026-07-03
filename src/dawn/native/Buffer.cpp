@@ -650,6 +650,7 @@ ResultOrError<bool> BufferBase::MapAtCreationInternal() {
     mMapOffset = 0;
     mMapSize = mSize;
     mStagingBuffer = std::move(stagingBuffer);
+    mIsMappedAtCreation = true;
     DAWN_TRY(FinalizeMap(BufferState::MappedAtCreation));
     return mStagingBuffer != nullptr;
 }
@@ -862,6 +863,7 @@ MaybeError BufferBase::Unmap(bool forDestroy) {
             break;
         case BufferState::MappedAtCreation:
             DAWN_TRY(TransitionState(BufferState::MappedAtCreation, BufferState::InUse));
+            mIsMappedAtCreation = false;
             if (mStagingBuffer != nullptr) {
                 if (forDestroy) {
                     // No need to upload staging contents if the buffer is being destroyed.
@@ -1084,7 +1086,11 @@ ExecutionSerial BufferBase::OnEndAccess() {
 }
 
 void BufferBase::OnBeginAccess() {
-    mState.store(BufferState::Unmapped, std::memory_order::release);
+    if (mIsMappedAtCreation) {
+        mState.store(BufferState::MappedAtCreation, std::memory_order::release);
+    } else {
+        mState.store(BufferState::Unmapped, std::memory_order::release);
+    }
 }
 
 bool BufferBase::HasAccess() const {

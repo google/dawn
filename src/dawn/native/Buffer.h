@@ -194,6 +194,8 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
 
     ApiObjectList* GetTexelBufferViewTrackingList();
 
+    BufferState GetState() const;
+
   protected:
     BufferBase(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& descriptor);
     BufferBase(DeviceBase* device, const BufferDescriptor* descriptor, ObjectBase::ErrorTag tag);
@@ -206,7 +208,6 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // creation. Otherwise, returns false indicating that backend specific mapping was used instead.
     ResultOrError<bool> MapAtCreationInternal();
 
-    BufferState GetState() const;
     wgpu::MapMode MapMode() const;
     size_t MapOffset() const;
     size_t MapSize() const;
@@ -305,6 +306,10 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // unmapped. Because this buffer itself is directly mappable, it will not create another
     // staging buffer recursively.
     Ref<BufferBase> mStagingBuffer = nullptr;
+
+    // Tracks whether the buffer was mapped at creation and hasn't been unmapped yet.
+    // Used by OnBeginAccess() to restore the correct state for SharedBufferMemory buffers.
+    bool mIsMappedAtCreation = false;
 
     // Mapping specific states.
     wgpu::MapMode mMapMode = wgpu::MapMode::None;
