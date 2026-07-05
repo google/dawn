@@ -679,8 +679,6 @@ crbug.com/407076123 [ android-14 android-pixel-6 ] webgpu:api,validation,createB
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 
-# Flaky failures on NVIDIA
-crbug.com/527091675 [ linux nvidia ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="premultiplied";colorSpace="display-p3";snapshotType="imageBitmap" [ Failure ]
 
 # Not implemented yet
 crbug.com/342840940 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 release ubuntu ] webgpu:api,validation,capability_checks,features,texture_formats:check_capability_guarantees: [ Failure ]
@@ -3159,8 +3157,6 @@ crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_ch
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipelineLayout,at_over:limitTest="atDefault";testValueName="overLimit";visibility=2;order="shiftByHalf" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipelineLayout,at_over:limitTest="atMaximum";testValueName="atLimit";visibility=7;order="shiftByHalf" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipelineLayout,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";visibility=5;order="shiftByHalf" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=true [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,createView:texture_view_usage_of_multiple_usages:usage1=16;usage2=32 [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,encoding,encoder_open_state:compute_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,validation,encoding,encoder_open_state:compute_pass_commands:command="setImmediates" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,encoding,encoder_open_state:compute_pass_commands:command="setImmediates" [ Failure ]
