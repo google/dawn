@@ -12,11 +12,9 @@ void subgroupMatrixStore_e6cbe9() {
   Matrix_right_u32_8x8 arg_2 = Matrix_right_u32_8x8::Splat(0u);
   uint arg_3 = 8u;
   uint v = arg_1;
-  Matrix_right_u32_8x8 v_1 = arg_2;
-  uint v_2 = max(arg_3, 8u);
-  if ((((v + (v_2 * 7u)) + 8u) <= 1024u)) {
-    v_1.Store(arg_0, v, v_2, MatrixLayout::RowMajor);
-  }
+  uint v_1 = max(arg_3, 8u);
+  bool v_2 = (((v + (v_1 * 7u)) + 8u) <= 1024u);
+  arg_2.Store(arg_0, select(v_2, v, 0u), select(v_2, v_1, 8u), MatrixLayout::RowMajor);
 }
 
 void compute_main_inner(uint tint_local_index) {

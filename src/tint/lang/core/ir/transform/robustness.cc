@@ -416,6 +416,7 @@ struct State {
     /// within the limits of the texture that they are accessing.
     /// @param call the texture builtin call instruction
     void PredicateSubgroupMatrixCall(ir::CoreBuiltinCall* call) {
+        // TODO(b/529415904): Clean up this function when deprecated variants are removed.
         const auto& args = call->Args();
 
         // Extract the arguments from the call.
@@ -473,7 +474,8 @@ struct State {
             min_stride = matrix_ty->Columns();
             major_dim = matrix_ty->Rows();
         }
-        // Offset and stride of templated versions are counted in elements of the scalar type.
+        // Offset and stride of majorness templated versions are counted in elements of the scalar
+        // type.
         if (majorness_template) {
             min_stride = min_stride * matrix_ty->Type()->Size() / scalar_ty->Size();
         }
@@ -532,6 +534,28 @@ struct State {
             if (const_end <= const_length) {
                 return;
             }
+        }
+
+        if (majorness_template) {
+            // Binding size is guaranteed to hold enough for `min_stride` matrix. So check if the
+            // array length is sufficient for the given parameters and, if not, use 0 offset and
+            // minimum stride.
+            b.InsertBefore(call, [&] {
+                // The beginning of the last row/column is at `offset + (major_dim-1)*stride`.
+                // We then add another `min_stride` elements to get to the end of the accessed
+                // memory.
+                offset = b.InsertBitcastIfNeeded(ty.u32(), offset);
+                stride = b.InsertBitcastIfNeeded(ty.u32(), stride);
+                auto* last_slice = b.Add(offset, b.Multiply(stride, u32(major_dim - 1)));
+                auto* end = b.Add(last_slice, u32(min_stride));
+                auto* in_bounds = b.LessThanEqual(end, array_length);
+                offset = b.Call(ty.u32(), BuiltinFn::kSelect, 0_u, offset, in_bounds)->Result();
+                stride = b.Call(ty.u32(), BuiltinFn::kSelect, u32(min_stride), stride, in_bounds)
+                             ->Result();
+                call->SetArg(1, offset);
+                call->SetArg(stride_index, stride);
+            });
+            return;
         }
 
         // Predicate the builtin call depending on whether it is in bounds.

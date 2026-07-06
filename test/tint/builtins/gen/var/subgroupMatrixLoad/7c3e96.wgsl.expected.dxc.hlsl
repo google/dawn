@@ -9,11 +9,8 @@ Matrix_right_f16_8x8 subgroupMatrixLoad_7c3e96() {
   uint arg_2 = 8u;
   uint v = arg_1;
   uint v_1 = max(arg_2, 8u);
-  Matrix_right_f16_8x8 v_2 = Matrix_right_f16_8x8::Splat(float16_t(0.0h));
-  if ((((v + (v_1 * 7u)) + 8u) <= 1024u)) {
-    v_2 = Matrix_right_f16_8x8::Load(sb_ro, (0u + (v * 2u)), (v_1 * 2u), MatrixLayout::RowMajor);
-  }
-  Matrix_right_f16_8x8 res = v_2;
+  bool v_2 = (((v + (v_1 * 7u)) + 8u) <= 1024u);
+  Matrix_right_f16_8x8 res = Matrix_right_f16_8x8::Load(sb_ro, (0u + (select(v_2, v, 0u) * 2u)), (select(v_2, v_1, 8u) * 2u), MatrixLayout::RowMajor);
   return res;
 }
 

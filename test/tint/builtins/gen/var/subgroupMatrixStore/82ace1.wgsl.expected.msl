@@ -26,11 +26,9 @@ void subgroupMatrixStore_82ace1(tint_module_vars_struct tint_module_vars) {
   simdgroup_half8x8 arg_2 = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
   uint arg_3 = 8u;
   uint const v = arg_1;
-  simdgroup_half8x8 const v_1 = arg_2;
-  uint const v_2 = max(arg_3, 8u);
-  if ((((v + (v_2 * 7u)) + 8u) <= 1024u)) {
-    (simdgroup_store(v_1, (&(*tint_module_vars.sb_rw).arg_0[v]), ulong(v_2), ulong2(0ul), false));
-  }
+  uint const v_1 = max(arg_3, 8u);
+  bool const v_2 = (((v + (v_1 * 7u)) + 8u) <= 1024u);
+  (simdgroup_store(arg_2, (&(*tint_module_vars.sb_rw).arg_0[select(0u, v, v_2)]), ulong(select(8u, v_1, v_2)), ulong2(0ul), false));
 }
 
 [[max_total_threads_per_threadgroup(1)]]

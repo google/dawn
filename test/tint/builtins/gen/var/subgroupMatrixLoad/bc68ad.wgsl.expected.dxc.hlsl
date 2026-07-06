@@ -7,13 +7,10 @@ RWByteAddressBuffer sb_rw : register(u1);
 Matrix_right_f32_8x8 subgroupMatrixLoad_bc68ad() {
   int arg_1 = int(1);
   uint arg_2 = 8u;
-  int v = arg_1;
-  uint v_1 = max(arg_2, 8u);
-  Matrix_right_f32_8x8 v_2 = Matrix_right_f32_8x8::Splat(0.0f);
-  if ((((asuint(v) + (v_1 * 7u)) + 8u) <= 1024u)) {
-    v_2 = Matrix_right_f32_8x8::Load(sb_rw, (0u + (uint(v) * 4u)), (v_1 * 4u), MatrixLayout::RowMajor);
-  }
-  Matrix_right_f32_8x8 res = v_2;
+  uint v = max(arg_2, 8u);
+  uint v_1 = asuint(arg_1);
+  bool v_2 = (((v_1 + (v * 7u)) + 8u) <= 1024u);
+  Matrix_right_f32_8x8 res = Matrix_right_f32_8x8::Load(sb_rw, (0u + (select(v_2, v_1, 0u) * 4u)), (select(v_2, v, 8u) * 4u), MatrixLayout::RowMajor);
   return res;
 }
 

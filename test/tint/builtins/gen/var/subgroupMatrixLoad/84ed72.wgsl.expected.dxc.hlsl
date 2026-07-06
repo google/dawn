@@ -7,13 +7,10 @@ ByteAddressBuffer sb_ro : register(t1);
 Matrix_left_f16_8x8 subgroupMatrixLoad_84ed72() {
   int arg_1 = int(1);
   uint arg_2 = 8u;
-  int v = arg_1;
-  uint v_1 = max(arg_2, 8u);
-  Matrix_left_f16_8x8 v_2 = Matrix_left_f16_8x8::Splat(float16_t(0.0h));
-  if ((((asuint(v) + (v_1 * 7u)) + 8u) <= 1024u)) {
-    v_2 = Matrix_left_f16_8x8::Load(sb_ro, (0u + (uint(v) * 2u)), (v_1 * 2u), MatrixLayout::ColMajor);
-  }
-  Matrix_left_f16_8x8 res = v_2;
+  uint v = max(arg_2, 8u);
+  uint v_1 = asuint(arg_1);
+  bool v_2 = (((v_1 + (v * 7u)) + 8u) <= 1024u);
+  Matrix_left_f16_8x8 res = Matrix_left_f16_8x8::Load(sb_ro, (0u + (select(v_2, v_1, 0u) * 2u)), (select(v_2, v, 8u) * 2u), MatrixLayout::ColMajor);
   return res;
 }
 

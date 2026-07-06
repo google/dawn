@@ -7,13 +7,10 @@ ByteAddressBuffer sb_ro : register(t1);
 Matrix_result_i32_8x8 subgroupMatrixLoad_e84627() {
   int arg_1 = int(1);
   int arg_2 = int(8);
-  int v = arg_1;
-  uint v_1 = max(asuint(arg_2), 8u);
-  Matrix_result_i32_8x8 v_2 = Matrix_result_i32_8x8::Splat(int(0));
-  if ((((asuint(v) + (v_1 * 7u)) + 8u) <= 1024u)) {
-    v_2 = Matrix_result_i32_8x8::Load(sb_ro, (0u + (uint(v) * 4u)), (v_1 * 4u), MatrixLayout::RowMajor);
-  }
-  Matrix_result_i32_8x8 res = v_2;
+  uint v = max(asuint(arg_2), 8u);
+  uint v_1 = asuint(arg_1);
+  bool v_2 = (((v_1 + (v * 7u)) + 8u) <= 1024u);
+  Matrix_result_i32_8x8 res = Matrix_result_i32_8x8::Load(sb_ro, (0u + (select(v_2, v_1, 0u) * 4u)), (select(v_2, v, 8u) * 4u), MatrixLayout::RowMajor);
   return res;
 }
 

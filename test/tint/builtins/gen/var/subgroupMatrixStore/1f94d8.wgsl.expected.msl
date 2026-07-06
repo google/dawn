@@ -25,12 +25,10 @@ void subgroupMatrixStore_1f94d8(tint_module_vars_struct tint_module_vars) {
   int arg_1 = 1;
   simdgroup_half8x8 arg_2 = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
   uint arg_3 = 8u;
-  int const v = arg_1;
-  simdgroup_half8x8 const v_1 = arg_2;
-  uint const v_2 = max(arg_3, 8u);
-  if ((((as_type<uint>(v) + (v_2 * 7u)) + 8u) <= 1024u)) {
-    (simdgroup_store(v_1, (&(*tint_module_vars.arg_0)[v]), ulong(v_2), ulong2(0ul), true));
-  }
+  uint const v = max(arg_3, 8u);
+  uint const v_1 = as_type<uint>(arg_1);
+  bool const v_2 = (((v_1 + (v * 7u)) + 8u) <= 1024u);
+  (simdgroup_store(arg_2, (&(*tint_module_vars.arg_0)[select(0u, v_1, v_2)]), ulong(select(8u, v, v_2)), ulong2(0ul), true));
 }
 
 void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {

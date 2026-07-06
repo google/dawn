@@ -27,13 +27,10 @@ simdgroup_half8x8 subgroupMatrixLoad_c72233(tint_module_vars_struct tint_module_
   uint arg_2 = 8u;
   uint const v = arg_1;
   uint const v_1 = max(arg_2, 8u);
-  simdgroup_half8x8 v_2 = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
-  if ((((v + (v_1 * 7u)) + 8u) <= 1024u)) {
-    simdgroup_half8x8 v_3 = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
-    (simdgroup_load(v_3, (&(*tint_module_vars.arg_0)[v]), ulong(v_1), ulong2(0ul), true));
-    v_2 = v_3;
-  }
-  simdgroup_half8x8 res = v_2;
+  bool const v_2 = (((v + (v_1 * 7u)) + 8u) <= 1024u);
+  simdgroup_half8x8 v_3 = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
+  (simdgroup_load(v_3, (&(*tint_module_vars.arg_0)[select(0u, v, v_2)]), ulong(select(8u, v_1, v_2)), ulong2(0ul), true));
+  simdgroup_half8x8 res = v_3;
   return res;
 }
 

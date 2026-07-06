@@ -7,12 +7,10 @@ void subgroupMatrixStore_48081f() {
   int arg_1 = int(1);
   Matrix_result_i8_8x8 arg_2 = Matrix_result_i8_8x8::Splat(int(0));
   int arg_3 = int(8);
-  int v = arg_1;
-  Matrix_result_i8_8x8 v_1 = arg_2;
-  uint v_2 = max(asuint(arg_3), 2u);
-  if ((((asuint(v) + (v_2 * 7u)) + 2u) <= 1024u)) {
-    v_1.Store(sb_rw, (0u + (uint(v) * 4u)), (v_2 * 4u), MatrixLayout::ColMajor);
-  }
+  uint v = max(asuint(arg_3), 2u);
+  uint v_1 = asuint(arg_1);
+  bool v_2 = (((v_1 + (v * 7u)) + 2u) <= 1024u);
+  arg_2.Store(sb_rw, (0u + (select(v_2, v_1, 0u) * 4u)), (select(v_2, v, 2u) * 4u), MatrixLayout::ColMajor);
 }
 
 [numthreads(1, 1, 1)]

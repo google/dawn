@@ -45,8 +45,8 @@
 %_ptr_Function_17 = OpTypePointer Function %17
      %uint_7 = OpConstant %uint 7
        %bool = OpTypeBool
-%_ptr_Workgroup_int = OpTypePointer Workgroup %int
      %uint_0 = OpConstant %uint 0
+%_ptr_Workgroup_int = OpTypePointer Workgroup %int
          %44 = OpTypeFunction %void %uint
  %uint_24840 = OpConstant %uint 24840
       %int_0 = OpConstant %int 0
@@ -66,13 +66,10 @@
          %32 = OpIAdd %uint %25 %30
          %33 = OpIAdd %uint %32 %uint_2
          %34 = OpULessThanEqual %bool %33 %uint_1024
-               OpSelectionMerge %36 None
-               OpBranchConditional %34 %37 %36
-         %37 = OpLabel
-         %38 = OpAccessChain %_ptr_Workgroup_int %arg_0 %25
-               OpCooperativeMatrixStoreKHR %38 %26 %uint_0 %28 NonPrivatePointer
-               OpBranch %36
-         %36 = OpLabel
+         %36 = OpSelect %uint %34 %25 %uint_0
+         %38 = OpSelect %uint %34 %28 %uint_2
+         %39 = OpAccessChain %_ptr_Workgroup_int %arg_0 %36
+               OpCooperativeMatrixStoreKHR %39 %26 %uint_0 %38 NonPrivatePointer
                OpReturn
                OpFunctionEnd
 %compute_main_inner = OpFunction %void None %44

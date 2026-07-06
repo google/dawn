@@ -64,13 +64,10 @@
          %31 = OpIAdd %uint %24 %29
          %32 = OpIAdd %uint %31 %uint_8
          %33 = OpULessThanEqual %bool %32 %uint_1024
-               OpSelectionMerge %35 None
-               OpBranchConditional %33 %36 %35
-         %36 = OpLabel
-         %37 = OpAccessChain %_ptr_Workgroup_int %arg_0 %24
-               OpCooperativeMatrixStoreKHR %37 %25 %uint_0 %27 NonPrivatePointer
-               OpBranch %35
-         %35 = OpLabel
+         %35 = OpSelect %uint %33 %24 %uint_0
+         %36 = OpSelect %uint %33 %27 %uint_8
+         %37 = OpAccessChain %_ptr_Workgroup_int %arg_0 %35
+               OpCooperativeMatrixStoreKHR %37 %25 %uint_0 %36 NonPrivatePointer
                OpReturn
                OpFunctionEnd
 %compute_main_inner = OpFunction %void None %42

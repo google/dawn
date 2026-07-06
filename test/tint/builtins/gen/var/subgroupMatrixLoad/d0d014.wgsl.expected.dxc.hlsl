@@ -13,11 +13,8 @@ Matrix_right_f32_8x8 subgroupMatrixLoad_d0d014() {
   int arg_2 = int(8);
   uint v = arg_1;
   uint v_1 = max(asuint(arg_2), 8u);
-  Matrix_right_f32_8x8 v_2 = Matrix_right_f32_8x8::Splat(0.0f);
-  if ((((v + (v_1 * 7u)) + 8u) <= 1024u)) {
-    v_2 = Matrix_right_f32_8x8::Load(arg_0, v, v_1, MatrixLayout::ColMajor);
-  }
-  Matrix_right_f32_8x8 res = v_2;
+  bool v_2 = (((v + (v_1 * 7u)) + 8u) <= 1024u);
+  Matrix_right_f32_8x8 res = Matrix_right_f32_8x8::Load(arg_0, select(v_2, v, 0u), select(v_2, v_1, 8u), MatrixLayout::ColMajor);
   return res;
 }
 

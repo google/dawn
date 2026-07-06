@@ -25,15 +25,12 @@ struct tint_module_vars_struct {
 simdgroup_float8x8 subgroupMatrixLoad_1fdfc1(tint_module_vars_struct tint_module_vars) {
   int arg_1 = 1;
   uint arg_2 = 8u;
-  int const v = arg_1;
-  uint const v_1 = max(arg_2, 8u);
-  simdgroup_float8x8 v_2 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  if ((((as_type<uint>(v) + (v_1 * 7u)) + 8u) <= 1024u)) {
-    simdgroup_float8x8 v_3 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-    (simdgroup_load(v_3, (&(*tint_module_vars.sb_rw).arg_0[v]), ulong(v_1), ulong2(0ul), true));
-    v_2 = v_3;
-  }
-  simdgroup_float8x8 res = v_2;
+  uint const v = max(arg_2, 8u);
+  uint const v_1 = as_type<uint>(arg_1);
+  bool const v_2 = (((v_1 + (v * 7u)) + 8u) <= 1024u);
+  simdgroup_float8x8 v_3 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  (simdgroup_load(v_3, (&(*tint_module_vars.sb_rw).arg_0[select(0u, v_1, v_2)]), ulong(select(8u, v, v_2)), ulong2(0ul), true));
+  simdgroup_float8x8 res = v_3;
   return res;
 }
 

@@ -8,11 +8,9 @@ void subgroupMatrixStore_a3c63e() {
   Matrix_right_f32_8x8 arg_2 = Matrix_right_f32_8x8::Splat(0.0f);
   int arg_3 = int(8);
   uint v = arg_1;
-  Matrix_right_f32_8x8 v_1 = arg_2;
-  uint v_2 = max(asuint(arg_3), 8u);
-  if ((((v + (v_2 * 7u)) + 8u) <= 1024u)) {
-    v_1.Store(sb_rw, (0u + (v * 4u)), (v_2 * 4u), MatrixLayout::RowMajor);
-  }
+  uint v_1 = max(asuint(arg_3), 8u);
+  bool v_2 = (((v + (v_1 * 7u)) + 8u) <= 1024u);
+  arg_2.Store(sb_rw, (0u + (select(v_2, v, 0u) * 4u)), (select(v_2, v_1, 8u) * 4u), MatrixLayout::RowMajor);
 }
 
 [numthreads(1, 1, 1)]

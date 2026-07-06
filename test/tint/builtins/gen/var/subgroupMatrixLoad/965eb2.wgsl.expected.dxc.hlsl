@@ -11,13 +11,10 @@ groupshared float16_t arg_0[1024];
 Matrix_left_f16_8x8 subgroupMatrixLoad_965eb2() {
   int arg_1 = int(1);
   uint arg_2 = 8u;
-  int v = arg_1;
-  uint v_1 = max(arg_2, 8u);
-  Matrix_left_f16_8x8 v_2 = Matrix_left_f16_8x8::Splat(float16_t(0.0h));
-  if ((((asuint(v) + (v_1 * 7u)) + 8u) <= 1024u)) {
-    v_2 = Matrix_left_f16_8x8::Load(arg_0, asuint(v), v_1, MatrixLayout::RowMajor);
-  }
-  Matrix_left_f16_8x8 res = v_2;
+  uint v = max(arg_2, 8u);
+  uint v_1 = asuint(arg_1);
+  bool v_2 = (((v_1 + (v * 7u)) + 8u) <= 1024u);
+  Matrix_left_f16_8x8 res = Matrix_left_f16_8x8::Load(arg_0, select(v_2, v_1, 0u), select(v_2, v, 8u), MatrixLayout::RowMajor);
   return res;
 }
 
