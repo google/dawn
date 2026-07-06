@@ -143,6 +143,19 @@ if(DAWN_SUPPORTS_CXX_MODULES)
     CXX_STANDARD    ${DAWN_TOPLEVEL_CXX_STANDARD}
     CXX_EXTENSIONS  ${DAWN_TOPLEVEL_CXX_EXTENSIONS}
   )
+
+  if (EMSCRIPTEN)
+    # Add module interface to emdawnwebgpu_pkg
+    add_custom_target(emdawnwebgpu_pkg_cppmodules
+      COMMAND ${CMAKE_COMMAND} -E make_directory
+        "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu_cpp/include/webgpu/"
+
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${DAWNCPP_MODULES_GEN_SOURCES}
+        "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu_cpp/include/webgpu/"
+    )
+    add_dependencies(emdawnwebgpu_pkg emdawnwebgpu_pkg_cppmodules)
+  endif()
 endif()
 
 ###############################################################################
