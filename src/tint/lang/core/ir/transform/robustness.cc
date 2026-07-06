@@ -570,6 +570,63 @@ struct State {
         });
     }
 
+    uint32_t MaxSubgroupMatrixSizeUse(const CoreBuiltinCall* arrayView) {
+        TINT_IR_ASSERT(ir, arrayView->Func() == BuiltinFn::kBufferArrayView);
+
+        uint32_t size = 0;
+        Vector<Usage, 4> worklist;
+        for (auto& u : arrayView->Result()->UsagesUnsorted()) {
+            worklist.Push(u);
+        }
+
+        while (!worklist.IsEmpty()) {
+            auto use = worklist.Pop();
+
+            // Since we're starting at bufferArrayView call there aren't too many possible uses we
+            // have to consider.
+            tint::Switch(
+                use.instruction,
+                [&](const Let* let) {
+                    for (auto& u : let->Result()->UsagesUnsorted()) {
+                        worklist.Push(u);
+                    }
+                },
+                [&](const UserCall* call) {
+                    auto* target = call->Target();
+                    auto* param = target->Params()[use.operand_index - call->ArgsOperandOffset()];
+                    for (auto& u : param->UsagesUnsorted()) {
+                        worklist.Push(u);
+                    }
+                },
+                [&](const CoreBuiltinCall* call) {
+                    const type::SubgroupMatrix* mat_ty = nullptr;
+                    // TODO(b/529415904): remove template checks when deprecated variants are
+                    // removed.
+                    if (call->Func() == BuiltinFn::kSubgroupMatrixLoad &&
+                        call->ExplicitTemplateParams().Length() == 2) {
+                        mat_ty = call->Result()->Type()->As<type::SubgroupMatrix>();
+                    }
+                    if (call->Func() == BuiltinFn::kSubgroupMatrixStore &&
+                        call->ExplicitTemplateParams().Length() == 1) {
+                        mat_ty = call->Args()[2]->Type()->As<type::SubgroupMatrix>();
+                    }
+                    if (mat_ty) {
+                        uint32_t mat_size =
+                            mat_ty->Rows() * mat_ty->Columns() * mat_ty->Type()->Size();
+                        size = std::max(size, mat_size);
+                    }
+                },
+                [&](const Access* access) {
+                    for (auto& u : access->Result()->UsagesUnsorted()) {
+                        worklist.Push(u);
+                    }
+                },
+                [&](Default) {});
+        }
+
+        return size;
+    }
+
     void ClampBufferViewArgs(ir::CoreBuiltinCall* call) {
         // bufferView %ptr, %offset, [%length]
         // bufferArrayView %ptr, %offset, %size, [%length]
@@ -596,6 +653,15 @@ struct State {
                 ty_stride = store_ty->As<type::Array>()->ImplicitStride();
                 ty_required_size = ty_stride;
             }
+        }
+
+        // The bound buffer is guaranteed to be large enough for any subgroup matrix access, but the
+        // size operand on bufferArrayView might be smaller than necessary. Search forwards for any
+        // subgroup matrix memory access and ensure the minimum size is large enough to accommodate
+        // the maximum needed size.
+        if (call->Func() == core::BuiltinFn::kBufferArrayView) {
+            uint32_t max_subgroup_matrix_size = MaxSubgroupMatrixSizeUse(call);
+            ty_required_size = std::max(ty_required_size, max_subgroup_matrix_size + ty_offset);
         }
 
         b.InsertBefore(call, [&] {

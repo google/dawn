@@ -6585,7 +6585,6 @@ S = struct @align(8) {
 
 TEST_P(IR_RobustnessTest, BufferArrayView_RuntimeStruct_ConstSize) {
     mod.properties.Add(Property::kAllowBufferTypes);
-    mod.properties.Add(Property::kAllowBufferTypes);
     auto* S = ty.Struct(mod.symbols.Register("S"),
                         {
                             {mod.symbols.Register("a"), ty.array(ty.u32(), 5)},
@@ -6639,6 +6638,218 @@ S = struct @align(8) {
 
     RobustnessConfig cfg;
     cfg.clamp_storage = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_SubgroupMatrixUse) {
+    mod.properties.Add(Property::kAllowBufferTypes);
+    auto* mat_ty = ty.subgroup_matrix_left(ty.u32(), 8, 8);
+    auto* func = b.Function("foo", ty.void_());
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
+    auto* o = b.FunctionParam("o", ty.u32());
+    auto* s = b.FunctionParam("s", ty.u32());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    func->SetParams({p, o, s, offset});
+    b.Append(func->Block(), [&] {
+        auto* view =
+            b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())), BuiltinFn::kBufferArrayView,
+                           Vector<TemplateParameter, 1>{ty.runtime_array(ty.u32())}, p, o, s);
+        b.CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat_ty, Majorness::kColMajor}, view, offset,
+                       8_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%p:ptr<storage, buffer, read_write>, %o:u32, %s:u32, %offset:u32):void {
+  $B1: {
+    %6:ptr<storage, array<u32>, read_write> = bufferArrayView<array<u32>> %p, %o, %s
+    %7:subgroup_matrix_left<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, col_major> %6, %offset, 8u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p:ptr<storage, buffer, read_write>, %o:u32, %s:u32, %offset:u32):void {
+  $B1: {
+    %6:u32 = bufferLength %p
+    %7:u32 = max %s, 256u
+    %8:u32 = addSat %o, %7
+    %9:bool = lt %6, %8
+    %10:u32 = select %o, 0u, %9
+    %11:u32 = select %7, 256u, %9
+    %12:ptr<storage, array<u32>, read_write> = bufferArrayView<array<u32>> %p, %10, %11
+    %13:subgroup_matrix_left<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, col_major> %12, %offset, 8u
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_storage = GetParam();
+    cfg.predicate_subgroup_matrix = false;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_SubgroupMatrixUse_Max) {
+    mod.properties.Add(Property::kAllowBufferTypes);
+    auto* mat1_ty = ty.subgroup_matrix_left(ty.u32(), 8, 8);
+    auto* mat2_ty = ty.subgroup_matrix_left(ty.u8(), 8, 8);
+    auto* func = b.Function("foo", ty.void_());
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
+    auto* o = b.FunctionParam("o", ty.u32());
+    auto* s = b.FunctionParam("s", ty.u32());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    func->SetParams({p, o, s, offset});
+    b.Append(func->Block(), [&] {
+        auto* view =
+            b.CallExplicit(ty.ptr(storage, ty.runtime_array(ty.u32())), BuiltinFn::kBufferArrayView,
+                           Vector<TemplateParameter, 1>{ty.runtime_array(ty.u32())}, p, o, s);
+        b.CallExplicit(mat1_ty, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat1_ty, Majorness::kColMajor}, view, offset,
+                       8_u);
+        b.CallExplicit(mat2_ty, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat2_ty, Majorness::kColMajor}, view, offset,
+                       8_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%p:ptr<storage, buffer, read_write>, %o:u32, %s:u32, %offset:u32):void {
+  $B1: {
+    %6:ptr<storage, array<u32>, read_write> = bufferArrayView<array<u32>> %p, %o, %s
+    %7:subgroup_matrix_left<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, col_major> %6, %offset, 8u
+    %8:subgroup_matrix_left<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major> %6, %offset, 8u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p:ptr<storage, buffer, read_write>, %o:u32, %s:u32, %offset:u32):void {
+  $B1: {
+    %6:u32 = bufferLength %p
+    %7:u32 = max %s, 256u
+    %8:u32 = addSat %o, %7
+    %9:bool = lt %6, %8
+    %10:u32 = select %o, 0u, %9
+    %11:u32 = select %7, 256u, %9
+    %12:ptr<storage, array<u32>, read_write> = bufferArrayView<array<u32>> %p, %10, %11
+    %13:subgroup_matrix_left<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, col_major> %12, %offset, 8u
+    %14:subgroup_matrix_left<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u8, 8, 8>, col_major> %12, %offset, 8u
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_storage = GetParam();
+    cfg.predicate_subgroup_matrix = false;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, BufferArrayView_ArrayU32_SubgroupMatrixUse_RuntimeStruct) {
+    mod.properties.Add(Property::kAllowBufferTypes);
+    auto* S =
+        ty.Struct(mod.symbols.New("S"), {
+                                            {mod.symbols.New("a"), ty.vec4u()},
+                                            {mod.symbols.New("b"), ty.runtime_array(ty.u32())},
+                                        });
+    auto* mat_ty = ty.subgroup_matrix_left(ty.u32(), 8, 8);
+    auto* bar = b.Function("bar", ty.void_());
+    auto* bar_p = b.FunctionParam("bar_p", ty.ptr(storage, S));
+    auto* bar_offset = b.FunctionParam("bar_offset", ty.u32());
+    bar->SetParams({bar_p, bar_offset});
+    b.Append(bar->Block(), [&] {
+        auto* access = b.Access(ty.ptr(storage, ty.runtime_array(ty.u32())), bar_p, 1_u);
+        b.CallExplicit(mat_ty, BuiltinFn::kSubgroupMatrixLoad,
+                       Vector<TemplateParameter, 2>{mat_ty, Majorness::kColMajor}, access,
+                       bar_offset, 8_u);
+        b.Return(bar);
+    });
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
+    auto* o = b.FunctionParam("o", ty.u32());
+    auto* s = b.FunctionParam("s", ty.u32());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    foo->SetParams({p, o, s, offset});
+    b.Append(foo->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(storage, S), BuiltinFn::kBufferArrayView,
+                                    Vector<TemplateParameter, 1>{S}, p, o, s);
+        auto* let_view = b.Let("let_view", view);
+        b.Call(ty.void_(), bar, let_view, offset);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:array<u32> @offset(16)
+}
+
+%bar = func(%bar_p:ptr<storage, S, read_write>, %bar_offset:u32):void {
+  $B1: {
+    %4:ptr<storage, array<u32>, read_write> = access %bar_p, 1u
+    %5:subgroup_matrix_left<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, col_major> %4, %bar_offset, 8u
+    ret
+  }
+}
+%foo = func(%p:ptr<storage, buffer, read_write>, %o:u32, %s:u32, %offset:u32):void {
+  $B2: {
+    %11:ptr<storage, S, read_write> = bufferArrayView<S> %p, %o, %s
+    %let_view:ptr<storage, S, read_write> = let %11
+    %13:void = call %bar, %let_view, %offset
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  a:vec4<u32> @offset(0)
+  b:array<u32> @offset(16)
+}
+
+%bar = func(%bar_p:ptr<storage, S, read_write>, %bar_offset:u32):void {
+  $B1: {
+    %4:ptr<storage, array<u32>, read_write> = access %bar_p, 1u
+    %5:subgroup_matrix_left<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<u32, 8, 8>, col_major> %4, %bar_offset, 8u
+    ret
+  }
+}
+%foo = func(%p:ptr<storage, buffer, read_write>, %o:u32, %s:u32, %offset:u32):void {
+  $B2: {
+    %11:u32 = bufferLength %p
+    %12:u32 = max %s, 272u
+    %13:u32 = addSat %o, %12
+    %14:bool = lt %11, %13
+    %15:u32 = select %o, 0u, %14
+    %16:u32 = select %12, 272u, %14
+    %17:ptr<storage, S, read_write> = bufferArrayView<S> %p, %15, %16
+    %let_view:ptr<storage, S, read_write> = let %17
+    %19:void = call %bar, %let_view, %offset
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_storage = GetParam();
+    cfg.predicate_subgroup_matrix = false;
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect : src, str());
