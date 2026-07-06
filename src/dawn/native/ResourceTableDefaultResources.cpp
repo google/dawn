@@ -167,8 +167,6 @@ MaybeError ResourceTableDefaultResources::Initialize(DeviceBase* device) {
     // Each resource is added in the order specified by GetOrder()
     auto AddDefaultTextureView = [&](TextureBase* texture, const TextureViewDescriptor* viewDesc =
                                                                nullptr) -> MaybeError {
-        DAWN_TRY(texture->Pin(wgpu::TextureUsage::TextureBinding));
-
         Ref<TextureViewBase> view;
         DAWN_TRY_ASSIGN(view, device->CreateTextureView(texture, viewDesc));
 

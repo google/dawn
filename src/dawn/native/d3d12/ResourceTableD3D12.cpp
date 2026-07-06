@@ -41,6 +41,7 @@
 #include "src/dawn/native/d3d12/SamplerD3D12.h"
 #include "src/dawn/native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "src/dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
+#include "src/dawn/native/d3d12/TextureD3D12.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native::d3d12 {
@@ -302,9 +303,15 @@ void ResourceTable::FreeCPUHeap(ResourceTable::Heap& heap) {
     heap.numDescriptors = 0;
 }
 
-// Apply updates to resources or to the metadata buffers that are pending.
-MaybeError ResourceTable::ApplyPendingUpdates(CommandRecordingContext* recordingContext) {
-    Updates updates = AcquireDirtySlotUpdates();
+MaybeError ResourceTable::ApplyPendingUpdates(
+    CommandRecordingContext* recordingContext,
+    const absl::flat_hash_set<TextureBase*>& writableTextures) {
+    Updates updates = AcquireDirtySlotUpdates(writableTextures);
+
+    // Transition and initialize all required textures
+    if (!updates.texturesToTransition.empty()) {
+        DAWN_TRY(TransitionResources(recordingContext, updates.texturesToTransition));
+    }
 
     // Update resource bindings before metadata to ensure mSlotToSamplerIndex is up-to-date
     if (!updates.resourceDiffs.empty()) {
@@ -314,6 +321,20 @@ MaybeError ResourceTable::ApplyPendingUpdates(CommandRecordingContext* recording
         DAWN_TRY(UpdateMetadataBuffer(recordingContext, updates.metadataUpdates));
     }
 
+    return {};
+}
+
+MaybeError ResourceTable::TransitionResources(
+    CommandRecordingContext* recordingContext,
+    const absl::flat_hash_set<Ref<TextureBase>>& textures) {
+    for (const auto& texture : textures) {
+        Texture* textureBackend = ToBackend(texture.Get());
+        DAWN_TRY(textureBackend->EnsureSubresourceContentInitialized(
+            recordingContext, textureBackend->GetAllSubresources()));
+        textureBackend->TrackUsageAndTransitionNow(recordingContext,
+                                                   wgpu::TextureUsage::TextureBinding,
+                                                   textureBackend->GetAllSubresources());
+    }
     return {};
 }
 

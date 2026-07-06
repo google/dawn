@@ -57,7 +57,8 @@ class ResourceTable final : public ResourceTableBase {
                                                     const ResourceTableDescriptor* descriptor);
 
     // Apply updates to resources or to the metadata buffers that are pending.
-    MaybeError ApplyPendingUpdates(CommandRecordingContext* recordingContext);
+    MaybeError ApplyPendingUpdates(CommandRecordingContext* recordingContext,
+                                   const absl::flat_hash_set<TextureBase*>& writableTextures);
 
     // Returns true if the ResourceTable was successfully populated (now or on a previous call)
     // in the current allocator's heap. If false is returned, caller should
@@ -102,6 +103,8 @@ class ResourceTable final : public ResourceTableBase {
                                                uint32_t descriptorCount);
     static void FreeCPUHeap(Heap& heap);
 
+    MaybeError TransitionResources(CommandRecordingContext* recordingContext,
+                                   const absl::flat_hash_set<Ref<TextureBase>>& textures);
     MaybeError UpdateMetadataBuffer(CommandRecordingContext* recordingContext,
                                     const std::vector<MetadataUpdate>& updates);
     MaybeError UpdateResourceBindings(const std::vector<ResourceDiff>& diffs);

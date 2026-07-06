@@ -549,54 +549,6 @@ MaybeError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
         for (const QuerySetBase* querySet : usages.usedQuerySets) {
             DAWN_TRY(querySet->ValidateCanUseInSubmitNow());
         }
-
-        // Validate that pinned textures are only used with their pinned usage. This is done in a
-        // separate pass to avoid adding validation overhead to non-bindless while prototyping
-        // bindless.
-        // TODO(https://crbug.com/435317394): Merge this validation with the validation that
-        // textures are not destroyed by turning the sets of resources in the PassUsageTracker into
-        // maps of resources to usages, and doing a single bitmask check to know if there's an error
-        // before finding out the reason why there is an error.
-        if (GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
-            for (const TextureBase* texture : usages.topLevelTextures) {
-                DAWN_INVALID_IF(texture->HasPinnedUsage(),
-                                "%s is pinned to %s while used in a CommandEncoder command.",
-                                texture, texture->GetPinnedUsage());
-            }
-            for (const SyncScopeResourceUsage& scope : usages.renderPasses) {
-                for (auto [j, texture] : Enumerate(scope.textures)) {
-                    if (!texture->HasPinnedUsage()) {
-                        continue;
-                    }
-
-                    DAWN_TRY(scope.textureSyncInfos[j].Iterate(
-                        [&](const SubresourceRange&, const TextureSyncInfo& info) -> MaybeError {
-                            DAWN_INVALID_IF(info.usage != texture->GetPinnedUsage(),
-                                            "%s is used as %s while pinned to %s.", texture,
-                                            info.usage, texture->GetPinnedUsage());
-                            return {};
-                        }));
-                }
-            }
-            for (const ComputePassResourceUsage& compute : usages.computePasses) {
-                for (const SyncScopeResourceUsage& scope : compute.dispatchUsages) {
-                    for (auto [j, texture] : Enumerate(scope.textures)) {
-                        if (!texture->HasPinnedUsage()) {
-                            continue;
-                        }
-
-                        DAWN_TRY(scope.textureSyncInfos[j].Iterate(
-                            [&](const SubresourceRange&,
-                                const TextureSyncInfo& info) -> MaybeError {
-                                DAWN_INVALID_IF(info.usage != texture->GetPinnedUsage(),
-                                                "%s is used as %s while pinned to %s.", texture,
-                                                info.usage, texture->GetPinnedUsage());
-                                return {};
-                            }));
-                    }
-                }
-            }
-        }
     }
 
     return {};
@@ -624,8 +576,6 @@ MaybeError QueueBase::ValidateWriteTexture(const TexelCopyTextureInfo* destinati
     DAWN_INVALID_IF(!(destination->texture->GetUsage() & wgpu::TextureUsage::CopyDst),
                     "Usage (%s) of %s does not include %s.", destination->texture->GetUsage(),
                     destination->texture, wgpu::TextureUsage::CopyDst);
-    DAWN_INVALID_IF(destination->texture->HasPinnedUsage(), "%s is pinned to %s.",
-                    destination->texture, destination->texture->GetPinnedUsage());
 
     DAWN_INVALID_IF(destination->texture->GetSampleCount() > 1, "Sample count (%u) of %s is not 1",
                     destination->texture->GetSampleCount(), destination->texture);

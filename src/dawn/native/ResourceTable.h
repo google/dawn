@@ -30,6 +30,7 @@
 
 #include <vector>
 
+#include "absl/container/flat_hash_set.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/WeakRefSupport.h"
@@ -61,9 +62,6 @@ MaybeError ValidateResourceTableDescriptor(const DeviceBase* device,
 //    may be accessed. Tint enum values are used since Tint is the place where shader-side
 //    validation is implemented..
 //  - The updates of resources in slots and of the metadata buffer are batched.
-//  - Textures must be pinned to be accessible via the resource table, which requires
-//    bidirectional communication so that textures know in which slot they are and notify them of
-//    pinning/unpinning. This is why ResourceTable is WeakRefSupport.
 //  - Default resources are inserted at the end of the table, in a way invisible to the
 //    application, which means that there are two different sizes for the table (the API visible
 //    size and the real one).
@@ -84,11 +82,6 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     bool IsDestroyed() const;
     MaybeError ValidateCanUseInSubmitNow() const;
 
-    // Methods used by resources to notify when pinning state changes, which in turns may need to
-    // update the contents of the metadata buffer.
-    void OnPinned(ResourceTableSlot slot, TextureBase* texture);
-    void OnUnpinned(ResourceTableSlot slot, TextureBase* texture);
-
     // Dawn API
     void APIDestroy();
     wgpu::Status APIUpdate(uint32_t slot, const BindingResource* resource);
@@ -99,6 +92,9 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     // Computes the tint::ResourceType that should be in the metadata buffer for the resource.
     static tint::ResourceType ComputeTypeId(
         const std::variant<std::monostate, Ref<TextureViewBase>, Ref<SamplerBase>>& resource);
+
+    // Notify the table of a texture state change (destroyed, begin/end access)
+    void OnTextureStateChange(TextureBase* texture);
 
   protected:
     ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor);
@@ -137,8 +133,9 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     struct Updates {
         std::vector<MetadataUpdate> metadataUpdates;
         std::vector<ResourceDiff> resourceDiffs;
+        absl::flat_hash_set<Ref<TextureBase>> texturesToTransition;
     };
-    Updates AcquireDirtySlotUpdates();
+    Updates AcquireDirtySlotUpdates(const absl::flat_hash_set<TextureBase*>& writableTextures);
 
   private:
     ResourceTableBase(DeviceBase* device,
@@ -153,6 +150,9 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     // Helper method that must be called when anything in the SlotState changes (except
     // `availableAfter`), so that the slot updates are included in the next batch of updates.
     void MarkStateDirty(ResourceTableSlot slot);
+
+    absl::flat_hash_set<Ref<TextureBase>> MakeResourcesVisibleExcept(
+        const absl::flat_hash_set<TextureBase*>& writableTextures);
 
     ResourceTableSlot mAPISize = ResourceTableSlot(0u);
     bool mDestroyed = false;
@@ -178,12 +178,24 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
         ExecutionSerial availableAfter = kBeginningOfGPUTime;
         bool dirty = false;
         bool resourceDirty = false;  // resourceDirty implies dirty.
-        bool pinned = false;         // Applies to textures
+        bool visible = false;        // Applies to textures
     };
     ityp::vector<ResourceTableSlot, SlotState> mSlots;
 
-    // The list of slots that need to be updated before the next use of the dynamic array.
+    // The list of slots that need to be updated before the next use of the resource table.
     std::vector<ResourceTableSlot> mDirtySlots;
+
+    // The state of textures in the table
+    struct TextureState {
+        bool visible = false;
+        // std::vector<ResourceTableSlot> slots;
+        absl::flat_hash_set<ResourceTableSlot> slots;
+    };
+    absl::flat_hash_map<TextureBase*, TextureState> mTextureState;
+
+    // Textures that are "dirty" for some reason, e.g. destroyed, access change, r/w change. Handled
+    // by MakeResourcesVisibleExcept.
+    absl::flat_hash_set<TextureBase*> mDirtyStateTextures;
 };
 
 }  // namespace dawn::native

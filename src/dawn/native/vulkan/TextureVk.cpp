@@ -1385,32 +1385,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
     return {};
 }
 
-MaybeError Texture::PinImpl(wgpu::TextureUsage usage) {
-    // Pinning means that until unpinned, the texture will have specific usage and can be used
-    // freely in shaders without any further check or memory barrier tracking. Ensure all
-    // subresources are cleared and transitioned to the usage.
-    DAWN_ASSERT(!HasPinnedUsage());
-    SubresourceRange pinnedSubresources = GetAllSubresources();
 
-    CommandRecordingContext* recordingContext =
-        ToBackend(GetDevice()->GetQueue())->GetPendingRecordingContext(Queue::SubmitMode::Passive);
-    DAWN_TRY(EnsureSubresourceContentInitialized(recordingContext, pinnedSubresources));
-
-    TransitionUsageNow(recordingContext, usage, kAllStages, pinnedSubresources);
-
-    // TODO(https://issues.chromium.org/473444516): Investigate what to do for imported textures.
-    // Should we consider a pin/unpin pair similar to an access on a queue such that we need to
-    // wait on fences or export them?
-    return {};
-}
-
-void Texture::UnpinImpl() {
-    DAWN_ASSERT(HasPinnedUsage());
-
-    // TODO(https://issues.chromium.org/473444516): Investigate what to do for imported textures.
-    // Should we consider a pin/unpin pair similar to an access on a queue such that we need to
-    // wait on fences or export them?
-}
 
 MaybeError Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                                         const SubresourceRange& range) {

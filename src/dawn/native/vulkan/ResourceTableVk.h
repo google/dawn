@@ -48,7 +48,8 @@ class ResourceTable final : public ResourceTableBase {
     static ResultOrError<VkDescriptorSetLayout> MakeDescriptorSetLayout(Device* device);
 
     // Apply updates to resources or to the metadata buffers that are pending.
-    MaybeError ApplyPendingUpdates(CommandRecordingContext* recordingContext);
+    MaybeError ApplyPendingUpdates(CommandRecordingContext* recordingContext,
+                                   const absl::flat_hash_set<TextureBase*>& writableTextures);
 
     VkDescriptorSet GetHandle() const;
 
@@ -62,6 +63,8 @@ class ResourceTable final : public ResourceTableBase {
     using ResourceTableBase::ResourceTableBase;
     MaybeError Initialize();
 
+    MaybeError TransitionResources(CommandRecordingContext* recordingContext,
+                                   const absl::flat_hash_set<Ref<TextureBase>>& textures);
     MaybeError UpdateMetadataBuffer(CommandRecordingContext* recordingContext,
                                     const std::vector<MetadataUpdate>& updates);
     MaybeError UpdateResourceBindings(const std::vector<ResourceDiff>& diffs);

@@ -355,30 +355,7 @@ void Texture::DestroyImpl(DestroyReason reason) {
     mIsExternalSwapChainTexture = false;
 }
 
-MaybeError Texture::PinImpl(wgpu::TextureUsage usage) {
-    DAWN_ASSERT(!HasPinnedUsage());
-    SubresourceRange pinnedSubresources = GetAllSubresources();
 
-    CommandRecordingContext* commandContext =
-        ToBackend(GetDevice()->GetQueue())->GetPendingCommandContext(Queue::SubmitMode::Passive);
-    DAWN_TRY(EnsureSubresourceContentInitialized(commandContext, pinnedSubresources));
-
-    // TODO(crbug.com/482008255): Handle residency of pinned resources
-    TrackUsageAndTransitionNow(commandContext, usage, pinnedSubresources);
-
-    // TODO(https://issues.chromium.org/473444516): Investigate what to do for imported textures.
-    // Should we consider a pin/unpin pair similar to an access on a queue such that we need to
-    // wait on fences or export them?
-    return {};
-}
-
-void Texture::UnpinImpl() {
-    DAWN_ASSERT(HasPinnedUsage());
-
-    // TODO(https://issues.chromium.org/473444516): Investigate what to do for imported textures.
-    // Should we consider a pin/unpin pair similar to an access on a queue such that we need to
-    // wait on fences or export them?
-}
 
 DXGI_FORMAT Texture::GetD3D12Format() const {
     return d3d::DXGITextureFormat(GetDevice(), GetFormat().format);

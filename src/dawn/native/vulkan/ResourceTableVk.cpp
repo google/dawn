@@ -188,9 +188,15 @@ MaybeError ResourceTable::Initialize() {
     return {};
 }
 
-// Apply updates to resources or to the metadata buffers that are pending.
-MaybeError ResourceTable::ApplyPendingUpdates(CommandRecordingContext* recordingContext) {
-    Updates updates = AcquireDirtySlotUpdates();
+MaybeError ResourceTable::ApplyPendingUpdates(
+    CommandRecordingContext* recordingContext,
+    const absl::flat_hash_set<TextureBase*>& writableTextures) {
+    Updates updates = AcquireDirtySlotUpdates(writableTextures);
+
+    // Transition and initialize all required textures
+    if (!updates.texturesToTransition.empty()) {
+        DAWN_TRY(TransitionResources(recordingContext, updates.texturesToTransition));
+    }
 
     if (!updates.metadataUpdates.empty()) {
         DAWN_TRY(UpdateMetadataBuffer(recordingContext, updates.metadataUpdates));
@@ -199,6 +205,19 @@ MaybeError ResourceTable::ApplyPendingUpdates(CommandRecordingContext* recording
         DAWN_TRY(UpdateResourceBindings(updates.resourceDiffs));
     }
 
+    return {};
+}
+
+MaybeError ResourceTable::TransitionResources(
+    CommandRecordingContext* recordingContext,
+    const absl::flat_hash_set<Ref<TextureBase>>& textures) {
+    for (const auto& texture : textures) {
+        Texture* textureBackend = ToBackend(texture.Get());
+        DAWN_TRY(textureBackend->EnsureSubresourceContentInitialized(
+            recordingContext, textureBackend->GetAllSubresources()));
+        textureBackend->TransitionUsageNow(recordingContext, wgpu::TextureUsage::TextureBinding,
+                                           kAllStages, textureBackend->GetAllSubresources());
+    }
     return {};
 }
 

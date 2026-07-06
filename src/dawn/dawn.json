@@ -4247,17 +4247,6 @@
                 "no autolock": true
             },
             {
-                "name": "pin",
-                "tags": ["dawn"],
-                "args": [
-                    {"name": "usage", "type": "texture usage"}
-                ]
-            },
-            {
-                "name": "unpin",
-                "tags": ["dawn"]
-            },
-            {
                 "name": "set ownership for memory dump",
                 "tags": ["dawn", "native"],
                 "_comment": "Sets texture's ownership information for memory dump, resets if given owner guid is 0.",

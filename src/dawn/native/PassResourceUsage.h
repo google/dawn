@@ -76,6 +76,7 @@ struct SyncScopeResourceUsage {
     std::vector<TextureSubresourceSyncInfo> textureSyncInfos;
 
     std::vector<ExternalTextureBase*> externalTextures;
+    // TODO(crbug.com/530981417): Have a single ResourceTable per sync scope
     std::vector<ResourceTableBase*> usedResourceTables;
 };
 
@@ -121,6 +122,9 @@ struct CommandBufferResourceUsage {
     absl::flat_hash_set<TextureBase*> topLevelTextures;
     absl::flat_hash_set<QuerySetBase*> usedQuerySets;
 };
+
+// Returns a set of writable textures from scope.textures
+absl::flat_hash_set<TextureBase*> GatherWritableTextures(const SyncScopeResourceUsage& scope);
 
 }  // namespace dawn::native
 

@@ -226,6 +226,7 @@ set(sources
     "Limits.cpp"
     "ObjectBase.cpp"
     "ObjectContentHasher.cpp"
+    "PassResourceUsage.cpp"
     "PassResourceUsageTracker.cpp"
     "PerStage.cpp"
     "PhysicalDevice.cpp"
