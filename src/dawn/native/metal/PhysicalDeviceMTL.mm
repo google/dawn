@@ -735,6 +735,11 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (([*mDevice supportsFamily:MTLGPUFamilyApple6] ||
          [*mDevice supportsFamily:MTLGPUFamilyMac2])) {
         EnableFeature(Feature::Subgroups);
+        // Apple doesn't support selecting a subgroup size, but if there is only one possible size
+        // we can trivially enable the feature.
+        if (mSubgroupMinSize == mSubgroupMaxSize) {
+            EnableFeature(Feature::SubgroupSizeControl);
+        }
     }
 
     if ([*mDevice supportsFamily:MTLGPUFamilyApple7]) {

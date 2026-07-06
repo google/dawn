@@ -63,6 +63,7 @@ using OptionalVertexPullingTransformConfig = std::optional<tint::VertexPullingCo
     X(UnsafeUnserializedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
     X(LimitsForCompilationRequest, limits)                                           \
     X(UnsafeUnserializedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
+    X(uint32_t, minSubgroupSize)                                                     \
     X(uint32_t, maxSubgroupSize)                                                     \
     X(bool, usesSubgroupMatrix)                                                      \
     X(bool, useStrictMath)                                                           \
@@ -369,6 +370,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
     req.adapterSupportedLimits = UnsafeUnserializedValue(
         LimitsForCompilationRequest::Create(device->GetAdapter()->GetLimits().v1));
+    req.minSubgroupSize = device->GetAdapter()->GetPhysicalDevice()->GetSubgroupMinSize();
     req.maxSubgroupSize = device->GetAdapter()->GetPhysicalDevice()->GetSubgroupMaxSize();
 
     CacheResult<MslCompilation> mslCompilation;
@@ -418,6 +420,15 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                                 ValidateComputeStageWorkgroupSize(
                                     result->workgroup_info, r.usesSubgroupMatrix, r.maxSubgroupSize,
                                     r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
+
+                if (result->workgroup_info.subgroup_size.has_value()) {
+                    uint32_t explicitSubgroupSize = result->workgroup_info.subgroup_size.value();
+                    DAWN_INVALID_IF(
+                        explicitSubgroupSize < r.minSubgroupSize ||
+                            explicitSubgroupSize > r.maxSubgroupSize,
+                        "The subgroup_size attribute (%u) is not in the allowed range ([%u, %u]).",
+                        explicitSubgroupSize, r.minSubgroupSize, r.maxSubgroupSize);
+                }
             }
 
             auto msl = std::move(result->msl);

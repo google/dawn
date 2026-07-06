@@ -375,6 +375,13 @@ class Printer : public tint::TextGenerator {
                     result_.workgroup_info.y = wg_size[1];
                     result_.workgroup_info.z = wg_size[2];
 
+                    // Store the subgroup size information away to return from the generator when
+                    // the `@subgroup_size` attribute is used.
+                    const auto const_sg_size = func->SubgroupSizeAsConst();
+                    if (const_sg_size.has_value()) {
+                        result_.workgroup_info.subgroup_size = const_sg_size;
+                    }
+
                     break;
                 }
                 case core::ir::Function::PipelineStage::kFragment:
