@@ -1497,6 +1497,151 @@ void Resolver::RegisterBufferView(const sem::Call* call, wgsl::BuiltinFn fn) {
     }
 }
 
+uint64_t Resolver::FindSubgroupMatrixStructOffset(const sem::ValueExpression* pointer) const {
+    uint64_t offset = 0;
+    auto* root = pointer->RootIdentifier();
+    auto* root_store_ty = root->Type()->UnwrapPtrOrRef();
+    if (root_store_ty->Is<core::type::Buffer>()) {
+        // We want to find the bufferView or bufferArrayView call that generated 'pointer'. We are
+        // looking for the case where the result store type was a structure. We need to include the
+        // offset to the array in that case.
+        const ast::Node* node = pointer->Declaration();
+        while (node) {
+            tint::Switch(
+                node,  //
+                [&](const ast::IdentifierExpression* ident) {
+                    if (auto user = sem_.Get<sem::VariableUser>(ident)) {
+                        if (user->Variable() == root) {
+                            node = nullptr;
+                        } else {
+                            node = user->Variable()->Declaration();
+                        }
+                    } else {
+                        TINT_UNREACHABLE()
+                            << "unexpected identifier " << ident->identifier->symbol.Name();
+                    }
+                },
+                [&](const ast::Let* let) { node = let->initializer; },
+                [&](const ast::IndexAccessorExpression* access) { node = access->object; },
+                [&](const ast::MemberAccessorExpression* access) { node = access->object; },
+                [&](const ast::UnaryOpExpression* unary) {
+                    if (unary->op == core::UnaryOp::kAddressOf ||
+                        unary->op == core::UnaryOp::kIndirection) {
+                        node = unary->expr;
+                    }
+                },
+                [&](const ast::CallExpression* call_expr) {
+                    auto* sem_call = sem_.Get(call_expr)->As<sem::Call>();
+                    auto* target = sem_call->Target()->As<sem::BuiltinFn>();
+                    if (target && (target->Fn() == wgsl::BuiltinFn::kBufferView ||
+                                   target->Fn() == wgsl::BuiltinFn::kBufferArrayView)) {
+                        auto* ret_store_ty = target->ReturnType()->UnwrapPtr();
+                        if (auto* str = ret_store_ty->As<core::type::Struct>()) {
+                            auto* last = str->Members().Back();
+                            offset = last->Offset();
+                        }
+                    }
+                    // No need to continue searching.
+                    node = nullptr;
+                },
+                TINT_ICE_ON_NO_MATCH);
+        }
+    } else if (auto* str = root_store_ty->As<core::type::Struct>()) {
+        if (root->Is<sem::GlobalVariable>()) {
+            // If we've reached the global reference, add the array offset.
+            auto* last = str->Members().Back();
+            offset = last->Offset();
+        }
+    }
+
+    return offset;
+}
+
+void Resolver::RegisterSubgroupMatrixAccess(const sem::Call* call, wgsl::BuiltinFn fn) {
+    auto* pointer = call->Arguments()[0];
+    auto* ptr_ty = pointer->Type()->As<core::type::Pointer>();
+    auto* store_ty = ptr_ty->StoreType();
+    if (store_ty->HasFixedFootprint()) {
+        return;
+    }
+
+    // Register the required matrix stride.
+    auto* templated_ident = call->Declaration()->target->identifier->As<ast::TemplatedIdentifier>();
+    const core::type::SubgroupMatrix* mat_ty = nullptr;
+    if (fn == wgsl::BuiltinFn::kSubgroupMatrixLoad) {
+        TINT_ASSERT(templated_ident);
+        // Don't validate deprecated variant.
+        // TODO(b/529415904): remove this after deprecated variant is removed.
+        if (templated_ident->arguments.Length() != 2) {
+            return;
+        }
+        mat_ty = call->Target()->ReturnType()->As<core::type::SubgroupMatrix>();
+    } else {
+        // Don't validate deprecated variant.
+        // TODO(b/529415904): remove this after deprecated variant is removed.
+        if (!templated_ident) {
+            return;
+        }
+        TINT_ASSERT(templated_ident->arguments.Length() == 1);
+        mat_ty = call->Arguments()[2]->Type()->As<core::type::SubgroupMatrix>();
+    }
+
+    uint64_t mat_required_size = mat_ty->Rows() * mat_ty->Columns() * mat_ty->Type()->Size();
+
+    auto* root = pointer->RootIdentifier();
+    mat_required_size += FindSubgroupMatrixStructOffset(pointer);
+
+    if (const auto* param = root->As<sem::Parameter>()) {
+        auto where = subgroup_matrix_sizes_.GetOrAddEntry(param, [&] { return mat_required_size; });
+        where.value = std::max(where.value, mat_required_size);
+    }
+
+    if (const auto* gvar = root->As<sem::GlobalVariable>()) {
+        auto* var_ty = gvar->Type()->UnwrapPtrOrRef();
+        if (!var_ty->HasFixedFootprint() && current_function_) {
+            current_function_->AddTransitivelyReferencedSubgroupMatrixSize(gvar, mat_required_size);
+        }
+    }
+}
+
+void Resolver::PropagateSubgroupMatrixAccesses(const sem::Call* call) {
+    auto* target = call->Target()->As<sem::Function>();
+    if (!target) {
+        return;
+    }
+
+    auto& args = call->Arguments();
+    for (size_t i = 0; i < args.Length(); i++) {
+        auto* arg = args[i];
+        if (!arg->Type()->Is<core::type::Pointer>()) {
+            continue;
+        }
+
+        auto* root = arg->RootIdentifier();
+        auto where = subgroup_matrix_sizes_.Get(target->Parameters()[i]);
+        if (!where) {
+            continue;
+        }
+        uint64_t mat_required_size = *where;
+        mat_required_size += FindSubgroupMatrixStructOffset(arg);
+
+        Switch(
+            root,
+            [&](const sem::GlobalVariable* global) {
+                const auto* ty = global->Type()->UnwrapPtrOrRef();
+                if (!ty->HasFixedFootprint()) {
+                    current_function_->AddTransitivelyReferencedSubgroupMatrixSize(
+                        global, mat_required_size);
+                }
+            },
+            [&](const sem::Parameter* param) {
+                auto param_where = subgroup_matrix_sizes_.GetOrAddEntry(
+                    param, [mat_required_size]() { return mat_required_size; });
+                param_where.value = std::max(param_where.value, mat_required_size);
+            });
+    }
+}
+
 bool Resolver::CheckBufferViews(const sem::Call* call) {
     auto* target = call->Target()->As<sem::Function>();
     if (!target) {
@@ -1512,51 +1657,53 @@ bool Resolver::CheckBufferViews(const sem::Call* call) {
 
         auto* root = arg->RootIdentifier();
         auto where = buffer_view_sizes_.Get(target->Parameters()[i]);
-        if (where) {
-            bool ret = Switch(
-                root,
-                [&](const sem::GlobalVariable* global) {
-                    const auto* ty = global->Type()->UnwrapPtrOrRef();
-                    if (const auto* buffer_ty = ty->As<core::type::Buffer>()) {
-                        auto count = buffer_ty->ConstantCount();
-                        if (count != std::nullopt && count.value() < where->total_size) {
-                            AddError(global->Declaration())
-                                << "buffer size (" << count.value()
-                                << " bytes) is smaller than the minimum view size ("
-                                << where->total_size << " bytes)";
-                            AddNote(where->node) << "due to call here";
-                            return false;
-                        }
-                        // Add transitive reference to global.
-                        if (buffer_ty->Count()->Is<core::type::RuntimeArrayCount>()) {
-                            current_function_->AddTransitivelyReferencedUnsizedBufferSize(
-                                global, where->min_type_size);
-                        }
-                    }
-                    return true;
-                },
-                [&](const sem::Parameter* param) {
-                    const auto* ty = param->Type()->UnwrapPtrOrRef();
-                    if (const auto* buffer_ty = ty->As<core::type::Buffer>()) {
-                        auto count = buffer_ty->ConstantCount();
-                        if (count != std::nullopt && count.value() < where->total_size) {
-                            AddError(param->Declaration())
-                                << "buffer size (" << count.value()
-                                << " bytes) is smaller than the minimum view size ("
-                                << where->total_size << " bytes)";
-                            AddNote(where->node) << "due to call here";
-                            return false;
-                        }
-                    }
-                    auto param_where =
-                        buffer_view_sizes_.GetOrAddEntry(param, [where]() { return *where; });
-                    param_where.value = {
-                        std::max(param_where.value.min_type_size, where->min_type_size),
-                        std::max(param_where.value.total_size, where->total_size), where->node};
-                    return true;
-                });
-            TINT_RET_IF(!ret);
+        if (!where) {
+            continue;
         }
+
+        bool ret = Switch(
+            root,
+            [&](const sem::GlobalVariable* global) {
+                const auto* ty = global->Type()->UnwrapPtrOrRef();
+                if (const auto* buffer_ty = ty->As<core::type::Buffer>()) {
+                    auto count = buffer_ty->ConstantCount();
+                    if (count != std::nullopt && count.value() < where->total_size) {
+                        AddError(global->Declaration())
+                            << "buffer size (" << count.value()
+                            << " bytes) is smaller than the minimum view size ("
+                            << where->total_size << " bytes)";
+                        AddNote(where->node) << "due to call here";
+                        return false;
+                    }
+                    // Add transitive reference to global.
+                    if (buffer_ty->Count()->Is<core::type::RuntimeArrayCount>()) {
+                        current_function_->AddTransitivelyReferencedUnsizedBufferSize(
+                            global, where->min_type_size);
+                    }
+                }
+                return true;
+            },
+            [&](const sem::Parameter* param) {
+                const auto* ty = param->Type()->UnwrapPtrOrRef();
+                if (const auto* buffer_ty = ty->As<core::type::Buffer>()) {
+                    auto count = buffer_ty->ConstantCount();
+                    if (count != std::nullopt && count.value() < where->total_size) {
+                        AddError(param->Declaration())
+                            << "buffer size (" << count.value()
+                            << " bytes) is smaller than the minimum view size ("
+                            << where->total_size << " bytes)";
+                        AddNote(where->node) << "due to call here";
+                        return false;
+                    }
+                }
+                auto param_where =
+                    buffer_view_sizes_.GetOrAddEntry(param, [where]() { return *where; });
+                param_where.value = {
+                    std::max(param_where.value.min_type_size, where->min_type_size),
+                    std::max(param_where.value.total_size, where->total_size), where->node};
+                return true;
+            });
+        TINT_RET_IF(!ret);
     }
 
     return true;
@@ -2353,10 +2500,12 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         case wgsl::BuiltinFn::kSubgroupMatrixLoad:
             TINT_RET_IF(!validator_.SubgroupMatrixLoadStore(call));
             RegisterLoad(args[0]);
+            RegisterSubgroupMatrixAccess(call, fn);
             break;
         case wgsl::BuiltinFn::kSubgroupMatrixStore:
             TINT_RET_IF(!validator_.SubgroupMatrixLoadStore(call));
             RegisterStore(args[0]);
+            RegisterSubgroupMatrixAccess(call, fn);
             break;
 
         case wgsl::BuiltinFn::kBufferView:
@@ -3071,10 +3220,14 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
             if (auto size = target->TransitivelyReferencedUnsizedBufferSize(var)) {
                 current_function_->AddTransitivelyReferencedUnsizedBufferSize(var, size.value());
             }
+            if (auto size = target->TransitivelyReferencedSubgroupMatrixSize(var)) {
+                current_function_->AddTransitivelyReferencedUnsizedBufferSize(var, size.value());
+            }
         }
 
         TINT_RET_IF(!AliasAnalysis(call));
         TINT_RET_IF(!CheckBufferViews(call));
+        PropagateSubgroupMatrixAccesses(call);
     }
 
     return call;
