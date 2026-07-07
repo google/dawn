@@ -163,13 +163,6 @@ gn_args.config(
 )
 
 gn_args.config(
-    name = "no_wayland",
-    args = {
-        "ozone_platform_wayland": False,
-    },
-)
-
-gn_args.config(
     name = "non_component",
     args = {
         "is_component_build": False,
