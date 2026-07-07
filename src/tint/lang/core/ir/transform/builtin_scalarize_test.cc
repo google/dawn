@@ -40,7 +40,10 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using IR_BuiltinScalarizeTest = TransformTest;
+struct IR_BuiltinScalarizeTest : public TransformTest {
+  protected:
+    void SetUp() override { mod.properties.Add(Property::kAllow16BitFloats); }
+};
 
 TEST_F(IR_BuiltinScalarizeTest, Clamp_VectorOperands_Scalarize) {
     auto* x = b.FunctionParam("x", ty.vec2f());

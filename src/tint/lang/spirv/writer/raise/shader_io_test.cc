@@ -41,6 +41,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 class SpirvWriter_ShaderIOTest : public core::ir::transform::TransformTest {
   public:
     SpirvWriter_ShaderIOTest() {
+        mod.properties.Add(core::ir::Property::kAllow16BitFloats);
         mod.properties.Add(core::ir::Property::kAllowBackendSpecificShaderIO);
         mod.properties.Add(core::ir::Property::kAllowLocationForNumericComposites);
     }

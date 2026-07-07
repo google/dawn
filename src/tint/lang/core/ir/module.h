@@ -62,12 +62,16 @@ enum class Property : uint8_t {
     kAllow16BitIntegers,
     /// Allows 64-bit integer types to be used.
     kAllow64BitIntegers,
+    /// Allows use of 16-bit floats.
+    kAllow16BitFloats,
     /// Allows input_attachment_index to be associated with any type
     kAllowAnyInputAttachmentIndexType,
     /// Allows lets to have any type.
     kAllowAnyLetType,
     /// Allows various backend-specific features for ShaderIO, like blend_src on non-struct members.
     kAllowBackendSpecificShaderIO,
+    /// Allows use of buffer types.
+    kAllowBufferTypes,
     /// Allows ClipDistances on f32 and vecN<f32> parameters
     kAllowClipDistancesOnF32ScalarAndVector,
     /// Allows binding points to be non-unique.
@@ -98,8 +102,6 @@ enum class Property : uint8_t {
     kAllowUnannotatedModuleIOVariables,
     /// Allows access instructions to create pointers to vector elements.
     kAllowVectorElementPointer,
-    /// Allows use of buffer types.
-    kAllowBufferTypes,
 
     /// Disallow use of the min/max/clamp builtins with vector types.
     kDisallowVectorMinMaxClamp,
@@ -141,6 +143,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(AllowUnannotatedModuleIOVariables);
         CASE(AllowVectorElementPointer);
         CASE(AllowBufferTypes);
+        CASE(Allow16BitFloats);
         CASE(DisallowVectorMinMaxClamp);
     }
 #undef CASE

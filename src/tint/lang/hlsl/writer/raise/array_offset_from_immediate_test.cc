@@ -44,7 +44,8 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 struct IR_ArrayOffsetFromImmediateTest : core::ir::transform::TransformTest {
     IR_ArrayOffsetFromImmediateTest() {
-        mod.properties.Add(core::ir::Property::kAllowNonCoreTypes);
+        mod.properties.Add(core::ir::Property::kAllow16BitFloats,
+                           core::ir::Property::kAllowNonCoreTypes);
     }
 };
 

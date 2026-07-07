@@ -45,7 +45,8 @@ class SpirvWriter_RelaxedPrecisionDecorationsTest : public core::ir::IRTestHelpe
   protected:
     void SetUp() override {
         core::ir::IRTestHelper::SetUp();
-        mod.properties.Add(core::ir::Property::kAllowNonCoreTypes);
+        mod.properties.Add(core::ir::Property::kAllow16BitFloats,
+                           core::ir::Property::kAllowNonCoreTypes);
     }
 
     type::Image* MakeSampledImage() {

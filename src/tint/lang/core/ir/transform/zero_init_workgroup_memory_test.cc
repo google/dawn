@@ -38,10 +38,11 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 class IR_ZeroInitWorkgroupMemoryTest : public TransformTest {
-  public:
-    void SetUp() override { mod.properties.Add(Property::kAllowBufferTypes); }
-
   protected:
+    void SetUp() override {
+        mod.properties.Add(Property::kAllow16BitFloats, Property::kAllowBufferTypes);
+    }
+
     Function* MakeEntryPoint(const char* name,
                              uint32_t wgsize_x,
                              uint32_t wgsize_y,

@@ -35,7 +35,10 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using SpirvWriter_UnaryPolyfillTest = core::ir::transform::TransformTest;
+struct SpirvWriter_UnaryPolyfillTest : public core::ir::transform::TransformTest {
+  protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
+};
 
 TEST_F(SpirvWriter_UnaryPolyfillTest, Negation_Scalar) {
     auto* arg = b.FunctionParam("arg", ty.f32());

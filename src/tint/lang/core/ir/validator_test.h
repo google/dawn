@@ -95,6 +95,12 @@ class IR_ValidatorTest : public IRTestHelper {
                           const std::string& name,
                           BuiltinValue builtin,
                           const core::type::Type* type);
+
+  protected:
+    void SetUp() override {
+        IRTestHelper::SetUp();
+        mod.properties.Add(Property::kAllow16BitFloats);
+    }
 };
 
 }  // namespace ir

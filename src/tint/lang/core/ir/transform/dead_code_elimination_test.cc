@@ -37,7 +37,10 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using IR_DeadCodeEliminationTest = TransformTest;
+struct IR_DeadCodeEliminationTest : public TransformTest {
+  protected:
+    void SetUp() override { mod.properties.Add(Property::kAllow16BitFloats); }
+};
 
 TEST_F(IR_DeadCodeEliminationTest, NoModify) {
     auto* buffer = b.Var("buffer", ty.ptr(core::AddressSpace::kOut, ty.i32()));

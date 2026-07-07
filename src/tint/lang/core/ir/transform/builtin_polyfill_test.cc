@@ -40,6 +40,8 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 class IR_BuiltinPolyfillTest : public TransformTest {
   protected:
+    void SetUp() override { mod.properties.Add(Property::kAllow16BitFloats); }
+
     /// Helper to build a function that calls a builtin with the given result and argument types.
     /// @param builtin the builtin to call
     /// @param result_ty the result type of the builtin call
@@ -3137,6 +3139,9 @@ TEST_F(IR_BuiltinPolyfillTest, Dot4U8Packed) {
 }
 
 class IR_SubgroupBroadcastPolyfillTest : public TransformTest {
+  public:
+    void SetUp() override { mod.properties.Add(Property::kAllow16BitFloats); }
+
   protected:
     /// Helper to build a function that calls subgroupBroadcast with the given type.
     /// @param type the type

@@ -845,6 +845,7 @@ struct Decoder {
             case pb::TypeBasic::f32:
                 return mod_out_.Types().f32();
             case pb::TypeBasic::f16:
+                mod_out_.properties.Add(core::ir::Property::kAllow16BitFloats);
                 return mod_out_.Types().f16();
             case pb::TypeBasic::i8:
                 return mod_out_.Types().i8();

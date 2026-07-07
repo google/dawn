@@ -40,7 +40,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::msl::writer::raise {
 namespace {
 
-using MslWriter_ModuleConstantTest = core::ir::transform::TransformTest;
+struct MslWriter_ModuleConstantTest : public core::ir::transform::TransformTest {
+  protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
+};
 
 TEST_F(MslWriter_ModuleConstantTest, ConstArray) {
     auto* func = b.Function("foo", ty.u32());

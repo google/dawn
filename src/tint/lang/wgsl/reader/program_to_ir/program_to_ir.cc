@@ -250,9 +250,12 @@ class Impl {
                     EmitVariable(var);
                 },
                 [&](const ast::Function* func) { EmitFunction(func); },
-                [&](const ast::Enable*) {
+                [&](const ast::Enable* enable) {
                     // TODO(dsinclair): Implement? I think these need to be passed along so further
                     // stages know what is enabled.
+                    if (enable->HasExtension(wgsl::Extension::kF16)) {
+                        mod.properties.Add(core::ir::Property::kAllow16BitFloats);
+                    }
                 },
                 [&](const ast::ConstAssert*) {
                     // Evaluated by the resolver, drop from the IR.

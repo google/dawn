@@ -54,6 +54,7 @@ class GlslWriterTestHelperBase : public BASE {
     Version version{};
 
   protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
     /// Generated GLSL
     Output output_;
 

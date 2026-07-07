@@ -38,7 +38,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::msl::writer::raise {
 namespace {
 
-using MslWriter_ValidateSubgroupMatrixTest = core::ir::transform::TransformTest;
+struct MslWriter_ValidateSubgroupMatrixTest : public core::ir::transform::TransformTest {
+  protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
+};
 
 TEST_F(MslWriter_ValidateSubgroupMatrixTest, F16_8x8) {
     auto* func = b.ComputeFunction("main");

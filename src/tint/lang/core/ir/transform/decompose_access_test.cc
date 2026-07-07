@@ -42,6 +42,7 @@ namespace {
 
 struct IR_DecomposeAccessTest : public core::ir::transform::TransformTest {
     void SetUp() override {
+        mod.properties.Add(Property::kAllow16BitFloats);
         mod.properties.Add(Property::kAllow16BitIntegers);
         mod.properties.Add(Property::kAllowBufferTypes);
     }

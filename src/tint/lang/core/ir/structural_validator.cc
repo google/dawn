@@ -705,10 +705,11 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::Struct* str) { return CheckStruct(str, diag); },
             [&](const core::type::Reference* ref) { return CheckRef(ref, diag, root); },
             [&](const core::type::Pointer* ptr) { return CheckPtr(ptr, diag); },
-            [&](const core::type::I8*) { return Check8Bit(diag, parent); },
-            [&](const core::type::U8*) { return Check8Bit(diag, parent); },
-            [&](const core::type::U16*) { return Check16Bit(diag); },
-            [&](const core::type::U64*) { return Check64Bit(diag); },
+            [&](const core::type::I8*) { return Check8BitInteger(diag, parent); },
+            [&](const core::type::U8*) { return Check8BitInteger(diag, parent); },
+            [&](const core::type::U16*) { return Check16BitInteger(diag); },
+            [&](const core::type::U64*) { return Check64BitInteger(diag); },
+            [&](const core::type::F16*) { return Check16BitFloat(diag); },
             [&](const core::type::Array* arr) { return CheckArray(arr, diag); },
             [&](const core::type::Vector* v) { return CheckVector(v, diag); },
             [&](const core::type::Matrix* m) { return CheckMatrix(m, diag); },
@@ -725,7 +726,7 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
             [&](const core::type::BindingArray* t) {
                 return CheckBindingArray(t, diag, addrspace);
             },
-            [&](const core::type::Buffer*) { return CheckBuffer(diag); },
+            [&](const core::type::Buffer* buf) { return CheckBuffer(buf, diag); },
             [](Default) { return true; });
         if (!chk) {
             return;
@@ -764,10 +765,20 @@ void Structural::CheckType(const core::type::Type* root, std::function<diag::Dia
     }
 }
 
-bool Structural::CheckBuffer(std::function<diag::Diagnostic&()>& diag) {
+bool Structural::CheckBuffer(const core::type::Buffer* buf,
+                             std::function<diag::Diagnostic&()>& diag) {
     if (!ir_.properties.Contains(Property::kAllowBufferTypes)) {
         diag() << "buffer types are not allowed in this context";
         return false;
+    }
+    if (auto count = buf->ConstantCount()) {
+        const bool allow_16_bits = ir_.properties.Contains(Property::kAllow16BitFloats) ||
+                                   ir_.properties.Contains(Property::kAllow16BitIntegers);
+        const uint32_t divisor = allow_16_bits ? 2 : 4;
+        if (count.value() % divisor != 0) {
+            diag() << "buffer size must be evenly divisible by " << divisor;
+            return false;
+        }
     }
     return true;
 }
@@ -942,10 +953,10 @@ bool Structural::CheckArray(const core::type::Array* arr,
     return true;
 }
 
-// 8-bit types are guarded by the Allow8BitIntegers property.
+// 8-bit integer types are guarded by the Allow8BitIntegers property.
 // They can be used as the component type of a subgroup matrix without the property.
-bool Structural::Check8Bit(std::function<diag::Diagnostic&()>& diag,
-                           const core::type::Type* parent) {
+bool Structural::Check8BitInteger(std::function<diag::Diagnostic&()>& diag,
+                                  const core::type::Type* parent) {
     if (!Is<core::type::SubgroupMatrix>(parent) &&
         !ir_.properties.Contains(Property::kAllow8BitIntegers)) {
         diag() << "8-bit integer types are not permitted";
@@ -954,8 +965,8 @@ bool Structural::Check8Bit(std::function<diag::Diagnostic&()>& diag,
     return true;
 }
 
-// 16-bit types are guarded by the Allow16BitIntegers property.
-bool Structural::Check16Bit(std::function<diag::Diagnostic&()>& diag) {
+// 16-bit integer types are guarded by the Allow16BitIntegers property.
+bool Structural::Check16BitInteger(std::function<diag::Diagnostic&()>& diag) {
     if (!ir_.properties.Contains(Property::kAllow16BitIntegers)) {
         diag() << "16-bit integer types are not permitted";
         return false;
@@ -963,10 +974,19 @@ bool Structural::Check16Bit(std::function<diag::Diagnostic&()>& diag) {
     return true;
 }
 
-// 64-bit types are guarded by the Allow64BitIntegers property.
-bool Structural::Check64Bit(std::function<diag::Diagnostic&()>& diag) {
+// 64-bit integer types are guarded by the Allow64BitIntegers property.
+bool Structural::Check64BitInteger(std::function<diag::Diagnostic&()>& diag) {
     if (!ir_.properties.Contains(Property::kAllow64BitIntegers)) {
         diag() << "64-bit integer types are not permitted";
+        return false;
+    }
+    return true;
+}
+
+// 16-bit float types are guarded by the Allow16BitFloats property.
+bool Structural::Check16BitFloat(std::function<diag::Diagnostic&()>& diag) {
+    if (!ir_.properties.Contains(Property::kAllow16BitFloats)) {
+        diag() << "16-bit float types are not permitted";
         return false;
     }
     return true;
@@ -1011,6 +1031,17 @@ bool Structural::CheckPtr(const core::type::Pointer* ptr,
         diag() << "pointers to pointers are not allowed";
         return false;
     }
+
+    if (ptr->StoreType()->Is<core::type::Buffer>()) {
+        if (ptr->AddressSpace() != AddressSpace::kWorkgroup &&
+            ptr->AddressSpace() != AddressSpace::kStorage &&
+            ptr->AddressSpace() != AddressSpace::kUniform) {
+            diag() << "buffer types are not allowed in the '" << ToString(ptr->AddressSpace())
+                   << "' address space";
+            return false;
+        }
+    }
+
     return true;
 }
 

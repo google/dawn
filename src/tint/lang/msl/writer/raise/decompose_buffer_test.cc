@@ -39,7 +39,8 @@ using namespace tint::core::number_suffixes;  // NOLINT
 class MslWriter_DecomposeBufferTest : public core::ir::transform::TransformTest {
   protected:
     void SetUp() override {
-        mod.properties.Add(core::ir::Property::kAllowMslEntryPointInterface,
+        mod.properties.Add(core::ir::Property::kAllow16BitFloats,
+                           core::ir::Property::kAllowMslEntryPointInterface,
                            core::ir::Property::kAllowBufferTypes);
     }
 };

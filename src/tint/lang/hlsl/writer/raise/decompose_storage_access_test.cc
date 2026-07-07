@@ -45,7 +45,11 @@ namespace tint::hlsl::writer::raise {
 namespace {
 
 struct HlslWriterDecomposeStorageAccessTest : public core::ir::transform::TransformTest {
-    void SetUp() override { mod.properties.Add(core::ir::Property::kAllowBufferTypes); }
+  protected:
+    void SetUp() override {
+        mod.properties.Add(core::ir::Property::kAllow16BitFloats,
+                           core::ir::Property::kAllowBufferTypes);
+    }
 };
 
 TEST_F(HlslWriterDecomposeStorageAccessTest, NoBufferAccess) {

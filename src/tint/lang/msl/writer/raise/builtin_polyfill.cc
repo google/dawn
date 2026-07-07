@@ -583,6 +583,7 @@ struct State {
     /// @param builtin the builtin call instruction
     void Pack2x16Float(core::ir::CoreBuiltinCall* builtin) {
         // Replace the call with `as_type<uint>(half2(value))`.
+        ir.properties.Add(core::ir::Property::kAllow16BitFloats);
         b.InsertBefore(builtin, [&] {
             auto* convert = b.Convert<vec2<f16>>(builtin->Args()[0]);
             auto* bitcast = b.Bitcast(ty.u32(), convert);
@@ -597,6 +598,7 @@ struct State {
         auto* arg = builtin->Args()[0];
 
         // Convert the argument to f16 and then back again.
+        ir.properties.Add(core::ir::Property::kAllow16BitFloats);
         b.InsertBefore(builtin, [&] {
             b.ConvertWithResult(builtin->DetachResult(),
                                 b.Convert(ty.MatchWidth(ty.f16(), arg->Type()), arg));
@@ -1052,6 +1054,7 @@ struct State {
     /// @param builtin the builtin call instruction
     void Unpack2x16Float(core::ir::CoreBuiltinCall* builtin) {
         // Replace the call with `float2(as_type<half2>(value))`.
+        ir.properties.Add(core::ir::Property::kAllow16BitFloats);
         b.InsertBefore(builtin, [&] {
             auto* bitcast = b.Bitcast<vec2<f16>>(builtin->Args()[0]);
             b.ConvertWithResult(builtin->DetachResult(), bitcast);

@@ -38,7 +38,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::msl::writer::raise {
 namespace {
 
-using MslWriter_ConvertPrintToLogTest = core::ir::transform::TransformTest;
+struct MslWriter_ConvertPrintToLogTest : public core::ir::transform::TransformTest {
+  protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
+};
 
 TEST_F(MslWriter_ConvertPrintToLogTest, NoPrint) {
     auto* f = b.ComputeFunction("foo");

@@ -38,7 +38,10 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using SpirvReader_BuiltinsTest = core::ir::transform::TransformTest;
+struct SpirvReader_BuiltinsTest : public core::ir::transform::TransformTest {
+  protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
+};
 
 TEST_F(SpirvReader_BuiltinsTest, Normalize_Scalar) {
     auto* ep = b.ComputeFunction("foo");

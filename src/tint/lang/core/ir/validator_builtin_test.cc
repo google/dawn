@@ -1479,10 +1479,13 @@ TEST_F(IR_ValidatorTest, InputAttachmentIndex_NonEntryPoint_InvalidIOKind) {
         << res.Failure();
 }
 
-using BitcastTypeTest = IRTestParamHelper<std::tuple<
-    /* bitcast allowed */ bool,
-    /* src type_builder */ TypeBuilderFn,
-    /* dest type_builder */ TypeBuilderFn>>;
+struct BitcastTypeTest : public IRTestParamHelper<std::tuple<
+                             /* bitcast allowed */ bool,
+                             /* src type_builder */ TypeBuilderFn,
+                             /* dest type_builder */ TypeBuilderFn>> {
+  protected:
+    void SetUp() override { mod.properties.Add(Property::kAllow16BitFloats); }
+};
 
 TEST_P(BitcastTypeTest, Check) {
     bool bitcast_allowed = std::get<0>(GetParam());

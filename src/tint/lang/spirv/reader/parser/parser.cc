@@ -196,6 +196,7 @@ class Parser {
         ir_.properties.Add(core::ir::Property::kAllowUnannotatedModuleIOVariables);
         ir_.properties.Add(core::ir::Property::kAllowVectorElementPointer);
         ir_.properties.Add(core::ir::Property::kAllowBackendSpecificShaderIO);
+        ir_.properties.Add(core::ir::Property::kAllow16BitFloats);
 
         RegisterNames();
 

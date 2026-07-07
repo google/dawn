@@ -497,12 +497,20 @@ bool Validator::SubgroupMatrix(const core::type::SubgroupMatrix* t, const Source
     return true;
 }
 
-bool Validator::Buffer(const core::type::Buffer*, const Source& source) const {
+bool Validator::Buffer(const core::type::Buffer* buffer, const Source& source) const {
     if (!allowed_features_.features.contains(wgsl::LanguageFeature::kBufferView)) {
         AddError(source) << "use of " << style::Type("buffer")
                          << " requires the buffer_view language feature, which is not allowed in "
                             "the current environment";
         return false;
+    }
+
+    if (auto count = buffer->ConstantCount()) {
+        const uint32_t divisor = enabled_extensions_.Contains(wgsl::Extension::kF16) ? 2 : 4;
+        if (count.value() % divisor != 0) {
+            AddError(source) << "buffer size must be divisible by " << divisor;
+            return false;
+        }
     }
 
     return true;

@@ -50,7 +50,8 @@ class IR_SubstituteOverridesTest : public TransformTest {
   protected:
     void SetUp() override {
         TransformTest::SetUp();
-        mod.properties.Add(core::ir::Property::kAllowOverrides,
+        mod.properties.Add(core::ir::Property::kAllow16BitFloats,
+                           core::ir::Property::kAllowOverrides,
                            core::ir::Property::kAllowBufferTypes);
     }
 };
@@ -2925,6 +2926,69 @@ $B1: {  # root
     EXPECT_EQ(
         result.Failure().reason,
         R"(error: invalid buffer size (16 bytes) when used with bufferView (20 bytes required))");
+}
+
+TEST_F(IR_SubstituteOverridesTest, Buffer_WorkgroupPtr_ThreeBytes) {
+    Override* o = nullptr;
+    core::type::Buffer* buffer_ty = nullptr;
+    b.Append(mod.root_block, [&] {
+        o = b.Override("x", ty.u32());
+        o->SetOverrideId({1});
+        auto* count = ty.Get<core::ir::type::ValueArrayCount>(o->Result());
+        buffer_ty = ty.Get<core::type::Buffer>(count);
+    });
+    auto* foo = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("p", ty.ptr(workgroup, buffer_ty));
+    foo->SetParams({param});
+    foo->Block()->Append(b.Return(foo));
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{1}] = 3;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, R"(error: buffer size must be evenly divisible by 2)");
+}
+
+TEST_F(IR_SubstituteOverridesTest, Buffer_WorkgroupPtr_TwoBytes_NoF16) {
+    mod.properties.Remove(Property::kAllow16BitFloats);
+    Override* o = nullptr;
+    core::type::Buffer* buffer_ty = nullptr;
+    b.Append(mod.root_block, [&] {
+        o = b.Override("x", ty.u32());
+        o->SetOverrideId({1});
+        auto* count = ty.Get<core::ir::type::ValueArrayCount>(o->Result());
+        buffer_ty = ty.Get<core::type::Buffer>(count);
+    });
+    auto* foo = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("p", ty.ptr(workgroup, buffer_ty));
+    foo->SetParams({param});
+    foo->Block()->Append(b.Return(foo));
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{1}] = 2;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, R"(error: buffer size must be evenly divisible by 4)");
+}
+
+TEST_F(IR_SubstituteOverridesTest, Buffer_WorkgroupPtr_TwoBytes_F16) {
+    Override* o = nullptr;
+    core::type::Buffer* buffer_ty = nullptr;
+    b.Append(mod.root_block, [&] {
+        o = b.Override("x", ty.u32());
+        o->SetOverrideId({1});
+        auto* count = ty.Get<core::ir::type::ValueArrayCount>(o->Result());
+        buffer_ty = ty.Get<core::type::Buffer>(count);
+    });
+    auto* foo = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("p", ty.ptr(workgroup, buffer_ty));
+    foo->SetParams({param});
+    foo->Block()->Append(b.Return(foo));
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{1}] = 2;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_EQ(result, Success);
 }
 
 template <typename T>

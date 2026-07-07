@@ -777,9 +777,12 @@ TEST_F(IR_ValidatorTest, BufferDisallowed) {
                 testing::HasSubstr("buffer types are not allowed in this context"));
 }
 
-using TypeTest = IRTestParamHelper<std::tuple<
-    /* allowed */ bool,
-    /* type_builder */ TypeBuilderFn>>;
+struct TypeTest : public IRTestParamHelper<std::tuple<
+                      /* allowed */ bool,
+                      /* type_builder */ TypeBuilderFn>> {
+  protected:
+    void SetUp() override { mod.properties.Add(Property::kAllow16BitFloats); }
+};
 
 using Type_ArrayElements = TypeTest;
 
@@ -1968,5 +1971,103 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(AddressSpace::kImmediate,
                         core::Access::kReadWrite,
                         "immediate pointers must be read access")));
+
+using Buffer_AddressSpace = IRTestParamHelper<std::tuple<AddressSpace, const char*>>;
+
+TEST_P(Buffer_AddressSpace, Test) {
+    mod.properties.Add(Property::kAllowBufferTypes);
+    auto aspace = std::get<0>(GetParam());
+    const std::string expected_error = std::get<1>(GetParam());
+    auto* func = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("p", ty.ptr(aspace, ty.unsized_buffer()));
+    func->SetParams({param});
+    func->Block()->Append(b.Return(func));
+
+    auto res = ir::Validate(mod);
+    if (expected_error.empty()) {
+        ASSERT_EQ(res, Success);
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason, testing::HasSubstr(expected_error));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    IR_ValidatorTest,
+    Buffer_AddressSpace,
+    testing::Values(
+        std::make_tuple(AddressSpace::kFunction,
+                        "buffer types are not allowed in the 'function' address space"),
+        std::make_tuple(AddressSpace::kPrivate,
+                        "buffer types are not allowed in the 'private' address space"),
+        std::make_tuple(AddressSpace::kHandle,
+                        "the 'handle' address space can only be used for handle types"),
+        std::make_tuple(AddressSpace::kImmediate,
+                        "buffer types are not allowed in the 'immediate' address space"),
+        std::make_tuple(AddressSpace::kStorage, ""),
+        std::make_tuple(AddressSpace::kUniform, ""),
+        std::make_tuple(AddressSpace::kWorkgroup, "")));
+
+using Buffer_SizeRestrictions = IRTestParamHelper<AddressSpace>;
+
+TEST_P(Buffer_SizeRestrictions, FourBytes) {
+    mod.properties.Add(Property::kAllowBufferTypes);
+    auto aspace = GetParam();
+    auto* func = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("p", ty.ptr(aspace, ty.buffer(4)));
+    func->SetParams({param});
+    func->Block()->Append(b.Return(func));
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_P(Buffer_SizeRestrictions, ThreeBytes) {
+    mod.properties.Add(Property::kAllowBufferTypes);
+    auto aspace = GetParam();
+    auto* func = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("p", ty.ptr(aspace, ty.buffer(3)));
+    func->SetParams({param});
+    func->Block()->Append(b.Return(func));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("buffer size must be evenly divisible by 4"));
+}
+
+TEST_P(Buffer_SizeRestrictions, TwoBytes_NoF16) {
+    mod.properties.Add(Property::kAllowBufferTypes);
+    mod.properties.Remove(Property::kAllow16BitFloats);
+    auto aspace = GetParam();
+    auto* func = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("p", ty.ptr(aspace, ty.buffer(2)));
+    func->SetParams({param});
+    func->Block()->Append(b.Return(func));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("buffer size must be evenly divisible by 4"));
+}
+
+TEST_P(Buffer_SizeRestrictions, TwoBytes_F16) {
+    mod.properties.Add(Property::kAllowBufferTypes);
+    mod.properties.Add(Property::kAllow16BitFloats);
+    auto aspace = GetParam();
+    auto* func = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("p", ty.ptr(aspace, ty.buffer(2)));
+    func->SetParams({param});
+    func->Block()->Append(b.Return(func));
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
+                         Buffer_SizeRestrictions,
+                         testing::Values(AddressSpace::kWorkgroup,
+                                         AddressSpace::kStorage,
+                                         AddressSpace::kUniform));
 
 }  // namespace tint::core::ir

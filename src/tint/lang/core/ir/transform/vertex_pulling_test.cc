@@ -40,6 +40,7 @@ namespace {
 
 class MslWriter_VertexPullingTest : public core::ir::transform::TransformTest {
   protected:
+    void SetUp() override { mod.properties.Add(Property::kAllow16BitFloats); }
     core::IOAttributes Location(uint32_t loc) {
         core::IOAttributes attrs;
         attrs.location = loc;

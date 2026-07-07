@@ -40,10 +40,12 @@ namespace tint::msl::writer::raise {
 namespace {
 
 class MslWriter_FixTypeLayoutTest : public core::ir::transform::TransformTest {
-  public:
-    void SetUp() override { mod.properties.Add(core::ir::Property::kAllowBufferTypes); }
-
   protected:
+    void SetUp() override {
+        mod.properties.Add(core::ir::Property::kAllow16BitFloats,
+                           core::ir::Property::kAllowBufferTypes);
+    }
+
     FixTypeLayoutOptions options;
     void Run() { core::ir::transform::TransformTest::Run(FixTypeLayout, options); }
 };

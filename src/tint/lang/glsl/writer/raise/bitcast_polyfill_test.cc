@@ -43,7 +43,8 @@ class GlslWriter_BitcastPolyfillTest : public core::ir::transform::TransformTest
   protected:
     void SetUp() override {
         core::ir::transform::TransformTest::SetUp();
-        mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
+        mod.properties.Add(core::ir::Property::kAllow16BitFloats,
+                           core::ir::Property::kAllow16BitIntegers);
     }
 };
 

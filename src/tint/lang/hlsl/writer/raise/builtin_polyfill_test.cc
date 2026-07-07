@@ -46,7 +46,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::hlsl::writer::raise {
 namespace {
 
-using HlslWriter_BuiltinPolyfillTest = core::ir::transform::TransformTest;
+struct HlslWriter_BuiltinPolyfillTest : public core::ir::transform::TransformTest {
+  protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
+};
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastIdentity) {
     auto* a = b.FunctionParam<i32>("a");

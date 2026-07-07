@@ -46,7 +46,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::glsl::writer::raise {
 namespace {
 
-using GlslWriter_BuiltinPolyfillTest = core::ir::transform::TransformTest;
+struct GlslWriter_BuiltinPolyfillTest : public core::ir::transform::TransformTest {
+  protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
+};
 
 TEST_F(GlslWriter_BuiltinPolyfillTest, SelectScalar) {
     auto* func = b.Function("foo", ty.f32());

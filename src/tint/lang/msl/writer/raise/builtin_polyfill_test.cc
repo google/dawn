@@ -48,7 +48,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::msl::writer::raise {
 namespace {
 
-using MslWriter_BuiltinPolyfillTest = core::ir::transform::TransformTest;
+struct MslWriter_BuiltinPolyfillTest : public core::ir::transform::TransformTest {
+  protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
+};
 
 TEST_F(MslWriter_BuiltinPolyfillTest, AtomicAdd_Workgroup_I32) {
     auto* a = b.FunctionParam<ptr<workgroup, atomic<i32>>>("a");

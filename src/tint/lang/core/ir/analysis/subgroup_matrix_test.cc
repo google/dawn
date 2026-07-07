@@ -42,7 +42,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::core::ir::analysis {
 namespace {
 
-using IR_SubgroupMatrixAnalysis = IRTestHelper;
+struct IR_SubgroupMatrixAnalysis : public IRTestHelper {
+  protected:
+    void SetUp() override { mod.properties.Add(Property::kAllow16BitFloats); }
+};
 
 struct TypeInfo {
     std::string_view type_name;
@@ -76,7 +79,7 @@ class IR_SubgroupMatrixAnalysisTypeTest : public IRTestParamHelper<TypeInfo> {
   protected:
     void SetUp() override {
         IRTestParamHelper<TypeInfo>::SetUp();
-        mod.properties.Add(Property::kAllow8BitIntegers);
+        mod.properties.Add(Property::kAllow16BitFloats, Property::kAllow8BitIntegers);
     }
 };
 TEST_P(IR_SubgroupMatrixAnalysisTypeTest, Config_Type_Left) {

@@ -390,18 +390,22 @@ class Structural {
 
     /// Checks that buffers are available
     /// @param diag a function that creates an error diagnostic for the source of the type
-    bool CheckBuffer(std::function<diag::Diagnostic&()>& diag);
+    bool CheckBuffer(const core::type::Buffer* buf, std::function<diag::Diagnostic&()>& diag);
 
-    /// Checks that 8-bit types are permitted
+    /// Checks that 8-bit integer types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
     /// @param parent the parent type for the 8-bit type
-    bool Check8Bit(std::function<diag::Diagnostic&()>& diag, const core::type::Type* parent);
-    /// Checks that 16-bit types are permitted
+    bool Check8BitInteger(std::function<diag::Diagnostic&()>& diag, const core::type::Type* parent);
+    /// Checks that 16-bit integer types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
-    bool Check16Bit(std::function<diag::Diagnostic&()>& diag);
-    /// Checks that 64-bit types are permitted
+    bool Check16BitInteger(std::function<diag::Diagnostic&()>& diag);
+    /// Checks that 64-bit integer types are permitted
     /// @param diag a function that creates an error diagnostic for the source of the type
-    bool Check64Bit(std::function<diag::Diagnostic&()>& diag);
+    bool Check64BitInteger(std::function<diag::Diagnostic&()>& diag);
+
+    /// Checks that 16-bit floats are allowed.
+    /// @param diag a function that creates an error diagnostic for the source of the type
+    bool Check16BitFloat(std::function<diag::Diagnostic&()>& diag);
 
     /// Checks that `ptr` is a valid pointer type
     /// @param ptr the pointer to check

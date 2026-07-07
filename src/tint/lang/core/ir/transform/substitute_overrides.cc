@@ -325,6 +325,15 @@ struct State {
                                                static_cast<uint32_t>(new_ary_size));
         } else {
             TINT_IR_ASSERT(ir, old_buf_ty);
+            const uint32_t divisor = ir.properties.Contains(Property::kAllow16BitFloats) ||
+                                             ir.properties.Contains(Property::kAllow16BitIntegers)
+                                         ? 2
+                                         : 4;
+            if (num_elements % divisor != 0) {
+                diag::Diagnostic error = MakeError(ir.SourceOf(cnt->value));
+                error << "buffer size must be evenly divisible by " << divisor;
+                return diag::Failure(error);
+            }
             new_ty = ty.Get<core::type::Buffer>(new_cnt);
         }
 

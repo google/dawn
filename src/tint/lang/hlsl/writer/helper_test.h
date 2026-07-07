@@ -52,6 +52,7 @@ class HlslWriterTestHelperBase : public BASE {
     core::type::Manager& ty{mod.Types()};
 
   protected:
+    void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
     /// Generated HLSL
     Output output_;
 
