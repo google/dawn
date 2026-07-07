@@ -1465,6 +1465,7 @@ crbug.com/527439864 [ microsoft target-cpu-64 webgpu-dxc-enabled win ] webgpu:sh
 
 crbug.com/499140183 [ intel win ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,reuse:* [ Failure ]
 crbug.com/532123166 [ amd mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";* [ Failure ]
+crbug.com/532174560 [ android-pixel-4 ] webgpu:api,validation,encoding,cmds,compute_pass:dispatch_sizes:dispatchType="direct";largeDimValueVariant=* [ Failure ]
 
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:2d_coords:format="depth* [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_2d_coords:format="depth* [ Failure ]
@@ -1883,7 +1884,6 @@ crbug.com/0000 [ arch-x86_64 clang-coverage dawn-no-backend-validation graphite-
 crbug.com/0000 [ clang-coverage dawn-no-backend-validation linux nvidia ] webgpu:api,validation,createView:texture_view_usage_of_multiple_usages:usage1=16;usage2=32 [ Failure ]
 crbug.com/0000 [ apple dawn-backend-validation mac ] webgpu:api,validation,createView:texture_view_usage_with_view_format:textureFormat="etc2-rgb8a1unorm";usage=4 [ Failure ]
 crbug.com/0000 [ apple dawn-backend-validation mac ] webgpu:api,validation,createView:texture_view_usage_with_view_format:textureFormat="etc2-rgb8a1unorm-srgb";usage=4 [ Failure ]
-crbug.com/0000 [ android-pixel-4 ] webgpu:api,validation,encoding,cmds,compute_pass:dispatch_sizes:dispatchType="direct";largeDimValueVariant={"mult":0,"add":1} [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_aspects:format="depth32float-stencil8" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_ranges:dimension="1d";copyBoxOffsets={"x":0,"y":0,"z":0,"width":0,"height":0,"depthOrArrayLayers":0};srcCopyLevel=0;dstCopyLevel=0 [ Failure ]
 crbug.com/0000 [ android-pixel-10 dawn-no-backend-validation webgpu-service-worker ] webgpu:idl,javascript:device,EventTarget:test="canPassEventThroughDevice" [ Failure ]
