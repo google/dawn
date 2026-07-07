@@ -48,6 +48,7 @@ enum class Architecture {
 };
 
 Architecture GetArchitecture(PCIVendorID vendorId, PCIDeviceID deviceId) {
+    // NOLINTBEGIN(bugprone-unhandled-code-paths) "switch with only one case"
     switch(vendorId) {
         {% for vendor in vendors %}
             {% if len(vendor.device_sets) %}
@@ -68,6 +69,7 @@ Architecture GetArchitecture(PCIVendorID vendorId, PCIDeviceID deviceId) {
             {% endif %}
         {% endfor %}
     }
+    // NOLINTEND(bugprone-unhandled-code-paths)
 
     return Architecture::Unknown;
 }

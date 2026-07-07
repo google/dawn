@@ -51,7 +51,7 @@ namespace {{native_namespace}} {
 
     {% for type in by_category["bitmask"] %}
         MaybeError Validate{{type.name.CamelCase()}}({{namespace}}::{{as_cppType(type.name)}} value) {
-            if ((value & static_cast<{{namespace}}::{{as_cppType(type.name)}}>(~{{type.full_mask}})) == 0) {
+            if ((value & static_cast<{{namespace}}::{{as_cppType(type.name)}}>(~{{type.full_mask}}u)) == 0) {
                 return {};
             }
             return DAWN_VALIDATION_ERROR("Value %i is invalid for {{as_cType(type.name)}}.", value);

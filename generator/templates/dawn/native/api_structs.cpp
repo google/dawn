@@ -62,6 +62,8 @@ namespace {{native_namespace}} {
         return data == rhs.data && length == rhs.length;
     }
 
+    // NOLINTBEGIN(bugprone-invalid-enum-default-initialization)
+
     {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
@@ -150,6 +152,7 @@ namespace {{native_namespace}} {
         }
 
     {% endfor %}
+    // NOLINTEND(bugprone-invalid-enum-default-initialization)
 
     {% for type in by_category["structure"] if type.has_free_members_function %}
         {% set CppType = as_cppType(type.name) %}

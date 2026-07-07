@@ -144,14 +144,14 @@ namespace {{namespace}} {
                 if (!first) {
                     s->Append("|");
                 }
-                s->Append(absl::StrFormat("{{as_cppType(type.name)}}::%x", static_cast<typename std::underlying_type<{{as_cppType(type.name)}}>::type>(value)));
+                s->Append(absl::StrFormat("{{as_cppType(type.name)}}::%x", static_cast<std::underlying_type<{{as_cppType(type.name)}}>::type>(value)));
             }
 
             if (moreThanOneBit) {
                 s->Append(")");
             }
         } else {
-            s->Append(absl::StrFormat("%u", static_cast<typename std::underlying_type<{{as_cppType(type.name)}}>::type>(value)));
+            s->Append(absl::StrFormat("%u", static_cast<std::underlying_type<{{as_cppType(type.name)}}>::type>(value)));
         }
         return {true};
     }

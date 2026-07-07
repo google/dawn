@@ -122,6 +122,8 @@ namespace {{native_namespace}} {
         #endif
     };
 
+    // NOLINTBEGIN(bugprone-invalid-enum-default-initialization)
+
     {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
         {% set CppType = as_cppType(type.name) %}
         {% set spanify = not CppType in structure_spanification_blocklist %}
@@ -203,6 +205,7 @@ namespace {{native_namespace}} {
         };
 
     {% endfor %}
+    // NOLINTEND(bugprone-invalid-enum-default-initialization)
 
     {% for typeDef in by_category["typedef"] if typeDef.type.category == "structure" %}
         using {{as_cppType(typeDef.name)}} = {{as_cppType(typeDef.type.name)}};

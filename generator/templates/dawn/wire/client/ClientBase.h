@@ -39,7 +39,6 @@ namespace dawn::wire::client {
         ClientBase() = default;
         ~ClientBase() override = default;
 
-      private:
         // Implementation of the ObjectIdProvider interface
         {% for type in by_category["object"] %}
             WireResult GetId({{as_cType(type.name)}} object, ObjectId* out) const final {

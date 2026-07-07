@@ -506,7 +506,7 @@ struct CallbackTypeBase<R, std::tuple<Args...>, T> {
 
 {% for type in by_category["callback function"] if type.name.get() not in SpecialCallbacks %}
     template <typename... T>
-    using {{as_cppType(type.name)}} = typename detail::CallbackTypeBase<
+    using {{as_cppType(type.name)}} = detail::CallbackTypeBase<
         {{as_cppType(type.returns.type.name) if type.returns else "void"}},
         std::tuple<
         {%- for arg in type.arguments -%}
@@ -516,9 +516,9 @@ struct CallbackTypeBase<R, std::tuple<Args...>, T> {
     >, T...>::Callback;
 {% endfor %}
 template <typename... T>
-using DeviceLostCallback = typename detail::CallbackTypeBase<void, std::tuple<const Device&, DeviceLostReason, StringView>, T...>::Callback;
+using DeviceLostCallback = detail::CallbackTypeBase<void, std::tuple<const Device&, DeviceLostReason, StringView>, T...>::Callback;
 template <typename... T>
-using UncapturedErrorCallback = typename detail::CallbackTypeBase<void, std::tuple<const Device&, ErrorType, StringView>, T...>::Callback;
+using UncapturedErrorCallback = detail::CallbackTypeBase<void, std::tuple<const Device&, ErrorType, StringView>, T...>::Callback;
 
 {%- macro render_cpp_callback_info_method_impl(type, method, typed, const) %}
     {{render_cpp_callback_info_method_declaration(type, method, typed=typed, const=const, dfn=True)}} {
@@ -666,6 +666,8 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
 //* Special structures that require some custom code generation.
 {% set SpecialStructures = ["string view"] %}
 
+// NOLINTBEGIN(bugprone-invalid-enum-default-initialization)
+
 {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
     {% set CppType = as_cppType(type.name) %}
     {% set Out = "Out" if type.output else "" %}
@@ -738,6 +740,7 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
     };
 
 {% endfor %}
+// NOLINTEND(bugprone-invalid-enum-default-initialization)
 
 // Callback info handling is generated and/or custom implemented here to convert the types between C and C++.
 namespace detail {
@@ -765,7 +768,7 @@ struct CppFTraitsImpl<CppFT, R(*)(CppArgs...), T> {
     static constexpr bool capturing = false;
 
     static constexpr size_t NumCppArgs = sizeof...(CppArgs);
-    using BaseArgsTuple = typename decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
+    using BaseArgsTuple = decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
         return std::type_identity<std::tuple<std::tuple_element_t<Is, std::tuple<CppArgs...>>...>>{};
     }(std::make_index_sequence<std::is_same_v<T, Untyped> ? NumCppArgs : NumCppArgs - 1>{})
     )::type;
@@ -778,7 +781,7 @@ struct CppFTraitsImpl<CppFT, R(C::*)(CppArgs...) const, T> {
     static constexpr bool capturing = !std::is_convertible_v<CppFT, PtrT>;
 
     static constexpr size_t NumCppArgs = sizeof...(CppArgs);
-    using BaseArgsTuple = typename decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
+    using BaseArgsTuple = decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
         return std::type_identity<std::tuple<std::tuple_element_t<Is, std::tuple<CppArgs...>>...>>{};
     }(std::make_index_sequence<std::is_same_v<T, Untyped> ? NumCppArgs : NumCppArgs - 1>{})
     )::type;
@@ -894,7 +897,7 @@ struct CallbackHelperImpl<R, CInfoT, CppF, std::tuple<CArgs...>, std::index_sequ
             std::unique_ptr<CppF> callback(reinterpret_cast<CppF*>(callbackParam));
             return std::apply(*callback, Converter::Convert(cArgs...));
         } else {
-            auto callback = reinterpret_cast<typename CppFTraits::PtrT>(callbackParam);
+            auto callback = reinterpret_cast<CppFTraits::PtrT>(callbackParam);
             return std::apply(callback, Converter::Convert(cArgs...));
         }
     }
@@ -909,7 +912,7 @@ struct CallbackHelperImpl<R, CInfoT, CppF, std::tuple<CArgs...>, std::index_sequ
         using CppFTraits = CppFTraits<CppF, T>;
         using Converter = CArgConverter<CInfoT, typename CppFTraits::BaseArgsTuple>;
 
-        auto callback = reinterpret_cast<typename CppFTraits::PtrT>(callbackParam);
+        auto callback = reinterpret_cast<CppFTraits::PtrT>(callbackParam);
         auto param = std::make_tuple(static_cast<T>(userdataParam));
         return std::apply(callback, std::tuple_cat(Converter::Convert(cArgs...), param));
     }
@@ -989,6 +992,7 @@ struct CallbackInfoHelper {
 // error: 'offsetof' within non-standard-layout type '{{metadata.namespace}}::XXX' is conditionally-supported
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #endif
+// NOLINTBEGIN(bugprone-invalid-enum-default-initialization)
 
 {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
     {% set CppType = as_cppType(type.name) %}
@@ -1140,7 +1144,7 @@ struct CallbackInfoHelper {
     {% endfor %}
 
 {% endfor %}
-
+// NOLINTEND(bugprone-invalid-enum-default-initialization)
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
@@ -1193,7 +1197,7 @@ struct CallbackInfoHelper {
     {% endfor %}
     {% for type in by_category["callback function"] %}
         template <typename... T>
-        using {{as_cppType(type.name)}} = typename {{c_namespace.namespace_case()}}::{{as_cppType(type.name)}}<T...>;
+        using {{as_cppType(type.name)}} = {{c_namespace.namespace_case()}}::{{as_cppType(type.name)}}<T...>;
     {% endfor %}
 {% endif %}
 
