@@ -136,6 +136,7 @@ EXPORTED_CHROMIUM_REPOS = {
     'buildtools': None,
     'testing': None,
     'third_party/abseil-cpp': None,
+    'third_party/chromium-tools-build/src': '../tools/build',
     'third_party/jinja2': None,
     'third_party/markupsafe': None,
     'third_party/partition_alloc': 'base/allocator/partition_allocator',

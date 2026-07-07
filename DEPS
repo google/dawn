@@ -35,7 +35,8 @@ vars = {
   # GN variable required by //testing that will be output in the gclient_args.gni
   'generate_location_tags': False,
 
-  # Fetch clang-tidy into the same bin/ directory as our clang binary.
+  # Fetch clang-tidy into the same bin/ directory as our clang binary,
+  # and Chromium's tools/build for tricium_clang_tidy_script.py.
   'checkout_clang_tidy': False,
 
   # Fetch clangd into the same bin/ directory as our clang binary.
@@ -179,6 +180,12 @@ deps = {
   'tools/code_coverage': {
     'url': '{chromium_git}/chromium/src/tools/code_coverage@74d04576e893e08d9d16c99866c7d6696713d554',
     'condition': 'dawn_standalone and checkout_clang_coverage_tools',
+  },
+
+  # For run-tricium-clang-tidy.py
+  'third_party/chromium-tools-build/src': {
+    'url': '{chromium_git}/chromium/tools/build@4e0efce45b87b3f218a89691a81da6cd09d3f1e1',
+    'condition': 'dawn_standalone and checkout_clang_tidy',
   },
 
   # Linux sysroots for hermetic builds instead of relying on whatever is

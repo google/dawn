@@ -177,3 +177,7 @@ GEMINI.md
 
 ### Jetski
 .jetskicli
+
+### run-tricium-clang-tidy.py outputs
+/clang-tidy-*-findings.json
+/clang-tidy-*-summary.txt

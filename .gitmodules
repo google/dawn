@@ -50,6 +50,10 @@
 	path = tools/code_coverage
 	url = https://chromium.googlesource.com/chromium/src/tools/code_coverage
 	gclient-condition = dawn_standalone and checkout_clang_coverage_tools
+[submodule "third_party/chromium-tools-build/src"]
+	path = third_party/chromium-tools-build/src
+	url = https://chromium.googlesource.com/chromium/tools/build
+	gclient-condition = dawn_standalone and checkout_clang_tidy
 [submodule "tools/mb"]
 	path = tools/mb
 	url = https://chromium.googlesource.com/chromium/src/tools/mb

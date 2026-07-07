@@ -1,222 +1,227 @@
 FormatStyle: file
-Checks: "-*,\
-          abseil-*,\
-          -abseil-faster-strsplit-delimiter,\
-          -abseil-string-find-startswith,\
-          -abseil-string-find-str-contains,\
-          bugprone-*,\
-          -bugprone-argument-comment,\
-          -bugprone-branch-clone,\
-          -bugprone-copy-constructor-init,\
-          -bugprone-crtp-constructor-accessibility,\
-          -bugprone-easily-swappable-parameters,\
-          -bugprone-forward-declaration-namespace,\
-          -bugprone-forwarding-reference-overload,\
-          -bugprone-implicit-widening-of-multiplication-result,\
-          -bugprone-infinite-loop,\
-          -bugprone-integer-division,\
-          -bugprone-lambda-function-name,\
-          -bugprone-macro-parentheses,\
-          -bugprone-misplaced-widening-cast,\
-          -bugprone-move-forwarding-reference,\
-          -bugprone-multi-level-implicit-pointer-conversion,\
-          -bugprone-narrowing-conversions,\
-          -bugprone-nondeterministic-pointer-iteration-order,\
-          -bugprone-parent-virtual-call,\
-          -bugprone-reserved-identifier,\
-          -bugprone-return-const-ref-from-parameter,\
-          -bugprone-signed-char-misuse,\
-          -bugprone-sizeof-expression,\
-          -bugprone-string-constructor,\
-          -bugprone-suspicious-include,\
-          -bugprone-suspicious-memory-comparison,\
-          -bugprone-suspicious-stringview-data-usage,\
-          -bugprone-swapped-arguments,\
-          -bugprone-switch-missing-default-case,\
-          -bugprone-throwing-static-initialization,\
-          -bugprone-too-small-loop-variable,\
-          -bugprone-unchecked-optional-access,\
-          -bugprone-unhandled-self-assignment,\
-          -bugprone-unintended-char-ostream-output,\
-          -bugprone-unused-local-non-trivial-variable,\
-          -bugprone-use-after-move,\
-          cert-*,\
-          -cert-arr39-c,\
-          -cert-dcl16-c,\
-          -cert-dcl21-cpp,\
-          -cert-dcl37-c,\
-          -cert-dcl50-cpp,\
-          -cert-dcl51-cpp,\
-          -cert-dcl54-cpp,\
-          -cert-dcl58-cpp,\
-          -cert-err33-c,\
-          -cert-err34-c,\
-          -cert-err58-cpp,\
-          -cert-exp42-c,\
-          -cert-flp37-c,\
-          -cert-int09-c,\
-          -cert-msc30-c,\
-          -cert-msc32-c,\
-          -cert-msc50-cpp,\
-          -cert-msc51-cpp,\
-          -cert-oop11-cpp,\
-          -cert-oop54-cpp,\
-          -cert-str34-c,\
-          -clang-analyzer-*,\
-          concurrency-*,\
-          -concurrency-mt-unsafe,\
-          cppcoreguidelines-*,\
-          -cppcoreguidelines-avoid-c-arrays,\
-          -cppcoreguidelines-avoid-const-or-ref-data-members,\
-          -cppcoreguidelines-avoid-do-while,\
-          -cppcoreguidelines-avoid-goto,\
-          -cppcoreguidelines-avoid-magic-numbers,\
-          -cppcoreguidelines-avoid-non-const-global-variables,\
-          -cppcoreguidelines-c-copy-assignment-signature,\
-          -cppcoreguidelines-explicit-virtual-functions,\
-          -cppcoreguidelines-init-variables,\
-          -cppcoreguidelines-interfaces-global-init,\
-          -cppcoreguidelines-macro-usage,\
-          -cppcoreguidelines-missing-std-forward,\
-          -cppcoreguidelines-narrowing-conversions,\
-          -cppcoreguidelines-no-malloc,\
-          -cppcoreguidelines-non-private-member-variables-in-classes,\
-          -cppcoreguidelines-owning-memory,\
-          -cppcoreguidelines-prefer-member-initializer,\
-          -cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
-          -cppcoreguidelines-pro-bounds-constant-array-index,\
-          -cppcoreguidelines-pro-bounds-pointer-arithmetic,\
-          -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,\
-          -cppcoreguidelines-pro-type-const-cast,\
-          -cppcoreguidelines-pro-type-cstyle-cast,\
-          -cppcoreguidelines-pro-type-reinterpret-cast,\
-          -cppcoreguidelines-pro-type-static-cast-downcast,\
-          -cppcoreguidelines-pro-type-union-access,\
-          -cppcoreguidelines-pro-type-vararg,\
-          -cppcoreguidelines-rvalue-reference-param-not-moved,\
-          -cppcoreguidelines-slicing,\
-          -cppcoreguidelines-special-member-functions,\
-          -cppcoreguidelines-use-default-member-init,\
-          -cppcoreguidelines-virtual-class-destructor,\
-          google-*,\
-          -google-build-using-namespace,\
-          -google-default-arguments,\
-          -google-explicit-constructor,\
-          -google-objc-function-naming,\
-          -google-objc-global-variable-declaration,\
-          -google-readability-avoid-underscore-in-googletest-name,\
-          -google-readability-braces-around-statements,\
-          -google-readability-casting,\
-          -google-readability-function-size,\
-          -google-readability-namespace-comments,\
-          -google-readability-todo,\
-          -google-runtime-float,\
-          -google-runtime-int,\
-          misc-*,\
-          -misc-confusable-identifiers,\
-          -misc-const-correctness,\
-          -misc-include-cleaner,\
-          -misc-misplaced-const,\
-          -misc-new-delete-overloads,\
-          -misc-non-private-member-variables-in-classes,\
-          -misc-no-recursion,\
-          -misc-redundant-expression,\
-          -misc-uniqueptr-reset-release,\
-          -misc-unconventional-assign-operator,\
-          -misc-unused-parameters,\
-          -misc-use-anonymous-namespace,\
-          -misc-use-internal-linkage,\
-          modernize-*,\
-          -modernize-avoid-c-arrays,\
-          -modernize-concat-nested-namespaces,\
-          -modernize-deprecated-headers,\
-          -modernize-loop-convert,\
-          -modernize-macro-to-enum,\
-          -modernize-make-unique,\
-          -modernize-min-max-use-initializer-list,\
-          -modernize-pass-by-value,\
-          -modernize-raw-string-literal,\
-          -modernize-redundant-void-arg,\
-          -modernize-return-braced-init-list,\
-          -modernize-type-traits,\
-          -modernize-unary-static-assert,\
-          -modernize-use-auto,\
-          -modernize-use-bool-literals,\
-          -modernize-use-default-member-init,\
-          -modernize-use-designated-initializers,\
-          -modernize-use-emplace,\
-          -modernize-use-equals-default,\
-          -modernize-use-equals-delete,\
-          -modernize-use-integer-sign-comparison,\
-          -modernize-use-nodiscard,\
-          -modernize-use-nullptr,\
-          -modernize-use-ranges,\
-          -modernize-use-starts-ends-with,\
-          -modernize-use-std-numbers,\
-          -modernize-use-std-format,\
-          -modernize-use-trailing-return-type,\
-          -modernize-use-transparent-functors,\
-          -modernize-use-using,\
-          performance-*,\
-          -performance-enum-size,\
-          -performance-faster-string-find,\
-          -performance-for-range-copy,\
-          -performance-inefficient-algorithm,\
-          -performance-inefficient-string-concatenation,\
-          -performance-move-const-arg,\
-          -performance-no-automatic-move,\
-          -performance-noexcept-move-constructor,\
-          -performance-no-int-to-ptr,\
-          -performance-trivially-destructible,\
-          -performance-unnecessary-copy-initialization,\
-          -performance-unnecessary-value-param,\
-          portability-*,\
-          -portability-template-virtual-member-function,\
-          readability-*,\
-          -readability-avoid-nested-conditional-operator,\
-          -readability-avoid-return-with-void-value,\
-          -readability-braces-around-statements,\
-          -readability-const-return-type,\
-          -readability-container-contains,\
-          -readability-container-data-pointer,\
-          -readability-container-size-empty,\
-          -readability-convert-member-functions-to-static,\
-          -readability-else-after-return,\
-          -readability-enum-initial-value,\
-          -readability-fn_size,\
-          -readability-function-cognitive-complexity,\
-          -readability-function-size,\
-          -readability-identifier-length,\
-          -readability-implicit-bool-conversion,\
-          -readability-inconsistent-declaration-parameter-name,\
-          -readability-isolate-declaration,\
-          -readability-magic-numbers,\
-          -readability-make-member-function-const,\
-          -readability-math-missing-parentheses,\
-          -readability-named-parameter,\
-          -readability-non-const-parameter,\
-          -readability-qualified-auto,\
-          -readability-redundant-access-specifiers,\
-          -readability-redundant-casting,\
-          -readability-redundant-control-flow,\
-          -readability-redundant-declaration,\
-          -readability-redundant-inline-specifier,\
-          -readability-redundant-member-init,\
-          -readability-redundant-preprocessor,\
-          -readability-redundant-parentheses,\
-          -readability-redundant-smartptr-get,\
-          -readability-redundant-string-cstr,\
-          -readability-redundant-string-init,\
-          -readability-reference-to-constructed-temporary,\
-          -readability-simplify-boolean-expr,\
-          -readability-static-accessed-through-instance,\
-          -readability-static-definition-in-anonymous-namespace,\
-          -readability-suspicious-call-argument,\
-          -readability-trailing-comma,\
-          -readability-uppercase-literal-suffix,\
-          -readability-use-anyofallof,\
-          -readability-use-std-min-max,\
-          "
+Checks:
+  # Enable interesting groups of checks.
+  - abseil-*
+  - bugprone-*
+  - cert-*
+  - concurrency-*
+  - cppcoreguidelines-*
+  - google-*
+  - misc-*
+  - modernize-*
+  - performance-*
+  - portability-*
+  - readability-*
+
+  # Checks we're not really interested in re-enabling.
+  # - Prefers #ifdef over #if defined. Triggers a lot and doesn't really matter.
+  - -readability-use-concise-preprocessor-directives
+
+  # Untriaged checks that weren't passing on a first-pass over the codebase.
+  - -abseil-faster-strsplit-delimiter
+  - -abseil-string-find-startswith
+  - -abseil-string-find-str-contains
+  - -bugprone-argument-comment
+  - -bugprone-branch-clone
+  - -bugprone-copy-constructor-init
+  - -bugprone-crtp-constructor-accessibility
+  - -bugprone-easily-swappable-parameters
+  - -bugprone-forward-declaration-namespace
+  - -bugprone-forwarding-reference-overload
+  - -bugprone-implicit-widening-of-multiplication-result
+  - -bugprone-infinite-loop
+  - -bugprone-integer-division
+  - -bugprone-lambda-function-name
+  - -bugprone-macro-parentheses
+  - -bugprone-misplaced-widening-cast
+  - -bugprone-move-forwarding-reference
+  - -bugprone-multi-level-implicit-pointer-conversion
+  - -bugprone-narrowing-conversions
+  - -bugprone-nondeterministic-pointer-iteration-order
+  - -bugprone-parent-virtual-call
+  - -bugprone-reserved-identifier
+  - -bugprone-return-const-ref-from-parameter
+  - -bugprone-signed-char-misuse
+  - -bugprone-sizeof-expression
+  - -bugprone-string-constructor
+  - -bugprone-suspicious-include
+  - -bugprone-suspicious-memory-comparison
+  - -bugprone-suspicious-stringview-data-usage
+  - -bugprone-swapped-arguments
+  - -bugprone-switch-missing-default-case
+  - -bugprone-throwing-static-initialization
+  - -bugprone-too-small-loop-variable
+  - -bugprone-unchecked-optional-access
+  - -bugprone-unhandled-self-assignment
+  - -bugprone-unintended-char-ostream-output
+  - -bugprone-unused-local-non-trivial-variable
+  - -bugprone-use-after-move
+  - -cert-arr39-c
+  - -cert-dcl16-c
+  - -cert-dcl21-cpp
+  - -cert-dcl37-c
+  - -cert-dcl50-cpp
+  - -cert-dcl51-cpp
+  - -cert-dcl54-cpp
+  - -cert-dcl58-cpp
+  - -cert-err33-c
+  - -cert-err34-c
+  - -cert-err58-cpp
+  - -cert-exp42-c
+  - -cert-flp37-c
+  - -cert-int09-c
+  - -cert-msc30-c
+  - -cert-msc32-c
+  - -cert-msc50-cpp
+  - -cert-msc51-cpp
+  - -cert-oop11-cpp
+  - -cert-oop54-cpp
+  - -cert-str34-c
+  - -concurrency-mt-unsafe
+  - -cppcoreguidelines-avoid-c-arrays
+  - -cppcoreguidelines-avoid-const-or-ref-data-members
+  - -cppcoreguidelines-avoid-do-while
+  - -cppcoreguidelines-avoid-goto
+  - -cppcoreguidelines-avoid-magic-numbers
+  - -cppcoreguidelines-avoid-non-const-global-variables
+  - -cppcoreguidelines-c-copy-assignment-signature
+  - -cppcoreguidelines-explicit-virtual-functions
+  - -cppcoreguidelines-init-variables
+  - -cppcoreguidelines-interfaces-global-init
+  - -cppcoreguidelines-macro-usage
+  - -cppcoreguidelines-missing-std-forward
+  - -cppcoreguidelines-narrowing-conversions
+  - -cppcoreguidelines-no-malloc
+  - -cppcoreguidelines-non-private-member-variables-in-classes
+  - -cppcoreguidelines-owning-memory
+  - -cppcoreguidelines-prefer-member-initializer
+  - -cppcoreguidelines-pro-bounds-array-to-pointer-decay
+  - -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access
+  - -cppcoreguidelines-pro-bounds-constant-array-index
+  - -cppcoreguidelines-pro-bounds-pointer-arithmetic
+  - -cppcoreguidelines-pro-type-const-cast
+  - -cppcoreguidelines-pro-type-cstyle-cast
+  - -cppcoreguidelines-pro-type-reinterpret-cast
+  - -cppcoreguidelines-pro-type-static-cast-downcast
+  - -cppcoreguidelines-pro-type-union-access
+  - -cppcoreguidelines-pro-type-vararg
+  - -cppcoreguidelines-rvalue-reference-param-not-moved
+  - -cppcoreguidelines-slicing
+  - -cppcoreguidelines-special-member-functions
+  - -cppcoreguidelines-use-default-member-init
+  - -cppcoreguidelines-virtual-class-destructor
+  - -google-build-using-namespace
+  - -google-default-arguments
+  - -google-explicit-constructor
+  - -google-objc-function-naming
+  - -google-objc-global-variable-declaration
+  - -google-readability-avoid-underscore-in-googletest-name
+  - -google-readability-braces-around-statements
+  - -google-readability-casting
+  - -google-readability-function-size
+  - -google-readability-namespace-comments
+  - -google-readability-todo
+  - -google-runtime-float
+  - -google-runtime-int
+  - -misc-confusable-identifiers
+  - -misc-const-correctness
+  - -misc-include-cleaner
+  - -misc-misplaced-const
+  - -misc-new-delete-overloads
+  - -misc-no-recursion
+  - -misc-non-private-member-variables-in-classes
+  - -misc-redundant-expression
+  - -misc-unconventional-assign-operator
+  - -misc-uniqueptr-reset-release
+  - -misc-unused-parameters
+  - -misc-use-anonymous-namespace
+  - -misc-use-internal-linkage
+  - -modernize-avoid-c-arrays
+  - -modernize-concat-nested-namespaces
+  - -modernize-deprecated-headers
+  - -modernize-loop-convert
+  - -modernize-macro-to-enum
+  - -modernize-make-unique
+  - -modernize-min-max-use-initializer-list
+  - -modernize-pass-by-value
+  - -modernize-raw-string-literal
+  - -modernize-redundant-void-arg
+  - -modernize-return-braced-init-list
+  - -modernize-type-traits
+  - -modernize-unary-static-assert
+  - -modernize-use-auto
+  - -modernize-use-bool-literals
+  - -modernize-use-default-member-init
+  - -modernize-use-designated-initializers
+  - -modernize-use-emplace
+  - -modernize-use-equals-default
+  - -modernize-use-equals-delete
+  - -modernize-use-integer-sign-comparison
+  - -modernize-use-nodiscard
+  - -modernize-use-nullptr
+  - -modernize-use-ranges
+  - -modernize-use-starts-ends-with
+  - -modernize-use-std-format
+  - -modernize-use-std-numbers
+  - -modernize-use-trailing-return-type
+  - -modernize-use-transparent-functors
+  - -modernize-use-using
+  - -performance-enum-size
+  - -performance-faster-string-find
+  - -performance-for-range-copy
+  - -performance-inefficient-algorithm
+  - -performance-inefficient-string-concatenation
+  - -performance-move-const-arg
+  - -performance-no-automatic-move
+  - -performance-no-int-to-ptr
+  - -performance-noexcept-move-constructor
+  - -performance-trivially-destructible
+  - -performance-unnecessary-copy-initialization
+  - -performance-unnecessary-value-param
+  - -portability-template-virtual-member-function
+  - -readability-avoid-nested-conditional-operator
+  - -readability-avoid-return-with-void-value
+  - -readability-braces-around-statements
+  - -readability-const-return-type
+  - -readability-container-contains
+  - -readability-container-data-pointer
+  - -readability-container-size-empty
+  - -readability-convert-member-functions-to-static
+  - -readability-else-after-return
+  - -readability-enum-initial-value
+  - -readability-fn_size
+  - -readability-function-cognitive-complexity
+  - -readability-function-size
+  - -readability-identifier-length
+  - -readability-implicit-bool-conversion
+  - -readability-inconsistent-declaration-parameter-name
+  - -readability-isolate-declaration
+  - -readability-magic-numbers
+  - -readability-make-member-function-const
+  - -readability-math-missing-parentheses
+  - -readability-named-parameter
+  - -readability-non-const-parameter
+  - -readability-qualified-auto
+  - -readability-redundant-access-specifiers
+  - -readability-redundant-casting
+  - -readability-redundant-control-flow
+  - -readability-redundant-declaration
+  - -readability-redundant-inline-specifier
+  - -readability-redundant-member-init
+  - -readability-redundant-parentheses
+  - -readability-redundant-preprocessor
+  - -readability-redundant-smartptr-get
+  - -readability-redundant-string-cstr
+  - -readability-redundant-string-init
+  - -readability-reference-to-constructed-temporary
+  - -readability-simplify-boolean-expr
+  - -readability-static-accessed-through-instance
+  - -readability-static-definition-in-anonymous-namespace
+  - -readability-suspicious-call-argument
+  - -readability-trailing-comma
+  - -readability-uppercase-literal-suffix
+  - -readability-use-anyofallof
+  - -readability-use-std-min-max
 
 CheckOptions:
   - key: cppcoreguidelines-avoid-do-while.IgnoreMacros
