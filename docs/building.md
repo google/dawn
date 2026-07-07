@@ -171,12 +171,13 @@ It may not always work, and the resulting binaries are not guaranteed to work.
 
     - `target_os = "mac"` `target_cpu = "arm64"`/`"x64"` on Linux hosts
     - `target_os = "win"` `target_cpu = "x64"` on Linux and Mac hosts
+        - On Mac hosts, many Windows files can't build using Siso remote builds.
+          Use `autoninja --offline` (or `autoninja -k=0 ; autoninja --offline`
+          to first compile everything possible with Siso, then compile the rest
+          locally). See <https://crbug.com/446124900>.
 
 For background, see also
 [this guide](https://chromium.googlesource.com/chromium/src/+/main/docs/win_cross.md).
-
-There is sometimes an unknown issue with building standard libraries with Siso.
-If this happens, try building locally, using `autoninja --offline`.
 
 #### For Android targets (Linux hosts)
 

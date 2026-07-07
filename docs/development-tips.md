@@ -41,6 +41,7 @@ CompileFlags:
   CompilationDatabase: out/Debug
   Add:
     - "-ferror-limit=0"
+    - "-fsafe-buffer-usage-suggestions"
     # Additional personal configs can go here OR in your user-wide
     # `clangd/config.yml` (https://clangd.llvm.org/config#files). Suggestions:
     # - `--header-insertion=never` if you find yourself accidentally adding
