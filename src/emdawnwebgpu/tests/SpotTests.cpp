@@ -126,8 +126,9 @@ class SpotTests : public ::testing::TestWithParam<Mode> {
         wgpu::SupportedFeatures deviceFeatures;
         device.GetFeatures(&deviceFeatures);
         mGotCompatibilityMode = true;
-        for (uint32_t i = 0; i < deviceFeatures.featureCount; ++i) {
-            if (deviceFeatures.features[i] == wgpu::FeatureName::CoreFeaturesAndLimits) {
+        for (auto feature :
+             DAWN_UNSAFE_TODO(std::span(deviceFeatures.features, deviceFeatures.featureCount))) {
+            if (feature == wgpu::FeatureName::CoreFeaturesAndLimits) {
                 mGotCompatibilityMode = false;
             }
         }
@@ -218,7 +219,7 @@ TEST_P(SpotTests, InvalidComponentSwizzle) {
 TEST_P(SpotTests, GetWGSLLanguageFeatures) {
     wgpu::SupportedWGSLLanguageFeatures f;
     mInstance.GetWGSLLanguageFeatures(&f);
-    auto features = std::span(f.features, f.featureCount);
+    auto features = DAWN_UNSAFE_TODO(std::span(f.features, f.featureCount));
     for (auto feature : features) {
         // GetWGSLLanguageFeatures should filter out any unknown features.
         EXPECT_NE(feature, wgpu::WGSLLanguageFeatureName{0});
@@ -241,7 +242,7 @@ template <typename AdapterOrDevice>
 void TestGetFeatures(AdapterOrDevice o, bool shouldHaveCompressedTexture) {
     wgpu::SupportedFeatures f;
     o.GetFeatures(&f);
-    auto features = std::span(f.features, f.featureCount);
+    auto features = DAWN_UNSAFE_TODO(std::span(f.features, f.featureCount));
     for (auto feature : features) {
         // GetFeatures should filter out any unknown features.
         EXPECT_NE(feature, wgpu::FeatureName{0});

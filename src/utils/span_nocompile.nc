@@ -25,7 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Test the type checks of dawn::Span
+// Test the type checks of dawn::Span.
+//
+// Note: All unsafe buffer warning tests are in warning_nocompile.nc.
+// Warnings don't trigger in this file because it contains errors. Because of this,
+// DAWN_UNSAFE_BUFFERS() annotations also don't need be to used in this file - they're ignored.
 
 #include <array>
 
@@ -56,24 +60,14 @@ struct FakeTypedRange {
 };
 
 void TestConstPointerToNonConstSpan() {
-    DAWN_UNSAFE_BUFFERS(Span<const int>(kSpanData.data(), kSpanData.size())); // Control case.
-    DAWN_UNSAFE_BUFFERS(Span<int>(kSpanData.data(), kSpanData.size())); // expected-error {{no matching constructor for initialization}}
+    Span<const int>(kSpanData.data(), kSpanData.size()); // Control case.
+    Span<int>(kSpanData.data(), kSpanData.size()); // expected-error {{no matching constructor for initialization}}
 
-    DAWN_UNSAFE_BUFFERS(Span<const int>(kSpanData.begin(), kSpanData.end())); // Control case.
-    DAWN_UNSAFE_BUFFERS(Span<int>(kSpanData.begin(), kSpanData.end())); // expected-error {{no matching constructor for initialization}}
+    Span<const int>(kSpanData.begin(), kSpanData.end()); // Control case.
+    Span<int>(kSpanData.begin(), kSpanData.end()); // expected-error {{no matching constructor for initialization}}
 
     Span<const int>{FakeRange()}; // Control case.
     Span<int>{FakeRange()}; // expected-error {{no matching constructor for initialization}}
-}
-
-void TestConstructorsThatRequireDawnUnsafeBuffers() {
-    DAWN_UNSAFE_BUFFERS(Span<const int>(kSpanData.data(), kSpanData.size())); // Control case.
-    // TODO(https://crbug.com/523128530): DAWN_UNSAFE_BUFFERS doesn't seem required in no-compile tests for some reason. Fix that and add an expected error here.
-    Span<const int>(kSpanData.data(), kSpanData.size());
-
-    DAWN_UNSAFE_BUFFERS(Span<const int>(kSpanData.begin(), kSpanData.end())); // Control case.
-    // TODO(https://crbug.com/523128530): DAWN_UNSAFE_BUFFERS doesn't seem required in no-compile tests for some reason. Fix that and add an expected error here.
-    Span<const int>(kSpanData.begin(), kSpanData.end());
 }
 
 void TestConstructorWithRangeRequirements() {
@@ -107,7 +101,7 @@ void TestConstructorWithRangeRequirements() {
 void TestTypedIntegerArguments() {
     ityp::span<Index, const int> sp{FakeTypedRange()};
 
-    DAWN_UNSAFE_BUFFERS(ityp::span<Index, const int>(kSpanData.data(), kSpanData.size())); // expected-error {{no matching constructor for initialization}}
+    ityp::span<Index, const int>(kSpanData.data(), kSpanData.size()); // expected-error {{no matching constructor for initialization}}
     (void) sp.at(2); // expected-error {{no viable conversion from}}
     (void) sp[2]; // expected-error {{no viable overloaded operator[]}}
     (void) sp.first(2); // expected-error {{no viable conversion from}}

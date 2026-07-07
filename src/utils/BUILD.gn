@@ -56,6 +56,14 @@ config("dawn_warnings") {
   if (dawn_weverything) {
     assert(is_clang)
 
+    if (!is_wasm) {
+      # One of the warnings in -Weverything is Clang's -Wunsafe-buffer-usage,
+      # but we don't want to run that warning on Dawn without the corresponding
+      # Chromium plugin, which implements support for unsafe_buffers_paths.txt
+      # and probably other important things.
+      assert(clang_use_unsafe_buffers_plugin)
+    }
+
     cflags = [ "-Weverything" ]
 
     # Suppressions
@@ -118,7 +126,6 @@ config("dawn_warnings") {
       "-Wno-reserved-identifier",
       "-Wno-unused-member-function",
       "-Wno-tautological-type-limit-compare",
-      "-Wno-unsafe-buffer-usage",
       "-Wno-nonportable-system-include-path",
     ]
 
@@ -423,7 +430,7 @@ source_set("gmock_and_gtest") {
 }
 
 ###############################################################################
-# Additional clang plugin for raw_ptr and unsafe-buffers
+# Additional clang plugins.
 ###############################################################################
 
 # Helper template to define clang plugins.

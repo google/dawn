@@ -25,17 +25,66 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+// Tests for warnings. Note this code should ONLY trigger warnings (no other hard errors),
+// otherwise the compiler suppresses the warnings in favor of the errors.
+
 #include <stdint.h>
+
+#include <array>
+#include <span>
+
+#include "src/utils/span.h"
 
 namespace dawn {
 
-// This test verifies that warnings that are part of -Weverything but not
-// -Wall -Wextra are enabled when This test runs only when `dawn_weverything = true`.
-
-// -Wcast-align is one such warning.
-void TestCastAlign() {
+// Verify that warnings that are part of -Weverything but not -Wall -Wextra
+// are enabled. This test runs only when `dawn_weverything = true`.
+void TestWeverything() {
+    // -Wcast-align is one such warning.
     char* p = nullptr;
     [[maybe_unused]] int* q = (int*)p; // expected-error {{increases required alignment}}
+}
+
+// -Wunsafe-buffer-usage: operator[] on T*
+void TestUnsafeBuffersRawPointer() {
+    constexpr std::array<int, 4> arr{};
+
+    // Safe to get a pointer to the first element.
+    const int* arrPtr = arr.data();
+
+    // But unsafe to use it like an array.
+    { [[maybe_unused]] int x = arr[1]; }
+    { [[maybe_unused]] int x = std::span(arr)[1]; }
+    { [[maybe_unused]] int x = arrPtr[1]; }  // expected-error {{unsafe buffer access}}
+}
+
+// -Wunsafe-buffer-usage-in-libc-call: memcpy()
+void TestUnsafeBuffersMemcpy() {
+    int x = 1;
+    int y = 2;
+    memcpy(&y, &x, sizeof(int));  // expected-error {{function 'memcpy' is unsafe}}
+}
+
+// -Wunsafe-buffer-usage: std::span() constructors
+void TestUnsafeBuffersStdSpanConstructors() {
+    std::array<int, 4> arr{};
+    // std::span is NOT tagged as being unsafe when using the unsafe buffers plugin.
+    // (If we use -Wunsafe-buffer-usage without the plugin, it would be. This may be fixable.)
+    { [[maybe_unused]] auto s = std::span(arr.data(), arr.size()); }
+    { [[maybe_unused]] std::span<int> s(arr.data(), arr.size()); }
+}
+
+// -Wunsafe-buffer-usage: dawn::Span() constructors
+void TestUnsafeBuffersDawnSpanConstructors() {
+    {
+        constexpr std::array<int, 5> kArr{};
+
+        DAWN_UNSAFE_BUFFERS(Span<const int>(kArr.data(), kArr.size()));  // Control case.
+        Span<const int>(kArr.data(), kArr.size());  // expected-error {{introduces unsafe buffer manipulation}}
+
+        DAWN_UNSAFE_BUFFERS(Span<const int>(kArr.begin(), kArr.end()));  // Control case.
+        Span<const int>(kArr.begin(), kArr.end());  // expected-error {{introduces unsafe buffer manipulation}}
+    }
 }
 
 }

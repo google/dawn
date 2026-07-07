@@ -25,9 +25,16 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# See https://chromium.googlesource.com/chromium/src/+/main/docs/unsafe_buffers.md
+# Config used by Chromium's unsafe buffers plugin to control Clang's builtin
+# -Wunsafe-buffer-usage* warnings.
+# Docs: http://crsrc.org/v/docs/unsafe_buffers.md
+#
+# Note the plugin is not used in Wasm builds, so this config is ignored.
 
-# Checks to enforce
+# Checks to enforce.
+# Docs: http://crsrc.org/v/docs/unsafe_buffers.md#syntax-of-unsafe-buffer-paths-file
+#
+# NOTE: If adding a check here, add a test to warning_nocompile.nc too.
 .buffers,libc
 
 # These directories are excluded because they come from outside Dawn and Tint and

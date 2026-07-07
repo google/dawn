@@ -652,7 +652,7 @@ TEST(SpanTest, SpanAsBytes) {
         std::array<int, 3> ints{};
 
         // SAFETY: This is viewing ints, just with typed indices.
-        ityp::span<Index, int> sp{ints.data(), Index(3u)};
+        ityp::span<Index, int> DAWN_UNSAFE_BUFFERS(sp{ints.data(), Index(3u)});
         auto bsp = SpanAsBytes(sp);
         static_assert(std::is_same_v<Span<const std::byte>, decltype(bsp)>);
         EXPECT_EQ(bsp.size(), sp.size_bytes());
@@ -663,7 +663,7 @@ TEST(SpanTest, SpanAsBytes) {
         EXPECT_EQ(wbsp.data(), reinterpret_cast<std::byte*>(sp.data()));
 
         // SAFETY: This is viewing ints, just with typed indices.
-        ityp::span<Index, volatile int> vsp{ints.data(), Index(3u)};
+        ityp::span<Index, volatile int> DAWN_UNSAFE_BUFFERS(vsp{ints.data(), Index(3u)});
         auto vbsp = SpanAsBytes(vsp);
         static_assert(std::is_same_v<Span<const volatile std::byte>, decltype(vbsp)>);
         EXPECT_EQ(vbsp.size(), vsp.size_bytes());
