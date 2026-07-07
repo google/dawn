@@ -277,8 +277,8 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     ResultOrError<Ref<TextureViewBase>> GetOrCreateDefaultView();
 
-    void ClearResourceTableUses();
     void MarkDirtyInResourceTables();
+    void MarkDestroyedInResourceTables();
 
     void WillAddFirstExternalRef() override;
     void WillDropLastExternalRef() override;

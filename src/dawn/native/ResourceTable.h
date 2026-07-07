@@ -95,6 +95,7 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
 
     // Notify the table of a texture state change (destroyed, begin/end access)
     void OnTextureStateChange(TextureBase* texture);
+    void OnTextureDestroyed(TextureBase* texture);
 
   protected:
     ResourceTableBase(DeviceBase* device, const ResourceTableDescriptor* descriptor);

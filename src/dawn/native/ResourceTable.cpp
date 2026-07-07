@@ -502,8 +502,6 @@ void ResourceTableBase::SetEntry(ResourceTableSlot slot, const BindingResource* 
                 mTextureState.erase(currTexture);
                 // Also remove the mapping of texture to this table
                 currTexture->RemoveResourceTableUse(this);
-                // Remove from mDirtyStateTextures
-                mDirtyStateTextures.erase(currTexture);
             }
         }
     } else if (auto sampler = GetRef<SamplerBase>(state.resource)) {
@@ -527,9 +525,7 @@ void ResourceTableBase::SetEntry(ResourceTableSlot slot, const BindingResource* 
             // Add the mapping to this table on the texture
             inputTexture->AddResourceTableUse(this);
             // Make it dirty to ensure it gets transitioned
-            if (textureState.visible) {
-                mDirtyStateTextures.insert(inputTexture);
-            }
+            mDirtyStateTextures.insert(inputTexture);
         }
         [[maybe_unused]] const bool inserted = textureState.slots.insert(slot).second;
         DAWN_ASSERT(inserted);
@@ -554,32 +550,21 @@ absl::flat_hash_set<Ref<TextureBase>> ResourceTableBase::MakeResourcesVisibleExc
     absl::flat_hash_set<Ref<TextureBase>> texturesToTransition;
 
     auto HandleDirtyTexture = [&](TextureBase* texture) {
-        // If the texture was destroyed, clear all slots
-        // TODO(crbug.com/522749739): This probably shouldn't be here as the goal of this function
-        // is to compute visibility. Consider moving this to OnTextureStateChange, or adding an
-        // OnTextureDestroyed.
-        if (texture->IsDestroyed()) {
-            auto& textureState = mTextureState[texture];
-            for (auto slot : textureState.slots) {
-                SlotState& state = mSlots[slot];
-                state.resource = std::monostate{};
-                state.typeId = tint::ResourceType::kEmpty;
-                state.visible = false;
-                state.resourceDirty = true;
-                MarkStateDirty(slot);
-            }
-            mTextureState.erase(texture);
+        // The texture may not be in mTextureState if, for example, it was destroyed.
+        auto iter = mTextureState.find(texture);
+        if (iter == mTextureState.end()) {
             return;
         }
+        auto& textureState = iter->second;
 
         // Update visible flag
-        bool visible = texture->HasAccess() && !writableTextures.contains(texture);
+        bool visible =
+            !texture->IsDestroyed() && texture->HasAccess() && !writableTextures.contains(texture);
 
         if (visible) {
             texturesToTransition.insert(texture);
         }
 
-        auto& textureState = mTextureState[texture];
         if (textureState.visible != visible) {
             // Used in SetEntry to update textureState.slots with this visibility
             textureState.visible = visible;
@@ -681,6 +666,21 @@ void ResourceTableBase::MarkStateDirty(ResourceTableSlot slot) {
 void ResourceTableBase::OnTextureStateChange(TextureBase* texture) {
     DAWN_ASSERT(mTextureState.contains(texture));
     mDirtyStateTextures.insert(texture);
+}
+
+void ResourceTableBase::OnTextureDestroyed(TextureBase* texture) {
+    auto iter = mTextureState.find(texture);
+    DAWN_ASSERT(iter != mTextureState.end());
+    // Make sure all slots for this texture are hidden
+    for (auto slot : iter->second.slots) {
+        SlotState& state = mSlots[slot];
+        state.resource = std::monostate{};
+        state.typeId = tint::ResourceType::kEmpty;
+        state.visible = false;
+        state.resourceDirty = true;
+        MarkStateDirty(slot);
+    }
+    mTextureState.erase(iter);
 }
 
 }  // namespace dawn::native

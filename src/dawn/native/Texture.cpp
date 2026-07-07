@@ -1138,7 +1138,8 @@ void TextureBase::DestroyImpl(DestroyReason reason) {
     //   other threads using the texture since there are no other live refs.
 
     // Destroying the texture implicitly hides it in resource tables.
-    ClearResourceTableUses();
+    MarkDestroyedInResourceTables();
+    mResourceTableUses.clear();
 
     mState.destroyed = true;
 
@@ -1340,7 +1341,8 @@ void TextureBase::SetInitialized(bool initialized) {
 
 ExecutionSerial TextureBase::OnEndAccess() {
     // Ending access on the texture implicitly hides it in resource tables.
-    ClearResourceTableUses();
+    MarkDirtyInResourceTables();
+    mResourceTableUses.clear();
 
     mState.hasAccess = false;
     ExecutionSerial lastUsageSerial = mLastSharedTextureMemoryUsageSerial;
@@ -1681,15 +1683,18 @@ void TextureBase::RemoveResourceTableUse(ResourceTableBase* table) {
     DAWN_CHECK(removed);
 }
 
-void TextureBase::ClearResourceTableUses() {
-    MarkDirtyInResourceTables();
-    mResourceTableUses.clear();
-}
-
 void TextureBase::MarkDirtyInResourceTables() {
     for (const auto& use : mResourceTableUses) {
         if (Ref<ResourceTableBase> table = use.Promote()) {
             table->OnTextureStateChange(this);
+        }
+    }
+}
+
+void TextureBase::MarkDestroyedInResourceTables() {
+    for (const auto& use : mResourceTableUses) {
+        if (Ref<ResourceTableBase> table = use.Promote()) {
+            table->OnTextureDestroyed(this);
         }
     }
 }
