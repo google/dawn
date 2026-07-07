@@ -1464,6 +1464,7 @@ crbug.com/527439864 [ intel release-x64 target-cpu-64 webgpu-dxc-enabled win ] w
 crbug.com/527439864 [ microsoft target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,validation,shader_io,align:required_alignment:decl="var";address_space="immediate";align=32 [ Failure ]
 
 crbug.com/499140183 [ intel win ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,reuse:* [ Failure ]
+crbug.com/532123166 [ amd mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";* [ Failure ]
 
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:2d_coords:format="depth* [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_2d_coords:format="depth* [ Failure ]
@@ -1510,9 +1511,6 @@ crbug.com/0000 [ amd mac ] webgpu:api,operation,render_pass,resolve:render_pass_
 crbug.com/0000 [ amd mac ] webgpu:api,operation,render_pass,resolve:render_pass_resolve:colorFormat="rgba8unorm-srgb";separateResolvePass=true;storeOperation="store" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,rendering,stencil:stencil_accumulation:format="depth24plus-stencil8" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,rendering,stencil:stencil_accumulation:format="depth32float-stencil8" [ Failure ]
-crbug.com/0000 [ amd-0x7340 dawn-no-backend-validation mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth24plus-stencil8" [ Failure ]
-crbug.com/0000 [ amd mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth32float-stencil8" [ Failure ]
-crbug.com/0000 [ amd-0x7340 dawn-no-backend-validation mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,storage_texture,read_only:basic:format="r16snorm";shaderStage="compute";dimension="1d";depthOrArrayLayers=1 [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,storage_texture,read_only:basic:format="r16snorm";shaderStage="compute";dimension="2d";depthOrArrayLayers=1 [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,storage_texture,read_only:basic:format="r16snorm";shaderStage="compute";dimension="2d";depthOrArrayLayers=2 [ Failure ]
