@@ -67,6 +67,16 @@ def main():
     project_root = script_dir.parent.parent
     litert_lm_dir = script_dir / 'src'
 
+    if not litert_lm_dir.exists():
+        print("Error: LiteRT-LM source directory not found.", file=sys.stderr)
+        print(
+            "Please add the following to your .gclient file under 'custom_vars':",
+            file=sys.stderr)
+        print('    "checkout_litert_lm": True,', file=sys.stderr)
+        print("And then run `gclient sync` to download the dependencies.",
+              file=sys.stderr)
+        sys.exit(1)
+
     bazelisk_path = project_root / 'tools' / 'bazelisk' / 'bazelisk'
     prebuilt_cipd_dir = script_dir / 'data' / 'prebuilt'
     prebuilt_src_dir = litert_lm_dir / 'prebuilt'
