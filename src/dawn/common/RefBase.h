@@ -57,8 +57,7 @@ class RefBase {
     ~RefBase() { Release(mValue); }
 
     // Constructors from nullptr.
-    // NOLINTNEXTLINE(runtime/explicit)
-    constexpr RefBase(std::nullptr_t) : RefBase() {}
+    explicit(false) constexpr RefBase(std::nullptr_t) : RefBase() {}
 
     RefBase<T, Traits>& operator=(std::nullptr_t) {
         Set(Traits::kNullValue);
@@ -66,8 +65,7 @@ class RefBase {
     }
 
     // Constructors from a value T.
-    // NOLINTNEXTLINE(runtime/explicit)
-    RefBase(T value) : mValue(value) { AddRef(value); }
+    explicit(false) RefBase(T value) : mValue(value) { AddRef(value); }
 
     RefBase<T, Traits>& operator=(const T& value) {
         Set(value);

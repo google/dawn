@@ -109,7 +109,7 @@ namespace {{native_namespace}} {
         bool operator==(const StringView& rhs) const;
 
         #ifndef ABSL_USES_STD_STRING_VIEW
-        // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
+        // NOLINTNEXTLINE(google-explicit-constructor)
         operator absl::string_view() const {
             if (this->length == wgpu::kStrlen) {
                 if (IsUndefined()) {

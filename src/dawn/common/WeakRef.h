@@ -61,14 +61,12 @@ class WeakRef {
     WeakRef() {}
 
     // Constructors from nullptr.
-    // NOLINTNEXTLINE(runtime/explicit)
-    constexpr WeakRef(std::nullptr_t) : WeakRef() {}
+    explicit(false) constexpr WeakRef(std::nullptr_t) : WeakRef() {}
 
     // Constructors from a WeakRef<U>, where U can also equal T.
 
     template <typename U>
-    // NOLINTNEXTLINE(runtime/explicit, google-explicit-constructor)
-    WeakRef(const WeakRef<U>& other)
+    explicit(false) WeakRef(const WeakRef<U>& other)
         requires(std::is_base_of_v<T, U>)
         : mData(other.mData) {}
     template <typename U>
@@ -80,8 +78,7 @@ class WeakRef {
     }
 
     template <typename U>
-    // NOLINTNEXTLINE(runtime/explicit, google-explicit-constructor)
-    WeakRef(WeakRef<U>&& other)
+    explicit(false) WeakRef(WeakRef<U>&& other)
         requires(std::is_base_of_v<T, U>)
         : mData(std::move(other.mData)) {}
     template <typename U>
@@ -95,8 +92,7 @@ class WeakRef {
     }
 
     // Constructor from implicit WeakRefSupport<T>* is allowed.
-    // NOLINTNEXTLINE(runtime/explicit)
-    WeakRef(WeakRefSupport<T>* support) : mData(support->mData) {}
+    explicit(false) WeakRef(WeakRefSupport<T>* support) : mData(support->mData) {}
 
     // Comparison operators.
     bool operator==(const WeakRef<T>& other) const = default;

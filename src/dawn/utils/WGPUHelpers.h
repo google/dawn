@@ -164,8 +164,7 @@ struct BindingLayoutEntryInitializationHelper : wgpu::BindGroupLayoutEntry {
                                            wgpu::ShaderStage entryVisibility,
                                            wgpu::TexelBufferBindingLayout* bindingLayout);
 #endif  // __EMSCRIPTEN__
-    // NOLINTNEXTLINE(runtime/explicit)
-    BindingLayoutEntryInitializationHelper(const wgpu::BindGroupLayoutEntry& entry);
+    explicit(false) BindingLayoutEntryInitializationHelper(const wgpu::BindGroupLayoutEntry& entry);
 };
 
 wgpu::BindGroupLayout MakeBindGroupLayout(

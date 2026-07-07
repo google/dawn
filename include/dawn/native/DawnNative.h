@@ -82,8 +82,7 @@ struct FeatureInfo {
 class DAWN_NATIVE_EXPORT Adapter {
   public:
     Adapter();
-    // NOLINTNEXTLINE(runtime/explicit)
-    Adapter(AdapterBase* impl);
+    explicit(false) Adapter(AdapterBase* impl);
     ~Adapter();
 
     Adapter(const Adapter& other);

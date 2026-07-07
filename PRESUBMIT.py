@@ -158,6 +158,26 @@ _BANNED_CPP_PATTERNS: Sequence[BanRule] = (
         treat_as_error=True,
         surface_as_gerrit_lint=True,
     ),
+    BanRule(
+        pattern=r'runtime/explicit',
+        explanation='Use explicit(false) instead of NOLINT(runtime/explicit).',
+        treat_as_error=True,
+        surface_as_gerrit_lint=True,
+    ),
+    BanRule(
+        pattern=
+        r'/misc-explicit-constructor|cppcoreguidelines-explicit-constructor',
+        # We would prefer to use explicit(false) here too, but it doesn't work
+        # to suppress the clang-tidy warning on operators.
+        # There's no ban rule on google-explicit-constructor because it's hard
+        # to implement while allowing it on operators.
+        explanation=(
+            'Use explicit(false) for constructors, and ',
+            'NOLINTNEXTLINE(google-explicit-constructor) for operators.',
+        ),
+        treat_as_error=True,
+        surface_as_gerrit_lint=True,
+    ),
 )
 
 EXPECTED_LICENSE_TEXT = {
@@ -713,8 +733,8 @@ def _GetMessageForMatchingType(input_api, affected_file, line_number, line,
     """
     result = []
 
-    # Ignore comments about banned types.
-    if input_api.re.search(r'^ *//', line):
+    # Ignore comments containing banned strings (but not NOLINT comments).
+    if input_api.re.search(r'^ *//(?! *NOLINT)', line):
         return result
     # A // nocheck comment will bypass this error.
     if line.endswith(' nocheck'):

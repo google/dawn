@@ -166,13 +166,11 @@ class SpanBase {
     // DAWN_CHECK() if the size doesn't fit in a size_t.
     template <typename R>
         requires CompatibleRange<T, Index, R>
-    // NOLINTNEXTLINE(runtime/explicit)
-    constexpr SpanBase(R&& range)
+    explicit(false) constexpr SpanBase(R&& range)
         : mSize(checked_cast<size_t>(range.size())), mData(range.data()) {}
     template <typename R>
         requires CompatibleRange<T, Index, R> && std::is_const_v<T>
-    // NOLINTNEXTLINE(runtime/explicit)
-    constexpr SpanBase(const R& range)
+    explicit(false) constexpr SpanBase(const R& range)
         : mSize(checked_cast<size_t>(range.size())), mData(range.data()) {}
 
     // Move / copy constructor / assignment operator.

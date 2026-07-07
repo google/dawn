@@ -52,8 +52,7 @@ struct ObjectHandle : public Handle {
     ObjectHandle& operator=(const ObjectHandle& rhs);
 
     // Allow direct conversion from the base Handle type.
-    // NOLINTNEXTLINE(runtime/explicit)
-    ObjectHandle(const Handle& rhs);
+    explicit(false) ObjectHandle(const Handle& rhs);
 
     // MSVC has a bug where it thinks the volatile copy assignment is a duplicate.
     // Workaround this by forwarding to a different function AssignFrom.

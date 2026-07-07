@@ -65,9 +65,10 @@ template <typename T>
 struct BoolConvertible {
     using Integral = typename std::underlying_type<T>::type;
 
-    // NOLINTNEXTLINE(runtime/explicit)
     explicit constexpr BoolConvertible(Integral value) : value(value) {}
+    // NOLINTNEXTLINE(google-explicit-constructor)
     constexpr operator bool() const { return value != 0; }
+    // NOLINTNEXTLINE(google-explicit-constructor)
     constexpr operator T() const { return static_cast<T>(value); }
 
     Integral value;

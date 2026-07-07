@@ -136,11 +136,10 @@ namespace {{metadata.namespace}} {
 class {{BoolCppType}} {
   public:
     constexpr {{BoolCppType}}() = default;
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    constexpr {{BoolCppType}}(bool value) : mValue(static_cast<{{BoolCType}}>(value)) {}
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    {{BoolCppType}}({{BoolCType}} value): mValue(value) {}
+    explicit(false) constexpr {{BoolCppType}}(bool value) : mValue(static_cast<{{BoolCType}}>(value)) {}
+    explicit(false) {{BoolCppType}}({{BoolCType}} value): mValue(value) {}
 
+    // NOLINTNEXTLINE(google-explicit-constructor)
     constexpr operator bool() const { return static_cast<bool>(mValue); }
 
   private:
@@ -157,13 +156,10 @@ class {{BoolCppType}} {
 class {{OptionalBoolCppType}} {
   public:
     constexpr {{OptionalBoolCppType}}() = default;
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    constexpr {{OptionalBoolCppType}}(bool value) : mValue(static_cast<{{OptionalBoolCType}}>(value)) {}
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    constexpr {{OptionalBoolCppType}}(std::optional<bool> value) :
+    explicit(false) constexpr {{OptionalBoolCppType}}(bool value) : mValue(static_cast<{{OptionalBoolCType}}>(value)) {}
+    explicit(false) constexpr {{OptionalBoolCppType}}(std::optional<bool> value) :
         mValue(value ? static_cast<{{OptionalBoolCType}}>(*value) : {{OptionalBoolUndefined}}) {}
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    constexpr {{OptionalBoolCppType}}({{OptionalBoolCType}} value): mValue(value) {}
+    explicit(false) constexpr {{OptionalBoolCppType}}({{OptionalBoolCType}} value): mValue(value) {}
 
     // Define the values that are equivalent to the enums.
     {% for value in OptionalBool.values %}
@@ -185,7 +181,9 @@ class {{OptionalBoolCppType}} {
     }
 
     // Conversion functions.
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator {{OptionalBoolCType}}() const { return mValue; }
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator std::optional<bool>() const {
         if (mValue == {{OptionalBoolUndefined}}) {
             return std::nullopt;
@@ -214,13 +212,12 @@ class {{OptionalBoolCppType}} {
 // Used while callers switch to checking the Status enum instead of booleans.
 // TODO(crbug.com/42241199): Remove when all callers check the enum.
 struct ConvertibleStatus {
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    constexpr ConvertibleStatus(Status status) : status(status) {}
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
+    explicit(false) constexpr ConvertibleStatus(Status status) : status(status) {}
+    // NOLINTNEXTLINE(google-explicit-constructor)
     constexpr operator bool() const {
         return status == Status::Success;
     }
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
+    // NOLINTNEXTLINE(google-explicit-constructor)
     constexpr operator Status() const {
         return status;
     }
@@ -231,7 +228,7 @@ template<typename Derived, typename CType>
 class ObjectBase {
   public:
     ObjectBase() = default;
-    ObjectBase(CType handle): mHandle(handle) {
+    explicit(false) ObjectBase(CType handle): mHandle(handle) {
         if (mHandle) Derived::{{c_prefix}}AddRef(mHandle);
     }
     ~ObjectBase() {
@@ -265,7 +262,7 @@ class ObjectBase {
         return static_cast<Derived&>(*this);
     }
 
-    ObjectBase(std::nullptr_t) {}
+    explicit(false) ObjectBase(std::nullptr_t) {}
     Derived& operator=(std::nullptr_t) {
         if (mHandle != nullptr) {
             Derived::{{c_prefix}}Release(mHandle);
@@ -442,7 +439,7 @@ struct StringView {
 
     {{wgpu_string_members("StringView") | indent(4)}}
 
-    StringView(const detail::StringViewAdapter& s);
+    explicit(false) StringView(const detail::StringViewAdapter& s);
 };
 
 namespace detail {
@@ -462,10 +459,13 @@ struct StringViewAdapter {
     WGPUStringView sv;
     char* nullTerminated = nullptr;
 
-    StringViewAdapter(WGPUStringView sv) : sv(sv) {}
+    explicit(false) StringViewAdapter(WGPUStringView sv) : sv(sv) {}
     ~StringViewAdapter() { delete[] nullTerminated; }
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator ::WGPUStringView() { return sv; }
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator StringView() { return {sv.data, sv.length}; }
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator const char*() {
         assert(sv.length != WGPU_STRLEN);
         assert(nullTerminated == nullptr);
@@ -704,7 +704,7 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
         //* Init struct for designated initializers. For chained types, this sets the sType.
         {% if type.chained or HasCallbackInfo %}
             struct Init;
-            inline {{CppType}}(Init&& init);
+            explicit(false) inline {{CppType}}(Init&& init);
         {% endif %}
         {% if type.has_free_members_function %}
             inline ~{{CppType}}();
@@ -714,6 +714,7 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
             inline {{CppType}}& operator=({{CppType}}&&);
         {% endif %}
         //* Provide a conversion operator to the underlying C struct type.
+        // NOLINTNEXTLINE(google-explicit-constructor)
         inline operator const {{as_cType(type.name)}}&() const noexcept;
 
         {% if HasCallbackInfo %}

@@ -28,20 +28,17 @@
 {% macro wgpu_string_members(CppType) %}
     inline constexpr {{CppType}}() noexcept = default;
 
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    inline constexpr {{CppType}}(const std::string_view& sv) noexcept {
+    explicit(false) inline constexpr {{CppType}}(const std::string_view& sv) noexcept {
         this->data = sv.data();
         this->length = sv.length();
     }
 
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    inline constexpr {{CppType}}(const char* s) {
+    explicit(false) inline constexpr {{CppType}}(const char* s) {
         this->data = s;
         this->length = WGPU_STRLEN;  // use strlen
     }
 
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    inline constexpr {{CppType}}(WGPUStringView s) {
+    explicit(false) inline constexpr {{CppType}}(WGPUStringView s) {
         this->data = s.data;
         this->length = s.length;
     }
@@ -51,14 +48,12 @@
         this->length = length;
     }
 
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    inline constexpr {{CppType}}(std::nullptr_t) {
+    explicit(false) inline constexpr {{CppType}}(std::nullptr_t) {
         this->data = nullptr;
         this->length = WGPU_STRLEN;
     }
 
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    inline constexpr {{CppType}}(std::nullopt_t) {
+    explicit(false) inline constexpr {{CppType}}(std::nullopt_t) {
         this->data = nullptr;
         this->length = WGPU_STRLEN;
     }
@@ -67,7 +62,7 @@
         return this->data == nullptr && this->length == wgpu::kStrlen;
     }
 
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator std::string_view() const {
         if (this->length == wgpu::kStrlen) {
             if (IsUndefined()) {

@@ -94,8 +94,7 @@ template <typename T>
 struct ClampedInteger {
     using IntegerType = T;
     ClampedInteger() : value(0) {}
-    // NOLINTNEXTLINE(runtime/explicit)
-    ClampedInteger(T v) : value(v) {}
+    explicit(false) ClampedInteger(T v) : value(v) {}
     operator T() const { return value; }
     T value;
 };
@@ -107,8 +106,7 @@ template <typename T>
 struct EnforceRangeInteger {
     using IntegerType = T;
     EnforceRangeInteger() : value(0) {}
-    // NOLINTNEXTLINE(runtime/explicit)
-    EnforceRangeInteger(T v) : value(v) {}
+    explicit(false) EnforceRangeInteger(T v) : value(v) {}
     operator T() const { return value; }
     T value;
 };

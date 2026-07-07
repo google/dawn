@@ -178,8 +178,7 @@ class bitset : private ::std::bitset<N> {
 
     constexpr bitset() noexcept : Base() {}
 
-    // NOLINTNEXTLINE(runtime/explicit)
-    constexpr bitset(uint64_t value) noexcept : Base(value) {
+    explicit(false) constexpr bitset(uint64_t value) noexcept : Base(value) {
         // Unlike std::bitset, we don't simply discard the most significant bits >= N as this is
         // almost always an error (e.g. the bitset is not large enough, or the value was incorrectly
         // computed). We assert that only the least significant bits < N are being set.

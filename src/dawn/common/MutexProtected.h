@@ -318,8 +318,7 @@ class MutexProtected {
     template <typename... Args>
         requires(sizeof...(Args) != 1 ||
                  !(std::is_same_v<std::decay_t<Args>, MutexProtected> && ...))
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    MutexProtected(Args&&... args)
+    explicit(false) MutexProtected(Args&&... args)
         : mMutex(Traits::CreateMutex()), mObj(std::forward<Args>(args)...) {}
     virtual ~MutexProtected() = default;
 
@@ -420,8 +419,7 @@ class MutexCondVarProtected {
     template <typename... Args>
         requires(sizeof...(Args) != 1 ||
                  !(std::is_same_v<std::decay_t<Args>, MutexCondVarProtected> && ...))
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    MutexCondVarProtected(Args&&... args)
+    explicit(false) MutexCondVarProtected(Args&&... args)
         : mMutex(Traits::CreateMutex()), mObj(std::forward<Args>(args)...) {}
     virtual ~MutexCondVarProtected() = default;
 

@@ -16,6 +16,10 @@ Checks:
   # Checks we're not really interested in re-enabling.
   # - Prefers #ifdef over #if defined. Triggers a lot and doesn't really matter.
   - -readability-use-concise-preprocessor-directives
+  # - Aliases of other checks. When adding a check here, verify that it didn't
+  #   disable the check you wanted.
+  - -cppcoreguidelines-explicit-constructor  # google-explicit-constructor
+  - -misc-explicit-constructor               # google-explicit-constructor
 
   # Untriaged checks that weren't passing on a first-pass over the codebase.
   - -abseil-faster-strsplit-delimiter
@@ -112,7 +116,6 @@ Checks:
   - -cppcoreguidelines-virtual-class-destructor
   - -google-build-using-namespace
   - -google-default-arguments
-  - -google-explicit-constructor
   - -google-objc-function-naming
   - -google-objc-global-variable-declaration
   - -google-readability-avoid-underscore-in-googletest-name

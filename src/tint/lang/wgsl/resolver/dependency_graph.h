@@ -61,7 +61,7 @@ class ResolvedIdentifier {
     /// Constructor
     /// @param value the resolved identifier value
     template <typename T>
-    ResolvedIdentifier(T value) : value_(value) {}  // NOLINT(runtime/explicit)
+    explicit(false) ResolvedIdentifier(T value) : value_(value) {}
 
     /// @return the UnresolvedIdentifier if the identifier was not resolved
     const UnresolvedIdentifier* Unresolved() const {

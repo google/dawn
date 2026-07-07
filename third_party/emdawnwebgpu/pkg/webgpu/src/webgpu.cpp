@@ -233,12 +233,10 @@ class Ref {
   ~Ref() { Release(mValue); }
 
   // Constructors from nullptr.
-  // NOLINTNEXTLINE(runtime/explicit)
-  constexpr Ref(std::nullptr_t) : Ref() {}
+  explicit(false) constexpr Ref(std::nullptr_t) : Ref() {}
 
   // Constructors from T*.
-  // NOLINTNEXTLINE(runtime/explicit)
-  Ref(T* value) : mValue(value) { AddRef(value); }
+  explicit(false) Ref(T* value) : mValue(value) { AddRef(value); }
   Ref<T>& operator=(T* value) {
     Set(value);
     return *this;

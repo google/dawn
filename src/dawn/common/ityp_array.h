@@ -55,8 +55,7 @@ class array : private ::std::array<Value, Size> {
     constexpr array() = default;
 
     template <typename... Values>
-    // NOLINTNEXTLINE(runtime/explicit)
-    constexpr array(Values&&... values) : Base{std::forward<Values>(values)...} {}
+    explicit(false) constexpr array(Values&&... values) : Base{std::forward<Values>(values)...} {}
 
     using Base::begin, Base::end;
     using Base::front, Base::back;
