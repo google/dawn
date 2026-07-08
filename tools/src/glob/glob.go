@@ -92,7 +92,13 @@ func Scan(root string, cfg Config, fsReader oswrapper.FilesystemReader) ([]strin
 		}
 
 		if rel == ".git" {
-			return filepath.SkipDir
+			// In a git worktree, .git is a file rather than a directory.
+			// Returning SkipDir on a file would cause filepath.Walk to skip the
+			// rest of the containing directory (which is the repository root).
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
 		}
 
 		if !cfg.shouldExamine(root, path) {
