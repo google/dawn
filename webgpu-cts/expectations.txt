@@ -1322,6 +1322,7 @@ crbug.com/422215216 [ android-pixel-10 ] webgpu:shader,execution,statement,disca
 crbug.com/422215216 [ android-pixel-10 ] webgpu:shader,execution,statement,discard:uniform_read_loop:useStorageBuffers=true [ Failure ]
 crbug.com/422215216 [ android-pixel-10 ] webgpu:shader,execution,statement,phony:executes:case="loop" [ Failure ]
 crbug.com/422215216 [ android-pixel-10 ] webgpu:shader,validation,parse,requires:wgsl_matches_api:* [ Failure ]
+crbug.com/532496600 [ android-pixel-10 ] webgpu:shader,validation,decl,const:initializer:case="init_matching_type" [ Failure ]
 
 # mapAsync early rejection cases
 crbug.com/487349982 webgpu:api,validation,buffer,mapping:getMappedRange,state,mapped: [ Failure ]
