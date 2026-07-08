@@ -44,6 +44,7 @@
 #include "src/dawn/native/webgpu/Serialization.h"
 #include "src/dawn/native/webgpu/TextureWGPU.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native::webgpu {
 
@@ -241,11 +242,11 @@ WGPUBuffer CaptureContext::GetCopyBuffer() {
 }
 
 void CaptureContext::WriteContentBytes(const void* data, size_t size) {
-    mContentStream->write(reinterpret_cast<const char*>(data), size);
+    mContentStream->write(reinterpret_cast<const char*>(data), sign_cast(size));
 }
 
 void CaptureContext::WriteCommandBytes(const void* data, size_t size) {
-    mCommandStream->write(reinterpret_cast<const char*>(data), size);
+    mCommandStream->write(reinterpret_cast<const char*>(data), sign_cast(size));
     mCommandBytesWritten += size;
 }
 

@@ -36,9 +36,9 @@ namespace dawn {
 namespace {
 
 struct Foo : public PlacementAllocated {
-    explicit Foo(int value) : value(value) {}
+    explicit Foo(uint32_t value) : value(value) {}
 
-    int value;
+    uint32_t value;
 };
 
 struct alignas(256) AlignedFoo : public Foo {
@@ -49,8 +49,8 @@ struct alignas(256) AlignedFoo : public Foo {
 TEST(SlabAllocatorTests, Single) {
     SlabAllocator<Foo> allocator(1 * sizeof(Foo));
 
-    Foo* obj = allocator.Allocate(4);
-    EXPECT_EQ(obj->value, 4);
+    Foo* obj = allocator.Allocate(4u);
+    EXPECT_EQ(obj->value, 4u);
 
     allocator.Deallocate(obj);
 }
@@ -62,13 +62,13 @@ TEST(SlabAllocatorTests, AllocateSequential) {
         SlabAllocator<Foo> allocator(5 * sizeof(Foo));
 
         std::vector<Foo*> objects;
-        for (int i = 0; i < 10; ++i) {
+        for (uint32_t i = 0; i < 10; ++i) {
             auto* ptr = allocator.Allocate(i);
             EXPECT_TRUE(std::find(objects.begin(), objects.end(), ptr) == objects.end());
             objects.push_back(ptr);
         }
 
-        for (int i = 0; i < 10; ++i) {
+        for (uint32_t i = 0; i < 10; ++i) {
             // Check that the value is correct and hasn't been trampled.
             EXPECT_EQ(objects[i]->value, i);
 
@@ -87,13 +87,13 @@ TEST(SlabAllocatorTests, AllocateSequential) {
         SlabAllocator<AlignedFoo> allocator(9 * sizeof(AlignedFoo));
 
         std::vector<AlignedFoo*> objects;
-        for (int i = 0; i < 21; ++i) {
+        for (uint32_t i = 0; i < 21; ++i) {
             auto* ptr = allocator.Allocate(i);
             EXPECT_TRUE(std::find(objects.begin(), objects.end(), ptr) == objects.end());
             objects.push_back(ptr);
         }
 
-        for (int i = 0; i < 21; ++i) {
+        for (uint32_t i = 0; i < 21; ++i) {
             // Check that the value is correct and hasn't been trampled.
             EXPECT_EQ(objects[i]->value, i);
 
@@ -114,7 +114,7 @@ TEST(SlabAllocatorTests, ReusesFreedMemory) {
 
     // Allocate a number of objects.
     std::set<Foo*> objects;
-    for (int i = 0; i < 17; ++i) {
+    for (uint32_t i = 0; i < 17; ++i) {
         EXPECT_TRUE(objects.insert(allocator.Allocate(i)).second);
     }
 
@@ -125,7 +125,7 @@ TEST(SlabAllocatorTests, ReusesFreedMemory) {
 
     std::set<Foo*> reallocatedObjects;
     // Allocate objects again. All of the pointers should be the same.
-    for (int i = 0; i < 17; ++i) {
+    for (uint32_t i = 0; i < 17; ++i) {
         Foo* ptr = allocator.Allocate(i);
         EXPECT_TRUE(reallocatedObjects.insert(ptr).second);
         EXPECT_TRUE(std::find(objects.begin(), objects.end(), ptr) != objects.end());
@@ -143,7 +143,7 @@ TEST(SlabAllocatorTests, DeleteAllSlabs) {
 
     // Allocate a number of objects.
     std::set<Foo*> objects;
-    for (int i = 0; i < 11; ++i) {
+    for (uint32_t i = 0; i < 11; ++i) {
         EXPECT_TRUE(objects.insert(allocator.Allocate(i)).second);
     }
     EXPECT_EQ(allocator.CountAllocatedSlabsForTesting(), 3u);
@@ -156,7 +156,7 @@ TEST(SlabAllocatorTests, DeleteAllSlabs) {
     // Allocate and deallocate one slab full of objects so both available and recycled lists are
     // populated.
     objects.clear();
-    for (int i = 0; i < 5; ++i) {
+    for (uint32_t i = 0; i < 5; ++i) {
         EXPECT_TRUE(objects.insert(allocator.Allocate(i)).second);
     }
     for (Foo* object : objects) {
@@ -174,7 +174,7 @@ TEST(SlabAllocatorTests, DeleteSomeSlabs) {
 
     // Allocate a number of objects.
     std::set<Foo*> objects;
-    for (int i = 0; i < 6; ++i) {
+    for (uint32_t i = 0; i < 6; ++i) {
         EXPECT_TRUE(objects.insert(allocator.Allocate(i)).second);
     }
 
@@ -184,7 +184,7 @@ TEST(SlabAllocatorTests, DeleteSomeSlabs) {
     }
 
     // Allocate a new object so one slab still has an allocation.
-    Foo* object = allocator.Allocate(6);
+    Foo* object = allocator.Allocate(6u);
     EXPECT_EQ(allocator.CountAllocatedSlabsForTesting(), 2u);
 
     allocator.DeleteEmptySlabs();
@@ -254,8 +254,8 @@ TEST(SlabAllocatorTests, AllocateDeallocateMany) {
 TEST(SlabAllocatorTests, TotalObjectBytesTooSmall) {
     SlabAllocator<AlignedFoo> allocator(sizeof(AlignedFoo) - 1);
 
-    AlignedFoo* obj = allocator.Allocate(4);
-    EXPECT_EQ(obj->value, 4);
+    AlignedFoo* obj = allocator.Allocate(4u);
+    EXPECT_EQ(obj->value, 4u);
 
     allocator.Deallocate(obj);
 }

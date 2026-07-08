@@ -458,7 +458,7 @@ MaybeError ReadContentIntoTexture(const DawnRootCommandVisitor& replay,
                                   ReadHead& readHead,
                                   wgpu::Device device,
                                   const schema::RootCommandWriteTextureCmdData& cmdData) {
-    const uint64_t dataSize = (cmdData.dataSize + 3) & ~3;
+    const uint64_t dataSize = (cmdData.dataSize + 3) & ~3u;
 
     const uint32_t* data;
     DAWN_TRY_ASSIGN(data, readHead.GetData(dataSize));
@@ -489,7 +489,7 @@ MaybeError InitializeTexture(const DawnRootCommandVisitor& replay,
                              ReadHead& readHead,
                              wgpu::Device device,
                              const schema::RootCommandInitTextureCmdData& cmdData) {
-    const uint64_t dataSize = (cmdData.dataSize + 3) & ~3;
+    const uint64_t dataSize = (cmdData.dataSize + 3) & ~3u;
 
     const uint32_t* data;
     DAWN_TRY_ASSIGN(data, readHead.GetData(dataSize));

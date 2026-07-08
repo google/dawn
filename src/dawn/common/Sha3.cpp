@@ -202,7 +202,7 @@ static constexpr std::array<bool, 256> kRoundConstantsBits = []() {
     uint8_t R = 1;
 
     // Step 3
-    for (int i = 1; i < 256; i++) {
+    for (uint32_t i = 1; i < 256; i++) {
         bool R8 = R & (0x80);
         // Step 3a, 3f
         R <<= 1;

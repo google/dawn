@@ -35,6 +35,7 @@
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/Queue.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::native {
 
@@ -171,7 +172,7 @@ void DynamicUploader::Deallocate(ExecutionSerial lastCompletedSerial, bool freeA
         // again unless explicitly asked to do so. The last buffer is the largest.
         const bool shouldFree = (i < mRingBuffers.size() - 1) || freeAll;
         if (mRingBuffers[i]->mAllocator.Empty() && shouldFree) {
-            mRingBuffers.erase(mRingBuffers.begin() + i);
+            mRingBuffers.erase(mRingBuffers.begin() + sign_cast(i));
         } else {
             i++;
         }

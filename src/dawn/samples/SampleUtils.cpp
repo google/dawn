@@ -384,7 +384,8 @@ bool SampleBase::Setup() {
 
     // Create the test window with no client API.
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    window = glfwCreateWindow(width, height, "Dawn window", nullptr, nullptr);
+    window = glfwCreateWindow(static_cast<int32_t>(width), static_cast<int32_t>(height),
+                              "Dawn window", nullptr, nullptr);
     if (!window) {
         return false;
     }

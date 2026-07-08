@@ -75,7 +75,7 @@ template <typename It>
 [[nodiscard]] bool WaitAnySystemEvent(It begin, It end, Nanoseconds timeout) {
     static_assert(std::is_same_v<typename std::iterator_traits<It>::value_type,
                                  std::pair<const SystemEventReceiver&, bool*>>);
-    size_t count = std::distance(begin, end);
+    size_t count = sign_cast(std::distance(begin, end));
     if (count == 0) {
         return false;
     }

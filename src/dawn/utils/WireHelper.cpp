@@ -46,6 +46,7 @@
 #include "src/dawn/utils/TerribleCommandBuffer.h"
 #include "src/utils/assert.h"
 #include "src/utils/log.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::utils {
 
@@ -89,7 +90,7 @@ class WireServerTraceLayer : public dawn::wire::CommandHandler {
 
     const volatile char* HandleCommands(const volatile char* commands, size_t size) override {
         if (mFile.is_open()) {
-            mFile.write(const_cast<const char*>(commands), size);
+            mFile.write(const_cast<const char*>(commands), sign_cast(size));
         }
         return mHandler->HandleCommands(commands, size);
     }

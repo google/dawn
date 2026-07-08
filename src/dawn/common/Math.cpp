@@ -33,17 +33,18 @@
 #include <limits>
 
 #include "src/utils/assert.h"
+#include "src/utils/numeric.h"
 
 namespace dawn {
 
 uint32_t Log2(uint32_t value) {
     DAWN_RELEASE_ASSUME(value != 0);
-    return 31 - std::countl_zero(value);
+    return 31ul - sign_dcast(std::countl_zero(value));
 }
 
 uint32_t Log2(uint64_t value) {
     DAWN_RELEASE_ASSUME(value != 0);
-    return 63 - std::countl_zero(value);
+    return 63ul - sign_dcast(std::countl_zero(value));
 }
 
 uint64_t NextPowerOfTwo(uint64_t n) {
@@ -102,7 +103,7 @@ uint16_t Float32ToFloat16(float fp32) {
 }
 
 float Float16ToFloat32(uint16_t fp16) {
-    uint32_t tmp = (fp16 & 0x7fff) << 13 | (fp16 & 0x8000) << 16;
+    uint32_t tmp = (fp16 & 0x7fffu) << 13u | (fp16 & 0x8000u) << 16u;
     float tmp2 = std::bit_cast<float>(tmp);
     return powf(2.0f, 127.0f - 15.0f) * tmp2;
 }

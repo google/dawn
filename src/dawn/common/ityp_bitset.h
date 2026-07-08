@@ -35,6 +35,7 @@
 #include "src/dawn/common/BitSetRangeIterator.h"
 #include "src/dawn/common/Math.h"
 #include "src/utils/assert.h"
+#include "src/utils/numeric.h"
 #include "src/utils/underlying_type.h"
 
 namespace dawn {
@@ -80,7 +81,7 @@ uint32_t Iterator64<Index, N>::getNextBit() const {
     if (mBits == 0) {
         return 0;
     }
-    return std::countr_zero(mBits);
+    return sign_dcast(std::countr_zero(mBits));
 }
 
 template <typename Index, size_t N>
@@ -137,7 +138,7 @@ uint32_t IteratorArray<Index, N>::getNextBit() {
     while (mOffset < N) {
         uint64_t wordBits = static_cast<uint64_t>((mBits & wordMask).to_ullong());
         if (wordBits != 0ull) {
-            return std::countr_zero(wordBits) + mOffset;
+            return sign_dcast(std::countr_zero(wordBits)) + mOffset;
         }
 
         mBits >>= kBitsPerWord;

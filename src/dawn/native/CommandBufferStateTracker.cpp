@@ -45,6 +45,7 @@
 #include "src/dawn/native/RenderPipeline.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/numeric.h"
 
 // TODO(dawn:563): None of the error messages in this file include the buffer objects they are
 // validating against. It would be nice to improve that, but difficult to do without incurring
@@ -651,7 +652,8 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
         ImmediateMask requiredMask = mLastPipeline->GetUserImmediateSlots();
         if (!IsSubset(requiredMask, mImmediateDataMask)) {
             ImmediateMask missing = requiredMask & ~mImmediateDataMask;
-            size_t firstMissing = std::countr_zero(static_cast<uint64_t>(missing.to_ullong()));
+            size_t firstMissing =
+                sign_dcast(std::countr_zero(static_cast<uint64_t>(missing.to_ullong())));
             return DAWN_VALIDATION_ERROR("Required immediate data at offset %u was not set.",
                                          firstMissing * kImmediateElementByteSize);
         }

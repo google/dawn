@@ -196,8 +196,8 @@ void SyncFromWindow(WindowData* data) {
     int height;
     glfwGetFramebufferSize(data->window, &width, &height);
 
-    data->targetConfig.width = std::max(1u, width / data->divisor);
-    data->targetConfig.height = std::max(1u, height / data->divisor);
+    data->targetConfig.width = std::max(1u, static_cast<uint32_t>(width) / data->divisor);
+    data->targetConfig.height = std::max(1u, static_cast<uint32_t>(height) / data->divisor);
 }
 
 void AddWindow() {

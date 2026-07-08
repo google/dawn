@@ -30,6 +30,7 @@
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 #include "src/utils/log.h"
+#include "src/utils/numeric.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
 #include "src/utils/windows_with_undefs.h"
@@ -127,7 +128,7 @@ std::optional<std::string> GetExecutablePath() {
         return {};
     }
 
-    path[result] = '\0';
+    path[sign_cast(result)] = '\0';
     return path.data();
 }
 #elif DAWN_PLATFORM_IS(MACOS) || DAWN_PLATFORM_IS(IOS)

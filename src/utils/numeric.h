@@ -28,6 +28,7 @@
 #ifndef SRC_UTILS_NUMERIC_H_
 #define SRC_UTILS_NUMERIC_H_
 
+#include <concepts>
 #include <limits>
 #include <type_traits>
 #include <utility>
@@ -63,6 +64,28 @@ constexpr inline Dst dchecked_cast(const Src& value) {
     ISrc valueISrc = static_cast<ISrc>(value);
     DAWN_ASSERT(std::in_range<IDst>(valueISrc));
     return Dst{static_cast<IDst>(valueISrc)};
+}
+
+// Checked cast from an integer type to it's exactly opposite-signed type.
+template <std::unsigned_integral T>
+auto sign_cast(T x) {
+    return checked_cast<std::make_signed_t<T>>(x);
+}
+
+template <std::signed_integral T>
+auto sign_cast(T x) {
+    return checked_cast<std::make_unsigned_t<T>>(x);
+}
+
+// Cast from an integer type to it's exactly opposite-signed type, only checked in debug builds.
+template <std::unsigned_integral T>
+auto sign_dcast(T x) {
+    return dchecked_cast<std::make_signed_t<T>>(x);
+}
+
+template <std::signed_integral T>
+auto sign_dcast(T x) {
+    return dchecked_cast<std::make_unsigned_t<T>>(x);
 }
 
 template <std::integral From, std::integral To>

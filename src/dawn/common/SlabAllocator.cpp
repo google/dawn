@@ -196,8 +196,8 @@ void SlabAllocatorImpl::DeleteEmptySlabs() {
 }
 
 uint32_t SlabAllocatorImpl::CountAllocatedSlabsForTesting() const {
-    auto CountSlabs = [](const SentinelSlab& sentinel) {
-        int count = 0;
+    auto CountSlabs = [](const SentinelSlab& sentinel) -> uint32_t {
+        uint32_t count = 0;
         for (Slab* current = sentinel.next; current != nullptr;) {
             ++count;
             current = current->next;

@@ -32,6 +32,7 @@
 #include <utility>
 
 #include "src/dawn/replay/SurfaceDiscovery.h"
+#include "src/utils/numeric.h"
 
 namespace dawn::replay {
 
@@ -50,11 +51,11 @@ std::unique_ptr<CaptureImpl> CaptureImpl::Create(CaptureStream& commandStream,
                                                  size_t contentSize) {
     std::vector<uint8_t> commands;
     commands.resize(commandSize);
-    commandStream.read(reinterpret_cast<char*>(commands.data()), commandSize);
+    commandStream.read(reinterpret_cast<char*>(commands.data()), sign_cast(commandSize));
 
     std::vector<uint8_t> content;
     content.resize(contentSize);
-    contentStream.read(reinterpret_cast<char*>(content.data()), contentSize);
+    contentStream.read(reinterpret_cast<char*>(content.data()), sign_cast(contentSize));
 
     return std::unique_ptr<CaptureImpl>(new CaptureImpl(std::move(commands), std::move(content)));
 }

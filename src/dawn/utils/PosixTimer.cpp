@@ -37,7 +37,8 @@ namespace {
 uint64_t GetCurrentTimeNs() {
     struct timespec currentTime;
     clock_gettime(CLOCK_MONOTONIC, &currentTime);
-    return currentTime.tv_sec * 1'000'000'000llu + currentTime.tv_nsec;
+    return static_cast<uint64_t>(currentTime.tv_sec) * 1'000'000'000llu +
+           static_cast<uint64_t>(currentTime.tv_nsec);
 }
 
 }  // anonymous namespace

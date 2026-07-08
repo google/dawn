@@ -10,3 +10,8 @@ src:*src/dawn/tests/white_box/SharedTextureMemoryTests_win.cpp
 src:*src/dawn/tests/white_box/SharedTextureMemoryTests_win_d3d12.cpp
 src:*src/tint/lang/hlsl/validate/validate.cc
 src:*src/tint/utils/rtti/castable.h
+
+[sign-conversion]
+# The OpenGL API forces an excessive amount of sign conversion that is not useful to fix.
+src:*src/dawn/native/opengl/*
+src:*src/dawn/tests/*

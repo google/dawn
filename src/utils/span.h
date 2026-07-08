@@ -153,7 +153,7 @@ class SpanBase {
         requires(CompatibleIter<element_type, It> && std::sized_sentinel_for<End, It> &&
                  !std::is_convertible_v<End, size_t>)
     DAWN_UNSAFE_BUFFER_USAGE constexpr SpanBase(It first, End last)
-        : mSize(last - first), mData(std::to_address(first)) {
+        : mSize(checked_cast<size_t>(last - first)), mData(std::to_address(first)) {
         DAWN_CHECK(first <= last);
         if constexpr (sizeof(size_t) > sizeof(Index)) {
             DAWN_CHECK(mSize <= size_t{UnderlyingType<Index>{DynamicExtent<Index>}});

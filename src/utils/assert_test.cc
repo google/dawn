@@ -95,7 +95,7 @@ enum class TestEnum : uint32_t {
     F,
 };
 
-int DoFakeOp(TestEnum enum_val, uint32_t t) {
+uint32_t DoFakeOp(TestEnum enum_val, uint32_t t) {
     // This should use a jump table in clang
     switch (enum_val) {
         case TestEnum::A:
