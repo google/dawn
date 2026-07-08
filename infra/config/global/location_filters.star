@@ -111,6 +111,22 @@ _GN_CLANG_NO_NODE_CQ_FILE_EXCLUSIONS = (_GN_CLANG_CQ_FILE_EXCLUSIONS +
 _GN_MSVC_CQ_FILE_EXCLUSIONS = (_COMMON_LOCATIONS_EXCLUDED_FROM_CQ +
                                _NON_CMAKE_NON_FUZZ_LOCATIONS_EXCLUDED_FROM_CQ)
 
+_BAZEL_CQ_FILE_INCLUSIONS = [
+    # Tint source, tests, headers and shared util code.
+    cq.location_filter(path_regexp = r"src/tint/.+"),
+    cq.location_filter(path_regexp = r"test/tint/.+"),
+    cq.location_filter(path_regexp = r"include/tint/.+"),
+    cq.location_filter(path_regexp = r"src/utils/.+"),
+    # Bazel files anywhere in the repository.
+    cq.location_filter(path_regexp = r".*bazel.*"),
+    cq.location_filter(path_regexp = r".+\.bzl"),
+    # Dependency configuration containing Bazelisk toolchain.
+    cq.location_filter(path_regexp = r"DEPS"),
+    # Generator tools and Go dependencies.
+    cq.location_filter(path_regexp = r"tools/src/.+"),
+    cq.location_filter(path_regexp = r"go\.(mod|sum)"),
+]
+
 exclusion_filters = struct(
     chromium_cq_file_exclusions = _CHROMIUM_CQ_FILE_EXCLUSIONS,
     cmake_cq_file_exclusions = _CMAKE_CQ_FILE_EXCLUSIONS,
@@ -122,4 +138,5 @@ exclusion_filters = struct(
 
 inclusion_filters = struct(
     cpp_changes_only = _CPP_FILE_INCLUSIONS,
+    bazel_cq_file_inclusions = _BAZEL_CQ_FILE_INCLUSIONS,
 )

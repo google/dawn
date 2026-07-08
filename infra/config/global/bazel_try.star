@@ -30,7 +30,7 @@
 load("@chromium-luci//try.star", "try_")
 load("//bazel_shared.star", "bazel_builder_defaults")
 load("//constants.star", "siso")
-load("//location_filters.star", "exclusion_filters")
+load("//location_filters.star", "inclusion_filters")
 
 try_.defaults.set(
     executable = "recipe:dawn/bazel",
@@ -56,7 +56,7 @@ def bazel_try_builder(**kwargs):
     """
     kwargs.setdefault("max_concurrent_builds", 3)
     kwargs.setdefault("cq_settings", try_.cq_settings(
-        location_filters = exclusion_filters.gn_clang_cq_file_exclusions,
+        location_filters = inclusion_filters.bazel_cq_file_inclusions,
     ))
     name = kwargs["name"]
     try_.builder(**kwargs)
@@ -64,7 +64,7 @@ def bazel_try_builder(**kwargs):
         cq_group = "Dawn-CQ",
         builder = "dawn:try/" + name,
         experiment_percentage = 100,
-        location_filters = exclusion_filters.gn_clang_cq_file_exclusions,
+        location_filters = inclusion_filters.bazel_cq_file_inclusions,
     )
 
 def bazel_linux_try_builder(**kwargs):
