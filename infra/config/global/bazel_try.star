@@ -63,7 +63,7 @@ def bazel_try_builder(**kwargs):
     luci.cq_tryjob_verifier(
         cq_group = "Dawn-CQ",
         builder = "dawn:try/" + name,
-        experiment_percentage = 100,
+        experiment_percentage = 0,
         location_filters = inclusion_filters.bazel_cq_file_inclusions,
     )
 
