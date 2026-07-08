@@ -705,6 +705,87 @@ TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithProperty) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, StructMember_RowMajor_NonMatrix) {
+    auto* member = ty.Get<core::type::StructMember>(mod.symbols.New("m"), ty.u32(), 0u, 0u, 4u, 4u,
+                                                    IOAttributes{});
+    member->SetRowMajor();
+    auto* str_ty = ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), Vector{member}, 4u);
+
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    mod.properties.Add(Property::kAllowStructMatrixDecorations);
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    "RowMajor attribute can only be applied to a matrix or an array of matrices"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_MatrixStride_NonMatrix) {
+    auto* member = ty.Get<core::type::StructMember>(mod.symbols.New("m"), ty.u32(), 0u, 0u, 4u, 4u,
+                                                    IOAttributes{});
+    member->SetMatrixStride(32);
+    auto* str_ty = ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), Vector{member}, 4u);
+
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    mod.properties.Add(Property::kAllowStructMatrixDecorations);
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            "MatrixStride attribute can only be applied to a matrix or an array of matrices"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_RowMajor_ArrayOfStruct) {
+    auto* mat_ty = ty.mat2x2<f32>();
+    auto* inner_member = ty.Get<core::type::StructMember>(
+        mod.symbols.New("m"), mat_ty, 0u, 0u, mat_ty->Align(), mat_ty->Size(), IOAttributes{});
+    auto* inner_str =
+        ty.Get<core::type::Struct>(mod.symbols.New("T"), Vector{inner_member}, mat_ty->Size());
+
+    auto* arr = ty.array(inner_str, 2u);
+    auto* member = ty.Get<core::type::StructMember>(mod.symbols.New("t"), arr, 0u, 0u, arr->Align(),
+                                                    arr->Size(), IOAttributes{});
+    member->SetRowMajor();
+
+    auto* str_ty = ty.Get<core::type::Struct>(mod.symbols.New("S"), Vector{member}, arr->Size());
+
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    mod.properties.Add(Property::kAllowStructMatrixDecorations);
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    "RowMajor attribute can only be applied to a matrix or an array of matrices"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_RowMajor_ArrayOfMatrix) {
+    auto* mat_ty = ty.mat2x2<f32>();
+    auto* arr = ty.array(mat_ty, 2u);
+    auto* member = ty.Get<core::type::StructMember>(mod.symbols.New("m"), arr, 0u, 0u, arr->Align(),
+                                                    arr->Size(), IOAttributes{});
+    member->SetRowMajor();
+
+    auto* str_ty =
+        ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), Vector{member}, arr->Size());
+
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    mod.properties.Add(Property::kAllowStructMatrixDecorations);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, FunctionParam_InvalidAddressSpaceForHandleType) {
     auto* type = ty.ptr(AddressSpace::kFunction, ty.sampler());
     auto* fn = b.Function("my_func", ty.void_());

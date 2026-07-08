@@ -1126,7 +1126,24 @@ bool Structural::CheckStruct(const core::type::Struct* str,
             diag() << "struct member type alignment must be a power of 2";
             return false;
         }
-        if (!ir_.properties.Contains(Property::kAllowStructMatrixDecorations)) {
+        if (ir_.properties.Contains(Property::kAllowStructMatrixDecorations)) {
+            if (member->RowMajor() || member->HasMatrixStride()) {
+                const core::type::Type* base_ty = member->Type();
+                while (auto* arr = base_ty->As<core::type::Array>()) {
+                    base_ty = arr->ElemType();
+                }
+                if (!base_ty->Is<core::type::Matrix>()) {
+                    if (member->RowMajor()) {
+                        diag() << "RowMajor attribute can only be applied to a matrix or an array "
+                                  "of matrices";
+                    } else {
+                        diag() << "MatrixStride attribute can only be applied to a matrix or an "
+                                  "array of matrices";
+                    }
+                    return false;
+                }
+            }
+        } else {
             if (member->RowMajor()) {
                 diag() << "Row major annotation not allowed on structures";
                 return false;
