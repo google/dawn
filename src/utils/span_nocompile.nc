@@ -133,4 +133,67 @@ void TestAsBytesRetainsVolatile() {
     }
 }
 
+void TestReinterpretSpan() {
+    {
+        // Non-byte source.
+        std::array<int, 3> ints{};
+        auto s = Span<int>{ints};
+        auto r1 = ReinterpretSpan<int>(s);  // expected-error {{no matching function for call}}
+        auto r2 = ReinterpretSpan<int, Index>(s);  // expected-error {{no matching function for call}}
+    }
+    {
+        // Casting away const or volatile.
+        std::array<std::byte, 4> bytes;
+        {
+            auto const_s = Span<const std::byte>{bytes};
+            auto r1 = ReinterpretSpan<char>(const_s); // expected-error {{no matching function for call}}
+            auto r2 = ReinterpretSpan<volatile char>(const_s); // expected-error {{no matching function for call}}
+            auto r3 = ReinterpretSpan<char, Index>(const_s); // expected-error {{no matching function for call}}
+            auto r4 = ReinterpretSpan<volatile char, Index>(const_s); // expected-error {{no matching function for call}}
+        }
+        {
+            auto volatile_s = Span<volatile std::byte>{bytes};
+            auto r1 = ReinterpretSpan<char>(volatile_s); // expected-error {{no matching function for call}}
+            auto r2 = ReinterpretSpan<const char>(volatile_s); // expected-error {{no matching function for call}}
+            auto r3 = ReinterpretSpan<char, Index>(volatile_s); // expected-error {{no matching function for call}}
+            auto r4 = ReinterpretSpan<const char, Index>(volatile_s); // expected-error {{no matching function for call}}
+        }
+        {
+            auto cv_s = Span<const volatile std::byte>{bytes};
+            auto r1 = ReinterpretSpan<char>(cv_s); // expected-error {{no matching function for call}}
+            auto r2 = ReinterpretSpan<const char>(cv_s); // expected-error {{no matching function for call}}
+            auto r3 = ReinterpretSpan<volatile char>(cv_s); // expected-error {{no matching function for call}}
+            auto r4 = ReinterpretSpan<char, Index>(cv_s); // expected-error {{no matching function for call}}
+            auto r5 = ReinterpretSpan<const char, Index>(cv_s); // expected-error {{no matching function for call}}
+            auto r6 = ReinterpretSpan<volatile char, Index>(cv_s); // expected-error {{no matching function for call}}
+        }
+    }
+    {
+        // Unless type is volatile, it needs to be trivially copyable.
+        struct S {
+            S() {}
+            ~S() {}
+            S(const volatile S&) {}
+            S(volatile S&) {}
+            S(const volatile S&&) {}
+            char i;
+        };
+        std::array<std::byte, 4> bytes;
+        auto s = Span<std::byte>{bytes};
+
+        // Allowed if the type is volatile.
+        [[maybe_unused]] auto r1 = ReinterpretSpan<volatile S>(s);
+        [[maybe_unused]] auto r2 = ReinterpretSpan<const volatile S>(s);
+        [[maybe_unused]] auto r3 = ReinterpretSpan<volatile S, Index>(s);
+        [[maybe_unused]] auto r4 = ReinterpretSpan<const volatile S, Index>(s);
+
+        // TODO(https://crbug.com/528027992): Re-enable these tests once wire serialization is volatile
+        // in both directions. These should all eventually fail to compile.
+        [[maybe_unused]] auto r5 = ReinterpretSpan<S>(s);
+        [[maybe_unused]] auto r6 = ReinterpretSpan<const S>(s);
+        [[maybe_unused]] auto r7 = ReinterpretSpan<S, Index>(s);
+        [[maybe_unused]] auto r8 = ReinterpretSpan<const S, Index>(s);
+    }
+}
+
 }  // namespace dawn

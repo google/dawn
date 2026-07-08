@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
 #include <array>
 
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -672,6 +673,134 @@ TEST(SpanTest, SpanAsBytes) {
         static_assert(std::is_same_v<Span<volatile std::byte>, decltype(vwbsp)>);
         EXPECT_EQ(vwbsp.size(), vsp.size_bytes());
         EXPECT_EQ(vwbsp.data(), reinterpret_cast<volatile std::byte*>(vsp.data()));
+    }
+}
+
+TEST(SpanTest, ReinterpretEmptySpans) {
+    // Non-const, non-volatile span.
+    {
+        Span<std::byte> bsp;
+        auto sp = ReinterpretSpan<int>(bsp);
+        static_assert(std::is_same_v<Span<int>, decltype(sp)>);
+        EXPECT_TRUE(sp.empty());
+
+        auto sp_const = ReinterpretSpan<const int>(bsp);
+        static_assert(std::is_same_v<Span<const int>, decltype(sp_const)>);
+        EXPECT_TRUE(sp_const.empty());
+
+        auto sp_volatile = ReinterpretSpan<volatile int>(bsp);
+        static_assert(std::is_same_v<Span<volatile int>, decltype(sp_volatile)>);
+        EXPECT_TRUE(sp_volatile.empty());
+
+        auto sp_const_volatile = ReinterpretSpan<const volatile int>(bsp);
+        static_assert(std::is_same_v<Span<const volatile int>, decltype(sp_const_volatile)>);
+        EXPECT_TRUE(sp_const_volatile.empty());
+    }
+    // Const span.
+    {
+        Span<const std::byte> bsp;
+        auto sp_const = ReinterpretSpan<const int>(bsp);
+        static_assert(std::is_same_v<Span<const int>, decltype(sp_const)>);
+        EXPECT_TRUE(sp_const.empty());
+
+        auto sp_const_volatile = ReinterpretSpan<const volatile int>(bsp);
+        static_assert(std::is_same_v<Span<const volatile int>, decltype(sp_const_volatile)>);
+        EXPECT_TRUE(sp_const_volatile.empty());
+    }
+    // Volatile span.
+    {
+        Span<volatile std::byte> bsp;
+        auto sp_volatile = ReinterpretSpan<volatile int>(bsp);
+        static_assert(std::is_same_v<Span<volatile int>, decltype(sp_volatile)>);
+        EXPECT_TRUE(sp_volatile.empty());
+
+        auto sp_const_volatile = ReinterpretSpan<const volatile int>(bsp);
+        static_assert(std::is_same_v<Span<const volatile int>, decltype(sp_const_volatile)>);
+        EXPECT_TRUE(sp_const_volatile.empty());
+    }
+    // Const and volatile span.
+    {
+        Span<const volatile std::byte> bsp;
+        auto sp_const_volatile = ReinterpretSpan<const volatile int>(bsp);
+        static_assert(std::is_same_v<Span<const volatile int>, decltype(sp_const_volatile)>);
+        EXPECT_TRUE(sp_const_volatile.empty());
+    }
+}
+
+TEST(SpanTest, ReintepretSpans) {
+    // Basic usages with varying const/volatile and type-ness.
+    {
+        alignas(uint32_t) std::array<std::byte, 8> bytes{};
+        Span<std::byte> bsp{bytes};
+
+        auto sp16 = ReinterpretSpan<uint16_t>(bsp);
+        static_assert(std::is_same_v<Span<uint16_t>, decltype(sp16)>);
+        EXPECT_EQ(sp16.size(), 4u);
+        EXPECT_EQ(sp16.data(), reinterpret_cast<uint16_t*>(bsp.data()));
+
+        auto sp32 = ReinterpretSpan<const uint32_t>(bsp);
+        static_assert(std::is_same_v<Span<const uint32_t>, decltype(sp32)>);
+        EXPECT_EQ(sp32.size(), 2u);
+        EXPECT_EQ(sp32.data(), reinterpret_cast<const uint32_t*>(bsp.data()));
+
+        auto sp16_typed = ReinterpretSpan<volatile uint16_t, Index>(bsp);
+        static_assert(std::is_same_v<ityp::span<Index, volatile uint16_t>, decltype(sp16_typed)>);
+        EXPECT_EQ(sp16_typed.size(), Index{4u});
+        EXPECT_EQ(sp16_typed.data(), reinterpret_cast<volatile uint16_t*>(bsp.data()));
+
+        auto sp32_typed = ReinterpretSpan<const volatile uint32_t, Index>(bsp);
+        static_assert(
+            std::is_same_v<ityp::span<Index, const volatile uint32_t>, decltype(sp32_typed)>);
+        EXPECT_EQ(sp32_typed.size(), Index{2u});
+        EXPECT_EQ(sp32_typed.data(), reinterpret_cast<const volatile uint32_t*>(bsp.data()));
+    }
+    // Round-trip data integrity with SpanAs*Bytes.
+    {
+        std::array<int, 3> ints{1, 2, 3};
+        Span<int> sp{ints};
+        {
+            Span<const std::byte> bsp = SpanAsBytes(sp);
+            Span<const int> sp2 = ReinterpretSpan<const int>(bsp);
+            EXPECT_EQ(sp2.size(), sp.size());
+            EXPECT_EQ(sp2.data(), sp.data());
+            EXPECT_TRUE(std::ranges::equal(sp2, sp));
+        }
+        {
+            Span<std::byte> wbsp = SpanAsWritableBytes(sp);
+            Span<int> sp2 = ReinterpretSpan<int>(wbsp);
+            EXPECT_EQ(sp2.size(), sp.size());
+            EXPECT_EQ(sp2.data(), sp.data());
+            EXPECT_TRUE(std::ranges::equal(sp2, sp));
+        }
+    }
+}
+
+TEST(SpanDeathTest, ReinterpretSpan) {
+    // Check unaligned empty span.
+    // Empty slice (e.g. data() != nullptr, but size() == 0).
+    {
+        alignas(uint32_t) std::array<std::byte, 4> bytes;
+        auto bsp = Span<std::byte>(bytes).subspan(1u, 0);
+        EXPECT_EQ(bsp.size(), 0u);
+        EXPECT_NE(bsp.data(), nullptr);
+        EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
+        EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint32_t, Index>(bsp)), "");
+    }
+    // Alignment check fails.
+    {
+        alignas(uint32_t) std::array<std::byte, 9> bytes;
+        auto bsp = Span<std::byte>(bytes).subspan(1u, 4u);
+        if (alignof(uint32_t) > 1) {
+            EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
+            EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint32_t, Index>(bsp)), "");
+        }
+    }
+    // Size check fails.
+    {
+        alignas(uint32_t) std::array<std::byte, 8> bytes;
+        auto bsp = Span<std::byte>(bytes).first(7u);
+        EXPECT_DEATH_IF_SUPPORTED(ReinterpretSpan<uint32_t>(bsp), "");
+        EXPECT_DEATH_IF_SUPPORTED((ReinterpretSpan<uint32_t, Index>(bsp)), "");
     }
 }
 

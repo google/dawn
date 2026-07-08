@@ -31,6 +31,7 @@
 #include <concepts>
 #include <limits>
 #include <memory>
+#include <new>
 #include <ranges>
 #include <span>
 
@@ -329,6 +330,61 @@ constexpr auto SpanAsWritableBytes(detail::SpanBase<T, Index, PtrType> s) {
         return DAWN_UNSAFE_BUFFERS(
             Span<std::byte>{reinterpret_cast<std::byte*>(s.data()), s.size_bytes()});
     }
+}
+
+// Converts a `Span<[const|volatile] std::byte>` to a `Span<[const|volatile] T>`.
+// Mirrors Chromium's base::subtle::reintepret_span with some minor differences:
+//   - Allows for volatile qualifiers as long as they are not cast away.
+//   - Relaxes requirement for std::is_trivially_copyable<T> for volatile structures because they
+//     are never trivially copyable when used in Spans.
+// TODO(https://crbug.com/524405497): Support `Span<std::byte, ...>` to `Span<T, N>` once fixed
+// extent spans are supported.
+template <typename T, typename Index = size_t, typename ByteType>
+    requires(
+        // This function effectively "creates" objects by overlaying a type onto raw bytes,
+        // bypassing constructors. Such an operation is only safe for objects that do not maintain
+        // internal invariant. Therefore, we restrict this function to trivially copyable types,
+        // unless we are dealing with a volatile type in which case we assume the user is aware of
+        // the potential pitfalls.
+        // TODO(https://crbug.com/528027992): Add this restriction back once we make wire
+        // serialization volatile in both directions.
+        // (std::is_trivially_copyable_v<T> || std::is_volatile_v<T>) &&
+        // Only allow reintepreting spans of std::byte type.
+        std::same_as<std::remove_cv_t<ByteType>, std::byte> &&
+        // Ensure we are not casting away constness.
+        (!std::is_const_v<ByteType> || std::is_const_v<T>) &&
+        // Ensure we are not casting away volatility.
+        (!std::is_volatile_v<ByteType> || std::is_volatile_v<T>))
+constexpr auto ReinterpretSpan(Span<ByteType> s) {
+    // Check for proper alignment of the target type.
+    DAWN_CHECK(reinterpret_cast<uintptr_t>(s.data()) % alignof(T) == 0u);
+    // Check that the size is a multiple of the target type.
+    DAWN_CHECK(s.size_bytes() % sizeof(T) == 0u);
+
+    // In C++, one cannot simply reinterpret a span of bytes as a span of `T` and dereference it,
+    // unless an object of type `T` actually exists at that memory location.
+    //
+    // Per [intro.object], casting a pointer does not start the lifetime of an object. Even if the
+    // bytes represent a valid object representation, strict adherence to the standard requires
+    // explicit object creation. Dereferencing a pointer to an object that hasn't been created is
+    // undefined behavior.
+    //
+    // The proper solution is C++23's `std::start_lifetime_as_array` (see [obj.lifetime]), which
+    // explicitly blesses the memory as containing objects of type `ElementType`.
+    //
+    // [intro.object]: https://eel.is/c++draft/intro.object
+    // [obj.lifetime] https://eel.is/c++draft/obj.lifetime
+    //
+    // std::start_lifetime_as_array is part of C++23, but not yet implemented by CLang as of January
+    // 2026. `std::launder` helps with pointer provenance issues, but does not by itself start the
+    // lifetime of the object. However, in practice, most compilers implicitly treat this pattern as
+    // valid de facto, but it is technically not standard-compliant.
+    auto* ptr = std::launder(reinterpret_cast<T*>(s.data()));
+
+    // SAFETY: We checked for proper alignment, size, strict aliasing rules, and started the
+    // lifetime of the array.
+    return DAWN_UNSAFE_BUFFERS(
+        ityp::span<Index, T>{ptr, Index{UnderlyingType<Index>(s.size_bytes() / sizeof(T))}});
 }
 
 // Converts a `[const] T&` to a `Span<[const] T>`.
