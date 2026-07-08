@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <limits>
+#include <type_traits>
 
 #include "src/utils/gtest.h"
 #include "src/utils/typed_integer.h"
@@ -50,6 +51,10 @@ TEST_F(TypedIntegerTest, ConstructionAndCast) {
 
     static_assert(static_cast<int32_t>(Signed(3)) == 3);
     static_assert(static_cast<uint32_t>(Unsigned(28u)) == 28);
+
+    // TypedInteger shouldn't be trivially default constructible, because it is
+    // always initialized (initialization is a "non-trivial" operation).
+    static_assert(!std::is_trivially_default_constructible_v<Unsigned>);
 }
 
 // Test that typed integers can be explicitly cast to other integral types

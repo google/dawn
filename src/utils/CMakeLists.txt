@@ -30,6 +30,7 @@ set(private_headers
     "compiler.h"
     "force_crash.h"
     "gtest.h"
+    "heap_array.h"
     "log.h"
     "non_copyable.h"
     "non_movable.h"

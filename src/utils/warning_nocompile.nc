@@ -33,6 +33,7 @@
 #include <array>
 #include <span>
 
+#include "src/utils/heap_array.h"
 #include "src/utils/span.h"
 
 namespace dawn {
@@ -85,6 +86,15 @@ void TestUnsafeBuffersDawnSpanConstructors() {
         DAWN_UNSAFE_BUFFERS(Span<const int>(kArr.begin(), kArr.end()));  // Control case.
         Span<const int>(kArr.begin(), kArr.end());  // expected-error {{introduces unsafe buffer manipulation}}
     }
+}
+
+// -Wunsafe-buffer-usage: dawn::HeapArray::Uninit()
+void TestUnsafeBuffersDawnHeapArrayConstructors() {
+    { [[maybe_unused]] auto x = DAWN_UNSAFE_BUFFERS(HeapArray<int>::Uninit(4)); }  // Control case.
+    { [[maybe_unused]] auto x = HeapArray<int>::Uninit(4); }  // expected-error {{introduces unsafe buffer manipulation}}
+
+    { [[maybe_unused]] auto x = DAWN_UNSAFE_BUFFERS(HeapArray<int>::Uninit(4, std::nothrow)); }  // Control case.
+    { [[maybe_unused]] auto x = HeapArray<int>::Uninit(4, std::nothrow); }  // expected-error {{introduces unsafe buffer manipulation}}
 }
 
 }

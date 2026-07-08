@@ -105,6 +105,19 @@
 #endif
 #endif
 
+// DAWN_MSAN_ENABLED()
+//
+// Checks whether MSan is enabled.
+#if DAWN_COMPILER_IS(CLANG)
+#define DAWN_MSAN_ENABLED() __has_feature(memory_sanitizer)
+#elif DAWN_COMPILER_IS(GCC) || DAWN_COMPILER_IS(MSVC)
+#if defined(__SANITIZE_ADDRESS__)
+#define DAWN_MSAN_ENABLED() 1
+#else
+#define DAWN_MSAN_ENABLED() 0
+#endif
+#endif
+
 // DAWN_NO_SANITIZE(instrumentation)
 //
 // Annotate a function or a global variable declaration to specify that a particular instrumentation

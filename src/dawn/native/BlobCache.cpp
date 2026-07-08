@@ -50,7 +50,7 @@ static constexpr const size_t kHashByteSize = sizeof(Hash);
 
 std::vector<std::byte> GenerateHashPrefixedPayload(std::span<const std::byte> value) {
     // Create a buffer for holding hash+payload.
-    // TODO(crbug.com/512465980): Use ityp::heap_array instead of std::vector.
+    // TODO(https://crbug.com/512465980): Use HeapArray instead of std::vector.
     const size_t byteSizeWithHash = value.size() + kHashByteSize;
     std::vector<std::byte> result(byteSizeWithHash);
 

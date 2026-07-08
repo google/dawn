@@ -286,6 +286,7 @@ static_library("utils") {
     "assert.h",
     "compiler.h",
     "force_crash.h",
+    "heap_array.h",
     "log.cc",
     "log.h",
     "non_copyable.h",
@@ -317,6 +318,7 @@ source_set("crash_handler") {
 dawn_nocompile_source_set("nocompile_sources") {
   deps = [ ":utils" ]
   sources = [
+    "heap_array_nocompile.nc",
     "numeric_nocompile.nc",
     "span_nocompile.nc",
     "typed_integer_nocompile.nc",
@@ -339,6 +341,7 @@ source_set("unittests") {
 
   sources = [
     "assert_test.cc",
+    "heap_array_test.cc",
     "numeric_test.cc",
     "span_tests.cc",
     "typed_integer_tests.cc",
