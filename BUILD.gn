@@ -161,10 +161,6 @@ if (dawn_standalone) {
   }
 }
 
-group("abseil") {
-  public_deps = [ "${dawn_abseil_dir}:absl" ]
-}
-
 # GN evaluates each .gn file once per toolchain, so restricting to default
 # toolchain will ensure write_file() is called only once.
 if (current_toolchain == default_toolchain) {

@@ -58,5 +58,5 @@ static_library("replay") {
     "${dawn_root}/src/dawn/common",
   ]
 
-  public_deps = [ "${dawn_root}:abseil" ]
+  public_deps = [ "${dawn_abseil_dir}:absl" ]
 }

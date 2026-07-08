@@ -91,6 +91,17 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
     "${root_gen_dir}/src/tint/{{$Path}}",
 {{- end}}
   ]
+{{- $public_deps := List}}
+{{- if $.Dependencies.ContainsExternal "abseil"}}
+  {{- $public_deps = Append $public_deps "${dawn_abseil_dir}:absl"}}
+{{- end}}
+{{- if $public_deps}}
+  public_deps = [
+{{-   range $Dep := $public_deps}}
+    "{{$Dep}}",
+{{-   end}}
+  ]
+{{- end}}
   deps = [
 {{- if and (not $.Kind.IsProto) $.GeneratedSourcePaths.List}}
     "${tint_src_dir}:generate_sources",
@@ -103,7 +114,9 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
 
 {{- /* Emit unconditional external dependencies */}}
 {{- range $Dep := $.UnconditionalExternalDependencies}}
+{{-   if ne $Dep.Name "abseil"}}
     {{Eval "ExternalDependencyTargets" $Dep}}
+{{-   end}}
 {{- end}}
   ]
 
@@ -124,7 +137,9 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
       "{{Eval "Dependency" $Dep}}",
 {{-       end}}
 {{-       range $Dep := $Cond.ExternalDependencies}}
+{{-         if ne $Dep.Name "abseil"}}
       {{Eval "ExternalDependencyTargets" $Dep}}
+{{-         end}}
 {{-       end}}
     ]
 {{-     end}}
@@ -173,7 +188,7 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
 --------------------------------------------------------------------------------
 */ -}}
 {{- define "ExternalDependencyTargets"}}
-{{-        if eq $.Name "abseil"                         -}}"${dawn_root}:abseil",
+{{-        if eq $.Name "abseil"                         -}}"${dawn_abseil_dir}:absl",
 {{-   else if eq $.Name "dl"                             -}}"${tint_src_dir}:dl",
 {{-   else if eq $.Name "dxc-include"                    -}}"${tint_src_dir}:dxc-include",
 {{-   else if eq $.Name "dxcompiler-for-fuzzer"          -}}"${tint_src_dir}:dxcompiler-for-fuzzer",

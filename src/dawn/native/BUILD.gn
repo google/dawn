@@ -232,7 +232,7 @@ source_set("sources") {
   # FooBackend.cpp need to be public deps so they are propagated to the
   # dawn native target
   public_deps = [
-    "${dawn_root}:abseil",
+    "${dawn_abseil_dir}:absl",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
     "${dawn_root}/src/dawn/platform",
   ]

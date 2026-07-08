@@ -50,8 +50,8 @@ libtint_source_set("strconv") {
     "parse_num.cc",
     "parse_num.h",
   ]
+  public_deps = [ "${dawn_abseil_dir}:absl" ]
   deps = [
-    "${dawn_root}:abseil",
     "${dawn_root}/src/utils",
     "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/ice",

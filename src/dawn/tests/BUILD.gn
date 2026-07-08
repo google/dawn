@@ -452,10 +452,8 @@ dawn_test("dawn_unittests") {
 source_set("partition_alloc_support") {
   testonly = true
 
-  deps = [
-    "${dawn_root}:abseil",
-    "${dawn_root}/src/dawn/common",
-  ]
+  public_deps = [ "${dawn_abseil_dir}:absl" ]
+  deps = [ "${dawn_root}/src/dawn/common" ]
   public = [ "PartitionAllocSupport.h" ]
   sources = [ "PartitionAllocSupport.cpp" ]
 

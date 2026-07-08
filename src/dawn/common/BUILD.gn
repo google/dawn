@@ -241,7 +241,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
     public_deps = [
       ":dawn_gpu_info_gen",
       ":dawn_version_gen",
-      "${dawn_root}:abseil",
+      "${dawn_abseil_dir}:absl",
       "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
       "${dawn_root}/src/utils",
     ]

@@ -156,7 +156,7 @@ source_set("sources") {
 
   public_deps = [
     ":headers",
-    "${dawn_root}:abseil",
+    "${dawn_abseil_dir}:absl",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
   ]
 }
