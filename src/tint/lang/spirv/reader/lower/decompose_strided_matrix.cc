@@ -31,6 +31,7 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/traverse.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/spirv/type/explicit_layout_array.h"
@@ -70,11 +71,44 @@ struct State {
     /// A map from rewritten structs to original structs.
     Hashmap<const core::type::Struct*, const core::type::Struct*, 4> struct_to_original{};
 
+    /// Worklist of access instructions that need to be updated.
+    Vector<core::ir::Access*, 32> access_worklist{};
+
+    /// Worklist of construct instructions that need to be updated.
+    Vector<core::ir::Construct*, 32> construct_worklist{};
+
     /// Process the module.
     void Process() {
-        Vector<core::ir::Access*, 32> access_worklist;
-        Vector<core::ir::Construct*, 32> construct_worklist;
-        for (auto* inst : ir.Instructions()) {
+        if (ir.root_block) {
+            ProcessBlock(ir.root_block);
+        }
+
+        // Update the types of any function parameters and function return types that contain
+        // matrices with non-default strides.
+        for (size_t i = 0; i < ir.functions.Length(); ++i) {
+            auto* func = ir.functions[i];
+            for (auto* param : func->Params()) {
+                param->SetType(RewriteType(param->Type()));
+            }
+            func->SetReturnType(RewriteType(func->ReturnType()));
+
+            ProcessBlock(func->Block());
+        }
+
+        // Update any access instructions that produce strided matrices.
+        for (auto* access : access_worklist) {
+            UpdateAccessInstruction(access, /* source_is_strided */ false);
+        }
+
+        // Convert strided matrix operands for construct instructions.
+        for (auto* construct : construct_worklist) {
+            ConvertConstructOperands(construct);
+        }
+    }
+
+    /// Process a block iteratively.
+    void ProcessBlock(core::ir::Block* block) {
+        core::ir::Traverse(block, [&](core::ir::Instruction* inst) {
             // Replace all constant operands where the type will be changed due to it containing a
             // structure that uses a matrix stride attribute.
             for (uint32_t i = 0; i < inst->Operands().Length(); ++i) {
@@ -94,30 +128,10 @@ struct State {
             // Track instructions that may need to be updated later.
             if (auto* access = inst->As<core::ir::Access>()) {
                 access_worklist.Push(access);
-            }
-            if (auto* construct = inst->As<core::ir::Construct>()) {
+            } else if (auto* construct = inst->As<core::ir::Construct>()) {
                 construct_worklist.Push(construct);
             }
-        }
-
-        // Update the types of any function parameters and function return types that contain
-        // matrices with non-default strides.
-        for (auto func : ir.functions) {
-            for (auto* param : func->Params()) {
-                param->SetType(RewriteType(param->Type()));
-            }
-            func->SetReturnType(RewriteType(func->ReturnType()));
-        }
-
-        // Update any access instructions that produce strided matrices.
-        for (auto* access : access_worklist) {
-            UpdateAccessInstruction(access, /* source_is_strided */ false);
-        }
-
-        // Convert strided matrix operands for construct instructions.
-        for (auto* construct : construct_worklist) {
-            ConvertConstructOperands(construct);
-        }
+        });
     }
 
     /// Rewrite a type to replace structure members that have matrix strides.
