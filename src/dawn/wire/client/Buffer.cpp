@@ -315,27 +315,29 @@ void Buffer::DeleteThis() {
 }
 
 void Buffer::WillDropLastExternalRef() {
-    mState.Use([this](auto state) {
-        SetFutureStatus(state, WGPUMapAsyncStatus_Aborted,
-                        "Buffer was destroyed before mapping was resolved.");
-    });
+    SetFutureStatus(WGPUMapAsyncStatus_Aborted,
+                    "Buffer was destroyed before mapping was resolved.");
 }
 
 ObjectType Buffer::GetObjectType() const {
     return ObjectType::Buffer;
 }
 
-void Buffer::SetFutureStatus(GuardedState& state,
-                             WGPUMapAsyncStatus status,
-                             std::string_view message) {
-    if (!state->pendingMapRequest) {
+void Buffer::SetFutureStatus(WGPUMapAsyncStatus status, std::string_view message) {
+    auto futureID = mState.Use([&](auto state) -> std::optional<FutureID> {
+        if (!state->pendingMapRequest) {
+            return std::nullopt;
+        }
+
+        FutureID result = state->pendingMapRequest->futureID;
+        state->pendingMapRequest = std::nullopt;
+        return result;
+    });
+
+    if (!futureID) {
         return;
     }
-
-    FutureID futureID = state->pendingMapRequest->futureID;
-    state->pendingMapRequest = std::nullopt;
-
-    auto wireStatus = GetEventManager().SetFutureReady<MapAsyncEvent>(futureID, status,
+    auto wireStatus = GetEventManager().SetFutureReady<MapAsyncEvent>(*futureID, status,
                                                                       ToOutputStringView(message));
     DAWN_CHECK(wireStatus == WireResult::Success);
 }
@@ -353,9 +355,6 @@ WGPUFuture Buffer::APIMapAsync(WGPUMapMode mode,
 
     bool success = mState.Use([&](auto state) {
         if (state->pendingMapRequest) {
-            [[maybe_unused]] auto id = GetEventManager().SetFutureReady<MapAsyncEvent>(
-                futureIDInternal, WGPUMapAsyncStatus_Error,
-                ToOutputStringView("Buffer already has an outstanding map pending."));
             return false;
         }
 
@@ -380,6 +379,9 @@ WGPUFuture Buffer::APIMapAsync(WGPUMapMode mode,
         return true;
     });
     if (!success) {
+        [[maybe_unused]] auto id = GetEventManager().SetFutureReady<MapAsyncEvent>(
+            futureIDInternal, WGPUMapAsyncStatus_Error,
+            ToOutputStringView("Buffer already has an outstanding map pending."));
         return {futureIDInternal};
     }
 
@@ -508,10 +510,9 @@ void Buffer::APIUnmap() {
         state->mappedState = MapState::Unmapped;
         state->mappedOffset = 0;
         state->mappedSize = 0;
-
-        SetFutureStatus(state, WGPUMapAsyncStatus_Aborted,
-                        "Buffer was unmapped before mapping was resolved.");
     });
+
+    SetFutureStatus(WGPUMapAsyncStatus_Aborted, "Buffer was unmapped before mapping was resolved.");
 
     BufferUnmapCmd cmd{};
     cmd.self = ToAPI(this);
@@ -523,10 +524,10 @@ void Buffer::APIDestroy() {
 
     // Remove the current mapping and destroy MemoryHandle.
     mState.Use([&](auto state) {
-        SetFutureStatus(state, WGPUMapAsyncStatus_Aborted,
-                        "Buffer was destroyed before mapping was resolved.");
         FreeMappedData(state);
     });
+    SetFutureStatus(WGPUMapAsyncStatus_Aborted,
+                    "Buffer was destroyed before mapping was resolved.");
 
     BufferDestroyCmd cmd{};
     cmd.self = ToAPI(this);

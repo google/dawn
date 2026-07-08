@@ -116,8 +116,8 @@ class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
 
     void WillDropLastExternalRef() override;
 
-    // Prepares the callbacks to be called and potentially calls them
-    void SetFutureStatus(GuardedState& state, WGPUMapAsyncStatus status, std::string_view message);
+    // Prepares the callbacks to be called and potentially calls them.
+    void SetFutureStatus(WGPUMapAsyncStatus status, std::string_view message);
 
     void FreeMappedData(GuardedState& state);
 
