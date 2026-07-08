@@ -3319,9 +3319,9 @@ TEST_F(IR_ValidatorTest, Function_Vertex_StructOnlyClipDistances) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(R"(:5:1 error: position must be declared for vertex entry point output
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:5:1 error: position must be declared on the return of a vertex entry point
 %my_func = @vertex func():MyStruct {
 ^^^^^^^^
 )")) << res.Failure();
@@ -3335,9 +3335,9 @@ TEST_F(IR_ValidatorTest, Function_Vertex_MissingPosition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(R"(:1:1 error: position must be declared for vertex entry point output
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:1:1 error: position must be declared on the return of a vertex entry point
 %my_func = @vertex func():vec4<f32> [@location(0)] {
 ^^^^^^^^
 )")) << res.Failure();

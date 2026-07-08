@@ -52,6 +52,7 @@
 #include "src/tint/lang/core/ir/member_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/override.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/store_vector_element.h"
@@ -115,6 +116,7 @@ class Functional {
 
     diag::Diagnostic& AddNote(Source src);
     diag::Diagnostic& AddNote(const Block* blk);
+    diag::Diagnostic& AddNote(const Function* func);
     diag::Diagnostic& AddNote(const Instruction* inst);
     diag::Diagnostic& AddNote(const Instruction* inst, size_t idx);
 
@@ -126,6 +128,8 @@ class Functional {
     void CheckRootBlock(const Block* blk);
     void CheckFunction(const Function* func);
     void CheckFunctionParam(const FunctionParam* param);
+    void CheckEntryPoint(const Function* func);
+    void CheckPositionPresentForVertexOutput(const Function* ep);
     void CheckBlock(const Block* blk);
     void CheckInstruction(const Instruction* inst);
 
@@ -168,6 +172,7 @@ class Functional {
 
     SymbolTable symbols_ = SymbolTable::Wrap(ir_.symbols);
     core::type::Manager type_mgr_ = core::type::Manager::Wrap(ir_.Types());
+    core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
 
     Vector<const Block*, 8> block_stack_;
     Hashset<OverrideId, 8> seen_override_ids_;

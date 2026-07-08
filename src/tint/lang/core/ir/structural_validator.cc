@@ -113,23 +113,6 @@ bool IsCoreType(const core::type::Type* type) {
     return std::string_view(type->TypeInfo().name).starts_with("tint::core");
 }
 
-/// @returns true if @p ty is a non-struct and decorated with @builtin(position), or if it is a
-/// struct and one of its members is decorated, otherwise false.
-/// @param attr attributes attached to data
-/// @param ty type of the data being tested
-bool IsPositionPresent(const IOAttributes& attr, const core::type::Type* ty) {
-    if (auto* ty_struct = ty->As<core::type::Struct>()) {
-        for (const auto* mem : ty_struct->Members()) {
-            if (mem->Attributes().builtin == BuiltinValue::kPosition) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    return attr.builtin == BuiltinValue::kPosition;
-}
-
 template <typename CTX, typename IMPL>
 void WalkTypeAndMembers(CTX& ctx,
                         const core::type::Type* type,
@@ -1352,19 +1335,7 @@ void Structural::CheckEntryPoint(const Function* func) {
                            CheckNotBool(f, t, "entry point returns can not be 'bool'");
                        });
 
-    Hashset<BindingPoint, 4> binding_points{};
-    const Var* user_declared_immediate = nullptr;
-
     for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
-        if (!ir_.properties.Contains(Property::kAllowDuplicateBindings) &&
-            var->BindingPoint().has_value()) {
-            auto bp = var->BindingPoint().value();
-            if (!binding_points.Add(bp)) {
-                AddError(var) << "found non-unique binding point, " << bp
-                              << ", being referenced in entry point, " << NameOf(func);
-            }
-        }
-
         const auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
         const auto* ty = var->Result()->Type()->UnwrapPtrOrRef();
         const auto attr = var->Attributes();
@@ -1372,28 +1343,7 @@ void Structural::CheckEntryPoint(const Function* func) {
             continue;
         }
 
-        auto address_space = mv->AddressSpace();
-        switch (address_space) {
-            case AddressSpace::kImmediate:
-                if (user_declared_immediate) {
-                    AddError(var) << "multiple user-declared immediate data variables referenced "
-                                     "by entry point "
-                                  << NameOf(func);
-                }
-                user_declared_immediate = var;
-                continue;
-            case AddressSpace::kWorkgroup:
-                if (!func->IsCompute()) {
-                    AddError(var) << "workgroup variable cannot be used in a " << func->Stage()
-                                  << " shader";
-                }
-                continue;
-            case AddressSpace::kPixelLocal:
-                if (!func->IsFragment()) {
-                    AddError(var) << "pixel_local variable cannot be used in a " << func->Stage()
-                                  << " shader";
-                }
-                continue;
+        switch (mv->AddressSpace()) {
             case AddressSpace::kIn:
             case AddressSpace::kOut:
                 break;
@@ -1401,7 +1351,7 @@ void Structural::CheckEntryPoint(const Function* func) {
                 continue;
         }
 
-        if (func->IsFragment() && address_space == AddressSpace::kIn) {
+        if (func->IsFragment() && mv->AddressSpace() == AddressSpace::kIn) {
             WalkTypeAndMembers(var, ty, attr, [this](const auto* v, const auto* t, const auto& a) {
                 CheckFrontFacingIfBool(v, a, t,
                                        "input address space values referenced by fragment shaders "
@@ -1416,10 +1366,6 @@ void Structural::CheckEntryPoint(const Function* func) {
                              "shaders and decorated with @builtin(front_facing)");
             });
         }
-    }
-
-    if (func->IsVertex()) {
-        CheckPositionPresentForVertexOutput(func);
     }
 }
 
@@ -1878,30 +1824,6 @@ void Structural::CheckSubgroupSize(const Function* func) {
     }
 
     AddError(func) << "@subgroup_size must be an InstructionResult or a Constant";
-}
-
-void Structural::CheckPositionPresentForVertexOutput(const Function* ep) {
-    if (IsPositionPresent(ep->ReturnAttributes(), ep->ReturnType())) {
-        return;
-    }
-
-    for (const auto& var : referenced_module_vars_.TransitiveReferences(ep)) {
-        const auto* ty = var->Result()->Type()->UnwrapPtrOrRef();
-        if (!ty) {
-            continue;
-        }
-
-        const auto attr = var->Attributes();
-        if (IsPositionPresent(attr, ty)) {
-            if (!ir_.properties.Contains(Property::kAllowBackendSpecificShaderIO)) {
-                AddError(var) << "position as part of a `var`, it must be part of the return";
-                AddNote(ep) << "used in entry point here";
-                return;
-            }
-            return;
-        }
-    }
-    AddError(ep) << "position must be declared for vertex entry point output";
 }
 
 void Structural::ProcessTasks() {

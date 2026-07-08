@@ -151,10 +151,27 @@ bool IsValidFunctionParamType(const core::type::Type* ty) {
     return false;
 }
 
+/// @returns true if @p ty is a non-struct and decorated with @builtin(position), or if it is a
+/// struct and one of its members is decorated, otherwise false.
+/// @param attr attributes attached to data
+/// @param ty type of the data being tested
+bool IsPositionPresent(const IOAttributes& attr, const core::type::Type* ty) {
+    if (auto* ty_struct = ty->As<core::type::Struct>()) {
+        for (const auto* mem : ty_struct->Members()) {
+            if (mem->Attributes().builtin == BuiltinValue::kPosition) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    return attr.builtin == BuiltinValue::kPosition;
+}
+
 }  // namespace
 
 Functional::Functional(const Module& ir, diag::List& diagnostics, ErrorSource error_source)
-    : ir_(ir), diag_(diagnostics), error_source_(error_source) {}
+    : ir_(ir), diag_(diagnostics), error_source_(error_source), referenced_module_vars_(ir) {}
 
 Functional::~Functional() = default;
 
@@ -281,6 +298,10 @@ diag::Diagnostic& Functional::AddNote(const Block* blk) {
     return AddNote(src);
 }
 
+diag::Diagnostic& Functional::AddNote(const Function* func) {
+    return AddNote(SourceOf(func));
+}
+
 diag::Diagnostic& Functional::AddNote(const Instruction* inst) {
     return AddNote(SourceOf(inst));
 }
@@ -302,34 +323,7 @@ void Functional::CheckRootBlock(const Block* blk) {
 }
 
 void Functional::CheckFunction(const Function* func) {
-    if (func->IsEntryPoint()) {
-        // Check that there is at most one entry point unless we allow multiple entry points.
-        if (!ir_.properties.Contains(Property::kAllowMultipleEntryPoints)) {
-            if (!entry_point_names_.IsEmpty()) {
-                AddError(func) << "a module with multiple entry points requires the "
-                                  "AllowMultipleEntryPoints property";
-                return;
-            }
-        }
-
-        if (DAWN_UNLIKELY(ir_.NameOf(func).Name().empty())) {
-            AddError(func) << "entry points must have names";
-        } else {
-            // Checking the name early, so its usage can be recorded, even if the function is
-            // malformed.
-            const auto name = ir_.NameOf(func).Name();
-            if (!entry_point_names_.Add(name)) {
-                AddError(func) << "entry point name " << style::Function(name) << " is not unique";
-            }
-        }
-
-        if (func->Stage() == Function::PipelineStage::kCompute) {
-            if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>())) {
-                AddError(func) << "compute entry point must not have a return type, found "
-                               << NameOf(func->ReturnType());
-            }
-        }
-    }
+    CheckEntryPoint(func);
 
     // void needs to be filtered out, since it isn't constructible, but used in the IR when no
     // return is specified.
@@ -343,6 +337,111 @@ void Functional::CheckFunction(const Function* func) {
     }
 
     CheckBlock(func->Block());
+}
+
+void Functional::CheckEntryPoint(const Function* func) {
+    if (!func->IsEntryPoint()) {
+        return;
+    }
+
+    // Check that there is at most one entry point unless we allow multiple entry points.
+    if (!ir_.properties.Contains(Property::kAllowMultipleEntryPoints) &&
+        !entry_point_names_.IsEmpty()) {
+        AddError(func) << "a module with multiple entry points requires the "
+                          "AllowMultipleEntryPoints property";
+        return;
+    }
+
+    if (DAWN_UNLIKELY(ir_.NameOf(func).Name().empty())) {
+        AddError(func) << "entry points must have names";
+    } else {
+        // Checking the name early, so its usage can be recorded, even if the function is
+        // malformed.
+        const auto name = ir_.NameOf(func).Name();
+        if (!entry_point_names_.Add(name)) {
+            AddError(func) << "entry point name " << style::Function(name) << " is not unique";
+        }
+    }
+
+    Hashset<BindingPoint, 4> binding_points{};
+    bool seen_immediate = false;
+    for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
+        if (!ir_.properties.Contains(Property::kAllowDuplicateBindings) &&
+            var->BindingPoint().has_value()) {
+            auto bp = var->BindingPoint().value();
+            if (!binding_points.Add(bp)) {
+                AddError(var) << "found non-unique binding point, " << bp
+                              << ", being referenced in entry point, " << NameOf(func);
+            }
+        }
+
+        const auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
+        if (!mv) {
+            continue;
+        }
+
+        auto address_space = mv->AddressSpace();
+        switch (address_space) {
+            case AddressSpace::kImmediate:
+                if (seen_immediate) {
+                    AddError(var) << "multiple user-declared immediate data variables referenced "
+                                     "by entry point "
+                                  << NameOf(func);
+                }
+                seen_immediate = true;
+                continue;
+            case AddressSpace::kWorkgroup:
+                if (!func->IsCompute()) {
+                    AddError(var) << "workgroup variable cannot be used in a " << func->Stage()
+                                  << " shader";
+                }
+                continue;
+            case AddressSpace::kPixelLocal:
+                if (!func->IsFragment()) {
+                    AddError(var) << "pixel_local variable cannot be used in a " << func->Stage()
+                                  << " shader";
+                }
+                continue;
+            case AddressSpace::kIn:
+            case AddressSpace::kOut:
+                break;
+            default:
+                continue;
+        }
+    }
+
+    if (func->IsCompute()) {
+        if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>())) {
+            AddError(func) << "compute entry point must not have a return type, found "
+                           << NameOf(func->ReturnType());
+        }
+    } else if (func->IsVertex()) {
+        CheckPositionPresentForVertexOutput(func);
+    }
+}
+
+void Functional::CheckPositionPresentForVertexOutput(const Function* ep) {
+    if (IsPositionPresent(ep->ReturnAttributes(), ep->ReturnType())) {
+        return;
+    }
+
+    for (const auto& var : referenced_module_vars_.TransitiveReferences(ep)) {
+        const auto* ty = var->Result()->Type()->UnwrapPtrOrRef();
+        if (!ty) {
+            continue;
+        }
+
+        const auto attr = var->Attributes();
+        if (IsPositionPresent(attr, ty)) {
+            if (!ir_.properties.Contains(Property::kAllowBackendSpecificShaderIO)) {
+                AddError(var) << "position as part of a `var`, it must be part of the return";
+                AddNote(ep) << "used in entry point here";
+                return;
+            }
+            return;
+        }
+    }
+    AddError(ep) << "position must be declared on the return of a vertex entry point";
 }
 
 void Functional::CheckFunctionParam(const FunctionParam* param) {
