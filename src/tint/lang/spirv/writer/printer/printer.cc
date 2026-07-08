@@ -877,6 +877,19 @@ class Printer {
                 TINT_IR_ICE(ir_) << "undefined pipeline stage for entry point";
         }
 
+        if (options_.extensions.use_maximal_reconvergence) {
+            module_.PushExtension("SPV_KHR_maximal_reconvergence");
+            module_.PushExecutionMode(spv::Op::OpExecutionMode,
+                                      {id, U32Operand(SpvExecutionModeMaximallyReconvergesKHR)});
+        } else if (options_.extensions.use_subgroup_uniform_control_flow &&
+                   (func->Stage() == core::ir::Function::PipelineStage::kCompute ||
+                    func->Stage() == core::ir::Function::PipelineStage::kFragment)) {
+            module_.PushExtension("SPV_KHR_subgroup_uniform_control_flow");
+            module_.PushExecutionMode(
+                spv::Op::OpExecutionMode,
+                {id, U32Operand(SpvExecutionModeSubgroupUniformControlFlowKHR)});
+        }
+
         // Use the remapped entry point name if requested, otherwise use the original name.
         std::string name;
         if (!options_.remapped_entry_point_name.empty()) {

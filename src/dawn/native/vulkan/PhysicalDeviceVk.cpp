@@ -1286,6 +1286,20 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->ForceSet(Toggle::UseSpirv14, false);
     }
 
+    if (GetDeviceInfo().HasExt(DeviceExt::MaximalReconvergence)) {
+        deviceToggles->Default(
+            Toggle::UseSpirvReconvergenceMode,
+            platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirvReconvergenceMode));
+    } else if (GetDeviceInfo().HasExt(DeviceExt::SubgroupUniformControlFlow) &&
+               (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
+               (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_FRAGMENT_BIT)) {
+        deviceToggles->Default(
+            Toggle::UseSpirvReconvergenceMode,
+            platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirvReconvergenceMode));
+    } else {
+        deviceToggles->ForceSet(Toggle::UseSpirvReconvergenceMode, false);
+    }
+
     // Vulkan waiting is already thread safe.
     deviceToggles->Default(Toggle::WaitIsThreadSafe, true);
 

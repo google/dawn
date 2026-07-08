@@ -196,6 +196,14 @@ struct Options {
         /// ...>.
         bool use_uniform_buffers = false;
 
+        /// Set to `true` to add `MaximallyReconvergesKHR` to entry points.
+        /// Takes precedence over `use_subgroup_uniform_control_flow`.
+        bool use_maximal_reconvergence = false;
+
+        /// Set to `true` to add `SubgroupUniformControlFlowKHR` to compute and fragment entry
+        /// points.
+        bool use_subgroup_uniform_control_flow = false;
+
         TINT_REFLECT(Extensions,
                      use_demote_to_helper_invocation,
                      use_storage_input_output_16,
@@ -204,7 +212,9 @@ struct Options {
                      disable_image_robustness,
                      disable_runtime_sized_array_index_clamping,
                      dot_4x8_packed,
-                     use_uniform_buffers);
+                     use_uniform_buffers,
+                     use_maximal_reconvergence,
+                     use_subgroup_uniform_control_flow);
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////

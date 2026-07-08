@@ -479,5 +479,107 @@ TEST_F(SpirvWriterTest, PolyfillPixelCenter) {
 )");
 }
 
+TEST_F(SpirvWriterTest, MaximalReconvergence_Compute) {
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    ep->Block()->Append(b.Return(ep));
+
+    Options options;
+    options.extensions.use_maximal_reconvergence = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST(R"(
+               OpExtension "SPV_KHR_maximal_reconvergence"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpExecutionMode %main MaximallyReconvergesKHR
+)");
+}
+
+TEST_F(SpirvWriterTest, MaximalReconvergence_Fragment) {
+    auto* ep = b.FragmentFunction("main", ty.void_());
+    ep->Block()->Append(b.Return(ep));
+
+    Options options;
+    options.extensions.use_maximal_reconvergence = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST(R"(
+               OpExtension "SPV_KHR_maximal_reconvergence"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpExecutionMode %main MaximallyReconvergesKHR
+)");
+}
+
+TEST_F(SpirvWriterTest, MaximalReconvergence_Vertex) {
+    auto* ep = b.Function("main", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetReturnAttributes({.builtin = core::BuiltinValue::kPosition});
+    ep->Block()->Append(b.Return(ep, b.Zero(ty.vec4f())));
+
+    Options options;
+    options.extensions.use_maximal_reconvergence = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST(R"(
+               OpExtension "SPV_KHR_maximal_reconvergence"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %main_position_Output %main___point_size_Output
+               OpExecutionMode %main MaximallyReconvergesKHR
+)");
+}
+
+TEST_F(SpirvWriterTest, SubgroupUniformControlFlow_Compute) {
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    ep->Block()->Append(b.Return(ep));
+
+    Options options;
+    options.extensions.use_subgroup_uniform_control_flow = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST(R"(
+               OpExtension "SPV_KHR_subgroup_uniform_control_flow"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpExecutionMode %main SubgroupUniformControlFlowKHR
+)");
+}
+
+TEST_F(SpirvWriterTest, SubgroupUniformControlFlow_Fragment) {
+    auto* ep = b.FragmentFunction("main", ty.void_());
+    ep->Block()->Append(b.Return(ep));
+
+    Options options;
+    options.extensions.use_subgroup_uniform_control_flow = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST(R"(
+               OpExtension "SPV_KHR_subgroup_uniform_control_flow"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpExecutionMode %main SubgroupUniformControlFlowKHR
+)");
+}
+
+TEST_F(SpirvWriterTest, SubgroupUniformControlFlow_Vertex) {
+    auto* ep = b.Function("main", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetReturnAttributes({.builtin = core::BuiltinValue::kPosition});
+    ep->Block()->Append(b.Return(ep, b.Zero(ty.vec4f())));
+
+    Options options;
+    options.extensions.use_subgroup_uniform_control_flow = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST(
+        R"(              OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %main_position_Output %main___point_size_Output
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

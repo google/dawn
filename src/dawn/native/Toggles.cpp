@@ -808,6 +808,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"vulkan_sleep_after_lost_device_wait",
       "Insert an arbitrary sleep after WaitIdle functions on device loss.",
       "https://crbug.com/500417361", ToggleStage::Device}},
+    {Toggle::UseSpirvReconvergenceMode,
+     {"use_spirv_reconvergence_mode",
+      "Use SPIR-V reconvergence execution mode if supported by the device.",
+      "https://crbug.com/379673383", ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

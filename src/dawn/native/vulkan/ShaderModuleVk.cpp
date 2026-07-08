@@ -317,6 +317,15 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.tintOptions.extensions.use_uniform_buffers =
         !GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
 
+    // Maximal reconvergence takes precedence over subgroup uniform control flow in the SPIR-V
+    // backend so just try to turn both on.
+    if (GetDevice()->IsToggleEnabled(Toggle::UseSpirvReconvergenceMode)) {
+        req.tintOptions.extensions.use_maximal_reconvergence =
+            ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::MaximalReconvergence);
+        req.tintOptions.extensions.use_subgroup_uniform_control_flow =
+            ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::SubgroupUniformControlFlow);
+    }
+
     req.tintOptions.workarounds.texture_sample_compare_depth_cube_array =
         GetDevice()->IsToggleEnabled(Toggle::VulkanSampleCompareDepthCubeArrayWorkaround);
     req.tintOptions.workarounds.texture_sample_compare_2d_polyfill =

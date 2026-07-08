@@ -113,6 +113,8 @@ bool Platform::IsFeatureEnabled(Features feature) {
             return true;
         case Features::kWebGPUUseHLSL2021:
             return true;
+        case Features::kWebGPUUseSpirvReconvergenceMode:
+            return true;
     }
     return false;
 }
