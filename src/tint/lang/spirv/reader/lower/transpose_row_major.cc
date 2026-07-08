@@ -216,14 +216,13 @@ struct State {
         auto* src_to = sve->To()->As<core::ir::InstructionResult>();
         TINT_ASSERT(src_to);
 
-        auto* src_access = src_to->Instruction()->As<core::ir::Access>();
-        TINT_ASSERT(src_access);
+        auto* src_inst = src_to->Instruction();
 
         auto access_idx = access_to_vector_index.Get(sve->To());
         TINT_ASSERT(access_idx);
 
         core::ir::Access* new_access = nullptr;
-        b.InsertAfter(src_access, [&] {
+        b.InsertAfter(src_inst, [&] {
             auto* src_ty = src_to->Type()->As<core::type::Pointer>();
             TINT_ASSERT(src_ty);
 
@@ -232,14 +231,14 @@ struct State {
 
             auto* new_ptr =
                 ty.ptr(src_ty->AddressSpace(), ty.vec(src_mat->Type(), src_mat->Rows()));
-            new_access = b.Access(new_ptr, src_access, Vector{sve->Index()});
+            new_access = b.Access(new_ptr, src_to, Vector{sve->Index()});
 
             b.InsertAfter(sve,
                           [&] { b.StoreVectorElement(new_access, *access_idx, sve->Value()); });
             sve->Destroy();
         });
 
-        instructions_to_remove_if_unused.Push(src_access);
+        instructions_to_remove_if_unused.Push(src_inst);
     }
 
     // This is a load vector element that is coming from a matrix which we've transposed the size
@@ -248,14 +247,13 @@ struct State {
         auto* src_result = lve->From()->As<core::ir::InstructionResult>();
         TINT_ASSERT(src_result);
 
-        auto* src_access = src_result->Instruction()->As<core::ir::Access>();
-        TINT_ASSERT(src_access);
+        auto* src_inst = src_result->Instruction();
 
         auto access_idx = access_to_vector_index.Get(lve->From());
         TINT_ASSERT(access_idx);
 
         core::ir::Access* new_access = nullptr;
-        b.InsertAfter(src_access, [&] {
+        b.InsertAfter(src_inst, [&] {
             auto* src_ty = src_result->Type()->As<core::type::Pointer>();
             TINT_ASSERT(src_ty);
 
@@ -264,7 +262,7 @@ struct State {
 
             auto* new_ptr =
                 ty.ptr(src_ty->AddressSpace(), ty.vec(src_mat->Type(), src_mat->Rows()));
-            new_access = b.Access(new_ptr, src_access, Vector{lve->Index()});
+            new_access = b.Access(new_ptr, src_result, Vector{lve->Index()});
 
             b.InsertAfter(lve, [&] {
                 b.LoadVectorElementWithResult(lve->DetachResult(), new_access, *access_idx);
@@ -272,7 +270,7 @@ struct State {
             lve->Destroy();
         });
 
-        instructions_to_remove_if_unused.Push(src_access);
+        instructions_to_remove_if_unused.Push(src_inst);
     }
 
     void ReplaceAccess(core::ir::Access* access) {
@@ -387,6 +385,19 @@ struct State {
         if (cur_ty->Is<core::type::Vector>()) {
             TINT_ASSERT(parent_ty != nullptr);
             auto* idx = access->PopLastIndex();
+
+            if (access->Indices().empty()) {
+                core::ir::Let* let = nullptr;
+                b.InsertBefore(access, [&] {
+                    let = b.LetWithResult(access->DetachResult(), access->Object());
+                });
+                let->Result()->SetType(let->Value()->Type());
+                replaced_result_types.insert(let->Result());
+                access_to_vector_index.Add(let->Result(), idx);
+                results_to_update.Push(let->Result());
+                instructions_to_remove_if_unused.Push(access);
+                return;
+            }
 
             /// The access now returns the transposed matrix
             auto* new_access_ty = access->Result()->Type();

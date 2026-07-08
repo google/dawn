@@ -1511,9 +1511,21 @@ class Builder {
             TINT_ASSERT(val);
             return nullptr;
         }
-        auto* let = ir.CreateInstruction<ir::Let>(InstructionResult(val->Type()), val);
-        Append(let);
-        return let;
+        return LetWithResult(InstructionResult(val->Type()), val);
+    }
+
+    /// Creates a new `let` declaration with an existing instruction result
+    /// @param result the instruction result to use
+    /// @param value the let value
+    /// @returns the instruction
+    template <typename VALUE>
+    ir::Let* LetWithResult(ir::InstructionResult* result, VALUE&& value) {
+        auto* val = Value(std::forward<VALUE>(value));
+        if (DAWN_UNLIKELY(!val)) {
+            TINT_ASSERT(val);
+            return nullptr;
+        }
+        return Append(ir.CreateInstruction<ir::Let>(result, val));
     }
 
     /// Creates a return instruction

@@ -4800,5 +4800,98 @@ S_1 = struct @align(16) {
     EXPECT_EQ(after, str());
 }
 
+TEST_F(SpirvReader_TransposeRowMajorTest, AccessWithSingleIndex) {
+    // struct Uniforms {
+    //   @row_major @matrix_stride(16) m : mat4x4<f32>,
+    // };
+    // var<uniform> u : Uniforms;
+    // ...
+    // let mptr = &u.m;
+    // let cptr = &(*mptr)[1];
+    // let eptr = &(*cptr)[2];
+    // let elem = *eptr;
+
+    auto* member = ty.Get<core::type::StructMember>(mod.symbols.New("m"), ty.mat4x4<f32>(), 0u, 0u,
+                                                    16u, 64u, core::IOAttributes{});
+    member->SetRowMajor();
+    member->SetMatrixStride(16u);
+
+    auto* strct = ty.Struct(mod.symbols.New("Uniforms"), Vector{member});
+
+    auto* u = b.Var("u", ty.ptr(core::AddressSpace::kUniform, strct, core::Access::kRead));
+    u->SetBindingPoint(0, 0);
+    mod.root_block->Append(u);
+
+    auto* out_pos = b.Var(
+        "out_pos", ty.ptr(core::AddressSpace::kPrivate, ty.vec4<f32>(), core::Access::kReadWrite));
+    mod.root_block->Append(out_pos);
+
+    auto* f_inner = b.Function("main_inner", ty.void_());
+    b.Append(f_inner->Block(), [&] {
+        auto* mptr = b.Access(
+            ty.ptr(core::AddressSpace::kUniform, ty.mat4x4<f32>(), core::Access::kRead), u, 0_i);
+        auto* cptr = b.Access(
+            ty.ptr(core::AddressSpace::kUniform, ty.vec4<f32>(), core::Access::kRead), mptr, 1_i);
+        auto* elem = b.LoadVectorElement(cptr, 2_i);
+        auto* construct = b.Construct(ty.vec4<f32>(), elem, elem, elem, elem);
+        b.Store(out_pos, construct);
+        b.Return(f_inner);
+    });
+
+    auto* before = R"(
+Uniforms = struct @align(16) {
+  m:mat4x4<f32> @offset(0), @row_major, @matrix_stride(16)
+}
+
+$B1: {  # root
+  %u:ptr<uniform, Uniforms, read> = var undef @binding_point(0, 0)
+  %out_pos:ptr<private, vec4<f32>, read_write> = var undef
+}
+
+%main_inner = func():void {
+  $B2: {
+    %4:ptr<uniform, mat4x4<f32>, read> = access %u, 0i
+    %5:ptr<uniform, vec4<f32>, read> = access %4, 1i
+    %6:f32 = load_vector_element %5, 2i
+    %7:vec4<f32> = construct %6, %6, %6, %6
+    store %out_pos, %7
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(before, str());
+
+    auto* after = R"(
+Uniforms = struct @align(16) {
+  m:mat4x4<f32> @offset(0), @row_major, @matrix_stride(16)
+}
+
+Uniforms_1 = struct @align(16) {
+  m:mat4x4<f32> @offset(0), @matrix_stride(16)
+}
+
+$B1: {  # root
+  %u:ptr<uniform, Uniforms_1, read> = var undef @binding_point(0, 0)
+  %out_pos:ptr<private, vec4<f32>, read_write> = var undef
+}
+
+%main_inner = func():void {
+  $B2: {
+    %4:ptr<uniform, mat4x4<f32>, read> = access %u, 0i
+    %5:ptr<uniform, mat4x4<f32>, read> = let %4
+    %6:ptr<uniform, vec4<f32>, read> = access %5, 2i
+    %7:f32 = load_vector_element %6, 1i
+    %8:vec4<f32> = construct %7, %7, %7, %7
+    store %out_pos, %8
+    ret
+  }
+}
+)";
+
+    Run(TransposeRowMajor);
+    EXPECT_EQ(after, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower
