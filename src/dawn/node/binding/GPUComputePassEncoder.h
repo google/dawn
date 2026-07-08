@@ -46,6 +46,7 @@ class GPUComputePassEncoder final : public interop::GPUComputePassEncoder {
     GPUComputePassEncoder(const wgpu::ComputePassDescriptor& desc, wgpu::ComputePassEncoder enc);
 
     // Implicit cast operator to Dawn GPU object
+    // NOLINTNEXTLINE(google-explicit-constructor)
     inline operator const wgpu::ComputePassEncoder&() const { return enc_; }
 
     // interop::GPUComputePassEncoder interface compliance

@@ -45,7 +45,7 @@ struct ObjectHandle : public Handle {
     ObjectHandle();
     ObjectHandle(ObjectId objId, ObjectGeneration objGeneration);
 
-    explicit ObjectHandle(const volatile ObjectHandle& rhs);
+    explicit(false) ObjectHandle(const volatile ObjectHandle& rhs);
     ObjectHandle& operator=(const volatile ObjectHandle& rhs);
 
     ObjectHandle(const ObjectHandle& rhs);

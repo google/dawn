@@ -48,6 +48,7 @@
 #include <utility>
 
 using Microsoft::WRL::ComPtr;
+
 template <typename T>
 struct std::hash<ComPtr<T>> {
     std::size_t operator()(const ComPtr<T>& v) const noexcept { return std::hash<T*>{}(v.Get()); }

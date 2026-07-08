@@ -88,7 +88,7 @@ class alignas(detail::kNativeVkHandleAlignment) VkHandle {
   public:
     // Default constructor and assigning of VK_NULL_HANDLE
     VkHandle() = default;
-    VkHandle(std::nullptr_t) {}
+    explicit(false) VkHandle(std::nullptr_t) {}
 
     // Use default copy constructor/assignment
     VkHandle(const VkHandle<Tag, HandleType>& other) = default;
@@ -102,6 +102,7 @@ class alignas(detail::kNativeVkHandleAlignment) VkHandle {
     bool operator!=(std::nullptr_t) const { return mHandle != 0; }
 
     // Implicit conversion to real Vulkan types.
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator HandleType() const { return GetHandle(); }
 
     const HandleType& GetHandle() const { return mHandle; }

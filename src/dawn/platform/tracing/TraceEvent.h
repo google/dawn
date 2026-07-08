@@ -833,6 +833,7 @@ union TraceValueUnion {
 class TraceStringWithCopy {
   public:
     explicit TraceStringWithCopy(const char* str) : m_str(str) {}
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator const char*() const { return m_str; }
 
   private:

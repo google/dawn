@@ -176,6 +176,7 @@ struct Number : NumberBase<Number<T>> {
 
     /// Conversion operator
     /// @returns the value as T
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator T() const { return value; }
 
     /// Negation operator
@@ -244,6 +245,7 @@ struct Number<tint::core::detail::NumberKindF16>
 
     /// Conversion operator
     /// @returns the value as the internal representation type of F16
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator float() const { return value; }
 
     /// Negation operator

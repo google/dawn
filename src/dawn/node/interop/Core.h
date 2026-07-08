@@ -95,6 +95,7 @@ struct ClampedInteger {
     using IntegerType = T;
     ClampedInteger() : value(0) {}
     explicit(false) ClampedInteger(T v) : value(v) {}
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator T() const { return value; }
     T value;
 };
@@ -107,6 +108,7 @@ struct EnforceRangeInteger {
     using IntegerType = T;
     EnforceRangeInteger() : value(0) {}
     explicit(false) EnforceRangeInteger(T v) : value(v) {}
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator T() const { return value; }
     T value;
 };
@@ -163,8 +165,11 @@ class Interface {
     explicit inline Interface(Napi::Object o) : object(o) {}
 
     // Implicit conversion operators to Napi objects.
+    // NOLINTNEXTLINE(google-explicit-constructor)
     inline operator napi_value() const { return object; }
+    // NOLINTNEXTLINE(google-explicit-constructor)
     inline operator const Napi::Value&() const { return object; }
+    // NOLINTNEXTLINE(google-explicit-constructor)
     inline operator const Napi::Object&() const { return object; }
 
     // Member and dereference operators
@@ -208,8 +213,11 @@ namespace detail {
 class PromiseBase {
   public:
     // Implicit conversion operators to Napi promises.
+    // NOLINTNEXTLINE(google-explicit-constructor)
     inline operator napi_value() const { return state_->deferred.Promise(); }
+    // NOLINTNEXTLINE(google-explicit-constructor)
     inline operator Napi::Value() const { return state_->deferred.Promise(); }
+    // NOLINTNEXTLINE(google-explicit-constructor)
     inline operator Napi::Promise() const { return state_->deferred.Promise(); }
 
     // Comparison operator between promises
@@ -771,6 +779,7 @@ struct DefaultedParameter {
     T default_value;  // The default value if no argument supplied
 
     // Implicit conversion operator. Returns value.
+    // NOLINTNEXTLINE(google-explicit-constructor)
     inline operator const T&() const { return value; }
 };
 

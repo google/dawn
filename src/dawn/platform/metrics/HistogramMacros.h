@@ -182,7 +182,7 @@ enum class ScopedHistogramTiming { kMicrosecondTimes, kMediumTimes, kLongTimes }
     class [[nodiscard]] ScopedHistogramTimer##key {                                         \
       public:                                                                               \
         using Platform = PlatformType##key;                                                 \
-        ScopedHistogramTimer##key(Platform* p)                                              \
+        explicit ScopedHistogramTimer##key(Platform* p)                                     \
             : platform_(p), constructed_(platform_->MonotonicallyIncreasingTime()) {}       \
         ~ScopedHistogramTimer##key() {                                                      \
             if (constructed_ == 0)                                                          \

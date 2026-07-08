@@ -53,7 +53,7 @@ namespace wgpu {
 namespace interop {
 
 struct Constructors : public ManualConstructors {
-  Constructors(Napi::Env env) : ManualConstructors(env) {}
+  explicit Constructors(Napi::Env env) : ManualConstructors(env) {}
 {{   range $ := .Declarations}}
 {{-     if and (IsInterfaceOrNamespace $) (not (HasAnnotation $ "ManualImplementation"))}}
   Napi::FunctionReference {{$.Name}}_ctor;

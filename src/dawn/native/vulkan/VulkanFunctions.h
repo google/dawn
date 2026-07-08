@@ -414,6 +414,7 @@ class VkResult {
   public:
     constexpr static VkResult WrapUnsafe(::VkResult value) { return VkResult(value); }
 
+    // NOLINTNEXTLINE(google-explicit-constructor)
     constexpr operator ::VkResult() const { return mValue; }
 
   private:

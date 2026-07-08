@@ -44,7 +44,7 @@ namespace dawn::wire::server {
 
     class ServerBase : public ChunkedCommandHandler, public ObjectIdResolver {
       public:
-        ServerBase(const DawnProcTable& procs) : mProcs(std::make_shared<DawnProcTable>(procs)) {}
+        explicit ServerBase(const DawnProcTable& procs) : mProcs(std::make_shared<DawnProcTable>(procs)) {}
         ~ServerBase() override = default;
 
         Mutex::AutoLock GetGuard() { return Mutex::AutoLock(&mMutex); }

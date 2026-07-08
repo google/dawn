@@ -95,7 +95,7 @@ class RefBase {
     // operators defined with `other` == RefBase<T, Traits>.
     template <typename U, typename UTraits>
         requires std::convertible_to<U, T>
-    RefBase(const RefBase<U, UTraits>& other) : mValue(other.mValue) {
+    explicit(false) RefBase(const RefBase<U, UTraits>& other) : mValue(other.mValue) {
         AddRef(other.mValue);
     }
 
@@ -108,7 +108,7 @@ class RefBase {
 
     template <typename U, typename UTraits>
         requires std::convertible_to<U, T>
-    RefBase(RefBase<U, UTraits>&& other) {
+    explicit(false) RefBase(RefBase<U, UTraits>&& other) {
         mValue = other.Detach();
     }
 

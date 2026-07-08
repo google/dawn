@@ -42,6 +42,7 @@ class GPUResourceTable final : public interop::GPUResourceTable {
     GPUResourceTable(const wgpu::ResourceTableDescriptor& desc, wgpu::ResourceTable table);
 
     // Implicit cast operator to Dawn GPU object
+    // NOLINTNEXTLINE(google-explicit-constructor)
     inline operator const wgpu::ResourceTable&() const { return table_; }
 
     // interop::GPUResourceTable interface compliance

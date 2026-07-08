@@ -78,8 +78,9 @@ wgpu::TexelCopyBufferLayout CreateTexelCopyBufferLayout(
 
 struct ComboRenderPassDescriptor : public wgpu::RenderPassDescriptor {
   public:
-    ComboRenderPassDescriptor(const std::vector<wgpu::TextureView>& colorAttachmentInfo = {},
-                              wgpu::TextureView depthStencil = wgpu::TextureView());
+    explicit ComboRenderPassDescriptor(
+        const std::vector<wgpu::TextureView>& colorAttachmentInfo = {},
+        wgpu::TextureView depthStencil = wgpu::TextureView());
     ~ComboRenderPassDescriptor();
 
     ComboRenderPassDescriptor(const ComboRenderPassDescriptor& otherRenderPass);

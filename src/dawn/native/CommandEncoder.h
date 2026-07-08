@@ -123,7 +123,7 @@ class CommandEncoder final : public ApiObjectBase {
       private:
         // Only CommandEncoder can make this class.
         friend class CommandEncoder;
-        InternalUsageScope(CommandEncoder* encoder);
+        explicit InternalUsageScope(CommandEncoder* encoder);
 
         raw_ptr<CommandEncoder> mEncoder;
         UsageValidationMode mUsageValidationMode = UsageValidationMode::Default;

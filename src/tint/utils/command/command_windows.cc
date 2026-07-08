@@ -73,6 +73,7 @@ class Handle {
     }
 
     /// @returns the handle
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator HANDLE() { return handle_; }
 
     /// @returns true if the handle is not invalid

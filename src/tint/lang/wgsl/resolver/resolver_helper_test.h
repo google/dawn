@@ -180,10 +180,10 @@ struct Scalar {
     /// Constructor
     /// @param val the value used to construct this Scalar
     template <typename T>
-    Scalar(T&& val) : value(std::forward<T>(val)) {}  // NOLINT
+    explicit(false) Scalar(T&& val) : value(std::forward<T>(val)) {}
 
     /// @returns the Value
-    operator Value&() { return value; }
+    explicit operator Value&() { return value; }
 
     /// Equality operator
     /// @param other the other Scalar

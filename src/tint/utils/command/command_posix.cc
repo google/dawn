@@ -76,6 +76,7 @@ class File {
     }
 
     /// @returns the file handle
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator int() { return handle_; }
 
     /// @returns true if the file is not closed

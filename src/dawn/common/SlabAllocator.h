@@ -192,9 +192,9 @@ class SlabAllocatorImpl {
 template <typename T>
 class SlabAllocator : public SlabAllocatorImpl {
   public:
-    SlabAllocator(size_t totalObjectBytes,
-                  uint32_t objectSize = u32_sizeof<T>,
-                  uint32_t objectAlignment = u32_alignof<T>)
+    explicit SlabAllocator(size_t totalObjectBytes,
+                           uint32_t objectSize = u32_sizeof<T>,
+                           uint32_t objectAlignment = u32_alignof<T>)
         : SlabAllocatorImpl(std::max(totalObjectBytes / objectSize, size_t{1}),
                             objectSize,
                             objectAlignment) {}

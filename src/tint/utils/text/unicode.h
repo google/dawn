@@ -46,6 +46,7 @@ struct CodePoint {
     inline explicit CodePoint(uint32_t v) : value(v) {}
 
     /// @returns the code point value
+    // NOLINTNEXTLINE(google-explicit-constructor)
     inline operator uint32_t() const { return value; }
 
     /// Assignment operator

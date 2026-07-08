@@ -142,6 +142,7 @@ class Parser::MultiTokenSource {
 
     /// @returns the Source that returns the combined source from start to the current last token's
     /// source.
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator tint::Source() const {
         auto end = parser_->last_source().End();
         if (end < start_) {
