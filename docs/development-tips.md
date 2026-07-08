@@ -49,7 +49,7 @@ CompileFlags:
 ---
 If:
   PathMatch:
-    - "src/dawn/native/d3d12/.*"
+    - "src/dawn/native/d3d.*"
     - "src/.*_[Ww]in.*"
     - "src/.*_[Dd]3[Dd].*"
 CompileFlags:
