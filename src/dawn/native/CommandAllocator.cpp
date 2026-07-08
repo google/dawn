@@ -230,8 +230,8 @@ void CommandAllocator::AppendNewBlock(size_t minimumSize) {
 }
 
 void CommandAllocator::ResetPointers() {
-    mCurrentPtr = reinterpret_cast<char*>(&mPlaceholderSpace[0]);
-    mEndPtr = reinterpret_cast<char*>(&DAWN_UNSAFE_TODO(mPlaceholderSpace[1]));
+    mCurrentPtr = reinterpret_cast<char*>(mPlaceholderSpace.data());
+    mEndPtr = reinterpret_cast<char*>(DAWN_UNSAFE_TODO(mPlaceholderSpace.data() + 1));
 }
 
 }  // namespace dawn::native

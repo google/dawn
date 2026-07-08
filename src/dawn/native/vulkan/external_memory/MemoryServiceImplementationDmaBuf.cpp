@@ -27,6 +27,7 @@
 
 #include "src/dawn/native/vulkan/external_memory/MemoryServiceImplementationDmaBuf.h"
 
+#include <array>
 #include <vector>
 
 #include "src/dawn/native/vulkan/BackendVk.h"
@@ -349,7 +350,7 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
         createInfoChain.Add(&externalMemoryImageCreateInfo,
                             VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO);
 
-        VkSubresourceLayout planeLayouts[ExternalImageDescriptorDmaBuf::kMaxPlanes];
+        std::array<VkSubresourceLayout, ExternalImageDescriptorDmaBuf::kMaxPlanes> planeLayouts;
         for (uint32_t plane = 0u; plane < planeCount; ++plane) {
             DAWN_UNSAFE_TODO(planeLayouts[plane]).offset =
                 dmaBufDescriptor->planeLayouts[plane].offset;

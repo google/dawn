@@ -251,8 +251,8 @@ TEST_F(WireArgumentTests, ObjectAsValueArgument) {
 
 // Test that the wire is able to send array of objects
 TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
-    wgpu::CommandBuffer cmdBufs[2];
-    WGPUCommandBuffer apiCmdBufs[2];
+    std::array<wgpu::CommandBuffer, 2> cmdBufs;
+    std::array<WGPUCommandBuffer, 2> apiCmdBufs;
 
     // Create two command buffers we need to use a GMock sequence otherwise the order of the
     // CreateCommandEncoder might be swapped since they are equivalent in term of matchers
@@ -274,7 +274,7 @@ TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
     }
 
     // Submit command buffer and check we got a call with both API-side command buffers
-    queue.Submit(2, cmdBufs);
+    queue.Submit(2, cmdBufs.data());
 
     DAWN_UNSAFE_TODO(EXPECT_CALL(
         api, QueueSubmit(apiQueue, 2, MatchesLambda([=](const WGPUCommandBuffer* cmdBufs) -> bool {

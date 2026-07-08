@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <array>
 #include <bit>
 #include <limits>
 #include <memory>
@@ -909,14 +910,14 @@ TEST_F(ShaderModuleMaxInterStageShaderVariablesValidationTest, Test) {
             const char* extension;
             std::optional<wgpu::FeatureName> requiredFeature;
         };
-        Builtin builtins[] = {
+        auto builtins = std::array<Builtin, 6>({
             {"front_facing", "bool", nullptr, {}},
             {"sample_index", "u32", nullptr, {}},
             {"sample_mask", "u32", nullptr, {}},
             {"primitive_index", "u32", "primitive_index", wgpu::FeatureName::PrimitiveIndex},
             {"subgroup_invocation_id", "u32", "subgroups", wgpu::FeatureName::Subgroups},
             {"subgroup_size", "u32", "subgroups", wgpu::FeatureName::Subgroups},
-        };
+        });
         for (uint8_t mask = 1; mask < 1 << std::size(builtins); ++mask) {
             std::string builtInDeclarations = "";
             bool canTest = true;

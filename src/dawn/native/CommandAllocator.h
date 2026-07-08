@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_COMMANDALLOCATOR_H_
 #define SRC_DAWN_NATIVE_COMMANDALLOCATOR_H_
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -284,7 +285,7 @@ class CommandAllocator : public NonCopyable {
     // Data used for the block range at initialization so that the first call to Allocate sees
     // there is not enough space and calls AppendNewBlock. This avoids having to special case the
     // initialization in Allocate.
-    uint32_t mPlaceholderSpace[1] = {0};
+    std::array<uint32_t, 1> mPlaceholderSpace = {0};
 
     // Pointers to the current range of allocation in the block. Guaranteed to allow for at
     // least one uint32_t if not nullptr, so that the special kEndOfBlock command id can always

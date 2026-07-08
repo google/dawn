@@ -52,7 +52,7 @@ struct ImmediateDataContent {
     const T* operator->() const { return reinterpret_cast<const T*>(&mData); }
     T* operator->() { return reinterpret_cast<T*>(&mData); }
 
-    const unsigned char* data() const { return mData; }
+    const unsigned char* data() const { return mData.data(); }
 
     template <typename Out>
     const Out* Get(uint32_t offset) const {
@@ -67,7 +67,7 @@ struct ImmediateDataContent {
     }
 
   private:
-    alignas(T) unsigned char mData[sizeof(T)] = {0};
+    std::array<unsigned char, sizeof(T)> mData = {0};
 };
 
 // TODO(crbug.com/366291600): Add inheritance ability(like BindGroupTracker) so that it can inherit

@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <array>
 #include <vector>
 
 #include "src/dawn/tests/DawnTest.h"
@@ -261,7 +262,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
                                                           {1, bufferA, 0, bufferSize},
                                                       });
 
-    wgpu::BindGroup bindGroups[2] = {bindGroupA, bindGroupB};
+    std::array<wgpu::BindGroup, 2> bindGroups = {bindGroupA, bindGroupB};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
@@ -328,7 +329,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
                                                           {1, bufferA, 0, bufferSize},
                                                       });
 
-    wgpu::BindGroup bindGroups[2] = {bindGroupA, bindGroupB};
+    std::array<wgpu::BindGroup, 2> bindGroups = {bindGroupA, bindGroupB};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::ComputePassEncoder pass = encoder.BeginComputePass();

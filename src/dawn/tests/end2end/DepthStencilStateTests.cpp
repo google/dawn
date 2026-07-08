@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <array>
 #include <vector>
 
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -435,11 +436,11 @@ TEST_P(DepthStencilStateTest, DepthStencilDisabled) {
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
-    TestSpec specs[3] = {
+    std::array<TestSpec, 3> specs = {{
         {&state, utils::RGBA8(255, 0, 0, 255), 0.0f, 0u},
         {&state, utils::RGBA8(0, 255, 0, 255), 0.5f, 0u},
         {&state, utils::RGBA8(0, 0, 255, 255), 1.0f, 0u},
-    };
+    }};
 
     // Test that for all combinations, the last triangle drawn is the one visible
     // We check against three triangles because the stencil test may modify results

@@ -30,6 +30,7 @@
 #pragma allow_unsafe_buffers
 #endif
 
+#include <array>
 #include <atomic>
 #include <condition_variable>
 #include <functional>
@@ -1098,7 +1099,7 @@ TEST_P(MultithreadTests, DestroyTextureAndViewsAtSameTime) {
         texDescriptor.sampleCount = 1;
 
         wgpu::Texture texture = device.CreateTexture(&texDescriptor);
-        wgpu::TextureView textureViews[kNumViews];
+        std::array<wgpu::TextureView, kNumViews> textureViews;
 
         for (uint32_t i = 0; i < kNumViews; ++i) {
             wgpu::TextureViewDescriptor viewDescriptor = {};

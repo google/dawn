@@ -30,6 +30,7 @@
 #pragma allow_unsafe_buffers
 #endif
 
+#include <array>
 #include <vector>
 
 #include "src/dawn/tests/perf_tests/DawnPerfTest.h"
@@ -193,8 +194,8 @@ class BufferMapExtendedUsagesPerf : public DawnPerfTestWithParams<BufferUploadPa
                          size_t offset,
                          size_t size);
 
-    wgpu::Buffer buffers[kNumIterations];
-    wgpu::Buffer stagingBuffers[kNumIterations];
+    std::array<wgpu::Buffer, kNumIterations> buffers;
+    std::array<wgpu::Buffer, kNumIterations> stagingBuffers;
     std::vector<uint8_t> data;
 };
 

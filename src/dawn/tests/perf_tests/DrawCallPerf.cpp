@@ -30,6 +30,7 @@
 #pragma allow_unsafe_buffers
 #endif
 
+#include <array>
 #include <tuple>
 #include <vector>
 
@@ -243,16 +244,16 @@ class DrawCallPerf : public DawnPerfTestWithParams<DrawCallParamForTest> {
     void Step() override;
 
     // One large dynamic vertex buffer, or multiple separate vertex buffers.
-    wgpu::Buffer mVertexBuffers[kNumDraws];
+    std::array<wgpu::Buffer, kNumDraws> mVertexBuffers;
     size_t mAlignedVertexDataSize;
 
     std::vector<float> mUniformBufferData;
     // One large dynamic uniform buffer, or multiple separate uniform buffers.
-    wgpu::Buffer mUniformBuffers[kNumDraws];
+    std::array<wgpu::Buffer, kNumDraws> mUniformBuffers;
 
     wgpu::BindGroupLayout mUniformBindGroupLayout;
     // One dynamic bind group or multiple bind groups.
-    wgpu::BindGroup mUniformBindGroups[kNumDraws];
+    std::array<wgpu::BindGroup, kNumDraws> mUniformBindGroups;
     size_t mAlignedUniformSize;
     size_t mNumUniformFloats;
 
@@ -261,7 +262,7 @@ class DrawCallPerf : public DawnPerfTestWithParams<DrawCallParamForTest> {
 
     // If the pipeline is static, only the first is used.
     // Otherwise, the test alternates between two pipelines for each draw.
-    wgpu::RenderPipeline mPipelines[2];
+    std::array<wgpu::RenderPipeline, 2> mPipelines;
 
     wgpu::TextureView mColorAttachment;
     wgpu::TextureView mDepthStencilAttachment;

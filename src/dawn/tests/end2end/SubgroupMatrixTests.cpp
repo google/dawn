@@ -31,6 +31,7 @@
 #endif
 
 #include <algorithm>
+#include <array>
 #include <string>
 #include <vector>
 
@@ -159,13 +160,13 @@ struct Matrix {
         // Pick values that should not cause precision issues for small matrix multiplies.
         // Rotate through an odd number of values to catch bugs with majorness and strides.
         constexpr auto kNumValues = 9;
-        constexpr float kFloatValues[kNumValues] = {
+        constexpr std::array<float, kNumValues> kFloatValues = {
             -1.0, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1.0,
         };
-        constexpr int32_t kSIntValues[kNumValues] = {
+        constexpr std::array<int32_t, kNumValues> kSIntValues = {
             -43, -32, -21, -10, 0, 10, 21, 32, 43,
         };
-        constexpr uint32_t kUIntValues[kNumValues] = {
+        constexpr std::array<uint32_t, kNumValues> kUIntValues = {
             0, 1, 2, 3, 11, 23, 37, 71, 101,
         };
         for (uint32_t r = 0; r < rows; r++) {

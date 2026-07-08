@@ -29,6 +29,7 @@
 #include <webgpu/webgpu_cpp.h>
 #include <webgpu/webgpu_enum_class_bitmasks.h>
 
+#include <array>
 #include <cmath>
 #include <limits>
 #include <vector>
@@ -145,7 +146,7 @@ TEST(Math, NextPowerOfTwo) {
 TEST(Math, AlignPtr) {
     constexpr size_t kTestAlignment = 8;
 
-    char buffer[kTestAlignment * 4];
+    std::array<char, kTestAlignment * 4> buffer;
 
     for (size_t i = 0; i < 2 * kTestAlignment; ++i) {
         char* unaligned = &DAWN_UNSAFE_TODO(buffer[i]);
@@ -256,7 +257,7 @@ TEST(Math, AlignSizeofN) {
 TEST(Math, IsPtrAligned) {
     constexpr size_t kTestAlignment = 8;
 
-    char buffer[kTestAlignment * 4];
+    std::array<char, kTestAlignment * 4> buffer;
 
     for (size_t i = 0; i < 2 * kTestAlignment; ++i) {
         char* unaligned = &DAWN_UNSAFE_TODO(buffer[i]);

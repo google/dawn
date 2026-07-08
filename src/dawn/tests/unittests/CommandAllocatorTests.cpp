@@ -30,6 +30,7 @@
 #pragma allow_unsafe_buffers
 #endif
 
+#include <array>
 #include <limits>
 #include <utility>
 #include <vector>
@@ -66,7 +67,7 @@ struct CommandImmediate {
 constexpr int kBigBufferSize = 65536;
 
 struct CommandBig {
-    uint32_t buffer[kBigBufferSize];
+    std::array<uint32_t, kBigBufferSize> buffer;
 };
 
 struct CommandSmall {
@@ -137,7 +138,7 @@ TEST(CommandAllocator, BasicWithData) {
 
     uint8_t mySize = 8;
     uint8_t myOffset = 3;
-    uint32_t myValues[5] = {6, 42, 0xFFFFFFFF, 0, 54};
+    std::array<uint32_t, 5> myValues = {6, 42, 0xFFFFFFFF, 0, 54};
 
     {
         CommandImmediate* immediates = allocator.Allocate<CommandImmediate>(CommandType::Immediate);
@@ -468,13 +469,17 @@ TEST(CommandAllocator, AllocateDataDefaultInitializes) {
 TEST(CommandAllocator, AcquireCommandBlocks) {
     constexpr size_t kNumAllocators = 2;
     constexpr size_t kNumCommandsPerAllocator = 2;
-    const uint64_t pipelines[kNumAllocators][kNumCommandsPerAllocator] = {
-        {0xDEADBEEFBEEFDEAD, 0xC0FFEEF00DC0FFEE},
-        {0x1337C0DE1337C0DE, 0xCAFEFACEFACECAFE},
-    };
-    const uint32_t attachmentPoints[kNumAllocators][kNumCommandsPerAllocator] = {{1, 2}, {3, 4}};
-    const uint32_t firsts[kNumAllocators][kNumCommandsPerAllocator] = {{42, 43}, {5, 6}};
-    const uint32_t counts[kNumAllocators][kNumCommandsPerAllocator] = {{16, 32}, {4, 8}};
+    const std::array<std::array<const uint64_t, kNumCommandsPerAllocator>, kNumAllocators>
+        pipelines = {{
+            {0xDEADBEEFBEEFDEAD, 0xC0FFEEF00DC0FFEE},
+            {0x1337C0DE1337C0DE, 0xCAFEFACEFACECAFE},
+        }};
+    const std::array<std::array<const uint32_t, kNumCommandsPerAllocator>, kNumAllocators>
+        attachmentPoints = {{{1, 2}, {3, 4}}};
+    const std::array<std::array<const uint32_t, kNumCommandsPerAllocator>, kNumAllocators> firsts =
+        {{{42, 43}, {5, 6}}};
+    const std::array<std::array<const uint32_t, kNumCommandsPerAllocator>, kNumAllocators> counts =
+        {{{16, 32}, {4, 8}}};
 
     std::vector<CommandAllocator> allocators(kNumAllocators);
     for (size_t j = 0; j < kNumAllocators; ++j) {

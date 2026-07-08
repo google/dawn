@@ -32,6 +32,7 @@
 #include <stdint.h>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <iterator>
 #include <new>
@@ -1067,7 +1068,7 @@ class Vector {
     TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE_IN_CONTAINER);
     /// The internal structure for the vector with a small array.
     struct ImplWithSmallArray {
-        TStorage small_arr[N];
+        std::array<TStorage, N> small_arr;
         internal::Slice<T> slice = {std::span<T>{&small_arr[0].Get(), N}, 0};
 
         /// Allocates a new vector of `T` either from #small_arr, or from the heap, then assigns the

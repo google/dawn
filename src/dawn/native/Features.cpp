@@ -48,7 +48,7 @@ struct FeatureEnumAndInfo {
     ManualFeatureInfo info;
 };
 
-static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
+static constexpr auto kFeatureInfo = std::to_array<FeatureEnumAndInfo>({
     {Feature::TextureCompressionBC,
      {"Support Block Compressed (BC) texture formats",
       "https://gpuweb.github.io/gpuweb/#texture-compression-bc",
@@ -479,7 +479,7 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://crbug.com/528245806", FeatureInfo::FeatureState::Experimental}},
 
     // Comment to separate the } so it is clearer what to copy-paste to add a feature.
-};
+});
 
 }  // anonymous namespace
 

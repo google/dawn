@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <sstream>
 #include <string>
@@ -490,9 +491,9 @@ TEST_F(CompatValidationTest, CanNotUseTooManyTextureSamplerCombos) {
         uint32_t maxTexturesPerShaderStage =
             limits.maxSampledTexturesPerShaderStage - (test.numExternalTextures * 3);
         auto numCombos = test.numCombos;
-        std::vector<std::string> textureDeclarations[2];
-        std::vector<std::string> samplerDeclarations[2];
-        std::vector<std::string> usages[2];
+        std::array<std::vector<std::string>, 2> textureDeclarations;
+        std::array<std::vector<std::string>, 2> samplerDeclarations;
+        std::array<std::vector<std::string>, 2> usages;
         for (uint32_t stage = 0; stage < 2; ++stage) {
             uint32_t count = 0;
             for (uint32_t t = 0; count < numCombos && t < maxTexturesPerShaderStage; ++t) {

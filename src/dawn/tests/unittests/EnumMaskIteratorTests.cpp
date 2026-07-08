@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <array>
+
 #include "gtest/gtest.h"
 #include "src/dawn/native/EnumMaskIterator.h"
 #include "src/utils/compiler.h"
@@ -64,7 +66,11 @@ TEST(EnumMaskIteratorTests, None) {
 }
 
 TEST(EnumMaskIteratorTests, All) {
-    TestAspect expected[] = {TestAspect::Color, TestAspect::Depth, TestAspect::Stencil};
+    std::array expected = {
+        TestAspect::Color,
+        TestAspect::Depth,
+        TestAspect::Stencil,
+    };
     uint32_t i = 0;
     TestAspect aspects = TestAspect::Color | TestAspect::Depth | TestAspect::Stencil;
     for (TestAspect aspect : IterateEnumMask(aspects)) {
@@ -73,7 +79,7 @@ TEST(EnumMaskIteratorTests, All) {
 }
 
 TEST(EnumMaskIteratorTests, Partial) {
-    TestAspect expected[] = {TestAspect::Color, TestAspect::Stencil};
+    std::array expected = {TestAspect::Color, TestAspect::Stencil};
     uint32_t i = 0;
     TestAspect aspects = TestAspect::Stencil | TestAspect::Color;
     for (TestAspect aspect : IterateEnumMask(aspects)) {

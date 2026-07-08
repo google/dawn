@@ -28,6 +28,7 @@
 #include "src/dawn/tests/perf_tests/DawnPerfTestPlatform.h"
 
 #include <algorithm>
+#include <array>
 #include <utility>
 
 #include "src/dawn/common/HashUtils.h"
@@ -45,12 +46,12 @@ struct TraceCategoryInfo {
     platform::TraceCategory category;
 };
 
-constexpr TraceCategoryInfo gTraceCategories[4] = {
+constexpr std::array<TraceCategoryInfo, 4> gTraceCategories = {{
     {1, platform::TraceCategory::General},
     {1, platform::TraceCategory::Validation},
     {1, platform::TraceCategory::Recording},
     {1, platform::TraceCategory::GPUWork},
-};
+}};
 
 static_assert(static_cast<uint32_t>(platform::TraceCategory::General) == 0);
 static_assert(static_cast<uint32_t>(platform::TraceCategory::Validation) == 1);

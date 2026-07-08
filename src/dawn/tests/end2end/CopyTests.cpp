@@ -67,7 +67,7 @@ struct Color {
     // Get representation of one component.
     T GetCompRep(size_t idx) const { return components[idx]; }
 
-    T components[NumComponents] = {};
+    std::array<T, NumComponents> components = {};
 };
 
 template <size_t NumComponents>

@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <array>
 #include <memory>
 #include <ostream>
 #include <sstream>
@@ -2405,11 +2406,11 @@ TEST_P(CaptureAndReplayTests, CaptureDepth24Plus) {
         queue.Submit(1, &replayCommands);
     }
 
-    float expected[kNumLayers];
+    std::array<float, kNumLayers> expected;
     for (uint32_t i = 0; i < kNumLayers; ++i) {
         DAWN_UNSAFE_TODO(expected[i]) = (i + 0.5f) / 6.f;
     }
-    EXPECT_BUFFER_FLOAT_RANGE_TOLERANCE_EQ(expected, result, 0, 6, 0.05);
+    EXPECT_BUFFER_FLOAT_RANGE_TOLERANCE_EQ(expected.data(), result, 0, 6, 0.05);
 }
 
 // Test that you can not copy Depth24plus/Depth24PlusStencil8 depth aspect
