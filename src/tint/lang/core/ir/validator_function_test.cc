@@ -34,15 +34,8 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/validator_test.h"
 #include "src/tint/lang/core/number.h"
-#include "src/tint/lang/core/type/abstract_float.h"
-#include "src/tint/lang/core/type/abstract_int.h"
-#include "src/tint/lang/core/type/function.h"
 #include "src/tint/lang/core/type/manager.h"
-#include "src/tint/lang/core/type/matrix.h"
-#include "src/tint/lang/core/type/memory_view.h"
-#include "src/tint/lang/core/type/reference.h"
-#include "src/tint/lang/core/type/storage_texture.h"
-#include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/core/type/reference.h"  // IWYU pragma: export
 
 namespace tint::core::ir {
 
@@ -3347,6 +3340,61 @@ TEST_F(IR_ValidatorTest, Function_Vertex_MissingPosition) {
         testing::HasSubstr(R"(:1:1 error: position must be declared for vertex entry point output
 %my_func = @vertex func():vec4<f32> [@location(0)] {
 ^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Vertex_PositionOnVarWithProperty) {
+    auto pos_ty = ty.vec4f();
+    auto pos_attr = IOAttributes();
+    pos_attr.builtin = BuiltinValue::kPosition;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), pos_ty, pos_attr},
+                                               });
+
+    auto* v = b.Var(ty.ptr(AddressSpace::kOut, str_ty, core::Access::kReadWrite));
+    mod.root_block->Append(v);
+
+    auto* f = b.Function("my_func", ty.void_(), Function::PipelineStage::kVertex);
+    b.Append(f->Block(), [&] {
+        b.Phony(v);
+        b.Return(f);
+    });
+
+    mod.properties.Add(ir::Property::kAllowPhonyInstructions);
+    mod.properties.Add(ir::Property::kAllowBackendSpecificShaderIO);
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Function_Vertex_PositionOnVarWithoutProperty) {
+    auto pos_ty = ty.vec4f();
+    auto pos_attr = IOAttributes();
+    pos_attr.builtin = BuiltinValue::kPosition;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), pos_ty, pos_attr},
+                                               });
+
+    auto* v = b.Var(ty.ptr(AddressSpace::kOut, str_ty, core::Access::kReadWrite));
+    mod.root_block->Append(v);
+
+    auto* f = b.Function("my_func", ty.void_(), Function::PipelineStage::kVertex);
+    b.Append(f->Block(), [&] {
+        b.Phony(v);
+        b.Return(f);
+    });
+
+    mod.properties.Add(ir::Property::kAllowPhonyInstructions);
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:6:41 error: var: position as part of a `var`, it must be part of the return
+  %1:ptr<__out, MyStruct, read_write> = var undef
 )")) << res.Failure();
 }
 

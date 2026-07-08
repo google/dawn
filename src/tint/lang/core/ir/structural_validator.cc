@@ -1893,6 +1893,11 @@ void Structural::CheckPositionPresentForVertexOutput(const Function* ep) {
 
         const auto attr = var->Attributes();
         if (IsPositionPresent(attr, ty)) {
+            if (!ir_.properties.Contains(Property::kAllowBackendSpecificShaderIO)) {
+                AddError(var) << "position as part of a `var`, it must be part of the return";
+                AddNote(ep) << "used in entry point here";
+                return;
+            }
             return;
         }
     }
