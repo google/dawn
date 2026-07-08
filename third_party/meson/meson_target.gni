@@ -96,6 +96,11 @@ template("_meson_setup") {
       "glslang = '${_glslang_path}'",
       "glslangValidator = '${_glslang_path}'",
     ]
+    if (is_linux) {
+      _native_file_content +=
+          [ "llvm-config = '" +
+            rebase_path("//third_party/llvm-dev/bin/llvm-config") + "'" ]
+    }
 
     write_file(_native_file_path, _native_file_content)
   }

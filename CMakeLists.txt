@@ -257,6 +257,10 @@ option(TINT_BUILD_TESTS "Build tests" ON)
 option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
 option(TINT_BUILD_MESA "Build Mesa" OFF)
 
+if (TINT_BUILD_MESA AND NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(FATAL_ERROR "Building Mesa is only supported on Linux")
+endif()
+
 if (EMSCRIPTEN)
   # Skip tint tests in emscripten build
   set(TINT_BUILD_TESTS OFF)

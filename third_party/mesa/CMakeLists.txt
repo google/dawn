@@ -30,6 +30,8 @@ include("${DAWN_THIRD_PARTY_DIR}/meson/CMakeLists.txt")
 set(MESA_OPTIONS
     "-Dgallium-drivers=llvmpipe"
     "-Dvulkan-drivers=swrast"
+    "-Dshared-llvm=disabled"
+    "-Dcpp_rtti=false"
 )
 
 meson_target("mesa_build"

@@ -163,6 +163,10 @@ declare_args() {
   }
 }
 
+if (tint_build_mesa && !is_linux) {
+  assert(false, "Building Mesa is only supported on Linux")
+}
+
 declare_args() {
   # Enable Vulkan support in Tint fuzzers
   if (!defined(tint_build_fuzzer_vulkan_support)) {

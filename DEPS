@@ -31,6 +31,7 @@ vars = {
   'dawn_node_version': 'version:2@20.11.0',
   'agility_sdk_version': 'version:2@1.721.0-preview',
   'dawn_bazelisk_version': 'version:3@1.29.0',
+  'dawn_llvm-dev_version': 'version:3@22.1.0',
 
   # GN variable required by //testing that will be output in the gclient_args.gni
   'generate_location_tags': False,
@@ -299,14 +300,22 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
-  # Required tint fuzzer + mesa
+  # Required for fuzzing Mesa via tint fuzzers
   'third_party/mesa/src': {
     'url': '{chromium_git}/external/gitlab.freedesktop.org/mesa/mesa/@2e683eb7385c54f872acc47b371210d2282bc103',
-    'condition': 'checkout_mesa',
+    'condition': 'checkout_mesa and host_os == "linux"',
   },
   'third_party/meson/src': {
     'url': '{chromium_git}/external/github.com/mesonbuild/meson@d389906a136c2aac9820ded0f38d1e25ef25fb9a',
-    'condition': 'checkout_mesa',
+    'condition': 'checkout_mesa and host_os == "linux"',
+  },
+  'third_party/llvm-dev': {
+    'packages': [{
+      'package': 'infra/3pp/tools/llvm-dev/linux-amd64',
+      'version': Var('dawn_llvm-dev_version'),
+    }],
+    'dep_type': 'cipd',
+    'condition': 'checkout_mesa and host_os == "linux"',
   },
 
   # Jinja2 and MarkupSafe for the code generator

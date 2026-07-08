@@ -28,4 +28,6 @@
 mesa_options = [
   "-Dgallium-drivers=llvmpipe",
   "-Dvulkan-drivers=swrast",
+  "-Dshared-llvm=disabled",
+  "-Dcpp_rtti=false",
 ]

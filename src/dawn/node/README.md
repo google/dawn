@@ -319,7 +319,9 @@ and [this extension for MSVC](https://marketplace.visualstudio.com/items?itemNam
 
 #### Building as part of Dawn
 
-Dawn can automatically build and configure Lavapipe as part of its build process.
+Dawn can automatically build and configure Lavapipe as part of its build process on Linux.
+
+> **Note:** Building Mesa/Lavapipe as part of Dawn is only supported on Linux.
 
 1.  **GN Build:**
     *   Ensure `checkout_mesa = True` is set in your `.gclient` file's `custom_vars` section, and run `gclient sync`.
@@ -329,7 +331,7 @@ Dawn can automatically build and configure Lavapipe as part of its build process
     *   Add `-DTINT_BUILD_MESA=ON` to your CMake configuration command.
     *   Build with `ninja` or `make`.
 
-The build system will automatically copy `libvulkan_lvp.so` (or platform equivalent) and `lvp_icd.json` to the root of your build directory.
+The build system will automatically copy `libvulkan_lvp.so` and `lvp_icd.json` to the root of your build directory.
 
 #### Building manually
 
