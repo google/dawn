@@ -191,6 +191,7 @@ class Device::DeviceLostEvent : public TrackedEvent {
         // The uncaptured error and logging callbacks are spontaneous and must not be called
         // after we call the device lost's |mCallback| below, so we clear them and wait for them to
         // be no longer referenced before moving forwards.
+        mDevice->mIsLost = true;
         mDevice->mCallbackInfos.Clear();
 
         void* userdata1 = mUserdata1.ExtractAsDangling();
@@ -228,8 +229,12 @@ ObjectType Device::GetObjectType() const {
     return ObjectType::Device;
 }
 
-bool Device::IsAlive() const {
-    return mIsAlive;
+bool Device::IsDestroyed() const {
+    return mIsDestroyed;
+}
+
+bool Device::IsKnownLost() const {
+    return mIsLost;
 }
 
 Queue* Device::GetQueue() {
@@ -254,6 +259,7 @@ const LimitsAndFeatures& Device::GetLimitsAndFeatures() const {
 }
 
 void Device::WillDropLastExternalRef() {
+    mIsDestroyed = true;
     if (IsRegistered()) {
         HandleDeviceLost(WGPUDeviceLostReason_Destroyed,
                          ToOutputStringView("Device was destroyed."));
@@ -298,7 +304,6 @@ void Device::HandleDeviceLost(WGPUDeviceLostReason reason, WGPUStringView messag
     FutureID futureID = APIGetLostFuture().id;
     auto wireStatus = GetEventManager().SetFutureReady<DeviceLostEvent>(futureID, reason, message);
     DAWN_CHECK(wireStatus == WireResult::Success);
-    mIsAlive = false;
 }
 
 WGPUFuture Device::APIGetLostFuture() {
@@ -312,7 +317,7 @@ WGPUFuture Device::APIGetLostFuture() {
 }
 
 void Device::APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo) {
-    if (mIsAlive) {
+    if (!mIsLost) {
         mCallbackInfos.SetLoggingCallbackInfo(callbackInfo);
     }
 }
@@ -443,7 +448,7 @@ void Device::APIDestroy() {
     cmd.self = ToAPI(this);
     GetClient()->SerializeCommand(cmd);
 
-    mIsAlive = false;
+    mIsDestroyed = true;
 }
 
 }  // namespace dawn::wire::client

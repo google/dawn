@@ -153,7 +153,7 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
             }
 
             // Device destruction/loss implicitly makes the map requests aborted.
-            if (!mBuffer->mDevice->IsAlive()) {
+            if (mBuffer->mDevice->IsDestroyed()) {
                 mStatus = WGPUMapAsyncStatus_Aborted;
                 mMessage = "The Device was lost before mapping was resolved.";
             }

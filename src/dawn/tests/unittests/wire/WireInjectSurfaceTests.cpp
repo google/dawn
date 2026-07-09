@@ -330,33 +330,5 @@ TEST_F(WireInjectSurfaceTests, GetCurrentTextureUnconfigured) {
     FlushClient();
 }
 
-// Test calling GetCurrentTexture after the device is destroyed.
-// Note that this tests the same code path as device loss.
-TEST_F(WireInjectSurfaceTests, GetCurrentTextureDeviceDestroyed) {
-    auto [reservation, surface] = ReserveSurface(&mCapabilities);
-
-    WGPUSurface apiSurface = api.GetNewSurface();
-    EXPECT_CALL(api, SurfaceAddRef(apiSurface));
-    ASSERT_TRUE(
-        GetWireServer()->InjectSurface(apiSurface, reservation.handle, reservation.instanceHandle));
-
-    surface.Configure(&mConfiguration);
-    EXPECT_CALL(api, SurfaceConfigure(apiSurface, _));
-
-    device.Destroy();
-    EXPECT_CALL(api, DeviceDestroy(apiDevice));
-
-    wgpu::SurfaceTexture texture;
-    surface.GetCurrentTexture(&texture);
-
-    WGPUTexture apiTexture = api.GetNewTexture();
-    EXPECT_CALL(api, DeviceCreateErrorTexture(apiDevice, _)).WillOnce(Return(apiTexture));
-
-    EXPECT_EQ(texture.status, wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal);
-    EXPECT_NE(texture.texture.Get(), nullptr);
-
-    FlushClient();
-}
-
 }  // anonymous namespace
 }  // namespace dawn::wire

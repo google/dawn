@@ -142,13 +142,6 @@ void Surface::APIGetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {
         return;
     }
 
-    if (!mConfiguredDevice->IsAlive()) {
-        surfaceTexture->status = WGPUSurfaceGetCurrentTextureStatus_SuccessOptimal;
-        surfaceTexture->texture =
-            Texture::CreateError(mConfiguredDevice.Get(), &mTextureDescriptor);
-        return;
-    }
-
     // Assume texture creation will work in the server and return a new texture proxy.
     Client* wireClient = GetClient();
     Ref<Texture> texture = wireClient->Make<Texture>(mConfiguredDevice.Get(), &mTextureDescriptor);
