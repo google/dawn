@@ -108,6 +108,8 @@ void TestTypedIntegerArguments() {
     (void) sp.last(2); // expected-error {{no viable conversion from}}
     (void) sp.subspan(2); // expected-error {{no matching member function for call to}}
     (void) sp.subspan(2, 2); // expected-error {{no matching member function for call to}}
+    (void) sp.SplitAt(2); // expected-error {{no viable conversion}}
+    (void) sp.TakeFirst(2); // expected-error {{no viable conversion}}
 }
 
 void TestAsWriteableBytesRequiresNonConst() {

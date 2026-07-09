@@ -852,5 +852,53 @@ TEST(SpanTest, SpanFromRefTyped) {
     }
 }
 
+TEST(SpanTest, TakeFirst) {
+    std::array<int, 3> ints{1, 2, 3};
+
+    // Take only a part.
+    {
+        Span<int> sp{ints};
+        auto taken = sp.TakeFirst(1);
+
+        EXPECT_EQ(sp.data(), &ints[1]);
+        EXPECT_EQ(sp.size(), 2u);
+
+        static_assert(std::is_same_v<decltype(taken), Span<int>>);
+        EXPECT_EQ(taken.data(), ints.data());
+        EXPECT_EQ(taken.size(), 1u);
+    }
+
+    // Take none.
+    {
+        Span<int> sp{ints};
+        auto taken = sp.TakeFirst(0);
+
+        EXPECT_EQ(sp.data(), ints.data());
+        EXPECT_EQ(sp.size(), 3u);
+
+        static_assert(std::is_same_v<decltype(taken), Span<int>>);
+        EXPECT_TRUE(taken.empty());
+    }
+
+    // Take all.
+    {
+        Span<int> sp{ints};
+        auto taken = sp.TakeFirst(3);
+
+        EXPECT_TRUE(sp.empty());
+
+        static_assert(std::is_same_v<decltype(taken), Span<int>>);
+        EXPECT_EQ(taken.data(), ints.data());
+        EXPECT_EQ(taken.size(), 3u);
+    }
+}
+
+TEST(SpanDeathTest, TakeFirstOOB) {
+    Span<const int> sp{FakeRange()};
+
+    sp.TakeFirst(sp.size());
+    EXPECT_DEATH_IF_SUPPORTED(sp.TakeFirst(sp.size() + 1), "");
+}
+
 }  // anonymous namespace
 }  // namespace dawn

@@ -271,14 +271,27 @@ class SpanBase {
 
     // Additions not part of std::span.
 
-    // None for now, but consider adding the following like in Chromium's base::span:
+    // Consider adding the following like in Chromium's base::span:
     //
     //  - constructor from (&T)[N]
     //  - operator ==, operator <=>
     //  - copy_from, copy_prefix_from
-    //  - split_at, take_first, take_first_elem
+    //  - take_first_elem
     //  - get_at
     //  - to_fixed_extent
+    //  - variants of methods that take offset / indices as template params to return sized spans.
+
+    // Splits a span a given offset, returning a pair of spans that cover the ranges strictly before
+    // the offset and starting at the offset, respectively. Will DAWN_CHECK when the offset is OOB.
+    constexpr auto SplitAt(Index offset) const { return std::pair(first(offset), subspan(offset)); }
+
+    // Returns a span of the first N elements, removing them. Will DAWN_CHECK when the offset is
+    // OOB.
+    constexpr auto TakeFirst(Index offset) {
+        const auto [first, rest] = SplitAt(offset);
+        *this = rest;
+        return first;
+    }
 
   private:
     // Helper function used to avoid doing the DAWN_CHECK inside at() redundantly when the
