@@ -323,8 +323,7 @@ MaybeError ValidateStaticSamplersWithTextureBindings(
                         "valid binding number.",
                         samplerBinding, sampledTextureBinding);
 
-        auto& textureEntry = DAWN_UNSAFE_TODO(
-            descriptor->entries[bindingNumberToIndexMap.at(sampledTextureBinding)]);
+        auto& textureEntry = descriptor->entries[bindingNumberToIndexMap.at(sampledTextureBinding)];
         DAWN_INVALID_IF(textureEntry.texture.sampleType == wgpu::TextureSampleType::BindingNotUsed,
                         "For static sampler binding (%u) the sampled texture binding (%u) is not a "
                         "texture binding.",

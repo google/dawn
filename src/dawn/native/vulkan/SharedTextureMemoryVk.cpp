@@ -411,9 +411,9 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     {
         std::array<VkSubresourceLayout, kMaxPlanesPerFormat> planeLayouts{};
         for (uint32_t plane = 0u; plane < memoryPlaneCount; ++plane) {
-            planeLayouts[plane].offset = DAWN_UNSAFE_TODO(descriptor->planes[plane]).offset;
+            planeLayouts[plane].offset = descriptor->planes[plane].offset;
             planeLayouts[plane].size = 0;  // VK_EXT_image_drm_format_modifier mandates size = 0.
-            planeLayouts[plane].rowPitch = DAWN_UNSAFE_TODO(descriptor->planes[plane]).stride;
+            planeLayouts[plane].rowPitch = descriptor->planes[plane].stride;
             planeLayouts[plane].arrayPitch = 0;  // Not an array texture
             planeLayouts[plane].depthPitch = 0;  // Not a depth texture
         }

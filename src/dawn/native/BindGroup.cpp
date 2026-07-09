@@ -454,8 +454,7 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
             textureIndexToEntryIndex.at(staticSamplerLayout.sampledTextureIndex);
 
         const SamplerBase* sampler = staticSamplerLayout.sampler.Get();
-        const TextureViewBase* textureView =
-            DAWN_UNSAFE_TODO(descriptor->entries[textureEntryIndex]).textureView;
+        const TextureViewBase* textureView = descriptor->entries[textureEntryIndex].textureView;
 
         // Compare static sampler and sampled textures to make sure they are compatible.
         if (sampler->IsYCbCr()) {

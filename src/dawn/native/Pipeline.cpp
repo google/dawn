@@ -168,9 +168,9 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
         absl::string_view key = constant.key;
         double value = constant.value;
 
-        DAWN_UNSAFE_TODO(DAWN_INVALID_IF(!metadata.overrides.contains(key),
-                                         "Pipeline overridable constant \"%s\" not found in %s.",
-                                         constants[i].key, module));
+        DAWN_INVALID_IF(!metadata.overrides.contains(key),
+                        "Pipeline overridable constant \"%s\" not found in %s.", constants[i].key,
+                        module);
         DAWN_INVALID_IF(!std::isfinite(value),
                         "Pipeline overridable constant \"%s\" with value (%f) is not finite in %s",
                         key, value, module);

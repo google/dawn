@@ -333,31 +333,29 @@ void RenderPassEncoder::APIExecuteBundles(Span<RenderBundleBase* const> renderBu
                 bool depthReadOnlyInPass = IsDepthReadOnly();
                 bool stencilReadOnlyInPass = IsStencilReadOnly();
                 for (auto [i, renderBundle] : Enumerate(renderBundles)) {
-                    DAWN_UNSAFE_TODO(DAWN_TRY(GetDevice()->ValidateObject(renderBundle)));
+                    DAWN_TRY(GetDevice()->ValidateObject(renderBundle));
 
-                    DAWN_UNSAFE_TODO(
-                        DAWN_INVALID_IF(attachmentState != renderBundle->GetAttachmentState(),
-                                        "Attachment state of renderBundles[%i] (%s) is not "
-                                        "compatible with %s.\n"
-                                        "%s expects an attachment state of %s.\n"
-                                        "renderBundles[%i] (%s) has an attachment state of %s.",
-                                        i, renderBundle, this, this, attachmentState, i,
-                                        renderBundle, renderBundle->GetAttachmentState()));
+                    DAWN_INVALID_IF(attachmentState != renderBundle->GetAttachmentState(),
+                                    "Attachment state of renderBundles[%i] (%s) is not "
+                                    "compatible with %s.\n"
+                                    "%s expects an attachment state of %s.\n"
+                                    "renderBundles[%i] (%s) has an attachment state of %s.",
+                                    i, renderBundle, this, this, attachmentState, i, renderBundle,
+                                    renderBundle->GetAttachmentState());
 
-                    bool depthReadOnlyInBundle = DAWN_UNSAFE_TODO(renderBundle)->IsDepthReadOnly();
-                    DAWN_UNSAFE_TODO(DAWN_INVALID_IF(
+                    bool depthReadOnlyInBundle = renderBundle->IsDepthReadOnly();
+                    DAWN_INVALID_IF(
                         depthReadOnlyInPass && !depthReadOnlyInBundle,
                         "DepthReadOnly (%u) of renderBundles[%i] (%s) is not compatible "
                         "with DepthReadOnly (%u) of %s.",
-                        depthReadOnlyInBundle, i, renderBundle, depthReadOnlyInPass, this));
+                        depthReadOnlyInBundle, i, renderBundle, depthReadOnlyInPass, this);
 
-                    bool stencilReadOnlyInBundle =
-                        DAWN_UNSAFE_TODO(renderBundle)->IsStencilReadOnly();
-                    DAWN_UNSAFE_TODO(DAWN_INVALID_IF(
-                        stencilReadOnlyInPass && !stencilReadOnlyInBundle,
-                        "StencilReadOnly (%u) of renderBundles[%i] (%s) is not "
-                        "compatible with StencilReadOnly (%u) of %s.",
-                        stencilReadOnlyInBundle, i, renderBundle, stencilReadOnlyInPass, this));
+                    bool stencilReadOnlyInBundle = renderBundle->IsStencilReadOnly();
+                    DAWN_INVALID_IF(stencilReadOnlyInPass && !stencilReadOnlyInBundle,
+                                    "StencilReadOnly (%u) of renderBundles[%i] (%s) is not "
+                                    "compatible with StencilReadOnly (%u) of %s.",
+                                    stencilReadOnlyInBundle, i, renderBundle, stencilReadOnlyInPass,
+                                    this);
                 }
             }
 

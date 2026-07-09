@@ -77,7 +77,7 @@ BindGroupLayout::BindGroupLayout(Device* device,
     externalTextureEntries.reserve(externalTextureCount);
 
     for (size_t i = 0; i < entries.size(); i++) {
-        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&DAWN_UNSAFE_TODO(descriptor->entries[i]));
+        UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&descriptor->entries[i]);
         entries[i] = *ToAPI(*entry);
 
         switch (entry->buffer.type) {

@@ -179,10 +179,9 @@ MaybeError ValidateVertexBufferLayout(DeviceBase* device,
                     "Vertex buffer arrayStride (%u) is not a multiple of 4.", buffer.arrayStride);
 
     for (auto [i, attribute] : Enumerate(buffer.attributes)) {
-        DAWN_UNSAFE_TODO(
-            DAWN_TRY_CONTEXT(ValidateVertexAttribute(device, attribute, metadata,
-                                                     buffer.arrayStride, attributesSetMask),
-                             "validating attributes[%u].", i));
+        DAWN_TRY_CONTEXT(ValidateVertexAttribute(device, attribute, metadata, buffer.arrayStride,
+                                                 attributesSetMask),
+                         "validating attributes[%u].", i);
     }
 
     return {};

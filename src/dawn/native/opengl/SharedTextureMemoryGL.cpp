@@ -86,9 +86,8 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
         }
 
         // All GL sync objects are binary.
-        DAWN_UNSAFE_TODO(DAWN_INVALID_IF(descriptor->signaledValues[i] != 1,
-                                         "%s signaled value (%u) was not 1.", fence,
-                                         descriptor->signaledValues[i]));
+        DAWN_INVALID_IF(descriptor->signaledValues[i] != 1, "%s signaled value (%u) was not 1.",
+                        fence, descriptor->signaledValues[i]);
     }
 
     return {};
