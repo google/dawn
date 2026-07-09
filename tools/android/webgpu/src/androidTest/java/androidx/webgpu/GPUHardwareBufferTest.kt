@@ -46,6 +46,7 @@ import java.util.concurrent.Executors
 
 @RunWith(AndroidJUnit4::class)
 @MediumTest
+@OptIn(ExperimentalWebGpuApi::class)
 class GPUHardwareBufferTest {
 
     companion object {

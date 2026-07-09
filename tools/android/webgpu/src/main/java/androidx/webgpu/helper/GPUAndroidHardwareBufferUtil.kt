@@ -6,9 +6,11 @@ import androidx.annotation.RequiresApi
 import androidx.webgpu.GPUDevice
 import androidx.webgpu.GPUExternalTextureDescriptor
 import androidx.webgpu.GPUHardwareBufferExternalTexture
+import androidx.webgpu.ExperimentalWebGpuApi
 import androidx.webgpu.GPUHardwareBufferTexture
 
 @RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalWebGpuApi::class)
 public object GPUAndroidHardwareBufferUtil {
 
   public fun createTexture(

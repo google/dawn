@@ -34,6 +34,7 @@ private fun classNames(namespace: String) = sequence {
     }
 }
 
+@OptIn(ExperimentalWebGpuApi::class)
 class MappedNamedConstantsTest {
 
     val TYPES_WITH_MAPPED_NAMED_CONSTANTS = arrayOf(

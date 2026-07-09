@@ -1221,6 +1221,7 @@ def compute_kotlin_params(loaded_json,
     params_kotlin['kotlin_default'] = kotlin_default
     params_kotlin['kotlin_return'] = kotlin_return
     params_kotlin['kotlin_name'] = kotlin_name
+    params_kotlin['customize_structures'] = customize_structures
     params_kotlin['include_method'] = include_method
     params_kotlin['include_structure'] = include_structure
     params_kotlin['include_enum'] = include_enum
