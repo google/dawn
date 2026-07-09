@@ -47,6 +47,7 @@ lucicfg.config(
         "builders/gn_args_locations.json",
         "luci/commit-queue.cfg",
         "luci/cr-buildbucket.cfg",
+        "luci/luci-bisection.cfg",
         "luci/luci-logdog.cfg",
         "luci/luci-milo.cfg",
         "luci/luci-notify.cfg",
@@ -425,3 +426,9 @@ exec("//cmake_try.star")
 exec("//gn_standalone_ci.star")
 exec("//gn_standalone_try.star")
 exec("//trusted_robots.star")
+
+# Just copy LUCI Bisection config to generated outputs.
+lucicfg.emit(
+    dest = "luci/luci-bisection.cfg",
+    data = io.read_file("luci-bisection.cfg"),
+)

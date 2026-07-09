@@ -1,5 +1,5 @@
 {
-	"lucicfg": "1.46.2",
+	"lucicfg": "1.46.3",
 	"packages": [
 		{
 			"name": "@dawn-project",
@@ -9,6 +9,7 @@
 			],
 			"lucicfg": "1.45.6",
 			"resources": [
+				"luci-bisection.cfg",
 				"milestones.json"
 			],
 			"entrypoints": [

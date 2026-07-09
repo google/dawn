@@ -61,5 +61,6 @@ pkg.depend(
 )
 
 pkg.resources([
+    "luci-bisection.cfg",
     "milestones.json",
 ])
