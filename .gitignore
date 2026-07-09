@@ -181,3 +181,6 @@ GEMINI.md
 ### run-tricium-clang-tidy.py outputs
 /clang-tidy-*-findings.json
 /clang-tidy-*-summary.txt
+
+### fuzz --triage outputs
+clusterfuzz-testcase-minimized-*
