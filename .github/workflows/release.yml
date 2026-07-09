@@ -57,6 +57,7 @@ jobs:
         run: |
           gh release create "$TAG_NAME" \
             --title "$TAG_NAME" \
+            --repo ${{ github.repository }} \
             --notes-file RELEASE_INFO.md \
             artifacts/Dawn-*/Dawn-*.tar.gz \
             artifacts/dawn-android-*/dawn-android-*.tar.gz \
