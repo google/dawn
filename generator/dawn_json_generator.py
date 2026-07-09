@@ -114,6 +114,7 @@ def validate_and_get_tags(json_data):
         'native',
         'deprecated',
         'art',
+        'art_experimental',
     }
 
     tags = json_data.get('tags')
@@ -946,7 +947,9 @@ def compute_kotlin_params(loaded_json,
                           kotlin_json,
                           webgpu_kt_docs_data=None,
                           doc_warn_log_file_path=None):
-    params_kotlin = parse_json(loaded_json, enabled_tags=['art'])
+
+    params_kotlin = parse_json(loaded_json,
+                               enabled_tags=['art', 'art_experimental'])
     params_kotlin['kotlin_package'] = kotlin_json['kotlin_package']
     params_kotlin['jni_primitives'] = kotlin_json['jni_primitives']
     params_kotlin['jni_signatures'] = kotlin_json['jni_signatures']
@@ -957,12 +960,13 @@ def compute_kotlin_params(loaded_json,
     customize_enums = customize_api["enums"]
     customize_callback = customize_api["function pointer"]
 
-    def kotlin_record_members(members):
+    def kotlin_record_members(members, structure_name=None):
         # Members are sorted in the following order.
         # 1. members with no default value (except callbacks).
         # 2. members with default values.
         # 3. callbacks.
-        for member in sorted(kotlin_record_members_unsorted(members),
+        for member in sorted(kotlin_record_members_unsorted(
+                members, structure_name),
                              key=lambda arg: kotlin_default(arg) is not None):
             yield member
 
@@ -978,7 +982,11 @@ def compute_kotlin_params(loaded_json,
                         yield function_member
                     continue
 
-    def kotlin_record_members_unsorted(members):
+    def kotlin_record_members_unsorted(members, structure_name=None):
+        struct_config = customize_structures.get(structure_name,
+                                                 {}) if structure_name else {}
+        exclude_members = struct_config.get('exclude_members', [])
+
         for member in members:
             # length parameters are omitted because Kotlin containers have 'length'.
             if member in [m.length for m in members]:
@@ -1002,7 +1010,28 @@ def compute_kotlin_params(loaded_json,
                          {'category': 'kotlin type'}), None, {})
                 continue
 
+            if member.name.get() in exclude_members or member.name.camelCase(
+            ) in exclude_members:
+                continue
+
             yield member
+
+        for added_member in struct_config.get('additional_members', []):
+            name = Name(added_member['name'])
+            # Default to native for simple types if not specified
+            category = added_member.get('category', 'native')
+            type_name = added_member['type']
+            if type_name in params_kotlin['types']:
+                typ = params_kotlin['types'][type_name]
+            else:
+                typ = Type(type_name, {'category': category})
+            yield RecordMember(name,
+                               typ,
+                               added_member.get('annotation', 'value'), {},
+                               optional=added_member.get('optional', False),
+                               default_value=added_member.get(
+                                   'default_value', None),
+                               skip_serialize=True)
 
     # Calculate if we should, and can, provide a Kotlin default value for a given argument.
     # This will affect its order in the method parameter and structure field lists.
@@ -1014,8 +1043,10 @@ def compute_kotlin_params(loaded_json,
             if arg.type.category in [
                     'callback function', 'callback info', 'function pointer',
                     'object', 'structure'
-            ]:
+            ] or arg.type.name.get() == 'char':
                 return 'arrayOf()'
+            if arg.type.name.get() == 'float':
+                return 'floatArrayOf()'
             return 'intArrayOf()'
 
         # All other optional types default to 'null'.
@@ -1347,6 +1378,19 @@ def annotate(typ, arg, *, make_const_member=False, with_nullability=False):
 def item_is_enabled(enabled_tags, json_data):
     tags = validate_and_get_tags(json_data)
     if tags is None: return True
+
+    # Strip 'art_experimental' for non-Art targets so it doesn't cause
+    # the item to be excluded from C++/Emscripten builds.
+    if not ('art_experimental' in enabled_tags):
+        original_tags_empty = not tags
+        tags = [tag for tag in tags if tag not in ('art_experimental')]
+        # NOTE: If an item is tagged ONLY with 'art_experimental', it is disabled
+        # for non-Art targets.
+        if not tags and not original_tags_empty:
+            return False
+        if not tags:
+            return True
+
     return any(tag in enabled_tags for tag in tags)
 
 

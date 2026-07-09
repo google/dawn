@@ -20,7 +20,7 @@ package {{ kotlin_package }}
 
 {% set ns = namespace(callback_count = 0, default_count = 0) %}
 {%- set members = [] -%}
-{%- for member in kotlin_record_members(structure.members) -%}
+{%- for member in kotlin_record_members(structure.members, structure.name.get()) -%}
     {%- if member.name.camelCase().endswith('Callback') -%}
         {%- set ns.callback_count = ns.callback_count + 1 -%}
     {%- endif -%}

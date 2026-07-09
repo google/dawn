@@ -61,6 +61,7 @@ class MappedNamedConstantsTest {
         DeviceLostReason::class,
         ErrorFilter::class,
         ErrorType::class,
+        ExternalTextureRotation::class,
         FeatureLevel::class,
         FeatureName::class,
         FilterMode::class,

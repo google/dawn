@@ -30,20 +30,24 @@
     {%- set optional = arg.optional and not strip_optional %}
     {%- set default_value = arg.default_value %}
     {%- if type.category == 'kotlin type' -%}
-        {{ type.name.get() }}  {#- The name *is* the type #}
+        {{ type.name.get() }}{{ '?' if optional }}  {#- The name *is* the type #}
     {%- elif arg.type.name.get() == 'string view' -%}
         String{{ '?' if optional }}
     {%- elif type.name.get() == 'void' %}
         {{- assert(arg.length and arg.constant_length != 1) -}}  {# void with length is binary data #}
         java.nio.ByteBuffer
-    {%- elif arg.length and arg.length != 'constant' %}
+    {%- elif arg.length and (arg.length != 'constant' or arg.constant_length != 1) %}
         {# * annotation can mean an array, e.g. an output argument #}
         {%- if type.category in ['callback function', 'callback info', 'function pointer', 'object', 'structure'] -%}
-            Array<{{ kotlin_name(type) }}>
+            Array<{{ kotlin_name(type) }}>{{ '?' if optional }}
         {%- elif type.category in ['bitmask', 'enum'] or type.name.get() in ['int', 'int32_t', 'uint32_t'] -%}
-            IntArray
+            IntArray{{ '?' if optional }}
+        {%- elif type.name.get() == 'float' -%}
+            FloatArray{{ '?' if optional }}
+        {%- elif type.name.get() == 'char' -%}
+            Array<String>{{ '?' if optional }}
         {%- else -%}
-            {{ unreachable_code() }}
+            {{ unreachable_code('Unsupported array type: ' + type.name.get()) }}
         {% endif %}
     {%- elif type.category in ['callback function', 'function pointer', 'object'] %}
         {{- kotlin_name(type) }}
