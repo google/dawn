@@ -1345,6 +1345,14 @@
                 ]
             },
             {
+                "name": "create error compute pipeline",
+                "returns": "compute pipeline",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "label", "type": "string view"}
+                ]
+            },
+            {
                 "name": "create compute pipeline async",
                 "no autolock": true,
                 "returns": "future",
@@ -1402,6 +1410,14 @@
                 "returns": "render pipeline",
                 "args": [
                     {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "create error render pipeline",
+                "returns": "render pipeline",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "label", "type": "string view"}
                 ]
             },
             {

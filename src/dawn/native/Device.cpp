@@ -1547,8 +1547,16 @@ BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
     return ReturnToAPI(BufferBase::MakeError(this, desc));
 }
 
+ComputePipelineBase* DeviceBase::APICreateErrorComputePipeline(StringView label) {
+    return ReturnToAPI(ComputePipelineBase::MakeError(this, label));
+}
+
 ExternalTextureBase* DeviceBase::APICreateErrorExternalTexture() {
     return ReturnToAPI(ExternalTextureBase::MakeError(this));
+}
+
+RenderPipelineBase* DeviceBase::APICreateErrorRenderPipeline(StringView label) {
+    return ReturnToAPI(RenderPipelineBase::MakeError(this, label));
 }
 
 TextureBase* DeviceBase::APICreateErrorTexture(const TextureDescriptor* desc) {

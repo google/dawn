@@ -86,6 +86,23 @@ TEST_F(RenderPipelineValidationTest, CreationSuccess) {
     }
 }
 
+// Test that CreateErrorRenderPipeline creates an invalid render pipeline but doesn't produce an
+// error right at creation.
+TEST_F(RenderPipelineValidationTest, CreateErrorRenderPipeline) {
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+
+    // Check that the descriptor is valid.
+    device.CreateRenderPipeline(&descriptor);
+
+    // Creating the error render pipeline doesn't produce a validation error at creation time.
+    wgpu::RenderPipeline pipeline = device.CreateErrorRenderPipeline("my_error_pipeline");
+
+    // Using the error render pipeline, for example to get a bind group layout, is an error.
+    ASSERT_DEVICE_ERROR(pipeline.GetBindGroupLayout(0));
+}
+
 // Tests that depth bias parameters must not be NaN.
 TEST_F(RenderPipelineValidationTest, DepthBiasParameterNotBeNaN) {
     // Control case, depth bias parameters in ComboRenderPipeline default to 0 which is finite

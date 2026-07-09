@@ -86,7 +86,7 @@ class PopErrorScopeEvent final : public TrackedEvent {
     std::string mMessage;
 };
 
-template <typename PipelineT, EventType Type, typename CallbackInfoT>
+template <typename PipelineT, EventType Type, typename CallbackInfoT, typename CreateErrorCmdT>
 class CreatePipelineEventBase : public TrackedEvent {
   public:
     // Export these types upwards for ease of use.
@@ -95,12 +95,18 @@ class CreatePipelineEventBase : public TrackedEvent {
 
     static constexpr EventType kType = Type;
 
-    CreatePipelineEventBase(const CallbackInfo& callbackInfo, Ref<Pipeline> pipeline)
+    CreatePipelineEventBase(const CallbackInfo& callbackInfo,
+                            Ref<Device> device,
+                            Ref<Pipeline> pipeline,
+                            WGPUStringView label)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
           mUserdata2(callbackInfo.userdata2),
+          mLabel(ToString(label)),
+          mDevice(std::move(device)),
           mPipeline(std::move(pipeline)) {
+        DAWN_ASSERT(mDevice != nullptr);
         DAWN_ASSERT(mPipeline != nullptr);
     }
 
@@ -127,6 +133,11 @@ class CreatePipelineEventBase : public TrackedEvent {
         if (completionType == EventCompletionType::Shutdown) {
             mStatus = WGPUCreatePipelineAsyncStatus_CallbackCancelled;
             mMessage = "A valid external Instance reference no longer exists.";
+        } else if (mDevice->IsKnownLost()) {
+            mPipeline =
+                mDevice->CreateErrorPipeline<Pipeline, CreateErrorCmdT>(ToOutputStringView(mLabel));
+            mStatus = WGPUCreatePipelineAsyncStatus_Success;
+            mMessage = "";
         }
 
         mCallback(mStatus,
@@ -144,17 +155,20 @@ class CreatePipelineEventBase : public TrackedEvent {
     WGPUCreatePipelineAsyncStatus mStatus = WGPUCreatePipelineAsyncStatus_Success;
     std::string mMessage;
 
+    std::string mLabel;
+    Ref<Device> mDevice;
     Ref<Pipeline> mPipeline;
 };
 
 using CreateComputePipelineEvent =
     CreatePipelineEventBase<ComputePipeline,
                             EventType::CreateComputePipeline,
-                            WGPUCreateComputePipelineAsyncCallbackInfo>;
-using CreateRenderPipelineEvent =
-    CreatePipelineEventBase<RenderPipeline,
-                            EventType::CreateRenderPipeline,
-                            WGPUCreateRenderPipelineAsyncCallbackInfo>;
+                            WGPUCreateComputePipelineAsyncCallbackInfo,
+                            DeviceCreateErrorComputePipelineCmd>;
+using CreateRenderPipelineEvent = CreatePipelineEventBase<RenderPipeline,
+                                                          EventType::CreateRenderPipeline,
+                                                          WGPUCreateRenderPipelineAsyncCallbackInfo,
+                                                          DeviceCreateErrorRenderPipelineCmd>;
 
 }  // namespace
 
@@ -259,12 +273,9 @@ const LimitsAndFeatures& Device::GetLimitsAndFeatures() const {
 }
 
 void Device::WillDropLastExternalRef() {
-    mIsDestroyed = true;
     if (IsRegistered()) {
-        HandleDeviceLost(WGPUDeviceLostReason_Destroyed,
-                         ToOutputStringView("Device was destroyed."));
+        APIDestroy();
     }
-    Unregister();
 }
 
 WGPUStatus Device::APIGetLimits(WGPULimits* limits) const {
@@ -398,8 +409,8 @@ WGPUFuture Device::CreatePipelineAsync(Descriptor const* descriptor,
 
     Client* client = GetClient();
     Ref<Pipeline> pipeline = client->Make<Pipeline>();
-    auto [futureIDInternal, tracked] =
-        GetEventManager().TrackEvent(AcquireRef(new Event(callbackInfo, pipeline)));
+    auto [futureIDInternal, tracked] = GetEventManager().TrackEvent(AcquireRef(new Event(
+        callbackInfo, this, pipeline, descriptor ? descriptor->label : WGPUStringView{})));
     if (!tracked) {
         return {futureIDInternal};
     }
@@ -444,11 +455,33 @@ WireResult Client::DoDeviceCreateRenderPipelineAsyncCallback(ObjectHandle eventM
 }
 
 void Device::APIDestroy() {
+    mIsDestroyed = true;
+    HandleDeviceLost(WGPUDeviceLostReason_Destroyed, ToOutputStringView("Device was destroyed."));
+
     DeviceDestroyCmd cmd;
     cmd.self = ToAPI(this);
     GetClient()->SerializeCommand(cmd);
-
-    mIsDestroyed = true;
 }
+
+template <typename PipelineT, typename CmdT>
+Ref<PipelineT> Device::CreateErrorPipeline(WGPUStringView label) {
+    Client* client = GetClient();
+    Ref<PipelineT> pipeline = client->Make<PipelineT>();
+
+    CmdT cmd;
+    cmd.self = ToAPI(this);
+    cmd.label = label;
+    cmd.result = pipeline->GetWireHandle(client);
+    client->SerializeCommand(cmd);
+
+    return pipeline;
+}
+
+template Ref<ComputePipeline>
+Device::CreateErrorPipeline<ComputePipeline, DeviceCreateErrorComputePipelineCmd>(
+    WGPUStringView label);
+template Ref<RenderPipeline>
+Device::CreateErrorPipeline<RenderPipeline, DeviceCreateErrorRenderPipelineCmd>(
+    WGPUStringView label);
 
 }  // namespace dawn::wire::client

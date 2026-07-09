@@ -367,6 +367,70 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateAfterDroppingInstance) {
     });
 }
 
+TEST_P(WireCreateComputePipelineAsyncTest, CreateInvalidThenDestroyDevice) {
+    DAWN_SKIP_TEST_IF(IsSpontaneous());
+
+    CreateComputePipelineAsync(&mDescriptor);
+
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _))
+        .WillOnce(InvokeWithoutArgs([&] {
+            api.CallDeviceCreateComputePipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+                ToOutputStringView("Some error message"));
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(api, DeviceDestroy(apiDevice)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallDeviceLostCallback(apiDevice, WGPUDeviceLostReason_Destroyed,
+                                   ToOutputStringView("Device destroyed"));
+    }));
+
+    device.Destroy();
+    FlushClient();
+
+    FlushFutures();
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb,
+                    Call(wgpu::CreatePipelineAsyncStatus::Success, NotNull(), SizedString("")))
+            .Times(1);
+
+        FlushCallbacks();
+    });
+}
+
+TEST_P(WireCreateRenderPipelineAsyncTest, CreateInvalidThenDestroyDevice) {
+    DAWN_SKIP_TEST_IF(IsSpontaneous());
+
+    CreateRenderPipelineAsync(&mDescriptor);
+
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _))
+        .WillOnce(InvokeWithoutArgs([&] {
+            api.CallDeviceCreateRenderPipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
+                ToOutputStringView("Some error message"));
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(api, DeviceDestroy(apiDevice)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallDeviceLostCallback(apiDevice, WGPUDeviceLostReason_Destroyed,
+                                   ToOutputStringView("Device destroyed"));
+    }));
+
+    device.Destroy();
+    FlushClient();
+
+    FlushFutures();
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb,
+                    Call(wgpu::CreatePipelineAsyncStatus::Success, NotNull(), SizedString("")))
+            .Times(1);
+
+        FlushCallbacks();
+    });
+}
+
 // Test that if the server is deleted before the callback, it forces the
 // callback to complete.
 TEST(WireCreatePipelineAsyncTestNullBackend, ServerDeletedBeforeCallback) {

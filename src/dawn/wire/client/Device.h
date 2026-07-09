@@ -74,6 +74,9 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     void APIInjectError(WGPUErrorType type, WGPUStringView message);
     WGPUFuture APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
 
+    template <typename PipelineT, typename CmdT>
+    Ref<PipelineT> CreateErrorPipeline(WGPUStringView label);
+
     WGPUBuffer APICreateBuffer(const WGPUBufferDescriptor* descriptor);
     WGPUBuffer APICreateErrorBuffer(const WGPUBufferDescriptor* descriptor);
     WGPUFuture APICreateComputePipelineAsync(

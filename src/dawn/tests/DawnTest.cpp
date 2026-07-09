@@ -1780,6 +1780,7 @@ void DawnTestBase::LoseDeviceForTesting(wgpu::Device deviceToLose) {
         .Times(1);
     resolvedDevice.ForceLoss(wgpu::DeviceLostReason::Unknown, "Device lost for testing");
     resolvedDevice.Tick();
+    FlushWire();
 }
 
 std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,

@@ -295,7 +295,9 @@ class DeviceBase : public ErrorSink,
 
     // For Dawn Wire
     BufferBase* APICreateErrorBuffer(const BufferDescriptor* desc);
+    ComputePipelineBase* APICreateErrorComputePipeline(StringView label);
     ExternalTextureBase* APICreateErrorExternalTexture();
+    RenderPipelineBase* APICreateErrorRenderPipeline(StringView label);
     TextureBase* APICreateErrorTexture(const TextureDescriptor* desc);
 
     AdapterBase* APIGetAdapter();
