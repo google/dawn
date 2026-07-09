@@ -1,0 +1,565 @@
+#include <android/hardware_buffer_jni.h>
+#include <android/sync.h>
+#include <errno.h>
+#include <jni.h>
+#include <poll.h>
+#include <string.h>
+#include <unistd.h>
+#include <webgpu/webgpu.h>
+
+#include <vector>
+
+#include "JNIClasses.h"
+#include "JNIContext.h"
+#include "src/dawn/common/ColorSpace.h"
+#include "src/dawn/common/ExternalTextureParams.h"
+#include "structures.h"
+
+#ifndef VK_IMAGE_LAYOUT_GENERAL
+#define VK_IMAGE_LAYOUT_GENERAL 1
+#endif
+
+#ifndef VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+#define VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL 5
+#endif
+
+namespace dawn::kotlin_api {
+
+struct AhbTextureWrapper {
+    WGPUSharedTextureMemory stm = nullptr;
+    WGPUTexture texture = nullptr;
+    WGPUTextureView view = nullptr;
+    WGPUExternalTexture externalTexture = nullptr;
+    AHardwareBuffer* ahb = nullptr;
+    WGPUDevice device = nullptr;
+};
+
+struct UniqueFd {
+    int fd = -1;
+    UniqueFd(int f) : fd(f) {}
+    ~UniqueFd() {
+        if (fd >= 0) {
+            close(fd);
+        }
+    }
+    UniqueFd(const UniqueFd&) = delete;
+    UniqueFd& operator=(const UniqueFd&) = delete;
+    UniqueFd(UniqueFd&& other) : fd(other.fd) { other.fd = -1; }
+    UniqueFd& operator=(UniqueFd&& other) {
+        if (this != &other) {
+            if (fd >= 0) {
+                close(fd);
+            }
+            fd = other.fd;
+            other.fd = -1;
+        }
+        return *this;
+    }
+    int release() {
+        int f = fd;
+        fd = -1;
+        return f;
+    }
+    operator int() const { return fd; }
+};
+
+extern "C" {
+
+static WGPUSharedTextureMemory createSharedTextureMemoryFromAhb(JNIEnv* env,
+                                                                jobject deviceObj,
+                                                                jobject hardwareBuffer,
+                                                                AHardwareBuffer** outAhb,
+                                                                WGPUDevice* outDevice) {
+    JNIClasses* classes = JNIClasses::getInstance(env);
+    jmethodID getHandle = env->GetMethodID(classes->device, "getHandle", "()J");
+    *outDevice = reinterpret_cast<WGPUDevice>(env->CallLongMethod(deviceObj, getHandle));
+
+    if (!*outDevice) {
+        env->ThrowNew(classes->javaIllegalStateException, "WGPUDevice handle is null.");
+        return nullptr;
+    }
+
+    *outAhb = AHardwareBuffer_fromHardwareBuffer(env, hardwareBuffer);
+    if (!*outAhb) {
+        env->ThrowNew(classes->javaIllegalStateException,
+                      "Failed to extract native AHardwareBuffer.");
+        return nullptr;
+    }
+    // AHardwareBuffer_fromHardwareBuffer does not acquire a reference; the returned pointer
+    // is only guaranteed to be valid while the Java HardwareBuffer remains alive. Since the
+    // wrapper outlives the JNI call, take our own reference to match the release in
+    // nativeDestroy.
+    AHardwareBuffer_acquire(*outAhb);
+
+    WGPUSharedTextureMemoryAHardwareBufferDescriptor ahbDesc = {};
+    ahbDesc.chain.sType = WGPUSType_SharedTextureMemoryAHardwareBufferDescriptor;
+    ahbDesc.handle = *outAhb;
+
+    WGPUSharedTextureMemoryDescriptor stmDesc = {};
+    stmDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&ahbDesc);
+
+    WGPUSharedTextureMemory stm = wgpuDeviceImportSharedTextureMemory(*outDevice, &stmDesc);
+    if (!stm && !env->ExceptionCheck()) {
+        env->ThrowNew(classes->javaIllegalStateException,
+                      "Dawn failed to import the AHardwareBuffer.");
+    }
+    return stm;
+}
+
+JNIEXPORT jobject JNICALL
+Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createTextureNative(JNIEnv* env,
+                                                                             jclass clazz,
+                                                                             jobject deviceObj,
+                                                                             jobject hardwareBuffer,
+                                                                             jint usage) {
+    JNIContext c(env);
+    JNIClasses* classes = JNIClasses::getInstance(env);
+    WGPUDevice device = nullptr;
+    AHardwareBuffer* ahb = nullptr;
+
+    WGPUSharedTextureMemory stm =
+        createSharedTextureMemoryFromAhb(env, deviceObj, hardwareBuffer, &ahb, &device);
+    if (!stm) {
+        if (ahb) {
+            AHardwareBuffer_release(ahb);
+        }
+        return nullptr;
+    }
+
+    if (!wgpuDeviceHasFeature(device, WGPUFeatureName_SharedTextureMemoryAHardwareBuffer)) {
+        wgpuSharedTextureMemoryRelease(stm);
+        if (ahb) {
+            AHardwareBuffer_release(ahb);
+        }
+        env->ThrowNew(classes->javaUnsupportedOperationException,
+                      "Missing WGPUFeatureName_SharedTextureMemoryAHardwareBuffer.");
+        return nullptr;
+    }
+
+    WGPUSharedTextureMemoryProperties props = {};
+    wgpuSharedTextureMemoryGetProperties(stm, &props);
+
+    if (props.format == WGPUTextureFormat_Undefined) {
+        wgpuSharedTextureMemoryRelease(stm);
+        if (ahb) {
+            AHardwareBuffer_release(ahb);
+        }
+        env->ThrowNew(classes->javaUnsupportedOperationException,
+                      "AHB format maps to WGPUTextureFormat_Undefined. Dawn cannot sample this.");
+        return nullptr;
+    }
+
+    WGPUTextureDescriptor texDesc = {};
+    texDesc.usage = static_cast<WGPUTextureUsage>(usage);
+    texDesc.dimension = WGPUTextureDimension_2D;
+    texDesc.size = {props.size.width, props.size.height, props.size.depthOrArrayLayers};
+    texDesc.format = props.format;
+    texDesc.mipLevelCount = 1;
+    texDesc.sampleCount = 1;
+
+    WGPUTexture texture = wgpuSharedTextureMemoryCreateTexture(stm, &texDesc);
+    if (!texture || env->ExceptionCheck()) {
+        if (texture) {
+            wgpuTextureRelease(texture);
+        }
+        wgpuSharedTextureMemoryRelease(stm);
+        if (ahb) {
+            AHardwareBuffer_release(ahb);
+        }
+        return nullptr;
+    }
+
+    wgpuTextureAddRef(texture);
+    wgpuDeviceAddRef(device);
+    auto* wrapper = new AhbTextureWrapper{stm, texture, nullptr, nullptr, ahb, device};
+
+    jobject texture_kt =
+        env->NewObject(classes->texture, env->GetMethodID(classes->texture, "<init>", "(J)V"),
+                       reinterpret_cast<jlong>(texture));
+
+    jclass wrapperClz = classes->gpuHardwareBufferTexture;
+    jmethodID wrapperInit =
+        env->GetMethodID(wrapperClz, "<init>", "(JLandroidx/webgpu/GPUTexture;)V");
+    return env->NewObject(wrapperClz, wrapperInit, reinterpret_cast<jlong>(wrapper), texture_kt);
+}
+
+JNIEXPORT jobject JNICALL
+Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNative(
+    JNIEnv* env,
+    jclass clazz,
+    jobject deviceObj,
+    jobject hardwareBuffer,
+    jobject descriptorObj) {
+    JNIContext c(env);
+    JNIClasses* classes = JNIClasses::getInstance(env);
+    WGPUDevice device = nullptr;
+    AHardwareBuffer* ahb = nullptr;
+
+    WGPUSharedTextureMemory stm =
+        createSharedTextureMemoryFromAhb(env, deviceObj, hardwareBuffer, &ahb, &device);
+    if (!stm) {
+        if (ahb) {
+            AHardwareBuffer_release(ahb);
+        }
+        return nullptr;
+    }
+
+    if (!wgpuDeviceHasFeature(device, WGPUFeatureName_OpaqueYCbCrAndroidForExternalTexture)) {
+        wgpuSharedTextureMemoryRelease(stm);
+        if (ahb) {
+            AHardwareBuffer_release(ahb);
+        }
+        env->ThrowNew(classes->javaUnsupportedOperationException,
+                      "Missing WGPUFeatureName_OpaqueYCbCrAndroidForExternalTexture.");
+        return nullptr;
+    }
+
+    WGPUSharedTextureMemoryProperties props = {};
+    wgpuSharedTextureMemoryGetProperties(stm, &props);
+    if (env->ExceptionCheck()) {
+        wgpuSharedTextureMemoryRelease(stm);
+        if (ahb) {
+            AHardwareBuffer_release(ahb);
+        }
+        return nullptr;
+    }
+
+    if (props.format == WGPUTextureFormat_Undefined) {
+        wgpuSharedTextureMemoryRelease(stm);
+        if (ahb) {
+            AHardwareBuffer_release(ahb);
+        }
+        env->ThrowNew(classes->javaUnsupportedOperationException,
+                      "YUV AHB format maps to WGPUTextureFormat_Undefined.");
+        return nullptr;
+    }
+
+    WGPUTextureDescriptor texDesc = {};
+    texDesc.usage = WGPUTextureUsage_TextureBinding;
+    texDesc.dimension = WGPUTextureDimension_2D;
+    texDesc.size = {props.size.width, props.size.height, 1};
+    texDesc.format = props.format;
+    texDesc.mipLevelCount = 1;
+    texDesc.sampleCount = 1;
+
+    WGPUTexture texture = wgpuSharedTextureMemoryCreateTexture(stm, &texDesc);
+    WGPUTextureView view = wgpuTextureCreateView(texture, nullptr);
+    if (env->ExceptionCheck()) {
+        if (view) {
+            wgpuTextureViewRelease(view);
+        }
+        if (texture) {
+            wgpuTextureRelease(texture);
+        }
+        wgpuSharedTextureMemoryRelease(stm);
+        if (ahb) {
+            AHardwareBuffer_release(ahb);
+        }
+        return nullptr;
+    }
+
+    WGPUExternalTextureDescriptor extDesc = {};
+    extDesc.plane0 = view;
+
+    jclass descClass = env->GetObjectClass(descriptorObj);
+
+    auto callObjectMethod = [&](const char* methodName, const char* sig) {
+        jmethodID mid = env->GetMethodID(descClass, methodName, sig);
+        return mid ? env->CallObjectMethod(descriptorObj, mid) : nullptr;
+    };
+
+    jobject colorSpaceObj =
+        callObjectMethod("getSrcColorSpace", "()Landroidx/webgpu/GPUColorSpaceDawn;");
+    jint dstColorSpaceInt =
+        env->CallIntMethod(descriptorObj, env->GetMethodID(descClass, "getDstColorSpace", "()I"));
+
+    wgpu::ColorSpaceDawn srcColorSpace = {};
+    srcColorSpace.primaries = static_cast<wgpu::ColorSpacePrimariesDawn>(
+        env->GetIntField(colorSpaceObj, classes->colorSpacePrimaries));
+    srcColorSpace.transfer = static_cast<wgpu::ColorSpaceTransferDawn>(
+        env->GetIntField(colorSpaceObj, classes->colorSpaceTransfer));
+    srcColorSpace.yCbCrRange = static_cast<wgpu::ColorSpaceYCbCrRangeDawn>(
+        env->GetIntField(colorSpaceObj, classes->colorSpaceYCbCrRange));
+    srcColorSpace.yCbCrMatrix = static_cast<wgpu::ColorSpaceYCbCrMatrixDawn>(
+        env->GetIntField(colorSpaceObj, classes->colorSpaceYCbCrMatrix));
+    env->DeleteLocalRef(colorSpaceObj);
+
+    wgpu::PredefinedColorSpace dstColorSpace =
+        static_cast<wgpu::PredefinedColorSpace>(dstColorSpaceInt);
+
+    dawn::ExternalTextureColorSpaceParams params;
+    wgpu::Status status = dawn::ComputeExternalTextureParams(srcColorSpace, dstColorSpace, &params);
+
+    if (status != wgpu::Status::Success) {
+        wgpuTextureViewRelease(view);
+        wgpuTextureRelease(texture);
+        wgpuSharedTextureMemoryRelease(stm);
+        if (ahb) {
+            AHardwareBuffer_release(ahb);
+        }
+        env->ThrowNew(classes->javaIllegalStateException,
+                      "Failed to compute external texture params.");
+        return nullptr;
+    }
+
+    extDesc.yuvToRgbConversionMatrix = params.yuvToRgbConversionMatrix.data();
+    extDesc.srcTransferFunctionParameters = params.srcTransferFunction.data();
+    extDesc.dstTransferFunctionParameters = params.dstTransferFunction.data();
+    extDesc.gamutConversionMatrix = params.gamutConversionMatrix.data();
+
+    jobject originObj = callObjectMethod("getCropOrigin", "()Landroidx/webgpu/GPUOrigin2D;");
+    if (originObj) {
+        extDesc.cropOrigin.x = env->GetIntField(originObj, classes->originX);
+        extDesc.cropOrigin.y = env->GetIntField(originObj, classes->originY);
+        env->DeleteLocalRef(originObj);
+    }
+
+    jobject cropSizeObj = callObjectMethod("getCropSize", "()Landroidx/webgpu/GPUExtent2D;");
+    if (cropSizeObj) {
+        extDesc.cropSize.width = env->GetIntField(cropSizeObj, classes->extentWidth);
+        extDesc.cropSize.height = env->GetIntField(cropSizeObj, classes->extentHeight);
+        env->DeleteLocalRef(cropSizeObj);
+    }
+    if (extDesc.cropSize.width == 0) {
+        extDesc.cropSize.width = props.size.width;
+    }
+    if (extDesc.cropSize.height == 0) {
+        extDesc.cropSize.height = props.size.height;
+    }
+
+    extDesc.apparentSize = extDesc.cropSize;
+    extDesc.mirrored =
+        env->CallBooleanMethod(descriptorObj, env->GetMethodID(descClass, "isMirrored", "()Z"));
+
+    jint rotation =
+        env->CallIntMethod(descriptorObj, env->GetMethodID(descClass, "getRotation", "()I"));
+    switch (rotation) {
+        case 2:
+            extDesc.rotation = WGPUExternalTextureRotation_Rotate90Degrees;
+            break;
+        case 3:
+            extDesc.rotation = WGPUExternalTextureRotation_Rotate180Degrees;
+            break;
+        case 4:
+            extDesc.rotation = WGPUExternalTextureRotation_Rotate270Degrees;
+            break;
+        default:
+            extDesc.rotation = WGPUExternalTextureRotation_Rotate0Degrees;
+            break;
+    }
+
+    WGPUExternalTexture externalTexture = wgpuDeviceCreateExternalTexture(device, &extDesc);
+    env->DeleteLocalRef(descClass);
+
+    wgpuExternalTextureAddRef(externalTexture);
+    wgpuDeviceAddRef(device);
+    auto* wrapper = new AhbTextureWrapper{stm, texture, view, externalTexture, ahb, device};
+
+    jobject extTex_kt = env->NewObject(classes->externalTexture,
+                                       env->GetMethodID(classes->externalTexture, "<init>", "(J)V"),
+                                       reinterpret_cast<jlong>(externalTexture));
+
+    jclass wrapperClz = classes->gpuHardwareBufferExternalTexture;
+    jmethodID wrapperInit =
+        env->GetMethodID(wrapperClz, "<init>", "(JLandroidx/webgpu/GPUExternalTexture;)V");
+
+    return env->NewObject(wrapperClz, wrapperInit, reinterpret_cast<jlong>(wrapper), extTex_kt);
+}
+
+JNIEXPORT void JNICALL
+Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeBeginAccess(JNIEnv* env,
+                                                                jobject thiz,
+                                                                jlong handle,
+                                                                jintArray fences) {
+    auto* wrapper = reinterpret_cast<AhbTextureWrapper*>(handle);
+    JNIClasses* classes = JNIClasses::getInstance(env);
+
+    std::vector<WGPUSharedFence> importedFences;
+    if (fences != nullptr) {
+        jsize len = env->GetArrayLength(fences);
+        if (len > 0) {
+            jint* fds = env->GetIntArrayElements(fences, nullptr);
+            for (int i = 0; i < len; ++i) {
+                int fd = fds[i];
+                if (fd >= 0) {
+                    // We only borrow the integer from Java's ParcelFileDescriptor.getFd().
+                    // Dawn's ImportSharedFence internally duplicates (dup) the file descriptor.
+                    // This allows Java's ParcelFileDescriptor to retain ownership of the original
+                    // FD and close it safely when it gets garbage collected, preventing leaks.
+                    WGPUSharedFenceSyncFDDescriptor syncFdDesc = {};
+                    syncFdDesc.chain.sType = WGPUSType_SharedFenceSyncFDDescriptor;
+                    syncFdDesc.handle = fd;
+
+                    WGPUSharedFenceDescriptor fenceDesc = {};
+                    fenceDesc.nextInChain = &syncFdDesc.chain;
+
+                    WGPUSharedFence fence =
+                        wgpuDeviceImportSharedFence(wrapper->device, &fenceDesc);
+                    if (fence) {
+                        importedFences.push_back(fence);
+                    }
+                }
+            }
+            env->ReleaseIntArrayElements(fences, fds, JNI_ABORT);
+        }
+    }
+
+    WGPUSharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+    beginDesc.fenceCount = importedFences.size();
+    beginDesc.fences = importedFences.data();
+    beginDesc.concurrentRead = false;
+    beginDesc.initialized = true;
+
+    WGPUSharedTextureMemoryVkImageLayoutBeginState beginLayout = {};
+
+    beginLayout.chain.sType = WGPUSType_SharedTextureMemoryVkImageLayoutBeginState;
+    beginLayout.chain.next = nullptr;
+    // Assuming the AHB comes in as GENERAL from the Android producer
+    beginLayout.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    // Transition for Dawn to sample the texture
+    beginLayout.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    beginDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&beginLayout.chain);
+
+    wgpuSharedTextureMemoryBeginAccess(wrapper->stm, wrapper->texture, &beginDesc);
+
+    for (WGPUSharedFence f : importedFences) {
+        wgpuSharedFenceRelease(f);
+    }
+}
+
+JNIEXPORT jint JNICALL Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeEndAccess(JNIEnv* env,
+                                                                                     jobject thiz,
+                                                                                     jlong handle) {
+    auto* wrapper = reinterpret_cast<AhbTextureWrapper*>(handle);
+    JNIClasses* classes = JNIClasses::getInstance(env);
+
+    WGPUSharedTextureMemoryEndAccessState endState = {};
+    WGPUSharedTextureMemoryVkImageLayoutEndState endLayout = {};
+
+    endLayout.chain.sType = WGPUSType_SharedTextureMemoryVkImageLayoutEndState;
+    endLayout.chain.next = nullptr;
+    // Use layouts that preserve data
+    endLayout.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    endLayout.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    endState.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&endLayout.chain);
+
+    WGPUStatus status = wgpuSharedTextureMemoryEndAccess(wrapper->stm, wrapper->texture, &endState);
+    if (status != WGPUStatus_Success) {
+        env->ThrowNew(classes->javaIllegalStateException,
+                      "Failed to end access on SharedTextureMemory.");
+        return -1;
+    }
+
+    std::vector<UniqueFd> fds;
+    bool failed = false;
+    if (endState.fenceCount > 0) {
+        for (size_t i = 0; i < endState.fenceCount && !failed; ++i) {
+            WGPUSharedFence cFence = endState.fences[i];
+
+            WGPUSharedFenceExportInfo exportInfo = {};
+            WGPUSharedFenceSyncFDExportInfo syncFdExportInfo = {};
+            syncFdExportInfo.chain.sType = WGPUSType_SharedFenceSyncFDExportInfo;
+            syncFdExportInfo.chain.next = nullptr;
+            exportInfo.nextInChain = &syncFdExportInfo.chain;
+
+            wgpuSharedFenceExportInfo(cFence, &exportInfo);
+            int fd = syncFdExportInfo.handle;
+            if (fd >= 0) {
+                // Dawn's ExportInfo borrows the FD; Dawn retains ownership of the underlying fence
+                // and closes it when the WGPUSharedFence is released. We dup() it here to safely
+                // take ownership of our own copy for JNI.
+                int dupedFd = dup(fd);
+                if (dupedFd >= 0) {
+                    fds.emplace_back(dupedFd);
+                } else {
+                    failed = true;
+                }
+            }
+        }
+    }
+
+    wgpuSharedTextureMemoryEndAccessStateFreeMembers(endState);
+
+    UniqueFd mergedFd(-1);
+    for (size_t i = 0; i < fds.size() && !failed; ++i) {
+        UniqueFd& fd = fds[i];
+        if (mergedFd.fd == -1) {
+            mergedFd = std::move(fd);
+        } else {
+            int newFd = sync_merge("wgpu_fence", mergedFd.fd, fd.fd);
+            mergedFd = UniqueFd(newFd);
+            if (newFd < 0) {
+                failed = true;
+            }
+        }
+    }
+
+    if (failed) {
+        env->ThrowNew(classes->javaIllegalStateException, "Failed to merge sync fences.");
+        return -1;
+    }
+
+    if (mergedFd.fd >= 0) {
+        return mergedFd.release();
+    }
+
+    return -1;
+}
+
+JNIEXPORT void JNICALL Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeDestroy(JNIEnv* env,
+                                                                                   jobject thiz,
+                                                                                   jlong handle) {
+    auto* wrapper = reinterpret_cast<AhbTextureWrapper*>(handle);
+
+    if (wrapper->externalTexture) {
+        wgpuExternalTextureRelease(wrapper->externalTexture);
+    }
+    if (wrapper->view) {
+        wgpuTextureViewRelease(wrapper->view);
+    }
+    if (wrapper->texture) {
+        wgpuTextureRelease(wrapper->texture);
+    }
+    if (wrapper->stm) {
+        wgpuSharedTextureMemoryRelease(wrapper->stm);
+    }
+    if (wrapper->ahb) {
+        AHardwareBuffer_release(wrapper->ahb);
+    }
+    if (wrapper->device) {
+        wgpuDeviceRelease(wrapper->device);
+    }
+
+    delete wrapper;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_androidx_webgpu_GPUSyncFence_awaitParcelFileDescriptorNative(JNIEnv* env,
+                                                                  jobject thiz,
+                                                                  jobject pfd,
+                                                                  jlong timeoutMillis) {
+    if (!pfd) {
+        return JNI_TRUE;
+    }
+
+    JNIClasses* classes = JNIClasses::getInstance(env);
+    jclass pfdClass = classes->parcelFileDescriptor;
+    jmethodID getFdMethod = classes->pfdGetFd;
+    int fd = env->CallIntMethod(pfd, getFdMethod);
+
+    if (fd < 0) {
+        return JNI_TRUE;
+    }
+
+    struct pollfd pfd_struct = {
+        .fd = fd,
+        .events = POLLIN,
+    };
+
+    int result = poll(&pfd_struct, 1, timeoutMillis);
+    return (result > 0 && (pfd_struct.revents & POLLIN)) ? JNI_TRUE : JNI_FALSE;
+}
+
+}  // extern "C"
+}  // namespace dawn::kotlin_api
