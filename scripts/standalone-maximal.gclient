@@ -28,4 +28,4 @@ target_os = []
 # If cross compiling on Mac, uncomment this:
 #target_os += ['win']
 # If cross compiling on Linux, uncomment this:
-#target_os += ['win', 'mac']
+#target_os += ['win', 'mac', 'android']

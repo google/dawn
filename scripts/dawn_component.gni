@@ -133,7 +133,7 @@ template("dawn_component") {
     # all symbols except JNI ones. Remove this config so that our
     # shared_library symbols are visible. This matches what Chromium's
     # component template does.
-    if (build_with_chromium && is_android) {
+    if (is_android) {
       configs -= [ "//build/config/android:hide_all_but_jni_onload" ]
     }
   }

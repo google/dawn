@@ -59,13 +59,18 @@ if (build_with_chromium) {
 dawn_is_winuwp = is_win && target_os == "winuwp"
 dawn_use_windows_ui = is_win
 
+if (is_android || is_ios) {
+  dawn_use_swiftshader = false
+} else {
+  declare_args() {
+    # Enables SwiftShader as the fallback adapter. Requires dawn_swiftshader_dir
+    # to be set to take effect.
+    dawn_use_swiftshader = true
+  }
+}
+
 declare_args() {
   dawn_tests_use_angle = true
-
-  # Enables SwiftShader as the fallback adapter. Requires dawn_swiftshader_dir
-  # to be set to take effect.
-  # TODO(dawn:1536): Enable SwiftShader for Android.
-  dawn_use_swiftshader = !is_android && !is_ios
 
   # Whether we allow building DXC.
   # DXC requires SM6.0+ which is blocklisted on x86.
@@ -79,8 +84,9 @@ declare_args() {
   # Whether to build Dawn's NodeJS bindings. Default to the value from .gclient.
   dawn_build_node_bindings = dawn_standalone && dawn_node
 
-  # Whether to build Emdawnwebgpu. Default to the value from .gclient.
-  dawn_build_emdawnwebgpu = dawn_standalone && dawn_wasm
+  # Whether to build Emdawnwebgpu. Default to the value from .gclient, except
+  # don't enable this in Android builds.
+  dawn_build_emdawnwebgpu = dawn_standalone && dawn_wasm && !is_android
 
   # Whether Dawn uses the Agility SDK.
   dawn_use_agility_sdk = false

@@ -61,8 +61,13 @@ CHROMIUM_REVISION_VAR = 'chromium_revision'
 DEFAULT_REVISION_CHARACTERS = 10
 
 # GN variables that need to be synced. A map from Dawn variable name to
-# Chromium variable name.
-SYNCED_VARIABLES = {}
+# Chromium variable name (if different).
+SYNCED_VARIABLES = {
+    # For Android builds in standalone.
+    # TODO(crbug.com/528413044): Replace this with a SYNCED_CIPD_DEPS entry on
+    # 'third_party/android_toolchain/ndk' instead to implicitly update this var.
+    'android_ndk_version': None,
+}
 
 # DEPS entries which have dep_type = cipd. In the Chromium DEPS file, these
 # will be prefixed with src/.
@@ -73,6 +78,12 @@ SYNCED_CIPD_DEPS = {
     'buildtools/win',
     'third_party/ninja',
     'third_party/siso/cipd',
+
+    # For Android builds in standalone.
+    'third_party/android_sdk/public',
+    'third_party/jdk/current',
+    'third_party/android_build_tools/aapt2/cipd',
+    'third_party/android_build_tools/manifest_merger/cipd',
 }
 
 # DEPS entries which have dep_type = gcs. In the Chromium DEPS file, these will
@@ -84,6 +95,13 @@ SYNCED_GCS_DEPS = {
     'build/linux/debian_bullseye_mipsel-sysroot',
     'build/linux/debian_bullseye_mips64el-sysroot',
     'build/linux/debian_bullseye_amd64-sysroot',
+}
+
+# Files that are copied from Chromium directly. A map from Dawn file path to
+# Chromium file path (if different).
+SYNCED_TEXT_FILES = {
+    'third_party/cpu_features/BUILD.gn': None,
+    'third_party/jdk/BUILD.gn': None,
 }
 
 # Repos that are independently synced by Chromium and Dawn. A map from Dawn
@@ -126,11 +144,16 @@ SYNCED_REPOS = {
     # third_party/webgpu-cts is technically used by both Chromium and Dawn, but
     # they are used for different purposes and the CTS roller needs to roll
     # Dawn's copy in order to update expectations.
+
+    # For Android builds in standalone.
+    'third_party/cpu_features/src': None,
+    'third_party/libunwind/src': None,
 }
 
 # Chromium directories that are exported as pseudo-repos in
 # chromium.googlesource.com under chromium/src/. Mapping of Dawn path to
 # Chromium src-relative path. None means that the names are identical.
+# NOTE: These are always rolled to top-of-tree - they ignore --revision.
 EXPORTED_CHROMIUM_REPOS = {
     'build': None,
     'buildtools': None,
@@ -148,6 +171,11 @@ EXPORTED_CHROMIUM_REPOS = {
     'tools/protoc_wrapper': None,
     'tools/valgrind': None,
     'tools/win': None,
+
+    # For Android builds in standalone.
+    'third_party/android_build_tools': None,
+    'third_party/android_sdk': None,
+    'third_party/ijar': None,
 }
 
 
@@ -546,6 +574,7 @@ def _get_changed_variables(dawn_deps: dict,
     """
     changed_variables = []
     for dawn_var, chromium_var in SYNCED_VARIABLES.items():
+        chromium_var = chromium_var or dawn_var
         dawn_value = dawn_deps['vars'].get(dawn_var)
         chromium_value = chromium_deps['vars'].get(chromium_var)
         if not dawn_value:
@@ -1130,6 +1159,14 @@ def _replace_starlark_package_revision(package_name: str, new_revision: str,
     return updated_contents
 
 
+def _sync_text_files(new_revision):
+    for dawn_file, chromium_file in SYNCED_TEXT_FILES.items():
+        chromium_file = chromium_file or dawn_file
+        content = _read_remote_chromium_file(chromium_file, new_revision)
+        with open(dawn_file, 'w', encoding='utf-8') as outfile:
+            outfile.write(content)
+
+
 def _parse_args() -> argparse.Namespace:
     """Parses and returns command line arguments."""
     parser = argparse.ArgumentParser('Roll DEPS entries shared with Chromium.')
@@ -1203,6 +1240,7 @@ def main() -> None:
         _create_roll_branch()
 
     _apply_changed_deps(changed_entries)
+    _sync_text_files(revision_range.new_revision)
 
     if args.autoroll:
         _amend_commit(commit_message)

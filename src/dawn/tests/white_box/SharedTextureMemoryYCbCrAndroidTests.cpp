@@ -625,7 +625,9 @@ TEST_P(SharedTextureMemoryVulkanYCbCrParamsTests, SampleY8Cb8Cr8AHB) {
         auto ycbcr = math::Vec4f(cr / 255.0, y / 255.0, cb / 255.0, 1.0);
         auto rgb = math::Mul(ycbcrToRgb, ycbcr);
 
-        auto expected = utils::RGBA8(rgb[0] * 255, rgb[1] * 255, rgb[2] * 255, 255);
+        auto expected =
+            utils::RGBA8(static_cast<uint8_t>(rgb[0] * 255), static_cast<uint8_t>(rgb[1] * 255),
+                         static_cast<uint8_t>(rgb[2] * 255), 255);
         auto bottom = utils::RGBA8(expected.r - 1, expected.g - 1, expected.b - 1, 255);
         auto top = utils::RGBA8(expected.r + 1, expected.g + 1, expected.b + 1, 255);
 

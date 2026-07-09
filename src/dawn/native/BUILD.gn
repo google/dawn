@@ -1019,6 +1019,7 @@ source_set("sources") {
         "vulkan/external_semaphore/SemaphoreServiceImplementationFD.h",
       ]
       if (is_android) {
+        libs += [ "android" ]
         sources += [
           "vulkan/external_memory/MemoryServiceImplementationAHardwareBuffer.cpp",
           "vulkan/external_memory/MemoryServiceImplementationAHardwareBuffer.h",

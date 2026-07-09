@@ -14,6 +14,7 @@
 /testing
 /third_party/abseil-cpp/
 /third_party/agility-sdk/src
+/third_party/android_toolchain/ndk
 /third_party/angle
 /third_party/binutils
 /third_party/catapult
@@ -27,6 +28,7 @@
 /third_party/google_benchmark/src
 /third_party/googletest
 /third_party/gpuweb
+/third_party/jdk/current
 /third_party/jinja2
 /third_party/jsoncpp
 /third_party/EGL-Registry/src
