@@ -81,7 +81,7 @@ void CopyD3D12Resource(ID3D12Device* device, ID3D12Resource* source, ID3D12Resou
     UINT64 signaledValue = 1;
     commandQueue->Signal(fence.Get(), signaledValue);
 
-    HANDLE fenceEvent = 0;
+    HANDLE fenceEvent = nullptr;
     if (fence->GetCompletedValue() < signaledValue) {
         fence->SetEventOnCompletion(signaledValue, fenceEvent);
         WaitForSingleObject(fenceEvent, INFINITE);

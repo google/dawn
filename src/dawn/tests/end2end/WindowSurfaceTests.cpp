@@ -163,7 +163,7 @@ TEST_F(WindowSurfaceInstanceTests, CorrectSTypeHWND) {
 TEST_F(WindowSurfaceInstanceTests, InvalidHWND) {
     wgpu::SurfaceSourceWindowsHWND chainedDescriptor;
     chainedDescriptor.hinstance = GetModuleHandle(nullptr);
-    chainedDescriptor.hwnd = 0;  // This always is an invalid HWND value.
+    chainedDescriptor.hwnd = nullptr;  // This always is an invalid HWND value.
 
     wgpu::SurfaceDescriptor descriptor;
     descriptor.nextInChain = &chainedDescriptor;
@@ -176,7 +176,7 @@ TEST_F(WindowSurfaceInstanceTests, InvalidHWND) {
 TEST_F(WindowSurfaceInstanceTests, HWNDSurfacesAreInvalid) {
     wgpu::SurfaceSourceWindowsHWND chainedDescriptor;
     chainedDescriptor.hinstance = nullptr;
-    chainedDescriptor.hwnd = 0;
+    chainedDescriptor.hwnd = nullptr;
 
     wgpu::SurfaceDescriptor descriptor;
     descriptor.nextInChain = &chainedDescriptor;

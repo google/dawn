@@ -211,7 +211,6 @@ config("dawn_warnings") {
       "-Wno-tautological-type-limit-compare",
       "-Wno-undefined-func-template",
       "-Wno-unused-parameter",
-      "-Wno-zero-as-null-pointer-constant",
 
       # The lifetime-safety-* warnings are part of an experimental analysis.
       # Many individual diagnostics (like

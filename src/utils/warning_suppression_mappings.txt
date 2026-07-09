@@ -16,6 +16,10 @@ src:*src/tint/utils/rtti/castable.h
 src:*src/dawn/native/opengl/*
 src:*src/dawn/tests/*
 
+[zero-as-null-pointer-constant]
+# Used by EGL macros.
+src:*src/dawn/native/opengl/*EGL*
+
 [cast-function-type-strict]
 # Needed to cast procs in GL.
 src:*gen/src/dawn/native/opengl/OpenGLFunctionsBase_autogen.cpp

@@ -205,7 +205,7 @@ static constexpr ICD kICDs[] = {
 
 // Suppress validation errors that are known. Returns false in that case.
 bool ShouldReportDebugMessage(const char* messageId, const char* message) {
-    // If a driver gives us a NULL pMessage (which would be a violation of the Vulkan spec)
+    // If a driver gives us a nullptr pMessage (which would be a violation of the Vulkan spec)
     // then ignore this message.
     if (message == nullptr) {
         return false;
@@ -220,7 +220,7 @@ bool ShouldReportDebugMessage(const char* messageId, const char* message) {
         return false;
     }
 
-    // The Vulkan spec does allow pMessageIdName to be NULL, but it may still contain a valid
+    // The Vulkan spec does allow pMessageIdName to be nullptr, but it may still contain a valid
     // message. Since we can't compare it with our skipped message list allow it through.
     if (messageId == nullptr) {
         return true;
@@ -239,8 +239,8 @@ void LogCallbackData(LogSeverity severity,
                      const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData) {
     LogMessage log = LogMessage(severity);
 
-    // pMessageIdName may be NULL, according to the Vulkan spec. Passing NULL into an ostream is
-    // undefined behavior, so we'll handle that scenario separately.
+    // pMessageIdName may be nullptr, according to the Vulkan spec. Passing nullptr into an ostream
+    // is undefined behavior, so we'll handle that scenario separately.
     if (pCallbackData->pMessageIdName != nullptr) {
         log << pCallbackData->pMessageIdName;
     } else {

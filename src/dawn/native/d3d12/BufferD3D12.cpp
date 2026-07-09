@@ -471,7 +471,7 @@ MaybeError Buffer::MapInternal(bool isWrite, size_t offset, size_t size, const c
     // mMappedData is the pointer to the start of the resource, irrespective of offset.
     // MSDN says (note the weird use of "never"):
     //
-    //   When ppData is not NULL, the pointer returned is never offset by any values in
+    //   When ppData is not nullptr, the pointer returned is never offset by any values in
     //   pReadRange.
     //
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12resource-map
@@ -651,9 +651,9 @@ MaybeError Buffer::SynchronizeBufferBeforeMapping() {
         for (const auto& fence : fences) {
             ComPtr<ID3D12Fence> d3dFence = ToBackend(fence.object)->GetD3DFence();
             if (d3dFence->GetCompletedValue() < fence.signaledValue) {
-                // If hEvent is NULL, SetEventOnCompletion will return when fence reaches
+                // If hEvent is nullptr, SetEventOnCompletion will return when fence reaches
                 // fence.signaledValue.
-                d3dFence->SetEventOnCompletion(fence.signaledValue, NULL);
+                d3dFence->SetEventOnCompletion(fence.signaledValue, nullptr);
             }
         }
     }

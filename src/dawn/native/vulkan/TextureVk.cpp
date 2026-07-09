@@ -917,8 +917,8 @@ void Texture::NotifySwapChainPresent() {
 
         // We signal the end of the current frame and the start of the next.
         // This means we miss capturing the very first frame.
-        renderDocApi->EndFrameCapture(renderDocDevicePtr, NULL);
-        renderDocApi->StartFrameCapture(renderDocDevicePtr, NULL);
+        renderDocApi->EndFrameCapture(renderDocDevicePtr, nullptr);
+        renderDocApi->StartFrameCapture(renderDocDevicePtr, nullptr);
     }
 #endif
 }

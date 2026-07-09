@@ -476,9 +476,9 @@ TEST_P(SharedTextureMemoryTests, SharedFenceSuccessfulImportExport) {
     hr = d3d11DeviceContext4->Signal(d3d11Fence.Get(), fenceValue + 1);
     ASSERT_EQ(hr, S_OK);
 
-    SystemHandle ev = SystemHandle::Acquire(::CreateEvent(NULL,   // default security attributes
-                                                          TRUE,   // manual-reset event
-                                                          FALSE,  // initial state is nonsignaled
+    SystemHandle ev = SystemHandle::Acquire(::CreateEvent(nullptr,  // default security attributes
+                                                          TRUE,     // manual-reset event
+                                                          FALSE,    // initial state is nonsignaled
                                                           TEXT("FenceComplete")  // object name
                                                           ));
     ASSERT_TRUE(ev.IsValid());

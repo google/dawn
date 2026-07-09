@@ -98,8 +98,7 @@ class alignas(detail::kNativeVkHandleAlignment) VkHandle {
     bool operator==(const VkHandle<Tag, HandleType>& other) const = default;
 
     // Comparisons between handles and VK_NULL_HANDLE
-    bool operator==(std::nullptr_t) const { return mHandle == 0; }
-    bool operator!=(std::nullptr_t) const { return mHandle != 0; }
+    bool operator==(std::nullptr_t) const { return mHandle == HandleType{}; }
 
     // Implicit conversion to real Vulkan types.
     // NOLINTNEXTLINE(google-explicit-constructor)
@@ -116,7 +115,7 @@ class alignas(detail::kNativeVkHandleAlignment) VkHandle {
   private:
     explicit VkHandle(HandleType handle) : mHandle(handle) {}
 
-    HandleType mHandle = 0;
+    HandleType mHandle{};
 };
 }  // namespace detail
 

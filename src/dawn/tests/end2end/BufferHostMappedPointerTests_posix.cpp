@@ -65,7 +65,7 @@ class MMapBackend : public BufferHostMappedPointerTestBackend {
         EXPECT_EQ(write(fd, initialData.data(), size), (signed)size);
 
         // Memory map the file.
-        void* ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+        void* ptr = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
 
         auto UnmapMemory = [=]() {
             munmap(ptr, size);

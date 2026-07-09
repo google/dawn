@@ -288,7 +288,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     createInfo.usage = VulkanBufferUsage(GetInternalUsage() | wgpu::BufferUsage::CopyDst);
     createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.queueFamilyIndexCount = 0;
-    createInfo.pQueueFamilyIndices = 0;
+    createInfo.pQueueFamilyIndices = nullptr;
 
     Device* device = ToBackend(GetDevice());
     DAWN_TRY(CheckVkOOMThenSuccess(
@@ -379,7 +379,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     createInfo.usage = VulkanBufferUsage(GetInternalUsage());
     createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.queueFamilyIndexCount = 0;
-    createInfo.pQueueFamilyIndices = 0;
+    createInfo.pQueueFamilyIndices = nullptr;
 
     Device* device = ToBackend(GetDevice());
     DAWN_TRY(CheckVkOOMThenSuccess(

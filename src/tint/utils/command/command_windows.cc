@@ -278,7 +278,7 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
         auto* thread_args = reinterpret_cast<StreamReadThreadArgs*>(user);
         DWORD n = 0;
         char buf[256];
-        while (ReadFile(thread_args->stream, buf, sizeof(buf), &n, NULL)) {
+        while (ReadFile(thread_args->stream, buf, sizeof(buf), &n, nullptr)) {
             auto s = std::string(buf, DAWN_UNSAFE_TODO(buf + n));
             thread_args->output += std::string(buf, DAWN_UNSAFE_TODO(buf + n));
         }

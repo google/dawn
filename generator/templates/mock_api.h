@@ -123,24 +123,24 @@ class ProcTableAsClass {
                     {% if method.returns and method.returns.type.name.get() == "future" %}
                         struct {{Suffix}}Data {
                             {{as_cType(CallbackType.name)}} callback = nullptr;
-                            void* userdata1 = 0;
-                            void* userdata2 = 0;
+                            void* userdata1 = nullptr;
+                            void* userdata2 = nullptr;
                         };
                         absl::flat_hash_map<dawn::FutureID, {{Suffix}}Data> m{{Suffix}}Requests;
                     {% else %}
-                        void* m{{Suffix}}Userdata1 = 0;
-                        void* m{{Suffix}}Userdata2 = 0;
+                        void* m{{Suffix}}Userdata1 = nullptr;
+                        void* m{{Suffix}}Userdata2 = nullptr;
                         {{as_cType(CallbackType.name)}} m{{Suffix}}Callback = nullptr;
                     {% endif %}
                 {% endfor %}
             {% endfor %}
             // Manually implement some callback helpers for testing.
             WGPUDeviceLostCallback mDeviceLostCallback = nullptr;
-            void* mDeviceLostUserdata1 = 0;
-            void* mDeviceLostUserdata2 = 0;
+            void* mDeviceLostUserdata1 = nullptr;
+            void* mDeviceLostUserdata2 = nullptr;
             WGPUUncapturedErrorCallback mUncapturedErrorCallback = nullptr;
-            void* mUncapturedErrorUserdata1 = 0;
-            void* mUncapturedErrorUserdata2 = 0;
+            void* mUncapturedErrorUserdata1 = nullptr;
+            void* mUncapturedErrorUserdata2 = nullptr;
         };
 
     private:

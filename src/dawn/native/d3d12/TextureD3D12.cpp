@@ -447,7 +447,7 @@ void Texture::NotifySwapChainPresent() {
     // For PIX, call ID3D12SharingContract::Present
     ID3D12SharingContract* d3dSharingContract = ToBackend(device->GetQueue())->GetSharingContract();
     if (d3dSharingContract != nullptr) {
-        d3dSharingContract->Present(mResourceAllocation.GetD3D12Resource(), 0, 0);
+        d3dSharingContract->Present(mResourceAllocation.GetD3D12Resource(), 0, nullptr);
     }
 
 #if defined(DAWN_ENABLE_RENDERDOC)
@@ -457,8 +457,8 @@ void Texture::NotifySwapChainPresent() {
     if (auto renderDocApi = dawn::native::utils::GetRenderDocApi(device)) {
         // We signal the end of the current frame and the start of the next.
         // This means we miss capturing the very first frame.
-        renderDocApi->EndFrameCapture(device->GetD3D12Device(), NULL);
-        renderDocApi->StartFrameCapture(device->GetD3D12Device(), NULL);
+        renderDocApi->EndFrameCapture(device->GetD3D12Device(), nullptr);
+        renderDocApi->StartFrameCapture(device->GetD3D12Device(), nullptr);
     }
 #endif
 }

@@ -895,7 +895,7 @@ static inline tracing::TraceEventHandle addTraceEvent(
     unsigned char flags,
     int /*unused, helps avoid empty __VA_ARGS__*/) {
     return TRACE_EVENT_API_ADD_TRACE_EVENT(platform, phase, categoryEnabled, name, id, zeroNumArgs,
-                                           0, 0, 0, flags);
+                                           nullptr, nullptr, nullptr, flags);
 }
 
 template <class ARG1_TYPE>
@@ -961,9 +961,9 @@ class TraceEndOnScopeClose {
     void addEventIfEnabled() {
         // Only called when m_pdata is non-null.
         if (*m_pdata->categoryEnabled) {
-            TRACE_EVENT_API_ADD_TRACE_EVENT(m_pdata->platform, TRACE_EVENT_PHASE_END,
-                                            m_pdata->categoryEnabled, m_pdata->name, noEventId,
-                                            zeroNumArgs, 0, 0, 0, TRACE_EVENT_FLAG_NONE);
+            TRACE_EVENT_API_ADD_TRACE_EVENT(
+                m_pdata->platform, TRACE_EVENT_PHASE_END, m_pdata->categoryEnabled, m_pdata->name,
+                noEventId, zeroNumArgs, nullptr, nullptr, nullptr, TRACE_EVENT_FLAG_NONE);
         }
     }
 
