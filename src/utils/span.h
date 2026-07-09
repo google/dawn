@@ -29,6 +29,7 @@
 #define SRC_UTILS_SPAN_H_
 
 #include <concepts>
+#include <cstdint>
 #include <limits>
 #include <memory>
 #include <new>
