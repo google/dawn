@@ -504,7 +504,7 @@ class ComputeMultipleDispatchesTests : public DawnTestWithParams<Params> {
                 indirectBufferData[indirectStart] > maxComputeWorkgroupsPerDimension ||
                 indirectBufferData[indirectStart + 1] > maxComputeWorkgroupsPerDimension ||
                 indirectBufferData[indirectStart + 2] > maxComputeWorkgroupsPerDimension) {
-                std::copy(kSentinelData.begin(), kSentinelData.end(), expected.begin() + o);
+                std::ranges::copy(kSentinelData, expected.begin() + o);
             } else {
                 expected[o] = indirectBufferData[indirectStart];
                 expected[o + 1] = indirectBufferData[indirectStart + 1];

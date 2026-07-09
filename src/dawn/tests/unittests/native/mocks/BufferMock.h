@@ -33,6 +33,7 @@
 #include "gmock/gmock.h"
 #include "src/dawn/native/Buffer.h"
 #include "src/dawn/tests/unittests/native/mocks/DeviceMock.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::native {
 
@@ -60,7 +61,7 @@ class BufferMock : public BufferBase {
     MOCK_METHOD(bool, IsCPUWritableAtCreation, (), (const, override));
 
   private:
-    std::unique_ptr<uint8_t[]> mBackingData;
+    HeapArray<uint8_t> mBackingData;
 };
 
 }  // namespace dawn::native

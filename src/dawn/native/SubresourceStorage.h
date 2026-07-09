@@ -39,6 +39,7 @@
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Subresource.h"
 #include "src/utils/assert.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::native {
 
@@ -239,12 +240,12 @@ class SubresourceStorage {
     std::array<T, kMaxAspects> mInlineAspectData = {};
 
     // Indexed as mLayerCompressed[aspectIndex * mArrayLayerCount + layer].
-    std::unique_ptr<bool[]> mLayerCompressed;
+    HeapArray<bool> mLayerCompressed;
 
     // Indexed as mData[(aspectIndex * mArrayLayerCount + layer) * mMipLevelCount + level].
     // The data for a compressed aspect is stored in the slot for (aspect, 0, 0). Similarly
     // the data for a compressed layer of aspect if in the slot for (aspect, layer, 0).
-    std::unique_ptr<T[]> mData;
+    HeapArray<T> mData;
 };
 
 template <typename T>
@@ -492,12 +493,12 @@ void SubresourceStorage<T>::DecompressAspect(uint32_t aspectIndex) {
     mAspectCompressed[aspectIndex] = false;
 
     // Extra allocations are only needed when aspects are decompressed. Create them lazily.
-    if (mData == nullptr) {
-        DAWN_ASSERT(mLayerCompressed == nullptr);
+    if (!mData) {
+        DAWN_ASSERT(!mLayerCompressed);
 
         uint32_t aspectCount = GetAspectCount(mAspects);
-        mLayerCompressed = std::make_unique<bool[]>(aspectCount * mArrayLayerCount);
-        mData = std::make_unique<T[]>(aspectCount * mArrayLayerCount * mMipLevelCount);
+        mLayerCompressed = HeapArray<bool>{aspectCount * mArrayLayerCount};
+        mData = HeapArray<T>{aspectCount * mArrayLayerCount * mMipLevelCount};
 
         for (uint32_t layerIndex = 0; layerIndex < aspectCount * mArrayLayerCount; layerIndex++) {
             mLayerCompressed[layerIndex] = true;

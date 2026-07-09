@@ -52,6 +52,7 @@
 #include "src/dawn/native/Texture.h"
 #include "src/dawn/native/ToBackend.h"
 #include "src/dawn/native/dawn_platform.h"
+#include "src/utils/heap_array.h"
 
 namespace dawn::native::null {
 
@@ -235,7 +236,7 @@ class BindGroupDataHolder {
     explicit BindGroupDataHolder(size_t size);
     ~BindGroupDataHolder();
 
-    raw_ptr<void> mBindingDataAllocation;
+    HeapArray<std::byte> mBindingDataAllocation;
 };
 
 // We don't have the complexity of placement-allocation of bind group data in
@@ -278,7 +279,7 @@ class Buffer final : public BufferBase {
     MaybeError MapAtCreationImpl() override;
     void* GetMappedPointerImpl() override;
 
-    std::unique_ptr<uint8_t[]> mBackingData;
+    HeapArray<uint8_t> mBackingData;
 };
 
 class CommandBuffer final : public CommandBufferBase {

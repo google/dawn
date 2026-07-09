@@ -40,7 +40,6 @@
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/Alloc.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/native/Adapter.h"
@@ -60,6 +59,7 @@
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
 #include "src/utils/log.h"
 
 namespace dawn::native {
@@ -81,19 +81,16 @@ class ErrorBuffer final : public BufferBase {
     bool IsCPUWritableAtCreation() const override { return true; }
 
     MaybeError MapAtCreationImpl() override {
-        DAWN_CHECK(mFakeMappedData == nullptr);
+        DAWN_CHECK(!mFakeMappedData);
 
-        // Check that the size can be used to allocate mFakeMappedData. A malloc(0)
-        // is invalid, and on 32bit systems we should avoid a narrowing conversion that
-        // would make size = 1 << 32 + 1 allocate one byte.
         uint64_t size = GetSize();
-        bool isValidSize = size != 0 && size < uint64_t(std::numeric_limits<size_t>::max());
-
-        if (isValidSize) {
-            mFakeMappedData = std::unique_ptr<uint8_t[]>(AllocNoThrow<uint8_t>(size));
+        if (size < uint64_t(std::numeric_limits<size_t>::max())) {
+            mFakeMappedData =
+                // SAFETY: Frontend is responsible for initializing MapAtCreation memory.
+                DAWN_UNSAFE_BUFFERS(HeapArray<uint8_t>::Uninit(size, std::nothrow));
         }
 
-        if (mFakeMappedData == nullptr) {
+        if (!mFakeMappedData) {
             return DAWN_OUT_OF_MEMORY_ERROR(
                 "Failed to allocate memory to map ErrorBuffer at creation.");
         }
@@ -107,11 +104,11 @@ class ErrorBuffer final : public BufferBase {
         DAWN_UNREACHABLE();
     }
 
-    void* GetMappedPointerImpl() override { return mFakeMappedData.get(); }
+    void* GetMappedPointerImpl() override { return mFakeMappedData.data(); }
 
-    void UnmapImpl(BufferState oldState, BufferState newState) override { mFakeMappedData.reset(); }
+    void UnmapImpl(BufferState oldState, BufferState newState) override { mFakeMappedData = {}; }
 
-    std::unique_ptr<uint8_t[]> mFakeMappedData = nullptr;
+    HeapArray<uint8_t> mFakeMappedData;
 };
 
 // GetMappedRange on a zero-sized buffer returns a pointer to this value.

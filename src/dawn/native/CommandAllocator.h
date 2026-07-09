@@ -40,6 +40,7 @@
 #include "src/dawn/common/Math.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
 #include "src/utils/non_copyable.h"
 
 namespace dawn::native {
@@ -75,10 +76,7 @@ namespace dawn::native {
 
 // These are the lists of blocks, should not be used directly, only through CommandAllocator
 // and CommandIterator
-struct BlockDef {
-    size_t size = 0;
-    std::unique_ptr<char[]> block = nullptr;
-};
+using BlockDef = HeapArray<char>;
 using CommandBlocks = std::vector<BlockDef>;
 
 namespace detail {
@@ -127,10 +125,10 @@ class CommandIterator : public NonCopyable {
 
     DAWN_FORCE_INLINE bool NextCommandId(uint32_t* commandId) {
         char* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
-        DAWN_UNSAFE_TODO(
-            DAWN_RELEASE_ASSUME(idPtr == reinterpret_cast<char*>(&mEndOfBlock) ||
-                                idPtr + sizeof(uint32_t) <= mBlocks[mCurrentBlock].block.get() +
-                                                                mBlocks[mCurrentBlock].size));
+        DAWN_ASSERT(idPtr == reinterpret_cast<char*>(&mEndOfBlock) ||
+                    DAWN_UNSAFE_TODO(idPtr + sizeof(uint32_t)) <=
+                        std::to_address(mBlocks[mCurrentBlock].end()));
+
         uint32_t id = *reinterpret_cast<uint32_t*>(idPtr);
 
         if (id != detail::kEndOfBlock) {
@@ -145,9 +143,8 @@ class CommandIterator : public NonCopyable {
 
     DAWN_FORCE_INLINE void* NextCommand(size_t commandSize, size_t commandAlignment) {
         char* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
-        DAWN_UNSAFE_TODO(
-            DAWN_RELEASE_ASSUME(commandPtr + sizeof(commandSize) <=
-                                mBlocks[mCurrentBlock].block.get() + mBlocks[mCurrentBlock].size));
+        DAWN_ASSERT(DAWN_UNSAFE_TODO(commandPtr + sizeof(commandSize)) <=
+                    std::to_address(mBlocks[mCurrentBlock].end()));
 
         mCurrentPtr = DAWN_UNSAFE_TODO(commandPtr + commandSize);
         return commandPtr;

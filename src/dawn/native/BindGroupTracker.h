@@ -70,8 +70,9 @@ class BindGroupTrackerBase {
 
         mBindGroups[index] = bindGroup;
         mDynamicOffsets[index].count = BindingIndex(dynamicOffsetCount);
-        std::copy(dynamicOffsets, DAWN_UNSAFE_TODO(dynamicOffsets + dynamicOffsetCount),
-                  mDynamicOffsets[index].offsets.begin());
+        auto dynamicOffsetsSpan =
+            DAWN_UNSAFE_TODO(Span<uint32_t>(dynamicOffsets, dynamicOffsetCount));
+        std::ranges::copy(dynamicOffsetsSpan, mDynamicOffsets[index].offsets.begin());
     }
 
     void OnSetPipeline(PipelineBase* pipeline) { mPipeline = pipeline; }

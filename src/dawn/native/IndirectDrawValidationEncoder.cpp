@@ -470,7 +470,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         IndirectDrawMetadata::DrawType drawType;
         uint64_t outputParamsSize = 0;
         uint64_t batchDataSize = 0;
-        std::unique_ptr<void, void (*)(void*)> batchData{nullptr, std::free};
+        HeapArray<uint8_t> batchData;
         std::vector<Batch> batches;
     };
 
@@ -647,13 +647,11 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
 
     // Now we allocate and populate host-side batch data to be copied to the GPU.
     for (Pass& pass : passes) {
-        // We use std::malloc here because it guarantees maximal scalar alignment.
-        pass.batchData = {std::malloc(pass.batchDataSize), std::free};
-        DAWN_UNSAFE_TODO(memset(pass.batchData.get(), 0, pass.batchDataSize));
-        uint8_t* batchData = static_cast<uint8_t*>(pass.batchData.get());
+        // batchData is maximally-aligned, so we can suballocate it.
+        pass.batchData = HeapArray<uint8_t>{checked_cast<size_t>(pass.batchDataSize)};
         for (Batch& batch : pass.batches) {
-            batch.batchInfo =
-                new (&DAWN_UNSAFE_TODO(batchData[batch.dataBufferOffset])) BatchInfo();
+            auto placement = pass.batchData.subspan(batch.dataBufferOffset, sizeof(BatchInfo));
+            batch.batchInfo = new (placement.data()) BatchInfo();
             batch.batchInfo->numDraws = static_cast<uint32_t>(batch.metadata->draws.size());
             batch.batchInfo->flags = pass.flags;
 
@@ -718,8 +716,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         // compute pass. The compute pass encodes a separate SetBindGroup and Dispatch command
         // for each batch.
         for (const Pass& pass : passes) {
-            commandEncoder->APIWriteBuffer(batchDataBuffer.GetBuffer(), 0,
-                                           static_cast<const uint8_t*>(pass.batchData.get()),
+            commandEncoder->APIWriteBuffer(batchDataBuffer.GetBuffer(), 0, pass.batchData.data(),
                                            pass.batchDataSize);
 
             Ref<ComputePassEncoder> passEncoder = commandEncoder->BeginComputePass();

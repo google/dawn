@@ -178,6 +178,7 @@ source_set("native_mocks_sources") {
   deps = [
     ":test_infra_sources",
     "${dawn_root}/src/dawn:proc",
+    "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native:sources",
     "${dawn_root}/src/dawn/native:static",
     "${dawn_root}/src/utils:gmock_and_gtest",
