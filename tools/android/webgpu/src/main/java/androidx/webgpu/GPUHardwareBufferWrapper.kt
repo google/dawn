@@ -6,6 +6,7 @@ import android.os.ParcelFileDescriptor
  * Base abstract wrapper for imported hardware buffers.
  * Manages the native handle and synchronization fences for accessing the buffer.
  */
+@ExperimentalWebGpuApi
 public abstract class GPUHardwareBufferWrapper(
   private val handle: Long
 ) : AutoCloseable {

@@ -27,6 +27,7 @@ import android.opengl.EGLSync
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import androidx.annotation.RequiresApi
+import androidx.webgpu.ExperimentalWebGpuApi
 import androidx.webgpu.GPUSyncFence
 
 /**
@@ -128,6 +129,7 @@ internal object GPUSyncFenceHelper {
      * @param syncFd The raw file descriptor representing a synchronization fence.
      * @return A valid [SyncFence] duplicated from the EGL sync object, or null if unsupported/failed.
      */
+    @OptIn(ExperimentalWebGpuApi::class)
     internal fun createSyncFenceFromFd(pfd: ParcelFileDescriptor): SyncFence? {
         // Ensures all EGL context operations and driver calls are perfectly synchronized across threads.
         synchronized(lock) {

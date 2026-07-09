@@ -19,6 +19,7 @@ import android.graphics.Color
 import android.hardware.SyncFence
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.webgpu.ExperimentalWebGpuApi
 import androidx.webgpu.GPUColor
 import androidx.webgpu.GPUSyncFence
 
@@ -55,6 +56,7 @@ public fun Long.toGPUColor(): GPUColor {
  * Safely handles API level compatibility internally. On devices below Android T (API 33),
  * this function will safely return `null` without requiring API version checks at the call site.
  */
+@ExperimentalWebGpuApi
 public fun GPUSyncFence?.toSyncFence(): SyncFence? {
     if (this == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
         return null

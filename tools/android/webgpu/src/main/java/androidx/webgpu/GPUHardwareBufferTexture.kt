@@ -1,5 +1,6 @@
 package androidx.webgpu
 
+@ExperimentalWebGpuApi
 public class GPUHardwareBufferTexture(
     handle: Long,
     public val texture: GPUTexture,

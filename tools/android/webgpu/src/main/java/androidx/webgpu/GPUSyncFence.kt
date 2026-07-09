@@ -29,6 +29,7 @@ import kotlin.jvm.JvmStatic
  *
  * This class is backed by a `ParcelFileDescriptor` representing a sync fence.
  */
+@ExperimentalWebGpuApi
 public class GPUSyncFence internal constructor(
     private val parcelFileDescriptor: ParcelFileDescriptor
 ) : AutoCloseable {
